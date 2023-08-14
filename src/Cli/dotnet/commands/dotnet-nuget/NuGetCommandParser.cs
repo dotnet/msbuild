@@ -166,11 +166,17 @@ namespace Microsoft.DotNet.Cli
                 new CliOption<string>("--source-url"),
             };
 
-            CliCommand CertificateCommand() => new CliCommand("certificate") {
-                new CliArgument<string>("NAME"),
-                new CliArgument<string>("FINGERPRINT"),
-                allowUntrustedRoot,
-                new CliOption<string>("--algorithm")
+            CliCommand CertificateCommand() {
+                CliOption<string> algorithm = new("--algorithm");
+                algorithm.DefaultValueFactory = () => "SHA256";
+                algorithm.AcceptOnlyFromAmong("SHA256", "SHA384", "SHA512");
+
+                return new CliCommand("certificate") {
+                    new CliArgument<string>("NAME"),
+                    new CliArgument<string>("FINGERPRINT"),
+                    allowUntrustedRoot,
+                    algorithm
+                };
             };
 
             CliCommand RemoveCommand() => new CliCommand("remove") {
