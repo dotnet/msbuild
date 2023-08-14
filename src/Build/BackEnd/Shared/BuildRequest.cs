@@ -128,6 +128,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="nodeRequestId">The id of the node issuing the request</param>
         /// <param name="configurationId">The configuration id to use.</param>
         /// <param name="proxyTargets"><see cref="ProxyTargets"/></param>
+        /// <param name="targets">The set of targets to execute</param>
         /// <param name="hostServices">Host services if any. May be null.</param>
         /// <param name="buildRequestDataFlags">Additional flags for the request.</param>
         /// <param name="requestedProjectState">Filter for desired build results.</param>
@@ -137,6 +138,7 @@ namespace Microsoft.Build.BackEnd
             int nodeRequestId,
             int configurationId,
             ProxyTargets proxyTargets,
+            List<string> targets,
             HostServices hostServices,
             BuildRequestDataFlags buildRequestDataFlags = BuildRequestDataFlags.None,
             RequestedProjectState requestedProjectState = null,
@@ -144,7 +146,7 @@ namespace Microsoft.Build.BackEnd
             : this(submissionId, nodeRequestId, configurationId, hostServices, buildRequestDataFlags, requestedProjectState, projectContextId)
         {
             _proxyTargets = proxyTargets;
-            _targets = proxyTargets.ProxyTargetToRealTargetMap.Keys.ToList();
+            _targets = targets;
 
             // Only root requests can have proxy targets.
             _parentGlobalRequestId = InvalidGlobalRequestId;

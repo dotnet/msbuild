@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Evaluation;
@@ -11,6 +12,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Unittest;
 using Shouldly;
 using Xunit;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -19,8 +21,6 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    using Microsoft.Build.Unittest;
-
     /// <summary>
     /// Tests of the scheduler.
     /// </summary>
@@ -544,7 +544,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             CreateConfiguration(1, "foo.csproj");
 
-            BuildRequest request1 = CreateProxyBuildRequest(1, 1, new ProxyTargets(new Dictionary<string, string> { { "foo", "bar" } }), null);
+            BuildRequest request1 = CreateBuildRequest(
+                nodeRequestId: 1,
+                configId: 1,
+                targets: new[] { "foo" },
+                NodeAffinity.Any,
+                parentRequest: null,
+                new ProxyTargets(new Dictionary<string, string> { { "foo", "bar" } }));
 
             BuildRequestBlocker blocker = new BuildRequestBlocker(-1, Array.Empty<string>(), new[] { request1 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
@@ -806,8 +812,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private BuildRequest CreateBuildRequest(int nodeRequestId, int configId, string[] targets, NodeAffinity nodeAffinity, BuildRequest parentRequest, ProxyTargets proxyTargets = null)
         {
-            (targets == null ^ proxyTargets == null).ShouldBeTrue();
-
             HostServices hostServices = null;
 
             if (nodeAffinity != NodeAffinity.Any)
@@ -816,16 +820,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 hostServices.SetNodeAffinity(String.Empty, nodeAffinity);
             }
 
-            if (targets != null)
+            if (proxyTargets != null)
             {
                 return new BuildRequest(
                     submissionId: 1,
                     nodeRequestId,
                     configId,
-                    targets,
-                    hostServices,
-                    BuildEventContext.Invalid,
-                    parentRequest);
+                    proxyTargets,
+                    targets.ToList(),
+                    hostServices);
             }
 
             parentRequest.ShouldBeNull();
@@ -833,19 +836,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 submissionId: 1,
                 nodeRequestId,
                 configId,
-                proxyTargets,
-                hostServices);
-        }
-
-        private BuildRequest CreateProxyBuildRequest(int nodeRequestId, int configId, ProxyTargets proxyTargets, BuildRequest parentRequest)
-        {
-            return CreateBuildRequest(
-                nodeRequestId,
-                configId,
-                null,
-                NodeAffinity.Any,
-                parentRequest,
-                proxyTargets);
+                targets,
+                hostServices,
+                BuildEventContext.Invalid,
+                parentRequest);
         }
 
         /// <summary>

@@ -1731,11 +1731,31 @@ namespace Microsoft.Build.Execution
             ProxyTargets proxyTargets,
             int projectContextId)
         {
+            // Reverse the map so we can look up requested targets
+            // The ProxyTargetToRealTargetMap is "backwards" from how most users would want to use it and doesn't provide as much flexibility as it could if reversed.
+            // Unfortunately this is part of a public API so cannot easily change at this point.
+            Dictionary<string, string> realTargetsToProxyTargets = new(proxyTargets.ProxyTargetToRealTargetMap.Count, StringComparer.OrdinalIgnoreCase);
+            foreach (KeyValuePair<string, string> kvp in proxyTargets.ProxyTargetToRealTargetMap)
+            {
+                // In the case of multiple proxy targets pointing to the same real target, the last one wins. Another awkwardness of ProxyTargetToRealTargetMap being "backwards".
+                realTargetsToProxyTargets[kvp.Value] = kvp.Key;
+            }
+
+            List<string> targets = new(submission.BuildRequestData.TargetNames.Count);
+            foreach (string requestedTarget in submission.BuildRequestData.TargetNames)
+            {
+                string effectiveTarget = realTargetsToProxyTargets.TryGetValue(requestedTarget, out string proxyTarget)
+                    ? proxyTarget
+                    : requestedTarget;
+                targets.Add(effectiveTarget);
+            }
+
             submission.BuildRequest = new BuildRequest(
                 submission.SubmissionId,
                 BackEnd.BuildRequest.InvalidNodeRequestId,
                 configurationId,
                 proxyTargets,
+                targets,
                 submission.BuildRequestData.HostServices,
                 submission.BuildRequestData.Flags,
                 submission.BuildRequestData.RequestedProjectState,

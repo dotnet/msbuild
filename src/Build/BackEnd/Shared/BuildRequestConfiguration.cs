@@ -745,13 +745,6 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(_projectInitialTargets != null, "Initial targets have not been set.");
             ErrorUtilities.VerifyThrow(_projectDefaultTargets != null, "Default targets have not been set.");
 
-            if (request.ProxyTargets != null)
-            {
-                ErrorUtilities.VerifyThrow(
-                    CollectionHelpers.SetEquivalent(request.Targets, request.ProxyTargets.ProxyTargetToRealTargetMap.Keys),
-                    "Targets must be same as proxy targets");
-            }
-
             List<string> initialTargets = _projectInitialTargets;
             List<string> nonInitialTargets = (request.Targets.Count == 0) ? _projectDefaultTargets : request.Targets;
 
