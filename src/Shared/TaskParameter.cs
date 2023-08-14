@@ -685,8 +685,9 @@ namespace Microsoft.Build.BackEnd
 
             if (translator.Mode == TranslationDirection.ReadFromStream)
             {
-                // We don't know how to convert the string back to the original value type.
-                // This is fine because the engine would eventually convert it to string anyway.
+                // We don't know how to convert the string back to the original value type. This is fine because output
+                // task parameters are anyway converted to strings by the engine (see TaskExecutionHost.GetValueOutputs)
+                // and input task parameters of custom value types are not supported.
                 _wrappedParameter = valueString;
             }
         }
