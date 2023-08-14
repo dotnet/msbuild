@@ -33,6 +33,7 @@
   <!-- Packages that are in-box for .NET Core, so we only need to reference them for .NET Framework -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PackageReference Include="System.Reflection.Metadata" VersionOverride="$(SystemReflectionMetadataVersion)" />
+    <PackageReference Include="System.Reflection.MetadataLoadContext" VersionOverride="$(SystemReflectionMetadataVersion)" />
   </ItemGroup>
 
   <ItemGroup>

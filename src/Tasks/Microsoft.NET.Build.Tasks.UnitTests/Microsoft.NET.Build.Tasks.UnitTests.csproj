@@ -21,6 +21,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyModel" />
     <PackageReference Include="NuGet.ProjectModel" />
     <PackageReference Include="System.Reflection.Metadata" VersionOverride="$(SystemReflectionMetadataVersion)" />
+    <PackageReference Include="System.Reflection.MetadataLoadContext" VersionOverride="$(SystemReflectionMetadataVersion)" />
     <PackageReference Include="System.Security.Cryptography.X509Certificates" />
   </ItemGroup>
 
