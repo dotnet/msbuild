@@ -450,9 +450,6 @@
     <PropertyGroup>
       <ReplacementPattern>"version": ".*"</ReplacementPattern>
       <ReplacementString>"version": "$(MicrosoftNETCoreAppRuntimePackageVersion)"</ReplacementString>
-
-      <DisabledBinaryFormatterPattern>"System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization": false</DisabledBinaryFormatterPattern>
-      <EnableBinaryFormatterString>"System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization": true</EnableBinaryFormatterString>
     </PropertyGroup>
     <ItemGroup>
       <!-- Exclude F# from retargeting: https://github.com/dotnet/toolset/issues/2866 -->
@@ -467,14 +464,6 @@
       DestinationFiles="@(ToolRuntimeConfigPath)"
       ReplacementPatterns="$(ReplacementPattern)"
       ReplacementStrings="$(ReplacementString)" />
-
-    <!-- Work around https://github.com/dotnet/msbuild/issues/6215 by opting back into net7 behavior -->
-    <ReplaceFileContents
-      InputFiles="@(ToolRuntimeConfigPath)"
-      DestinationFiles="@(ToolRuntimeConfigPath)"
-      ReplacementPatterns="$(DisabledBinaryFormatterPattern)"
-      ReplacementStrings="$(EnableBinaryFormatterString)"
-      Condition=" '%(ToolRuntimeConfigPath.FileName)' == 'MSBuild.runtimeconfig'" />
 
     <Move
       SourceFiles="@(MSBuild15Items)"
