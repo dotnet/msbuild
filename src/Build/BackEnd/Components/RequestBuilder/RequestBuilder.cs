@@ -1215,12 +1215,14 @@ namespace Microsoft.Build.BackEnd
                     // Update the results cache.
                     cachedResult.AddResultsForTarget(
                         realTarget,
-                        proxyTargetResult);
+                        proxyTargetResult,
+                        allowReplacement: true);
 
                     // Update and return this one because TargetBuilder.BuildTargets did some mutations on it not present in the cached result.
                     resultFromTargetBuilder.AddResultsForTarget(
                         realTarget,
-                        proxyTargetResult);
+                        proxyTargetResult,
+                        allowReplacement: true);
                 }
 
                 return resultFromTargetBuilder;

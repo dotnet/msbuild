@@ -478,7 +478,15 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <param name="target">The target to which these results apply.</param>
         /// <param name="result">The results for the target.</param>
-        public void AddResultsForTarget(string target, TargetResult result)
+        public void AddResultsForTarget(string target, TargetResult result) => AddResultsForTarget(target, result, allowReplacement: false);
+
+        /// <summary>
+        /// Adds the results for the specified target to this result collection.
+        /// </summary>
+        /// <param name="target">The target to which these results apply.</param>
+        /// <param name="result">The results for the target.</param>
+        /// <param name="allowReplacement">Whether to allow replacing existing results.</param>
+        internal void AddResultsForTarget(string target, TargetResult result, bool allowReplacement)
         {
             ErrorUtilities.VerifyThrowArgumentNull(target, nameof(target));
             ErrorUtilities.VerifyThrowArgumentNull(result, nameof(result));
@@ -488,7 +496,7 @@ namespace Microsoft.Build.Execution
                 _resultsByTarget ??= CreateTargetResultDictionary(1);
             }
 
-            if (_resultsByTarget.TryGetValue(target, out TargetResult targetResult))
+            if (!allowReplacement && _resultsByTarget.TryGetValue(target, out TargetResult targetResult))
             {
                 ErrorUtilities.VerifyThrow(targetResult.ResultCode == TargetResultCode.Skipped, "Items already exist for target {0}.", target);
             }
