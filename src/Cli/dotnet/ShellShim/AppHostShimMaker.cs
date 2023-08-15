@@ -39,12 +39,13 @@ namespace Microsoft.DotNet.ShellShim
             string entryPointFullPath = Path.GetFullPath(entryPoint.Value);
             var appBinaryFilePath = Path.GetRelativePath(Path.GetDirectoryName(appHostDestinationFilePath), entryPointFullPath);
 
-
             var windowsGraphicalUserInterfaceBit = PEUtils.GetWindowsGraphicalUserInterfaceBit(entryPointFullPath);
+            var windowsGraphicalUserInterface = (windowsGraphicalUserInterfaceBit == WindowsGUISubsystem) && OperatingSystem.IsWindows();
+
             HostWriter.CreateAppHost(appHostSourceFilePath: appHostSourcePath,
                                      appHostDestinationFilePath: appHostDestinationFilePath,
                                      appBinaryFilePath: appBinaryFilePath,
-                                     windowsGraphicalUserInterface: (windowsGraphicalUserInterfaceBit == WindowsGUISubsystem) && OperatingSystem.IsWindows(),
+                                     windowsGraphicalUserInterface: windowsGraphicalUserInterface,
                                      assemblyToCopyResourcesFrom: entryPointFullPath);
 
             _filePermissionSetter.SetUserExecutionPermission(appHostDestinationFilePath);
