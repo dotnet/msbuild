@@ -25,7 +25,7 @@ internal class LoggingConfigurationTelemetry : TelemetryBase
     public string? TerminalLoggerUserIntent { get; set; }
 
     /// <summary>
-    /// How was user intent signalized:
+    /// How was user intent signaled:
     ///   arg -> from command line argument or rsp file
     ///   MSBUILDTERMINALLOGGER -> from environment variable
     ///   MSBUILDLIVELOGGER -> from environment variable
@@ -43,7 +43,7 @@ internal class LoggingConfigurationTelemetry : TelemetryBase
     public string? TerminalLoggerDefault { get; set; }
 
     /// <summary>
-    /// How was default behavior signalized:
+    /// How was default behavior signaled:
     ///   sdk -> from SDK
     ///   DOTNET_CLI_BUILD_TERMINAL_LOGGER -> from environment variable
     ///   msbuild -> MSBuild hardcoded default
