@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="DeprecatedEventSerialization">
         <source>Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
-        <target state="new">Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</target>
+        <target state="translated">Utilizzo di BinaryFormatter non sicuro durante la serializzazione del tipo di evento personalizzato '{0}'. Questa operazione verrà presto deprecata. Usare invece Extended*EventArgs. Altre informazioni: https://aka.ms/msbuild/eventargs</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedEventToBeSerializable">
