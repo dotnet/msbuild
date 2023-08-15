@@ -2686,8 +2686,13 @@ namespace Microsoft.Build.CommandLine
                 if (bool.TryParse(terminalLoggerArg, out bool result))
                 {
                     useTerminalLogger = result;
-                    // This needs to be called so Ansi Color Codes are enabled for the terminal logger.
-                    (_, _, s_originalConsoleMode) =  NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
+
+                    // Try Enable Ansi Color Codes when terminal logger is enabled/enforced.
+                    if (result)
+                    {
+                        // This needs to be called so Ansi Color Codes are enabled for the terminal logger.
+                        (_, _, s_originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
+                    }
 
                     return true;
                 }
