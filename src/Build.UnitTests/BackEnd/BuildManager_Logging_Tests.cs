@@ -80,7 +80,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
         [DotNetOnlyTheory]
         [InlineData("1", true)]
-        [InlineData("0", false)]
+        // [InlineData("0", true)] <-- explicitly opting out on core will lead to node crash (as documented)
         [InlineData(null, true)]
         public void Build_WithCustomBuildArgs_NetCore(string envVariableValue, bool isWarningExpected)
             => TestCustomEventWarning<BuildErrorEventArgs>(envVariableValue, isWarningExpected);
