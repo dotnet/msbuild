@@ -822,6 +822,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             if (proxyTargets != null)
             {
+                parentRequest.ShouldBeNull();
                 return new BuildRequest(
                     submissionId: 1,
                     nodeRequestId,
@@ -831,7 +832,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     hostServices);
             }
 
-            parentRequest.ShouldBeNull();
             return new BuildRequest(
                 submissionId: 1,
                 nodeRequestId,

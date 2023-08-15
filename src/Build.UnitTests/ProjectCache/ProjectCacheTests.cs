@@ -507,7 +507,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 }
             }
 
-
             AssertCacheBuild(graph, testData, mockCache, logger, nodesToBuildResults, targets: null);
         }
 
