@@ -75,7 +75,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             bool testLegacyImplementation)
             => VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost(testLegacyImplementation);
 
-        public void VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost(bool testLegacyImplementation)
+        private void VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost(bool testLegacyImplementation)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
 
