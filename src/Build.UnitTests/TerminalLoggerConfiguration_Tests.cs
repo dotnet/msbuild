@@ -113,7 +113,7 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
     [Fact]
     public void TerminalLoggerDefaultByEnv()
     {
-        _env.SetEnvironmentVariable("DOTNET_CLI_BUILD_TERMINAL_LOGGER", bool.TrueString);
+        _env.SetEnvironmentVariable("DOTNET_CLI_CONFIGURE_MSBUILD_TERMINAL_LOGGER", bool.TrueString);
         string output = RunnerUtilities.ExecMSBuild($"{_cmd} -tlp:default={bool.TrueString}", out bool success);
         success.ShouldBeTrue();
 
@@ -121,7 +121,7 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
         {
             TerminalLogger = true,
             TerminalLoggerDefault = bool.TrueString,
-            TerminalLoggerDefaultSource = "DOTNET_CLI_BUILD_TERMINAL_LOGGER",
+            TerminalLoggerDefaultSource = "DOTNET_CLI_CONFIGURE_MSBUILD_TERMINAL_LOGGER",
             TerminalLoggerUserIntent = null,
             TerminalLoggerUserIntentSource = null,
             ConsoleLogger = false,

@@ -45,7 +45,7 @@ internal class LoggingConfigurationTelemetry : TelemetryBase
     /// <summary>
     /// How was default behavior signaled:
     ///   sdk -> from SDK
-    ///   DOTNET_CLI_BUILD_TERMINAL_LOGGER -> from environment variable
+    ///   DOTNET_CLI_CONFIGURE_MSBUILD_TERMINAL_LOGGER -> from environment variable
     ///   msbuild -> MSBuild hardcoded default
     ///   null -> unspecified
     /// </summary>

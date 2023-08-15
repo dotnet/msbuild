@@ -2593,9 +2593,9 @@ namespace Microsoft.Build.CommandLine
                 else
                 {
                     // Lets check DOTNET CLI env var
-                    string dotnetCliEnvVar = Environment.GetEnvironmentVariable("DOTNET_CLI_BUILD_TERMINAL_LOGGER");
+                    string dotnetCliEnvVar = Environment.GetEnvironmentVariable("DOTNET_CLI_CONFIGURE_MSBUILD_TERMINAL_LOGGER");
                     KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerDefault = terminalLoggerDefault;
-                    KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerDefaultSource = string.IsNullOrWhiteSpace(dotnetCliEnvVar) ? "sdk" : "DOTNET_CLI_BUILD_TERMINAL_LOGGER";
+                    KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerDefaultSource = string.IsNullOrWhiteSpace(dotnetCliEnvVar) ? "sdk" : "DOTNET_CLI_CONFIGURE_MSBUILD_TERMINAL_LOGGER";
                 }
 
                 return terminalLoggerDefault;
