@@ -228,10 +228,6 @@
     <Delete Files="$(OutputPath)/$(TargetName).deps.json;
                    $(OutputPath)/$(TargetName).runtimeconfig.json" />
 
-    <ItemGroup>
-      <BundledToolProjects Remove="redist" />
-    </ItemGroup>
-
     <Delete Files="$(OutputPath)/%(BundledToolProjects.Identity).dll;
                    $(OutputPath)/%(BundledToolProjects.Identity).pdb" />
 
