@@ -271,7 +271,7 @@ namespace Microsoft.DotNet.Cli
                     option.EnsureHelpName();
                 }
 
-                if (command.Name.Equals(NuGetCommandParser.GetCommand().Name))
+                if (command.Equals(NuGetCommandParser.GetCommand()) || command.Parents.Any(parent => parent == NuGetCommandParser.GetCommand()))
                 {
                     NuGetCommand.Run(context.ParseResult);
                 }
