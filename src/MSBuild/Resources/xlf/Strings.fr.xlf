@@ -108,6 +108,16 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="InvalidTerminalLoggerValue">
+        <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
+        <target state="translated">MSBUILD : error MSB1065: La valeur du journal du terminal n’est pas valide. Il doit s’agir de 'auto', 'true' ou 'false'. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1065: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
         <target state="translated">Version MSBuild {0} pour {1}</target>
@@ -1393,8 +1403,8 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
     </note>
       </trans-unit>
       <trans-unit id="NameInvalid">
-        <source>MSBUILD: error MSB5016: The name "{0}" contains an invalid character "{1}".</source>
-        <target state="new">MSBUILD: error MSB5016: The name "{0}" contains an invalid character "{1}".</target>
+        <source>MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</source>
+        <target state="translated">MSBUILD : error MSB5016: le nom «{0}» contient un caractère non valide «{1}».</target>
         <note>
       {StrBegin="MSBUILD : error MSB5016: "}
     </note>
@@ -1595,17 +1605,17 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
-        <target state="new">Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</target>
+        <target state="translated">L’enregistreur d’événements de terminal n’a pas été utilisé, car la build est exécutée dans le contexte d’un processus (par exemple, 'dotnet test') qui demande un accès direct au flux stdout.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedNotSupported">
         <source>Terminal Logger was not used because the output is not supported.</source>
-        <target state="new">Terminal Logger was not used because the output is not supported.</target>
+        <target state="translated">L’enregistreur d’événements de terminal n’a pas été utilisé, car la sortie n’est pas prise en charge.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedRedirected">
         <source>Terminal Logger was not used because the output is being redirected to a file.</source>
-        <target state="new">Terminal Logger was not used because the output is being redirected to a file.</target>
+        <target state="translated">L’enregistreur d’événements du terminal n’a pas été utilisé car la sortie est redirigée vers un fichier.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">

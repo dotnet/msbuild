@@ -16,10 +16,18 @@ internal static class AnsiCodes
     /// <summary>
     /// Select graphic rendition.
     /// </summary>
-    /// <remarks>\
+    /// <remarks>
     /// Print <see cref="CSI"/>color-code<see cref="SetColor"/> to change text color.
     /// </remarks>
     public const string SetColor = ";1m";
+
+    /// <summary>
+    /// Select graphic rendition - set bold mode.
+    /// </summary>
+    /// <remarks>
+    /// Print <see cref="CSI"/><see cref="SetBold"/> to change text to bold.
+    /// </remarks>
+    public const string SetBold = "1m";
 
     /// <summary>
     /// A shortcut to reset color back to normal.
@@ -95,13 +103,23 @@ internal static class AnsiCodes
     public const string ShowCursor = "\x1b[?25h";
 
     /// <summary>
-    /// Set progress state to a busy spinner.
+    /// Set progress state to a busy spinner. <br/>
+    /// Note: this code works only on ConEmu terminals, and conflicts with push a notification code on iTerm2.
     /// </summary>
+    /// <remarks>
+    /// <see href="https://conemu.github.io/en/AnsiEscapeCodes.html#ConEmu_specific_OSC">ConEmu specific OSC codes.</see><br/>
+    /// <see href="https://iterm2.com/documentation-escape-codes.html">iTerm2 proprietary escape codes.</see>
+    /// </remarks>
     public const string SetProgressIndeterminate = "\x1b]9;4;3;\x1b\\";
 
     /// <summary>
-    /// Remove progress state, restoring taskbar status to normal.
+    /// Remove progress state, restoring taskbar status to normal. <br/>
+    /// Note: this code works only on ConEmu terminals, and conflicts with push a notification code on iTerm2.
     /// </summary>
+    /// <remarks>
+    /// <see href="https://conemu.github.io/en/AnsiEscapeCodes.html#ConEmu_specific_OSC">ConEmu specific OSC codes.</see><br/>
+    /// <see href="https://iterm2.com/documentation-escape-codes.html">iTerm2 proprietary escape codes.</see>
+    /// </remarks>
     public const string RemoveProgress = "\x1b]9;4;0;\x1b\\";
 
     public static string Colorize(string? s, TerminalColor color)
@@ -112,5 +130,15 @@ internal static class AnsiCodes
         }
 
         return $"{CSI}{(int)color}{SetColor}{s}{SetDefaultColor}";
+    }
+
+    public static string MakeBold(string? s)
+    {
+        if (string.IsNullOrWhiteSpace(s))
+        {
+            return s ?? "";
+        }
+
+        return $"{CSI}{SetBold}{s}{SetDefaultColor}";
     }
 }

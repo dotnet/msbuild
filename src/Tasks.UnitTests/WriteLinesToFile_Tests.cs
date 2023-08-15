@@ -239,6 +239,57 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         /// <summary>
+        /// Question WriteLines to return true when Lines are empty.
+        /// </summary>
+        [Fact]
+        public void QuestionWriteLinesWhenLinesAreEmpty()
+        {
+            // Test the combination of:
+            // 1) File exists
+            // 2) Overwrite
+            // 3) WriteOnlyWhenDifferent
+
+            var fileExists = FileUtilities.GetTemporaryFile();
+            var fileNotExists = FileUtilities.GetTemporaryFileName();
+            try
+            {
+                TestWriteLines(fileExists, fileNotExists, Overwrite: true, WriteOnlyWhenDifferent: true);
+                TestWriteLines(fileExists, fileNotExists, Overwrite: false, WriteOnlyWhenDifferent: true);
+                TestWriteLines(fileExists, fileNotExists, Overwrite: true, WriteOnlyWhenDifferent: false);
+                TestWriteLines(fileExists, fileNotExists, Overwrite: false, WriteOnlyWhenDifferent: false);
+            }
+            finally
+            {
+                File.Delete(fileExists);
+            }
+
+            void TestWriteLines(string fileExists, string fileNotExists, bool Overwrite, bool WriteOnlyWhenDifferent)
+            {
+                var test1 = new WriteLinesToFile
+                {
+                    Overwrite = Overwrite,
+                    BuildEngine = new MockEngine(_output),
+                    File = new TaskItem(fileExists),
+                    WriteOnlyWhenDifferent = WriteOnlyWhenDifferent,
+                    FailIfNotIncremental = true,
+                    // Tests Lines = null.
+                };
+                test1.Execute().ShouldBeTrue();
+
+                var test2 = new WriteLinesToFile
+                {
+                    Overwrite = Overwrite,
+                    BuildEngine = new MockEngine(_output),
+                    File = new TaskItem(fileNotExists),
+                    WriteOnlyWhenDifferent = WriteOnlyWhenDifferent,
+                    FailIfNotIncremental = true,
+                    Lines = Array.Empty<ITaskItem>(),  // Test empty.
+                };
+                test2.Execute().ShouldBeTrue();
+            }
+        }
+
+        /// <summary>
         /// Should create directory structure when target <see cref="WriteLinesToFile.File"/> does not exist.
         /// </summary>
         [Fact]
