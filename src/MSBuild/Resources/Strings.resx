@@ -1033,6 +1033,37 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>
+  <data name="MissingGetPropertyError" UESanitized="true" Visibility="Public">
+    <value>MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</value>
+    <comment>
+      {StrBegin="MSBUILD : error MSB1010: "}UE: This happens if the user does something like "msbuild.exe -getProperty". The user must pass in an actual property name
+      following the switch, as in "msbuild.exe -getProperty:blah".
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </comment>
+  </data>
+  <data name="MissingGetItemError" UESanitized="true" Visibility="Public">
+    <value>MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</value>
+    <comment>
+      {StrBegin="MSBUILD : error MSB1014: "}UE: This happens if the user does something like "msbuild.exe -getItem". The user must pass in an actual item name
+      following the switch, as in "msbuild.exe -getItem:blah".
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </comment>
+  </data>
+  <data name="MissingGetTargetResultError" UESanitized="true" Visibility="Public">
+    <value>MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</value>
+    <comment>
+      {StrBegin="MSBUILD : error MSB1017: "}UE: This happens if the user does something like "msbuild.exe -getTargetResult". The user must pass in an actual target name
+      following the switch, as in "msbuild.exe -getTargetResult:blah".
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </comment>
+  </data>
+  <data name="SolutionBuildInvalidForCommandLineEvaluation" UESanitized="true" Visibility="Public">
+    <value>MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</value>
+    <comment>
+      {StrBegin="MSBUILD : error MSB1063: "}UE: This happens if the user passes in a solution file when trying to access individual properties or items. The user must pass in a project file.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </comment>
+  </data>
   <data name="MissingToolsVersionError" UESanitized="false" Visibility="Public">
     <value>MSBUILD : error MSB1039: Specify the version of the toolset.</value>
     <comment>
@@ -1495,6 +1526,9 @@
       {3}: target
       {4}: duration in seconds with 1 decimal point
     </comment>
+  </data>
+  <data name="BuildFailedWithPropertiesItemsOrTargetResultsRequested" xml:space="preserve">
+    <value>Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</value>
   </data>
   <data name="TerminalLoggerNotUsedDisabled" xml:space="preserve">
     <value>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</value>
