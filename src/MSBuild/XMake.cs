@@ -2536,7 +2536,7 @@ namespace Microsoft.Build.CommandLine
 
             return KnownTelemetry.LoggingConfigurationTelemetry.TerminalLogger = useTerminalLogger;
 
-            static bool DoesEnvironmentSupportTerminalLogger()
+            static bool CheckIfTerminalIsSupportedAndTryEnableAnsiColorCodes()
             {
                 (var acceptAnsiColorCodes, var outputIsScreen, s_originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
 
@@ -2708,7 +2708,7 @@ namespace Microsoft.Build.CommandLine
                     CommandLineSwitchException.Throw("InvalidTerminalLoggerValue", terminalLoggerArg);
                 }
 
-                useTerminalLogger = DoesEnvironmentSupportTerminalLogger();
+                useTerminalLogger = CheckIfTerminalIsSupportedAndTryEnableAnsiColorCodes();
             }
         }
 
