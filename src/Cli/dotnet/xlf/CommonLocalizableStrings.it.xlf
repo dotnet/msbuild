@@ -218,8 +218,8 @@ export PATH="$PATH:{0}"
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'false.' However, when targeting .NET 7 or lower, the default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">Pubblica il runtime .NET con l'applicazione in modo che non sia necessario installarlo nel computer di destinazione.
-L'impostazione predefinita è 'true' se si specifica un identificatore di runtime.</target>
+        <target state="new">Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'false.' However, when targeting .NET 7 or lower, the default is 'true' if a runtime identifier is specified.</target>
         <note />
       </trans-unit>
       <trans-unit id="Solution">

@@ -218,8 +218,8 @@ export PATH="$PATH:{0}"
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'false.' However, when targeting .NET 7 or lower, the default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">將 .NET 執行階段發佈於您的應用程式中，以便目標電腦不必安裝執行階段。
-如有指定執行階段識別碼，則預設為 'true'。</target>
+        <target state="new">Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'false.' However, when targeting .NET 7 or lower, the default is 'true' if a runtime identifier is specified.</target>
         <note />
       </trans-unit>
       <trans-unit id="Solution">
