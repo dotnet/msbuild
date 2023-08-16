@@ -115,9 +115,14 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         /// <param name="log">Test logger.</param>
         /// <param name="homeDirectory">The settings path for dotnet new.</param>
         /// <param name="workingDirectory">The working directory to use.</param>
-        internal string InstallTestTemplate(string templateName, ITestOutputHelper log, string homeDirectory, string? workingDirectory = null)
+        /// <param name="enableTemporaryPath">Whether or not copy the test project to the temporary path.</param>
+        internal string InstallTestTemplate(string templateName, ITestOutputHelper log, string homeDirectory, string? workingDirectory = null, bool enableTemporaryPath = false)
         {
-            string testTemplate = _testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateName}").WithSource().Path;
+            string testTemplate = GetTestTemplateLocation(templateName);
+            if (enableTemporaryPath)
+            {
+                testTemplate = _testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateName}").WithSource().Path;
+            }
 
             DotnetNewCommand command = new DotnetNewCommand(log, "install", testTemplate)
                 .WithCustomHive(homeDirectory);
