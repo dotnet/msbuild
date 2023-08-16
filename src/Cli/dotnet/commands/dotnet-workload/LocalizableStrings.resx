@@ -157,7 +157,7 @@
     <value>Checking the state of installed workloads...</value>
   </data>
   <data name="WorkloadIntegrityCheckError" xml:space="preserve">
-    <value>An issue was encountered when verifying workloads. For more information, run "dotnet workload update".</value>
-    <comment>Do not translate "dotnet workload update" as it is a CLI command.</comment>
+    <value>An issue was encountered verifying workloads. For more information, run "dotnet workload update".</value>
+    <comment>{Locked="dotnet workload update"}</comment>
   </data>
 </root>

@@ -53,9 +53,9 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIntegrityCheckError">
-        <source>An issue was encountered when verifying workloads. For more information, run "dotnet workload update".</source>
-        <target state="new">An issue was encountered when verifying workloads. For more information, run "dotnet workload update".</target>
-        <note>Do not translate "dotnet workload update" as it is a CLI command.</note>
+        <source>An issue was encountered verifying workloads. For more information, run "dotnet workload update".</source>
+        <target state="new">An issue was encountered verifying workloads. For more information, run "dotnet workload update".</target>
+        <note>{Locked="dotnet workload update"}</note>
       </trans-unit>
       <trans-unit id="WorkloadManfiestVersionColumn">
         <source>Manifest Version</source>
