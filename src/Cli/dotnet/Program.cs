@@ -162,11 +162,11 @@ namespace Microsoft.DotNet.Cli
 
                     var environmentProvider = new EnvironmentProvider();
 
-                    bool generateAspNetCertificate = environmentProvider.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", defaultValue: true);
+                    bool generateAspNetCertificate = environmentProvider.GetEnvironmentVariableAsBool(EnvironmentVariableNames.DOTNET_GENERATE_ASPNET_CERTIFICATE, defaultValue: true);
                     bool telemetryOptout = environmentProvider.GetEnvironmentVariableAsBool(EnvironmentVariableNames.TELEMETRY_OPTOUT, defaultValue: CompileOptions.TelemetryOptOutDefault);
-                    bool addGlobalToolsToPath = environmentProvider.GetEnvironmentVariableAsBool("DOTNET_ADD_GLOBAL_TOOLS_TO_PATH", defaultValue: true);
-                    bool nologo = environmentProvider.GetEnvironmentVariableAsBool("DOTNET_NOLOGO", defaultValue: false);
-                    bool skipWorkloadIntegrityCheck = environmentProvider.GetEnvironmentVariableAsBool("DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK",
+                    bool addGlobalToolsToPath = environmentProvider.GetEnvironmentVariableAsBool(EnvironmentVariableNames.DOTNET_ADD_GLOBAL_TOOLS_TO_PATH, defaultValue: true);
+                    bool nologo = environmentProvider.GetEnvironmentVariableAsBool(EnvironmentVariableNames.DOTNET_NOLOGO, defaultValue: false);
+                    bool skipWorkloadIntegrityCheck = environmentProvider.GetEnvironmentVariableAsBool(EnvironmentVariableNames.DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK,
                         // Default the workload integrity check skip to true if the command is being ran in CI. Otherwise, false.
                         defaultValue: new CIEnvironmentDetectorForTelemetry().IsCIEnvironment());
 
