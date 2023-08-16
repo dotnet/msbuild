@@ -21,6 +21,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
         internal const string SdkTaskBaseCatchExceptionTelemetryEventName = "taskBaseCatchException";
         internal const string PublishPropertiesTelemetryEventName = "PublishProperties";
+        internal const string WorkloadPublishPropertiesTelemetryEventName = "WorkloadPublishProperties";
         internal const string ReadyToRunTelemetryEventName = "ReadyToRun";
 
         internal const string TargetFrameworkVersionTelemetryPropertyKey = "TargetFrameworkVersion";
@@ -124,6 +125,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
                 case SdkTaskBaseCatchExceptionTelemetryEventName:
                 case PublishPropertiesTelemetryEventName:
                 case ReadyToRunTelemetryEventName:
+                case WorkloadPublishPropertiesTelemetryEventName:
                     TrackEvent(telemetry, args.EventName, args.Properties, Array.Empty<string>(), Array.Empty<string>() );
                     break;
                 default:
