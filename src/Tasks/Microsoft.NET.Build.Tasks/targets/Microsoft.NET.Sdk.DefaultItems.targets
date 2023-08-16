@@ -33,6 +33,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultItemExcludes>$(DefaultItemExcludes);**/*.*proj</DefaultItemExcludes>
     <DefaultItemExcludes>$(DefaultItemExcludes);**/*.sln</DefaultItemExcludes>
     <DefaultItemExcludes>$(DefaultItemExcludes);**/*.vssscc</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);**/.DS_Store</DefaultItemExcludes>
 
     <!-- WARNING: This pattern is there to ignore folders such as .git and .vs, but it will also match items included with a
          relative path outside the project folder (for example "..\Shared\Shared.cs").  So be sure only to apply it to items
