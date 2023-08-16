@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, templateName, "-n", "MyProject")
                 .WithCustomHive(home)
@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
             string outputDirectory = CreateTemporaryFolder("output");
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, expectedTemplateName, "-n", "MyProject", "-o", outputDirectory)
                 .WithCustomHive(home)
@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
             string outputDirectory = "output";
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, expectedTemplateName, "-n", "MyProject", "-o", outputDirectory)
                 .WithCustomHive(home)
@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, templateName, "-n", "MyProject", "--firstRename", "Awesome")
                 .WithCustomHive(home)
@@ -174,7 +174,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, templateName, "-n", "TemplateApplication")
                 .WithCustomHive(home)
@@ -215,7 +215,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, templateName, "-n", "TemplateApplication")
                 .WithCustomHive(home)
@@ -259,7 +259,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string templateName = "TestAssets.PostActions.RunScript.Basic";
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             CommandResult commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
                 .WithCustomHive(home)
@@ -292,7 +292,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string templateName = "TestAssets.PostActions.RunScript.DoNotRedirect";
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             CommandResult commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
                 .WithCustomHive(home)
@@ -317,7 +317,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string templateName = "TestAssets.PostActions.RunScript.Redirect";
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             CommandResult commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
                 .WithCustomHive(home)
@@ -342,7 +342,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string templateName = "TestAssets.PostActions.RunScript.RedirectOnError";
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             CommandResult commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
                 .WithCustomHive(home)
@@ -375,7 +375,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, templateName)
                 .WithCustomHive(home)
@@ -406,7 +406,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
             string outputDirectory = CreateTemporaryFolder("output");
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, expectedTemplateName, "-o", outputDirectory, "-n", "MyProject")
                 .WithCustomHive(home)
@@ -437,7 +437,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string expectedTemplateName = "TestAssets.PostActions.AddPackageReference.Basic";
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, expectedTemplateName, "-o", "output", "-n", "MyProject")
                 .WithCustomHive(home)
@@ -468,7 +468,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string expectedTemplateName = "TestAssets.PostActions.AddProjectReference.Basic";
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, expectedTemplateName)
                 .WithCustomHive(home)
@@ -505,7 +505,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
             string outputDirectory = CreateTemporaryFolder("output");
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, expectedTemplateName, "-o", outputDirectory)
                 .WithCustomHive(home)
@@ -535,7 +535,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string expectedTemplateName = "TestAssets.PostActions.AddProjectReference.Basic";
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             new DotnetNewCommand(_log, expectedTemplateName, "-o", "output")
                 .WithCustomHive(home)
@@ -565,7 +565,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             CommandResult commandResult = new DotnetNewCommand(_log, templateName)
                    .WithCustomHive(home)
@@ -603,7 +603,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             //creating solution file to add to
             new DotnetNewCommand(_log, "sln", "-n", "MySolution")
@@ -637,7 +637,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
             string outputDirectory = CreateTemporaryFolder("output");
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             //creating solution file to add to
             new DotnetNewCommand(_log, "sln", "-n", "MySolution", "-o", outputDirectory)
@@ -673,7 +673,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
             string outputDirectory = CreateTemporaryFolder("output");
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             //creating solution file to add to
             new DotnetNewCommand(_log, "sln", "-n", "MySolution", "-o", outputDirectory)
@@ -709,7 +709,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
             string outputDirectory = "output";
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             //creating solution file to add to
             new DotnetNewCommand(_log, "sln", "-n", "MySolution", "-o", outputDirectory)
@@ -744,7 +744,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string expectedTemplateName = "TestAssets.PostActions.AddProjectToSolution.BasicWithIndexes";
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             //creating solution file to add to
             new DotnetNewCommand(_log, "sln", "-n", "MySolution")
@@ -783,7 +783,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             string templateName = "TestAssets.PostActions.Instructions.Basic";
             string home = CreateTemporaryFolder(folderName: "Home");
             string workingDirectory = CreateTemporaryFolder();
-            InstallTestTemplate(templateLocation, _log, home, workingDirectory, true);
+            InstallTestTemplate(_testAssetsManager.CopyTestAsset("", testAssetSubdirectory: $"{DotnetNewTestTemplatesBasePath}/{templateLocation}").WithSource().Path, _log, home, workingDirectory);
 
             CommandResult commandResult = new DotnetNewCommand(_log, templateName)
                 .WithCustomHive(home)
