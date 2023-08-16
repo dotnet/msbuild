@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -191,6 +192,8 @@ namespace Microsoft.Build.Logging
             LogInitialInfo();
 
             eventSource.AnyEventRaised += EventSource_AnyEventRaised;
+
+            KnownTelemetry.LoggingConfigurationTelemetry.BinaryLogger = true;
         }
 
         private void EventArgsWriter_EmbedFile(string filePath)
@@ -356,6 +359,7 @@ namespace Microsoft.Build.Logging
             {
                 FilePath = "msbuild.binlog";
             }
+            KnownTelemetry.LoggingConfigurationTelemetry.BinaryLoggerUsedDefaultName = FilePath == "msbuild.binlog";
 
             try
             {

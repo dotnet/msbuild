@@ -1379,6 +1379,16 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="MissingTerminalLoggerParameterError">
+        <source>MSBUILD : error MSB1066: Specify one or more parameters for the terminal logger if using the -terminalLoggerParameters switch</source>
+        <target state="new">MSBUILD : error MSB1066: Specify one or more parameters for the terminal logger if using the -terminalLoggerParameters switch</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1066: "}
+      UE: This happens if the user does something like "msbuild.exe -termionalLoggerParameters:". The user must pass in one or more parameters
+      after the switch e.g. "msbuild.exe -terminalLoggerParameters:default=auto".
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="MissingToolsVersionError">
         <source>MSBUILD : error MSB1039: Specify the version of the toolset.</source>
         <target state="translated">MSBUILD : error MSB1039: Zadejte verzi sady nástrojů.</target>
