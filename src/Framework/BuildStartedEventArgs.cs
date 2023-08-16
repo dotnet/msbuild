@@ -53,7 +53,7 @@ namespace Microsoft.Build.Framework
         public BuildStartedEventArgs(
             string? message,
             string? helpKeyword,
-            IDictionary<string, string> environmentOfBuild)
+            IDictionary<string, string>? environmentOfBuild)
             : this(message, helpKeyword, DateTime.UtcNow)
         {
             environmentOnBuildStart = environmentOfBuild;
