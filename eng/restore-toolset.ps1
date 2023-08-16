@@ -154,6 +154,9 @@ function CleanOutStage0ToolsetsAndRuntimes {
       Remove-Item (Join-Path $coreRuntimePath "$majorVersion.*") -Recurse
       Remove-Item (Join-Path $wdRuntimePath "$majorVersion.*") -Recurse
       Remove-Item (Join-Path $sdkPath "$majorVersion.*") -Recurse
+      Remove-Item (Join-Path $dotnetRoot "packs") -Recurse
+      Remove-Item (Join-Path $dotnetRoot "sdk-manifests") -Recurse
+      Remove-Item (Join-Path $dotnetRoot "templates") -Recurse
       throw "Installed a new SDK, deleting existing shared frameworks and sdk folders. Please rerun build"
     }
   }
@@ -166,5 +169,3 @@ function CleanOutStage0ToolsetsAndRuntimes {
 InitializeCustomSDKToolset
 
 CleanOutStage0ToolsetsAndRuntimes
-
-throw "exit early"
