@@ -61,13 +61,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         private static bool CanWriteToDotnetRoot(string dotnetDir = null)
         {
-            dotnetDir = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
+            dotnetDir ??= Path.GetDirectoryName(Environment.ProcessPath);
             try
             {
                 var testPath = Path.Combine(dotnetDir, "metadata", Path.GetRandomFileName());
                 if (Directory.Exists(Path.GetDirectoryName(testPath)))
                 {
-                    using (FileStream fs = File.Create(testPath, 1, FileOptions.DeleteOnClose)) { }
+                    using FileStream fs = File.Create(testPath, 1, FileOptions.DeleteOnClose);
                 }
                 else
                 {

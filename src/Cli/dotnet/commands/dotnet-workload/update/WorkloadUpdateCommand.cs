@@ -50,8 +50,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 _workloadInstaller.GetWorkloadInstallationRecordRepository(), _workloadInstaller, _packageSourceLocation, sdkFeatureBand: _sdkFeatureBand);
         }
 
-
-
         public override int Execute()
         {
             if (!string.IsNullOrWhiteSpace(_downloadToCacheOption))
@@ -164,7 +162,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 {
                     //  Nothing to roll back at this level, InstallWorkloadManifest and InstallWorkloadPacks handle the transaction rollback
                 });
-
         }
 
         private async Task DownloadToOfflineCacheAsync(DirectoryPath offlineCache, bool includePreviews)
