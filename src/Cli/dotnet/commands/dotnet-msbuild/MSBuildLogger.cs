@@ -17,6 +17,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
         internal const string TargetFrameworkTelemetryEventName = "targetframeworkeval";
         internal const string BuildTelemetryEventName = "build";
+        internal const string LoggingConfigurationTelemetryEventName = "loggingConfiguration";
 
         internal const string SdkTaskBaseCatchExceptionTelemetryEventName = "taskBaseCatchException";
         internal const string PublishPropertiesTelemetryEventName = "PublishProperties";
@@ -86,70 +87,85 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
         internal static void FormatAndSend(ITelemetry telemetry, TelemetryEventArgs args)
         {
-            if (args.EventName == TargetFrameworkTelemetryEventName)
+            switch (args.EventName)
             {
-                var newEventName = $"msbuild/{TargetFrameworkTelemetryEventName}";
-                Dictionary<string, string> maskedProperties = new Dictionary<string, string>();
-
-                foreach (var key in new[] {
-                    TargetFrameworkVersionTelemetryPropertyKey,
-                    RuntimeIdentifierTelemetryPropertyKey,
-                    SelfContainedTelemetryPropertyKey,
-                    UseApphostTelemetryPropertyKey,
-                    OutputTypeTelemetryPropertyKey
-                })
-                {
-                    if (args.Properties.TryGetValue(key, out string value))
+                case TargetFrameworkTelemetryEventName:
                     {
-                        maskedProperties.Add(key, Sha256Hasher.HashWithNormalizedCasing(value));
-                    }
-                }
+                        var newEventName = $"msbuild/{TargetFrameworkTelemetryEventName}";
+                        Dictionary<string, string> maskedProperties = new Dictionary<string, string>();
 
-                telemetry.TrackEvent(newEventName, maskedProperties, measurements: null);
-            }
-            else if (args.EventName == BuildTelemetryEventName)
-            {
-                var newEventName = $"msbuild/{BuildTelemetryEventName}";
-                Dictionary<string, string> properties = new Dictionary<string, string>(args.Properties);
-                Dictionary<string, double> measurements = new Dictionary<string, double>();
-
-                string[] toBeHashed = new[] { "ProjectPath", "BuildTarget" };
-                foreach (var propertyToBeHashed in toBeHashed)
-                {
-                    if (properties.TryGetValue(propertyToBeHashed, out string value))
-                    {
-                        properties[propertyToBeHashed] = Sha256Hasher.HashWithNormalizedCasing(value);
-                    }
-                }
-
-                string[] toBeMeasured = new[] { "BuildDurationInMilliseconds", "InnerBuildDurationInMilliseconds" };
-                foreach (var propertyToBeMeasured in toBeMeasured)
-                {
-                    if (properties.TryGetValue(propertyToBeMeasured, out string value))
-                    {
-                        properties.Remove(propertyToBeMeasured);
-                        if (double.TryParse(value, CultureInfo.InvariantCulture, out double realValue))
+                        foreach (var key in new[] {
+                            TargetFrameworkVersionTelemetryPropertyKey,
+                            RuntimeIdentifierTelemetryPropertyKey,
+                            SelfContainedTelemetryPropertyKey,
+                            UseApphostTelemetryPropertyKey,
+                            OutputTypeTelemetryPropertyKey
+                        })
                         {
-                            measurements[propertyToBeMeasured] = realValue;
+                            if (args.Properties.TryGetValue(key, out string value))
+                            {
+                                maskedProperties.Add(key, Sha256Hasher.HashWithNormalizedCasing(value));
+                            }
                         }
+
+                        telemetry.TrackEvent(newEventName, maskedProperties, measurements: null);
+                        break;
+                    }
+                case BuildTelemetryEventName:
+                    TrackEvent(telemetry, $"msbuild/{BuildTelemetryEventName}", args.Properties,
+                        toBeHashed: new[] { "ProjectPath", "BuildTarget" },
+                        toBeMeasured: new[] { "BuildDurationInMilliseconds", "InnerBuildDurationInMilliseconds" });
+                    break;
+                case LoggingConfigurationTelemetryEventName:
+                    TrackEvent(telemetry, $"msbuild/{LoggingConfigurationTelemetryEventName}", args.Properties,
+                        toBeHashed: Array.Empty<string>(),
+                        toBeMeasured: new[] { "FileLoggersCount" });
+                    break;
+                // Pass through events that don't need special handling
+                case SdkTaskBaseCatchExceptionTelemetryEventName:
+                case PublishPropertiesTelemetryEventName:
+                case ReadyToRunTelemetryEventName:
+                case WorkloadPublishPropertiesTelemetryEventName:
+                    TrackEvent(telemetry, args.EventName, args.Properties, Array.Empty<string>(), Array.Empty<string>() );
+                    break;
+                default:
+                    // Ignore unknown events
+                    break;
+            }
+        }
+
+        private static void TrackEvent(ITelemetry telemetry, string eventName, IDictionary<string, string> eventProperties, string[] toBeHashed, string[] toBeMeasured)
+        {
+            Dictionary<string, string> properties = null;
+            Dictionary<string, double> measurements = null;
+
+            foreach (var propertyToBeHashed in toBeHashed)
+            {
+                if (eventProperties.TryGetValue(propertyToBeHashed, out string value))
+                {
+                    // Lets lazy allocate in case there is tons of telemetry 
+                    properties ??= new Dictionary<string, string>(eventProperties);
+                    properties[propertyToBeHashed] = Sha256Hasher.HashWithNormalizedCasing(value);
+                }
+            }
+
+            foreach (var propertyToBeMeasured in toBeMeasured)
+            {
+                if (eventProperties.TryGetValue(propertyToBeMeasured, out string value))
+                {
+                    // Lets lazy allocate in case there is tons of telemetry 
+                    properties ??= new Dictionary<string, string>(eventProperties);
+                    properties.Remove(propertyToBeMeasured);
+                    if (double.TryParse(value, CultureInfo.InvariantCulture, out double realValue))
+                    {
+                        // Lets lazy allocate in case there is tons of telemetry
+                        measurements ??= new Dictionary<string, double>();
+                        measurements[propertyToBeMeasured] = realValue;
                     }
                 }
-
-                telemetry.TrackEvent(newEventName, properties, measurements);
             }
-            else
-            {
-                var passthroughEvents = new string[] {
-                    SdkTaskBaseCatchExceptionTelemetryEventName, 
-                    PublishPropertiesTelemetryEventName,
-                    WorkloadPublishPropertiesTelemetryEventName,
-                    ReadyToRunTelemetryEventName };
 
-                if (passthroughEvents.Contains(args.EventName))
-                {
-                    telemetry.TrackEvent(args.EventName, args.Properties, measurements: null);
-                }
-            }
+            telemetry.TrackEvent(eventName, properties ?? eventProperties, measurements);
         }
 
         private void OnTelemetryLogged(object sender, TelemetryEventArgs args)
