@@ -139,12 +139,12 @@
       </trans-unit>
       <trans-unit id="ImageLoadFailed">
         <source>CONTAINER1009: Failed to load image from local registry. stdout: {0}</source>
-        <target state="needs-review-translation">CONTAINER1009: не удалось загрузить образ в локальную управляющую программу Docker. StdOut:{0}</target>
+        <target state="new">CONTAINER1009: Failed to load image from local registry. stdout: {0}</target>
         <note>{StrBegin="CONTAINER1009: "}</note>
       </trans-unit>
       <trans-unit id="ImagePullNotSupported">
         <source>CONTAINER1010: Pulling images from local registry is not supported.</source>
-        <target state="needs-review-translation">CONTAINER1010: извлечение образов из локальной управляющей программы Docker не поддерживается.</target>
+        <target state="new">CONTAINER1010: Pulling images from local registry is not supported.</target>
         <note>{StrBegin="CONTAINER1010: "}</note>
       </trans-unit>
       <trans-unit id="InvalidEnvVar">

@@ -139,7 +139,7 @@
       </trans-unit>
       <trans-unit id="ImageLoadFailed">
         <source>CONTAINER1009: Failed to load image from local registry. stdout: {0}</source>
-        <target state="needs-review-translation">CONTAINER1009: Nepovedlo se načíst image do místního procesu démon Dockeru. stdout: {0}</target>
+        <target state="new">CONTAINER1009: Failed to load image from local registry. stdout: {0}</target>
         <note>{StrBegin="CONTAINER1009: "}</note>
       </trans-unit>
       <trans-unit id="ImagePullNotSupported">
