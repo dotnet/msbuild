@@ -1,16 +1,16 @@
-{
+﻿{
   "author": "Microsoft",
-  "name": "Konzolová aplikace",
-  "description": "Projekt pro vytvoření aplikace příkazového řádku, která běží na platformě .NET v systémech Windows, Linux a macOS",
-  "symbols/TargetFrameworkOverride/description": "Přepíše cílovou architekturu.",
-  "symbols/TargetFrameworkOverride/displayName": "Přepsání cílové architektury",
-  "symbols/Framework/description": "Cílová architektura pro projekt",
+  "name": "Console App",
+  "description": "A project for creating a command-line application that can run on .NET on Windows, Linux and macOS",
+  "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
+  "symbols/TargetFrameworkOverride/displayName": "Target framework override",
+  "symbols/Framework/description": "The target framework for the project.",
   "symbols/Framework/choices/net8.0/description": "Target net8.0",
   "symbols/Framework/choices/net8.0/displayName": ".NET 8.0",
   "symbols/Framework/displayName": "Framework",
-  "symbols/skipRestore/description": "Pokud se tato možnost zadá, přeskočí automatické obnovení projektu při vytvoření.",
-  "symbols/skipRestore/displayName": "Přeskočit obnovení",
-  "postActions/restore/description": "Obnoví balíčky NuGet vyžadované tímto projektem.",
-  "postActions/restore/manualInstructions/default/text": "Spustit dotnet restore",
-  "postActions/open-file/description": "Otevře Program.fn v editoru."
+  "symbols/skipRestore/description": "If specified, skips the automatic restore of the project on create.",
+  "symbols/skipRestore/displayName": "Skip restore",
+  "postActions/restore/description": "Restore NuGet packages required by this project.",
+  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
+  "postActions/open-file/description": "Opens Program.fs in the editor"
 }
