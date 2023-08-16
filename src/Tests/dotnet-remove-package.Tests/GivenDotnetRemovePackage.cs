@@ -75,7 +75,7 @@ Commands:
                 .WithWorkingDirectory(projectDirectory)
                 .Execute("add", "package", packageName);
             add.Should().Pass();
-          
+
 
             var remove = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)

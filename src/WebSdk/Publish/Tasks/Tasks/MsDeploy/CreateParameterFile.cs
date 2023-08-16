@@ -3,12 +3,12 @@
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 {
-    using Microsoft.Build.Utilities;
     using System.IO;
+    using System.Text.RegularExpressions;
+    using Microsoft.Build.Utilities;
     using Framework = Microsoft.Build.Framework;
     using Utilities = Microsoft.Build.Utilities;
     using Xml = System.Xml;
-    using System.Text.RegularExpressions;
 
     public class CreateParameterFile : Task
     {

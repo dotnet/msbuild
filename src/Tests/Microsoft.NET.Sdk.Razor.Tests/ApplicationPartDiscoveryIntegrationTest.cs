@@ -5,7 +5,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 {
     public class ApplicationPartDiscoveryIntegrationTest : AspNetSdkTest
     {
-        public ApplicationPartDiscoveryIntegrationTest(ITestOutputHelper log) : base(log) {}
+        public ApplicationPartDiscoveryIntegrationTest(ITestOutputHelper log) : base(log) { }
 
         [CoreMSBuildOnlyFact]
         public void Build_ProjectWithDependencyThatReferencesMvc_AddsAttribute_WhenBuildingUsingDotnetMsbuild()
@@ -38,7 +38,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             string intermediateOutputPath = Path.Combine(build.GetBaseIntermediateDirectory().FullName, "Debug", DefaultTfm);
 
-            File.Exists(Path.Combine(intermediateOutputPath, "SimpleMvc.MvcApplicationPartsAssemblyInfo.cs")).Should().BeFalse();;
+            File.Exists(Path.Combine(intermediateOutputPath, "SimpleMvc.MvcApplicationPartsAssemblyInfo.cs")).Should().BeFalse(); ;
 
             // We should produced a cache file for build incrementalism
             File.Exists(Path.Combine(intermediateOutputPath, "SimpleMvc.MvcApplicationPartsAssemblyInfo.cache")).Should().BeTrue();
@@ -50,7 +50,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         {
             var testAsset = "RazorAppWithP2PReference";
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
-            
+
             var build = new BuildCommand(projectDirectory, "AppWithP2PReference");
             build.Execute().Should().Pass();
 
@@ -65,7 +65,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             // Touch a file in the main app which should call recompilation, but not the Mvc discovery tasks to re-run.
             File.AppendAllText(Path.Combine(build.ProjectRootPath, "Program.cs"), " ");
-            
+
             build = new BuildCommand(projectDirectory, "AppWithP2PReference");
             build.Execute().Should().Pass();
 

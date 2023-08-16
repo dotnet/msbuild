@@ -237,7 +237,7 @@ namespace Microsoft.NET.Build.Tests
                     project.Root.Add(itemGroup);
                     itemGroup.Add(new XElement(ns + "EnableNETAnalyzers", "true"));
                     itemGroup.Add(new XElement(ns + "TreatWarningsAsErrors", "true"));
-                    
+
                     // Don't error when generators/analyzers can't be loaded.
                     // This can occur when running tests against FullFramework MSBuild
                     // if the build machine has an MSBuild install with an older version of Roslyn

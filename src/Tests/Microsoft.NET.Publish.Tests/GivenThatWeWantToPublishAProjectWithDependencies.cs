@@ -39,7 +39,7 @@ namespace Microsoft.NET.Publish.Tests
 
             string appPath = publishCommand.GetPublishedAppPath("SimpleDependencies", targetFramework);
 
-            TestCommand runAppCommand = new DotnetCommand(Log,  appPath, "one", "two" );
+            TestCommand runAppCommand = new DotnetCommand(Log, appPath, "one", "two");
 
             string expectedOutput =
 @"{
@@ -200,7 +200,7 @@ namespace Microsoft.NET.Publish.Tests
             var kitchenSinkAsset = _testAssetsManager
                 .CopyTestAsset("KitchenSink", identifier: $"{expectAppDocPublished}_{expectLibProjectDocPublished}")
                 .WithSource();
-            
+
             var publishCommand = new PublishCommand(kitchenSinkAsset, "TestApp");
             var publishArgs = properties.Split(';').Select(p => $"/p:{p}").ToArray();
             var publishResult = publishCommand.Execute(publishArgs);

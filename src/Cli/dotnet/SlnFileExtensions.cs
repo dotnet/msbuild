@@ -115,7 +115,7 @@ namespace Microsoft.DotNet.Tools.Common
                                                                    && p.TypeGuid == ProjectTypeGuids.SolutionFolderGuid).FirstOrDefault();
                     if (duplicateProject != null)
                     {
-                       // Try making a new folder for the project to put it under so we can still add it despite there being one with the same name already in the parent folder
+                        // Try making a new folder for the project to put it under so we can still add it despite there being one with the same name already in the parent folder
                         slnFile.AddSolutionFolders(slnProject, new List<string>() { Path.GetDirectoryName(relativeProjectPath) });
                     }
                 }
@@ -325,7 +325,7 @@ namespace Microsoft.DotNet.Tools.Common
                 {
                     id = nestedProjects[id];
                     var parentSlnProject = solutionFolderProjects.Where(p => p.Id == id).SingleOrDefault();
-                    if(parentSlnProject == null) // see: https://github.com/dotnet/sdk/pull/28811
+                    if (parentSlnProject == null) // see: https://github.com/dotnet/sdk/pull/28811
                         throw new GracefulException(CommonLocalizableStrings.CorruptSolutionProjectFolderStructure, slnFile.FullPath, id);
                     path = Path.Combine(parentSlnProject.FilePath, path);
                 }
@@ -488,7 +488,8 @@ namespace Microsoft.DotNet.Tools.Common
             {
                 nonSolutionFolderProjects = slnFile.Projects.GetProjectsNotOfType(
                     ProjectTypeGuids.SolutionFolderGuid);
-            } else
+            }
+            else
             {
                 nonSolutionFolderProjects = projectsToSearchFor;
             }

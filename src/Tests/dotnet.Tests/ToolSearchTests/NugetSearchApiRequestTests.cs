@@ -22,7 +22,7 @@ namespace dotnet.Tests.ToolSearchTests
         [Fact]
         public void WhenPassedWithoutParameterItCanConstructTheUrl()
         {
-            NugetToolSearchApiRequest.ConstructUrl(domainAndPathOverride:_domainAndPathOverride)
+            NugetToolSearchApiRequest.ConstructUrl(domainAndPathOverride: _domainAndPathOverride)
                 .GetAwaiter().GetResult()
                 .AbsoluteUri
                 .Should().Be(

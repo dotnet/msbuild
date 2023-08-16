@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
         }
         public void LogError(string message) => errors.Add(message);
         public void LogError(string code, string message) => errors.Add($"{code} {message}");
-        
+
         public bool LogWarning(Suppression suppression, string code, string message)
         {
             warnings.Add($"{code} {message}");

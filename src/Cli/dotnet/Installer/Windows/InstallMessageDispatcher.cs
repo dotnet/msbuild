@@ -3,8 +3,8 @@
 
 using System.IO.Pipes;
 using System.Runtime.Versioning;
-using static Microsoft.Win32.Msi.Error;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
+using static Microsoft.Win32.Msi.Error;
 
 namespace Microsoft.DotNet.Installer.Windows
 {

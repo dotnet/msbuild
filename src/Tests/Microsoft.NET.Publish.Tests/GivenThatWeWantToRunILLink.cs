@@ -192,7 +192,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
             testProject.AdditionalProperties["_RequiresILLinkPack"] = "true";
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
-            
+
             var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute()
                 .Should().Fail()
@@ -919,7 +919,8 @@ namespace Microsoft.NET.Publish.Tests
             // This should also detect unexpected duplicates of expected warnings.
             // Each expected warning string/regex matches at most one warning.
             List<string> extraWarnings = new();
-            foreach (var warning in warnings) {
+            foreach (var warning in warnings)
+            {
                 bool expected = false;
                 for (int i = 0; i < expectedWarnings.Count; i++)
                 {
@@ -932,7 +933,8 @@ namespace Microsoft.NET.Publish.Tests
                     }
                 }
 
-                if (!expected) {
+                if (!expected)
+                {
                     extraWarnings.Add(warning);
                 }
             }

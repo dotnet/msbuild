@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             _reporterMock.Verify(r => r.WriteLine(It.Is<string>(str => str.Contains(LocalizableStrings.FirstTimeMessageMoreInformation))));
             _reporterMock.Verify(r => r.Write(It.IsAny<string>()), Times.Never);
         }
-    
+
         [Fact]
         public void It_adds_the_tool_path_to_the_environment_if_the_tool_path_sentinel_does_not_exist()
         {
@@ -98,7 +98,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
-            
+
             _toolPathSentinelMock.Verify(s => s.Create(), Times.Once);
             _pathAdderMock.Verify(p => p.AddPackageExecutablePathToUserPath(), Times.Once);
         }
@@ -143,7 +143,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 (
                     generateAspNetCertificate: true,
                     telemetryOptout: false,
-                    addGlobalToolsToPath: true, 
+                    addGlobalToolsToPath: true,
                     nologo: false
                 ),
                 _reporterMock.Object,
@@ -319,6 +319,6 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             measurements.Should().NotContainKey("AddPackageExecutablePath Time");
             measurements.Should().NotContainKey("FirstTimeUseNotice Time");
             measurements.Should().NotContainKey("GenerateAspNetCertificate Time");
-         }
+        }
     }
 }

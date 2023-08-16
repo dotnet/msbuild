@@ -3,8 +3,8 @@
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using NuGet.ProjectModel;
 using NuGet.Packaging.Core;
+using NuGet.ProjectModel;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -59,9 +59,9 @@ namespace Microsoft.NET.Build.Tasks
                 runtimeFrameworks: null,
                 IsSelfContained);
 
-            var packageClosure =  new HashSet<PackageIdentity>();
+            var packageClosure = new HashSet<PackageIdentity>();
 
-            foreach ( var packageItem in PackagesToPrune)
+            foreach (var packageItem in PackagesToPrune)
             {
                 var pkgName = packageItem.ItemSpec;
                 if (!string.IsNullOrEmpty(pkgName))

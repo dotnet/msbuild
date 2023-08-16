@@ -3,9 +3,9 @@
 
 #nullable enable
 using Microsoft.Deployment.DotNet.Releases;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.NativeWrapper;
-using Microsoft.DotNet.Cli;
 
 namespace Microsoft.DotNet.Tools.Sdk.Check
 {
@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
         private bool NewerSdkPatchExists(NetSdkInfo bundle)
         {
             var newestPatchVesion = NewestSdkPatchVersion(bundle);
-            return newestPatchVesion == null ? false : newestPatchVesion> bundle.Version;
+            return newestPatchVesion == null ? false : newestPatchVesion > bundle.Version;
         }
 
         private ReleaseVersion? NewestSdkPatchVersion(NetSdkInfo bundle)

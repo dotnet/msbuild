@@ -20,7 +20,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
         private readonly object _lockObject = new object();
 
         public ConcurrentLruCache(int capacity)
-            : this (capacity, EqualityComparer<TKey>.Default)
+            : this(capacity, EqualityComparer<TKey>.Default)
         {
         }
 

@@ -12,8 +12,8 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             if (args.Length > 0 && string.Equals("--debug", args[0], StringComparison.OrdinalIgnoreCase))
             {
-               args = args.Skip(1).ToArray();
-               WaitForDebugger();
+                args = args.Skip(1).ToArray();
+                WaitForDebugger();
             }
         }
 

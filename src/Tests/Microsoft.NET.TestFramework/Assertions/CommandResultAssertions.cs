@@ -217,7 +217,7 @@ namespace Microsoft.NET.TestFramework.Assertions
 
         }
 
-        private string ReadNuPkg(string nupkgPath, params string[] filePaths) 
+        private string ReadNuPkg(string nupkgPath, params string[] filePaths)
         {
             if (nupkgPath == null)
             {
@@ -247,7 +247,7 @@ namespace Microsoft.NET.TestFramework.Assertions
             if (expected == null)
             {
                 throw new ArgumentNullException(nameof(expected));
-            }    
+            }
 
             new FileInfo(nuspecPath).Should().Exist();
             var content = File.ReadAllText(nuspecPath);
@@ -268,7 +268,7 @@ namespace Microsoft.NET.TestFramework.Assertions
             if (expected == null)
             {
                 throw new ArgumentNullException(nameof(expected));
-            }    
+            }
 
             new FileInfo(nuspecPath).Should().Exist();
             var content = File.ReadAllText(nuspecPath);

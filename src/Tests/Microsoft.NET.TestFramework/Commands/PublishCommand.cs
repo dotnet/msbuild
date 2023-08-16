@@ -34,7 +34,7 @@ namespace Microsoft.NET.TestFramework.Commands
                 targetFramework = "netcoreapp1.1";
             }
 
-            DirectoryInfo baseDirectory = base.GetOutputDirectory(targetFramework, configuration, runtimeIdentifier); 
+            DirectoryInfo baseDirectory = base.GetOutputDirectory(targetFramework, configuration, runtimeIdentifier);
             return new DirectoryInfo(Path.Combine(baseDirectory.FullName, PublishSubfolderName));
         }
 

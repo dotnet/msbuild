@@ -12,6 +12,7 @@
     <ProjectReference Include="..\..\Cli\Microsoft.DotNet.Cli.Sln.Internal\Microsoft.DotNet.Cli.Sln.Internal.csproj" />
     <ProjectReference Include="..\..\Cli\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
     <ProjectReference Include="..\..\Cli\Microsoft.DotNet.InternalAbstractions\Microsoft.DotNet.InternalAbstractions.csproj" />
+    <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,13 +24,4 @@
     <PackageReference Include="System.Security.Cryptography.X509Certificates" />
   </ItemGroup>
 
-  <!-- Global usings removal -->
-  <!-- See: https://learn.microsoft.com/dotnet/core/project-sdk/msbuild-props#using -->
-  <ItemGroup>
-    <Using Remove="Microsoft.NET.TestFramework" />
-    <Using Remove="Microsoft.NET.TestFramework.Assertions" />
-    <Using Remove="Microsoft.NET.TestFramework.Commands" />
-    <Using Remove="Microsoft.NET.TestFramework.ProjectConstruction" />
-    <Using Remove="Microsoft.NET.TestFramework.Utilities" />
-  </ItemGroup>
 </Project>

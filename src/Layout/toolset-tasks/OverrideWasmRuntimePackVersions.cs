@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Build.Tasks
 
                 return true;
             }
-            
+
             return false;
         }
     }

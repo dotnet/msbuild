@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [Fact]
         public void RunParserCanGetArgumentFromDoubleDash()
         {
-            var runCommand = RunCommand.FromArgs(new[]{ "--", "foo" });
+            var runCommand = RunCommand.FromArgs(new[] { "--", "foo" });
             runCommand.Args.Single().Should().Be("foo");
         }
     }

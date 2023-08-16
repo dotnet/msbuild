@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.ToolPackage
     internal static class ToolPackageFactory
     {
         public static (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller) CreateToolPackageStoresAndInstaller(
-            DirectoryPath? nonGlobalLocation = null,  IEnumerable<string> additionalRestoreArguments = null)
+            DirectoryPath? nonGlobalLocation = null, IEnumerable<string> additionalRestoreArguments = null)
         {
             ToolPackageStoreAndQuery toolPackageStore = CreateConcreteToolPackageStore(nonGlobalLocation);
             var toolPackageInstaller = new ToolPackageInstaller(

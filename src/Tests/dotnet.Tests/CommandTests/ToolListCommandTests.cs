@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         public void WhenRunWithBothGlobalAndToolPathShowErrorMessage()
         {
             var result = Parser.Instance.Parse($"dotnet tool list -g --tool-path /test/path");
-            
+
             var toolInstallCommand = new ToolListCommand(
                 result);
 

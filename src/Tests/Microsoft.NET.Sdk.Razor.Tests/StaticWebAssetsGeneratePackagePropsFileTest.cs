@@ -25,8 +25,8 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                 var task = new StaticWebAssetsGeneratePackagePropsFile
                 {
                     BuildEngine = buildEngine.Object,
-                    PropsFileImport="Microsoft.AspNetCore.StaticWebAssets.props",
-                    BuildTargetPath=file
+                    PropsFileImport = "Microsoft.AspNetCore.StaticWebAssets.props",
+                    BuildTargetPath = file
                 };
 
                 // Act

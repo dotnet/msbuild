@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void WhenItCannotResolveCommandItThrows()
         {
-            Action a = () => { CommandFactoryUsingResolver.Create(new ResolveNothingCommandResolverPolicy(), "non-exist-command", Array.Empty<string>() ); };
+            Action a = () => { CommandFactoryUsingResolver.Create(new ResolveNothingCommandResolverPolicy(), "non-exist-command", Array.Empty<string>()); };
             a.Should().Throw<CommandUnknownException>();
         }
 

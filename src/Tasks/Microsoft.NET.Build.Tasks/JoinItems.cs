@@ -126,7 +126,7 @@ namespace Microsoft.NET.Build.Tasks
 
                     return (ITaskItem)ret;
                 },
-                StringComparer.OrdinalIgnoreCase).ToArray();            
+                StringComparer.OrdinalIgnoreCase).ToArray();
         }
 
         static string GetKeyValue(string key, ITaskItem item)

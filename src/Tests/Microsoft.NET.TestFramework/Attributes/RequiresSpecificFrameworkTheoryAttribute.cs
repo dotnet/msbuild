@@ -3,10 +3,10 @@
 
 #if NETCOREAPP
 
-using Microsoft.DotNet.Tools.Test.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
 namespace Microsoft.NET.TestFramework

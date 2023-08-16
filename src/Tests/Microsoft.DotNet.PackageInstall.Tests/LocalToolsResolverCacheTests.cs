@@ -285,7 +285,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                 useRealFileSystem: true,
                 corruptCache: (fileSystem, cachePath, existingCache) =>
                 {
-                    File.WriteAllBytes(cachePath, new byte[] {0x12, 0x23, 0x34, 0x45});
+                    File.WriteAllBytes(cachePath, new byte[] { 0x12, 0x23, 0x34, 0x45 });
                 }
             );
         }

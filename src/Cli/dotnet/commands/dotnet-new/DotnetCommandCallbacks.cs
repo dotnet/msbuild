@@ -3,12 +3,12 @@
 
 #nullable enable
 
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Tools.Add.PackageReference;
-using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.Add.ProjectToProjectReference;
+using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.Restore;
 using Microsoft.DotNet.Tools.Sln.Add;
-using Microsoft.DotNet.Cli;
 
 namespace Microsoft.DotNet.Tools.New
 {

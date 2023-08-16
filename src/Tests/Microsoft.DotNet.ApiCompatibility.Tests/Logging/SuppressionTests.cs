@@ -7,8 +7,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging.Tests
     {
         public static IEnumerable<object[]> GetEqualData()
         {
-            yield return new object[] { new Suppression(string.Empty), new Suppression(string.Empty) { Left = null, Right = null, Target = null} };
-            yield return new object[] { new Suppression(string.Empty), new Suppression(string.Empty) { Left = string.Empty, Right = string.Empty, Target = string.Empty} };
+            yield return new object[] { new Suppression(string.Empty), new Suppression(string.Empty) { Left = null, Right = null, Target = null } };
+            yield return new object[] { new Suppression(string.Empty), new Suppression(string.Empty) { Left = string.Empty, Right = string.Empty, Target = string.Empty } };
             yield return new object[] { new Suppression("PK004"), new Suppression("pk004") };
             yield return new object[] { new Suppression("PK004"), new Suppression(" pk004 ") };
             yield return new object[] { new Suppression("PK004") { Target = "A.B" }, new Suppression(" pk004 ") { Target = "A.b " } };

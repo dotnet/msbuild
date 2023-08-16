@@ -7,7 +7,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 {
     public class BuildIncrementalismTest : AspNetSdkTest
     {
-        public BuildIncrementalismTest(ITestOutputHelper log) : base(log) {}
+        public BuildIncrementalismTest(ITestOutputHelper log) : base(log) { }
 
 
         [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/28780")]
@@ -84,7 +84,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var page = Path.Combine(projectDirectory.Path, "Views", "Shared", "NavMenu.razor");
             File.WriteAllText(page, updatedContent, Encoding.UTF8);
             File.SetLastWriteTimeUtc(page, File.GetLastWriteTimeUtc(page).AddSeconds(1));
-            
+
             build = new BuildCommand(projectDirectory);
             result = build.Execute();
 
@@ -119,7 +119,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var classLibraryDll = Path.Combine(intermediateOutputPath, "ClassLibrary.dll");
             var classLibraryViewsDll = Path.Combine(intermediateOutputPath, "ClassLibrary.Views.dll");
-            var markerFile = Path.Combine(intermediateOutputPath, "ClassLibrary.csproj.CopyComplete");;
+            var markerFile = Path.Combine(intermediateOutputPath, "ClassLibrary.csproj.CopyComplete"); ;
 
             new FileInfo(classLibraryDll).Should().Exist();
             new FileInfo(classLibraryViewsDll).Should().Exist();

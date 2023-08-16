@@ -144,7 +144,7 @@ namespace Microsoft.DotNet.Tests.BuildServerTests
 
             var directoryMock = new Mock<IDirectory>();
             directoryMock.Setup(d => d.Exists(pidDirectory)).Returns(true);
-            directoryMock.Setup(d => d.EnumerateFiles(pidDirectory)).Returns(new [] { pidFilePath });
+            directoryMock.Setup(d => d.EnumerateFiles(pidDirectory)).Returns(new[] { pidFilePath });
 
             var fileMock = new Mock<IFile>();
             fileMock
@@ -155,7 +155,7 @@ namespace Microsoft.DotNet.Tests.BuildServerTests
                     FileShare.Write | FileShare.Delete,
                     4096,
                     FileOptions.None))
-                .Throws((Exception)Activator.CreateInstance(exceptionType, new object[] { ErrorMessage } ));
+                .Throws((Exception)Activator.CreateInstance(exceptionType, new object[] { ErrorMessage }));
 
             var fileSystemMock = new Mock<IFileSystem>();
             fileSystemMock.SetupGet(fs => fs.Directory).Returns(directoryMock.Object);

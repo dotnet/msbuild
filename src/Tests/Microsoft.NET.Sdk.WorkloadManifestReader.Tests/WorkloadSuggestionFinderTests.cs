@@ -86,7 +86,7 @@ namespace ManifestReaderTests
         [Fact]
         public static void CanFindSimpleAndPartialSuggestions()
         {
-            var workloads = new(string workloadId, string[] packIds)[]
+            var workloads = new (string workloadId, string[] packIds)[]
             {
                 ("workload1", new[] { "pack1" }), // irrelevant
                 ("workload2", new[] { "pack1", "pack2" }), //partial
@@ -95,7 +95,7 @@ namespace ManifestReaderTests
                 ("workload5", new[] { "pack2", "pack3", "pack4" }), //complete
                 ("workload6", new[] { "pack2", "pack4" }) //partial
             }
-            .Select (a => (new WorkloadId(a.workloadId), a.packIds.Select(p => new WorkloadPackId(p)).ToHashSet()));
+            .Select(a => (new WorkloadId(a.workloadId), a.packIds.Select(p => new WorkloadPackId(p)).ToHashSet()));
 
             var requestedPacks = new[]
             {
@@ -122,14 +122,14 @@ namespace ManifestReaderTests
         [Fact]
         public static void SuggestionsArePermutedCorrectly()
         {
-            static HashSet<WorkloadPackId> ConstructPackHash (params string[] packIds)
-                => new HashSet<WorkloadPackId> (packIds.Select(id => new WorkloadPackId(id)));
+            static HashSet<WorkloadPackId> ConstructPackHash(params string[] packIds)
+                => new HashSet<WorkloadPackId>(packIds.Select(id => new WorkloadPackId(id)));
 
-            static HashSet<WorkloadId> ConstructWorkloadHash (params string[] workloadIds)
-                => new HashSet<WorkloadId> (workloadIds.Select(id => new WorkloadId(id)));
+            static HashSet<WorkloadId> ConstructWorkloadHash(params string[] workloadIds)
+                => new HashSet<WorkloadId>(workloadIds.Select(id => new WorkloadId(id)));
 
             static WorkloadSuggestionCandidate ConstructCandidate(string[] workloadIds, string[] packIds, string[] unsatisfiedPackIds)
-                => new WorkloadSuggestionCandidate (ConstructWorkloadHash(workloadIds), ConstructPackHash(packIds), ConstructPackHash(unsatisfiedPackIds));
+                => new WorkloadSuggestionCandidate(ConstructWorkloadHash(workloadIds), ConstructPackHash(packIds), ConstructPackHash(unsatisfiedPackIds));
 
             //we're looking for suggestions with "pack1", "pack2", "pack3"
             var partialSuggestions = new List<WorkloadSuggestionCandidate>
@@ -148,7 +148,7 @@ namespace ManifestReaderTests
             static int CountMatchingSuggestions(HashSet<WorkloadSuggestionCandidate> suggestions, params string[] workloadIds)
             {
                 int found = 0;
-                foreach(var suggestion in suggestions)
+                foreach (var suggestion in suggestions)
                 {
                     if (suggestion.Workloads.Count == workloadIds.Length)
                     {
@@ -193,7 +193,7 @@ namespace ManifestReaderTests
         private static void FakeFileSystemChecksSoThesePackagesAppearInstalled(WorkloadResolver resolver, params string[] ids)
         {
             var installedPacks = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach(var id in ids)
+            foreach (var id in ids)
             {
                 installedPacks.Add(id);
             }

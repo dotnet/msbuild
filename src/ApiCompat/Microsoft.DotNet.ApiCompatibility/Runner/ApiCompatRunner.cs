@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
                 IApiComparer apiComparer = _apiComparerFactory.Create();
                 apiComparer.Settings.StrictMode = workItem.Options.EnableStrictMode;
                 apiComparer.Settings.WithReferences = runWithReferences;
-                        
+
 
                 // Invoke the api comparer for the work item and operate on the difference result
                 IEnumerable<CompatDifference> differences = apiComparer.GetDifferences(leftContainerList, rightContainersList);

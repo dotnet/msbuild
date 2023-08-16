@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Workloads.Workload
             if (OperatingSystem.IsWindows())
             {
                 using RegistryKey policyKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Policies\Microsoft\dotnet\Workloads");
-                
+
                 return ((int?)policyKey?.GetValue("VerifySignatures") ?? 0) != 0;
             }
 

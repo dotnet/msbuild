@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Pack.Tests
             var outputDir = new DirectoryInfo(Path.Combine(testInstance.Path, "bin", "Test"));
 
             outputDir.Should().Exist()
-                          .And.HaveFiles(new []
+                          .And.HaveFiles(new[]
                                             {
                                                 "TestLibraryWithConfiguration.1.0.0.nupkg"
                                             });
@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Pack.Tests
                 .Should().Pass();
 
             outputDir.Should().Exist()
-                          .And.HaveFiles(new []
+                          .And.HaveFiles(new[]
                                             {
                                                 "TestLibraryWithConfiguration.1.0.0.nupkg"
                                             });
@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Pack.Tests
             outputPackage.Should().Exist();
         }
 
-        [Fact(Skip="Test project missing")]
+        [Fact(Skip = "Test project missing")]
         public void HasIncludedFiles()
         {
             var testInstance = _testAssetsManager.CopyTestAsset("EndToEndTestApp")
@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.Pack.Tests
                      .And.Contain(e => e.FullName == "anotherpath/pack2.txt");
         }
 
-        [Fact(Skip="Test project doesn't override assembly name")]
+        [Fact(Skip = "Test project doesn't override assembly name")]
         public void PackAddsCorrectFilesForProjectsWithOutputNameSpecified()
         {
             var testInstance = _testAssetsManager.CopyTestAsset("LibraryWithOutputAssemblyName")

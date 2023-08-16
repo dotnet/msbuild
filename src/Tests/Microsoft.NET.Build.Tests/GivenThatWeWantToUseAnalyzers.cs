@@ -166,7 +166,7 @@ namespace Microsoft.NET.Build.Tests
                     break;
 
                 case "VB":
-                    analyzers.Select(x => GetPackageAndPath(x)).Should().BeEquivalentTo( new[]
+                    analyzers.Select(x => GetPackageAndPath(x)).Should().BeEquivalentTo(new[]
                         {
                             ("microsoft.net.sdk", (string)null, "analyzers/Microsoft.CodeAnalysis.VisualBasic.NetAnalyzers.dll"),
                             ("microsoft.net.sdk", (string)null, "analyzers/Microsoft.CodeAnalysis.NetAnalyzers.dll"),

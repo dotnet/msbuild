@@ -27,7 +27,8 @@ namespace Microsoft.DotNet.Tools.Sln.Remove
             SlnFile slnFile = SlnFileFactory.CreateFromFileOrDirectory(_fileOrDirectory);
 
             var baseDirectory = PathUtility.EnsureTrailingSlash(slnFile.BaseDirectory);
-            var relativeProjectPaths = _arguments.Select(p => {
+            var relativeProjectPaths = _arguments.Select(p =>
+            {
                 var fullPath = Path.GetFullPath(p);
                 return Path.GetRelativePath(
                     baseDirectory,

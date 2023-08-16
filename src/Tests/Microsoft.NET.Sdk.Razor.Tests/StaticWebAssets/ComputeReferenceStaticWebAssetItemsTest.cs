@@ -48,7 +48,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 BuildEngine = buildEngine.Object,
                 Source = "MyPackage",
                 Assets = new[] { CreateCandidate("wwwroot\\candidate.js", "MyPackage", "Discovered", "candidate.js", "All", "All") },
-                Patterns = new [] { CreatePatternCandidate("MyPackage\\wwwroot", "base", Directory.GetCurrentDirectory(), "wwwroot\\**", "MyPackage") },
+                Patterns = new[] { CreatePatternCandidate("MyPackage\\wwwroot", "base", Directory.GetCurrentDirectory(), "wwwroot\\**", "MyPackage") },
                 AssetKind = "Build",
                 ProjectMode = "Default"
             };

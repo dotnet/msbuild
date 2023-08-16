@@ -59,7 +59,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         {
             if (reader.Read() && reader.TokenType.IsInt())
             {
-                if (reader.TryGetInt64 (out long value))
+                if (reader.TryGetInt64(out long value))
                 {
                     return value;
                 }
@@ -78,8 +78,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             throw new WorkloadManifestFormatException(Strings.ExpectedBoolAtOffset, reader.TokenStartIndex);
         }
 
-        private static void ThrowDuplicateKeyException<T> (ref Utf8JsonStreamReader reader, T key)
-            => throw new WorkloadManifestFormatException(Strings.DuplicateKeyAtOffset, key?.ToString() ?? throw new ArgumentNullException (nameof(key)), reader.TokenStartIndex);
+        private static void ThrowDuplicateKeyException<T>(ref Utf8JsonStreamReader reader, T key)
+            => throw new WorkloadManifestFormatException(Strings.DuplicateKeyAtOffset, key?.ToString() ?? throw new ArgumentNullException(nameof(key)), reader.TokenStartIndex);
 
         private static WorkloadManifest ReadWorkloadManifest(
             string id, string manifestPath,
@@ -173,13 +173,13 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                             throw new WorkloadManifestFormatException(Strings.MissingOrInvalidManifestVersion);
                         }
 
-                        return new WorkloadManifest (
+                        return new WorkloadManifest(
                             id,
                             version,
                             description,
                             manifestPath,
-                            workloads ?? new Dictionary<WorkloadId, BaseWorkloadDefinition> (),
-                            packs ?? new Dictionary<WorkloadPackId, WorkloadPack> (),
+                            workloads ?? new Dictionary<WorkloadId, BaseWorkloadDefinition>(),
+                            packs ?? new Dictionary<WorkloadPackId, WorkloadPack>(),
                             dependsOn
                         );
                     default:
@@ -193,7 +193,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// <summary>
         /// this expects the reader to be before the value token, and leaves it on the last token of the value
         /// </summary>
-        private static bool ConsumeValue (ref Utf8JsonStreamReader reader)
+        private static bool ConsumeValue(ref Utf8JsonStreamReader reader)
         {
             if (!reader.Read())
             {
@@ -287,8 +287,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 switch (reader.TokenType)
                 {
                     case JsonTokenType.PropertyName:
-                        var packId = new WorkloadPackId (reader.GetString());
-                        var pack = ReadWorkloadPack(packId,ref reader);
+                        var packId = new WorkloadPackId(reader.GetString());
+                        var pack = ReadWorkloadPack(packId, ref reader);
                         if (packs.ContainsKey(packId)) ThrowDuplicateKeyException(ref reader, packId);
                         packs[packId] = pack;
                         continue;
@@ -348,11 +348,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             throw new WorkloadManifestFormatException(Strings.IncompleteDocument);
         }
 
-        private static Dictionary<string,string> ReadStringDictionary(ref Utf8JsonStreamReader reader)
+        private static Dictionary<string, string> ReadStringDictionary(ref Utf8JsonStreamReader reader)
         {
             ConsumeToken(ref reader, JsonTokenType.StartObject);
 
-            var dictionary = new Dictionary<string,string>();
+            var dictionary = new Dictionary<string, string>();
 
             while (reader.Read())
             {
@@ -374,7 +374,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             throw new WorkloadManifestFormatException(Strings.IncompleteDocument);
         }
 
-        private static Dictionary<string, TValue> ReadStringDictionary<TValue>(ref Utf8JsonStreamReader reader, Func<string,TValue> mapValue)
+        private static Dictionary<string, TValue> ReadStringDictionary<TValue>(ref Utf8JsonStreamReader reader, Func<string, TValue> mapValue)
         {
             ConsumeToken(ref reader, JsonTokenType.StartObject);
 
@@ -473,7 +473,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         if (string.Equals("replace-with", propName, StringComparison.OrdinalIgnoreCase))
                         {
                             if (replaceWith != null) ThrowDuplicateKeyException(ref reader, propName);
-                            replaceWith = new WorkloadId (ReadString(ref reader));
+                            replaceWith = new WorkloadId(ReadString(ref reader));
                             continue;
                         }
 
@@ -489,11 +489,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                             //return new WorkloadRedirect (id, replacementId);
                         }
                         var isAbstract = isAbstractOrNull ?? false;
-                        if (!isAbstract && kind == WorkloadDefinitionKind.Dev && string.IsNullOrEmpty (description))
+                        if (!isAbstract && kind == WorkloadDefinitionKind.Dev && string.IsNullOrEmpty(description))
                         {
                             throw new WorkloadManifestFormatException(Strings.ConcreteWorkloadHasNoDescription, id);
                         }
-                        return new WorkloadDefinition (id, isAbstract, description, kind ?? WorkloadDefinitionKind.Dev, extends, packs, platforms);
+                        return new WorkloadDefinition(id, isAbstract, description, kind ?? WorkloadDefinitionKind.Dev, extends, packs, platforms);
                     default:
                         throw new WorkloadManifestFormatException(Strings.UnexpectedTokenAtOffset, reader.TokenType, reader.TokenStartIndex);
                 }
@@ -557,7 +557,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         {
                             throw new WorkloadManifestFormatException(Strings.MissingWorkloadPackKind, id);
                         }
-                        return new WorkloadPack (id, version, kind.Value, aliasTo);
+                        return new WorkloadPack(id, version, kind.Value, aliasTo);
                     default:
                         throw new WorkloadManifestFormatException(Strings.UnexpectedTokenAtOffset, reader.TokenType, reader.TokenStartIndex);
                 }

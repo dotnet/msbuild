@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Cli
 
         internal static void ShowWorkloadsInfo(ParseResult parseResult = null, IWorkloadInfoHelper workloadInfoHelper = null, IReporter reporter = null, string dotnetDir = null)
         {
-            if(workloadInfoHelper != null)
+            if (workloadInfoHelper != null)
             {
                 workloadInfoHelper ??= new WorkloadInfoHelper(parseResult != null ? parseResult.HasOption(SharedOptions.InteractiveOption) : false);
             }
@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Cli
                 return;
             }
 
-            var manifestInfoDict =  workloadInfoHelper.WorkloadResolver.GetInstalledManifests().ToDictionary(info => info.Id, StringComparer.OrdinalIgnoreCase);
+            var manifestInfoDict = workloadInfoHelper.WorkloadResolver.GetInstalledManifests().ToDictionary(info => info.Id, StringComparer.OrdinalIgnoreCase);
 
             foreach (var workload in installedWorkloads.AsEnumerable())
             {

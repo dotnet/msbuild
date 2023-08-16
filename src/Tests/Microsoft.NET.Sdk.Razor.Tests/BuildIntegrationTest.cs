@@ -7,7 +7,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 {
     public class BuildIntegrationTest : AspNetSdkTest
     {
-        public BuildIntegrationTest(ITestOutputHelper log) : base(log) {}
+        public BuildIntegrationTest(ITestOutputHelper log) : base(log) { }
 
         [CoreMSBuildOnlyFact]
         public void Build_SimpleMvc_UsingDotnetMSBuildAndWithoutBuildServer_CanBuildSuccessfully()
@@ -131,7 +131,8 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         {
             var testAsset = "RazorSimpleMvc";
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset)
-                .WithProjectChanges(project => {
+                .WithProjectChanges(project =>
+                {
                     var ns = project.Root.Name.Namespace;
                     var itemGroup = new XElement(ns + "PropertyGroup");
                     itemGroup.Add(new XElement("PreserveCompilationReferences", "true"));
@@ -187,13 +188,14 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset)
                 .WithProjectChanges((path, project) =>
                 {
-                    if (path.Contains("AppWithP2PReference")) {
+                    if (path.Contains("AppWithP2PReference"))
+                    {
                         var ns = project.Root.Name.Namespace;
                         var itemGroup = new XElement(ns + "ItemGroup");
                         itemGroup.Add(new XElement("ProjectReference", new XAttribute("Include", "..\\AnotherClassLib\\AnotherClassLib.csproj")));
                         project.Root.Add(itemGroup);
                     }
-                });;
+                }); ;
 
             var build = new BuildCommand(projectDirectory, "AppWithP2PReference");
             build.Execute().Should().Pass();

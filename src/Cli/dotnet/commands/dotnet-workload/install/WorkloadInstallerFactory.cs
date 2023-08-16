@@ -1,11 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -14,15 +14,15 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         public static IInstaller GetWorkloadInstaller(
             IReporter reporter,
             SdkFeatureBand sdkFeatureBand,
-            IWorkloadResolver workloadResolver, 
+            IWorkloadResolver workloadResolver,
             VerbosityOptions verbosity,
             string userProfileDir,
             bool verifySignatures,
             INuGetPackageDownloader nugetPackageDownloader = null,
-            string dotnetDir = null, 
+            string dotnetDir = null,
             string tempDirPath = null,
             PackageSourceLocation packageSourceLocation = null,
-            RestoreActionConfig restoreActionConfig = null, 
+            RestoreActionConfig restoreActionConfig = null,
             bool elevationRequired = true)
         {
             dotnetDir = string.IsNullOrWhiteSpace(dotnetDir) ? Path.GetDirectoryName(Environment.ProcessPath) : dotnetDir;

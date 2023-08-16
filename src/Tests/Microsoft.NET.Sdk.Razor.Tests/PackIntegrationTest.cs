@@ -6,7 +6,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
     public class PackIntegrationTest : AspNetSdkTest
     {
 
-        public PackIntegrationTest(ITestOutputHelper log) : base(log) {}
+        public PackIntegrationTest(ITestOutputHelper log) : base(log) { }
 
         [Fact]
         public void Pack_NoBuild_Works_IncludesAssembly()

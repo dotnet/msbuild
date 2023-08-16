@@ -33,7 +33,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader.Tests
             }
         }
 
-        [Fact(Skip="https://github.com/dotnet/sdk/issues/28759")]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/28759")]
         public void GetPackDefinitionLocations()
         {
             var definitionLocations = GetWorkloadPackDefinitionLocations(GetManifests());
@@ -177,7 +177,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader.Tests
                     groups.Add(group);
                 }
             }
-            
+
 
             return groups;
         }
@@ -219,7 +219,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader.Tests
 
         class WorkloadPackGroupJson
         {
-            public string? GroupPackageId { get;set; }
+            public string? GroupPackageId { get; set; }
             public string? GroupPackageVersion { get; set; }
 
             public List<WorkloadPackJson> Packs { get; set; } = new List<WorkloadPackJson>();

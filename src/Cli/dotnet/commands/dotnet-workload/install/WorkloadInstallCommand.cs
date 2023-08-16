@@ -2,14 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.NET.Sdk.WorkloadManifestReader;
 using System.Text.Json;
-using Microsoft.DotNet.ToolPackage;
-using NuGet.Versioning;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
+using NuGet.Versioning;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
@@ -103,7 +103,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
             else if (_skipManifestUpdate && usedRollback)
             {
-                throw new GracefulException(string.Format(LocalizableStrings.CannotCombineSkipManifestAndRollback, 
+                throw new GracefulException(string.Format(LocalizableStrings.CannotCombineSkipManifestAndRollback,
                     WorkloadInstallCommandParser.SkipManifestUpdateOption.Name, InstallingWorkloadCommandParser.FromRollbackFileOption.Name,
                     WorkloadInstallCommandParser.SkipManifestUpdateOption.Name, InstallingWorkloadCommandParser.FromRollbackFileOption.Name), isUserError: true);
             }
@@ -132,7 +132,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             Reporter.WriteLine();
 
-            var manifestsToUpdate = Enumerable.Empty<ManifestVersionUpdate> ();
+            var manifestsToUpdate = Enumerable.Empty<ManifestVersionUpdate>();
             if (!skipManifestUpdate)
             {
                 if (Verbosity != VerbosityOptions.quiet && Verbosity != VerbosityOptions.q)
@@ -232,7 +232,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private async Task<IEnumerable<string>> GetPackageDownloadUrlsAsync(IEnumerable<WorkloadId> workloadIds, bool skipManifestUpdate, bool includePreview)
         {
             var downloads = await GetDownloads(workloadIds, skipManifestUpdate, includePreview);
-            
+
             var urls = new List<string>();
             foreach (var download in downloads)
             {

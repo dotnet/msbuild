@@ -114,7 +114,7 @@ Commands:
 
             var cmd = new ListReferenceCommand(Log)
                     .WithProject(projName)
-                    .WithWorkingDirectory(setup.TestRoot)                    
+                    .WithWorkingDirectory(setup.TestRoot)
                     .Execute(setup.ValidRefCsprojPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.ProjectIsInvalid, projName));

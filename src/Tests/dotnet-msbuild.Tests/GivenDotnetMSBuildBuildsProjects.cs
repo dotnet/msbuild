@@ -39,14 +39,14 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
             new DotnetCommand(Log)
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute("msbuild", "/t:SayThis",  "/p:This=GreatScott")
+                .Execute("msbuild", "/t:SayThis", "/p:This=GreatScott")
                 .Should()
                 .Pass()
                 .And
                 .HaveStdOutContaining("You want me to say 'GreatScott'");
         }
 
-        [Theory(Skip="New parser feature needed")]
+        [Theory(Skip = "New parser feature needed")]
         [InlineData("build")]
         [InlineData("clean")]
         [InlineData("pack")]
@@ -109,8 +109,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
 
 
-        
+
     }
 
-    
+
 }

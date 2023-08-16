@@ -16,7 +16,7 @@ namespace Microsoft.NET.Publish.Tests
 
         [Theory]
         [MemberData(nameof(PublishData))]
-        public void It_publishes_the_project_correctly(string targetFramework, string [] expectedPublishFiles)
+        public void It_publishes_the_project_correctly(string targetFramework, string[] expectedPublishFiles)
         {
             PublishCommand publishCommand = GetPublishCommand(targetFramework);
             publishCommand
@@ -100,7 +100,7 @@ namespace Microsoft.NET.Publish.Tests
             baselineConfigJsonObject["runtimeOptions"]["tfm"] = targetFramework;
             baselineConfigJsonObject["runtimeOptions"]["framework"]["version"] =
                 targetFramework == "net6.0" ? "6.0.0" : "1.1.2";
-            
+
             runtimeConfigJsonObject
                 .Should()
                 .BeEquivalentTo(baselineConfigJsonObject);

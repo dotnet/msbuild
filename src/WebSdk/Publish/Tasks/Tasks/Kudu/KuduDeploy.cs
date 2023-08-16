@@ -9,9 +9,9 @@
 /// Copyright(c) 2006 Microsoft Corporation
 ///--------------------------------------------------------------------------------------------
 
+using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 using Framework = Microsoft.Build.Framework;
 using Utilities = Microsoft.Build.Utilities;
-using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
 {
@@ -104,7 +104,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
         {
             KuduVfsDeploy fileDeploy = new KuduVfsDeploy(connectionInfo, Log);
 
-            bool success; 
+            bool success;
             if (!DeployIndividualFiles)
             {
                 success = DeployZipFile(connectionInfo);
@@ -131,12 +131,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
         }
 
 
-#region Zip File Publish
+        #region Zip File Publish
         internal bool DeployZipFile(KuduConnectionInfo connectionInfo)
         {
             bool success;
             KuduZipDeploy zipDeploy = new KuduZipDeploy(connectionInfo, Log);
-            
+
             string zipFileFullPath = CreateZipFile(PublishIntermediateOutputPath);
             System.Threading.Tasks.Task<bool> zipTask = zipDeploy.DeployAsync(zipFileFullPath);
             try
@@ -147,7 +147,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
                     Log.LogError(String.Format(Resources.KUDUDEPLOY_AzurePublishErrorReason, Resources.KUDUDEPLOY_OperationTimeout));
                 }
             }
-            catch(AggregateException ae)
+            catch (AggregateException ae)
             {
                 Log.LogError(String.Format(Resources.KUDUDEPLOY_AzurePublishErrorReason, ae.Flatten().Message));
                 success = false;
@@ -169,7 +169,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
             {
                 System.IO.Compression.ZipFile.CreateFromDirectory(sourcePath, zipFileFullPath);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Log.LogError(String.Format(Resources.KUDUDEPLOY_AzurePublishErrorReason, e.Message));
                 // If we are unable to zip the file, then we fail.
@@ -183,23 +183,23 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
 
         internal System.Threading.Tasks.Task DeleteTempZipFile(string tempFilePath)
         {
-             return System.Threading.Tasks.Task.Factory.StartNew(
-                () =>
-                {
-                    if (File.Exists(tempFilePath))
-                    {
-                        try
-                        {
-                            File.Delete(tempFilePath);
-                        }
-                        catch
-                        {
-                            // We don't need to do any thing if we are unable to delete the temp file.
-                        }
-                    }
-                });
+            return System.Threading.Tasks.Task.Factory.StartNew(
+               () =>
+               {
+                   if (File.Exists(tempFilePath))
+                   {
+                       try
+                       {
+                           File.Delete(tempFilePath);
+                       }
+                       catch
+                       {
+                           // We don't need to do any thing if we are unable to delete the temp file.
+                       }
+                   }
+               });
         }
 
-#endregion
+        #endregion
     }
 }

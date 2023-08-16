@@ -864,8 +864,8 @@ class Program
         }
 
         [WindowsOnlyTheory]
-        [InlineData("true",  "true")]
-        [InlineData("true",  "false")]
+        [InlineData("true", "true")]
+        [InlineData("true", "false")]
         [InlineData("false", "true")]
         [InlineData("false", "false")]
         public void It_places_package_pdb_and_xml_files_in_output_directory(string enableCopyDebugSymbolFilesFromPackages, string enableDocumentationFilesFromPackages)
@@ -878,7 +878,7 @@ class Program
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("Microsoft.Build", "17.3.1"));
-            
+
             testProject.AdditionalProperties.Add("CopyDebugSymbolFilesFromPackages", enableCopyDebugSymbolFilesFromPackages);
             testProject.AdditionalProperties.Add("CopyDocumentationFilesFromPackages", enableDocumentationFilesFromPackages);
 
@@ -898,8 +898,8 @@ class Program
         }
 
         [WindowsOnlyTheory]
-        [InlineData("true",  "true")]
-        [InlineData("true",  "false")]
+        [InlineData("true", "true")]
+        [InlineData("true", "false")]
         [InlineData("false", "true")]
         [InlineData("false", "false")]
         public void It_places_package_pdb_and_xml_files_from_project_references_in_output_directory(string enableCopyDebugSymbolFilesFromPackages, string enableDocumentationFilesFromPackages)
@@ -941,8 +941,8 @@ class Program
         }
 
         [WindowsOnlyTheory]
-        [InlineData("true",  "true")]
-        [InlineData("true",  "false")]
+        [InlineData("true", "true")]
+        [InlineData("true", "false")]
         [InlineData("false", "true")]
         [InlineData("false", "false")]
         public void It_places_package_pdb_and_xml_files_in_publish_directory(string enableCopyDebugSymbolFilesFromPackages, string enableDocumentationFilesFromPackages)

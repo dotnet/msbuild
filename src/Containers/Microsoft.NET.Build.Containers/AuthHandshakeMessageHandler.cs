@@ -1,19 +1,17 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Net.Sockets;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-
-using Valleysoft.DockerCredsProvider;
-
 using Microsoft.NET.Build.Containers.Credentials;
-using System.Net.Sockets;
 using Microsoft.NET.Build.Containers.Resources;
-using System.Collections.Concurrent;
+using Valleysoft.DockerCredsProvider;
 
 namespace Microsoft.NET.Build.Containers;
 
@@ -63,7 +61,8 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
         }
         return false;
 
-        static bool TryParseBearerAuthInfo(Dictionary<string, string> authValues, [NotNullWhen(true)] out AuthInfo? authInfo) {
+        static bool TryParseBearerAuthInfo(Dictionary<string, string> authValues, [NotNullWhen(true)] out AuthInfo? authInfo)
+        {
             if (authValues.TryGetValue("realm", out string? realm))
             {
                 string? service = null;
@@ -73,13 +72,15 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
                 authInfo = new AuthInfo(realm, service, scope);
                 return true;
             }
-            else {
+            else
+            {
                 authInfo = null;
                 return false;
             }
         }
 
-        static bool TryParseBasicAuthInfo(Dictionary<string, string> authValues, Uri requestUri, out AuthInfo? authInfo) {
+        static bool TryParseBasicAuthInfo(Dictionary<string, string> authValues, Uri requestUri, out AuthInfo? authInfo)
+        {
             authInfo = null;
             return true;
         }

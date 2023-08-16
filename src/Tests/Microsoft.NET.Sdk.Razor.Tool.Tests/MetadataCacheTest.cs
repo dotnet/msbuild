@@ -5,7 +5,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool.Tests
 {
     public class MetadataCacheTest : SdkTest
     {
-        public MetadataCacheTest(ITestOutputHelper log) : base(log) {}
+        public MetadataCacheTest(ITestOutputHelper log) : base(log) { }
 
         [Fact]
         public void GetMetadata_AddsToCache()

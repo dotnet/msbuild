@@ -182,7 +182,7 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
             private int FindPositionToInsertInSelector(SimpleSelector lastSimpleSelector)
             {
                 var children = lastSimpleSelector.Children;
-                for (var i  = 0; i < children.Count; i++)
+                for (var i = 0; i < children.Count; i++)
                 {
                     switch (children[i])
                     {

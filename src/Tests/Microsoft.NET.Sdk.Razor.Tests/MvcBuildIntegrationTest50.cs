@@ -5,7 +5,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 {
     public class MvcBuildIntegrationTest50 : MvcBuildIntegrationTestLegacy
     {
-        public MvcBuildIntegrationTest50(ITestOutputHelper log) : base(log) {}
+        public MvcBuildIntegrationTest50(ITestOutputHelper log) : base(log) { }
 
         public override string TestProjectName => "SimpleMvc50";
         public override string TargetFramework => "net5.0";
@@ -15,7 +15,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         {
             var testAsset = "RazorMvcWithComponents";
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset, overrideTfm: TargetFramework);
-                
+
             // Introducing a Razor semantic error
             var indexPage = Path.Combine(projectDirectory.Path, "Views", "Shared", "NavMenu.razor");
             File.WriteAllText(indexPage, "@{ // Unterminated code block");
@@ -52,7 +52,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             // We need to ensure that we continue providing Razor binaries and symbols as files to be copied over.
             var testAsset = "RazorAppWithP2PReference";
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset, overrideTfm: TargetFramework);
-            
+
             var build = new BuildCommand(projectDirectory, "AppWithP2PReference");
             build.Execute().Should().Pass();
 

@@ -1,11 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Reflection;
+using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using System.Reflection.Metadata;
-using System.Reflection;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -65,7 +65,7 @@ namespace Microsoft.NET.Build.Tasks
             get
             {
                 // Crossgen2 V6 and above always has TargetOS metadata available
-                if (ReadyToRunUseCrossgen2 && !string.IsNullOrEmpty(Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS))) 
+                if (ReadyToRunUseCrossgen2 && !string.IsNullOrEmpty(Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS)))
                     return Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS) == "windows";
                 else
                     return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
@@ -77,7 +77,7 @@ namespace Microsoft.NET.Build.Tasks
             get
             {
                 // Crossgen2 V6 and above always has TargetOS metadata available
-                if (ReadyToRunUseCrossgen2 && !string.IsNullOrEmpty(Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS))) 
+                if (ReadyToRunUseCrossgen2 && !string.IsNullOrEmpty(Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS)))
                     return Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS) == "linux";
                 else
                     return RuntimeInformation.IsOSPlatform(OSPlatform.Linux);

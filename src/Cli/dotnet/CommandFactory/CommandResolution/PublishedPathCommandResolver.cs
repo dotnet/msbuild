@@ -77,6 +77,6 @@ namespace Microsoft.DotNet.CommandFactory
             }
 
             return _environment.GetCommandPathFromRootPath(publishDirectory, commandName, ".dll");
-        }      
+        }
     }
 }

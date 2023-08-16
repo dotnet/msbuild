@@ -1,9 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Reflection;
 using FluentAssertions;
 using Microsoft.Build.Framework;
-using System.Reflection;
 using Xunit;
 using static Microsoft.NET.Build.Tasks.ResolvePackageAssets;
 
@@ -21,12 +21,12 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             byte[] oldHash;
             try
             {
-                 oldHash = task.HashSettings();
+                oldHash = task.HashSettings();
             }
             catch (ArgumentNullException)
             {
                 Assert.True(
-                    false, 
+                    false,
                     "HashSettings is likely not correctly handling null value of one or more optional task parameters");
 
                 throw; // unreachable
@@ -55,7 +55,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
                 byte[] newHash = task.HashSettings();
                 newHash.Should().NotBeEquivalentTo(
-                    oldHash, 
+                    oldHash,
                     because: $"{property.Name} should be included in hash.");
 
                 oldHash = newHash;
@@ -210,7 +210,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
                 property.SetValue(task, "_");
             }
-            
+
             task.BuildEngine = new MockBuildEngine();
 
             return task;

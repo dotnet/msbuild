@@ -6,7 +6,8 @@ namespace Microsoft.NET.Build.Containers;
 /// <summary>
 /// Abstracts over the concept of a local registry storeof some kind.
 /// </summary>
-internal interface ILocalRegistry {
+internal interface ILocalRegistry
+{
 
     /// <summary>
     /// Loads an image (presumably from a tarball) into the local registry.

@@ -84,8 +84,9 @@ public sealed class ComputeDotnetBaseImageTag : Microsoft.Build.Utilities.Task
         return baseImageTag;
     }
 
-     private string? DetermineLabelBasedOnChannel(int major, int minor, string[] releaseLabels) {
-      // this would be a switch, but we have to support net47x where Range and Index aren't available
+    private string? DetermineLabelBasedOnChannel(int major, int minor, string[] releaseLabels)
+    {
+        // this would be a switch, but we have to support net47x where Range and Index aren't available
         if (releaseLabels.Length == 0)
         {
             return $"{major}.{minor}";
@@ -117,5 +118,5 @@ public sealed class ComputeDotnetBaseImageTag : Microsoft.Build.Utilities.Task
                 return null;
             }
         }
-     }
+    }
 }

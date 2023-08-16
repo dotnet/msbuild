@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void ItCanInvokeDiagramDirective()
         {
-            string [] args = new[] { "[diagram]", "build", "-o", "output" };
+            string[] args = new[] { "[diagram]", "build", "-o", "output" };
             new DotnetCommand(Log, args)
                 .Execute()
                 .Should()
@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void ItCanInvokeSuggestDirective()
         {
-            string[] args = new[] { "[suggest]", "--l"};
+            string[] args = new[] { "[suggest]", "--l" };
             new DotnetCommand(Log, args)
                 .Execute()
                 .Should()

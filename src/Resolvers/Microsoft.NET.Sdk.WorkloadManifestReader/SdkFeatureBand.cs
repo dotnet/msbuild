@@ -23,7 +23,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             {
                 // Treat preview versions as their own feature bands
                 var prereleaseComponents = fullVersion.Prerelease.Split('.');
-                var formattedPrerelease = prereleaseComponents.Length > 1 ? 
+                var formattedPrerelease = prereleaseComponents.Length > 1 ?
                     $"{prereleaseComponents[0]}.{prereleaseComponents[1]}"
                     : prereleaseComponents[0];
                 _featureBand = new ReleaseVersion(fullVersion.Major, fullVersion.Minor, fullVersion.SdkFeatureBand, formattedPrerelease);

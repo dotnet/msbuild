@@ -27,7 +27,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
                 definition.Culture,
                 isReference: false);
         }
-        
+
         internal static AssemblyIdentity[] GetReferencedAssembliesOrThrow(this MetadataReader reader)
         {
             var references = new List<AssemblyIdentity>(reader.AssemblyReferences.Count);
@@ -47,7 +47,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
 
             return references.ToArray();
         }
-        
+
         private static AssemblyIdentity CreateAssemblyIdentity(
             MetadataReader reader,
             Version version,

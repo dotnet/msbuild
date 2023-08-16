@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Installer.Windows
         /// Gets whether the underlying stream is connected.
         /// </summary>
         public bool IsConnected => _pipeStream.IsConnected;
-       
+
         /// <summary>
         /// Creates a new <see cref="PipeStreamMessageDispatcherBase"/> instance.
         /// </summary>

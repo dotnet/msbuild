@@ -1,13 +1,13 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.DotNet.ApiSymbolExtensions.Filtering;
-using Microsoft.DotNet.ApiSymbolExtensions;
 using Microsoft.CodeAnalysis.Editing;
-using System.Diagnostics.CodeAnalysis;
+using Microsoft.DotNet.ApiSymbolExtensions;
+using Microsoft.DotNet.ApiSymbolExtensions.Filtering;
 
 namespace Microsoft.DotNet.GenAPI
 {
@@ -109,7 +109,8 @@ namespace Microsoft.DotNet.GenAPI
                 // Collect generic excluded fields
                 IEnumerable<IFieldSymbol> genericTypedFields = excludedFields.Where(f =>
                 {
-                    if (f.Type is INamedTypeSymbol ty) {
+                    if (f.Type is INamedTypeSymbol ty)
+                    {
                         return !ty.IsBoundGenericType() && symbolFilter.Include(ty);
                     }
                     return f.Type is ITypeParameterSymbol;
@@ -204,7 +205,7 @@ namespace Microsoft.DotNet.GenAPI
             // records with a record constructor don't require a default constructor
             if (namedType.IsRecord && namedType.TryGetRecordConstructor(out _))
             {
-                yield break;                
+                yield break;
             }
 
             // Nothing to do if type already exposes constructor, or has an excluded implicit constructor (since it would match visibility)
@@ -298,7 +299,7 @@ namespace Microsoft.DotNet.GenAPI
                 .FirstOrDefault(m => m is IMethodSymbol && m.IsCompilerGenerated());
 
             // Locate the compiler generated constructor by matching parameters to Deconstruct - since we cannot locate it with an attribute.
-            recordConstructor =  (IMethodSymbol?)type.GetMembers(".ctor")
+            recordConstructor = (IMethodSymbol?)type.GetMembers(".ctor")
                 .FirstOrDefault(m => m is IMethodSymbol method &&
                     method.MethodKind == MethodKind.Constructor &&
                     (deconstructMethod == null ?

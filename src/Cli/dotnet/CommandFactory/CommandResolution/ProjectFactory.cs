@@ -47,8 +47,8 @@ namespace Microsoft.DotNet.CommandFactory
                 LocalizableStrings.MSBuildProjectPath,
                 ProjectFactoryName,
                 msBuildProjectPath));
-            
-            if(msBuildProjectPath == null)
+
+            if (msBuildProjectPath == null)
             {
                 return null;
             }
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.CommandFactory
             catch (InvalidProjectFileException ex)
             {
                 Reporter.Verbose.WriteLine(ex.ToString().Red());
-                
+
                 return null;
             }
         }

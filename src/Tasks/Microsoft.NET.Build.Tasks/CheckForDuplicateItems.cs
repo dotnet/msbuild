@@ -1,15 +1,15 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Framework;
 using System.Globalization;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.NET.Build.Tasks
 {
     public class CheckForDuplicateItems : TaskBase
     {
         [Required]
-        public ITaskItem [] Items { get; set; }
+        public ITaskItem[] Items { get; set; }
 
         [Required]
         public string ItemName { get; set; }
@@ -27,7 +27,7 @@ namespace Microsoft.NET.Build.Tasks
         public string MoreInformationLink { get; set; }
 
         [Output]
-        public ITaskItem [] DeduplicatedItems { get; set; }
+        public ITaskItem[] DeduplicatedItems { get; set; }
 
         protected override void ExecuteCore()
         {

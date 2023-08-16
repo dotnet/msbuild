@@ -276,7 +276,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 propertyGroup.Element(ns + "OutputType").SetValue("WinExe");
             }
 
-            if(this.SelfContained != "")
+            if (this.SelfContained != "")
             {
                 propertyGroup.Add(new XElement(ns + "SelfContained", String.Equals(this.SelfContained, "true", StringComparison.OrdinalIgnoreCase) ? "true" : "false"));
             }

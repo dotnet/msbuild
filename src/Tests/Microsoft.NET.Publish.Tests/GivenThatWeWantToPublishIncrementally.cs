@@ -21,7 +21,7 @@ namespace Microsoft.NET.Publish.Tests
             };
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
-           
+
 
             // Publish normally
             var publishCommand = new PublishCommand(testAsset);

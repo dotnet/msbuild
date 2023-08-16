@@ -26,7 +26,7 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
             for (var i = 0; i < ScopedCssInput.Length; i++)
             {
                 var input = ScopedCssInput[i];
-                var relativePath = input.ItemSpec.ToLowerInvariant().Replace("\\","//");
+                var relativePath = input.ItemSpec.ToLowerInvariant().Replace("\\", "//");
                 var scope = input.GetMetadata("CssScope");
                 scope = !string.IsNullOrEmpty(scope) ? scope : GenerateScope(TargetName, relativePath);
 

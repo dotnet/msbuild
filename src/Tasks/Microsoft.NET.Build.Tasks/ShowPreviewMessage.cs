@@ -14,7 +14,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             const string previewMessageKey = "Microsoft.NET.Build.Tasks.DisplayPreviewMessageKey";
 
-            object messageDisplayed = 
+            object messageDisplayed =
                 BuildEngine4.GetRegisteredTaskObject(previewMessageKey, RegisteredTaskObjectLifetime.Build);
             if (messageDisplayed == null)
             {

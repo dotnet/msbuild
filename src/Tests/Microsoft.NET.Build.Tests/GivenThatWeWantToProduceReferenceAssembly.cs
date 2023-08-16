@@ -6,7 +6,7 @@ namespace Microsoft.NET.Build.Tests
     public class GivenThatWeWantToProduceReferenceAssembly : SdkTest
     {
         public GivenThatWeWantToProduceReferenceAssembly(ITestOutputHelper log) : base(log)
-        {}
+        { }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("netcoreapp3.1", false)]

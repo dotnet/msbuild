@@ -7,7 +7,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 {
     public class PublishIntegrationTest : AspNetSdkTest
     {
-        public PublishIntegrationTest(ITestOutputHelper log) : base(log) {}
+        public PublishIntegrationTest(ITestOutputHelper log) : base(log) { }
 
         [Fact]
         public void Publish_RazorCompileOnPublish_IsDefault()
@@ -166,7 +166,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                         itemGroup.Add(new XElement("ProjectReference", new XAttribute("Include", "..\\AnotherClassLib\\AnotherClassLib.csproj")));
                         project.Root.Add(itemGroup);
                     }
-                    
+
                 });
 
             var build = new BuildCommand(projectDirectory, "AppWithP2PReference");
