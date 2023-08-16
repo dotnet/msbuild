@@ -114,7 +114,7 @@ Si la commande est spécifiée sans l’argument, elle répertorie tous les pack
       </trans-unit>
       <trans-unit id="Option_AddSource">
         <source>Specifies a NuGet source to use.</source>
-        <target state="needs-review-translation">Spécifie une source NuGet à utiliser lors de l’installation.</target>
+        <target state="new">Specifies a NuGet source to use.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_AuthorFilter">

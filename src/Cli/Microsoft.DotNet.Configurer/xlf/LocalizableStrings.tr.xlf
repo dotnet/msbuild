@@ -35,16 +35,12 @@ Explore documentation: https://aka.ms/dotnet-docs
 Report issues and find source on GitHub: https://github.com/dotnet/core
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
 --------------------------------------------------------------------------------------</source>
-        <target state="needs-review-translation">----------------
-Bir ASP.NET Core HTTPS geliştirme sertifikası yüklendi.
-Sertifikaya güvenmek için 'dotnet dev-certs https --trust' komutunu çalıştırın (yalnızca Windows ve macOS).
-HTTPS hakkında bilgi edinin: https://aka.ms/dotnet-https
-----------------
-İlk uygulamanızı yazın: https://aka.ms/dotnet-hello-world
-Yenilikleri öğrenin: https://aka.ms/dotnet-whats-new
-Belgeleri keşfedin: https://aka.ms/dotnet-docs
-Sorunları bildirin ve GitHub'da kaynak bulun: https://github.com/dotnet/core
-Kullanılabilir komutları görmek için 'dotnet --help' komutunu kullanın veya şu adresi ziyaret edin: https://aka.ms/dotnet-cli
+        <target state="new">----------------
+Write your first app: https://aka.ms/dotnet-hello-world
+Find out what's new: https://aka.ms/dotnet-whats-new
+Explore documentation: https://aka.ms/dotnet-docs
+Report issues and find source on GitHub: https://github.com/dotnet/core
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
 --------------------------------------------------------------------------------------</target>
         <note />
       </trans-unit>

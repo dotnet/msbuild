@@ -35,16 +35,12 @@ Explore documentation: https://aka.ms/dotnet-docs
 Report issues and find source on GitHub: https://github.com/dotnet/core
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
 --------------------------------------------------------------------------------------</source>
-        <target state="needs-review-translation">----------------
-È stato installato un certificato di sviluppo HTTPS ASP.NET Core.
-Per considerare attendibile il certificato, eseguire 'dotnet dev-certs https --trust' (solo Windows e macOS).
-Altre informazioni su HTTPS: https://aka.ms/dotnet-https
-----------------
-Istruzioni per la creazione della prima app: https://aka.ms/dotnet-hello-world
-Novità: https://aka.ms/dotnet-whats-new
-Documentazione: https://aka.ms/dotnet-docs
-Segnalazione di problemi e ricerca del codice sorgente in GitHub: https://github.com/dotnet/core
-Usare 'dotnet --help' per visualizzare i comandi disponibili oppure visitare: https://aka.ms/dotnet-cli
+        <target state="new">----------------
+Write your first app: https://aka.ms/dotnet-hello-world
+Find out what's new: https://aka.ms/dotnet-whats-new
+Explore documentation: https://aka.ms/dotnet-docs
+Report issues and find source on GitHub: https://github.com/dotnet/core
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
 --------------------------------------------------------------------------------------</target>
         <note />
       </trans-unit>

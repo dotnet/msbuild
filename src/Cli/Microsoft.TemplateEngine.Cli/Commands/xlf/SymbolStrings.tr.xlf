@@ -114,7 +114,7 @@ Eğer komut bağımsız değişken olmadan belirtilirse yüklü tüm şablon pak
       </trans-unit>
       <trans-unit id="Option_AddSource">
         <source>Specifies a NuGet source to use.</source>
-        <target state="needs-review-translation">Yükleme sırasında kullanılacak NuGet kaynağını belirtir.</target>
+        <target state="new">Specifies a NuGet source to use.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_AuthorFilter">

@@ -114,7 +114,7 @@ If command is specified without the argument, it lists all the template packages
       </trans-unit>
       <trans-unit id="Option_AddSource">
         <source>Specifies a NuGet source to use.</source>
-        <target state="needs-review-translation">指定安装期间将使用的 NuGet 源。</target>
+        <target state="new">Specifies a NuGet source to use.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_AuthorFilter">
