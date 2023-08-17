@@ -44,7 +44,7 @@
       </trans-unit>
       <trans-unit id="DownloadingPackToCacheMessage">
         <source>Downloading pack {0} version {1} to offline cache {2}...</source>
-        <target state="new">Downloading pack {0} version {1} to offline cache {2}...</target>
+        <target state="translated">{0} paketi sürüm{1}, {2} çevrimdışı önbelleğine indiriliyor...</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedSingleManifest">
