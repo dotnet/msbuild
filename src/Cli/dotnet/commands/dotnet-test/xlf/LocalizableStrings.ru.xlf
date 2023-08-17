@@ -44,7 +44,7 @@ Implies --blame.</target>
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
         <source>The type of crash dump to be collected. Supported values are full (default) and mini. Implies --blame-crash.</source>
-        <target state="new">The type of crash dump to be collected. Supported values are full (default) and mini. Implies --blame-crash.</target>
+        <target state="translated">Тип собираемого аварийного дампа. Поддерживаемые значения: "full" (по умолчанию) и "mini". Подразумевается использование параметра --blame-crash.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangDescription">
@@ -54,7 +54,7 @@ Implies --blame.</target>
       </trans-unit>
       <trans-unit id="CmdBlameHangDumpTypeDescription">
         <source>The type of crash dump to be collected. The supported values are full (default), mini, and none. When 'none' is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</source>
-        <target state="new">The type of crash dump to be collected. The supported values are full (default), mini, and none. When 'none' is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</target>
+        <target state="translated">Тип собираемого аварийного дампа. Поддерживаемые значения: "full" (по умолчанию), "mini" и "none". Если задано значение "none", то узел тестирования завершает работу после истечения времени ожидания, но сбор дампа не выполняется. Подразумевается использование параметра --blame-hang.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangTimeoutDescription">

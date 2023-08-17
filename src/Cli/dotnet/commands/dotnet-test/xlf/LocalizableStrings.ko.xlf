@@ -44,7 +44,7 @@ Implies --blame.</target>
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
         <source>The type of crash dump to be collected. Supported values are full (default) and mini. Implies --blame-crash.</source>
-        <target state="new">The type of crash dump to be collected. Supported values are full (default) and mini. Implies --blame-crash.</target>
+        <target state="translated">수집할 크래시 덤프의 유형입니다. 지원되는 값은 full(기본값) 및 mini입니다. --blame-crash를 의미합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangDescription">
@@ -54,7 +54,7 @@ Implies --blame.</target>
       </trans-unit>
       <trans-unit id="CmdBlameHangDumpTypeDescription">
         <source>The type of crash dump to be collected. The supported values are full (default), mini, and none. When 'none' is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</source>
-        <target state="new">The type of crash dump to be collected. The supported values are full (default), mini, and none. When 'none' is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</target>
+        <target state="translated">수집할 크래시 덤프의 유형입니다. 지원되는 값은 full(기본값), mini, none입니다. 'none'이 사용된 경우 테스트 호스트가 시간 초과될 때 종료되지만 덤프는 수집되지 않습니다. --blame-hang을 의미합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangTimeoutDescription">

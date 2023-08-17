@@ -44,7 +44,7 @@ Implies --blame.</target>
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
         <source>The type of crash dump to be collected. Supported values are full (default) and mini. Implies --blame-crash.</source>
-        <target state="new">The type of crash dump to be collected. Supported values are full (default) and mini. Implies --blame-crash.</target>
+        <target state="translated">要收集的損毀傾印類型。支援的值為 full (預設值) 和 mini。表示 --blame-crash。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangDescription">
@@ -54,7 +54,7 @@ Implies --blame.</target>
       </trans-unit>
       <trans-unit id="CmdBlameHangDumpTypeDescription">
         <source>The type of crash dump to be collected. The supported values are full (default), mini, and none. When 'none' is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</source>
-        <target state="new">The type of crash dump to be collected. The supported values are full (default), mini, and none. When 'none' is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</target>
+        <target state="translated">要收集之損毀傾印的類型。支援的值為完整的 full (預設值)，mini 和 none。若使用「none」，則測試主機將會在逾時時終止，不會收集任何傾印。表示 --blame-hang。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangTimeoutDescription">

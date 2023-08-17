@@ -44,7 +44,7 @@ Implies --blame.</target>
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
         <source>The type of crash dump to be collected. Supported values are full (default) and mini. Implies --blame-crash.</source>
-        <target state="new">The type of crash dump to be collected. Supported values are full (default) and mini. Implies --blame-crash.</target>
+        <target state="translated">O tipo de despejo de memória a ser coletado. Os valores com suporte são full (padrão) e mini. Implica --blame-crash.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangDescription">
@@ -54,7 +54,7 @@ Implies --blame.</target>
       </trans-unit>
       <trans-unit id="CmdBlameHangDumpTypeDescription">
         <source>The type of crash dump to be collected. The supported values are full (default), mini, and none. When 'none' is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</source>
-        <target state="new">The type of crash dump to be collected. The supported values are full (default), mini, and none. When 'none' is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</target>
+        <target state="translated">O tipo de despejo de memória a ser coletado. Os valores com suporte são full (padrão), mini e none. Quando “none” é usado, o host de teste é encerrado no tempo limite, mas nenhum despejo é coletado. Implica --blame-hang.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangTimeoutDescription">

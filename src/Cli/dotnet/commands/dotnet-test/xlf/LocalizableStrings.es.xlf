@@ -44,7 +44,7 @@ Implies --blame.</target>
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
         <source>The type of crash dump to be collected. Supported values are full (default) and mini. Implies --blame-crash.</source>
-        <target state="new">The type of crash dump to be collected. Supported values are full (default) and mini. Implies --blame-crash.</target>
+        <target state="translated">Tipo de volcado de memoria que se va a recopilar. Los valores admitidos son completo (valor predeterminado) y mini. Implica --blame-crash.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangDescription">
@@ -54,7 +54,7 @@ Implies --blame.</target>
       </trans-unit>
       <trans-unit id="CmdBlameHangDumpTypeDescription">
         <source>The type of crash dump to be collected. The supported values are full (default), mini, and none. When 'none' is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</source>
-        <target state="new">The type of crash dump to be collected. The supported values are full (default), mini, and none. When 'none' is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</target>
+        <target state="translated">El tipo de volcado de memoria que se va a recoger. Los valores soportados son completo (valor predeterminado), mini, y ninguno. Si se utiliza "ninguno", el host de prueba termina cuando se agota el tiempo de espera, pero no se recoge ningún volcado. Implica --blame-hang.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangTimeoutDescription">
