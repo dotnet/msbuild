@@ -21,9 +21,8 @@
         <source>
       Provides the details for specified template package.
       The command checks if the package is installed locally, if it was not found, it searches the configured NuGet feeds.</source>
-        <target state="new">
-      Provides the details for specified template package.
-      The command checks if the package is installed locally, if it was not found, it searches the configured NuGet feeds.</target>
+        <target state="translated">提供指定模板包的详细信息。
+      命令将检查包是否安装在本地，如果找不到，则会搜索配置的 NuGet 源。</target>
         <note />
       </trans-unit>
       <trans-unit id="Command_Install_Argument_Package">

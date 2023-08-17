@@ -21,9 +21,8 @@
         <source>
       Provides the details for specified template package.
       The command checks if the package is installed locally, if it was not found, it searches the configured NuGet feeds.</source>
-        <target state="new">
-      Provides the details for specified template package.
-      The command checks if the package is installed locally, if it was not found, it searches the configured NuGet feeds.</target>
+        <target state="translated">Предоставляет сведения для указанного пакета шаблона.
+      Команда проверяет, установлен ли пакет локально, если он не найден, выполняет поиск в настроенных каналах NuGet.</target>
         <note />
       </trans-unit>
       <trans-unit id="Command_Install_Argument_Package">

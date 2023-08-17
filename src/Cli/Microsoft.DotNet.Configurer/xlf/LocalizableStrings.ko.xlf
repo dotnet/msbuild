@@ -12,19 +12,19 @@
 Installed an ASP.NET Core HTTPS development certificate.
 To trust the certificate, run 'dotnet dev-certs https --trust'
 Learn about HTTPS: https://aka.ms/dotnet-https</source>
-        <target state="new">----------------
-Installed an ASP.NET Core HTTPS development certificate.
-To trust the certificate, run 'dotnet dev-certs https --trust'
-Learn about HTTPS: https://aka.ms/dotnet-https</target>
+        <target state="translated">----------------
+ASP.NET Core HTTPS 개발 인증서를 설치했습니다.
+인증서를 신뢰하려면 'dotnet dev-certs https --trust'를 실행하세요.
+HTTPS에 대한 자세한 정보: https://aka.ms/dotnet-https</target>
         <note />
       </trans-unit>
       <trans-unit id="FirstTimeMessageAspNetCertificateLinux">
         <source>----------------
 Installed an ASP.NET Core HTTPS development certificate.
 To trust the certificate, view the instructions: https://aka.ms/dotnet-https-linux</source>
-        <target state="new">----------------
-Installed an ASP.NET Core HTTPS development certificate.
-To trust the certificate, view the instructions: https://aka.ms/dotnet-https-linux</target>
+        <target state="translated">----------------
+ASP.NET Core HTTPS 개발 인증서를 설치했습니다.
+인증서를 신뢰하려면 다음 지침을 확인하세요. https://aka.ms/dotnet-https-linux</target>
         <note />
       </trans-unit>
       <trans-unit id="FirstTimeMessageMoreInformation">

@@ -12,19 +12,19 @@
 Installed an ASP.NET Core HTTPS development certificate.
 To trust the certificate, run 'dotnet dev-certs https --trust'
 Learn about HTTPS: https://aka.ms/dotnet-https</source>
-        <target state="new">----------------
-Installed an ASP.NET Core HTTPS development certificate.
-To trust the certificate, run 'dotnet dev-certs https --trust'
-Learn about HTTPS: https://aka.ms/dotnet-https</target>
+        <target state="translated">----------------
+Ein ASP.NET Core HTTPS-Entwicklungszertifikat wurde installiert.
+Führen Sie "dotnet dev-certs https --trust" aus, um dem Zertifikat zu vertrauen.
+Weitere Informationen zu HTTPS: https://aka.ms/dotnet-https</target>
         <note />
       </trans-unit>
       <trans-unit id="FirstTimeMessageAspNetCertificateLinux">
         <source>----------------
 Installed an ASP.NET Core HTTPS development certificate.
 To trust the certificate, view the instructions: https://aka.ms/dotnet-https-linux</source>
-        <target state="new">----------------
-Installed an ASP.NET Core HTTPS development certificate.
-To trust the certificate, view the instructions: https://aka.ms/dotnet-https-linux</target>
+        <target state="translated">----------------
+Ein ASP.NET Core HTTPS-Entwicklungszertifikat wurde installiert.
+Um dem Zertifikat zu vertrauen, zeigen Sie die Anweisungen an: https://aka.ms/dotnet-https-linux</target>
         <note />
       </trans-unit>
       <trans-unit id="FirstTimeMessageMoreInformation">
