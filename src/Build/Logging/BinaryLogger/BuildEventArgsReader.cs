@@ -270,14 +270,7 @@ namespace Microsoft.Build.Logging
         private readonly StringReadEventArgs stringReadEventArgs = new StringReadEventArgs(string.Empty);
         private void ReadStringRecord()
         {
-            this.StringEncountered?.Invoke();
             string text = ReadString();
-            if (this.StringReadDone != null)
-            {
-                stringReadEventArgs.Reuse(text);
-                StringReadDone(stringReadEventArgs);
-                text = stringReadEventArgs.StringToBeUsed;
-            }
             object storedString = stringStorage.Add(text);
             stringRecords.Add(storedString);
         }
@@ -1176,7 +1169,15 @@ namespace Microsoft.Build.Logging
 
         private string ReadString()
         {
-            return binaryReader.ReadString();
+            this.StringEncountered?.Invoke();
+            string text = binaryReader.ReadString();
+            if (this.StringReadDone != null)
+            {
+                stringReadEventArgs.Reuse(text);
+                StringReadDone(stringReadEventArgs);
+                text = stringReadEventArgs.StringToBeUsed;
+            }
+            return text;
         }
 
         private string? ReadOptionalString()
