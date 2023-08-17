@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="DotnetWorkloadInfoLabel">
         <source>.NET workloads installed:</source>
-        <target state="new">.NET workloads installed:</target>
+        <target state="translated">Nainstalované úlohy .NET:</target>
         <note />
       </trans-unit>
       <trans-unit id="MalformedText">
