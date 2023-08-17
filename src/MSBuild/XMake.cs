@@ -1533,7 +1533,13 @@ namespace Microsoft.Build.CommandLine
                                 if (graphBuildOptions != null)
                                 {
                                     graphResult = ExecuteGraphBuild(buildManager, graphBuildRequest);
-                                    result = graphResult[graphBuildRequest.ProjectGraph.EntryPointNodes.First()];
+                                    ProjectGraphEntryPoint entryPoint = graphBuildRequest.ProjectGraphEntryPoints.First();
+                                    result = graphResult.ResultsByNode.First(
+                                        nodeResultKvp =>
+                                        nodeResultKvp.Key.ProjectInstance.FullPath.Equals(entryPoint.ProjectFile) &&
+                                        nodeResultKvp.Key.ProjectInstance.GlobalProperties.Count == entryPoint.GlobalProperties.Count &&
+                                        nodeResultKvp.Key.ProjectInstance.GlobalProperties.All(propertyKvp => entryPoint.GlobalProperties[propertyKvp.Key].Equals(propertyKvp.Value)))
+                                        .Value;
                                 }
                                 else
                                 {
