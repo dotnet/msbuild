@@ -14,17 +14,17 @@
       </trans-unit>
       <trans-unit id="AotUnsupportedHostRuntimeIdentifier">
         <source>NETSDK1204: Ahead-of-time compilation is not supported on the current platform '{0}'.</source>
-        <target state="new">NETSDK1204: Ahead-of-time compilation is not supported on the current platform '{0}'.</target>
+        <target state="translated">NETSDK1204: Geçerli platformda önceden derleme '{0}'.</target>
         <note>{StrBegin="NETSDK1204: "}</note>
       </trans-unit>
       <trans-unit id="AotUnsupportedTargetFramework">
         <source>NETSDK1207: Ahead-of-time compilation is not supported for the target framework.</source>
-        <target state="new">NETSDK1207: Ahead-of-time compilation is not supported for the target framework.</target>
+        <target state="translated">NETSDK1207: Hedef çerçeve için önceden derleme desteklenmiyor.</target>
         <note>{StrBegin="NETSDK1207: "}</note>
       </trans-unit>
       <trans-unit id="AotUnsupportedTargetRuntimeIdentifier">
         <source>NETSDK1203: Ahead-of-time compilation is not supported for the target runtime identifier '{0}'.</source>
-        <target state="new">NETSDK1203: Ahead-of-time compilation is not supported for the target runtime identifier '{0}'.</target>
+        <target state="translated">NETSDK1203: Hedef çalışma zamanı tanımlayıcısı için önceden derleme '{0}'.</target>
         <note>{StrBegin="NETSDK1203: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="ArtifactsPathCannotBeSetInProject">
         <source>NETSDK1199: The ArtifactsPath and UseArtifactsOutput properties cannot be set in a project file, due to MSBuild ordering constraints. They must be set in a Directory.Build.props file or from the command line. See https://aka.ms/netsdk1199 for more information.</source>
-        <target state="new">NETSDK1199: The ArtifactsPath and UseArtifactsOutput properties cannot be set in a project file, due to MSBuild ordering constraints. They must be set in a Directory.Build.props file or from the command line. See https://aka.ms/netsdk1199 for more information.</target>
+        <target state="translated">NETSDK1199: ARTIFACTSPath ve UseArtifactsOutput özellikleri, MSBuild sıralama kısıtlamaları nedeniyle bir proje dosyasında ayarlanamaz. Bir Directory.Build.props dosyasında veya komut satırından ayarlanmalıdır. Daha fazla https://aka.ms/netsdk1199 için daha fazla bilgi için bkz.</target>
         <note>{StrBegin="NETSDK1199: "}</note>
       </trans-unit>
       <trans-unit id="AspNetCoreAllNotSupported">
@@ -402,8 +402,8 @@
       <trans-unit id="EnableSingleFileAnalyzerUnsupported">
         <source>NETSDK1211: EnableSingleFileAnalyzer is not supported for the target framework. Consider multi-targeting to a supported framework to enable single-file analysis, and set EnableSingleFileAnalyzer only for the supported frameworks. For example:
 &lt;EnableSingleFileAnalyzer Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))"&gt;true&lt;/EnableSingleFileAnalyzer&gt;</source>
-        <target state="new">NETSDK1211: EnableSingleFileAnalyzer is not supported for the target framework. Consider multi-targeting to a supported framework to enable single-file analysis, and set EnableSingleFileAnalyzer only for the supported frameworks. For example:
-&lt;EnableSingleFileAnalyzer Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))"&gt;true&lt;/EnableSingleFileAnalyzer&gt;</target>
+        <target state="translated">NETSDK1211: EnableSingleFileAnalyzer hedef çerçeve için desteklenmiyor. Tek dosyalı analizi etkinleştirmek için desteklenen bir çerçeveye çoklu hedeflemeyi düşünün ve yalnızca desteklenen çerçeveler için EnableSingleFileAnalyzer'ı ayarlayın. Örneğin:
+&lt;EnableSingleFileAnalyzer Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))"&gt;doğru&lt;/EnableSingleFileAnalyzer&gt;</target>
         <note>{StrBegin="NETSDK1211: "}</note>
       </trans-unit>
       <trans-unit id="EncounteredConflict_Info">
@@ -488,7 +488,7 @@
       </trans-unit>
       <trans-unit id="ILLinkNoValidRuntimePackageError">
         <source>NETSDK1195: Trimming, or code compatibility analysis for trimming, single-file deployment, or ahead-of-time compilation is not supported for the target framework. For more information, see https://aka.ms/netsdk1195</source>
-        <target state="new">NETSDK1195: Trimming, or code compatibility analysis for trimming, single-file deployment, or ahead-of-time compilation is not supported for the target framework. For more information, see https://aka.ms/netsdk1195</target>
+        <target state="translated">NETSDK1195: Kırpma, tek dosya dağıtımı veya önceden derleme için kırpma veya kod uyumluluğu analizi hedef çerçeve için desteklenmiyor. Daha fazla bilgi için bkz. https://aka.ms/netsdk1195</target>
         <note>{StrBegin="NETSDK1195: "}</note>
       </trans-unit>
       <trans-unit id="ILLinkNotSupportedError">
@@ -572,15 +572,15 @@ The following are names of parameters or literal values and should not be transl
       <trans-unit id="IsAotCompatibleUnsupported">
         <source>NETSDK1210: IsAotCompatible is not supported for the target framework. Consider multi-targeting to a supported framework to enable ahead-of-time compilation analysis, and set IsAotCompatible only for the supported frameworks. For example:
 &lt;IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))"&gt;true&lt;/IsAotCompatible&gt;</source>
-        <target state="new">NETSDK1210: IsAotCompatible is not supported for the target framework. Consider multi-targeting to a supported framework to enable ahead-of-time compilation analysis, and set IsAotCompatible only for the supported frameworks. For example:
-&lt;IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))"&gt;true&lt;/IsAotCompatible&gt;</target>
+        <target state="translated">NETSDK1210: IsAotCompatible hedef çerçeve için desteklenmiyor. Önceden derleme analizini etkinleştirmek için desteklenen bir çerçeveye çoklu hedeflemeyi düşünün ve Yalnızca desteklenen çerçeveler için IsAotCompatible'ı ayarlayın. Örneğin:
+&lt;IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))"&gt;doğru&lt;/IsAotCompatible&gt;</target>
         <note>{StrBegin="NETSDK1210: "}</note>
       </trans-unit>
       <trans-unit id="IsTrimmableUnsupported">
         <source>NETSDK1212: IsTrimmable is not supported for the target framework. Consider multi-targeting to a supported framework to enable trimming, and set IsTrimmable only for the supported frameworks. For example:
 &lt;IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))"&gt;true&lt;/IsTrimmable&gt;</source>
-        <target state="new">NETSDK1212: IsTrimmable is not supported for the target framework. Consider multi-targeting to a supported framework to enable trimming, and set IsTrimmable only for the supported frameworks. For example:
-&lt;IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))"&gt;true&lt;/IsTrimmable&gt;</target>
+        <target state="translated">NETSDK1212: IsTrimmable hedef çerçeve için desteklenmiyor. Kırpmayı etkinleştirmek için desteklenen bir çerçeveye çoklu hedeflemeyi düşünün ve Yalnızca desteklenen çerçeveler için IsTrimmable'i ayarlayın. Örneğin:
+&lt;IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))"&gt;doğru&lt;/IsTrimmable&gt;</target>
         <note>{StrBegin="NETSDK1212: "}</note>
       </trans-unit>
       <trans-unit id="JitLibraryNotFound">
@@ -698,7 +698,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="NonPortableRuntimeIdentifierDetected">
         <source>NETSDK1206: Found version-specific or distribution-specific runtime identifier(s): {0}. Affected libraries: {1}. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details.</source>
-        <target state="new">NETSDK1206: Found version-specific or distribution-specific runtime identifier(s): {0}. Affected libraries: {1}. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details.</target>
+        <target state="translated">NETSDK1206: Sürüme özgü veya dağıtıma özgü çalışma zamanı tanımlayıcıları bulundu: {0}. Etkilenen kitaplıklar: {1}. .NET 8.0 ve üzeri sürümlerde, sürüme özgü ve dağıtıma özgü çalışma zamanı tanımlayıcıları için varlıklar varsayılan olarak bulunamıyor. Ayrıntılar https://aka.ms/dotnet/rid-usage daha fazla bilgi edinin.</target>
         <note>{StrBegin="NETSDK1206: "}</note>
       </trans-unit>
       <trans-unit id="NonSelfContainedExeCannotReferenceSelfContained">
@@ -798,7 +798,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PublishUnsupportedWithoutTargetFramework">
         <source>NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify one of the following frameworks in order to publish: {0}</source>
-        <target state="new">NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify one of the following frameworks in order to publish: {0}</target>
+        <target state="translated">NETSDK1129: 'Publish' hedef çerçeve belirtilmeden desteklenmez. Geçerli proje birden çok çerçeveyi hedefliyor. Yayımlamak için şu çerçevelerden birini belirtseniz gerekir: {0}</target>
         <note>{StrBegin="NETSDK1129: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunCompilationFailed">
@@ -838,7 +838,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="RuntimeIdentifierWillNoLongerImplySelfContained">
         <source>NETSDK1201: For projects targeting .NET 8.0 and higher, specifying a RuntimeIdentifier will no longer produce a self contained app by default. To continue building self-contained apps, set the SelfContained property to true or use the --self-contained argument.</source>
-        <target state="new">NETSDK1201: For projects targeting .NET 8.0 and higher, specifying a RuntimeIdentifier will no longer produce a self contained app by default. To continue building self-contained apps, set the SelfContained property to true or use the --self-contained argument.</target>
+        <target state="translated">NETSDK1201: .NET 8.0 ve üzerini hedefleyen projeler için, RuntimeIdentifier belirtmek artık varsayılan olarak kendi içinde bulunan bir uygulama üretmez. Kendi içinde uygulamalar oluşturmaya devam etmek için SelfContained özelliğini true olarak ayarlayın veya --self-contained bağımsız değişkenlerini kullanın.</target>
         <note>{StrBegin="NETSDK1201: "}</note>
       </trans-unit>
       <trans-unit id="RuntimeListNotFound">
@@ -874,7 +874,7 @@ The following are names of parameters or literal values and should not be transl
       <trans-unit id="SolutionProjectConfigurationsConflict">
         <source>NETSDK1197: Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set the property for all projects. Conflicting projects:
 {1}</source>
-        <target state="new">NETSDK1197: Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set the property for all projects. Conflicting projects:
+        <target state="translated">NETSDK1197: Birden çok çözüm projesi çakışan '{0}' içeriyor; değerlerin eşleşmiyor olduğundan emin olun. Tüm projelerin özelliğini ayarlamak için bir Directory.build.props dosyası kullanmayı düşünün. Çakışan projeler:
 {1}</target>
         <note>{StrBegin="NETSDK1197: "}</note>
       </trans-unit>
@@ -985,7 +985,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UseArtifactsOutputRequiresDirectoryBuildProps">
         <source>NETSDK1200: If UseArtifactsPath is set to true and ArtifactsPath is not set, there must be a Directory.Build.props file in order to determine where the artifacts folder should be located.</source>
-        <target state="new">NETSDK1200: If UseArtifactsPath is set to true and ArtifactsPath is not set, there must be a Directory.Build.props file in order to determine where the artifacts folder should be located.</target>
+        <target state="translated">NETSDK1200: UseArtifactsPath true olarak ayarlanırsa ve ArtifactsPath ayarlanmamışsa, yapıtlar klasörünün nerede bulunacağı belirlemek için bir Directory.Build.props dosyası olmalıdır.</target>
         <note>{StrBegin="NETSDK1200: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedVisualStudioVersion">
