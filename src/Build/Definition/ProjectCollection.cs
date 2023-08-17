@@ -1549,13 +1549,6 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Logs a BuildFinished event. This is used specifically when a ProjectCollection is created but never actually built, yet a BuildFinished event
-        /// is still desired. As an example, if a Project is just meant to be evaluated, but a binlog is also collected, that binlog should be able to
-        /// say the build succeeded or failed. This provides a mechanism to achieve that.
-        /// </summary>
-        public void LogBuildFinishedEvent(bool success) => _loggingService.LogBuildFinished(success);
-
-        /// <summary>
         /// Called by a Project object to load itself into this collection.
         /// If the project was already loaded under a different name, it is unloaded.
         /// Stores the project in the list of loaded projects if it has a name.
