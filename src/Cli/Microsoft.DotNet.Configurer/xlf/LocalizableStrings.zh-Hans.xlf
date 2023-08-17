@@ -35,16 +35,12 @@ Explore documentation: https://aka.ms/dotnet-docs
 Report issues and find source on GitHub: https://github.com/dotnet/core
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
 --------------------------------------------------------------------------------------</source>
-        <target state="needs-review-translation">----------------
-已安装 ASP.NET Core HTTPS 开发证书。
-若要信任该证书，请运行 "dotnet dev-certs https --trust" (仅限 Windows 和 macOS)。
-了解 HTTPS: https://aka.ms/dotnet-https
-----------------
-编写你的第一个应用: https://aka.ms/dotnet-hello-world
-查找新增功能: https://aka.ms/dotnet-whats-new
-浏览文档: https://aka.ms/dotnet-docs
-在 GitHub 上报告问题和查找源: https://github.com/dotnet/core
-使用 "dotnet --help" 查看可用命令或访问: https://aka.ms/dotnet-cli
+        <target state="new">----------------
+Write your first app: https://aka.ms/dotnet-hello-world
+Find out what's new: https://aka.ms/dotnet-whats-new
+Explore documentation: https://aka.ms/dotnet-docs
+Report issues and find source on GitHub: https://github.com/dotnet/core
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
 --------------------------------------------------------------------------------------</target>
         <note />
       </trans-unit>

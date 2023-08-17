@@ -260,7 +260,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="ColumnNamePackageNameAndOwners">
         <source>Package Name / Owners</source>
-        <target state="new">Package Name / Owners</target>
+        <target state="translated">パッケージ名/所有者</target>
         <note>information about NuGet package: its name and owner</note>
       </trans-unit>
       <trans-unit id="ColumnNamePrecedence">
@@ -382,17 +382,17 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="DetailsCommand_Argument_PackageIdentifier">
         <source>Package identifier</source>
-        <target state="new">Package identifier</target>
+        <target state="translated">パッケージ識別子</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_NoNuGetSources">
         <source>No NuGet sources are defined or enabled</source>
-        <target state="new">No NuGet sources are defined or enabled</target>
+        <target state="translated">NuGet ソースが定義されていないか、有効になっていません</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Option_Version">
         <source>Specifies a concrete version for displaying details. If not specified the last is taken.</source>
-        <target state="new">Specifies a concrete version for displaying details. If not specified the last is taken.</target>
+        <target state="translated">詳細を表示するための具象バージョンを指定します。指定されていない場合、最後の項目が取得されます。</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Authors">
@@ -422,7 +422,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_LicenseMetadata">
         <source>License Metadata</source>
-        <target state="new">License Metadata</target>
+        <target state="translated">ライセンス メタデータ</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_LicenseUrl">
@@ -447,12 +447,12 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_ShortNames">
         <source>Short Names</source>
-        <target state="new">Short Names</target>
+        <target state="translated">短い名前</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_SourceFeed">
         <source>Source Feed</source>
-        <target state="new">Source Feed</target>
+        <target state="translated">ソース フィード</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Tags">
@@ -472,7 +472,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="DetailsCommand_UnableToLoadResorce">
         <source>Could not parse NuGet source '{0}', so it was discarded</source>
-        <target state="new">Could not parse NuGet source '{0}', so it was discarded</target>
+        <target state="translated">NuGet ソース '{0}' を解析できなかったため、破棄されました</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_UnableToLoadResorces">
@@ -562,14 +562,12 @@ The header is followed by the list of parameters and their errors (might be seve
       To search for the template packages on NuGet.org, run:
         dotnet new search --package {0}
     </source>
-        <target state="new">
-      No template packages found matching: {0}.
+        <target state="translated">一致するテンプレート パッケージが見つかりませんでした: {0}。
       
-      To list installed template packages, run:
-        dotnet new uninstall
-      To search for the template packages on NuGet.org, run:
-        dotnet new search --package {0}
-    </target>
+インストールされているテンプレート パッケージを一覧表示するには、次を実行します:
+        dotnet の新しいアンインストール
+      NuGet.org でテンプレート パッケージを検索するには、次を実行します:
+        dotnet の新しい検索 --package {0}    </target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_Info_NoMatchingTemplates">
@@ -827,27 +825,27 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_ArgumentNotConfigured">
         <source>Post action argument '{0}' is mandatory, but not configured.</source>
-        <target state="new">Post action argument '{0}' is mandatory, but not configured.</target>
+        <target state="translated">post アクション引数 '{0}' は必須ですが、構成されていません。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_MultipleJsonFiles">
         <source>More than one file found that matches '{0}'.</source>
-        <target state="new">More than one file found that matches '{0}'.</target>
+        <target state="translated">'{0}' に一致するファイルが複数見つかりました。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_NoJsonFile">
         <source>Unable to find the json file in the solution</source>
-        <target state="new">Unable to find the json file in the solution</target>
+        <target state="translated">ソリューションに JSON ファイルが見つかりません</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_ParentPropertyPathInvalid">
         <source>Parent property path '{0}' could not be traversed.</source>
-        <target state="new">Parent property path '{0}' could not be traversed.</target>
+        <target state="translated">親プロパティのパス '{0}' をスキャンできませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Succeeded">
         <source>Successfully modified {0}.</source>
-        <target state="new">Successfully modified {0}.</target>
+        <target state="translated">{0} が正常に変更されました。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
@@ -983,12 +981,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Download_Error_VulnerablePackage">
         <source>Failed to install {0}, due to detected vulnerabilities:</source>
-        <target state="new">Failed to install {0}, due to detected vulnerabilities:</target>
+        <target state="translated">検出された脆弱性により、{0} をインストールできませんでした:</target>
         <note>{0} - template package name.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Download_VulnerablePackage">
         <source>Installed package has the following vulnerabilities:</source>
-        <target state="new">Installed package has the following vulnerabilities:</target>
+        <target state="translated">インストールされているパッケージには次の脆弱性があります:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
@@ -1028,7 +1026,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Error_VulnerablePackageTip">
         <source>In order to install this package, run:</source>
-        <target state="new">In order to install this package, run:</target>
+        <target state="translated">このパッケージをインストールするには、次を実行します:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_OverrideNotice">
@@ -1088,7 +1086,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_UpdateCheck_Error_VulnerablePackage">
         <source>The package {0} contains vulnerabilities:</source>
-        <target state="new">The package {0} contains vulnerabilities:</target>
+        <target state="translated">パッケージ {0} に脆弱性が含まれています:</target>
         <note>{0} - template package name.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_GenericError">
@@ -1113,12 +1111,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_VulnerablePackage">
         <source>The package {0} was not updated due to detected vulnerabilities:</source>
-        <target state="new">The package {0} was not updated due to detected vulnerabilities:</target>
+        <target state="translated">検出された脆弱性のため、パッケージ {0} は更新されませんでした:</target>
         <note>{0} - template package name.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_VulnerablePackageTip">
         <source>In order to update this package, run:</source>
-        <target state="new">In order to update this package, run:</target>
+        <target state="translated">このパッケージを更新するには、次を実行します:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_AllPackagesAreUpToDate">
