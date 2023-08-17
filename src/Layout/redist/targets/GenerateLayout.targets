@@ -2,7 +2,11 @@
 
   <Target Name="PublishPortableRuntimeIdentifierGraph"
           BeforeTargets="Build">
-    
+
+      <ItemGroup Condition="'$(DotNetBuildFromSource)' == 'true' AND '$(TargetRid)' != '' AND '$(PortableRid)' != '' AND '$(TargetRid)' != '$(PortableRid)'">
+        <AdditionalRuntimeIdentifier Include="$(TargetRid)" Imports="$(PortableRid)" />
+      </ItemGroup>
+
       <UpdatePortableRuntimeIdentifierGraph
         InputFile="PortableRuntimeIdentifierGraph.json"
         OutputFile="$(OutputPath)/PortableRuntimeIdentifierGraph.json"
