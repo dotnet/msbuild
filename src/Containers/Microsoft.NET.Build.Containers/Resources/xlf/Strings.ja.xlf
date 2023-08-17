@@ -14,17 +14,17 @@
       </trans-unit>
       <trans-unit id="AppCommandArgsSetNoAppCommand">
         <source>CONTAINER2025: ContainerAppCommandArgs are provided without specifying a ContainerAppCommand.</source>
-        <target state="new">CONTAINER2025: ContainerAppCommandArgs are provided without specifying a ContainerAppCommand.</target>
+        <target state="translated">CONTAINER2025: ContainerAppCommandArgs が ContainerAppCommand を指定せずに指定されています。</target>
         <note>{StrBegin="CONTAINER2025: "}</note>
       </trans-unit>
       <trans-unit id="AppCommandSetNotUsed">
         <source>CONTAINER2026: ContainerAppCommand and ContainerAppCommandArgs must be empty when ContainerAppCommandInstruction is '{0}'.</source>
-        <target state="new">CONTAINER2026: ContainerAppCommand and ContainerAppCommandArgs must be empty when ContainerAppCommandInstruction is '{0}'.</target>
+        <target state="translated">CONTAINER2026: ContainerAppCommandInstruction が '{0}' の場合、ContainerAppCommand および ContainerAppCommandArgs を空にする必要があります。</target>
         <note>{StrBegin="CONTAINER2026: "}</note>
       </trans-unit>
       <trans-unit id="BaseEntrypointOverwritten">
         <source>CONTAINER2022: The base image has an entrypoint that will be overwritten to start the application. Set ContainerAppCommandInstruction to 'Entrypoint' if this is desired. To preserve the base image entrypoint, set ContainerAppCommandInstruction to 'DefaultArgs'.</source>
-        <target state="new">CONTAINER2022: The base image has an entrypoint that will be overwritten to start the application. Set ContainerAppCommandInstruction to 'Entrypoint' if this is desired. To preserve the base image entrypoint, set ContainerAppCommandInstruction to 'DefaultArgs'.</target>
+        <target state="translated">CONTAINER2022: 基本イメージには、アプリケーションを起動するために上書きされるエントリ ポイントがあります。これが必要な場合は、ContainerAppCommandInstruction を 'Entrypoint' に設定します。基本イメージのエントリ ポイントを保持するには、ContainerAppCommandInstruction を 'DefaultArgs' に設定します。</target>
         <note>{StrBegin="CONTAINER2022: "}</note>
       </trans-unit>
       <trans-unit id="BaseImageNameParsingFailed">
@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="BaseImageNameRegistryFallback">
         <source>CONTAINER2020: {0} does not specify a registry and will be pulled from Docker Hub. Please prefix the name with the image registry, for example: '{1}/&lt;image&gt;'.</source>
-        <target state="new">CONTAINER2020: {0} does not specify a registry and will be pulled from Docker Hub. Please prefix the name with the image registry, for example: '{1}/&lt;image&gt;'.</target>
+        <target state="translated">CONTAINER2020: {0} はレジストリを指定していないため、Docker Hubからプルされます。名前の前にイメージ レジストリを付けてください。例: '{1}/&lt;image&gt;'。</target>
         <note>{StrBegin="CONTAINER2020: "}</note>
       </trans-unit>
       <trans-unit id="BaseImageNameWithSpaces">
@@ -104,27 +104,27 @@
       </trans-unit>
       <trans-unit id="EntrypointAndAppCommandArgsSetNoAppCommandInstruction">
         <source>CONTAINER2023: A ContainerEntrypoint and ContainerAppCommandArgs are provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</source>
-        <target state="new">CONTAINER2023: A ContainerEntrypoint and ContainerAppCommandArgs are provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</target>
+        <target state="translated">CONTAINER2023: ContainerEntrypoint と ContainerAppCommandArgs が指定されています。アプリケーションの起動方法を構成するには、ContainerAppInstruction を設定する必要があります。有効な手順が {0}。</target>
         <note>{StrBegin="CONTAINER2023: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointSetNoAppCommandInstruction">
         <source>CONTAINER2027: A ContainerEntrypoint is provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</source>
-        <target state="new">CONTAINER2027: A ContainerEntrypoint is provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</target>
+        <target state="translated">CONTAINER2027: ContainerEntrypoint が指定されています。アプリケーションの起動方法を構成するには、ContainerAppInstruction を設定する必要があります。有効な手順が {0}。</target>
         <note>{StrBegin="CONTAINER2027: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointArgsSetNoEntrypoint">
         <source>CONTAINER2024: ContainerEntrypointArgs are provided without specifying a ContainerEntrypoint.</source>
-        <target state="new">CONTAINER2024: ContainerEntrypointArgs are provided without specifying a ContainerEntrypoint.</target>
+        <target state="translated">CONTAINER2024: ContainerEntrypointArgs が ContainerEntrypoint を指定せずに指定されています。</target>
         <note>{StrBegin="CONTAINER2024: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointArgsSetPreferAppCommandArgs">
         <source>CONTAINER2029: ContainerEntrypointArgsSet are provided. Change to use ContainerAppCommandArgs for arguments that must always be set, or ContainerDefaultArgs for arguments that can be overridden when the container is created.</source>
-        <target state="new">CONTAINER2029: ContainerEntrypointArgsSet are provided. Change to use ContainerAppCommandArgs for arguments that must always be set, or ContainerDefaultArgs for arguments that can be overridden when the container is created.</target>
+        <target state="translated">CONTAINER2029: ContainerEntrypointArgsSet が指定されています。常に設定する必要がある引数に ContainerAppCommandArgs を使用するように変更するか、コンテナーの作成時にオーバーライドできる引数の ContainerDefaultArgs を使用するように変更します。</target>
         <note>{StrBegin="CONTAINER2029: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointConflictAppCommand">
         <source>CONTAINER2028: ContainerEntrypoint can not be combined with ContainerAppCommandInstruction '{0}'.</source>
-        <target state="new">CONTAINER2028: ContainerEntrypoint can not be combined with ContainerAppCommandInstruction '{0}'.</target>
+        <target state="translated">CONTAINER2028: ContainerEntrypoint を ContainerAppCommandInstruction '{0}' と組み合わせることができません。</target>
         <note>{StrBegin="CONTAINER2028: "}</note>
       </trans-unit>
       <trans-unit id="FailedRetrievingCredentials">
@@ -324,7 +324,7 @@
       </trans-unit>
       <trans-unit id="UnknownAppCommandInstruction">
         <source>CONTAINER2021: Unknown AppCommandInstruction '{0}'. Valid instructions are {1}.</source>
-        <target state="new">CONTAINER2021: Unknown AppCommandInstruction '{0}'. Valid instructions are {1}.</target>
+        <target state="translated">CONTAINER2021: 不明な AppCommandInstruction '{0}'。有効な手順が {1}。</target>
         <note>{StrBegin="CONTAINER2021: "}</note>
       </trans-unit>
       <trans-unit id="UnknownLocalRegistryType">
