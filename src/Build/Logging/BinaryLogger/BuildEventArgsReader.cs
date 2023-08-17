@@ -398,7 +398,8 @@ namespace Microsoft.Build.Logging
         private BuildEventArgs ReadProjectEvaluationStartedEventArgs()
         {
             var fields = ReadBuildEventArgsFields();
-            // Null message arg is not expected
+            // Null message arg is not expected by the ProjectEvaluationStartedEventArgs
+            // Ensuring the non-null value - to avoid a need for public API change
             var projectFile = ReadDeduplicatedString() ?? string.Empty;
 
             var e = new ProjectEvaluationStartedEventArgs(

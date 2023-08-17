@@ -98,19 +98,9 @@ namespace Microsoft.Build.Logging
 
             using var reader = new BuildEventArgsReader(binaryReader, fileFormatVersion);
             NotificationsSourceCreated?.Invoke(reader);
-            while (true)
+
+            while (!cancellationToken.IsCancellationRequested && reader.Read() is { } instance)
             {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    return;
-                }
-
-                BuildEventArgs? instance = reader.Read();
-                if (instance == null)
-                {
-                    break;
-                }
-
                 Dispatch(instance);
             }
         }
