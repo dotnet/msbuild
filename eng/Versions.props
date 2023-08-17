@@ -20,7 +20,7 @@
     <PreReleaseVersionLabel Condition="'$(StabilizePackageVersion)' != 'true'">alpha</PreReleaseVersionLabel>
     <PreReleaseVersionLabel Condition="'$(StabilizePackageVersion)' == 'true' and $(VersionPrefix.EndsWith('00'))">rtm</PreReleaseVersionLabel>
     <PreReleaseVersionLabel Condition="'$(StabilizePackageVersion)' == 'true' and !$(VersionPrefix.EndsWith('00'))">servicing</PreReleaseVersionLabel>
-    <PreReleaseVersionIteration Condition="'$(StabilizePackageVersion)' != 'true'">2</PreReleaseVersionIteration>
+    <PreReleaseVersionIteration Condition="'$(StabilizePackageVersion)' != 'true'">1</PreReleaseVersionIteration>
   </PropertyGroup>
   <!-- Production Dependencies -->
   <PropertyGroup>
