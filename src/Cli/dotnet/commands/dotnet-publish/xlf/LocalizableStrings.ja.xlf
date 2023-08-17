@@ -56,7 +56,7 @@ The default is to publish a framework-dependent application.</source>
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default is 'Release' for NET 8.0 projects and above, but 'Debug' for older projects.</source>
-        <target state="new">The configuration to publish for. The default is 'Release' for NET 8.0 projects and above, but 'Debug' for older projects.</target>
+        <target state="translated">公開する構成。NET 8.0 以降のプロジェクトの既定値は 'Release' ですが、古いプロジェクトの場合は 'デバッグ' です。</target>
         <note />
       </trans-unit>
     </body>
