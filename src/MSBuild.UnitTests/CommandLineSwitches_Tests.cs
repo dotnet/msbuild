@@ -13,7 +13,6 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
-using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
@@ -498,60 +497,6 @@ namespace Microsoft.Build.UnitTests
             multipleParametersAllowed.ShouldBeFalse();
             missingParametersErrorMessage.ShouldBeNull();
             unquoteParameters.ShouldBeTrue();
-        }
-
-        [Fact]
-        public void GetPropertySwitchIdentificationTest()
-        {
-            CommandLineSwitches.IsParameterizedSwitch(
-                "getProperty",
-                out CommandLineSwitches.ParameterizedSwitch parameterizedSwitch,
-                out string duplicateSwitchErrorMessage,
-                out bool multipleParametersAllowed,
-                out string missingParametersErrorMessage,
-                out _,
-                out _);
-
-            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.GetProperty);
-            duplicateSwitchErrorMessage.ShouldBeNull();
-            multipleParametersAllowed.ShouldBeTrue();
-            missingParametersErrorMessage.ShouldNotBeNullOrEmpty();
-        }
-
-        [Fact]
-        public void GetItemSwitchIdentificationTest()
-        {
-            CommandLineSwitches.IsParameterizedSwitch(
-                "getItem",
-                out CommandLineSwitches.ParameterizedSwitch parameterizedSwitch,
-                out string duplicateSwitchErrorMessage,
-                out bool multipleParametersAllowed,
-                out string missingParametersErrorMessage,
-                out _,
-                out _);
-
-            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.GetItem);
-            duplicateSwitchErrorMessage.ShouldBeNull();
-            multipleParametersAllowed.ShouldBeTrue();
-            missingParametersErrorMessage.ShouldNotBeNullOrEmpty();
-        }
-
-        [Fact]
-        public void GetTargetResultSwitchIdentificationTest()
-        {
-            CommandLineSwitches.IsParameterizedSwitch(
-                "getTargetResult",
-                out CommandLineSwitches.ParameterizedSwitch parameterizedSwitch,
-                out string duplicateSwitchErrorMessage,
-                out bool multipleParametersAllowed,
-                out string missingParametersErrorMessage,
-                out _,
-                out _);
-
-            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.GetTargetResult);
-            duplicateSwitchErrorMessage.ShouldBeNull();
-            multipleParametersAllowed.ShouldBeTrue();
-            missingParametersErrorMessage.ShouldNotBeNullOrEmpty();
         }
 
         [Theory]
@@ -1097,7 +1042,6 @@ namespace Microsoft.Build.UnitTests
                     filename = FileUtilities.GetTemporaryFileName();
                     ProjectRootElement project = ProjectRootElement.Create();
                     project.Save(filename);
-                    BuildResult buildResult = null;
                     MSBuildApp.BuildProject(
                                         filename,
                                         null,
@@ -1129,8 +1073,6 @@ namespace Microsoft.Build.UnitTests
                                         question: false,
                                         inputResultsCaches: null,
                                         outputResultsCache: null,
-                                        saveProjectResult: false,
-                                        ref buildResult,
                                         commandLine: null);
                 }
                 finally

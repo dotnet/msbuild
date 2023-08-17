@@ -10,11 +10,6 @@
       fire this error.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
-      <trans-unit id="BuildFailedWithPropertiesItemsOrTargetResultsRequested">
-        <source>Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</source>
-        <target state="new">Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
         <target state="translated">Sestavení {0} za {1}s</target>
@@ -1299,33 +1294,6 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
         <target state="translated">Protokoly MSBuild a informace o ladění budou dostupné v „{0}“</target>
         <note />
       </trans-unit>
-      <trans-unit id="MissingGetItemError">
-        <source>MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</source>
-        <target state="new">MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</target>
-        <note>
-      {StrBegin="MSBUILD : error MSB1014: "}UE: This happens if the user does something like "msbuild.exe -getItem". The user must pass in an actual item name
-      following the switch, as in "msbuild.exe -getItem:blah".
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
-    </note>
-      </trans-unit>
-      <trans-unit id="MissingGetPropertyError">
-        <source>MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</source>
-        <target state="new">MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</target>
-        <note>
-      {StrBegin="MSBUILD : error MSB1010: "}UE: This happens if the user does something like "msbuild.exe -getProperty". The user must pass in an actual property name
-      following the switch, as in "msbuild.exe -getProperty:blah".
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
-    </note>
-      </trans-unit>
-      <trans-unit id="MissingGetTargetResultError">
-        <source>MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</source>
-        <target state="new">MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</target>
-        <note>
-      {StrBegin="MSBUILD : error MSB1017: "}UE: This happens if the user does something like "msbuild.exe -getTargetResult". The user must pass in an actual target name
-      following the switch, as in "msbuild.exe -getTargetResult:blah".
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
-    </note>
-      </trans-unit>
       <trans-unit id="MissingLoggerError">
         <source>MSBUILD : error MSB1007: Specify a logger.</source>
         <target state="translated">MSBUILD : error MSB1007: Zadejte protokolovací nástroj.</target>
@@ -1603,14 +1571,6 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
         <note>{StrBegin="MSBUILD : error MSB1026: "}UE: This error is printed if the default schema does not exist or in the extremely unlikely event
     that an explicit schema file was passed and existed when the command line parameters were checked but was deleted from disk before this check was made.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="SolutionBuildInvalidForCommandLineEvaluation">
-        <source>MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</source>
-        <target state="new">MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</target>
-        <note>
-      {StrBegin="MSBUILD : error MSB1063: "}UE: This happens if the user passes in a solution file when trying to access individual properties or items. The user must pass in a project file.
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
-    </note>
       </trans-unit>
       <trans-unit id="SwitchErrorWithArguments">
         <source>{0}
