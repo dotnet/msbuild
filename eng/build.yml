@@ -275,7 +275,7 @@ jobs:
           displayName: Run AoT Tests in Helix
           env:
               SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-              HelixAccessToken: ''
+              HelixAccessToken: $(_HelixApiToken)
               RunAoTTests: 'true'
 
       - ${{ if eq(parameters.agentOs, 'Darwin') }}:
