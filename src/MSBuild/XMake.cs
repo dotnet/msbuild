@@ -1534,6 +1534,11 @@ namespace Microsoft.Build.CommandLine
                                 {
                                     graphResult = ExecuteGraphBuild(buildManager, graphBuildRequest);
                                     ProjectGraphEntryPoint entryPoint = graphBuildRequest.ProjectGraphEntryPoints.First();
+                                    if (!entryPoint.GlobalProperties.ContainsKey(PropertyNames.IsGraphBuild))
+                                    {
+                                        entryPoint.GlobalProperties[PropertyNames.IsGraphBuild] = "true";
+                                    }
+
                                     result = graphResult.ResultsByNode.First(
                                         nodeResultKvp =>
                                         nodeResultKvp.Key.ProjectInstance.FullPath.Equals(entryPoint.ProjectFile) &&
