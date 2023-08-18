@@ -11,17 +11,17 @@ Paths searched: '{1}', '{2}'.</target>
       </trans-unit>
       <trans-unit id="CleanAllOptionDescription">
         <source>Causes clean to remove and uninstall all workload components from all SDK versions.</source>
-        <target state="new">Causes clean to remove and uninstall all workload components from all SDK versions.</target>
+        <target state="translated">導致從所有 SDK 版本移除及卸載所有工作負載元件。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Removes workload components that may have been left behind from previous updates and uninstallations.</source>
-        <target state="new">Removes workload components that may have been left behind from previous updates and uninstallations.</target>
+        <target state="translated">移除先前更新和卸載中可能遺漏的工作負載元件。</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidWorkloadProcessPath">
         <source>The path '{0}' of the process is the root path of the drive, which is not allowed, or it is invalid/inaccessible. Please run dotnet in a valid and available path.</source>
-        <target state="new">The path '{0}' of the process is the root path of the drive, which is not allowed, or it is invalid/inaccessible. Please run dotnet in a valid and available path.</target>
+        <target state="translated">處理常式的路徑 '{0}' 是磁片磁碟機的根路徑，這是不允許的，或是它無效/無法存取。請在有效且可用的路徑中執行 dotnet。</target>
         <note />
       </trans-unit>
       <trans-unit id="VSWorkloadNotRemoved">

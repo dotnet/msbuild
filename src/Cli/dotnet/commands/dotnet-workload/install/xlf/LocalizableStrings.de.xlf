@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
         <source>Uninstalling workload pack {0} version {1}...</source>
-        <target state="needs-review-translation">Das Workloadpaket {0}, Version {1}, wird deinstalliert…</target>
+        <target state="new">Uninstalling workload pack {0} version {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadToCacheOptionArgumentName">
@@ -44,7 +44,7 @@
       </trans-unit>
       <trans-unit id="DownloadingPackToCacheMessage">
         <source>Downloading pack {0} version {1} to offline cache {2}...</source>
-        <target state="needs-review-translation">Das Paket {0}, Version {1}, wird in den Offlinecache {2} heruntergeladen…</target>
+        <target state="translated">Das Paket "{0}", Version {1}, wird in den Offlinecache "{2}" heruntergeladen...</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedSingleManifest">
@@ -119,7 +119,7 @@
       </trans-unit>
       <trans-unit id="InstallingWorkloadManifest">
         <source>Installing workload manifest {0} version {1}...</source>
-        <target state="needs-review-translation">Das Workloadmanifest {0}, Version {1}, wird installiert…</target>
+        <target state="new">Installing workload manifest {0} version {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="InsufficientPrivilegeToStartServer">
@@ -199,7 +199,7 @@
       </trans-unit>
       <trans-unit id="PendingReboot">
         <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
-        <target state="needs-review-translation">Für den Computer steht ein Neustart aus. Die Installation wird fortgesetzt, aber Sie müssen möglicherweise neu starten.</target>
+        <target state="new">The machine has a pending reboot. The workload operation will continue, but you may need to restart.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">
