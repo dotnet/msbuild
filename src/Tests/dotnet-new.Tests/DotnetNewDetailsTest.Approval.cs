@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             return Verify(commandResult.StdOut);
         }
 
-        [Fact]
+        [Fact(Skip="Test targeting specific versions")]
         public Task CanDisplayDetails_RemotePackage_OtherFeedNoVersion()
         {
             CommandResult commandResult = new DotnetNewCommand(_log, "details", "Microsoft.Azure.WebJobs.ItemTemplates")
@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             return Verify(commandResult.StdOut);
         }
 
-        [Fact]
+        [Fact(Skip="Test targeting specific versions")]
         public Task CanDisplayDetails_InstalledPackage_OtherFeed()
         {
             string home = CreateTemporaryFolder(folderName: "Home");
