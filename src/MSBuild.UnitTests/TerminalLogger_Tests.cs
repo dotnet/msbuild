@@ -294,7 +294,6 @@ namespace Microsoft.Build.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             { 
-                env.SetEnvironmentVariable("MSBUILDTESTINGFORCETERMINALLOGGERUSE", "1");
                 string contents = @"
 <Project>
     <ItemGroup>
@@ -319,7 +318,7 @@ namespace Microsoft.Build.UnitTests
                 loggerWithoutTL.Parameters = logFileWithoutTL;
 
                 // Execute MSBuild with binary, file and terminal loggers
-                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /m /bl:{logFileWithTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithTL.log")};verbosity=diagnostic -tl", out bool success);
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /m /bl:{logFileWithTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithTL.log")};verbosity=diagnostic -tl:on", out bool success);
                 success.ShouldBeTrue();
 
                 // Execute MSBuild with binary and file loggers
