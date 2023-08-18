@@ -181,36 +181,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(value, deserializedValue);
         }
 
-        /// <summary>
-        /// Tests serializing using the DotNet serializer.
-        /// </summary>
-        [Fact]
-        public void TestSerializeDotNet()
-        {
-            ArgumentNullException value = new ArgumentNullException("The argument was null", new InsufficientMemoryException());
-            TranslationHelpers.GetWriteTranslator().TranslateDotNet(ref value);
-
-            ArgumentNullException deserializedValue = null;
-            TranslationHelpers.GetReadTranslator().TranslateDotNet(ref deserializedValue);
-
-            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, out string diffReason), diffReason);
-        }
-
-        /// <summary>
-        /// Tests serializing using the DotNet serializer passing in null.
-        /// </summary>
-        [Fact]
-        public void TestSerializeDotNetNull()
-        {
-            ArgumentNullException value = null;
-            TranslationHelpers.GetWriteTranslator().TranslateDotNet(ref value);
-
-            ArgumentNullException deserializedValue = null;
-            TranslationHelpers.GetReadTranslator().TranslateDotNet(ref deserializedValue);
-
-            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, out string diffReason), diffReason);
-        }
-
         [Fact]
         public void TestSerializeException()
         {

@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -78,6 +80,26 @@ namespace Microsoft.Build.Framework
 
                 return RawMessage;
             }
+        }
+
+        internal override void WriteToStream(BinaryWriter writer)
+        {
+            base.WriteToStream(writer);
+
+            writer.WriteOptionalString(PropertyName);
+            writer.WriteOptionalString(NewValue);
+            writer.WriteOptionalString(PreviousValue);
+            writer.WriteOptionalString(Location);
+        }
+
+        internal override void CreateFromStream(BinaryReader reader, int version)
+        {
+            base.CreateFromStream(reader, version);
+
+            PropertyName = reader.ReadOptionalString();
+            NewValue = reader.ReadOptionalString();
+            PreviousValue = reader.ReadOptionalString();
+            Location = reader.ReadOptionalString();
         }
     }
 }

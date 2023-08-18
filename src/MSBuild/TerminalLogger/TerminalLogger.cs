@@ -165,6 +165,11 @@ internal sealed class TerminalLogger : INodeLogger
     };
 
     /// <summary>
+    /// The two directory separator characters to be passed to methods like <see cref="String.IndexOfAny(char[])"/>.
+    /// </summary>
+    private static readonly char[] PathSeparators = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
+
+    /// <summary>
     /// Default constructor, used by the MSBuild logger infra.
     /// </summary>
     public TerminalLogger()
@@ -461,26 +466,7 @@ internal sealed class TerminalLogger : INodeLogger
                     {
                         foreach (BuildMessage buildMessage in project.BuildMessages)
                         {
-                            TerminalColor color = buildMessage.Severity switch
-                            {
-                                MessageSeverity.Warning => TerminalColor.Yellow,
-                                MessageSeverity.Error => TerminalColor.Red,
-                                _ => TerminalColor.Default,
-                            };
-                            char symbol = buildMessage.Severity switch
-                            {
-                                MessageSeverity.Warning => '⚠',
-                                MessageSeverity.Error => '❌',
-                                _ => ' ',
-                            };
-
-                            // The error and warning symbols may be rendered with different width on some terminals. To make sure that the message text
-                            // is always aligned, we print the symbol, move back to the start of the line, then move forward to the desired column, and
-                            // finally print the message text.
-                            int maxSymbolWidth = 2;
-                            int messageStartColumn = Indentation.Length + Indentation.Length + maxSymbolWidth;
-                            Terminal.WriteColorLine(color, $"{Indentation}{Indentation}{symbol}\uFE0E{AnsiCodes.CSI}{messageStartColumn + 1}{AnsiCodes.MoveBackward}" +
-                                $"{AnsiCodes.CSI}{messageStartColumn}{AnsiCodes.MoveForward} {buildMessage.Message}");
+                            Terminal.WriteLine($"{Indentation}{Indentation}{buildMessage.Message}");
                         }
                     }
 
@@ -583,7 +569,20 @@ internal sealed class TerminalLogger : INodeLogger
         var buildEventContext = e.BuildEventContext;
         if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
-            string message = EventArgsFormatting.FormatEventMessage(e, false);
+            string message = EventArgsFormatting.FormatEventMessage(
+                category: AnsiCodes.Colorize("warning", TerminalColor.Yellow),
+                subcategory: e.Subcategory,
+                message: e.Message,
+                code: AnsiCodes.Colorize(e.Code, TerminalColor.Yellow),
+                file: HighlightFileName(e.File),
+                projectFile: null,
+                lineNumber: e.LineNumber,
+                endLineNumber: e.EndLineNumber,
+                columnNumber: e.ColumnNumber,
+                endColumnNumber: e.EndColumnNumber,
+                threadId: e.ThreadId,
+                logOutputProperties: null);
+
             project.AddBuildMessage(MessageSeverity.Warning, message);
         }
     }
@@ -596,7 +595,20 @@ internal sealed class TerminalLogger : INodeLogger
         var buildEventContext = e.BuildEventContext;
         if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
-            string message = EventArgsFormatting.FormatEventMessage(e, false);
+            string message = EventArgsFormatting.FormatEventMessage(
+                category: AnsiCodes.Colorize("error", TerminalColor.Red),
+                subcategory: e.Subcategory,
+                message: e.Message,
+                code: AnsiCodes.Colorize(e.Code, TerminalColor.Red),
+                file: HighlightFileName(e.File),
+                projectFile: null,
+                lineNumber: e.LineNumber,
+                endLineNumber: e.EndLineNumber,
+                columnNumber: e.ColumnNumber,
+                endColumnNumber: e.EndColumnNumber,
+                threadId: e.ThreadId,
+                logOutputProperties: null);
+
             project.AddBuildMessage(MessageSeverity.Error, message);
         }
     }
@@ -840,6 +852,22 @@ internal sealed class TerminalLogger : INodeLogger
     {
         // Node IDs reported by the build are 1-based.
         return context.NodeId - 1;
+    }
+
+    /// <summary>
+    /// Colorizes the filename part of the given path.
+    /// </summary>
+    private static string? HighlightFileName(string? path)
+    {
+        if (path == null)
+        {
+            return null;
+        }
+
+        int index = path.LastIndexOfAny(PathSeparators);
+        return index >= 0
+            ? $"{path.Substring(0, index + 1)}{AnsiCodes.MakeBold(path.Substring(index + 1))}"
+            : path;
     }
 
     #endregion

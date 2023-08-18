@@ -133,8 +133,11 @@ namespace Microsoft.Build.Tasks
 
                         if (FailIfNotIncremental)
                         {
-                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
-                            return false;
+                            if (Lines?.Length > 0)
+                            {
+                                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
+                                return false;
+                            }
                         }
                         else
                         {
@@ -143,7 +146,7 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        if (FailIfNotIncremental)
+                        if (FailIfNotIncremental && Lines?.Length > 0)
                         {
                             Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", File.ItemSpec, string.Empty);
                             return false;

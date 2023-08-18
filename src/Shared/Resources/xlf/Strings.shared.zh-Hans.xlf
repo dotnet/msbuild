@@ -22,6 +22,11 @@
         <target state="translated">MSB4008: 在“{1}”处发现了与任务程序集“{0}”冲突的程序集。</target>
         <note>{StrBegin="MSB4008: "}UE: This message is shown when the type/class of a task cannot be resolved uniquely from a single assembly.</note>
       </trans-unit>
+      <trans-unit id="DeprecatedEventSerialization">
+        <source>Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
+        <target state="translated">在自定义事件类型“{0}”的序列化期间使用了不安全的 BinaryFormatter。这将很快被弃用。请改用 Extended*EventArgs。详细信息: https://aka.ms/msbuild/eventargs</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ExpectedEventToBeSerializable">
         <source>Event type "{0}" was expected to be serializable using the .NET serializer. The event was not serializable and has been ignored.</source>
         <target state="translated">事件类型“{0}”应可以使用 .NET 序列化程序进行序列化。此事件不可序列化，已忽略它。</target>
@@ -34,7 +39,7 @@
       </trans-unit>
       <trans-unit id="LoggingBeforeTaskInitialization">
         <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
-        <target state="new">MSB6005: Task attempted to log before it was initialized. Message was: {0}</target>
+        <target state="translated">MSB6005: 任务尚未初始化就尝试进行日志记录。消息为: {0}</target>
         <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
       </trans-unit>
       <trans-unit id="ModifyingTaskHostEnvironmentHeader">

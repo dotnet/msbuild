@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
@@ -39,96 +40,124 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(TaskParameterType.Null, t2.ParameterType);
         }
 
-        /// <summary>
-        /// Verifies that construction and serialization with a string parameter is OK.
-        /// </summary>
-        [Fact]
-        public void StringParameter()
+        [Theory]
+        [InlineData(typeof(bool), (int)TypeCode.Boolean, "True")]
+        [InlineData(typeof(byte), (int)TypeCode.Byte, "127")]
+        [InlineData(typeof(sbyte), (int)TypeCode.SByte, "-127")]
+        [InlineData(typeof(double), (int)TypeCode.Double, "3.14")]
+        [InlineData(typeof(float), (int)TypeCode.Single, "3.14")]
+        [InlineData(typeof(short), (int)TypeCode.Int16, "-20000")]
+        [InlineData(typeof(ushort), (int)TypeCode.UInt16, "30000")]
+        [InlineData(typeof(int), (int)TypeCode.Int32, "-1")]
+        [InlineData(typeof(uint), (int)TypeCode.UInt32, "1")]
+        [InlineData(typeof(long), (int)TypeCode.Int64, "-1000000000000")]
+        [InlineData(typeof(ulong), (int)TypeCode.UInt64, "1000000000000")]
+        [InlineData(typeof(decimal), (int)TypeCode.Decimal, "29.99")]
+        [InlineData(typeof(char), (int)TypeCode.Char, "q")]
+        [InlineData(typeof(string), (int)TypeCode.String, "foo")]
+        [InlineData(typeof(DateTime), (int)TypeCode.DateTime, "1/1/2000 12:12:12")]
+        public void PrimitiveParameter(Type type, int expectedTypeCodeAsInt, string testValueAsString)
         {
-            TaskParameter t = new TaskParameter("foo");
+            TypeCode expectedTypeCode = (TypeCode)expectedTypeCodeAsInt;
 
-            Assert.Equal("foo", t.WrappedParameter);
-            Assert.Equal(TaskParameterType.String, t.ParameterType);
+            object value = Convert.ChangeType(testValueAsString, type, CultureInfo.InvariantCulture);
+            TaskParameter t = new TaskParameter(value);
+
+            Assert.Equal(value, t.WrappedParameter);
+            Assert.Equal(TaskParameterType.PrimitiveType, t.ParameterType);
+            Assert.Equal(expectedTypeCode, t.ParameterTypeCode);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal("foo", t2.WrappedParameter);
-            Assert.Equal(TaskParameterType.String, t2.ParameterType);
+            Assert.Equal(value, t2.WrappedParameter);
+            Assert.Equal(TaskParameterType.PrimitiveType, t2.ParameterType);
+            Assert.Equal(expectedTypeCode, t2.ParameterTypeCode);
         }
 
-        /// <summary>
-        /// Verifies that construction and serialization with a string array parameter is OK.
-        /// </summary>
-        [Fact]
-        public void StringArrayParameter()
+        [Theory]
+        [InlineData(typeof(bool), (int)TypeCode.Boolean, "True;False;True")]
+        [InlineData(typeof(byte), (int)TypeCode.Byte, "127;100;0")]
+        [InlineData(typeof(sbyte), (int)TypeCode.SByte, "-127;-126;12")]
+        [InlineData(typeof(double), (int)TypeCode.Double, "3.14;3.15")]
+        [InlineData(typeof(float), (int)TypeCode.Single, "3.14;3.15")]
+        [InlineData(typeof(short), (int)TypeCode.Int16, "-20000;0;-1")]
+        [InlineData(typeof(ushort), (int)TypeCode.UInt16, "30000;20000;10")]
+        [InlineData(typeof(int), (int)TypeCode.Int32, "-1;-2")]
+        [InlineData(typeof(uint), (int)TypeCode.UInt32, "1;5;6")]
+        [InlineData(typeof(long), (int)TypeCode.Int64, "-1000000000000;0")]
+        [InlineData(typeof(ulong), (int)TypeCode.UInt64, "1000000000000;0")]
+        [InlineData(typeof(decimal), (int)TypeCode.Decimal, "29.99;0.88")]
+        [InlineData(typeof(char), (int)TypeCode.Char, "q;r;c")]
+        [InlineData(typeof(string), (int)TypeCode.String, "foo;bar")]
+        [InlineData(typeof(DateTime), (int)TypeCode.DateTime, "1/1/2000 12:12:12;2/2/2000 13:13:13")]
+        public void PrimitiveArrayParameter(Type type, int expectedTypeCodeAsInt, string testValueAsString)
         {
-            TaskParameter t = new TaskParameter(new string[] { "foo", "bar" });
+            TypeCode expectedTypeCode = (TypeCode)expectedTypeCodeAsInt;
 
-            Assert.Equal(TaskParameterType.StringArray, t.ParameterType);
+            string[] values = testValueAsString.Split(';');
+            Array array = Array.CreateInstance(type, values.Length);
+            for (int i = 0; i < values.Length; i++)
+            {
+                object value = Convert.ChangeType(values[i], type, CultureInfo.InvariantCulture);
+                array.SetValue(value, i);
+            }
 
-            string[] wrappedParameter = t.WrappedParameter as string[];
-            Assert.NotNull(wrappedParameter);
-            Assert.Equal(2, wrappedParameter.Length);
-            Assert.Equal("foo", wrappedParameter[0]);
-            Assert.Equal("bar", wrappedParameter[1]);
+            TaskParameter t = new TaskParameter(array);
+
+            Assert.Equal(array, t.WrappedParameter);
+            Assert.Equal(TaskParameterType.PrimitiveTypeArray, t.ParameterType);
+            Assert.Equal(expectedTypeCode, t.ParameterTypeCode);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(TaskParameterType.StringArray, t2.ParameterType);
-
-            string[] wrappedParameter2 = t2.WrappedParameter as string[];
-            Assert.NotNull(wrappedParameter2);
-            Assert.Equal(2, wrappedParameter2.Length);
-            Assert.Equal("foo", wrappedParameter2[0]);
-            Assert.Equal("bar", wrappedParameter2[1]);
+            Assert.Equal(array, t2.WrappedParameter);
+            Assert.Equal(TaskParameterType.PrimitiveTypeArray, t2.ParameterType);
+            Assert.Equal(expectedTypeCode, t2.ParameterTypeCode);
         }
 
-        /// <summary>
-        /// Verifies that construction and serialization with a value type (integer) parameter is OK.
-        /// </summary>
         [Fact]
-        public void IntParameter()
+        public void ValueTypeParameter()
         {
-            TaskParameter t = new TaskParameter(1);
+            TaskBuilderTestTask.CustomStruct value = new TaskBuilderTestTask.CustomStruct(3.14);
+            TaskParameter t = new TaskParameter(value);
 
-            Assert.Equal(1, t.WrappedParameter);
-            Assert.Equal(TaskParameterType.Int, t.ParameterType);
+            Assert.Equal(value, t.WrappedParameter);
+            Assert.Equal(TaskParameterType.ValueType, t.ParameterType);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(1, t2.WrappedParameter);
-            Assert.Equal(TaskParameterType.Int, t2.ParameterType);
+            // Custom IConvertible structs are deserialized into strings.
+            Assert.Equal(value.ToString(CultureInfo.InvariantCulture), t2.WrappedParameter);
+            Assert.Equal(TaskParameterType.ValueType, t2.ParameterType);
         }
 
-        /// <summary>
-        /// Verifies that construction and serialization with a parameter that is an array of value types (ints) is OK.
-        /// </summary>
         [Fact]
-        public void IntArrayParameter()
+        public void ValueTypeArrayParameter()
         {
-            TaskParameter t = new TaskParameter(new int[] { 2, 15 });
+            TaskBuilderTestTask.CustomStruct[] value = new TaskBuilderTestTask.CustomStruct[]
+            {
+                new TaskBuilderTestTask.CustomStruct(3.14),
+                new TaskBuilderTestTask.CustomStruct(2.72),
+            };
+            TaskParameter t = new TaskParameter(value);
 
+            Assert.Equal(value, t.WrappedParameter);
             Assert.Equal(TaskParameterType.ValueTypeArray, t.ParameterType);
 
-            int[] wrappedParameter = t.WrappedParameter as int[];
-            Assert.NotNull(wrappedParameter);
-            Assert.Equal(2, wrappedParameter.Length);
-            Assert.Equal(2, wrappedParameter[0]);
-            Assert.Equal(15, wrappedParameter[1]);
-
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
+            // Custom IConvertible structs are deserialized into strings.
+            Assert.True(t2.WrappedParameter is string[]);
             Assert.Equal(TaskParameterType.ValueTypeArray, t2.ParameterType);
 
-            int[] wrappedParameter2 = t2.WrappedParameter as int[];
-            Assert.NotNull(wrappedParameter2);
-            Assert.Equal(2, wrappedParameter2.Length);
-            Assert.Equal(2, wrappedParameter2[0]);
-            Assert.Equal(15, wrappedParameter2[1]);
+            string[] stringArray = (string[])t2.WrappedParameter;
+            Assert.Equal(2, stringArray.Length);
+            Assert.Equal(value[0].ToString(CultureInfo.InvariantCulture), stringArray[0]);
+            Assert.Equal(value[1].ToString(CultureInfo.InvariantCulture), stringArray[1]);
         }
 
         private enum TestEnumForParameter
@@ -143,55 +172,15 @@ namespace Microsoft.Build.UnitTests
             TaskParameter t = new TaskParameter(TestEnumForParameter.SomethingElse);
 
             Assert.Equal("SomethingElse", t.WrappedParameter);
-            Assert.Equal(TaskParameterType.String, t.ParameterType);
+            Assert.Equal(TaskParameterType.PrimitiveType, t.ParameterType);
+            Assert.Equal(TypeCode.String, t.ParameterTypeCode);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             Assert.Equal("SomethingElse", t2.WrappedParameter);
-            Assert.Equal(TaskParameterType.String, t2.ParameterType);
-        }
-
-        [Fact]
-        public void BoolParameter()
-        {
-            TaskParameter t = new TaskParameter(true);
-
-            Assert.Equal(true, t.WrappedParameter);
-            Assert.Equal(TaskParameterType.Bool, t.ParameterType);
-
-            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
-            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
-
-            Assert.Equal(true, t2.WrappedParameter);
-            Assert.Equal(TaskParameterType.Bool, t2.ParameterType);
-        }
-
-        /// <summary>
-        /// Verifies that construction and serialization with a parameter that is an array of value types (ints) is OK.
-        /// </summary>
-        [Fact]
-        public void BoolArrayParameter()
-        {
-            TaskParameter t = new TaskParameter(new bool[] { false, true });
-
-            Assert.Equal(TaskParameterType.ValueTypeArray, t.ParameterType);
-
-            bool[] wrappedParameter = t.WrappedParameter as bool[];
-            Assert.NotNull(wrappedParameter);
-            Assert.Equal(2, wrappedParameter.Length);
-            Assert.False(wrappedParameter[0]);
-            Assert.True(wrappedParameter[1]);
-
-            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
-            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
-
-            Assert.Equal(TaskParameterType.ValueTypeArray, t2.ParameterType);
-
-            bool[] wrappedParameter2 = Assert.IsType<bool[]>(t2.WrappedParameter);
-            Assert.Equal(2, wrappedParameter2.Length);
-            Assert.False(wrappedParameter2[0]);
-            Assert.True(wrappedParameter2[1]);
+            Assert.Equal(TaskParameterType.PrimitiveType, t2.ParameterType);
+            Assert.Equal(TypeCode.String, t2.ParameterTypeCode);
         }
 
         /// <summary>

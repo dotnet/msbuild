@@ -22,6 +22,11 @@
         <target state="translated">MSB4008: un assembly en conflit avec l'assembly de tâche "{0}" a été trouvé sur "{1}".</target>
         <note>{StrBegin="MSB4008: "}UE: This message is shown when the type/class of a task cannot be resolved uniquely from a single assembly.</note>
       </trans-unit>
+      <trans-unit id="DeprecatedEventSerialization">
+        <source>Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
+        <target state="translated">Utilisation de BinaryFormatter non sécurisé lors de la sérialisation d’un type d’événement personnalisé '{0}'. Cette opération sera bientôt déconseillée. Utilisez Extended*EventArgs à la place. Plus d’informations : https://aka.ms/msbuild/eventargs</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ExpectedEventToBeSerializable">
         <source>Event type "{0}" was expected to be serializable using the .NET serializer. The event was not serializable and has been ignored.</source>
         <target state="translated">Le type d'événement "{0}" devait être sérialisable à l'aide du sérialiseur .NET. L'événement n'était pas sérialisable et a été ignoré.</target>
@@ -34,7 +39,7 @@
       </trans-unit>
       <trans-unit id="LoggingBeforeTaskInitialization">
         <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
-        <target state="new">MSB6005: Task attempted to log before it was initialized. Message was: {0}</target>
+        <target state="translated">MSB6005: La tâche a tenté d'ouvrir une session avant d'être initialisée. Le message était le suivant : {0}</target>
         <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
       </trans-unit>
       <trans-unit id="ModifyingTaskHostEnvironmentHeader">

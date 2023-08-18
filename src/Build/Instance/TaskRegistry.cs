@@ -1479,7 +1479,7 @@ namespace Microsoft.Build.Execution
                                         initialized = factory.Initialize(RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, taskFactoryLoggingHost);
 
                                         // TaskFactoryParameters will always be null unless specifically created to have runtime and architecture parameters.
-                                        if (TaskFactoryParameters != null)
+                                        if (initialized && TaskFactoryParameters != null)
                                         {
                                             targetLoggingContext.LogWarning(
                                                 null,
@@ -1493,7 +1493,7 @@ namespace Microsoft.Build.Execution
                                     }
 
                                     // Throw an error if the ITaskFactory did not set the TaskType property.  If the property is null, it can cause NullReferenceExceptions in our code
-                                    if (factory.TaskType == null)
+                                    if (initialized && factory.TaskType == null)
                                     {
                                         throw new InvalidOperationException(AssemblyResources.GetString("TaskFactoryTaskTypeIsNotSet"));
                                     }
