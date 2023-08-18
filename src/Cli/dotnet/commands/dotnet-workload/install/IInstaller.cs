@@ -33,8 +33,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         void ReplaceWorkloadResolver(IWorkloadResolver workloadResolver);
 
         void Shutdown();
-
-
     }
 
     // Interface to pass to workload manifest updater
@@ -63,6 +61,5 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             NuGetPackageId = nuGetPackageId;
             NuGetPackageVersion = nuGetPackageVersion;
         }
-
     }
 }

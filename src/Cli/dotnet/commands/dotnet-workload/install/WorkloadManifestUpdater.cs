@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                           reporter,
                                           verifySignatures: SignCheck.IsDotNetSigned());
             var installer = WorkloadInstallerFactory.GetWorkloadInstaller(reporter, new SdkFeatureBand(sdkVersion),
-                workloadResolver, Cli.VerbosityOptions.normal, userProfileDir, verifySignatures: false);
+                workloadResolver, VerbosityOptions.normal, userProfileDir, verifySignatures: false);
             var workloadRecordRepo = installer.GetWorkloadInstallationRecordRepository();
 
             return new WorkloadManifestUpdater(reporter, workloadResolver, nugetPackageDownloader, userProfileDir, tempPackagesDir.Value, workloadRecordRepo, installer);
