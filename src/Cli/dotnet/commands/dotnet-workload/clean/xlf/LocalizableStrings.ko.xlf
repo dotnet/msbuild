@@ -5,13 +5,13 @@
       <trans-unit id="CannotAnalyzeVSWorkloadBand">
         <source>Workloads managed by Visual Studio must be uninstalled using the Visual Studio Installer. For the version of Visual Studio managing the SDK '{0}', we could not display workloads to uninstall. This is likely because '{0}' uses a different dotnet root path or custom user profile directory from the current running SDK.
 Paths searched: '{1}', '{2}'.</source>
-        <target state="translated">Visual Studio 관리하는 워크로드는 Visual Studio 설치 관리자 사용하여 제거해야 합니다. SDK '{0}' 관리하는 Visual Studio 버전의 경우 제거할 워크로드를 표시할 수 없습니다. '{0}' 현재 실행 중인 SDK와 다른 dotnet 루트 경로 또는 사용자 지정 사용자 프로필 디렉터리를 사용하기 때문일 수 있습니다.
+        <target state="translated">Visual Studio에서 관리하는 워크로드는 Visual Studio 설치 관리자를 사용하여 제거해야 합니다. '{0}' SDK를 관리하는 Visual Studio 버전의 경우 제거할 워크로드를 표시할 수 없습니다. '{0}'에서 현재 실행 중인 SDK와 다른 dotnet 루트 경로 또는 사용자 지정 사용자 프로필 디렉터리를 사용하기 때문일 수 있습니다.
 검색된 경로: '{1}', '{2}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CleanAllOptionDescription">
         <source>Causes clean to remove and uninstall all workload components from all SDK versions.</source>
-        <target state="translated">클린 모든 SDK 버전에서 모든 워크로드 구성 요소를 제거하고 제거합니다.</target>
+        <target state="translated">정리를 수행하여 모든 SDK 버전에서 모든 워크로드 구성 요소를 제거합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
@@ -26,7 +26,7 @@ Paths searched: '{1}', '{2}'.</source>
       </trans-unit>
       <trans-unit id="VSWorkloadNotRemoved">
         <source>Workload '{0}' was not removed because it is installed and managed by Visual Studio: '{1}'. Please uninstall this workload using the Visual Studio Installer to fully remove it.</source>
-        <target state="translated">워크로드 '{0}' Visual Studio 설치 및 관리되므로 제거되지 않았습니다. '{1}'. Visual Studio 설치 관리자 사용하여 이 워크로드를 제거하여 완전히 제거하세요.</target>
+        <target state="translated">'{0}' 워크로드는 '{1}' Visual Studio 설치 관리자에서 설치하고 관리하므로 제거되지 않았습니다. Visual Studio 설치 관리자를 사용하여 이 워크로드를 제거하여 완전히 제거하세요.</target>
         <note />
       </trans-unit>
     </body>
