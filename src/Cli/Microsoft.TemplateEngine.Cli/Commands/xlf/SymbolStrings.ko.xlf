@@ -21,8 +21,9 @@
         <source>
       Provides the details for specified template package.
       The command checks if the package is installed locally, if it was not found, it searches the configured NuGet feeds.</source>
-        <target state="translated">지정된 템플릿 패키지에 대한 세부 정보를 제공합니다.
-      명령은 패키지가 로컬에 설치되어 있는지 확인하고, 패키지가 없으면 구성된 NuGet 피드를 검색합니다.</target>
+        <target state="translated">
+      지정된 템플릿 패키지에 대한 세부 정보를 제공합니다.
+      명령은 패키지가 로컬로 설치되어 있는지, 패키지가 없으면 구성된 NuGet 피드를 검색하는지 확인합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Command_Install_Argument_Package">
@@ -113,7 +114,7 @@ If command is specified without the argument, it lists all the template packages
       </trans-unit>
       <trans-unit id="Option_AddSource">
         <source>Specifies a NuGet source to use.</source>
-        <target state="new">Specifies a NuGet source to use.</target>
+        <target state="translated">사용할 NuGet 소스를 지정합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_AuthorFilter">

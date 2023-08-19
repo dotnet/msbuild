@@ -260,7 +260,7 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
       </trans-unit>
       <trans-unit id="ColumnNamePackageNameAndOwners">
         <source>Package Name / Owners</source>
-        <target state="translated">Název /vlastníci balíčku</target>
+        <target state="translated">Název balíčku / vlastníci</target>
         <note>information about NuGet package: its name and owner</note>
       </trans-unit>
       <trans-unit id="ColumnNamePrecedence">
@@ -290,7 +290,7 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
       </trans-unit>
       <trans-unit id="ColumnNameTrusted">
         <source>Trusted</source>
-        <target state="new">Trusted</target>
+        <target state="translated">Důvěryhodná</target>
         <note>information about NuGet package origin; if a package has PrefixReserved indicator </note>
       </trans-unit>
       <trans-unit id="ColumnNameType">
@@ -382,7 +382,7 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
       </trans-unit>
       <trans-unit id="DetailsCommand_Argument_PackageIdentifier">
         <source>Package identifier</source>
-        <target state="new">Package identifier</target>
+        <target state="translated">Identifikátor balíčku</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_NoNuGetSources">
@@ -392,32 +392,32 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
       </trans-unit>
       <trans-unit id="DetailsCommand_Option_Version">
         <source>Specifies a concrete version for displaying details. If not specified the last is taken.</source>
-        <target state="translated">Určuje konkrétní verzi pro zobrazení podrobností. Pokud není zadáno, je poslední pořízeno.</target>
+        <target state="translated">Určuje konkrétní verzi pro zobrazení podrobností. Pokud se nezadá, použije se poslední.</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Authors">
         <source>Authors</source>
-        <target state="new">Authors</target>
+        <target state="translated">Autoři</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Description">
         <source>Details</source>
-        <target state="new">Details</target>
+        <target state="translated">Podrobnosti</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Languages">
         <source>Languages</source>
-        <target state="new">Languages</target>
+        <target state="translated">Jazyky</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_License">
         <source>License</source>
-        <target state="new">License</target>
+        <target state="translated">Licence</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_LicenseExpression">
         <source>License Expression</source>
-        <target state="new">License Expression</target>
+        <target state="translated">Výraz licence</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_LicenseMetadata">
@@ -427,22 +427,22 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_LicenseUrl">
         <source>License Url</source>
-        <target state="new">License Url</target>
+        <target state="translated">Adresa URL licence</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Owners">
         <source>Owners</source>
-        <target state="new">Owners</target>
+        <target state="translated">Vlastníci</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_PrefixReserved">
         <source>Reserved</source>
-        <target state="new">Reserved</target>
+        <target state="translated">Vyhrazená</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_RepoUrl">
         <source>Repository Url</source>
-        <target state="new">Repository Url</target>
+        <target state="translated">Adresa URL úložiště</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_ShortNames">
@@ -457,27 +457,27 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Tags">
         <source>Tags</source>
-        <target state="new">Tags</target>
+        <target state="translated">Značky</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Templates">
         <source>Templates</source>
-        <target state="new">Templates</target>
+        <target state="translated">Šablony</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Version">
         <source>Package version</source>
-        <target state="new">Package version</target>
+        <target state="translated">Verze balíčku</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_UnableToLoadResorce">
         <source>Could not parse NuGet source '{0}', so it was discarded</source>
-        <target state="translated">Nepovedlo se parsovat zdrojový '{0}' NuGet, proto se zahodil.</target>
+        <target state="translated">Nepovedlo se parsovat zdroj NuGet „{0}“, takže se zahodil.</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_UnableToLoadResorces">
         <source>Failed to load NuGet sources configured for the folder {0}</source>
-        <target state="new">Failed to load NuGet sources configured for the folder {0}</target>
+        <target state="translated">Nepovedlo se načíst zdroje NuGet nakonfigurované pro složku {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="DisplaysHelp">
@@ -562,12 +562,14 @@ The header is followed by the list of parameters and their errors (might be seve
       To search for the template packages on NuGet.org, run:
         dotnet new search --package {0}
     </source>
-        <target state="translated">Nenašly se žádné balíčky šablon odpovídající těmto {0}.
+        <target state="translated">
+      Nebyly nalezeny žádné odpovídající balíčky šablon: {0}.
       
-Pokud chcete zobrazit seznam nainstalovaných balíčků šablon, spusťte:
+      Chcete-li vypsat nainstalované balíčky šablon, spusťte příkaz:
         dotnet new uninstall
-      Pokud chcete vyhledat balíčky šablon na NuGet.org, spusťte:
-        dotnet new search --package {0}    </target>
+      Chcete-li vyhledat balíčky šablon v NuGet.org, spusťte příkaz:
+        dotnet new search --package {0}
+    </target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_Info_NoMatchingTemplates">
@@ -825,12 +827,12 @@ Pokud chcete zobrazit seznam nainstalovaných balíčků šablon, spusťte:
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_ArgumentNotConfigured">
         <source>Post action argument '{0}' is mandatory, but not configured.</source>
-        <target state="translated">Argument akce post '{0}' je povinný, ale není nakonfigurovaný.</target>
+        <target state="translated">Argument „{0}“ po akci je povinný, ale není nakonfigurovaný.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_MultipleJsonFiles">
         <source>More than one file found that matches '{0}'.</source>
-        <target state="translated">Našel se víc než jeden soubor, který odpovídá '{0}'.</target>
+        <target state="translated">Našel se více než jeden soubor, který odpovídá „{0}“.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_NoJsonFile">
@@ -840,12 +842,12 @@ Pokud chcete zobrazit seznam nainstalovaných balíčků šablon, spusťte:
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_ParentPropertyPathInvalid">
         <source>Parent property path '{0}' could not be traversed.</source>
-        <target state="translated">Cestu k nadřazené vlastnosti '{0}' nelze procházet.</target>
+        <target state="translated">Cestu k nadřazené vlastnosti „{0}“ nelze projít.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Succeeded">
         <source>Successfully modified {0}.</source>
-        <target state="translated">{0} se úspěšně změnil.</target>
+        <target state="translated">{0} byl úspěšně změněn.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
@@ -981,7 +983,7 @@ Pokud chcete zobrazit seznam nainstalovaných balíčků šablon, spusťte:
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Download_Error_VulnerablePackage">
         <source>Failed to install {0}, due to detected vulnerabilities:</source>
-        <target state="translated">Nepovedlo se nainstalovat {0} kvůli zjištěným ohrožením zabezpečení:</target>
+        <target state="translated">Instalace {0} se nezdařila z důvodu zjištěných ohrožení zabezpečení:</target>
         <note>{0} - template package name.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Download_VulnerablePackage">
@@ -1026,7 +1028,7 @@ Pokud chcete zobrazit seznam nainstalovaných balíčků šablon, spusťte:
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Error_VulnerablePackageTip">
         <source>In order to install this package, run:</source>
-        <target state="translated">Chcete-li nainstalovat tento balíček, spusťte:</target>
+        <target state="translated">Pokud chcete nainstalovat tento balíček, spusťte:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_OverrideNotice">
@@ -1086,7 +1088,7 @@ Pokud chcete zobrazit seznam nainstalovaných balíčků šablon, spusťte:
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_UpdateCheck_Error_VulnerablePackage">
         <source>The package {0} contains vulnerabilities:</source>
-        <target state="translated">{0} balíčku obsahuje ohrožení zabezpečení:</target>
+        <target state="translated">Balíček {0} obsahuje ohrožení zabezpečení:</target>
         <note>{0} - template package name.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_GenericError">
@@ -1116,7 +1118,7 @@ Pokud chcete zobrazit seznam nainstalovaných balíčků šablon, spusťte:
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_VulnerablePackageTip">
         <source>In order to update this package, run:</source>
-        <target state="translated">Chcete-li aktualizovat tento balíček, spusťte:</target>
+        <target state="translated">Pokud chcete tento balíček aktualizovat, spusťte:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_AllPackagesAreUpToDate">
@@ -1156,22 +1158,22 @@ Pokud chcete zobrazit seznam nainstalovaných balíčků šablon, spusťte:
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Critical">
         <source>Critical</source>
-        <target state="new">Critical</target>
+        <target state="translated">Kritická</target>
         <note>represents nuget api severity of level 3.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_High">
         <source>High</source>
-        <target state="new">High</target>
+        <target state="translated">Vysoké</target>
         <note>represents nuget api severity of level 2.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Low">
         <source>Low</source>
-        <target state="new">Low</target>
+        <target state="translated">Nízké</target>
         <note>represents nuget api severity of level 0.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Moderate">
         <source>Moderate</source>
-        <target state="new">Moderate</target>
+        <target state="translated">Střední</target>
         <note>represents nuget api severity of level 1.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled">
