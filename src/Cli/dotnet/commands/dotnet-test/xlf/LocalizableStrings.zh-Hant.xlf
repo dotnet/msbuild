@@ -29,17 +29,17 @@ The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downlo
 To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
 
 Implies --blame.</source>
-        <target state="new">Runs the tests in blame mode and collects a crash dump when the test host exits unexpectedly. This option depends on the version of .NET used, the type of error, and the operating system.
+        <target state="translated">在歸責模式中執行測試，並在測試主機未預期地結束時收集損毀傾印。此選項取決於使用的 .NET 版本、錯誤類型和作業系統。
   
-For exceptions in managed code, a dump will be automatically collected on .NET 5.0 and later versions. It will generate a dump for testhost or any child process that also ran on .NET 5.0 and crashed. Crashes in native code will not generate a dump. This option works on Windows, macOS, and Linux.
+對於受控程式碼中的例外，將自動在 .NET 5.0 及更新版本上收集傾印。其會為 testhost 或任何也在 .NET 5.0 上執行且毀損的子處理序產生傾印。原生程式碼中的當機將不會產生傾印。此選項適用於 Windows、macOS、和 Linux。
 
-Crash dumps in native code, or when targetting .NET Framework, or .NET Core 3.1 and earlier versions, can only be collected on Windows, by using Procdump. A directory that contains procdump.exe and procdump64.exe must be in the PATH or PROCDUMP_PATH environment variable.
+原生程式碼中的損毀傾印，或以 .NET Framework 或 .NET Core 3.1 和較舊版本為目標時，則只能在 Windows 上使用 Procdump 收集。包含 procdump.exe 和 procdump64.exe 的目錄必須位在 PATH 或 PROCDUMP_PATH 環境變數中。
 
-The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downloads/procdump
+您可以在這裡下載工具: https://docs.microsoft.com/sysinternals/downloads/procdump
   
-To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
+若要從執行 .NET 5.0 或更新版本的原生應用程式收集損毀傾印，可透過將 VSTEST_DUMP_FORCEPROCDUMP 環境變數設定為 1，以強制使用 Procdump。
 
-Implies --blame.</target>
+隱含 --blame。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
@@ -62,10 +62,10 @@ Implies --blame.</target>
 The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
 When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
 For MSTest before 2.2.4, the timeout is used for all testcases.</source>
-        <target state="new">Per-test timeout, after which hang dump is triggered and the testhost process is terminated. Default is 1h.
-The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
-When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
-For MSTest before 2.2.4, the timeout is used for all testcases.</target>
+        <target state="translated">每個測試的逾時，在此之後將會觸發停止回應傾印，並終止 testhost 處理序。預設值為 1 小時。
+使用下列格式來指定逾時值: 1.5 h/90m/5400s/5400000ms。若未使用單位 (例如 5400000)，將會假設該值的單位為毫秒。
+當與資料驅動型測試一起使用時，逾時行為取決於使用的測試介面卡。對於 xUnit、NUnit 與 MSTest 2.2.4 以上版本，逾時會在每次執行測試案例之後更新。
+對於 MSTest 2.2.4 之前的版本，該逾時會用於所有測試案例。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableDescription">
@@ -269,18 +269,18 @@ Example:
   Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
   dotnet test --blame-hang-timeout 20min
 </source>
-        <target state="new">Runs the tests in blame mode. This option is helpful in isolating problematic tests that cause the test host to crash or hang, but it does not create a memory dump by default. 
+        <target state="translated">在歸責模式中執行測試。此選項有助於找出導致測試主機損毀或停止回應的問題測試，但預設不會建立記憶體傾印。
 
-When a crash is detected, it creates an sequence file in TestResults/guid/guid_Sequence.xml that captures the order of tests that were run before the crash.
+偵測到損毀時，其會在 TestResults/guid/guid_Sequence.xml 中建立順序檔案，擷取在損毀前所執行測試的順序。
 
-Based on the additional settings, hang dump or crash dump can also be collected.
+依據其他設定，也可以收集損毀或停止回應的傾印。
 
-Example: 
-  Timeout the test run when test takes more than the default timeout of 1 hour, and collect crash dump when the test host exits unexpectedly. 
-  (Crash dumps require additional setup, see below.)
+範例: 
+  當測試進行時間超過預設的 1 小時逾時讓測試逾時，並在測試主機未預期地結束時收集損毀傾印。
+  (損毀傾印需要其他的設定，請參閱以下)。
   dotnet test --blame-hang --blame-crash
-Example: 
-  Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
+範例: 
+  當測試進行時間超過 20 分鐘時讓測試逾時，並收集停止回應傾印。
   dotnet test --blame-hang-timeout 20min
 </target>
         <note />

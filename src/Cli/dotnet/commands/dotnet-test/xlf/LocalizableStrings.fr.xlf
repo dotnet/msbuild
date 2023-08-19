@@ -29,17 +29,17 @@ The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downlo
 To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
 
 Implies --blame.</source>
-        <target state="new">Runs the tests in blame mode and collects a crash dump when the test host exits unexpectedly. This option depends on the version of .NET used, the type of error, and the operating system.
+        <target state="translated">Exécute les tests en mode blame (responsabilité) et collecte un vidage sur incident lorsque l’hôte de test se ferme de manière inattendue. Cette option dépend de la version de .NET utilisée, du type d’erreur et du système d’exploitation.
   
-For exceptions in managed code, a dump will be automatically collected on .NET 5.0 and later versions. It will generate a dump for testhost or any child process that also ran on .NET 5.0 and crashed. Crashes in native code will not generate a dump. This option works on Windows, macOS, and Linux.
+Pour les exceptions dans le code managé, une copie de sauvegarde est automatiquement collectée sur .NET 5.0 et versions ultérieures. Cela génère une sauvegarde pour l’hôte de test ou tout processus enfant qui s’est également exécuté sur .NET 5.0 et s’est arrêté. Les blocages dans le code natif ne génèrent pas de vidage. Cette option fonctionne sur Windows, macOS et Linux.
 
-Crash dumps in native code, or when targetting .NET Framework, or .NET Core 3.1 and earlier versions, can only be collected on Windows, by using Procdump. A directory that contains procdump.exe and procdump64.exe must be in the PATH or PROCDUMP_PATH environment variable.
+Les vidages sur incident dans du code natif, ou lors du ciblage de .NET Framework, ou .NET Core 3.1 et versions antérieures, peuvent uniquement être collectés sur Windows, à l’aide de Procdump. Un répertoire qui contient procdump.exe et procdump64.exe doit se trouver dans la variable d’environnement PATH ou PROCDUMP_PATH.
 
-The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downloads/procdump
-  
-To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
+Les outils peuvent être téléchargés ici : https://docs.microsoft.com/sysinternals/downloads/procdump
+ 
+Pour collecter un vidage sur incident à partir d’une application native exécutée sur .NET 5.0 ou version ultérieure, l’utilisation de Procdump peut être forcée en définissant la variable d’environnement VSTEST_DUMP_FORCEPROCDUMP sur 1.
 
-Implies --blame.</target>
+Implique --blame.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
@@ -62,10 +62,10 @@ Implies --blame.</target>
 The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
 When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
 For MSTest before 2.2.4, the timeout is used for all testcases.</source>
-        <target state="new">Per-test timeout, after which hang dump is triggered and the testhost process is terminated. Default is 1h.
-The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
-When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
-For MSTest before 2.2.4, the timeout is used for all testcases.</target>
+        <target state="translated">Délai d’expiration par test, après celui-ci, le vidage de blocage est déclenché et le processus hôte de test est terminé. La valeur par défaut est 1h.
+La valeur du délai d’attente est spécifiée au format suivant : 1,5 h/ 90 m / 5 400 / 54 000 000 ms. Lorsqu’aucune unité n’est utilisée (par exemple, 5 400 000), la valeur est supposée être en millisecondes.
+Lorsqu’elle est utilisée avec des tests pilotés par les données, le comportement du délai d’attente dépend de l’adaptateur de test utilisé. Pour xUnit, NUnit et MSTest 2.2.4+ le délai d’expiration est renouvelé après chaque cas de test,
+Pour MSTest avant la version 2.2.4, le délai d’expiration est utilisé pour tous les cas de test.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableDescription">
@@ -269,18 +269,18 @@ Example:
   Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
   dotnet test --blame-hang-timeout 20min
 </source>
-        <target state="new">Runs the tests in blame mode. This option is helpful in isolating problematic tests that cause the test host to crash or hang, but it does not create a memory dump by default. 
+        <target state="translated">Exécute les tests en mode blame (responsabilité). Cette option permet d'isoler les tests problématiques à l'origine d'un plantage ou d'un blocage sur l'hôte de test, mais cela ne crée pas de vidage de mémoire par défaut. 
 
-When a crash is detected, it creates an sequence file in TestResults/guid/guid_Sequence.xml that captures the order of tests that were run before the crash.
+Quand un plantage est détecté, un fichier de séquence est créé dans TestResults/guid/guid_Sequence.xml pour capturer l'ordre des tests exécutés avant le plantage.
 
-Based on the additional settings, hang dump or crash dump can also be collected.
+En fonction de paramètres supplémentaires, des données de vidage sur blocage ou de vidage sur plantage peuvent également être collectées.
 
-Example: 
-  Timeout the test run when test takes more than the default timeout of 1 hour, and collect crash dump when the test host exits unexpectedly. 
-  (Crash dumps require additional setup, see below.)
+Exemple : 
+  Définissez le délai d'expiration de la série de tests quand les tests prennent plus de temps que le délai par défaut (1 heure), et collectez les données de vidage sur plantage quand l'hôte de test se ferme de manière inattendue. 
+  (Les vidages sur plantage nécessitent une configuration supplémentaire, comme vous pouvez le voir ci-dessous.)
   dotnet test --blame-hang --blame-crash
-Example: 
-  Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
+Exemple : 
+  Définissez le délai d'expiration de la série de tests quand un test prend plus de 20 minutes, et collectez les données de vidage sur blocage. 
   dotnet test --blame-hang-timeout 20min
 </target>
         <note />
