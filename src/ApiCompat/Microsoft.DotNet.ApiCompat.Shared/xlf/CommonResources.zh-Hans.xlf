@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="NoBreakingChangesFound">
         <source>APICompat ran successfully without finding any breaking changes.</source>
-        <target state="translated">APICompat 已成功运行，但未找到任何重大更改。</target>
+        <target state="translated">APICompat 成功运行，但未找到任何中断性变更。</target>
         <note />
       </trans-unit>
       <trans-unit id="SuppressionsFileNotSpecified">
