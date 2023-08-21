@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
         <source>Uninstalling workload pack {0} version {1}...</source>
-        <target state="needs-review-translation">正在卸载工作负载包 {0} 版本 {1}…</target>
+        <target state="translated">正在卸载工作负载包 {0} 版本 {1}…</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadToCacheOptionArgumentName">
@@ -44,7 +44,7 @@
       </trans-unit>
       <trans-unit id="DownloadingPackToCacheMessage">
         <source>Downloading pack {0} version {1} to offline cache {2}...</source>
-        <target state="needs-review-translation">正在将包 {0} 版本 {1} 下载到脱机缓存 {2}...</target>
+        <target state="translated">正在将包 {0} 版本 {1} 下载到脱机缓存 {2}...</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedSingleManifest">
@@ -119,7 +119,7 @@
       </trans-unit>
       <trans-unit id="InstallingWorkloadManifest">
         <source>Installing workload manifest {0} version {1}...</source>
-        <target state="needs-review-translation">正在安装工作负载清单 {0} 版本 {1}…</target>
+        <target state="translated">正在安装工作负载清单 {0} 版本 {1}…</target>
         <note />
       </trans-unit>
       <trans-unit id="InsufficientPrivilegeToStartServer">
@@ -199,7 +199,7 @@
       </trans-unit>
       <trans-unit id="PendingReboot">
         <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
-        <target state="needs-review-translation">计算机有挂起的重新启动。安装将继续，但可能需要重新启动。</target>
+        <target state="translated">计算机有挂起的重新启动。安装将继续，但可能需要重新启动。</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">

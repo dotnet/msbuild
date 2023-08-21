@@ -1,19 +1,19 @@
-{
+﻿{
   "author": "Microsoft",
   "name": "Konsol Uygulaması",
   "description": "Windows, Linux ve macOS'de .NET üzerinde çalışabilen bir komut satırı uygulaması oluşturma projesi",
   "symbols/TargetFrameworkOverride/description": "Hedef çerçeveyi geçersiz kılar",
   "symbols/TargetFrameworkOverride/displayName": "Hedef çerçeveyi geçersiz kılma",
   "symbols/Framework/description": "Projenin hedef çerçevesi.",
-  "symbols/Framework/choices/net8.0/description": "Target net8.0",
+  "symbols/Framework/choices/net8.0/description": "Hedef net8.0",
   "symbols/Framework/choices/net8.0/displayName": ".NET 8.0",
   "symbols/Framework/displayName": "Çerçeve",
   "symbols/langVersion/description": "Oluşturulan proje dosyasında LangVersion özelliğini ayarlar",
   "symbols/langVersion/displayName": "Dil sürümü",
   "symbols/skipRestore/description": "Belirtilirse, oluşturma sırasında projenin otomatik geri yüklenmesini atlar.",
   "symbols/skipRestore/displayName": "Geri yüklemeyi atla",
-  "symbols/NativeAot/description": "Whether to enable the project for publishing as native AOT.",
-  "symbols/NativeAot/displayName": "Enable _native AOT publish",
+  "symbols/NativeAot/description": "Projenin native AOT olarak yayımlama için etkinleştirilip etkinleştirilmeyeceğini belirtir.",
+  "symbols/NativeAot/displayName": "_native AOT yayımlamayı etkinleştir",
   "postActions/restore/description": "Bu projenin gerektirdiği NuGet paketlerini geri yükleyin.",
   "postActions/restore/manualInstructions/default/text": "'dotnet restore' çalıştır",
   "postActions/open-file/description": "Düzenleyicide Program.vb’yi açar"

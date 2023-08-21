@@ -23,6 +23,9 @@ Copyright (c) .NET Foundation. All rights reserved.
        Configuration-specific PropertyGroup), so in that case we won't append to it by default. -->
   <PropertyGroup Condition="'$(UsingNETSdkDefaults)' == 'true'">
     <AppendTargetFrameworkToOutputPath Condition="'$(AppendTargetFrameworkToOutputPath)' == ''">true</AppendTargetFrameworkToOutputPath>
+    <AppendPlatformToOutputPath Condition="'$(AppendPlatformToOutputPath)' == '' and '$(PlatformName)' == 'AnyCPU'">false</AppendPlatformToOutputPath>
+    <AppendPlatformToOutputPath Condition="'$(AppendPlatformToOutputPath)' == '' and '$(PlatformName)' != 'AnyCPU'">true</AppendPlatformToOutputPath>
+    <_PlatformToAppendToOutputPath Condition="'$(AppendPlatformToOutputPath)' == 'true'">$(PlatformName)\</_PlatformToAppendToOutputPath>
   </PropertyGroup>
 
   <!-- NOTE: If we want to default UseArtifactsOutput to true when targeting a given version of .NET or higher, this is where we would do it.
@@ -93,8 +96,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(UseArtifactsOutput)' != 'true'">
     <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">bin\</BaseOutputPath>
     <BaseOutputPath Condition="!HasTrailingSlash('$(BaseOutputPath)')">$(BaseOutputPath)\</BaseOutputPath>
-    <OutputPath Condition="'$(OutputPath)' == '' and '$(PlatformName)' == 'AnyCPU'">$(BaseOutputPath)$(Configuration)\</OutputPath>
-    <OutputPath Condition="'$(OutputPath)' == '' and '$(PlatformName)' != 'AnyCPU'">$(BaseOutputPath)$(PlatformName)\$(Configuration)\</OutputPath>
+    <OutputPath Condition="'$(OutputPath)' == ''">$(BaseOutputPath)$(_PlatformToAppendToOutputPath)$(Configuration)\</OutputPath>
     <OutputPath Condition="!HasTrailingSlash('$(OutputPath)')">$(OutputPath)\</OutputPath>
   </PropertyGroup>
 
@@ -103,8 +105,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(UseArtifactsIntermediateOutput)' != 'true'">
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">obj\</BaseIntermediateOutputPath>
     <BaseIntermediateOutputPath Condition="!HasTrailingSlash('$(BaseIntermediateOutputPath)')">$(BaseIntermediateOutputPath)\</BaseIntermediateOutputPath>
-    <IntermediateOutputPath Condition=" $(IntermediateOutputPath) == '' and '$(PlatformName)' == 'AnyCPU' ">$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
-    <IntermediateOutputPath Condition=" $(IntermediateOutputPath) == '' and '$(PlatformName)' != 'AnyCPU' ">$(BaseIntermediateOutputPath)$(PlatformName)\$(Configuration)\</IntermediateOutputPath>
+    <IntermediateOutputPath Condition=" $(IntermediateOutputPath) == '' ">$(BaseIntermediateOutputPath)$(_PlatformToAppendToOutputPath)$(Configuration)\</IntermediateOutputPath>
     <IntermediateOutputPath Condition="!HasTrailingSlash('$(IntermediateOutputPath)')">$(IntermediateOutputPath)\</IntermediateOutputPath>
   </PropertyGroup>
 

@@ -56,7 +56,7 @@ The default is to publish a framework-dependent application.</source>
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default is 'Release' for NET 8.0 projects and above, but 'Debug' for older projects.</source>
-        <target state="needs-review-translation">Конфигурация для публикации. По умолчанию используется Debug. Используйте свойство PublishRelease, чтобы сделать Release стандартом для этой команды.</target>
+        <target state="translated">Конфигурация для публикации. Значение по умолчанию — "Release" для проектов NET 8.0 и более поздней версии, но "Debug" для более старых проектов.</target>
         <note />
       </trans-unit>
     </body>

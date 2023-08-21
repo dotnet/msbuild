@@ -4,6 +4,6 @@
   "description": "Un archivo Directory.Build.props vacío que se puede usar para especificar propiedades de MSBuild para toda una carpeta",
   "symbols/inherit/displayName": "Heredar",
   "symbols/inherit/description": "Si es true, agrega una importación para el archivo Directory.Build.props más cercano en la jerarquía de directorios del sistema de archivos. Directory.Build.props no hereda de forma predeterminada, por lo que esto le permite crear un conjunto de personalizaciones carpeta por carpeta.",
-  "symbols/useArtifacts/displayName": "Use Artifacts Output Layout",
-  "symbols/useArtifacts/description": "If true, adds a property to enable the artifacts output layout. This is a common pattern for projects that produce build artifacts, such as NuGet packages, that are placed in a common folder."
+  "symbols/useArtifacts/displayName": "Usar diseño de salida de artefactos",
+  "symbols/useArtifacts/description": "Si es true, agrega una propiedad para habilitar el diseño de salida de los artefactos. Este es un patrón común para los proyectos que generan artefactos de compilación, como paquetes NuGet, que se colocan en una carpeta común."
 }

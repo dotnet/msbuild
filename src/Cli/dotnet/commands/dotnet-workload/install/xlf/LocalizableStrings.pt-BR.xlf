@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
         <source>Uninstalling workload pack {0} version {1}...</source>
-        <target state="needs-review-translation">Desinstalando pacote de carga de trabalho {0} versão {1}...</target>
+        <target state="translated">Desinstalando o pacote de carga de trabalho {0} versão {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadToCacheOptionArgumentName">
@@ -44,7 +44,7 @@
       </trans-unit>
       <trans-unit id="DownloadingPackToCacheMessage">
         <source>Downloading pack {0} version {1} to offline cache {2}...</source>
-        <target state="needs-review-translation">Baixando pacote {0} versão {1} para o cache offline {2}...</target>
+        <target state="translated">Baixando o pacote {0} versão {1} para o cache offline {2}...</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedSingleManifest">
@@ -119,7 +119,7 @@
       </trans-unit>
       <trans-unit id="InstallingWorkloadManifest">
         <source>Installing workload manifest {0} version {1}...</source>
-        <target state="needs-review-translation">Instalando manifesto de carga de trabalho {0} versão {1}...</target>
+        <target state="translated">Instalando o manifesto da carga de trabalho {0} versão {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="InsufficientPrivilegeToStartServer">
@@ -199,7 +199,7 @@
       </trans-unit>
       <trans-unit id="PendingReboot">
         <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
-        <target state="needs-review-translation">A máquina tem uma reinicialização pendente. A instalação vai continuar, mas talvez seja necessário reiniciar.</target>
+        <target state="translated">A máquina tem uma reinicialização pendente. A operação de carga de trabalho continuará, mas pode ser necessário reiniciar.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">

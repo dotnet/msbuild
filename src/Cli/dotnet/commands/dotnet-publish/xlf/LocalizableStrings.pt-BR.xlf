@@ -56,7 +56,7 @@ O padrão é publicar uma aplicação dependente de framework.</target>
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default is 'Release' for NET 8.0 projects and above, but 'Debug' for older projects.</source>
-        <target state="needs-review-translation">A configuração para a qual publicar. O padrão é 'Depurar'. Use a propriedade `PublishRelease` para tornar 'Release' o padrão para este comando.</target>
+        <target state="translated">A configuração para a qual publicar. O padrão é 'Release' para projetos NET 8.0 e superiores, mas 'Debug' para projetos mais antigos.</target>
         <note />
       </trans-unit>
     </body>

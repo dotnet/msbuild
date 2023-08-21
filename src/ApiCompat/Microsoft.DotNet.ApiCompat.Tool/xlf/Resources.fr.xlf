@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="BreakingChangesFoundRegenerateSuppressionFileCommandHelp">
         <source>API breaking changes found. If those are intentional, the APICompat suppression file can be updated by specifying the '--generate-suppression-file' parameter.</source>
-        <target state="new">API breaking changes found. If those are intentional, the APICompat suppression file can be updated by specifying the '--generate-suppression-file' parameter.</target>
+        <target state="translated">Modifications avec rupture de l'API trouvées. Si ceux-ci sont intentionnels, le fichier de suppression APICompat peut être mis à jour en spécifiant le paramètre '--generate-suppression-file'.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnnecessarySuppressionsFoundRegenerateSuppressionFileCommandHelp">
         <source>Unnecessary suppressions found. The APICompat suppression file can be updated by specifying the '--generate-suppression-file' parameter.</source>
-        <target state="new">Unnecessary suppressions found. The APICompat suppression file can be updated by specifying the '--generate-suppression-file' parameter.</target>
+        <target state="translated">Suppressions inutiles trouvées. Le fichier de suppression APICompat peut être mis à jour en spécifiant le paramètre '--generate-suppression-file'.</target>
         <note />
       </trans-unit>
     </body>

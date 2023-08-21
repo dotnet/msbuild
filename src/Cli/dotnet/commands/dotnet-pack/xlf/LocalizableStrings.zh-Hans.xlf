@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for building the package. The default is 'Release'.</source>
-        <target state="needs-review-translation">用于生成包的配置。默认值为 “Debug”。使用 `PackRelease` 属性将 “Release” 作为此命令的默认值。</target>
+        <target state="translated">用于生成包的配置。默认值为 "Release"。</target>
         <note />
       </trans-unit>
     </body>

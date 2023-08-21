@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for building the package. The default is 'Release'.</source>
-        <target state="needs-review-translation">Konfigurace, která se má použít k sestavení balíčku. Výchozí hodnota je Debug. Pomocí vlastnosti PackRelease nastavte release jako výchozí pro tento příkaz.</target>
+        <target state="translated">Konfigurace, která se má použít k sestavení balíčku. Výchozí hodnota je Release.</target>
         <note />
       </trans-unit>
     </body>

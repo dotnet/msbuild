@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
         <source>Uninstalling workload pack {0} version {1}...</source>
-        <target state="needs-review-translation">Идет удаление пакета рабочих нагрузок {0} версии {1}...</target>
+        <target state="translated">Идет удаление пакета рабочих нагрузок {0} версии {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadToCacheOptionArgumentName">
@@ -44,7 +44,7 @@
       </trans-unit>
       <trans-unit id="DownloadingPackToCacheMessage">
         <source>Downloading pack {0} version {1} to offline cache {2}...</source>
-        <target state="needs-review-translation">Загрузка пакета {0} версии {1} в автономный кэш {2}...</target>
+        <target state="translated">Загрузка пакета {0} версии {1} в автономный кэш {2}...</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedSingleManifest">
@@ -119,7 +119,7 @@
       </trans-unit>
       <trans-unit id="InstallingWorkloadManifest">
         <source>Installing workload manifest {0} version {1}...</source>
-        <target state="needs-review-translation">Установка манифеста рабочей нагрузки {0} версии {1}...</target>
+        <target state="translated">Установка манифеста рабочей нагрузки {0} версии {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="InsufficientPrivilegeToStartServer">
@@ -199,7 +199,7 @@
       </trans-unit>
       <trans-unit id="PendingReboot">
         <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
-        <target state="needs-review-translation">Ожидается перезагрузка компьютера. Установка будет продолжена, но, возможно, потребуется перезагрузить компьютер.</target>
+        <target state="translated">Ожидается перезагрузка компьютера. Операция рабочей нагрузки будет продолжена, но может потребоваться перезагрузить компьютер.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">

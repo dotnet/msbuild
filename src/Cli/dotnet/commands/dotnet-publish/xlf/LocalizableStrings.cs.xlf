@@ -56,7 +56,7 @@ Ve výchozím nastavení je publikována aplikace závislá na architektuře.</t
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default is 'Release' for NET 8.0 projects and above, but 'Debug' for older projects.</source>
-        <target state="needs-review-translation">Konfigurace, pro kterou se má publikovat. Výchozí hodnota je Debug. Pomocí vlastnosti PublishRelease nastavte release jako výchozí pro tento příkaz.</target>
+        <target state="translated">Konfigurace, pro kterou se má publikovat. Pro projekty NET 8.0 a vyšší je výchozí hodnota Release, ale pro starší projekty je hodnota Debug.</target>
         <note />
       </trans-unit>
     </body>

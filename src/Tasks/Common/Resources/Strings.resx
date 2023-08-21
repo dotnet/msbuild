@@ -946,7 +946,7 @@ You may need to build the project on another operating system or architecture, o
   </data>
   <data name="Net8NotCompatibleWithDev177" xml:space="preserve">
     <value>NETSDK1213: Targeting .NET 8.0 or higher in Visual Studio 2022 17.7 is not supported.</value>
-    <comment>{StrBegin="NETSDK1192: "}</comment>
+    <comment>{StrBegin="NETSDK1213: "}</comment>
   </data>
   <!-- The latest message added is Net8NotCompatibleWithDev177. Please update this value with each PR to catch parallel PRs both adding a new message -->
 </root>

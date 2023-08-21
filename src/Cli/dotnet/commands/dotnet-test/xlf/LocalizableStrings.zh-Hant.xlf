@@ -29,16 +29,22 @@ The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downlo
 To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
 
 Implies --blame.</source>
-        <target state="needs-review-translation">當測試主機意外結束時，在改動者模式中執行測試，並允許收集損毀傾印。
-目前只有 Windows 支援此選項，而且必須在 PATH 中提供 procdump.exe 與 procdump64.exe。
-也可以設定 PROCDUMP_PATH 環境變數，並指向包含 procdump.exe 與 procdump64.exe 的目錄。
-這些工具可從下列網址下載: https://docs.microsoft.com/sysinternals/downloads/procdump 
-表示 --blame。</target>
+        <target state="translated">在歸責模式中執行測試，並在測試主機未預期地結束時收集損毀傾印。此選項取決於使用的 .NET 版本、錯誤類型和作業系統。
+  
+對於受控程式碼中的例外，將自動在 .NET 5.0 及更新版本上收集傾印。其會為 testhost 或任何也在 .NET 5.0 上執行且毀損的子處理序產生傾印。原生程式碼中的當機將不會產生傾印。此選項適用於 Windows、macOS、和 Linux。
+
+原生程式碼中的損毀傾印，或以 .NET Framework 或 .NET Core 3.1 和較舊版本為目標時，則只能在 Windows 上使用 Procdump 收集。包含 procdump.exe 和 procdump64.exe 的目錄必須位在 PATH 或 PROCDUMP_PATH 環境變數中。
+
+您可以在這裡下載工具: https://docs.microsoft.com/sysinternals/downloads/procdump
+  
+若要從執行 .NET 5.0 或更新版本的原生應用程式收集損毀傾印，可透過將 VSTEST_DUMP_FORCEPROCDUMP 環境變數設定為 1，以強制使用 Procdump。
+
+隱含 --blame。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
         <source>The type of crash dump to be collected. Supported values are full (default) and mini. Implies --blame-crash.</source>
-        <target state="needs-review-translation">要收集的損毀傾印類型。Implies --blame-crash。</target>
+        <target state="translated">要收集的損毀傾印類型。支援的值為 full (預設值) 和 mini。表示 --blame-crash。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangDescription">
@@ -48,7 +54,7 @@ Implies --blame.</source>
       </trans-unit>
       <trans-unit id="CmdBlameHangDumpTypeDescription">
         <source>The type of crash dump to be collected. The supported values are full (default), mini, and none. When 'none' is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</source>
-        <target state="needs-review-translation">要收集之損毀傾印的類型。若使用 [無]，測試主機將會在逾時時終止，但不會收集任何傾印。Implies --blame-hang。</target>
+        <target state="translated">要收集之損毀傾印的類型。支援的值為完整的 full (預設值)，mini 和 none。若使用「none」，則測試主機將會在逾時時終止，不會收集任何傾印。表示 --blame-hang。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangTimeoutDescription">
@@ -56,11 +62,10 @@ Implies --blame.</source>
 The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
 When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
 For MSTest before 2.2.4, the timeout is used for all testcases.</source>
-        <target state="needs-review-translation">每個測試的逾時，在此之後將會觸發停止回應傾印，而且測試主機處理序將會終止。
-指定此逾時值時，請使用下列格式: 1.5 h/90m/5400s/5400000ms。若未使用單位 (例如 5400000)，將會假設該值的單位為毫秒。
-當與資料驅動型測試並用時，逾時行為取決於使用的測試配接器。對於 xUnit 與 NUnit，此逾時值會在每次執行測試案例之後更新。
-對於 MSTest，此逾時值會套用到所有測試案例。
-目前只有安裝有 netcoreapp 2.1 及更新版本的 Windows 支援此選項。此外安裝有 netcoreapp 3.1 及更新版本的 Linux 也支援此選項。不支援 OSX 與 UWP。</target>
+        <target state="translated">每個測試的逾時，在此之後將會觸發停止回應傾印，並終止 testhost 處理序。預設值為 1 小時。
+使用下列格式來指定逾時值: 1.5 h/90m/5400s/5400000ms。若未使用單位 (例如 5400000)，將會假設該值的單位為毫秒。
+當與資料驅動型測試一起使用時，逾時行為取決於使用的測試介面卡。對於 xUnit、NUnit 與 MSTest 2.2.4 以上版本，逾時會在每次執行測試案例之後更新。
+對於 MSTest 2.2.4 之前的版本，該逾時會用於所有測試案例。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableDescription">
@@ -264,15 +269,18 @@ Example:
   Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
   dotnet test --blame-hang-timeout 20min
 </source>
-        <target state="needs-review-translation">在改動者模式中執行測試。此選項可用於找出導致測試主機損毀或停止回應的問題測試。
-當偵測到損毀時，其會在 TestResults/guid/guid_Sequence.xml 中建立所擷取在損毀前，測試之執行順序的順序檔案。
-依據其他設定，也可收集損毀或停止回應的傾印。
+        <target state="translated">在歸責模式中執行測試。此選項有助於找出導致測試主機損毀或停止回應的問題測試，但預設不會建立記憶體傾印。
+
+偵測到損毀時，其會在 TestResults/guid/guid_Sequence.xml 中建立順序檔案，擷取在損毀前所執行測試的順序。
+
+依據其他設定，也可以收集損毀或停止回應的傾印。
+
 範例: 
-  當測試進行時間超過預設的 1 小時時，將測試逾時，並在測試主機未預期地結束時收集損毀傾印
-  (損毀傾印需要其他的設定，請參閱下文)。
+  當測試進行時間超過預設的 1 小時逾時讓測試逾時，並在測試主機未預期地結束時收集損毀傾印。
+  (損毀傾印需要其他的設定，請參閱以下)。
   dotnet test --blame-hang --blame-crash
 範例: 
-  當測試進行時間超過 20 分鐘時，將測試逾時，並收集停止回應傾印。
+  當測試進行時間超過 20 分鐘時讓測試逾時，並收集停止回應傾印。
   dotnet test --blame-hang-timeout 20min
 </target>
         <note />

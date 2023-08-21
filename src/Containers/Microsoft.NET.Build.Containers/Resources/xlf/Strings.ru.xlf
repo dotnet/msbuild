@@ -14,17 +14,17 @@
       </trans-unit>
       <trans-unit id="AppCommandArgsSetNoAppCommand">
         <source>CONTAINER2025: ContainerAppCommandArgs are provided without specifying a ContainerAppCommand.</source>
-        <target state="new">CONTAINER2025: ContainerAppCommandArgs are provided without specifying a ContainerAppCommand.</target>
+        <target state="translated">CONTAINER2025: ContainerAppCommandArgs предоставлены без указания ContainerAppCommand.</target>
         <note>{StrBegin="CONTAINER2025: "}</note>
       </trans-unit>
       <trans-unit id="AppCommandSetNotUsed">
         <source>CONTAINER2026: ContainerAppCommand and ContainerAppCommandArgs must be empty when ContainerAppCommandInstruction is '{0}'.</source>
-        <target state="new">CONTAINER2026: ContainerAppCommand and ContainerAppCommandArgs must be empty when ContainerAppCommandInstruction is '{0}'.</target>
+        <target state="translated">CONTAINER2026: ContainerAppCommand и ContainerAppCommandArgs должны быть пустыми, если ContainerAppCommandInstruction — "{0}".</target>
         <note>{StrBegin="CONTAINER2026: "}</note>
       </trans-unit>
       <trans-unit id="BaseEntrypointOverwritten">
         <source>CONTAINER2022: The base image has an entrypoint that will be overwritten to start the application. Set ContainerAppCommandInstruction to 'Entrypoint' if this is desired. To preserve the base image entrypoint, set ContainerAppCommandInstruction to 'DefaultArgs'.</source>
-        <target state="new">CONTAINER2022: The base image has an entrypoint that will be overwritten to start the application. Set ContainerAppCommandInstruction to 'Entrypoint' if this is desired. To preserve the base image entrypoint, set ContainerAppCommandInstruction to 'DefaultArgs'.</target>
+        <target state="translated">CONTAINER2022: базовый образ содержит точку входа, которая будет перезаписана для запуска приложения. При необходимости настройте для ContainerAppCommandInstruction значение "Entrypoint". Чтобы сохранить точку входа базового образа, настройте для ContainerAppCommandInstruction значение "DefaultArgs".</target>
         <note>{StrBegin="CONTAINER2022: "}</note>
       </trans-unit>
       <trans-unit id="BaseImageNameParsingFailed">
@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="BaseImageNameRegistryFallback">
         <source>CONTAINER2020: {0} does not specify a registry and will be pulled from Docker Hub. Please prefix the name with the image registry, for example: '{1}/&lt;image&gt;'.</source>
-        <target state="new">CONTAINER2020: {0} does not specify a registry and will be pulled from Docker Hub. Please prefix the name with the image registry, for example: '{1}/&lt;image&gt;'.</target>
+        <target state="translated">CONTAINER2020: {0} не указывает реестр и будет извлечен из Docker Hub. Добавьте для имени префикс в виде реестра образов, например: "{1}/&lt;image&gt;".</target>
         <note>{StrBegin="CONTAINER2020: "}</note>
       </trans-unit>
       <trans-unit id="BaseImageNameWithSpaces">
@@ -89,7 +89,7 @@
       </trans-unit>
       <trans-unit id="DockerProcessCreationFailed">
         <source>CONTAINER3001: Failed creating {0} process.</source>
-        <target state="new">CONTAINER3001: Failed creating {0} process.</target>
+        <target state="translated">CONTAINER3001: не удалось создать процесс {0}.</target>
         <note>CONTAINER3001: {0} is the name of the command we failed to run, usually 'docker' or 'podman'.</note>
       </trans-unit>
       <trans-unit id="EmptyOrWhitespacePropertyIgnored">
@@ -104,27 +104,27 @@
       </trans-unit>
       <trans-unit id="EntrypointAndAppCommandArgsSetNoAppCommandInstruction">
         <source>CONTAINER2023: A ContainerEntrypoint and ContainerAppCommandArgs are provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</source>
-        <target state="new">CONTAINER2023: A ContainerEntrypoint and ContainerAppCommandArgs are provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</target>
+        <target state="translated">CONTAINER2023: предоставлены ContainerEntrypoint и ContainerAppCommandArgs. Чтобы настроить способ запуска приложения, необходимо настроить ContainerAppInstruction. Допустимые инструкции: {0}.</target>
         <note>{StrBegin="CONTAINER2023: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointSetNoAppCommandInstruction">
         <source>CONTAINER2027: A ContainerEntrypoint is provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</source>
-        <target state="new">CONTAINER2027: A ContainerEntrypoint is provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</target>
+        <target state="translated">CONTAINER2027: предоставлен ContainerEntrypoint. Чтобы настроить способ запуска приложения, необходимо настроить ContainerAppInstruction. Допустимые инструкции: {0}.</target>
         <note>{StrBegin="CONTAINER2027: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointArgsSetNoEntrypoint">
         <source>CONTAINER2024: ContainerEntrypointArgs are provided without specifying a ContainerEntrypoint.</source>
-        <target state="new">CONTAINER2024: ContainerEntrypointArgs are provided without specifying a ContainerEntrypoint.</target>
+        <target state="translated">CONTAINER2024: ContainerEntrypointArgs предоставлены без указания ContainerEntrypoint.</target>
         <note>{StrBegin="CONTAINER2024: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointArgsSetPreferAppCommandArgs">
         <source>CONTAINER2029: ContainerEntrypointArgsSet are provided. Change to use ContainerAppCommandArgs for arguments that must always be set, or ContainerDefaultArgs for arguments that can be overridden when the container is created.</source>
-        <target state="new">CONTAINER2029: ContainerEntrypointArgsSet are provided. Change to use ContainerAppCommandArgs for arguments that must always be set, or ContainerDefaultArgs for arguments that can be overridden when the container is created.</target>
+        <target state="translated">CONTAINER2029: предоставлен параметр ContainerEntrypointArgsSet. Измените, чтобы использовать ContainerAppCommandArgs для аргументов, которые всегда должны быть настроены, или ContainerDefaultArgs для аргументов, которые можно переопределить при создании контейнера.</target>
         <note>{StrBegin="CONTAINER2029: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointConflictAppCommand">
         <source>CONTAINER2028: ContainerEntrypoint can not be combined with ContainerAppCommandInstruction '{0}'.</source>
-        <target state="new">CONTAINER2028: ContainerEntrypoint can not be combined with ContainerAppCommandInstruction '{0}'.</target>
+        <target state="translated">CONTAINER2028: ContainerEntrypoint невозможно объединить с ContainerAppCommandInstruction "{0}".</target>
         <note>{StrBegin="CONTAINER2028: "}</note>
       </trans-unit>
       <trans-unit id="FailedRetrievingCredentials">
@@ -139,12 +139,12 @@
       </trans-unit>
       <trans-unit id="ImageLoadFailed">
         <source>CONTAINER1009: Failed to load image from local registry. stdout: {0}</source>
-        <target state="needs-review-translation">CONTAINER1009: не удалось загрузить образ в локальную управляющую программу Docker. StdOut:{0}</target>
+        <target state="translated">CONTAINER1009: не удалось загрузить образ из локального реестра. stdout: {0}</target>
         <note>{StrBegin="CONTAINER1009: "}</note>
       </trans-unit>
       <trans-unit id="ImagePullNotSupported">
         <source>CONTAINER1010: Pulling images from local registry is not supported.</source>
-        <target state="needs-review-translation">CONTAINER1010: извлечение образов из локальной управляющей программы Docker не поддерживается.</target>
+        <target state="translated">CONTAINER1010: извлечение образов из локального реестра не поддерживается.</target>
         <note>{StrBegin="CONTAINER1010: "}</note>
       </trans-unit>
       <trans-unit id="InvalidEnvVar">
@@ -209,7 +209,7 @@
       </trans-unit>
       <trans-unit id="LocalRegistryNotAvailable">
         <source>CONTAINER1012: The local registry is not available, but pushing to a local registry was requested.</source>
-        <target state="new">CONTAINER1012: The local registry is not available, but pushing to a local registry was requested.</target>
+        <target state="translated">CONTAINER1012: локальный реестр недоступен, но была запрошена отправка в локальный реестр.</target>
         <note>{StrBegin="CONTAINER1012: "}</note>
       </trans-unit>
       <trans-unit id="LocalDocker_FailedToGetConfig">
@@ -324,12 +324,12 @@
       </trans-unit>
       <trans-unit id="UnknownAppCommandInstruction">
         <source>CONTAINER2021: Unknown AppCommandInstruction '{0}'. Valid instructions are {1}.</source>
-        <target state="new">CONTAINER2021: Unknown AppCommandInstruction '{0}'. Valid instructions are {1}.</target>
+        <target state="translated">CONTAINER2021: неизвестный элемент AppCommandInstruction "{0}". Допустимые инструкции: {1}.</target>
         <note>{StrBegin="CONTAINER2021: "}</note>
       </trans-unit>
       <trans-unit id="UnknownLocalRegistryType">
         <source>CONTAINER2002: Unknown local registry type '{0}'. Valid local container registry types are {1}.</source>
-        <target state="new">CONTAINER2002: Unknown local registry type '{0}'. Valid local container registry types are {1}.</target>
+        <target state="translated">CONTAINER2002: неизвестный тип локального реестра "{0}". Допустимыми типами реестра локального контейнера являются {1}.</target>
         <note>{StrBegin="CONTAINER2002: "}</note>
       </trans-unit>
       <trans-unit id="UnknownMediaType">

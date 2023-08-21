@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="CreateManifestIfNeededOptionDescription">
         <source>Create a tool manifest if one isn't found during tool installation. For information on how manifests are located, see https://aka.ms/dotnet/tools/create-manifest-if-needed</source>
-        <target state="new">Create a tool manifest if one isn't found during tool installation. For information on how manifests are located, see https://aka.ms/dotnet/tools/create-manifest-if-needed</target>
+        <target state="translated">Vytvořte manifest nástroje, pokud se nějaký nenajde během instalace nástroje. Informace o tom, jak se manifesty nacházejí, najdete v tématu https://aka.ms/dotnet/tools/create-manifest-if-needed</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">

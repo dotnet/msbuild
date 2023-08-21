@@ -5,28 +5,28 @@
       <trans-unit id="CannotAnalyzeVSWorkloadBand">
         <source>Workloads managed by Visual Studio must be uninstalled using the Visual Studio Installer. For the version of Visual Studio managing the SDK '{0}', we could not display workloads to uninstall. This is likely because '{0}' uses a different dotnet root path or custom user profile directory from the current running SDK.
 Paths searched: '{1}', '{2}'.</source>
-        <target state="new">Workloads managed by Visual Studio must be uninstalled using the Visual Studio Installer. For the version of Visual Studio managing the SDK '{0}', we could not display workloads to uninstall. This is likely because '{0}' uses a different dotnet root path or custom user profile directory from the current running SDK.
-Paths searched: '{1}', '{2}'.</target>
+        <target state="translated">Úlohy spravované Visual Studio se musí odinstalovat pomocí Instalačního programu pro Visual Studio. U verze Visual Studio správy sady SDK „{0}“ se nám nepovedlo zobrazit úlohy k odinstalaci. Je to pravděpodobně proto, že „{0}“ používá jinou kořenovou cestu dotnet nebo vlastní adresář profilu uživatele z aktuální spuštěné sady SDK.
+Prohledané cesty: „{1}“, „{2}“.</target>
         <note />
       </trans-unit>
       <trans-unit id="CleanAllOptionDescription">
         <source>Causes clean to remove and uninstall all workload components from all SDK versions.</source>
-        <target state="new">Causes clean to remove and uninstall all workload components from all SDK versions.</target>
+        <target state="translated">Způsobí vyčištění, které odebere a odinstaluje všechny součásti úloh ze všech verzí sady SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Removes workload components that may have been left behind from previous updates and uninstallations.</source>
-        <target state="new">Removes workload components that may have been left behind from previous updates and uninstallations.</target>
+        <target state="translated">Odebere součásti úloh, které mohly být pozůstatky z předchozích aktualizací a odinstalací.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidWorkloadProcessPath">
         <source>The path '{0}' of the process is the root path of the drive, which is not allowed, or it is invalid/inaccessible. Please run dotnet in a valid and available path.</source>
-        <target state="new">The path '{0}' of the process is the root path of the drive, which is not allowed, or it is invalid/inaccessible. Please run dotnet in a valid and available path.</target>
+        <target state="translated">Cesta „{0}“ procesu je kořenová cesta jednotky, která není povolena nebo je neplatná nebo nepřístupná. Spusťte prosím dotnet v platné a dostupné cestě.</target>
         <note />
       </trans-unit>
       <trans-unit id="VSWorkloadNotRemoved">
         <source>Workload '{0}' was not removed because it is installed and managed by Visual Studio: '{1}'. Please uninstall this workload using the Visual Studio Installer to fully remove it.</source>
-        <target state="new">Workload '{0}' was not removed because it is installed and managed by Visual Studio: '{1}'. Please uninstall this workload using the Visual Studio Installer to fully remove it.</target>
+        <target state="translated">Úloha „{0}“ se neodebrala, protože je nainstalovaná a spravovaná Visual Studio: „{1}“. Pokud chcete tuto úlohu úplně odebrat, odinstalujte ji pomocí Instalační program pro Visual Studio.</target>
         <note />
       </trans-unit>
     </body>

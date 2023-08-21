@@ -56,7 +56,7 @@ Varsayılan durum, çerçeveye bağımlı bir uygulama yayımlamaktır.</target>
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default is 'Release' for NET 8.0 projects and above, but 'Debug' for older projects.</source>
-        <target state="needs-review-translation">Yayımlama için yapılandırma. Varsayılan değer: 'Debug'. Bu komutta, 'Release' komutunu varsayılan yapmak için 'PublishRelease' özelliğini kullanın.</target>
+        <target state="translated">Yayımlanacak yapılandırma. NET 8.0 projeleri ve üzeri için varsayılan değer 'Release' iken eski projeler için değer 'Debug' olmalıdır.</target>
         <note />
       </trans-unit>
     </body>

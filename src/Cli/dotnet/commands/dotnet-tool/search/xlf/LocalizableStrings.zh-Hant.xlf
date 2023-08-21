@@ -59,12 +59,12 @@
       </trans-unit>
       <trans-unit id="PrereleaseDescription">
         <source>Include pre-release packages.</source>
-        <target state="needs-review-translation">正在判斷是否要包含發行前版本套件。</target>
+        <target state="translated">包含發行前版本套件。</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermArgumentName">
         <source>SEARCH_TERM</source>
-        <target state="needs-review-translation">搜尋字詞</target>
+        <target state="translated">SEARCH_TERM</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermDescription">

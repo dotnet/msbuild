@@ -5,28 +5,28 @@
       <trans-unit id="CannotAnalyzeVSWorkloadBand">
         <source>Workloads managed by Visual Studio must be uninstalled using the Visual Studio Installer. For the version of Visual Studio managing the SDK '{0}', we could not display workloads to uninstall. This is likely because '{0}' uses a different dotnet root path or custom user profile directory from the current running SDK.
 Paths searched: '{1}', '{2}'.</source>
-        <target state="new">Workloads managed by Visual Studio must be uninstalled using the Visual Studio Installer. For the version of Visual Studio managing the SDK '{0}', we could not display workloads to uninstall. This is likely because '{0}' uses a different dotnet root path or custom user profile directory from the current running SDK.
-Paths searched: '{1}', '{2}'.</target>
+        <target state="translated">I carichi di lavoro gestiti da Visual Studio devono essere disinstallati usando il Programma di installazione di Visual Studio. Per la versione di Visual Studio che gestisce '{0}' SDK, non è stato possibile visualizzare i carichi di lavoro da disinstallare. È probabile che '{0}' usi un percorso radice dotnet o una directory del profilo utente personalizzata diversa dall'SDK in esecuzione corrente.
+Percorsi cercati: '{1}', '{2}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CleanAllOptionDescription">
         <source>Causes clean to remove and uninstall all workload components from all SDK versions.</source>
-        <target state="new">Causes clean to remove and uninstall all workload components from all SDK versions.</target>
+        <target state="translated">Provoca la rimozione e la disinstallazione di tutti i componenti del carico di lavoro da tutte le versioni dell'SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Removes workload components that may have been left behind from previous updates and uninstallations.</source>
-        <target state="new">Removes workload components that may have been left behind from previous updates and uninstallations.</target>
+        <target state="translated">Rimuove i componenti del carico di lavoro che potrebbero essere stati lasciati indietro da aggiornamenti e disinstallazioni precedenti.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidWorkloadProcessPath">
         <source>The path '{0}' of the process is the root path of the drive, which is not allowed, or it is invalid/inaccessible. Please run dotnet in a valid and available path.</source>
-        <target state="new">The path '{0}' of the process is the root path of the drive, which is not allowed, or it is invalid/inaccessible. Please run dotnet in a valid and available path.</target>
+        <target state="translated">Il percorso '{0}' del processo è il percorso radice dell'unità, che non è consentito o non è valido/inaccessibile. Eseguire dotnet in un percorso valido e disponibile.</target>
         <note />
       </trans-unit>
       <trans-unit id="VSWorkloadNotRemoved">
         <source>Workload '{0}' was not removed because it is installed and managed by Visual Studio: '{1}'. Please uninstall this workload using the Visual Studio Installer to fully remove it.</source>
-        <target state="new">Workload '{0}' was not removed because it is installed and managed by Visual Studio: '{1}'. Please uninstall this workload using the Visual Studio Installer to fully remove it.</target>
+        <target state="translated">Il carico di lavoro '{0}' non è stato rimosso perché è installato e gestito da Visual Studio: '{1}'. Disinstallare questo carico di lavoro usando il Programma di installazione di Visual Studio per rimuoverlo completamente.</target>
         <note />
       </trans-unit>
     </body>

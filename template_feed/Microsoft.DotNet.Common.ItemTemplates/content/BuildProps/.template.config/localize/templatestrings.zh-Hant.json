@@ -4,6 +4,6 @@
   "description": "空的 Directory.Build.props 檔案，可用來指定整個資料夾的 MSBuild 屬性",
   "symbols/inherit/displayName": "繼承",
   "symbols/inherit/description": "如果為 True，則會為檔案系統目錄階層中最接近的 Directory.Build.props 新增 Import。Directory.Build.props 預設不會繼承，因此這麼做可讓您建置一組按資料夾的自訂項目。",
-  "symbols/useArtifacts/displayName": "Use Artifacts Output Layout",
-  "symbols/useArtifacts/description": "If true, adds a property to enable the artifacts output layout. This is a common pattern for projects that produce build artifacts, such as NuGet packages, that are placed in a common folder."
+  "symbols/useArtifacts/displayName": "使用成品輸出配置",
+  "symbols/useArtifacts/description": "如果為 True，則新增屬性以啟用成品輸出配置。這是會產生放在一般資料夾中的建置成品 (例如 NuGet 套件) 的專案常見模式。"
 }

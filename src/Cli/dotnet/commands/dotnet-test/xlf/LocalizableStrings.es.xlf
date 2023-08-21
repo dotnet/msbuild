@@ -29,16 +29,24 @@ The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downlo
 To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
 
 Implies --blame.</source>
-        <target state="needs-review-translation">Ejecuta las pruebas en modo de culpa y habilita la recopilación del volcado de memoria cuando el host de prueba se cierra de forma inesperada. 
-Actualmente, esta opción solo se admite en Windows y requiere que procdump.exe y procdump64.exe estén disponibles en PATH.
-O bien que se establezca la variable de entorno PROCDUMP_PATH y apunte a un directorio que contenga procdump.exe y procdump64.exe. 
-Las herramientas se pueden descargar aquí: https://docs.microsoft.com/sysinternals/downloads/procdump 
+        <target state="translated">Ejecuta las pruebas en modo de reprobación y recopila un volcado de memoria cuando el host de prueba se cierra inesperadamente. Esta opción depende de la versión de .NET usada, el tipo de error y el sistema operativo.
+ 
+
+Para las excepciones en código administrado, se recopilará automáticamente un volcado en .NET 5.0 y versiones posteriores. Generará un volcado para testhost o cualquier proceso secundario que también se ejecutara en .NET 5.0 y se bloqueara. Los bloqueos en código nativo no generarán un volcado. Esta opción funciona en Windows, macOS y Linux.
+
+Los volcados de memoria en código nativo, o al establecer como destino .NET Framework, o .NET Core 3.1 y versiones anteriores, solo se pueden recopilar en Windows, mediante Procdump. Un directorio que contenga procdump.exe y procdump64.exe debe estar en la variable de entorno PATH o PROCDUMP_PATH.
+
+Las herramientas se pueden descargar aquí: https://docs.microsoft.com/sysinternals/downloads/procdump
+ 
+
+Para recopilar un volcado de memoria de una aplicación nativa que se ejecuta en .NET 5.0 o posterior, se puede forzar el uso de Procdump estableciendo la variable de entorno VSTEST_DUMP_FORCEPROCDUMP en 1.
+
 Implica --blame.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
         <source>The type of crash dump to be collected. Supported values are full (default) and mini. Implies --blame-crash.</source>
-        <target state="needs-review-translation">Tipo de volcado de memoria que se va a recopilar. Implica --blame-crash.</target>
+        <target state="translated">Tipo de volcado de memoria que se va a recopilar. Los valores admitidos son completo (valor predeterminado) y mini. Implica --blame-crash.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangDescription">
@@ -48,7 +56,7 @@ Implica --blame.</target>
       </trans-unit>
       <trans-unit id="CmdBlameHangDumpTypeDescription">
         <source>The type of crash dump to be collected. The supported values are full (default), mini, and none. When 'none' is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</source>
-        <target state="needs-review-translation">Tipo de volcado de memoria que se va a recopilar. Cuando se usa None, el host de prueba finaliza en el tiempo de espera, pero no se recopila ningún volcado. Implica --blame-hang.</target>
+        <target state="translated">El tipo de volcado de memoria que se va a recoger. Los valores soportados son completo (valor predeterminado), mini, y ninguno. Si se utiliza "ninguno", el host de prueba termina cuando se agota el tiempo de espera, pero no se recoge ningún volcado. Implica --blame-hang.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangTimeoutDescription">
@@ -56,11 +64,10 @@ Implica --blame.</target>
 The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
 When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
 For MSTest before 2.2.4, the timeout is used for all testcases.</source>
-        <target state="needs-review-translation">Tiempo de espera por prueba, después del cual se desencadena el volcado de memoria y se termina el proceso del host de prueba. 
-El valor de tiempo de espera se especifica con el siguiente formato: 1,5 h/90m/5400s/5400000ms. Cuando no se usa ninguna unidad (por ejemplo, 5400000), se supone que el valor está en milisegundos.
-Cuando se usa junto con las pruebas controladas por datos, el comportamiento de tiempo de espera depende del adaptador de prueba utilizado. Para xUnit y NUnit, el tiempo de espera se renueva después de cada caso de prueba.
-Para MSTest, el tiempo de espera se usa para todos los casos de prueba.
-Actualmente, esta opción solo se admite en Windows junto con netcoreapp 2.1 y versiones posteriores. Y en Linux con netcoreapp 3.1 y versiones posteriores. OSX y UWP no son compatibles.</target>
+        <target state="translated">Tiempo de espera por prueba, después del cual se desencadena el volcado de memoria y finaliza el proceso testhost. El valor predeterminado es 1h.
+El valor de tiempo de espera se especifica en el siguiente formato: 1,5h / 90m / 5400s / 5400000ms. Cuando no se usa ninguna unidad (por ejemplo, 5400000), se supone que el valor está en milisegundos.
+Cuando se usa junto con pruebas controladas por datos, el comportamiento del tiempo de espera depende del adaptador de prueba utilizado. Para xUnit, NUnit y MSTest 2.2.4+ el tiempo de espera se renueva después de cada caso de prueba,
+Para MSTest antes de 2.2.4, el tiempo de espera se usa para todos los casos de prueba.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableDescription">
@@ -264,16 +271,19 @@ Example:
   Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
   dotnet test --blame-hang-timeout 20min
 </source>
-        <target state="needs-review-translation">Ejecuta las pruebas en el modo de culpa. Esta opción es útil para aislar las pruebas problemáticas que provocan el bloqueo del host de prueba. 
-Cuando se detecta un bloqueo, crea un archivo de secuencia en TestResults/guid/guid_Sequence.xml que captura el orden de las pruebas que se ejecutaron antes de que se produjera el bloqueo.
-En función de la configuración adicional, también se puede recopilar el volcado de memoria o el volcado del bloqueo.
-Ejemplo 
-  Se agota el tiempo de espera de la serie de pruebas cuando la prueba tarda más del tiempo de espera predeterminado de 1 hora y recopila el volcado de memoria cuando el host de prueba se cierra inesperadamente. 
-  (Los volcados de memoria requieren una configuración adicional; consulte más adelante).
-  dotnet test --blame-hang --blame-crash
-Ejemplo 
-  Se agota el tiempo de espera de la ejecución de pruebas cuando una prueba tarda más de 20 minutos y recopila el volcado de bloqueo. 
-  dotnet test --blame-hang-timeout 20min
+        <target state="translated">Ejecuta las pruebas en modo de reprobación. Esta opción es útil para aislar las pruebas problemáticas que hacen que el host de prueba se bloquee o se bloquee, pero no crea un volcado de memoria de forma predeterminada.
+
+Cuando se detecta un bloqueo, crea un archivo de secuencia en TestResults/guid/guid_Sequence.xml que captura el orden de las pruebas que se ejecutaron antes del bloqueo.
+
+En función de la configuración adicional, también se pueden recopilar volcados de memoria o volcados de memoria.
+
+Ejemplo: 
+Tiempo de espera de la serie de pruebas cuando la prueba supera el tiempo de espera predeterminado de 1 hora, y recopile el volcado de memoria cuando el host de prueba se cierre inesperadamente. 
+ (los volcados de memoria requieren una configuración adicional, consulte a continuación).
+ prueba de dotnet --blame-hang --blame-crash
+Ejemplo: 
+ Tiempo de espera de la ejecución de pruebas cuando una prueba tarda más de 20 minutos y recopilar volcado de bloqueo. 
+ prueba de dotnet --blame-hang-timeout 20min
 </target>
         <note />
       </trans-unit>

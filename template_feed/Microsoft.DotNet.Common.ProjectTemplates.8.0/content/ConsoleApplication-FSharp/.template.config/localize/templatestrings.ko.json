@@ -1,11 +1,11 @@
-{
+﻿{
   "author": "Microsoft",
   "name": "콘솔 앱",
   "description": "Windows, Linux 및 macOS의 .NET에서 실행할 수 있는 명령줄 응용 프로그램을 만들기 위한 프로젝트",
   "symbols/TargetFrameworkOverride/description": "대상 프레임워크를 재정의합니다",
   "symbols/TargetFrameworkOverride/displayName": "대상 프레임워크 재정의",
   "symbols/Framework/description": "프로젝트에 대한 대상 프레임워크입니다.",
-  "symbols/Framework/choices/net8.0/description": "Target net8.0",
+  "symbols/Framework/choices/net8.0/description": "대상 net8.0",
   "symbols/Framework/choices/net8.0/displayName": ".NET 8.0",
   "symbols/Framework/displayName": "프레임워크",
   "symbols/skipRestore/description": "지정된 경우, 프로젝트 생성 시 자동 복원을 건너뜁니다.",

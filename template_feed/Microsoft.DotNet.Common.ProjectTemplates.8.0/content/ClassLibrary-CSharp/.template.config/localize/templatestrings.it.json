@@ -1,11 +1,11 @@
-{
+﻿{
   "author": "Microsoft",
   "name": "Libreria di classi",
   "description": "Progetto per la creazione di una libreria di classi destinata a .NET o.NET Standard.",
   "symbols/TargetFrameworkOverride/description": "Ignora il framework di destinazione",
   "symbols/TargetFrameworkOverride/displayName": "Override del framework di destinazione",
   "symbols/Framework/description": "Il framework di destinazione per il progetto.",
-  "symbols/Framework/choices/net8.0/description": "Target net8.0",
+  "symbols/Framework/choices/net8.0/description": "Destinazione net8.0",
   "symbols/Framework/choices/net8.0/displayName": ".NET 8.0",
   "symbols/Framework/choices/netstandard2.1/description": "Netstandard2.1 di destinazione",
   "symbols/Framework/choices/netstandard2.1/displayName": ".NET Standard 2.1",

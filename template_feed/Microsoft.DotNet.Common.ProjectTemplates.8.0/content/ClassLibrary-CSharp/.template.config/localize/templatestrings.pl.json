@@ -1,11 +1,11 @@
-{
+﻿{
   "author": "Microsoft",
   "name": "Biblioteka klas",
   "description": "Projekt służący do tworzenia biblioteki klas przeznaczonej dla platformy .NET lub .NET Standard",
   "symbols/TargetFrameworkOverride/description": "Zastępuje platformę docelową",
   "symbols/TargetFrameworkOverride/displayName": "Odrzucenie platformy docelowej",
   "symbols/Framework/description": "Platforma docelowa dla tego projektu.",
-  "symbols/Framework/choices/net8.0/description": "Target net8.0",
+  "symbols/Framework/choices/net8.0/description": "Docelowa platforma net8.0",
   "symbols/Framework/choices/net8.0/displayName": ".NET 8.0",
   "symbols/Framework/choices/netstandard2.1/description": "Docelowy netstandard2.1",
   "symbols/Framework/choices/netstandard2.1/displayName": ".NET Standard 2.1",

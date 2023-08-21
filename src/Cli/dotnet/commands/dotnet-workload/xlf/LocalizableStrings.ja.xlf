@@ -47,6 +47,16 @@
         <target state="translated">インストールの種類</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadIntegrityCheck">
+        <source>Checking the state of installed workloads...</source>
+        <target state="translated">インストールされているワークロードの状態を確認しています...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadIntegrityCheckError">
+        <source>An issue was encountered verifying workloads. For more information, run "dotnet workload update".</source>
+        <target state="translated">ワークロードの検証中に問題が発生しました。詳細については、"dotnet workload update" を実行してください。</target>
+        <note>{Locked="dotnet workload update"}</note>
+      </trans-unit>
       <trans-unit id="WorkloadManfiestVersionColumn">
         <source>Manifest Version</source>
         <target state="translated">マニフェストのバージョン</target>

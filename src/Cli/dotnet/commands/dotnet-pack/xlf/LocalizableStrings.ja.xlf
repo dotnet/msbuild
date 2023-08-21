@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for building the package. The default is 'Release'.</source>
-        <target state="needs-review-translation">パッケージのビルドに使用する構成。既定値は 'Debug' です。'Release' をこのコマンドの既定値にするには、'PackRelease' プロパティを使用します。</target>
+        <target state="translated">パッケージのビルドに使用する構成。既定値は 'Release' です。</target>
         <note />
       </trans-unit>
     </body>

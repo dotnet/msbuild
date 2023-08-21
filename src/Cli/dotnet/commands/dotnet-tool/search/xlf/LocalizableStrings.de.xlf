@@ -59,12 +59,12 @@
       </trans-unit>
       <trans-unit id="PrereleaseDescription">
         <source>Include pre-release packages.</source>
-        <target state="needs-review-translation">Es wird ermittelt, ob Vorabversionspakete eingeschlossen werden sollen.</target>
+        <target state="translated">Vorabversionspakete einschließen.</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermArgumentName">
         <source>SEARCH_TERM</source>
-        <target state="needs-review-translation">Suchbegriff</target>
+        <target state="translated">SEARCH_TERM</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermDescription">

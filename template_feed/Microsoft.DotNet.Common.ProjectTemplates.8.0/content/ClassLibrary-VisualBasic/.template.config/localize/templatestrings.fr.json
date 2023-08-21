@@ -1,11 +1,11 @@
-{
+﻿{
   "author": "Microsoft",
   "name": "Bibliothèque de classe",
   "description": "Projet de création d'une bibliothèque de classes ciblant .NET ou .NET Standard",
   "symbols/TargetFrameworkOverride/description": "Remplace l’infrastructure cible",
   "symbols/TargetFrameworkOverride/displayName": "Remplacement du frame cible",
   "symbols/Framework/description": "Framework cible du projet.",
-  "symbols/Framework/choices/net8.0/description": "Target net8.0",
+  "symbols/Framework/choices/net8.0/description": "Cible net8.0",
   "symbols/Framework/choices/net8.0/displayName": ".NET 8.0",
   "symbols/Framework/choices/netstandard2.1/description": "netstandard2.1 cible",
   "symbols/Framework/choices/netstandard2.1/displayName": ".NET Standard 2.1",

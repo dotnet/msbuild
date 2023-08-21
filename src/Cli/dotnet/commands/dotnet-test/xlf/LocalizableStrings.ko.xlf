@@ -29,16 +29,22 @@ The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downlo
 To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
 
 Implies --blame.</source>
-        <target state="needs-review-translation">테스트를 원인 모드로 실행하고 테스트 호스트가 예기치 않게 종료될 때 크래시 덤프 수집을 사용하도록 설정합니다. 
-이 옵션은 현재 Windows에서만 지원되며, PATH에 procdump.exe 및 procdump64.exe를 사용할 수 있어야 합니다.
-또는 PROCDUMP_PATH 환경 변수를 설정하고 procdump.exe 및 procdump64.exe를 포함하는 디렉터리를 가리킵니다. 
-이 도구는 https://docs.microsoft.com/sysinternals/downloads/procdump에서 다운로드할 수 있습니다. 
+        <target state="translated">테스트를 원인 모드로 실행하고 테스트 호스트가 예기치 않게 종료되면 크래시 덤프를 수집합니다. 이 옵션은 사용된 .NET 버전, 오류 유형 및 운영 체제에 따라 달라집니다.
+  
+관리 코드 예외의 경우 .NET 5.0 이상 버전에서 덤프가 자동으로 수집됩니다. 역시 .NET 5.0에서 실행되어 작동이 중단된 testhost 또는 자식 프로세스에 대한 덤프를 생성합니다. 네이티브 코드의 크래시는 덤프를 생성하지 않습니다. 이 옵션은 Windows, macOS 및 Linux에서 작동합니다.
+
+네이티브 코드의 크래시 덤프나 .NET Framework 또는 .NET Core 3.1 이하 버전을 대상으로 하는 경우 Procdump를 사용하여 Windows에서만 수집할 수 있습니다. procdump.exe 및 procdump64.exe가 포함된 디렉터리는 PATH 또는 PROCDUMP_PATH 환경 변수에 있어야 합니다.
+
+도구는 다음 페이지에서 다운로드할 수 있습니다. https://docs.microsoft.com/sysinternals/downloads/procdump
+  
+.NET 5.0 이상에서 실행되는 네이티브 애플리케이션에서 크래시 덤프를 수집하려면 VSTEST_DUMP_FORCEPROCDUMP 환경 변수를 1로 설정하여 Procdump를 강제로 사용할 수 있습니다.
+
 --blame을 의미합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
         <source>The type of crash dump to be collected. Supported values are full (default) and mini. Implies --blame-crash.</source>
-        <target state="needs-review-translation">수집할 크래시 덤프의 유형입니다. --blame-crash를 의미합니다.</target>
+        <target state="translated">수집할 크래시 덤프의 유형입니다. 지원되는 값은 full(기본값) 및 mini입니다. --blame-crash를 의미합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangDescription">
@@ -48,7 +54,7 @@ Implies --blame.</source>
       </trans-unit>
       <trans-unit id="CmdBlameHangDumpTypeDescription">
         <source>The type of crash dump to be collected. The supported values are full (default), mini, and none. When 'none' is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</source>
-        <target state="needs-review-translation">수집할 크래시 덤프의 유형입니다. 없음이 사용된 경우 테스트 호스트가 시간 초과될 때 종료되지만, 덤프가 수집되지 않습니다. --blame-hang을 의미합니다.</target>
+        <target state="translated">수집할 크래시 덤프의 유형입니다. 지원되는 값은 full(기본값), mini, none입니다. 'none'이 사용된 경우 테스트 호스트가 시간 초과될 때 종료되지만 덤프는 수집되지 않습니다. --blame-hang을 의미합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangTimeoutDescription">
@@ -56,11 +62,10 @@ Implies --blame.</source>
 The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
 When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
 For MSTest before 2.2.4, the timeout is used for all testcases.</source>
-        <target state="needs-review-translation">중단 덤프가 트리거되고 테스트 호스트 프로세스가 종료되는 테스트별 시간 제한입니다. 
+        <target state="translated">중단 덤프가 트리거되고 테스트 호스트 프로세스가 종료되는 테스트별 시간 제한입니다. 기본값은 1h입니다.
 이 시간 제한 값은 1.5h/90m/5400s/5400000ms 형식으로 지정됩니다. 단위가 사용되지 않으면(예: 5400000), 값은 밀리초 단위로 간주됩니다.
-데이터 기반 테스트와 함께 사용되는 경우 시간 제한 동작은 사용되는 테스트 어댑터에 따라 다릅니다. xUnit 및 NUnit의 경우 모든 테스트 사례 후에 시간 제한이 갱신됩니다.
-MSTest의 경우 모든 테스트 사례에 시간 제한이 사용됩니다.
-이 옵션은 현재 netcoreapp2.1 이상이 사용되는 Windows에서만 지원됩니다. 그리고 netcoreapp3.1 이상이 사용되는 Linux에서 지원됩니다. OSX 및 UWP는 지원되지 않습니다.</target>
+데이터 기반 테스트와 함께 사용되는 경우 시간 제한 동작은 사용되는 테스트 어댑터에 따라 달라집니다. xUnit, NUnit 및 MSTest 2.2.4 이상의 경우 모든 테스트 사례 후에 시간 제한이 갱신됩니다.
+2.2.4 이전 MSTest의 경우 모든 테스트 사례에 시간 제한이 사용됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableDescription">
@@ -264,9 +269,12 @@ Example:
   Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
   dotnet test --blame-hang-timeout 20min
 </source>
-        <target state="needs-review-translation">테스트를 원인 모드로 실행합니다. 이 옵션은 테스트 호스트 크래시 또는 중단을 유발하는 문제 있는 테스트를 격리하는 데 유용합니다. 
+        <target state="translated">테스트를 원인 모드로 실행합니다. 이 옵션은 테스트 호스트의 크래시 또는 중단을 유발하는 문제 있는 테스트를 격리하는 데 유용하지만 기본적으로 메모리 덤프를 생성하지는 않습니다. 
+
 크래시가 탐지되면 크래시 전에 실행된 테스트의 순서를 캡처하는 시퀀스 파일이 TestResults/guid/guid_Sequence.xml에 생성됩니다.
+
 추가 설정에 따라 중단 덤프 또는 크래시 덤프가 수집될 수도 있습니다.
+
 예: 
   테스트에 걸리는 시간이 기본 시간 제한인 1시간보다 길면 테스트 실행이 시간 초과되고, 테스트 호스트가 예기치 않게 종료되면 크래시 덤프를 수집합니다. 
   (크래시 덤프에는 추가 설정이 필요합니다. 아래를 참조하세요.)

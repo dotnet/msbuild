@@ -1,12 +1,12 @@
-{
+﻿{
   "author": "Майкрософт",
   "name": "Консольное приложение",
   "description": "Проект для создания приложения командной строки, которое может выполняться в среде .NET в Windows, Linux и macOS",
   "symbols/TargetFrameworkOverride/description": "Переопределяет целевую платформу",
   "symbols/TargetFrameworkOverride/displayName": "Переопределение целевой платформы",
   "symbols/Framework/description": "Целевая платформа для проекта.",
-  "symbols/Framework/choices/net8.0/description": "Target net8.0",
-  "symbols/Framework/choices/net8.0/displayName": ".NET 8.0",
+  "symbols/Framework/choices/net8.0/description": "Целевая среда net8.0",
+  "symbols/Framework/choices/net8.0/displayName": "NET 8.0",
   "symbols/Framework/displayName": "Платформа",
   "symbols/langVersion/description": "Задает свойство LangVersion в созданном файле проекта",
   "symbols/langVersion/displayName": "Версия языка",
@@ -14,8 +14,8 @@
   "symbols/skipRestore/displayName": "Пропустить восстановление",
   "symbols/UseProgramMain/description": "Следует ли создавать явный класс Program и метод Main вместо операторов верхнего уровня.",
   "symbols/UseProgramMain/displayName": "Не использовать _операторы верхнего уровня",
-  "symbols/NativeAot/description": "Whether to enable the project for publishing as native AOT.",
-  "symbols/NativeAot/displayName": "Enable _native AOT publish",
+  "symbols/NativeAot/description": "Включить ли проект для публикации как native AOT.",
+  "symbols/NativeAot/displayName": "Включить публикацию _native AOT",
   "postActions/restore/description": "Восстановление пакетов NuGet, необходимых для этого проекта.",
   "postActions/restore/manualInstructions/default/text": "Выполнить команду \"dotnet restore\"",
   "postActions/open-file/description": "Открывает файл Program.cs в редакторе"

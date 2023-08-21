@@ -5,28 +5,28 @@
       <trans-unit id="CannotAnalyzeVSWorkloadBand">
         <source>Workloads managed by Visual Studio must be uninstalled using the Visual Studio Installer. For the version of Visual Studio managing the SDK '{0}', we could not display workloads to uninstall. This is likely because '{0}' uses a different dotnet root path or custom user profile directory from the current running SDK.
 Paths searched: '{1}', '{2}'.</source>
-        <target state="new">Workloads managed by Visual Studio must be uninstalled using the Visual Studio Installer. For the version of Visual Studio managing the SDK '{0}', we could not display workloads to uninstall. This is likely because '{0}' uses a different dotnet root path or custom user profile directory from the current running SDK.
-Paths searched: '{1}', '{2}'.</target>
+        <target state="translated">Visual Studio tarafından yönetilen iş yüklerinin Visual Studio Yükleyicisi kullanılarak kaldırılması gerekir. '{0}' SDK’sını yöneten Visual Studio sürümü için kaldırılacak iş yüklerini görüntüleyemedik. Bunun olası nedeni, '{0}' sürümünün geçerli çalışan sürümden farklı bir dotnet kök yolu veya özel kullanıcı profili dizini kullanmasıdır.
+Aranan yollar: '{1}', '{2}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CleanAllOptionDescription">
         <source>Causes clean to remove and uninstall all workload components from all SDK versions.</source>
-        <target state="new">Causes clean to remove and uninstall all workload components from all SDK versions.</target>
+        <target state="translated">Tüm SDK sürümlerindeki iş yükü bileşenlerinin tümünü tamamen kaldıracak şekilde temizlemeyi sağlar.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Removes workload components that may have been left behind from previous updates and uninstallations.</source>
-        <target state="new">Removes workload components that may have been left behind from previous updates and uninstallations.</target>
+        <target state="translated">Önceki güncelleştirme ve kaldırma işlemlerinden kalmış olabilecek iş yükü bileşenlerini kaldırır.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidWorkloadProcessPath">
         <source>The path '{0}' of the process is the root path of the drive, which is not allowed, or it is invalid/inaccessible. Please run dotnet in a valid and available path.</source>
-        <target state="new">The path '{0}' of the process is the root path of the drive, which is not allowed, or it is invalid/inaccessible. Please run dotnet in a valid and available path.</target>
+        <target state="translated">İşlemin '{0}' yolu sürücünün kök yolu (bu yola izin verilmiyor) veya geçersiz/erişilemiyor. Lütfen dotnet komutunu geçerli ve kullanılabilir bir yolda çalıştırın.</target>
         <note />
       </trans-unit>
       <trans-unit id="VSWorkloadNotRemoved">
         <source>Workload '{0}' was not removed because it is installed and managed by Visual Studio: '{1}'. Please uninstall this workload using the Visual Studio Installer to fully remove it.</source>
-        <target state="new">Workload '{0}' was not removed because it is installed and managed by Visual Studio: '{1}'. Please uninstall this workload using the Visual Studio Installer to fully remove it.</target>
+        <target state="translated">Visual Studio: '{1}' tarafından yüklendiği ve yönetildiği için '{0}' iş yükü kaldırılmadı. Bu iş yükünü tamamen kaldırmak için Visual Studio Yükleyicisini kullanarak kaldırın.</target>
         <note />
       </trans-unit>
     </body>

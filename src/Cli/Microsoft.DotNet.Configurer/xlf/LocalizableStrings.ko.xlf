@@ -12,19 +12,19 @@
 Installed an ASP.NET Core HTTPS development certificate.
 To trust the certificate, run 'dotnet dev-certs https --trust'
 Learn about HTTPS: https://aka.ms/dotnet-https</source>
-        <target state="new">----------------
-Installed an ASP.NET Core HTTPS development certificate.
-To trust the certificate, run 'dotnet dev-certs https --trust'
-Learn about HTTPS: https://aka.ms/dotnet-https</target>
+        <target state="translated">----------------
+ASP.NET Core HTTPS 개발 인증서를 설치했습니다.
+인증서를 신뢰하려면 'dotnet dev-certs https --trust'를 실행하세요.
+HTTPS에 관한 자세한 정보: https://aka.ms/dotnet-https</target>
         <note />
       </trans-unit>
       <trans-unit id="FirstTimeMessageAspNetCertificateLinux">
         <source>----------------
 Installed an ASP.NET Core HTTPS development certificate.
 To trust the certificate, view the instructions: https://aka.ms/dotnet-https-linux</source>
-        <target state="new">----------------
-Installed an ASP.NET Core HTTPS development certificate.
-To trust the certificate, view the instructions: https://aka.ms/dotnet-https-linux</target>
+        <target state="translated">----------------
+ASP.NET Core HTTPS 개발 인증서를 설치했습니다.
+인증서를 신뢰하려면 다음 지침을 확인하세요. https://aka.ms/dotnet-https-linux</target>
         <note />
       </trans-unit>
       <trans-unit id="FirstTimeMessageMoreInformation">
@@ -35,11 +35,7 @@ Explore documentation: https://aka.ms/dotnet-docs
 Report issues and find source on GitHub: https://github.com/dotnet/core
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
 --------------------------------------------------------------------------------------</source>
-        <target state="needs-review-translation">----------------
-ASP.NET Core HTTPS 개발 인증서를 설치했습니다.
-인증서를 신뢰하려면 'dotnet dev-certs https --trust'를 실행합니다(Windows 및 macOS만).
-HTTPS에 대한 자세한 정보: https://aka.ms/dotnet-https
-----------------
+        <target state="translated">----------------
 첫 번째 앱 작성: https://aka.ms/dotnet-hello-world
 새로운 기능 확인: https://aka.ms/dotnet-whats-new
 설명서 살펴보기: https://aka.ms/dotnet-docs

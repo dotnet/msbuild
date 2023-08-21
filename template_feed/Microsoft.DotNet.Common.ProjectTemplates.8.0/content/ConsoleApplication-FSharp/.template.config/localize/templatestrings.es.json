@@ -1,11 +1,11 @@
-{
+﻿{
   "author": "Microsoft",
   "name": "Aplicación de consola",
   "description": "Proyecto para crear una aplicación de línea de comandos que se puede ejecutar en .NET en Windows, Linux y macOS.",
   "symbols/TargetFrameworkOverride/description": "Invalida la plataforma de destino",
   "symbols/TargetFrameworkOverride/displayName": "Invalidación de la plataforma de destino",
   "symbols/Framework/description": "Marco de destino del proyecto.",
-  "symbols/Framework/choices/net8.0/description": "Target net8.0",
+  "symbols/Framework/choices/net8.0/description": "NET8.0 de destino",
   "symbols/Framework/choices/net8.0/displayName": ".NET 8.0",
   "symbols/Framework/displayName": "Plataforma",
   "symbols/skipRestore/description": "Si se especifica, se omite la restauración automática del proyecto durante la creación.",

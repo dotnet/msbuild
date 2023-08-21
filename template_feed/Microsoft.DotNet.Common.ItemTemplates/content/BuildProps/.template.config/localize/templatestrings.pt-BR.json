@@ -4,6 +4,6 @@
   "description": "Um arquivo Directory.Build.props vazio que pode ser usado para especificar as propriedades do MSBuild para uma pasta inteira",
   "symbols/inherit/displayName": "Herdar",
   "symbols/inherit/description": "Se verdadeiro, adiciona um Import para o Directory.Build.props mais próximo na hierarquia de diretórios do sistema de arquivos. Directory.Build.props não herdam por padrão, portanto, isso permite que você crie um conjunto de personalizações pasta por pasta.",
-  "symbols/useArtifacts/displayName": "Use Artifacts Output Layout",
-  "symbols/useArtifacts/description": "If true, adds a property to enable the artifacts output layout. This is a common pattern for projects that produce build artifacts, such as NuGet packages, that are placed in a common folder."
+  "symbols/useArtifacts/displayName": "Usar layout de saída de artefatos",
+  "symbols/useArtifacts/description": "Se verdadeiro, adiciona uma propriedade para habilitar o layout de saída dos artefatos. Esse é um padrão comum para projetos que produzem artefatos de compilação, como pacotes NuGet, que são colocados em uma pasta comum."
 }

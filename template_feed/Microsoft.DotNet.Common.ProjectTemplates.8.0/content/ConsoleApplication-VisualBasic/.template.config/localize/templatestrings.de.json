@@ -1,19 +1,19 @@
-{
+﻿{
   "author": "Microsoft",
   "name": "Konsolen-App",
   "description": "Ein Projekt zum Erstellen einer Befehlszeilenanwendung, die mit .NET unter Windows, Linux und macOS ausgeführt werden kann",
   "symbols/TargetFrameworkOverride/description": "Überschreibt das Zielframework",
   "symbols/TargetFrameworkOverride/displayName": "Zielframeworküberschreibung",
   "symbols/Framework/description": "Das Zielframework für das Projekt.",
-  "symbols/Framework/choices/net8.0/description": "Target net8.0",
+  "symbols/Framework/choices/net8.0/description": "Ziel net8.0",
   "symbols/Framework/choices/net8.0/displayName": ".NET 8.0",
   "symbols/Framework/displayName": "Framework",
   "symbols/langVersion/description": "Legt die „LangVersion“-Eigenschaft in der erstellten Projektdatei fest",
   "symbols/langVersion/displayName": "Sprachversion",
   "symbols/skipRestore/description": "Wenn angegeben, wird die automatische Wiederherstellung des Projekts beim Erstellen übersprungen.",
   "symbols/skipRestore/displayName": "Wiederherstellung überspringen",
-  "symbols/NativeAot/description": "Whether to enable the project for publishing as native AOT.",
-  "symbols/NativeAot/displayName": "Enable _native AOT publish",
+  "symbols/NativeAot/description": "Gibt an, ob das Projekt für die Veröffentlichung als native AOT aktiviert werden soll.",
+  "symbols/NativeAot/displayName": "_native AOT-Veröffentlichung aktivieren",
   "postActions/restore/description": "„NuGet-Pakete“ wiederherstellen, die für dieses Projekt erforderlich sind.",
   "postActions/restore/manualInstructions/default/text": "„dotnet restore“ ausführen",
   "postActions/open-file/description": "Öffnet „Program.vb“ im Editor"

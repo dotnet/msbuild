@@ -5,28 +5,28 @@
       <trans-unit id="CannotAnalyzeVSWorkloadBand">
         <source>Workloads managed by Visual Studio must be uninstalled using the Visual Studio Installer. For the version of Visual Studio managing the SDK '{0}', we could not display workloads to uninstall. This is likely because '{0}' uses a different dotnet root path or custom user profile directory from the current running SDK.
 Paths searched: '{1}', '{2}'.</source>
-        <target state="new">Workloads managed by Visual Studio must be uninstalled using the Visual Studio Installer. For the version of Visual Studio managing the SDK '{0}', we could not display workloads to uninstall. This is likely because '{0}' uses a different dotnet root path or custom user profile directory from the current running SDK.
-Paths searched: '{1}', '{2}'.</target>
+        <target state="translated">必須使用 Visual Studio 安裝程式解除安裝由 Visual Studio 管理的工作負載。針對管理 SDK '{0}' 的 Visual Studio 版本，我們無法顯示要解除安裝的工作負載。這可能是因為 '{0}' 使用與目前執行中 SDK 不同的 dotnet 根路徑或自訂使用者設定檔目錄。
+搜尋的路徑: '{1}'、'{2}'。</target>
         <note />
       </trans-unit>
       <trans-unit id="CleanAllOptionDescription">
         <source>Causes clean to remove and uninstall all workload components from all SDK versions.</source>
-        <target state="new">Causes clean to remove and uninstall all workload components from all SDK versions.</target>
+        <target state="translated">導致從所有 SDK 版本移除及解除安裝所有工作負載元件。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Removes workload components that may have been left behind from previous updates and uninstallations.</source>
-        <target state="new">Removes workload components that may have been left behind from previous updates and uninstallations.</target>
+        <target state="translated">移除先前更新和解除安裝中可能遺漏的工作負載元件。</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidWorkloadProcessPath">
         <source>The path '{0}' of the process is the root path of the drive, which is not allowed, or it is invalid/inaccessible. Please run dotnet in a valid and available path.</source>
-        <target state="new">The path '{0}' of the process is the root path of the drive, which is not allowed, or it is invalid/inaccessible. Please run dotnet in a valid and available path.</target>
+        <target state="translated">處理常式的路徑 '{0}' 是磁碟機的根路徑，這是不允許的，或是它無效/無法存取。請在有效且可用的路徑中執行 dotnet。</target>
         <note />
       </trans-unit>
       <trans-unit id="VSWorkloadNotRemoved">
         <source>Workload '{0}' was not removed because it is installed and managed by Visual Studio: '{1}'. Please uninstall this workload using the Visual Studio Installer to fully remove it.</source>
-        <target state="new">Workload '{0}' was not removed because it is installed and managed by Visual Studio: '{1}'. Please uninstall this workload using the Visual Studio Installer to fully remove it.</target>
+        <target state="translated">未移除工作負載 '{0}'，因為它已安裝並由 Visual Studio管理: '{1}'。請使用 Visual Studio 安裝程式解除安裝此工作負載，以將其完全移除。</target>
         <note />
       </trans-unit>
     </body>

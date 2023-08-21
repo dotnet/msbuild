@@ -1,11 +1,11 @@
-{
+﻿{
   "author": "Microsoft",
   "name": "類別庫",
   "description": "專案，用於建立以 .NET 或 .NET Standard 為目標的類別庫",
   "symbols/TargetFrameworkOverride/description": "覆寫目標 Framework",
   "symbols/TargetFrameworkOverride/displayName": "目標 Framework 覆寫",
   "symbols/Framework/description": "專案的目標 Framework。",
-  "symbols/Framework/choices/net8.0/description": "Target net8.0",
+  "symbols/Framework/choices/net8.0/description": "目標 net8.0",
   "symbols/Framework/choices/net8.0/displayName": ".NET 8.0",
   "symbols/Framework/choices/netstandard2.1/description": "目標 netstandard2.1",
   "symbols/Framework/choices/netstandard2.1/displayName": ".NET Standard 2.1",

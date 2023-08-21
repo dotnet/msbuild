@@ -1,11 +1,11 @@
-{
+﻿{
   "author": "Microsoft",
   "name": "主控台應用程式",
   "description": "專案，用於建立可在 Windows、Linux 及 macOS 於 .NET 執行的命令列應用程式",
   "symbols/TargetFrameworkOverride/description": "覆寫目標 Framework",
   "symbols/TargetFrameworkOverride/displayName": "目標 Framework 覆寫",
   "symbols/Framework/description": "專案的目標 Framework。",
-  "symbols/Framework/choices/net8.0/description": "Target net8.0",
+  "symbols/Framework/choices/net8.0/description": "目標 net8.0",
   "symbols/Framework/choices/net8.0/displayName": ".NET 8.0",
   "symbols/Framework/displayName": "架構",
   "symbols/skipRestore/description": "若指定，會在建立時跳過專案的自動還原。",

@@ -1,12 +1,12 @@
-{
+﻿{
   "author": "Майкрософт",
   "name": "Библиотека классов",
   "description": "Проект для создания библиотеки классов, предназначенной для .NET или .NET Standard.",
   "symbols/TargetFrameworkOverride/description": "Переопределяет целевую платформу",
   "symbols/TargetFrameworkOverride/displayName": "Переопределение целевой платформы",
   "symbols/Framework/description": "Целевая платформа для проекта.",
-  "symbols/Framework/choices/net8.0/description": "Target net8.0",
-  "symbols/Framework/choices/net8.0/displayName": ".NET 8.0",
+  "symbols/Framework/choices/net8.0/description": "Целевая среда net8.0",
+  "symbols/Framework/choices/net8.0/displayName": "NET 8.0",
   "symbols/Framework/choices/netstandard2.1/description": "Целевая платформа: netstandard2.1",
   "symbols/Framework/choices/netstandard2.1/displayName": ".NET Standard 2.1",
   "symbols/Framework/choices/netstandard2.0/description": "Целевая платформа: netstandard2.0",
