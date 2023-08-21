@@ -61,10 +61,21 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        [Theory]
+        [DotNetOnlyTheory]
+        [InlineData(false)]
+        // [InlineData(true)] <-- explicitly opting out on core will lead to node crash
+        public void VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost_NetCore(
+            bool testLegacyImplementation)
+            => VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost(testLegacyImplementation);
+
+        [WindowsFullFrameworkOnlyTheory]
         [InlineData(false)]
         [InlineData(true)]
-        public void VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost(bool testLegacyImplementation)
+        public void VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost_Framework(
+            bool testLegacyImplementation)
+            => VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost(testLegacyImplementation);
+
+        private void VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost(bool testLegacyImplementation)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
 
