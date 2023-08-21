@@ -5,5 +5,5 @@
   "symbols/inherit/displayName": "Dziedzicz",
   "symbols/inherit/description": "Jeśli jest prawdą, dodaje import dla najbliższego pliku Directory.Build.props w hierarchii katalogów systemu plików. Plik Directory.Build.props nie dziedziczy domyślnie, więc pozwala to na utworzenie zestawu dostosowań dla każdego folderu z osobna.",
   "symbols/useArtifacts/displayName": "Użyj układu wyjściowego artefaktów",
-  "symbols/useArtifacts/description": "W przypadku wartości true dodaje właściwość umożliwiającą włączenie układu wyjściowego artefaktów. Jest to typowy wzorzec dla projektów tworzących artefakty kompilacji, takie jak pakiety NuGet, które są umieszczane we wspólnym folderze."
+  "symbols/useArtifacts/description": "W przypadku wartości true dodaje właściwość umożliwiającą włączenie układu wyjściowego artefaktów. Jest to typowy wzorzec dla projektów, które tworzą artefakty kompilacji, takie jak pakiety NuGet, które są umieszczane we wspólnym folderze."
 }

@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="NoBreakingChangesFound">
         <source>APICompat ran successfully without finding any breaking changes.</source>
-        <target state="translated">중단된 변경 내용을 찾지 않고 APICompat이 실행되었습니다.</target>
+        <target state="translated">중단된 변경 내용을 찾지 않고 APICompat을 실행했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SuppressionsFileNotSpecified">

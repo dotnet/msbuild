@@ -290,7 +290,7 @@ Ejecute "dotnet {1} --show-aliases" sin argumentos para mostrar todos los alias.
       </trans-unit>
       <trans-unit id="ColumnNameTrusted">
         <source>Trusted</source>
-        <target state="new">Trusted</target>
+        <target state="translated">De confianza</target>
         <note>information about NuGet package origin; if a package has PrefixReserved indicator </note>
       </trans-unit>
       <trans-unit id="ColumnNameType">
@@ -382,7 +382,7 @@ Ejecute "dotnet {1} --show-aliases" sin argumentos para mostrar todos los alias.
       </trans-unit>
       <trans-unit id="DetailsCommand_Argument_PackageIdentifier">
         <source>Package identifier</source>
-        <target state="translated">Identificador de paquete</target>
+        <target state="translated">Identificador del paquete</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_NoNuGetSources">
@@ -397,27 +397,27 @@ Ejecute "dotnet {1} --show-aliases" sin argumentos para mostrar todos los alias.
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Authors">
         <source>Authors</source>
-        <target state="new">Authors</target>
+        <target state="translated">Autores</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Description">
         <source>Details</source>
-        <target state="new">Details</target>
+        <target state="translated">Detalles</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Languages">
         <source>Languages</source>
-        <target state="new">Languages</target>
+        <target state="translated">Idiomas</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_License">
         <source>License</source>
-        <target state="new">License</target>
+        <target state="translated">Licencia</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_LicenseExpression">
         <source>License Expression</source>
-        <target state="new">License Expression</target>
+        <target state="translated">Expresión de licencia</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_LicenseMetadata">
@@ -427,22 +427,22 @@ Ejecute "dotnet {1} --show-aliases" sin argumentos para mostrar todos los alias.
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_LicenseUrl">
         <source>License Url</source>
-        <target state="new">License Url</target>
+        <target state="translated">URL de la licencia</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Owners">
         <source>Owners</source>
-        <target state="new">Owners</target>
+        <target state="translated">Propietarios</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_PrefixReserved">
         <source>Reserved</source>
-        <target state="new">Reserved</target>
+        <target state="translated">Reservado</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_RepoUrl">
         <source>Repository Url</source>
-        <target state="new">Repository Url</target>
+        <target state="translated">Dirección URL del repositorio</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_ShortNames">
@@ -457,27 +457,27 @@ Ejecute "dotnet {1} --show-aliases" sin argumentos para mostrar todos los alias.
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Tags">
         <source>Tags</source>
-        <target state="new">Tags</target>
+        <target state="translated">Etiquetas</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Templates">
         <source>Templates</source>
-        <target state="new">Templates</target>
+        <target state="translated">Plantillas</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Version">
         <source>Package version</source>
-        <target state="new">Package version</target>
+        <target state="translated">Versión del paquete</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_UnableToLoadResorce">
         <source>Could not parse NuGet source '{0}', so it was discarded</source>
-        <target state="translated">No se pudo analizar el '{0}' de origen de NuGet, por lo que se descartó.</target>
+        <target state="translated">No se pudo analizar el origen de NuGet ''{0}, por lo que se descartó</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_UnableToLoadResorces">
         <source>Failed to load NuGet sources configured for the folder {0}</source>
-        <target state="new">Failed to load NuGet sources configured for the folder {0}</target>
+        <target state="translated">No se pudieron cargar los orígenes de NuGet configurados para la carpeta {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="DisplaysHelp">
@@ -562,12 +562,14 @@ The header is followed by the list of parameters and their errors (might be seve
       To search for the template packages on NuGet.org, run:
         dotnet new search --package {0}
     </source>
-        <target state="translated">No se encontraron paquetes de plantillas que coincidan: {0}.
+        <target state="translated">
+      No se encontraron paquetes de plantilla que coincidan: {0}.
       
-Para enumerar los paquetes de plantillas instalados, ejecute:
-        nueva desinstalación de dotnet
-      Para buscar los paquetes de plantillas en NuGet.org, ejecute:
-        dotnet new search --package {0}    </target>
+      Para enumerar los paquetes de plantilla instalados, ejecute:
+      dotnet new uninstall
+      Para buscar los paquetes de plantilla en NuGet.org, ejecute:
+       dotnet new search --package {0}
+    </target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_Info_NoMatchingTemplates">
@@ -830,7 +832,7 @@ Para enumerar los paquetes de plantillas instalados, ejecute:
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_MultipleJsonFiles">
         <source>More than one file found that matches '{0}'.</source>
-        <target state="translated">Se encontró más de un archivo que coincide con '{0}'.</target>
+        <target state="translated">Se encontró más de un archivo que coincide con ''{0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_NoJsonFile">
@@ -840,12 +842,12 @@ Para enumerar los paquetes de plantillas instalados, ejecute:
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_ParentPropertyPathInvalid">
         <source>Parent property path '{0}' could not be traversed.</source>
-        <target state="translated">No se pudo recorrer la ruta de acceso de la propiedad primaria '{0}'.</target>
+        <target state="translated">No se pudo atravesar la ruta de acceso de la propiedad primaria '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Succeeded">
         <source>Successfully modified {0}.</source>
-        <target state="translated">La {0} se modificó correctamente.</target>
+        <target state="translated">{0} modificado correctamente.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
@@ -981,7 +983,7 @@ Para enumerar los paquetes de plantillas instalados, ejecute:
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Download_Error_VulnerablePackage">
         <source>Failed to install {0}, due to detected vulnerabilities:</source>
-        <target state="translated">No se pudo instalar {0} debido a vulnerabilidades detectadas:</target>
+        <target state="translated">No se pudo instalar {0}, debido a vulnerabilidades detectadas:</target>
         <note>{0} - template package name.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Download_VulnerablePackage">
@@ -1156,22 +1158,22 @@ Para enumerar los paquetes de plantillas instalados, ejecute:
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Critical">
         <source>Critical</source>
-        <target state="new">Critical</target>
+        <target state="translated">Crítico</target>
         <note>represents nuget api severity of level 3.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_High">
         <source>High</source>
-        <target state="new">High</target>
+        <target state="translated">Alto</target>
         <note>represents nuget api severity of level 2.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Low">
         <source>Low</source>
-        <target state="new">Low</target>
+        <target state="translated">Bajo</target>
         <note>represents nuget api severity of level 0.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Moderate">
         <source>Moderate</source>
-        <target state="new">Moderate</target>
+        <target state="translated">Moderado</target>
         <note>represents nuget api severity of level 1.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled">

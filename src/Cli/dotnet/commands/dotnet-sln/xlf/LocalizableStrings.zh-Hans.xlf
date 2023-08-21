@@ -99,7 +99,7 @@
       </trans-unit>
       <trans-unit id="SolutionFolderHeader">
         <source>Solution Folder(s)</source>
-        <target state="translated">解决方案文件夹()</target>
+        <target state="translated">解决方案文件夹</target>
         <note />
       </trans-unit>
     </body>
