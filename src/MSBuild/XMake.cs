@@ -17,30 +17,28 @@ using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Microsoft.Build.Collections;
+
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Experimental;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Graph;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
-using static Microsoft.Build.CommandLine.MSBuildApp;
-using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
-using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
+
 using FileLogger = Microsoft.Build.Logging.FileLogger;
-using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
+using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
-using SimpleErrorLogger = Microsoft.Build.Logging.SimpleErrorLogger.SimpleErrorLogger;
+using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
+using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
 using TerminalLogger = Microsoft.Build.Logging.TerminalLogger.TerminalLogger;
+using Microsoft.Build.Shared.Debugging;
+using Microsoft.Build.Experimental;
+using Microsoft.Build.Framework.Telemetry;
+using Microsoft.Build.Internal;
 
 #nullable disable
 
@@ -709,10 +707,6 @@ namespace Microsoft.Build.CommandLine
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
                 bool question = false;
-                string[] getProperty = Array.Empty<string>();
-                string[] getItem = Array.Empty<string>();
-                string[] getTargetResult = Array.Empty<string>();
-                BuildResult result = null;
 
                 GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _);
                 bool buildCanBeInvoked = ProcessCommandLineSwitches(
@@ -749,9 +743,6 @@ namespace Microsoft.Build.CommandLine
                                             ref outputResultsCache,
                                             ref lowPriority,
                                             ref question,
-                                            ref getProperty,
-                                            ref getItem,
-                                            ref getTargetResult,
                                             recursing: false,
 #if FEATURE_GET_COMMANDLINE
                                             commandLine);
@@ -785,30 +776,11 @@ namespace Microsoft.Build.CommandLine
 
                     DateTime t1 = DateTime.Now;
 
-                    bool outputPropertiesItemsOrTargetResults = getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0;
-
                     // If the primary file passed to MSBuild is a .binlog file, play it back into passed loggers
                     // as if a build is happening
                     if (FileUtilities.IsBinaryLogFilename(projectFile))
                     {
                         ReplayBinaryLog(projectFile, loggers, distributedLoggerRecords, cpuCount);
-                    }
-                    else if (outputPropertiesItemsOrTargetResults && FileUtilities.IsSolutionFilename(projectFile))
-                    {
-                        exitType = ExitType.BuildError;
-                        CommandLineSwitchException.Throw("SolutionBuildInvalidForCommandLineEvaluation",
-                            getProperty.Length > 0 ? "getProperty" :
-                            getItem.Length > 0 ? "getItem" :
-                            "getTargetResult");
-                    }
-                    else if ((getProperty.Length > 0 || getItem.Length > 0) && (targets is null || targets.Length == 0))
-                    {
-                        using (ProjectCollection collection = new(globalProperties, loggers, ToolsetDefinitionLocations.Default))
-                        {
-                            Project project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
-                            exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project);
-                            collection.LogBuildFinishedEvent(exitType == ExitType.Success);
-                        }
                     }
                     else // regular build
                     {
@@ -844,8 +816,6 @@ namespace Microsoft.Build.CommandLine
                                     question,
                                     inputResultsCaches,
                                     outputResultsCache,
-                                    saveProjectResult: outputPropertiesItemsOrTargetResults,
-                                    ref result,
                                     commandLine))
                         {
                             exitType = ExitType.BuildError;
@@ -857,11 +827,6 @@ namespace Microsoft.Build.CommandLine
                     TimeSpan elapsedTime = t2.Subtract(t1);
 
                     string timerOutputFilename = Environment.GetEnvironmentVariable("MSBUILDTIMEROUTPUTS");
-
-                    if (outputPropertiesItemsOrTargetResults && targets?.Length > 0 && result is not null)
-                    {
-                        exitType = OutputBuildInformationInJson(result, getProperty, getItem, getTargetResult, loggers, exitType);
-                    }
 
                     if (!string.IsNullOrEmpty(timerOutputFilename))
                     {
@@ -1020,64 +985,6 @@ namespace Microsoft.Build.CommandLine
             return exitType;
         }
 
-        private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, Project project)
-        {
-            try
-            {
-                // Special case if the user requests exactly one property: skip json formatting
-                if (getProperty.Length == 1 && getItem.Length == 0)
-                {
-                    Console.WriteLine(project.GetPropertyValue(getProperty[0]));
-                }
-                else
-                {
-                    JsonOutputFormatter jsonOutputFormatter = new();
-                    jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
-                    jsonOutputFormatter.AddItemsInJsonFormat(getItem, project);
-                    Console.WriteLine(jsonOutputFormatter.ToString());
-                }
-
-                return ExitType.Success;
-            }
-            catch (InvalidProjectFileException e)
-            {
-                Console.Error.WriteLine(e.Message);
-                return ExitType.BuildError;
-            }
-        }
-
-        private static ExitType OutputBuildInformationInJson(BuildResult result, string[] getProperty, string[] getItem, string[] getTargetResult, ILogger[] loggers, ExitType exitType)
-        {
-            ProjectInstance builtProject = result.ProjectStateAfterBuild;
-
-            ILogger logger = loggers.FirstOrDefault(l => l is SimpleErrorLogger);
-            if (logger is not null)
-            {
-                exitType = exitType == ExitType.Success && (logger as SimpleErrorLogger).HasLoggedErrors ? ExitType.BuildError : exitType;
-            }
-
-            if (builtProject is null)
-            {
-                // Build failed; do not proceed
-                Console.Error.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildFailedWithPropertiesItemsOrTargetResultsRequested"));
-            }
-            // Special case if the user requests exactly one property: skip the json formatting
-            else if (getProperty.Length == 1 && getItem.Length == 0 && getTargetResult.Length == 0)
-            {
-                Console.WriteLine(builtProject.GetPropertyValue(getProperty[0]));
-            }
-            else
-            {
-                JsonOutputFormatter jsonOutputFormatter = new();
-                jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => builtProject.GetPropertyValue(property));
-                jsonOutputFormatter.AddItemInstancesInJsonFormat(getItem, builtProject);
-                jsonOutputFormatter.AddTargetResultsInJsonFormat(getTargetResult, result);
-                Console.WriteLine(jsonOutputFormatter.ToString());
-            }
-
-            return exitType;
-        }
-
         /// <summary>
         /// Handler for when CTRL-C or CTRL-BREAK is called.
         /// CTRL-BREAK means "die immediately"
@@ -1230,8 +1137,6 @@ namespace Microsoft.Build.CommandLine
             bool question,
             string[] inputResultsCaches,
             string outputResultsCache,
-            bool saveProjectResult,
-            ref BuildResult result,
 #if FEATURE_GET_COMMANDLINE
             string commandLine)
 #else
@@ -1454,8 +1359,7 @@ namespace Microsoft.Build.CommandLine
 
                     BuildManager buildManager = BuildManager.DefaultBuildManager;
 
-                    result = null;
-                    GraphBuildResult graphResult = null;
+                    BuildResultCode? result = null;
 
                     if (!Traits.Instance.EscapeHatches.DoNotSendDeferredMessagesToBuildManager)
                     {
@@ -1499,30 +1403,21 @@ namespace Microsoft.Build.CommandLine
                             BuildRequestData buildRequest = null;
                             if (!restoreOnly)
                             {
-                                // By default, the project state is thrown out after a build. The ProvideProjectStateAfterBuild flag adds the project state after build
-                                // to the BuildResult passed back at the end of the build. This can then be used to find the value of properties, items, etc. after the
-                                // build is complete.
-                                BuildRequestDataFlags flags = BuildRequestDataFlags.None;
-                                if (saveProjectResult)
-                                {
-                                    flags |= BuildRequestDataFlags.ProvideProjectStateAfterBuild;
-                                }
-
                                 if (graphBuildOptions != null)
                                 {
-                                    graphBuildRequest = new GraphBuildRequestData(new[] { new ProjectGraphEntryPoint(projectFile, globalProperties) }, targets, null, flags, graphBuildOptions);
+                                    graphBuildRequest = new GraphBuildRequestData(new[] { new ProjectGraphEntryPoint(projectFile, globalProperties) }, targets, null, BuildRequestDataFlags.None, graphBuildOptions);
                                 }
                                 else
                                 {
-                                    buildRequest = new BuildRequestData(projectFile, globalProperties, toolsVersion, targets, null, flags);
+                                    buildRequest = new BuildRequestData(projectFile, globalProperties, toolsVersion, targets, null);
                                 }
                             }
 
                             if (enableRestore || restoreOnly)
                             {
-                                result = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties);
+                                (result, exception) = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties);
 
-                                if (result.OverallResult != BuildResultCode.Success)
+                                if (result != BuildResultCode.Success)
                                 {
                                     return false;
                                 }
@@ -1532,18 +1427,17 @@ namespace Microsoft.Build.CommandLine
                             {
                                 if (graphBuildOptions != null)
                                 {
-                                    graphResult = ExecuteGraphBuild(buildManager, graphBuildRequest);
-                                    result = graphResult[graphBuildRequest.ProjectGraph.EntryPointNodes.First()];
+                                    (result, exception) = ExecuteGraphBuild(buildManager, graphBuildRequest);
                                 }
                                 else
                                 {
-                                    result = ExecuteBuild(buildManager, buildRequest);
+                                    (result, exception) = ExecuteBuild(buildManager, buildRequest);
                                 }
                             }
 
-                            if (result != null && result.Exception == null)
+                            if (result != null && exception == null)
                             {
-                                success = result.OverallResult == BuildResultCode.Success;
+                                success = result == BuildResultCode.Success;
                             }
                         }
                         finally
@@ -1686,7 +1580,7 @@ namespace Microsoft.Build.CommandLine
             return messages;
         }
 
-        private static BuildResult ExecuteBuild(BuildManager buildManager, BuildRequestData request)
+        private static (BuildResultCode result, Exception exception) ExecuteBuild(BuildManager buildManager, BuildRequestData request)
         {
             BuildSubmission submission;
             lock (s_buildLock)
@@ -1702,10 +1596,11 @@ namespace Microsoft.Build.CommandLine
                 }
             }
 
-            return submission.Execute();
+            var result = submission.Execute();
+            return (result.OverallResult, result.Exception);
         }
 
-        private static GraphBuildResult ExecuteGraphBuild(BuildManager buildManager, GraphBuildRequestData request)
+        private static (BuildResultCode result, Exception exception) ExecuteGraphBuild(BuildManager buildManager, GraphBuildRequestData request)
         {
             GraphBuildSubmission submission;
             lock (s_buildLock)
@@ -1721,10 +1616,11 @@ namespace Microsoft.Build.CommandLine
                 }
             }
 
-            return submission.Execute();
+            GraphBuildResult result = submission.Execute();
+            return (result.OverallResult, result.Exception);
         }
 
-        private static BuildResult ExecuteRestore(string projectFile, string toolsVersion, BuildManager buildManager, Dictionary<string, string> globalProperties)
+        private static (BuildResultCode result, Exception exception) ExecuteRestore(string projectFile, string toolsVersion, BuildManager buildManager, Dictionary<string, string> globalProperties)
         {
             // Make a copy of the global properties
             Dictionary<string, string> restoreGlobalProperties = new Dictionary<string, string>(globalProperties);
@@ -2365,9 +2261,6 @@ namespace Microsoft.Build.CommandLine
             ref string outputResultsCache,
             ref bool lowPriority,
             ref bool question,
-            ref string[] getProperty,
-            ref string[] getItem,
-            ref string[] getTargetResult,
             bool recursing,
             string commandLine)
         {
@@ -2392,15 +2285,9 @@ namespace Microsoft.Build.CommandLine
             }
 #endif
 
-            bool shouldShowLogo = !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoLogo] &&
-                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Preprocess) &&
-                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetProperty) &&
-                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetItem) &&
-                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetTargetResult);
-
             // show copyright message if nologo switch is not set
             // NOTE: we heed the nologo switch even if there are switch errors
-            if (!recursing && shouldShowLogo)
+            if (!recursing && !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoLogo] && !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Preprocess))
             {
                 DisplayVersionMessage();
             }
@@ -2490,26 +2377,12 @@ namespace Microsoft.Build.CommandLine
                                                            ref outputResultsCache,
                                                            ref lowPriority,
                                                            ref question,
-                                                           ref getProperty,
-                                                           ref getItem,
-                                                           ref getTargetResult,
                                                            recursing: true,
                                                            commandLine);
                     }
 
                     // figure out which targets we are building
                     targets = ProcessTargetSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Target]);
-
-                    // If we are looking for the value of a specific property or item post-evaluation or a target post-build, figure that out now
-                    getProperty = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetProperty] ?? Array.Empty<string>();
-                    getItem = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetItem] ?? Array.Empty<string>();
-                    getTargetResult = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetTargetResult] ?? Array.Empty<string>();
-                    if (getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0)
-                    {
-                        commandLineSwitches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.Verbosity, "q", "q", true, true, true);
-                    }
-
-                    targets = targets.Union(getTargetResult, MSBuildNameIgnoreCaseComparer.Default).ToArray();
 
                     // figure out which ToolsVersion has been set on the command line
                     toolsVersion = ProcessToolsVersionSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ToolsVersion]);
@@ -2573,7 +2446,7 @@ namespace Microsoft.Build.CommandLine
 
                     outputResultsCache = ProcessOutputResultsCache(commandLineSwitches);
 
-                    bool terminallogger = ProcessTerminalLoggerConfiguration(commandLineSwitches);
+                    bool useTerminalLogger = ProcessTerminalLoggerConfiguration(commandLineSwitches, out string aggregatedTerminalLoggerParameters);
 
                     // figure out which loggers are going to listen to build events
                     string[][] groupedFileLoggerParameters = commandLineSwitches.GetFileLoggerParameters();
@@ -2584,13 +2457,13 @@ namespace Microsoft.Build.CommandLine
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Verbosity],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.DistributedFileLogger],
-                        terminallogger,
+                        useTerminalLogger,
+                        aggregatedTerminalLoggerParameters,
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters], // used by DistributedFileLogger
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation],
                         groupedFileLoggerParameters,
-                        getProperty.Length + getItem.Length + getTargetResult.Length > 0,
                         out distributedLoggerRecords,
                         out verbosity,
                         out originalVerbosity,
@@ -2642,61 +2515,28 @@ namespace Microsoft.Build.CommandLine
             return invokeBuild;
         }
 
-        private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches)
+        private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)
         {
-            string terminalloggerArg;
+            aggregatedParameters = AggregateParameters(commandLineSwitches);
+            string defaultValue = FindDefaultValue(aggregatedParameters);
 
-            // Command line wins, so check it first
-            if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.TerminalLogger))
+            string terminalLoggerArg = null;
+            if (!TryFromCommandLine(commandLineSwitches) && !TryFromEnvironmentVariables())
             {
-                // There's a switch set, but there might be more than one
-                string[] switches = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.TerminalLogger];
-
-                terminalloggerArg = switches[switches.Length - 1];
-
-                // if the switch was set but not to an explicit value, the value is "auto"
-                if (string.IsNullOrEmpty(terminalloggerArg))
-                {
-                    terminalloggerArg = "auto";
-                }
-            }
-            else
-            {
-                // Keep MSBUILDLIVELOGGER supporitng existing use. But MSBUILDTERMINALLOGGER takes precedence.
-                string liveLoggerArg = Environment.GetEnvironmentVariable("MSBUILDLIVELOGGER");
-                terminalloggerArg = Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER");
-                if (!string.IsNullOrEmpty(terminalloggerArg))
-                {
-                    s_globalMessagesToLogInBuildLoggers.Add(
-                        new BuildManager.DeferredBuildMessage($"The environment variable MSBUILDTERMINALLOGGER was set to {terminalloggerArg}.", MessageImportance.Low));
-                }
-                else if (!string.IsNullOrEmpty(liveLoggerArg))
-                {
-                    terminalloggerArg = liveLoggerArg;
-                    s_globalMessagesToLogInBuildLoggers.Add(
-                        new BuildManager.DeferredBuildMessage($"The environment variable MSBUILDLIVELOGGER was set to {liveLoggerArg}.", MessageImportance.Low));
-                }
-                else
-                {
-                    return false;
-                }
+                ApplyDefault();
             }
 
-            // We now have a string. It can be "true" or "false" which means just that:
-            if (bool.TryParse(terminalloggerArg, out bool result))
+            terminalLoggerArg = NormalizeIntoBooleanValues();
+
+            bool useTerminalLogger = false;
+            if (!TrueOrFalse())
             {
-                return result;
+                ItMustBeAuto();
             }
 
-            // or it can be "auto", meaning "enable if we can"
-            if (!terminalloggerArg.Equals("auto", StringComparison.OrdinalIgnoreCase))
-            {
-                CommandLineSwitchException.Throw("InvalidTerminalLoggerValue", terminalloggerArg);
-            }
+            return KnownTelemetry.LoggingConfigurationTelemetry.TerminalLogger = useTerminalLogger;
 
-            return DoesEnvironmentSupportTerminalLogger();
-
-            static bool DoesEnvironmentSupportTerminalLogger()
+            static bool CheckIfTerminalIsSupportedAndTryEnableAnsiColorCodes()
             {
                 (var acceptAnsiColorCodes, var outputIsScreen, s_originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
 
@@ -2723,6 +2563,152 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 return true;
+            }
+
+            string FindDefaultValue(string s)
+            {
+                // Find default configuration so it is part of telemetry even when default is not used.
+                // Default can be stored in /tlp:default=true|false|on|off|auto
+                string terminalLoggerDefault = null;
+                foreach (string parameter in s.Split(MSBuildConstants.SemicolonChar))
+                {
+                    if (string.IsNullOrWhiteSpace(parameter))
+                    {
+                        continue;
+                    }
+
+                    string[] parameterAndValue = parameter.Split(MSBuildConstants.EqualsChar);
+                    if (parameterAndValue[0].Equals("default", StringComparison.InvariantCultureIgnoreCase) && parameterAndValue.Length > 1)
+                    {
+                        terminalLoggerDefault = parameterAndValue[1];
+                    }
+                }
+
+                if (terminalLoggerDefault == null)
+                {
+                    terminalLoggerDefault = bool.FalseString;
+                    KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerDefault = bool.FalseString;
+                    KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerDefaultSource = "msbuild";
+                }
+                else
+                {
+                    // Lets check DOTNET CLI env var
+                    string dotnetCliEnvVar = Environment.GetEnvironmentVariable("DOTNET_CLI_CONFIGURE_MSBUILD_TERMINAL_LOGGER");
+                    KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerDefault = terminalLoggerDefault;
+                    KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerDefaultSource = string.IsNullOrWhiteSpace(dotnetCliEnvVar) ? "sdk" : "DOTNET_CLI_CONFIGURE_MSBUILD_TERMINAL_LOGGER";
+                }
+
+                return terminalLoggerDefault;
+            }
+
+            bool TryFromCommandLine(CommandLineSwitches commandLineSwitches1)
+            {
+                if (!commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.TerminalLogger))
+                {
+                    return false;
+                }
+
+                // There's a switch set, but there might be more than one
+                string[] switches = commandLineSwitches1[CommandLineSwitches.ParameterizedSwitch.TerminalLogger];
+
+                terminalLoggerArg = switches[switches.Length - 1];
+
+                // if the switch was set but not to an explicit value, the value is "auto"
+                if (string.IsNullOrEmpty(terminalLoggerArg))
+                {
+                    terminalLoggerArg = "auto";
+                }
+
+                KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerUserIntent = terminalLoggerArg ?? string.Empty;
+                KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerUserIntentSource = "arg";
+
+                return true;
+            }
+
+            bool TryFromEnvironmentVariables()
+            {
+                // Keep MSBUILDLIVELOGGER supporitng existing use. But MSBUILDTERMINALLOGGER takes precedence.
+                string liveLoggerArg = Environment.GetEnvironmentVariable("MSBUILDLIVELOGGER");
+                terminalLoggerArg = Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER");
+                if (!string.IsNullOrEmpty(terminalLoggerArg))
+                {
+                    s_globalMessagesToLogInBuildLoggers.Add(
+                        new BuildManager.DeferredBuildMessage($"The environment variable MSBUILDTERMINALLOGGER was set to {terminalLoggerArg}.", MessageImportance.Low));
+
+                    KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerUserIntent = terminalLoggerArg;
+                    KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerUserIntentSource = "MSBUILDTERMINALLOGGER";
+                }
+                else if (!string.IsNullOrEmpty(liveLoggerArg))
+                {
+                    terminalLoggerArg = liveLoggerArg;
+                    s_globalMessagesToLogInBuildLoggers.Add(
+                        new BuildManager.DeferredBuildMessage($"The environment variable MSBUILDLIVELOGGER was set to {liveLoggerArg}.", MessageImportance.Low));
+
+                    KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerUserIntent = terminalLoggerArg;
+                    KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerUserIntentSource = "MSBUILDLIVELOGGER";
+                }
+                else
+                {
+                    return false;
+                }
+
+                return true;
+            }
+
+            string NormalizeIntoBooleanValues()
+            {
+                // We now have a string`. It can be "true" or "false" which means just that:
+                if (terminalLoggerArg.Equals("on", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    terminalLoggerArg = bool.TrueString;
+                }
+                else if (terminalLoggerArg.Equals("off", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    terminalLoggerArg = bool.FalseString;
+                }
+
+                return terminalLoggerArg;
+            }
+
+            void ApplyDefault()
+            {
+                terminalLoggerArg = defaultValue;
+            }
+
+            string AggregateParameters(CommandLineSwitches switches)
+            {
+                string[] terminalLoggerParameters = switches[CommandLineSwitches.ParameterizedSwitch.TerminalLoggerParameters];
+                return terminalLoggerParameters?.Length > 0 ? MSBuildApp.AggregateParameters(string.Empty, terminalLoggerParameters) : string.Empty;
+            }
+
+            bool TrueOrFalse()
+            {
+                if (bool.TryParse(terminalLoggerArg, out bool result))
+                {
+                    useTerminalLogger = result;
+
+                    // Try Enable Ansi Color Codes when terminal logger is enabled/enforced.
+                    if (result)
+                    {
+                        // This needs to be called so Ansi Color Codes are enabled for the terminal logger.
+                        (_, _, s_originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            void ItMustBeAuto()
+            {
+                // or it can be "auto", meaning "enable if we can"
+                if (!terminalLoggerArg.Equals("auto", StringComparison.OrdinalIgnoreCase))
+                {
+                    CommandLineSwitchException.Throw("InvalidTerminalLoggerValue", terminalLoggerArg);
+                }
+
+                useTerminalLogger = CheckIfTerminalIsSupportedAndTryEnableAnsiColorCodes();
             }
         }
 
@@ -3482,12 +3468,12 @@ namespace Microsoft.Build.CommandLine
             bool noConsoleLogger,
             bool distributedFileLogger,
             bool terminalloggerOptIn,
+            string aggregatedTerminalLoggerParameters,
             string[] fileLoggerParameters,
             string[] consoleLoggerParameters,
             string[] binaryLoggerParameters,
             string[] profileEvaluationParameters,
             string[][] groupedFileLoggerParameters,
-            bool useSimpleErrorLogger,
             out List<DistributedLoggerRecord> distributedLoggerRecords,
             out LoggerVerbosity verbosity,
             out LoggerVerbosity originalVerbosity,
@@ -3510,23 +3496,15 @@ namespace Microsoft.Build.CommandLine
             var outVerbosity = verbosity;
             ProcessBinaryLogger(binaryLoggerParameters, loggers, ref outVerbosity);
 
-            // When returning the result of evaluation from the command line, do not use custom loggers.
-            if (!useSimpleErrorLogger)
-            {
-                ProcessLoggerSwitch(loggerSwitchParameters, loggers, verbosity);
-            }
+            ProcessLoggerSwitch(loggerSwitchParameters, loggers, verbosity);
 
             // Add any loggers which have been specified on the commandline
             distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
 
-            // Otherwise choose default console logger: None, TerminalLogger, or the older ConsoleLogger
-            if (useSimpleErrorLogger)
+            // Choose default console logger
+            if (terminalloggerOptIn)
             {
-                loggers.Add(new SimpleErrorLogger());
-            }
-            else if (terminalloggerOptIn)
-            {
-                ProcessTerminalLogger(noConsoleLogger, distributedLoggerRecords, cpuCount, loggers);
+                ProcessTerminalLogger(noConsoleLogger, aggregatedTerminalLoggerParameters, distributedLoggerRecords, cpuCount, loggers);
             }
             else
             {
@@ -3702,8 +3680,8 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static void ProcessTerminalLogger(
-            bool noConsoleLogger,
+        private static void ProcessTerminalLogger(bool noConsoleLogger,
+            string aggregatedLoggerParameters,
             List<DistributedLoggerRecord> distributedLoggerRecords,
             int cpuCount,
             List<ILogger> loggers)
@@ -3711,7 +3689,10 @@ namespace Microsoft.Build.CommandLine
             if (!noConsoleLogger)
             {
                 // A central logger will be created for both single proc and multiproc.
-                TerminalLogger logger = new TerminalLogger();
+                TerminalLogger logger = new TerminalLogger()
+                {
+                    Parameters = aggregatedLoggerParameters
+                };
 
                 // Check to see if there is a possibility we will be logging from an out-of-proc node.
                 // If so (we're multi-proc or the in-proc node is disabled), we register a distributed logger.

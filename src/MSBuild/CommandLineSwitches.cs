@@ -90,6 +90,7 @@ namespace Microsoft.Build.CommandLine
             FileLoggerParameters8,
             FileLoggerParameters9,
             TerminalLogger,
+            TerminalLoggerParameters,
             NodeReuse,
             Preprocess,
             Targets,
@@ -108,9 +109,6 @@ namespace Microsoft.Build.CommandLine
             LowPriority,
             Question,
             DetailedSummary,
-            GetProperty,
-            GetItem,
-            GetTargetResult,
             NumberOfParameterizedSwitches,
         }
 
@@ -251,6 +249,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters9", "flp9" },     ParameterizedSwitch.FileLoggerParameters9,      null,                           false,          "MissingFileLoggerParameterError",     true,   false),
             // To not break existing use, keep supporting live logger switches
             new ParameterizedSwitchInfo(  new string[] { "livelogger", "ll", "terminallogger", "tl" }, ParameterizedSwitch.TerminalLogger,      null,                           true,           null,                                  true,   true),
+            new ParameterizedSwitchInfo(  new string[] { "terminalloggerparameters", "tlp" },   ParameterizedSwitch.TerminalLoggerParameters,   null,                           false,          "MissingTerminalLoggerParameterError", true,   false),
             new ParameterizedSwitchInfo(  new string[] { "nodereuse", "nr" },                   ParameterizedSwitch.NodeReuse,                  null,                           false,          "MissingNodeReuseParameterError",      true,   false),
             new ParameterizedSwitchInfo(  new string[] { "preprocess", "pp" },                  ParameterizedSwitch.Preprocess,                 null,                           false,          null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "targets", "ts" },                     ParameterizedSwitch.Targets,                    null,                           false,          null,                                  true,   false),
@@ -269,9 +268,6 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "lowpriority", "low" },                ParameterizedSwitch.LowPriority,                null,                           false,          null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "question", "q" },                     ParameterizedSwitch.Question,                   null,                           false,          null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "detailedsummary", "ds" },             ParameterizedSwitch.DetailedSummary,            null,                           false,          null,                                  true,   false),
-            new ParameterizedSwitchInfo(  new string[] { "getProperty" },                       ParameterizedSwitch.GetProperty,                null,                           true,           "MissingGetPropertyError",             true,   false),
-            new ParameterizedSwitchInfo(  new string[] { "getItem" },                           ParameterizedSwitch.GetItem,                    null,                           true,           "MissingGetItemError",             true,   false),
-            new ParameterizedSwitchInfo(  new string[] { "getTargetResult" },                   ParameterizedSwitch.GetTargetResult,            null,                           true,           "MissingGetTargetResultError",             true,   false),
         };
 
         /// <summary>

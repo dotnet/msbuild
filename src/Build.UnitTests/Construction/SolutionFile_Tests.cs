@@ -282,7 +282,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 string solutionFileContents =
                     @"
                     Microsoft Visual Studio Solution File, Format Version 8.00
-                        Project('{F14B399A-7131-4C87-9E4B-1186C45EF12D}') = 'PrtProj', '" + Path.GetFileName(rptprojPath) + @"', '{CCCCCCCC-9925-4D57-9DAF-E0A9D936ABDB}'
+                        Project('{F14B399A-7131-4C87-9E4B-1186C45EF12D}') = 'RptProj', '" + Path.GetFileName(rptprojPath) + @"', '{CCCCCCCC-9925-4D57-9DAF-E0A9D936ABDB}'
                             ProjectSection(ProjectDependencies) = postProject
                             EndProjectSection
                         EndProject
