@@ -123,15 +123,13 @@ namespace Microsoft.Build.Tasks
                         {
                             if (FailIfNotIncremental)
                             {
-                                Log.LogErrorFromResources("Delete.DeletingFile", file.ItemSpec);
+                                Log.LogWarningFromResources("Delete.DeletingFile", file.ItemSpec);
                             }
-                            else
-                            {
-                                // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                                Log.LogMessageFromResources(MessageImportance.Normal, "Delete.DeletingFile", file.ItemSpec);
 
-                                File.Delete(file.ItemSpec);
-                            }
+                            // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
+                            Log.LogMessageFromResources(MessageImportance.Normal, "Delete.DeletingFile", file.ItemSpec);
+
+                            File.Delete(file.ItemSpec);
                         }
                         else
                         {

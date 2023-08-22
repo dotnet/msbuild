@@ -202,8 +202,7 @@ namespace Microsoft.Build.Tasks
                 {
                     if (FailIfNotIncremental)
                     {
-                        Log.LogErrorFromResources("Touch.CreatingFile", file, "AlwaysCreate");
-                        return false;
+                        Log.LogWarningFromResources("Touch.CreatingFile", file, "AlwaysCreate");
                     }
                     else
                     {
@@ -222,16 +221,12 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            // Ignore touching the disk when FailIfNotIncremental.
             if (FailIfNotIncremental)
             {
-                Log.LogErrorFromResources("Touch.Touching", file);
-                return false;
+                Log.LogWarningFromResources("Touch.Touching", file);
             }
-            else
-            {
-                Log.LogMessageFromResources(messageImportance, "Touch.Touching", file);
-            }
+
+            Log.LogMessageFromResources(messageImportance, "Touch.Touching", file);
 
             // If the file is read only then we must either issue an error, or, if the user so 
             // specified, make the file temporarily not read only.
