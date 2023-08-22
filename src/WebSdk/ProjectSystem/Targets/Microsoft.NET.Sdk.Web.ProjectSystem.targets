@@ -59,8 +59,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <EnableConfigurationBindingGenerator Condition="'$(EnableConfigurationBindingGenerator)' == ''">true</EnableConfigurationBindingGenerator>
   </PropertyGroup>
 
-  <!-- Enable the interceptors compiler feature by default for projects that use the RequestDelegateGenerator. -->
-  <PropertyGroup Condition="'$(EnableRequestDelegateGenerator)' == 'true'">
+  <!-- Enable the interceptors compiler feature by default for projects that use the RequestDelegateGenerator or the ConfigurationBindingGenerator. -->
+  <PropertyGroup Condition="'$(EnableRequestDelegateGenerator)' == 'true' Or '$(EnableConfigurationBindingGenerator)' == 'true'">
     <Features>$(Features);InterceptorsPreview</Features>
   </PropertyGroup>
 
