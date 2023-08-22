@@ -233,10 +233,7 @@ namespace Microsoft.DotNet.Tests.Commands
         public void GivenNuGetTrustCommandItDisplaysCompletions()
         {
             var expected = new[] {
-                "--algorithm",
-                "--allow-untrusted-root",
                 "--configfile",
-                "--owners",
                 "--verbosity",
                 "--help",
                 "-v",
