@@ -1,9 +1,10 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
 #nullable disable
@@ -42,7 +43,7 @@ namespace Microsoft.Build.Tasks
                 culture = item.GetMetadata("Culture");
                 // If 'WithCulture' is explicitly set to false, treat as 'culture-neutral' and keep the original name of the resource.
                 // https://github.com/dotnet/msbuild/issues/3064
-                treatAsCultureNeutral = item.GetMetadata("WithCulture").Equals("false", StringComparison.OrdinalIgnoreCase);
+                treatAsCultureNeutral = ConversionUtilities.ValidBooleanFalse(item.GetMetadata("WithCulture"));
             }
 
             /*
