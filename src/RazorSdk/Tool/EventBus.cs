@@ -35,7 +35,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
         public virtual void ConnectionCompleted(int count)
         {
         }
-        
+
         /// <summary>
         /// Called when a compilation is completed successfully and the response is written to the stream.
         /// </summary>

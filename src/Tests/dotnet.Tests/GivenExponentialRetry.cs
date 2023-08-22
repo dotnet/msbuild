@@ -15,7 +15,8 @@ namespace Microsoft.DotNet.Tests
         public void ItReturnsOnSuccess()
         {
             var retryCount = 0;
-            Func<Task<string>> action = () => {
+            Func<Task<string>> action = () =>
+            {
                 retryCount++;
                 return Task.FromResult("done");
             };
@@ -28,7 +29,8 @@ namespace Microsoft.DotNet.Tests
         public void ItRetriesOnError()
         {
             var retryCount = 0;
-            Func<Task<string>> action = () => {
+            Func<Task<string>> action = () =>
+            {
                 retryCount++;
                 throw new Exception();
             };

@@ -144,7 +144,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.Tasks
             try
             {
                 // Arrange
-                List<XDocument> locationWebConfigTemplateList = new List<XDocument>() {WebConfigTransformTemplates.WebConfigTemplate};
+                List<XDocument> locationWebConfigTemplateList = new List<XDocument>() { WebConfigTransformTemplates.WebConfigTemplate };
                 foreach (var locationWebConfigTemplate in locationWebConfigTemplateList)
                 {
 

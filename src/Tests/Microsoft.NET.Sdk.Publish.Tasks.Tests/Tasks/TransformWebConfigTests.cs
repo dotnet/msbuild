@@ -28,9 +28,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
                 var webConfig = transformWebConfigTask.GetWebConfigFileOrDefault(projectFile, "web.config");
 
                 //Assert
-                Assert.Equal(Path.Combine(projectFolder, webConfigToSearchFor), webConfig); 
+                Assert.Equal(Path.Combine(projectFolder, webConfigToSearchFor), webConfig);
             }
-            finally 
+            finally
             {
                 if (File.Exists(Path.Combine(projectFolder, webConfigToSearchFor)))
                 {
@@ -44,26 +44,26 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
         {
             string projectFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             string fileName = "unrelated.txt";
-            try 
+            try
             {
                 //Arrange
                 CreateDummyFile(projectFolder, fileName);
                 var transformWebConfigTask = new TransformWebConfig();
 
                 var projectFile = Path.Combine(projectFolder, "Test.csproj");
-                
+
                 //Act
                 var webConfig = transformWebConfigTask.GetWebConfigFileOrDefault(projectFile, "web.config");
 
                 //Assert
                 Assert.Equal(Path.Combine(projectFolder, "web.config"), webConfig);
-            } 
-            finally 
+            }
+            finally
             {
                 if (File.Exists(Path.Combine(projectFolder, fileName)))
                 {
                     File.Delete(Path.Combine(projectFolder, fileName));
-                } 
+                }
             }
         }
 

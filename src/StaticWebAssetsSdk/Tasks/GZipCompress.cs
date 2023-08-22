@@ -28,7 +28,7 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
             {
                 var file = FilesToCompress[i];
                 var outputRelativePath = file.ItemSpec;
-                
+
                 if (!AssetToCompress.TryFindInputFilePath(file, Log, out var inputFullPath))
                 {
                     return;

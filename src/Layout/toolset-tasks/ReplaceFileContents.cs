@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.Cli.Build
                 outText = outText.Replace(replacementPattern, replacementString);
             }
 
-            for (int i=0; i<ReplacementPatterns.Length; ++i)
+            for (int i = 0; i < ReplacementPatterns.Length; ++i)
             {
                 var replacementPattern = ReplacementPatterns[i].ItemSpec;
                 var replacementString = ReplacementStrings[i].ItemSpec;

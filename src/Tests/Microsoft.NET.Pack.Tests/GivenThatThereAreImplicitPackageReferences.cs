@@ -117,7 +117,7 @@ namespace Microsoft.NET.Pack.Tests
             testProject.References.Add("System.Web");
 
             var dependencies = GetFrameworkAssemblies(PackAndGetNuspec(testProject), out var _);
-            
+
             dependencies.Count().Should().Be(1);
             dependencies.Single().Attribute("assemblyName").Value.Should().Be("System.Web");
         }

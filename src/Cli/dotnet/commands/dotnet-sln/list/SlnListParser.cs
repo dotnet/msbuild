@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Cli
 {
     public static class SlnListParser
     {
-        public static readonly CliOption<bool> SolutionFolderOption = new ("--solution-folders") { Description = LocalizableStrings.ListSolutionFoldersArgumentDescription };
+        public static readonly CliOption<bool> SolutionFolderOption = new("--solution-folders") { Description = LocalizableStrings.ListSolutionFoldersArgumentDescription };
 
         private static readonly CliCommand Command = ConstructCommand();
 

@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 readerThreadExecuting.WaitOne();
 
                 Assert.True(readerThread.IsAlive);
-               
+
                 // give it a little while to ensure it is blocking
                 Thread.Sleep(10);
                 Assert.True(readerThread.IsAlive);

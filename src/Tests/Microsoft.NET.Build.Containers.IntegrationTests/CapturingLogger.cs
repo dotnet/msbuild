@@ -11,13 +11,13 @@ public class CapturingLogger : ILogger
     public string Parameters { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
     private List<BuildMessageEventArgs> _messages = new();
-    public IReadOnlyList<BuildMessageEventArgs> Messages {get  { return _messages; } }
+    public IReadOnlyList<BuildMessageEventArgs> Messages { get { return _messages; } }
 
     private List<BuildWarningEventArgs> _warnings = new();
-    public IReadOnlyList<BuildWarningEventArgs> Warnings {get  { return _warnings; } }
+    public IReadOnlyList<BuildWarningEventArgs> Warnings { get { return _warnings; } }
 
     private List<BuildErrorEventArgs> _errors = new();
-    public IReadOnlyList<BuildErrorEventArgs> Errors {get  { return _errors; } }
+    public IReadOnlyList<BuildErrorEventArgs> Errors { get { return _errors; } }
 
     public List<string> AllMessages => Errors.Select(e => e.Message!).Concat(Warnings.Select(w => w.Message!)).Concat(Messages.Select(m => m.Message!)).ToList();
 

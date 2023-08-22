@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Tests
             resolverCalls.Should()
                 .HaveCount(2)
                 .And
-                .ContainInOrder(new [] {1, 2});
+                .ContainInOrder(new[] { 1, 2 });
 
         }
 
@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Tests
             resolverCalls.Should()
                 .HaveCount(1)
                 .And
-                .ContainInOrder(new [] {1});
+                .ContainInOrder(new[] { 1 });
 
         }
     }

@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
             this.output = output;
         }
 
-        [Fact] 
+        [Fact]
         public void RestoreCapturesArgumentsToForwardToMSBuildWhenTargetIsSpecified()
         {
             var result = Parser.Instance.Parse(@"dotnet restore .\some.csproj --packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");

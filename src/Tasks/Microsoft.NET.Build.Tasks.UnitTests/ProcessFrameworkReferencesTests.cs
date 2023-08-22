@@ -166,7 +166,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 RuntimeGraphPath =
                     runtimeGraphPathPath,
                 FrameworkReferences =
-                    new[] {new MockTaskItem("Microsoft.Windows.SDK.NET.Ref", new Dictionary<string, string>())},
+                    new[] { new MockTaskItem("Microsoft.Windows.SDK.NET.Ref", new Dictionary<string, string>()) },
                 KnownFrameworkReferences = new[]
                 {
                     new MockTaskItem("Microsoft.Windows.SDK.NET.Ref",

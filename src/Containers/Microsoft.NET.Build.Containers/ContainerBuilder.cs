@@ -82,7 +82,8 @@ public static class ContainerBuilder
             {
                 logger.LogWarning(Resource.GetString(nameof(s)));
             },
-            logError: (s, a) => {
+            logError: (s, a) =>
+            {
                 hasErrors = true;
                 if (a is null)
                 {

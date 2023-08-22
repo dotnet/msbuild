@@ -77,7 +77,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 AssemblyVersion = new Version(4, 1, 0, 0),
                 ItemType = ConflictItemType.Platform
             };
-            
+
             Assert.Null(resolver.Resolve(packageItem, platformItem));
             Assert.Null(resolver.Resolve(platformItem, packageItem));
 

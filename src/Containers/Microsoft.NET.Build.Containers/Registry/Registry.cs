@@ -1,12 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Extensions.Logging;
-using Microsoft.NET.Build.Containers.Resources;
-using NuGet.RuntimeModel;
 using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Text.Json.Nodes;
+using Microsoft.Extensions.Logging;
+using Microsoft.NET.Build.Containers.Resources;
+using NuGet.RuntimeModel;
 
 namespace Microsoft.NET.Build.Containers;
 
@@ -92,7 +92,8 @@ internal sealed class Registry
     /// <remarks>
     /// Google Artifact Registry locations (one for each availability zone) are of the form "ZONE-docker.pkg.dev".
     /// </remarks>
-    public bool IsGoogleArtifactRegistry {
+    public bool IsGoogleArtifactRegistry
+    {
         get => RegistryName.EndsWith("-docker.pkg.dev", StringComparison.Ordinal);
     }
 
@@ -153,7 +154,8 @@ internal sealed class Registry
         var runtimeGraph = GetRuntimeGraphForDotNet(runtimeIdentifierGraphPath);
         var ridManifestDict = GetManifestsByRid(manifestList);
         var bestManifestRid = GetBestMatchingRid(runtimeGraph, runtimeIdentifier, ridManifestDict.Keys);
-        if (bestManifestRid is null) {
+        if (bestManifestRid is null)
+        {
             throw new BaseImageNotFoundException(runtimeIdentifier, repositoryName, reference, ridManifestDict.Keys);
         }
         PlatformSpecificManifest matchingManifest = ridManifestDict[bestManifestRid];
@@ -170,7 +172,8 @@ internal sealed class Registry
     IReadOnlyDictionary<string, PlatformSpecificManifest> GetManifestsByRid(ManifestListV2 manifestList)
     {
         var ridDict = new Dictionary<string, PlatformSpecificManifest>();
-        foreach (var manifest in manifestList.manifests) {
+        foreach (var manifest in manifestList.manifests)
+        {
             if (CreateRidForPlatform(manifest.platform) is { } rid)
             {
                 ridDict.TryAdd(rid, manifest);
@@ -207,7 +210,7 @@ internal sealed class Registry
         // TODO: we _may_ need OS-specific version parsing. Need to do more research on what the field looks like across more manifest lists.
         var versionPart = platform.version?.Split('.') switch
         {
-            [var major, .. ] => major,
+            [var major, ..] => major,
             _ => null
         };
         var platformPart = platform.architecture switch
@@ -294,13 +297,13 @@ internal sealed class Registry
 
             int bytesRead = await contents.ReadAsync(chunkBackingStore, cancellationToken).ConfigureAwait(false);
 
-            ByteArrayContent content = new (chunkBackingStore, offset: 0, count: bytesRead);
+            ByteArrayContent content = new(chunkBackingStore, offset: 0, count: bytesRead);
             content.Headers.ContentLength = bytesRead;
 
             // manual because ACR throws an error with the .NET type {"Range":"bytes 0-84521/*","Reason":"the Content-Range header format is invalid"}
             //    content.Headers.Add("Content-Range", $"0-{contents.Length - 1}");
             Debug.Assert(content.Headers.TryAddWithoutValidation("Content-Range", $"{chunkStart}-{chunkStart + bytesRead - 1}"));
-            
+
             NextChunkUploadInformation nextChunk = await _registryAPI.Blob.Upload.UploadChunkAsync(patchUri, content, cancellationToken).ConfigureAwait(false);
             patchUri = nextChunk.UploadUri;
 
@@ -379,7 +382,7 @@ internal sealed class Registry
             }
 
             // Blob wasn't there; can we tell the server to get it from the base image?
-            if (! await _registryAPI.Blob.Upload.TryMountAsync(destination.Repository, source.Repository, digest, cancellationToken).ConfigureAwait(false))
+            if (!await _registryAPI.Blob.Upload.TryMountAsync(destination.Repository, source.Repository, digest, cancellationToken).ConfigureAwait(false))
             {
                 // The blob wasn't already available in another namespace, so fall back to explicitly uploading it
 
@@ -391,7 +394,8 @@ internal sealed class Registry
                     await destinationRegistry.PushLayerAsync(Layer.FromDescriptor(descriptor), destination.Repository, cancellationToken).ConfigureAwait(false);
                     _logger.LogInformation(Strings.Registry_LayerUploaded, digest, destinationRegistry.RegistryName);
                 }
-                else {
+                else
+                {
                     throw new NotImplementedException(Resource.GetString(nameof(Strings.MissingLinkToRegistry)));
                 }
             }
@@ -403,7 +407,7 @@ internal sealed class Registry
         }
         else
         {
-            foreach(var descriptor in builtImage.LayerDescriptors)
+            foreach (var descriptor in builtImage.LayerDescriptors)
             {
                 await uploadLayerFunc(descriptor).ConfigureAwait(false);
             }

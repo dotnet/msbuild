@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Installer.Windows
     [SupportedOSPlatform("windows")]
     internal class InstallServerElevationContext : InstallElevationContextBase
     {
-        public override bool IsClient => false;        
+        public override bool IsClient => false;
 
         /// <summary>
         /// Creates a new <see cref="InstallServerElevationContext"/> instance.

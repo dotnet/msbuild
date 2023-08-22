@@ -77,7 +77,8 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
         }
         return false;
 
-        static bool TryParseBearerAuthInfo(Dictionary<string, string> authValues, [NotNullWhen(true)] out AuthInfo? authInfo) {
+        static bool TryParseBearerAuthInfo(Dictionary<string, string> authValues, [NotNullWhen(true)] out AuthInfo? authInfo)
+        {
             if (authValues.TryGetValue("realm", out string? realm))
             {
                 string? service = null;
@@ -87,13 +88,15 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
                 authInfo = new AuthInfo(realm, service, scope);
                 return true;
             }
-            else {
+            else
+            {
                 authInfo = null;
                 return false;
             }
         }
 
-        static bool TryParseBasicAuthInfo(Dictionary<string, string> authValues, Uri requestUri, out AuthInfo? authInfo) {
+        static bool TryParseBasicAuthInfo(Dictionary<string, string> authValues, Uri requestUri, out AuthInfo? authInfo)
+        {
             authInfo = null;
             return true;
         }

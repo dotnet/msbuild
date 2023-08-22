@@ -1,15 +1,13 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using FluentAssertions;
 using Microsoft.Build.Framework;
 using Microsoft.NET.TestFramework;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-
 using Xunit;
 using Xunit.Abstractions;
-
 using static Microsoft.NET.Build.Tasks.ResolveTargetingPackAssets;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests
@@ -70,7 +68,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 });
         }
 
-            [Fact]
+        [Fact]
         public void Given_Passing_ResolvedTargetingPacks_It_Passes_Again_With_Cached_Results()
         {
             ResolveTargetingPackAssets task1 = InitializeMockTargetingPackAssetsDirectory(out string packageDirectory);
@@ -309,7 +307,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             StronglyTypedInputs defaultObject = new(
                 frameworkReferences: DefaultFrameworkReferences(),
                 resolvedTargetingPacks: DefaultTargetingPacks(Path.GetTempPath()),
-                runtimeFrameworks: new[] {new MockTaskItem("RuntimeFramework1", new Dictionary<string, string>()) },
+                runtimeFrameworks: new[] { new MockTaskItem("RuntimeFramework1", new Dictionary<string, string>()) },
                 generateErrorForMissingTargetingPacks: true,
                 nuGetRestoreSupported: true,
                 disableTransitiveFrameworkReferences: false,

@@ -10,7 +10,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Theory(Skip="https://github.com/microsoft/msbuild/issues/4488")]
+        [Theory(Skip = "https://github.com/microsoft/msbuild/issues/4488")]
         [InlineData(ToolsetInfo.CurrentTargetFramework, true)]
         public void DependentUponTest(string targetFramework, bool isExe)
         {

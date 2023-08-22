@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Text.RegularExpressions;
-using Microsoft.Build.Utilities;
 using Microsoft.AspNetCore.StaticWebAssets.Tasks;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.NET.Sdk.Razor.Test
 {
@@ -29,7 +29,7 @@ namespace Microsoft.NET.Sdk.Razor.Test
 
             // Assert
             result.Should().Be(true);
-            taskInstance.ScopedCss.Select(s => s.GetMetadata("CssScope")).Should().OnlyContain(item => 
+            taskInstance.ScopedCss.Select(s => s.GetMetadata("CssScope")).Should().OnlyContain(item =>
                 !string.IsNullOrEmpty(item) && new Regex("b-[a-z0-9]+").IsMatch(item));
 
             taskInstance.ScopedCss.Select(s => s.GetMetadata("CssScope")).Should().HaveCount(3).And.OnlyHaveUniqueItems();

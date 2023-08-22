@@ -54,7 +54,7 @@ namespace Microsoft.NET.Build.Tests
                 Name = "AspNetImplicitVersion",
                 TargetFrameworks = "netcoreapp2.1",
                 IsExe = true,
-                
+
             };
 
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);

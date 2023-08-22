@@ -1,9 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using FluentAssertions.Execution;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
+using FluentAssertions.Execution;
 
 namespace Microsoft.NET.TestFramework.Assertions
 {
@@ -74,24 +74,24 @@ namespace Microsoft.NET.TestFramework.Assertions
                     switch (attribute.Constructor.Kind)
                     {
                         case HandleKind.MethodDefinition:
-                        {
-                            var methodDef = metadataReader.GetMethodDefinition((MethodDefinitionHandle)attribute.Constructor);
-                            var declaringTypeHandle = methodDef.GetDeclaringType();
-                            var typeDefinition = metadataReader.GetTypeDefinition(declaringTypeHandle);
-                            var @namespace = metadataReader.GetString(typeDefinition.Namespace);
-                            var name = metadataReader.GetString(typeDefinition.Name);
-                            return $"{@namespace}.{name}";
-                        }
+                            {
+                                var methodDef = metadataReader.GetMethodDefinition((MethodDefinitionHandle)attribute.Constructor);
+                                var declaringTypeHandle = methodDef.GetDeclaringType();
+                                var typeDefinition = metadataReader.GetTypeDefinition(declaringTypeHandle);
+                                var @namespace = metadataReader.GetString(typeDefinition.Namespace);
+                                var name = metadataReader.GetString(typeDefinition.Name);
+                                return $"{@namespace}.{name}";
+                            }
                         case HandleKind.MemberReference:
-                        {
-                            var memberRef = metadataReader.GetMemberReference((MemberReferenceHandle)attribute.Constructor);
-                            var typeRef = metadataReader.GetTypeReference((TypeReferenceHandle)memberRef.Parent);
-                            var @namespace = metadataReader.GetString(typeRef.Namespace);
-                            var name = metadataReader.GetString(typeRef.Name);
-                            return $"{@namespace}.{name}";
-                        }
-                    default:
-                        throw new InvalidOperationException();
+                            {
+                                var memberRef = metadataReader.GetMemberReference((MemberReferenceHandle)attribute.Constructor);
+                                var typeRef = metadataReader.GetTypeReference((TypeReferenceHandle)memberRef.Parent);
+                                var @namespace = metadataReader.GetString(typeRef.Namespace);
+                                var name = metadataReader.GetString(typeRef.Name);
+                                return $"{@namespace}.{name}";
+                            }
+                        default:
+                            throw new InvalidOperationException();
                     }
                 }).ToArray();
             }

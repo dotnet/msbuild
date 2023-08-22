@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Installer.Windows
             DefaultSerializerSettings = new JsonSerializerSettings()
             {
                 NullValueHandling = NullValueHandling.Ignore
-            };          
+            };
         }
     }
 }

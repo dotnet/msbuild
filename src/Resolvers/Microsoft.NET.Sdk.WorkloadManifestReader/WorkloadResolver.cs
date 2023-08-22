@@ -148,7 +148,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         else
                         {
                             throw new WorkloadManifestCompositionException(Strings.ManifestDependencyMissing, dependency.Key, manifest.Id, manifest.ManifestPath);
-                    }
+                        }
                     }
                 }
 
@@ -452,7 +452,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         internal IEnumerable<(WorkloadPackId packId, WorkloadDefinition referencingWorkload, WorkloadManifest workloadDefinedIn)> GetPacksInWorkload(WorkloadDefinition workload, WorkloadManifest manifest)
         {
-            foreach((WorkloadDefinition w, WorkloadManifest m) in EnumerateWorkloadWithExtends(workload, manifest))
+            foreach ((WorkloadDefinition w, WorkloadManifest m) in EnumerateWorkloadWithExtends(workload, manifest))
             {
                 if (w.Packs != null && w.Packs.Count > 0)
                 {
@@ -717,7 +717,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             }
             throw new Exception($"Manifest with id {manifestId} does not exist.");
         }
-            
+
 
         public IEnumerable<WorkloadManifestInfo> GetInstalledManifests() => _manifests.Select(t => t.Value.info);
     }

@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         public void WhenRunWithBothGlobalAndLocalShowErrorMessage()
         {
             var parseResult = Parser.Instance.Parse(
-                new[] { "dotnet", "tool", "install", "--local", "--tool-path", "/tmp/folder", PackageId});
+                new[] { "dotnet", "tool", "install", "--local", "--tool-path", "/tmp/folder", PackageId });
 
             var toolInstallCommand = new ToolInstallCommand(
                 parseResult);
@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         public void WhenRunWithGlobalAndToolManifestShowErrorMessage()
         {
             var parseResult = Parser.Instance.Parse(
-                new[] { "dotnet", "tool", "install", "-g", "--tool-manifest", "folder/my-manifest.format", "PackageId"});
+                new[] { "dotnet", "tool", "install", "-g", "--tool-manifest", "folder/my-manifest.format", "PackageId" });
 
             var toolInstallCommand = new ToolInstallCommand(
                 parseResult);

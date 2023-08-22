@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.BuildServer
         public const string RazorServerType = "rzc";
         public const string FilePrefix = "rzc-";
 
-        public RazorPidFile(FilePath path, int processId, FilePath serverPath, string pipeName) 
+        public RazorPidFile(FilePath path, int processId, FilePath serverPath, string pipeName)
         {
             Path = path;
             ProcessId = processId;

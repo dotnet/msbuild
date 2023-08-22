@@ -215,8 +215,9 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         }
     }
 
-    private void SafeLog(string message, params object[] formatParams) {
-        if(BuildEngine != null) Log.LogMessage(MessageImportance.High, message, formatParams);
+    private void SafeLog(string message, params object[] formatParams)
+    {
+        if (BuildEngine != null) Log.LogMessage(MessageImportance.High, message, formatParams);
     }
 
     public void Dispose()

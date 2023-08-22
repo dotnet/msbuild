@@ -3,14 +3,14 @@
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 {
+    using System.Collections.Generic;
+    using System.Linq;
     using Microsoft.Build.Framework;
+    using Microsoft.NET.Sdk.Publish.Tasks.Properties;
     using Collections = System.Collections;
     using Diagnostics = System.Diagnostics;
     using Framework = Build.Framework;
     using Utilities = Build.Utilities;
-    using System.Linq;
-    using System.Collections.Generic;
-    using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 
     /// <summary>
     /// WrapperClass for Microsoft.Web.Deployment
@@ -22,7 +22,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         {
         }
 
-        static public string AssemblyName { get { return "Microsoft.Web.Deployment";}}
+        static public string AssemblyName { get { return "Microsoft.Web.Deployment"; } }
         static public MSWebDeploymentAssembly DynamicAssembly { get; set; }
         static public void SetVersion(System.Version version)
         {
@@ -46,7 +46,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             {
                 foreach (dynamic item in deploymentCollection)
                 {
-                    if ( string.Compare(name,  item.Name.ToString(), System.StringComparison.OrdinalIgnoreCase) == 0)
+                    if (string.Compare(name, item.Name.ToString(), System.StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         foundObject = item;
                         return true;
@@ -115,7 +115,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         protected VSMSDeployObject _dest;
         protected VSMSDeployObject _src;
         protected IVSMSDeployHost _host;
-        
+
         protected /*VSMSDeploySyncOption*/ dynamic _option;
         protected bool _isCancelOperation = false;
         protected string _cancelMessage;
@@ -142,7 +142,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         public bool IsCancelOperation
         {
             get { return _isCancelOperation; }
-            set { 
+            set
+            {
                 _isCancelOperation = value;
                 if (!_isCancelOperation)
                     CancelMessage = null; // reset error age
@@ -154,7 +155,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             get { return _cancelMessage; }
             set { _cancelMessage = value; }
         }
-        
+
         /// <summary>
         /// called by the msdeploy to cancel the operation
         /// </summary>
@@ -168,7 +169,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         {
             if (_option == null)
             {
-                object option =  MSWebDeploymentAssembly.DynamicAssembly.CreateObject("Microsoft.Web.Deployment.DeploymentSyncOptions");
+                object option = MSWebDeploymentAssembly.DynamicAssembly.CreateObject("Microsoft.Web.Deployment.DeploymentSyncOptions");
 #if NET472
                 System.Type deploymentCancelCallbackType = MSWebDeploymentAssembly.DynamicAssembly.GetType("Microsoft.Web.Deployment.DeploymentCancelCallback");
                 object cancelCallbackDelegate = System.Delegate.CreateDelegate(deploymentCancelCallbackType, this, "CancelCallback");
@@ -239,15 +240,16 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// </summary>
         protected void InvokeMSdeploySync()
         {
-            /*VSMSDeploySyncOption*/ dynamic option = CreateOptionIfNeeded();
+            /*VSMSDeploySyncOption*/
+            dynamic option = CreateOptionIfNeeded();
             IsCancelOperation = false;
 
             _host.PopulateOptions(option);
 
             // you can reuse traceEventHandler if you know the function signuture is the same 
             System.Delegate traceEventHandler = DynamicAssembly.AddEventDeferHandler(
-                _src.BaseOptions, 
-                "Trace", 
+                _src.BaseOptions,
+                "Trace",
                 new DynamicAssembly.EventHandlerDynamicDelegate(TraceEventHandlerDynamic));
             DynamicAssembly.AddEventHandler(_dest.BaseOptions, "Trace", traceEventHandler);
 
@@ -262,7 +264,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
             _src.ResetBaseOptions();
             _dest.ResetBaseOptions();
-            
+
         }
 
         /// <summary>
@@ -298,7 +300,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// <param name="e"></param>
         // abstract protected void LogTrace(Deployment.DeploymentTraceEventArgs e);
 
-        abstract protected void LogTrace(dynamic e, System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.MessageImportance> customTypeLoging );
+        abstract protected void LogTrace(dynamic e, System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.MessageImportance> customTypeLoging);
 
         /// <summary>
         /// Encapsulate the things to be done after the deploy is done
@@ -342,9 +344,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             : base(msg, keyword, senderName)
         {
         }
-        
+
         Collections.Specialized.HybridDictionary m_hybridDictionary = new System.Collections.Specialized.HybridDictionary(10);
-#region IDictionary Members 
+        #region IDictionary Members 
         // Delegate everything to m_hybridDictionary
 
         public void Add(object key, object value)
@@ -398,9 +400,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             set { m_hybridDictionary[key] = value; }
         }
 
-#endregion
+        #endregion
 
-#region ICollection Members
+        #region ICollection Members
 
         public void CopyTo(System.Array array, int index)
         {
@@ -422,15 +424,15 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             get { return m_hybridDictionary.SyncRoot; }
         }
 
-#endregion
+        #endregion
 
-#region IEnumerable Members
+        #region IEnumerable Members
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }
-#endregion
+        #endregion
     }
 
 
@@ -442,13 +444,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
     {
         protected override void BeforeSync()
         {
-            string strMsg = string.Format(System.Globalization.CultureInfo.CurrentCulture,Resources.VSMSDEPLOY_Start, _src.ToString(), _dest.ToString());
+            string strMsg = string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.VSMSDEPLOY_Start, _src.ToString(), _dest.ToString());
             _host.Log.LogMessage(strMsg);
         }
 
 
         // Utility function to log all public instance property to CustomerBuildEventArgs 
-        private static void AddAllPropertiesToCustomBuildWithPropertyEventArgs(CustomBuildWithPropertiesEventArgs cbpEventArg,System.Object obj)
+        private static void AddAllPropertiesToCustomBuildWithPropertyEventArgs(CustomBuildWithPropertiesEventArgs cbpEventArg, System.Object obj)
         {
 #if NET472
             if (obj != null)
@@ -614,7 +616,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         string _enableLink;
         private string _disableSkipDirective;
         private string _enableSkipDirective;
-        
+
         bool _result = false;
         bool _whatIf = false;
         string _deploymentTraceLevel;
@@ -623,7 +625,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         private int m_retryInterval = -1;
 
         bool _allowUntrustedCert;
-        bool _skipExtraFilesOnServer=false;
+        bool _skipExtraFilesOnServer = false;
 
         private Framework.ITaskItem[] m_sourceITaskItem = null;
         private Framework.ITaskItem[] m_destITaskItem = null;
@@ -632,7 +634,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         private Framework.ITaskItem[] m_declareParameterItems = null;
         private Framework.ITaskItem[] m_importDeclareParametersItems = null;
         private Framework.ITaskItem[] m_simpleSetParamterItems = null;
-        private Framework.ITaskItem[] m_importSetParametersItems = null; 
+        private Framework.ITaskItem[] m_importSetParametersItems = null;
         private Framework.ITaskItem[] m_setParamterItems = null;
 
         private BaseMSDeployDriver m_msdeployDriver = null;
@@ -664,7 +666,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
         public bool SkipExtraFilesOnServer
         {
-            get { return _skipExtraFilesOnServer;}
+            get { return _skipExtraFilesOnServer; }
             set { _skipExtraFilesOnServer = value; }
         }
 
@@ -785,24 +787,26 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             set { this.m_setParamterItems = value; }
         }
 
-        public bool EnableMSDeployBackup {get;set;}
+        public bool EnableMSDeployBackup { get; set; }
 
         public bool EnableMSDeployAppOffline { get; set; }
 
-        public bool EnableMSDeployWebConfigEncryptRule {get;set;}
+        public bool EnableMSDeployWebConfigEncryptRule { get; set; }
 
         private string _userAgent;
-        public string UserAgent {
-            get{return _userAgent;}
-            set {
-                if(!string.IsNullOrEmpty(value))
+        public string UserAgent
+        {
+            get { return _userAgent; }
+            set
+            {
+                if (!string.IsNullOrEmpty(value))
                 {
                     _userAgent = MsDeploy.Utility.GetFullUserAgentString(value);
                 }
             }
         }
 
-        public Framework.ITaskItem[] AdditionalDestinationProviderOptions {get;set;}
+        public Framework.ITaskItem[] AdditionalDestinationProviderOptions { get; set; }
 
         public string MSDeployVersionsToTry
         {
@@ -851,7 +855,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             if (!MsDeploy.Utility.CheckMSDeploymentVersion(this.Log, out errorMessage))
                 return false;
 
-            VSMSDeployObject src = null ;
+            VSMSDeployObject src = null;
             VSMSDeployObject dest = null;
 
             if (this.Source == null || this.Source.GetLength(0) != 1)
@@ -946,25 +950,28 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             return Result;
         }
 
-#region IVSMSDeployHost Members
+        #region IVSMSDeployHost Members
 
         string IVsPublishMsBuildTaskHost.TaskName
         {
-            get {
+            get
+            {
                 return GetType().Name;
             }
         }
 
         Microsoft.Build.Utilities.TaskLoggingHelper IVsPublishMsBuildTaskHost.Log
         {
-            get {
+            get
+            {
                 return Log;
             }
         }
 
         Microsoft.Build.Framework.IBuildEngine IVsPublishMsBuildTaskHost.BuildEngine
         {
-            get {
+            get
+            {
                 return BuildEngine;
             }
         }
@@ -1004,7 +1011,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 destVsMsDeployobject.BaseOptions.TraceLevel = deploymentTraceEventLevel;
             }
 
-            Utility.AddSetParametersFilesVsMsDeployObject(srcVsMsDeployobject, ImportSetParametersItems); 
+            Utility.AddSetParametersFilesVsMsDeployObject(srcVsMsDeployobject, ImportSetParametersItems);
             Utility.AddSimpleSetParametersVsMsDeployObject(srcVsMsDeployobject, SimpleSetParameterItems, OptimisticParameterDefaultValue);
             Utility.AddSetParametersVsMsDeployObject(srcVsMsDeployobject, SetParameterItems, OptimisticParameterDefaultValue);
 
@@ -1040,11 +1047,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             {
                 foreach (ITaskItem item in AdditionalDestinationProviderOptions)
                 {
-                    if(!string.IsNullOrEmpty(item.ItemSpec))
+                    if (!string.IsNullOrEmpty(item.ItemSpec))
                     {
                         string settingName = item.GetMetadata("Name");
                         string settingValue = item.GetMetadata("Value");
-                        if(!string.IsNullOrEmpty(settingName) && !string.IsNullOrEmpty(settingValue))
+                        if (!string.IsNullOrEmpty(settingName) && !string.IsNullOrEmpty(settingValue))
                             destVsMsDeployobject.BaseOptions.AddDefaultProviderSetting(item.ItemSpec, settingName, settingValue);
                     }
                 }
@@ -1056,24 +1063,27 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             // Nothing to do here
         }
 
-        void IVSMSDeployHost.PopulateOptions(/*Microsoft.Web.Deployment.DeploymentSyncOptions*/ dynamic option) {
+        void IVSMSDeployHost.PopulateOptions(/*Microsoft.Web.Deployment.DeploymentSyncOptions*/ dynamic option)
+        {
             option.WhatIf = WhatIf;
             // Add the replace rules, we should consider doing the same thing for the skip rule
             MsDeploy.Utility.AddReplaceRulesToOptions(option.Rules, ReplaceRuleItems);
             MsDeploy.Utility.AddImportDeclareParametersFileOptions(option, ImportDeclareParametersItems);
             MsDeploy.Utility.AddDeclareParametersToOptions(option, DeclareParameterItems, OptimisticParameterDefaultValue);
-            
+
             option.UseChecksum = UseChecksum;
             option.DoNotDelete = SkipExtraFilesOnServer;
-            if(EnableMSDeployBackup == false)
+            if (EnableMSDeployBackup == false)
             {
                 // We need to remove the BackupRule to work around bug DevDiv: 478647. We try catch in case
                 // the rule isn't there and webdeploy throws. The documentation doesn't say what the exceptions are and the function
                 // is void.
-                try {
+                try
+                {
                     option.Rules.Remove("BackupRule");
                 }
-                catch {
+                catch
+                {
                 }
             }
 
@@ -1088,9 +1098,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
         }
 
-#endregion
+        #endregion
 
-#region ICancelableTask Members
+        #region ICancelableTask Members
 
         public void Cancel()
         {
@@ -1103,13 +1113,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                     m_msdeployDriver.IsCancelOperation = true;
                 }
             }
-            catch (System.Exception ex) 
+            catch (System.Exception ex)
             {
                 Diagnostics.Debug.Fail("Exception on ICancelableTask.Cancel being invoked:" + ex.Message);
             }
         }
 
-#endregion
+        #endregion
 
 
         public object GetProperty(string propertyName)
@@ -1140,11 +1150,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 object existingRule = option.Rules[ruleName];
                 ruleExists = true;
             }
-            catch (Collections.Generic.KeyNotFoundException){ }
+            catch (Collections.Generic.KeyNotFoundException) { }
 
             if (!ruleExists)
             {
-                dynamic appOfflineRuleHanlder = MSWebDeploymentAssembly.DynamicAssembly.CreateObject(handlerType, new object[]{});
+                dynamic appOfflineRuleHanlder = MSWebDeploymentAssembly.DynamicAssembly.CreateObject(handlerType, new object[] { });
                 dynamic appOfflineRule = MSWebDeploymentAssembly.DynamicAssembly.CreateObject("Microsoft.Web.Deployment.DeploymentRule",
                     new object[] { ruleName, appOfflineRuleHanlder });
                 option.Rules.Add(appOfflineRule);

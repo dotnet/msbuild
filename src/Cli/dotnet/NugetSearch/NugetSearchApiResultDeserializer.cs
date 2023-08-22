@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.NugetSearch
         {
             var options = new JsonSerializerOptions
             {
-                Converters = {new AuthorsConverter()},
+                Converters = { new AuthorsConverter() },
                 AllowTrailingCommas = true,
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };

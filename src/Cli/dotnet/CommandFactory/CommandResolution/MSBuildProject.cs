@@ -116,17 +116,17 @@ namespace Microsoft.DotNet.CommandFactory
                { "MSBuildExtensionsPath", Path.GetDirectoryName(msBuildExePath) }
             };
 
-            if(framework != null)
+            if (framework != null)
             {
                 globalProperties.Add("TargetFramework", framework.GetShortFolderName());
             }
 
-            if(outputPath != null)
+            if (outputPath != null)
             {
                 globalProperties.Add("OutputPath", outputPath);
             }
 
-            if(configuration != null)
+            if (configuration != null)
             {
                 globalProperties.Add("Configuration", configuration);
             }

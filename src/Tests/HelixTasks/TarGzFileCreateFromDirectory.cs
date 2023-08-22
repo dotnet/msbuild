@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
         protected override int ExecuteTool(string pathToTool, string responseFileCommands, string commandLineCommands)
         {
             int returnCode = base.ExecuteTool(pathToTool, responseFileCommands, commandLineCommands);
-            
+
             // returnCode 1 indicates that files changed during tar. In our case, it is likely being overwritten by another copy of the same file, so we can safely ignore this warning.
             if (IgnoreExitCode || returnCode == 1)
             {
@@ -143,10 +143,10 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
                     excludes += $" --exclude {excludeTaskItem.ItemSpec}";
                 }
             }
-            
+
             return excludes;
         }
-        
+
         protected override void LogToolCommand(string message)
         {
             base.LogToolCommand($"{base.GetWorkingDirectory()}> {message}");

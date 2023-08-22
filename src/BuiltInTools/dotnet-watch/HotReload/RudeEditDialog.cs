@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 "Do you want to restart your app - Yes (y) / No (n) / Always (a) / Never (v)?",
                 KeyPressed,
                 cancellationToken);
-            
+
             switch (key)
             {
                 case ConsoleKey.Escape:

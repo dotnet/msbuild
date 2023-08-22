@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
                     $"--add-source {expectedSourceValue1} " +
                     $"--add-source {expectedSourceValue2} console.test.app");
 
-            
+
             result.GetValue<string[]>(ToolInstallCommandParser.AddSourceOption)[0].Should().Be(expectedSourceValue1);
             result.GetValue<string[]>(ToolInstallCommandParser.AddSourceOption)[1].Should().Be(expectedSourceValue2);
         }
@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
 
             result.GetValue(ToolInstallCommandParser.GlobalOption).Should().Be(true);
         }
-        
+
         [Fact]
         public void InstallToolParserCanGetLocalOption()
         {

@@ -69,7 +69,7 @@ Options:
 
             try
             {
-                string [] newArgs = new[] { "classlib", "-o", projDir.Path, "--no-restore" };
+                string[] newArgs = new[] { "classlib", "-o", projDir.Path, "--no-restore" };
                 new DotnetNewCommand(Log)
                     .WithVirtualHive()
                     .WithWorkingDirectory(projDir.Path)
@@ -115,7 +115,7 @@ Options:
             return ret;
         }
 
-        private ProjDir AddValidRef(TestSetup setup, ProjDir proj, params string [] frameworkArgs)
+        private ProjDir AddValidRef(TestSetup setup, ProjDir proj, params string[] frameworkArgs)
         {
             var ret = new ProjDir(setup.ValidRefDir);
             new AddReferenceCommand(Log)

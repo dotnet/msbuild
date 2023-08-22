@@ -14,7 +14,7 @@ internal class MockReporter : IReporter
 
     public void Output(string message, string emoji = "⌚")
         => Messages.Add($"output {emoji} " + message);
-    
+
     public void Warn(string message, string emoji = "⌚")
         => Messages.Add($"warn {emoji} " + message);
 

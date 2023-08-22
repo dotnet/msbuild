@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Installer.Windows
         public static InstallResponseMessage Create(byte[] bytes)
         {
             string json = Encoding.UTF8.GetString(bytes);
-            
+
             return JsonConvert.DeserializeObject<InstallResponseMessage>(json, DefaultSerializerSettings);
         }
 

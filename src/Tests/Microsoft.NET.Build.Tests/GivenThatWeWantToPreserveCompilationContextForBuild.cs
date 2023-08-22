@@ -26,7 +26,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.AdditionalProperties.Add("PreserveCompilationContext", "true");
 
             if (withoutCopyingRefs)
-            { 
+            {
                 testProject.AdditionalProperties.Add("PreserveCompilationReferences", "false");
             }
 
@@ -106,7 +106,7 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
-        private static readonly string[] net462ReferenceOnlyAssemblies = new []
+        private static readonly string[] net462ReferenceOnlyAssemblies = new[]
         {
             "Microsoft.Win32.Primitives.dll",
             "netfx.force.conflicts.dll",

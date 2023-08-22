@@ -39,7 +39,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
 
             var destination = Path.Combine(assemblyDirectory, Path.GetFileName(filePath));
             CopyFile(filePath, destination);
-            
+
             var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(filePath);
             var resourcesNameWithoutExtension = fileNameWithoutExtension + ".resources";
             var resourcesNameWithExtension = resourcesNameWithoutExtension + ".dll";

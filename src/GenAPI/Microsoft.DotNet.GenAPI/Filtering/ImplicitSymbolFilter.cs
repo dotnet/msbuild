@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.GenAPI.Filtering
 
                 // If the method is an explicitly implemented getter or setter, exclude it.
                 // https://github.com/dotnet/roslyn/issues/53911
-                if (method.MethodKind == MethodKind.ExplicitInterfaceImplementation && 
+                if (method.MethodKind == MethodKind.ExplicitInterfaceImplementation &&
                     method.ExplicitInterfaceImplementations.Any(m => m is { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet }))
                 {
                     return false;

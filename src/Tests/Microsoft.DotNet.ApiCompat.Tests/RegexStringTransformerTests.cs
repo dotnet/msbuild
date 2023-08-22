@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
         [Fact]
         public void Transform_MultiplePatterns_ReturnsExpected()
         {
-            var patterns = new(string, string)[] 
+            var patterns = new (string, string)[]
             {
                 (@".+\\(.+)\\(.+)", "lib/$1/$2"),
                 (@"(.+)/(net\d.\d)-(.+)/(.+)", "runtimes/$3/$1/$2/$4"),

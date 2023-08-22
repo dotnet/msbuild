@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         [Fact]
         public void OrderingMatchesSemVer200Rules()
         {
-            TestCase [] orderedCases = new TestCase []
+            TestCase[] orderedCases = new TestCase[]
             {
                 new TestCase( "1.0.0-0.3.7",                false ),
                 new TestCase( "1.0.0-alpha",                false ),

@@ -21,7 +21,7 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager.CreateTestProject(project);
 
             string directoryBuildPropsPath = Path.Combine(testAsset.Path, "Directory.Build.props");
-            
+
             var directoryBuildPropsContent = @"
 <Project>
   <PropertyGroup>

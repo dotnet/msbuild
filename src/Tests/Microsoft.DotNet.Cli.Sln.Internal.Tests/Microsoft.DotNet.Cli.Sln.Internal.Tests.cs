@@ -96,12 +96,12 @@ EndGlobal
 
         private string CreateFile([CallerMemberName] string callerName = null, string identifier = null)
         {
-            var folder = _testAssetsManager.CreateTestDirectory(testName: callerName +  identifier);
+            var folder = _testAssetsManager.CreateTestDirectory(testName: callerName + identifier);
             var filename = Path.Combine(folder.Path, Guid.NewGuid().ToString() + ".tmp");
             using (new FileStream(filename, FileMode.CreateNew)) { }
             return filename;
         }
-        
+
 
         [Fact]
         public void WhenGivenAValidSlnFileItReadsAndVerifiesContents()
@@ -259,7 +259,7 @@ EndGlobal
             var attr = File.GetAttributes(tmpFile);
             attr = attr | FileAttributes.ReadOnly;
             File.SetAttributes(tmpFile, attr);
-        
+
             Action act = () => SlnFile.Read(tmpFile);
             act.Should().NotThrow("Because readonly file is not being modified.");
         }

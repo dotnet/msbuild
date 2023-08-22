@@ -4,8 +4,8 @@
 using System.Diagnostics;
 using System.Formats.Tar;
 using System.IO.Compression;
-using System.Security.Cryptography;
 using System.IO.Enumeration;
+using System.Security.Cryptography;
 
 namespace Microsoft.NET.Build.Containers;
 

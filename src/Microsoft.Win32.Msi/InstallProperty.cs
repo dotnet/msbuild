@@ -97,6 +97,6 @@ namespace Microsoft.Win32.Msi
         /// <summary>
         /// The product version. For more information, see the <see href="https://docs.microsoft.com/en-us/windows/desktop/Msi/productversion">ProductVersion</see> property.
         /// </summary>
-        public const string VERSIONSTRING = "VersionString";        
+        public const string VERSIONSTRING = "VersionString";
     }
 }

@@ -254,7 +254,7 @@ namespace Microsoft.NET.Build.Tests
             testProjectC.AdditionalProperties.Add("DisableTransitiveProjectReferences", "true");
             testProjectC.ReferencedProjects.Add(testProjectB);
             var testAsset = _testAssetsManager.CreateTestProject(testProjectC).WithProjectChanges((path, p) =>
-            { 
+            {
                 if (Path.GetFileNameWithoutExtension(path) == testProjectA.Name)
                 {
                     var ns = p.Root.Name.Namespace;

@@ -24,7 +24,8 @@ public class DockerRegistryManager
     {
         using TestLoggerFactory loggerFactory = new(testOutput);
 
-        if (!new DockerCli(loggerFactory).IsAvailable()) {
+        if (!new DockerCli(loggerFactory).IsAvailable())
+        {
             throw new InvalidOperationException("Docker is not available, tests cannot run");
         }
 
@@ -59,7 +60,7 @@ public class DockerRegistryManager
                         .Execute()
                         .Should().Pass();
 
-                    logger.LogInformation("Tagging image '{sourceRepo}/{sourceImage}:{sourceTag}' as '{targetRepo}/{targetImage}:{targetTag}'.",BaseImageSource, RuntimeBaseImage, tag, LocalRegistry, RuntimeBaseImage, tag);
+                    logger.LogInformation("Tagging image '{sourceRepo}/{sourceImage}:{sourceTag}' as '{targetRepo}/{targetImage}:{targetTag}'.", BaseImageSource, RuntimeBaseImage, tag, LocalRegistry, RuntimeBaseImage, tag);
                     ContainerCli.TagCommand(testOutput, $"{BaseImageSource}/{RuntimeBaseImage}:{tag}", $"{LocalRegistry}/{RuntimeBaseImage}:{tag}")
                         .Execute()
                         .Should().Pass();
@@ -84,7 +85,7 @@ public class DockerRegistryManager
                     {
                         ContainerCli.StopCommand(testOutput, s_registryContainerId).Execute();
                     }
-                    catch(Exception ex2)
+                    catch (Exception ex2)
                     {
                         logger.LogError(ex2, "Failed to stop the registry {id}.", s_registryContainerId);
                     }

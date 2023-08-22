@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Tools.Sln
             }
 
             bool hasRelativeRoot = !string.IsNullOrEmpty(relativeRoot);
-            
+
             if (_inRoot && hasRelativeRoot)
             {
                 // These two options are mutually exclusive

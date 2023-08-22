@@ -111,7 +111,7 @@ internal sealed class ImageConfig
 
         // These fields aren't (yet) supported by the task layer, but we should
         // preserve them if they're already set in the base image.
-        foreach (string propertyName in new [] { "Volumes", "StopSignal" })
+        foreach (string propertyName in new[] { "Volumes", "StopSignal" })
         {
             if (_config["config"]?[propertyName] is JsonNode propertyValue)
             {
@@ -126,7 +126,7 @@ internal sealed class ImageConfig
         // The number of (non empty) history items must match the number of layers in the image.
         // Some registries like JFrog Artifactory have there a strict validation rule (see sdk-container-builds#382).
         int numberOfLayers = _rootFsLayers.Count;
-        int numberOfNonEmptyLayerHistoryEntries = _history.Count(h =>h.empty_layer is null or false);
+        int numberOfNonEmptyLayerHistoryEntries = _history.Count(h => h.empty_layer is null or false);
         int missingHistoryEntries = numberOfLayers - numberOfNonEmptyLayerHistoryEntries;
         HistoryEntry customHistoryEntry = new(created: DateTime.UtcNow, author: ".NET SDK",
             created_by: $".NET SDK Container Tooling, version {Constants.Version}");
@@ -167,7 +167,7 @@ internal sealed class ImageConfig
         {
             history["comment"] = h.comment;
         }
-        if (h.created is {} date)
+        if (h.created is { } date)
         {
             history["created"] = RFC3339Format(date);
         }

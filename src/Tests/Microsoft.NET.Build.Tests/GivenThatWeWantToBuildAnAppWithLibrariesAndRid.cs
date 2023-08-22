@@ -106,7 +106,7 @@ namespace Microsoft.NET.Build.Tests
                 $"libuv{FileConstants.DynamicLibSuffix}"
             };
 
-            outputDirectory.Should().OnlyHaveFiles(expectedFiles.Where(x => !String.IsNullOrEmpty(x)).ToList() );
+            outputDirectory.Should().OnlyHaveFiles(expectedFiles.Where(x => !String.IsNullOrEmpty(x)).ToList());
 
             new DotnetCommand(Log, Path.Combine(outputDirectory.FullName, "App.dll"))
                 .Execute()

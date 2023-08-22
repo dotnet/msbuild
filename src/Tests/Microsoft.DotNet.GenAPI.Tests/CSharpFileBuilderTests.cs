@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
             bool includeEffectivelyPrivateSymbols = true,
             bool includeExplicitInterfaceImplementationSymbols = true,
             bool allowUnsafe = false,
-            [CallerMemberName]string assemblyName = "")
+            [CallerMemberName] string assemblyName = "")
         {
             StringWriter stringWriter = new();
 

@@ -196,7 +196,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         throw new FileNotFoundException(string.Format(Strings.ManifestFromWorkloadSetNotFound, manifestSpecifier.ToString(), _workloadSet.Version));
                     }
                     AddManifest(manifestSpecifier.Id.ToString(), manifestDirectory, manifestSpecifier.FeatureBand.ToString());
-                    
+
                 }
             }
 

@@ -95,9 +95,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 var value = data.Element(ns + "value").Value;
                 var comment = data.Element(ns + "comment")?.Value ?? "";
                 var prefix = value.Substring(0, value.IndexOf(' '));
-                
+
                 if (name.EndsWith("_Info"))
-                { 
+                {
                     comment.Should().NotContain("StrBegin",
                         because: "informational messages should not have error codes.");
                 }

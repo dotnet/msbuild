@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
                 return new Guid(res);
             }
-        }        
+        }
 
         // Do a byte order swap, .NET GUIDs store multi byte components in little
         // endian.

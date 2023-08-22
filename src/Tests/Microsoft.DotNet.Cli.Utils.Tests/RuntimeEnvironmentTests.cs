@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 .Trim('\"', '\'')
                 .ToLowerInvariant();
             Assert.Equal(id, RuntimeEnvironment.OperatingSystem.ToLowerInvariant());
-            
+
             string version = osRelease
                 .First(line => line.StartsWith("VERSION_ID=", StringComparison.OrdinalIgnoreCase))
                 .Substring("VERSION_ID=".Length)

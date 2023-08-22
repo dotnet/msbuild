@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli
             {
                 return false;
             }
-            
+
         }
 
         /*

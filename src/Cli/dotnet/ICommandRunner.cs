@@ -3,8 +3,8 @@
 
 namespace Microsoft.DotNet.Cli
 {
-    public interface ICommandRunner 
-    { 
-        int Run(string[] commandArgs); 
-    } 
+    public interface ICommandRunner
+    {
+        int Run(string[] commandArgs);
+    }
 }

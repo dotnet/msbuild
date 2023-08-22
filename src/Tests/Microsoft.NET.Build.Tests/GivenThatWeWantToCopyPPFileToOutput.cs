@@ -6,7 +6,7 @@ namespace Microsoft.NET.Build.Tests
     public class GivenThatWeHaveAPpContentFile : SdkTest
     {
         public GivenThatWeHaveAPpContentFile(ITestOutputHelper log) : base(log)
-        {}
+        { }
 
         [Fact]
         public void It_copies_to_output_successfully()
@@ -16,7 +16,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "CopyPPToOutputTest",
-                IsExe = true, 
+                IsExe = true,
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
             testProject.PackageReferences.Add(packageReference);

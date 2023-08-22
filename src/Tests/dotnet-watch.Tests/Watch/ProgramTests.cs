@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Watcher.Tests
         [InlineData(new[] { "--no-hot-reload", "run", "args" }, "args")]
         [InlineData(new[] { "--no-hot-reload", "--", "run", "args" }, "run,args")]
         [InlineData(new[] { "--no-hot-reload" }, "")]
-        [InlineData(new string[] {}, "")]
+        [InlineData(new string[] { }, "")]
         [InlineData(new[] { "run" }, "")]
         [InlineData(new[] { "run", "args" }, "args")]
         [InlineData(new[] { "--", "run", "args" }, "run,args")]

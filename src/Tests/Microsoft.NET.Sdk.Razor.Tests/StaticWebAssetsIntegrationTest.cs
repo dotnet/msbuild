@@ -962,7 +962,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             {
                 var tfm = project.Root.Descendants("TargetFramework").Single();
                 tfm.Name = "TargetFrameworks";
-                tfm.Value="net6.0;" + DefaultTfm;
+                tfm.Value = "net6.0;" + DefaultTfm;
             });
 
             var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path);

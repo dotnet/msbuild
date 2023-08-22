@@ -1,23 +1,23 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.CommandLine;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.ToolManifest;
 using Microsoft.DotNet.ToolPackage;
-using Microsoft.DotNet.Tools.Tool.Install;
 using Microsoft.DotNet.Tools.Tests.ComponentMocks;
+using Microsoft.DotNet.Tools.Tool.Install;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Frameworks;
 using NuGet.Versioning;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Install.LocalizableStrings;
-using Microsoft.DotNet.ToolManifest;
-using NuGet.Frameworks;
-using System.CommandLine;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tests.Commands.Tool
 {
-    public class ToolInstallLocalCommandTests:SdkTest
+    public class ToolInstallLocalCommandTests : SdkTest
     {
         private readonly IFileSystem _fileSystem;
         private readonly IToolPackageStore _toolPackageStore;
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         private readonly ToolManifestFinder _toolManifestFinder;
         private readonly ToolManifestEditor _toolManifestEditor;
 
-        public ToolInstallLocalCommandTests(ITestOutputHelper log):base(log) 
+        public ToolInstallLocalCommandTests(ITestOutputHelper log) : base(log)
         {
             _packageVersionA = NuGetVersion.Parse("1.0.4");
 
@@ -211,7 +211,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 new FilePath(_manifestFilePath),
                 _packageIdA,
                 new NuGetVersion(1, 1, 1),
-                new[] {_toolCommandNameA});
+                new[] { _toolCommandNameA });
 
             var toolInstallLocalCommand = GetDefaultTestToolInstallLocalCommand();
 
@@ -328,7 +328,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             installLocalCommand.Execute().Should().Be(0);
             _fileSystem.File.Exists(Path.Combine(_temporaryDirectory, ".config", "dotnet-tools.json")).Should().BeTrue();
-         }
+        }
 
         [Fact]
         public void GivenNoManifestFileAndCreateManifestIfNeededFlagItShouldCreateManifestInSln()
@@ -362,7 +362,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             ParseResult parseResult =
                 Parser.Instance.Parse(
                     $"dotnet tool install {_packageIdA.ToString()} --create-manifest-if-needed");
-            
+
             var installLocalCommand = new ToolInstallLocalCommand(
                 parseResult,
                 _toolPackageInstallerMock,

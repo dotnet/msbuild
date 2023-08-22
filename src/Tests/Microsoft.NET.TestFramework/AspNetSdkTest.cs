@@ -23,12 +23,12 @@ namespace Microsoft.NET.TestFramework
             [CallerMemberName] string callerName = "",
             string subdirectory = "",
             string overrideTfm = null,
-            string identifier = null) 
+            string identifier = null)
         {
             var projectDirectory = _testAssetsManager
                 .CopyTestAsset(testAsset, callingMethod: callerName, testAssetSubdirectory: subdirectory, identifier: identifier)
                 .WithSource()
-                .WithProjectChanges(project => 
+                .WithProjectChanges(project =>
                 {
                     var ns = project.Root.Name.Namespace;
                     var targetFramework = project.Descendants()

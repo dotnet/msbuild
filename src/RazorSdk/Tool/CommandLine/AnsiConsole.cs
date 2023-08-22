@@ -58,7 +58,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool.CommandLineUtils
             }
 
             var escapeScan = 0;
-            for (; ;)
+            for (; ; )
             {
                 var escapeIndex = message.IndexOf("\x1b[", escapeScan, StringComparison.Ordinal);
                 if (escapeIndex == -1)

@@ -1,9 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.DotNet.Cli.Utils;
 using NuGet.Frameworks;
 using NuGet.Versioning;
-using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.CommandFactory
 {
@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.CommandFactory
             {
                 return Enumerable.Empty<NuGetVersion>();
             }
-            
+
             var versionDirectories = Directory.EnumerateDirectories(toolBase);
 
             foreach (var versionDirectory in versionDirectories)

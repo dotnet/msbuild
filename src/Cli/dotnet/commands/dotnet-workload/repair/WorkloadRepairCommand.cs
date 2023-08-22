@@ -4,11 +4,11 @@
 using System.CommandLine;
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
-using Microsoft.Extensions.EnvironmentAbstractions;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Workloads.Workload.Install;
+using Microsoft.Extensions.EnvironmentAbstractions;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 namespace Microsoft.DotNet.Workloads.Workload.Repair
 {

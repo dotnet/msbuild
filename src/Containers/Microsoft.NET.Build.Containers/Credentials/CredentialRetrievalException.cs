@@ -7,9 +7,9 @@ namespace Microsoft.NET.Build.Containers.Credentials;
 
 internal sealed class CredentialRetrievalException : Exception
 {
-	public CredentialRetrievalException(string registry, Exception innerException)
-		: base(
+    public CredentialRetrievalException(string registry, Exception innerException)
+        : base(
             Resource.FormatString(nameof(Strings.FailedRetrievingCredentials), registry, innerException.Message),
             innerException)
-	{ }
+    { }
 }

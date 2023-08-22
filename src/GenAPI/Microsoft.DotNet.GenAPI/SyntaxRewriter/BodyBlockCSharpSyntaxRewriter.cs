@@ -86,7 +86,7 @@ namespace Microsoft.DotNet.GenAPI.SyntaxRewriter
         {
             return base.VisitConversionOperatorDeclaration(node) is ConversionOperatorDeclarationSyntax rs ?
                 rs.WithBody(GetThrowNullBody()).WithParameterList(rs.ParameterList.WithTrailingTrivia(SyntaxFactory.Space)) :
-                null; 
+                null;
         }
 
         /// <inheritdoc />

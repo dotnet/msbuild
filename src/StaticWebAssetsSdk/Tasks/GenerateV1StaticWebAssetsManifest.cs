@@ -116,7 +116,7 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
             }
 
             // Its important that we order the nodes here to produce a manifest deterministically.
-            return nodes.OrderBy(e=>e.Attribute(BasePath).Value).ThenBy(e => e.Attribute(NodePath).Value);
+            return nodes.OrderBy(e => e.Attribute(BasePath).Value).ThenBy(e => e.Attribute(NodePath).Value);
         }
 
         private bool ValidateArguments()
