@@ -1,16 +1,20 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if NETFRAMEWORK
 using Microsoft.Build.Utilities;
+#endif
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks
 {
+#if NETFRAMEWORK
+
     /// <summary>
     /// The AspNetCompiler task, which is a wrapper around aspnet_compiler.exe
     /// </summary>
-    public class AspNetCompiler : ToolTaskExtension
+    public class AspNetCompiler : ToolTaskExtension, IAspNetCompilerTaskContract
     {
         /*
             C:\WINDOWS\Microsoft.NET\Framework\v2.0.x86dbg>aspnet_compiler /?
@@ -337,5 +341,71 @@ namespace Microsoft.Build.Tasks
 
             return true;
         }
+    }
+
+#else
+
+    public class AspNetCompiler : TaskRequiresFramework, IAspNetCompilerTaskContract
+    {
+        public AspNetCompiler()
+            : base(nameof(AspNetCompiler))
+        {
+        }
+
+        #region Properties
+
+        public bool AllowPartiallyTrustedCallers { get; set; }
+
+        public bool DelaySign { get; set; }
+
+        public bool FixedNames { get; set; }
+
+        public string KeyContainer { get; set; }
+
+        public string KeyFile { get; set; }
+
+        public string MetabasePath { get; set; }
+
+        public string PhysicalPath { get; set; }
+
+        public string TargetPath { get; set; }
+
+        public string VirtualPath { get; set; }
+
+        public bool Updateable { get; set; }
+
+        public bool Force { get; set; }
+
+        public bool Debug { get; set; }
+
+        public bool Clean { get; set; }
+
+        public string TargetFrameworkMoniker { get; set; }
+
+        #endregion
+    }
+
+#endif
+
+    internal interface IAspNetCompilerTaskContract
+    {
+        #region Properties
+
+        bool AllowPartiallyTrustedCallers { get; set; }
+        bool DelaySign { get; set; }
+        bool FixedNames { get; set; }
+        string KeyContainer { get; set; }
+        string KeyFile { get; set; }
+        string MetabasePath { get; set; }
+        string PhysicalPath { get; set; }
+        string TargetPath { get; set; }
+        string VirtualPath { get; set; }
+        bool Updateable { get; set; }
+        bool Force { get; set; }
+        bool Debug { get; set; }
+        bool Clean { get; set; }
+        string TargetFrameworkMoniker { get; set; }
+
+        #endregion
     }
 }

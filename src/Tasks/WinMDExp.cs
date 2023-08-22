@@ -1,21 +1,28 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if NETFRAMEWORK
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
-using Microsoft.Build.Framework;
+
 using Microsoft.Build.Shared;
+#endif
+
+using System.Diagnostics.CodeAnalysis;
+
+using Microsoft.Build.Framework;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks
 {
+#if NETFRAMEWORK
+
     /// <summary>
     /// Exports a managed assembly to a windows runtime metadata.
     /// </summary>
-    public class WinMDExp : ToolTaskExtension
+    public class WinMDExp : ToolTaskExtension, IWinMDExpTaskContract
     {
         #region Properties
 
@@ -272,6 +279,70 @@ namespace Microsoft.Build.Tasks
 
             return false;
         }
+        #endregion
+    }
+
+#else
+
+    public class WinMDExp : TaskRequiresFramework, IWinMDExpTaskContract
+    {
+        public WinMDExp()
+            : base(nameof(WinMDExp))
+        {
+        }
+
+        #region Properties
+
+        [Required]
+        public ITaskItem[] References { get; set; }
+
+        public string DisabledWarnings { get; set; }
+
+        public string InputDocumentationFile { get; set; }
+
+        public string OutputDocumentationFile { get; set; }
+
+        public string InputPDBFile { get; set; }
+
+        public string OutputPDBFile { get; set; }
+
+        [Required]
+        public string WinMDModule { get; set; }
+
+        [Output]
+        public string OutputWindowsMetadataFile { get; set; }
+
+        public string SdkToolsPath { get; set; }
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "UTF", Justification = "Not worth breaking customers because of case correction")]
+        public bool UTF8Output { get; set; }
+
+        public bool TreatWarningsAsErrors { get; set; }
+
+        public string AssemblyUnificationPolicy { get; set; }
+
+        #endregion
+    }
+
+#endif
+
+    internal interface IWinMDExpTaskContract
+    {
+        #region Properties
+
+        ITaskItem[] References { get; set; }
+        string DisabledWarnings { get; set; }
+        string InputDocumentationFile { get; set; }
+        string OutputDocumentationFile { get; set; }
+        string InputPDBFile { get; set; }
+        string OutputPDBFile { get; set; }
+        string WinMDModule { get; set; }
+        string OutputWindowsMetadataFile { get; set; }
+        string SdkToolsPath { get; set; }
+        bool UTF8Output { get; set; }
+        bool TreatWarningsAsErrors { get; set; }
+        string AssemblyUnificationPolicy { get; set; }
+
         #endregion
     }
 }

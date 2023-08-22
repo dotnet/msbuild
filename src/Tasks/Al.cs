@@ -1,21 +1,26 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if NETFRAMEWORK
 using System;
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+#endif
+
+using Microsoft.Build.Framework;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks
 {
+#if NETFRAMEWORK
+
     /// <summary>
     /// This class defines the "AL" XMake task, which enables using al.exe to link
     /// modules and resource files into assemblies.
     /// </summary>
-    public class AL : ToolTaskExtension
+    public class AL : ToolTaskExtension, IALTaskContract
     {
         #region Properties
         /*
@@ -386,6 +391,131 @@ namespace Microsoft.Build.Tasks
 
             return base.Execute();
         }
+
+        #endregion
+    }
+
+#else
+
+    /// <summary>
+    /// Stub AL task for .NET Core
+    /// </summary>
+    public class AL : TaskRequiresFramework, IALTaskContract
+    {
+        public AL()
+            : base(nameof(AL))
+        {
+        }
+
+        #region Properties
+
+        public string AlgorithmId { get; set; }
+
+        public string BaseAddress { get; set; }
+
+        public string CompanyName { get; set; }
+
+        public string Configuration { get; set; }
+
+        public string Copyright { get; set; }
+
+        public string Culture { get; set; }
+
+        public bool DelaySign { get; set; }
+
+        public string Description { get; set; }
+
+        public string EvidenceFile { get; set; }
+
+        public string FileVersion { get; set; }
+
+        public string Flags { get; set; }
+
+        public bool GenerateFullPaths { get; set; }
+
+        public string KeyFile { get; set; }
+
+        public string KeyContainer { get; set; }
+
+        public string MainEntryPoint { get; set; }
+
+        [Output]
+        [Required]
+        public ITaskItem OutputAssembly { get; set; }
+
+        public string Platform { get; set; }
+
+        public bool Prefer32Bit { get; set; }
+
+        public string ProductName { get; set; }
+
+        public string ProductVersion { get; set; }
+
+        public string[] ResponseFiles { get; set; }
+
+        public string TargetType { get; set; }
+
+        public string TemplateFile { get; set; }
+
+        public string Title { get; set; }
+
+        public string Trademark { get; set; }
+
+        public string Version { get; set; }
+
+        public string Win32Icon { get; set; }
+
+        public string Win32Resource { get; set; }
+
+        public ITaskItem[] SourceModules { get; set; }
+
+        public ITaskItem[] EmbedResources { get; set; }
+
+        public ITaskItem[] LinkResources { get; set; }
+
+        public string SdkToolsPath { get; set; }
+
+        #endregion
+    }
+
+#endif
+
+    internal interface IALTaskContract
+    {
+        #region Properties
+
+        string AlgorithmId { get; set; }
+        string BaseAddress { get; set; }
+        string CompanyName { get; set; }
+        string Configuration { get; set; }
+        string Copyright { get; set; }
+        string Culture { get; set; }
+        bool DelaySign { get; set; }
+        string Description { get; set; }
+        string EvidenceFile { get; set; }
+        string FileVersion { get; set; }
+        string Flags { get; set; }
+        bool GenerateFullPaths { get; set; }
+        string KeyFile { get; set; }
+        string KeyContainer { get; set; }
+        string MainEntryPoint { get; set; }
+        ITaskItem OutputAssembly { get; set; }
+        string Platform { get; set; }
+        bool Prefer32Bit { get; set; }
+        string ProductName { get; set; }
+        string ProductVersion { get; set; }
+        string[] ResponseFiles { get; set; }
+        string TargetType { get; set; }
+        string TemplateFile { get; set; }
+        string Title { get; set; }
+        string Trademark { get; set; }
+        string Version { get; set; }
+        string Win32Icon { get; set; }
+        string Win32Resource { get; set; }
+        ITaskItem[] SourceModules { get; set; }
+        ITaskItem[] EmbedResources { get; set; }
+        ITaskItem[] LinkResources { get; set; }
+        string SdkToolsPath { get; set; }
 
         #endregion
     }

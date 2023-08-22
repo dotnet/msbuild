@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if NETFRAMEWORK
 using System;
 using System.IO;
 using System.Collections;
@@ -9,20 +10,25 @@ using System.Collections.Generic;
 using System.Diagnostics;
 #endif
 using System.Linq;
-using Microsoft.Build.Framework;
+
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
+#endif
+
+using Microsoft.Build.Framework;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks
 {
+#if NETFRAMEWORK
+
     /// <summary>
     /// Main class for the native reference resolution task.
     /// </summary>
-    public class ResolveNativeReference : TaskExtension
+    public class ResolveNativeReference : TaskExtension, IResolveNativeReferenceTaskConract
     {
         #region Constructors
 
@@ -340,4 +346,62 @@ namespace Microsoft.Build.Tasks
         }
         #endregion
     }
+
+#else
+
+    public class ResolveNativeReference : TaskRequiresFramework, IResolveNativeReferenceTaskConract
+    {
+        public ResolveNativeReference()
+            : base(nameof(ResolveNativeReference))
+        {
+        }
+
+        #region Properties
+
+        [Required]
+        public ITaskItem[] NativeReferences { get; set; }
+
+        [Required]
+        public string[] AdditionalSearchPaths { get; set; }
+
+        [Output]
+        public ITaskItem[] ContainingReferenceFiles { get; set; }
+
+        [Output]
+        public ITaskItem[] ContainedPrerequisiteAssemblies { get; set; }
+
+        [Output]
+        public ITaskItem[] ContainedComComponents { get; set; }
+
+        [Output]
+        public ITaskItem[] ContainedTypeLibraries { get; set; }
+
+        [Output]
+        public ITaskItem[] ContainedLooseTlbFiles { get; set; }
+
+        [Output]
+        public ITaskItem[] ContainedLooseEtcFiles { get; set; }
+
+        #endregion
+    }
+
+#endif
+
+#pragma warning disable SA1201 // Elements should appear in the correct order
+    internal interface IResolveNativeReferenceTaskConract
+    {
+        #region Properties
+
+        ITaskItem[] NativeReferences { get; set; }
+        string[] AdditionalSearchPaths { get; set; }
+        ITaskItem[] ContainingReferenceFiles { get; set; }
+        ITaskItem[] ContainedPrerequisiteAssemblies { get; set; }
+        ITaskItem[] ContainedComComponents { get; set; }
+        ITaskItem[] ContainedTypeLibraries { get; set; }
+        ITaskItem[] ContainedLooseTlbFiles { get; set; }
+        ITaskItem[] ContainedLooseEtcFiles { get; set; }
+
+        #endregion
+    }
+#pragma warning restore SA1201 // Elements should appear in the correct order
 }

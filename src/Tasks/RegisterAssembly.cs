@@ -1,7 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#if FEATURE_APPDOMAIN
+#if NETFRAMEWORK && FEATURE_APPDOMAIN
 
 using System;
 using System.Diagnostics;
@@ -11,20 +11,25 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Security;
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+
+#endif
+
+using Microsoft.Build.Framework;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks
 {
+#if NETFRAMEWORK && FEATURE_APPDOMAIN
+
     /// <summary>
     /// Registers a managed assembly for COM interop (equivalent of regasm.exe functionality, but this code doesn't actually call the exe).
     /// </summary>
     /// <comment>ITypeLibExporterNotifySink is necessary for the ITypeLibConverter.ConvertAssemblyToTypeLib call.</comment>
-    public class RegisterAssembly : AppDomainIsolatedTaskExtension, ITypeLibExporterNotifySink
+    public class RegisterAssembly : AppDomainIsolatedTaskExtension, ITypeLibExporterNotifySink, IRegisterAssemblyTaskContract
     {
         #region Properties
 
@@ -360,5 +365,42 @@ namespace Microsoft.Build.Tasks
 
         #endregion
     }
-}
+
+#elif !NETFRAMEWORK
+
+    public class RegisterAssembly : TaskRequiresFramework, IRegisterAssemblyTaskContract
+    {
+        public RegisterAssembly()
+            : base(nameof(RegisterAssembly))
+        {
+        }
+
+        #region Properties
+
+        [Required]
+        public ITaskItem[] Assemblies { get; set; }
+
+        [Output]
+        public ITaskItem[] TypeLibFiles { get; set; }
+
+        public bool CreateCodeBase { get; set; }
+
+        public ITaskItem AssemblyListFile { get; set; }
+
+        #endregion
+    }
+
 #endif
+
+    internal interface IRegisterAssemblyTaskContract
+    {
+        #region Properties
+
+        ITaskItem[] Assemblies { get; set; }
+        ITaskItem[] TypeLibFiles { get; set; }
+        bool CreateCodeBase { get; set; }
+        ITaskItem AssemblyListFile { get; set; }
+
+        #endregion
+    }
+}

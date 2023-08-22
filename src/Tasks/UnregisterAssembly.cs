@@ -1,7 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#if FEATURE_APPDOMAIN
+#if NETFRAMEWORK && FEATURE_APPDOMAIN
 
 using System;
 #if DEBUG
@@ -14,19 +14,23 @@ using System.Security;
 using System.Threading;
 using System.Runtime.InteropServices.ComTypes;
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+#endif
+
+using Microsoft.Build.Framework;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks
 {
+#if NETFRAMEWORK && FEATURE_APPDOMAIN
+
     /// <summary>
     /// Registers a managed assembly for COM interop (equivalent of regasm.exe functionality, but this code
     /// doesn't actually call the exe).
     /// </summary>
-    public class UnregisterAssembly : AppDomainIsolatedTaskExtension
+    public class UnregisterAssembly : AppDomainIsolatedTaskExtension, IUnregisterAssemblyTaskContract
     {
         #region Properties
 
@@ -289,5 +293,37 @@ namespace Microsoft.Build.Tasks
         private const string unregisteringLockName = "MSBUILD_V_3_5_UNREGISTER_LOCK";
         #endregion
     }
-}
+
+#elif !NETFRAMEWORK
+
+    public class UnregisterAssembly : TaskRequiresFramework, IUnregisterAssemblyTaskContract
+    {
+        public UnregisterAssembly()
+            : base(nameof(UnregisterAssembly))
+        {
+        }
+
+        #region Properties
+
+        public ITaskItem[] Assemblies { get; set; }
+
+        public ITaskItem[] TypeLibFiles { get; set; }
+
+        public ITaskItem AssemblyListFile { get; set; }
+
+        #endregion
+    }
+
 #endif
+
+    public interface IUnregisterAssemblyTaskContract
+    {
+        #region Properties
+
+        ITaskItem[] Assemblies { get; set; }
+        ITaskItem[] TypeLibFiles { get; set; }
+        ITaskItem AssemblyListFile { get; set; }
+
+        #endregion
+    }
+}

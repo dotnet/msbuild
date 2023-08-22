@@ -1,19 +1,25 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if NETFRAMEWORK
 using System;
-using Microsoft.Build.Framework;
+
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+#endif
+
+using Microsoft.Build.Framework;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks
 {
+#if NETFRAMEWORK
+
     /// <summary>
     /// Returns paths to the frameworks SDK.
     /// </summary>
-    public class GetFrameworkSdkPath : TaskExtension
+    public class GetFrameworkSdkPath : TaskExtension, IGetFrameworkSdkPathTaskContract
     {
         #region Properties
 
@@ -311,4 +317,61 @@ namespace Microsoft.Build.Tasks
 
         #endregion
     }
+#else
+
+    public class GetFrameworkSdkPath : TaskRequiresFramework, IGetFrameworkSdkPathTaskContract
+    {
+        public GetFrameworkSdkPath()
+            : base(nameof(GetFrameworkSdkPath))
+        {
+        }
+
+        #region Properties
+
+        [Output]
+        public string Path { get; set; }
+
+        [Output]
+        public string FrameworkSdkVersion20Path { get; }
+
+        [Output]
+        public string FrameworkSdkVersion35Path { get; }
+
+        [Output]
+        public string FrameworkSdkVersion40Path { get; }
+
+        [Output]
+        public string FrameworkSdkVersion45Path { get; }
+
+        [Output]
+        public string FrameworkSdkVersion451Path { get; }
+
+        [Output]
+        public string FrameworkSdkVersion46Path { get; }
+
+        [Output]
+        public string FrameworkSdkVersion461Path { get; }
+
+        #endregion
+    }
+
+#endif
+
+#pragma warning disable SA1201 // Elements should appear in the correct order
+    internal interface IGetFrameworkSdkPathTaskContract
+    {
+        #region Properties
+
+        string Path { get; set; }
+        string FrameworkSdkVersion20Path { get; }
+        string FrameworkSdkVersion35Path { get; }
+        string FrameworkSdkVersion40Path { get; }
+        string FrameworkSdkVersion45Path { get; }
+        string FrameworkSdkVersion451Path { get; }
+        string FrameworkSdkVersion46Path { get; }
+        string FrameworkSdkVersion461Path { get; }
+
+        #endregion
+    }
+#pragma warning restore SA1201 // Elements should appear in the correct order
 }
