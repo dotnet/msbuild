@@ -21,8 +21,9 @@
         <source>
       Provides the details for specified template package.
       The command checks if the package is installed locally, if it was not found, it searches the configured NuGet feeds.</source>
-        <target state="translated">Poskytuje podrobnosti pro zadaný balíček šablony.
-      Příkaz zkontroluje, jestli je balíček nainstalovaný místně. Pokud se nenašel, prohledá nakonfigurované informační kanály NuGet.</target>
+        <target state="translated">
+      Poskytuje podrobnosti pro zadaný balíček šablony.
+      Příkaz zkontroluje, jestli je balíček nainstalovaný místně, pokud se nenašel, prohledá nakonfigurované informační kanály NuGet.</target>
         <note />
       </trans-unit>
       <trans-unit id="Command_Install_Argument_Package">
@@ -113,7 +114,7 @@ Pokud je příkaz zadán bez argumentu, zobrazí seznam všech nainstalovaných 
       </trans-unit>
       <trans-unit id="Option_AddSource">
         <source>Specifies a NuGet source to use.</source>
-        <target state="new">Specifies a NuGet source to use.</target>
+        <target state="translated">Určuje zdroj NuGet, který se má použít.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_AuthorFilter">

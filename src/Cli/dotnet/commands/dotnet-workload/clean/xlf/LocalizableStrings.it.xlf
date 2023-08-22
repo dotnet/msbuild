@@ -5,7 +5,7 @@
       <trans-unit id="CannotAnalyzeVSWorkloadBand">
         <source>Workloads managed by Visual Studio must be uninstalled using the Visual Studio Installer. For the version of Visual Studio managing the SDK '{0}', we could not display workloads to uninstall. This is likely because '{0}' uses a different dotnet root path or custom user profile directory from the current running SDK.
 Paths searched: '{1}', '{2}'.</source>
-        <target state="translated">I carichi di lavoro gestiti da Visual Studio devono essere disinstallati usando il Programma di installazione di Visual Studio. Per la versione di Visual Studio la gestione del '{0}' SDK, non è stato possibile visualizzare i carichi di lavoro da disinstallare. È probabile che '{0}' usi un percorso radice dotnet o una directory del profilo utente personalizzata diversa dall'SDK in esecuzione corrente.
+        <target state="translated">I carichi di lavoro gestiti da Visual Studio devono essere disinstallati usando il Programma di installazione di Visual Studio. Per la versione di Visual Studio che gestisce '{0}' SDK, non è stato possibile visualizzare i carichi di lavoro da disinstallare. È probabile che '{0}' usi un percorso radice dotnet o una directory del profilo utente personalizzata diversa dall'SDK in esecuzione corrente.
 Percorsi cercati: '{1}', '{2}'.</target>
         <note />
       </trans-unit>
@@ -26,7 +26,7 @@ Percorsi cercati: '{1}', '{2}'.</target>
       </trans-unit>
       <trans-unit id="VSWorkloadNotRemoved">
         <source>Workload '{0}' was not removed because it is installed and managed by Visual Studio: '{1}'. Please uninstall this workload using the Visual Studio Installer to fully remove it.</source>
-        <target state="translated">La '{0}' del carico di lavoro non è stata rimossa perché è installata e gestita da Visual Studio: '{1}'. Disinstallare questo carico di lavoro usando il Programma di installazione di Visual Studio per rimuoverlo completamente.</target>
+        <target state="translated">Il carico di lavoro '{0}' non è stato rimosso perché è installato e gestito da Visual Studio: '{1}'. Disinstallare questo carico di lavoro usando il Programma di installazione di Visual Studio per rimuoverlo completamente.</target>
         <note />
       </trans-unit>
     </body>

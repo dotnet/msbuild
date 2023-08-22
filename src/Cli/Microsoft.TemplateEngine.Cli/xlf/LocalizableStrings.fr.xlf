@@ -260,7 +260,7 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
       </trans-unit>
       <trans-unit id="ColumnNamePackageNameAndOwners">
         <source>Package Name / Owners</source>
-        <target state="translated">Nom/propriétaires du package</target>
+        <target state="translated">Nom du package / Propriétaires</target>
         <note>information about NuGet package: its name and owner</note>
       </trans-unit>
       <trans-unit id="ColumnNamePrecedence">
@@ -290,7 +290,7 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
       </trans-unit>
       <trans-unit id="ColumnNameTrusted">
         <source>Trusted</source>
-        <target state="new">Trusted</target>
+        <target state="translated">De confiance</target>
         <note>information about NuGet package origin; if a package has PrefixReserved indicator </note>
       </trans-unit>
       <trans-unit id="ColumnNameType">
@@ -382,7 +382,7 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
       </trans-unit>
       <trans-unit id="DetailsCommand_Argument_PackageIdentifier">
         <source>Package identifier</source>
-        <target state="translated">Identificateur de package</target>
+        <target state="translated">Identificateur de paquet</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_NoNuGetSources">
@@ -392,32 +392,32 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
       </trans-unit>
       <trans-unit id="DetailsCommand_Option_Version">
         <source>Specifies a concrete version for displaying details. If not specified the last is taken.</source>
-        <target state="translated">Spécifie une version concrète pour l’affichage des détails. Si rien n’est spécifié, le dernier est pris.</target>
+        <target state="translated">Spécifie une version concrète pour afficher les détails. S'il n'est pas spécifié, le dernier est pris.</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Authors">
         <source>Authors</source>
-        <target state="new">Authors</target>
+        <target state="translated">Auteurs</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Description">
         <source>Details</source>
-        <target state="new">Details</target>
+        <target state="translated">Détails</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Languages">
         <source>Languages</source>
-        <target state="new">Languages</target>
+        <target state="translated">Langages</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_License">
         <source>License</source>
-        <target state="new">License</target>
+        <target state="translated">Licence</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_LicenseExpression">
         <source>License Expression</source>
-        <target state="new">License Expression</target>
+        <target state="translated">Expression de licence</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_LicenseMetadata">
@@ -427,27 +427,27 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_LicenseUrl">
         <source>License Url</source>
-        <target state="new">License Url</target>
+        <target state="translated">URL de licence</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Owners">
         <source>Owners</source>
-        <target state="new">Owners</target>
+        <target state="translated">Propriétaires</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_PrefixReserved">
         <source>Reserved</source>
-        <target state="new">Reserved</target>
+        <target state="translated">Réservé</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_RepoUrl">
         <source>Repository Url</source>
-        <target state="new">Repository Url</target>
+        <target state="translated">URL du référentiel</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_ShortNames">
         <source>Short Names</source>
-        <target state="translated">Noms courts</target>
+        <target state="translated">Noms abrégés</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_SourceFeed">
@@ -457,27 +457,27 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Tags">
         <source>Tags</source>
-        <target state="new">Tags</target>
+        <target state="translated">Balises</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Templates">
         <source>Templates</source>
-        <target state="new">Templates</target>
+        <target state="translated">Modèles</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Version">
         <source>Package version</source>
-        <target state="new">Package version</target>
+        <target state="translated">Version du package</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_UnableToLoadResorce">
         <source>Could not parse NuGet source '{0}', so it was discarded</source>
-        <target state="translated">Impossible d’analyser la source NuGet '{0}', elle a donc été ignorée</target>
+        <target state="translated">Impossible d'analyser la source NuGet '{0}', elle a donc été supprimée</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_UnableToLoadResorces">
         <source>Failed to load NuGet sources configured for the folder {0}</source>
-        <target state="new">Failed to load NuGet sources configured for the folder {0}</target>
+        <target state="translated">Échec du chargement des sources NuGet configurées pour le dossier {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="DisplaysHelp">
@@ -562,12 +562,14 @@ The header is followed by the list of parameters and their errors (might be seve
       To search for the template packages on NuGet.org, run:
         dotnet new search --package {0}
     </source>
-        <target state="translated">Aucun package de modèle correspondant n’a été trouvé : {0}.
+        <target state="translated">
+      Aucun package de modèle correspondant n'a été trouvé : {0}.
       
-Pour répertorier les packages de modèles installés, exécutez :
-        dotnet new uninstall
+      Pour répertorier les packages de modèles installés, exécutez :
+        nouvelle désinstallation de dotnet
       Pour rechercher les packages de modèles sur NuGet.org, exécutez :
-        dotnet new search --package {0}    </target>
+        dotnet nouvelle recherche --package {0}
+    </target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_Info_NoMatchingTemplates">
@@ -825,7 +827,7 @@ Pour répertorier les packages de modèles installés, exécutez :
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_ArgumentNotConfigured">
         <source>Post action argument '{0}' is mandatory, but not configured.</source>
-        <target state="translated">L’argument post-action '{0}' est obligatoire, mais n’est pas configuré.</target>
+        <target state="translated">L'argument de publication de l'action '{0}' est obligatoire, mais n'est pas configuré.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_MultipleJsonFiles">
@@ -835,17 +837,17 @@ Pour répertorier les packages de modèles installés, exécutez :
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_NoJsonFile">
         <source>Unable to find the json file in the solution</source>
-        <target state="translated">Fichier json introuvable dans la solution</target>
+        <target state="translated">Impossible de trouver le fichier json dans la solution</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_ParentPropertyPathInvalid">
         <source>Parent property path '{0}' could not be traversed.</source>
-        <target state="translated">Impossible de parcourir le chemin d’accès de la propriété parente '{0}'.</target>
+        <target state="translated">Le chemin de la propriété parente '{0}' n'a pas pu être traversé.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Succeeded">
         <source>Successfully modified {0}.</source>
-        <target state="translated">Modification réussie {0}.</target>
+        <target state="translated">Modifié avec succès {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
@@ -981,12 +983,12 @@ Pour répertorier les packages de modèles installés, exécutez :
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Download_Error_VulnerablePackage">
         <source>Failed to install {0}, due to detected vulnerabilities:</source>
-        <target state="translated">Échec de l’installation de {0} en raison de vulnérabilités détectées :</target>
+        <target state="translated">Échec de l'installation {0} en raison de vulnérabilités détectées :</target>
         <note>{0} - template package name.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Download_VulnerablePackage">
         <source>Installed package has the following vulnerabilities:</source>
-        <target state="translated">Le package installé présente les vulnérabilités suivantes :</target>
+        <target state="translated">Le package installé présente les vulnérabilités suivantes :</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
@@ -1026,7 +1028,7 @@ Pour répertorier les packages de modèles installés, exécutez :
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Error_VulnerablePackageTip">
         <source>In order to install this package, run:</source>
-        <target state="translated">Pour installer ce package, exécutez :</target>
+        <target state="translated">Pour installer ce package, exécutez :</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_OverrideNotice">
@@ -1086,7 +1088,7 @@ Pour répertorier les packages de modèles installés, exécutez :
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_UpdateCheck_Error_VulnerablePackage">
         <source>The package {0} contains vulnerabilities:</source>
-        <target state="translated">Le {0} du package contient des vulnérabilités :</target>
+        <target state="translated">Le package {0} contient des vulnérabilités :</target>
         <note>{0} - template package name.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_GenericError">
@@ -1111,12 +1113,12 @@ Pour répertorier les packages de modèles installés, exécutez :
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_VulnerablePackage">
         <source>The package {0} was not updated due to detected vulnerabilities:</source>
-        <target state="translated">Le {0} de package n’a pas été mis à jour en raison de vulnérabilités détectées :</target>
+        <target state="translated">Le package {0} n'a pas été mis à jour en raison de vulnérabilités détectées :</target>
         <note>{0} - template package name.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_VulnerablePackageTip">
         <source>In order to update this package, run:</source>
-        <target state="translated">Pour mettre à jour ce package, exécutez :</target>
+        <target state="translated">Pour mettre à jour ce package, exécutez :</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_AllPackagesAreUpToDate">
@@ -1156,22 +1158,22 @@ Pour répertorier les packages de modèles installés, exécutez :
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Critical">
         <source>Critical</source>
-        <target state="new">Critical</target>
+        <target state="translated">Critique</target>
         <note>represents nuget api severity of level 3.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_High">
         <source>High</source>
-        <target state="new">High</target>
+        <target state="translated">Élevée</target>
         <note>represents nuget api severity of level 2.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Low">
         <source>Low</source>
-        <target state="new">Low</target>
+        <target state="translated">Faible</target>
         <note>represents nuget api severity of level 0.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Moderate">
         <source>Moderate</source>
-        <target state="new">Moderate</target>
+        <target state="translated">Modéré</target>
         <note>represents nuget api severity of level 1.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled">

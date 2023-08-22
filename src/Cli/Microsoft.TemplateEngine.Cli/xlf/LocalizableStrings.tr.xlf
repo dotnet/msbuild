@@ -260,7 +260,7 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
       </trans-unit>
       <trans-unit id="ColumnNamePackageNameAndOwners">
         <source>Package Name / Owners</source>
-        <target state="translated">Paket Adı / Sahipleri</target>
+        <target state="translated">Paket Adı/Sahipleri</target>
         <note>information about NuGet package: its name and owner</note>
       </trans-unit>
       <trans-unit id="ColumnNamePrecedence">
@@ -290,7 +290,7 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
       </trans-unit>
       <trans-unit id="ColumnNameTrusted">
         <source>Trusted</source>
-        <target state="new">Trusted</target>
+        <target state="translated">Güvenilir</target>
         <note>information about NuGet package origin; if a package has PrefixReserved indicator </note>
       </trans-unit>
       <trans-unit id="ColumnNameType">
@@ -392,32 +392,32 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
       </trans-unit>
       <trans-unit id="DetailsCommand_Option_Version">
         <source>Specifies a concrete version for displaying details. If not specified the last is taken.</source>
-        <target state="translated">Ayrıntıları görüntülemek için somut bir sürüm belirtin. Belirtilmezse, son alınan.</target>
+        <target state="translated">Ayrıntıları görüntülemek için somut bir sürüm belirtir. Belirtilmezse, sonuncu sürüm alınır.</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Authors">
         <source>Authors</source>
-        <target state="new">Authors</target>
+        <target state="translated">Yazarlar</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Description">
         <source>Details</source>
-        <target state="new">Details</target>
+        <target state="translated">Ayrıntılar</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Languages">
         <source>Languages</source>
-        <target state="new">Languages</target>
+        <target state="translated">Diller</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_License">
         <source>License</source>
-        <target state="new">License</target>
+        <target state="translated">Lisans</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_LicenseExpression">
         <source>License Expression</source>
-        <target state="new">License Expression</target>
+        <target state="translated">Lisans İfadesi</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_LicenseMetadata">
@@ -427,22 +427,22 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_LicenseUrl">
         <source>License Url</source>
-        <target state="new">License Url</target>
+        <target state="translated">Lisans URL'si</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Owners">
         <source>Owners</source>
-        <target state="new">Owners</target>
+        <target state="translated">Sahipler</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_PrefixReserved">
         <source>Reserved</source>
-        <target state="new">Reserved</target>
+        <target state="translated">Ayrılmış</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_RepoUrl">
         <source>Repository Url</source>
-        <target state="new">Repository Url</target>
+        <target state="translated">Depo URL'si</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_ShortNames">
@@ -457,27 +457,27 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Tags">
         <source>Tags</source>
-        <target state="new">Tags</target>
+        <target state="translated">Etiketler</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Templates">
         <source>Templates</source>
-        <target state="new">Templates</target>
+        <target state="translated">Şablonlar</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Version">
         <source>Package version</source>
-        <target state="new">Package version</target>
+        <target state="translated">Paket sürümü</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_UnableToLoadResorce">
         <source>Could not parse NuGet source '{0}', so it was discarded</source>
-        <target state="translated">NuGet kaynağı '{0}', bu nedenle atıldı</target>
+        <target state="translated">'{0}' NuGet kaynağı ayrıştırılamadı, bu nedenle atıldı</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_UnableToLoadResorces">
         <source>Failed to load NuGet sources configured for the folder {0}</source>
-        <target state="new">Failed to load NuGet sources configured for the folder {0}</target>
+        <target state="translated">{0} klasörü için yapılandırılan NuGet kaynakları yüklenemedi.</target>
         <note />
       </trans-unit>
       <trans-unit id="DisplaysHelp">
@@ -562,12 +562,14 @@ The header is followed by the list of parameters and their errors (might be seve
       To search for the template packages on NuGet.org, run:
         dotnet new search --package {0}
     </source>
-        <target state="translated">Eşleşen şablon paketi bulunamadı: {0}.
+        <target state="translated">
+      Eşleşen şablon paketi bulunamadı: {0}.
       
-Yüklü şablon paketlerini listeley için şu komutu çalıştırın:
+      Yüklü şablon paketlerini listelemek için şu komutu çalıştırın:
         dotnet new uninstall
-      Bu şablonda şablon paketlerini aramak NuGet.org çalıştırın:
-        dotnet new search --package {0}    </target>
+      NuGet.org üzerinde şablon paketlerini aramak için şu komutu çalıştırın:
+        dotnet new search --package {0}
+    </target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_Info_NoMatchingTemplates">
@@ -825,12 +827,12 @@ Yüklü şablon paketlerini listeley için şu komutu çalıştırın:
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_ArgumentNotConfigured">
         <source>Post action argument '{0}' is mandatory, but not configured.</source>
-        <target state="translated">Eylem sonrası '{0}' zorunludur, ancak yapılandırılmaz.</target>
+        <target state="translated">'{0}' eylem sonrası bağımsız değişkeni zorunlu, ancak yapılandırılmamış.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_MultipleJsonFiles">
         <source>More than one file found that matches '{0}'.</source>
-        <target state="translated">Bu dosyayla eşleşen birden fazla dosya '{0}'.</target>
+        <target state="translated">'{0}' ile eşleşen birden fazla dosya bulundu.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_NoJsonFile">
@@ -845,7 +847,7 @@ Yüklü şablon paketlerini listeley için şu komutu çalıştırın:
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Succeeded">
         <source>Successfully modified {0}.</source>
-        <target state="translated">Dosya başarıyla {0}.</target>
+        <target state="translated">{0} başarıyla değiştirildi.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
@@ -981,7 +983,7 @@ Yüklü şablon paketlerini listeley için şu komutu çalıştırın:
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Download_Error_VulnerablePackage">
         <source>Failed to install {0}, due to detected vulnerabilities:</source>
-        <target state="translated">Algılanan güvenlik {0} yüklenemiyor:</target>
+        <target state="translated">Algılanan güvenlik açıkları nedeniyle {0} yüklenemedi:</target>
         <note>{0} - template package name.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Download_VulnerablePackage">
@@ -1086,7 +1088,7 @@ Yüklü şablon paketlerini listeley için şu komutu çalıştırın:
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_UpdateCheck_Error_VulnerablePackage">
         <source>The package {0} contains vulnerabilities:</source>
-        <target state="translated">Paket {0} güvenlik açıkları içeriyor:</target>
+        <target state="translated">{0} paketi güvenlik açıkları içeriyor:</target>
         <note>{0} - template package name.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_GenericError">
@@ -1111,7 +1113,7 @@ Yüklü şablon paketlerini listeley için şu komutu çalıştırın:
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_VulnerablePackage">
         <source>The package {0} was not updated due to detected vulnerabilities:</source>
-        <target state="translated">Paket {0} algılanan güvenlik açıkları nedeniyle güncelleştirilmedi:</target>
+        <target state="translated">{0} paketi algılanan güvenlik açıkları nedeniyle güncelleştirilmedi:</target>
         <note>{0} - template package name.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_VulnerablePackageTip">
@@ -1156,22 +1158,22 @@ Yüklü şablon paketlerini listeley için şu komutu çalıştırın:
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Critical">
         <source>Critical</source>
-        <target state="new">Critical</target>
+        <target state="translated">Kritik</target>
         <note>represents nuget api severity of level 3.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_High">
         <source>High</source>
-        <target state="new">High</target>
+        <target state="translated">Yüksek</target>
         <note>represents nuget api severity of level 2.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Low">
         <source>Low</source>
-        <target state="new">Low</target>
+        <target state="translated">Düşük</target>
         <note>represents nuget api severity of level 0.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Moderate">
         <source>Moderate</source>
-        <target state="new">Moderate</target>
+        <target state="translated">Orta</target>
         <note>represents nuget api severity of level 1.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled">

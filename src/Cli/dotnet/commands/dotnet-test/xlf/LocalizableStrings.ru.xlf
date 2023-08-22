@@ -29,17 +29,17 @@ The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downlo
 To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
 
 Implies --blame.</source>
-        <target state="new">Runs the tests in blame mode and collects a crash dump when the test host exits unexpectedly. This option depends on the version of .NET used, the type of error, and the operating system.
+        <target state="translated">Запускает тесты в режиме обвинения и собирает аварийный дамп при неожиданном завершении работы узла тестирования. Этот параметр зависит от используемой версии .NET, от типа ошибки и от операционной системы.
   
-For exceptions in managed code, a dump will be automatically collected on .NET 5.0 and later versions. It will generate a dump for testhost or any child process that also ran on .NET 5.0 and crashed. Crashes in native code will not generate a dump. This option works on Windows, macOS, and Linux.
+Для исключений в управляемом коде сбор дампа автоматически производится в .NET 5.0 и более поздних версиях. Создается дамп для узла тестирования и всех дочерних процессов, также работавших под управлением .NET 5.0, где произошел сбой. При возникновении сбоев в собственном коде дамп не создается. Этот параметр действует в Windows, macOS и Linux.
 
-Crash dumps in native code, or when targetting .NET Framework, or .NET Core 3.1 and earlier versions, can only be collected on Windows, by using Procdump. A directory that contains procdump.exe and procdump64.exe must be in the PATH or PROCDUMP_PATH environment variable.
+Собирать аварийные дампы в собственном коде, а также при работе с .NET Framework или .NET Core 3.1 и более ранних версий можно только в Windows с помощью Procdump. Папка, в которой находятся файлы procdump.exe и procdump64.exe, должна быть указана в переменной среды PATH или PROCDUMP_PATH.
 
-The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downloads/procdump
+Эти инструменты можно скачать здесь: https://docs.microsoft.com/sysinternals/downloads/procdump
   
-To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
+Чтобы собрать аварийный дамп для собственного приложения, работающего с .NET 5.0 или более поздней версии, можно принудительно включить использование Procdump. Для этого необходимо установить для переменной среды VSTEST_DUMP_FORCEPROCDUMP значение 1.
 
-Implies --blame.</target>
+Подразумевается использование параметра --blame.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
@@ -62,10 +62,10 @@ Implies --blame.</target>
 The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
 When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
 For MSTest before 2.2.4, the timeout is used for all testcases.</source>
-        <target state="new">Per-test timeout, after which hang dump is triggered and the testhost process is terminated. Default is 1h.
-The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
-When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
-For MSTest before 2.2.4, the timeout is used for all testcases.</target>
+        <target state="translated">Время ожидания каждого теста, по истечении которого выполняется сбор дампа зависания и процесс узла тестирования завершается. Значение по умолчанию: 1 час. 
+Значение времени ожидания указывается в следующем формате: 1.5h / 90m / 5400s / 5400000ms. Если единица измерения не указана (например, 5400000), предполагается, что время задано в миллисекундах.
+При использовании вместе с тестами под управлением данных время ожидания зависит от используемого адаптера теста. Для xUnit, NUnit и MSTest версии 2.2.4 и более поздних версий отсчет времени ожидания начинается заново для каждого тестового случая.
+Для MSTest версии ниже 2.2.4 время ожидания подсчитывается суммарно для всех тестовых случаев.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableDescription">
@@ -269,18 +269,18 @@ Example:
   Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
   dotnet test --blame-hang-timeout 20min
 </source>
-        <target state="new">Runs the tests in blame mode. This option is helpful in isolating problematic tests that cause the test host to crash or hang, but it does not create a memory dump by default. 
+        <target state="translated">Запускает тесты в режиме обвинения. Этот параметр удобно использовать для изоляции проблемных тестов, которые приводят к сбою или зависанию узла тестирования, но при этом по умолчанию не создается дамп памяти. 
 
-When a crash is detected, it creates an sequence file in TestResults/guid/guid_Sequence.xml that captures the order of tests that were run before the crash.
+При обнаружении сбоя создается файл последовательности TestResults/guid/guid_Sequence.xml с указанием порядка тестов, которые были выполнены до возникновения сбоя.
 
-Based on the additional settings, hang dump or crash dump can also be collected.
+На основе дополнительных параметров также можно выполнить сбор дампа зависания или аварийного дампа.
 
-Example: 
-  Timeout the test run when test takes more than the default timeout of 1 hour, and collect crash dump when the test host exits unexpectedly. 
-  (Crash dumps require additional setup, see below.)
+Пример. 
+Прервать выполнение теста из-за истечения времени ожидания, когда время выполнения теста превышает время ожидания по умолчанию, равное 1 часу, и собрать аварийный дамп при неожиданном завершении работы узла тестирования. 
+  (Для сбора аварийного дампа необходимо задать дополнительные параметры, см. ниже).
   dotnet test --blame-hang --blame-crash
-Example: 
-  Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
+Пример. 
+  Прервать выполнение теста из-за истечения времени ожидания, когда время выполнения теста превышает 20 минут, и собрать дамп зависания. 
   dotnet test --blame-hang-timeout 20min
 </target>
         <note />

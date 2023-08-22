@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="PrereleaseDescription">
         <source>Include pre-release packages.</source>
-        <target state="new">Include pre-release packages.</target>
+        <target state="translated">Includere pacchetti della versione non definitiva.</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermArgumentName">

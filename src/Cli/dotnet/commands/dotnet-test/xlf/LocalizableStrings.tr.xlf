@@ -29,17 +29,17 @@ The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downlo
 To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
 
 Implies --blame.</source>
-        <target state="new">Runs the tests in blame mode and collects a crash dump when the test host exits unexpectedly. This option depends on the version of .NET used, the type of error, and the operating system.
+        <target state="translated">Testleri blame modunda çalıştırır ve test ana bilgisayarı beklenmedik şekilde çıktığında kilitlenme bilgi dökümlerini toplar. Bu seçenek kullanılan .NET sürümüne, hata türüne ve işletim sistemine bağlıdır.
   
-For exceptions in managed code, a dump will be automatically collected on .NET 5.0 and later versions. It will generate a dump for testhost or any child process that also ran on .NET 5.0 and crashed. Crashes in native code will not generate a dump. This option works on Windows, macOS, and Linux.
+Yönetilen koddaki özel durumlar için .NET 5.0 ve sonraki sürümler üzerinde otomatik olarak bir döküm toplanır. Testhost veya .NET 5.0 üzerinde çalışan ve kilitlenen herhangi bir alt işlem için döküm oluşturur. Yerel koddaki kilitlenmeler döküm oluşturmaz. Bu seçenek Windows, macOS ve Linux'ta çalışır.
 
-Crash dumps in native code, or when targetting .NET Framework, or .NET Core 3.1 and earlier versions, can only be collected on Windows, by using Procdump. A directory that contains procdump.exe and procdump64.exe must be in the PATH or PROCDUMP_PATH environment variable.
+Yerel kodda bulunan veya .NET Framework ya da .NET Core 3.1 ve önceki sürümler hedeflendiğinde kilitlenme dökümleri, yalnızca Procdump kullanılarak Windows'ta toplanabilir. Procdump.exe ve procdump64.exe içeren dizin PATH veya PROCDUMP_PATH değişkende olmalıdır.
 
-The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downloads/procdump
+Araçlar buradan indirilebilir: https://docs.microsoft.com/sysinternals/downloads/procdump
   
-To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
+.NET 5.0 veya sonraki bir sürümde çalışan yerel bir uygulamadaki kilitlenme bilgi dökümlerini toplamak için Procdump kullanılması, VSTEST_DUMP_FORCEPROCDUMP ortam değişkeni 1 olarak ayarlanarak zorlanabilir.
 
-Implies --blame.</target>
+--blame gerektirir.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
@@ -62,10 +62,10 @@ Implies --blame.</target>
 The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
 When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
 For MSTest before 2.2.4, the timeout is used for all testcases.</source>
-        <target state="new">Per-test timeout, after which hang dump is triggered and the testhost process is terminated. Default is 1h.
-The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
-When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
-For MSTest before 2.2.4, the timeout is used for all testcases.</target>
+        <target state="translated">Yanıt vermemeye başlama bilgi dökümü tetiklendikten ve test ana bilgisayarı işlemi sonlandırıldıktan sonraki test başına zaman aşımı süresi. Varsayılan değer: 1h. 
+Zaman aşımı değeri şu biçimde belirtilir: 1.5s / 90dk / 5400sn / 5400000ms. Birim kullanılmadığında ör. 5400000 olarak belirtildiğinde değer, milisaniye cinsinden kabul edilir.
+Zaman aşımı davranışı veri tabanlı testlerle birlikte kullanıldığında, kullanılan test bağdaştırıcısına göre farklılık gösterir. xUnit, NUnit ve MSTest 2.2.4+ için zaman aşımı süresi her test çalışmasından sonra yenilenir.
+2.2.4’ten önceki MSTest sürümleri için zaman aşımı süresi tüm test çalışmalarına yönelik olarak kullanılır.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableDescription">
@@ -269,18 +269,18 @@ Example:
   Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
   dotnet test --blame-hang-timeout 20min
 </source>
-        <target state="new">Runs the tests in blame mode. This option is helpful in isolating problematic tests that cause the test host to crash or hang, but it does not create a memory dump by default. 
+        <target state="translated">Testleri blame modunda çalıştırır. Bu seçenek, test ana bilgisayarının kilitlenmesine veya yanıt vermemeye başlamasına neden olan sorunlu testleri yalıtmak için yararlıdır, ancak varsayılan olarak bellek dökümü oluşturmaz. 
 
-When a crash is detected, it creates an sequence file in TestResults/guid/guid_Sequence.xml that captures the order of tests that were run before the crash.
+Kilitlenme algılandığında, TestResults/guid/guid_Sequence.xml içinde kilitlenmeden önce çalıştırılan testlerin sırasını yakalayan bir sıra dosyası oluşturur.
 
-Based on the additional settings, hang dump or crash dump can also be collected.
+Ek ayarlara bağlı olarak, yanıt vermemeye başlama veya kilitlenme bilgi dökümü de toplanabilir.
 
-Example: 
-  Timeout the test run when test takes more than the default timeout of 1 hour, and collect crash dump when the test host exits unexpectedly. 
-  (Crash dumps require additional setup, see below.)
-  dotnet test --blame-hang --blame-crash
-Example: 
-  Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
+Örnek: 
+  Test 1 saatlik varsayılan zaman aşımı süresinden uzun sürdüğünde test çalıştırmasını zaman aşımına uğratın ve test ana bilgisayarı beklenmedik bir şekilde çıkış yaptığında kilitlenme dökümünü toplayın.
+ (Kilitlenme bilgi dökümleri için ek kurulum gerekir, aşağıya bakın.)
+ dotnet test --blame-hang --blame-crash
+Örnek: 
+\   Test 20 dakikadan uzun sürdüğünde test çalıştırmasını zaman aşımına uğratın ve yanıt vermemeye başlama bilgi dökümünü toplayın. 
   dotnet test --blame-hang-timeout 20min
 </target>
         <note />

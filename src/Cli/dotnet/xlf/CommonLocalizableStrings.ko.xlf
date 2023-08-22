@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="ArchArgumentName">
         <source>ARCH</source>
-        <target state="translated">아치</target>
+        <target state="translated">ARCH</target>
         <note />
       </trans-unit>
       <trans-unit id="ArchitectureOptionDescription">
@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="DidYouMean">
         <source>Did you mean the following command?</source>
-        <target state="new">Did you mean the following command?</target>
+        <target state="translated">다음 명령을 의미했나요?</target>
         <note />
       </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
@@ -142,7 +142,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="OSArgumentName">
         <source>OS</source>
-        <target state="new">OS</target>
+        <target state="translated">OS</target>
         <note />
       </trans-unit>
       <trans-unit id="OperatingSystemOptionDescription">
@@ -218,8 +218,9 @@ export PATH="$PATH:{0}"
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'false.' However, when targeting .NET 7 or lower, the default is 'true' if a runtime identifier is specified.</source>
-        <target state="new">Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'false.' However, when targeting .NET 7 or lower, the default is 'true' if a runtime identifier is specified.</target>
+        <target state="translated">대상 컴퓨터에 런타임을 설치할 필요가 없도록 애플리케이션과 함께 .NET 런타임을 게시합니다. 
+
+기본값은 'false'입니다. 그러나 .NET 7 이하를 대상으로 하고 런타임 식별자를 지정하는 경우 기본값은 'true'입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Solution">
@@ -229,7 +230,7 @@ The default is 'false.' However, when targeting .NET 7 or lower, the default is 
       </trans-unit>
       <trans-unit id="SolutionArgumentMisplaced">
         <source>Solution argument '{0}' is misplaced.</source>
-        <target state="translated">솔루션 인수 '{0}' 위치가 잘못되었습니다.</target>
+        <target state="translated">'{0}' 솔루션 인수의 위치가 잘못되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionFile">
@@ -279,7 +280,7 @@ The default is 'false.' However, when targeting .NET 7 or lower, the default is 
       </trans-unit>
       <trans-unit id="SolutionFolderAlreadyContainsProject">
         <source>Solution {0} already contains project {1} in solution folder {2}.</source>
-        <target state="translated">솔루션 {0} 솔루션 폴더 {2} 프로젝트 {1} 이미 포함되어 있습니다.</target>
+        <target state="translated">{0} 솔루션은 {2} 솔루션 폴더에 {1} 프로젝트를 이미 포함합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Update">

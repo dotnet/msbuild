@@ -5,5 +5,5 @@
   "symbols/inherit/displayName": "Erben",
   "symbols/inherit/description": "Bei \"true\" wird ein Import für die nächstgelegene Datei \"Directory.Build.props\" in der Verzeichnishierarchie des Dateisystems hinzugefügt. \"Directory.Build.props\" erbt nicht standardmäßig. Auf diese Weise können Sie einen Satz von Anpassungen für einzelne Ordner erstellen.",
   "symbols/useArtifacts/displayName": "Artefaktausgabelayout verwenden",
-  "symbols/useArtifacts/description": "Wenn TRUE, wird eine Eigenschaft hinzugefügt, um das Artefaktausgabelayout zu aktivieren. Dies ist ein allgemeines Muster für Projekte, die Buildartefakte erstellen, z. B. NuGet-Pakete, die sich in einem gemeinsamen Ordner befinden."
+  "symbols/useArtifacts/description": "Wenn TRUE, wird eine Eigenschaft hinzugefügt, um das Artefaktausgabelayout zu aktivieren. Dies ist ein gängiges Muster für Projekte, die Buildartefakte erstellen, z. B. NuGet-Pakete, die in einem gemeinsamen Ordner platziert werden."
 }
