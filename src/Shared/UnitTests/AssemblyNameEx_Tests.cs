@@ -685,68 +685,6 @@ namespace Microsoft.Build.UnitTests
         [InlineData("System.Xml, Culture=de-DE")]
         [InlineData("System.Xml, Version=10.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a, Retargetable=Yes")]
         [InlineData("System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-        public void VerifyAssemblyNameExSerialization(string assemblyName)
-        {
-            AssemblyNameExtension assemblyNameOriginal = new AssemblyNameExtension(assemblyName);
-            AssemblyNameExtension assemblyNameDeserialized;
-
-            byte[] bytes;
-
-            using (MemoryStream ms = new MemoryStream())
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(ms, assemblyNameOriginal);
-
-                bytes = ms.ToArray();
-            }
-
-            using (MemoryStream ms = new MemoryStream(bytes))
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-                assemblyNameDeserialized = (AssemblyNameExtension)formatter.Deserialize(ms);
-            }
-
-            assemblyNameDeserialized.ShouldBe(assemblyNameOriginal);
-        }
-
-        [Fact]
-        public void VerifyAssemblyNameExSerializationWithRemappedFrom()
-        {
-            AssemblyNameExtension assemblyNameOriginal = new AssemblyNameExtension("System.Xml, Version=10.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
-            AssemblyNameExtension assemblyRemappedFrom = new AssemblyNameExtension("System.Xml, Version=9.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
-            assemblyRemappedFrom.MarkImmutable();
-            assemblyNameOriginal.AddRemappedAssemblyName(assemblyRemappedFrom);
-            assemblyNameOriginal.RemappedFromEnumerator.Count().ShouldBe(1);
-
-            AssemblyNameExtension assemblyNameDeserialized;
-
-            byte[] bytes;
-
-            using (MemoryStream ms = new MemoryStream())
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(ms, assemblyNameOriginal);
-
-                bytes = ms.ToArray();
-            }
-
-            using (MemoryStream ms = new MemoryStream(bytes))
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-                assemblyNameDeserialized = (AssemblyNameExtension)formatter.Deserialize(ms);
-            }
-
-            assemblyNameDeserialized.Equals(assemblyNameOriginal).ShouldBeTrue();
-            assemblyNameDeserialized.RemappedFromEnumerator.Count().ShouldBe(1);
-            assemblyNameDeserialized.RemappedFromEnumerator.First().ShouldBe(assemblyRemappedFrom);
-        }
-
-        [Theory]
-        [InlineData("System.Xml")]
-        [InlineData("System.XML, Version=2.0.0.0")]
-        [InlineData("System.Xml, Culture=de-DE")]
-        [InlineData("System.Xml, Version=10.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a, Retargetable=Yes")]
-        [InlineData("System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
         public void VerifyAssemblyNameExSerializationByTranslator(string assemblyName)
         {
             AssemblyNameExtension assemblyNameOriginal = new AssemblyNameExtension(assemblyName);
