@@ -725,7 +725,15 @@ namespace Microsoft.Build.Tasks
                 }
                 else if (FailIfNotIncremental)
                 {
-                    Log.LogErrorFromResources("GenerateResource.OutOfDate");
+                    int maxCount = Math.Min(inputsToProcess.Count, outputsToProcess.Count);
+                    maxCount = Math.Min(maxCount, 5);  // Limit to just 5
+
+                    for (int index = 0; index < maxCount; index++)
+                    {
+                        Log.LogErrorFromResources("GenerateResource.ProcessingFile", inputsToProcess[index], outputsToProcess[index]);
+                    }
+
+                    return false;
                 }
                 else
                 {
@@ -3605,7 +3613,7 @@ namespace Microsoft.Build.Tasks
                         name.Length--;
                     }
                     ch = sr.Read(); // move past =
-                    // If it exists, move past the first space after the equals sign.
+                                    // If it exists, move past the first space after the equals sign.
                     if (ch == ' ')
                     {
                         ch = sr.Read();
@@ -3747,7 +3755,7 @@ namespace Microsoft.Build.Tasks
                     // specifically an InvalidOperationException: "Token EndElement in state Error would result in an invalid XML document."
                     try { writer.Dispose(); }
                     catch (Exception) { } // We agressively catch all exception types since we already have one we will throw.
-                    // The second time we catch the out of disk space exception.
+                                          // The second time we catch the out of disk space exception.
                     try { writer.Dispose(); }
                     catch (Exception) { } // We agressively catch all exception types since we already have one we will throw.
                     throw capturedException; // In the event of a full disk, this is an out of disk space IOException.
