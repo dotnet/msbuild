@@ -30,7 +30,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             HashSet<string> exclusionList =
                 projectContext.GetExcludeFromPublishList(excludeFromPublishPackageIds, libraryLookup);
-            
+
             HashSet<string> expectedExclusions = new HashSet<string>()
             {
                 "Microsoft.Extensions.Logging.Abstractions",

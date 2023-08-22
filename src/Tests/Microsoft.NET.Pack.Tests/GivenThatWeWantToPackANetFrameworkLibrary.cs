@@ -82,7 +82,7 @@ namespace Microsoft.NET.Pack.Tests
 
             string nuspecPath = packCommand.GetIntermediateNuspecPath();
             return nuspecPath;
-           
+
         }
     }
 }

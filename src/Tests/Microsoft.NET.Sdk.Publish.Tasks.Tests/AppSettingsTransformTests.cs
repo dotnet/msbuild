@@ -92,7 +92,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
         }
 
         [Theory]
-        [MemberData(nameof(ConnectionStringsData), MemberType=typeof(AppSettingsTransformTests))]
+        [MemberData(nameof(ConnectionStringsData), MemberType = typeof(AppSettingsTransformTests))]
         public void AppSettingsTransform_UpdatesMultipleConnectionStrings(ITaskItem[] values)
         {
             // Arrange

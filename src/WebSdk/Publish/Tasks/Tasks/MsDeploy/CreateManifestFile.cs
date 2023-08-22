@@ -42,7 +42,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             get { return m_generateFileEvenIfEmpty; }
             set { m_generateFileEvenIfEmpty = value; }
         }
-        
+
         /// <summary>
         /// utility function to write the simple setParameter.xml file
         /// </summary>
@@ -133,6 +133,6 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         }
     }
 
-    
+
 
 }

@@ -433,28 +433,39 @@ namespace Microsoft.NET.Build.Tasks
                 if (AddToolPack(ToolPackType.ILLink, _normalizedTargetFrameworkVersion, packagesToDownload, implicitPackageReferences) is not ToolPackSupport.Supported)
                 {
                     // Keep the checked properties in sync with _RequiresILLinkPack in Microsoft.NET.Publish.targets.
-                    if (PublishAot) {
+                    if (PublishAot)
+                    {
                         // If PublishAot is set, this should produce a specific error above already.
                         // Also produce one here just in case there are custom KnownILCompilerPack/KnownILLinkPack
                         // items that bypass the error above.
                         Log.LogError(Strings.AotUnsupportedTargetFramework);
-                    } else if (IsAotCompatible || EnableAotAnalyzer) {
+                    }
+                    else if (IsAotCompatible || EnableAotAnalyzer)
+                    {
                         // Technically this is reachable by setting EnableAotAnalyzer without IsAotCompatible,
                         // but the recommended way to enable AOT analysis is to set IsAotCompatible,
                         // so the warning points to the common case.
                         Log.LogWarning(Strings.IsAotCompatibleUnsupported);
-                    } else if (PublishTrimmed) {
+                    }
+                    else if (PublishTrimmed)
+                    {
                         Log.LogError(Strings.PublishTrimmedRequiresVersion30);
-                    } else if (IsTrimmable || EnableTrimAnalyzer) {
+                    }
+                    else if (IsTrimmable || EnableTrimAnalyzer)
+                    {
                         // Technically this is reachable by setting EnableTrimAnalyzer without IsTrimmable,
                         // but the recommended way to enable trim analysis is to set IsTrimmable,
                         // so the warning points to the common case.
                         Log.LogWarning(Strings.IsTrimmableUnsupported);
-                    } else if (EnableSingleFileAnalyzer) {
+                    }
+                    else if (EnableSingleFileAnalyzer)
+                    {
                         // There's no IsSingleFileCompatible setting. EnableSingleFileAnalyzer is the
                         // recommended way to ensure single-file compatibility for libraries.
                         Log.LogWarning(Strings.EnableSingleFileAnalyzerUnsupported);
-                    } else {
+                    }
+                    else
+                    {
                         // _RequiresILLinkPack was set. This setting acts as an override for the
                         // user-visible properties, and should generally only be used by
                         // other SDKs that can't use the other properties for some reason.
@@ -701,7 +712,8 @@ namespace Microsoft.NET.Build.Tasks
             WebAssemblySdk
         }
 
-        enum ToolPackSupport {
+        enum ToolPackSupport
+        {
             UnsupportedForTargetFramework,
             UnsupportedForHostRuntimeIdentifier,
             UnsupportedForTargetRuntimeIdentifier,

@@ -32,7 +32,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             var packageSet = new HashSet<PackageIdentity>();
 
-            foreach(var pkg in InputPackageReferences)
+            foreach (var pkg in InputPackageReferences)
             {
                 var pkgName = pkg.ItemSpec;
                 var pkgVersion = NuGetVersion.Parse(pkg.GetMetadata("Version"));

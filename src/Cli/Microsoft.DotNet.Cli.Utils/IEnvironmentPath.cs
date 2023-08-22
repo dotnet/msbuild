@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.Cli.Utils
 {
-    public interface IEnvironmentPath: IEnvironmentPathInstruction
+    public interface IEnvironmentPath : IEnvironmentPathInstruction
     {
         void AddPackageExecutablePathToUserPath();
     }

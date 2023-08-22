@@ -37,7 +37,7 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
     class CachingWorkloadResolver
     {
         private sealed record CachedState
-        {            
+        {
             public string DotnetRootPath { get; init; }
             public string SdkVersion { get; init; }
             public string GlobalJsonPath { get; init; }
@@ -146,7 +146,7 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
             }
             else
             {
-                var packInfo = workloadResolver.TryGetPackInfo(new WorkloadPackId (sdkReferenceName));
+                var packInfo = workloadResolver.TryGetPackInfo(new WorkloadPackId(sdkReferenceName));
                 if (packInfo != null)
                 {
                     if (Directory.Exists(packInfo.Path))

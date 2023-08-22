@@ -3,8 +3,8 @@
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
-	public class NullCurrentSessionIdFixture
-	{
+    public class NullCurrentSessionIdFixture
+    {
         public NullCurrentSessionIdFixture()
         {
             // We need to set this to guarantee that the telemetry logging

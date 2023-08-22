@@ -1,8 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using NuGet.Packaging;
 using System.Runtime.CompilerServices;
+using NuGet.Packaging;
 
 namespace Microsoft.NET.ToolPack.Tests
 {
@@ -17,7 +17,7 @@ namespace Microsoft.NET.ToolPack.Tests
 
         private string SetupNuGetPackage(bool multiTarget, [CallerMemberName] string callingMethod = "")
         {
-            
+
             TestAsset helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("PortableTool", callingMethod + multiTarget)
                 .WithSource()

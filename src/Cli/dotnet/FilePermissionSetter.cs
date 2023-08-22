@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Tools
             }
 
             CommandResult result = new CommandFactory.CommandFactory()
-                .Create("chmod", new[] {chmodArgument, path})
+                .Create("chmod", new[] { chmodArgument, path })
                 .CaptureStdOut()
                 .CaptureStdErr()
                 .Execute();

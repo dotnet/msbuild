@@ -6,8 +6,8 @@ using Microsoft.DotNet.Cli.Utils;
 namespace Microsoft.NET.TestFramework.Commands
 {
     public class MSBuildCommand : TestCommand
-    { 
-        public string Target { get;  }
+    {
+        public string Target { get; }
 
         private readonly string _projectRootPath;
 
@@ -151,7 +151,7 @@ namespace Microsoft.NET.TestFramework.Commands
         {
             var newArgs = args.ToList();
             newArgs.Insert(0, FullPathProjectFile);
-            
+
             return TestContext.Current.ToolsetUnderTest.CreateCommandForTarget(Target, newArgs);
         }
     }

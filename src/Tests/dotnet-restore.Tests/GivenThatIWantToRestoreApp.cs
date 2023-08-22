@@ -136,7 +136,7 @@ namespace Microsoft.DotNet.Restore.Test
                 .Should()
                 .Pass();
 
-            string[] args = new[] { "--packages", dir, "--verbosity",  "quiet" };
+            string[] args = new[] { "--packages", dir, "--verbosity", "quiet" };
             args = HandleStaticGraphEvaluation(useStaticGraphEvaluation, args);
             new DotnetRestoreCommand(Log)
                  .WithWorkingDirectory(rootPath)
@@ -169,7 +169,7 @@ namespace Microsoft.DotNet.Restore.Test
         }
 
         private static string[] HandleStaticGraphEvaluation(bool useStaticGraphEvaluation, string[] args) =>
-            useStaticGraphEvaluation ? 
+            useStaticGraphEvaluation ?
                 args.Append("/p:RestoreUseStaticGraphEvaluation=true").ToArray() :
                 args;
     }

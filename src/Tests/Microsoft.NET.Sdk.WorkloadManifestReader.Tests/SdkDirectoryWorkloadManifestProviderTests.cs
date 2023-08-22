@@ -559,7 +559,7 @@ namespace ManifestReaderTests
   "ios": "12.0.1/8.0.200"
 }
 """);
-            CreateMockInstallState("8.0.200", 
+            CreateMockInstallState("8.0.200",
                 """
                 {
                     "workloadVersion": "8.0.201"
@@ -1026,7 +1026,7 @@ namespace ManifestReaderTests
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
                 .BeEquivalentTo("Android: AndroidContent1", "iOS: iOSContent", "Test: TestContent2");
-         
+
         }
 
         [Fact]
@@ -1035,7 +1035,7 @@ namespace ManifestReaderTests
             Initialize();
 
             var additionalManifestDirectory = Path.Combine(_testDirectory, "AdditionalManifests");
-                
+
             var environmentMock = new EnvironmentMock();
             environmentMock.Add(EnvironmentVariableNames.WORKLOAD_MANIFEST_ROOTS, additionalManifestDirectory);
 
@@ -1049,7 +1049,7 @@ namespace ManifestReaderTests
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
                 .BeEquivalentTo("Android: AndroidContent");
-         
+
         }
 
         [Fact]

@@ -226,7 +226,7 @@ namespace Microsoft.NET.Build.Tests
                                         new XAttribute("Condition", $"'%(Filename)%(Extension)' == '{filenameToSkip}'"));
 
                 itemGroup.Add(fileToSkipItem);
-            }            
+            }
 
             var conflictItem = new XElement(ns + "_ConflictPackageFiles",
                                 new XAttribute("Include", "@(_FileToSkip)"),

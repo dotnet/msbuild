@@ -82,7 +82,7 @@ Options:
                 .CopyTestAsset("InvalidSolution", identifier: "GivenDotnetSlnList")
                 .WithSource()
                 .Path;
-            
+
             var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
                 .Execute("sln", "InvalidSolution.sln", "list");
@@ -192,7 +192,7 @@ Options:
             var slnFileName = Path.Combine(projectDirectory, "App.sln");
             var attributes = File.GetAttributes(slnFileName);
             File.SetAttributes(slnFileName, attributes | FileAttributes.ReadOnly);
-            
+
             var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
                 .Execute("sln", "list");

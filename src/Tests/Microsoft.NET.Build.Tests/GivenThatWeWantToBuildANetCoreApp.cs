@@ -1,14 +1,14 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyModel;
+using Microsoft.NET.Build.Tasks;
 using Newtonsoft.Json.Linq;
 using NuGet.Common;
 using NuGet.Frameworks;
 using NuGet.ProjectModel;
-using Microsoft.NET.Build.Tasks;
 using NuGet.Versioning;
-using System.Runtime.CompilerServices;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -789,11 +789,11 @@ class Program
             var testProject = new TestProject()
             {
                 Name = "MultiTargetedPackageReference",
-                TargetFrameworks = ToolsetInfo.CurrentTargetFramework +";netstandard2.1",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework + ";netstandard2.1",
                 RuntimeIdentifier = "win-x64",
                 IsExe = true
             };
-            testProject.PackageReferences.Add(new TestPackageReference("Nuget.Common","6.5.7"));
+            testProject.PackageReferences.Add(new TestPackageReference("Nuget.Common", "6.5.7"));
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
@@ -1046,7 +1046,7 @@ class Program
         [Fact]
         public void It_does_not_warn_on_rids_if_no_framework_references()
         {
-            var packageProject = CreateProjectWithRidAssets(ToolsetInfo.CurrentTargetFramework, new string[] { "unix", "win", "alpine-x64"}, true, true);
+            var packageProject = CreateProjectWithRidAssets(ToolsetInfo.CurrentTargetFramework, new string[] { "unix", "win", "alpine-x64" }, true, true);
 
             var packCommand = new PackCommand(_testAssetsManager.CreateTestProject(packageProject));
             packCommand.Execute().Should().Pass();

@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             _wasmApplier.Initialize(context, cancellationToken);
             _hostApplier.Initialize(context, cancellationToken);
         }
-        
+
         public override async Task<ApplyStatus> Apply(DotNetWatchContext context, ImmutableArray<WatchHotReloadService.Update> updates, CancellationToken cancellationToken)
         {
             // Apply to both processes.
@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 }
             }
         }
-        
+
         public override void Dispose()
         {
             _hostApplier.Dispose();

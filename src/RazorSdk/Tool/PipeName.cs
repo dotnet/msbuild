@@ -37,7 +37,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
 
             return $"{userName}.{baseName}";
         }
-        
+
         private static string ComputeBaseName(string baseDirectory)
         {
             // Normalize away trailing slashes. File APIs are not consistent about including it, so it's

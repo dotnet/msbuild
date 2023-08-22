@@ -446,7 +446,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             // Another command, which should not be affected by PublishRelease
             new BuildCommand(helloWorldAsset)
                .Execute();
-            
+
             var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Release");
             Assert.False(Directory.Exists(expectedAssetPath));
         }

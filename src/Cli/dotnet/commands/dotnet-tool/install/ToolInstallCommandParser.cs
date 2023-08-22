@@ -57,11 +57,11 @@ namespace Microsoft.DotNet.Cli
         };
 
         public static readonly CliOption<bool> GlobalOption = ToolAppliedOption.GlobalOption;
-        
+
         public static readonly CliOption<bool> LocalOption = ToolAppliedOption.LocalOption;
 
         public static readonly CliOption<string> ToolPathOption = ToolAppliedOption.ToolPathOption;
-        
+
         public static readonly CliOption<string> ToolManifestOption = ToolAppliedOption.ToolManifestOption;
 
         private static readonly CliCommand Command = ConstructCommand();

@@ -147,7 +147,7 @@ namespace Microsoft.DotNet.CommandFactory
                 arguments.Add(packageFolder);
             }
 
-            if(_addAdditionalArguments != null)
+            if (_addAdditionalArguments != null)
             {
                 _addAdditionalArguments(commandPath, arguments);
             }

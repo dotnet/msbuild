@@ -59,7 +59,7 @@ public readonly record struct Descriptor
     /// <remarks>
     /// <see href="https://github.com/opencontainers/image-spec/blob/7b36cea86235157d78528944cb94c3323ee0905c/annotations.md"/>
     /// </remarks>
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public Dictionary<string, string?>? Annotations { get; init; } = null;
 
     /// <summary>
@@ -68,7 +68,7 @@ public readonly record struct Descriptor
     /// <remarks>
     /// <see href="https://github.com/opencontainers/image-spec/blob/7b36cea86235157d78528944cb94c3323ee0905c/descriptor.md#embedded-content"/>
     /// </remarks>
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Data { get; init; } = null;
 
     public Descriptor(string mediaType, string digest, long size)

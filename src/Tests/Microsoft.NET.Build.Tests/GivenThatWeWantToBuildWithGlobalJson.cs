@@ -6,7 +6,7 @@ namespace Microsoft.NET.Build.Tests
     public class GivenThatWeWantToBuildWithGlobalJson : SdkTest
     {
         public GivenThatWeWantToBuildWithGlobalJson(ITestOutputHelper log) : base(log)
-        {}
+        { }
 
         [FullMSBuildOnlyTheory]
         [InlineData(true)]

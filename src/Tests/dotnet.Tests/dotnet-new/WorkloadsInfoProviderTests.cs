@@ -7,8 +7,8 @@ using Microsoft.DotNet.Tools.New;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.DotNet.Workloads.Workload.List;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
-using Moq;
 using Microsoft.TemplateEngine.Abstractions.Components;
+using Moq;
 
 namespace Microsoft.DotNet.Cli.New.Tests
 {

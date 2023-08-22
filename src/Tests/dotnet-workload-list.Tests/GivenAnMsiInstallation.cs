@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Runtime.Versioning;
-using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
-using Microsoft.Win32;
 using Microsoft.DotNet.Installer.Windows;
+using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
+using Microsoft.Win32;
 
 namespace Microsoft.DotNet.Cli.Workload.List.Tests
 {
@@ -81,6 +81,6 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
 
         public override void Elevate()
         {
-        }            
+        }
     }
 }

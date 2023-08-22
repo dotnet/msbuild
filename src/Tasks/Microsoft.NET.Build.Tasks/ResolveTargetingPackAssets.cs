@@ -140,7 +140,7 @@ namespace Microsoft.NET.Build.Tasks
                             {
                                 errors.Add(string.Format(Strings.UnknownFrameworkReference, frameworkReference.Name));
                             }
-                            
+
                         }
                         else
                         {
@@ -466,13 +466,13 @@ namespace Microsoft.NET.Build.Tasks
         internal class StronglyTypedInputs
         {
             public FrameworkReference[] FrameworkReferences { get; private set; }
-            public TargetingPack[] ResolvedTargetingPacks {get; private set;}
-            public RuntimeFramework[] RuntimeFrameworks {get; private set;}
-            public bool GenerateErrorForMissingTargetingPacks {get; private set;}
-            public bool NuGetRestoreSupported {get; private set;}
+            public TargetingPack[] ResolvedTargetingPacks { get; private set; }
+            public RuntimeFramework[] RuntimeFrameworks { get; private set; }
+            public bool GenerateErrorForMissingTargetingPacks { get; private set; }
+            public bool NuGetRestoreSupported { get; private set; }
             public bool DisableTransitiveFrameworkReferences { get; private set; }
-            public string NetCoreTargetingPackRoot {get; private set;}
-            public string ProjectLanguage {get; private set;}
+            public string NetCoreTargetingPackRoot { get; private set; }
+            public string ProjectLanguage { get; private set; }
 
             public StronglyTypedInputs(
                 ITaskItem[] frameworkReferences,

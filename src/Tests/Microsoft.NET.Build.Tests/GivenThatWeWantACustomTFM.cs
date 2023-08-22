@@ -6,7 +6,7 @@ namespace Microsoft.NET.Build.Tests
     public class GivenThatWeWantACustomTFM : SdkTest
     {
         public GivenThatWeWantACustomTFM(ITestOutputHelper log) : base(log)
-        {}
+        { }
 
         [Fact]
         public void It_imports_custom_parsing_targets()
@@ -16,8 +16,8 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "CustomTFMProject",
-                IsExe = true, 
-                TargetFrameworks = $"{ targetFramework }-{ runtimeIdentifier }"
+                IsExe = true,
+                TargetFrameworks = $"{targetFramework}-{runtimeIdentifier}"
             };
 
             testProject.AdditionalProperties["BeforeTargetFrameworkInferenceTargets"] = @"$(MSBuildProjectDirectory)\CustomTargetFramework.targets";

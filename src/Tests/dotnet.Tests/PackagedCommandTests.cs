@@ -1,9 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tests
 {
@@ -118,7 +118,7 @@ namespace Microsoft.DotNet.Tests
                 .Execute()
                 .Should()
                 .Pass();
-            
+
             var result = new DotnetCommand(Log)
                     .WithWorkingDirectory(testInstance.Path)
                     .Execute("portable-v1");
@@ -235,8 +235,8 @@ namespace Microsoft.DotNet.Tests
                 .Execute();
 
             result.StdErr.Should().Contain(string.Format(LocalizableStrings.NoExecutableFoundMatchingCommand, "dotnet-hello"));
-            
-            result.Should().Fail();        
+
+            result.Should().Fail();
         }
 
         private void SetGeneratedPackageName(FileInfo project, string packageName)

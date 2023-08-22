@@ -271,7 +271,7 @@ namespace Microsoft.NET.TestFramework
                 {
                     return Path.Combine(ArtifactsPath, "obj", pivot);
                 }
-                
+
             }
 
             targetFramework = targetFramework ?? TargetFramework ?? string.Empty;

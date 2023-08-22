@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
                 rightBaseType = rightBaseType.BaseType;
             }
-            
+
             differences.Add(new CompatDifference(
                 leftMetadata,
                 rightMetadata,

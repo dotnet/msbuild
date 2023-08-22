@@ -96,7 +96,7 @@ namespace Microsoft.DotNet.Cli.SdkCheck.Tests
         [InlineData(new string[] { "5.0.100" }, new string[] { }, new string[] { })]
         [InlineData(new string[] { }, new string[] { "3.1.3" }, new string[] { "3.1.10" })]
         [InlineData(new string[] { }, new string[] { "5.0.0" }, new string[] { })]
-        [InlineData(new string[] { "1.1.10", "2.1.300", "2.1.810", "3.1.400" }, new string[] { }, new string[] {  "3.1.404" })]
+        [InlineData(new string[] { "1.1.10", "2.1.300", "2.1.810", "3.1.400" }, new string[] { }, new string[] { "3.1.404" })]
         [InlineData(new string[] { }, new string[] { "1.1.10", "2.1.20", "3.1.0" }, new string[] { "3.1.10" })]
         [InlineData(new string[] { "1.1.10", "2.1.300", "2.1.810", "3.1.400" }, new string[] { "1.1.10", "2.1.20", "3.1.0" }, new string[] { "3.1.404", "3.1.10" })]
         public void WhenANewPatchIsAvailableItIsAdvertised(string[] sdkVersions, string[] runtimeVersions, string[] latestPatchVersions)
@@ -121,10 +121,10 @@ namespace Microsoft.DotNet.Cli.SdkCheck.Tests
         [InlineData(new string[] { "5.0.100" }, new string[] { }, new string[] { })]
         [InlineData(new string[] { }, new string[] { "1.0.1" }, new string[] { "1.0.1" })]
         [InlineData(new string[] { }, new string[] { "5.0.0" }, new string[] { })]
-        [InlineData(new string[] { "1.0.10", "1.0.9", "2.0.308", "2.1.804", "3.0.309", "3.1.401" }, new string[] { }, new string[] { "1.0.10", "1.0.9", "2.0.308", "2.1.804"})]
+        [InlineData(new string[] { "1.0.10", "1.0.9", "2.0.308", "2.1.804", "3.0.309", "3.1.401" }, new string[] { }, new string[] { "1.0.10", "1.0.9", "2.0.308", "2.1.804" })]
         [InlineData(new string[] { }, new string[] { "1.0.0", "1.0.1", "2.0.3", "2.1.8", "3.0.3", "3.1.4" }, new string[] { "1.0.0", "1.0.1", "2.0.3", "2.1.8" })]
         [InlineData(new string[] { "1.0.10", "1.0.9", "2.0.308", "2.1.804", "3.0.309", "3.1.401" }, new string[] { "1.0.0", "1.0.1", "2.0.3", "2.1.8", "3.0.3", "3.1.4" },
-            new string[] { "1.0.10", "1.0.9", "2.0.308", "2.1.804", "1.0.0", "1.0.1", "2.0.3" , "2.1.8" })]
+            new string[] { "1.0.10", "1.0.9", "2.0.308", "2.1.804", "1.0.0", "1.0.1", "2.0.3", "2.1.8" })]
         public void WhenABundleIsOutOfSupportItPrintsWarning(string[] sdkVersions, string[] runtimeVersions, string[] outOfSupportVersions)
         {
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "sdk", "check" });

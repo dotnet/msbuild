@@ -5,7 +5,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     public abstract class BaseWorkloadDefinition
     {
-        public BaseWorkloadDefinition (WorkloadId id)
+        public BaseWorkloadDefinition(WorkloadId id)
         {
             Id = id;
         }
@@ -18,7 +18,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         public WorkloadDefinition(
             WorkloadId id, bool isAbstract, string? description, WorkloadDefinitionKind kind, List<WorkloadId>? extends,
             List<WorkloadPackId>? packs, List<string>? platforms
-            ) : base (id)
+            ) : base(id)
         {
             IsAbstract = isAbstract;
             Description = description;
@@ -44,7 +44,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
     public class WorkloadRedirect : BaseWorkloadDefinition
     {
-        public WorkloadRedirect(WorkloadId id, WorkloadId replaceWith) : base (id)
+        public WorkloadRedirect(WorkloadId id, WorkloadId replaceWith) : base(id)
         {
             ReplaceWith = replaceWith;
         }

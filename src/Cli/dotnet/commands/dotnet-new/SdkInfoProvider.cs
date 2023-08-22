@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Tools.New
             }
             // The NETCoreSdkResolverNativeWrapper is not properly initialized (case of OSx in test env) - let's manually perform what
             //  sdk_info::get_all_sdk_infos does
-            catch (Exception e) when(e is HostFxrRuntimePropertyNotSetException or HostFxrNotFoundException)
+            catch (Exception e) when (e is HostFxrRuntimePropertyNotSetException or HostFxrNotFoundException)
             {
                 string sdkDir = Path.Combine(dotnetDir, "sdk");
                 sdks =

@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Tests
 
         protected override void OnEventSourceCreated(EventSource eventSource)
         {
-            if(eventSource.Name.Equals(PerfLogEventSourceName))
+            if (eventSource.Name.Equals(PerfLogEventSourceName))
             {
                 EnableEvents(eventSource, EventLevel.Verbose);
             }

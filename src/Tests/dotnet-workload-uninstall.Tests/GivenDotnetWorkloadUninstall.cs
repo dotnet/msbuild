@@ -208,8 +208,8 @@ namespace Microsoft.DotNet.Cli.Workload.Uninstall.Tests
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot, userLocal, userProfileDir);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
 
-            var command = new List<string> { "dotnet", "workload", "uninstall", uninstallingWorkload};
-            if(args != null)
+            var command = new List<string> { "dotnet", "workload", "uninstall", uninstallingWorkload };
+            if (args != null)
             {
                 command.AddRange(args);
             }

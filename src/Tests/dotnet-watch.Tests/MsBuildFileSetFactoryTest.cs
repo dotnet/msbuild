@@ -355,7 +355,7 @@ $@"<ItemGroup>
             return new MsBuildFileSetFactory(options, _reporter, _muxerPath, projectPath, targetFramework: null, buildProperties: null, new OutputSink(), waitOnError: false, trace: false).CreateAsync(CancellationToken.None);
         }
 
-        private static DotNetWatchOptions GetWatchOptions() => 
+        private static DotNetWatchOptions GetWatchOptions() =>
             new DotNetWatchOptions(false, false, false, false, false, TestFlags.None);
 
         private static string GetTestProjectPath(TestAsset target) => Path.Combine(GetTestProjectDirectory(target), target.TestProject.Name + ".csproj");

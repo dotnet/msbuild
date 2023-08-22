@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Cli.Utils
         /// <param name="args"></param>
         /// <returns></returns>
         public static string EscapeAndConcatenateArgArrayForProcessStart(IEnumerable<string> args)
-        { 
+        {
             var escaped = EscapeArgArray(args);
 #if NET35
             return string.Join(" ", escaped.ToArray());
@@ -137,7 +137,7 @@ namespace Microsoft.DotNet.Cli.Utils
                     sb.Append(arg[i]);
                 }
             }
-            
+
             if (needsQuotes) sb.Append("\"");
 
             return sb.ToString();

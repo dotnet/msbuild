@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Cli
         {
             Description = LocalizableStrings.CmdFrameworkDescription,
             HelpName = Tools.Add.PackageReference.LocalizableStrings.CmdFramework
-                
+
         }.AddCompletions(Complete.TargetFrameworksFromProjectFile);
 
         public static readonly CliOption<bool> InteractiveOption = CommonOptions.InteractiveOption;

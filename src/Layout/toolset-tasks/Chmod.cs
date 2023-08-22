@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         private string GetRecursive()
         {
-            if(Recursive)
+            if (Recursive)
             {
                 return "--recursive";
             }

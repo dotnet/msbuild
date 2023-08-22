@@ -1,12 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Runtime.CompilerServices;
+using FakeItEasy;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.NET.Build.Containers.IntegrationTests;
 using Microsoft.NET.Build.Containers.UnitTests;
-using FakeItEasy;
-using Microsoft.Build.Framework;
-using System.Runtime.CompilerServices;
 
 namespace Microsoft.NET.Build.Containers.Tasks.IntegrationTests;
 
@@ -65,7 +65,8 @@ public class CreateNewImageTests
         newProjectDir.Delete(true);
     }
 
-    private static ImageConfig GetImageConfigFromTask(CreateNewImage task) {
+    private static ImageConfig GetImageConfigFromTask(CreateNewImage task)
+    {
         return new(task.GeneratedContainerConfiguration);
     }
 
@@ -218,7 +219,7 @@ public class CreateNewImageTests
     [DockerAvailableFact]
     public async System.Threading.Tasks.Task CreateNewImage_RootlessBaseImage()
     {
-        const string RootlessBase ="dotnet/rootlessbase";
+        const string RootlessBase = "dotnet/rootlessbase";
         const string AppImage = "dotnet/testimagerootless";
         const string RootlessUser = "1654";
         var loggerFactory = new TestLoggerFactory(_testOutput);
@@ -306,7 +307,7 @@ public class CreateNewImageTests
         return (buildEngine, errors);
     }
 
-    private static string GetTestDirectoryName([CallerMemberName]string testName = "DefaultTest") => Path.Combine(TestSettings.TestArtifactsDirectory, testName + "_" + DateTime.Now.ToString("yyyyMMddHHmmss"));
+    private static string GetTestDirectoryName([CallerMemberName] string testName = "DefaultTest") => Path.Combine(TestSettings.TestArtifactsDirectory, testName + "_" + DateTime.Now.ToString("yyyyMMddHHmmss"));
 
     private static string FormatBuildMessages(List<string?> messages) => string.Join("\r\n", messages);
 }

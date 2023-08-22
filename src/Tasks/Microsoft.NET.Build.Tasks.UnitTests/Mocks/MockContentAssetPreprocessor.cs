@@ -15,7 +15,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
         public string MockWrittenContent { get; set; }
 
-        public MockContentAssetPreprocessor(Func<string,bool> exists)
+        public MockContentAssetPreprocessor(Func<string, bool> exists)
         {
             _exists = exists;
         }

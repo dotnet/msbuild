@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
 
             HasLoggedErrorSuppressions = true;
             LogError(code, message);
-            
+
             return true;
         }
 
@@ -40,9 +40,9 @@ namespace Microsoft.DotNet.ApiCompat.Tool
         {
             if (_suppressionEngine.IsErrorSuppressed(suppression))
                 return false;
-            
+
             LogWarning(code, message);
-            
+
             return true;
         }
     }

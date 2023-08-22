@@ -7,12 +7,12 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
     {
         public static void Main(string[] args)
         {
-            bool first=true;
+            bool first = true;
             foreach (var arg in args)
             {
                 if (first)
                 {
-                    first=false;
+                    first = false;
                 }
                 else
                 {

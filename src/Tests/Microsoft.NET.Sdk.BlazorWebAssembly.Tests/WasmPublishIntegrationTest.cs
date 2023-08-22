@@ -3,8 +3,8 @@
 
 using System.IO.Compression;
 using System.Text.Json;
-using static Microsoft.NET.Sdk.BlazorWebAssembly.Tests.ServiceWorkerAssert;
 using Microsoft.NET.Sdk.WebAssembly;
+using static Microsoft.NET.Sdk.BlazorWebAssembly.Tests.ServiceWorkerAssert;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {

@@ -208,7 +208,7 @@ namespace CompatTests
 
             // make sure it is separated by a space and is not a substring of a word.
             string left = " " + expectedLeftName;
-            string right = " " + expectedRightName; 
+            string right = " " + expectedRightName;
             if (leftFirst)
             {
                 Assert.Contains(left + " ", message);

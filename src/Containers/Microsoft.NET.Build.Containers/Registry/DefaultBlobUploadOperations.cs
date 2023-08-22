@@ -2,10 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
-using System.Net.Http.Headers;
 using System.Net;
-using Microsoft.NET.Build.Containers.Resources;
+using System.Net.Http.Headers;
 using Microsoft.Extensions.Logging;
+using Microsoft.NET.Build.Containers.Resources;
 
 namespace Microsoft.NET.Build.Containers;
 

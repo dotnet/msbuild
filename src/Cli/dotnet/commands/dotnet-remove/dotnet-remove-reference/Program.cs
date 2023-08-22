@@ -28,7 +28,8 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
         public override int Execute()
         {
             var msbuildProj = MsbuildProject.FromFileOrDirectory(new ProjectCollection(), _fileOrDirectory, false);
-            var references = _arguments.Select(p => {
+            var references = _arguments.Select(p =>
+            {
                 var fullPath = Path.GetFullPath(p);
                 if (!Directory.Exists(fullPath))
                 {

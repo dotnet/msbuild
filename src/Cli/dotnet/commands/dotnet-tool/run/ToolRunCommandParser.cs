@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Cli
         {
             Description = "arguments forwarded to the tool"
         };
-       
+
         private static readonly CliCommand Command = ConstructCommand();
 
         public static CliCommand GetCommand()

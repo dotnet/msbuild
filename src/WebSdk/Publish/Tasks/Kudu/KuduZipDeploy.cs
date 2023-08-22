@@ -7,7 +7,7 @@ using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
 {
-    public class KuduZipDeploy: KuduConnect
+    public class KuduZipDeploy : KuduConnect
     {
         private TaskLoggingHelper _logger;
 

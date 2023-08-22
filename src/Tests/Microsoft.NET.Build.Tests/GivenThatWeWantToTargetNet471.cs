@@ -266,7 +266,7 @@ namespace Microsoft.NET.Build.Tests
             }.Concat(net471Shims));
         }
 
-        
+
         [WindowsOnlyFact]
         public void Aliases_are_preserved_for_replaced_references()
         {

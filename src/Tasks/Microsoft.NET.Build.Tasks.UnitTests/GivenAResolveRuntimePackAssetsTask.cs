@@ -49,7 +49,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             task.Execute();
             task.RuntimePackAssets.Should().HaveCount(1);
-            string expectedResource = Path.Combine("runtimes","de","a.resources.dll");
+            string expectedResource = Path.Combine("runtimes", "de", "a.resources.dll");
             task.RuntimePackAssets.FirstOrDefault().ItemSpec.Should().Contain(expectedResource);
         }
     }

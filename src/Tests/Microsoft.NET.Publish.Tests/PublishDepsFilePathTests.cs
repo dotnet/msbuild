@@ -58,7 +58,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var values = getValuesCommand.GetValues();
 
-            return values.Any() ? values.Single() : null;  
+            return values.Any() ? values.Single() : null;
         }
 
         private TestProject SetupProject(bool singleFile)

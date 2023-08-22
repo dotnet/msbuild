@@ -120,7 +120,9 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         if (IsLazyLoadedAssembly($"{fileName}.dll"))
                         {
                             resourceList = resourceData.lazyAssembly;
-                        } else {
+                        }
+                        else
+                        {
                             resourceList = resourceData.pdb;
                         }
                     }

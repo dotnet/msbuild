@@ -114,25 +114,25 @@ internal sealed class DockerCli : ILocalRegistry
             switch (commandPath)
             {
                 case DockerCommand:
-                {
-                    JsonDocument config = GetConfig();
+                    {
+                        JsonDocument config = GetConfig();
 
-                    if (!config.RootElement.TryGetProperty("ServerErrors", out JsonElement errorProperty))
-                    {
-                        return true;
+                        if (!config.RootElement.TryGetProperty("ServerErrors", out JsonElement errorProperty))
+                        {
+                            return true;
+                        }
+                        else if (errorProperty.ValueKind == JsonValueKind.Array && errorProperty.GetArrayLength() == 0)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            // we have errors, turn them into a string and log them
+                            string messages = string.Join(Environment.NewLine, errorProperty.EnumerateArray());
+                            _logger.LogError($"The daemon server reported errors: {messages}");
+                            return false;
+                        }
                     }
-                    else if (errorProperty.ValueKind == JsonValueKind.Array && errorProperty.GetArrayLength() == 0)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        // we have errors, turn them into a string and log them
-                        string messages = string.Join(Environment.NewLine, errorProperty.EnumerateArray());
-                        _logger.LogError($"The daemon server reported errors: {messages}");
-                        return false;
-                    }
-                }
                 case PodmanCommand:
                     return commandPathWasUnknown || await TryRunVersionCommandAsync(PodmanCommand, cancellationToken);
                 default:

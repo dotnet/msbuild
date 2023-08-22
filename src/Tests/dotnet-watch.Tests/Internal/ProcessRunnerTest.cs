@@ -13,8 +13,8 @@ namespace Microsoft.DotNet.Watcher.Internal
             // Arrange
             var processStartInfo = new ProcessStartInfo();
 
-           // Act
-           ProcessRunner.SetEnvironmentVariable(processStartInfo, "Test", new () { "value1" }, ';', _ => null);
+            // Act
+            ProcessRunner.SetEnvironmentVariable(processStartInfo, "Test", new() { "value1" }, ';', _ => null);
 
             // Assert
             Assert.Equal("value1", processStartInfo.Environment["Test"]);
@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Watcher.Internal
             {
                 Environment = { ["Test"] = "value4" },
             };
-            
+
             // Act
             ProcessRunner.SetEnvironmentVariable(processStartInfo, "Test", new() { "value1", "value2" }, ';', _ => "value3");
 

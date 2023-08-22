@@ -69,10 +69,10 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
   ""packs"": {{
   }}
 }}";
-                   
-               File.WriteAllText(Path.Combine(dataFolder, "WorkloadManifest.json"), manifestContents);
+
+                File.WriteAllText(Path.Combine(dataFolder, "WorkloadManifest.json"), manifestContents);
             }
-            
+
             return Task.FromResult(new List<string>() as IEnumerable<string>);
         }
 

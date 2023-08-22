@@ -84,7 +84,7 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        private static IEnumerable<PathAndPropertiesTuple> SelectPath<T>(IList<T> fileItemList) 
+        private static IEnumerable<PathAndPropertiesTuple> SelectPath<T>(IList<T> fileItemList)
             where T : LockFileItem
             => fileItemList.Select(c => Tuple.Create(c.Path, c.Properties));
     }

@@ -1,14 +1,14 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.ToolManifest;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools.Tool.Uninstall;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Uninstall.LocalizableStrings;
-using Microsoft.DotNet.ToolManifest;
-using System.CommandLine;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tests.Commands.Tool
@@ -159,7 +159,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             _defaultToolUninstallLocalCommand.Execute();
 
             _fileSystem.File.ReadAllText(parentManifestFilePath).Should().Be(
-                _entryRemovedJsonContent, 
+                _entryRemovedJsonContent,
                 "First invoke remove the one in current dir, the second invoke remove the one in parent dir.");
         }
 

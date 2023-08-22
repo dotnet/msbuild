@@ -19,9 +19,9 @@ namespace Microsoft.NET.Build.Tests
 
         internal static void TestSatelliteResources(
             ITestOutputHelper log,
-            TestAssetsManager testAssetsManager, 
+            TestAssetsManager testAssetsManager,
             Action<XDocument> projectChanges = null,
-            Action<BuildCommand> setup = null, 
+            Action<BuildCommand> setup = null,
             [CallerMemberName] string callingMethod = null)
         {
             var testAsset = testAssetsManager

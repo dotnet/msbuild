@@ -7,7 +7,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 {
     public class BuildWithComponentsIntegrationTest : AspNetSdkTest
     {
-        public BuildWithComponentsIntegrationTest(ITestOutputHelper log) : base(log) {}
+        public BuildWithComponentsIntegrationTest(ITestOutputHelper log) : base(log) { }
 
         [CoreMSBuildOnlyFact]
         public void Build_Components_WithDotNetCoreMSBuild_Works() => Build_ComponentsWorks();

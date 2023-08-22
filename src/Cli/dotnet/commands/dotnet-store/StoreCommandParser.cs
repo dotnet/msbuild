@@ -20,7 +20,8 @@ namespace Microsoft.DotNet.Cli
         {
             Description = LocalizableStrings.ProjectManifestDescription,
             HelpName = LocalizableStrings.ProjectManifest
-        }.ForwardAsMany(o => {
+        }.ForwardAsMany(o =>
+        {
             // the first path doesn't need to go through CommandDirectoryContext.ExpandPath
             // since it is a direct argument to MSBuild, not a property
             var materializedString = $"{o.First()}";

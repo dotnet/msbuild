@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Cli
 
         private static CliCommand ConstructCommand()
         {
-            DocumentedCommand command = new ("clean", DocsLink, LocalizableStrings.AppFullName);
+            DocumentedCommand command = new("clean", DocsLink, LocalizableStrings.AppFullName);
 
             command.Arguments.Add(SlnOrProjectArgument);
             command.Options.Add(FrameworkOption);

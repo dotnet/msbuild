@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.TemplateLocator.Tests
 
             _manifestDirectory = Path.Combine(_fakeDotnetRootDirectory, "sdk-manifests", "5.0.100");
             Directory.CreateDirectory(_manifestDirectory);
-            
+
         }
 
         [Fact]

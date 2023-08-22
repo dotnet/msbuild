@@ -1,8 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using NuGet.Packaging.Core;
 using Microsoft.Build.Framework;
+using NuGet.Packaging.Core;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -22,7 +22,7 @@ namespace Microsoft.NET.Build.Tasks
         public string PackageVersion { get; }
         public string PathInPackage { get; }
         public string DestinationSubDirectory { get; }
-        public AssetType Asset{ get; }
+        public AssetType Asset { get; }
         public bool IsRuntimeTarget { get; }
         public string RuntimeIdentifier { get; }
         public string Culture { get; }

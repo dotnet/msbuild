@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Tests
 
             Guid.TryParse(assignedMachineId, out var _).Should().BeTrue("it should be a guid");
         }
-        
+
         [Fact]
         public void TelemetryCommonPropertiesShouldReturnHashedMachineIdOld()
         {
@@ -143,14 +143,20 @@ namespace Microsoft.DotNet.Tests
 
         [Theory]
         [MemberData(nameof(CITelemetryTestCases))]
-        public void CanDetectCIStatusForEnvVars(Dictionary<string, string> envVars, bool expected) {
-            try {
-                foreach (var (key, value) in envVars) {
+        public void CanDetectCIStatusForEnvVars(Dictionary<string, string> envVars, bool expected)
+        {
+            try
+            {
+                foreach (var (key, value) in envVars)
+                {
                     Environment.SetEnvironmentVariable(key, value);
                 }
                 new CIEnvironmentDetectorForTelemetry().IsCIEnvironment().Should().Be(expected);
-            } finally {
-                foreach (var (key, value) in envVars) {
+            }
+            finally
+            {
+                foreach (var (key, value) in envVars)
+                {
                     Environment.SetEnvironmentVariable(key, null);
                 }
             }

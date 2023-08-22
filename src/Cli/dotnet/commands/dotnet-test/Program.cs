@@ -114,7 +114,7 @@ namespace Microsoft.DotNet.Tools.Test
             {
                 testSessionCorrelationId = $"{Environment.ProcessId}_{Guid.NewGuid()}";
             }
-            
+
             return FromParseResult(parseResult, settings, testSessionCorrelationId, msbuildPath);
         }
 

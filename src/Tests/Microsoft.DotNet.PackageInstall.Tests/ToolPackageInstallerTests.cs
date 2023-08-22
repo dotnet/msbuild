@@ -3,18 +3,18 @@
 
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Transactions;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools;
-using Microsoft.DotNet.Tools.Tool.Install;
 using Microsoft.DotNet.Tools.Tests.ComponentMocks;
+using Microsoft.DotNet.Tools.Tool.Install;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using NuGet.Versioning;
-using System.Runtime.CompilerServices;
-using Microsoft.DotNet.ToolPackage;
 using NuGet.Frameworks;
+using NuGet.Versioning;
 
 namespace Microsoft.DotNet.PackageInstall.Tests
 {

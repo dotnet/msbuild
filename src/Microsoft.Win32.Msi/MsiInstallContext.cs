@@ -20,7 +20,7 @@ namespace Microsoft.Win32.Msi
         /// <summary>
         /// Invalid context for a product.
         /// </summary>
-        NONE = 0,  
+        NONE = 0,
 
         /// <summary>
         /// User managed install context.

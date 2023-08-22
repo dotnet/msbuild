@@ -7,7 +7,7 @@ using Microsoft.TemplateEngine.MSBuildEvaluation;
 
 namespace Microsoft.DotNet.Cli.New.Tests
 {
-    public class CapabilityExpressionEvaluationTests 
+    public class CapabilityExpressionEvaluationTests
     {
         [Theory]
         [InlineData("Capability", "", false)]

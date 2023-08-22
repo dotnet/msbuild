@@ -36,7 +36,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp1.1")]
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void ResolvePackageAssets_runs_incrementally(string targetFramework)
-        { 
+        {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: targetFramework)
                 .WithSource()

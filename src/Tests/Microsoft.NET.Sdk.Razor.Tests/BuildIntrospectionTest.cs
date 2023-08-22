@@ -5,14 +5,14 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 {
     public class BuildIntrospectionTest : AspNetSdkTest
     {
-        public BuildIntrospectionTest(ITestOutputHelper log) : base(log) {}
+        public BuildIntrospectionTest(ITestOutputHelper log) : base(log) { }
 
         [Fact]
         public void RazorSdk_AddsCshtmlFilesToUpToDateCheckInput()
         {
             var testAsset = "RazorSimpleMvc";
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
-            
+
             var build = new BuildCommand(projectDirectory);
             build.Execute("/t:_IntrospectUpToDateCheck")
                 .Should()
@@ -26,7 +26,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         {
             var testAsset = "RazorSimpleMvc";
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
-            
+
             var build = new BuildCommand(projectDirectory);
             build.Execute("/t:_IntrospectUpToDateReloadFileTypes")
                 .Should()
@@ -61,7 +61,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         {
             var testAsset = "RazorSimpleMvc";
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
-            
+
             var build = new BuildCommand(projectDirectory);
             build.Execute("/t:_IntrospectUpToDateReloadFileTypes")
                 .Should()

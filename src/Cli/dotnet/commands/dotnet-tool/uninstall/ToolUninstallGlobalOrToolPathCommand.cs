@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
             {
                 throw new GracefulException(
                     messages: ToolUninstallCommandLowLevelErrorConverter.GetUserFacingMessages(ex, packageId),
-                    verboseMessages: new[] {ex.ToString()},
+                    verboseMessages: new[] { ex.ToString() },
                     isUserError: false);
             }
         }

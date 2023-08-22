@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.ShellShim
                     environmentProvider: environmentProvider);
             }
 
-			if (OperatingSystem.IsWindows())
+            if (OperatingSystem.IsWindows())
             {
                 return new WindowsEnvironmentPath(
                     CliFolderPathCalculator.ToolsShimPath,

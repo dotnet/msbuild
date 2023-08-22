@@ -10,8 +10,8 @@ using Newtonsoft.Json.Linq;
 using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
-using NuGet.Versioning;
 using NuGet.RuntimeModel;
+using NuGet.Versioning;
 using Xunit;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests
@@ -67,7 +67,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, includeRuntimeFileVersions: false, runtimeGraph: null, projectContext: projectContext, libraryLookup: lockFileLookup)
                 .WithDirectReferences(directReferences)
                 .WithCompilationOptions(compilationOptions)
-                .WithResolvedNuGetFiles((ResolvedFile[]) resolvedNuGetFiles)
+                .WithResolvedNuGetFiles((ResolvedFile[])resolvedNuGetFiles)
                 .Build();
 
             JObject result = Save(dependencyContext);
@@ -256,7 +256,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 runtimeFrameworks: null,
                 isSelfContained: false);
 
-            CompilationOptions compilationOptions = 
+            CompilationOptions compilationOptions =
                 useCompilationOptions ? CreateCompilationOptions() :
                 null;
 
@@ -309,7 +309,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 isSelfContained: true);
 
             var runtimeGraph = new RuntimeGraph(
-                new RuntimeDescription []
+                new RuntimeDescription[]
                 {
                     new RuntimeDescription("os-arch", new string [] { "os", "base" }),
                     new RuntimeDescription("new_os-arch", new string [] { "os-arch", "os", "base" }),

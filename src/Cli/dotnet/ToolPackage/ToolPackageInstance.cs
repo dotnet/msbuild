@@ -2,12 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Frameworks;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
-using Microsoft.DotNet.Cli.Utils;
-using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ToolPackage
 {

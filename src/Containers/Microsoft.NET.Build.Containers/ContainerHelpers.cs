@@ -20,7 +20,7 @@ public static class ContainerHelpers
     internal const string HostObjectPass = "SDK_CONTAINER_REGISTRY_PWORD";
 
     internal const string DockerRegistryAlias = "docker.io";
-    
+
     /// <summary>
     /// Matches an environment variable name - must start with a letter or underscore, and can only contain letters, numbers, and underscores.
     /// </summary>
@@ -272,7 +272,7 @@ public static class ContainerHelpers
             if (!IsAlpha(firstChar) && !IsNumeric(firstChar))
             {
                 // The name did not start with an alphanumeric character, so we can't normalize it.
-                var error = (nameof(Strings.InvalidImageName_NonAlphanumericStartCharacter), new []{ containerRepository });
+                var error = (nameof(Strings.InvalidImageName_NonAlphanumericStartCharacter), new[] { containerRepository });
                 return (null, null, error);
             }
 
@@ -314,7 +314,7 @@ public static class ContainerHelpers
             // check for warning/notification that we did indeed perform normalization
             if (normalizationOccurred)
             {
-                var warning = (nameof(Strings.NormalizedContainerName), new string[]{ containerRepository, normalizedImageName });
+                var warning = (nameof(Strings.NormalizedContainerName), new string[] { containerRepository, normalizedImageName });
                 return (normalizedImageName, warning, null);
             }
 

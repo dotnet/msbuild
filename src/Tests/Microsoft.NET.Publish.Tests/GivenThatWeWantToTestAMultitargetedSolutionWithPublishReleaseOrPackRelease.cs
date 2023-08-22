@@ -246,7 +246,7 @@ namespace Microsoft.NET.Publish.Tests
             var secondProjectTfm = ToolsetInfo.CurrentTargetFramework; // This should work for Net8+, test name is for brevity
 
             var (testAsset, testProjects) = Setup(new List<string> { firstProjectTfm }, new List<string> { secondProjectTfm }, PublishRelease, "", publishReleaseValue, identifier: publishReleaseValue);
-        
+
             var dotnetCommand = new DotnetPublishCommand(Log);
             dotnetCommand
                 .WithEnvironmentVariable("DOTNET_CLI_LAZY_PUBLISH_AND_PACK_RELEASE_FOR_SOLUTIONS", "true")

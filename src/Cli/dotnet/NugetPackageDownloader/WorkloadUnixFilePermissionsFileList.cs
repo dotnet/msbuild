@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader.WorkloadUnixFilePermission
             get => fileField;
             set => fileField = value;
         }
-        
+
         public static FileList Deserialize(string pathToXml)
         {
             var serializer = new XmlSerializer(typeof(FileList));

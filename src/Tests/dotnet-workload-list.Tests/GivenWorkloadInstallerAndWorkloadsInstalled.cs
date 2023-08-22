@@ -107,7 +107,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         {
             Setup(nameof(ItShouldGetAvailableUpdate));
             WorkloadListCommand.UpdateAvailableEntry[] result =
-                _workloadListCommand.GetUpdateAvailable(new List<WorkloadId> {new("xamarin-android")});
+                _workloadListCommand.GetUpdateAvailable(new List<WorkloadId> { new("xamarin-android") });
 
             result.Should().NotBeEmpty();
             result[0].WorkloadId.Should().Be(InstallingWorkload, "Only should installed workload");
@@ -177,7 +177,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                 SdkFeatureBand featureBand = new SdkFeatureBand(new ReleaseVersion(6, 0, 100));
                 if (sdkFeatureBand.Equals(featureBand))
                 {
-                    return new[] {new WorkloadId("xamarin-android")};
+                    return new[] { new WorkloadId("xamarin-android") };
                 }
 
                 throw new Exception($"Should not pass other feature band {sdkFeatureBand}");

@@ -6,11 +6,11 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.PackageInstall.Tests
 {
-    public class MockFirstPartyNuGetPackageSigningVerifier: IFirstPartyNuGetPackageSigningVerifier
+    public class MockFirstPartyNuGetPackageSigningVerifier : IFirstPartyNuGetPackageSigningVerifier
     {
         private readonly bool _verifyResult;
         private readonly string _commandOutput;
-        
+
         public MockFirstPartyNuGetPackageSigningVerifier(bool verifyResult = true, string commandOutput = "")
         {
             _verifyResult = verifyResult;

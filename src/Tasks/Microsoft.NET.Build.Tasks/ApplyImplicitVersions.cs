@@ -40,7 +40,7 @@ namespace Microsoft.NET.Build.Tasks
                     string versionOnPackageReference = packageReference.GetMetadata(MetadataKeys.Version);
                     if (string.IsNullOrEmpty(versionOnPackageReference))
                     {
-                        packageReference.SetMetadata(MetadataKeys.Version, 
+                        packageReference.SetMetadata(MetadataKeys.Version,
                             TargetLatestRuntimePatch ? implicitVersion.LatestVersion : implicitVersion.DefaultVersion);
 
                         packageReference.SetMetadata(MetadataKeys.IsImplicitlyDefined, "true");
