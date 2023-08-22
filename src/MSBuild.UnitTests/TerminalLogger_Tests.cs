@@ -298,6 +298,7 @@ namespace Microsoft.Build.UnitTests
 <Project>
     <ItemGroup>
         <Compile Include=""MyItem1.cs"" />
+        <Compile Include=""MyItem2.cs"" />
     </ItemGroup>
     <PropertyGroup>
         <MyProp1>MyProperty1</MyProp1>
@@ -342,12 +343,12 @@ namespace Microsoft.Build.UnitTests
                 mockLogFromPlaybackWithoutTL.Warnings.Count.ShouldBe(mockLogFromPlaybackWithTL.Warnings.Count);
                 mockLogFromPlaybackWithoutTL.AllBuildEvents.Count.ShouldBe(mockLogFromPlaybackWithTL.AllBuildEvents.Count);
 
-                // Check presence of some items and properties
-                mockLogFromPlaybackWithoutTL.EvaluationFinishedEvents.FindAll(x => (x.Items != null)).Count.ShouldBe(1);
-                mockLogFromPlaybackWithTL.EvaluationFinishedEvents.FindAll(x => (x.Items != null)).Count.ShouldBe(1);
+                // Check presence of some items and properties and that they have at least 1 item and property
+                mockLogFromPlaybackWithoutTL.EvaluationFinishedEvents.ShouldContain(x => (x.Items != null) && x.Items.GetEnumerator().MoveNext());
+                mockLogFromPlaybackWithTL.EvaluationFinishedEvents.ShouldContain(x => (x.Items != null) && x.Items.GetEnumerator().MoveNext());
 
-                mockLogFromPlaybackWithoutTL.EvaluationFinishedEvents.FindAll(x => (x.Properties != null)).Count.ShouldBe(1);
-                mockLogFromPlaybackWithTL.EvaluationFinishedEvents.FindAll(x => (x.Properties != null)).Count.ShouldBe(1);
+                mockLogFromPlaybackWithoutTL.EvaluationFinishedEvents.ShouldContain(x => (x.Properties != null) && x.Properties.GetEnumerator().MoveNext());
+                mockLogFromPlaybackWithTL.EvaluationFinishedEvents.ShouldContain(x => (x.Properties != null) && x.Properties.GetEnumerator().MoveNext());
             }
         }
     }
