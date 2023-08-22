@@ -1,5 +1,5 @@
 ﻿Microsoft.Azure.WebJobs.ItemTemplates
-   Package version: 4.0.2727
+   Package version: 4.0.2738
    Details: Collection of templates for Azure Functions
    Source Feed: https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json
    Authors:
@@ -8,29 +8,30 @@
       License Url: https://go.microsoft.com/fwlink/?linkid=2028464
       Repository Url: https://go.microsoft.com/fwlink/?linkid=848145
    Templates:
-      Template Name                        Short Name       Type  Tags                                                   Language
-      -----------------------------------  ---------------  ----  -----------------------------------------------------  --------
-      HttpTrigger                          http             item  Azure Function/Trigger/Http                            C#,F#   
-      QueueTrigger                         queue            item  Azure Function/Trigger/Storage Queue                   C#      
-      HttpTriggerWithOpenAPI               httpOpenAPI      item  Azure Function/Trigger/Http                            C#      
-      BlobTrigger                          blob             item  Azure Function/Trigger/Blob                            C#,F#   
-      TimerTrigger                         timer            item  Azure Function/Trigger/Timer                           C#,F#   
-      DurableFunctionsOrchestration        durable          item  Azure Function/Durable Functions Orchestration         C#      
-      DurableFunctionsEntityOrchestration  durableentity    item  Azure Function/Durable Functions Entity Orchestration  C#      
-      SendGrid                             sendgrid         item  Azure Function/Ouput/SendGrid                          C#      
-      EventHubTrigger                      eventhub         item  Azure Function/Trigger/EventHub                        C#,F#   
-      ServiceBusQueueTrigger               squeue           item  Azure Function/Trigger/Service Bus/Queue               C#      
-      ServiceBusTopicTrigger               stopic           item  Azure Function/Trigger/Service Bus/Topic               C#      
-      EventGridTrigger                     eventgrid        item  Azure Function/Trigger/EventGrid                       C#      
-      IotHubTrigger                        iothub           item  Azure Function/Trigger/IotHub                          C#      
-      CosmosDBTrigger                      cosmos,CosmosDB  item  Azure Function/Trigger/Cosmos DB                       C#,F#   
-      SignalRTrigger                       signalr          item  Azure Function/Trigger/Http/SignalR                    C#      
-      RabbitMQTrigger                      rqueue           item  Azure Function/Trigger/RabbitMQ Queue                  C#      
-      KafkaTrigger                         kafka            item  Azure Function/Trigger/Kafka                           C#      
-      KafkaOutput                          kafkao           item  Azure Function/Ouput/Kafka                             C#      
-      SqlInputBinding                      sqlinput         item  Azure Function/Input/SQL                               C#      
-      SqlOutputBinding                     sqloutput        item  Azure Function/Output/SQL                              C#      
-      SqlTriggerBinding                    sqltrigger       item  Azure Function/Trigger/SQL                             C#      
-      KustoInputBinding                    kustoinput       item  Azure Function/Input/Kusto                             C#      
-      KustoOutputBinding                   kustooutput      item  Azure Function/Output/Kusto                            C#      
+      Template Name                        Short Name           Type  Tags                                                   Language
+      -----------------------------------  -------------------  ----  -----------------------------------------------------  --------
+      HttpTrigger                          http                 item  Azure Function/Trigger/Http                            C#,F#   
+      QueueTrigger                         queue                item  Azure Function/Trigger/Storage Queue                   C#      
+      HttpTriggerWithOpenAPI               httpOpenAPI          item  Azure Function/Trigger/Http                            C#      
+      BlobTrigger                          blob                 item  Azure Function/Trigger/Blob                            C#,F#   
+      TimerTrigger                         timer                item  Azure Function/Trigger/Timer                           C#,F#   
+      DurableFunctionsOrchestration        durable              item  Azure Function/Durable Functions Orchestration         C#      
+      DurableFunctionsEntityOrchestration  durableentity        item  Azure Function/Durable Functions Entity Orchestration  C#      
+      SendGrid                             sendgrid             item  Azure Function/Ouput/SendGrid                          C#      
+      EventHubTrigger                      eventhub             item  Azure Function/Trigger/EventHub                        C#,F#   
+      ServiceBusQueueTrigger               squeue               item  Azure Function/Trigger/Service Bus/Queue               C#      
+      ServiceBusTopicTrigger               stopic               item  Azure Function/Trigger/Service Bus/Topic               C#      
+      EventGridCloudEventTrigger           eventgridcloudevent  item  Azure Function/Trigger/EventGrid/EventGrid CloudEvent  C#,F#   
+      EventGridTrigger                     eventgrid            item  Azure Function/Trigger/EventGrid                       C#      
+      IotHubTrigger                        iothub               item  Azure Function/Trigger/IotHub                          C#      
+      CosmosDBTrigger                      cosmos,CosmosDB      item  Azure Function/Trigger/Cosmos DB                       C#,F#   
+      SignalRTrigger                       signalr              item  Azure Function/Trigger/Http/SignalR                    C#      
+      RabbitMQTrigger                      rqueue               item  Azure Function/Trigger/RabbitMQ Queue                  C#      
+      KafkaTrigger                         kafka                item  Azure Function/Trigger/Kafka                           C#      
+      KafkaOutput                          kafkao               item  Azure Function/Ouput/Kafka                             C#      
+      SqlInputBinding                      sqlinput             item  Azure Function/Input/SQL                               C#      
+      SqlOutputBinding                     sqloutput            item  Azure Function/Output/SQL                              C#      
+      SqlTriggerBinding                    sqltrigger           item  Azure Function/Trigger/SQL                             C#      
+      KustoInputBinding                    kustoinput           item  Azure Function/Input/Kusto                             C#      
+      KustoOutputBinding                   kustooutput          item  Azure Function/Output/Kusto                            C#      
       

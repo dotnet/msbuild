@@ -260,7 +260,7 @@ Execute 'dotnet {1} --mostrar- aliases' sem nenhum args para mostrar todos os al
       </trans-unit>
       <trans-unit id="ColumnNamePackageNameAndOwners">
         <source>Package Name / Owners</source>
-        <target state="new">Package Name / Owners</target>
+        <target state="translated">Nome/Proprietários do Pacote</target>
         <note>information about NuGet package: its name and owner</note>
       </trans-unit>
       <trans-unit id="ColumnNamePrecedence">
@@ -382,17 +382,17 @@ Execute 'dotnet {1} --mostrar- aliases' sem nenhum args para mostrar todos os al
       </trans-unit>
       <trans-unit id="DetailsCommand_Argument_PackageIdentifier">
         <source>Package identifier</source>
-        <target state="new">Package identifier</target>
+        <target state="translated">Identificador do pacote</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_NoNuGetSources">
         <source>No NuGet sources are defined or enabled</source>
-        <target state="new">No NuGet sources are defined or enabled</target>
+        <target state="translated">Nenhuma fonte NuGet definida ou habilitada</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Option_Version">
         <source>Specifies a concrete version for displaying details. If not specified the last is taken.</source>
-        <target state="new">Specifies a concrete version for displaying details. If not specified the last is taken.</target>
+        <target state="translated">Especifica uma versão concreta para exibir detalhes. Se não for especificado, o último será usado.</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Authors">
@@ -422,7 +422,7 @@ Execute 'dotnet {1} --mostrar- aliases' sem nenhum args para mostrar todos os al
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_LicenseMetadata">
         <source>License Metadata</source>
-        <target state="new">License Metadata</target>
+        <target state="translated">Metadados de Licença</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_LicenseUrl">
@@ -447,12 +447,12 @@ Execute 'dotnet {1} --mostrar- aliases' sem nenhum args para mostrar todos os al
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_ShortNames">
         <source>Short Names</source>
-        <target state="new">Short Names</target>
+        <target state="translated">Nomes Curtos</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_SourceFeed">
         <source>Source Feed</source>
-        <target state="new">Source Feed</target>
+        <target state="translated">Feed de Origem</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Tags">
@@ -472,7 +472,7 @@ Execute 'dotnet {1} --mostrar- aliases' sem nenhum args para mostrar todos os al
       </trans-unit>
       <trans-unit id="DetailsCommand_UnableToLoadResorce">
         <source>Could not parse NuGet source '{0}', so it was discarded</source>
-        <target state="new">Could not parse NuGet source '{0}', so it was discarded</target>
+        <target state="translated">Não foi possível analisar a fonte do NuGet '{0}', portanto, ela foi descartada</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_UnableToLoadResorces">
@@ -562,14 +562,12 @@ The header is followed by the list of parameters and their errors (might be seve
       To search for the template packages on NuGet.org, run:
         dotnet new search --package {0}
     </source>
-        <target state="new">
-      No template packages found matching: {0}.
+        <target state="translated">Nenhum pacote de modelo encontrado correspondente: {0}.
       
-      To list installed template packages, run:
-        dotnet new uninstall
-      To search for the template packages on NuGet.org, run:
-        dotnet new search --package {0}
-    </target>
+Para listar os pacotes de modelos instalados, execute:
+        dotnet nova desinstalação
+      Para pesquisar os pacotes de modelo NuGet.org, execute:
+        dotnet new search --package {0}    </target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_Info_NoMatchingTemplates">
@@ -827,27 +825,27 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_ArgumentNotConfigured">
         <source>Post action argument '{0}' is mandatory, but not configured.</source>
-        <target state="new">Post action argument '{0}' is mandatory, but not configured.</target>
+        <target state="translated">O argumento pós-'{0}' é obrigatório, mas não está configurado.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_MultipleJsonFiles">
         <source>More than one file found that matches '{0}'.</source>
-        <target state="new">More than one file found that matches '{0}'.</target>
+        <target state="translated">Mais de um arquivo encontrado que corresponde '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_NoJsonFile">
         <source>Unable to find the json file in the solution</source>
-        <target state="new">Unable to find the json file in the solution</target>
+        <target state="translated">Não é possível localizar o arquivo json na solução</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_ParentPropertyPathInvalid">
         <source>Parent property path '{0}' could not be traversed.</source>
-        <target state="new">Parent property path '{0}' could not be traversed.</target>
+        <target state="translated">Não foi possível percorrer '{0}' caminho da propriedade pai.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Succeeded">
         <source>Successfully modified {0}.</source>
-        <target state="new">Successfully modified {0}.</target>
+        <target state="translated">Êxito ao modificar {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
@@ -983,12 +981,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Download_Error_VulnerablePackage">
         <source>Failed to install {0}, due to detected vulnerabilities:</source>
-        <target state="new">Failed to install {0}, due to detected vulnerabilities:</target>
+        <target state="translated">Falha ao instalar {0}, devido a vulnerabilidades detectadas:</target>
         <note>{0} - template package name.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Download_VulnerablePackage">
         <source>Installed package has the following vulnerabilities:</source>
-        <target state="new">Installed package has the following vulnerabilities:</target>
+        <target state="translated">O pacote instalado tem as seguintes vulnerabilidades:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
@@ -1028,7 +1026,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Error_VulnerablePackageTip">
         <source>In order to install this package, run:</source>
-        <target state="new">In order to install this package, run:</target>
+        <target state="translated">Para instalar este pacote, execute:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_OverrideNotice">
@@ -1088,7 +1086,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_UpdateCheck_Error_VulnerablePackage">
         <source>The package {0} contains vulnerabilities:</source>
-        <target state="new">The package {0} contains vulnerabilities:</target>
+        <target state="translated">O pacote {0} contém vulnerabilidades:</target>
         <note>{0} - template package name.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_GenericError">
@@ -1113,12 +1111,12 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_VulnerablePackage">
         <source>The package {0} was not updated due to detected vulnerabilities:</source>
-        <target state="new">The package {0} was not updated due to detected vulnerabilities:</target>
+        <target state="translated">O pacote {0} foi atualizado devido a vulnerabilidades detectadas:</target>
         <note>{0} - template package name.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_VulnerablePackageTip">
         <source>In order to update this package, run:</source>
-        <target state="new">In order to update this package, run:</target>
+        <target state="translated">Para atualizar este pacote, execute:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_AllPackagesAreUpToDate">

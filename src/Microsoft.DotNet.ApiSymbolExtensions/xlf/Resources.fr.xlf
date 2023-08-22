@@ -4,37 +4,37 @@
     <body>
       <trans-unit id="CouldNotResolveReference">
         <source>Could not resolve reference '{0}' in any of the provided search directories.</source>
-        <target state="new">Could not resolve reference '{0}' in any of the provided search directories.</target>
+        <target state="translated">Impossible de résoudre la référence «{0}» dans l’un des répertoires de recherche fournis.</target>
         <note />
       </trans-unit>
       <trans-unit id="MatchingAssemblyNotFound">
         <source>Could not find matching assembly: '{0}' in any of the search directories.</source>
-        <target state="new">Could not find matching assembly: '{0}' in any of the search directories.</target>
+        <target state="translated">Assembly correspondant introuvable : «{0}» dans les répertoires de recherche.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProvidedPathToLoadBinariesFromNotFound">
         <source>Could not find the provided path '{0}' to load binaries from.</source>
-        <target state="new">Could not find the provided path '{0}' to load binaries from.</target>
+        <target state="translated">Le chemin d’accès fourni «{0}» à partir duquel charger les fichiers binaires est introuvable.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProvidedStreamDoesNotHaveMetadata">
         <source>Provided stream for assembly '{0}' doesn't have any metadata to read. from.</source>
-        <target state="new">Provided stream for assembly '{0}' doesn't have any metadata to read. from.</target>
+        <target state="translated">Le flux fourni pour l’assembly '{0}' n’a aucune métadonnée à lire. De.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShouldNotBeNullAndContainAtLeastOneElement">
         <source>Should not be null and contain at least one element.</source>
-        <target state="new">Should not be null and contain at least one element.</target>
+        <target state="translated">Ne doit pas être null et contenir au moins un élément.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShouldProvideValidAssemblyName">
         <source>Should provide a valid assembly name.</source>
-        <target state="new">Should provide a valid assembly name.</target>
+        <target state="translated">Doit fournir un nom d’assembly valide.</target>
         <note />
       </trans-unit>
       <trans-unit id="StreamPositionGreaterThanLength">
         <source>Stream position is greater than it's length, so there are no contents available to read.</source>
-        <target state="new">Stream position is greater than it's length, so there are no contents available to read.</target>
+        <target state="translated">La position du flux est supérieure à sa longueur. Aucun contenu n’est donc disponible pour la lecture.</target>
         <note />
       </trans-unit>
     </body>

@@ -7,8 +7,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Sockets;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 using Microsoft.NET.Build.Containers.Credentials;
 using Microsoft.NET.Build.Containers.Resources;
 using Valleysoft.DockerCredsProvider;
@@ -22,11 +24,25 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
 {
     private const int MaxRequestRetries = 5; // Arbitrary but seems to work ok for chunked uploads to ghcr.io
 
+    /// <summary>
+    /// Unique identifier that is used to tag requests from this library to external registries.
+    /// </summary>
+    /// <remarks>
+    /// Valid characters for this clientID are in the unicode range <see href="https://wintelguy.com/unicode_character_lookup.pl/?str=20-7E">20-7E</see>
+    /// </remarks>
+    private const string ClientID = "netsdkcontainers";
+
     private sealed record AuthInfo(string Realm, string? Service, string? Scope);
 
     private readonly string _registryName;
-
+    private readonly ILogger _logger;
     private static ConcurrentDictionary<string, AuthenticationHeaderValue?> _authenticationHeaders = new();
+
+    public AuthHandshakeMessageHandler(string registryName, HttpMessageHandler innerHandler, ILogger logger) : base(innerHandler)
+    {
+        _registryName = registryName;
+        _logger = logger;
+    }
 
     /// <summary>
     /// the www-authenticate header must have realm, service, and scope information, so this method parses it into that shape if present
@@ -96,11 +112,6 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
         }
     }
 
-    public AuthHandshakeMessageHandler(string registryName, HttpMessageHandler innerHandler) : base(innerHandler)
-    {
-        _registryName = registryName;
-    }
-
     /// <summary>
     /// Response to a request to get a token using some auth.
     /// </summary>
@@ -110,19 +121,22 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
     private sealed record TokenResponse(string? token, string? access_token, int? expires_in, DateTimeOffset? issued_at)
     {
         public string ResolvedToken => token ?? access_token ?? throw new ArgumentException(Resource.GetString(nameof(Strings.InvalidTokenResponse)));
+        public DateTimeOffset ResolvedExpiration {
+            get {
+                var issueTime = this.issued_at ?? DateTimeOffset.UtcNow; // per spec, if no issued_at use the current time
+                var validityDuration = this.expires_in ?? 60; // per spec, if no expires_in use 60 seconds
+                var expirationTime = issueTime.AddSeconds(validityDuration);
+                return expirationTime;
+            }
+        }
     }
 
     /// <summary>
     /// Uses the authentication information from a 401 response to perform the authentication dance for a given registry.
     /// Credentials for the request are retrieved from the credential provider, then used to acquire a token.
-    /// That token is cached for some duration on a per-host basis.
+    /// That token is cached for some duration determined by the authentication mechanism on a per-host basis.
     /// </summary>
-    /// <param name="uri"></param>
-    /// <param name="service"></param>
-    /// <param name="scope"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    private async Task<AuthenticationHeaderValue?> GetAuthenticationAsync(string registry, string scheme, AuthInfo? bearerAuthInfo, CancellationToken cancellationToken)
+    private async Task<(AuthenticationHeaderValue, DateTimeOffset)?> GetAuthenticationAsync(string registry, string scheme, AuthInfo? bearerAuthInfo, CancellationToken cancellationToken)
     {
         // Allow overrides for auth via environment variables
         string? credU = Environment.GetEnvironmentVariable(ContainerHelpers.HostObjectUser);
@@ -142,17 +156,100 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
 
         if (scheme is "Basic")
         {
-            return new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{privateRepoCreds.Username}:{privateRepoCreds.Password}")));
+            var authValue = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{privateRepoCreds.Username}:{privateRepoCreds.Password}")));
+            return new (authValue, DateTimeOffset.MaxValue);
         }
         else if (scheme is "Bearer")
         {
             Debug.Assert(bearerAuthInfo is not null);
 
-            // use those creds when calling the token provider
+            var authenticationValueAndDuration = await TryOAuthPostAsync(privateRepoCreds, bearerAuthInfo, cancellationToken).ConfigureAwait(false);
+            if (authenticationValueAndDuration is not null)
+            {
+                return authenticationValueAndDuration;
+            }
+
+            authenticationValueAndDuration = await TryTokenGetAsync(privateRepoCreds, bearerAuthInfo, cancellationToken).ConfigureAwait(false);
+            return authenticationValueAndDuration;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Implements the Docker OAuth2 Authentication flow as documented at <see href="https://docs.docker.com/registry/spec/auth/oauth/"/>.
+    /// </summary
+    private async Task<(AuthenticationHeaderValue, DateTimeOffset)?> TryOAuthPostAsync(DockerCredentials privateRepoCreds, AuthInfo bearerAuthInfo, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        Uri uri = new(bearerAuthInfo.Realm);
+
+        _logger.LogTrace("Attempting to authenticate on {uri} using POST.", uri);
+        Dictionary<string, string?> parameters = new()
+        {
+            ["client_id"] = ClientID,
+        };
+        if (!string.IsNullOrWhiteSpace(privateRepoCreds.IdentityToken))
+        {
+            parameters["grant_type"] = "refresh_token";
+            parameters["refresh_token"] = privateRepoCreds.IdentityToken;
+        }
+        else
+        {
+            parameters["grant_type"] = "password";
+            parameters["username"] = privateRepoCreds.Username;
+            parameters["password"] = privateRepoCreds.Password;
+        }
+        if (bearerAuthInfo.Service is not null)
+        {
+            parameters["service"] = bearerAuthInfo.Service;
+        }
+        if (bearerAuthInfo.Scope is not null)
+        {
+            parameters["scope"] = bearerAuthInfo.Scope;
+        };
+        HttpRequestMessage postMessage = new(HttpMethod.Post, uri)
+        {
+            Content = new FormUrlEncodedContent(parameters)
+        };
+
+        HttpResponseMessage postResponse = await base.SendAsync(postMessage, cancellationToken).ConfigureAwait(false);
+        if (!postResponse.IsSuccessStatusCode)
+        {
+            await postResponse.LogHttpResponseAsync(_logger, cancellationToken).ConfigureAwait(false);
+            //return null to try HTTP GET instead
+            return null;
+        }
+        _logger.LogTrace("Received '{statuscode}'.", postResponse.StatusCode);
+        TokenResponse? tokenResponse = JsonSerializer.Deserialize<TokenResponse>(postResponse.Content.ReadAsStream(cancellationToken));
+        if (tokenResponse is { } tokenEnvelope)
+        {
+            var authValue = new AuthenticationHeaderValue("Bearer", tokenResponse.ResolvedToken);
+            return (authValue, tokenResponse.ResolvedExpiration);
+        }
+        else
+        {
+            _logger.LogTrace(Resource.GetString(nameof(Strings.CouldntDeserializeJsonToken)));
+            // logging and returning null to try HTTP GET instead
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Implements the Docker Token Authentication flow as documented at <see href="https://docs.docker.com/registry/spec/auth/token/"/>
+    /// </summary>
+    private async Task<(AuthenticationHeaderValue, DateTimeOffset)?> TryTokenGetAsync(DockerCredentials privateRepoCreds, AuthInfo bearerAuthInfo, CancellationToken cancellationToken)
+    {
+            // this doesn't seem to be called out in the spec, but actual username/password auth information should be converted into Basic auth here,
+            // even though the overall Scheme we're authenticating for is Bearer
             var header = privateRepoCreds.Username == "<token>"
                             ? new AuthenticationHeaderValue("Bearer", privateRepoCreds.Password)
                             : new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{privateRepoCreds.Username}:{privateRepoCreds.Password}")));
             var builder = new UriBuilder(new Uri(bearerAuthInfo.Realm));
+
+            _logger.LogTrace("Attempting to authenticate on {uri} using GET.", bearerAuthInfo.Realm);
             var queryDict = System.Web.HttpUtility.ParseQueryString("");
             if (bearerAuthInfo.Service is string svc)
             {
@@ -167,20 +264,19 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
             message.Headers.Authorization = header;
 
             var tokenResponse = await base.SendAsync(message, cancellationToken).ConfigureAwait(false);
+            if (!tokenResponse.IsSuccessStatusCode)
+            {
+                await tokenResponse.LogHttpResponseAsync(_logger, cancellationToken).ConfigureAwait(false);
+            }
             tokenResponse.EnsureSuccessStatusCode();
+            _logger.LogTrace("Received '{statuscode}'.", tokenResponse.StatusCode);
 
             TokenResponse? token = JsonSerializer.Deserialize<TokenResponse>(tokenResponse.Content.ReadAsStream(cancellationToken));
             if (token is null)
             {
                 throw new ArgumentException(Resource.GetString(nameof(Strings.CouldntDeserializeJsonToken)));
             }
-
-            return new AuthenticationHeaderValue("Bearer", token.ResolvedToken);
-        }
-        else
-        {
-            return null;
-        }
+            return (new AuthenticationHeaderValue("Bearer", token.ResolvedToken), token.ResolvedExpiration);
     }
 
     private static async Task<DockerCredentials> GetLoginCredentials(string registry)
@@ -233,7 +329,7 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
                 }
                 else if (response is { StatusCode: HttpStatusCode.Unauthorized } && TryParseAuthenticationInfo(response, out string? scheme, out AuthInfo? authInfo))
                 {
-                    if (await GetAuthenticationAsync(_registryName, scheme, authInfo, cancellationToken).ConfigureAwait(false) is AuthenticationHeaderValue authHeader)
+                    if (await GetAuthenticationAsync(_registryName, scheme, authInfo, cancellationToken).ConfigureAwait(false) is (AuthenticationHeaderValue authHeader, DateTimeOffset expirationTime))
                     {
                         _authenticationHeaders[_registryName] = authHeader;
                         request.Headers.Authorization = authHeader;
@@ -249,10 +345,8 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
             catch (HttpRequestException e) when (e.InnerException is IOException ioe && ioe.InnerException is SocketException se)
             {
                 retryCount += 1;
-
-                // TODO: log in a way that is MSBuild-friendly
-                Console.WriteLine($"Encountered a SocketException with message \"{se.Message}\". Pausing before retry.");
-
+                _logger.LogInformation("Encountered a SocketException with message \"{message}\". Pausing before retry.", se.Message);
+                _logger.LogTrace("Exception details: {ex}", se);
                 await Task.Delay(TimeSpan.FromSeconds(1.0 * Math.Pow(2, retryCount)), cancellationToken).ConfigureAwait(false);
 
                 // retry
