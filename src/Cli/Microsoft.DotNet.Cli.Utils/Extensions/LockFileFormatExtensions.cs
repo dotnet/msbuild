@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Cli.Utils
         public static async Task<LockFile> ReadWithLock(this LockFileFormat subject, string path)
         {
             return await ConcurrencyUtilities.ExecuteWithFileLockedAsync(
-                path, 
+                path,
                 lockedToken =>
                 {
                     if (!File.Exists(path))
@@ -21,10 +21,10 @@ namespace Microsoft.DotNet.Cli.Utils
                             string.Format(LocalizableStrings.FileNotFound, path),
                             LocalizableStrings.ProjectNotRestoredOrRestoreFailed));
                     }
-                    
+
                     var lockFile = FileAccessRetrier.RetryOnFileAccessFailure(() => subject.Read(path), LocalizableStrings.CouldNotAccessAssetsFile);
 
-                    return lockFile;       
+                    return lockFile;
                 },
                 CancellationToken.None);
         }

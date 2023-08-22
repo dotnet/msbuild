@@ -18,7 +18,7 @@ namespace Microsoft.NET.TestFramework.Utilities
             if (AddLine)
             {
                 Lines.Add(message);
-            } 
+            }
             else
             {
                 AddLine = true;

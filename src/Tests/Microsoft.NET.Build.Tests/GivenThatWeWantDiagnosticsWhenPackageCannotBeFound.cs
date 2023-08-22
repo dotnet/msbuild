@@ -59,7 +59,7 @@ namespace Microsoft.NET.Build.Tests
                package.Version,
                $"{package.ID}.{package.Version}.nupkg.sha512");
 
-            var nupkgMetadataFile =  Path.Combine(
+            var nupkgMetadataFile = Path.Combine(
                TestContext.Current.NuGetCachePath,
                package.ID,
                package.Version,

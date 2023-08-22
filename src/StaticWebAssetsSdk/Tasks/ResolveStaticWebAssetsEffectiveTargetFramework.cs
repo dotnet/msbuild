@@ -7,7 +7,7 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
     public class ResolveStaticWebAssetsEffectiveTargetFramework : Task
     {
-        [Required] public ITaskItem [] TargetFrameworks { get; set; }
+        [Required] public ITaskItem[] TargetFrameworks { get; set; }
 
         [Output] public string EffectiveTargetFramework { get; set; }
 

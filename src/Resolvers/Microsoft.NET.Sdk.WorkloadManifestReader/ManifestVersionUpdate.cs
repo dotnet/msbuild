@@ -31,7 +31,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             if (other == null) return 1;
             int ret = ManifestId.CompareTo(other.ManifestId);
             if (ret != 0) return ret;
-            
+
             if (ExistingVersion == null && other.ExistingVersion != null) return -1;
             if (ExistingVersion != null && other.ExistingVersion == null) return 1;
             if (ExistingVersion != null)

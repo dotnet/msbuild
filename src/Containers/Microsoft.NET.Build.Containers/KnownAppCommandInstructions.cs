@@ -9,5 +9,5 @@ internal static class KnownAppCommandInstructions
     public const string Entrypoint = nameof(Entrypoint);
     public const string None = nameof(None);
 
-    public static readonly string[] SupportedAppCommandInstructions = new [] { Entrypoint, DefaultArgs, None };
+    public static readonly string[] SupportedAppCommandInstructions = new[] { Entrypoint, DefaultArgs, None };
 }

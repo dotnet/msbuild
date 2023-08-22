@@ -8,7 +8,7 @@ namespace Microsoft.NET.Build.Tasks
     public class CheckForImplicitPackageReferenceOverrides : TaskBase
     {
         [Required]
-        public ITaskItem [] PackageReferenceItems { get; set; }
+        public ITaskItem[] PackageReferenceItems { get; set; }
 
         [Required]
         public string MoreInformationLink { get; set; }
@@ -34,7 +34,7 @@ namespace Microsoft.NET.Build.Tasks
                         if (item.GetMetadata(MetadataKeys.IsImplicitlyDefined).Equals("true", StringComparison.OrdinalIgnoreCase))
                         {
                             itemsToRemove.Add(item);
-  
+
                             Log.LogWarning(Strings.PackageReferenceOverrideWarning, item.ItemSpec, MoreInformationLink);
                         }
                         else

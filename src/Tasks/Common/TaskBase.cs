@@ -6,8 +6,8 @@
 #nullable disable
 #pragma warning restore IDE0240 // Remove redundant nullable directive
 
-using Microsoft.Build.Framework;
 using System.Globalization;
+using Microsoft.Build.Framework;
 using Task = Microsoft.Build.Utilities.Task;
 
 namespace Microsoft.NET.Build.Tasks

@@ -8,7 +8,7 @@ namespace Microsoft.NET.ToolPack.Tests
     public class GivenThatWeWantToBuildWithGeneratePackageOnBuildAndPackAsTool : SdkTest
     {
         public GivenThatWeWantToBuildWithGeneratePackageOnBuildAndPackAsTool(ITestOutputHelper log) : base(log)
-        {}
+        { }
 
         [Theory]
         [InlineData(false, false)]

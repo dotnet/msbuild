@@ -12,7 +12,8 @@ namespace Microsoft.DotNet.Tests.ParserTests
         }
 
         [Fact]
-        public void Can_safely_expand_response_file_lines() {
+        public void Can_safely_expand_response_file_lines()
+        {
             var tempFileDir = _testAssetsManager.CreateTestDirectory().Path;
             var tempFilePath = Path.Combine(tempFileDir, "params.rsp");
             var lines = new[] {
@@ -23,12 +24,12 @@ namespace Microsoft.DotNet.Tests.ParserTests
             File.WriteAllLines(tempFilePath, lines);
 
             var parser = Parser.Instance;
-            var parseResult = parser.Parse(new []{ "dotnet", $"@{tempFilePath}" });
+            var parseResult = parser.Parse(new[] { "dotnet", $"@{tempFilePath}" });
 
             var tokens = parseResult.Tokens.Select(t => t.Value);
             var tokenString = string.Join(", ", tokens);
             var bc = Microsoft.DotNet.Tools.Build.BuildCommand.FromParseResult(parseResult);
-            var tokenized = new [] {
+            var tokenized = new[] {
                 "build",
                 "a b",
                 "-p",
@@ -42,8 +43,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
         }
 
         [Fact]
-        public void Can_skip_empty_and_commented_lines() {
-             var tempFileDir = _testAssetsManager.CreateTestDirectory().Path;
+        public void Can_skip_empty_and_commented_lines()
+        {
+            var tempFileDir = _testAssetsManager.CreateTestDirectory().Path;
             var tempFilePath = Path.Combine(tempFileDir, "skips.rsp");
             var lines = new[] {
                 "build",
@@ -55,9 +57,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
             File.WriteAllLines(tempFilePath, lines);
 
             var parser = Parser.Instance;
-            var parseResult = parser.Parse(new []{ "dotnet", $"@{tempFilePath}" });
+            var parseResult = parser.Parse(new[] { "dotnet", $"@{tempFilePath}" });
             var tokens = parseResult.Tokens.Select(t => t.Value);
-            var tokenized = new [] {
+            var tokenized = new[] {
                 "build",
                 "run #but don't skip this"
             };

@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result =
                 Parser.Instance.Parse(@"dotnet tool restore --ignore-failed-sources");
-            
+
             result.OptionValuesToBeForwarded(ToolRestoreCommandParser.GetCommand()).Should().ContainSingle("--ignore-failed-sources");
         }
 

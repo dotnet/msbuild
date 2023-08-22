@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.BuildServer
 
         public void Shutdown()
         {
-            if(!_fileSystem.File.Exists(PidFile.ServerPath.Value))
+            if (!_fileSystem.File.Exists(PidFile.ServerPath.Value))
             {
                 // The razor server path doesn't exist anymore so trying to shut it down would fail
                 // Ensure the pid file is cleaned up so we don't try to shut it down again

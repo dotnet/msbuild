@@ -5,7 +5,7 @@ using ManifestReaderTests;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader.Tests
 {
-    public class WorkloadResolverTests: SdkTest
+    public class WorkloadResolverTests : SdkTest
     {
         private const string fakeRootPath = "fakeRootPath";
 
@@ -57,7 +57,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader.Tests
             var manifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "Sample.json");
             var workloadResolver = WorkloadResolver.CreateForTests(new FakeManifestProvider(manifestPath), fakeRootPath);
 
-            Exception exc = Assert.Throws<WorkloadManifestCompositionException>(() => 
+            Exception exc = Assert.Throws<WorkloadManifestCompositionException>(() =>
                 workloadResolver.GetExtendedWorkloads(new List<WorkloadId>() { new WorkloadId("BAH"), }).ToList());
 
             exc.Message.Should().StartWith("Could not find workload 'BAH'");

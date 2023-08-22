@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using Microsoft.DotNet.Cli.Utils;
 using System.Globalization;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Cli.Telemetry
 {
@@ -20,8 +20,8 @@ namespace Microsoft.DotNet.Cli.Telemetry
         public IEnumerable<ApplicationInsightsEntryFormat> Filter(object objectToFilter)
         {
             var result = new List<ApplicationInsightsEntryFormat>();
-            Dictionary<string,double> measurements = null;
-             if (objectToFilter is Tuple<ParseResult, Dictionary<string,double>> parseResultWithMeasurements)
+            Dictionary<string, double> measurements = null;
+            if (objectToFilter is Tuple<ParseResult, Dictionary<string, double>> parseResultWithMeasurements)
             {
                 objectToFilter = parseResultWithMeasurements.Item1;
                 measurements = parseResultWithMeasurements.Item2;
@@ -190,7 +190,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
             return s;
         }
 
-        private Dictionary<string,double> RemoveZeroTimes(Dictionary<string,double> measurements)
+        private Dictionary<string, double> RemoveZeroTimes(Dictionary<string, double> measurements)
         {
             if (measurements != null)
             {

@@ -825,7 +825,8 @@ namespace Microsoft.NET.Publish.Tests
 
         private void GetKnownILCompilerPackVersion(TestAsset testAsset, string targetFramework, out string version)
         {
-            var getKnownPacks = new GetValuesCommand(testAsset, "KnownILCompilerPack", GetValuesCommand.ValueType.Item, targetFramework) {
+            var getKnownPacks = new GetValuesCommand(testAsset, "KnownILCompilerPack", GetValuesCommand.ValueType.Item, targetFramework)
+            {
                 MetadataNames = new List<string> { "TargetFramework", "ILCompilerPackVersion" }
             };
             getKnownPacks.Execute().Should().Pass();

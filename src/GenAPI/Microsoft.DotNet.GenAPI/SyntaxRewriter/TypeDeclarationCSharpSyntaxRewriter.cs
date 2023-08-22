@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.GenAPI.SyntaxRewriter
         public override SyntaxNode? VisitRecordDeclaration(RecordDeclarationSyntax node)
         {
             RecordDeclarationSyntax? rs = (RecordDeclarationSyntax?)base.VisitRecordDeclaration(node);
-            
+
             rs = RemoveBaseType(rs, x => Regex.IsMatch(x.ToString(), $"global::System.IEquatable<.*{rs!.Identifier}>"));
 
             return VisitCommonTypeDeclaration(rs);

@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
 
             rawEvaluatedArgument.Length.Should().Be(escapedEvaluatedRawArgument.Length);
 
-            for (int i=0; i<rawEvaluatedArgument.Length; ++i)
+            for (int i = 0; i < rawEvaluatedArgument.Length; ++i)
             {
                 var rawArg = rawEvaluatedArgument[i];
                 var escapedArg = escapedEvaluatedRawArgument[i];
@@ -98,7 +98,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
             {
                 rawEvaluatedArgument.Length.Should().Be(escapedEvaluatedRawArgument.Length);
             }
-            catch(Exception)
+            catch (Exception)
             {
                 Console.WriteLine("Argument Lists differ in length.");
 
@@ -119,7 +119,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
                 {
                     rawArg.Should().Be(escapedArg);
                 }
-                catch(Exception)
+                catch (Exception)
                 {
                     Console.WriteLine($"Expected: {rawArg}");
                     Console.WriteLine($"Actual: {escapedArg}");
@@ -216,11 +216,11 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
         private string[] ParseReflectorCmdOutput(string reflectorOutput)
         {
             var args = reflectorOutput.Split(new string[] { "," }, StringSplitOptions.None);
-            args[args.Length-1] = args[args.Length-1].TrimEnd('\r', '\n');
+            args[args.Length - 1] = args[args.Length - 1].TrimEnd('\r', '\n');
 
             // To properly pass args to cmd, quotes inside a parameter are doubled
             // Count them as a single quote for our comparison.
-            for (int i=0; i < args.Length; ++i)
+            for (int i = 0; i < args.Length; ++i)
             {
                 args[i] = args[i].Replace(@"""""", @"""");
             }

@@ -138,7 +138,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         {
             var filtered = new HashSet<WorkloadSuggestionCandidate>();
 
-            foreach(var suggestion in completeSuggestions)
+            foreach (var suggestion in completeSuggestions)
             {
                 bool isSupersetOfAny = false;
                 foreach (var other in completeSuggestions)

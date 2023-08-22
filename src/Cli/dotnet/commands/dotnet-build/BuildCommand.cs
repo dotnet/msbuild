@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Build
         public static BuildCommand FromParseResult(ParseResult parseResult, string msbuildPath = null)
         {
             PerformanceLogEventSource.Log.CreateBuildCommandStart();
-             
+
             var msbuildArgs = new List<string>();
 
             parseResult.ShowHelpOrErrorIfAppropriate();

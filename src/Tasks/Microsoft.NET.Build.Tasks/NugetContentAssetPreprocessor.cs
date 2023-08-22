@@ -1,8 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using NuGet.Common;
 using System.Security.Cryptography;
+using NuGet.Common;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -34,7 +34,8 @@ namespace Microsoft.NET.Build.Tasks
 
                 using (FileStream input = File.OpenRead(originalAssetPath))
                 {
-                    string result = Preprocessor.Process(input, (token) => {
+                    string result = Preprocessor.Process(input, (token) =>
+                    {
                         string value;
                         if (!_preprocessorValues.TryGetValue(token, out value))
                         {

@@ -210,7 +210,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             var conflictItems = new ITaskItem[conflicts.Count];
 
             int i = 0;
-            foreach(var conflict in conflicts)
+            foreach (var conflict in conflicts)
             {
                 conflictItems[i++] = CreateConflictTaskItem(conflict);
             }

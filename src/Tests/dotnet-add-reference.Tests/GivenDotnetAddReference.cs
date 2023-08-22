@@ -228,7 +228,7 @@ Commands:
         {
             var setup = Setup();
             var lib = NewLibWithFrameworks(dir: setup.TestRoot);
-            
+
             int noCondBefore = lib.CsProj().NumberOfItemGroupsWithoutCondition();
             var cmd = new DotnetCommand(Log, "add", lib.CsProjPath, "reference")
                 .WithWorkingDirectory(setup.TestRoot)

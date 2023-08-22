@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Watcher
         );
 
         public bool NonInteractive { get; set; }
-        
+
         public bool RunningAsTest { get => ((TestFlags & TestFlags.RunningAsTest) != TestFlags.None); }
 
         private static bool IsEnvironmentSet(string key)

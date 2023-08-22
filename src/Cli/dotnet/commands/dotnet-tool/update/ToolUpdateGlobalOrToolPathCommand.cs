@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
 
     internal delegate (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller, IToolPackageUninstaller) CreateToolPackageStoresAndInstallerAndUninstaller(
         DirectoryPath? nonGlobalLocation = null,
-		IEnumerable<string> additionalRestoreArguments = null);
+        IEnumerable<string> additionalRestoreArguments = null);
 
     internal class ToolUpdateGlobalOrToolPathCommand : CommandBase
     {
@@ -258,7 +258,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
                 _reporter.WriteLine(
                     string.Format(
                         (
-                        newInstalledPackage.Version.IsPrerelease ? 
+                        newInstalledPackage.Version.IsPrerelease ?
                         LocalizableStrings.UpdateSucceededPreVersionNoChange : LocalizableStrings.UpdateSucceededStableVersionNoChange
                         ),
                         newInstalledPackage.Id, newInstalledPackage.Version).Green());

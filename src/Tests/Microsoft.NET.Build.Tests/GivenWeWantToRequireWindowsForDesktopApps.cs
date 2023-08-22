@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO.MemoryMappedFiles;
-using Microsoft.NET.Build.Tasks;
 using System.Runtime.CompilerServices;
+using Microsoft.NET.Build.Tasks;
 
 namespace Microsoft.NET.Build.Tests
 {

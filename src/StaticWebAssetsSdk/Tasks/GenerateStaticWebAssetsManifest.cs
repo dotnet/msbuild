@@ -79,7 +79,7 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
             }
             catch (Exception ex)
             {
-                Log.LogErrorFromException(ex, showStackTrace: true, showDetail:true, file: null);
+                Log.LogErrorFromException(ex, showStackTrace: true, showDetail: true, file: null);
             }
             return !Log.HasLoggedErrors;
         }

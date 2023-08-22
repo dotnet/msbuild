@@ -59,7 +59,7 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
                 });
             }
 
-            packageFiles.Sort((x,y) => string.Compare(x.Id, y.Id, StringComparison.Ordinal));
+            packageFiles.Sort((x, y) => string.Compare(x.Id, y.Id, StringComparison.Ordinal));
 
             var manifest = new StaticWebAssetsPackManifest
             {
@@ -114,7 +114,7 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
         {
             public StaticWebAssetPackageFile[] Files { get; set; }
 
-            public string [] ElementsToRemove { get; set; }
+            public string[] ElementsToRemove { get; set; }
         }
     }
 }

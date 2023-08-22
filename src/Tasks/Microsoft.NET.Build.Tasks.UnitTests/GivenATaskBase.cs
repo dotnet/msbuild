@@ -11,7 +11,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
     {
         private sealed class TestTask : TaskBase
         {
-            protected override void ExecuteCore() {}
+            protected override void ExecuteCore() { }
         }
 
         [Fact]

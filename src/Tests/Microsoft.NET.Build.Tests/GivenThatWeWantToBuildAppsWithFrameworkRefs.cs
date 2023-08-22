@@ -50,8 +50,8 @@ namespace Microsoft.NET.Build.Tests
         }
 
         private void VerifyBuild(TestAsset testAsset, string project, string targetFramework, string runtimeIdentifier,
-            string [] buildArgs,
-            params string [] expectedFiles)
+            string[] buildArgs,
+            params string[] expectedFiles)
         {
             var buildCommand = new BuildCommand(testAsset, project);
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);

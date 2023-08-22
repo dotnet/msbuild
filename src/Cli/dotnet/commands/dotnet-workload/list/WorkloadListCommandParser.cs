@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Cli
         {
             Description = Workloads.Workload.Install.LocalizableStrings.TempDirOptionDescription
         }.Hide();
-        
+
         public static readonly CliOption<bool> IncludePreviewsOption = new CliOption<bool>("--include-previews")
         {
             Description = Workloads.Workload.Install.LocalizableStrings.IncludePreviewOptionDescription

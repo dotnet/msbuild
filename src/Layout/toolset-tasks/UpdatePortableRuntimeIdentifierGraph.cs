@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Cli.Build
                 json = JObject.ReadFrom(reader);
             }
 
-            JObject runtimes = (JObject) json["runtimes"];
+            JObject runtimes = (JObject)json["runtimes"];
 
             if (AdditionalRuntimeIdentifiers != null)
             {

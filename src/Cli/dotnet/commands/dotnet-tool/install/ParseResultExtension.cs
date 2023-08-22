@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                         LocalizableStrings.InvalidNuGetVersionRange,
                         packageVersion));
             }
-            
+
             if (string.IsNullOrEmpty(packageVersion))
             {
                 var nugetToolSearchApiRequest = new NugetToolSearchApiRequest();

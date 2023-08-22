@@ -47,7 +47,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource();
 
             new PublishCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest"))
-                .Execute(new string[] { "-p:Platform=x64", "-p:EnableManagedpackageReferenceSupport=true"})
+                .Execute(new string[] { "-p:Platform=x64", "-p:EnableManagedpackageReferenceSupport=true" })
                 .Should()
                 .Fail()
                 .And.HaveStdOutContaining(Strings.NoSupportCppPublishDotnetCore);

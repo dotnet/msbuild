@@ -6,8 +6,8 @@ using Microsoft.Build.Utilities;
 using Microsoft.Extensions.DependencyModel;
 using Newtonsoft.Json;
 using NuGet.Packaging.Core;
-using NuGet.RuntimeModel;
 using NuGet.ProjectModel;
+using NuGet.RuntimeModel;
 
 namespace Microsoft.NET.Build.Tasks
 {

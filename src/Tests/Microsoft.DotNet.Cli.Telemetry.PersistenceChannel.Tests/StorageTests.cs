@@ -174,7 +174,7 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
 
         private static Transmission CreateTransmission(IChannelTelemetry telemetry)
         {
-            byte[] data = JsonSerializer.Serialize(new[] {telemetry});
+            byte[] data = JsonSerializer.Serialize(new[] { telemetry });
             Transmission transmission = new Transmission(
                 new Uri(@"http://some.url"),
                 data,

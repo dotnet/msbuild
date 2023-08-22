@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.ApiSymbolExtensions.Tests
                                                                   publicSign: publicSign,
                                                                   cryptoPublicKey: publicSign ? publicKey.ToImmutableArray() : default,
                                                                   nullableContextOptions: enableNullable ? NullableContextOptions.Enable : NullableContextOptions.Disable,
-                                                                  allowUnsafe: allowUnsafe, 
+                                                                  allowUnsafe: allowUnsafe,
                                                                   specificDiagnosticOptions: DiagnosticOptions);
 
             return CSharpCompilation.Create(name, options: compilationOptions, references: DefaultReferences);

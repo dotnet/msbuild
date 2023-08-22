@@ -60,7 +60,7 @@ namespace Microsoft.NET.Restore.Tests
             var restoreCommand = testAsset.GetRestoreCommand(Log, relativePath: testProjectName);
             restoreCommand
                 .Execute($"/p:RestorePackagesPath={packagesFolder}")
-                .Should().Pass();;
+                .Should().Pass(); ;
         }
     }
 }

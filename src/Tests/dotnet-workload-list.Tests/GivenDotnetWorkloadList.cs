@@ -1,10 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.DotNet.Workloads.Workload.List;
 using System.CommandLine;
-using Microsoft.NET.Sdk.WorkloadManifestReader;
 using ManifestReaderTests;
+using Microsoft.DotNet.Workloads.Workload.List;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 using ListStrings = Microsoft.DotNet.Workloads.Workload.List.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli.Workload.List.Tests

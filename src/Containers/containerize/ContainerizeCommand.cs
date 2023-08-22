@@ -23,7 +23,7 @@ internal class ContainerizeCommand : CliRootCommand
         Required = true
     };
 
-    internal CliOption<string> BaseImageNameOption { get;  } = new("--baseimagename")
+    internal CliOption<string> BaseImageNameOption { get; } = new("--baseimagename")
     {
         Description = "The base image to pull.",
         Required = true

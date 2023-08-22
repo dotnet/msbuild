@@ -21,9 +21,8 @@
         <source>
       Provides the details for specified template package.
       The command checks if the package is installed locally, if it was not found, it searches the configured NuGet feeds.</source>
-        <target state="new">
-      Provides the details for specified template package.
-      The command checks if the package is installed locally, if it was not found, it searches the configured NuGet feeds.</target>
+        <target state="translated">Proporciona los detalles del paquete de plantillas especificado.
+      El comando comprueba si el paquete está instalado localmente; si no se encontró, busca en las fuentes de NuGet configuradas.</target>
         <note />
       </trans-unit>
       <trans-unit id="Command_Install_Argument_Package">
@@ -114,7 +113,7 @@ Si el comando se especifica sin el argumento, muestra todos los paquetes de plan
       </trans-unit>
       <trans-unit id="Option_AddSource">
         <source>Specifies a NuGet source to use.</source>
-        <target state="needs-review-translation">Especifica un origen de NuGet para usarlo durante la instalación.</target>
+        <target state="new">Specifies a NuGet source to use.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_AuthorFilter">

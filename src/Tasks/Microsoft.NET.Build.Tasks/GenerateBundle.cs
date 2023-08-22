@@ -25,7 +25,7 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string OutputDir { get; set; }
         [Required]
-        public bool ShowDiagnosticOutput { get; set; }        
+        public bool ShowDiagnosticOutput { get; set; }
         [Required]
         public bool EnableCompressionInSingleFile { get; set; }
 
@@ -41,7 +41,7 @@ namespace Microsoft.NET.Build.Tasks
                                       RuntimeIdentifier.EndsWith("-x86") || RuntimeIdentifier.Contains("-x86-") ? Architecture.X86 :
                                       RuntimeIdentifier.EndsWith("-arm64") || RuntimeIdentifier.Contains("-arm64-") ? Architecture.Arm64 :
                                       RuntimeIdentifier.EndsWith("-arm") || RuntimeIdentifier.Contains("-arm-") ? Architecture.Arm :
-                                      throw new ArgumentException(nameof (RuntimeIdentifier));
+                                      throw new ArgumentException(nameof(RuntimeIdentifier));
 
             BundleOptions options = BundleOptions.None;
             options |= IncludeNativeLibraries ? BundleOptions.BundleNativeBinaries : BundleOptions.None;
@@ -63,8 +63,8 @@ namespace Microsoft.NET.Build.Tasks
 
             foreach (var item in FilesToBundle)
             {
-                fileSpec.Add(new FileSpec(sourcePath: item.ItemSpec, 
-                                          bundleRelativePath:item.GetMetadata(MetadataKeys.RelativePath)));
+                fileSpec.Add(new FileSpec(sourcePath: item.ItemSpec,
+                                          bundleRelativePath: item.GetMetadata(MetadataKeys.RelativePath)));
             }
 
             bundler.GenerateBundle(fileSpec);

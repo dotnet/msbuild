@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
         private static readonly TestRuleFactory s_ruleFactory = new((settings, context) => new AssemblyIdentityMustMatch(new SuppressableTestLog(), settings, context));
 
         private static readonly byte[] _publicKey = new byte[]
-        { 
+        {
             0, 36, 0, 0, 4, 128, 0, 0, 148, 0, 0, 0, 6, 2, 0, 0, 0, 36, 0, 0,
             82, 83, 65, 49, 0, 4, 0, 0, 1, 0, 1, 0, 59, 95, 150, 159, 243, 67,
             213, 101, 13, 42, 127, 1, 28, 70, 32, 249, 95, 32, 222, 178, 241,
@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
 
             ApiComparer differ = new(s_ruleFactory);
             IEnumerable<CompatDifference> differences = differ.GetDifferences(leftSymbol, rightSymbol);
-            
+
             Assert.Single(differences);
             CompatDifference expected = CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, $"{leftSymbol.Name}, Version=0.0.0.0, Culture=de, PublicKeyToken=null");
             Assert.Equal(expected, differences.First());
@@ -172,7 +172,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
 
             ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: strictMode));
             IEnumerable<CompatDifference> differences = differ.GetDifferences(leftSymbol, rightSymbol);
-            
+
             Assert.Single(differences);
             CompatDifference expected = CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, $"{leftSymbol.Name}, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
             Assert.Equal(expected, differences.First());

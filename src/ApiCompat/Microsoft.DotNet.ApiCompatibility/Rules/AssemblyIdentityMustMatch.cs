@@ -107,7 +107,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                     rightMetadata.DisplayString,
                     rightIdentity));
             }
- 
+
             if (rightAssemblyVersion < leftAssemblyVersion)
             {
                 differences.Add(CreateIdentityDifference(
@@ -139,7 +139,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                     leftMetadata,
                     rightMetadata,
                     Resources.AssemblyPublicKeyTokenDoesNotMatch,
-                    GetStringRepresentation(leftAssemblyPublicKeyToken), 
+                    GetStringRepresentation(leftAssemblyPublicKeyToken),
                     GetStringRepresentation(rightAssemblyPublicKeyToken),
                     leftMetadata.DisplayString,
                     rightMetadata.DisplayString,
@@ -151,7 +151,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                     leftMetadata,
                     rightMetadata,
                     Resources.AssemblyPublicKeyTokenDoesNotMatch,
-                    GetStringRepresentation(rightAssemblyPublicKeyToken), 
+                    GetStringRepresentation(rightAssemblyPublicKeyToken),
                     GetStringRepresentation(leftAssemblyPublicKeyToken),
                     rightMetadata.DisplayString,
                     leftMetadata.DisplayString,

@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void NoTelemetryIfCommandIsInvalid()
         {
-            string[] args = { "publish", "-r"};
+            string[] args = { "publish", "-r" };
             Action a = () => { Cli.Program.ProcessArgs(args); };
             a.Should().NotThrow<ArgumentOutOfRangeException>();
         }

@@ -45,7 +45,8 @@ public class DockerRegistryTests
         var registryAuthDir = new DirectoryInfo(Path.Combine(registryDir.FullName, "auth"));
         var registryCertsDir = new DirectoryInfo(Path.Combine(registryDir.FullName, "certs"));
         var registryName = "localhost:5555";
-        try {
+        try
+        {
             if (!registryCertsDir.Exists)
             {
                 registryCertsDir.Create();

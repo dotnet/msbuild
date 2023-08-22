@@ -1,10 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Moq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.NET.Build.Containers.Tasks;
+using Moq;
 
 namespace Microsoft.NET.Build.Containers.UnitTests;
 
@@ -12,7 +12,7 @@ public class CreateNewImageTests
 {
     [Theory]
     // Entrypoint, backwards compatibility.
-    [InlineData("", "entrypointArg", "appCommand", "", "",    null, new [] { "appCommand" }, new [] { "entrypointArg"})]
+    [InlineData("", "entrypointArg", "appCommand", "", "", null, new[] { "appCommand" }, new[] { "entrypointArg" })]
     // When no entrypoint is specified, emit the AppCommand as the Entrypoint.
     [InlineData("", "", "appCommand", "appCommandArgs", "defaultArgs", "baseEntrypoint", new[] { "appCommand", "appCommandArgs" }, new[] { "defaultArgs" })]
     // Set all properties. When an entrypoint is specified, emit the AppCommand as Cmd.
@@ -23,43 +23,43 @@ public class CreateNewImageTests
 
     [Theory]
     // Set all properties.
-    [InlineData("entrypoint", "entrypointArgs", "appCommand", "appCommandArgs", "defaultArgs", 
+    [InlineData("entrypoint", "entrypointArgs", "appCommand", "appCommandArgs", "defaultArgs",
                                                                        "baseEntrypoint", new[] { "entrypoint", "entrypointArgs" }, new[] { "appCommand", "appCommandArgs", "defaultArgs" })]
     // No Entrypoint, AppCommand specified, base entrypoint is preserved.
-    [InlineData("", "", "appCommand", "", "",                          "",               null,                                     new [] { "appCommand" })]
-    [InlineData("", "", "appCommand", "appCommandArgs", "",            "",               null,                                     new [] { "appCommand", "appCommandArgs" })]
-    [InlineData("", "", "appCommand", "appCommandArgs", "defaultArgs", "",               null,                                     new [] { "appCommand", "appCommandArgs", "defaultArgs" })]
-    [InlineData("", "", "appCommand", "", "",                          "baseEntrypoint", new[] { "baseEntrypoint" },               new [] { "appCommand" })]
-    [InlineData("", "", "appCommand", "appCommandArgs", "",            "baseEntrypoint", new[] { "baseEntrypoint" },               new [] { "appCommand", "appCommandArgs" })]
-    [InlineData("", "", "appCommand", "appCommandArgs", "defaultArgs", "baseEntrypoint", new[] { "baseEntrypoint" },               new [] { "appCommand", "appCommandArgs", "defaultArgs" })]
+    [InlineData("", "", "appCommand", "", "", "", null, new[] { "appCommand" })]
+    [InlineData("", "", "appCommand", "appCommandArgs", "", "", null, new[] { "appCommand", "appCommandArgs" })]
+    [InlineData("", "", "appCommand", "appCommandArgs", "defaultArgs", "", null, new[] { "appCommand", "appCommandArgs", "defaultArgs" })]
+    [InlineData("", "", "appCommand", "", "", "baseEntrypoint", new[] { "baseEntrypoint" }, new[] { "appCommand" })]
+    [InlineData("", "", "appCommand", "appCommandArgs", "", "baseEntrypoint", new[] { "baseEntrypoint" }, new[] { "appCommand", "appCommandArgs" })]
+    [InlineData("", "", "appCommand", "appCommandArgs", "defaultArgs", "baseEntrypoint", new[] { "baseEntrypoint" }, new[] { "appCommand", "appCommandArgs", "defaultArgs" })]
     // No Entrypoint, AppCommand specified, 'dotnet' base entrypoint is ignored.
-    [InlineData("", "", "appCommand", "", "",                          "dotnet",         null,                                     new [] { "appCommand" })]
-    [InlineData("", "", "appCommand", "appCommandArgs", "",            "dotnet",         null,                                     new [] { "appCommand", "appCommandArgs" })]
-    [InlineData("", "", "appCommand", "appCommandArgs", "defaultArgs", "dotnet",         null,                                     new [] { "appCommand", "appCommandArgs", "defaultArgs" })]
+    [InlineData("", "", "appCommand", "", "", "dotnet", null, new[] { "appCommand" })]
+    [InlineData("", "", "appCommand", "appCommandArgs", "", "dotnet", null, new[] { "appCommand", "appCommandArgs" })]
+    [InlineData("", "", "appCommand", "appCommandArgs", "defaultArgs", "dotnet", null, new[] { "appCommand", "appCommandArgs", "defaultArgs" })]
     // No Entrypoint, AppCommand specified, '/usr/bin/dotnet' base entrypoint is ignored.
-    [InlineData("", "", "appCommand", "", "",                          "/usr/bin/dotnet", null,                                    new [] { "appCommand" })]
-    [InlineData("", "", "appCommand", "appCommandArgs", "",            "/usr/bin/dotnet", null,                                    new [] { "appCommand", "appCommandArgs" })]
-    [InlineData("", "", "appCommand", "appCommandArgs", "defaultArgs", "/usr/bin/dotnet", null,                                    new [] { "appCommand", "appCommandArgs", "defaultArgs" })]
+    [InlineData("", "", "appCommand", "", "", "/usr/bin/dotnet", null, new[] { "appCommand" })]
+    [InlineData("", "", "appCommand", "appCommandArgs", "", "/usr/bin/dotnet", null, new[] { "appCommand", "appCommandArgs" })]
+    [InlineData("", "", "appCommand", "appCommandArgs", "defaultArgs", "/usr/bin/dotnet", null, new[] { "appCommand", "appCommandArgs", "defaultArgs" })]
     public void EntrypointAndCmd_DefaultArgsInstruction(string entrypoint, string entrypointArgs, string appCommand, string appCommandArgs, string defaultArgs, string? baseImageEntrypoint, string[]? expectedEntrypoint, string[]? expectedCmd)
         => ValidateArgsAndCmd("DefaultArgs", entrypoint, entrypointArgs, appCommand, appCommandArgs, defaultArgs, baseImageEntrypoint, expectedEntrypoint, expectedCmd);
 
     [Theory]
     // Set all properties except entrypoint and entrypointArgs.
-    [InlineData("", "", "appCommand", "appCommandArgs", "defaultArgs",                         "baseEntrypoint", new[] { "appCommand", "appCommandArgs" }, new[] { "defaultArgs" })]
+    [InlineData("", "", "appCommand", "appCommandArgs", "defaultArgs", "baseEntrypoint", new[] { "appCommand", "appCommandArgs" }, new[] { "defaultArgs" })]
     // Can't set entrypoint or entrypointArgs with instruction 'Entrypoint'.
     [InlineData("entrypoint", "entrypointArgs", "appCommand", "appCommandArgs", "defaultArgs", "baseEntrypoint", null, null)]
-    [InlineData("",           "entrypointArgs", "appCommand", "appCommandArgs", "defaultArgs", "baseEntrypoint", null, null)]
-    [InlineData("entrypoint", "",               "appCommand", "appCommandArgs", "defaultArgs", "baseEntrypoint", null, null)]
+    [InlineData("", "entrypointArgs", "appCommand", "appCommandArgs", "defaultArgs", "baseEntrypoint", null, null)]
+    [InlineData("entrypoint", "", "appCommand", "appCommandArgs", "defaultArgs", "baseEntrypoint", null, null)]
     public void EntrypointAndCmd_EntrypointInstruction(string entrypoint, string entrypointArgs, string appCommand, string appCommandArgs, string defaultArgs, string? baseImageEntrypoint, string[]? expectedEntrypoint, string[]? expectedCmd)
         => ValidateArgsAndCmd("Entrypoint", entrypoint, entrypointArgs, appCommand, appCommandArgs, defaultArgs, baseImageEntrypoint, expectedEntrypoint, expectedCmd);
 
     [Theory]
     // Set all properties except appCommand and appCommandArgs.
-    [InlineData("entrypoint", "entrypointArgs", "", "",                         "defaultArgs", "baseEntrypoint", new[] { "entrypoint", "entrypointArgs" }, new[] { "defaultArgs" })]
+    [InlineData("entrypoint", "entrypointArgs", "", "", "defaultArgs", "baseEntrypoint", new[] { "entrypoint", "entrypointArgs" }, new[] { "defaultArgs" })]
     // Can't set appCommand or appCommandArgs with instruction 'None'.
     [InlineData("entrypoint", "entrypointArgs", "appCommand", "appCommandArgs", "defaultArgs", "baseEntrypoint", null, null)]
-    [InlineData("entrypoint", "entrypointArgs", "",           "appCommandArgs", "defaultArgs", "baseEntrypoint", null, null)]
-    [InlineData("entrypoint", "entrypointArgs", "appCommand", "",               "defaultArgs", "baseEntrypoint", null, null)]
+    [InlineData("entrypoint", "entrypointArgs", "", "appCommandArgs", "defaultArgs", "baseEntrypoint", null, null)]
+    [InlineData("entrypoint", "entrypointArgs", "appCommand", "", "defaultArgs", "baseEntrypoint", null, null)]
     public void EntrypointAndCmd_NoneInstruction(string entrypoint, string entrypointArgs, string appCommand, string appCommandArgs, string defaultArgs, string? baseImageEntrypoint, string[]? expectedEntrypoint, string[]? expectedCmd)
         => ValidateArgsAndCmd("None", entrypoint, entrypointArgs, appCommand, appCommandArgs, defaultArgs, baseImageEntrypoint, expectedEntrypoint, expectedCmd);
 

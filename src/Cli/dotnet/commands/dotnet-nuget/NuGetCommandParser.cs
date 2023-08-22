@@ -135,7 +135,7 @@ namespace Microsoft.DotNet.Cli
 
             return trustCommand;
         }
-        
+
         private static CliCommand GetSignCommand()
         {
             CliCommand signCommand = new("sign");

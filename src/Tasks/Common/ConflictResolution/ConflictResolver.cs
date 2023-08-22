@@ -101,7 +101,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                     //  if they lose against the new winner.  Otherwise, keep them in the unresolved conflict
                     //  list.
                     List<TConflictItem> previouslyUnresolvedConflicts;
-                    if(_unresolvedConflictItems.TryGetValue(itemKey, out previouslyUnresolvedConflicts) &&
+                    if (_unresolvedConflictItems.TryGetValue(itemKey, out previouslyUnresolvedConflicts) &&
                         previouslyUnresolvedConflicts.Contains(loser))
                     {
                         List<TConflictItem> newUnresolvedConflicts = new List<TConflictItem>();
@@ -132,7 +132,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                                 newUnresolvedConflicts.Add(previouslyUnresolvedItem);
                             }
 
-                            
+
                         }
                         _unresolvedConflictItems.Remove(itemKey);
                         if (newUnresolvedConflicts.Count > 0)
@@ -284,7 +284,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                     losingVersion = fileVersion1;
                 }
 
-                LogMessage(conflictMessage, Strings.ChoosingFileVersion_Info, 
+                LogMessage(conflictMessage, Strings.ChoosingFileVersion_Info,
                     winningDisplayName,
                     winningVersion,
                     losingVersion);
@@ -354,7 +354,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
             if (logUnresolvedConflicts)
             {
-                 LogMessage(conflictMessage, Strings.CouldNotDetermineWinner_EqualVersions_Info);
+                LogMessage(conflictMessage, Strings.CouldNotDetermineWinner_EqualVersions_Info);
             }
             return null;
         }
@@ -362,7 +362,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
         private void LogMessage(string conflictMessage, string format, params object[] args)
         {
             _log.LogMessage(
-                MessageImportance.Low, 
+                MessageImportance.Low,
                 conflictMessage + " " + string.Format(format, args));
         }
     }

@@ -2,14 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Tools.Tool.Install;
+using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools.Tests.ComponentMocks;
+using Microsoft.DotNet.Tools.Tool.Install;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Versioning;
-using System.Runtime.CompilerServices;
-using Microsoft.DotNet.ToolPackage;
 
 namespace Microsoft.DotNet.PackageInstall.Tests
 {

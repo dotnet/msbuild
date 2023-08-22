@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Framework;
-using Microsoft.NET.Build.Tasks;
 using Microsoft.DotNet.ApiSymbolExtensions.Logging;
+using Microsoft.NET.Build.Tasks;
 
 namespace Microsoft.DotNet.GenAPI.Task
 {

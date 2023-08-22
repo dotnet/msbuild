@@ -45,7 +45,7 @@ namespace Microsoft.Extensions.Tools.Internal
                     Console.Out.Write($"  {questionMark} ");
                     Console.ResetColor();
                 }
-                
+
                 var tcs = new TaskCompletionSource<ConsoleKey>(TaskCreationOptions.RunContinuationsAsynchronously);
                 Console.KeyPressed += KeyPressed;
                 try
@@ -75,7 +75,7 @@ namespace Microsoft.Extensions.Tools.Internal
                     }
                 }
             }
-            
+
             void WriteLine(string message, ConsoleColor color = ConsoleColor.DarkGray)
             {
                 lock (_writeLock)

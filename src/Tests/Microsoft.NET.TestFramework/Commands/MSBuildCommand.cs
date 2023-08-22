@@ -6,8 +6,8 @@ using Microsoft.DotNet.Cli.Utils;
 namespace Microsoft.NET.TestFramework.Commands
 {
     public class MSBuildCommand : TestCommand
-    { 
-        public string Target { get;  }
+    {
+        public string Target { get; }
 
         private readonly string _projectRootPath;
 
@@ -68,18 +68,19 @@ namespace Microsoft.NET.TestFramework.Commands
             return buildProjectFiles[0];
         }
 
-        public virtual DirectoryInfo GetOutputDirectory(string targetFramework = null, string configuration = "Debug", string runtimeIdentifier = null)
+        public virtual DirectoryInfo GetOutputDirectory(string targetFramework = null, string configuration = "Debug", string runtimeIdentifier = null, string platform = null)
         {
             if (TestAsset != null)
             {
-                return new DirectoryInfo(OutputPathCalculator.FromProject(ProjectFile, TestAsset).GetOutputDirectory(targetFramework, configuration, runtimeIdentifier));
+                return new DirectoryInfo(OutputPathCalculator.FromProject(ProjectFile, TestAsset).GetOutputDirectory(targetFramework, configuration, runtimeIdentifier, platform));
             }
 
-            targetFramework = targetFramework ?? string.Empty;
-            configuration = configuration ?? string.Empty;
-            runtimeIdentifier = runtimeIdentifier ?? string.Empty;
+            platform ??= string.Empty;
+            targetFramework ??= string.Empty;
+            configuration ??= string.Empty;
+            runtimeIdentifier ??= string.Empty;
 
-            string output = Path.Combine(ProjectRootPath, "bin", configuration, targetFramework, runtimeIdentifier);
+            string output = Path.Combine(ProjectRootPath, "bin", platform, configuration, targetFramework, runtimeIdentifier);
             return new DirectoryInfo(output);
         }
 
@@ -150,7 +151,7 @@ namespace Microsoft.NET.TestFramework.Commands
         {
             var newArgs = args.ToList();
             newArgs.Insert(0, FullPathProjectFile);
-            
+
             return TestContext.Current.ToolsetUnderTest.CreateCommandForTarget(Target, newArgs);
         }
     }

@@ -44,7 +44,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 #endif
 
                 InstallState installState = new();
-                
+
                 JsonReader.ConsumeToken(ref reader, JsonTokenType.StartObject);
                 while (reader.Read())
                 {
@@ -91,7 +91,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                             workloadSetDict[propName] = propValue;
                             break;
                         case JsonTokenType.EndObject:
-                            return WorkloadSet.FromDictionaryForJson(workloadSetDict, new SdkFeatureBand(new ReleaseVersion(0,0,0)));
+                            return WorkloadSet.FromDictionaryForJson(workloadSetDict, new SdkFeatureBand(new ReleaseVersion(0, 0, 0)));
                         default:
                             throw new JsonFormatException(Strings.UnexpectedTokenAtOffset, reader.TokenType, reader.TokenStartIndex);
                     }

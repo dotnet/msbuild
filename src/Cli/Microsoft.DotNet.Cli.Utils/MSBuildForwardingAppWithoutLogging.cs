@@ -17,6 +17,7 @@ namespace Microsoft.DotNet.Cli.Utils
     {
         private static readonly bool AlwaysExecuteMSBuildOutOfProc = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_RUN_MSBUILD_OUTOFPROC");
         private static readonly bool UseMSBuildServer = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_USE_MSBUILD_SERVER", false);
+        private static readonly string TerminalLoggerDefault = Env.GetEnvironmentVariable("DOTNET_CLI_CONFIGURE_MSBUILD_TERMINAL_LOGGER");
 
         private const string MSBuildExeName = "MSBuild.dll";
 
@@ -52,6 +53,18 @@ namespace Microsoft.DotNet.Cli.Utils
             string defaultMSBuildPath = GetMSBuildExePath();
 
             _argsToForward = argsToForward;
+            string tlpDefault = TerminalLoggerDefault;
+            /* TODO: Consider to enable it for dotnet 9+ SDK
+            if (!string.IsNullOrWhiteSpace(tlpDefault))
+            {
+                tlpDefault = "auto";
+            }
+            */
+            if (!string.IsNullOrWhiteSpace(tlpDefault))
+            {
+                _argsToForward = _argsToForward.Concat(new[] { $"-tlp:default={tlpDefault}" });
+            }
+
             MSBuildPath = msbuildPath ?? defaultMSBuildPath;
 
             EnvironmentVariable("MSBUILDUSESERVER", UseMSBuildServer ? "1" : "0");
@@ -67,7 +80,7 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             _forwardingApp = new ForwardingAppImplementation(
                 MSBuildPath,
-                _msbuildRequiredParameters.Concat(_argsToForward.Select(Escape)),
+                GetAllArguments(),
                 environmentVariables: _msbuildRequiredEnvironmentVariables);
         }
 
@@ -95,13 +108,13 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (value == string.Empty || value == "\0")
             {
-                // Do not allow MSBUILDUSESERVER as null env vars are not properly transferred to build nodes
-                _msbuildRequiredEnvironmentVariables["MSBUILDUSESERVER"] = "0";
-
                 // Unlike ProcessStartInfo.EnvironmentVariables, Environment.SetEnvironmentVariable can't set a variable
                 // to an empty value, so we just fall back to calling MSBuild out-of-proc if we encounter this case.
                 // https://github.com/dotnet/runtime/issues/50554
                 InitializeForOutOfProcForwarding();
+
+                // Disable MSBUILDUSESERVER if any env vars are null as those are not properly transferred to build nodes
+                _msbuildRequiredEnvironmentVariables["MSBUILDUSESERVER"] = "0";
             }
         }
 

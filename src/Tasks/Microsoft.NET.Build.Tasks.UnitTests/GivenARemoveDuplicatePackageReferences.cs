@@ -3,9 +3,9 @@
 
 using FluentAssertions;
 using Microsoft.Build.Framework;
-using Xunit;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
+using Xunit;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests
 {

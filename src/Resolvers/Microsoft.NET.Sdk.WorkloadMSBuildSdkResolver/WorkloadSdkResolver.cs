@@ -43,7 +43,7 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
                 cachedState = resolverContextState;
             }
 
-            
+
             if (cachedState == null)
             {
                 var dotnetRootPath = GetDotNetRoot(resolverContext);

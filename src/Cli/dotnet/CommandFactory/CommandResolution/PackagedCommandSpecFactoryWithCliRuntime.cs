@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.CommandFactory
 
         private static void AddAdditionalParameters(string commandPath, IList<string> arguments)
         {
-            if(PrefersCliRuntime(commandPath))
+            if (PrefersCliRuntime(commandPath))
             {
                 var runtimeConfigFile = Path.ChangeExtension(commandPath, FileNameSuffixes.RuntimeConfigJson);
 

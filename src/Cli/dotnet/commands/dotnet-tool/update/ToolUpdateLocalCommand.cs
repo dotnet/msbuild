@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
 
         public override int Execute()
         {
-            (FilePath? manifestFileOptional, string warningMessage) = 
+            (FilePath? manifestFileOptional, string warningMessage) =
                 _toolManifestFinder.ExplicitManifestOrFindManifestContainPackageId(_explicitManifestFile, _packageId);
 
             var manifestFile = manifestFileOptional ?? _toolManifestFinder.FindFirst();

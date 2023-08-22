@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
 
             result.GetValue<string>(ToolUninstallCommandParser.ToolPathOption).Should().Be(@"C:\Tools");
         }
-        
+
         [Fact]
         public void UninstallToolParserCanParseLocalOption()
         {
@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
 
             result.GetValue<bool>(ToolUninstallCommandParser.LocalOption).Should().Be(true);
         }
-        
+
         [Fact]
         public void UninstallToolParserCanParseToolManifestOption()
         {

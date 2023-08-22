@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Tests
             var table = new PrintableTable<string[]>();
 
             var lines = new List<string>();
-            table.PrintRows(new string[][] {}, l => lines.Add(l));
+            table.PrintRows(new string[][] { }, l => lines.Add(l));
 
             lines.Should().BeEmpty();
         }
@@ -25,7 +25,8 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void GivenAnEmptyRowsCollectionItPrintsColumnHeaders()
         {
-            RunTest(new TestData() {
+            RunTest(new TestData()
+            {
                 Columns = new[] {
                     "First Column",
                     "2nd Column",
@@ -44,7 +45,8 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void GivenASingleRowItPrintsCorrectly()
         {
-            RunTest(new TestData() {
+            RunTest(new TestData()
+            {
                 Columns = new[] {
                     "1st",
                     "2nd",
@@ -69,7 +71,8 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void GivenMultipleRowsItPrintsCorrectly()
         {
-            RunTest(new TestData() {
+            RunTest(new TestData()
+            {
                 Columns = new[] {
                     "First",
                     "Second",
@@ -114,7 +117,8 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void GivenARowWithEmptyStringsItPrintsCorrectly()
         {
-            RunTest(new TestData() {
+            RunTest(new TestData()
+            {
                 Columns = new[] {
                     "First",
                     "Second",
@@ -159,7 +163,8 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void GivenColumnsWithMaximumWidthsItPrintsCorrectly()
         {
-            RunTest(new TestData() {
+            RunTest(new TestData()
+            {
                 Columns = new[] {
                     "First",
                     "Second",
@@ -211,7 +216,8 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void GivenARowContainingUnicodeCharactersItPrintsCorrectly()
         {
-            RunTest(new TestData() {
+            RunTest(new TestData()
+            {
                 Columns = new[] {
                     "Poem"
                 },
@@ -232,11 +238,12 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void GivenARowContainingUnicodeCharactersItWrapsCorrectly()
         {
-            RunTest(new TestData() {
+            RunTest(new TestData()
+            {
                 Columns = new[] {
                     "Poem"
                 },
-                ColumnWidths = new [] {
+                ColumnWidths = new[] {
                     5
                 },
                 Rows = new string[][] {
@@ -261,7 +268,8 @@ namespace Microsoft.DotNet.Tests
             // The unicode string is "test" with "enclosing circle backslash" around each character
             // Given 0x20E0 is a combining character, the string should be four graphemes in length,
             // despite having eight codepoints. Thus there should be 10 spaces following the characters.
-            RunTest(new TestData() {
+            RunTest(new TestData()
+            {
                 Columns = new[] {
                     "Unicode String"
                 },
@@ -284,7 +292,8 @@ namespace Microsoft.DotNet.Tests
         {
             // See comment for GivenARowContainingUnicodeCombiningCharactersItPrintsCorrectly regarding string content
             // This should wrap after the second grapheme rather than the second code point (constituting the first grapheme)
-            RunTest(new TestData() {
+            RunTest(new TestData()
+            {
                 Columns = new[] {
                     "01"
                 },
@@ -309,7 +318,8 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void GivenAnEmptyColumnHeaderItPrintsTheColumnHeaderAsEmpty()
         {
-            RunTest(new TestData() {
+            RunTest(new TestData()
+            {
                 Columns = new[] {
                     "First",
                     "",
@@ -334,7 +344,8 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void GivenAllEmptyColumnHeadersItPrintsTheEntireHeaderAsEmpty()
         {
-            RunTest(new TestData() {
+            RunTest(new TestData()
+            {
                 Columns = new[] {
                     null,
                     "",
@@ -359,7 +370,8 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void GivenZeroWidthColumnsItSkipsTheColumns()
         {
-            RunTest(new TestData() {
+            RunTest(new TestData()
+            {
                 Columns = new[] {
                     "",
                     "First",

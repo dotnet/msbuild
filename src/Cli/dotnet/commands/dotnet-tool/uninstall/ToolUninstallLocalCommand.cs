@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
             if (!manifestFileOptional.HasValue)
             {
                 throw new GracefulException(
-                    new[] { string.Format(LocalizableStrings.NoManifestFileContainPackageId, _packageId) }, 
+                    new[] { string.Format(LocalizableStrings.NoManifestFileContainPackageId, _packageId) },
                     isUserError: false);
             }
 

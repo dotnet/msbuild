@@ -1,8 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.DotNet.ToolManifest;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.ToolManifest;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             toolManifestFileEditor.Add(new FilePath(manifestFile),
                 new PackageId("new-tool"),
                 NuGetVersion.Parse("3.0.0"),
-                new[] {new ToolCommandName("newtool")});
+                new[] { new ToolCommandName("newtool") });
 
             _fileSystem.File.ReadAllText(manifestFile).Should().Be(
                 @"{
@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             toolManifestFileEditor.Add(new FilePath(manifestFile),
                 new PackageId("new-tool"),
                 NuGetVersion.Parse("3.0.0"),
-                new[] {new ToolCommandName("newtool")});
+                new[] { new ToolCommandName("newtool") });
 
             _fileSystem.File.ReadAllText(manifestFile).Should().Be(
                 @"{
@@ -103,7 +103,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             Action a = () => toolManifestFileEditor.Add(new FilePath(manifestFile),
                 packageId,
                 nuGetVersion,
-                new[] {new ToolCommandName("dotnetsay")});
+                new[] { new ToolCommandName("dotnetsay") });
 
             var expectedString = string.Format(
                 LocalizableStrings.ManifestPackageIdCollision,
@@ -131,7 +131,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             Action a = () => toolManifestFileEditor.Add(new FilePath(manifestFile),
                 packageId,
                 nuGetVersion,
-                new[] {new ToolCommandName("dotnetsay")});
+                new[] { new ToolCommandName("dotnetsay") });
 
             a.Should().NotThrow();
 
@@ -151,7 +151,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             Action a = () => toolManifestFileEditor.Add(new FilePath(manifestFile),
                 packageId,
                 nuGetVersion,
-                new[] {new ToolCommandName("dotnetsay")});
+                new[] { new ToolCommandName("dotnetsay") });
 
             a.Should().Throw<ToolManifestException>()
                 .And.Message.Should().Contain(
@@ -253,7 +253,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             Action a = () => toolManifestFileEditor.Edit(new FilePath(manifestFile),
                 new PackageId("non-exist"),
                 NuGetVersion.Parse("3.0.0"),
-                new[] {new ToolCommandName("t-rex3")});
+                new[] { new ToolCommandName("t-rex3") });
 
             a.Should().Throw<ArgumentException>().And.Message.Should()
                 .Contain($"Manifest {manifestFile} does not contain package id 'non-exist'.");
@@ -271,7 +271,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             toolManifestFileEditor.Edit(new FilePath(manifestFile),
                 new PackageId("t-rex"),
                 NuGetVersion.Parse("3.0.0"),
-                new[] {new ToolCommandName("t-rex3")});
+                new[] { new ToolCommandName("t-rex3") });
 
             _fileSystem.File.ReadAllText(manifestFile).Should().Be(
                 @"{

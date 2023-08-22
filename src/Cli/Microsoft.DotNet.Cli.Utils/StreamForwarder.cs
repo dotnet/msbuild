@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 {
                     WriteBuilder();
                 }
-                else if (! s_ignoreCharacters.Contains(currentCharacter))
+                else if (!s_ignoreCharacters.Contains(currentCharacter))
                 {
                     _builder.Append(currentCharacter);
                 }

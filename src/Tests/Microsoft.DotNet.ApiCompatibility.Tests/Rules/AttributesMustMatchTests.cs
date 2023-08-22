@@ -3,8 +3,8 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Tests;
-using Microsoft.DotNet.ApiSymbolExtensions.Tests;
 using Microsoft.DotNet.ApiSymbolExtensions.Filtering;
+using Microsoft.DotNet.ApiSymbolExtensions.Tests;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
 {

@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.DotNetSdkResolver
 
             // NB: All calls to Exists and LastWriteTimeUtc below will not hit the disk
             //     They will return data obtained during Refresh() here.
-            file.Refresh(); 
+            file.Refresh();
 
             lock (_lock)
             {

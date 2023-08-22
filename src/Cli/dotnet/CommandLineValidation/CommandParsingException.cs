@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.Cli
     internal class CommandParsingException : Exception
     {
         public CommandParsingException(
-            string message, 
+            string message,
             ParseResult parseResult = null) : base(message)
         {
             ParseResult = parseResult;

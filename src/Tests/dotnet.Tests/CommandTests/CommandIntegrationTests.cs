@@ -5,7 +5,7 @@ namespace Microsoft.DotNet.Tests.Commands
 {
     public class CommandIntegrationTests : SdkTest
     {
-        public CommandIntegrationTests(ITestOutputHelper log) : base(log) {}
+        public CommandIntegrationTests(ITestOutputHelper log) : base(log) { }
 
         [Fact]
         public void GivenNoArgumentsProvided()

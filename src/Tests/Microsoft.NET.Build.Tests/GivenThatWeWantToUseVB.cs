@@ -132,8 +132,8 @@ namespace Microsoft.NET.Build.Tests
                     });
 
                 case ("netcoreapp3.0", false):
-                   return (VBRuntime.Referenced, new[]
-                   {
+                    return (VBRuntime.Referenced, new[]
+                    {
                         "HelloWorld.dll",
                         "HelloWorld.pdb",
                         "HelloWorld.deps.json",

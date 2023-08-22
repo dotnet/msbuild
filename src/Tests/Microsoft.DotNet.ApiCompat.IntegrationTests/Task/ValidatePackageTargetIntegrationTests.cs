@@ -7,9 +7,9 @@ using Microsoft.DotNet.ApiCompatibility.Logging;
 using Microsoft.DotNet.ApiCompatibility.Rules;
 using Microsoft.DotNet.ApiCompatibility.Runner;
 using Microsoft.DotNet.ApiCompatibility.Tests;
+using Microsoft.DotNet.ApiSymbolExtensions;
 using Microsoft.DotNet.PackageValidation;
 using Microsoft.DotNet.PackageValidation.Validators;
-using Microsoft.DotNet.ApiSymbolExtensions;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ApiCompat.Task.IntegrationTests

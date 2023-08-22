@@ -1,8 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.DotNet.Cli.Utils;
 using System.Reflection;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.NET.TestFramework
 {
@@ -131,7 +131,7 @@ namespace Microsoft.NET.TestFramework
                 return MicrosoftNETBuildExtensionsPathOverride;
             }
             else
-            {                
+            {
                 if (ShouldUseFullFrameworkMSBuild)
                 {
                     var msbuildBinPath = Path.GetDirectoryName(FullFrameworkMSBuildPath);
@@ -334,7 +334,7 @@ namespace Microsoft.NET.TestFramework
             if (repoRoot != null)
             {
                 ret.CliHomePath = Path.Combine(repoArtifactsDir, "tmp", configuration);
-            }            
+            }
 
             return ret;
         }

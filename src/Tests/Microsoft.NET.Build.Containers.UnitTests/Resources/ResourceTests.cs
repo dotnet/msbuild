@@ -34,7 +34,7 @@ namespace Microsoft.NET.Build.Containers.UnitTests.Resources
                 .GroupBy(e => e.Value!.ToString()!.Substring(9, 4))
                 .Where(g => g.Count() > 1);
 
-            foreach(IGrouping<string, DictionaryEntry> group in groups)
+            foreach (IGrouping<string, DictionaryEntry> group in groups)
             {
                 if (!group.First().Key!.ToString()!.Contains('_'))
                 {

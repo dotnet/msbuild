@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         public void ItShouldDetectFileWithMarkOfTheWeb()
         {
             var testFile = Path.Combine(_testAssetsManager.CreateTestDirectory().Path, Path.GetRandomFileName());
-            
+
             File.WriteAllText(testFile, string.Empty);
             AlternateStream.WriteAlternateStream(
                 testFile,

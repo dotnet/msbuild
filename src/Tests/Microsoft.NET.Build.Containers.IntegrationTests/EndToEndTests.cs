@@ -36,7 +36,7 @@ public class EndToEndTests : IDisposable
     {
         _loggerFactory.Dispose();
     }
-    
+
     [DockerAvailableFact]
     public async Task ApiEndToEndWithRegistryPushAndPull()
     {

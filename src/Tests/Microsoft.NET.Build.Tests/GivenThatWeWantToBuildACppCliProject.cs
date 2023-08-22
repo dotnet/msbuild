@@ -184,7 +184,7 @@ namespace Microsoft.NET.Build.Tests
 
         private void ConfigureProject(string projectPath, XDocument project, string targetFramework, string[] properties)
         {
-            AddBuildProperty(projectPath, project, "EnableManagedpackageReferenceSupport","true");
+            AddBuildProperty(projectPath, project, "EnableManagedpackageReferenceSupport", "true");
             ChangeTargetFramework(projectPath, project, targetFramework);
             RecordProperties(projectPath, project, properties);
         }

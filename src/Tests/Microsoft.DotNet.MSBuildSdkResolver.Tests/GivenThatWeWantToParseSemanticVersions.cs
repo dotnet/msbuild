@@ -49,30 +49,30 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         }
 
         [Theory]
-        [InlineData("1.0.0-0.3.7",                1, 0, 0,  "-0.3.7",             "")]
-        [InlineData("1.0.0-alpha",                1, 0, 0,  "-alpha",             "")]
-        [InlineData("1.0.0-alpha+001",            1, 0, 0,  "-alpha",             "+001")]
-        [InlineData("1.0.0-alpha.1",              1, 0, 0,  "-alpha.1",           "")]
-        [InlineData("1.0.0-alpha.beta",           1, 0, 0,  "-alpha.beta",        "")]
-        [InlineData("1.0.0-beta",                 1, 0, 0,  "-beta",              "")]
-        [InlineData("1.0.0-beta+exp.sha.5114f85", 1, 0, 0,  "-beta",              "+exp.sha.5114f85")]
-        [InlineData("1.0.0-beta.2",               1, 0, 0,  "-beta.2",            "")]
-        [InlineData("1.0.0-beta.11",              1, 0, 0,  "-beta.11",           "")]
-        [InlineData("1.0.0-rc.1",                 1, 0, 0,  "-rc.1",              "")]
-        [InlineData("1.0.0-x.7.z.92",             1, 0, 0,  "-x.7.z.92",          "")]
-        [InlineData("1.0.0",                      1, 0, 0,  "",                   "")]
-        [InlineData("1.0.0+20130313144700",       1, 0, 0,  "",                   "+20130313144700")]
-        [InlineData("1.9.0-9",                    1, 9, 0,  "-9",                 "")]
-        [InlineData("1.9.0-10",                   1, 9, 0,  "-10",                "")]
-        [InlineData("1.9.0-1A",                   1, 9, 0,  "-1A",                "")]
-        [InlineData("1.9.0",                      1, 9, 0,  "",                   "")]
-        [InlineData("1.10.0",                     1, 10, 0, "",                   "")]
-        [InlineData("1.11.0",                     1, 11, 0, "",                   "")]
-        [InlineData("2.0.0",                      2, 0, 0,  "",                   "")]
-        [InlineData("2.1.0",                      2, 1, 0,  "",                   "")]
-        [InlineData("2.1.1",                      2, 1, 1,  "",                   "")]
-        [InlineData("4.6.0-preview.19064.1",      4, 6, 0,  "-preview.19064.1",   "")]
-        [InlineData("4.6.0-preview1-27018-01",    4, 6, 0,  "-preview1-27018-01", "")]
+        [InlineData("1.0.0-0.3.7", 1, 0, 0, "-0.3.7", "")]
+        [InlineData("1.0.0-alpha", 1, 0, 0, "-alpha", "")]
+        [InlineData("1.0.0-alpha+001", 1, 0, 0, "-alpha", "+001")]
+        [InlineData("1.0.0-alpha.1", 1, 0, 0, "-alpha.1", "")]
+        [InlineData("1.0.0-alpha.beta", 1, 0, 0, "-alpha.beta", "")]
+        [InlineData("1.0.0-beta", 1, 0, 0, "-beta", "")]
+        [InlineData("1.0.0-beta+exp.sha.5114f85", 1, 0, 0, "-beta", "+exp.sha.5114f85")]
+        [InlineData("1.0.0-beta.2", 1, 0, 0, "-beta.2", "")]
+        [InlineData("1.0.0-beta.11", 1, 0, 0, "-beta.11", "")]
+        [InlineData("1.0.0-rc.1", 1, 0, 0, "-rc.1", "")]
+        [InlineData("1.0.0-x.7.z.92", 1, 0, 0, "-x.7.z.92", "")]
+        [InlineData("1.0.0", 1, 0, 0, "", "")]
+        [InlineData("1.0.0+20130313144700", 1, 0, 0, "", "+20130313144700")]
+        [InlineData("1.9.0-9", 1, 9, 0, "-9", "")]
+        [InlineData("1.9.0-10", 1, 9, 0, "-10", "")]
+        [InlineData("1.9.0-1A", 1, 9, 0, "-1A", "")]
+        [InlineData("1.9.0", 1, 9, 0, "", "")]
+        [InlineData("1.10.0", 1, 10, 0, "", "")]
+        [InlineData("1.11.0", 1, 11, 0, "", "")]
+        [InlineData("2.0.0", 2, 0, 0, "", "")]
+        [InlineData("2.1.0", 2, 1, 0, "", "")]
+        [InlineData("2.1.1", 2, 1, 1, "", "")]
+        [InlineData("4.6.0-preview.19064.1", 4, 6, 0, "-preview.19064.1", "")]
+        [InlineData("4.6.0-preview1-27018-01", 4, 6, 0, "-preview1-27018-01", "")]
         public void ReturnsCorrectFXVersion(string s1, int major, int minor, int patch, string pre, string build)
         {
             FXVersion fxVersion;
@@ -153,7 +153,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         public void ReturnsFXVersionWhenMajorMinorPatchAndPreAndBuildIsFound()
         {
             FXVersion fxVersion;
-            
+
             var result = FXVersion.TryParse("1.2.3-pre+build", out fxVersion);
 
             result.Should().BeTrue();

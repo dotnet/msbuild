@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="ArchArgumentName">
         <source>ARCH</source>
-        <target state="new">ARCH</target>
+        <target state="translated">拱</target>
         <note />
       </trans-unit>
       <trans-unit id="ArchitectureOptionDescription">
@@ -14,12 +14,12 @@
       </trans-unit>
       <trans-unit id="ArtifactsPathArgumentName">
         <source>ARTIFACTS_DIR</source>
-        <target state="new">ARTIFACTS_DIR</target>
+        <target state="translated">ARTIFACTS_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="ArtifactsPathOptionDescription">
         <source>The artifacts path. All output from the project, including build, publish, and pack output, will go in subfolders under the specified path.</source>
-        <target state="new">The artifacts path. All output from the project, including build, publish, and pack output, will go in subfolders under the specified path.</target>
+        <target state="translated">成品路徑。專案中的所有輸出，包括建置、發佈及封裝輸出，都將移至指定路徑下的子資料夾中。</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotResolveRuntimeIdentifier">
@@ -218,8 +218,8 @@ export PATH="$PATH:{0}"
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'false.' However, when targeting .NET 7 or lower, the default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">將 .NET 執行階段發佈於您的應用程式中，以便目標電腦不必安裝執行階段。
-如有指定執行階段識別碼，則預設為 'true'。</target>
+        <target state="new">Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'false.' However, when targeting .NET 7 or lower, the default is 'true' if a runtime identifier is specified.</target>
         <note />
       </trans-unit>
       <trans-unit id="Solution">
@@ -229,7 +229,7 @@ The default is 'false.' However, when targeting .NET 7 or lower, the default is 
       </trans-unit>
       <trans-unit id="SolutionArgumentMisplaced">
         <source>Solution argument '{0}' is misplaced.</source>
-        <target state="new">Solution argument '{0}' is misplaced.</target>
+        <target state="translated">解決方案引數 '{0}' 錯位。</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionFile">
@@ -279,7 +279,7 @@ The default is 'false.' However, when targeting .NET 7 or lower, the default is 
       </trans-unit>
       <trans-unit id="SolutionFolderAlreadyContainsProject">
         <source>Solution {0} already contains project {1} in solution folder {2}.</source>
-        <target state="new">Solution {0} already contains project {1} in solution folder {2}.</target>
+        <target state="translated">方案 {0} 已在解決方案資料夾 {2} 中包含專案 {1}。</target>
         <note />
       </trans-unit>
       <trans-unit id="Update">

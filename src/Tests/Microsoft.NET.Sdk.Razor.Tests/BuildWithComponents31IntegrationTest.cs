@@ -5,7 +5,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 {
     public class BuildWithComponents31IntegrationTest : AspNetSdkTest
     {
-        public BuildWithComponents31IntegrationTest(ITestOutputHelper log) : base(log) {}
+        public BuildWithComponents31IntegrationTest(ITestOutputHelper log) : base(log) { }
 
         [CoreMSBuildOnlyFact]
         public void Build_Components_WithDotNetCoreMSBuild_Works()
@@ -22,7 +22,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             new FileInfo(Path.Combine(outputPath, "blazor31.pdb")).Should().Exist();
             new FileInfo(Path.Combine(outputPath, "blazor31.Views.dll")).Should().Exist();
             new FileInfo(Path.Combine(outputPath, "blazor31.Views.pdb")).Should().Exist();
-        
+
             new FileInfo(Path.Combine(outputPath, "blazor31.dll")).AssemblyShould().ContainType("blazor31.Pages.Index");
             new FileInfo(Path.Combine(outputPath, "blazor31.dll")).AssemblyShould().ContainType("blazor31.Shared.NavMenu");
 

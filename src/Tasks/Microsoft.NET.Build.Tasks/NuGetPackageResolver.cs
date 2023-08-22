@@ -25,7 +25,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public string GetPackageDirectory(string packageId, NuGetVersion version)
             => _packagePathResolver?.GetPackageDirectory(packageId, version);
-        
+
         public string GetPackageDirectory(string packageId, NuGetVersion version, out string packageRoot)
         {
             var packageInfo = _packagePathResolver?.GetPackageInfo(packageId, version);

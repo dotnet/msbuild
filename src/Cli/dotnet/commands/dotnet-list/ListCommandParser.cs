@@ -15,10 +15,10 @@ namespace Microsoft.DotNet.Cli
 
         internal static CliArgument<string> CreateSlnOrProjectArgument(string name, string description)
             => new CliArgument<string>(name)
-        {
-            Description = description,
-            Arity = ArgumentArity.ZeroOrOne
-        }.DefaultToCurrentDirectory();
+            {
+                Description = description,
+                Arity = ArgumentArity.ZeroOrOne
+            }.DefaultToCurrentDirectory();
 
         private static readonly CliCommand Command = ConstructCommand();
 

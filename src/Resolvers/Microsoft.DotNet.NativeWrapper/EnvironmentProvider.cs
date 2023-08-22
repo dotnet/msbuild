@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.NativeWrapper
                     .Equals(Constants.DotNet, StringComparison.InvariantCultureIgnoreCase))
             {
                 string dotnetExeFromPath = GetCommandPath(Constants.DotNet);
-                
+
                 if (dotnetExeFromPath != null && !Interop.RunningOnWindows)
                 {
                     // e.g. on Linux the 'dotnet' command from PATH is a symlink so we need to
@@ -84,7 +84,9 @@ namespace Microsoft.DotNet.NativeWrapper
                 if (!string.IsNullOrWhiteSpace(dotnetExeFromPath))
                 {
                     dotnetExe = dotnetExeFromPath;
-                } else {
+                }
+                else
+                {
                     log?.Invoke($"GetDotnetExeDirectory: dotnet command path not found.  Using current process");
                     log?.Invoke($"GetDotnetExeDirectory: Path variable: {_getEnvironmentVariable(Constants.PATH)}");
                 }

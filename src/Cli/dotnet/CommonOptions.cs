@@ -1,11 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.CommandLine;
+using System.CommandLine.Completions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Common;
-using System.CommandLine;
-using System.CommandLine.Completions;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Cli
             {
                 Description = CommonLocalizableStrings.ArtifactsPathOptionDescription,
                 HelpName = CommonLocalizableStrings.ArtifactsPathArgumentName
-            }.ForwardAsSingle(o => $"-property:ArtifactsPath={CommandDirectoryContext.GetFullPath(o)}");            
+            }.ForwardAsSingle(o => $"-property:ArtifactsPath={CommandDirectoryContext.GetFullPath(o)}");
 
         private static string RuntimeArgName = CommonLocalizableStrings.RuntimeIdentifierArgumentName;
         public static IEnumerable<string> RuntimeArgFunc(string rid)
@@ -107,10 +107,10 @@ namespace Microsoft.DotNet.Cli
             return arg;
         }
 
-        public static CliOption<bool> NoRestoreOption =new("--no-restore")
-            {
-                Description = CommonLocalizableStrings.NoRestoreDescription
-            };
+        public static CliOption<bool> NoRestoreOption = new("--no-restore")
+        {
+            Description = CommonLocalizableStrings.NoRestoreDescription
+        };
 
         public static CliOption<bool> InteractiveMsBuildForwardOption =
             new ForwardedOption<bool>("--interactive")

@@ -89,7 +89,7 @@ namespace Microsoft.NET.Build.Tests
                 .Execute()
                 .Should()
                 .Pass();
-       }
+        }
 
         [Theory]
         [InlineData("netcoreapp3.0")]

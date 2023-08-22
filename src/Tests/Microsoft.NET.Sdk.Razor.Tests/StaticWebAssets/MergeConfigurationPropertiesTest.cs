@@ -62,7 +62,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             {
                 BuildEngine = buildEngine.Object,
                 CandidateConfigurations = new[] { CreateCandidateProjectConfiguration(Path.GetFullPath(referenceProjectFile)) },
-                ProjectReferences = new[] 
+                ProjectReferences = new[]
                 {
                     CreateProjectReference(
                         project: Path.Combine("..", "myRCL", "myRcl.csproj"),

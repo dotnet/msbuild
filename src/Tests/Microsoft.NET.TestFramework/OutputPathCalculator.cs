@@ -159,7 +159,7 @@ namespace Microsoft.NET.TestFramework
             return !string.IsNullOrEmpty(TargetFrameworks);
         }
 
-        public string GetOutputDirectory(string targetFramework = null, string configuration = "Debug", string runtimeIdentifier = "")
+        public string GetOutputDirectory(string targetFramework = null, string configuration = "Debug", string runtimeIdentifier = "", string platform = "")
         {
             if (UseArtifactsOutput)
             {
@@ -188,24 +188,25 @@ namespace Microsoft.NET.TestFramework
             }
             else
             {
-                targetFramework = targetFramework ?? TargetFramework ?? string.Empty;
-                configuration = configuration ?? string.Empty;
-                runtimeIdentifier = runtimeIdentifier ?? RuntimeIdentifier ?? string.Empty;
+                targetFramework ??= TargetFramework ?? string.Empty;
+                configuration ??= string.Empty;
+                runtimeIdentifier ??= RuntimeIdentifier ?? string.Empty;
+                platform ??= string.Empty;
 
                 if (IsSdkProject)
                 {
-                    string output = System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", configuration, targetFramework, runtimeIdentifier);
+                    string output = System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", platform, configuration, targetFramework, runtimeIdentifier);
                     return output;
                 }
                 else
                 {
-                    string output = System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", configuration);
+                    string output = System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", platform, configuration);
                     return output;
                 }
             }
         }
 
-        public string GetPublishDirectory(string targetFramework = null, string configuration = "Debug", string runtimeIdentifier = "")
+        public string GetPublishDirectory(string targetFramework = null, string configuration = "Debug", string runtimeIdentifier = "", string platform = "")
         {
             if (UseArtifactsOutput)
             {
@@ -234,11 +235,12 @@ namespace Microsoft.NET.TestFramework
             }
             else
             {
-                targetFramework = targetFramework ?? TargetFramework ?? string.Empty;
-                configuration = configuration ?? string.Empty;
-                runtimeIdentifier = runtimeIdentifier ?? RuntimeIdentifier ?? string.Empty;
+                targetFramework ??= TargetFramework ?? string.Empty;
+                configuration ??= string.Empty;
+                runtimeIdentifier ??= RuntimeIdentifier ?? string.Empty;
+                platform ??= string.Empty;
 
-                string output = System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", configuration, targetFramework, runtimeIdentifier, "publish");
+                string output = System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", platform, configuration, targetFramework, runtimeIdentifier, "publish");
                 return output;
             }
         }
@@ -269,7 +271,7 @@ namespace Microsoft.NET.TestFramework
                 {
                     return Path.Combine(ArtifactsPath, "obj", pivot);
                 }
-                
+
             }
 
             targetFramework = targetFramework ?? TargetFramework ?? string.Empty;

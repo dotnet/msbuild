@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Installer.Windows.Security
         /// <summary>
         /// Pointer to the object for which trust will be verified. This is a union member. See <see cref="dwUIChoice"/>.
         /// </summary>
-        public IntPtr pWinTrustInfo; 
+        public IntPtr pWinTrustInfo;
 
         /// <summary>
         /// Specifies the action to be taken.

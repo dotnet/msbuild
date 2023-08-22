@@ -1,8 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.DotNet.Cli.Utils;
 using System.Globalization;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.NET.TestFramework
 {
@@ -81,7 +81,7 @@ namespace Microsoft.NET.TestFramework
             Environment.SetEnvironmentVariable("MSBuildSdksPath", null);
 
             TestContext testContext = new TestContext();
-            
+
             bool runAsTool = false;
             if (Directory.Exists(Path.Combine(AppContext.BaseDirectory, "Assets")))
             {
@@ -94,7 +94,7 @@ namespace Microsoft.NET.TestFramework
                 //  This allows testing most of the "tests as global tool" behavior by setting an environment
                 //  variable instead of packing the test, and installing it as a global tool.
                 runAsTool = true;
-                
+
                 testContext.TestAssetsDirectory = FindFolderInTree(Path.Combine("src", "Assets"), AppContext.BaseDirectory);
             }
             else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_ASSETS_DIRECTORY")))
@@ -184,7 +184,7 @@ namespace Microsoft.NET.TestFramework
             {
                 var nugetFolder = FindFolderInTree(".nuget", AppContext.BaseDirectory, false)
                     ?? Path.Combine(testContext.TestExecutionDirectory, ".nuget");
-                
+
 
                 testContext.NuGetFallbackFolder = Path.Combine(nugetFolder, "NuGetFallbackFolder");
                 testContext.NuGetExePath = Path.Combine(nugetFolder, $"nuget{Constants.ExeSuffix}");

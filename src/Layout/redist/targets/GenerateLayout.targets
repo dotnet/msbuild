@@ -2,7 +2,11 @@
 
   <Target Name="PublishPortableRuntimeIdentifierGraph"
           BeforeTargets="Build">
-    
+
+      <ItemGroup Condition="'$(DotNetBuildFromSource)' == 'true' AND '$(TargetRid)' != '' AND '$(PortableRid)' != '' AND '$(TargetRid)' != '$(PortableRid)'">
+        <AdditionalRuntimeIdentifier Include="$(TargetRid)" Imports="$(PortableRid)" />
+      </ItemGroup>
+
       <UpdatePortableRuntimeIdentifierGraph
         InputFile="PortableRuntimeIdentifierGraph.json"
         OutputFile="$(OutputPath)/PortableRuntimeIdentifierGraph.json"
@@ -238,8 +242,9 @@
           DestinationFiles="$(OutputPath)/%(BundledTools.Identity).runtimeconfig.json" />
 
     <Delete Files="$(OutputPath)/$(TargetName).deps.json;
-                   $(OutputPath)/$(TargetName).runtimeconfig.json;
-                   $(OutputPath)/%(BundledToolProjects.Identity).dll;
+                   $(OutputPath)/$(TargetName).runtimeconfig.json" />
+
+    <Delete Files="$(OutputPath)/%(BundledToolProjects.Identity).dll;
                    $(OutputPath)/%(BundledToolProjects.Identity).pdb" />
 
     <ChangeEntryPointLibraryName

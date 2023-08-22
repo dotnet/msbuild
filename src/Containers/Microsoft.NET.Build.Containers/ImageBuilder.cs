@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Text;
-using Microsoft.NET.Build.Containers.Resources;
-using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
+using Microsoft.NET.Build.Containers.Resources;
 
 namespace Microsoft.NET.Build.Containers;
 
@@ -243,7 +243,7 @@ internal sealed class ImageBuilder
         if (_baseImageConfig.EnvironmentVariables.TryGetValue(EnvironmentVariables.ASPNETCORE_HTTP_PORTS, out string? httpPorts))
         {
             _logger.LogTrace("Setting ports from ASPNETCORE_HTTP_PORTS environment variable");
-            foreach(var port in Split(httpPorts))
+            foreach (var port in Split(httpPorts))
             {
                 if (int.TryParse(port, out int parsedPort))
                 {
@@ -260,7 +260,7 @@ internal sealed class ImageBuilder
         if (_baseImageConfig.EnvironmentVariables.TryGetValue(EnvironmentVariables.ASPNETCORE_HTTPS_PORTS, out string? httpsPorts))
         {
             _logger.LogTrace("Setting ports from ASPNETCORE_HTTPS_PORTS environment variable");
-            foreach(var port in Split(httpsPorts))
+            foreach (var port in Split(httpsPorts))
             {
                 if (int.TryParse(port, out int parsedPort))
                 {
@@ -277,7 +277,7 @@ internal sealed class ImageBuilder
         // https://learn.microsoft.com//aspnet/core/fundamentals/host/web-host?view=aspnetcore-8.0#server-urls - the format of ASPNETCORE_URLS has been stable for many years now
         if (_baseImageConfig.EnvironmentVariables.TryGetValue(EnvironmentVariables.ASPNETCORE_URLS, out string? urls))
         {
-            foreach(var url in Split(urls))
+            foreach (var url in Split(urls))
             {
                 _logger.LogTrace("Setting ports from ASPNETCORE_URLS environment variable");
                 var match = aspnetPortRegex.Match(url);

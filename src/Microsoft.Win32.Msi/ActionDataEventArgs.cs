@@ -8,7 +8,7 @@ namespace Microsoft.Win32.Msi
     /// </summary>
     public class ActionDataEventArgs : InstallMessageEventArgs
     {
-        public ActionDataEventArgs(string message, InstallMessage messageType, MessageBox style) : 
+        public ActionDataEventArgs(string message, InstallMessage messageType, MessageBox style) :
             base(message, messageType, style)
         {
 

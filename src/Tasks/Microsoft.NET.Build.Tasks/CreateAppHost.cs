@@ -72,14 +72,15 @@ namespace Microsoft.NET.Build.Tasks
                                                ex is HResultException ||
                                                (ex is AggregateException && (ex.InnerException is IOException || ex.InnerException is UnauthorizedAccessException)))
                     {
-                        if (Retries < 0 || attempts == Retries) {
+                        if (Retries < 0 || attempts == Retries)
+                        {
                             throw;
                         }
 
                         ++attempts;
 
                         string message = ex.Message;
-                        if(ex is AggregateException)
+                        if (ex is AggregateException)
                         {
                             message = ex.InnerException.Message;
                         }
@@ -90,7 +91,8 @@ namespace Microsoft.NET.Build.Tasks
                                 Retries + 1,
                                 message));
 
-                        if (RetryDelayMilliseconds > 0) {
+                        if (RetryDelayMilliseconds > 0)
+                        {
                             Thread.Sleep(RetryDelayMilliseconds);
                         }
                     }

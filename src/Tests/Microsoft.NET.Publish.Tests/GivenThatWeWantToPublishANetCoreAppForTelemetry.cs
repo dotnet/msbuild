@@ -58,7 +58,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [CoreMSBuildOnlyTheory]
-        [InlineData(ToolsetInfo.CurrentTargetFramework)] 
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         void It_collects_crossgen2_publishing_properties(string targetFramework)
         {
             // Crossgen2 only supported for Linux/Windows x64 scenarios for now

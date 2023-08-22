@@ -258,7 +258,7 @@ namespace Microsoft.NET.Build.Tasks
         /// Pdb files to be copied to the output directory
         /// </remarks>
         [Output]
-        public ITaskItem[] DebugSymbolsFiles { get; private set;}
+        public ITaskItem[] DebugSymbolsFiles { get; private set; }
 
         /// <summary>
         /// List of xml files related to NuGet packages.
@@ -742,10 +742,10 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 else
                 {
-                    _compileTimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, runtimeIdentifier: null); 
+                    _compileTimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, runtimeIdentifier: null);
                     _runtimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, _task.RuntimeIdentifier);
                 }
-                
+
 
                 _stringTable = new Dictionary<string, int>(InitialStringTableCapacity, StringComparer.Ordinal);
                 _metadataStrings = new List<string>(InitialStringTableCapacity);
@@ -895,7 +895,7 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     return StringComparer.OrdinalIgnoreCase.Equals(l1.Item1, l2.Item1)
                         && l1.Item2.Equals(l2.Item2);
-                    
+
                 }
                 public int GetHashCode((string, NuGetVersion) library)
                 {
@@ -1400,7 +1400,7 @@ namespace Microsoft.NET.Build.Tasks
                     return false;
                 }
                 else
-                { 
+                {
                     var targetFramework = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, null).TargetFramework;
 
                     if (targetFramework.Version.Major >= 3
@@ -1575,7 +1575,8 @@ namespace Microsoft.NET.Build.Tasks
                             if (tfm.Version.Major >= 7)
                             {
                                 _task.Log.LogWarning(Strings.PackageContainsUnknownLocale, package.Name, package.Version.ToNormalizedString(), cnf.InvalidCultureName);
-                            } else
+                            }
+                            else
                             {
                                 _task.Log.LogMessage(Strings.PackageContainsUnknownLocale, package.Name, package.Version.ToNormalizedString(), cnf.InvalidCultureName);
                             }
@@ -1645,7 +1646,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 foreach (var library in _runtimeTarget.Libraries)
                 {
-                    if (!library.IsTransitiveProjectReference(_lockFile, ref directProjectDependencies, 
+                    if (!library.IsTransitiveProjectReference(_lockFile, ref directProjectDependencies,
                         _lockFile.GetLockFileTargetAlias(_lockFile.GetTargetAndReturnNullIfNotFound(_targetFramework, null))))
                     {
                         continue;
@@ -1754,7 +1755,7 @@ namespace Microsoft.NET.Build.Tasks
                     shouldIncludeInPublish = false;
                 }
 
-                if (!shouldCopyLocal&& !shouldIncludeInPublish)
+                if (!shouldCopyLocal && !shouldIncludeInPublish)
                 {
                     return false;
                 }

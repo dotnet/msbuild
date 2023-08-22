@@ -13,6 +13,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
         public abstract string TargetFramework { get; }
 
-        
+
     }
 }

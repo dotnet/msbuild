@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli.Utils
         internal static PerformanceLogEventListener Create(IFileSystem fileSystem, string logDirectory)
         {
             // Only create a listener if the log directory exists.
-            if(string.IsNullOrWhiteSpace(logDirectory) || !fileSystem.Directory.Exists(logDirectory))
+            if (string.IsNullOrWhiteSpace(logDirectory) || !fileSystem.Directory.Exists(logDirectory))
             {
                 return null;
             }
@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Cli.Utils
             }
             catch
             {
-                if(eventListener != null)
+                if (eventListener != null)
                 {
                     eventListener.Dispose();
                 }

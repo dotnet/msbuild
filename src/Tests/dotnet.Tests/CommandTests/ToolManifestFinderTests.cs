@@ -129,7 +129,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             var rootDirectory = new DirectoryPath(_testDirectoryRoot);
             while (rootDirectory.GetParentPathNullable() != null)
             {
-                rootDirectory = (DirectoryPath) rootDirectory.GetParentPathNullable();
+                rootDirectory = (DirectoryPath)rootDirectory.GetParentPathNullable();
             }
             var dotnetconfigDirectory = Path.Combine(rootDirectory.Value, ".config");
             _fileSystem.Directory.CreateDirectory(dotnetconfigDirectory);
@@ -162,13 +162,14 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                     new DirectoryPath(_testDirectoryRoot),
                     _fileSystem,
                     new FakeDangerousFileDetector(),
-                    getEnvironmentVariable: name => {
-                        if(name.Equals(EnvironmentVariableNames.DOTNET_TOOLS_ALLOW_MANIFEST_IN_ROOT, StringComparison.OrdinalIgnoreCase))
+                    getEnvironmentVariable: name =>
+                    {
+                        if (name.Equals(EnvironmentVariableNames.DOTNET_TOOLS_ALLOW_MANIFEST_IN_ROOT, StringComparison.OrdinalIgnoreCase))
                         {
                             return "true";
                         }
                         throw new ArgumentException($"Didn't expect environment query for {name}");
-                });
+                    });
 
             var manifestResult = toolManifest.Find();
 
@@ -322,7 +323,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             Action a = () => toolManifest.Find();
 
             a.Should().Throw<ToolManifestException>()
-                .And.Message.Should().Contain(string.Format(LocalizableStrings.UnexpectedTypeInJson, "True|False" ,"isRoot"));
+                .And.Message.Should().Contain(string.Format(LocalizableStrings.UnexpectedTypeInJson, "True|False", "isRoot"));
         }
 
         [Fact]

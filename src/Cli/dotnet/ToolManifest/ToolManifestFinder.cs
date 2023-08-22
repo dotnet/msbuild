@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.ToolManifest
         {
             IEnumerable<(FilePath manifestfile, DirectoryPath _)> allPossibleManifests =
                 filePath != null
-                    ? new[] {(filePath.Value, filePath.Value.GetDirectoryPath())}
+                    ? new[] { (filePath.Value, filePath.Value.GetDirectoryPath()) }
                     : EnumerateDefaultAllPossibleManifests();
 
             var findAnyManifest =
@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.ToolManifest
         {
             IEnumerable<(FilePath manifestfile, DirectoryPath _)> allPossibleManifests =
                 filePath != null
-                    ? new[] {(filePath.Value, filePath.Value.GetDirectoryPath())}
+                    ? new[] { (filePath.Value, filePath.Value.GetDirectoryPath()) }
                     : EnumerateDefaultAllPossibleManifests();
 
 
@@ -70,11 +70,11 @@ namespace Microsoft.DotNet.ToolManifest
         }
 
         private bool TryFindToolManifestPackages(
-            IEnumerable<(FilePath manifestfile, DirectoryPath _)> allPossibleManifests, 
+            IEnumerable<(FilePath manifestfile, DirectoryPath _)> allPossibleManifests,
             out List<(ToolManifestPackage toolManifestPackage, FilePath SourceManifest)> toolManifestPackageAndSource)
         {
             bool findAnyManifest = false;
-            toolManifestPackageAndSource 
+            toolManifestPackageAndSource
                 = new List<(ToolManifestPackage toolManifestPackage, FilePath SourceManifest)>();
             foreach ((FilePath possibleManifest, DirectoryPath correspondingDirectory) in allPossibleManifests)
             {
@@ -170,7 +170,7 @@ namespace Microsoft.DotNet.ToolManifest
             }
             return !RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         }
-        
+
         public FilePath FindFirst(bool createIfNotFound = false)
         {
             foreach ((FilePath possibleManifest, DirectoryPath _) in EnumerateDefaultAllPossibleManifests())
@@ -204,7 +204,7 @@ namespace Microsoft.DotNet.ToolManifest
         private DirectoryPath GetDirectoryToCreateToolManifest()
         {
             DirectoryPath? currentSearchDirectory = _probeStart;
-            while (currentSearchDirectory.HasValue && currentSearchDirectory.Value.GetParentPathNullable()!=null)
+            while (currentSearchDirectory.HasValue && currentSearchDirectory.Value.GetParentPathNullable() != null)
             {
                 var currentSearchGitDirectory = currentSearchDirectory.Value.WithSubDirectories(Constants.GitDirectoryName);
                 if (_fileSystem.Directory.Exists(currentSearchGitDirectory.Value))
