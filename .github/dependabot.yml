@@ -15,7 +15,7 @@ updates:
     open-pull-requests-limit: 10
     schedule:
       interval: "weekly"
-    target-branch: "release/7.0.4xx"
+    target-branch: "release/8.0.1xx"
     labels:
       - "dependencies"
-      - "dependabot: 7.0.4xx"
+      - "dependabot: 8.0.1xx"
