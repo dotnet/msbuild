@@ -46,7 +46,7 @@ namespace Microsoft.Build.Logging
         /// Caller is responsible for disposing the returned reader.
         /// </summary>
         /// <param name="sourceFilePath"></param>
-        /// <returns></returns>
+        /// <returns>BinaryReader of the given binlog file.</returns>
         public static BinaryReader OpenReader(string sourceFilePath)
         {
             Stream? stream = null;
