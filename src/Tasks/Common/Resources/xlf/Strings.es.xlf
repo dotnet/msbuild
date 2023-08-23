@@ -482,8 +482,8 @@
         <note>{StrBegin="NETSDK1141: "}</note>
       </trans-unit>
       <trans-unit id="ILLinkFailed">
-        <source>NETSDK1144: Optimizing assemblies for size failed. Optimization can be disabled by setting the PublishTrimmed property to false.</source>
-        <target state="translated">NETSDK1144: Error al optimizar el tamaño de los ensamblados. Para deshabilitar la optimización, establezca la propiedad PublishTrimmed en false.</target>
+        <source>NETSDK1144: Optimizing assemblies for size failed.</source>
+        <target state="needs-review-translation">NETSDK1144: Error al optimizar el tamaño de los ensamblados. Para deshabilitar la optimización, establezca la propiedad PublishTrimmed en false.</target>
         <note>{StrBegin="NETSDK1144: "}</note>
       </trans-unit>
       <trans-unit id="ILLinkNoValidRuntimePackageError">

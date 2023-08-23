@@ -482,8 +482,8 @@ true &lt;EnableSingleFileAnalyzer Condition="$([MSBuild]::IsTargetFrameworkCompa
         <note>{StrBegin="NETSDK1141: "}</note>
       </trans-unit>
       <trans-unit id="ILLinkFailed">
-        <source>NETSDK1144: Optimizing assemblies for size failed. Optimization can be disabled by setting the PublishTrimmed property to false.</source>
-        <target state="translated">NETSDK1144: 어셈블리의 크기를 최적화하지 못했습니다. PublishTrimmed 속성을 false로 설정하여 최적화를 사용하지 않도록 설정할 수 있습니다.</target>
+        <source>NETSDK1144: Optimizing assemblies for size failed.</source>
+        <target state="needs-review-translation">NETSDK1144: 어셈블리의 크기를 최적화하지 못했습니다. PublishTrimmed 속성을 false로 설정하여 최적화를 사용하지 않도록 설정할 수 있습니다.</target>
         <note>{StrBegin="NETSDK1144: "}</note>
       </trans-unit>
       <trans-unit id="ILLinkNoValidRuntimePackageError">

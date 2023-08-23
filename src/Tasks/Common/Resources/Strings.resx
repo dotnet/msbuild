@@ -683,7 +683,7 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1143: "}</comment>
   </data>
   <data name="ILLinkFailed" xml:space="preserve">
-    <value>NETSDK1144: Optimizing assemblies for size failed. Optimization can be disabled by setting the PublishTrimmed property to false.</value>
+    <value>NETSDK1144: Optimizing assemblies for size failed.</value>
     <comment>{StrBegin="NETSDK1144: "}</comment>
   </data>
   <data name="TargetingApphostPackMissingCannotRestore" xml:space="preserve">
