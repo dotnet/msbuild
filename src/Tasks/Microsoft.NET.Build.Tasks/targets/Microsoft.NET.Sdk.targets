@@ -49,11 +49,14 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <!-- For .NET 8 and higher, we will by default use a simplified "portable" RID graph -->
+  <PropertyGroup>
+    <_UseRidGraphWasSpecified Condition="'$(UseRidGraph)' != ''">true</_UseRidGraphWasSpecified>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(UseRidGraph)' == ''">
     <UseRidGraph Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '8.0'))">false</UseRidGraph>
     <UseRidGraph Condition="'$(UseRidGraph)' == ''">true</UseRidGraph>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="'$(RuntimeIdentifierGraphPath)' == ''">
     <RuntimeIdentifierGraphPath Condition="'$(UseRidGraph)' == 'true'">$(BundledRuntimeIdentifierGraphFile)</RuntimeIdentifierGraphPath>
 
@@ -612,6 +615,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeHostConfigurationOption Include="System.Runtime.TieredPGO"
                                     Condition="'$(TieredPGO)' != ''"
                                     Value="$(TieredPGO)" />
+
+    <RuntimeHostConfigurationOption Include="System.Runtime.Loader.UseRidGraph"
+                                    Condition="'$(_UseRidGraphWasSpecified)' == 'true'"
+                                    Value="$(UseRidGraph)" />
 
     <RuntimeHostConfigurationOption Include="System.StartupHookProvider.IsSupported"
                                     Condition="'$(StartupHookSupport)' != ''"

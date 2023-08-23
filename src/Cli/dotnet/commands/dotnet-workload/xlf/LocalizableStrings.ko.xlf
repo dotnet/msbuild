@@ -49,12 +49,12 @@
       </trans-unit>
       <trans-unit id="WorkloadIntegrityCheck">
         <source>Checking the state of installed workloads...</source>
-        <target state="new">Checking the state of installed workloads...</target>
+        <target state="translated">설치된 워크로드의 상태를 확인하는 중...</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIntegrityCheckError">
         <source>An issue was encountered verifying workloads. For more information, run "dotnet workload update".</source>
-        <target state="new">An issue was encountered verifying workloads. For more information, run "dotnet workload update".</target>
+        <target state="translated">워크로드를 확인하는 동안 문제가 발생했습니다. 자세한 내용을 확인하려면 "dotnet workload update"를 실행하세요.</target>
         <note>{Locked="dotnet workload update"}</note>
       </trans-unit>
       <trans-unit id="WorkloadManfiestVersionColumn">
