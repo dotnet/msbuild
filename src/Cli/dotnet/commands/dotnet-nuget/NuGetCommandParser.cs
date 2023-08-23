@@ -120,18 +120,72 @@ namespace Microsoft.DotNet.Cli
         {
             CliCommand trustCommand = new("trust");
 
-            CliArgument<string> commandArgument = new CliArgument<string>("command") { Arity = ArgumentArity.ZeroOrOne };
-            commandArgument.AcceptOnlyFromAmong(new string[] { "list", "author", "repository", "source", "certificate", "remove", "sync" });
+            CliOption<bool> allowUntrustedRoot = new("--allow-untrusted-root");
+            CliOption<string> owners = new("--owners");
 
-            trustCommand.Arguments.Add(commandArgument);
+            trustCommand.Subcommands.Add (new CliCommand("list"));
+            trustCommand.Subcommands.Add (AuthorCommand());
+            trustCommand.Subcommands.Add (RepositoryCommand());
+            trustCommand.Subcommands.Add (SourceCommand());
+            trustCommand.Subcommands.Add (CertificateCommand());
+            trustCommand.Subcommands.Add (RemoveCommand());
+            trustCommand.Subcommands.Add (SyncCommand());
 
-            trustCommand.Options.Add(new CliOption<string>("--algorithm"));
-            trustCommand.Options.Add(new CliOption<bool>("--allow-untrusted-root"));
-            trustCommand.Options.Add(new CliOption<string>("--owners"));
-            trustCommand.Options.Add(new CliOption<string>("--configfile"));
+            CliOption<string> configFile = new("--configfile");
+
+            // now set global options for all nuget commands: configfile, verbosity
+            // as well as the standard NugetCommand.Run handler
+
+            trustCommand.Options.Add(configFile);
             trustCommand.Options.Add(CommonOptions.VerbosityOption);
-
             trustCommand.SetAction(NuGetCommand.Run);
+
+            foreach (var command in trustCommand.Subcommands)
+            {
+                command.Options.Add(configFile);
+                command.Options.Add(CommonOptions.VerbosityOption);
+                command.SetAction(NuGetCommand.Run);
+            }
+
+            CliCommand AuthorCommand() => new CliCommand("author") {
+                new CliArgument<string>("NAME"),
+                new CliArgument<string>("PACKAGE"),
+                allowUntrustedRoot,
+            };
+
+            CliCommand RepositoryCommand() => new CliCommand("repository") {
+                new CliArgument<string>("NAME"),
+                new CliArgument<string>("PACKAGE"),
+                allowUntrustedRoot,
+                owners
+            };
+
+            CliCommand SourceCommand() => new CliCommand("source") {
+                new CliArgument<string>("NAME"),
+                owners,
+                new CliOption<string>("--source-url"),
+            };
+
+            CliCommand CertificateCommand() {
+                CliOption<string> algorithm = new("--algorithm");
+                algorithm.DefaultValueFactory = (_argResult) => "SHA256";
+                algorithm.AcceptOnlyFromAmong("SHA256", "SHA384", "SHA512");
+
+                return new CliCommand("certificate") {
+                    new CliArgument<string>("NAME"),
+                    new CliArgument<string>("FINGERPRINT"),
+                    allowUntrustedRoot,
+                    algorithm
+                };
+            };
+
+            CliCommand RemoveCommand() => new CliCommand("remove") {
+                new CliArgument<string>("NAME"),
+            };
+
+            CliCommand SyncCommand() => new CliCommand("sync") {
+                new CliArgument<string>("NAME"),
+            };
 
             return trustCommand;
         }
