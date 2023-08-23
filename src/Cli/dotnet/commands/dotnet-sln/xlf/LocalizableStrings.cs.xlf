@@ -99,7 +99,7 @@
       </trans-unit>
       <trans-unit id="SolutionFolderHeader">
         <source>Solution Folder(s)</source>
-        <target state="translated">Složky řešení</target>
+        <target state="translated">Složk(a/y) řešení</target>
         <note />
       </trans-unit>
     </body>

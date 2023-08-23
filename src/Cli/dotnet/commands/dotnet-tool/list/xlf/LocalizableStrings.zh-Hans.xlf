@@ -29,12 +29,12 @@
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to list</source>
-        <target state="new">The NuGet Package Id of the tool to list</target>
+        <target state="translated">要列出的工具的 NuGet 包 ID</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
         <source>PACKAGE_ID</source>
-        <target state="new">PACKAGE_ID</target>
+        <target state="translated">PACKAGE_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">

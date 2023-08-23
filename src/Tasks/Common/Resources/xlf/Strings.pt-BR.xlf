@@ -14,17 +14,17 @@
       </trans-unit>
       <trans-unit id="AotUnsupportedHostRuntimeIdentifier">
         <source>NETSDK1204: Ahead-of-time compilation is not supported on the current platform '{0}'.</source>
-        <target state="translated">NETSDK1204: não há suporte para compilação antecipada na plataforma atual '{0}'.</target>
+        <target state="translated">NETSDK1204: A compilação antecipada não é suportada na plataforma atual '{0}'.</target>
         <note>{StrBegin="NETSDK1204: "}</note>
       </trans-unit>
       <trans-unit id="AotUnsupportedTargetFramework">
         <source>NETSDK1207: Ahead-of-time compilation is not supported for the target framework.</source>
-        <target state="translated">NETSDK1207: não há suporte para compilação antecipada na estrutura de destino.</target>
+        <target state="translated">NETSDK1207: A compilação antecipada não tem suporte para a estrutura de destino.</target>
         <note>{StrBegin="NETSDK1207: "}</note>
       </trans-unit>
       <trans-unit id="AotUnsupportedTargetRuntimeIdentifier">
         <source>NETSDK1203: Ahead-of-time compilation is not supported for the target runtime identifier '{0}'.</source>
-        <target state="translated">NETSDK1203: não há suporte para compilação antecipada para o identificador de tempo de execução de destino '{0}'.</target>
+        <target state="translated">NETSDK1203: A compilação antecipada não é suportada para o identificador de tempo de execução de destino '{0}'.</target>
         <note>{StrBegin="NETSDK1203: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="ArtifactsPathCannotBeSetInProject">
         <source>NETSDK1199: The ArtifactsPath and UseArtifactsOutput properties cannot be set in a project file, due to MSBuild ordering constraints. They must be set in a Directory.Build.props file or from the command line. See https://aka.ms/netsdk1199 for more information.</source>
-        <target state="translated">NETSDK1199: as propriedades ArtifactsPath e UseArtifactsOutput não podem ser definidas em um arquivo de projeto devido a restrições de ordenação do MSBuild. Eles devem ser definidos em um arquivo Directory.Build.props ou na linha de comando. Consulte https://aka.ms/netsdk1199 para obter mais informações.</target>
+        <target state="translated">NETSDK1199: As propriedades ArtifactsPath e UseArtifactsOutput não podem ser definidas em um arquivo de projeto devido às restrições de ordenação do MSBuild. Eles devem ser configurados em um arquivo Directory.Build.props ou na linha de comandos. Veja https://aka.ms/netsdk1199 para obter mais informações.</target>
         <note>{StrBegin="NETSDK1199: "}</note>
       </trans-unit>
       <trans-unit id="AspNetCoreAllNotSupported">
@@ -402,7 +402,7 @@
       <trans-unit id="EnableSingleFileAnalyzerUnsupported">
         <source>NETSDK1211: EnableSingleFileAnalyzer is not supported for the target framework. Consider multi-targeting to a supported framework to enable single-file analysis, and set EnableSingleFileAnalyzer only for the supported frameworks. For example:
 &lt;EnableSingleFileAnalyzer Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))"&gt;true&lt;/EnableSingleFileAnalyzer&gt;</source>
-        <target state="translated">NETSDK1211: EnableSingleFileAnalyzer não tem suporte para a estrutura de destino. Considere o direcionamento múltiplo para uma estrutura com suporte para habilitar a análise de arquivo único e defina EnableSingleFileAnalyzer somente para as estruturas com suporte. Por exemplo:
+        <target state="translated">NETSDK1211: EnableSingleFileAnalyzer não é compatível com a estrutura de destino. Considere o direcionamento múltiplo para uma estrutura com suporte para habilitar a análise de arquivo único e defina EnableSingleFileAnalyzer somente para as estruturas com suporte. Por exemplo:
 &lt;EnableSingleFileAnalyzer Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))"&gt;verdadeiro&lt;/EnableSingleFileAnalyzer&gt;</target>
         <note>{StrBegin="NETSDK1211: "}</note>
       </trans-unit>
@@ -488,7 +488,7 @@
       </trans-unit>
       <trans-unit id="ILLinkNoValidRuntimePackageError">
         <source>NETSDK1195: Trimming, or code compatibility analysis for trimming, single-file deployment, or ahead-of-time compilation is not supported for the target framework. For more information, see https://aka.ms/netsdk1195</source>
-        <target state="translated">NETSDK1195: não há suporte para análise de compatibilidade de código ou corte para corte, implantação de arquivo único ou compilação antecipada para a estrutura de destino. Para obter mais informações, consulte https://aka.ms/netsdk1195</target>
+        <target state="translated">NETSDK1195: corte ou análise de compatibilidade de código para corte, implantação de arquivo único ou compilação antecipada não é compatível com a estrutura de destino. Para obter mais informações, consulte https://aka.ms/netsdk1195</target>
         <note>{StrBegin="NETSDK1195: "}</note>
       </trans-unit>
       <trans-unit id="ILLinkNotSupportedError">
@@ -572,14 +572,14 @@ The following are names of parameters or literal values and should not be transl
       <trans-unit id="IsAotCompatibleUnsupported">
         <source>NETSDK1210: IsAotCompatible is not supported for the target framework. Consider multi-targeting to a supported framework to enable ahead-of-time compilation analysis, and set IsAotCompatible only for the supported frameworks. For example:
 &lt;IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))"&gt;true&lt;/IsAotCompatible&gt;</source>
-        <target state="translated">NETSDK1210: Não há suporte para IsAotCompatible na estrutura de destino. Considere o direcionamento múltiplo para uma estrutura com suporte para habilitar a análise de compilação antecipada e definir IsAotCompatible somente para as estruturas com suporte. Por exemplo:
+        <target state="translated">NETSDK1210: IsAotCompatible não é compatível com a estrutura de destino. Considere o direcionamento múltiplo para uma estrutura com suporte para permitir a análise de compilação antecipada e defina IsAotCompatible apenas para as estruturas com suporte. Por exemplo:
 &lt;IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))"&gt;verdadeiro&lt;/IsAotCompatible&gt;</target>
         <note>{StrBegin="NETSDK1210: "}</note>
       </trans-unit>
       <trans-unit id="IsTrimmableUnsupported">
         <source>NETSDK1212: IsTrimmable is not supported for the target framework. Consider multi-targeting to a supported framework to enable trimming, and set IsTrimmable only for the supported frameworks. For example:
 &lt;IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))"&gt;true&lt;/IsTrimmable&gt;</source>
-        <target state="translated">NETSDK1212: Não há suporte para IsTrimmable na estrutura de destino. Considere o direcionamento múltiplo para uma estrutura com suporte para habilitar a filtragem e defina IsTrimmable somente para as estruturas com suporte. Por exemplo:
+        <target state="translated">NETSDK1212: IsTrimmable não é compatível com a estrutura de destino. Considere o direcionamento múltiplo para uma estrutura com suporte para habilitar o corte e defina IsTrimmable somente para as estruturas com suporte. Por exemplo:
 &lt;IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))"&gt;verdadeiro&lt;/IsTrimmable&gt;</target>
         <note>{StrBegin="NETSDK1212: "}</note>
       </trans-unit>
@@ -698,7 +698,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="NonPortableRuntimeIdentifierDetected">
         <source>NETSDK1206: Found version-specific or distribution-specific runtime identifier(s): {0}. Affected libraries: {1}. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details.</source>
-        <target state="translated">NETSDK1206: identificadores de runtime específicos ou específicos de distribuição encontrados: {0}. Bibliotecas afetadas: {1}. No .NET 8.0 e superior, os ativos para identificadores de runtime específicos de versão e específicos de distribuição não serão encontrados por padrão. Consulte https://aka.ms/dotnet/rid-usage para obter detalhes.</target>
+        <target state="translated">NETSDK1206: Encontrados identificadores de tempo de execução específicos da versão ou da distribuição: {0}. Bibliotecas afetadas: {1}. No .NET 8.0 e superior, ativos para identificadores de tempo de execução específicos da versão e da distribuição não serão encontrados por padrão. Veja https://aka.ms/dotnet/rid-usage para obter detalhes.</target>
         <note>{StrBegin="NETSDK1206: "}</note>
       </trans-unit>
       <trans-unit id="NonSelfContainedExeCannotReferenceSelfContained">
@@ -798,7 +798,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PublishUnsupportedWithoutTargetFramework">
         <source>NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify one of the following frameworks in order to publish: {0}</source>
-        <target state="translated">NETSDK1129: o 'Publish' destino não tem suporte sem especificar uma estrutura de destino. O projeto atual é direcionado a várias estruturas. Você deve especificar uma das seguintes estruturas para publicar: {0}</target>
+        <target state="translated">NETSDK1129: O destino 'Publish' não é suportado sem a especificação de uma estrutura de destino. O projeto atual destina-se a vários frameworks, você deve especificar um dos seguintes frameworks para publicar: {0}</target>
         <note>{StrBegin="NETSDK1129: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunCompilationFailed">
@@ -838,7 +838,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="RuntimeIdentifierWillNoLongerImplySelfContained">
         <source>NETSDK1201: For projects targeting .NET 8.0 and higher, specifying a RuntimeIdentifier will no longer produce a self contained app by default. To continue building self-contained apps, set the SelfContained property to true or use the --self-contained argument.</source>
-        <target state="translated">NETSDK1201: para projetos direcionados ao .NET 8.0 e superior, a especificação de um RuntimeIdentifier não produzirá mais um aplicativo autossusttivo por padrão. Para continuar criando aplicativos autossustados, defina a propriedade SelfContained como true ou use o argumento --self-contained.</target>
+        <target state="translated">NETSDK1201: para projetos voltados para .NET 8.0 e superior, especificar um RuntimeIdentifier não produzirá mais um aplicativo independente por padrão. Para continuar criando aplicativos independentes, defina a propriedade SelfContained como verdadeiro ou use o argumento --self-contained.</target>
         <note>{StrBegin="NETSDK1201: "}</note>
       </trans-unit>
       <trans-unit id="RuntimeListNotFound">
@@ -874,7 +874,7 @@ The following are names of parameters or literal values and should not be transl
       <trans-unit id="SolutionProjectConfigurationsConflict">
         <source>NETSDK1197: Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set the property for all projects. Conflicting projects:
 {1}</source>
-        <target state="translated">NETSDK1197: vários projetos de solução contêm valores '{0}' conflito; verifique se os valores correspondem. Considere usar um arquivo Directory.build.props para definir a propriedade para todos os projetos. Projetos conflitatários:
+        <target state="translated">NETSDK1197: Vários projetos de solução contêm valores '{0}' conflitantes; garantir que os valores correspondam. Considere usar um arquivo Directory.build.props para configurar a propriedade para todos os projetos. Projetos conflitantes:
 {1}</target>
         <note>{StrBegin="NETSDK1197: "}</note>
       </trans-unit>
@@ -985,7 +985,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UseArtifactsOutputRequiresDirectoryBuildProps">
         <source>NETSDK1200: If UseArtifactsPath is set to true and ArtifactsPath is not set, there must be a Directory.Build.props file in order to determine where the artifacts folder should be located.</source>
-        <target state="translated">NETSDK1200: se UseArtifactsPath estiver definido como true e ArtifactsPath não estiver definido, deverá haver um arquivo Directory.Build.props para determinar onde a pasta de artefatos deve ser localizada.</target>
+        <target state="translated">NETSDK1200: Se UseArtifactsPath for definido como verdadeiro e Artifact Path não for definido, deve haver um arquivo Directory.Build.props para determinar onde a pasta de artefatos deve ser localizada.</target>
         <note>{StrBegin="NETSDK1200: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedVisualStudioVersion">

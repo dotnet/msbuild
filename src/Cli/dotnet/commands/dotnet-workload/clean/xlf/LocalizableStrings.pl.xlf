@@ -5,8 +5,8 @@
       <trans-unit id="CannotAnalyzeVSWorkloadBand">
         <source>Workloads managed by Visual Studio must be uninstalled using the Visual Studio Installer. For the version of Visual Studio managing the SDK '{0}', we could not display workloads to uninstall. This is likely because '{0}' uses a different dotnet root path or custom user profile directory from the current running SDK.
 Paths searched: '{1}', '{2}'.</source>
-        <target state="translated">Obciążenia zarządzane przez Visual Studio muszą zostać odinstalowane przy użyciu Instalator programu Visual Studio. W przypadku wersji Visual Studio zarządzania zestawem SDK '{0}' nie można wyświetlić obciążeń do odinstalowania. Prawdopodobnie jest to spowodowane tym, że '{0}' używa innej ścieżki katalogu głównego dotnet lub niestandardowego katalogu profilu użytkownika niż bieżący uruchomiony zestaw SDK.
-Przeszukane ścieżki: '{1}', '{2}'.</target>
+        <target state="translated">Obciążenia zarządzane przez program Visual Studio należy odinstalować przy użyciu Instalatora programu Visual Studio. W przypadku wersji programu Visual Studio zarządzającej zestawem SDK „{0}” nie można wyświetlić obciążeń do odinstalowania. Jest to prawdopodobnie spowodowane tym, że element „{0}” używa innej ścieżki głównej dotnet lub niestandardowego katalogu profilu użytkownika z bieżącego uruchomionego zestawu SDK. 
+Przeszukane ścieżki: „{1}”, „{2}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="CleanAllOptionDescription">
@@ -21,12 +21,12 @@ Przeszukane ścieżki: '{1}', '{2}'.</target>
       </trans-unit>
       <trans-unit id="InvalidWorkloadProcessPath">
         <source>The path '{0}' of the process is the root path of the drive, which is not allowed, or it is invalid/inaccessible. Please run dotnet in a valid and available path.</source>
-        <target state="translated">Ścieżka '{0}' procesu jest ścieżką główną dysku, co jest niedozwolone lub jest nieprawidłowa/niedostępna. Uruchom program dotnet w prawidłowej i dostępnej ścieżce.</target>
+        <target state="translated">Ścieżka „{0}” procesu jest ścieżką główną dysku, co jest niedozwolone lub jest nieprawidłowe/niedostępne. Uruchom narzędzie dotnet w prawidłowej i dostępnej ścieżce.</target>
         <note />
       </trans-unit>
       <trans-unit id="VSWorkloadNotRemoved">
         <source>Workload '{0}' was not removed because it is installed and managed by Visual Studio: '{1}'. Please uninstall this workload using the Visual Studio Installer to fully remove it.</source>
-        <target state="translated">Nie usunięto '{0}' obciążenia, ponieważ jest on zainstalowany i zarządzany przez usługę Visual Studio: '{1}'. Odinstaluj to obciążenie przy użyciu Instalator programu Visual Studio, aby w pełni je usunąć.</target>
+        <target state="translated">Obciążenie „{0}” nie zostało usunięte, ponieważ jest zainstalowane i zarządzane przez program Visual Studio: „{1}”. Odinstaluj to obciążenie przy użyciu Instalatora programu Visual Studio, aby w pełni je usunąć.</target>
         <note />
       </trans-unit>
     </body>

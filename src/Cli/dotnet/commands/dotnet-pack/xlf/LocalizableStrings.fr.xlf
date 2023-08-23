@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for building the package. The default is 'Release'.</source>
-        <target state="new">The configuration to use for building the package. The default is 'Release'.</target>
+        <target state="translated">Configuration à utiliser pour la génération du package. La valeur par défaut est « Release ».</target>
         <note />
       </trans-unit>
     </body>

@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="ArtifactsPathOptionDescription">
         <source>The artifacts path. All output from the project, including build, publish, and pack output, will go in subfolders under the specified path.</source>
-        <target state="translated">Der Artefaktpfad. Die gesamte Ausgabe des Projekts, einschließlich Build-, Veröffentlichungs- und Bündelausgabe, wird in Unterordnern unter dem angegebenen Pfad gespeichert.</target>
+        <target state="translated">Der Artefaktpfad. Die gesamte Ausgabe des Projekts, einschließlich Build-, Veröffentlichungs- und Paketausgabe, wird in Unterordnern unter dem angegebenen Pfad angezeigt.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotResolveRuntimeIdentifier">
@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="DidYouMean">
         <source>Did you mean the following command?</source>
-        <target state="new">Did you mean the following command?</target>
+        <target state="translated">Meinten Sie den folgenden Befehl?</target>
         <note />
       </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
@@ -132,7 +132,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="MSBuildAdditionalOptionTitle">
         <source>.NET Cli Options:</source>
-        <target state="translated">.NET-CLI-Optionen:</target>
+        <target state="translated">.NET-Cli-Optionen:</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
@@ -142,7 +142,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="OSArgumentName">
         <source>OS</source>
-        <target state="new">OS</target>
+        <target state="translated">Betriebssystem</target>
         <note />
       </trans-unit>
       <trans-unit id="OperatingSystemOptionDescription">
@@ -218,8 +218,8 @@ export PATH="$PATH:{0}"
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'false.' However, when targeting .NET 7 or lower, the default is 'true' if a runtime identifier is specified.</source>
-        <target state="new">Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'false.' However, when targeting .NET 7 or lower, the default is 'true' if a runtime identifier is specified.</target>
+        <target state="translated">Hiermit wird die .NET-Runtime mit Ihrer Anwendung veröffentlicht, sodass die Runtime nicht auf dem Zielcomputer installiert werden muss.
+Der Standardwert lautet FALSE. Wenn sie jedoch auf .NET 7 oder niedriger abzielen, lautet der Standardwert TRUE, wenn ein Laufzeitbezeichner angegeben wird.</target>
         <note />
       </trans-unit>
       <trans-unit id="Solution">
@@ -229,7 +229,7 @@ The default is 'false.' However, when targeting .NET 7 or lower, the default is 
       </trans-unit>
       <trans-unit id="SolutionArgumentMisplaced">
         <source>Solution argument '{0}' is misplaced.</source>
-        <target state="translated">Das '{0}' des Lösungsarguments wurde falsch platziert.</target>
+        <target state="translated">Das Projektmappenargument "{0}" wurde falsch eingefügt.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionFile">
@@ -279,7 +279,7 @@ The default is 'false.' However, when targeting .NET 7 or lower, the default is 
       </trans-unit>
       <trans-unit id="SolutionFolderAlreadyContainsProject">
         <source>Solution {0} already contains project {1} in solution folder {2}.</source>
-        <target state="translated">Die projektmappe {0} enthält bereits projekt {1} im Projektmappenordner {2}.</target>
+        <target state="translated">Die Projektmappe "{0}" enthält bereits das Projekt "{1}" im Projektmappenordner "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="Update">

@@ -29,17 +29,17 @@ The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downlo
 To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
 
 Implies --blame.</source>
-        <target state="new">Runs the tests in blame mode and collects a crash dump when the test host exits unexpectedly. This option depends on the version of .NET used, the type of error, and the operating system.
+        <target state="translated">Spustí testy v režimu blame a shromáždí výpis stavu systému, když se hostitel testů neočekávaně ukončí. Tato možnost závisí na verzi použitého rozhraní .NET, typu chyby a operačním systému.
   
-For exceptions in managed code, a dump will be automatically collected on .NET 5.0 and later versions. It will generate a dump for testhost or any child process that also ran on .NET 5.0 and crashed. Crashes in native code will not generate a dump. This option works on Windows, macOS, and Linux.
+Pro výjimky ve spravovaném kódu se výpis automaticky shromáždí v rozhraní .NET 5.0 a novějších verzích. Vygeneruje výpis pro hostitele testu nebo jakýkoli podřízený proces, který také běžel v rozhraní .NET 5.0 a došlo k chybovému ukončení. Chybová ukončení v nativním kódu nevygenerují výpis paměti. Tato možnost funguje ve Windows, macOS a Linuxu.
 
-Crash dumps in native code, or when targetting .NET Framework, or .NET Core 3.1 and earlier versions, can only be collected on Windows, by using Procdump. A directory that contains procdump.exe and procdump64.exe must be in the PATH or PROCDUMP_PATH environment variable.
+Výpisy stavu systému v nativním kódu nebo při cílení na .NET Framework nebo .NET Core 3.1 a starší verze se dají shromažďovat jenom ve Windows pomocí Procdumpu. Adresář obsahující procdump.exe a procdump64.exe musí být v proměnné prostředí PATH nebo PROCDUMP_PATH.
 
-The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downloads/procdump
+Nástroje si můžete stáhnout odsud: https://docs.microsoft.com/sysinternals/downloads/procdump
   
-To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
+Pokud chcete shromáždit výpis stavu systému z nativní aplikace spuštěné na rozhraní .NET 5.0 nebo novějším, je možné použití procdumpu vynutit nastavením proměnné prostředí VSTEST_DUMP_FORCEPROCDUMP na hodnotu 1.
 
-Implies --blame.</target>
+Implikuje --blame.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
@@ -62,10 +62,10 @@ Implies --blame.</target>
 The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
 When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
 For MSTest before 2.2.4, the timeout is used for all testcases.</source>
-        <target state="new">Per-test timeout, after which hang dump is triggered and the testhost process is terminated. Default is 1h.
-The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
-When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
-For MSTest before 2.2.4, the timeout is used for all testcases.</target>
+        <target state="translated">Časový limit pro jednotlivé testy, po kterém se aktivuje výpis stavu systému a proces testhost se ukončí. Výchozí hodnota je 1h.
+Hodnota časového limitu je zadána v následujícím formátu: 1,5 h / 90m / 5400 s / 5400000 ms. Pokud se nepoužije žádná jednotka (např. 5400000), předpokládá se, že hodnota je v milisekundách.
+Při použití společně s testy řízenými daty závisí chování časového limitu na použitém testovacím adaptéru. Pro xUnit, NUnit a MSTest 2.2.4+ se časový limit prodlouží po každém testovacím případu
+Pro MSTest před 2.2.4 se časový limit použije pro všechny testovací případy.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableDescription">
@@ -269,19 +269,19 @@ Example:
   Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
   dotnet test --blame-hang-timeout 20min
 </source>
-        <target state="new">Runs the tests in blame mode. This option is helpful in isolating problematic tests that cause the test host to crash or hang, but it does not create a memory dump by default. 
+        <target state="translated">Spustí testy v režimu blame. Tato možnost se hodí pro izolaci problematických testů, které způsobují chybové ukončení nebo zablokování testovacího hostitele, ale ve výchozím nastavení nevytváří výpis paměti. 
 
-When a crash is detected, it creates an sequence file in TestResults/guid/guid_Sequence.xml that captures the order of tests that were run before the crash.
+Při zjištění chybového ukončení vytvoří soubor sekvence v souboru TestResults/guid/guid_Sequence.xml, který zachycuje pořadí testů, které byly spuštěny před chybou.
 
-Based on the additional settings, hang dump or crash dump can also be collected.
+Na základě dalších nastavení je také možné shromáždit výpis stavu systému nebo výpis stavu systému.
 
-Example: 
-  Timeout the test run when test takes more than the default timeout of 1 hour, and collect crash dump when the test host exits unexpectedly. 
-  (Crash dumps require additional setup, see below.)
-  dotnet test --blame-hang --blame-crash
-Example: 
-  Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
-  dotnet test --blame-hang-timeout 20min
+Příklad: 
+ Vypršení časového limitu testovacího běhu, když test trvá déle než výchozí časový limit 1 hodina, a shromážděte výpis stavu systému, když se hostitel testu neočekávaně ukončí. 
+ (výpisy stavu systému vyžadují další nastavení, viz níže).
+ dotnet test --blame-hang --blame-crash
+Příklad: 
+ Vypršení časového limitu testovacího běhu, když test trvá více než 20 minut, a shromáždění výpisu stavu systému. 
+ dotnet test --blame-hang-timeout 20 minut
 </target>
         <note />
       </trans-unit>

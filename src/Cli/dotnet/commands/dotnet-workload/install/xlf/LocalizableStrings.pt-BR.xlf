@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
         <source>Uninstalling workload pack {0} version {1}...</source>
-        <target state="new">Uninstalling workload pack {0} version {1}...</target>
+        <target state="translated">Desinstalando o pacote de carga de trabalho {0} versão {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadToCacheOptionArgumentName">
@@ -119,7 +119,7 @@
       </trans-unit>
       <trans-unit id="InstallingWorkloadManifest">
         <source>Installing workload manifest {0} version {1}...</source>
-        <target state="new">Installing workload manifest {0} version {1}...</target>
+        <target state="translated">Instalando o manifesto da carga de trabalho {0} versão {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="InsufficientPrivilegeToStartServer">
@@ -199,7 +199,7 @@
       </trans-unit>
       <trans-unit id="PendingReboot">
         <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
-        <target state="new">The machine has a pending reboot. The workload operation will continue, but you may need to restart.</target>
+        <target state="translated">A máquina tem uma reinicialização pendente. A operação de carga de trabalho continuará, mas pode ser necessário reiniciar.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">

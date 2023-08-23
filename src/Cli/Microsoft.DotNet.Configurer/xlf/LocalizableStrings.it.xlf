@@ -35,12 +35,12 @@ Explore documentation: https://aka.ms/dotnet-docs
 Report issues and find source on GitHub: https://github.com/dotnet/core
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
 --------------------------------------------------------------------------------------</source>
-        <target state="new">----------------
-Write your first app: https://aka.ms/dotnet-hello-world
-Find out what's new: https://aka.ms/dotnet-whats-new
-Explore documentation: https://aka.ms/dotnet-docs
-Report issues and find source on GitHub: https://github.com/dotnet/core
-Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
+        <target state="translated">----------------
+Scrivere la prima app: https://aka.ms/dotnet-hello-world
+Scoprire le novità: https://aka.ms/dotnet-whats-new
+Esplorare la documentazione: https://aka.ms/dotnet-docs
+Segnalare problemi e trovare l'origine in GitHub: https://github.com/dotnet/core
+Usare 'dotnet --help' per vedere i comandi disponibili o visitare: https://aka.ms/dotnet-cli
 --------------------------------------------------------------------------------------</target>
         <note />
       </trans-unit>

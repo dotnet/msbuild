@@ -29,17 +29,17 @@ The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downlo
 To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
 
 Implies --blame.</source>
-        <target state="new">Runs the tests in blame mode and collects a crash dump when the test host exits unexpectedly. This option depends on the version of .NET used, the type of error, and the operating system.
+        <target state="translated">テスト ホストが予期せず終了したときに、変更履歴モードでテストを実行し、クラッシュ ダンプを収集します。このオプションは、使用されている .NET のバージョン、エラーの種類、オペレーティング システムによって異なります。
   
-For exceptions in managed code, a dump will be automatically collected on .NET 5.0 and later versions. It will generate a dump for testhost or any child process that also ran on .NET 5.0 and crashed. Crashes in native code will not generate a dump. This option works on Windows, macOS, and Linux.
+マネージド コードの例外の場合、ダンプは .NET 5.0 以降のバージョンで自動的に収集されます。testhost または .NET 5.0 で実行されクラッシュした任意の子プロセスのダンプが生成されます。ネイティブ コードのクラッシュではダンプは生成されません。このオプションは、Windows、macOS、Linux で動作します。
 
-Crash dumps in native code, or when targetting .NET Framework, or .NET Core 3.1 and earlier versions, can only be collected on Windows, by using Procdump. A directory that contains procdump.exe and procdump64.exe must be in the PATH or PROCDUMP_PATH environment variable.
+ネイティブ コード、.NET Framework または .NET Core 3.1 以前のバージョンでのクラッシュ ダンプは、Procdump を使用して Windows でのみ収集できます。procdump.exe と procdump64.exe を含むディレクトリは、PATH または PROCDUMP_PATH 環境変数に存在する必要があります。
 
-The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downloads/procdump
+ツールは次の場所からダウンロードできます: https://docs.microsoft.com/sysinternals/downloads/procdump
   
-To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
+.NET 5.0 以降で実行中のネイティブ アプリケーションからクラッシュ ダンプを収集するには、VSTEST_DUMP_FORCEPROCDUMP 環境変数を 1 に設定して Procdump を適用できます。
 
-Implies --blame.</target>
+--blame を示します。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
@@ -62,10 +62,10 @@ Implies --blame.</target>
 The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
 When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
 For MSTest before 2.2.4, the timeout is used for all testcases.</source>
-        <target state="new">Per-test timeout, after which hang dump is triggered and the testhost process is terminated. Default is 1h.
-The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
-When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
-For MSTest before 2.2.4, the timeout is used for all testcases.</target>
+        <target state="translated">テストごとのタイムアウト。これを経過すると、ハング ダンプがトリガーされ、TestHost プロセスが中止されます。既定値は 1 時間です。
+タイムアウト値は次の形式で指定されます: 1.5h、90m、5400s、5400000ms。単位が使用されていない場合 (例: 5400000)、この値は ms (ミリ秒) 単位であると想定されます。
+データ ドリブン テストと共に使用すると、タイムアウトの動作は使用するテスト アダプターに依存します。xUnit、NUnit、MSTest 2.2.4+ の場合、タイムアウトはテスト ケースの後に毎回更新されます。
+MSTest 2.2.4 以前の場合、タイムアウトはすべてのテスト ケースに使用されます。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableDescription">
@@ -269,18 +269,18 @@ Example:
   Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
   dotnet test --blame-hang-timeout 20min
 </source>
-        <target state="new">Runs the tests in blame mode. This option is helpful in isolating problematic tests that cause the test host to crash or hang, but it does not create a memory dump by default. 
+        <target state="translated">変更履歴モードでテストを実行します。このオプションは、テスト ホストがクラッシュまたは失敗する原因となる問題のあるテストを分離するのに役立ちますが、既定ではメモリ ダンプは作成されません。
 
-When a crash is detected, it creates an sequence file in TestResults/guid/guid_Sequence.xml that captures the order of tests that were run before the crash.
+クラッシュが検出されると、クラッシュの前に実行されたテストの順序をキャプチャしたシーケンス ファイルが TestResults/guid/guid_Sequence.xml に作成されます。
 
-Based on the additional settings, hang dump or crash dump can also be collected.
+追加設定に基づいて、ハング ダンプまたはクラッシュ ダンプを収集することもできます。
 
-Example: 
-  Timeout the test run when test takes more than the default timeout of 1 hour, and collect crash dump when the test host exits unexpectedly. 
-  (Crash dumps require additional setup, see below.)
+例: 
+  テストが既定のタイムアウト時間の 1 時間より長くかかる場合にテストの実行をタイムアウトし、テスト ホストが予期せず終了したときにクラッシュ ダンプを収集します。
+  (クラッシュ ダンプには追加のセットアップが必要です。以下を参照してください。)
   dotnet test --blame-hang --blame-crash
-Example: 
-  Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
+例: 
+  テストが 20 分より長くかかる場合にテストの実行をタイムアウトし、ハング ダンプを収集します。
   dotnet test --blame-hang-timeout 20min
 </target>
         <note />
