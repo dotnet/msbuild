@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="ArtifactsPathOptionDescription">
         <source>The artifacts path. All output from the project, including build, publish, and pack output, will go in subfolders under the specified path.</source>
-        <target state="translated">Yapıt yolu. Derleme, yayımlama ve paket çıkışı dahil olmak üzere projedeki tüm çıkışlar belirtilen yol altındaki alt klasörlerde olacak.</target>
+        <target state="translated">Yapıtlar yolu. Derleme, yayımlama ve paket çıkışı dahil olmak üzere projedeki tüm çıkışlar belirtilen yol altındaki alt klasörlerde bulunur.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotResolveRuntimeIdentifier">
@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="DidYouMean">
         <source>Did you mean the following command?</source>
-        <target state="new">Did you mean the following command?</target>
+        <target state="translated">Aşağıdaki komutu mu kullanmak istediniz?</target>
         <note />
       </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
@@ -142,7 +142,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="OSArgumentName">
         <source>OS</source>
-        <target state="new">OS</target>
+        <target state="translated">İS</target>
         <note />
       </trans-unit>
       <trans-unit id="OperatingSystemOptionDescription">
@@ -218,8 +218,8 @@ export PATH="$PATH:{0}"
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'false.' However, when targeting .NET 7 or lower, the default is 'true' if a runtime identifier is specified.</source>
-        <target state="new">Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'false.' However, when targeting .NET 7 or lower, the default is 'true' if a runtime identifier is specified.</target>
+        <target state="translated">Uygulamanızla birlikte .NET çalışma zamanını yayımladığınızda hedef makinede çalışma zamanının yüklü olması gerekmez.
+Varsayılan değer 'false' olur. Ancak çalışma zamanı tanımlayıcısı belirtildiyse .NET 7 veya altı projeler hedeflenirken varsayılan değer 'true' olur.</target>
         <note />
       </trans-unit>
       <trans-unit id="Solution">
@@ -229,7 +229,7 @@ The default is 'false.' However, when targeting .NET 7 or lower, the default is 
       </trans-unit>
       <trans-unit id="SolutionArgumentMisplaced">
         <source>Solution argument '{0}' is misplaced.</source>
-        <target state="translated">Çözüm bağımsız '{0}' yanlış yerleştirilmiş.</target>
+        <target state="translated">'{0}' çözüm bağımsız değişkeni yanlış yerleştirilmiş.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionFile">
@@ -279,7 +279,7 @@ The default is 'false.' However, when targeting .NET 7 or lower, the default is 
       </trans-unit>
       <trans-unit id="SolutionFolderAlreadyContainsProject">
         <source>Solution {0} already contains project {1} in solution folder {2}.</source>
-        <target state="translated">Çözüm {0} zaten çözüm klasöründe {1} proje {2}.</target>
+        <target state="translated">{0} çözümü zaten {2} çözüm klasöründe {1} projesini içeriyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="Update">

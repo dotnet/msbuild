@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="ArchArgumentName">
         <source>ARCH</source>
-        <target state="translated">拱</target>
+        <target state="translated">ARCH</target>
         <note />
       </trans-unit>
       <trans-unit id="ArchitectureOptionDescription">
@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="ArtifactsPathOptionDescription">
         <source>The artifacts path. All output from the project, including build, publish, and pack output, will go in subfolders under the specified path.</source>
-        <target state="translated">项目路径。项目中的所有输出，包括生成、发布和打包输出，都将位于指定路径下的子文件夹中。</target>
+        <target state="translated">工件路径。项目中的所有输出(包括生成、发布和打包输出)都将放到指定路径下的子文件夹中。</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotResolveRuntimeIdentifier">
@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="DidYouMean">
         <source>Did you mean the following command?</source>
-        <target state="new">Did you mean the following command?</target>
+        <target state="translated">你是否是指以下命令?</target>
         <note />
       </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
@@ -132,7 +132,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="MSBuildAdditionalOptionTitle">
         <source>.NET Cli Options:</source>
-        <target state="new">.NET Cli Options:</target>
+        <target state="translated">.NET Cli 选项:</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
@@ -142,7 +142,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="OSArgumentName">
         <source>OS</source>
-        <target state="new">OS</target>
+        <target state="translated">OS</target>
         <note />
       </trans-unit>
       <trans-unit id="OperatingSystemOptionDescription">
@@ -218,8 +218,8 @@ export PATH="$PATH:{0}"
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'false.' However, when targeting .NET 7 or lower, the default is 'true' if a runtime identifier is specified.</source>
-        <target state="new">Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'false.' However, when targeting .NET 7 or lower, the default is 'true' if a runtime identifier is specified.</target>
+        <target state="translated">随应用程序一起发布 .NET 运行时，这样就不需要在目标计算机上安装运行时。
+默认值为 "false"。但目标为 .NET 7 或更低版本时，如果指定了运行时标识符，则默认值为 "true"。</target>
         <note />
       </trans-unit>
       <trans-unit id="Solution">
@@ -229,7 +229,7 @@ The default is 'false.' However, when targeting .NET 7 or lower, the default is 
       </trans-unit>
       <trans-unit id="SolutionArgumentMisplaced">
         <source>Solution argument '{0}' is misplaced.</source>
-        <target state="translated">解决方案参数 '{0}' 错放。</target>
+        <target state="translated">解决方案参数“{0}”位置错误。</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionFile">

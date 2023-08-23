@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
         <source>Uninstalling workload pack {0} version {1}...</source>
-        <target state="new">Uninstalling workload pack {0} version {1}...</target>
+        <target state="translated">正在解除安裝工作負載套件 {0} 版本 {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadToCacheOptionArgumentName">
@@ -119,7 +119,7 @@
       </trans-unit>
       <trans-unit id="InstallingWorkloadManifest">
         <source>Installing workload manifest {0} version {1}...</source>
-        <target state="new">Installing workload manifest {0} version {1}...</target>
+        <target state="translated">正在安裝工作負載資訊清單 {0} 版本 {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="InsufficientPrivilegeToStartServer">
@@ -199,7 +199,7 @@
       </trans-unit>
       <trans-unit id="PendingReboot">
         <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
-        <target state="new">The machine has a pending reboot. The workload operation will continue, but you may need to restart.</target>
+        <target state="translated">機器有擱置中的重新開機。工作負載作業將繼續，但您可能需要重新開機。</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">

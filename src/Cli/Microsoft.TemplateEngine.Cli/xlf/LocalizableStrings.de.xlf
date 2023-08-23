@@ -290,7 +290,7 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
       </trans-unit>
       <trans-unit id="ColumnNameTrusted">
         <source>Trusted</source>
-        <target state="new">Trusted</target>
+        <target state="translated">Vertrauenswürdig</target>
         <note>information about NuGet package origin; if a package has PrefixReserved indicator </note>
       </trans-unit>
       <trans-unit id="ColumnNameType">
@@ -392,32 +392,32 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
       </trans-unit>
       <trans-unit id="DetailsCommand_Option_Version">
         <source>Specifies a concrete version for displaying details. If not specified the last is taken.</source>
-        <target state="translated">Gibt eine konkrete Version zum Anzeigen von Details an. Falls nicht angegeben, wird das letzte Element verwendet.</target>
+        <target state="translated">Gibt eine konkrete Version zum Anzeigen von Details an. Wenn nicht angegeben, wird die letzte Aufnahme durchgeführt.</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Authors">
         <source>Authors</source>
-        <target state="new">Authors</target>
+        <target state="translated">Autoren</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Description">
         <source>Details</source>
-        <target state="new">Details</target>
+        <target state="translated">Details</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Languages">
         <source>Languages</source>
-        <target state="new">Languages</target>
+        <target state="translated">Sprachen</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_License">
         <source>License</source>
-        <target state="new">License</target>
+        <target state="translated">Lizenz</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_LicenseExpression">
         <source>License Expression</source>
-        <target state="new">License Expression</target>
+        <target state="translated">Lizenzausdruck</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_LicenseMetadata">
@@ -427,22 +427,22 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_LicenseUrl">
         <source>License Url</source>
-        <target state="new">License Url</target>
+        <target state="translated">Lizenz-URL</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Owners">
         <source>Owners</source>
-        <target state="new">Owners</target>
+        <target state="translated">Besitzer</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_PrefixReserved">
         <source>Reserved</source>
-        <target state="new">Reserved</target>
+        <target state="translated">Reserviert</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_RepoUrl">
         <source>Repository Url</source>
-        <target state="new">Repository Url</target>
+        <target state="translated">Repository-URL</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_ShortNames">
@@ -457,27 +457,27 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Tags">
         <source>Tags</source>
-        <target state="new">Tags</target>
+        <target state="translated">Tags</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Templates">
         <source>Templates</source>
-        <target state="new">Templates</target>
+        <target state="translated">Vorlagen</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_Version">
         <source>Package version</source>
-        <target state="new">Package version</target>
+        <target state="translated">Paketversion</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_UnableToLoadResorce">
         <source>Could not parse NuGet source '{0}', so it was discarded</source>
-        <target state="translated">NuGet-Quell-'{0}' konnte nicht analysiert werden und wurde daher verworfen.</target>
+        <target state="translated">Die NuGet-Quelle "{0}" konnte nicht analysiert werden, daher wurde sie verworfen.</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_UnableToLoadResorces">
         <source>Failed to load NuGet sources configured for the folder {0}</source>
-        <target state="new">Failed to load NuGet sources configured for the folder {0}</target>
+        <target state="translated">Fehler beim Laden der für den Ordner "{0}" konfigurierten NuGet-Quellen.</target>
         <note />
       </trans-unit>
       <trans-unit id="DisplaysHelp">
@@ -562,12 +562,14 @@ The header is followed by the list of parameters and their errors (might be seve
       To search for the template packages on NuGet.org, run:
         dotnet new search --package {0}
     </source>
-        <target state="translated">Es wurden keine Vorlagenpakete gefunden, die übereinstimmen: {0}.
+        <target state="translated">
+      Es wurden keine übereinstimmenden Vorlagenpakete gefunden: {0}.
       
-Führen Sie zum Auflisten der installierten Vorlagenpakete Folgenden aus:
+      Führen Sie zum Auflisten installierter Vorlagenpakete Folgendes aus: 
         dotnet new uninstall
-      Führen Sie Folgendes aus, um nach den Vorlagenpaketen auf NuGet.org zu suchen:
-        dotnet new search --package {0}    </target>
+      Führen Sie zum Suchen nach den Vorlagenpaketen auf NuGet.org Folgendes aus: 
+        dotnet new search --package {0}
+    </target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_Info_NoMatchingTemplates">
@@ -825,12 +827,12 @@ Führen Sie zum Auflisten der installierten Vorlagenpakete Folgenden aus:
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_ArgumentNotConfigured">
         <source>Post action argument '{0}' is mandatory, but not configured.</source>
-        <target state="translated">Das Argument '{0}' nach der Aktion ist obligatorisch, aber nicht konfiguriert.</target>
+        <target state="translated">Das Postaktionsargument "{0}" ist obligatorisch, aber nicht konfiguriert.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_MultipleJsonFiles">
         <source>More than one file found that matches '{0}'.</source>
-        <target state="translated">Es wurden mehrere Dateien gefunden, die '{0}' entsprechen.</target>
+        <target state="translated">Es wurden mehrere Dateien gefunden, die mit "{0}" übereinstimmen.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_NoJsonFile">
@@ -840,12 +842,12 @@ Führen Sie zum Auflisten der installierten Vorlagenpakete Folgenden aus:
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Error_ParentPropertyPathInvalid">
         <source>Parent property path '{0}' could not be traversed.</source>
-        <target state="translated">Der pfad der übergeordneten Eigenschaft '{0}' konnte nicht durchsucht werden.</target>
+        <target state="translated">Der übergeordnete Eigenschaftenpfad "{0}" konnte nicht durchlaufen werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ModifyJson_Succeeded">
         <source>Successfully modified {0}.</source>
-        <target state="translated">{0} wurde erfolgreich geändert.</target>
+        <target state="translated">{0} erfolgreich geändert.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
@@ -981,7 +983,7 @@ Führen Sie zum Auflisten der installierten Vorlagenpakete Folgenden aus:
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Download_Error_VulnerablePackage">
         <source>Failed to install {0}, due to detected vulnerabilities:</source>
-        <target state="translated">Fehler beim Installieren {0} aufgrund erkannter Sicherheitsrisiken:</target>
+        <target state="translated">Fehler beim Installieren von "{0}", aufgrund erkannter Sicherheitsrisiken:</target>
         <note>{0} - template package name.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Download_VulnerablePackage">
@@ -1026,7 +1028,7 @@ Führen Sie zum Auflisten der installierten Vorlagenpakete Folgenden aus:
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Error_VulnerablePackageTip">
         <source>In order to install this package, run:</source>
-        <target state="translated">Führen Sie folgende Ausführung aus, um dieses Paket zu installieren:</target>
+        <target state="translated">Führen Sie Folgendes aus, um dieses Paket zu installieren:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_OverrideNotice">
@@ -1086,7 +1088,7 @@ Führen Sie zum Auflisten der installierten Vorlagenpakete Folgenden aus:
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_UpdateCheck_Error_VulnerablePackage">
         <source>The package {0} contains vulnerabilities:</source>
-        <target state="translated">Das Paket {0} enthält Sicherheitsrisiken:</target>
+        <target state="translated">Das Paket "{0}" enthält Sicherheitsrisiken:</target>
         <note>{0} - template package name.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_GenericError">
@@ -1111,12 +1113,12 @@ Führen Sie zum Auflisten der installierten Vorlagenpakete Folgenden aus:
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_VulnerablePackage">
         <source>The package {0} was not updated due to detected vulnerabilities:</source>
-        <target state="translated">Das Paket {0} wurde aufgrund erkannter Sicherheitsrisiken nicht aktualisiert:</target>
+        <target state="translated">Das Paket "{0}" wurde aufgrund erkannter Sicherheitsrisiken nicht aktualisiert:</target>
         <note>{0} - template package name.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_VulnerablePackageTip">
         <source>In order to update this package, run:</source>
-        <target state="translated">Führen Sie folgende Ausführung aus, um dieses Paket zu aktualisieren:</target>
+        <target state="translated">Führen Sie Folgendes aus, um dieses Paket zu aktualisieren:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_AllPackagesAreUpToDate">
@@ -1156,22 +1158,22 @@ Führen Sie zum Auflisten der installierten Vorlagenpakete Folgenden aus:
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Critical">
         <source>Critical</source>
-        <target state="new">Critical</target>
+        <target state="translated">Kritisch</target>
         <note>represents nuget api severity of level 3.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_High">
         <source>High</source>
-        <target state="new">High</target>
+        <target state="translated">Hoch</target>
         <note>represents nuget api severity of level 2.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Low">
         <source>Low</source>
-        <target state="new">Low</target>
+        <target state="translated">Niedrig</target>
         <note>represents nuget api severity of level 0.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Moderate">
         <source>Moderate</source>
-        <target state="new">Moderate</target>
+        <target state="translated">Moderat</target>
         <note>represents nuget api severity of level 1.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled">

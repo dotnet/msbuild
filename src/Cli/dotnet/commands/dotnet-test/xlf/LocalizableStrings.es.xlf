@@ -29,17 +29,19 @@ The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downlo
 To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
 
 Implies --blame.</source>
-        <target state="new">Runs the tests in blame mode and collects a crash dump when the test host exits unexpectedly. This option depends on the version of .NET used, the type of error, and the operating system.
-  
-For exceptions in managed code, a dump will be automatically collected on .NET 5.0 and later versions. It will generate a dump for testhost or any child process that also ran on .NET 5.0 and crashed. Crashes in native code will not generate a dump. This option works on Windows, macOS, and Linux.
+        <target state="translated">Ejecuta las pruebas en modo de reprobación y recopila un volcado de memoria cuando el host de prueba se cierra inesperadamente. Esta opción depende de la versión de .NET usada, el tipo de error y el sistema operativo.
+ 
 
-Crash dumps in native code, or when targetting .NET Framework, or .NET Core 3.1 and earlier versions, can only be collected on Windows, by using Procdump. A directory that contains procdump.exe and procdump64.exe must be in the PATH or PROCDUMP_PATH environment variable.
+Para las excepciones en código administrado, se recopilará automáticamente un volcado en .NET 5.0 y versiones posteriores. Generará un volcado para testhost o cualquier proceso secundario que también se ejecutara en .NET 5.0 y se bloqueara. Los bloqueos en código nativo no generarán un volcado. Esta opción funciona en Windows, macOS y Linux.
 
-The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downloads/procdump
-  
-To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
+Los volcados de memoria en código nativo, o al establecer como destino .NET Framework, o .NET Core 3.1 y versiones anteriores, solo se pueden recopilar en Windows, mediante Procdump. Un directorio que contenga procdump.exe y procdump64.exe debe estar en la variable de entorno PATH o PROCDUMP_PATH.
 
-Implies --blame.</target>
+Las herramientas se pueden descargar aquí: https://docs.microsoft.com/sysinternals/downloads/procdump
+ 
+
+Para recopilar un volcado de memoria de una aplicación nativa que se ejecuta en .NET 5.0 o posterior, se puede forzar el uso de Procdump estableciendo la variable de entorno VSTEST_DUMP_FORCEPROCDUMP en 1.
+
+Implica --blame.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
@@ -62,10 +64,10 @@ Implies --blame.</target>
 The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
 When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
 For MSTest before 2.2.4, the timeout is used for all testcases.</source>
-        <target state="new">Per-test timeout, after which hang dump is triggered and the testhost process is terminated. Default is 1h.
-The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
-When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
-For MSTest before 2.2.4, the timeout is used for all testcases.</target>
+        <target state="translated">Tiempo de espera por prueba, después del cual se desencadena el volcado de memoria y finaliza el proceso testhost. El valor predeterminado es 1h.
+El valor de tiempo de espera se especifica en el siguiente formato: 1,5h / 90m / 5400s / 5400000ms. Cuando no se usa ninguna unidad (por ejemplo, 5400000), se supone que el valor está en milisegundos.
+Cuando se usa junto con pruebas controladas por datos, el comportamiento del tiempo de espera depende del adaptador de prueba utilizado. Para xUnit, NUnit y MSTest 2.2.4+ el tiempo de espera se renueva después de cada caso de prueba,
+Para MSTest antes de 2.2.4, el tiempo de espera se usa para todos los casos de prueba.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableDescription">
@@ -269,19 +271,19 @@ Example:
   Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
   dotnet test --blame-hang-timeout 20min
 </source>
-        <target state="new">Runs the tests in blame mode. This option is helpful in isolating problematic tests that cause the test host to crash or hang, but it does not create a memory dump by default. 
+        <target state="translated">Ejecuta las pruebas en modo de reprobación. Esta opción es útil para aislar las pruebas problemáticas que hacen que el host de prueba se bloquee o se bloquee, pero no crea un volcado de memoria de forma predeterminada.
 
-When a crash is detected, it creates an sequence file in TestResults/guid/guid_Sequence.xml that captures the order of tests that were run before the crash.
+Cuando se detecta un bloqueo, crea un archivo de secuencia en TestResults/guid/guid_Sequence.xml que captura el orden de las pruebas que se ejecutaron antes del bloqueo.
 
-Based on the additional settings, hang dump or crash dump can also be collected.
+En función de la configuración adicional, también se pueden recopilar volcados de memoria o volcados de memoria.
 
-Example: 
-  Timeout the test run when test takes more than the default timeout of 1 hour, and collect crash dump when the test host exits unexpectedly. 
-  (Crash dumps require additional setup, see below.)
-  dotnet test --blame-hang --blame-crash
-Example: 
-  Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
-  dotnet test --blame-hang-timeout 20min
+Ejemplo: 
+Tiempo de espera de la serie de pruebas cuando la prueba supera el tiempo de espera predeterminado de 1 hora, y recopile el volcado de memoria cuando el host de prueba se cierre inesperadamente. 
+ (los volcados de memoria requieren una configuración adicional, consulte a continuación).
+ prueba de dotnet --blame-hang --blame-crash
+Ejemplo: 
+ Tiempo de espera de la ejecución de pruebas cuando una prueba tarda más de 20 minutos y recopilar volcado de bloqueo. 
+ prueba de dotnet --blame-hang-timeout 20min
 </target>
         <note />
       </trans-unit>
