@@ -143,21 +143,7 @@ namespace Microsoft.Build.Utilities
         /// A timeout to wait for a task to terminate before killing it.  In milliseconds.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if the property is set to a negative value other than -1.</exception>
-        protected int TaskProcessTerminationTimeout
-        {
-            get => _taskProcessTerminationTimeout;
-            set
-            {
-                if (value < -1)
-                {
-                    ErrorUtilities.ThrowArgumentOutOfRange(nameof(TaskProcessTerminationTimeout));
-                }
-                else
-                {
-                    _taskProcessTerminationTimeout = value;
-                }
-            }
-        }
+        protected int TaskProcessTerminationTimeout { get; set; }
 
         /// <summary>
         /// Used to signal when a tool has been cancelled.
@@ -365,7 +351,16 @@ namespace Microsoft.Build.Utilities
         /// Implemented in the derived class
         /// </summary>
         /// <returns>true, if successful</returns>
-        protected internal virtual bool ValidateParameters() => true; // Default is no validation (ie. parameters are always valid, hence the true return value). This is useful for tools that don't need validation.
+        protected internal virtual bool ValidateParameters()
+        {
+            if (TaskProcessTerminationTimeout < -1 && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6))
+            {
+                Log.LogWarningWithCodeFromResources("ToolTask.InvalidTerminationTimeout", TaskProcessTerminationTimeout);
+                return false;
+            }
+
+            return true;
+        }
 
         /// <summary>
         /// Returns true if task execution is not necessary. Executed after ValidateParameters
@@ -965,7 +960,7 @@ namespace Microsoft.Build.Utilities
                     LogShared.LogWarningWithCodeFromResources("Shared.KillingProcessByCancellation", processName);
                 }
 
-                int timeout = TaskProcessTerminationTimeout;
+                int timeout = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) && TaskProcessTerminationTimeout >= -1 ? TaskProcessTerminationTimeout : 5000;
                 string timeoutFromEnvironment = Environment.GetEnvironmentVariable("MSBUILDTOOLTASKCANCELPROCESSWAITTIMEOUT");
                 if (timeoutFromEnvironment != null)
                 {

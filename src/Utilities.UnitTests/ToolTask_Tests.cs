@@ -830,7 +830,7 @@ namespace Microsoft.Build.UnitTests
         /// Verifies the validation of the <see cref="ToolTask.TaskProcessTerminationTimeout" />.
         /// </summary>
         /// <param name="timeout">New value for <see cref="ToolTask.TaskProcessTerminationTimeout" />.</param>
-        /// <param name="expectException">Is an exception expected or not.</param>
+        /// <param name="isInvalidValid">Is a task expected to be valid or not.</param>
         [Theory]
         [InlineData(int.MaxValue, false)]
         [InlineData(97, false)]
@@ -839,7 +839,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData(-2, true)]
         [InlineData(-101, true)]
         [InlineData(int.MinValue, true)]
-        public void SetsTerminationTimeoutCorrectly(int timeout, bool expectException)
+        public void SetsTerminationTimeoutCorrectly(int timeout, bool isInvalidValid)
         {
             using var env = TestEnvironment.Create(_output);
 
@@ -849,16 +849,9 @@ namespace Microsoft.Build.UnitTests
                 BuildEngine = new MockEngine()
             };
 
-            if (expectException)
-            {
-                Assert.Throws<ArgumentOutOfRangeException>(() => task.TerminationTimeout = timeout);
-                task.TerminationTimeout.ShouldBe(5000);
-            }
-            else
-            {
-                task.TerminationTimeout = timeout;
-                task.TerminationTimeout.ShouldBe(timeout);
-            }
+            task.TerminationTimeout = timeout;
+            task.ValidateParameters().ShouldBe(!isInvalidValid);
+            task.TerminationTimeout.ShouldBe(timeout);
         }
 		
 		/// <summary>
@@ -1004,6 +997,7 @@ namespace Microsoft.Build.UnitTests
             public ToolTaskSetsTerminationTimeout()
                 : base()
             {
+                base.TaskResources = AssemblyResources.PrimaryResources;
             }
 
             /// <summary>
