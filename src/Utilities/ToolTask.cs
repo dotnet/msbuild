@@ -135,14 +135,8 @@ namespace Microsoft.Build.Utilities
         public bool EchoOff { get; set; }
 
         /// <summary>
-        /// This is the backing field for property <see cref="TaskProcessTerminationTimeout" />.
-        /// </summary>
-        private int _taskProcessTerminationTimeout;
-
-        /// <summary>
         /// A timeout to wait for a task to terminate before killing it.  In milliseconds.
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the property is set to a negative value other than -1.</exception>
         protected int TaskProcessTerminationTimeout { get; set; }
 
         /// <summary>
