@@ -88,6 +88,7 @@
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="$(MicrosoftNETCoreAppRefPackageVersion)" />
     <PackageVersion Include="System.Drawing.Common" Version="$(MicrosoftNETCoreAppRefPackageVersion)" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
+    <!-- System.Reflection.Metadata and System.Collections.Immutable cannot be pinned here because of hard dependencies within Roslyn on specific versions that have to work both here and in VS -->
     <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextVersion)" />
     <PackageVersion Include="System.Resources.Extensions" Version="$(SystemResourcesExtensionsPackageVersion)" />
     <PackageVersion Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
