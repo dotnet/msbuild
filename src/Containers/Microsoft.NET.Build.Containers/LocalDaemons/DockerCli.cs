@@ -283,7 +283,7 @@ internal sealed class DockerCli : ILocalRegistry
             dockerCommand
         ).ConfigureAwait(false);
 
-        if (dockerCommand.Result)
+        if (dockerCommand.Result && !IsPodmanAlias())
         {
             _commandPath = DockerCommand;
         }
@@ -293,6 +293,18 @@ internal sealed class DockerCli : ILocalRegistry
         }
 
         return _commandPath;
+    }
+
+    private static bool IsPodmanAlias()
+    {
+        var dockerPath = FindFullPathFromPath("docker");
+        if (dockerPath is null)
+        {
+            return false;
+        }
+
+        var fi = new FileInfo(dockerPath);
+        return fi.LinkTarget == null;
     }
 
     private async Task<bool> TryRunVersionCommandAsync(string command, CancellationToken cancellationToken)
