@@ -641,6 +641,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                                     Condition="'$(ThreadPoolMaxThreads)' != ''"
                                     Value="$(ThreadPoolMaxThreads)" />
 
+    <RuntimeHostConfigurationOption Include="System.Threading.ThreadPool.UseWindowsThreadPool"
+                                    Condition="'$(UseWindowsThreadPool)' != ''"
+                                    Value="$(UseWindowsThreadPool)" />
+
     <RuntimeHostConfigurationOption Include="System.Xml.XmlResolver.IsNetworkingEnabledByDefault"
                                     Condition="'$(XmlResolverIsNetworkingEnabledByDefault)' != ''"
                                     Value="$(XmlResolverIsNetworkingEnabledByDefault)"
