@@ -5,6 +5,12 @@ using System;
 
 namespace Microsoft.Build.Framework.FileAccess
 {
+    /*
+     * Implementation note: This is a copy of BuildXL.Processes.DesiredAccess.
+     * The purpose of the copy is because this is part of the public MSBuild API and it's not desirable to
+     * expose BuildXL types directly.
+     */
+
     /// <summary>
     /// The requested access to the file or device.
     /// </summary>
@@ -13,7 +19,6 @@ namespace Microsoft.Build.Framework.FileAccess
     /// </remarks>
     [Flags]
     [CLSCompliant(false)]
-
     public enum DesiredAccess : uint
     {
         /// <summary>

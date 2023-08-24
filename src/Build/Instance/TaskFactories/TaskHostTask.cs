@@ -436,10 +436,13 @@ namespace Microsoft.Build.BackEnd
         private void HandleTaskHostTaskComplete(TaskHostTaskComplete taskHostTaskComplete)
         {
 #if FEATURE_REPORTFILEACCESSES
-            foreach (FileAccessData fileAccessData in taskHostTaskComplete.FileAccessData)
+            if (taskHostTaskComplete.FileAccessData.Count > 0)
             {
-                ((IFileAccessManager)_buildComponentHost.GetComponent(BuildComponentType.FileAccessManager))
-                    .ReportFileAccess(fileAccessData, _buildComponentHost.BuildParameters.NodeId);
+                IFileAccessManager fileAccessManager = ((IFileAccessManager)_buildComponentHost.GetComponent(BuildComponentType.FileAccessManager));
+                foreach (FileAccessData fileAccessData in taskHostTaskComplete.FileAccessData)
+                {
+                    fileAccessManager.ReportFileAccess(fileAccessData, _buildComponentHost.BuildParameters.NodeId);
+                }
             }
 #endif
 

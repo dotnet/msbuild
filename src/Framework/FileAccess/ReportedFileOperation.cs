@@ -3,6 +3,12 @@
 
 namespace Microsoft.Build.Framework.FileAccess
 {
+    /*
+     * Implementation note: This is a copy of BuildXL.Processes.ReportedFileOperation.
+     * The purpose of the copy is because this is part of the public MSBuild API and it's not desirable to
+     * expose BuildXL types directly.
+     */
+
     /// <summary>
     /// Which operation resulted in a reported file access.
     /// </summary>

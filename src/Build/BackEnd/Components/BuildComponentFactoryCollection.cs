@@ -83,7 +83,9 @@ namespace Microsoft.Build.BackEnd
             // SDK resolution
             _componentEntriesByType[BuildComponentType.SdkResolverService] = new BuildComponentEntry(BuildComponentType.SdkResolverService, MainNodeSdkResolverService.CreateComponent, CreationPattern.Singleton);
 
+#if FEATURE_REPORTFILEACCESSES
             _componentEntriesByType[BuildComponentType.FileAccessManager] = new BuildComponentEntry(BuildComponentType.FileAccessManager, FileAccessManager.CreateComponent, CreationPattern.Singleton);
+#endif
         }
 
         /// <summary>

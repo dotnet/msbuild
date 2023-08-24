@@ -71,13 +71,9 @@ namespace Microsoft.Build.BackEnd
 
             string exeName = msbuildLocation;
 
-#if RUNTIME_TYPE_NETCORE || MONO
-            // Mono automagically uses the current mono, to execute a managed assembly
-            if (!NativeMethodsShared.IsMono)
-            {
-                // Run the child process with the same host as the currently-running process.
-                exeName = CurrentHost.GetCurrentHost();
-            }
+#if RUNTIME_TYPE_NETCORE
+            // Run the child process with the same host as the currently-running process.
+            exeName = CurrentHost.GetCurrentHost();
 #endif
 
             var eventListener = new DetoursEventListener(_fileAccessManager, nodeId);
@@ -117,7 +113,7 @@ namespace Microsoft.Build.BackEnd
             // needed for logging process arguments when a new process is invoked; see DetoursEventListener.cs
             info.FileAccessManifest.ReportProcessArgs = true;
 
-            // By default, Domino sets the timestamp of all input files to January 1, 1970
+            // By default, BuildXL sets the timestamp of all input files to January 1, 1970
             // This breaks some tools like Robocopy which will not copy a file to the destination if the file exists at the destination and has a timestamp that is more recent than the source file
             info.FileAccessManifest.NormalizeReadTimestamps = false;
 

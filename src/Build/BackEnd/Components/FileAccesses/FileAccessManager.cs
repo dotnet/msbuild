@@ -1,9 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if FEATURE_REPORTFILEACCESSES
 using System;
 using System.Collections.Concurrent;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
@@ -19,6 +21,7 @@ namespace Microsoft.Build.FileAccesses
         // In order to synchronize between the node communication and the file access reporting, a special file access
         // is used to mark when the file accesses should be considered complete. Only after both this special file access is seen
         // and the build result is reported can plugins be notified about project completion.
+        // NOTE! This is currently Windows-specific and will need to change once this feature is opened up to more scenarios.
         private static readonly string FileAccessCompletionPrefix = BuildParameters.StartupDirectory[0] + @":\{MSBuildFileAccessCompletion}\";
 
         private IScheduler? _scheduler;
@@ -67,8 +70,8 @@ namespace Microsoft.Build.FileAccesses
             }
             else if (_tempDirectory != null && fileAccessPath.StartsWith(_tempDirectory))
             {
-                // Ignore the temp directory as these are related to internal MSBuild functionality and not always directly related to the execution of the project itself,
-                // so should not be exposed to handlers.
+                // Ignore MSBuild's temp directory as these are related to internal MSBuild functionality and not always directly related to the execution of the project itself,
+                // so should not be exposed to handlers. Note that this is not %TEMP% but instead a subdir under %TEMP% which is only expected to be used by MSBuild.
                 return;
             }
             else
@@ -134,6 +137,9 @@ namespace Microsoft.Build.FileAccesses
             }
         }
 
+        // The [SupportedOSPlatform] attribute is a safeguard to ensure that the comment on FileAccessCompletionPrefix regarding being Windows-only gets addressed.
+        // [SupportedOSPlatform] doesn't apply to fields, so using it here as a reasonable proxy.
+        [SupportedOSPlatform("windows")]
         public static void NotifyFileAccessCompletion(int globalRequestId)
         {
             // Make a dummy file access to use as a notification that the file accesses should be completed for a project.
@@ -179,3 +185,4 @@ namespace Microsoft.Build.FileAccesses
         }
     }
 }
+#endif

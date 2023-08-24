@@ -811,20 +811,7 @@ namespace Microsoft.Build.Execution
         public bool ReportFileAccesses
         {
             get => _reportFileAccesses;
-            set
-            {
-                _reportFileAccesses = value;
-
-                // TODO dfederm: What if either of these are set after ReportFileAccesses is? Do we need to move this elsewhere?
-                if (_reportFileAccesses)
-                {
-                    // To properly report file access, we need to disable the in-proc node which won't be detoured.
-                    DisableInProcNode = true;
-
-                    // Node reuse must be disabled as future builds will not be able to listen to events raised by detours.
-                    EnableNodeReuse = false;
-                }
-            }
+            set => _reportFileAccesses = value;
         }
 #endif
 

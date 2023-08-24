@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if FEATURE_REPORTFILEACCESSES
 using System;
 using System.Threading;
 using Microsoft.Build.BackEnd;
@@ -59,3 +60,4 @@ namespace Microsoft.Build.FileAccesses
             throw new NotImplementedException("This method should not be called in OOP nodes.");
     }
 }
+#endif

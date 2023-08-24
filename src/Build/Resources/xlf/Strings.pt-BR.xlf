@@ -265,8 +265,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheHandleBuildResultFailed">
-        <source>MSB4269: The project cache failed while handling build result for the following project: {0}.</source>
-        <target state="new">MSB4269: The project cache failed while handling build result for the following project: {0}.</target>
+        <source>MSB4269: The project cache failed while handling a build result for the following project: {0}.</source>
+        <target state="new">MSB4269: The project cache failed while handling a build result for the following project: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheHitWithDefaultTargets">

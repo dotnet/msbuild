@@ -36,7 +36,9 @@ namespace Microsoft.Build.Experimental.ProjectCache
         private readonly BuildManager _buildManager;
         private readonly IBuildComponentHost _componentHost;
         private readonly ILoggingService _loggingService;
+#if FEATURE_REPORTFILEACCESSES
         private readonly IFileAccessManager _fileAccessManager;
+#endif
         private readonly IConfigCache _configCache;
 
         private readonly ProjectCacheDescriptor? _globalProjectCacheDescriptor;
@@ -53,7 +55,9 @@ namespace Microsoft.Build.Experimental.ProjectCache
         private record struct ProjectCachePlugin(
             string Name,
             ProjectCachePluginBase? Instance,
+#if FEATURE_REPORTFILEACCESSES
             FileAccessManager.HandlerRegistration? HandlerRegistration,
+#endif
             ExceptionDispatchInfo? InitializationException = null);
 
         /// <summary>
@@ -72,14 +76,18 @@ namespace Microsoft.Build.Experimental.ProjectCache
         public ProjectCacheService(
             BuildManager buildManager,
             ILoggingService loggingService,
+#if FEATURE_REPORTFILEACCESSES
             IFileAccessManager fileAccessManager,
+#endif
             IConfigCache configCache,
             ProjectCacheDescriptor? globalProjectCacheDescriptor)
         {
             _buildManager = buildManager;
             _componentHost = buildManager;
             _loggingService = loggingService;
+#if FEATURE_REPORTFILEACCESSES
             _fileAccessManager = fileAccessManager;
+#endif
             _configCache = configCache;
             _globalProjectCacheDescriptor = globalProjectCacheDescriptor;
         }
@@ -203,7 +211,13 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 }
                 catch (Exception e)
                 {
-                    return new ProjectCachePlugin(pluginTypeName, Instance: null, HandlerRegistration: null, ExceptionDispatchInfo.Capture(e));
+                    return new ProjectCachePlugin(
+                        pluginTypeName,
+                        Instance: null,
+#if FEATURE_REPORTFILEACCESSES
+                        HandlerRegistration: null,
+#endif
+                        ExceptionDispatchInfo.Capture(e));
                 }
                 finally
                 {
@@ -234,7 +248,11 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     ProjectCacheException.ThrowForErrorLoggedInsideTheProjectCache("ProjectCacheInitializationFailed");
                 }
 
-                FileAccessManager.HandlerRegistration handlerRegistration = _fileAccessManager.RegisterHandlers(
+#if FEATURE_REPORTFILEACCESSES
+            FileAccessManager.HandlerRegistration? handlerRegistration = null;
+            if (_componentHost.BuildParameters.ReportFileAccesses)
+            {
+                handlerRegistration = _fileAccessManager.RegisterHandlers(
                     (buildRequest, fileAccessData) =>
                     {
                         // TODO: Filter out projects which do not configure this plugin
@@ -247,12 +265,26 @@ namespace Microsoft.Build.Experimental.ProjectCache
                         FileAccessContext fileAccessContext = GetFileAccessContext(buildRequest);
                         pluginInstance.HandleProcess(fileAccessContext, processData);
                     });
+            }
+#endif
 
-                return new ProjectCachePlugin(pluginTypeName, pluginInstance, handlerRegistration);
+                return new ProjectCachePlugin(
+                    pluginTypeName,
+                    pluginInstance,
+#if FEATURE_REPORTFILEACCESSES
+                    handlerRegistration,
+#endif
+                    InitializationException: null);
             }
             catch (Exception e)
             {
-                return new ProjectCachePlugin(pluginTypeName, Instance: null, HandlerRegistration: null, ExceptionDispatchInfo.Capture(e));
+                return new ProjectCachePlugin(
+                    pluginTypeName,
+                    Instance: null,
+#if FEATURE_REPORTFILEACCESSES
+                    HandlerRegistration: null,
+#endif
+                    ExceptionDispatchInfo.Capture(e));
             }
             finally
             {
@@ -773,10 +805,12 @@ namespace Microsoft.Build.Experimental.ProjectCache
                         return;
                     }
 
+#if FEATURE_REPORTFILEACCESSES
                     if (plugin.HandlerRegistration.HasValue)
                     {
                         plugin.HandlerRegistration.Value.Dispose();
                     }
+#endif
 
                     MSBuildEventSource.Log.ProjectCacheEndBuildStart(plugin.Name);
                     try

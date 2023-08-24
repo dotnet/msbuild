@@ -437,9 +437,7 @@ namespace Microsoft.Build.BackEnd
                 DesiredAccess desiredAccess = default;
                 FlagsAndAttributes flagsAndAttributes = default;
                 string path = default;
-#nullable enable
-                string? processArgs = default;
-#nullable disable
+                string processArgs = default;
                 bool isAnAugmentedFileAccess = default;
                 TranslateEnum(ref reportedFileOperation, (int)reportedFileOperation);
                 TranslateEnum(ref requestedAccess, (int)requestedAccess);
@@ -1205,9 +1203,7 @@ namespace Microsoft.Build.BackEnd
                 DesiredAccess desiredAccess = fileAccessData.DesiredAccess;
                 FlagsAndAttributes flagsAndAttributes = fileAccessData.FlagsAndAttributes;
                 string path = fileAccessData.Path;
-#nullable enable
-                string? processArgs = fileAccessData.ProcessArgs;
-#nullable disable
+                string processArgs = fileAccessData.ProcessArgs;
                 bool isAnAugmentedFileAccess = fileAccessData.IsAnAugmentedFileAccess;
                 TranslateEnum(ref reportedFileOperation, (int)reportedFileOperation);
                 TranslateEnum(ref requestedAccess, (int)requestedAccess);

@@ -171,7 +171,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// The file accesses reported by the most recently completed task.
         /// </summary>
-        private List<FileAccessData> _fileAccessData;
+        private List<FileAccessData> _fileAccessData = new List<FileAccessData>();
 #endif
 
         /// <summary>
@@ -202,9 +202,6 @@ namespace Microsoft.Build.CommandLine
 
 #if !CLR2COMPATIBILITY
             EngineServices = new EngineServicesImpl(this);
-#endif
-#if FEATURE_REPORTFILEACCESSES
-            _fileAccessData = new List<FileAccessData>();
 #endif
         }
 
@@ -559,15 +556,15 @@ namespace Microsoft.Build.CommandLine
 
 #endif
 
-                #region INodePacketFactory Members
+        #region INodePacketFactory Members
 
-                /// <summary>
-                /// Registers the specified handler for a particular packet type.
-                /// </summary>
-                /// <param name="packetType">The packet type.</param>
-                /// <param name="factory">The factory for packets of the specified type.</param>
-                /// <param name="handler">The handler to be called when packets of the specified type are received.</param>
-                public void RegisterPacketHandler(NodePacketType packetType, NodePacketFactoryMethod factory, INodePacketHandler handler)
+        /// <summary>
+        /// Registers the specified handler for a particular packet type.
+        /// </summary>
+        /// <param name="packetType">The packet type.</param>
+        /// <param name="factory">The factory for packets of the specified type.</param>
+        /// <param name="handler">The handler to be called when packets of the specified type are received.</param>
+        public void RegisterPacketHandler(NodePacketType packetType, NodePacketFactoryMethod factory, INodePacketHandler handler)
         {
             _packetFactory.RegisterPacketHandler(packetType, factory, handler);
         }

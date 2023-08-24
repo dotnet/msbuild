@@ -5,6 +5,12 @@ using System;
 
 namespace Microsoft.Build.Framework.FileAccess
 {
+    /*
+     * Implementation note: This is a copy of BuildXL.Processes.RequestedAccess.
+     * The purpose of the copy is because this is part of the public MSBuild API and it's not desirable to
+     * expose BuildXL types directly.
+     */
+
     /// <summary>
     /// Level of access requested by a reported file operation.
     /// </summary>

@@ -17,7 +17,6 @@ namespace Microsoft.Build.Framework.FileAccess
     [CLSCompliant(false)]
     public readonly record struct ProcessData(
         string ProcessName,
-
         uint ProcessId,
         uint ParentProcessId,
         DateTime CreationDateTime,

@@ -562,6 +562,12 @@ namespace Microsoft.Build.Execution
 #if FEATURE_REPORTFILEACCESSES
                 if (_buildParameters.ReportFileAccesses)
                 {
+                    // To properly report file access, we need to disable the in-proc node which won't be detoured.
+                    _buildParameters.DisableInProcNode = true;
+
+                    // Node reuse must be disabled as future builds will not be able to listen to events raised by detours.
+                    _buildParameters.EnableNodeReuse = false;
+
                     _componentFactories.ReplaceFactory(BuildComponentType.NodeLauncher, DetouredNodeLauncher.CreateComponent);
                 }
 #endif
@@ -576,11 +582,16 @@ namespace Microsoft.Build.Execution
 
                 InitializeCaches();
 
+#if FEATURE_REPORTFILEACCESSES
                 var fileAccessManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.FileAccessManager) as IFileAccessManager;
+#endif
+
                 _projectCacheService = new ProjectCacheService(
                     this,
                     loggingService,
+#if FEATURE_REPORTFILEACCESSES
                     fileAccessManager,
+#endif
                     _configCache,
                     _buildParameters.ProjectCacheDescriptor);
 
@@ -2398,8 +2409,9 @@ namespace Microsoft.Build.Execution
             if (_buildSubmissions.TryGetValue(result.SubmissionId, out BuildSubmission buildSubmission))
             {
                 // The result may be associated with the build submission due to it being the submission which
-                // caused the build, but not the actual request which was used with the build submission. Ensure
-                // only the actual submission's request is considered.
+                // caused the build, but not the actual request which was originally used with the build submission.
+                // ie. it may be a dependency of the "root-level" project which is associated with this submission, which
+                // isn't what we're looking for. Ensure only the actual submission's request is considered.
                 if (buildSubmission.BuildRequest != null
                     && buildSubmission.BuildRequest.ConfigurationId == configuration.ConfigurationId
                     && _projectCacheService.ShouldUseCache(configuration))
