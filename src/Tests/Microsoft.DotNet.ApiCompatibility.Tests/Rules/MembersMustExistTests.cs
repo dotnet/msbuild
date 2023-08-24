@@ -531,5 +531,56 @@ namespace CompatTests
                 CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.F(System.String)")
             }, differences);
         }
+
+        [Fact]
+        public void MemberTypesChangeFlagged()
+        {
+            string leftSyntax = @"
+using System;
+
+namespace CompatTests
+{
+  public class First
+  {
+    public string S;
+    public bool Prop { get; set; }
+    public string M() => null;
+    public delegate void SampleEventHandler(object sender, EventArgs e);
+    public event SampleEventHandler E;
+  }
+}
+";
+            string rightSyntax = @"
+using System;
+
+namespace CompatTests
+{
+  public class First
+  {
+    public delegate void SampleEventHandler(object sender, EventArgs e);
+
+    public int S;
+    public string Prop { get; set; }
+    public bool M() => false;
+    public delegate void SampleEventHandler1(object sender, EventArgs e);
+    public event SampleEventHandler1 E;
+  }
+}
+";
+            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
+            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory);
+
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
+
+            Assert.Equal(new[]
+            {
+                CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "F:CompatTests.First.S"),
+                // CompatTests.First.Prop.set isn't reported as the return types match: 'void'.
+                CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.get_Prop"),
+                CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.M")
+                // CompatTests.First.E_add and CompatTests.First.E_remove aren't reported as the symbol's DisplayString doesn't include the parameter type.
+            }, differences);
+        }
     }
 }

@@ -14,6 +14,7 @@ namespace Microsoft.DotNet.ApiSymbolExtensions
         {
             // This is the default format for symbol.ToDisplayString;
             SymbolDisplayFormat format = SymbolDisplayFormat.CSharpErrorMessageFormat;
+            format = format.WithMemberOptions(format.MemberOptions | SymbolDisplayMemberOptions.IncludeType);
 
             DisplayFormat = format.WithParameterOptions(format.ParameterOptions | SymbolDisplayParameterOptions.IncludeExtensionThis);
 
