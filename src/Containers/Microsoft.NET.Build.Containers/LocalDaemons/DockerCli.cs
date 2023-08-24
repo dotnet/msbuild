@@ -283,7 +283,12 @@ internal sealed class DockerCli : ILocalRegistry
             dockerCommand
         ).ConfigureAwait(false);
 
-        if (dockerCommand.Result && !IsPodmanAlias())
+        // be explicit with this check so that we don't do the link target check unless it might actually be a solution.
+        if (dockerCommand.Result && podmanCommand.Result && IsPodmanAlias())
+        {
+            _commandPath = PodmanCommand;
+        }
+        else if (dockerCommand.Result)
         {
             _commandPath = DockerCommand;
         }
