@@ -114,25 +114,25 @@ internal sealed class DockerCli : ILocalRegistry
             switch (commandPath)
             {
                 case DockerCommand:
-                {
-                    JsonDocument config = GetConfig();
+                    {
+                        JsonDocument config = GetConfig();
 
-                    if (!config.RootElement.TryGetProperty("ServerErrors", out JsonElement errorProperty))
-                    {
-                        return true;
+                        if (!config.RootElement.TryGetProperty("ServerErrors", out JsonElement errorProperty))
+                        {
+                            return true;
+                        }
+                        else if (errorProperty.ValueKind == JsonValueKind.Array && errorProperty.GetArrayLength() == 0)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            // we have errors, turn them into a string and log them
+                            string messages = string.Join(Environment.NewLine, errorProperty.EnumerateArray());
+                            _logger.LogError($"The daemon server reported errors: {messages}");
+                            return false;
+                        }
                     }
-                    else if (errorProperty.ValueKind == JsonValueKind.Array && errorProperty.GetArrayLength() == 0)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        // we have errors, turn them into a string and log them
-                        string messages = string.Join(Environment.NewLine, errorProperty.EnumerateArray());
-                        _logger.LogError($"The daemon server reported errors: {messages}");
-                        return false;
-                    }
-                }
                 case PodmanCommand:
                     return commandPathWasUnknown || await TryRunVersionCommandAsync(PodmanCommand, cancellationToken);
                 default:
@@ -275,13 +275,21 @@ internal sealed class DockerCli : ILocalRegistry
         // Try to find the docker or podman cli.
         // On systems with podman it's not uncommon for docker to be an alias to podman.
         // We try to find podman first so we can identify those systems to be using podman.
-        foreach (var command in new[] { PodmanCommand, DockerCommand })
+        var podmanCommand = TryRunVersionCommandAsync(PodmanCommand, cancellationToken);
+        var dockerCommand = TryRunVersionCommandAsync(DockerCommand, cancellationToken);
+
+        await Task.WhenAll(
+            podmanCommand,
+            dockerCommand
+        ).ConfigureAwait(false);
+
+        if (dockerCommand.Result)
         {
-            if (await TryRunVersionCommandAsync(command, cancellationToken))
-            {
-                _commandPath = command;
-                break;
-            }
+            _commandPath = DockerCommand;
+        }
+        else if (podmanCommand.Result)
+        {
+            _commandPath = PodmanCommand;
         }
 
         return _commandPath;
