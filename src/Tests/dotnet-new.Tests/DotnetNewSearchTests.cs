@@ -462,7 +462,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             // rows can be shrunk: ML.NET Console App for Training and ML.NET Console App for Train...
             // in this case ML.NET Console App for Training < ML.NET Console App for Train...
             // therefore use custom comparer
-            var nameComparer = new ShrinkAwareOrdinalStringComparer();
+            var nameComparer = new ShrinkAwareCurrentCultureStringComparer();
             var downloadCountComparer = new DownloadCountComparer();
 
             var orderedRows = tableOutput
@@ -935,7 +935,7 @@ For more information, run:
             }
         }
 
-        private class ShrinkAwareOrdinalStringComparer : IComparer<string>
+        private class ShrinkAwareCurrentCultureStringComparer : IComparer<string>
         {
             public int Compare(string? left, string? right)
             {
@@ -958,18 +958,18 @@ For more information, run:
                 bool rightIsShrunk = right.EndsWith("...");
                 if (!(leftIsShrunk ^ rightIsShrunk))
                 {
-                    return string.Compare(left, right, StringComparison.OrdinalIgnoreCase);
+                    return string.Compare(left, right, StringComparison.CurrentCultureIgnoreCase);
                 }
 
-                if (rightIsShrunk && left.StartsWith(right.Substring(0, right.Length - 3), StringComparison.OrdinalIgnoreCase))
+                if (rightIsShrunk && left.StartsWith(right.Substring(0, right.Length - 3), StringComparison.CurrentCultureIgnoreCase))
                 {
                     return -1;
                 }
-                if (leftIsShrunk && right.StartsWith(left.Substring(0, left.Length - 3), StringComparison.OrdinalIgnoreCase))
+                if (leftIsShrunk && right.StartsWith(left.Substring(0, left.Length - 3), StringComparison.CurrentCultureIgnoreCase))
                 {
                     return 1;
                 }
-                return string.Compare(left, right, StringComparison.OrdinalIgnoreCase);
+                return string.Compare(left, right, StringComparison.CurrentCultureIgnoreCase);
             }
         }
 
