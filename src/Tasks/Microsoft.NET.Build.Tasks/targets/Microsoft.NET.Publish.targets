@@ -958,7 +958,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <UsingTask TaskName="GenerateBundle" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="GenerateSingleFileBundle"
-          Condition="'$(PublishSingleFile)' == 'true'"
+          Condition="'$(PublishSingleFile)' == 'true' and '$(PublishAot)' != 'true'"
           DependsOnTargets="_ComputeFilesToBundle;PrepareForBundle;_GenerateSingleFileBundleInputCache"
           Inputs="@(FilesToBundle);$(_GenerateSingleFileBundlePropertyInputsCache)"
           Outputs="$(PublishedSingleFilePath)">
