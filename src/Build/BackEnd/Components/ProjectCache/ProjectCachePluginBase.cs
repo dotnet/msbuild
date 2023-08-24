@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Execution;
@@ -44,6 +45,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         /// <summary>
         ///     Called for each file access from an MSBuild node or one of its children.
         /// </summary>
+        [CLSCompliant(false)]
         public virtual void HandleFileAccess(FileAccessContext fileAccessContext, FileAccessData fileAccessData)
         {
         }
@@ -51,6 +53,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         /// <summary>
         ///     Called for each new child process created by an MSBuild node or one of its children.
         /// </summary>
+        [CLSCompliant(false)]
         public virtual void HandleProcess(FileAccessContext fileAccessContext, ProcessData processData)
         {
         }

@@ -12,11 +12,9 @@ namespace Microsoft.Build.Framework.FileAccess
     /// See https://learn.microsoft.com/en-us/windows/win32/fileio/file-access-rights-constants for a full list of values.
     /// </remarks>
     [Flags]
+    [CLSCompliant(false)]
 
-    // TODO dshepelev: Fix suppression.
-#pragma warning disable CS3009 // Base type is not CLS-compliant.
     public enum DesiredAccess : uint
-#pragma warning restore CS3009 // Base type is not CLS-compliant.
     {
         /// <summary>
         /// For a directory, the right to list the contents of the directory.

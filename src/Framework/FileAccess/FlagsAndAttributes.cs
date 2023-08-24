@@ -9,11 +9,8 @@ namespace Microsoft.Build.Framework.FileAccess
     /// The file or device attributes and flags.
     /// </summary>
     [Flags]
-
-    // TODO dshepelev: Fix suppression.
-#pragma warning disable CS3009 // Base type is not CLS-compliant.
+    [CLSCompliant(false)]
     public enum FlagsAndAttributes : uint
-#pragma warning restore CS3009 // Base type is not CLS-compliant.
     {
         /// <summary>
         /// The file is read only. Applications can read the file but cannot write to or delete it.

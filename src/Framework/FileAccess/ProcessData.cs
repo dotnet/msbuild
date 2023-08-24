@@ -14,19 +14,13 @@ namespace Microsoft.Build.Framework.FileAccess
     /// <param name="CreationDateTime">The creation date time.</param>
     /// <param name="ExitDateTime">The exit date time.</param>
     /// <param name="ExitCode">The exit code.</param>
+    [CLSCompliant(false)]
     public readonly record struct ProcessData(
         string ProcessName,
 
-        // TODO dshepelev: Fix suppression.
-#pragma warning disable CS3001, CS3003 // Argument type is not CLS-compliant; Type is not CLS-compliant.
         uint ProcessId,
         uint ParentProcessId,
-#pragma warning restore CS3001, CS3003 // Argument type is not CLS-compliant; Type is not CLS-compliant.
         DateTime CreationDateTime,
         DateTime ExitDateTime,
-
-        // TODO dshepelev: Fix suppression.
-#pragma warning disable CS3001, CS3003 // Argument type is not CLS-compliant; Type is not CLS-compliant.
         uint ExitCode);
-#pragma warning restore CS3001, CS3003 // Argument type is not CLS-compliant; Type is not CLS-compliant.
 }

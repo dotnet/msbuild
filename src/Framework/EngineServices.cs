@@ -59,6 +59,7 @@ namespace Microsoft.Build.Framework
         /// Reports a file access from a task.
         /// </summary>
         /// <param name="fileAccessData">The file access to report.</param>
+        [CLSCompliant(false)]
         public virtual void ReportFileAccess(FileAccessData fileAccessData) => throw new NotImplementedException();
     }
 }
