@@ -297,14 +297,15 @@ internal sealed class DockerCli : ILocalRegistry
 
     private static bool IsPodmanAlias()
     {
-        var dockerPath = FindFullPathFromPath("docker");
-        if (dockerPath is null)
+        var dockerPath = FindFullPathFromPath(DockerCommand);
+        var podmanPath = FindFullPathFromPath(PodmanCommand);
+        if (dockerPath is null || podmanPath is null)
         {
             return false;
         }
 
         var fi = new FileInfo(dockerPath);
-        return fi.LinkTarget == null;
+        return fi.LinkTarget == podmanPath;
     }
 
     private async Task<bool> TryRunVersionCommandAsync(string command, CancellationToken cancellationToken)
