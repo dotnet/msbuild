@@ -1336,7 +1336,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       </trans-unit>
       <trans-unit id="MissingTerminalLoggerParameterError">
         <source>MSBUILD : error MSB1066: Specify one or more parameters for the terminal logger if using the -terminalLoggerParameters switch</source>
-        <target state="new">MSBUILD : error MSB1066: Specify one or more parameters for the terminal logger if using the -terminalLoggerParameters switch</target>
+        <target state="translated">MSBUILD : error MSB1066: spécifiez un ou plusieurs paramètres pour l’enregistreur d’événements de terminal si vous utilisez le commutateur -terminalLoggerParameters</target>
         <note>
       {StrBegin="MSBUILD : error MSB1066: "}
       UE: This happens if the user does something like "msbuild.exe -termionalLoggerParameters:". The user must pass in one or more parameters

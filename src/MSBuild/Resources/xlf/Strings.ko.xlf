@@ -1336,7 +1336,7 @@
       </trans-unit>
       <trans-unit id="MissingTerminalLoggerParameterError">
         <source>MSBUILD : error MSB1066: Specify one or more parameters for the terminal logger if using the -terminalLoggerParameters switch</source>
-        <target state="new">MSBUILD : error MSB1066: Specify one or more parameters for the terminal logger if using the -terminalLoggerParameters switch</target>
+        <target state="translated">MSBUILD : error MSB1066: -terminalLoggerParameters 스위치를 사용하는 경우 터미널 로거에 대해 하나 이상의 매개 변수를 지정하세요.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1066: "}
       UE: This happens if the user does something like "msbuild.exe -termionalLoggerParameters:". The user must pass in one or more parameters
