@@ -550,6 +550,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                                     Value="$(UseNativeHttpHandler)"
                                     Trim="true" />
 
+    <RuntimeHostConfigurationOption Include="System.Net.Security.UseManagedNtlm"
+                                    Condition="'$(_UseManagedNtlm)' != ''"
+                                    Value="$(_UseManagedNtlm)"
+                                    Trim="true" />
+
     <RuntimeHostConfigurationOption Include="System.Reflection.Metadata.MetadataUpdater.IsSupported"
                                     Condition="'$(MetadataUpdaterSupport)' != ''"
                                     Value="$(MetadataUpdaterSupport)"
