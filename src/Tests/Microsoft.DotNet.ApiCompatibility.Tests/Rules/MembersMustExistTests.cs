@@ -497,5 +497,39 @@ namespace CompatTests
 
             Assert.Empty(differences);
         }
+
+        [Fact]
+        public void ThisExtensionMethodModifierRemovalFlagged()
+        {
+            string leftSyntax = @"
+namespace CompatTests
+{
+  public static class First
+  {
+    public static void F(this string s) {}
+  }
+}
+";
+            string rightSyntax = @"
+namespace CompatTests
+{
+  public static class First
+  {
+    public static void F(string s) {}
+  }
+}
+";
+            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
+            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory);
+
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
+
+            Assert.Equal(new[]
+            {
+                // The call to GetDocumentationCommentId doesn't return a string that includes the "this" keyword.
+                CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.F(System.String)")
+            }, differences);
+        }
     }
 }
