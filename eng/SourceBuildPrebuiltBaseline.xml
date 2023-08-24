@@ -12,9 +12,6 @@
     <UsagePattern IdentityGlob="System.Reflection.MetadataLoadContext/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Security.Cryptography.ProtectedData/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Text.Json/*7.0.3*" />
-
-    <!-- This is for windows-only project caching acceleration -->
-    <UsagePattern IdentityGlob="System.Security.Principal.Windows/*6.0.0*" />
   </IgnorePatterns>
   <Usages>
   </Usages>
