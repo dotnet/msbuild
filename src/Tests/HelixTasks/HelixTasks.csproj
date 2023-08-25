@@ -10,7 +10,8 @@
     <PackageReference Include="Microsoft.Build" VersionOverride="15.7.179" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" VersionOverride="15.7.179" />
     <PackageReference Include="Newtonsoft.Json" />
-    <PackageReference Include="System.Reflection.Metadata" VersionOverride="1.7.0" />
+    <PackageReference Include="System.Reflection.Metadata" VersionOverride="$(SystemReflectionMetadataVersion)" />
+    <PackageReference Include="System.Collections.Immutable" VersionOverride="$(SystemCollectionsImmutablePackageVersion)" />
     <PackageReference Include="NuGet.ProjectModel" />
   </ItemGroup>
 
