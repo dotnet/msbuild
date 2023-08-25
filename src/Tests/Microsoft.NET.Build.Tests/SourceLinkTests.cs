@@ -112,7 +112,7 @@ namespace Microsoft.NET.Build.Tests
         /// <summary>
         /// When creating a new repository locally we want the build to work and not report warnings even before the remote is set.
         /// </summary>
-        [Fact]
+        [RequiresMSBuildVersionFact("17.8.0")]
         public void WithNoRemoteNoCommit()
         {
             var testAsset = _testAssetsManager
@@ -131,7 +131,7 @@ namespace Microsoft.NET.Build.Tests
         /// <summary>
         /// When creating a new repository locally we want the build to work and not report warnings even before the remote is set.
         /// </summary>
-        [Fact]
+        [RequiresMSBuildVersionFact("17.8.0")]
         public void WithNoRemote()
         {
             var testAsset = _testAssetsManager
