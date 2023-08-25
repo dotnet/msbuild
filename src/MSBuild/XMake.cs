@@ -1533,18 +1533,26 @@ namespace Microsoft.Build.CommandLine
                                 if (graphBuildOptions != null)
                                 {
                                     graphResult = ExecuteGraphBuild(buildManager, graphBuildRequest);
-                                    ProjectGraphEntryPoint entryPoint = graphBuildRequest.ProjectGraphEntryPoints.First();
-                                    if (!entryPoint.GlobalProperties.ContainsKey(PropertyNames.IsGraphBuild))
-                                    {
-                                        entryPoint.GlobalProperties[PropertyNames.IsGraphBuild] = "true";
-                                    }
 
-                                    result = graphResult.ResultsByNode.First(
-                                        nodeResultKvp =>
-                                        nodeResultKvp.Key.ProjectInstance.FullPath.Equals(entryPoint.ProjectFile) &&
-                                        nodeResultKvp.Key.ProjectInstance.GlobalProperties.Count == entryPoint.GlobalProperties.Count &&
-                                        nodeResultKvp.Key.ProjectInstance.GlobalProperties.All(propertyKvp => entryPoint.GlobalProperties[propertyKvp.Key].Equals(propertyKvp.Value)))
-                                        .Value;
+                                    if (saveProjectResult)
+                                    {
+                                        ProjectGraphEntryPoint entryPoint = graphBuildRequest.ProjectGraphEntryPoints.Single();
+                                        if (!entryPoint.GlobalProperties.ContainsKey(PropertyNames.IsGraphBuild))
+                                        {
+                                            entryPoint.GlobalProperties[PropertyNames.IsGraphBuild] = "true";
+                                        }
+
+                                        result = graphResult.ResultsByNode.Single(
+                                            nodeResultKvp =>
+                                            nodeResultKvp.Key.ProjectInstance.FullPath.Equals(entryPoint.ProjectFile) &&
+                                            nodeResultKvp.Key.ProjectInstance.GlobalProperties.Count == entryPoint.GlobalProperties.Count &&
+                                            nodeResultKvp.Key.ProjectInstance.GlobalProperties.All(propertyKvp => entryPoint.GlobalProperties[propertyKvp.Key].Equals(propertyKvp.Value)))
+                                            .Value;
+                                    }
+                                    else
+                                    {
+                                        success = graphResult.OverallResult == BuildResultCode.Success;
+                                    }
                                 }
                                 else
                                 {
