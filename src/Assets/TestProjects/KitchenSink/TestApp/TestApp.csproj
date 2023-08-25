@@ -41,6 +41,7 @@
     <AutoreleasePoolSupport>false</AutoreleasePoolSupport>
     <ThreadPoolMinThreads>2</ThreadPoolMinThreads>
     <ThreadPoolMaxThreads>9</ThreadPoolMaxThreads>
+    <_UseManagedNtlm>true</_UseManagedNtlm>
   </PropertyGroup>
 
   <ItemGroup>
