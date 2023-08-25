@@ -619,21 +619,30 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData("-getProperty:Foo;Bar", true, "EvalValue", false, false, false)]
-        [InlineData("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false)]
-        [InlineData("-getItem:MyItem", false, "", true, false, false)]
-        [InlineData("-getItem:MyItem -t:Build", false, "", true, true, false)]
-        [InlineData("-getItem:WrongItem -t:Build", false, "", false, false, false)]
-        [InlineData("-getProperty:Foo;Bar -getItem:MyItem -t:Build", true, "TargetValue", true, true, false)]
-        [InlineData("-getProperty:Foo;Bar -getItem:MyItem", true, "EvalValue", true, false, false)]
-        [InlineData("-getProperty:Foo;Bar -getTargetResult:MyTarget", true, "TargetValue", false, false, true)]
+        [InlineData("-getProperty:Foo;Bar", true, "EvalValue", false, false, false, true)]
+        [InlineData("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false, true)]
+        [InlineData("-getItem:MyItem", false, "", true, false, false, true)]
+        [InlineData("-getItem:MyItem -t:Build", false, "", true, true, false, true)]
+        [InlineData("-getItem:WrongItem -t:Build", false, "", false, false, false, true)]
+        [InlineData("-getProperty:Foo;Bar -getItem:MyItem -t:Build", true, "TargetValue", true, true, false, true)]
+        [InlineData("-getProperty:Foo;Bar -getItem:MyItem", true, "EvalValue", true, false, false, true)]
+        [InlineData("-getProperty:Foo;Bar -getTargetResult:MyTarget", true, "TargetValue", false, false, true, true)]
+        [InlineData("-getProperty:Foo;Bar", true, "EvalValue", false, false, false, false)]
+        [InlineData("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false, false)]
+        [InlineData("-getItem:MyItem", false, "", true, false, false, false)]
+        [InlineData("-getItem:MyItem -t:Build", false, "", true, true, false, false)]
+        [InlineData("-getItem:WrongItem -t:Build", false, "", false, false, false, false)]
+        [InlineData("-getProperty:Foo;Bar -getItem:MyItem -t:Build", true, "TargetValue", true, true, false, false)]
+        [InlineData("-getProperty:Foo;Bar -getItem:MyItem", true, "EvalValue", true, false, false, false)]
+        [InlineData("-getProperty:Foo;Bar -getTargetResult:MyTarget", true, "TargetValue", false, false, true, false)]
         public void ExecuteAppWithGetPropertyItemAndTargetResult(
             string extraSwitch,
             bool fooPresent,
             string fooResult,
             bool itemIncludesAlwaysThere,
             bool itemIncludesTargetItem,
-            bool targetResultPresent)
+            bool targetResultPresent,
+            bool isGraphBuild)
         {
             using TestEnvironment env = TestEnvironment.Create();
             TransientTestFile project = env.CreateFile("testProject.csproj", @"
@@ -663,7 +672,8 @@ namespace Microsoft.Build.UnitTests
 
 </Project>
 ");
-            string results = RunnerUtilities.ExecMSBuild($" {project.Path} {extraSwitch}", out bool success);
+            string graph = isGraphBuild ? "--graph" : "";
+            string results = RunnerUtilities.ExecMSBuild($" {project.Path} {extraSwitch} {graph}", out bool success);
             success.ShouldBeTrue();
             if (fooPresent)
             {
