@@ -79,7 +79,7 @@
       <ShimTargets Include="Workflow.Targets" />
       <ShimTargets Include="Workflow.VisualBasic.Targets" />
 
-      <InstalledMicrosoftExtensions Include="$(MSBuildExtensionsPath)\Microsoft\**\*.*" />
+      <InstalledMicrosoftExtensions Include="$(MSBuildExtensionsPath)\Microsoft\**\*.*" Exclude="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\NodeJs\**" />
 
       <InstalledNuGetFiles Include="$(MSBuildExtensionsPath)\Microsoft\NuGet\*" />
 
