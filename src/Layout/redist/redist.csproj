@@ -43,6 +43,11 @@
     <PackageReference Include="System.Text.Encoding.CodePages" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" />
     <PackageReference Include="System.Resources.Extensions" />
+    <PackageReference Include="Microsoft.Build.Runtime" VersionOverride="$(MicrosoftBuildCurrentPackageVersion)" />
+    <PackageReference Include="Microsoft.Build" VersionOverride="$(MicrosoftBuildCurrentPackageVersion)" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" VersionOverride="$(MicrosoftBuildCurrentPackageVersion)" />
+    <PackageReference Include="Microsoft.Build.Framework" VersionOverride="$(MicrosoftBuildCurrentPackageVersion)" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" VersionOverride="$(MicrosoftBuildCurrentPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
