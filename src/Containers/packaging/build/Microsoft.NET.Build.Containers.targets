@@ -12,7 +12,7 @@
                                 )
                           )">true</_IsSDKContainerAllowedVersion>
     <_ContainerIsTargetingNet8TFM>false</_ContainerIsTargetingNet8TFM>
-    <_ContainerIsTargetingNet8TFM Condition="$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'net8.0'))">true</_ContainerIsTargetingNet8TFM>
+    <_ContainerIsTargetingNet8TFM Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' >= '8.0'">true</_ContainerIsTargetingNet8TFM>
   </PropertyGroup>
 
   <ItemGroup>
