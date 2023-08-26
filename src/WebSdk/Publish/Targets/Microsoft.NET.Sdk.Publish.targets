@@ -97,7 +97,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Use default TrimMode for projects targeting net8.0 and above and retain TrimMode=partial for back-compat. -->
     <TrimMode Condition="'$(TrimMode)' == '' And
       '$(PublishTrimmed)' == 'true' And
-      !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">partial</TrimMode>
+      '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
+      '$(_TargetFrameworkVersionWithoutV)' < '8.0'">partial</TrimMode>
   </PropertyGroup>
 
   <!--
