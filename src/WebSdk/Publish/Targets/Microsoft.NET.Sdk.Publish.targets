@@ -98,7 +98,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <TrimMode Condition="'$(TrimMode)' == '' And
       '$(PublishTrimmed)' == 'true' And
       '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
-      '$(_TargetFrameworkVersionWithoutV)' < '8.0'">partial</TrimMode>
+      $([MSBuild]::VersionLessThan($(_TargetFrameworkVersionWithoutV), '8.0'))">partial</TrimMode>
   </PropertyGroup>
 
   <!--
