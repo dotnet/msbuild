@@ -189,7 +189,7 @@
     </PublishContainerDependsOn>
   </PropertyGroup>
 
-  <Target Name="PublishContainer" DependsOnTargets="$(PublishContainerDependsOn)">
+  <Target Name="PublishContainer" DependsOnTargets="$(PublishContainerDependsOn)" Condition="'$(EnableSdkContainerSupport)' == 'true' and '$(IsPublishable)' == 'true'">
 
     <PropertyGroup Condition="'$(DOTNET_HOST_PATH)' == ''">
       <DotNetHostDirectory>$(NetCoreRoot)</DotNetHostDirectory>
