@@ -368,7 +368,7 @@ namespace Microsoft.Build.Tasks
 
 #elif !NETFRAMEWORK
 
-    public class RegisterAssembly : TaskRequiresFramework, IRegisterAssemblyTaskContract
+    public sealed class RegisterAssembly : TaskRequiresFramework, IRegisterAssemblyTaskContract
     {
         public RegisterAssembly()
             : base(nameof(RegisterAssembly))

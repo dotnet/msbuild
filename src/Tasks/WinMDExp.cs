@@ -284,7 +284,7 @@ namespace Microsoft.Build.Tasks
 
 #else
 
-    public class WinMDExp : TaskRequiresFramework, IWinMDExpTaskContract
+    public sealed class WinMDExp : TaskRequiresFramework, IWinMDExpTaskContract
     {
         public WinMDExp()
             : base(nameof(WinMDExp))

@@ -319,7 +319,7 @@ namespace Microsoft.Build.Tasks
     }
 #else
 
-    public class GetFrameworkSdkPath : TaskRequiresFramework, IGetFrameworkSdkPathTaskContract
+    public sealed class GetFrameworkSdkPath : TaskRequiresFramework, IGetFrameworkSdkPathTaskContract
     {
         public GetFrameworkSdkPath()
             : base(nameof(GetFrameworkSdkPath))

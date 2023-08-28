@@ -43,7 +43,7 @@ namespace Microsoft.Build.Tasks
 
 #else
 
-    public class UpdateManifest : TaskRequiresFramework, IUpdateManifestTaskContract
+    public sealed class UpdateManifest : TaskRequiresFramework, IUpdateManifestTaskContract
     {
         public UpdateManifest()
             : base(nameof(UpdateManifest))

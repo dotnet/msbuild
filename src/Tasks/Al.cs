@@ -398,9 +398,9 @@ namespace Microsoft.Build.Tasks
 #else
 
     /// <summary>
-    /// Stub AL task for .NET Core
+    /// Stub AL task for .NET Core.
     /// </summary>
-    public class AL : TaskRequiresFramework, IALTaskContract
+    public sealed class AL : TaskRequiresFramework, IALTaskContract
     {
         public AL()
             : base(nameof(AL))

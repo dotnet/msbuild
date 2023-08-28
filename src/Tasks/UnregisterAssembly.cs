@@ -296,7 +296,7 @@ namespace Microsoft.Build.Tasks
 
 #elif !NETFRAMEWORK
 
-    public class UnregisterAssembly : TaskRequiresFramework, IUnregisterAssemblyTaskContract
+    public sealed class UnregisterAssembly : TaskRequiresFramework, IUnregisterAssemblyTaskContract
     {
         public UnregisterAssembly()
             : base(nameof(UnregisterAssembly))

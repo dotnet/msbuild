@@ -345,7 +345,7 @@ namespace Microsoft.Build.Tasks
 
 #else
 
-    public class AspNetCompiler : TaskRequiresFramework, IAspNetCompilerTaskContract
+    public sealed class AspNetCompiler : TaskRequiresFramework, IAspNetCompilerTaskContract
     {
         public AspNetCompiler()
             : base(nameof(AspNetCompiler))

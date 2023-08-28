@@ -349,7 +349,7 @@ namespace Microsoft.Build.Tasks
 
 #else
 
-    public class ResolveNativeReference : TaskRequiresFramework, IResolveNativeReferenceTaskConract
+    public sealed class ResolveNativeReference : TaskRequiresFramework, IResolveNativeReferenceTaskConract
     {
         public ResolveNativeReference()
             : base(nameof(ResolveNativeReference))
@@ -387,7 +387,6 @@ namespace Microsoft.Build.Tasks
 
 #endif
 
-#pragma warning disable SA1201 // Elements should appear in the correct order
     internal interface IResolveNativeReferenceTaskConract
     {
         #region Properties
@@ -403,5 +402,4 @@ namespace Microsoft.Build.Tasks
 
         #endregion
     }
-#pragma warning restore SA1201 // Elements should appear in the correct order
 }

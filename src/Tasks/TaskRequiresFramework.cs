@@ -5,8 +5,6 @@
 
 using System;
 
-#nullable disable
-
 namespace Microsoft.Build.Tasks
 {
     public abstract class TaskRequiresFramework : TaskExtension
