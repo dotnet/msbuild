@@ -23,35 +23,35 @@
         <source>failed</source>
         <target state="translated">non riuscito</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
         <source>failed with errors</source>
         <target state="translated">non riuscito con errori</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
         <source>failed with warnings</source>
         <target state="translated">non riuscito con avvisi</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_Succeeded">
         <source>succeeded</source>
         <target state="translated">operazione riuscita</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with warnings</source>
         <target state="translated">completato con avvisi</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="CommandLine">
@@ -98,6 +98,16 @@
         <target state="translated">MSBUILD : error MSB1064: il valore di priorità bassa non è valido. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1064: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidTerminalLoggerValue">
+        <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
+        <target state="translated">MSBUILD : error MSB1065: il valore del logger del terminale non è valido. Deve essere 'auto', 'true' o 'false'. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
@@ -935,8 +945,9 @@ Nota: livello di dettaglio dei logger di file
                      è la directory corrente. Per impostazione predefinita, ai
                      file viene assegnato il nome "MSBuild&lt;idnodo&gt;.log". Il
                      percorso dei file e altri parametri di fileLogger possono
-                     essere specificati aggiungendo l'opzione "-fileLoggerParameters".
+                     essere specificati aggiungendo l'opzione
 
+                     "-fileLoggerParameters".
                      Se il nome di un file di log viene impostato con l'opzione
                      fileLoggerParameters, il logger distribuito userà il nome
                      file come modello e aggiungerà l'ID del nodo per creare un
@@ -1334,6 +1345,16 @@ Nota: livello di dettaglio dei logger di file
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="MissingTerminalLoggerParameterError">
+        <source>MSBUILD : error MSB1066: Specify one or more parameters for the terminal logger if using the -terminalLoggerParameters switch</source>
+        <target state="translated">MSBUILD : error MSB1066: specificare uno o più parametri per il logger del terminale se si usa l'opzione -terminalLoggerParameters</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1066: "}
+      UE: This happens if the user does something like "msbuild.exe -termionalLoggerParameters:". The user must pass in one or more parameters
+      after the switch e.g. "msbuild.exe -terminalLoggerParameters:default=auto".
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="MissingToolsVersionError">
         <source>MSBUILD : error MSB1039: Specify the version of the toolset.</source>
         <target state="translated">MSBUILD : error MSB1039: specificare la versione del set di strumenti.</target>
@@ -1368,6 +1389,13 @@ Nota: livello di dettaglio dei logger di file
         <note>
       {StrBegin="MSBUILD : error MSB1024: "}UE: The user did something like msbuild -validate:foo.xsd -validate:bar.xsd. We only allow one schema to be specified.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="NameInvalid">
+        <source>MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</source>
+        <target state="translated">MSBUILD : error MSB5016: il nome "{0}" contiene un carattere non valido "{1}".</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB5016: "}
     </note>
       </trans-unit>
       <trans-unit id="NotWarnAsErrorWithoutWarnAsError">
@@ -1555,6 +1583,21 @@ Nota: livello di dettaglio dei logger di file
         <source>MSBUILD : error MSB1059: Targets could not be printed. {0}</source>
         <target state="translated">MSBUILD : error MSB1059: non è stato possibile stampare le destinazioni. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
+      </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedDisabled">
+        <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
+        <target state="translated">Il logger di terminale non è stato usato perché la compilazione viene eseguita nel contesto di un processo (ad esempio 'dotnet test') che richiede l'accesso diretto al flusso stdout.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedNotSupported">
+        <source>Terminal Logger was not used because the output is not supported.</source>
+        <target state="translated">Il logger del terminale non è stato usato perché l'output non è supportato.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedRedirected">
+        <source>Terminal Logger was not used because the output is being redirected to a file.</source>
+        <target state="translated">Il logger del terminale non è stato usato perché l'output viene reindirizzato a un file.</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>
@@ -1939,15 +1982,16 @@ Esegue la profilatura della valutazione di MSBuild e scrive
                        -restoreProperty:IsRestore=true;MyProperty=value
     </source>
         <target state="translated">  -restoreProperty:&lt;n&gt;=&lt;v&gt;
-                     Imposta queste proprietà a livello di progetto o ne esegue
-                     l'override solo durante il ripristino e non usa le
-                     proprietà specificate con l'argomento -property.
-                     &lt;v&gt; rappresenta il nome della proprietà e &lt;v&gt; il
-                     valore della proprietà. Usare il punto e virgola o la
-                     virgola per delimitare più proprietà o specificare ogni proprietà separatamente.
-                     (Forma breve: -rp)
-                     Esempio:
-                       -restoreProperty:IsRestore=true;MyProperty=value
+                      Imposta queste proprietà a livello di progetto o ne esegue
+                      l'override solo durante il ripristino e non usa le
+                      proprietà specificate con l'argomento -property.
+                      &lt;v&gt; rappresenta il nome della proprietà e &lt;v&gt; il
+                      valore della proprietà. Usare il punto e virgola o la
+                      virgola per delimitare più proprietà o specificare ogni
+                      proprietà separatamente.
+                      Forma breve: -rp.
+                      Esempio:
+                        -restoreProperty:IsRestore=true;MyProperty=value
     </target>
         <note>
       LOCALIZATION: "-restoreProperty" and "-rp" should not be localized.

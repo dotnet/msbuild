@@ -1,0 +1,5 @@
+﻿  project [31;1mfailed with errors[m (0.0s)
+    directory/[1mfile[m(1,2,3,4): [31;1merror[m [31;1mAA0000[m: Error!
+[?25l[1F
+[?25h
+Build [31;1mfailed with errors[m in 0.0s

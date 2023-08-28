@@ -55,6 +55,11 @@
       LOCALIZATION: Do not localize the following words: ProjectReference, ProjectReferenceTargets
     </note>
       </trans-unit>
+      <trans-unit id="CannotCopyFromElementOfThatType">
+        <source>MSB4277: Cannot copy from object of that type.</source>
+        <target state="translated">MSB4277: No se puede copiar desde un objeto de ese tipo.</target>
+        <note>{StrBegin="MSB4277: "}</note>
+      </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
         <target state="translated">MSB4248: No se pueden expandir los metadatos en la expresión "{0}". {1}</target>
@@ -133,6 +138,11 @@
         <target state="translated">No se ha podido resolver el SDK "{0}". Exactamente uno de los siguientes mensajes de sondeo indica por qué no se pudo resolver el SDK. Investigue y resuelva ese mensaje para especificar correctamente el SDK.
   {1}</target>
         <note />
+      </trans-unit>
+      <trans-unit id="General.TwoVectorsMustHaveSameLength">
+        <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
+        <target state="translated">MSB3094: "{2}" hace referencia a {0} elementos y "{3}" hace referencia a {1} elementos. Deben tener el mismo número de elementos.</target>
+        <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
@@ -455,9 +465,9 @@
     </note>
       </trans-unit>
       <trans-unit id="UnhandledMSBuildError">
-        <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled.
+        <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Esta es una excepción no controlada en MSBuild. VOTE POR UN PROBLEMA EXISTENTE O PRESENTE UNO NUEVO EN https://aka.ms/msbuild/unhandled.
+        <target state="translated">Esta es una excepción no controlada en MSBuild. VOTE POR UN PROBLEMA EXISTENTE O PRESENTE UNO NUEVO EN https://aka.ms/msbuild/unhandled
     {0}</target>
         <note />
       </trans-unit>

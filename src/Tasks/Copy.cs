@@ -361,7 +361,7 @@ namespace Microsoft.Build.Tasks
         private void TryCopyViaLink(string linkComment, MessageImportance messageImportance, FileState sourceFileState, FileState destinationFileState, out bool linkCreated, ref string errorMessage, Func<string, string, string, bool> createLink)
         {
             // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-            Log.LogMessage(MessageImportance.Normal, linkComment, sourceFileState.Name, destinationFileState.Name);
+            Log.LogMessage(MessageImportance.Normal, linkComment, sourceFileState.FileNameFullPath, destinationFileState.FileNameFullPath);
 
             linkCreated = createLink(sourceFileState.Name, destinationFileState.Name, errorMessage);
         }
@@ -422,9 +422,18 @@ namespace Microsoft.Build.Tasks
 
             // Use single-threaded code path when requested or when there is only copy to make
             // (no need to create all the parallel infrastructure for that case).
-            bool success = parallelism == 1 || DestinationFiles.Length == 1
-                ? CopySingleThreaded(copyFile, out destinationFilesSuccessfullyCopied)
-                : CopyParallel(copyFile, parallelism, out destinationFilesSuccessfullyCopied);
+            bool success = false;
+
+            try
+            {
+                success = parallelism == 1 || DestinationFiles.Length == 1
+                    ? CopySingleThreaded(copyFile, out destinationFilesSuccessfullyCopied)
+                    : CopyParallel(copyFile, parallelism, out destinationFilesSuccessfullyCopied);
+            }
+            catch (OperationCanceledException)
+            {
+                return false;
+            }
 
             // copiedFiles contains only the copies that were successful.
             CopiedFiles = destinationFilesSuccessfullyCopied.ToArray();

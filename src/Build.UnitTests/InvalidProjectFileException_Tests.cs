@@ -23,42 +23,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify I implemented ISerializable correctly
-        /// </summary>
-        [Fact]
-        public void SerializeDeserialize()
-        {
-            InvalidProjectFileException e = new InvalidProjectFileException(
-                "projectFile",
-                1, 2, 3, 4,
-                "message",
-                "errorSubcategory",
-                "errorCode",
-                "helpKeyword");
-
-            using (MemoryStream memstr = new MemoryStream())
-            {
-                BinaryFormatter frm = new BinaryFormatter();
-
-                frm.Serialize(memstr, e);
-                memstr.Position = 0;
-
-                InvalidProjectFileException e2 = (InvalidProjectFileException)frm.Deserialize(memstr);
-
-                Assert.Equal(e.ColumnNumber, e2.ColumnNumber);
-                Assert.Equal(e.EndColumnNumber, e2.EndColumnNumber);
-                Assert.Equal(e.EndLineNumber, e2.EndLineNumber);
-                Assert.Equal(e.ErrorCode, e2.ErrorCode);
-                Assert.Equal(e.ErrorSubcategory, e2.ErrorSubcategory);
-                Assert.Equal(e.HasBeenLogged, e2.HasBeenLogged);
-                Assert.Equal(e.HelpKeyword, e2.HelpKeyword);
-                Assert.Equal(e.LineNumber, e2.LineNumber);
-                Assert.Equal(e.Message, e2.Message);
-                Assert.Equal(e.ProjectFile, e2.ProjectFile);
-            }
-        }
-
-        /// <summary>
         /// Verify that nesting an IPFE copies the error code
         /// </summary>
         [Fact]

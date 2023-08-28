@@ -33,7 +33,6 @@
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
-    <PackageReference Include="System.Text.Json" />
 
     <PackageReference Include="System.Reflection.Metadata" Condition="'$(MonoBuild)' == 'true'" />
     <PackageReference Include="System.Reflection.MetadataLoadContext" />
@@ -47,6 +46,7 @@
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="System.IO.Compression" />
     <PackageReference Include="System.Memory" />
+    <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
@@ -159,6 +159,9 @@
     <Compile Include="BackEnd\Components\SdkResolution\TranslationHelpers.cs" />
     <Compile Include="FileSystem\*.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
+    <Compile Include="Logging\BinaryLogger\IBuildEventArgsReaderNotifications.cs" />
+    <Compile Include="Logging\BinaryLogger\IBuildEventStringsReader.cs" />
+    <Compile Include="Logging\BinaryLogger\StringReadEventArgs.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />
@@ -617,6 +620,7 @@
     <Compile Include="Logging\LoggerDescription.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Logging\OptimizedStringIndenter.cs" />
     <Compile Include="Logging\ParallelLogger\ParallelLoggerHelpers.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -798,9 +802,5 @@
       <SubType>Designer</SubType>
       <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Collections\RetrievableEntryHashSet\Originals\*" />
   </ItemGroup>
 </Project>

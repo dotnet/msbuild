@@ -34,7 +34,7 @@ using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
-using LiveLogger = Microsoft.Build.Logging.LiveLogger.LiveLogger;
+using TerminalLogger = Microsoft.Build.Logging.TerminalLogger.TerminalLogger;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework.Telemetry;
@@ -2446,7 +2446,7 @@ namespace Microsoft.Build.CommandLine
 
                     outputResultsCache = ProcessOutputResultsCache(commandLineSwitches);
 
-                    bool liveLogger = ProcessLiveLoggerConfiguration(commandLineSwitches);
+                    bool useTerminalLogger = ProcessTerminalLoggerConfiguration(commandLineSwitches, out string aggregatedTerminalLoggerParameters);
 
                     // figure out which loggers are going to listen to build events
                     string[][] groupedFileLoggerParameters = commandLineSwitches.GetFileLoggerParameters();
@@ -2457,7 +2457,8 @@ namespace Microsoft.Build.CommandLine
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Verbosity],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.DistributedFileLogger],
-                        liveLogger,
+                        useTerminalLogger,
+                        aggregatedTerminalLoggerParameters,
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters], // used by DistributedFileLogger
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
@@ -2514,72 +2515,200 @@ namespace Microsoft.Build.CommandLine
             return invokeBuild;
         }
 
-        private static bool ProcessLiveLoggerConfiguration(CommandLineSwitches commandLineSwitches)
+        private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)
         {
-            string liveLoggerArg;
+            aggregatedParameters = AggregateParameters(commandLineSwitches);
+            string defaultValue = FindDefaultValue(aggregatedParameters);
 
-            // Command line wins, so check it first
-            if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.LiveLogger))
+            string terminalLoggerArg = null;
+            if (!TryFromCommandLine(commandLineSwitches) && !TryFromEnvironmentVariables())
             {
-                // There's a switch set, but there might be more than one
-                string[] switches = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LiveLogger];
-
-                liveLoggerArg = switches[switches.Length - 1];
-
-                // if the switch was set but not to an explicit value, the value is "auto"
-                if (string.IsNullOrEmpty(liveLoggerArg))
-                {
-                    liveLoggerArg = "auto";
-                }
-            }
-            else
-            {
-                liveLoggerArg = Environment.GetEnvironmentVariable("MSBUILDLIVELOGGER");
-
-                if (string.IsNullOrWhiteSpace(liveLoggerArg))
-                {
-                    return false;
-                }
-                else
-                {
-                    s_globalMessagesToLogInBuildLoggers.Add(
-                        new BuildManager.DeferredBuildMessage($"The environment variable MSBUILDLIVELOGGER was set to {liveLoggerArg}.", MessageImportance.Low));
-                }
+                ApplyDefault();
             }
 
-            // We now have a string. It can be "true" or "false" which means just that:
-            if (bool.TryParse(liveLoggerArg, out bool result))
+            terminalLoggerArg = NormalizeIntoBooleanValues();
+
+            bool useTerminalLogger = false;
+            if (!TrueOrFalse())
             {
-                return result;
+                ItMustBeAuto();
             }
 
-            // or it can be "auto", meaning "enable if we can"
-            if (!liveLoggerArg.Equals("auto", StringComparison.OrdinalIgnoreCase))
-            {
-                CommandLineSwitchException.Throw("InvalidLiveLoggerValue", liveLoggerArg);
-            }
+            return KnownTelemetry.LoggingConfigurationTelemetry.TerminalLogger = useTerminalLogger;
 
-            return DoesEnvironmentSupportLiveLogger();
-
-            static bool DoesEnvironmentSupportLiveLogger()
+            static bool CheckIfTerminalIsSupportedAndTryEnableAnsiColorCodes()
             {
                 (var acceptAnsiColorCodes, var outputIsScreen, s_originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
 
                 if (!outputIsScreen)
                 {
                     s_globalMessagesToLogInBuildLoggers.Add(
-                        new BuildManager.DeferredBuildMessage("LiveLogger was not used because the output is being redirected to a file.", MessageImportance.Low));
+                        new BuildManager.DeferredBuildMessage(ResourceUtilities.GetResourceString("TerminalLoggerNotUsedRedirected"), MessageImportance.Low));
                     return false;
                 }
 
-                // LiveLogger is not used if the terminal does not support ANSI/VT100 escape sequences.
+                // TerminalLogger is not used if the terminal does not support ANSI/VT100 escape sequences.
                 if (!acceptAnsiColorCodes)
                 {
                     s_globalMessagesToLogInBuildLoggers.Add(
-                        new BuildManager.DeferredBuildMessage("LiveLogger was not used because the output is not supported.", MessageImportance.Low));
+                        new BuildManager.DeferredBuildMessage(ResourceUtilities.GetResourceString("TerminalLoggerNotUsedNotSupported"), MessageImportance.Low));
                     return false;
                 }
+
+                if (Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
+                {
+                    s_globalMessagesToLogInBuildLoggers.Add(
+                        new BuildManager.DeferredBuildMessage(ResourceUtilities.GetResourceString("TerminalLoggerNotUsedDisabled"), MessageImportance.Low));
+                    return false;
+                }
+
                 return true;
+            }
+
+            string FindDefaultValue(string s)
+            {
+                // Find default configuration so it is part of telemetry even when default is not used.
+                // Default can be stored in /tlp:default=true|false|on|off|auto
+                string terminalLoggerDefault = null;
+                foreach (string parameter in s.Split(MSBuildConstants.SemicolonChar))
+                {
+                    if (string.IsNullOrWhiteSpace(parameter))
+                    {
+                        continue;
+                    }
+
+                    string[] parameterAndValue = parameter.Split(MSBuildConstants.EqualsChar);
+                    if (parameterAndValue[0].Equals("default", StringComparison.InvariantCultureIgnoreCase) && parameterAndValue.Length > 1)
+                    {
+                        terminalLoggerDefault = parameterAndValue[1];
+                    }
+                }
+
+                if (terminalLoggerDefault == null)
+                {
+                    terminalLoggerDefault = bool.FalseString;
+                    KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerDefault = bool.FalseString;
+                    KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerDefaultSource = "msbuild";
+                }
+                else
+                {
+                    // Lets check DOTNET CLI env var
+                    string dotnetCliEnvVar = Environment.GetEnvironmentVariable("DOTNET_CLI_CONFIGURE_MSBUILD_TERMINAL_LOGGER");
+                    KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerDefault = terminalLoggerDefault;
+                    KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerDefaultSource = string.IsNullOrWhiteSpace(dotnetCliEnvVar) ? "sdk" : "DOTNET_CLI_CONFIGURE_MSBUILD_TERMINAL_LOGGER";
+                }
+
+                return terminalLoggerDefault;
+            }
+
+            bool TryFromCommandLine(CommandLineSwitches commandLineSwitches1)
+            {
+                if (!commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.TerminalLogger))
+                {
+                    return false;
+                }
+
+                // There's a switch set, but there might be more than one
+                string[] switches = commandLineSwitches1[CommandLineSwitches.ParameterizedSwitch.TerminalLogger];
+
+                terminalLoggerArg = switches[switches.Length - 1];
+
+                // if the switch was set but not to an explicit value, the value is "auto"
+                if (string.IsNullOrEmpty(terminalLoggerArg))
+                {
+                    terminalLoggerArg = "auto";
+                }
+
+                KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerUserIntent = terminalLoggerArg ?? string.Empty;
+                KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerUserIntentSource = "arg";
+
+                return true;
+            }
+
+            bool TryFromEnvironmentVariables()
+            {
+                // Keep MSBUILDLIVELOGGER supporitng existing use. But MSBUILDTERMINALLOGGER takes precedence.
+                string liveLoggerArg = Environment.GetEnvironmentVariable("MSBUILDLIVELOGGER");
+                terminalLoggerArg = Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER");
+                if (!string.IsNullOrEmpty(terminalLoggerArg))
+                {
+                    s_globalMessagesToLogInBuildLoggers.Add(
+                        new BuildManager.DeferredBuildMessage($"The environment variable MSBUILDTERMINALLOGGER was set to {terminalLoggerArg}.", MessageImportance.Low));
+
+                    KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerUserIntent = terminalLoggerArg;
+                    KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerUserIntentSource = "MSBUILDTERMINALLOGGER";
+                }
+                else if (!string.IsNullOrEmpty(liveLoggerArg))
+                {
+                    terminalLoggerArg = liveLoggerArg;
+                    s_globalMessagesToLogInBuildLoggers.Add(
+                        new BuildManager.DeferredBuildMessage($"The environment variable MSBUILDLIVELOGGER was set to {liveLoggerArg}.", MessageImportance.Low));
+
+                    KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerUserIntent = terminalLoggerArg;
+                    KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerUserIntentSource = "MSBUILDLIVELOGGER";
+                }
+                else
+                {
+                    return false;
+                }
+
+                return true;
+            }
+
+            string NormalizeIntoBooleanValues()
+            {
+                // We now have a string`. It can be "true" or "false" which means just that:
+                if (terminalLoggerArg.Equals("on", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    terminalLoggerArg = bool.TrueString;
+                }
+                else if (terminalLoggerArg.Equals("off", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    terminalLoggerArg = bool.FalseString;
+                }
+
+                return terminalLoggerArg;
+            }
+
+            void ApplyDefault()
+            {
+                terminalLoggerArg = defaultValue;
+            }
+
+            string AggregateParameters(CommandLineSwitches switches)
+            {
+                string[] terminalLoggerParameters = switches[CommandLineSwitches.ParameterizedSwitch.TerminalLoggerParameters];
+                return terminalLoggerParameters?.Length > 0 ? MSBuildApp.AggregateParameters(string.Empty, terminalLoggerParameters) : string.Empty;
+            }
+
+            bool TrueOrFalse()
+            {
+                if (bool.TryParse(terminalLoggerArg, out bool result))
+                {
+                    useTerminalLogger = result;
+
+                    // Try Enable Ansi Color Codes when terminal logger is enabled/enforced.
+                    if (result)
+                    {
+                        // This needs to be called so Ansi Color Codes are enabled for the terminal logger.
+                        (_, _, s_originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            void ItMustBeAuto()
+            {
+                // or it can be "auto", meaning "enable if we can"
+                if (!terminalLoggerArg.Equals("auto", StringComparison.OrdinalIgnoreCase))
+                {
+                    CommandLineSwitchException.Throw("InvalidTerminalLoggerValue", terminalLoggerArg);
+                }
+
+                useTerminalLogger = CheckIfTerminalIsSupportedAndTryEnableAnsiColorCodes();
             }
         }
 
@@ -3259,6 +3388,14 @@ namespace Microsoft.Build.CommandLine
         /// <returns>List of target names.</returns>
         private static string[] ProcessTargetSwitch(string[] parameters)
         {
+            foreach (string parameter in parameters)
+            {
+                int indexOfSpecialCharacter = parameter.IndexOfAny(XMakeElements.InvalidTargetNameCharacters);
+                if (indexOfSpecialCharacter >= 0)
+                {
+                    CommandLineSwitchException.Throw("NameInvalid", nameof(XMakeElements.target), parameter, parameter[indexOfSpecialCharacter].ToString());
+                }
+            }
             return parameters;
         }
 
@@ -3330,7 +3467,8 @@ namespace Microsoft.Build.CommandLine
             string[] verbositySwitchParameters,
             bool noConsoleLogger,
             bool distributedFileLogger,
-            bool liveLoggerOptIn,
+            bool terminalloggerOptIn,
+            string aggregatedTerminalLoggerParameters,
             string[] fileLoggerParameters,
             string[] consoleLoggerParameters,
             string[] binaryLoggerParameters,
@@ -3364,9 +3502,9 @@ namespace Microsoft.Build.CommandLine
             distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
 
             // Choose default console logger
-            if (liveLoggerOptIn)
+            if (terminalloggerOptIn)
             {
-                ProcessLiveLogger(noConsoleLogger, distributedLoggerRecords, cpuCount, loggers);
+                ProcessTerminalLogger(noConsoleLogger, aggregatedTerminalLoggerParameters, distributedLoggerRecords, cpuCount, loggers);
             }
             else
             {
@@ -3542,8 +3680,8 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static void ProcessLiveLogger(
-            bool noConsoleLogger,
+        private static void ProcessTerminalLogger(bool noConsoleLogger,
+            string aggregatedLoggerParameters,
             List<DistributedLoggerRecord> distributedLoggerRecords,
             int cpuCount,
             List<ILogger> loggers)
@@ -3551,7 +3689,10 @@ namespace Microsoft.Build.CommandLine
             if (!noConsoleLogger)
             {
                 // A central logger will be created for both single proc and multiproc.
-                LiveLogger logger = new LiveLogger();
+                TerminalLogger logger = new TerminalLogger()
+                {
+                    Parameters = aggregatedLoggerParameters
+                };
 
                 // Check to see if there is a possibility we will be logging from an out-of-proc node.
                 // If so (we're multi-proc or the in-proc node is disabled), we register a distributed logger.
@@ -3562,7 +3703,7 @@ namespace Microsoft.Build.CommandLine
                 else
                 {
                     // For performance, register this logger using the forwarding logger mechanism.
-                    DistributedLoggerRecord forwardingLoggerRecord = CreateForwardingLoggerRecord(logger, string.Join(";", LiveLogger.ConfigurableForwardingLoggerParameters), LoggerVerbosity.Quiet);
+                    DistributedLoggerRecord forwardingLoggerRecord = CreateForwardingLoggerRecord(logger, string.Join(";", TerminalLogger.ConfigurableForwardingLoggerParameters), LoggerVerbosity.Quiet);
                     distributedLoggerRecords.Add(forwardingLoggerRecord);
                 }
             }

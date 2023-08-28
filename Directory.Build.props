@@ -24,12 +24,8 @@
           scripts/Deploy-MSBuild.ps1
           src/Framework/README.md
           src/Utilities/README.md
-
-        Special-case while MSBuild uses Arcade 6 to build: 17.7 should
-        continue to target .NET 7, so bump a 6 here to 7.
      -->
     <LatestDotNetCoreForMSBuild>$(NetCurrent)</LatestDotNetCoreForMSBuild>
-    <LatestDotNetCoreForMSBuild Condition=" '$(NetCurrent)' == 'net6.0' ">net7.0</LatestDotNetCoreForMSBuild>
   </PropertyGroup>
 
   <PropertyGroup>

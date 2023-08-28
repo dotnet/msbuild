@@ -24,47 +24,37 @@ namespace Microsoft.Build.BackEnd
     internal enum TaskParameterType
     {
         /// <summary>
-        /// Parameter is null
+        /// Parameter is null.
         /// </summary>
         Null,
 
         /// <summary>
-        /// Parameter is a string
+        /// Parameter is of a type described by a <see cref="TypeCode"/>.
         /// </summary>
-        String,
+        PrimitiveType,
 
         /// <summary>
-        /// Parameter is an array of strings
+        /// Parameter is an array of a type described by a <see cref="TypeCode"/>.
         /// </summary>
-        StringArray,
+        PrimitiveTypeArray,
 
         /// <summary>
-        /// Parameter is <c>true</c> or <c>false</c>.
-        /// </summary>
-        Bool,
-
-        /// <summary>
-        /// Parameter is an <see langword="int"/>.
-        /// </summary>
-        Int,
-
-        /// <summary>
-        /// Parameter is a value type.  Note:  Must be serializable
+        /// Parameter is a value type.  Note:  Must be <see cref="IConvertible"/>.
         /// </summary>
         ValueType,
 
         /// <summary>
-        /// Parameter is an array of value types.  Note:  Must be serializable.
+        /// Parameter is an array of value types.  Note:  Must be <see cref="IConvertible"/>.
         /// </summary>
         ValueTypeArray,
 
         /// <summary>
-        /// Parameter is an ITaskItem
+        /// Parameter is an ITaskItem.
         /// </summary>
         ITaskItem,
 
         /// <summary>
-        /// Parameter is an array of ITaskItems
+        /// Parameter is an array of ITaskItems.
         /// </summary>
         ITaskItemArray,
 
@@ -72,7 +62,7 @@ namespace Microsoft.Build.BackEnd
         /// An invalid parameter -- the value of this parameter contains the exception
         /// that is thrown when trying to access it.
         /// </summary>
-        Invalid
+        Invalid,
     }
 
     /// <summary>
@@ -86,9 +76,14 @@ namespace Microsoft.Build.BackEnd
         ITranslatable
     {
         /// <summary>
-        /// The TaskParameterType of the wrapped parameter
+        /// The TaskParameterType of the wrapped parameter.
         /// </summary>
         private TaskParameterType _parameterType;
+
+        /// <summary>
+        /// The <see cref="TypeCode"/> of the wrapped parameter if it's a primitive type.
+        /// </summary>
+        private TypeCode _parameterTypeCode;
 
         /// <summary>
         /// The actual task parameter that we're wrapping
@@ -124,9 +119,11 @@ namespace Microsoft.Build.BackEnd
 
             if (wrappedParameterType.IsArray)
             {
-                if (wrappedParameterType == typeof(string[]))
+                TypeCode typeCode = Type.GetTypeCode(wrappedParameterType.GetElementType());
+                if (typeCode != TypeCode.Object && typeCode != TypeCode.DBNull)
                 {
-                    _parameterType = TaskParameterType.StringArray;
+                    _parameterType = TaskParameterType.PrimitiveTypeArray;
+                    _parameterTypeCode = typeCode;
                     _wrappedParameter = wrappedParameter;
                 }
                 else if (typeof(ITaskItem[]).GetTypeInfo().IsAssignableFrom(wrappedParameterType.GetTypeInfo()))
@@ -158,37 +155,27 @@ namespace Microsoft.Build.BackEnd
             else
             {
                 // scalar parameter
-                if (wrappedParameterType == typeof(string))
+                // Preserve enums as strings: the enum type itself may not
+                // be loaded on the other side of the serialization, but
+                // we would convert to string anyway after pulling the
+                // task output into a property or item.
+                if (wrappedParameterType.IsEnum)
                 {
-                    _parameterType = TaskParameterType.String;
+                    wrappedParameter = (string)Convert.ChangeType(wrappedParameter, typeof(string), CultureInfo.InvariantCulture);
+                    wrappedParameterType = typeof(string);
+                }
+
+                TypeCode typeCode = Type.GetTypeCode(wrappedParameterType);
+                if (typeCode != TypeCode.Object && typeCode != TypeCode.DBNull)
+                {
+                    _parameterType = TaskParameterType.PrimitiveType;
+                    _parameterTypeCode = typeCode;
                     _wrappedParameter = wrappedParameter;
                 }
                 else if (typeof(ITaskItem).IsAssignableFrom(wrappedParameterType))
                 {
                     _parameterType = TaskParameterType.ITaskItem;
                     _wrappedParameter = CreateNewTaskItemFrom((ITaskItem)wrappedParameter);
-                }
-                // Preserve enums as strings: the enum type itself may not
-                // be loaded on the other side of the serialization, but
-                // we would convert to string anyway after pulling the
-                // task output into a property or item.
-                else if (wrappedParameterType.IsEnum)
-                {
-                    _parameterType = TaskParameterType.String;
-                    _wrappedParameter = (string)Convert.ChangeType(wrappedParameter, typeof(string), CultureInfo.InvariantCulture);
-                }
-                // Also stringify known common value types, to avoid calling
-                // TranslateDotNet when they'll just be stringified on the
-                // output side
-                else if (wrappedParameterType == typeof(bool))
-                {
-                    _parameterType = TaskParameterType.Bool;
-                    _wrappedParameter = wrappedParameter;
-                }
-                else if (wrappedParameterType == typeof(int))
-                {
-                    _parameterType = TaskParameterType.Int;
-                    _wrappedParameter = wrappedParameter;
                 }
                 else if (wrappedParameterType.GetTypeInfo().IsValueType)
                 {
@@ -203,31 +190,26 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Constructor for deserialization
+        /// Constructor for deserialization.
         /// </summary>
         private TaskParameter()
         {
         }
 
         /// <summary>
-        /// The TaskParameterType of the wrapped parameter
+        /// The TaskParameterType of the wrapped parameter.
         /// </summary>
-        public TaskParameterType ParameterType
-        {
-            [DebuggerStepThrough]
-            get
-            { return _parameterType; }
-        }
+        public TaskParameterType ParameterType => _parameterType;
 
         /// <summary>
-        /// The actual task parameter that we're wrapping
+        /// The <see cref="TypeCode"/> of the wrapper parameter if it's a primitive or array of primitives.
         /// </summary>
-        public object WrappedParameter
-        {
-            [DebuggerStepThrough]
-            get
-            { return _wrappedParameter; }
-        }
+        public TypeCode ParameterTypeCode => _parameterTypeCode;
+
+        /// <summary>
+        /// The actual task parameter that we're wrapping.
+        /// </summary>
+        public object WrappedParameter => _wrappedParameter;
 
         /// <summary>
         /// TaskParameter's ToString should just pass through to whatever it's wrapping.
@@ -242,44 +224,38 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void Translate(ITranslator translator)
         {
-            translator.TranslateEnum<TaskParameterType>(ref _parameterType, (int)_parameterType);
+            translator.TranslateEnum(ref _parameterType, (int)_parameterType);
 
             switch (_parameterType)
             {
                 case TaskParameterType.Null:
                     _wrappedParameter = null;
                     break;
-                case TaskParameterType.String:
-                    string stringParam = (string)_wrappedParameter;
-                    translator.Translate(ref stringParam);
-                    _wrappedParameter = stringParam;
+                case TaskParameterType.PrimitiveType:
+                    TranslatePrimitiveType(translator);
                     break;
-                case TaskParameterType.StringArray:
-                    string[] stringArrayParam = (string[])_wrappedParameter;
-                    translator.Translate(ref stringArrayParam);
-                    _wrappedParameter = stringArrayParam;
-                    break;
-                case TaskParameterType.Bool:
-                    bool boolParam = _wrappedParameter switch
-                    {
-                        bool hadValue => hadValue,
-                        _ => default,
-                    };
-                    translator.Translate(ref boolParam);
-                    _wrappedParameter = boolParam;
-                    break;
-                case TaskParameterType.Int:
-                    int intParam = _wrappedParameter switch
-                    {
-                        int hadValue => hadValue,
-                        _ => default,
-                    };
-                    translator.Translate(ref intParam);
-                    _wrappedParameter = intParam;
+                case TaskParameterType.PrimitiveTypeArray:
+                    TranslatePrimitiveTypeArray(translator);
                     break;
                 case TaskParameterType.ValueType:
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
+                    {
+                        TranslateValueType(translator);
+                    }
+                    else
+                    {
+                        translator.TranslateDotNet(ref _wrappedParameter);
+                    }
+                    break;
                 case TaskParameterType.ValueTypeArray:
-                    translator.TranslateDotNet(ref _wrappedParameter);
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
+                    {
+                        TranslateValueTypeArray(translator);
+                    }
+                    else
+                    {
+                        translator.TranslateDotNet(ref _wrappedParameter);
+                    }
                     break;
                 case TaskParameterType.ITaskItem:
                     TranslateITaskItem(translator);
@@ -535,6 +511,223 @@ namespace Microsoft.Build.BackEnd
             }
 
             return haveRef;
+        }
+
+        /// <summary>
+        /// Serializes or deserializes a primitive type value wrapped by this <see cref="TaskParameter"/>.
+        /// </summary>
+        private void TranslatePrimitiveType(ITranslator translator)
+        {
+            translator.TranslateEnum(ref _parameterTypeCode, (int)_parameterTypeCode);
+
+            switch (_parameterTypeCode)
+            {
+                case TypeCode.Boolean:
+                    bool boolParam = _wrappedParameter is bool wrappedBool ? wrappedBool : default;
+                    translator.Translate(ref boolParam);
+                    _wrappedParameter = boolParam;
+                    break;
+
+                case TypeCode.Byte:
+                    byte byteParam = _wrappedParameter is byte wrappedByte ? wrappedByte : default;
+                    translator.Translate(ref byteParam);
+                    _wrappedParameter = byteParam;
+                    break;
+
+                case TypeCode.Int16:
+                    short shortParam = _wrappedParameter is short wrappedShort ? wrappedShort : default;
+                    translator.Translate(ref shortParam);
+                    _wrappedParameter = shortParam;
+                    break;
+
+                case TypeCode.UInt16:
+                    ushort ushortParam = _wrappedParameter is ushort wrappedUShort ? wrappedUShort : default;
+                    translator.Translate(ref ushortParam);
+                    _wrappedParameter = ushortParam;
+                    break;
+
+                case TypeCode.Int64:
+                    long longParam = _wrappedParameter is long wrappedLong ? wrappedLong : default;
+                    translator.Translate(ref longParam);
+                    _wrappedParameter = longParam;
+                    break;
+
+                case TypeCode.Double:
+                    double doubleParam = _wrappedParameter is double wrappedDouble ? wrappedDouble : default;
+                    translator.Translate(ref doubleParam);
+                    _wrappedParameter = doubleParam;
+                    break;
+
+                case TypeCode.String:
+                    string stringParam = (string)_wrappedParameter;
+                    translator.Translate(ref stringParam);
+                    _wrappedParameter = stringParam;
+                    break;
+
+                case TypeCode.DateTime:
+                    DateTime dateTimeParam = _wrappedParameter is DateTime wrappedDateTime ? wrappedDateTime : default;
+                    translator.Translate(ref dateTimeParam);
+                    _wrappedParameter = dateTimeParam;
+                    break;
+
+                default:
+                    // Fall back to converting to/from string for types that don't have ITranslator support.
+                    string stringValue = null;
+                    if (translator.Mode == TranslationDirection.WriteToStream)
+                    {
+                        stringValue = (string)Convert.ChangeType(_wrappedParameter, typeof(string), CultureInfo.InvariantCulture);
+                    }
+
+                    translator.Translate(ref stringValue);
+
+                    if (translator.Mode == TranslationDirection.ReadFromStream)
+                    {
+                        _wrappedParameter = Convert.ChangeType(stringValue, _parameterTypeCode, CultureInfo.InvariantCulture);
+                    }
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Serializes or deserializes an array of primitive type values wrapped by this <see cref="TaskParameter"/>.
+        /// </summary>
+        private void TranslatePrimitiveTypeArray(ITranslator translator)
+        {
+            translator.TranslateEnum(ref _parameterTypeCode, (int)_parameterTypeCode);
+
+            switch (_parameterTypeCode)
+            {
+                case TypeCode.Boolean:
+                    bool[] boolArrayParam = (bool[])_wrappedParameter;
+                    translator.Translate(ref boolArrayParam);
+                    _wrappedParameter = boolArrayParam;
+                    break;
+
+                case TypeCode.Int32:
+                    int[] intArrayParam = (int[])_wrappedParameter;
+                    translator.Translate(ref intArrayParam);
+                    _wrappedParameter = intArrayParam;
+                    break;
+
+                case TypeCode.String:
+                    string[] stringArrayParam = (string[])_wrappedParameter;
+                    translator.Translate(ref stringArrayParam);
+                    _wrappedParameter = stringArrayParam;
+                    break;
+
+                default:
+                    // Fall back to converting to/from string for types that don't have ITranslator support.
+                    if (translator.Mode == TranslationDirection.WriteToStream)
+                    {
+                        Array array = (Array)_wrappedParameter;
+                        int length = array.Length;
+
+                        translator.Translate(ref length);
+
+                        for (int i = 0; i < length; i++)
+                        {
+                            string valueString = Convert.ToString(array.GetValue(i), CultureInfo.InvariantCulture);
+                            translator.Translate(ref valueString);
+                        }
+                    }
+                    else
+                    {
+                        Type elementType = _parameterTypeCode switch
+                        {
+                            TypeCode.Char => typeof(char),
+                            TypeCode.SByte => typeof(sbyte),
+                            TypeCode.Byte => typeof(byte),
+                            TypeCode.Int16 => typeof(short),
+                            TypeCode.UInt16 => typeof(ushort),
+                            TypeCode.UInt32 => typeof(uint),
+                            TypeCode.Int64 => typeof(long),
+                            TypeCode.UInt64 => typeof(ulong),
+                            TypeCode.Single => typeof(float),
+                            TypeCode.Double => typeof(double),
+                            TypeCode.Decimal => typeof(decimal),
+                            TypeCode.DateTime => typeof(DateTime),
+                            _ => throw new NotImplementedException(),
+                        };
+
+                        int length = 0;
+                        translator.Translate(ref length);
+
+                        Array array = Array.CreateInstance(elementType, length);
+                        for (int i = 0; i < length; i++)
+                        {
+                            string valueString = null;
+                            translator.Translate(ref valueString);
+                            array.SetValue(Convert.ChangeType(valueString, _parameterTypeCode, CultureInfo.InvariantCulture), i);
+                        }
+                        _wrappedParameter = array;
+                    }
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Serializes or deserializes the value type instance wrapped by this <see cref="TaskParameter"/>.
+        /// </summary>
+        /// <remarks>
+        /// The value type is converted to/from string using the <see cref="Convert"/> class. Note that we require
+        /// task parameter types to be <see cref="IConvertible"/> so this conversion is guaranteed to work for parameters
+        /// that have made it this far.
+        /// </remarks>
+        private void TranslateValueType(ITranslator translator)
+        {
+            string valueString = null;
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                valueString = (string)Convert.ChangeType(_wrappedParameter, typeof(string), CultureInfo.InvariantCulture);
+            }
+
+            translator.Translate(ref valueString);
+
+            if (translator.Mode == TranslationDirection.ReadFromStream)
+            {
+                // We don't know how to convert the string back to the original value type. This is fine because output
+                // task parameters are anyway converted to strings by the engine (see TaskExecutionHost.GetValueOutputs)
+                // and input task parameters of custom value types are not supported.
+                _wrappedParameter = valueString;
+            }
+        }
+
+        /// <summary>
+        /// Serializes or deserializes the value type array instance wrapped by this <see cref="TaskParameter"/>.
+        /// </summary>
+        /// <remarks>
+        /// The array is assumed to be non-null.
+        /// </remarks>
+        private void TranslateValueTypeArray(ITranslator translator)
+        {
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                Array array = (Array)_wrappedParameter;
+                int length = array.Length;
+
+                translator.Translate(ref length);
+
+                for (int i = 0; i < length; i++)
+                {
+                    string valueString = Convert.ToString(array.GetValue(i), CultureInfo.InvariantCulture);
+                    translator.Translate(ref valueString);
+                }
+            }
+            else
+            {
+                int length = 0;
+                translator.Translate(ref length);
+
+                string[] stringArray = new string[length];
+                for (int i = 0; i < length; i++)
+                {
+                    translator.Translate(ref stringArray[i]);
+                }
+
+                // We don't know how to convert the string array back to the original value type array.
+                // This is fine because the engine would eventually convert it to strings anyway.
+                _wrappedParameter = stringArray;
+            }
         }
 
         /// <summary>
@@ -854,6 +1047,14 @@ namespace Microsoft.Build.BackEnd
                 {
                     var unescaped = new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.UnescapeAll(kvp.Value));
                     yield return unescaped;
+                }
+            }
+
+            public void ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata)
+            {
+                foreach (KeyValuePair<string, string> kvp in metadata)
+                {
+                    SetMetadata(kvp.Key, kvp.Value);
                 }
             }
         }

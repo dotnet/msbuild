@@ -167,13 +167,13 @@ namespace Microsoft.Build.UnitTests
         [InlineData("terminallogger")]
         [InlineData("TerminalLogger")]
         [InlineData("TERMINALLOGGER")]
-        public void LiveLoggerSwitchIdentificationTests(string livelogger)
+        public void TerminalLoggerSwitchIdentificationTests(string terminallogger)
         {
             CommandLineSwitches.ParameterizedSwitch parameterlessSwitch;
             string duplicateSwitchErrorMessage;
 
-            CommandLineSwitches.IsParameterizedSwitch(livelogger, out parameterlessSwitch, out duplicateSwitchErrorMessage, out bool multipleParametersAllowed, out string missingParametersErrorMessage, out bool unquoteParameters, out bool emptyParametersAllowed).ShouldBeTrue();
-            parameterlessSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.LiveLogger);
+            CommandLineSwitches.IsParameterizedSwitch(terminallogger, out parameterlessSwitch, out duplicateSwitchErrorMessage, out bool multipleParametersAllowed, out string missingParametersErrorMessage, out bool unquoteParameters, out bool emptyParametersAllowed).ShouldBeTrue();
+            parameterlessSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.TerminalLogger);
             duplicateSwitchErrorMessage.ShouldBeNull();
             multipleParametersAllowed.ShouldBeTrue();
             missingParametersErrorMessage.ShouldBeNull();
@@ -197,6 +197,28 @@ namespace Microsoft.Build.UnitTests
 
             CommandLineSwitches.IsParameterizedSwitch(fileloggerparameters, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed).ShouldBeTrue();
             parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldNotBeNull();
+            unquoteParameters.ShouldBeTrue();
+        }
+
+        [Theory]
+        [InlineData("tlp")]
+        [InlineData("TLP")]
+        [InlineData("terminalLoggerParameters")]
+        [InlineData("TERMINALLOGGERPARAMETERS")]
+        public void TerminalLoggerParametersIdentificationTests(string terminalLoggerParameters)
+        {
+            CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
+            string duplicateSwitchErrorMessage;
+            bool multipleParametersAllowed;
+            string missingParametersErrorMessage;
+            bool unquoteParameters;
+            bool emptyParametersAllowed;
+
+            CommandLineSwitches.IsParameterizedSwitch(terminalLoggerParameters, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.TerminalLoggerParameters);
             duplicateSwitchErrorMessage.ShouldBeNull();
             multipleParametersAllowed.ShouldBeFalse();
             missingParametersErrorMessage.ShouldNotBeNull();
@@ -1367,6 +1389,26 @@ namespace Microsoft.Build.UnitTests
             {
                 exception.ShouldBeNull();
             }
+        }
+
+        /// <summary>
+        /// Verifies that the /target switch is parsed properly with invalid characters.
+        /// </summary>
+        [Fact]
+        public void ProcessInvalidTargetSwitch()
+        {
+            string projectContent = """
+                <Project>
+                </Project>
+                """;
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            string project = testEnvironment.CreateTestProjectWithFiles("project.proj", projectContent).ProjectFile;
+
+#if FEATURE_GET_COMMANDLINE
+            MSBuildApp.Execute(@"msbuild.exe " + project + " /t:foo.bar").ShouldBe(MSBuildApp.ExitType.SwitchError);
+#else
+            MSBuildApp.Execute(new[] { @"msbuild.exe", project, "/t:foo.bar" }).ShouldBe(MSBuildApp.ExitType.SwitchError);
+#endif
         }
 
         /// <summary>

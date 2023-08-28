@@ -886,7 +886,7 @@ namespace Microsoft.Build.BackEnd
 
                         string multiplier = Environment.GetEnvironmentVariable("MSBUILDCUSTOMSCHEDULERFORSQLCONFIGURATIONLIMITMULTIPLIER");
                         double convertedMultiplier = 0;
-                        if (!Double.TryParse(multiplier, out convertedMultiplier) || convertedMultiplier < 1)
+                        if (!Double.TryParse(multiplier, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture.NumberFormat, out convertedMultiplier) || convertedMultiplier < 1)
                         {
                             _customSchedulerForSQLConfigurationLimitMultiplier = DefaultCustomSchedulerForSQLConfigurationLimitMultiplier;
                         }

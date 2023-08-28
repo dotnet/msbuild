@@ -78,7 +78,7 @@ namespace Microsoft.Build.Evaluation
         /// When an error occurs expanding a property, just leave it unexpanded.
         /// </summary>
         /// <remarks>
-        /// This should only be used in cases where property evaluation isn't critcal, such as when attempting to log a
+        /// This should only be used in cases where property evaluation isn't critical, such as when attempting to log a
         /// message with a best effort expansion of a string, or when discovering partial information during lazy evaluation.
         /// </remarks>
         LeavePropertiesUnexpandedOnError = 0x20,
@@ -285,7 +285,7 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// The CultureInfo from the invariant culture. Used to avoid allocations for
-        /// perfoming IndexOf etc.
+        /// performing IndexOf etc.
         /// </summary>
         private static CompareInfo s_invariantCompareInfo = CultureInfo.InvariantCulture.CompareInfo;
 
@@ -1338,7 +1338,7 @@ namespace Microsoft.Build.Evaluation
                         if (function != null)
                         {
                             // We will have either extracted the actual property name
-                            // or realised that there is none (static function), and have recorded a null
+                            // or realized that there is none (static function), and have recorded a null
                             propertyName = function.Receiver;
                         }
                         else
@@ -2581,12 +2581,9 @@ namespace Microsoft.Build.Evaluation
                             {
                                 metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                             }
-                            catch (ArgumentException ex) // Blank metadata name
+                            catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
                             {
-                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
-                            }
-                            catch (InvalidOperationException ex)
-                            {
+                                // Blank metadata name
                                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                             }
 
@@ -2786,12 +2783,9 @@ namespace Microsoft.Build.Evaluation
                         {
                             metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                         }
-                        catch (ArgumentException ex) // Blank metadata name
+                        catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
                         {
-                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
-                        }
-                        catch (InvalidOperationException ex)
-                        {
+                            // Blank metadata name
                             ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                         }
 
@@ -2824,16 +2818,46 @@ namespace Microsoft.Build.Evaluation
                         {
                             metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                         }
-                        catch (ArgumentException ex) // Blank metadata name
+                        catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
                         {
-                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
-                        }
-                        catch (InvalidOperationException ex)
-                        {
+                            // Blank metadata name
                             ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                         }
 
                         if (metadataValue != null && String.Equals(metadataValue, metadataValueToFind, StringComparison.OrdinalIgnoreCase))
+                        {
+                            // return a result through the enumerator
+                            yield return new Pair<string, S>(item.Key, item.Value);
+                        }
+                    }
+                }
+
+                /// <summary>
+                /// Intrinsic function that returns those items don't have the given metadata value
+                /// Using a case insensitive comparison.
+                /// </summary>
+                internal static IEnumerable<Pair<string, S>> WithoutMetadataValue(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                {
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
+
+                    string metadataName = arguments[0];
+                    string metadataValueToFind = arguments[1];
+
+                    foreach (Pair<string, S> item in itemsOfType)
+                    {
+                        string metadataValue = null;
+
+                        try
+                        {
+                            metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
+                        }
+                        catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
+                        {
+                            // Blank metadata name
+                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
+                        }
+
+                        if (!String.Equals(metadataValue, metadataValueToFind, StringComparison.OrdinalIgnoreCase))
                         {
                             // return a result through the enumerator
                             yield return new Pair<string, S>(item.Key, item.Value);
@@ -2863,12 +2887,9 @@ namespace Microsoft.Build.Evaluation
                             {
                                 metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                             }
-                            catch (ArgumentException ex) // Blank metadata name
+                            catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
                             {
-                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
-                            }
-                            catch (InvalidOperationException ex)
-                            {
+                                // Blank metadata name
                                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                             }
 
@@ -3160,7 +3181,7 @@ namespace Microsoft.Build.Evaluation
         /// It is also responsible for executing the function.
         /// </summary>
         /// <typeparam name="T">Type of the properties used to expand the expression.</typeparam>
-        private class Function<T>
+        internal class Function<T>
             where T : class, IProperty
         {
             /// <summary>
@@ -3294,7 +3315,7 @@ namespace Microsoft.Build.Evaluation
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionStaticMethodSyntax", expressionFunction, String.Empty);
                     }
 
-                    var typeName = expressionRoot.Slice(1, typeEndIndex - 1).ToString();
+                    var typeName = Strings.WeakIntern(expressionRoot.Slice(1, typeEndIndex - 1));
                     var methodStartIndex = typeEndIndex + 1;
 
                     if (expressionRoot.Length > methodStartIndex + 2 && expressionRoot[methodStartIndex] == ':' && expressionRoot[methodStartIndex + 1] == ':')
@@ -3352,7 +3373,7 @@ namespace Microsoft.Build.Evaluation
                     var rootEndIndex = expressionRoot.IndexOf('.');
 
                     // If this is an instance function rather than a static, then we'll capture the name of the property referenced
-                    var functionReceiver = expressionRoot.Slice(0, rootEndIndex).Trim().ToString();
+                    var functionReceiver = Strings.WeakIntern(expressionRoot.Slice(0, rootEndIndex).Trim());
 
                     // If propertyValue is null (we're not recursing), then we're expecting a valid property name
                     if (propertyValue == null && !IsValidPropertyName(functionReceiver))
@@ -3461,6 +3482,13 @@ namespace Microsoft.Build.Evaluation
                     // that it matches the left hand side ready for the default binder’s method invoke.
                     if (objectInstance != null && args.Length == 1 && (String.Equals("Equals", _methodMethodName, StringComparison.OrdinalIgnoreCase) || String.Equals("CompareTo", _methodMethodName, StringComparison.OrdinalIgnoreCase)))
                     {
+                        // Support comparison when the lhs is an integer
+                        if (IsFloatingPointRepresentation(args[0]) && !IsFloatingPointRepresentation(objectInstance))
+                        {
+                            objectInstance = Convert.ChangeType(objectInstance, typeof(double), CultureInfo.InvariantCulture);
+                            _receiverType = objectInstance.GetType();
+                        }
+
                         // change the type of the final unescaped string into the destination
                         args[0] = Convert.ChangeType(args[0], objectInstance.GetType(), CultureInfo.InvariantCulture);
                     }
@@ -3468,14 +3496,11 @@ namespace Microsoft.Build.Evaluation
                     if (_receiverType == typeof(IntrinsicFunctions))
                     {
                         // Special case a few methods that take extra parameters that can't be passed in by the user
-                        //
-
                         if (_methodMethodName.Equals("GetPathOfFileAbove") && args.Length == 1)
                         {
                             // Append the IElementLocation as a parameter to GetPathOfFileAbove if the user only
                             // specified the file name.  This is syntactic sugar so they don't have to always
                             // include $(MSBuildThisFileDirectory) as a parameter.
-                            //
                             string startingDirectory = String.IsNullOrWhiteSpace(elementLocation.File) ? String.Empty : Path.GetDirectoryName(elementLocation.File);
 
                             args = new[]
@@ -3528,7 +3553,7 @@ namespace Microsoft.Build.Evaluation
                                 functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
                             }
                             // If we're invoking a method, then there are deeper attempts that can be made to invoke the method.
-                            // If not, we were asked to get a property or field but found that we cannot locate it. No further argument coersion is possible, so throw.
+                            // If not, we were asked to get a property or field but found that we cannot locate it. No further argument coercion is possible, so throw.
                             catch (MissingMethodException ex) when ((_bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
                             {
                                 // The standard binder failed, so do our best to coerce types into the arguments for the function
@@ -3932,41 +3957,36 @@ namespace Microsoft.Build.Evaluation
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Add), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryGetArgs(args, out double arg0, out double arg1))
+                            if (TryExecuteArithmeticOverload(args, IntrinsicFunctions.Add, IntrinsicFunctions.Add, out returnVal))
                             {
-                                returnVal = IntrinsicFunctions.Add(arg0, arg1);
                                 return true;
                             }
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Subtract), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryGetArgs(args, out double arg0, out double arg1))
+                            if (TryExecuteArithmeticOverload(args, IntrinsicFunctions.Subtract, IntrinsicFunctions.Subtract, out returnVal))
                             {
-                                returnVal = IntrinsicFunctions.Subtract(arg0, arg1);
                                 return true;
                             }
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Multiply), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryGetArgs(args, out double arg0, out double arg1))
+                            if (TryExecuteArithmeticOverload(args, IntrinsicFunctions.Multiply, IntrinsicFunctions.Multiply, out returnVal))
                             {
-                                returnVal = IntrinsicFunctions.Multiply(arg0, arg1);
                                 return true;
                             }
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Divide), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryGetArgs(args, out double arg0, out double arg1))
+                            if (TryExecuteArithmeticOverload(args, IntrinsicFunctions.Divide, IntrinsicFunctions.Divide, out returnVal))
                             {
-                                returnVal = IntrinsicFunctions.Divide(arg0, arg1);
                                 return true;
                             }
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Modulo), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryGetArgs(args, out double arg0, out double arg1))
+                            if (TryExecuteArithmeticOverload(args, IntrinsicFunctions.Modulo, IntrinsicFunctions.Modulo, out returnVal))
                             {
-                                returnVal = IntrinsicFunctions.Modulo(arg0, arg1);
                                 return true;
                             }
                         }
@@ -4514,38 +4534,97 @@ namespace Microsoft.Build.Evaluation
                 return true;
             }
 
-            private static bool TryConvertToInt(object value, out int arg0)
+            /// <summary>
+            /// Try to convert value to int.
+            /// </summary>
+            internal static bool TryConvertToInt(object value, out int arg)
             {
                 switch (value)
                 {
                     case double d:
-                        arg0 = Convert.ToInt32(d);
-                        return arg0 == d;
+                        if (d >= int.MinValue && d <= int.MaxValue)
+                        {
+                            arg = Convert.ToInt32(d);
+                            if (Math.Abs(arg - d) == 0)
+                            {
+                                return true;
+                            }
+                        }
+
+                        break;
+                    case long l:
+                        if (l >= int.MinValue && l <= int.MaxValue)
+                        {
+                            arg = Convert.ToInt32(l);
+                            return true;
+                        }
+
+                        break;
                     case int i:
-                        arg0 = i;
+                        arg = i;
                         return true;
-                    case string s when int.TryParse(s, out arg0):
+                    case string s when int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture.NumberFormat, out arg):
                         return true;
-                }
-
-                arg0 = 0;
-                return false;
-            }
-
-            private static bool TryConvertToDouble(object value, out double arg)
-            {
-                if (value is double unboxed)
-                {
-                    arg = unboxed;
-                    return true;
-                }
-                else if (value is string str && double.TryParse(str, out arg))
-                {
-                    return true;
                 }
 
                 arg = 0;
                 return false;
+            }
+
+            /// <summary>
+            /// Try to convert value to long.
+            /// </summary>
+            internal static bool TryConvertToLong(object value, out long arg)
+            {
+                switch (value)
+                {
+                    case double d:
+                        if (d >= long.MinValue && d <= long.MaxValue)
+                        {
+                            arg = (long)d;
+                            if (Math.Abs(arg - d) == 0)
+                            {
+                                return true;
+                            }
+                        }
+
+                        break;
+                    case long l:
+                        arg = l;
+                        return true;
+                    case int i:
+                        arg = i;
+                        return true;
+                    case string s when long.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture.NumberFormat, out arg):
+                        return true;
+                }
+
+                arg = 0;
+                return false;
+            }
+
+            /// <summary>
+            /// Try to convert value to double.
+            /// </summary>
+            internal static bool TryConvertToDouble(object value, out double arg)
+            {
+                switch (value)
+                {
+                    case double unboxed:
+                        arg = unboxed;
+                        return true;
+                    case long l:
+                        arg = l;
+                        return true;
+                    case int i:
+                        arg = i;
+                        return true;
+                    case string str when double.TryParse(str, NumberStyles.Number | NumberStyles.Float, CultureInfo.InvariantCulture.NumberFormat, out arg):
+                        return true;
+                    default:
+                        arg = 0;
+                        return false;
+                }
             }
 
             private static bool TryGetArg(object[] args, out string arg0)
@@ -4669,6 +4748,38 @@ namespace Microsoft.Build.Evaluation
                     arg0 != null &&
                     int.TryParse(value1, out arg1))
                 {
+                    return true;
+                }
+
+                return false;
+            }
+
+            private static bool IsFloatingPointRepresentation(object value)
+            {
+                return value is double || (value is string str && double.TryParse(str, NumberStyles.Number | NumberStyles.Float, CultureInfo.InvariantCulture.NumberFormat, out double _));
+            }
+
+            private static bool TryExecuteArithmeticOverload(object[] args, Func<long, long, long> integerOperation, Func<double, double, double> realOperation, out object resultValue)
+            {
+                resultValue = null;
+
+                if (args.Length != 2)
+                {
+                    return false;
+                }
+
+                if (IntrinsicFunctionOverload.IsIntrinsicFunctionOverloadsEnabled())
+                {
+                    if (TryConvertToLong(args[0], out long argLong0) && TryConvertToLong(args[1], out long argLong1))
+                    {
+                        resultValue = integerOperation(argLong0, argLong1);
+                        return true;
+                    }
+                }
+
+                if (TryConvertToDouble(args[0], out double argDouble0) && TryConvertToDouble(args[1], out double argDouble1))
+                {
+                    resultValue = realOperation(argDouble0, argDouble1);
                     return true;
                 }
 
@@ -5187,7 +5298,6 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private object LateBindExecute(Exception ex, BindingFlags bindingFlags, object objectInstance /* null unless instance method */, object[] args, bool isConstructor)
             {
-
                 // First let's try for a method where all arguments are strings..
                 Type[] types = new Type[_arguments.Length];
                 for (int n = 0; n < _arguments.Length; n++)
@@ -5209,15 +5319,25 @@ namespace Microsoft.Build.Evaluation
                 // search for a method with the right number of arguments
                 if (memberInfo == null)
                 {
-                    MethodBase[] members;
                     // Gather all methods that may match
+                    IEnumerable<MethodBase> members;
                     if (isConstructor)
                     {
                         members = _receiverType.GetConstructors(bindingFlags);
                     }
+                    else if (_receiverType == typeof(IntrinsicFunctions) && IntrinsicFunctionOverload.IsKnownOverloadMethodName(_methodMethodName))
+                    {
+                        MemberInfo[] foundMembers = _receiverType.FindMembers(
+                            MemberTypes.Method,
+                            bindingFlags,
+                            (info, criteria) => string.Equals(info.Name, (string)criteria, StringComparison.OrdinalIgnoreCase),
+                            _methodMethodName);
+                        Array.Sort(foundMembers, IntrinsicFunctionOverload.IntrinsicFunctionOverloadMethodComparer);
+                        members = foundMembers.Cast<MethodBase>();
+                    }
                     else
                     {
-                        members = _receiverType.GetMethods(bindingFlags);
+                        members = _receiverType.GetMethods(bindingFlags).Where(m => string.Equals(m.Name, _methodMethodName, StringComparison.OrdinalIgnoreCase));
                     }
 
                     foreach (MethodBase member in members)
@@ -5227,22 +5347,19 @@ namespace Microsoft.Build.Evaluation
                         // Simple match on name and number of params, we will be case insensitive
                         if (parameters.Length == _arguments.Length)
                         {
-                            if (isConstructor || String.Equals(member.Name, _methodMethodName, StringComparison.OrdinalIgnoreCase))
-                            {
-                                // Try to find a method with the right name, number of arguments and
-                                // compatible argument types
-                                // we have a match on the name and argument number
-                                // now let's try to coerce the arguments we have
-                                // into the arguments on the matching method
-                                object[] coercedArguments = CoerceArguments(args, parameters);
+                            // Try to find a method with the right name, number of arguments and
+                            // compatible argument types
+                            // we have a match on the name and argument number
+                            // now let's try to coerce the arguments we have
+                            // into the arguments on the matching method
+                            object[] coercedArguments = CoerceArguments(args, parameters);
 
-                                if (coercedArguments != null)
-                                {
-                                    // We have a complete match
-                                    memberInfo = member;
-                                    args = coercedArguments;
-                                    break;
-                                }
+                            if (coercedArguments != null)
+                            {
+                                // We have a complete match
+                                memberInfo = member;
+                                args = coercedArguments;
+                                break;
                             }
                         }
                     }
@@ -5334,6 +5451,44 @@ namespace Microsoft.Build.Evaluation
         {
             get;
             set;
+        }
+    }
+
+    internal static class IntrinsicFunctionOverload
+    {
+        private static readonly string[] s_knownOverloadName = { "Add", "Subtract", "Multiply", "Divide", "Modulo", };
+
+        // Order by the TypeCode of the first parameter.
+        // When change wave is enabled, order long before double.
+        // Otherwise preserve prior behavior of double before long.
+        // For reuse, the comparer is cached in a non-generic type.
+        // Both comparer instances can be cached to support change wave testing.
+        private static IComparer<MemberInfo>? s_comparerLongBeforeDouble;
+        private static IComparer<MemberInfo>? s_comparerDoubleBeforeLong;
+
+        internal static IComparer<MemberInfo> IntrinsicFunctionOverloadMethodComparer => IsIntrinsicFunctionOverloadsEnabled() ? LongBeforeDoubleComparer : DoubleBeforeLongComparer;
+
+        private static IComparer<MemberInfo> LongBeforeDoubleComparer => s_comparerLongBeforeDouble ??= Comparer<MemberInfo>.Create((key0, key1) => SelectTypeOfFirstParameter(key0).CompareTo(SelectTypeOfFirstParameter(key1)));
+
+        private static IComparer<MemberInfo> DoubleBeforeLongComparer => s_comparerDoubleBeforeLong ??= Comparer<MemberInfo>.Create((key0, key1) => SelectTypeOfFirstParameter(key1).CompareTo(SelectTypeOfFirstParameter(key0)));
+
+        // The arithmetic overload feature uses this method to test for the change wave.
+        internal static bool IsIntrinsicFunctionOverloadsEnabled() => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8);
+
+        internal static bool IsKnownOverloadMethodName(string methodName) => s_knownOverloadName.Any(name => string.Equals(name, methodName, StringComparison.OrdinalIgnoreCase));
+
+        private static TypeCode SelectTypeOfFirstParameter(MemberInfo member)
+        {
+            MethodBase? method = member as MethodBase;
+            if (method == null)
+            {
+                return TypeCode.Empty;
+            }
+
+            ParameterInfo[] parameters = method.GetParameters();
+            return parameters.Length > 0
+                ? Type.GetTypeCode(parameters[0].ParameterType)
+                : TypeCode.Empty;
         }
     }
 }
