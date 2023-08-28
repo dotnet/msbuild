@@ -2501,10 +2501,10 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Report the received <paramref name="fileAccessReport"/> to the <see cref="FileAccessManager"/>.
+        /// Report the received <paramref name="fileAccessReport"/> to the file access manager.
         /// </summary>
         /// <param name="nodeId">The id of the node from which the <paramref name="fileAccessReport"/> was received.</param>
-        /// <param name="fileAccessReport">The file access to report to the <see cref="FileAccessManager"/>.</param>
+        /// <param name="fileAccessReport">The file access report.</param>
         private void HandleFileAccessReport(int nodeId, FileAccessReport fileAccessReport)
         {
 #if FEATURE_REPORTFILEACCESSES
@@ -2516,10 +2516,10 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Report the received <paramref name="processReport"/> to the <see cref="FileAccessManager"/>.
+        /// Report the received <paramref name="processReport"/> to the file access manager.
         /// </summary>
         /// <param name="nodeId">The id of the node from which the <paramref name="processReport"/> was received.</param>
-        /// <param name="processReport">The process data to report to the <see cref="FileAccessManager"/>.</param>
+        /// <param name="processReport">The process data report.</param>
         private void HandleProcessReport(int nodeId, ProcessReport processReport)
         {
 #if FEATURE_REPORTFILEACCESSES
