@@ -19,7 +19,7 @@ internal class DefaultRegistryAPI : IRegistryAPI
         bool isAmazonECRRegistry = baseUri.IsAmazonECRRegistry();
         _baseUri = baseUri;
         _logger = logger;
-        _client = CreateClient(registryName, baseUri, isAmazonECRRegistry);
+        _client = CreateClient(registryName, baseUri, logger, isAmazonECRRegistry);
         Manifest = new DefaultManifestOperations(_baseUri, registryName, _client, _logger);
         Blob = new DefaultBlobOperations(_baseUri, registryName, _client, _logger);
     }
