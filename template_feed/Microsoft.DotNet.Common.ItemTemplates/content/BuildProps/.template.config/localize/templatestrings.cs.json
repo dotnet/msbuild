@@ -4,6 +4,6 @@
   "description": "Prázdný soubor Directory.Build.props, který lze použít k určení vlastností MSBuild pro celou složku",
   "symbols/inherit/displayName": "Zdědit",
   "symbols/inherit/description": "Při hodnotě true přidá import pro nejbližší soubor Directory.Build.props v hierarchii adresářů systému souborů. Directory.Build.props ve výchozím nastavení nedědí, takže můžete vytvořit sadu přizpůsobení pro každou složku zvlášť.",
-  "symbols/useArtifacts/displayName": "Use Artifacts Output Layout",
-  "symbols/useArtifacts/description": "If true, adds a property to enable the artifacts output layout. This is a common pattern for projects that produce build artifacts, such as NuGet packages, that are placed in a common folder."
+  "symbols/useArtifacts/displayName": "Použít rozložení výstupu artefaktů",
+  "symbols/useArtifacts/description": "Při hodnotě true přidá vlastnost pro povolení výstupního rozložení artefaktů. Toto je běžný vzor pro projekty, které vytvářejí artefakty sestavení, jako jsou balíčky NuGet, které jsou umístěné ve společné složce."
 }

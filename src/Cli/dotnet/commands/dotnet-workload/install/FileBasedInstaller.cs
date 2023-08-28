@@ -83,7 +83,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return packs;
         }
 
-
         public void InstallWorkloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, ITransactionContext transactionContext, DirectoryPath? offlineCache = null)
         {
             var packInfos = GetPacksInWorkloads(workloadIds);
@@ -189,7 +188,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public void RepairWorkloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
         {
-            //  TODO: Actually re-extract the packs to fix any corrupted files. 
+            // TODO: Actually re-extract the packs to fix any corrupted files.
             CliTransaction.RunNew(context => InstallWorkloads(workloadIds, sdkFeatureBand, context, offlineCache));
         }
 

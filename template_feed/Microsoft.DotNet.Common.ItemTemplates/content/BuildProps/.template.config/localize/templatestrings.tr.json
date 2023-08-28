@@ -4,6 +4,6 @@
   "description": "Bir klasörün tamamı için MSBuild özelliklerini belirtmek üzere kullanılabilecek boş bir Directory.Build.props dosyası",
   "symbols/inherit/displayName": "Inherit",
   "symbols/inherit/description": "True ise, dosya sistemi dizin hiyerarşisindeki en yakın Directory.Build.props için bir Import değeri ekler. Directory.Build.props varsayılan olarak devralmadığından bunu yapmak, klasörden klasöre bir özelleştirme kümesi oluşturmanızı sağlar.",
-  "symbols/useArtifacts/displayName": "Use Artifacts Output Layout",
-  "symbols/useArtifacts/description": "If true, adds a property to enable the artifacts output layout. This is a common pattern for projects that produce build artifacts, such as NuGet packages, that are placed in a common folder."
+  "symbols/useArtifacts/displayName": "Yapıtlar Çıkış Düzenini Kullan",
+  "symbols/useArtifacts/description": "true ise yapıt çıkış düzenini etkinleştirmek için bir özellik ekler. Bu, ortak bir klasöre yerleştirilen NuGet paketleri gibi derleme yapıtları üreten projeler için ortak bir desendir."
 }

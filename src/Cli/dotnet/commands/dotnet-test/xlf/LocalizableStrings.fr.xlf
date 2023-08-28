@@ -29,16 +29,22 @@ The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downlo
 To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
 
 Implies --blame.</source>
-        <target state="needs-review-translation">Exécute les tests en mode blame (responsabilité) et active la collecte des données de vidage sur plantage en cas de sortie inattendue de testhost. 
-Cette option est uniquement prise en charge sur Windows. Elle nécessite la présence de procdump.exe et procdump64.exe dans PATH.
-Sinon, la variable d'environnement PROCDUMP_PATH doit être définie et pointer vers un répertoire qui contient procdump.exe et procdump64.exe. 
-Vous pouvez télécharger les outils ici : https://docs.microsoft.com/sysinternals/downloads/procdump 
-Implies --blame.</target>
+        <target state="translated">Exécute les tests en mode blame (responsabilité) et collecte un vidage sur incident lorsque l’hôte de test se ferme de manière inattendue. Cette option dépend de la version de .NET utilisée, du type d’erreur et du système d’exploitation.
+  
+Pour les exceptions dans le code managé, une copie de sauvegarde est automatiquement collectée sur .NET 5.0 et versions ultérieures. Cela génère une sauvegarde pour l’hôte de test ou tout processus enfant qui s’est également exécuté sur .NET 5.0 et s’est arrêté. Les blocages dans le code natif ne génèrent pas de vidage. Cette option fonctionne sur Windows, macOS et Linux.
+
+Les vidages sur incident dans du code natif, ou lors du ciblage de .NET Framework, ou .NET Core 3.1 et versions antérieures, peuvent uniquement être collectés sur Windows, à l’aide de Procdump. Un répertoire qui contient procdump.exe et procdump64.exe doit se trouver dans la variable d’environnement PATH ou PROCDUMP_PATH.
+
+Les outils peuvent être téléchargés ici : https://docs.microsoft.com/sysinternals/downloads/procdump
+ 
+Pour collecter un vidage sur incident à partir d’une application native exécutée sur .NET 5.0 ou version ultérieure, l’utilisation de Procdump peut être forcée en définissant la variable d’environnement VSTEST_DUMP_FORCEPROCDUMP sur 1.
+
+Implique --blame.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
         <source>The type of crash dump to be collected. Supported values are full (default) and mini. Implies --blame-crash.</source>
-        <target state="needs-review-translation">Type de données de vidage sur plantage à collecter. Implique --blame-crash.</target>
+        <target state="translated">Type de vidage sur incident à collecter. Les valeurs prises en charge sont 'Complet' (par défaut) et 'Mini'. Implique --blame-crash.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangDescription">
@@ -48,7 +54,7 @@ Implies --blame.</target>
       </trans-unit>
       <trans-unit id="CmdBlameHangDumpTypeDescription">
         <source>The type of crash dump to be collected. The supported values are full (default), mini, and none. When 'none' is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</source>
-        <target state="needs-review-translation">Type de données de vidage sur plantage à collecter. En l'absence de spécification du type de vidage, l'exécution de l'hôte de test prend fin à l'issue du délai d'expiration mais aucune donnée de vidage n'est collectée. Implique --blame-hang.</target>
+        <target state="translated">Type de vidage sur incident à collecter. Les valeurs prises en charge sont 'Complet' (par défaut), 'Mini' et 'Aucun'. Quand 'Aucun' est utilisé, l’hôte de test se termine à l’expiration du délai d’attente, mais aucune copie de sauvegarde n’est collectée. Implique --blame-hang.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangTimeoutDescription">
@@ -56,11 +62,10 @@ Implies --blame.</target>
 The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
 When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
 For MSTest before 2.2.4, the timeout is used for all testcases.</source>
-        <target state="needs-review-translation">Définissez un délai d'expiration spécifique à chaque test. À l'issue de ce délai, un vidage sur blocage se déclenche et l'exécution du processus testhost prend fin. 
-La valeur du délai d'expiration est spécifiée au format suivant : 1.5h / 90m / 5400s / 5400000ms. Quand aucune unité n'est utilisée (par exemple 5400000), la valeur est supposée être en millisecondes.
-En cas d'utilisation avec des tests pilotés par les données, le comportement du délai d'expiration dépend de l'adaptateur de test utilisé. Pour xUnit et NUnit, le délai d'expiration est renouvelé après chaque cas de test.
-Avec MSTest, le délai d'expiration est utilisé pour tous les cas de test.
-Cette option est prise en charge uniquement sur Windows avec netcoreapp2.1 et les versions ultérieures. Elle est également prise en charge sur Linux avec netcoreapp3.1 et les versions ultérieures. OSX et UWP ne sont pas pris en charge.</target>
+        <target state="translated">Délai d’expiration par test, après celui-ci, le vidage de blocage est déclenché et le processus hôte de test est terminé. La valeur par défaut est 1h.
+La valeur du délai d’attente est spécifiée au format suivant : 1,5 h/ 90 m / 5 400 / 54 000 000 ms. Lorsqu’aucune unité n’est utilisée (par exemple, 5 400 000), la valeur est supposée être en millisecondes.
+Lorsqu’elle est utilisée avec des tests pilotés par les données, le comportement du délai d’attente dépend de l’adaptateur de test utilisé. Pour xUnit, NUnit et MSTest 2.2.4+ le délai d’expiration est renouvelé après chaque cas de test,
+Pour MSTest avant la version 2.2.4, le délai d’expiration est utilisé pour tous les cas de test.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableDescription">
@@ -80,7 +85,7 @@ Crée la variable si elle n'existe pas, et la remplace si elle existe.
 Cela entraîne l'exécution forcée des tests dans un processus isolé. 
 Vous pouvez spécifier cet argument plusieurs fois pour fournir plusieurs variables.
 
-Exemples :
+Exemples :
 -e VARIABLE=abc
 -e VARIABLE="valeur avec des espaces"
 -e VARIABLE="valeur;séparée;par;des;points;virgules"
@@ -127,10 +132,10 @@ Exemples :
                                         See https://aka.ms/vstest-filtering for more information on filtering support.
                                         </source>
         <target state="translated">Permet d'exécuter les tests qui correspondent à l'expression indiquée.
-                                        Exemples :
-                                        Exécuter les tests de priorité 1 : --filter "Priority = 1"
-                                        Exécuter un test avec le nom complet spécifié : --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
-                                        Exécuter les tests qui contiennent le nom spécifié : --filter "FullyQualifiedName~Namespace.Class"
+                                        Exemples :
+                                        Exécuter les tests de priorité 1 : --filter "Priority = 1"
+                                        Exécuter un test avec le nom complet spécifié : --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
+                                        Exécuter les tests qui contiennent le nom spécifié : --filter "FullyQualifiedName~Namespace.Class"
                                         Pour plus d'informations sur la prise en charge du filtrage, consultez https://aka.ms/vstest-filtering.
                                         </target>
         <note />
@@ -152,9 +157,9 @@ Exemples :
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         See https://aka.ms/vstest-report for more information on logger arguments.</source>
         <target state="translated">Journaliseur à utiliser pour les résultats des tests.
-                                        Exemples :
-                                        Journal au format trx avec un nom de fichier unique : --logger trx
-                                        Journal au format trx avec le nom de fichier spécifié : --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
+                                        Exemples :
+                                        Journal au format trx avec un nom de fichier unique : --logger trx
+                                        Journal au format trx avec le nom de fichier spécifié : --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         Pour plus d'informations sur les arguments du journaliseur, consultez https://aka.ms/vstest-report.</target>
         <note />
       </trans-unit>
@@ -217,7 +222,7 @@ Le répertoire spécifié est créé, s'il n'existe pas déjà.</target>
       </trans-unit>
       <trans-unit id="IgnoredArgumentsMessage">
         <source>The following arguments have been ignored : "{0}"</source>
-        <target state="translated">Les arguments suivants ont été ignorés : "{0}"</target>
+        <target state="translated">Les arguments suivants ont été ignorés : "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="RunSettingsArgumentsDescription">
@@ -230,11 +235,11 @@ RunSettings arguments:
   Example: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</source>
         <target state="translated">
 
-Arguments de RunSettings :
+Arguments de RunSettings :
   Arguments à passer en tant que configurations RunSettings. Spécifiez les arguments en tant que paires '[name]=[value]' après "-- " (notez l'espace après --). 
   Utilisez un espace pour séparer plusieurs paires '[name]=[value]'.
   Pour plus d'informations sur les arguments de RunSettings, consultez https://aka.ms/vstest-runsettings-arguments.
-  Exemple : dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</target>
+  Exemple : dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</target>
         <note />
       </trans-unit>
       <trans-unit id="cmdCollectFriendlyName">
@@ -246,7 +251,7 @@ Arguments de RunSettings :
         <source>The friendly name of the data collector to use for the test run.
                                         More info here: https://aka.ms/vstest-collect</source>
         <target state="translated">Nom convivial du collecteur de données à utiliser pour la série de tests.
-                                        Plus d'informations ici : https://aka.ms/vstest-collect</target>
+                                        Plus d'informations ici : https://aka.ms/vstest-collect</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameDescription">
@@ -264,15 +269,18 @@ Example:
   Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
   dotnet test --blame-hang-timeout 20min
 </source>
-        <target state="needs-review-translation">Exécute les tests en mode blame (responsabilité). Cette option permet d'isoler les tests problématiques à l'origine d'un plantage ou d'un blocage sur l'hôte de test. 
+        <target state="translated">Exécute les tests en mode blame (responsabilité). Cette option permet d'isoler les tests problématiques à l'origine d'un plantage ou d'un blocage sur l'hôte de test, mais cela ne crée pas de vidage de mémoire par défaut. 
+
 Quand un plantage est détecté, un fichier de séquence est créé dans TestResults/guid/guid_Sequence.xml pour capturer l'ordre des tests exécutés avant le plantage.
+
 En fonction de paramètres supplémentaires, des données de vidage sur blocage ou de vidage sur plantage peuvent également être collectées.
-Exemple : 
-  Définissez le délai d'expiration de la série de tests quand les tests prennent plus de temps que le délai par défaut (1 heure), et collectez les données de vidage sur plantage quand l'hôte de test se ferme de manière inattendue. 
+
+Exemple : 
+  Définissez le délai d'expiration de la série de tests quand les tests prennent plus de temps que le délai par défaut (1 heure), et collectez les données de vidage sur plantage quand l'hôte de test se ferme de manière inattendue. 
   (Les vidages sur plantage nécessitent une configuration supplémentaire, comme vous pouvez le voir ci-dessous.)
   dotnet test --blame-hang --blame-crash
-Exemple : 
-  Définissez le délai d'expiration de la série de tests quand un test prend plus de 20 minutes, et collectez les données de vidage sur blocage. 
+Exemple : 
+  Définissez le délai d'expiration de la série de tests quand un test prend plus de 20 minutes, et collectez les données de vidage sur blocage. 
   dotnet test --blame-hang-timeout 20min
 </target>
         <note />

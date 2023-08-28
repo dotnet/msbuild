@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="ListSolutionFoldersArgumentDescription">
         <source>Display solution folder paths.</source>
-        <target state="new">Display solution folder paths.</target>
+        <target state="translated">Exibir caminhos de pasta da solução.</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveAppFullName">
@@ -99,7 +99,7 @@
       </trans-unit>
       <trans-unit id="SolutionFolderHeader">
         <source>Solution Folder(s)</source>
-        <target state="new">Solution Folder(s)</target>
+        <target state="translated">Pastas da Solução</target>
         <note />
       </trans-unit>
     </body>

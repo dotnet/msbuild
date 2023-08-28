@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
         <source>Uninstalling workload pack {0} version {1}...</source>
-        <target state="needs-review-translation">Probíhá odinstalace sady úloh {0} verze {1}...</target>
+        <target state="translated">Probíhá odinstalace sady funkcí {0} verze {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadToCacheOptionArgumentName">
@@ -44,7 +44,7 @@
       </trans-unit>
       <trans-unit id="DownloadingPackToCacheMessage">
         <source>Downloading pack {0} version {1} to offline cache {2}...</source>
-        <target state="needs-review-translation">Probíhá stahování balíčku {0} verze {1} do offline mezipaměti {2}…</target>
+        <target state="translated">Probíhá stahování balíčku {0} verze {1} do offline mezipaměti {2}…</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedSingleManifest">
@@ -119,7 +119,7 @@
       </trans-unit>
       <trans-unit id="InstallingWorkloadManifest">
         <source>Installing workload manifest {0} version {1}...</source>
-        <target state="needs-review-translation">Instaluje se manifest úlohy {0} verze {1}...</target>
+        <target state="translated">Probíhá instalace manifestu úlohy {0} verze {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="InsufficientPrivilegeToStartServer">
@@ -199,7 +199,7 @@
       </trans-unit>
       <trans-unit id="PendingReboot">
         <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
-        <target state="needs-review-translation">Počítač čeká na restartování. Instalace bude pokračovat, ale bude pravděpodobně nutné restartovat počítač.</target>
+        <target state="translated">Počítač čeká na restartování. Operace úlohy bude pokračovat, ale možná budete muset provést restartování.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">

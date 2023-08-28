@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for building the package. The default is 'Release'.</source>
-        <target state="needs-review-translation">Paket derlemede kullanmak için yapılandırma. Varsayılan değer: 'Debug'. Bu komutta, 'Release' komutunu varsayılan yapmak için 'PackRelease' özelliğini kullanın.</target>
+        <target state="translated">Paketi derlemek için kullanılacak yapılandırma. Varsayılan değer 'Release' olur.</target>
         <note />
       </trans-unit>
     </body>

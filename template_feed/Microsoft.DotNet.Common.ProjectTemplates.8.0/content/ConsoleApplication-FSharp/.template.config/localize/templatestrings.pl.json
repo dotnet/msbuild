@@ -1,11 +1,11 @@
-{
+﻿{
   "author": "Microsoft",
   "name": "Aplikacja konsoli",
   "description": "Projekt służący do tworzenia aplikacji wiersza polecenia, która może działać na platformie .NET w systemach Windows, Linux i macOS",
   "symbols/TargetFrameworkOverride/description": "Zastępuje platformę docelową",
   "symbols/TargetFrameworkOverride/displayName": "Odrzucenie platformy docelowej",
   "symbols/Framework/description": "Platforma docelowa dla tego projektu.",
-  "symbols/Framework/choices/net8.0/description": "Target net8.0",
+  "symbols/Framework/choices/net8.0/description": "Docelowa platforma net8.0",
   "symbols/Framework/choices/net8.0/displayName": ".NET 8.0",
   "symbols/Framework/displayName": "Platforma",
   "symbols/skipRestore/description": "Jeśli ta opcja jest określona, pomija automatyczne przywracanie projektu podczas tworzenia.",

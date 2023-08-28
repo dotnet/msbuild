@@ -130,6 +130,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         // at this point we're done with modifications and are just pushing the data other places
         GeneratedContainerManifest = JsonSerializer.Serialize(builtImage.Manifest);
         GeneratedContainerConfiguration = builtImage.Config;
+        GeneratedContainerDigest = builtImage.Manifest.GetDigest();
 
         foreach (ImageReference destinationImageReference in destinationImageReferences)
         {

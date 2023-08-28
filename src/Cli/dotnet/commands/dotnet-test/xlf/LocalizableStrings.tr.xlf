@@ -29,16 +29,22 @@ The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downlo
 To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
 
 Implies --blame.</source>
-        <target state="needs-review-translation">Testleri blame modunda çalıştırır ve test ana bilgisayarları beklenmedik şekilde çıkış yaptığında kilitlenme bilgi dökümünün toplanmasını sağlar. 
-Bu seçenek şu anda yalnızca Windows'da desteklenmektedir ve procdump.exe ile procdump64.exe dosyalarının PATH içinde mevcut olmasını gerektirir. 
-Alternatif olarak, PROCDUMP_PATH ortam değişkeninin ayarlanması ve procdump.exe ile procdump64.exe dosyalarını içeren bir dizine işaret etmesi gerekir. 
-Araçları https://docs.microsoft.com/sysinternals/downloads/procdump adresinden indirebilirsiniz 
---blame anlamına gelir.</target>
+        <target state="translated">Testleri blame modunda çalıştırır ve test ana bilgisayarı beklenmedik şekilde çıktığında kilitlenme bilgi dökümlerini toplar. Bu seçenek kullanılan .NET sürümüne, hata türüne ve işletim sistemine bağlıdır.
+  
+Yönetilen koddaki özel durumlar için .NET 5.0 ve sonraki sürümler üzerinde otomatik olarak bir döküm toplanır. Testhost veya .NET 5.0 üzerinde çalışan ve kilitlenen herhangi bir alt işlem için döküm oluşturur. Yerel koddaki kilitlenmeler döküm oluşturmaz. Bu seçenek Windows, macOS ve Linux'ta çalışır.
+
+Yerel kodda bulunan veya .NET Framework ya da .NET Core 3.1 ve önceki sürümler hedeflendiğinde kilitlenme dökümleri, yalnızca Procdump kullanılarak Windows'ta toplanabilir. Procdump.exe ve procdump64.exe içeren dizin PATH veya PROCDUMP_PATH değişkende olmalıdır.
+
+Araçlar buradan indirilebilir: https://docs.microsoft.com/sysinternals/downloads/procdump
+  
+.NET 5.0 veya sonraki bir sürümde çalışan yerel bir uygulamadaki kilitlenme bilgi dökümlerini toplamak için Procdump kullanılması, VSTEST_DUMP_FORCEPROCDUMP ortam değişkeni 1 olarak ayarlanarak zorlanabilir.
+
+--blame gerektirir.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
         <source>The type of crash dump to be collected. Supported values are full (default) and mini. Implies --blame-crash.</source>
-        <target state="needs-review-translation">Toplanacak kilitlenme bilgi dökümünün türü. --blame-crash anlamına gelir.</target>
+        <target state="translated">Toplanacak kilitlenme bilgi dökümü türü. Desteklenen değerler: full (varsayılan) ve mini. --blame-crash gerektirir.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangDescription">
@@ -48,7 +54,7 @@ Araçları https://docs.microsoft.com/sysinternals/downloads/procdump adresinden
       </trans-unit>
       <trans-unit id="CmdBlameHangDumpTypeDescription">
         <source>The type of crash dump to be collected. The supported values are full (default), mini, and none. When 'none' is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</source>
-        <target state="needs-review-translation">Toplanacak kilitlenme bilgi dökümünün türü. None kullanıldığında test ana bilgisayarı sonlandırılır ancak bilgi dökümü toplanmaz. --blame-hang anlamına gelir.</target>
+        <target state="translated">Toplanacak kilitlenme bilgi dökümünün türü. Desteklenen değerler: full (varsayılan), mini ve none. None kullanıldığında test ana bilgisayarı sonlandırılır ancak bilgi dökümü toplanmaz. --blame-hang gerektirir.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangTimeoutDescription">
@@ -56,11 +62,10 @@ Araçları https://docs.microsoft.com/sysinternals/downloads/procdump adresinden
 The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
 When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
 For MSTest before 2.2.4, the timeout is used for all testcases.</source>
-        <target state="needs-review-translation">Yanıt vermemeye başlama bilgi dökümü tetiklendikten ve test ana bilgisayarı işlemi sonlandırıldıktan sonraki test başına zaman aşımı süresi. 
-Zaman aşımı değeri şu biçimde belirtilir: 1.5h / 90m / 5400s / 5400000ms. Birim kullanılmadığında (ör. 5400000) değerin milisaniye cinsinden olduğu kabul edilir.
-Zaman aşımı davranışı veri tabanlı testlerle birlikte kullanıldığında, kullanılan test bağdaştırıcısına göre farklılık gösterir. xUnit and NUnit için zaman aşımı süresi her test çalışmasından sonra yenilenir.
-MSTest için zaman aşımı süresi tüm test çalışmalarına yönelik olarak kullanılır.
-Bu seçenek, şu anda yalnızca netcoreapp2.1 ve üzeri bir sürüme sahip Windows ile netcoreapp3.1 ve üzeri bir sürüme sahip Linux'ta desteklenmektedir. OSX ve UWP desteklenmez.</target>
+        <target state="translated">Yanıt vermemeye başlama bilgi dökümü tetiklendikten ve test ana bilgisayarı işlemi sonlandırıldıktan sonraki test başına zaman aşımı süresi. Varsayılan değer: 1h. 
+Zaman aşımı değeri şu biçimde belirtilir: 1.5s / 90dk / 5400sn / 5400000ms. Birim kullanılmadığında ör. 5400000 olarak belirtildiğinde değer, milisaniye cinsinden kabul edilir.
+Zaman aşımı davranışı veri tabanlı testlerle birlikte kullanıldığında, kullanılan test bağdaştırıcısına göre farklılık gösterir. xUnit, NUnit ve MSTest 2.2.4+ için zaman aşımı süresi her test çalışmasından sonra yenilenir.
+2.2.4’ten önceki MSTest sürümleri için zaman aşımı süresi tüm test çalışmalarına yönelik olarak kullanılır.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableDescription">
@@ -264,9 +269,12 @@ Example:
   Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
   dotnet test --blame-hang-timeout 20min
 </source>
-        <target state="needs-review-translation">Testleri blame modunda çalıştırır. Bu seçenek, test ana bilgisayarının kilitlenmesine veya yanıt vermemeye başlamasına neden olan sorunlu testleri yalıtmak için yararlıdır. 
+        <target state="translated">Testleri blame modunda çalıştırır. Bu seçenek, test ana bilgisayarının kilitlenmesine veya yanıt vermemeye başlamasına neden olan sorunlu testleri yalıtmak için yararlıdır, ancak varsayılan olarak bellek dökümü oluşturmaz. 
+
 Kilitlenme algılandığında, TestResults/guid/guid_Sequence.xml içinde kilitlenmeden önce çalıştırılan testlerin sırasını yakalayan bir sıra dosyası oluşturur.
+
 Ek ayarlara bağlı olarak, yanıt vermemeye başlama veya kilitlenme bilgi dökümü de toplanabilir.
+
 Örnek: 
   Test 1 saatlik varsayılan zaman aşımı süresinden uzun sürdüğünde test çalıştırmasını zaman aşımına uğratın ve test ana bilgisayarı beklenmedik bir şekilde çıkış yaptığında kilitlenme dökümünü toplayın.
  (Kilitlenme bilgi dökümleri için ek kurulum gerekir, aşağıya bakın.)

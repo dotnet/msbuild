@@ -1,11 +1,11 @@
-{
+﻿{
   "author": "Microsoft",
   "name": "Biblioteca de clases",
   "description": "Proyecto para crear una biblioteca de clases para .NET o .NET Standard",
   "symbols/TargetFrameworkOverride/description": "Invalida la plataforma de destino",
   "symbols/TargetFrameworkOverride/displayName": "Invalidación de la plataforma de destino",
   "symbols/Framework/description": "Marco de destino del proyecto.",
-  "symbols/Framework/choices/net8.0/description": "Target net8.0",
+  "symbols/Framework/choices/net8.0/description": "NET8.0 de destino",
   "symbols/Framework/choices/net8.0/displayName": ".NET 8.0",
   "symbols/Framework/choices/netstandard2.1/description": "Objetivo netstandard2.1",
   "symbols/Framework/choices/netstandard2.1/displayName": ".NET Standard 2.1",

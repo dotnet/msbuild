@@ -24,6 +24,8 @@ Microsoft.NET.Build.Containers.PortType.udp = 1 -> Microsoft.NET.Build.Container
 Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag
 Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.ComputedBaseImageTag.get -> string?
 Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.ComputeDotnetBaseImageTag() -> void
+Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.ContainerFamily.get -> string!
+Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.ContainerFamily.set -> void
 Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.SdkVersion.get -> string!
 Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.SdkVersion.set -> void
 Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.TargetFrameworkVersion.get -> string!
@@ -62,6 +64,8 @@ Microsoft.NET.Build.Containers.Tasks.CreateNewImage.GeneratedContainerConfigurat
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.GeneratedContainerConfiguration.set -> void
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.GeneratedContainerManifest.get -> string!
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.GeneratedContainerManifest.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.GeneratedContainerDigest.get -> string!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.GeneratedContainerDigest.set -> void
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.Repository.get -> string!
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.Repository.set -> void
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ImageTags.get -> string![]!

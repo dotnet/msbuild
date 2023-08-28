@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="ArchArgumentName">
         <source>ARCH</source>
-        <target state="new">ARCH</target>
+        <target state="translated">ARC</target>
         <note />
       </trans-unit>
       <trans-unit id="ArchitectureOptionDescription">
@@ -14,12 +14,12 @@
       </trans-unit>
       <trans-unit id="ArtifactsPathArgumentName">
         <source>ARTIFACTS_DIR</source>
-        <target state="new">ARTIFACTS_DIR</target>
+        <target state="translated">ARTIFACTS_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="ArtifactsPathOptionDescription">
         <source>The artifacts path. All output from the project, including build, publish, and pack output, will go in subfolders under the specified path.</source>
-        <target state="new">The artifacts path. All output from the project, including build, publish, and pack output, will go in subfolders under the specified path.</target>
+        <target state="translated">Le chemin des artefacts. Toutes les sorties du projet, y compris les sorties de build, de publication et de pack, iront dans des sous-dossiers sous le chemin spécifié.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotResolveRuntimeIdentifier">
@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="DidYouMean">
         <source>Did you mean the following command?</source>
-        <target state="new">Did you mean the following command?</target>
+        <target state="translated">Vouliez-vous dire la commande suivante ?</target>
         <note />
       </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
@@ -132,7 +132,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="MSBuildAdditionalOptionTitle">
         <source>.NET Cli Options:</source>
-        <target state="new">.NET Cli Options:</target>
+        <target state="translated">Options Cli .NET :</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
@@ -142,7 +142,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="OSArgumentName">
         <source>OS</source>
-        <target state="new">OS</target>
+        <target state="translated">Système d'exploitation</target>
         <note />
       </trans-unit>
       <trans-unit id="OperatingSystemOptionDescription">
@@ -218,8 +218,9 @@ export PATH="$PATH:{0}"
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'false.' However, when targeting .NET 7 or lower, the default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">Publiez le runtime .NET avec votre application pour éviter à l'utilisateur de l'installer sur la machine cible.
-La valeur par défaut est 'true' si un identificateur de runtime est spécifié.</target>
+        <target state="translated">Publiez le runtime .NET avec votre application afin que le runtime n’ait pas besoin d’être installé sur l’ordinateur cible. 
+
+La valeur par défaut est « false ». Toutefois, lorsque vous ciblez .NET 7 ou une version antérieure, la valeur par défaut est « true » si un identificateur d’exécution est spécifié.</target>
         <note />
       </trans-unit>
       <trans-unit id="Solution">
@@ -229,7 +230,7 @@ La valeur par défaut est 'true' si un identificateur de runtime est spécifié.
       </trans-unit>
       <trans-unit id="SolutionArgumentMisplaced">
         <source>Solution argument '{0}' is misplaced.</source>
-        <target state="new">Solution argument '{0}' is misplaced.</target>
+        <target state="translated">L'argument de solution '{0}' est mal placé.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionFile">
@@ -279,7 +280,7 @@ La valeur par défaut est 'true' si un identificateur de runtime est spécifié.
       </trans-unit>
       <trans-unit id="SolutionFolderAlreadyContainsProject">
         <source>Solution {0} already contains project {1} in solution folder {2}.</source>
-        <target state="new">Solution {0} already contains project {1} in solution folder {2}.</target>
+        <target state="translated">La solution {0} contient déjà le projet {1} dans le dossier de la solution {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="Update">

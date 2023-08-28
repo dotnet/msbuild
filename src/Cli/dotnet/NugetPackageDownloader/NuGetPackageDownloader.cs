@@ -15,6 +15,7 @@ using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 {
+    // TODO: Never name a class the same name as the namespace. Update either for easier type resolution.
     internal class NuGetPackageDownloader : INuGetPackageDownloader
     {
         private readonly SourceCacheContext _cacheSettings;

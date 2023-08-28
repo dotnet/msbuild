@@ -28,7 +28,7 @@ internal class DefaultRegistryAPI : IRegistryAPI
 
     public IManifestOperations Manifest { get; }
 
-    private static HttpClient CreateClient(string registryName, Uri baseUri, bool isAmazonECRRegistry = false)
+    private static HttpClient CreateClient(string registryName, Uri baseUri, ILogger logger, bool isAmazonECRRegistry = false)
     {
         var innerHandler = new SocketsHttpHandler()
         {
@@ -45,7 +45,7 @@ internal class DefaultRegistryAPI : IRegistryAPI
             };
         }
 
-        HttpMessageHandler clientHandler = new AuthHandshakeMessageHandler(registryName, innerHandler);
+        HttpMessageHandler clientHandler = new AuthHandshakeMessageHandler(registryName, innerHandler, logger);
 
         if (isAmazonECRRegistry)
         {

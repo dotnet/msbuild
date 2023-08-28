@@ -47,6 +47,16 @@
         <target state="translated">Tipo di installazione</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadIntegrityCheck">
+        <source>Checking the state of installed workloads...</source>
+        <target state="translated">Controllo dello stato dei carichi di lavoro installati...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadIntegrityCheckError">
+        <source>An issue was encountered verifying workloads. For more information, run "dotnet workload update".</source>
+        <target state="translated">Si è verificato un problema nella verifica dei carichi di lavoro. Per altre informazioni, eseguire "dotnet workload update".</target>
+        <note>{Locked="dotnet workload update"}</note>
+      </trans-unit>
       <trans-unit id="WorkloadManfiestVersionColumn">
         <source>Manifest Version</source>
         <target state="translated">Versioni del manifesto</target>

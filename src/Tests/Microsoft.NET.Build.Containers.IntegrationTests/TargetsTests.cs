@@ -222,4 +222,26 @@ public class TargetsTests
         var computedRid = instance.GetProperty(KnownStrings.Properties.ContainerRuntimeIdentifier)?.EvaluatedValue;
         computedRid.Should().Be(expectedRid);
     }
+
+    [InlineData("8.0.100", "v7.0", "", "7.0")]
+    [InlineData("8.0.100-preview.2", "v8.0", "", "8.0.0-preview.2")]
+    [InlineData("8.0.100-preview.2", "v8.0", "jammy", "8.0.0-preview.2-jammy")]
+    [InlineData("8.0.100-preview.2", "v8.0", "jammy-chiseled", "8.0.0-preview.2-jammy-chiseled")]
+    [InlineData("8.0.100-rc.2", "v8.0", "jammy-chiseled", "8.0.0-rc.2-jammy-chiseled")]
+    [InlineData("8.0.100", "v8.0", "jammy-chiseled", "8.0-jammy-chiseled")]
+    [Theory]
+    public void CanTakeContainerBaseFamilyIntoAccount(string sdkVersion, string tfmMajMin, string containerFamily, string expectedTag)
+    {
+        var (project, logger, d) = ProjectInitializer.InitProject(new()
+        {
+            ["NetCoreSdkVersion"] = sdkVersion,
+            ["TargetFrameworkVersion"] = tfmMajMin,
+            [KnownStrings.Properties.ContainerFamily] = containerFamily,
+        }, projectName: $"{nameof(CanTakeContainerBaseFamilyIntoAccount)}_{sdkVersion}_{tfmMajMin}_{containerFamily}_{expectedTag}");
+        using var _ = d;
+        var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
+        instance.Build(new[]{ _ComputeContainerBaseImageTag }, null, null, out var outputs).Should().BeTrue(String.Join(Environment.NewLine, logger.Errors));
+        var computedBaseImageTag = instance.GetProperty(KnownStrings.Properties._ContainerBaseImageTag)?.EvaluatedValue;
+        computedBaseImageTag.Should().Be(expectedTag);
+    }
 }

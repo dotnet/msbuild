@@ -29,16 +29,22 @@ The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downlo
 To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
 
 Implies --blame.</source>
-        <target state="needs-review-translation">Spustí testy v režimu blame a umožní shromažďování výpisů stavu systému, když se hostitel testů neočekávaně ukončí. 
-V současné době se tato možnost podporuje jen ve Windows a vyžaduje, aby v proměnné PATH byly k dispozici nástroje procdump.exe a procdump64.exe.
-Případně může být nastavená proměnná prostředí PROCDUMP_PATH, která vede na adresář s nástroji procdump.exe a procdump64.exe.
-Tyto nástroje se dají stáhnout tady: https://docs.microsoft.com/sysinternals/downloads/procdump.
-Tato možnost představuje přepínač --blame.</target>
+        <target state="translated">Spustí testy v režimu blame a shromáždí výpis stavu systému, když se hostitel testů neočekávaně ukončí. Tato možnost závisí na verzi použitého rozhraní .NET, typu chyby a operačním systému.
+  
+Pro výjimky ve spravovaném kódu se výpis automaticky shromáždí v rozhraní .NET 5.0 a novějších verzích. Vygeneruje výpis pro hostitele testu nebo jakýkoli podřízený proces, který také běžel v rozhraní .NET 5.0 a došlo k chybovému ukončení. Chybová ukončení v nativním kódu nevygenerují výpis paměti. Tato možnost funguje ve Windows, macOS a Linuxu.
+
+Výpisy stavu systému v nativním kódu nebo při cílení na .NET Framework nebo .NET Core 3.1 a starší verze se dají shromažďovat jenom ve Windows pomocí Procdumpu. Adresář obsahující procdump.exe a procdump64.exe musí být v proměnné prostředí PATH nebo PROCDUMP_PATH.
+
+Nástroje si můžete stáhnout odsud: https://docs.microsoft.com/sysinternals/downloads/procdump
+  
+Pokud chcete shromáždit výpis stavu systému z nativní aplikace spuštěné na rozhraní .NET 5.0 nebo novějším, je možné použití procdumpu vynutit nastavením proměnné prostředí VSTEST_DUMP_FORCEPROCDUMP na hodnotu 1.
+
+Implikuje --blame.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
         <source>The type of crash dump to be collected. Supported values are full (default) and mini. Implies --blame-crash.</source>
-        <target state="needs-review-translation">Typ výpisu stavu systému, který se má shromáždit. Tato možnost představuje přepínač --blame-crash.</target>
+        <target state="translated">Typ výpisu stavu systému, který se má shromáždit. Podporované hodnoty jsou úplné (výchozí) a mini. Implikuje --blame-crash.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangDescription">
@@ -48,7 +54,7 @@ Tato možnost představuje přepínač --blame.</target>
       </trans-unit>
       <trans-unit id="CmdBlameHangDumpTypeDescription">
         <source>The type of crash dump to be collected. The supported values are full (default), mini, and none. When 'none' is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</source>
-        <target state="needs-review-translation">Typ výpisu stavu systému, který se má shromáždit. Když se použije možnost Žádný, hostitel testů se po vypršení časového limitu ukončí, ale neshromáždí se žádný výpis. Tato možnost představuje přepínač --blame-hang.</target>
+        <target state="translated">Typ výpisu stavu systému, který se má shromáždit. Když se použije možnost Žádný, hostitel testů se po vypršení časového limitu ukončí, ale neshromáždí se žádný výpis. Implikuje --blame-hang.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangTimeoutDescription">
@@ -56,11 +62,10 @@ Tato možnost představuje přepínač --blame.</target>
 The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
 When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
 For MSTest before 2.2.4, the timeout is used for all testcases.</source>
-        <target state="needs-review-translation">Časový limit pro jednotlivé testy, po kterém se aktivuje výpis stavu systému při zablokování a ukončí se proces hostitele testů. 
-Hodnota časového limitu se zadává v následujícím formátu: 1.5h / 90m / 5400s / 5400000ms. Když se nepoužije žádná jednotka (např. 5400000), předpokládá se, že hodnota představuje milisekundy.
-Když se časový limit použije spolu s testy řízenými daty, jeho chování závisí na použitém adaptéru testu. Pro xUnit a NUnit se časový limit obnovuje po každém testovacím případu.
-Pro MSTest se časový limit používá pro všechny testovací případy.
-V současné době se tato možnost podporuje jen ve Windows spolu s netcoreapp2.1 a novějšími a Linuxu s netcoreapp3.1 a novějšími. OSX a UPW se nepodporují.</target>
+        <target state="translated">Časový limit pro jednotlivé testy, po kterém se aktivuje výpis stavu systému a proces testhost se ukončí. Výchozí hodnota je 1h.
+Hodnota časového limitu je zadána v následujícím formátu: 1,5 h / 90m / 5400 s / 5400000 ms. Pokud se nepoužije žádná jednotka (např. 5400000), předpokládá se, že hodnota je v milisekundách.
+Při použití společně s testy řízenými daty závisí chování časového limitu na použitém testovacím adaptéru. Pro xUnit, NUnit a MSTest 2.2.4+ se časový limit prodlouží po každém testovacím případu
+Pro MSTest před 2.2.4 se časový limit použije pro všechny testovací případy.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableDescription">
@@ -264,16 +269,19 @@ Example:
   Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
   dotnet test --blame-hang-timeout 20min
 </source>
-        <target state="needs-review-translation">Spustí testy v režimu blame. Tato možnost je užitečná při izolaci problémových testů, které způsobují chybové ukončení nebo zablokování hostitele testů. 
-Když se zjistí chybové ukončení, vytvoří se v TestResults/guid/guid_Sequence.xml soubor sekvence, která zachycuje pořadí testů spuštěných před chybovým ukončením.
-Na základě dalších nastavení je možné shromažďovat výpisy stavu paměti i při zablokování nebo chybovém ukončení.
+        <target state="translated">Spustí testy v režimu blame. Tato možnost se hodí pro izolaci problematických testů, které způsobují chybové ukončení nebo zablokování testovacího hostitele, ale ve výchozím nastavení nevytváří výpis paměti. 
+
+Při zjištění chybového ukončení vytvoří soubor sekvence v souboru TestResults/guid/guid_Sequence.xml, který zachycuje pořadí testů, které byly spuštěny před chybou.
+
+Na základě dalších nastavení je také možné shromáždit výpis stavu systému nebo výpis stavu systému.
+
 Příklad: 
-  Vypršení časového limitu, když testovací běh trvá déle než výchozí limit, který je 1 hodina, a shromáždění výpisu stavu systému, když se hostitel testů neočekávaně ukončí 
-  (Výpisy stavu paměti vyžadují další nastavování. Informace najdete níže.)
-  dotnet test --blame-hang --blame-crash
+ Vypršení časového limitu testovacího běhu, když test trvá déle než výchozí časový limit 1 hodina, a shromážděte výpis stavu systému, když se hostitel testu neočekávaně ukončí. 
+ (výpisy stavu systému vyžadují další nastavení, viz níže).
+ dotnet test --blame-hang --blame-crash
 Příklad: 
-  Vypršení časového limitu pro testovací běh, když test trvá déle než 20 minut, a shromáždění výpisu stavu systému při zablokování 
-  dotnet test --blame-hang-timeout 20min
+ Vypršení časového limitu testovacího běhu, když test trvá více než 20 minut, a shromáždění výpisu stavu systému. 
+ dotnet test --blame-hang-timeout 20 minut
 </target>
         <note />
       </trans-unit>

@@ -147,6 +147,9 @@ partial class CreateNewImage
     [Output]
     public string GeneratedContainerConfiguration { get; set; }
 
+    [Output]
+    public string GeneratedContainerDigest { get; set; }
+
     public CreateNewImage()
     {
         ContainerizeDirectory = "";
@@ -176,6 +179,7 @@ partial class CreateNewImage
 
         GeneratedContainerConfiguration = "";
         GeneratedContainerManifest = "";
+        GeneratedContainerDigest = "";
 
         TaskResources = Resource.Manager;
     }

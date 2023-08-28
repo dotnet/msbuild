@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Cli.Utils;
+using System.Reflection;
 
 namespace Microsoft.NET.TestFramework
 {
@@ -409,6 +410,17 @@ namespace Microsoft.NET.TestFramework
             string fullMSBuildDirectory = Path.GetDirectoryName(FullFrameworkMSBuildPath);
             string extensionsImportAfterPath = Path.Combine(fullMSBuildDirectory, "..", "Microsoft.Common.targets", "ImportAfter", "Microsoft.NET.Build.Extensions.targets");
             return !File.Exists(extensionsImportAfterPath);
+        }
+
+        private static readonly Lazy<string> _NewtonsoftJsonPackageVersion = new Lazy<string>(() =>
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            return assembly.GetCustomAttributes(true).OfType<AssemblyMetadataAttribute>().FirstOrDefault(a => a.Key == "NewtonsoftJsonPackageVersion").Value;
+        });
+
+        public static string GetNewtonsoftJsonPackageVersion()
+        {
+            return _NewtonsoftJsonPackageVersion.Value;
         }
 
     }

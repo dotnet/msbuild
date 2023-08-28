@@ -104,7 +104,7 @@ namespace Microsoft.NET.Build.Tests
                 TargetFrameworks = targetFramework,
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1", privateAssets: "All"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.GetNewtonsoftJsonPackageVersion(), privateAssets: "All"));
             testProject.PackageReferences.Add(new TestPackageReference("Humanizer", "2.8.26"));
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
@@ -118,7 +118,7 @@ namespace Microsoft.NET.Build.Tests
 
             getValuesCommand.GetValues()
                 .Should()
-                .BeEquivalentTo("Newtonsoft.Json/13.0.1", "Humanizer/2.8.26");
+                .BeEquivalentTo($"Newtonsoft.Json/{ToolsetInfo.GetNewtonsoftJsonPackageVersion()}", "Humanizer/2.8.26");
         }
 
         [Theory]
@@ -188,7 +188,7 @@ namespace Microsoft.NET.Build.Tests
             };
 
             //  Add some package references to test more code paths (such as in ResolvePackageAssets)
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1", privateAssets: "All"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.GetNewtonsoftJsonPackageVersion(), privateAssets: "All"));
             testProject.PackageReferences.Add(new TestPackageReference("Humanizer", "2.8.26"));
 
             //  Use a test-specific packages folder

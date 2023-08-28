@@ -1,11 +1,11 @@
-{
+﻿{
   "author": "Microsoft",
   "name": "Klassenbibliothek",
   "description": "Ein Projekt zum Erstellen einer Klassenbibliothek für .NET oder .NET Standard",
   "symbols/TargetFrameworkOverride/description": "Überschreibt das Zielframework",
   "symbols/TargetFrameworkOverride/displayName": "Zielframeworküberschreibung",
   "symbols/Framework/description": "Das Zielframework für das Projekt.",
-  "symbols/Framework/choices/net8.0/description": "Target net8.0",
+  "symbols/Framework/choices/net8.0/description": "Ziel net8.0",
   "symbols/Framework/choices/net8.0/displayName": ".NET 8.0",
   "symbols/Framework/choices/netstandard2.1/description": "Auf „netstandard2.1“ abzielen",
   "symbols/Framework/choices/netstandard2.1/displayName": ".NET Standard 2.1",

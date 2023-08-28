@@ -1,19 +1,19 @@
-{
+﻿{
   "author": "Microsoft",
   "name": "コンソール アプリ",
   "description": "Windows、Linux、macOS 上の .NET で実行できるコマンド ライン アプリケーションを作成するためのプロジェクト",
   "symbols/TargetFrameworkOverride/description": "ターゲット フレームワークをオーバーライドする",
   "symbols/TargetFrameworkOverride/displayName": "ターゲット フレームワークのオーバーライド",
   "symbols/Framework/description": "プロジェクトのターゲット フレームワークです。",
-  "symbols/Framework/choices/net8.0/description": "Target net8.0",
+  "symbols/Framework/choices/net8.0/description": "ターゲット net8.0",
   "symbols/Framework/choices/net8.0/displayName": ".NET 8.0",
   "symbols/Framework/displayName": "フレームワーク",
   "symbols/langVersion/description": "作成されたプロジェクト ファイルで LangVersion プロパティを設定する",
   "symbols/langVersion/displayName": "言語バージョン",
   "symbols/skipRestore/description": "指定した場合、作成時にプロジェクトの自動復元がスキップされます。",
   "symbols/skipRestore/displayName": "復元のスキップ",
-  "symbols/NativeAot/description": "Whether to enable the project for publishing as native AOT.",
-  "symbols/NativeAot/displayName": "Enable _native AOT publish",
+  "symbols/NativeAot/description": "プロジェクトを native AOT として発行できるようにするかどうかを指定します。",
+  "symbols/NativeAot/displayName": "_native AOT 発行を有効にする",
   "postActions/restore/description": "このプロジェクトに必要な NuGet パッケージを復元します。",
   "postActions/restore/manualInstructions/default/text": "'dotnet restore' を実行する",
   "postActions/open-file/description": "エディターで Program.vb を開く"

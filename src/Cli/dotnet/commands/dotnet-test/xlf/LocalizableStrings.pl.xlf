@@ -29,16 +29,22 @@ The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downlo
 To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
 
 Implies --blame.</source>
-        <target state="needs-review-translation">Uruchamia testy w trybie blame i włącza zbieranie zrzutów awaryjnych po nieoczekiwanym zakończeniu działania hosta testowego. 
-Ta opcja jest obecnie obsługiwana tylko w systemie Windows i wymaga, aby w zmiennej PATH były dostępne programy procdump.exe i procdump64.exe.
-Alternatywnie musi być ustawiona zmienna środowiska PROCDUMP_PATH wskazująca katalog z programami procdump.exe i procdump64.exe. 
-Narzędzia można pobrać stąd: https://docs.microsoft.com/sysinternals/downloads/procdump 
-Implikuje użycie parametru --blame.</target>
+        <target state="translated">Uruchamia testy w trybie blame i zbiera zrzut awaryjny, gdy host testowy nieoczekiwanie kończy działanie. Ta opcja zależy od używanej wersji platformy .NET, typu błędu, i systemu operacyjnego.
+ 
+W przypadku wyjątków w kodzie zarządzanym zrzut zostanie automatycznie zebrany na platformie .NET 5.0 i nowszych wersjach. Spowoduje to wygenerowanie zrzutu dla hosta testowego lub dowolnego procesu podrzędnego, który również został uruchomiony na platformie .NET 5.0 i uległ awarii. Awarie w kodzie natywnym nie wygenerują zrzutu. Ta opcja działa w systemach Windows, macOS, i Linux.
+
+Zrzuty awaryjny w kodzie natywnym, lub w przypadku platformy .NET Framework lub .NET Core 3.1 i starszych wersji, mogą być zbierane tylko w systemie Windows przy użyciu narzędzia Procdump. Katalog zawierający pliki procdump.exe i procdump64.exe musi znajdować się w zmiennej środowiskowej PATH lub PROCDUMP_PATH.
+
+Przykłady można pobrać tutaj: https://docs.microsoft.com/sysinternals/downloads/procdump
+ 
+Aby zebrać zrzut awaryjny z aplikacji natywnej działającej na platformie .NET 5.0 lub nowszej, użycie elementu Procdump można wymusić, ustawiając zmienną środowiskową VSTEST_DUMP_FORCEPROCDUMP na wartość 1.
+
+Implies --blame.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
         <source>The type of crash dump to be collected. Supported values are full (default) and mini. Implies --blame-crash.</source>
-        <target state="needs-review-translation">Typ zrzutu awaryjnego do zebrania. Implikuje użycie parametru --blame-crash.</target>
+        <target state="translated">Typ zrzutu awaryjnego do zebrania. Obsługiwane wartości są pełne (domyślne) i mini. Implikuje --blame-crash.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangDescription">
@@ -48,7 +54,7 @@ Implikuje użycie parametru --blame.</target>
       </trans-unit>
       <trans-unit id="CmdBlameHangDumpTypeDescription">
         <source>The type of crash dump to be collected. The supported values are full (default), mini, and none. When 'none' is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</source>
-        <target state="needs-review-translation">Typ zrzutu awaryjnego do zebrania. Jeśli żaden nie jest używany, działanie hosta testowego jest przerywane po upłynięciu limitu czasu, ale nie jest zbierany żaden zrzut. Implikuje użycie parametru --blame-crash.</target>
+        <target state="translated">Typ zrzutu awaryjnego do zebrania. Obsługiwane wartości są pełne (domyślne), mini i żadne. Gdy jest używana wartość „none”, host testowy jest przerywany po przekroczeniu limitu czasu, ale nie jest zbierany zrzut. Implikuje --blame-hang.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangTimeoutDescription">
@@ -56,11 +62,10 @@ Implikuje użycie parametru --blame.</target>
 The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
 When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
 For MSTest before 2.2.4, the timeout is used for all testcases.</source>
-        <target state="needs-review-translation">Przekroczono limit czasu na test, po którym jest wyzwalany zrzut stanu zawieszenia, a działanie procesu na hoście testowym jest kończone. 
-Wartość limitu czasu jest określana w następującym formacie: 1.5h / 90m / 5400s / 5400000ms. Gdy nie jest używana żadna jednostka (np. 5400000), przyjmuje się, że wartość jest w milisekundach.
-W przypadku użycia razem z testami opartymi na danych zachowanie limitu czasu zależy od użytego adaptera testowego. W przypadku programów xUnit i NUnit limit czasu jest odnawiany po każdym przypadku testowym.
-W przypadku programu MSTest limit czasu jest używany dla wszystkich przypadków testowych.
-Ta opcja jest obecnie obsługiwana tylko w systemie Windows razem z aplikacją netcoreapp2.1 i nowszymi oraz w systemie Linux z aplikacją netcoreapp3.1 i nowszymi. System OSX i platforma UWP nie są obsługiwane.</target>
+        <target state="translated">Przekroczono limit czasu na test, po którym jest wyzwalany zrzut stanu zawieszenia, a działanie procesu na hoście testowym jest kończone. Wartość domyślna to 1 godz.
+Wartość limitu czasu jest określana w następującym formacie: 1.5 godz. / 90 min / 5400 sek. / 5400000 ms. Gdy nie jest używana żadna jednostka (np. 5400000), przyjmuje się, że wartość jest w milisekundach.
+W przypadku użycia razem z testami opartymi na danych zachowanie limitu czasu zależy od użytego adaptera testowego. W przypadku platform xUnit i NUnit i MSTest w wersji 2.2.4+ limit czasu jest odnawiany po każdym przypadku testowym,
+W przypadku platformy MSTest przed wersją 2.2.4 limit czasu jest używany dla wszystkich przypadków testowych.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableDescription">
@@ -264,9 +269,12 @@ Example:
   Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
   dotnet test --blame-hang-timeout 20min
 </source>
-        <target state="needs-review-translation">Uruchamia testy w trybie blame. Ta opcja pomaga w izolowaniu problematycznych testów, które powodują awarię lub zawieszanie się hosta testowego. 
+        <target state="translated">Uruchamia testy w trybie blame. Ta opcja pomaga w izolowaniu problematycznych testów, które powodują awarię lub zawieszanie się hosta testowego. 
+
 Gdy zostanie wykryta awaria, tworzy plik sekwencji w lokalizacji TestResults/guid/guid_Sequence.xml, który przechwytuje kolejność testów uruchomionych przed awarią.
+
 Na podstawie dodatkowych ustawień może być również zbierany zrzut stanu zawieszenia lub zrzut awaryjny.
+
 Przykład: 
   Spowodowanie przekroczenia limitu czasu przebiegu testu, gdy test trwa dłużej niż domyślny limit czasu (1 godzina), i zebranie zrzutu awaryjnego, gdy host testowy nieoczekiwanie zakończy działanie. 
   (Zrzuty awaryjne wymagają dodatkowej konfiguracji; zobacz poniżej).

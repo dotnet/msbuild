@@ -1,11 +1,11 @@
-{
+﻿{
   "author": "Microsoft",
   "name": "Aplikacja konsoli",
   "description": "Projekt służący do tworzenia aplikacji wiersza polecenia, która może działać na platformie .NET w systemach Windows, Linux i macOS",
   "symbols/TargetFrameworkOverride/description": "Zastępuje platformę docelową",
   "symbols/TargetFrameworkOverride/displayName": "Odrzucenie platformy docelowej",
   "symbols/Framework/description": "Platforma docelowa dla tego projektu.",
-  "symbols/Framework/choices/net8.0/description": "Target net8.0",
+  "symbols/Framework/choices/net8.0/description": "Docelowa platforma net8.0",
   "symbols/Framework/choices/net8.0/displayName": ".NET 8.0",
   "symbols/Framework/displayName": "Platforma",
   "symbols/langVersion/description": "Ustawia właściwość LangVersion w utworzonym pliku projektu",
@@ -14,8 +14,8 @@
   "symbols/skipRestore/displayName": "Pomiń przywracanie",
   "symbols/UseProgramMain/description": "Określa, czy wygenerować jawną klasę Program i metodę Main zamiast instrukcji najwyższego poziomu.",
   "symbols/UseProgramMain/displayName": "Nie używaj ins_trukcji najwyższego poziomu",
-  "symbols/NativeAot/description": "Whether to enable the project for publishing as native AOT.",
-  "symbols/NativeAot/displayName": "Enable _native AOT publish",
+  "symbols/NativeAot/description": "Określa, czy włączyć publikowanie projektu jako native AOT.",
+  "symbols/NativeAot/displayName": "Włącz publikowanie _native AOT",
   "postActions/restore/description": "Przywróć pakiety NuGet wymagane przez ten projekt.",
   "postActions/restore/manualInstructions/default/text": "Uruchom polecenie \"dotnet restore\"",
   "postActions/open-file/description": "Otwiera plik Program.cs w edytorze"

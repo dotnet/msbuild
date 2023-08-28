@@ -21,9 +21,9 @@
         <source>
       Provides the details for specified template package.
       The command checks if the package is installed locally, if it was not found, it searches the configured NuGet feeds.</source>
-        <target state="new">
-      Provides the details for specified template package.
-      The command checks if the package is installed locally, if it was not found, it searches the configured NuGet feeds.</target>
+        <target state="translated">
+      Belirtilen şablon paketi için ayrıntıları sağlar.
+      Komut, paketin yerel olarak yüklü olup olmadığını denetler. Paket bulunamadıysa, yapılandırılan NuGet akışlarını arar.</target>
         <note />
       </trans-unit>
       <trans-unit id="Command_Install_Argument_Package">
@@ -114,7 +114,7 @@ Eğer komut bağımsız değişken olmadan belirtilirse yüklü tüm şablon pak
       </trans-unit>
       <trans-unit id="Option_AddSource">
         <source>Specifies a NuGet source to use.</source>
-        <target state="needs-review-translation">Yükleme sırasında kullanılacak NuGet kaynağını belirtir.</target>
+        <target state="translated">Kullanılacak NuGet kaynağını belirtir.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_AuthorFilter">

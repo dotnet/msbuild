@@ -137,6 +137,28 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
+        [Theory]
+        [InlineData("false", false)]
+        [InlineData("true", true)]
+        [InlineData("", false)]
+        public void It_includes_platform_in_output_path_if_requested(string appendPlatformValue, bool shouldIncludePlatform)
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("DesktopMinusRid")
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Add(new XElement(ns + "AppendPlatformToOutputPath", appendPlatformValue));
+                });
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute().Should().Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory("net46", platform: shouldIncludePlatform ? "AnyCPU" : "");
+            outputDirectory.GetFiles("DesktopMinusRid.exe").Length.Should().Be(1);
+        }
+
         [WindowsOnlyTheory]
         // implicit rid with option to append rid to output path off -> do not append
         [InlineData("implicitOff", "", false, false)]
@@ -392,7 +414,7 @@ namespace DefaultReferences
 
                     itemGroup.Add(new XElement(ns + "PackageReference",
                                     new XAttribute("Include", "NewtonSoft.Json"),
-                                    new XAttribute("Version", "13.0.1")));
+                                    new XAttribute("Version", ToolsetInfo.GetNewtonsoftJsonPackageVersion())));
                 });
 
             var buildCommand = new BuildCommand(testAsset);

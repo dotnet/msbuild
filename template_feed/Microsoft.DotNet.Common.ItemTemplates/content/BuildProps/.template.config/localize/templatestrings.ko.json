@@ -4,6 +4,6 @@
   "description": "전체 폴더에 대해 MSBuild 속성을 지정하는 데 사용할 수 있는 빈 Directory.Build.props 파일입니다.",
   "symbols/inherit/displayName": "상속",
   "symbols/inherit/description": "true이면 파일 시스템 디렉터리 계층에서 가장 가까운 Directory.Build.props에 대해 Import를 추가합니다. Directory.Build.props는 기본적으로 상속되지 않으므로 이 작업을 수행하여 폴더별 사용자 지정 집합을 만들 수 있습니다.",
-  "symbols/useArtifacts/displayName": "Use Artifacts Output Layout",
-  "symbols/useArtifacts/description": "If true, adds a property to enable the artifacts output layout. This is a common pattern for projects that produce build artifacts, such as NuGet packages, that are placed in a common folder."
+  "symbols/useArtifacts/displayName": "아티팩트 출력 레이아웃 사용",
+  "symbols/useArtifacts/description": "true일 경우 아티팩트 출력 레이아웃을 사용하도록 설정하는 속성을 추가합니다. 공용 폴더에 배치되는 NuGet 패키지와 같은 빌드 아티팩트를 생성하는 프로젝트의 일반적인 패턴입니다."
 }

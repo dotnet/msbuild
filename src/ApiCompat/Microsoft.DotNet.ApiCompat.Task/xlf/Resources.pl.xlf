@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="BreakingChangesFoundRegenerateSuppressionFileCommandHelp">
         <source>API breaking changes found. If those are intentional, the APICompat suppression file can be updated by rebuilding with '/p:ApiCompatGenerateSuppressionFile=true'</source>
-        <target state="new">API breaking changes found. If those are intentional, the APICompat suppression file can be updated by rebuilding with '/p:ApiCompatGenerateSuppressionFile=true'</target>
+        <target state="translated">Znaleziono zmiany powodujące niezgodność interfejsu API. Jeśli są one zamierzone, plik pomijania APICompat można zaktualizować przez ponowne skompilowanie przy użyciu elementu „/p:ApiCompatGenerateSuppressionFile=true”</target>
         <note />
       </trans-unit>
       <trans-unit id="UnnecessarySuppressionsFoundRegenerateSuppressionFileCommandHelp">
         <source>Unnecessary suppressions found. The APICompat suppression file can be updated by rebuilding with '/p:ApiCompatGenerateSuppressionFile=true'</source>
-        <target state="new">Unnecessary suppressions found. The APICompat suppression file can be updated by rebuilding with '/p:ApiCompatGenerateSuppressionFile=true'</target>
+        <target state="translated">Znaleziono niepotrzebne pominięcia. Plik pomijania APICompat można zaktualizować, odbudowując go za pomocą polecenia „/p:ApiCompatGenerateSuppressionFile=true”</target>
         <note />
       </trans-unit>
     </body>

@@ -1,11 +1,11 @@
-{
+﻿{
   "author": "Microsoft",
   "name": "Konsolen-App",
   "description": "Ein Projekt zum Erstellen einer Befehlszeilenanwendung, die mit .NET unter Windows, Linux und macOS ausgeführt werden kann",
   "symbols/TargetFrameworkOverride/description": "Überschreibt das Zielframework",
   "symbols/TargetFrameworkOverride/displayName": "Zielframeworküberschreibung",
   "symbols/Framework/description": "Das Zielframework für das Projekt.",
-  "symbols/Framework/choices/net8.0/description": "Target net8.0",
+  "symbols/Framework/choices/net8.0/description": "Ziel net8.0",
   "symbols/Framework/choices/net8.0/displayName": ".NET 8.0",
   "symbols/Framework/displayName": "Framework",
   "symbols/skipRestore/description": "Wenn angegeben, wird die automatische Wiederherstellung des Projekts beim Erstellen übersprungen.",

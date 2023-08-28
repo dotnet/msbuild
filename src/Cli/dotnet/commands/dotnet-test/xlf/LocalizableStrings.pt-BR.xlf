@@ -29,16 +29,22 @@ The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downlo
 To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
 
 Implies --blame.</source>
-        <target state="needs-review-translation">Executa os testes no modo blame e habilita a coleta de despejo de memória quando o host de teste é encerrado inesperadamente. 
-No momento, há suporte para essa opção somente no Windows e ela exige que o procdump.exe e o procdump64.exe estejam disponíveis em PATH.
-Ou exige que a variável de ambiente PROCDUMP_PATH esteja definida e aponte para um diretório que contenha o procdump.exe e o procdump64.exe. 
-As ferramentas podem ser baixadas aqui: https://docs.microsoft.com/sysinternals/downloads/procdump 
-Implica --blame.</target>
+        <target state="translated">Executa os testes no modo de culpa e coleta um despejo de memória quando o host de teste sai inesperadamente. Esta opção depende da versão do .NET utilizada, do tipo de erro e do sistema operacional.
+  
+Para exceções no código gerenciado, um despejo será coletado automaticamente no .NET 5.0 e versões posteriores. Ele gerará um despejo para testhost ou qualquer processo filho que também foi executado no .NET 5.0 e travou. Falhas no código nativo não gerarão um despejo. Esta opção funciona no Windows, macOS e Linux.
+
+Os despejos de falha no código nativo ou ao direcionar o .NET Framework ou o .NET Core 3.1 e versões anteriores só podem ser coletados no Windows, usando o Procdump. Um diretório que contém procdump.exe e procdump64.exe deve estar na variável de ambiente PATH ou PROCDUMP_PATH.
+
+As ferramentas podem ser baixadas aqui: https://docs.microsoft.com/sysinternals/downloads/procdump
+  
+Para coletar um despejo de memória de um aplicativo nativo em execução no .NET 5.0 ou posterior, o uso de Procdump pode ser forçado definindo a variável de ambiente VSTEST_DUMP_FORCEPROCDUMP como 1.
+
+Implica --culpa.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
         <source>The type of crash dump to be collected. Supported values are full (default) and mini. Implies --blame-crash.</source>
-        <target state="needs-review-translation">O tipo de despejo de memória a ser coletado. Implica --blame-crash.</target>
+        <target state="translated">O tipo de despejo de memória a ser coletado. Os valores com suporte são full (padrão) e mini. Implica --blame-crash.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangDescription">
@@ -48,7 +54,7 @@ Implica --blame.</target>
       </trans-unit>
       <trans-unit id="CmdBlameHangDumpTypeDescription">
         <source>The type of crash dump to be collected. The supported values are full (default), mini, and none. When 'none' is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</source>
-        <target state="needs-review-translation">O tipo de despejo de memória a ser coletado. Quando a opção None é usada, o host de teste é encerrado ao atingir o tempo limite, mas o despejo de memória não é coletado. Implica --blame-hang.</target>
+        <target state="translated">O tipo de despejo de memória a ser coletado. Os valores com suporte são full (padrão), mini e none. Quando “none” é usado, o host de teste é encerrado no tempo limite, mas nenhum despejo é coletado. Implica --blame-hang.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangTimeoutDescription">
@@ -56,11 +62,10 @@ Implica --blame.</target>
 The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
 When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
 For MSTest before 2.2.4, the timeout is used for all testcases.</source>
-        <target state="needs-review-translation">Tempo limite por teste, após o qual o despejo do travamento é disparado e o processo do host de teste é encerrado. 
-O valor do tempo limite é especificado no seguinte formato: 1.5h / 90m / 5400s / 5400000ms. Quando não é usada nenhuma unidade (por exemplo, 5400000), considera-se que o valor esteja em milissegundos.
-Quando usado juntamente com testes controlados por dados, o comportamento do tempo limite depende do adaptador de teste usado. Para xUnit e NUnit, o tempo limite é renovado após cada caso de teste,
-Para o MSTest, o tempo limite é usado para todos os casos teste.
-No momento, há suporte para essa opção somente no Windows juntamente com o netcoreapp2.1 e mais recentes. E no Linux com o netcoreapp3.1 e mais recentes. Não há suporte para OSX e UWP.</target>
+        <target state="translated">Tempo limite por teste, após o qual o hang dump é acionado e o processo do testhost é encerrado. O padrão é 1h.
+O valor do tempo limite é especificado no seguinte formato: 1.5h / 90m / 5400s / 5400000ms. Quando nenhuma unidade é usada (por exemplo, 5400000), o valor é considerado em milissegundos.
+Quando usado junto com testes controlados por dados, o comportamento do tempo limite depende do adaptador de teste usado. Para xUnit, NUnit e MSTest 2.2.4+, o tempo limite é renovado após cada caso de teste,
+Para MSTest antes de 2.2.4, o tempo limite é usado para todos os casos de teste.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableDescription">
@@ -264,16 +269,19 @@ Example:
   Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
   dotnet test --blame-hang-timeout 20min
 </source>
-        <target state="needs-review-translation">Executa os testes no modo blame. Essa opção é útil para isolar testes problemáticos que fazem com que o host de teste falhe ou trave. 
-Quando uma falha é detectada, ele cria um arquivo de sequência em TestResults/guid/guid_Sequence.xml que captura a ordem dos testes que foram executados antes da falha.
-Com base nas configurações adicionais, o despejo de travamento ou o despejo de memória também podem ser coletados.
-Exemplo 
-  Atingir o tempo limite de execução de teste quando o teste durar mais que o tempo limite padrão de uma hora e coletar o despejo de memória quando o host de teste for encerrado inesperadamente. 
-  (Os despejos de memória exigem uma configuração adicional, veja abaixo.)
-  dotnet test --blame-hang --blame-crash
-Exemplo 
-  Atingir o tempo limite de execução do teste quando um teste durar mais de 20 minutos e coletar o despejo de travamento. 
-  dotnet test --blame-hang-timeout 20min
+        <target state="translated">Executa os testes no modo de culpa. Essa opção é útil para isolar testes problemáticos que fazem com que o host de teste trave ou trave, mas não cria um despejo de memória por padrão. 
+
+Quando uma falha é detectada, ele cria um arquivo de sequência em TestResults/guid/guid_Sequence.xml que captura a ordem dos testes executados antes da falha.
+
+Com base nas configurações adicionais, hang dump ou crash dump também podem ser coletados.
+
+Exemplo: 
+  Limite a execução do teste quando o teste demorar mais do que o tempo limite padrão de 1 hora e colete o despejo de memória quando o host de teste for encerrado inesperadamente. 
+  (Os despejos de memória requerem configuração adicional, veja abaixo.)
+   teste dotnet --blame-hang --blame-crash
+Exemplo: 
+  Tempo limite da execução do teste quando um teste leva mais de 20 minutos e coleta o dump suspenso. 
+  teste dotnet --blame-hang-timeout 20min
 </target>
         <note />
       </trans-unit>

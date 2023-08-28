@@ -7,11 +7,11 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using LocalizableStrings = Microsoft.DotNet.Cli.Utils.LocalizableStrings;
 using Microsoft.DotNet.CommandFactory;
 using NuGet.Frameworks;
 using CommandResult = System.CommandLine.Parsing.CommandResult;
 using System.CommandLine;
+using Microsoft.DotNet.Workloads.Workload;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -162,14 +162,13 @@ namespace Microsoft.DotNet.Cli
 
                     var environmentProvider = new EnvironmentProvider();
 
-                    bool generateAspNetCertificate =
-                        environmentProvider.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", defaultValue: true);
-                    bool telemetryOptout =
-                      environmentProvider.GetEnvironmentVariableAsBool(EnvironmentVariableNames.TELEMETRY_OPTOUT, defaultValue: CompileOptions.TelemetryOptOutDefault);
-                    bool addGlobalToolsToPath =
-                        environmentProvider.GetEnvironmentVariableAsBool("DOTNET_ADD_GLOBAL_TOOLS_TO_PATH", defaultValue: true);
-                    bool nologo =
-                        environmentProvider.GetEnvironmentVariableAsBool("DOTNET_NOLOGO", defaultValue: false);
+                    bool generateAspNetCertificate = environmentProvider.GetEnvironmentVariableAsBool(EnvironmentVariableNames.DOTNET_GENERATE_ASPNET_CERTIFICATE, defaultValue: true);
+                    bool telemetryOptout = environmentProvider.GetEnvironmentVariableAsBool(EnvironmentVariableNames.TELEMETRY_OPTOUT, defaultValue: CompileOptions.TelemetryOptOutDefault);
+                    bool addGlobalToolsToPath = environmentProvider.GetEnvironmentVariableAsBool(EnvironmentVariableNames.DOTNET_ADD_GLOBAL_TOOLS_TO_PATH, defaultValue: true);
+                    bool nologo = environmentProvider.GetEnvironmentVariableAsBool(EnvironmentVariableNames.DOTNET_NOLOGO, defaultValue: false);
+                    bool skipWorkloadIntegrityCheck = environmentProvider.GetEnvironmentVariableAsBool(EnvironmentVariableNames.DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK,
+                        // Default the workload integrity check skip to true if the command is being ran in CI. Otherwise, false.
+                        defaultValue: new CIEnvironmentDetectorForTelemetry().IsCIEnvironment());
 
                     ReportDotnetHomeUsage(environmentProvider);
 
@@ -186,7 +185,8 @@ namespace Microsoft.DotNet.Cli
                         generateAspNetCertificate: generateAspNetCertificate,
                         telemetryOptout: telemetryOptout,
                         addGlobalToolsToPath: addGlobalToolsToPath,
-                        nologo: nologo);
+                        nologo: nologo,
+                        skipWorkloadIntegrityCheck: skipWorkloadIntegrityCheck);
 
                     ConfigureDotNetForFirstTimeUse(
                         firstTimeUseNoticeSentinel,
@@ -291,7 +291,7 @@ namespace Microsoft.DotNet.Cli
 
             Reporter.Verbose.WriteLine(
                 string.Format(
-                    LocalizableStrings.DotnetCliHomeUsed,
+                    Utils.LocalizableStrings.DotnetCliHomeUsed,
                     home,
                     CliFolderPathCalculator.DotnetHomeVariableName));
         }
@@ -305,16 +305,18 @@ namespace Microsoft.DotNet.Cli
            IEnvironmentProvider environmentProvider,
            Dictionary<string, double> performanceMeasurements)
         {
+            var isFirstTimeUse = !firstTimeUseNoticeSentinel.Exists();
             var environmentPath = EnvironmentPathFactory.CreateEnvironmentPath(isDotnetBeingInvokedFromNativeInstaller, environmentProvider);
             var commandFactory = new DotNetCommandFactory(alwaysRunOutOfProc: true);
             var aspnetCertificateGenerator = new AspNetCoreCertificateGenerator();
+            var reporter = Reporter.Output;
             var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(
                 firstTimeUseNoticeSentinel,
                 aspNetCertificateSentinel,
                 aspnetCertificateGenerator,
                 toolPathSentinel,
                 dotnetFirstRunConfiguration,
-                Reporter.Output,
+                reporter,
                 environmentPath,
                 performanceMeasurements);
 
@@ -323,6 +325,19 @@ namespace Microsoft.DotNet.Cli
             if (isDotnetBeingInvokedFromNativeInstaller && OperatingSystem.IsWindows())
             {
                 DotDefaultPathCorrector.Correct();
+            }
+
+            if (isFirstTimeUse && !dotnetFirstRunConfiguration.SkipWorkloadIntegrityCheck)
+            {
+                try
+                {
+                    WorkloadIntegrityChecker.RunFirstUseCheck(reporter);
+                }
+                catch (Exception)
+                {
+                    // If the workload check fails for any reason, we want to eat the failure and continue running the command.
+                    reporter.WriteLine(Workloads.Workload.LocalizableStrings.WorkloadIntegrityCheckError.Yellow());
+                }
             }
         }
 

@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 """);
         }
 
-        [Fact(Skip= "https://github.com/dotnet/sdk/issues/32196")]
+        [Fact]
         public void TestStructDeclaration()
         {
             RunTest(original: """
@@ -131,6 +131,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     public readonly ref struct PublicReadonlyRefStruct { }
                 }
                 """,
+                // It's expected that record structs are expanded - they're effectively syntactic sugar that is not persisted in metadata
                 expected: """
                 namespace Foo
                 {
@@ -154,16 +155,383 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     {
                     }
 
-                    internal readonly record struct ReadonlyRecordStruct : System.IEquatable<ReadonlyRecordStruct>
+                    internal readonly partial struct ReadonlyRecordStruct : System.IEquatable<ReadonlyRecordStruct>
                     {
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public readonly bool Equals(ReadonlyRecordStruct other) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly bool Equals(object obj) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly int GetHashCode() { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public static bool operator ==(ReadonlyRecordStruct left, ReadonlyRecordStruct right) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public static bool operator !=(ReadonlyRecordStruct left, ReadonlyRecordStruct right) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly string ToString() { throw null; }
                     }
 
                     internal readonly partial struct ReadonlyStruct
                     {
                     }
 
-                    internal record struct RecordStruct : System.IEquatable<RecordStruct>
+                    internal partial struct RecordStruct : System.IEquatable<RecordStruct>
                     {
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public readonly bool Equals(RecordStruct other) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly bool Equals(object obj) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly int GetHashCode() { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public static bool operator ==(RecordStruct left, RecordStruct right) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public static bool operator !=(RecordStruct left, RecordStruct right) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly string ToString() { throw null; }
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        public void TestRecordDeclaration()
+        {
+            RunTest(original: """
+                namespace Foo
+                {   
+                    public record RecordClass;
+                    public record RecordClass1(int i);
+                    public record RecordClass2(string s, int i);
+                    public record DerivedRecord(string s, int i, double d) : RecordClass2(s, i);
+                    public record DerivedRecord2(string x, int i, double d) : RecordClass2(default(string)!, i);
+                    public record DerivedRecord3(string x, int i, double d) : RecordClass2(default(string)!, i);
+                    public record DerivedRecord4(double d) : RecordClass2(default(string)!, default);
+                    public record DerivedRecord5() : RecordClass2(default(string)!, default);
+                
+                    public record RecordClassWithMethods(int i)
+                    {
+                        public void DoSomething() { }
+                        public static void DoSomethingStatic() { }
+                    }
+
+                    public record RecordClassWithProperties(int i)
+                    {
+                        public int AddI { get; set; }
+                        public int AddIinit { get; init; }
+                        public int AddIro { get; }
+                    }
+                    public record RecordClassWithConstructors(int i)
+                    {
+                        public RecordClassWithConstructors() : this(1) { }
+                        public RecordClassWithConstructors(string s) : this(int.Parse(s)) { }
+                    }
+                    public record RecordWithPrivateDefaultConstructor
+                    {
+                        private RecordWithPrivateDefaultConstructor() { }
+                    }
+                    public sealed record SealedRecordWithPrivateDefaultConstructor
+                    {
+                        private SealedRecordWithPrivateDefaultConstructor() { }
+                    }
+                }
+                """,
+                expected: """
+                namespace Foo
+                {
+                    public partial record DerivedRecord(string s, int i, double d) : RecordClass2(default(string)!, default(int))
+                    {
+                    }
+
+                    public partial record DerivedRecord2(string x, int i, double d) : RecordClass2(default(string)!, default(int))
+                    {
+                    }
+
+                    public partial record DerivedRecord3(string x, int i, double d) : RecordClass2(default(string)!, default(int))
+                    {
+                    }
+
+                    public partial record DerivedRecord4(double d) : RecordClass2(default(string)!, default(int))
+                    {
+                    }
+
+                    public partial record DerivedRecord5() : RecordClass2(default(string)!, default(int))
+                    {
+                    }
+
+                    public partial record RecordClass()
+                    {
+                    }
+
+                    public partial record RecordClass1(int i)
+                    {
+                    }
+
+                    public partial record RecordClass2(string s, int i)
+                    {
+                    }
+
+                    public partial record RecordClassWithConstructors(int i)
+                    {
+                        public RecordClassWithConstructors() { }
+
+                        public RecordClassWithConstructors(string s) { }
+                    }
+
+                    public partial record RecordClassWithMethods(int i)
+                    {
+                        public void DoSomething() { }
+
+                        public static void DoSomethingStatic() { }
+                    }
+
+                    public partial record RecordClassWithProperties(int i)
+                    {
+                        public int AddI { get { throw null; } set { } }
+
+                        public int AddIinit { get { throw null; } init { } }
+
+                        public int AddIro { get { throw null; } }
+                    }
+
+                    public partial record RecordWithPrivateDefaultConstructor
+                    {
+                        private RecordWithPrivateDefaultConstructor() { }
+                    }
+
+                    public sealed partial record SealedRecordWithPrivateDefaultConstructor
+                    {
+                        private SealedRecordWithPrivateDefaultConstructor() { }
+                    }
+                }
+                """);
+        }
+
+        [Fact]
+        public void TestRecordStructDeclaration()
+        {
+            RunTest(original: """
+                namespace Foo
+                {
+                    
+                    public record struct RecordStruct;                    
+                    public record struct RecordStruct1(int i);
+                    public record struct RecordStruct2(string s, int i);
+                
+                    public record struct RecordStructWithMethods(int i)
+                    {
+                        public void DoSomething() { }
+                        public static void DoSomethingStatic() { }
+                    }
+
+                    public record struct RecordStructWithProperties(int i)
+                    {
+                        public int AddI { get; set; }
+                        public int AddIinit { get; init; }
+                        public int AddIro { get; }
+                    }
+                    public record struct RecordStructWithConstructors(int i)
+                    {
+                        public RecordStructWithConstructors() : this(1) { }
+                        public RecordStructWithConstructors(string s) : this(int.Parse(s)) { }
+                    }
+                
+                }
+                """,
+                expected: """                
+                namespace Foo
+                {
+                    public partial struct RecordStruct : System.IEquatable<RecordStruct>
+                    {
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public readonly bool Equals(RecordStruct other) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly bool Equals(object obj) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly int GetHashCode() { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public static bool operator ==(RecordStruct left, RecordStruct right) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public static bool operator !=(RecordStruct left, RecordStruct right) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly string ToString() { throw null; }
+                    }
+
+                    public partial struct RecordStruct1 : System.IEquatable<RecordStruct1>
+                    {
+                        private int _dummyPrimitive;
+                        public RecordStruct1(int i) { }
+
+                        public int i { get { throw null; } set { } }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public readonly void Deconstruct(out int i) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public readonly bool Equals(RecordStruct1 other) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly bool Equals(object obj) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly int GetHashCode() { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public static bool operator ==(RecordStruct1 left, RecordStruct1 right) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public static bool operator !=(RecordStruct1 left, RecordStruct1 right) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly string ToString() { throw null; }
+                    }
+
+                    public partial struct RecordStruct2 : System.IEquatable<RecordStruct2>
+                    {
+                        private object _dummy;
+                        private int _dummyPrimitive;
+                        public RecordStruct2(string s, int i) { }
+
+                        public int i { get { throw null; } set { } }
+
+                        public string s { get { throw null; } set { } }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public readonly void Deconstruct(out string s, out int i) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public readonly bool Equals(RecordStruct2 other) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly bool Equals(object obj) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly int GetHashCode() { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public static bool operator ==(RecordStruct2 left, RecordStruct2 right) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public static bool operator !=(RecordStruct2 left, RecordStruct2 right) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly string ToString() { throw null; }
+                    }
+
+                    public partial struct RecordStructWithConstructors : System.IEquatable<RecordStructWithConstructors>
+                    {
+                        private int _dummyPrimitive;
+                        public RecordStructWithConstructors() { }
+
+                        public RecordStructWithConstructors(int i) { }
+
+                        public RecordStructWithConstructors(string s) { }
+
+                        public int i { get { throw null; } set { } }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public readonly void Deconstruct(out int i) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public readonly bool Equals(RecordStructWithConstructors other) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly bool Equals(object obj) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly int GetHashCode() { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public static bool operator ==(RecordStructWithConstructors left, RecordStructWithConstructors right) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public static bool operator !=(RecordStructWithConstructors left, RecordStructWithConstructors right) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly string ToString() { throw null; }
+                    }
+
+                    public partial struct RecordStructWithMethods : System.IEquatable<RecordStructWithMethods>
+                    {
+                        private int _dummyPrimitive;
+                        public RecordStructWithMethods(int i) { }
+
+                        public int i { get { throw null; } set { } }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public readonly void Deconstruct(out int i) { throw null; }
+
+                        public void DoSomething() { }
+
+                        public static void DoSomethingStatic() { }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public readonly bool Equals(RecordStructWithMethods other) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly bool Equals(object obj) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly int GetHashCode() { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public static bool operator ==(RecordStructWithMethods left, RecordStructWithMethods right) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public static bool operator !=(RecordStructWithMethods left, RecordStructWithMethods right) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly string ToString() { throw null; }
+                    }
+
+                    public partial struct RecordStructWithProperties : System.IEquatable<RecordStructWithProperties>
+                    {
+                        private int _dummyPrimitive;
+                        public RecordStructWithProperties(int i) { }
+
+                        public int AddI { get { throw null; } set { } }
+
+                        public int AddIinit { get { throw null; } init { } }
+
+                        public int AddIro { get { throw null; } }
+
+                        public int i { get { throw null; } set { } }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public readonly void Deconstruct(out int i) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public readonly bool Equals(RecordStructWithProperties other) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly bool Equals(object obj) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly int GetHashCode() { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public static bool operator ==(RecordStructWithProperties left, RecordStructWithProperties right) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public static bool operator !=(RecordStructWithProperties left, RecordStructWithProperties right) { throw null; }
+
+                        [System.Runtime.CompilerServices.CompilerGenerated]
+                        public override readonly string ToString() { throw null; }
                     }
                 }
                 """);

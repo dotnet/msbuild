@@ -8,6 +8,8 @@ internal static class KnownStrings
     public static class Properties
     {
         public static readonly string ContainerBaseImage = nameof(ContainerBaseImage);
+        public static readonly string ContainerFamily = nameof(ContainerFamily);
+        public static readonly string _ContainerBaseImageTag = nameof(_ContainerBaseImageTag);
         public static readonly string ContainerRegistry = nameof(ContainerRegistry);
         /// <summary>Note that this is deprecated in favor of <see cref="ContainerRepository"/></summary>
         public static readonly string ContainerImageName = nameof(ContainerImageName);
@@ -22,6 +24,8 @@ internal static class KnownStrings
         public static readonly string ContainerPort = nameof(ContainerPort);
         public static readonly string ContainerEnvironmentVariable = nameof(ContainerEnvironmentVariable);
 
+        public static readonly string ComputeContainerBaseImage = nameof(ComputeContainerBaseImage);
+        public static readonly string _ComputeContainerBaseImageTag = nameof(_ComputeContainerBaseImageTag);
         public static readonly string ComputeContainerConfig = nameof(ComputeContainerConfig);
         public static readonly string AssemblyName = nameof(AssemblyName);
         public static readonly string ContainerBaseRegistry = nameof(ContainerBaseRegistry);

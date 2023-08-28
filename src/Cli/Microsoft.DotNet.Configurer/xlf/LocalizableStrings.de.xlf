@@ -12,19 +12,19 @@
 Installed an ASP.NET Core HTTPS development certificate.
 To trust the certificate, run 'dotnet dev-certs https --trust'
 Learn about HTTPS: https://aka.ms/dotnet-https</source>
-        <target state="new">----------------
-Installed an ASP.NET Core HTTPS development certificate.
-To trust the certificate, run 'dotnet dev-certs https --trust'
-Learn about HTTPS: https://aka.ms/dotnet-https</target>
+        <target state="translated">----------------
+Ein ASP.NET Core-HTTPS-Entwicklungszertifikat installiert.
+Um dem Zertifikat zu vertrauen, führen Sie "dotnet dev-certs https --trust" aus
+Informationen zu HTTPS: https://aka.ms/dotnet-https</target>
         <note />
       </trans-unit>
       <trans-unit id="FirstTimeMessageAspNetCertificateLinux">
         <source>----------------
 Installed an ASP.NET Core HTTPS development certificate.
 To trust the certificate, view the instructions: https://aka.ms/dotnet-https-linux</source>
-        <target state="new">----------------
-Installed an ASP.NET Core HTTPS development certificate.
-To trust the certificate, view the instructions: https://aka.ms/dotnet-https-linux</target>
+        <target state="translated">----------------
+Ein ASP.NET Core-HTTPS-Entwicklungszertifikat installiert.
+Um dem Zertifikat zu vertrauen, sehen Sie sich die folgenden Anweisungen an: https://aka.ms/dotnet-https-linux</target>
         <note />
       </trans-unit>
       <trans-unit id="FirstTimeMessageMoreInformation">
@@ -35,16 +35,12 @@ Explore documentation: https://aka.ms/dotnet-docs
 Report issues and find source on GitHub: https://github.com/dotnet/core
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
 --------------------------------------------------------------------------------------</source>
-        <target state="needs-review-translation">----------------
-Ein ASP.NET Core-HTTPS-Entwicklungszertifikat wurde installiert.
-Um das Zertifikat als vertrauenswürdig einzustufen, führen Sie "dotnet dev-certs https --trust" aus (nur Windows und macOS).
-Weitere Informationen zu HTTPS: https://aka.ms/dotnet-https
-----------------
+        <target state="translated">----------------
 Schreiben Sie Ihre erste App: https://aka.ms/dotnet-hello-world
 Neuigkeiten: https://aka.ms/dotnet-whats-new
 Dokumentation: https://aka.ms/dotnet-docs
 Probleme melden und Quelle in GitHub suchen: https://github.com/dotnet/core
-Verwenden Sie "dotnet --help", um verfügbare Befehle anzuzeigen, oder besuchen Sie https://aka.ms/dotnet-cli.
+verwenden Sie "dotnet --help", um verfügbare Befehle anzuzeigen, oder besuchen Sie https://aka.ms/dotnet-cli
 --------------------------------------------------------------------------------------</target>
         <note />
       </trans-unit>

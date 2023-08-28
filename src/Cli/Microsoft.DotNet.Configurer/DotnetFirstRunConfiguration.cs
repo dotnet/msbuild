@@ -13,16 +13,20 @@ namespace Microsoft.DotNet.Configurer
 
         public bool NoLogo { get; }
 
+        public bool SkipWorkloadIntegrityCheck { get; }
+
         public DotnetFirstRunConfiguration(
             bool generateAspNetCertificate,
             bool telemetryOptout,
             bool addGlobalToolsToPath,
-            bool nologo)
+            bool nologo,
+            bool skipWorkloadIntegrityCheck)
         {
             GenerateAspNetCertificate = generateAspNetCertificate;
             TelemetryOptout = telemetryOptout;
             AddGlobalToolsToPath = addGlobalToolsToPath;
             NoLogo = nologo;
+            SkipWorkloadIntegrityCheck = skipWorkloadIntegrityCheck;
         }
     }
 }

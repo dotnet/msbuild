@@ -29,16 +29,22 @@ The tools can be downloaded here: https://docs.microsoft.com/sysinternals/downlo
 To collect a crash dump from a native application running on .NET 5.0 or later, the usage of Procdump can be forced by setting the VSTEST_DUMP_FORCEPROCDUMP environment variable to 1.
 
 Implies --blame.</source>
-        <target state="needs-review-translation">Esegue i test in modalità di segnalazione errore e abilita la raccolta del dump di arresto anomalo del sistema in caso di chiusura imprevista dell'host di test. 
-Questa opzione è attualmente supportata in Windows e richiede la presenza di procdump.exe e procdump64.exe in PATH.
-In alternativa, è necessario impostare la variabile di ambiente PROCDUMP_PATH in modo che punti a una directory che contiene procdump.exe e procdump64.exe. 
-È possibile scaricare gli strumenti dall'articolo seguente: https://docs.microsoft.com/sysinternals/downloads/procdump 
-Implica --blame.</target>
+        <target state="translated">Esegue i test in modalità di errore e raccoglie un dump di arresto anomalo quando l'host di test si chiude in modo imprevisto. Questa opzione dipende dalla versione di .NET usata, dal tipo di errore e dal sistema operativo.
+  
+Per le eccezioni nel codice gestito, un dump verrà raccolto automaticamente in .NET 5.0 e versioni successive. Verrà generato un dump per host di test o qualsiasi processo figlio eseguito in .NET 5.0 e che si è arrestato in modo anomalo. Gli arresti anomali nel codice nativo non genereranno un dump. Questa opzione funziona in Windows, macOS e Linux.
+
+Dump di arresto anomalo nel codice nativo o durante la destinazione a .NET Framework, o .NET Core 3.1 e versioni precedenti, possono essere raccolti solo in Windows tramite Procdump. Una directory che contiene procdump.exe e procdump64.exe deve trovarsi nella variabile di ambiente PATH o PROCDUMP_PATH.
+
+Gli strumenti possono essere scaricati qui: https://docs.microsoft.com/sysinternals/downloads/procdump
+ 
+Per raccogliere un dump di arresto anomalo da un'applicazione nativa in esecuzione in .NET 5.0 o versioni successive, è possibile forzare l'utilizzo di Procdump impostando la variabile di ambiente VSTEST_DUMP_FORCEPROCDUMP su 1.
+
+Implies --blame.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameCrashDumpTypeDescription">
         <source>The type of crash dump to be collected. Supported values are full (default) and mini. Implies --blame-crash.</source>
-        <target state="needs-review-translation">Tipo di dump di arresto anomalo del sistema da raccogliere. Implica --blame-crash.</target>
+        <target state="translated">Tipo di dump di arresto anomalo da raccogliere. I valori supportati sono completi (impostazione predefinita) e mini. Implica --blame-crash.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangDescription">
@@ -48,7 +54,7 @@ Implica --blame.</target>
       </trans-unit>
       <trans-unit id="CmdBlameHangDumpTypeDescription">
         <source>The type of crash dump to be collected. The supported values are full (default), mini, and none. When 'none' is used then test host is terminated on timeout, but no dump is collected. Implies --blame-hang.</source>
-        <target state="needs-review-translation">Tipo del dump di arresto anomalo da raccogliere. Quando è impostato su None, viene usato quando l'host di test viene terminato al raggiungimento del timeout, ma non viene raccolto alcun dump. Implica --blame-hang.</target>
+        <target state="translated">Tipo di dump di arresto anomalo da raccogliere. I valori supportati sono completi (impostazione predefinita), mini e nessuno. Quando si usa 'none', l'host di test viene terminato in caso di timeout, ma non viene raccolto alcun dump. Implica --blame-hang.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameHangTimeoutDescription">
@@ -56,11 +62,10 @@ Implica --blame.</target>
 The timeout value is specified in the following format: 1.5h / 90m / 5400s / 5400000ms. When no unit is used (e.g. 5400000), the value is assumed to be in milliseconds.
 When used together with data driven tests, the timeout behavior depends on the test adapter used. For xUnit, NUnit and MSTest 2.2.4+ the timeout is renewed after every test case,
 For MSTest before 2.2.4, the timeout is used for all testcases.</source>
-        <target state="needs-review-translation">Timeout per singolo test dopo il quale viene attivato il dump di blocco e il processo dell'host di test viene terminato. 
-Il valore di timeout viene specificato nel formato seguente: 1.5h / 90m / 5400s / 5400000ms. Quando non viene usata alcuna unità (ad esempio 5400000), si presuppone che il valore sia espresso in millisecondi.
-Se viene usato insieme a test basati sui dati, il comportamento di timeout dipende dall'adattatore di test usato. Per xUnit e NUnit il timeout viene rinnovato dopo ogni test case.
-Per MSTest il timeout viene usato per tutti i test case.
-Questa opzione è attualmente supportata solo in Windows insieme a netcoreapp2.1 e versioni successive, nonché in Linux con netcoreapp3.1 e versioni successive. OSX e la piattaforma UWP non sono supportati.</target>
+        <target state="translated">Timeout per singolo test dopo il quale viene attivato il dump di blocco e il processo dell'host di test viene terminato. Il valore predefinito è 1h.
+Il valore di timeout viene specificato nel formato seguente: 1.5h / 90m / 5400s / 5400000ms. Quando non viene usata alcuna unità, ad esempio 5400000, si presuppone che il valore sia espresso in millisecondi.
+Se viene usato insieme a test basati sui dati, il comportamento di timeout dipende dall'adattatore di test usato. Per xUnit e NUnit e MSTest 2.2.4+, il timeout viene rinnovato dopo ogni test case.
+Per MSTest prima di 2.2.4, il timeout viene usato per tutti i test case.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableDescription">
@@ -264,9 +269,12 @@ Example:
   Timeout the test run when a test takes more than 20 minutes and collect hang dump. 
   dotnet test --blame-hang-timeout 20min
 </source>
-        <target state="needs-review-translation">Esegue i test in modalità di segnalazione errore. Questa opzione è utile per isolare test problematici che causano l'arresto anomalo o il blocco dell'host di test. 
-Quando viene rilevato un arresto anomalo, crea in TestResults/guid/guid_Sequence.xml un file di sequenza che acquisisce l'ordine dei test eseguiti prima dell'arresto anomalo.
+        <target state="translated">Esegue i test in modalità di segnalazione errore. Questa opzione è utile per isolare test problematici che causano l'arresto anomalo o il blocco dell'host di test, ma non crea un dump della memoria per impostazione predefinita.
+
+Quando viene rilevato un arresto anomalo, viene creato un file di sequenza in TestResults/guid/guid_Sequence.xml che acquisisce l'ordine dei test eseguiti prima dell'arresto anomalo.
+
 Sulla base di impostazioni aggiuntive, possono essere raccolti anche i dump di blocco o di arresto anomalo.
+
 Esempio: 
   Timeout dell'esecuzione dei test quando il test impiega più del timeout predefinito di un'ora e raccoglie il dump di arresto anomalo in caso di chiusura imprevista dell'host di test. 
   Per i dump di arresto anomalo è richiesta una configurazione aggiuntiva. Vedere di seguito.

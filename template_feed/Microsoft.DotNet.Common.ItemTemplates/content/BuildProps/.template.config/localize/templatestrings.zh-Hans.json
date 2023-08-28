@@ -4,6 +4,6 @@
   "description": "一个空的 Directory.Build.props 文件，可用于为整个文件夹指定 MSBuild 属性",
   "symbols/inherit/displayName": "继承",
   "symbols/inherit/description": "如果为 true，则为文件系统目录层次结构中最近的 Directory.Build.props 添加 Import。默认情况下，Directory.Build.props 不会继承，因此这样做可以按文件夹生成一组自定义项。",
-  "symbols/useArtifacts/displayName": "Use Artifacts Output Layout",
-  "symbols/useArtifacts/description": "If true, adds a property to enable the artifacts output layout. This is a common pattern for projects that produce build artifacts, such as NuGet packages, that are placed in a common folder."
+  "symbols/useArtifacts/displayName": "使用工件输出布局",
+  "symbols/useArtifacts/description": "如果为 true，则添加属性来启动工件输出布局。这是用于创建生成工件(例如 NuGet 包)的项目的常见模式，这些项目放置在公用文件夹中。"
 }

@@ -33,6 +33,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultItemExcludes>$(DefaultItemExcludes);**/*.*proj</DefaultItemExcludes>
     <DefaultItemExcludes>$(DefaultItemExcludes);**/*.sln</DefaultItemExcludes>
     <DefaultItemExcludes>$(DefaultItemExcludes);**/*.vssscc</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);**/.DS_Store</DefaultItemExcludes>
 
     <!-- WARNING: This pattern is there to ignore folders such as .git and .vs, but it will also match items included with a
          relative path outside the project folder (for example "..\Shared\Shared.cs").  So be sure only to apply it to items
@@ -128,16 +129,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                  FormatArguments="$(SdkResolverGlobalJsonPath)" />
   </Target>
 
-  <Target Name="_WarnWhenUsingNET6AndVSPriorTo17"
+  <Target Name="_WarnWhenUsingNET8AndVSPriorTo178"
         BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
-        Condition="$([MSBuild]::VersionLessThan($(VisualStudioVersion), '17.0')) and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))">
-    <NetSdkWarning ResourceName="Net6NotCompatibleWithDev16"/>
-  </Target>
-
-  <Target Name="_WarnWhenUsingNET7AndVSPriorTo174"
-        BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
-        Condition="$([MSBuild]::VersionLessThan($(MSBuildVersion), '17.4.0')) and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '7.0'))">
-    <NetSdkWarning ResourceName="Net7NotCompatibleWithDev173"/>
+        Condition="$([MSBuild]::VersionLessThan($(MSBuildVersion), '17.8.0')) and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '8.0'))">
+    <NetSdkWarning ResourceName="Net8NotCompatibleWithDev177"/>
   </Target>
 
   <Target Name="_CheckForInvalidWindowsDesktopTargetingConfiguration"

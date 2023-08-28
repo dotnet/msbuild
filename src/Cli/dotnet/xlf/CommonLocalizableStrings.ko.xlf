@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="ArchArgumentName">
         <source>ARCH</source>
-        <target state="new">ARCH</target>
+        <target state="translated">ARCH</target>
         <note />
       </trans-unit>
       <trans-unit id="ArchitectureOptionDescription">
@@ -14,12 +14,12 @@
       </trans-unit>
       <trans-unit id="ArtifactsPathArgumentName">
         <source>ARTIFACTS_DIR</source>
-        <target state="new">ARTIFACTS_DIR</target>
+        <target state="translated">ARTIFACTS_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="ArtifactsPathOptionDescription">
         <source>The artifacts path. All output from the project, including build, publish, and pack output, will go in subfolders under the specified path.</source>
-        <target state="new">The artifacts path. All output from the project, including build, publish, and pack output, will go in subfolders under the specified path.</target>
+        <target state="translated">아티팩트 경로입니다. 빌드, 게시 및 팩 출력을 포함한 프로젝트의 모든 출력이 지정된 경로 아래의 하위 폴더로 이동합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotResolveRuntimeIdentifier">
@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="DidYouMean">
         <source>Did you mean the following command?</source>
-        <target state="new">Did you mean the following command?</target>
+        <target state="translated">다음 명령을 의미했나요?</target>
         <note />
       </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
@@ -132,7 +132,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="MSBuildAdditionalOptionTitle">
         <source>.NET Cli Options:</source>
-        <target state="new">.NET Cli Options:</target>
+        <target state="translated">.NET Cli 옵션:</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
@@ -142,7 +142,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="OSArgumentName">
         <source>OS</source>
-        <target state="new">OS</target>
+        <target state="translated">OS</target>
         <note />
       </trans-unit>
       <trans-unit id="OperatingSystemOptionDescription">
@@ -218,8 +218,9 @@ export PATH="$PATH:{0}"
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'false.' However, when targeting .NET 7 or lower, the default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">대상 머신에 런타임을 설치할 필요가 없도록 애플리케이션과 함께 .NET 런타임을 게시합니다.
-런타임 식별자를 지정한 경우 기본값은 'true'입니다.</target>
+        <target state="translated">대상 컴퓨터에 런타임을 설치할 필요가 없도록 애플리케이션과 함께 .NET 런타임을 게시합니다. 
+
+기본값은 'false'입니다. 그러나 .NET 7 이하를 대상으로 하고 런타임 식별자를 지정하는 경우 기본값은 'true'입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Solution">
@@ -229,7 +230,7 @@ The default is 'false.' However, when targeting .NET 7 or lower, the default is 
       </trans-unit>
       <trans-unit id="SolutionArgumentMisplaced">
         <source>Solution argument '{0}' is misplaced.</source>
-        <target state="new">Solution argument '{0}' is misplaced.</target>
+        <target state="translated">'{0}' 솔루션 인수의 위치가 잘못되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionFile">
@@ -279,7 +280,7 @@ The default is 'false.' However, when targeting .NET 7 or lower, the default is 
       </trans-unit>
       <trans-unit id="SolutionFolderAlreadyContainsProject">
         <source>Solution {0} already contains project {1} in solution folder {2}.</source>
-        <target state="new">Solution {0} already contains project {1} in solution folder {2}.</target>
+        <target state="translated">{0} 솔루션은 {2} 솔루션 폴더에 {1} 프로젝트를 이미 포함합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Update">

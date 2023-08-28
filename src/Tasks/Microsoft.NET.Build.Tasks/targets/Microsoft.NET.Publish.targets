@@ -22,14 +22,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- PublishAot depends on PublishTrimmed. This must be set early enough for the KnownILLinkPack to be restored. -->
     <PublishTrimmed Condition="'$(PublishTrimmed)' == '' And '$(PublishAot)' == 'true'">true</PublishTrimmed>
     <IsTrimmable Condition="'$(IsTrimmable)' == '' and '$(IsAotCompatible)' == 'true'">true</IsTrimmable>
-    <!-- Keep this in sync with requiresILLinkPack in ProcessFrameworkReferences.cs. -->
-    <_RequiresILLinkPack Condition="'$(_RequiresILLinkPack)' == '' And (
-        '$(PublishAot)' == 'true' Or
-        '$(IsAotCompatible)' == 'true' Or '$(EnableAotAnalyzer)' == 'true' Or
-        '$(PublishTrimmed)' == 'true' Or
-        '$(IsTrimmable)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true' Or
-        '$(EnableSingleFileAnalyzer)' == 'true')">true</_RequiresILLinkPack>
-    <_RequiresILLinkPack Condition="'$(_RequiresILLinkPack)' == ''">false</_RequiresILLinkPack>
   </PropertyGroup>
 
   <ItemDefinitionGroup>
@@ -37,6 +29,20 @@ Copyright (c) .NET Foundation. All rights reserved.
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </ResolvedFileToPublish>
   </ItemDefinitionGroup>
+
+  <Target Name="_ComputeRequiresILLinkPack" BeforeTargets="ProcessFrameworkReferences">
+    <!-- Keep this in sync with the warnings produced for RequiresILLinkPack in ProcessFrameworkReferences.cs. 
+         Must be set late enough to see the inferred value of EnableSingleFileAnalyzer. -->
+    <PropertyGroup>
+      <_RequiresILLinkPack Condition="'$(_RequiresILLinkPack)' == '' And (
+          '$(PublishAot)' == 'true' Or
+          '$(IsAotCompatible)' == 'true' Or '$(EnableAotAnalyzer)' == 'true' Or
+          '$(PublishTrimmed)' == 'true' Or
+          '$(IsTrimmable)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true' Or
+          '$(EnableSingleFileAnalyzer)' == 'true')">true</_RequiresILLinkPack>
+      <_RequiresILLinkPack Condition="'$(_RequiresILLinkPack)' == ''">false</_RequiresILLinkPack>
+    </PropertyGroup>
+  </Target>
 
   <!--
     ============================================================

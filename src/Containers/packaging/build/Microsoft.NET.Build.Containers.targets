@@ -32,7 +32,8 @@
   <Target Name="_ComputeContainerBaseImageTag" Returns="$(_ContainerBaseImageTag)">
     <ComputeDotnetBaseImageTag
       SdkVersion="$(NetCoreSdkVersion)"
-      TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV).0">
+      TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV).0"
+      ContainerFamily="$(ContainerFamily)">
         <Output TaskParameter="ComputedBaseImageTag" PropertyName="_ContainerBaseImageTag" />
     </ComputeDotnetBaseImageTag>
   </Target>
@@ -223,6 +224,7 @@
 
       <Output TaskParameter="GeneratedContainerManifest" PropertyName="GeneratedContainerManifest" />
       <Output TaskParameter="GeneratedContainerConfiguration" PropertyName="GeneratedContainerConfiguration" />
+      <Output TaskParameter="GeneratedContainerDigest" PropertyName="GeneratedContainerDigest" />
     </CreateNewImage>
   </Target>
 </Project>

@@ -4,6 +4,6 @@
   "description": "Eine leere \"Directory.Build.props\"-Datei, die zum Angeben von MSBuild-Eigenschaften für einen gesamten Ordner verwendet werden kann.",
   "symbols/inherit/displayName": "Erben",
   "symbols/inherit/description": "Bei \"true\" wird ein Import für die nächstgelegene Datei \"Directory.Build.props\" in der Verzeichnishierarchie des Dateisystems hinzugefügt. \"Directory.Build.props\" erbt nicht standardmäßig. Auf diese Weise können Sie einen Satz von Anpassungen für einzelne Ordner erstellen.",
-  "symbols/useArtifacts/displayName": "Use Artifacts Output Layout",
-  "symbols/useArtifacts/description": "If true, adds a property to enable the artifacts output layout. This is a common pattern for projects that produce build artifacts, such as NuGet packages, that are placed in a common folder."
+  "symbols/useArtifacts/displayName": "Artefaktausgabelayout verwenden",
+  "symbols/useArtifacts/description": "Wenn TRUE, wird eine Eigenschaft hinzugefügt, um das Artefaktausgabelayout zu aktivieren. Dies ist ein gängiges Muster für Projekte, die Buildartefakte erstellen, z. B. NuGet-Pakete, die in einem gemeinsamen Ordner platziert werden."
 }

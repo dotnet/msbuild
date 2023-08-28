@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for building the package. The default is 'Release'.</source>
-        <target state="needs-review-translation">將用以組建套件的設定。預設值為 'Debug'。使用 'PackRelease' 屬性將 'Release' 設定為此命令的預設值。</target>
+        <target state="translated">用於建置套件的設定。預設值為 'Release'。</target>
         <note />
       </trans-unit>
     </body>

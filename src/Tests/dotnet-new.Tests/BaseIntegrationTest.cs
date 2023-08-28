@@ -133,11 +133,15 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         /// <summary>
         /// Packs test template package and returns path to it.
         /// </summary>
-        internal static string PackTestNuGetPackage(ITestOutputHelper log, [CallerMemberName] string testName = "UnnamedTest")
+        internal string PackTestNuGetPackage(ITestOutputHelper log, [CallerMemberName] string testName = "UnnamedTest")
         {
-            string outputLocation = CreateTemporaryFolder(testName, "TestNuGetPackage");
+            var testAsset = _testAssetsManager.CopyTestAsset("dotnet-new", callingMethod: testName, testAssetSubdirectory: "TestPackages").WithSource();
+            string testProject = Path.GetFileName(DotnetNewTestTemplatePackageProjectPath);
+            string testPath = testAsset.Path;
 
-            new DotnetPackCommand(log, DotnetNewTestTemplatePackageProjectPath, "-o", outputLocation)
+            string outputLocation = Path.Combine(testPath, "TestNuGetPackage");
+
+            new DotnetPackCommand(log, $"{testPath}\\{testProject}", "-o", outputLocation)
                 .Execute()
                 .Should()
             .Pass();
@@ -180,6 +184,5 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             }
             return repoRoot;
         }
-
     }
 }

@@ -832,10 +832,6 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1181: Error getting pack version: Pack '{0}' was not present in workload manifests.</value>
     <comment>{StrBegin="NETSDK1181: "}</comment>
   </data>
-  <data name="Net6NotCompatibleWithDev16" xml:space="preserve">
-    <value>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</value>
-    <comment>{StrBegin="NETSDK1182: "}</comment>
-  </data>
   <data name="TargetingPackNotRestored_TransitiveDisabled" xml:space="preserve">
     <value>NETSDK1184: The Targeting Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</value>
     <comment>{StrBegin="NETSDK1184: "}</comment>
@@ -864,10 +860,6 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</value>
     <comment>{StrBegin="NETSDK1191: "}</comment>
   </data>
-  <data name="Net7NotCompatibleWithDev173" xml:space="preserve">
-    <value>NETSDK1192: Targeting .NET 7.0 or higher in Visual Studio 2022 17.3 is not supported.</value>
-    <comment>{StrBegin="NETSDK1192: "}</comment>
-  </data>
   <data name="PublishSelfContainedMustBeBool" xml:space="preserve">
     <value>NETSDK1193: If PublishSelfContained is set, it must be either true or false. The value given was '{0}'.</value>
     <comment>{StrBegin="NETSDK1193: "}</comment>
@@ -876,10 +868,8 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1194: The "--output" option isn't supported when building a solution. Specifying a solution-level output path results in all projects copying outputs to the same directory, which can lead to inconsistent builds.</value>
     <comment>{StrBegin="NETSDK1194: "}{Locked="--output"}</comment>
   </data>
-  <data name="IsTrimmableUnsupported" xml:space="preserve">
-    <value>NETSDK1195: IsTrimmable is not supported for the target framework. Consider multi-targeting to a supported framework to enable trimming, and set IsTrimmable only for the supported frameworks. For example:
-&lt;IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))"&gt;true&lt;/IsTrimmable&gt;
-For more information, see https://aka.ms/netsdk1195</value>
+  <data name="ILLinkNoValidRuntimePackageError" xml:space="preserve">
+    <value>NETSDK1195: Trimming, or code compatibility analysis for trimming, single-file deployment, or ahead-of-time compilation is not supported for the target framework. For more information, see https://aka.ms/netsdk1195</value>
     <comment>{StrBegin="NETSDK1195: "}</comment>
   </data>
   <data name="AotNotSupported" xml:space="preserve">
@@ -949,5 +939,14 @@ For more information, see https://aka.ms/netsdk1195</value>
 &lt;EnableSingleFileAnalyzer Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))"&gt;true&lt;/EnableSingleFileAnalyzer&gt;</value>
     <comment>{StrBegin="NETSDK1211: "}</comment>
   </data>
-  <!-- The latest message added is EnableSingleFileAnalyzerUnsupported. Please update this value with each PR to catch parallel PRs both adding a new message -->
+  <data name="IsTrimmableUnsupported" xml:space="preserve">
+    <value>NETSDK1212: IsTrimmable is not supported for the target framework. Consider multi-targeting to a supported framework to enable trimming, and set IsTrimmable only for the supported frameworks. For example:
+&lt;IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))"&gt;true&lt;/IsTrimmable&gt;</value>
+    <comment>{StrBegin="NETSDK1212: "}</comment>
+  </data>
+  <data name="Net8NotCompatibleWithDev177" xml:space="preserve">
+    <value>NETSDK1213: Targeting .NET 8.0 or higher in Visual Studio 2022 17.7 is not supported.</value>
+    <comment>{StrBegin="NETSDK1213: "}</comment>
+  </data>
+  <!-- The latest message added is Net8NotCompatibleWithDev177. Please update this value with each PR to catch parallel PRs both adding a new message -->
 </root>
