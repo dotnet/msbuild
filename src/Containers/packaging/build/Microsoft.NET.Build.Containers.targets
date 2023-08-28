@@ -189,7 +189,10 @@
     </PublishContainerDependsOn>
   </PropertyGroup>
 
-  <Target Name="PublishContainer" DependsOnTargets="$(PublishContainerDependsOn)" Condition="'$(EnableSdkContainerSupport)' == 'true' and '$(IsPublishable)' == 'true'">
+  <!-- TODO: change this comparison from IsPublishing != false to IsPublishing == true when console apps Import the Publish SDK -->
+  <Target Name="PublishContainer"
+    DependsOnTargets="$(PublishContainerDependsOn)"
+    Condition="'$(EnableSdkContainerSupport)' == 'true' and '$(IsPublishable)' != 'false'">
 
     <PropertyGroup Condition="'$(DOTNET_HOST_PATH)' == ''">
       <DotNetHostDirectory>$(NetCoreRoot)</DotNetHostDirectory>
