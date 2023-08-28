@@ -1889,7 +1889,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Static graph loaded in {0} seconds: {1} nodes, {2} edges</value>
   </data>
   <data name="IsolatedContextDoesNotSupportFileSystem" xml:space="preserve">
-    <value>EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system.</value>
+    <value>EvaluationContext objects created with SharingPolicy.Isolated or SharingPolicy.SharedSDKCache do not support being passed an MSBuildFileSystemBase file system.</value>
   </data>
   <data name="LoadingProjectCachePlugin" xml:space="preserve">
     <value>Loading the following project cache plugin: {0}</value>

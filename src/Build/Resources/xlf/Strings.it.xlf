@@ -160,8 +160,8 @@
         <note />
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
-        <source>EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system.</source>
-        <target state="translated">Agli oggetti EvaluationContext creati con SharingPolicy.Isolated non è possibile passare un file system MSBuildFileSystemBase.</target>
+        <source>EvaluationContext objects created with SharingPolicy.Isolated or SharingPolicy.SharedSDKCache do not support being passed an MSBuildFileSystemBase file system.</source>
+        <target state="needs-review-translation">Agli oggetti EvaluationContext creati con SharingPolicy.Isolated non è possibile passare un file system MSBuildFileSystemBase.</target>
         <note />
       </trans-unit>
       <trans-unit id="ItemReferencingSelfInTarget">

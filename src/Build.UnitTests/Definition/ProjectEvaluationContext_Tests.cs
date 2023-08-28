@@ -56,6 +56,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         [Theory]
         [InlineData(EvaluationContext.SharingPolicy.Shared)]
+        [InlineData(EvaluationContext.SharingPolicy.SharedSDKCache)]
         [InlineData(EvaluationContext.SharingPolicy.Isolated)]
         public void SharedContextShouldGetReusedWhereasIsolatedContextShouldNot(EvaluationContext.SharingPolicy policy)
         {
@@ -75,6 +76,9 @@ namespace Microsoft.Build.UnitTests.Definition
                     {
                         case EvaluationContext.SharingPolicy.Shared:
                             currentContext.ShouldBeSameAs(previousContext, $"Shared policy: usage {i} was not the same as usage {i - 1}");
+                            break;
+                        case EvaluationContext.SharingPolicy.SharedSDKCache:
+                            currentContext.ShouldNotBeSameAs(previousContext, $"SharedSDKCache policy: usage {i} was the same as usage {i - 1}");
                             break;
                         case EvaluationContext.SharingPolicy.Isolated:
                             currentContext.ShouldNotBeSameAs(previousContext, $"Isolated policy: usage {i} was the same as usage {i - 1}");
@@ -123,11 +127,13 @@ namespace Microsoft.Build.UnitTests.Definition
             fileSystem.FileOrDirectoryExistsCalls.ShouldBe(2);
         }
 
-        [Fact]
-        public void IsolatedContextShouldNotSupportBeingPassedAFileSystem()
+        [Theory]
+        [InlineData(EvaluationContext.SharingPolicy.SharedSDKCache)]
+        [InlineData(EvaluationContext.SharingPolicy.Isolated)]
+        public void NonSharedContextShouldNotSupportBeingPassedAFileSystem(EvaluationContext.SharingPolicy policy)
         {
             var fileSystem = new Helpers.LoggingFileSystem();
-            Should.Throw<ArgumentException>(() => EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated, fileSystem));
+            Should.Throw<ArgumentException>(() => EvaluationContext.Create(policy, fileSystem));
         }
 
         [Theory]
@@ -184,6 +190,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         [Theory]
         [InlineData(EvaluationContext.SharingPolicy.Shared)]
+        [InlineData(EvaluationContext.SharingPolicy.SharedSDKCache)]
         [InlineData(EvaluationContext.SharingPolicy.Isolated)]
         public void ReevaluationShouldNotReuseInitialContext(EvaluationContext.SharingPolicy policy)
         {
@@ -220,6 +227,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         [Theory]
         [InlineData(EvaluationContext.SharingPolicy.Shared)]
+        [InlineData(EvaluationContext.SharingPolicy.SharedSDKCache)]
         [InlineData(EvaluationContext.SharingPolicy.Isolated)]
         public void ProjectInstanceShouldRespectSharingPolicy(EvaluationContext.SharingPolicy policy)
         {
@@ -267,6 +275,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         [Theory]
         [InlineData(EvaluationContext.SharingPolicy.Shared, 1, 1)]
+        [InlineData(EvaluationContext.SharingPolicy.SharedSDKCache, 1, 1)]
         [InlineData(EvaluationContext.SharingPolicy.Isolated, 4, 4)]
         public void ContextPinsSdkResolverCache(EvaluationContext.SharingPolicy policy, int sdkLookupsForFoo, int sdkLookupsForBar)
         {
@@ -323,17 +332,20 @@ namespace Microsoft.Build.UnitTests.Definition
                     }
                 };
 
-                yield return new object[]
+                foreach (var policy in new[] { EvaluationContext.SharingPolicy.SharedSDKCache, EvaluationContext.SharingPolicy.Isolated })
                 {
-                    EvaluationContext.SharingPolicy.Isolated,
-                    new[]
+                    yield return new object[]
                     {
-                        new[] {"0.cs"},
-                        new[] {"0.cs", "1.cs"},
-                        new[] {"0.cs", "1.cs", "2.cs"},
-                        new[] {"0.cs", "1.cs", "2.cs", "3.cs"},
-                    }
-                };
+                        policy,
+                        new[]
+                        {
+                            new[] {"0.cs"},
+                            new[] {"0.cs", "1.cs"},
+                            new[] {"0.cs", "1.cs", "2.cs"},
+                            new[] {"0.cs", "1.cs", "2.cs", "3.cs"},
+                        }
+                    };
+                }
             }
         }
 
@@ -394,17 +406,20 @@ namespace Microsoft.Build.UnitTests.Definition
                     }
                 };
 
-                yield return new object[]
+                foreach (var policy in new[] { EvaluationContext.SharingPolicy.SharedSDKCache, EvaluationContext.SharingPolicy.Isolated })
                 {
-                    EvaluationContext.SharingPolicy.Isolated,
-                    new[]
+                    yield return new object[]
                     {
-                        new[] {"0.cs"},
-                        new[] {"0.cs", "1.cs"},
-                        new[] {"0.cs", "1.cs", "2.cs"},
-                        new[] {"0.cs", "1.cs", "2.cs", "3.cs"},
-                    }
-                };
+                        policy,
+                        new[]
+                        {
+                            new[] {"0.cs"},
+                            new[] {"0.cs", "1.cs"},
+                            new[] {"0.cs", "1.cs", "2.cs"},
+                            new[] {"0.cs", "1.cs", "2.cs", "3.cs"},
+                        }
+                    };
+                }
             }
         }
 
@@ -672,12 +687,18 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Directory.CreateDirectory(globDirectory.Path);
 
-            // Globs with a directory part will produce items prepended with that directory part
-            foreach (var globExpansion in expectedGlobExpansions)
+            // Globs with a directory part will produce items prepended with that directory part.
+            // Make a deep copy of the argument to avoid writing to global variables.
+            string[][] prependedExpectedGlobExpansions = new string[expectedGlobExpansions.Length][];
+            for (int expIndex = 0; expIndex < expectedGlobExpansions.Length; expIndex++)
             {
+                string[] globExpansion = expectedGlobExpansions[expIndex];
+                string[] prependedGlobExpansion = new string[globExpansion.Length];
+
+                prependedExpectedGlobExpansions[expIndex] = prependedGlobExpansion;
                 for (var i = 0; i < globExpansion.Length; i++)
                 {
-                    globExpansion[i] = Path.Combine(itemSpecDirectoryPart, globExpansion[i]);
+                    prependedGlobExpansion[i] = Path.Combine(itemSpecDirectoryPart, globExpansion[i]);
                 }
             }
 
@@ -708,7 +729,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 context,
                 project =>
                 {
-                    var expectedGlobExpansion = expectedGlobExpansions[evaluationCount];
+                    var expectedGlobExpansion = prependedExpectedGlobExpansions[evaluationCount];
                     evaluationCount++;
 
                     File.WriteAllText(Path.Combine(globDirectory.Path, $"{evaluationCount}.cs"), "");
@@ -771,6 +792,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         [Theory]
         [InlineData(EvaluationContext.SharingPolicy.Isolated)]
+        [InlineData(EvaluationContext.SharingPolicy.SharedSDKCache)]
         [InlineData(EvaluationContext.SharingPolicy.Shared)]
         public void ContextCachesExistenceChecksInConditions(EvaluationContext.SharingPolicy policy)
         {
@@ -806,6 +828,7 @@ namespace Microsoft.Build.UnitTests.Definition
                             case EvaluationContext.SharingPolicy.Shared:
                                 project.GetPropertyValue("p").ShouldBe("val");
                                 break;
+                            case EvaluationContext.SharingPolicy.SharedSDKCache:
                             case EvaluationContext.SharingPolicy.Isolated:
                                 project.GetPropertyValue("p").ShouldBeEmpty();
                                 break;
@@ -818,6 +841,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         [Theory]
         [InlineData(EvaluationContext.SharingPolicy.Isolated)]
+        [InlineData(EvaluationContext.SharingPolicy.SharedSDKCache)]
         [InlineData(EvaluationContext.SharingPolicy.Shared)]
         public void ContextCachesExistenceChecksInGetDirectoryNameOfFileAbove(EvaluationContext.SharingPolicy policy)
         {
@@ -850,6 +874,7 @@ namespace Microsoft.Build.UnitTests.Definition
                         case EvaluationContext.SharingPolicy.Shared:
                             searchedPath.EvaluatedValue.ShouldBe(subdirectory.Path);
                             break;
+                        case EvaluationContext.SharingPolicy.SharedSDKCache:
                         case EvaluationContext.SharingPolicy.Isolated:
                             searchedPath.EvaluatedValue.ShouldBe(
                                 evaluationCount == 1
@@ -872,6 +897,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         [Theory]
         [InlineData(EvaluationContext.SharingPolicy.Isolated)]
+        [InlineData(EvaluationContext.SharingPolicy.SharedSDKCache)]
         [InlineData(EvaluationContext.SharingPolicy.Shared)]
         public void ContextCachesExistenceChecksInGetPathOfFileAbove(EvaluationContext.SharingPolicy policy)
         {
@@ -904,6 +930,7 @@ namespace Microsoft.Build.UnitTests.Definition
                         case EvaluationContext.SharingPolicy.Shared:
                             searchedPath.EvaluatedValue.ShouldBe(subdirectoryFile.Path);
                             break;
+                        case EvaluationContext.SharingPolicy.SharedSDKCache:
                         case EvaluationContext.SharingPolicy.Isolated:
                             searchedPath.EvaluatedValue.ShouldBe(
                                 evaluationCount == 1
