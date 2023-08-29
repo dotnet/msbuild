@@ -73,13 +73,13 @@
       <Sha>ed9a83526483c094fb51e7000b6f816ce6cb0325</Sha>
       <SourceBuild RepoName="xliff-tasks" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.8.0-preview.1.69">
+    <Dependency Name="NuGet.Build.Tasks" Version="6.8.0-preview.1.82">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>e873b496daa6839a86f4b820d15945a9aad98e3d</Sha>
+      <Sha>7bb6ca5f6930d23fd93820dfc9c6a4373c8fd691</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.8.0-1.23419.1">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.8.0-2.23426.1">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>5fcefbef4fa8a28c2ac73c8c03ab37fca30e4570</Sha>
+      <Sha>34268d1bb9370c7b01c742303a895a99daf10d6a</Sha>
       <SourceBuild RepoName="roslyn" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="8.0.0-beta.23425.2">
