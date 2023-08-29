@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.IO.MemoryMappedFiles;
 using System.Runtime.CompilerServices;
 using Microsoft.NET.Build.Tasks;
 
@@ -102,6 +103,41 @@ namespace Microsoft.NET.Build.Tests
                 .Execute()
                 .Should()
                 .Pass();
+        }
+
+        [PlatformSpecificFact(TestPlatforms.Linux | TestPlatforms.OSX | TestPlatforms.FreeBSD)]
+        public void AppTargetingWindows10WillProduceWindowsGUISubsystemExe()
+        {
+            // check subsystem is successfully set as WindowsGUISubsystem
+            var testProject = new TestProject()
+            {
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework + "-windows10.0.19041.0",
+                IsWinExe = true
+            };
+            testProject.AdditionalProperties["EnableWindowsTargeting"] = "true";
+            testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x64";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            new PublishCommand(testAsset)
+                .Execute()
+                .Should()
+                .Pass();
+
+            var exePath = Path.Combine(testAsset.TestRoot, testAsset.TestProject.Name,
+                "bin", "Debug", testAsset.TestProject.TargetFrameworks, "win-x64", "publish",
+                $"{testAsset.TestProject.Name}.exe");
+
+            const int PEHeaderPointerOffset = 0x3C;
+            const int SubsystemOffset = 0x5C;
+            const ushort WindowsGUISubsystem = 0x2;
+
+            using var mmap = MemoryMappedFile.CreateFromFile(exePath);
+            using var accessor = mmap.CreateViewAccessor();
+
+            uint peHeaderOffset = accessor.ReadUInt32(PEHeaderPointerOffset);
+            ushort subsystem = accessor.ReadUInt16(peHeaderOffset + SubsystemOffset);
+            subsystem.Should().Be(WindowsGUISubsystem);
         }
 
         [PlatformSpecificFact(TestPlatforms.Linux | TestPlatforms.OSX | TestPlatforms.FreeBSD)]

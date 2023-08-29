@@ -3,7 +3,6 @@
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using Microsoft.NET.HostModel;
 using Microsoft.NET.HostModel.AppHost;
 using NuGet.Versioning;
 
@@ -108,7 +107,7 @@ namespace Microsoft.NET.Build.Tasks
                 try
                 {
                     var windowsGraphicalUserInterface = runtimeIdentifier.StartsWith("win") && "WinExe".Equals(OutputType, StringComparison.OrdinalIgnoreCase);
-                    if (ResourceUpdater.IsSupportedOS() && runtimeIdentifier.StartsWith("win"))
+                    if (runtimeIdentifier.StartsWith("win"))
                     {
                         HostWriter.CreateAppHost(appHostSourceFilePath: resolvedApphostAssetPath,
                                                  appHostDestinationFilePath: appHostDestinationFilePath,
