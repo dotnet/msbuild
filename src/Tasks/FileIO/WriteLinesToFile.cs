@@ -55,6 +55,9 @@ namespace Microsoft.Build.Tasks
         /// written to the file.</remarks>
         public bool FailIfNotIncremental { get; set; }
 
+        [Obsolete]
+        public bool CanBeIncremental => WriteOnlyWhenDifferent;
+
         /// <summary>
         /// Execute the task.
         /// </summary>
