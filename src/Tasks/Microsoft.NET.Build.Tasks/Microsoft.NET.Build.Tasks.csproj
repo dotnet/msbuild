@@ -60,7 +60,6 @@
     <ProjectReference Include="..\..\Microsoft.DotNet.ApiSymbolExtensions\Microsoft.DotNet.ApiSymbolExtensions.csproj" OutputItemType="ReferenceCopyLocalPaths" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
-
   <!-- Packages that are in-box for .NET Core, so we only need to reference them for .NET Framework -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildFromSource)' != 'true'">
     <!--
@@ -69,8 +68,9 @@
         the same System.Reflection.Metadata assembly and their types can unify. See the following link for the MSBuild binding redirect config.
           https://github.com/dotnet/msbuild/blob/5d102ae37163fc1f22610bb433c3ab9a2fff91f0/src/MSBuild/app.config#L59
     -->
-    <PackageReference Include="System.Collections.Immutable" />
-    <PackageReference Include="System.Reflection.Metadata" />
+    <PackageReference Include="System.Collections.Immutable" VersionOverride="$(SystemCollectionsImmutablePackageVersion)" />
+    <PackageReference Include="System.Reflection.Metadata" VersionOverride="$(SystemReflectionMetadataVersion)" />
+    <PackageReference Include="System.Reflection.MetadataLoadContext" VersionOverride="$(SystemReflectionMetadataVersion)" />
   </ItemGroup>
 
   <!-- These are loaded from the CLI's copy on .NET Core, we don't need to duplicate them on disk -->
