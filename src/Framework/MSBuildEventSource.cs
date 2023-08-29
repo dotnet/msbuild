@@ -661,6 +661,18 @@ namespace Microsoft.Build.Eventing
         {
             WriteEvent(90, commandLine, countOfConsoleMessages, sumSizeOfConsoleMessages, clientExitType, serverExitType);
         }
+
+        [Event(91, Keywords = Keywords.All)]
+        public void ProjectCacheHandleBuildResultStart(string pluginTypeName, string projectPath, string targets)
+        {
+            WriteEvent(91, pluginTypeName, projectPath, targets);
+        }
+
+        [Event(92, Keywords = Keywords.All)]
+        public void ProjectCacheHandleBuildResultStop(string pluginTypeName, string projectPath, string targets)
+        {
+            WriteEvent(92, pluginTypeName, projectPath, targets);
+        }
         #endregion
     }
 }

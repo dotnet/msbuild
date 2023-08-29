@@ -1073,6 +1073,9 @@ namespace Microsoft.Build.UnitTests
                                         question: false,
                                         inputResultsCaches: null,
                                         outputResultsCache: null,
+#if FEATURE_REPORTFILEACCESSES
+                                        reportFileAccesses: false,
+#endif
                                         commandLine: null);
                 }
                 finally

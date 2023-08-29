@@ -25,6 +25,7 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Experimental.ProjectCache;
+using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Graph;
@@ -558,6 +559,19 @@ namespace Microsoft.Build.Execution
                     _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath("msbuild-cache");
                 }
 
+#if FEATURE_REPORTFILEACCESSES
+                if (_buildParameters.ReportFileAccesses)
+                {
+                    // To properly report file access, we need to disable the in-proc node which won't be detoured.
+                    _buildParameters.DisableInProcNode = true;
+
+                    // Node reuse must be disabled as future builds will not be able to listen to events raised by detours.
+                    _buildParameters.EnableNodeReuse = false;
+
+                    _componentFactories.ReplaceFactory(BuildComponentType.NodeLauncher, DetouredNodeLauncher.CreateComponent);
+                }
+#endif
+
                 // Initialize components.
                 _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
 
@@ -572,9 +586,17 @@ namespace Microsoft.Build.Execution
 
                 InitializeCaches();
 
+#if FEATURE_REPORTFILEACCESSES
+                var fileAccessManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.FileAccessManager) as IFileAccessManager;
+#endif
+
                 _projectCacheService = new ProjectCacheService(
                     this,
                     loggingService,
+#if FEATURE_REPORTFILEACCESSES
+                    fileAccessManager,
+#endif
+                    _configCache,
                     _buildParameters.ProjectCacheDescriptor);
 
                 _taskHostNodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.TaskHostNodeManager) as INodeManager;
@@ -584,7 +606,9 @@ namespace Microsoft.Build.Execution
                 _nodeManager.RegisterPacketHandler(NodePacketType.BuildRequestConfiguration, BuildRequestConfiguration.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.BuildRequestConfigurationResponse, BuildRequestConfigurationResponse.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.BuildResult, BuildResult.FactoryForDeserialization, this);
+                _nodeManager.RegisterPacketHandler(NodePacketType.FileAccessReport, FileAccessReport.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
+                _nodeManager.RegisterPacketHandler(NodePacketType.ProcessReport, ProcessReport.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.ResolveSdkRequest, SdkResolverRequest.FactoryForDeserialization, SdkResolverService as INodePacketHandler);
                 _nodeManager.RegisterPacketHandler(NodePacketType.ResourceRequest, ResourceRequest.FactoryForDeserialization, this);
 
@@ -1564,6 +1588,16 @@ namespace Microsoft.Build.Execution
                         HandleNodeShutdown(node, shutdownPacket);
                         break;
 
+                    case NodePacketType.FileAccessReport:
+                        FileAccessReport fileAccessReport = ExpectPacketType<FileAccessReport>(packet, NodePacketType.FileAccessReport);
+                        HandleFileAccessReport(node, fileAccessReport);
+                        break;
+
+                    case NodePacketType.ProcessReport:
+                        ProcessReport processReport = ExpectPacketType<ProcessReport>(packet, NodePacketType.ProcessReport);
+                        HandleProcessReport(node, processReport);
+                        break;
+
                     default:
                         ErrorUtilities.ThrowInternalError("Unexpected packet received by BuildManager: {0}", packet.Type);
                         break;
@@ -2371,6 +2405,39 @@ namespace Microsoft.Build.Execution
                 configuration.ProjectTargets ??= result.ProjectTargets;
             }
 
+            // Only report results to the project cache services if it's the result for a build submission.
+            // Note that graph builds create a submission for each node in the graph, so each node in the graph will be
+            // handled here. This intentionally mirrors the behavior for cache requests, as it doesn't make sense to
+            // report for projects which aren't going to be requested. Ideally, *any* request could be handled, but that
+            // would require moving the cache service interactions to the Scheduler.
+            if (_buildSubmissions.TryGetValue(result.SubmissionId, out BuildSubmission buildSubmission))
+            {
+                // The result may be associated with the build submission due to it being the submission which
+                // caused the build, but not the actual request which was originally used with the build submission.
+                // ie. it may be a dependency of the "root-level" project which is associated with this submission, which
+                // isn't what we're looking for. Ensure only the actual submission's request is considered.
+                if (buildSubmission.BuildRequest != null
+                    && buildSubmission.BuildRequest.ConfigurationId == configuration.ConfigurationId
+                    && _projectCacheService.ShouldUseCache(configuration))
+                {
+                    BuildEventContext buildEventContext = _projectStartedEvents.TryGetValue(result.SubmissionId, out BuildEventArgs buildEventArgs)
+                        ? buildEventArgs.BuildEventContext
+                        : new BuildEventContext(result.SubmissionId, node, configuration.Project?.EvaluationId ?? BuildEventContext.InvalidEvaluationId, configuration.ConfigurationId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                    try
+                    {
+                        _projectCacheService.HandleBuildResultAsync(configuration, result, buildEventContext, _executionCancellationTokenSource.Token).Wait();
+                    }
+                    catch (AggregateException ex) when (ex.InnerExceptions.All(inner => inner is OperationCanceledException))
+                    {
+                        // The build is being cancelled. Swallow any exceptions related specifically to cancellation.
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // The build is being cancelled. Swallow any exceptions related specifically to cancellation.
+                    }
+                }
+            }
+
             IEnumerable<ScheduleResponse> response = _scheduler.ReportResult(node, result);
             PerformSchedulingActions(response);
         }
@@ -2435,6 +2502,36 @@ namespace Microsoft.Build.Execution
             }
 
             CheckForActiveNodesAndCleanUpSubmissions();
+        }
+
+        /// <summary>
+        /// Report the received <paramref name="fileAccessReport"/> to the file access manager.
+        /// </summary>
+        /// <param name="nodeId">The id of the node from which the <paramref name="fileAccessReport"/> was received.</param>
+        /// <param name="fileAccessReport">The file access report.</param>
+        private void HandleFileAccessReport(int nodeId, FileAccessReport fileAccessReport)
+        {
+#if FEATURE_REPORTFILEACCESSES
+            if (_buildParameters.ReportFileAccesses)
+            {
+                ((FileAccessManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.FileAccessManager)).ReportFileAccess(fileAccessReport.FileAccessData, nodeId);
+            }
+#endif
+        }
+
+        /// <summary>
+        /// Report the received <paramref name="processReport"/> to the file access manager.
+        /// </summary>
+        /// <param name="nodeId">The id of the node from which the <paramref name="processReport"/> was received.</param>
+        /// <param name="processReport">The process data report.</param>
+        private void HandleProcessReport(int nodeId, ProcessReport processReport)
+        {
+#if FEATURE_REPORTFILEACCESSES
+            if (_buildParameters.ReportFileAccesses)
+            {
+                ((FileAccessManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.FileAccessManager)).ReportProcess(processReport.ProcessData, nodeId);
+            }
+#endif
         }
 
         /// <summary>
