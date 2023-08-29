@@ -383,7 +383,7 @@ namespace Microsoft.NET.ToolPack.Tests
             AssertValidShim(_testRoot, nugetPackage);
         }
 
-        [WindowsOnlyFact]
+        [Fact]
         public void Given_wpf_project_It_contains_shim_with_WindowsGraphicalUserInterfaceBit()
         {
             ushort windowsGUISubsystem = 0x2;
@@ -395,6 +395,7 @@ namespace Microsoft.NET.ToolPack.Tests
                 IsWinExe = true,
             };
 
+            testProject.AdditionalProperties.Add("EnableWindowsTargeting", "true");
             testProject.AdditionalProperties.Add("UseWPF", "true");
             testProject.AdditionalProperties.Add("PackAsToolShimRuntimeIdentifiers", $"win-x64;{ToolsetInfo.LatestMacRuntimeIdentifier}-x64");
             testProject.AdditionalProperties.Add("ToolCommandName", _customToolCommandName);
