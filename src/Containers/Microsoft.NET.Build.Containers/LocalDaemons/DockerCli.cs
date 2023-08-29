@@ -302,15 +302,22 @@ internal sealed class DockerCli : ILocalRegistry
 
     private static bool IsPodmanAlias()
     {
-        var dockerPath = FindFullPathFromPath(DockerCommand);
-        var podmanPath = FindFullPathFromPath(PodmanCommand);
-        if (dockerPath is null || podmanPath is null)
+        // If both exist we need to check and see if the docker command is actually docker,
+        // or if it is a podman script in a trenchcoat.
+        try
+        {
+            var dockerinfo = GetConfig().RootElement;
+            // Docker's info output has a 'DockerRootDir' top-level property string that is a good marker,
+            // while Podman has a 'host' top-level property object with a 'buildahVersion' subproperty
+            var hasdockerProperty =
+                dockerinfo.TryGetProperty("DockerRootDir", out var dockerRootDir) && dockerRootDir.GetString() is not null;
+            var hasPodmanProperty = dockerinfo.TryGetProperty("host", out var host) && host.TryGetProperty("buildahVersion", out var buildahVersion) && buildahVersion.GetString() is not null;
+            return !hasdockerProperty && hasPodmanProperty;
+        }
+        catch
         {
             return false;
         }
-
-        var fi = new FileInfo(dockerPath);
-        return fi.LinkTarget == podmanPath;
     }
 
     private async Task<bool> TryRunVersionCommandAsync(string command, CancellationToken cancellationToken)
