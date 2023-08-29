@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -32,12 +32,15 @@
 
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
+    <PackageReference Include="System.Security.Principal.Windows" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
 
     <PackageReference Include="System.Reflection.Metadata" Condition="'$(MonoBuild)' == 'true'" />
     <PackageReference Include="System.Reflection.MetadataLoadContext" />
 
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
+
+    <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildFromSource)' != 'true'">
@@ -51,7 +54,6 @@
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
     <PackageReference Include="System.Reflection.Metadata" />
-    <PackageReference Include="System.Security.Principal.Windows" />
     <PackageReference Include="System.Text.Encoding.CodePages" />
   </ItemGroup>
 
@@ -152,13 +154,22 @@
     <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\ProjectCache\*.cs" />
     <Compile Include="BackEnd\Components\Communications\CurrentHost.cs" />
+    <Compile Include="BackEnd\Components\Communications\DetouredNodeLauncher.cs" />
     <Compile Include="BackEnd\Components\Communications\SerializationContractInitializer.cs" />
     <Compile Include="BackEnd\Components\Communications\ServerNodeEndpointOutOfProc.cs" />
+    <Compile Include="BackEnd\Components\FileAccesses\IFileAccessManager.cs" />
+    <Compile Include="BackEnd\Components\FileAccesses\FileAccessManager.cs" />
+    <Compile Include="BackEnd\Components\FileAccesses\FileAccessReport.cs" />
+    <Compile Include="BackEnd\Components\FileAccesses\OutOfProcNodeFileAccessManager.cs" />
+    <Compile Include="BackEnd\Components\FileAccesses\ProcessReport.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\AssemblyLoadsTracker.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverException.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\TranslationHelpers.cs" />
     <Compile Include="FileSystem\*.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
+    <Compile Include="Logging\BinaryLogger\IBuildEventArgsReaderNotifications.cs" />
+    <Compile Include="Logging\BinaryLogger\IBuildEventStringsReader.cs" />
+    <Compile Include="Logging\BinaryLogger\StringReadEventArgs.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />
@@ -358,6 +369,7 @@
     <Compile Include="BackEnd\Shared\TargetResult.cs" />
     <Compile Include="BackEnd\Shared\WorkUnitResult.cs" />
     <Compile Include="BackEnd\Components\BuildRequestEngine\IBuildRequestEngine.cs" />
+    <Compile Include="BackEnd\Components\Communications\INodeLauncher.cs" />
     <Compile Include="BackEnd\Components\Communications\INodeManager.cs" />
     <Compile Include="BackEnd\Components\Communications\INodeProvider.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeEndpointInProc.cs" />

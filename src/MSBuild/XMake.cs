@@ -713,6 +713,9 @@ namespace Microsoft.Build.CommandLine
                 string[] getItem = Array.Empty<string>();
                 string[] getTargetResult = Array.Empty<string>();
                 BuildResult result = null;
+#if FEATURE_REPORTFILEACCESSES
+                bool reportFileAccesses = false;
+#endif
 
                 GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _);
                 bool buildCanBeInvoked = ProcessCommandLineSwitches(
@@ -747,6 +750,9 @@ namespace Microsoft.Build.CommandLine
                                             ref graphBuildOptions,
                                             ref inputResultsCaches,
                                             ref outputResultsCache,
+#if FEATURE_REPORTFILEACCESSES
+                                            ref reportFileAccesses,
+#endif
                                             ref lowPriority,
                                             ref question,
                                             ref getProperty,
@@ -846,6 +852,9 @@ namespace Microsoft.Build.CommandLine
                                     outputResultsCache,
                                     saveProjectResult: outputPropertiesItemsOrTargetResults,
                                     ref result,
+#if FEATURE_REPORTFILEACCESSES
+                                    reportFileAccesses,
+#endif
                                     commandLine))
                         {
                             exitType = ExitType.BuildError;
@@ -1232,6 +1241,9 @@ namespace Microsoft.Build.CommandLine
             string outputResultsCache,
             bool saveProjectResult,
             ref BuildResult result,
+#if FEATURE_REPORTFILEACCESSES
+            bool reportFileAccesses,
+#endif
 #if FEATURE_GET_COMMANDLINE
             string commandLine)
 #else
@@ -1423,6 +1435,9 @@ namespace Microsoft.Build.CommandLine
                     parameters.InputResultsCacheFiles = inputResultsCaches;
                     parameters.OutputResultsCacheFile = outputResultsCache;
                     parameters.Question = question;
+#if FEATURE_REPORTFILEACCESSES
+                    parameters.ReportFileAccesses = reportFileAccesses;
+#endif
 
                     // Propagate the profiler flag into the project load settings so the evaluator
                     // can pick it up
@@ -2383,6 +2398,9 @@ namespace Microsoft.Build.CommandLine
             ref GraphBuildOptions graphBuild,
             ref string[] inputResultsCaches,
             ref string outputResultsCache,
+#if FEATURE_REPORTFILEACCESSES
+            ref bool reportFileAccesses,
+#endif
             ref bool lowPriority,
             ref bool question,
             ref string[] getProperty,
@@ -2446,6 +2464,13 @@ namespace Microsoft.Build.CommandLine
             // leave priority where it was.
             catch (Win32Exception) { }
 
+#if FEATURE_REPORTFILEACCESSES
+            if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.ReportFileAccesses))
+            {
+                reportFileAccesses = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ReportFileAccesses], defaultValue: true, resourceName: "");
+            }
+#endif
+
             // if help switch is set (regardless of switch errors), show the help message and ignore the other switches
             if (commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Help])
             {
@@ -2508,6 +2533,9 @@ namespace Microsoft.Build.CommandLine
                                                            ref graphBuild,
                                                            ref inputResultsCaches,
                                                            ref outputResultsCache,
+#if FEATURE_REPORTFILEACCESSES
+                                                           ref reportFileAccesses,
+#endif
                                                            ref lowPriority,
                                                            ref question,
                                                            ref getProperty,
@@ -4426,6 +4454,9 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_InputCachesFiles"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_OutputCacheFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_36_GraphBuildSwitch"));
+#if FEATURE_REPORTFILEACCESSES
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_42_ReportFileAccessesSwitch"));
+#endif
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_39_LowPrioritySwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_41_QuestionSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_7_ResponseFile"));

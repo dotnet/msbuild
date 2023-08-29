@@ -57,6 +57,11 @@
         <target state="translated">MSB6003: non è stato possibile eseguire il file eseguibile "{0}" dell'attività. {1}</target>
         <note>{StrBegin="MSB6003: "}</note>
       </trans-unit>
+      <trans-unit id="ToolTask.InvalidTerminationTimeout">
+        <source>Specified termination timeout ({0}) is invalid - expecting value greater or equal to -1.</source>
+        <target state="translated">Il timeout di terminazione specificato ({0}) non è valido - è previsto un valore maggiore o uguale a -1.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ToolTask.NotUpToDate">
         <source>Unable to skip task because it is not up-to-date.</source>
         <target state="translated">Non è possibile ignorare l'attività perché non è aggiornata.</target>

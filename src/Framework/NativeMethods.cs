@@ -1300,7 +1300,7 @@ internal static class NativeMethods
                 // using (var r = FileUtilities.OpenRead("/proc/" + processId + "/stat"))
                 // and could be again when FileUtilities moves to Framework
 
-                using var fileStream = new FileStream("/proc/" + processId + "/stat", FileMode.Open, FileAccess.Read);
+                using var fileStream = new FileStream("/proc/" + processId + "/stat", FileMode.Open, System.IO.FileAccess.Read);
                 using StreamReader r = new(fileStream);
 
                 line = r.ReadLine();

@@ -30,6 +30,10 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
         _env = TestEnvironment.Create(output);
         _output = output;
 
+        // Ignore environment variables that may have been set by the environment where the tests are running.
+        _env.SetEnvironmentVariable("MSBUILDLIVELOGGER", null);
+        _env.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", null);
+
         TransientTestFolder logFolder = _env.CreateFolder(createFolder: true);
         TransientTestFile projectFile = _env.CreateFile(logFolder, "myProj.proj", $"""
             <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Hello">

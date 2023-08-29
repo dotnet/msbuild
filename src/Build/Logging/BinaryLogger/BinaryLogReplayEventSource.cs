@@ -9,8 +9,6 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-#nullable disable
-
 namespace Microsoft.Build.Logging
 {
     /// <summary>
@@ -29,6 +27,11 @@ namespace Microsoft.Build.Logging
         }
 
         /// <summary>
+        /// Raised once <see cref="BuildEventArgsReader"/> is created during replaying
+        /// </summary>
+        public event Action<IBuildEventArgsReaderNotifications>? NotificationsSourceCreated;
+
+        /// <summary>
         /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
         /// </summary>
         /// <param name="sourceFilePath">The full file path of the binary log file</param>
@@ -38,48 +41,67 @@ namespace Microsoft.Build.Logging
         }
 
         /// <summary>
+        /// Creates a <see cref="BinaryReader"/> for the provided binary log file.
+        /// Performs decompression and buffering in the optimal way.
+        /// Caller is responsible for disposing the returned reader.
+        /// </summary>
+        /// <param name="sourceFilePath"></param>
+        /// <returns>BinaryReader of the given binlog file.</returns>
+        public static BinaryReader OpenReader(string sourceFilePath)
+        {
+            Stream? stream = null;
+            try
+            {
+                stream = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                var gzipStream = new GZipStream(stream, CompressionMode.Decompress, leaveOpen: false);
+
+                // wrapping the GZipStream in a buffered stream significantly improves performance
+                // and the max throughput is reached with a 32K buffer. See details here:
+                // https://github.com/dotnet/runtime/issues/39233#issuecomment-745598847
+                var bufferedStream = new BufferedStream(gzipStream, 32768);
+                return new BinaryReader(bufferedStream);
+            }
+            catch(Exception)
+            {
+                stream?.Dispose();
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
         /// </summary>
         /// <param name="sourceFilePath">The full file path of the binary log file</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
         public void Replay(string sourceFilePath, CancellationToken cancellationToken)
         {
-            using (var stream = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using var binaryReader = OpenReader(sourceFilePath);
+            Replay(binaryReader, cancellationToken);
+        }
+
+        /// <summary>
+        /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
+        /// </summary>
+        /// <param name="binaryReader">The binary log content binary reader - caller is responsible for disposing.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
+        public void Replay(BinaryReader binaryReader, CancellationToken cancellationToken)
+        {
+            int fileFormatVersion = binaryReader.ReadInt32();
+
+            // the log file is written using a newer version of file format
+            // that we don't know how to read
+            if (fileFormatVersion > BinaryLogger.FileFormatVersion)
             {
-                var gzipStream = new GZipStream(stream, CompressionMode.Decompress, leaveOpen: true);
+                var text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnsupportedLogFileFormat", fileFormatVersion, BinaryLogger.FileFormatVersion);
+                throw new NotSupportedException(text);
+            }
 
-                // wrapping the GZipStream in a buffered stream significantly improves performance
-                // and the max throughput is reached with a 32K buffer. See details here:
-                // https://github.com/dotnet/runtime/issues/39233#issuecomment-745598847
-                var bufferedStream = new BufferedStream(gzipStream, 32768);
-                var binaryReader = new BinaryReader(bufferedStream);
+            using var reader = new BuildEventArgsReader(binaryReader, fileFormatVersion);
+            NotificationsSourceCreated?.Invoke(reader);
 
-                int fileFormatVersion = binaryReader.ReadInt32();
-
-                // the log file is written using a newer version of file format
-                // that we don't know how to read
-                if (fileFormatVersion > BinaryLogger.FileFormatVersion)
-                {
-                    var text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnsupportedLogFileFormat", fileFormatVersion, BinaryLogger.FileFormatVersion);
-                    throw new NotSupportedException(text);
-                }
-
-                using var reader = new BuildEventArgsReader(binaryReader, fileFormatVersion);
-                while (true)
-                {
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        return;
-                    }
-
-                    BuildEventArgs instance = reader.Read();
-                    if (instance == null)
-                    {
-                        break;
-                    }
-
-                    Dispatch(instance);
-                }
+            while (!cancellationToken.IsCancellationRequested && reader.Read() is { } instance)
+            {
+                Dispatch(instance);
             }
         }
     }

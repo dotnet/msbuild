@@ -20,7 +20,7 @@ namespace Microsoft.Build.Framework
             AssemblyLoadingContext loadingContext,
             string? loadingInitiator,
             string? assemblyName,
-            string assemblyPath,
+            string? assemblyPath,
             Guid mvid,
             string? customAppDomainDescriptor,
             MessageImportance importance = MessageImportance.Low)
