@@ -1,18 +1,78 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- https://learn.microsoft.com/en-us/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <Suppression>
-<!-- For ease of logging the "not supported on Core" message, this task is a
-         TaskExtension on netstandard/netcore. Since the type is sealed there,
+<!-- For ease of logging the "not supported on Core" message, these tasks are a
+         TaskRequiresFramework on netstandard/netcore. Since the type is sealed there,
          that shouldn't cause any implementation problems since no one can derive
          from it and try to call TaskExtension.Log. -->
+  <Suppression>
+    <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.AL</Target>
+    <Left>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/net472/Microsoft.Build.Tasks.Core.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.AspNetCompiler</Target>
+    <Left>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/net472/Microsoft.Build.Tasks.Core.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.GenerateBootstrapper</Target>
+    <Left>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/net472/Microsoft.Build.Tasks.Core.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.GenerateTrustInfo</Target>
+    <Left>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/net472/Microsoft.Build.Tasks.Core.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.GetFrameworkSdkPath</Target>
+    <Left>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/net472/Microsoft.Build.Tasks.Core.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.RegisterAssembly</Target>
+    <Left>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/net472/Microsoft.Build.Tasks.Core.dll</Right>
+  </Suppression>
+  <Suppression>
     <DiagnosticId>CP0007</DiagnosticId>
     <Target>T:Microsoft.Build.Tasks.ResolveComReference</Target>
     <Left>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Left>
     <Right>ref/net472/Microsoft.Build.Tasks.Core.dll</Right>
   </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.ResolveNativeReference</Target>
+    <Left>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/net472/Microsoft.Build.Tasks.Core.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.UnregisterAssembly</Target>
+    <Left>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/net472/Microsoft.Build.Tasks.Core.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.UpdateManifest</Target>
+    <Left>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/net472/Microsoft.Build.Tasks.Core.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.WinMDExp</Target>
+    <Left>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/net472/Microsoft.Build.Tasks.Core.dll</Right>
+  </Suppression>
 
-  <!-- We don't have the net7 reference assemblies handy to pass in to compare against the net8 ones -->
+<!-- We don't have the net7 reference assemblies handy to pass in to compare against the net8 ones -->
   <Suppression>
     <DiagnosticId>CP1002</DiagnosticId>
     <Target>System.Security.Cryptography, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</Target>
