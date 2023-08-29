@@ -7,12 +7,16 @@ namespace Microsoft.DotNet.ApiSymbolExtensions
 {
     public static class SymbolExtensions
     {
-        public static SymbolDisplayFormat Format { get; } = GetSymbolDisplayFormat();
+        private static readonly SymbolDisplayFormat s_comparisonFormat;
+        public static readonly SymbolDisplayFormat DisplayFormat;
 
-        public static SymbolDisplayFormat GetSymbolDisplayFormat()
+        static SymbolExtensions()
         {
             // This is the default format for symbol.ToDisplayString;
             SymbolDisplayFormat format = SymbolDisplayFormat.CSharpErrorMessageFormat;
+            format = format.WithMemberOptions(format.MemberOptions | SymbolDisplayMemberOptions.IncludeType);
+
+            DisplayFormat = format.WithParameterOptions(format.ParameterOptions | SymbolDisplayParameterOptions.IncludeExtensionThis);
 
             // Remove ? annotations from reference types as we want to map the APIs without nullable annotations
             // and have a special rule to catch those differences.
@@ -24,11 +28,11 @@ namespace Microsoft.DotNet.ApiSymbolExtensions
                 ~SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
 
             // Remove ref/out from parameters to compare APIs when building the mappers.
-            return format.WithParameterOptions(format.ParameterOptions & ~SymbolDisplayParameterOptions.IncludeParamsRefOut);
+            s_comparisonFormat = format.WithParameterOptions((format.ParameterOptions | SymbolDisplayParameterOptions.IncludeExtensionThis) & ~SymbolDisplayParameterOptions.IncludeParamsRefOut);
         }
 
         public static string ToComparisonDisplayString(this ISymbol symbol) =>
-            symbol.ToDisplayString(Format)
+            symbol.ToDisplayString(s_comparisonFormat)
                   .Replace("System.IntPtr", "nint") // Treat IntPtr and nint as the same
                   .Replace("System.UIntPtr", "nuint"); // Treat UIntPtr and nuint as the same
 
