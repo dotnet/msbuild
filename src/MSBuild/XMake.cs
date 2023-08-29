@@ -1546,7 +1546,8 @@ namespace Microsoft.Build.CommandLine
                                             nodeResultKvp =>
                                             nodeResultKvp.Key.ProjectInstance.FullPath.Equals(entryPoint.ProjectFile) &&
                                             nodeResultKvp.Key.ProjectInstance.GlobalProperties.Count == entryPoint.GlobalProperties.Count &&
-                                            nodeResultKvp.Key.ProjectInstance.GlobalProperties.All(propertyKvp => entryPoint.GlobalProperties[propertyKvp.Key].Equals(propertyKvp.Value)))
+                                            nodeResultKvp.Key.ProjectInstance.GlobalProperties.All(propertyKvp => entryPoint.GlobalProperties.TryGetValue(propertyKvp.Key, out string entryValue) &&
+                                                                                                                                        entryValue.Equals(propertyKvp.Value)))
                                             .Value;
                                     }
                                     else
