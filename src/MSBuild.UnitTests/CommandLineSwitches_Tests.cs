@@ -109,6 +109,20 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
+        [InlineData("test")]
+        [InlineData("TEST")]
+        [InlineData("Test")]
+        public void TestSwitchIdentificationTests(string test)
+        {
+            CommandLineSwitches.ParameterlessSwitch parameterlessSwitch;
+            string duplicateSwitchErrorMessage;
+
+            CommandLineSwitches.IsParameterlessSwitch(test, out parameterlessSwitch, out duplicateSwitchErrorMessage).ShouldBeTrue();
+            parameterlessSwitch.ShouldBe(CommandLineSwitches.ParameterlessSwitch.Test);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+        }
+
+        [Theory]
         [InlineData("noconsolelogger")]
         [InlineData("NOCONSOLELOGGER")]
         [InlineData("NoConsoleLogger")]
@@ -1127,6 +1141,7 @@ namespace Microsoft.Build.UnitTests
                                         graphBuildOptions: null,
                                         lowPriority: false,
                                         question: false,
+                                        test: false,
                                         inputResultsCaches: null,
                                         outputResultsCache: null,
                                         saveProjectResult: false,
