@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Logging.TerminalLogger;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging.SimpleErrorLogger
@@ -41,21 +42,27 @@ namespace Microsoft.Build.Logging.SimpleErrorLogger
         {
             eventSource.ErrorRaised += HandleErrorEvent;
             eventSource.WarningRaised += HandleWarningEvent;
+
+            // This needs to happen so binary loggers can get evaluation properties and items
+            if (eventSource is IEventSource4 eventSource4)
+            {
+                eventSource4.IncludeEvaluationPropertiesAndItems();
+            }
         }
 
         private void HandleErrorEvent(object sender, BuildErrorEventArgs e)
         {
             HasLoggedErrors = true;
-            Console.Error.Write("\x1b[31;1m");
-            Console.Error.Write(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true));
-            Console.Error.WriteLine("\x1b[m");
+            Console.Error.Write(AnsiCodes.Colorize(
+                EventArgsFormatting.FormatEventMessage(e, showProjectFile: true),
+                TerminalColor.Red));
         }
 
         private void HandleWarningEvent(object sender, BuildWarningEventArgs e)
         {
-            Console.Error.Write("\x1b[33;1m");
-            Console.Error.Write(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true));
-            Console.Error.WriteLine("\x1b[m");
+            Console.Error.Write(AnsiCodes.Colorize(
+                EventArgsFormatting.FormatEventMessage(e, showProjectFile: true),
+                TerminalColor.Yellow));
         }
 
         public void Initialize(IEventSource eventSource)
