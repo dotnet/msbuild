@@ -5738,6 +5738,27 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Condition="'$(ClickOncePublishDir)'=='$(OutputPath)app.publish\' and Exists('$(ClickOncePublishDir)')"/>
 
   </Target>
+  
+  <!--
+    ***********************************************************************************************
+    ***********************************************************************************************
+                                                                Test Section
+    ***********************************************************************************************
+    ***********************************************************************************************
+  -->
+  <!--
+    ============================================================
+    This stub `MSBuildRunTests` target allows for targets implementing Test execution functionality
+    to run after it.
+    
+    For example:
+    <Target Name="ExecuteTests" AfterTargets="MSBuildRunTests">
+     (implementation)
+    </Target>
+    ============================================================
+  -->
+
+  <Target Name="MSBuildRunTests"></Target>
 
   <!--
     ***********************************************************************************************
