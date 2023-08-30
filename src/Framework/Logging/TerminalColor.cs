@@ -4,7 +4,7 @@
 namespace Microsoft.Build.Logging.TerminalLogger;
 
 /// <summary>
-/// Enumerates the text colors supported by <see cref="Microsoft.Build.Logging.TerminalLogger.ITerminal"/>.
+/// Enumerates the text colors supported by VT100 terminal.
 /// </summary>
 internal enum TerminalColor
 {
