@@ -709,6 +709,7 @@ namespace Microsoft.Build.CommandLine
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
                 bool question = false;
+                bool test = false;
                 string[] getProperty = Array.Empty<string>();
                 string[] getItem = Array.Empty<string>();
                 string[] getTargetResult = Array.Empty<string>();
@@ -749,6 +750,7 @@ namespace Microsoft.Build.CommandLine
                                             ref outputResultsCache,
                                             ref lowPriority,
                                             ref question,
+                                            ref test,
                                             ref getProperty,
                                             ref getItem,
                                             ref getTargetResult,
@@ -842,6 +844,7 @@ namespace Microsoft.Build.CommandLine
                                     graphBuildOptions,
                                     lowPriority,
                                     question,
+                                    test,
                                     inputResultsCaches,
                                     outputResultsCache,
                                     saveProjectResult: outputPropertiesItemsOrTargetResults,
@@ -1228,6 +1231,7 @@ namespace Microsoft.Build.CommandLine
             GraphBuildOptions graphBuildOptions,
             bool lowPriority,
             bool question,
+            bool test,
             string[] inputResultsCaches,
             string outputResultsCache,
             bool saveProjectResult,
@@ -1423,6 +1427,7 @@ namespace Microsoft.Build.CommandLine
                     parameters.InputResultsCacheFiles = inputResultsCaches;
                     parameters.OutputResultsCacheFile = outputResultsCache;
                     parameters.Question = question;
+                    parameters.Test = test;
 
                     // Propagate the profiler flag into the project load settings so the evaluator
                     // can pick it up
@@ -1506,6 +1511,11 @@ namespace Microsoft.Build.CommandLine
                                 if (saveProjectResult)
                                 {
                                     flags |= BuildRequestDataFlags.ProvideProjectStateAfterBuild;
+                                }
+
+                                if (test)
+                                {
+                                    targets = targets.Append(MSBuildConstants.TestTargetName).ToArray();
                                 }
 
                                 if (graphBuildOptions != null)
@@ -2385,6 +2395,7 @@ namespace Microsoft.Build.CommandLine
             ref string outputResultsCache,
             ref bool lowPriority,
             ref bool question,
+            ref bool test,
             ref string[] getProperty,
             ref string[] getItem,
             ref string[] getTargetResult,
@@ -2510,6 +2521,7 @@ namespace Microsoft.Build.CommandLine
                                                            ref outputResultsCache,
                                                            ref lowPriority,
                                                            ref question,
+                                                           ref test,
                                                            ref getProperty,
                                                            ref getItem,
                                                            ref getTargetResult,
@@ -2588,6 +2600,8 @@ namespace Microsoft.Build.CommandLine
                     }
 
                     question = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Question);
+
+                    test = commandLineSwitches.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.Test);
 
                     inputResultsCaches = ProcessInputResultsCaches(commandLineSwitches);
 

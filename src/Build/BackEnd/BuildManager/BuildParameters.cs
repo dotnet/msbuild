@@ -207,6 +207,8 @@ namespace Microsoft.Build.Execution
 
         private bool _question;
 
+        private bool _test;
+
         /// <summary>
         /// The settings used to load the project under build
         /// </summary>
@@ -306,6 +308,7 @@ namespace Microsoft.Build.Execution
             DiscardBuildResults = other.DiscardBuildResults;
             LowPriority = other.LowPriority;
             Question = other.Question;
+            Test = other.Test;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
         }
 
@@ -821,6 +824,14 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Gets or sets a value that will error when the build process fails an incremental check.
+        /// </summary>
+        public bool Test
+        {
+            get => _test;
+            set => _test = value;
+        }
+        /// <summary>
         /// Gets or sets the project cache description to use for all <see cref="BuildSubmission"/> or <see cref="GraphBuildSubmission"/>
         /// in addition to any potential project caches described in each project.
         /// </summary>
@@ -884,6 +895,7 @@ namespace Microsoft.Build.Execution
             translator.TranslateEnum(ref _projectLoadSettings, (int)_projectLoadSettings);
             translator.Translate(ref _interactive);
             translator.Translate(ref _question);
+            translator.Translate(ref _test);
             translator.TranslateEnum(ref _projectIsolationMode, (int)_projectIsolationMode);
 
             // ProjectRootElementCache is not transmitted.
