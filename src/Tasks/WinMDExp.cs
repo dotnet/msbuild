@@ -293,7 +293,6 @@ namespace Microsoft.Build.Tasks
 
         #region Properties
 
-        [Required]
         public ITaskItem[] References { get; set; }
 
         public string DisabledWarnings { get; set; }
@@ -306,7 +305,6 @@ namespace Microsoft.Build.Tasks
 
         public string OutputPDBFile { get; set; }
 
-        [Required]
         public string WinMDModule { get; set; }
 
         [Output]

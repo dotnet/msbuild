@@ -440,7 +440,6 @@ namespace Microsoft.Build.Tasks
         public string MainEntryPoint { get; set; }
 
         [Output]
-        [Required]
         public ITaskItem OutputAssembly { get; set; }
 
         public string Platform { get; set; }

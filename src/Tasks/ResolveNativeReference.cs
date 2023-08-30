@@ -358,10 +358,8 @@ namespace Microsoft.Build.Tasks
 
         #region Properties
 
-        [Required]
         public ITaskItem[] NativeReferences { get; set; }
 
-        [Required]
         public string[] AdditionalSearchPaths { get; set; }
 
         [Output]

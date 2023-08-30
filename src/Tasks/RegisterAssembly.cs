@@ -377,7 +377,6 @@ namespace Microsoft.Build.Tasks
 
         #region Properties
 
-        [Required]
         public ITaskItem[] Assemblies { get; set; }
 
         [Output]

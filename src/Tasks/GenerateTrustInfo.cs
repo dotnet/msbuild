@@ -127,7 +127,6 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] ApplicationDependencies { get; set; }
 
         [Output]
-        [Required]
         public ITaskItem TrustInfoFile { get; set; }
 
         #endregion

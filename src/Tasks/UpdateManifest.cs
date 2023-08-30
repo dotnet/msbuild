@@ -52,16 +52,12 @@ namespace Microsoft.Build.Tasks
 
         #region Properties
 
-        [Required]
         public string ApplicationPath { get; set; }
 
-        [Required]
         public string TargetFrameworkVersion { get; set; }
 
-        [Required]
         public ITaskItem ApplicationManifest { get; set; }
 
-        [Required]
         public ITaskItem InputManifest { get; set; }
 
         [Output]
