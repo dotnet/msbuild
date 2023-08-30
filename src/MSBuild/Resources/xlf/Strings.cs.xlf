@@ -99,6 +99,24 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_42_ReportFileAccessesSwitch">
+        <source>  -reportFileAccesses[:True|False]
+                     Causes MSBuild to report file accesses to any configured
+                     project cache plugins.
+
+                     This flag is experimental and may not work as intended.
+    </source>
+        <target state="new">  -reportFileAccesses[:True|False]
+                     Causes MSBuild to report file accesses to any configured
+                     project cache plugins.
+
+                     This flag is experimental and may not work as intended.
+    </target>
+        <note>
+      LOCALIZATION: "-reportFileAccesses" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1064: Hodnota s nízkou prioritou není platná. {0}</target>
@@ -116,6 +134,16 @@
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidReportFileAccessesValue">
+        <source>MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</source>
+        <target state="new">MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1063: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>

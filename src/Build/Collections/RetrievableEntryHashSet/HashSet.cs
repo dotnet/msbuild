@@ -32,6 +32,11 @@ using Microsoft.Build.Shared;
 
 #nullable disable
 
+// The BuildXL package causes an indirect dependency on the RuntimeContracts package, which adds an analyzer which forbids the use of System.Diagnostics.Contract.
+// So effectively if your dependencies use RuntimeContracts, it attempts to force itself on your as well.
+// See: https://github.com/SergeyTeplyakov/RuntimeContracts/issues/12
+#pragma warning disable RA001 // Do not use System.Diagnostics.Contract class.
+
 namespace Microsoft.Build.Collections
 {
     /// <summary>

@@ -264,6 +264,11 @@
         <target state="translated">MSB4273: 프로젝트 캐시는 {0} 메서드에서 처리되지 않은 예외를 발생시켰습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheHandleBuildResultFailed">
+        <source>MSB4269: The project cache failed while handling a build result for the following project: {0}.</source>
+        <target state="new">MSB4269: The project cache failed while handling a build result for the following project: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectCacheHitWithDefaultTargets">
         <source>Project cache hit for "{0}" (default targets).</source>
         <target state="translated">"{0}"(기본 대상)에 대한 프로젝트 캐시 적중입니다.</target>

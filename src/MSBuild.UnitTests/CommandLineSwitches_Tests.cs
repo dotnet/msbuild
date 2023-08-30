@@ -1131,6 +1131,9 @@ namespace Microsoft.Build.UnitTests
                                         outputResultsCache: null,
                                         saveProjectResult: false,
                                         ref buildResult,
+#if FEATURE_REPORTFILEACCESSES
+                                        reportFileAccesses: false,
+#endif
                                         commandLine: null);
                 }
                 finally
