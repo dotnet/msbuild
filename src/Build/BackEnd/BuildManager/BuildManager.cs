@@ -335,13 +335,13 @@ namespace Microsoft.Build.Execution
             Idle,
 
             /// <summary>
-            /// This is the state the BuildManager is in after <see cref="BeginBuild(BuildParameters)"/> has been called but before <see cref="EndBuild"/> has been called.
-            /// <see cref="BuildManager.PendBuildRequest(Microsoft.Build.Execution.BuildRequestData)"/>, <see cref="BuildManager.BuildRequest(Microsoft.Build.Execution.BuildRequestData)"/>, <see cref="BuildManager.PendBuildRequest(GraphBuildRequestData)"/>, <see cref="BuildManager.BuildRequest(GraphBuildRequestData)"/>, and <see cref="BuildManager.EndBuild"/> may be called in this state.
+            /// This is the state the BuildManager is in after <see cref="BeginBuild(BuildParameters)"/> has been called but before <see cref="EndBuild()"/> has been called.
+            /// <see cref="BuildManager.PendBuildRequest(Microsoft.Build.Execution.BuildRequestData)"/>, <see cref="BuildManager.BuildRequest(Microsoft.Build.Execution.BuildRequestData)"/>, <see cref="BuildManager.PendBuildRequest(GraphBuildRequestData)"/>, <see cref="BuildManager.BuildRequest(GraphBuildRequestData)"/>, and <see cref="BuildManager.EndBuild()"/> may be called in this state.
             /// </summary>
             Building,
 
             /// <summary>
-            /// This is the state the BuildManager is in after <see cref="BuildManager.EndBuild"/> has been called but before all existing submissions have completed.
+            /// This is the state the BuildManager is in after <see cref="BuildManager.EndBuild()"/> has been called but before all existing submissions have completed.
             /// </summary>
             WaitingForBuildToComplete
         }
