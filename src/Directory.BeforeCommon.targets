@@ -117,9 +117,4 @@
     <FeatureMSIORedist>true</FeatureMSIORedist>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(FullFrameworkTFM)'">
-    <DefineConstants>$(DefineConstants);FEATURE_REPORTFILEACCESSES</DefineConstants>
-    <FeatureReportFileAccesses>true</FeatureReportFileAccesses>
-  </PropertyGroup>
-
 </Project>

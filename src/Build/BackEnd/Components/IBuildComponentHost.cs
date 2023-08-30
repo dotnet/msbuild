@@ -130,18 +130,6 @@ namespace Microsoft.Build.BackEnd
         /// The SDK resolution service.
         /// </summary>
         SdkResolverService,
-
-#if FEATURE_REPORTFILEACCESSES
-        /// <summary>
-        /// The component which is the sink for file access reports and forwards reports to other components.
-        /// </summary>
-        FileAccessManager,
-#endif
-
-        /// <summary>
-        /// The component which launches new MSBuild nodes.
-        /// </summary>
-        NodeLauncher,
     }
 
     /// <summary>
