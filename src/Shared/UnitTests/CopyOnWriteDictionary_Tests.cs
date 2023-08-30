@@ -192,53 +192,5 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             Assert.Equal("1", dictionary["test"]);
             Assert.Equal("2", clone["test"]);
         }
-
-        /// <summary>
-        /// Serialize basic case
-        /// </summary>
-        [Fact]
-        public void SerializeDeserialize()
-        {
-            CopyOnWriteDictionary<string> dictionary = new CopyOnWriteDictionary<string>();
-            dictionary.Add("Key1", "1");
-
-            using (MemoryStream stream = new MemoryStream())
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-
-                formatter.Serialize(stream, dictionary);
-                stream.Position = 0;
-
-                var dictionary2 = (CopyOnWriteDictionary<string>)formatter.Deserialize(stream);
-
-                Assert.Equal(dictionary.Count, dictionary2.Count);
-                Assert.Equal(dictionary.Comparer, dictionary2.Comparer);
-                Assert.Equal("1", dictionary2["Key1"]);
-
-                dictionary2.Add("key2", "2");
-            }
-        }
-
-        /// <summary>
-        /// Serialize custom comparer
-        /// </summary>
-        [Fact]
-        public void SerializeDeserialize2()
-        {
-            CopyOnWriteDictionary<string> dictionary = new CopyOnWriteDictionary<string>(MSBuildNameIgnoreCaseComparer.Default);
-
-            using (MemoryStream stream = new MemoryStream())
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-
-                formatter.Serialize(stream, dictionary);
-                stream.Position = 0;
-
-                CopyOnWriteDictionary<string> deserialized = (CopyOnWriteDictionary<string>)formatter.Deserialize(stream);
-
-                deserialized.Count.ShouldBe(dictionary.Count);
-                deserialized.Comparer.ShouldBeOfType<MSBuildNameIgnoreCaseComparer>();
-            }
-        }
     }
 }

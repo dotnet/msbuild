@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -139,7 +139,7 @@ namespace Microsoft.Build.Tasks
                             dependentUpon,
                             // If 'WithCulture' is explicitly set to false, treat as 'culture-neutral' and keep the original name of the resource.
                             // https://github.com/dotnet/msbuild/issues/3064
-                            AssignedFiles[i].GetMetadata("WithCulture").Equals("false", StringComparison.OrdinalIgnoreCase));
+                            ConversionUtilities.ValidBooleanFalse(AssignedFiles[i].GetMetadata("WithCulture")));
 
                     if (!string.IsNullOrEmpty(info.culture))
                     {

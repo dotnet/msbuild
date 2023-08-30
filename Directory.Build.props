@@ -44,14 +44,6 @@
     <GenerateNeutralResourcesLanguageAttribute>false</GenerateNeutralResourcesLanguageAttribute>
 
     <!--
-      Serialization/Deserialization of BinaryFormatter throws out System.NotSupportedException with latest .NET.
-      To work around temporarily add this property. The issues below are tracking this problem.
-      https://github.com/dotnet/msbuild/issues/9051
-      https://github.com/dotnet/msbuild/issues/8823
-    -->
-    <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
-
-    <!--
         NU1507: ManagePackageVersionsCentrally implies source mapping, which we should consider turning on but it's nontrivial
         NU1603: Microsoft.xunit.netcore.extensions package has dependencies to versions which aren't published, so ignore those warnings
         NU5105: we're explicitly opting in to semver2, as is most of .NET Core
