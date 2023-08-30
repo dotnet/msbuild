@@ -14,7 +14,6 @@ using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -154,14 +153,10 @@ namespace Microsoft.Build.Execution
 
             // Create a factory for the out-of-proc SDK resolver service which can pass our SendPacket delegate to be used for sending packets to the main node
             OutOfProcNodeSdkResolverServiceFactory sdkResolverServiceFactory = new OutOfProcNodeSdkResolverServiceFactory(SendPacket);
-            ((IBuildComponentHost)this).RegisterFactory(BuildComponentType.SdkResolverService, sdkResolverServiceFactory.CreateInstance);
-            _sdkResolverService = (this as IBuildComponentHost).GetComponent(BuildComponentType.SdkResolverService) as ISdkResolverService;
 
-#if FEATURE_REPORTFILEACCESSES
-            ((IBuildComponentHost)this).RegisterFactory(
-                BuildComponentType.FileAccessManager,
-                (componentType) => OutOfProcNodeFileAccessManager.CreateComponent(componentType, SendPacket));
-#endif
+            ((IBuildComponentHost)this).RegisterFactory(BuildComponentType.SdkResolverService, sdkResolverServiceFactory.CreateInstance);
+
+            _sdkResolverService = (this as IBuildComponentHost).GetComponent(BuildComponentType.SdkResolverService) as ISdkResolverService;
 
             if (s_projectRootElementCacheBase == null)
             {
@@ -374,13 +369,6 @@ namespace Microsoft.Build.Execution
             {
                 _nodeEndpoint.SendData(result);
             }
-
-#if FEATURE_REPORTFILEACCESSES
-            if (_buildParameters.ReportFileAccesses)
-            {
-                FileAccessManager.NotifyFileAccessCompletion(result.GlobalRequestId);
-            }
-#endif
         }
 
         /// <summary>

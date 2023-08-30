@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Framework.FileAccess;
 
 namespace Microsoft.Build.Framework
 {
@@ -22,18 +21,10 @@ namespace Microsoft.Build.Framework
         public const int Version1 = 1;
 
         /// <summary>
-        /// Includes <see cref="ReportFileAccess(FileAccessData)"/>.
-        /// </summary>
-        public const int Version2 = 2;
-
-        /// <summary>
-        /// Gets an explicit version of this class.
-        /// </summary>
-        /// <remarks>
-        /// Must be incremented whenever new members are added. Derived classes should override
+        /// An explicit version of this class. Must be incremented whenever new members are added. Derived classes should override
         /// the property to return the version actually being implemented.
-        /// </remarks>
-        public virtual int Version => Version2;
+        /// </summary>
+        public virtual int Version => Version1; // Not updated since we have not shipped 17.0 yet. This comment is meant to bypass RequiredVersionBumps check in build.ps1 for PR #470646. If the changes in the file are cosmetic, change PR# in this comment to silence the build error on CI build.
 
         /// <summary>
         /// Returns <see langword="true"/> if the given message importance is not guaranteed to be ignored by registered loggers.
@@ -54,12 +45,5 @@ namespace Microsoft.Build.Framework
         /// This is a performance optimization allowing tasks to skip expensive double-logging.
         /// </remarks>
         public virtual bool IsTaskInputLoggingEnabled => throw new NotImplementedException();
-
-        /// <summary>
-        /// Reports a file access from a task.
-        /// </summary>
-        /// <param name="fileAccessData">The file access to report.</param>
-        [CLSCompliant(false)]
-        public virtual void ReportFileAccess(FileAccessData fileAccessData) => throw new NotImplementedException();
     }
 }
