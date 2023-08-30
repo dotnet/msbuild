@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 {
     internal interface ILaunchSettingsProvider
     {
-        LaunchSettingsApplyResult TryGetLaunchSettings(JsonElement model);
+        LaunchSettingsApplyResult TryGetLaunchSettings(string launchProfileName, JsonElement model);
     }
 
 }

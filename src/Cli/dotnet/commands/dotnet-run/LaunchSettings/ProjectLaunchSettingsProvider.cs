@@ -11,9 +11,11 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 
         public string CommandName => CommandNameValue;
 
-        public LaunchSettingsApplyResult TryGetLaunchSettings(JsonElement model)
+        public LaunchSettingsApplyResult TryGetLaunchSettings(string launchProfileName, JsonElement model)
         {
             var config = new ProjectLaunchSettingsModel();
+            config.LaunchProfileName = launchProfileName;
+
             foreach (var property in model.EnumerateObject())
             {
                 if (string.Equals(property.Name, nameof(ProjectLaunchSettingsModel.CommandLineArgs), StringComparison.OrdinalIgnoreCase))

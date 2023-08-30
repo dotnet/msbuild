@@ -40,12 +40,13 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                         return new LaunchSettingsApplyResult(false, LocalizableStrings.LaunchProfilesCollectionIsNotAJsonObject);
                     }
 
+                    var selectedProfileName = profileName;
                     JsonElement profileObject;
                     if (string.IsNullOrEmpty(profileName))
                     {
-                        profileObject = profilesObject
-                            .EnumerateObject()
-                            .FirstOrDefault(IsDefaultProfileType).Value;
+                        var firstProfileProperty = profilesObject.EnumerateObject().FirstOrDefault(IsDefaultProfileType);
+                        selectedProfileName = firstProfileProperty.Name;
+                        profileObject = firstProfileProperty.Value;
                     }
                     else // Find a profile match for the given profileName
                     {
@@ -109,7 +110,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                         return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.LaunchProfileHandlerCannotBeLocated, commandName));
                     }
 
-                    return provider.TryGetLaunchSettings(profileObject);
+                    return provider.TryGetLaunchSettings(selectedProfileName, profileObject);
                 }
             }
             catch (JsonException ex)
