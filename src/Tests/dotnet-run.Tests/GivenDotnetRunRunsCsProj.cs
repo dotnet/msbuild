@@ -484,6 +484,26 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         }
 
         [Fact]
+        public void ItSetsTheDotnetLaunchProfileEnvironmentVariableToEmptyWhenNoLaunchProfileSwitchIsUsed()
+        {
+            var testAppName = "AppThatOutputsDotnetLaunchProfile";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                            .WithSource();
+
+            var testProjectDirectory = testInstance.Path;
+            var launchSettingsPath = Path.Combine(testProjectDirectory, "Properties", "launchSettings.json");
+
+            var cmd = new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("--no-launch-profile");
+
+            cmd.Should().Pass()
+                .And.HaveStdOutContaining("DOTNET_LAUNCH_PROFILE=<<<>>>");
+
+            cmd.StdErr.Should().BeEmpty();
+        }
+
+        [Fact]
         public void ItPrintsUsingLaunchSettingsMessageWhenNotQuiet()
         {
             var testInstance = _testAssetsManager.CopyTestAsset("AppWithLaunchSettings")
