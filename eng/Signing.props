@@ -1,10 +1,8 @@
 <Project>
   <ItemGroup>
     <ItemsToSign Include="$(VisualStudioSetupInsertionPath)Microsoft.Build.UnGAC.exe" />
-
-    <FileSignInfo Include="RuntimeContracts.dll" CertificateName="3PartySHA2" />
   </ItemGroup>
-
+    
   <PropertyGroup>
     <UseDotNetCertificate>true</UseDotNetCertificate>
   </PropertyGroup>
