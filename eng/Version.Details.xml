@@ -10,9 +10,9 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>03d25cd9f3868c92554e27048a57c49a39ce07c9</Sha>
     </Dependency>
-    <Dependency Name="VS.Redist.Common.NetCore.SharedFramework.x64.8.0" Version="8.0.0-rc.1.23421.3">
+    <Dependency Name="VS.Redist.Common.NetCore.SharedFramework.x64.9.0" Version="9.0.0-alpha.1.23430.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>f8c110b8003d68cc635add4ca791d6cf2e645561</Sha>
+      <Sha>03d25cd9f3868c92554e27048a57c49a39ce07c9</Sha>
       <SourceBuild RepoName="runtime" ManagedOnly="false" />
     </Dependency>
     <Dependency Name="VS.Redist.Common.NetCore.TargetingPack.x64.8.0" Version="8.0.0-rc.1.23421.3">
