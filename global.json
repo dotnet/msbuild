@@ -3,7 +3,7 @@
     "dotnet": "8.0.100-preview.7.23376.3",
     "runtimes": {
       "dotnet": [
-        "$(VSRedistCommonNetCoreSharedFrameworkx6480PackageVersion)"
+        "$(VSRedistCommonNetCoreSharedFrameworkx6490PackageVersion)"
       ],
       "aspnetcore": [
         "$(MicrosoftAspNetCoreAppRefPackageVersion)"
