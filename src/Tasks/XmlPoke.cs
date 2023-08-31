@@ -20,51 +20,23 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class XmlPoke : TaskExtension
     {
-        #region Members
-        /// <summary>
-        /// The XML input as file paths.
-        /// </summary>
-        private ITaskItem _xmlInputPath;
-
-        /// <summary>
-        /// The XPath Query.
-        /// </summary>
-        private string _query;
-
-        #endregion
-
         #region Properties
+
         /// <summary>
         /// The XML input as file path.
         /// </summary>
-        public ITaskItem XmlInputPath
-        {
-            get
-            {
-                ErrorUtilities.VerifyThrowArgumentNull(_xmlInputPath, nameof(XmlInputPath));
-                return _xmlInputPath;
-            }
-
-            set => _xmlInputPath = value;
-        }
+        [Required]
+        public ITaskItem XmlInputPath { get; set; }
 
         /// <summary>
         /// The XPath Query.
         /// </summary>
-        public string Query
-        {
-            get
-            {
-                ErrorUtilities.VerifyThrowArgumentNull(_query, nameof(Query));
-                return _query;
-            }
-
-            set => _query = value;
-        }
+        [Required]
+        public string Query { get; set; }
 
         /// <summary>
         /// The value to be inserted into the specified location.
-        /// </summary>        
+        /// </summary>
         public ITaskItem Value { get; set; }
 
         /// <summary>
@@ -80,12 +52,10 @@ namespace Microsoft.Build.Tasks
         /// <returns>true if transformation succeeds.</returns>
         public override bool Execute()
         {
-            ErrorUtilities.VerifyThrowArgumentNull(_query, "Query");
-            ErrorUtilities.VerifyThrowArgumentNull(_xmlInputPath, "XmlInputPath");
             if (Value == null)
             {
                 // When Value is null, it means Value is not set or empty. Here we treat them all as empty.
-                Value = new TaskItem(String.Empty);
+                Value = new TaskItem(string.Empty);
             }
 
             // Load the XPath Document
@@ -93,7 +63,7 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                using (FileStream fs = new FileStream(_xmlInputPath.ItemSpec, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (FileStream fs = new FileStream(XmlInputPath.ItemSpec, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     XmlReaderSettings xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
                     using (XmlReader sr = XmlReader.Create(fs, xrs))
@@ -104,7 +74,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                Log.LogErrorWithCodeFromResources("XmlPeekPoke.InputFileError", _xmlInputPath.ItemSpec, e.Message);
+                Log.LogErrorWithCodeFromResources("XmlPeekPoke.InputFileError", XmlInputPath.ItemSpec, e.Message);
                 return false;
             }
 
@@ -114,11 +84,11 @@ namespace Microsoft.Build.Tasks
             try
             {
                 // Create the expression from query
-                expr = nav.Compile(_query);
+                expr = nav.Compile(Query);
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                Log.LogErrorWithCodeFromResources("XmlPeekPoke.XPathError", _query, e.Message);
+                Log.LogErrorWithCodeFromResources("XmlPeekPoke.XPathError", Query, e.Message);
                 return false;
             }
 
@@ -169,12 +139,12 @@ namespace Microsoft.Build.Tasks
             if (count > 0)
             {
 #if RUNTIME_TYPE_NETCORE
-                using (Stream stream = File.Create(_xmlInputPath.ItemSpec))
+                using (Stream stream = File.Create(XmlInputPath.ItemSpec))
                 {
                     xmlDoc.Save(stream);
                 }
 #else
-                xmlDoc.Save(_xmlInputPath.ItemSpec);
+                xmlDoc.Save(XmlInputPath.ItemSpec);
 #endif
             }
 
