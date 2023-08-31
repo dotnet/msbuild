@@ -3,8 +3,12 @@
 
 using System;
 using System.IO;
+
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+
+using Shouldly;
+
 using Xunit;
 
 #nullable disable
@@ -314,6 +318,17 @@ namespace Microsoft.Build.UnitTests
 
             // Verify that the task was indeed found.
             logger.AssertLogDoesntContain("MSB4036");
+        }
+
+        [Fact]
+        public void PeekWithNoParameters()
+        {
+            MockEngine engine = new(true);
+
+            XmlPeek task = new() { BuildEngine = engine };
+
+            task.Execute().ShouldBeFalse();
+            engine.Log.ShouldContain("MSB4044");
         }
 
         private void Prepare(string xmlFile, out string xmlInputPath)

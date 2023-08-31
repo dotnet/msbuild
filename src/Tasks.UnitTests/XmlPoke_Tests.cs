@@ -6,9 +6,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
+
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+
 using Shouldly;
+
 using Xunit;
 
 #nullable disable
@@ -135,37 +138,63 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void PokeMissingParams()
+        public void PokeWithNoParameters()
         {
-            MockEngine engine = new MockEngine(true);
-            string xmlInputPath;
-            Prepare(_xmlFileNoNs, out xmlInputPath);
+            MockEngine engine = new(true);
 
-            for (int i = 0; i < 4; i++)
+            XmlPoke task = new() { BuildEngine = engine };
+
+            task.Execute().ShouldBeFalse();
+            engine.Log.ShouldContain("MSB4044");
+        }
+
+        [Fact]
+        public void PokeWithMissingRequiredQuery()
+        {
+            MockEngine engine = new(true);
+            Prepare(_xmlFileNoNs, out string xmlInputPath);
+
+            XmlPoke task = new()
             {
-                XmlPoke p = new XmlPoke();
-                p.BuildEngine = engine;
+                BuildEngine = engine,
+                XmlInputPath = new TaskItem(xmlInputPath),
+            };
 
-                if ((i & 1) == 1)
-                {
-                    p.XmlInputPath = new TaskItem(xmlInputPath);
-                }
+            task.Execute().ShouldBeFalse();
+            engine.Log.ShouldContain("MSB4044");
+            engine.Log.ShouldContain("Query");
+        }
 
-                if ((i & 2) == 2)
-                {
-                    p.Query = "//variable/@Name";
-                }
+        [Fact]
+        public void PokeWithMissingRequiredXmlInputPath()
+        {
+            MockEngine engine = new(true);
 
-                // "Expecting argumentnullexception for the first 3 tests"
-                if (i < 3)
-                {
-                    Should.Throw<ArgumentNullException>(() => p.Execute());
-                }
-                else
-                {
-                    Should.NotThrow(() => p.Execute());
-                }
-            }
+            XmlPoke task = new()
+            {
+                BuildEngine = engine,
+                Query = "//variable/@Name",
+            };
+
+            task.Execute().ShouldBeFalse();
+            engine.Log.ShouldContain("MSB4044");
+            engine.Log.ShouldContain("XmlInputPath");
+        }
+
+        [Fact]
+        public void PokeWithRequiredParameters()
+        {
+            MockEngine engine = new(true);
+            Prepare(_xmlFileNoNs, out string xmlInputPath);
+
+            XmlPoke task = new()
+            {
+                BuildEngine = engine,
+                XmlInputPath = new TaskItem(xmlInputPath),
+                Query = "//variable/@Name",
+            };
+
+            task.Execute().ShouldBeTrue();
         }
 
         [Fact]

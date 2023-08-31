@@ -236,7 +236,8 @@ namespace Microsoft.Build.Tasks
                 {
                     throw new ArgumentException(ResourceUtilities.GetResourceString("XmlPeek.XmlInput.TooMany"));
                 }
-                else if (xmlInputPath == null && xmlContent == null)
+
+                if (xmlInputPath == null && xmlContent == null)
                 {
                     throw new ArgumentException(ResourceUtilities.GetResourceString("XmlPeek.XmlInput.TooFew"));
                 }
