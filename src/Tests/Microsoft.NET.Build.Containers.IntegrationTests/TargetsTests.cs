@@ -9,15 +9,17 @@ namespace Microsoft.NET.Build.Containers.Targets.IntegrationTests;
 
 public class TargetsTests
 {
-    [InlineData(true, "/app/foo.exe")]
-    [InlineData(false, "dotnet", "/app/foo.dll")]
+    [InlineData("SelfContained", true, "/app/foo.exe")]
+    [InlineData("SelfContained", false, "dotnet", "/app/foo.dll")]
+    [InlineData("PublishSelfContained", true, "/app/foo.exe")]
+    [InlineData("PublishSelfContained", false, "dotnet", "/app/foo.dll")]
     [Theory]
-    public void CanSetEntrypointArgsToUseAppHost(bool useAppHost, params string[] entrypointArgs)
+    public void CanDeferEntrypoint(string selfContainedPropertyName, bool selfContainedPropertyValue, params string[] entrypointArgs)
     {
         var (project, _, d) = ProjectInitializer.InitProject(new()
         {
-            [UseAppHost] = useAppHost.ToString()
-        }, projectName: $"{nameof(CanSetEntrypointArgsToUseAppHost)}_{useAppHost}_{String.Join("_", entrypointArgs)}");
+            [selfContainedPropertyName] = selfContainedPropertyValue.ToString()
+        }, projectName: $"{nameof(CanDeferEntrypoint)}_{selfContainedPropertyName}_{selfContainedPropertyValue}_{String.Join("_", entrypointArgs)}");
         using var _ = d;
         Assert.True(project.Build(ComputeContainerConfig));
         var computedEntrypointArgs = project.GetItems(ContainerEntrypoint).Select(i => i.EvaluatedInclude).ToArray();
