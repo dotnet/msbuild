@@ -48,16 +48,16 @@
       <Sha>66dbaefff04250dc72849f0172e0c53bcfb3ab38</Sha>
       <SourceBuild RepoName="emsdk" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="17.8.0-preview-23430-04">
+    <Dependency Name="Microsoft.Build" Version="17.8.0-preview-23431-02">
       <Uri>https://github.com/dotnet/msbuild</Uri>
       <Sha>3c910ba83fc9dbd8e12f50dddc8c381404f928c4</Sha>
       <SourceBuild RepoName="msbuild" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.Build.Localization" Version="17.8.0-preview-23430-04">
+    <Dependency Name="Microsoft.Build.Localization" Version="17.8.0-preview-23431-02">
       <Uri>https://github.com/dotnet/msbuild</Uri>
       <Sha>3c910ba83fc9dbd8e12f50dddc8c381404f928c4</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.msbuild" Version="17.8.0-preview-23430-04">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.msbuild" Version="17.8.0-preview-23431-02">
       <Uri>https://github.com/dotnet/msbuild</Uri>
       <Sha>3c910ba83fc9dbd8e12f50dddc8c381404f928c4</Sha>
     </Dependency>
