@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 
@@ -323,12 +324,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void PeekWithNoParameters()
         {
-            MockEngine engine = new(true);
+            MockLogger log = new();
+            Project project = ObjectModelHelpers.CreateInMemoryProject(@"<Project><Target Name=""Test""><XmlPeek /></Target></Project>", log);
 
-            XmlPeek task = new() { BuildEngine = engine };
-
-            task.Execute().ShouldBeFalse();
-            engine.Log.ShouldContain("MSB4044");
+            project.Build().ShouldBeFalse();
+            log.AssertLogContains("MSB4044");
+            log.AssertLogContains("\"Query\"");
         }
 
         private void Prepare(string xmlFile, out string xmlInputPath)

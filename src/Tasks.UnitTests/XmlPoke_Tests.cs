@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 
@@ -140,45 +141,37 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void PokeWithNoParameters()
         {
-            MockEngine engine = new(true);
+            MockLogger log = new();
+            Project project = ObjectModelHelpers.CreateInMemoryProject(@"<Project><Target Name=""Test""><XmlPoke /></Target></Project>", log);
 
-            XmlPoke task = new() { BuildEngine = engine };
-
-            task.Execute().ShouldBeFalse();
-            engine.Log.ShouldContain("MSB4044");
+            project.Build().ShouldBeFalse();
+            log.AssertLogContains("MSB4044");
         }
 
         [Fact]
         public void PokeWithMissingRequiredQuery()
         {
-            MockEngine engine = new(true);
-            Prepare(_xmlFileNoNs, out string xmlInputPath);
+            const string projectContent = @"<Project><Target Name=""Test""><XmlPoke XmlInputPath=""nonesuch"" /></Target></Project>";
 
-            XmlPoke task = new()
-            {
-                BuildEngine = engine,
-                XmlInputPath = new TaskItem(xmlInputPath),
-            };
+            MockLogger log = new();
+            Project project = ObjectModelHelpers.CreateInMemoryProject(projectContent, log);
 
-            task.Execute().ShouldBeFalse();
-            engine.Log.ShouldContain("MSB4044");
-            engine.Log.ShouldContain("Query");
+            project.Build().ShouldBeFalse();
+            log.AssertLogContains("MSB4044");
+            log.AssertLogContains("\"Query\"");
         }
 
         [Fact]
         public void PokeWithMissingRequiredXmlInputPath()
         {
-            MockEngine engine = new(true);
+            const string projectContent = @"<Project><Target Name=""Test""><XmlPoke Query=""nonesuch"" /></Target></Project>";
 
-            XmlPoke task = new()
-            {
-                BuildEngine = engine,
-                Query = "//variable/@Name",
-            };
+            MockLogger log = new();
+            Project project = ObjectModelHelpers.CreateInMemoryProject(projectContent, log);
 
-            task.Execute().ShouldBeFalse();
-            engine.Log.ShouldContain("MSB4044");
-            engine.Log.ShouldContain("XmlInputPath");
+            project.Build().ShouldBeFalse();
+            log.AssertLogContains("MSB4044");
+            log.AssertLogContains("\"XmlInputPath\"");
         }
 
         [Fact]
