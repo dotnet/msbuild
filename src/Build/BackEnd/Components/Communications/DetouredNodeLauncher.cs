@@ -25,12 +25,6 @@ namespace Microsoft.Build.BackEnd
 
         private IFileAccessManager _fileAccessManager;
 
-        public static IBuildComponent CreateComponent(BuildComponentType type)
-        {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(type == BuildComponentType.NodeLauncher, nameof(type));
-            return new DetouredNodeLauncher();
-        }
-
         public void InitializeComponent(IBuildComponentHost host)
         {
             _fileAccessManager = (IFileAccessManager)host.GetComponent(BuildComponentType.FileAccessManager);

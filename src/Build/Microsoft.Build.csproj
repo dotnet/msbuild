@@ -155,6 +155,7 @@
     <Compile Include="BackEnd\Components\ProjectCache\*.cs" />
     <Compile Include="BackEnd\Components\Communications\CurrentHost.cs" />
     <Compile Include="BackEnd\Components\Communications\DetouredNodeLauncher.cs" />
+    <Compile Include="BackEnd\Components\Communications\DetouredNodeLauncherFactory.cs" />
     <Compile Include="BackEnd\Components\Communications\SerializationContractInitializer.cs" />
     <Compile Include="BackEnd\Components\Communications\ServerNodeEndpointOutOfProc.cs" />
     <Compile Include="BackEnd\Components\FileAccesses\IFileAccessManager.cs" />
