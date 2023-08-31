@@ -198,12 +198,31 @@ namespace Microsoft.Build.Logging
                 default:
                     // convert all unrecognized objects to message
                     // and just preserve the message
-                    var buildMessageEventArgs = new BuildMessageEventArgs(
-                        e.Message,
-                        e.HelpKeyword,
-                        e.SenderName,
-                        MessageImportance.Normal,
-                        e.Timestamp);
+                    BuildMessageEventArgs buildMessageEventArgs;
+                    if (e is IExtendedBuildEventArgs extendedData)
+                    {
+                        // For Extended events convert to ExtendedBuildMessageEventArgs
+                        buildMessageEventArgs = new ExtendedBuildMessageEventArgs(
+                            extendedData.ExtendedType,
+                            e.Message,
+                            e.HelpKeyword,
+                            e.SenderName,
+                            MessageImportance.Normal,
+                            e.Timestamp)
+                        {
+                            ExtendedData = extendedData.ExtendedData,
+                            ExtendedMetadata = extendedData.ExtendedMetadata,
+                        };
+                    }
+                    else
+                    {
+                        buildMessageEventArgs = new BuildMessageEventArgs(
+                            e.Message,
+                            e.HelpKeyword,
+                            e.SenderName,
+                            MessageImportance.Normal,
+                            e.Timestamp);
+                    }
                     buildMessageEventArgs.BuildEventContext = e.BuildEventContext ?? BuildEventContext.Invalid;
                     Write(buildMessageEventArgs);
                     break;
@@ -426,6 +445,7 @@ namespace Microsoft.Build.Logging
             Write(e.ColumnNumber);
             Write(e.EndLineNumber);
             Write(e.EndColumnNumber);
+            Write(e as IExtendedBuildEventArgs);
         }
 
         private void Write(BuildWarningEventArgs e)
@@ -441,6 +461,7 @@ namespace Microsoft.Build.Logging
             Write(e.ColumnNumber);
             Write(e.EndLineNumber);
             Write(e.EndColumnNumber);
+            Write(e as IExtendedBuildEventArgs);
         }
 
         private void Write(BuildMessageEventArgs e)
@@ -458,11 +479,19 @@ namespace Microsoft.Build.Logging
                 case PropertyInitialValueSetEventArgs propertyInitialValueSet: Write(propertyInitialValueSet); break;
                 case CriticalBuildMessageEventArgs criticalBuildMessage: Write(criticalBuildMessage); break;
                 case AssemblyLoadBuildEventArgs assemblyLoad: Write(assemblyLoad); break;
+                case ExtendedBuildMessageEventArgs extendedMessage: Write(extendedMessage); break;
                 default: // actual BuildMessageEventArgs
                     Write(BinaryLogRecordKind.Message);
                     WriteMessageFields(e, writeImportance: true);
                     break;
             }
+        }
+
+        private void Write(ExtendedBuildMessageEventArgs extendedMessage)
+        {
+            Write(BinaryLogRecordKind.ExtendedMessage);
+            WriteMessageFields(extendedMessage, writeImportance: true);
+            Write((IExtendedBuildEventArgs)extendedMessage);
         }
 
         private void Write(ProjectImportedEventArgs e)
@@ -1216,6 +1245,21 @@ namespace Microsoft.Build.Logging
             Write(e.NumberOfHits);
             Write(e.ExclusiveTime);
             Write(e.InclusiveTime);
+        }
+
+        private void Write(IExtendedBuildEventArgs extendedData)
+        {
+            if (extendedData?.ExtendedType == null)
+            {
+                Write(false);
+            }
+            else
+            {
+                Write(true); // Contains ExtendedData
+                WriteDeduplicatedString(extendedData.ExtendedType);
+                Write(extendedData.ExtendedMetadata);
+                WriteDeduplicatedString(extendedData.ExtendedData);
+            }
         }
 
         internal readonly struct HashKey : IEquatable<HashKey>

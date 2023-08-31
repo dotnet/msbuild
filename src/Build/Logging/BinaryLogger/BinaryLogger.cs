@@ -61,7 +61,11 @@ namespace Microsoft.Build.Logging
         //   - new record kind: ResponseFileUsedEventArgs
         // version 16:
         //   - AssemblyLoadBuildEventArgs
-        internal const int FileFormatVersion = 16;
+        // version 17:
+        //   - new record kind: ExtendedMessage
+        //   - Error: added extended data
+        //   - Warning: added extended data
+        internal const int FileFormatVersion = 17;
 
         private Stream stream;
         private BinaryWriter binaryWriter;

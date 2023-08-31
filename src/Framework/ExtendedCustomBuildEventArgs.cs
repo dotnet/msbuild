@@ -18,7 +18,7 @@ public sealed class ExtendedCustomBuildEventArgs : CustomBuildEventArgs, IExtend
     public string ExtendedType { get; set; }
 
     /// <inheritdoc />
-    public Dictionary<string, string?>? ExtendedMetadata { get; set; }
+    public IDictionary<string, string?>? ExtendedMetadata { get; set; }
 
     /// <inheritdoc />
     public string? ExtendedData { get; set; }

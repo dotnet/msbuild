@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using Microsoft.Build.Framework;
@@ -108,7 +109,7 @@ namespace Microsoft.Build.Shared
             bool haveMetadata = reader.ReadBoolean();
             if (haveMetadata)
             {
-                data.ExtendedMetadata = new();
+                data.ExtendedMetadata = new Dictionary<string, string?>();
 
                 int count = reader.Read7BitEncodedInt();
                 for (int i = 0; i < count; i++)
