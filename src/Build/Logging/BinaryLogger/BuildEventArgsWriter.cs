@@ -445,7 +445,6 @@ namespace Microsoft.Build.Logging
             Write(e.ColumnNumber);
             Write(e.EndLineNumber);
             Write(e.EndColumnNumber);
-            Write(e as IExtendedBuildEventArgs);
         }
 
         private void Write(BuildWarningEventArgs e)
@@ -461,7 +460,6 @@ namespace Microsoft.Build.Logging
             Write(e.ColumnNumber);
             Write(e.EndLineNumber);
             Write(e.EndColumnNumber);
-            Write(e as IExtendedBuildEventArgs);
         }
 
         private void Write(BuildMessageEventArgs e)
@@ -479,7 +477,6 @@ namespace Microsoft.Build.Logging
                 case PropertyInitialValueSetEventArgs propertyInitialValueSet: Write(propertyInitialValueSet); break;
                 case CriticalBuildMessageEventArgs criticalBuildMessage: Write(criticalBuildMessage); break;
                 case AssemblyLoadBuildEventArgs assemblyLoad: Write(assemblyLoad); break;
-                case ExtendedBuildMessageEventArgs extendedMessage: Write(extendedMessage); break;
                 default: // actual BuildMessageEventArgs
                     Write(BinaryLogRecordKind.Message);
                     WriteMessageFields(e, writeImportance: true);
@@ -487,12 +484,6 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        private void Write(ExtendedBuildMessageEventArgs extendedMessage)
-        {
-            Write(BinaryLogRecordKind.ExtendedMessage);
-            WriteMessageFields(extendedMessage, writeImportance: true);
-            Write((IExtendedBuildEventArgs)extendedMessage);
-        }
 
         private void Write(ProjectImportedEventArgs e)
         {
@@ -639,6 +630,11 @@ namespace Microsoft.Build.Logging
             {
                 Write(e.Timestamp);
             }
+
+            if ((flags & BuildEventArgsFieldFlags.Extended) != 0)
+            {
+                Write(e as IExtendedBuildEventArgs);
+            }
         }
 
         private void WriteMessageFields(BuildMessageEventArgs e, bool writeMessage = true, bool writeImportance = false)
@@ -701,7 +697,7 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        private void WriteArguments(object[] arguments)
+            private void WriteArguments(object[] arguments)
         {
             if (arguments == null || arguments.Length == 0)
             {
@@ -802,6 +798,11 @@ namespace Microsoft.Build.Logging
             if (e.Timestamp != default(DateTime))
             {
                 flags |= BuildEventArgsFieldFlags.Timestamp;
+            }
+
+            if (e is IExtendedBuildEventArgs extendedData)
+            {
+                flags |= BuildEventArgsFieldFlags.Extended;
             }
 
             return flags;
@@ -1249,13 +1250,8 @@ namespace Microsoft.Build.Logging
 
         private void Write(IExtendedBuildEventArgs extendedData)
         {
-            if (extendedData?.ExtendedType == null)
+            if (extendedData?.ExtendedType != null)
             {
-                Write(false);
-            }
-            else
-            {
-                Write(true); // Contains ExtendedData
                 WriteDeduplicatedString(extendedData.ExtendedType);
                 Write(extendedData.ExtendedMetadata);
                 WriteDeduplicatedString(extendedData.ExtendedData);

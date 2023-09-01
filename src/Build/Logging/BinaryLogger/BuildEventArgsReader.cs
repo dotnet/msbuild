@@ -159,9 +159,6 @@ namespace Microsoft.Build.Logging
                 case BinaryLogRecordKind.Message:
                     result = ReadBuildMessageEventArgs();
                     break;
-                case BinaryLogRecordKind.ExtendedMessage:
-                    result = ReadExtendedBuildMessageEventArgs();
-                    break;
                 case BinaryLogRecordKind.CriticalBuildMessage:
                     result = ReadCriticalBuildMessageEventArgs();
                     break;
@@ -606,10 +603,9 @@ namespace Microsoft.Build.Logging
         {
             var fields = ReadBuildEventArgsFields();
             ReadDiagnosticFields(fields);
-            var extended = ReadExtendedDataFields();
 
             BuildEventArgs e;
-            if (extended == null)
+            if (fields.Extended == null)
             {
                 e = new BuildErrorEventArgs(
                     fields.Subcategory,
@@ -631,7 +627,7 @@ namespace Microsoft.Build.Logging
             else
             {
                 e = new ExtendedBuildErrorEventArgs(
-                    extended.ExtendedType,
+                    fields.Extended.ExtendedType,
                     fields.Subcategory,
                     fields.Code,
                     fields.File,
@@ -646,8 +642,8 @@ namespace Microsoft.Build.Logging
                     fields.Arguments)
                 {
                     ProjectFile = fields.ProjectFile,
-                    ExtendedMetadata = extended.ExtendedMetadata,
-                    ExtendedData = extended.ExtendedData,
+                    ExtendedMetadata = fields.Extended.ExtendedMetadata,
+                    ExtendedData = fields.Extended.ExtendedData,
                 };
             }
             e.BuildEventContext = fields.BuildEventContext;
@@ -659,10 +655,9 @@ namespace Microsoft.Build.Logging
         {
             var fields = ReadBuildEventArgsFields();
             ReadDiagnosticFields(fields);
-            var extended = ReadExtendedDataFields();
 
             BuildEventArgs e;
-            if (extended == null)
+            if (fields.Extended == null)
             {
                 e = new BuildWarningEventArgs(
                     fields.Subcategory,
@@ -684,7 +679,7 @@ namespace Microsoft.Build.Logging
             else
             {
                 e = new ExtendedBuildWarningEventArgs(
-                    extended.ExtendedType,
+                    fields.Extended.ExtendedType,
                     fields.Subcategory,
                     fields.Code,
                     fields.File,
@@ -699,8 +694,8 @@ namespace Microsoft.Build.Logging
                     fields.Arguments)
                 {
                     ProjectFile = fields.ProjectFile,
-                    ExtendedMetadata = extended.ExtendedMetadata,
-                    ExtendedData = extended.ExtendedData,
+                    ExtendedMetadata = fields.Extended.ExtendedMetadata,
+                    ExtendedData = fields.Extended.ExtendedData,
                 };
             }
             e.BuildEventContext = fields.BuildEventContext;
@@ -712,7 +707,10 @@ namespace Microsoft.Build.Logging
         {
             var fields = ReadBuildEventArgsFields(readImportance: true);
 
-            BuildEventArgs e = new BuildMessageEventArgs(
+            BuildEventArgs e;
+            if (fields.Extended == null)
+            {
+                e = new BuildMessageEventArgs(
                     fields.Subcategory,
                     fields.Code,
                     fields.File,
@@ -727,20 +725,13 @@ namespace Microsoft.Build.Logging
                     fields.Timestamp,
                     fields.Arguments)
                 {
-                    BuildEventContext = fields.BuildEventContext,
                     ProjectFile = fields.ProjectFile,
                 };
-
-            return e;
-        }
-
-        private BuildEventArgs ReadExtendedBuildMessageEventArgs()
-        {
-            var fields = ReadBuildEventArgsFields(readImportance: true);
-            var extended = ReadExtendedDataFields();
-
-            var e = new ExtendedBuildMessageEventArgs(
-                    extended?.ExtendedType ?? string.Empty,
+            }
+            else
+            {
+                e = new ExtendedBuildMessageEventArgs(
+                    fields.Extended?.ExtendedType ?? string.Empty,
                     fields.Subcategory,
                     fields.Code,
                     fields.File,
@@ -755,11 +746,13 @@ namespace Microsoft.Build.Logging
                     fields.Timestamp,
                     fields.Arguments)
                 {
-                    BuildEventContext = fields.BuildEventContext,
                     ProjectFile = fields.ProjectFile,
-                    ExtendedMetadata = extended?.ExtendedMetadata,
-                    ExtendedData = extended?.ExtendedData,
+                    ExtendedMetadata = fields.Extended?.ExtendedMetadata,
+                    ExtendedData = fields.Extended?.ExtendedData,
                 };
+            }
+
+            e.BuildEventContext = fields.BuildEventContext;
 
             return e;
         }
@@ -954,17 +947,12 @@ namespace Microsoft.Build.Logging
         private ExtendedDataFields? ReadExtendedDataFields()
         {
             ExtendedDataFields? fields = null;
-            if (fileFormatVersion >= 17)
-            {
-                bool containsExtendedData = ReadBoolean();
-                if (containsExtendedData)
-                {
-                    fields = new ExtendedDataFields();
-                    fields.ExtendedType = ReadOptionalString();
-                    fields.ExtendedMetadata = ReadStringDictionary();
-                    fields.ExtendedData = ReadOptionalString();
-                }
-            }
+
+            fields = new ExtendedDataFields();
+
+            fields.ExtendedType = ReadOptionalString();
+            fields.ExtendedMetadata = ReadStringDictionary();
+            fields.ExtendedData = ReadOptionalString();
 
             return fields;
         }
@@ -974,6 +962,8 @@ namespace Microsoft.Build.Logging
             BuildEventArgsFieldFlags flags = (BuildEventArgsFieldFlags)ReadInt32();
             var result = new BuildEventArgsFields();
             result.Flags = flags;
+
+            // Base Fields
 
             if ((flags & BuildEventArgsFieldFlags.Message) != 0)
             {
@@ -1004,6 +994,13 @@ namespace Microsoft.Build.Logging
             {
                 result.Timestamp = ReadDateTime();
             }
+
+            if ((flags & BuildEventArgsFieldFlags.Extended) != 0)
+            {
+                result.Extended = ReadExtendedDataFields();
+            }
+
+            // End of BaseFields
 
             if ((flags & BuildEventArgsFieldFlags.Subcategory) != 0)
             {

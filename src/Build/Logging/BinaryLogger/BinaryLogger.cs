@@ -62,9 +62,7 @@ namespace Microsoft.Build.Logging
         // version 16:
         //   - AssemblyLoadBuildEventArgs
         // version 17:
-        //   - new record kind: ExtendedMessage
-        //   - Error: added extended data
-        //   - Warning: added extended data
+        //   - Added extended data for types implementing IExtendedBuildEventArgs
         internal const int FileFormatVersion = 17;
 
         private Stream stream;
