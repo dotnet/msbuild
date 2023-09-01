@@ -1,7 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Diagnostics;
+#nullable enable
+
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Microsoft.DotNet.Cli.Utils;
 
@@ -22,7 +24,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
             };
         }
 
-        public static LaunchSettingsApplyResult TryApplyLaunchSettings(string launchSettingsJsonContents, string profileName = null)
+        public static LaunchSettingsApplyResult TryApplyLaunchSettings(string launchSettingsJsonContents, string? profileName = null)
         {
             try
             {
@@ -84,7 +86,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                             {
                                 if (prop.Value.TryGetProperty(CommandNameKey, out var commandNameElement) && commandNameElement.ValueKind == JsonValueKind.String)
                                 {
-                                    if (_providers.ContainsKey(commandNameElement.GetString()))
+                                    if (commandNameElement.GetString() is { } commandNameElementKey &&  _providers.ContainsKey(commandNameElementKey))
                                     {
                                         profileObject = prop.Value;
                                         break;
@@ -105,8 +107,8 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                         return new LaunchSettingsApplyResult(false, LocalizableStrings.UsableLaunchProfileCannotBeLocated);
                     }
 
-                    string commandName = finalCommandNameElement.GetString();
-                    if (!TryLocateHandler(commandName, out ILaunchSettingsProvider provider))
+                    string? commandName = finalCommandNameElement.GetString();
+                    if (!TryLocateHandler(commandName, out ILaunchSettingsProvider? provider))
                     {
                         return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.LaunchProfileHandlerCannotBeLocated, commandName));
                     }
@@ -120,8 +122,14 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
             }
         }
 
-        private static bool TryLocateHandler(string commandName, out ILaunchSettingsProvider provider)
+        private static bool TryLocateHandler(string? commandName, [NotNullWhen(true)]out ILaunchSettingsProvider? provider)
         {
+            if (commandName == null)
+            {
+                provider = null;
+                return false;
+            }
+
             return _providers.TryGetValue(commandName, out provider);
         }
 
