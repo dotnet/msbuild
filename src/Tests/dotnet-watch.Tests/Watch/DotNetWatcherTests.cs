@@ -28,6 +28,45 @@ namespace Microsoft.DotNet.Watcher.Tests
         }
 
         [Fact]
+        public async Task RunsWithDotnetLaunchProfileEnvVariableWhenNotExplicitlySpecified()
+        {
+            Assert.True(string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_LAUNCH_PROFILE")), "DOTNET_LAUNCH_PROFILE cannot be set already when this test is running");
+
+            var testAsset = TestAssets.CopyTestAsset(AppName)
+                .WithSource()
+                .Path;
+
+            await App.StartWatcherAsync(testAsset);
+            Assert.Equal("<<<First>>>", await App.AssertOutputLineStartsWith("DOTNET_LAUNCH_PROFILE = "));
+        }
+
+        [Fact]
+        public async Task RunsWithDotnetLaunchProfileEnvVariableWhenExplicitlySpecified()
+        {
+            Assert.True(string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_LAUNCH_PROFILE")), "DOTNET_LAUNCH_PROFILE cannot be set already when this test is running");
+
+            var testAsset = TestAssets.CopyTestAsset(AppName)
+                .WithSource()
+                .Path;
+
+            await App.StartWatcherAsync(testAsset, [ "--launch-profile", "Second"]);
+            Assert.Equal("<<<Second>>>", await App.AssertOutputLineStartsWith("DOTNET_LAUNCH_PROFILE = "));
+        }
+
+        [Fact]
+        public async Task RunsWithDotnetLaunchProfileEnvVariableWhenExplicitlySpecifiedButNotPresentIsEmpty()
+        {
+            Assert.True(string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_LAUNCH_PROFILE")), "DOTNET_LAUNCH_PROFILE cannot be set already when this test is running");
+
+            var testAsset = TestAssets.CopyTestAsset(AppName)
+                .WithSource()
+                .Path;
+
+            await App.StartWatcherAsync(testAsset, ["--launch-profile", "Third"]);
+            Assert.Equal("<<<>>>", await App.AssertOutputLineStartsWith("DOTNET_LAUNCH_PROFILE = "));
+        }
+
+        [Fact]
         public async Task RunsWithIterationEnvVariable()
         {
             var testAsset = TestAssets.CopyTestAsset(AppName)
