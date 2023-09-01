@@ -260,7 +260,7 @@
     <comment>{StrBegin="CONTAINER1013: "}</comment>
   </data>
   <data name="RegistryPushFailed" xml:space="preserve">
-    <value>CONTAINER1005: Registry push failed.</value>
+    <value>CONTAINER1005: Registry push failed; received status code '{0}'.</value>
     <comment>{StrBegin="CONTAINER1005: "}</comment>
   </data>
   <data name="RequiredItemsContainsEmptyItems" xml:space="preserve">

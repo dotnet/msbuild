@@ -31,6 +31,28 @@ namespace Microsoft.NET.Build.Tests
             VerifyInterceptorsFeatureEnabled(asset, isEnabled);
         }
 
+        [Theory]
+        [InlineData("WebApp", false)]
+        [InlineData("WebApp", true)]
+        [InlineData("WebApp", null)]
+        public void It_resolves_configbindinggenerator_correctly(string testAssetName, bool? isEnabled)
+        {
+            var asset = _testAssetsManager
+                .CopyTestAsset(testAssetName, identifier: isEnabled.ToString())
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    if (isEnabled != null)
+                    {
+                        var ns = project.Root.Name.Namespace;
+                        project.Root.Add(new XElement(ns + "PropertyGroup", new XElement("EnableConfigurationBindingGenerator", isEnabled)));
+                    }
+                });
+
+            VerifyConfigBindingGeneratorIsUsed(asset, isEnabled);
+            VerifyInterceptorsFeatureEnabled(asset, isEnabled);
+        }
+
         [Fact]
         public void It_enables_requestdelegategenerator_and_configbindinggenerator_for_PublishAot()
         {

@@ -41,7 +41,8 @@ internal class DefaultManifestOperations : IManifestOperations
 
         if (!putResponse.IsSuccessStatusCode)
         {
-            throw new ContainerHttpException(Resource.GetString(nameof(Strings.RegistryPushFailed)), putResponse.RequestMessage?.RequestUri?.ToString(), jsonString);
+            await putResponse.LogHttpResponseAsync(_logger, cancellationToken).ConfigureAwait(false);
+            throw new ContainerHttpException(Resource.FormatString(nameof(Strings.RegistryPushFailed), putResponse.StatusCode), putResponse.RequestMessage?.RequestUri?.ToString());
         }
     }
 }
