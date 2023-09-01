@@ -23,6 +23,8 @@ namespace Microsoft.Build.BackEnd
     {
         private readonly List<ISandboxedProcess> _sandboxedProcesses = new();
 
+        private readonly BuildParameters.IBuildParameters _environmentVariables = CreateEnvironmentVariables();
+
         private IFileAccessManager _fileAccessManager;
 
         public void InitializeComponent(IBuildComponentHost host)
@@ -84,7 +86,7 @@ namespace Microsoft.Build.BackEnd
                 PipDescription = "MSBuild",
                 PipSemiStableHash = 0,
                 Arguments = commandLineArgs,
-                EnvironmentVariables = EnvironmentalBuildParameters.Instance,
+                EnvironmentVariables = _environmentVariables,
                 MaxLengthInMemory = 0, // Don't buffer any output
             };
 
@@ -123,6 +125,17 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", sp.ProcessId, exeName);
             return Process.GetProcessById(sp.ProcessId);
+        }
+
+        private static BuildParameters.IBuildParameters CreateEnvironmentVariables()
+        {
+            var envVars = new Dictionary<string, string>();
+            foreach (DictionaryEntry baseVar in Environment.GetEnvironmentVariables())
+            {
+                envVars.Add((string)baseVar.Key, (string)baseVar.Value);
+            }
+
+            return BuildParameters.GetFactory().PopulateFromDictionary(envVars);
         }
 
         private sealed class EnvironmentalBuildParameters : BuildParameters.IBuildParameters
