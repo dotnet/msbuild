@@ -60,13 +60,16 @@ internal static class HttpExtensions
     /// </summary>
     internal static async Task LogHttpResponseAsync(this HttpResponseMessage response, ILogger logger, CancellationToken cancellationToken)
     {
-        StringBuilder s = new();
-        s.AppendLine($"Last request URI: {response.RequestMessage?.RequestUri?.ToString()}");
-        s.AppendLine($"Status code: {response.StatusCode}");
-        s.AppendLine($"Response headers:");
-        s.AppendLine(response.Headers.ToString());
-        string detail = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-        s.AppendLine($"Response content: {(string.IsNullOrWhiteSpace(detail) ? "<empty>" : detail)}");
-        logger.LogTrace(s.ToString());
+        if (logger.IsEnabled(LogLevel.Trace))
+        {
+            StringBuilder s = new();
+            s.AppendLine($"Request URI: {response.RequestMessage?.Method} {response.RequestMessage?.RequestUri?.ToString()}");
+            s.AppendLine($"Status code: {response.StatusCode}");
+            s.AppendLine($"Response headers:");
+            s.AppendLine(response.Headers.ToString());
+            string detail = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            s.AppendLine($"Response content: {(string.IsNullOrWhiteSpace(detail) ? "<empty>" : detail)}");
+            logger.LogTrace(s.ToString());
+        }
     }
 }

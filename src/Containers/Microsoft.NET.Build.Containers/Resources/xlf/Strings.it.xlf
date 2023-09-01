@@ -253,8 +253,8 @@
         <note>{StrBegin="CONTAINER1013: "}</note>
       </trans-unit>
       <trans-unit id="RegistryPushFailed">
-        <source>CONTAINER1005: Registry push failed.</source>
-        <target state="translated">CONTAINER1005: push del registro non riuscito.</target>
+        <source>CONTAINER1005: Registry push failed; received status code '{0}'.</source>
+        <target state="new">CONTAINER1005: Registry push failed; received status code '{0}'.</target>
         <note>{StrBegin="CONTAINER1005: "}</note>
       </trans-unit>
       <trans-unit id="Registry_ConfigUploadStarted">
