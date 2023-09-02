@@ -9,8 +9,6 @@ namespace Microsoft.DotNet.Watcher.Tools
 {
     internal sealed class DotNetWatchContext
     {
-        public string? LaunchProfileName { get; set; }
-
         public required bool HotReloadEnabled { get; init; }
 
         public IReporter Reporter { get; init; } = NullReporter.Singleton;

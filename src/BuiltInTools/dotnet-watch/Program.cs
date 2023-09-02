@@ -198,7 +198,6 @@ namespace Microsoft.DotNet.Watcher
 
             var context = new DotNetWatchContext
             {
-                LaunchProfileName = launchProfileName,
                 HotReloadEnabled = enableHotReload,
                 ProcessSpec = new ProcessSpec
                 {
