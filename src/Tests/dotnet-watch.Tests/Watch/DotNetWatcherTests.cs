@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Watcher.Tests
                 .Path;
 
             await App.StartWatcherAsync(testAsset, ["--launch-profile", "Third"]);
-            Assert.Equal("<<<>>>", await App.AssertOutputLineStartsWith("DOTNET_LAUNCH_PROFILE = "));
+            Assert.Equal("<<<First>>>", await App.AssertOutputLineStartsWith("DOTNET_LAUNCH_PROFILE = "));
         }
 
         [Fact]
