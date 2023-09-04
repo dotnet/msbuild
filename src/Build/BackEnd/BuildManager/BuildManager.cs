@@ -562,13 +562,7 @@ namespace Microsoft.Build.Execution
 #if FEATURE_REPORTFILEACCESSES
                 if (_buildParameters.ReportFileAccesses)
                 {
-                    // To properly report file access, we need to disable the in-proc node which won't be detoured.
-                    _buildParameters.DisableInProcNode = true;
-
-                    // Node reuse must be disabled as future builds will not be able to listen to events raised by detours.
-                    _buildParameters.EnableNodeReuse = false;
-
-                    _componentFactories.ReplaceFactory(BuildComponentType.NodeLauncher, DetouredNodeLauncherFactory.CreateComponent);
+                    EnableDetouredNodeLauncher();
                 }
 #endif
 
@@ -722,6 +716,25 @@ namespace Microsoft.Build.Execution
                 }
             }
         }
+
+#if FEATURE_REPORTFILEACCESSES
+        /// <summary>
+        /// Configure the build to use I/O tracking for nodes.
+        /// </summary>
+        /// <remarks>
+        /// Must be a separate method to avoid loading the BuildXL assembly when not opted in.
+        /// </remarks>
+        private void EnableDetouredNodeLauncher()
+        {
+            // To properly report file access, we need to disable the in-proc node which won't be detoured.
+            _buildParameters.DisableInProcNode = true;
+
+            // Node reuse must be disabled as future builds will not be able to listen to events raised by detours.
+            _buildParameters.EnableNodeReuse = false;
+
+            _componentFactories.ReplaceFactory(BuildComponentType.NodeLauncher, DetouredNodeLauncher.CreateComponent);
+        }
+#endif
 
         private static void AttachDebugger()
         {
