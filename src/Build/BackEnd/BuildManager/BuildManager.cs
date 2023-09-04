@@ -13,6 +13,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -722,8 +723,9 @@ namespace Microsoft.Build.Execution
         /// Configure the build to use I/O tracking for nodes.
         /// </summary>
         /// <remarks>
-        /// Must be a separate method to avoid loading the BuildXL assembly when not opted in.
+        /// Must be a separate non-inlinable method to avoid loading the BuildXL assembly when not opted in.
         /// </remarks>
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private void EnableDetouredNodeLauncher()
         {
             // To properly report file access, we need to disable the in-proc node which won't be detoured.
