@@ -254,7 +254,7 @@
       </trans-unit>
       <trans-unit id="RegistryPushFailed">
         <source>CONTAINER1005: Registry push failed; received status code '{0}'.</source>
-        <target state="new">CONTAINER1005: Registry push failed; received status code '{0}'.</target>
+        <target state="translated">CONTAINER1005: 레지스트리 푸시에 실패했습니다. 상태 코드 '{0}'을(를) 받았습니다.</target>
         <note>{StrBegin="CONTAINER1005: "}</note>
       </trans-unit>
       <trans-unit id="Registry_ConfigUploadStarted">
