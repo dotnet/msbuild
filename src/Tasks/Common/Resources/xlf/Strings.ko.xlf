@@ -633,7 +633,7 @@ true &lt;IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(Targ
       </trans-unit>
       <trans-unit id="Net8NotCompatibleWithDev177">
         <source>NETSDK1213: Targeting .NET 8.0 or higher in Visual Studio 2022 17.7 is not supported.</source>
-        <target state="new">NETSDK1213: Targeting .NET 8.0 or higher in Visual Studio 2022 17.7 is not supported.</target>
+        <target state="translated">NETSDK1213: Visual Studio 2022 17.7에서는 .NET 8.0 이상을 대상으로 지정하는 것이 지원되지 않습니다.</target>
         <note>{StrBegin="NETSDK1213: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
