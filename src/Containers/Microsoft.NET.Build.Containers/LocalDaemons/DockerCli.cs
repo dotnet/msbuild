@@ -57,7 +57,7 @@ internal sealed class DockerCli : ILocalRegistry
         return command;
     }
 
-    public async Task LoadAsync(BuiltImage image, ImageReference sourceReference, ImageReference destinationReference, CancellationToken cancellationToken)
+    public async Task LoadAsync(BuiltImage image, SourceImageReference sourceReference, DestinationImageReference destinationReference, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         string dockerPath = FindFullPathFromPath("docker") ?? "docker";
@@ -196,7 +196,7 @@ internal sealed class DockerCli : ILocalRegistry
 
     private static void Proc_OutputDataReceived(object sender, DataReceivedEventArgs e) => throw new NotImplementedException();
 
-    private static async Task WriteImageToStreamAsync(BuiltImage image, ImageReference sourceReference, ImageReference destinationReference, Stream imageStream, CancellationToken cancellationToken)
+    private static async Task WriteImageToStreamAsync(BuiltImage image, SourceImageReference sourceReference, DestinationImageReference destinationReference, Stream imageStream, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         using TarWriter writer = new(imageStream, TarEntryFormat.Pax, leaveOpen: true);
@@ -241,10 +241,11 @@ internal sealed class DockerCli : ILocalRegistry
         }
 
         // Add manifest
-        JsonArray tagsNode = new()
+        JsonArray tagsNode = new();
+        foreach (string tag in destinationReference.Tags)
         {
-            destinationReference.RepositoryAndTag
-        };
+            tagsNode.Add($"{destinationReference.Repository}:{tag}");
+        }
 
         JsonNode manifestNode = new JsonArray(new JsonObject
         {
