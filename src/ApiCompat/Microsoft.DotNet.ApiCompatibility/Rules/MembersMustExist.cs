@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                     leftMetadata,
                     rightMetadata,
                     DiagnosticIds.TypeMustExist,
-                    string.Format(Resources.TypeMissingOnSide, left.ToDisplayString(), leftMetadata, rightMetadata),
+                    string.Format(Resources.TypeMissingOnSide, left.ToDisplayString(SymbolExtensions.DisplayFormat), leftMetadata, rightMetadata),
                     DifferenceType.Removed,
                     left));
             }
@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                     leftMetadata,
                     rightMetadata,
                     DiagnosticIds.TypeMustExist,
-                    string.Format(Resources.TypeMissingOnSide, right.ToDisplayString(), rightMetadata, leftMetadata),
+                    string.Format(Resources.TypeMissingOnSide, right.ToDisplayString(SymbolExtensions.DisplayFormat), rightMetadata, leftMetadata),
                     DifferenceType.Added,
                     right));
             }
@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                         leftMetadata,
                         rightMetadata,
                         DiagnosticIds.MemberMustExist,
-                        string.Format(Resources.MemberExistsOnLeft, left.ToDisplayString(), leftMetadata, rightMetadata),
+                        string.Format(Resources.MemberExistsOnLeft, left.ToDisplayString(SymbolExtensions.DisplayFormat), leftMetadata, rightMetadata),
                         DifferenceType.Removed,
                         left));
                 }
@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                         leftMetadata,
                         rightMetadata,
                         DiagnosticIds.MemberMustExist,
-                        string.Format(Resources.MemberExistsOnRight, right.ToDisplayString(), leftMetadata, rightMetadata),
+                        string.Format(Resources.MemberExistsOnRight, right.ToDisplayString(SymbolExtensions.DisplayFormat), leftMetadata, rightMetadata),
                         DifferenceType.Added,
                         right));
                 }

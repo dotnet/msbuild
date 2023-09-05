@@ -12,7 +12,8 @@
                                 )
                           )">true</_IsSDKContainerAllowedVersion>
     <_ContainerIsTargetingNet8TFM>false</_ContainerIsTargetingNet8TFM>
-    <_ContainerIsTargetingNet8TFM Condition="$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'net8.0'))">true</_ContainerIsTargetingNet8TFM>
+    <_ContainerIsTargetingNet8TFM Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '8.0'))">true</_ContainerIsTargetingNet8TFM>
+    <_ContainerIsSelfContained Condition="'$(SelfContained)' == 'true' or '$(PublishSelfContained)' == 'true'">true</_ContainerIsSelfContained>
   </PropertyGroup>
 
   <ItemGroup>
@@ -42,13 +43,11 @@
     Returns="$(ContainerBaseImage)"
     DependsOnTargets="_ComputeContainerBaseImageTag">
     <PropertyGroup>
-      <!-- Reference data about this project -->
-      <_IsSelfContained Condition="'$(SelfContained)' == 'true' or '$(PublishSelfContained)' == 'true'">true</_IsSelfContained>
       <_IsAspNet Condition="@(FrameworkReference->Count()) > 0 and @(FrameworkReference->AnyHaveMetadataValue('Identity', 'Microsoft.AspnetCore.App'))">true</_IsAspNet>
 
       <!-- Compute private defaults -->
       <_ContainerBaseRegistry>mcr.microsoft.com</_ContainerBaseRegistry>
-      <_ContainerBaseImageName Condition="'$(_IsSelfContained)' == 'true'">dotnet/runtime-deps</_ContainerBaseImageName>
+      <_ContainerBaseImageName Condition="'$(_ContainerIsSelfContained)' == 'true'">dotnet/runtime-deps</_ContainerBaseImageName>
       <_ContainerBaseImageName Condition="'$(_ContainerBaseImageName)' == '' and '$(_IsAspNet)' == 'true'">dotnet/aspnet</_ContainerBaseImageName>
       <_ContainerBaseImageName Condition="'$(_ContainerBaseImageName)' == ''">dotnet/runtime</_ContainerBaseImageName>
 
@@ -103,11 +102,11 @@
     </PropertyGroup>
 
     <ItemGroup Label="AppCommand Assignment" Condition="'$(ContainerAppCommandInstruction)' != 'None'">
-      <!-- For non-apphosts, we need to invoke `dotnet` `app` as separate args -->
-      <ContainerAppCommand Condition="'$(ContainerAppCommand)' == '' and '$(UseAppHost)' != 'true'" Include="dotnet;$(TargetFileName)" />
-      <!-- For apphosts, we need to invoke `app` as a single arg -->
-      <ContainerAppCommand Condition="'$(ContainerAppCommand)' == '' and '$(UseAppHost)' == 'true' and !$(_ContainerIsTargetingWindows)" Include="$(ContainerWorkingDirectory)/$(AssemblyName)$(_NativeExecutableExtension)" />
-      <ContainerAppCommand Condition="'$(ContainerAppCommand)' == '' and '$(UseAppHost)' == 'true' and $(_ContainerIsTargetingWindows)" Include="$(AssemblyName)$(_NativeExecutableExtension)" />
+      <!-- For self-contained, invoke the native executable as a single arg -->
+      <ContainerAppCommand Condition="'$(ContainerAppCommand)' == '' and '$(_ContainerIsSelfContained)' == 'true' and !$(_ContainerIsTargetingWindows)" Include="$(ContainerWorkingDirectory)/$(AssemblyName)$(_NativeExecutableExtension)" />
+      <ContainerAppCommand Condition="'$(ContainerAppCommand)' == '' and '$(_ContainerIsSelfContained)' == 'true' and $(_ContainerIsTargetingWindows)" Include="$(AssemblyName)$(_NativeExecutableExtension)" />
+      <!-- For non self-contained, invoke `dotnet` `app.dll` as separate args -->
+      <ContainerAppCommand Condition="'$(ContainerAppCommand)' == ''" Include="dotnet;$(TargetFileName)" />
     </ItemGroup>
 
     <!-- We only set a default user when the base image is Microsoft-authored, and we're targeting a version of those images that supports a nonroot user -->

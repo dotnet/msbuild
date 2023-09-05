@@ -124,7 +124,7 @@ setTimeout(async function () {
     styleElement.parentNode.insertBefore(newElement, styleElement.nextSibling);
   }
 
-  function applyBlazorDeltas(serverSecret, deltas, sendErrorToClient) {
+  async function applyBlazorDeltas(serverSecret, deltas, sendErrorToClient) {
     if (sharedSecret && (serverSecret != sharedSecret.encodedSharedSecret)) {
       // Validate the shared secret if it was specified. It might be unspecified in older versions of VS
       // that do not support this feature as yet.
@@ -143,16 +143,15 @@ setTimeout(async function () {
           console.warn(error);
           applyError = error;
         }
-      }); 
+      });
     }
 
-    fetch('/_framework/blazor-hotreload', { method: 'post', headers: { 'content-type': 'application/json' }, body: JSON.stringify(deltas) })
-      .then(response => {
-        if (response.status == 200) {
-          const etag = response.headers['etag'];
-          window.sessionStorage.setItem('blazor-webassembly-cache', { etag, deltas });
-        }
-      });
+    try {
+      await fetch('/_framework/blazor-hotreload', { method: 'post', headers: { 'content-type': 'application/json' }, body: JSON.stringify(deltas) });
+    } catch (error) {
+      console.warn(error);
+      applyError = error;
+    }
 
     if (applyError) {
       sendDeltaNotApplied(sendErrorToClient ? applyError : undefined);

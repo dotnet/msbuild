@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.ApiSymbolExtensions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
@@ -39,7 +40,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                         leftMetadata,
                         rightMetadata,
                         DiagnosticIds.CannotAddMemberToInterface,
-                        string.Format(Resources.CannotAddMemberToInterface, right.ToDisplayString(), rightMetadata, leftMetadata),
+                        string.Format(Resources.CannotAddMemberToInterface, right.ToDisplayString(SymbolExtensions.DisplayFormat), rightMetadata, leftMetadata),
                         DifferenceType.Added,
                         right));
                 }

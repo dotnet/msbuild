@@ -371,7 +371,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("recommended", "true", new string[] { "CA1310", "CA1068", "CA2200" })]
         [InlineData("all", "false", new string[] { "CA1031", "CA1310", "CA1068", "CA2200" })]
         [InlineData("all", "true", new string[] { "CA1031", "CA1310", "CA1068", "CA2200" })]
-        [RequiresMSBuildVersionTheory("16.8")]
+        [RequiresMSBuildVersionTheory("17.8.0")]
         public void It_bulk_configures_rules_with_different_analysis_modes(string analysisMode, string codeAnalysisTreatWarningsAsErrors, string[] expectedViolations)
         {
             var testProject = new TestProject

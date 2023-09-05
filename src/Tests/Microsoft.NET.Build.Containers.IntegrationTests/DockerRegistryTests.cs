@@ -77,8 +77,8 @@ public class DockerRegistryTests
             var ridgraphfile = ToolsetUtils.GetRuntimeGraphFilePath();
             Registry mcr = new Registry(DockerRegistryManager.BaseImageSource, logger);
 
-            var sourceImage = new ImageReference(mcr, DockerRegistryManager.RuntimeBaseImage, DockerRegistryManager.Net6ImageTag);
-            var destinationImage = new ImageReference(localAuthed, DockerRegistryManager.RuntimeBaseImage, DockerRegistryManager.Net6ImageTag);
+            var sourceImage = new SourceImageReference(mcr, DockerRegistryManager.RuntimeBaseImage, DockerRegistryManager.Net6ImageTag);
+            var destinationImage = new DestinationImageReference(localAuthed, DockerRegistryManager.RuntimeBaseImage,new[] { DockerRegistryManager.Net6ImageTag });
             ImageBuilder? downloadedImage = await mcr.GetImageManifestAsync(
                 DockerRegistryManager.RuntimeBaseImage,
                 DockerRegistryManager.Net6ImageTag,
