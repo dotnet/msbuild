@@ -1068,6 +1068,61 @@ namespace InlineTask
             }
         }
 
+        [Fact]
+        public void RoslynCodeTaskFactory_UsingAPI()
+        {
+            string text = $@"
+<Project>
+
+  <UsingTask
+    TaskName=""Custom1""
+    TaskFactory=""RoslynCodeTaskFactory""
+    AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"" >
+    <ParameterGroup>
+      <SayHi ParameterType=""System.String"" Required=""true"" />
+    </ParameterGroup>
+    <Task>
+      <Reference Include=""{typeof(Enumerable).Assembly.Location}"" />
+      <Code Type=""Fragment"" Language=""cs"">
+        <![CDATA[
+        string sayHi = ""Hello "" + SayHi;
+        Log.LogMessage(sayHi);
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+    <Target Name=""Build"">
+        <Custom1 SayHi=""World"" />
+    </Target>
+
+</Project>";
+
+            using var env = TestEnvironment.Create();
+#if !FEATURE_RUN_EXE_IN_TESTS
+            RunnerUtilities.ApplyDotnetHostPathEnvironmentVariable(env);
+#endif
+
+            var project = env.CreateTestProjectWithFiles("p1.proj", text);
+
+            var logger = project.BuildProjectExpectSuccess();
+#if !FEATURE_RUN_EXE_IN_TESTS
+            var filter = "dotnet path is ";
+#else
+            var filter = "Compiling task source code";
+
+#endif
+            var logLines = logger.AllBuildEvents.Select(a => a.Message);
+            var log = string.Join("\n", logLines);
+            var messages = logLines.Where(l => l.Contains(filter)).ToList();
+            messages.Count.ShouldBe(1, log);
+#if !FEATURE_RUN_EXE_IN_TESTS
+            var dotnetPath = messages[0].Replace(filter, string.Empty);
+            bool isFilePath = File.Exists(dotnetPath);
+            isFilePath.ShouldBeTrue(dotnetPath);
+#endif
+        }
+
         private void TryLoadTaskBodyAndExpectFailure(string taskBody, string expectedErrorMessage)
         {
             if (expectedErrorMessage == null)
