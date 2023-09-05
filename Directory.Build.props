@@ -11,7 +11,7 @@
     <!-- Default to all packages generating a corresponding symbol package -->
     <IncludeSymbols>true</IncludeSymbols>
     <IsShippingPackage>false</IsShippingPackage>
-    <SdkTargetFramework>net8.0</SdkTargetFramework>
+    <SdkTargetFramework>net9.0</SdkTargetFramework>
     <!-- Temporarily disable build warnings while upgrading to the net9.0 TFM -->
     <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
     <ToolsetTargetFramework>$(SdkTargetFramework)</ToolsetTargetFramework>
