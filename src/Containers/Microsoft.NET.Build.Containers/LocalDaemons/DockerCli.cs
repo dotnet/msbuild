@@ -22,7 +22,7 @@ internal sealed class DockerCli : ILocalRegistry
     private readonly ILogger _logger;
     private string? _commandPath;
 
-    public DockerCli(string? command, ILoggerFactory logger)
+    public DockerCli(string? command, ILoggerFactory loggerFactory)
     {
         if (!(command == null ||
               command == PodmanCommand ||
@@ -32,7 +32,7 @@ internal sealed class DockerCli : ILocalRegistry
         }
 
         this._commandPath = command;
-        this._logger = logger.CreateLogger<DockerCli>();
+        this._logger = loggerFactory.CreateLogger<DockerCli>();
     }
 
     public DockerCli(ILoggerFactory loggerFactory) : this(null, loggerFactory)
@@ -196,7 +196,7 @@ internal sealed class DockerCli : ILocalRegistry
 
     private static void Proc_OutputDataReceived(object sender, DataReceivedEventArgs e) => throw new NotImplementedException();
 
-    private static async Task WriteImageToStreamAsync(BuiltImage image, SourceImageReference sourceReference, DestinationImageReference destinationReference, Stream imageStream, CancellationToken cancellationToken)
+    public static async Task WriteImageToStreamAsync(BuiltImage image, SourceImageReference sourceReference, DestinationImageReference destinationReference, Stream imageStream, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         using TarWriter writer = new(imageStream, TarEntryFormat.Pax, leaveOpen: true);
@@ -311,4 +311,5 @@ internal sealed class DockerCli : ILocalRegistry
         }
     }
 
+    public override string ToString() => _commandPath ?? "unknown local registry";
 }

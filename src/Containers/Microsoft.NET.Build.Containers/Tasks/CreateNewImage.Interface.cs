@@ -43,6 +43,11 @@ partial class CreateNewImage
     public string OutputRegistry { get; set; }
 
     /// <summary>
+    /// The file path to which to write a tar.gz archive of the container image.
+    /// </summary>
+    public string ArchiveOutputPath { get; set; }
+
+    /// <summary>
     /// The kind of local registry to use, if any.
     /// </summary>
     public string LocalRegistry { get; set; }
@@ -159,6 +164,7 @@ partial class CreateNewImage
         BaseImageName = "";
         BaseImageTag = "";
         OutputRegistry = "";
+        ArchiveOutputPath = "";
         Repository = "";
         ImageTags = Array.Empty<string>();
         PublishDirectory = "";

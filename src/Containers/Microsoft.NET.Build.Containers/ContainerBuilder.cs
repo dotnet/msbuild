@@ -30,6 +30,7 @@ public static class ContainerBuilder
         string ridGraphPath,
         string localRegistry,
         string? containerUser,
+        string? archiveOutputPath,
         ILoggerFactory loggerFactory,
         CancellationToken cancellationToken)
     {
@@ -45,9 +46,13 @@ public static class ContainerBuilder
         Registry? sourceRegistry = isLocalPull ? null : new Registry(baseRegistry, logger);
         SourceImageReference sourceImageReference = new(sourceRegistry, baseImageName, baseImageTag);
 
-        bool isLocalPush = string.IsNullOrEmpty(outputRegistry);
-        Registry? destinationRegistry = isLocalPush ? null : new Registry(outputRegistry!, logger);
-        DestinationImageReference destinationImageReference = new DestinationImageReference(destinationRegistry, imageName, imageTags);
+        DestinationImageReference destinationImageReference = DestinationImageReference.CreateFromSettings(
+            imageName,
+            imageTags,
+            loggerFactory,
+            archiveOutputPath,
+            outputRegistry,
+            localRegistry);
 
         ImageBuilder? imageBuilder;
         if (sourceRegistry is { } registry)
@@ -120,46 +125,76 @@ public static class ContainerBuilder
         BuiltImage builtImage = imageBuilder.Build();
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (isLocalPush)
+        int exitCode;
+        switch (destinationImageReference.Kind)
         {
-            ILocalRegistry containerRegistry = KnownLocalRegistryTypes.CreateLocalRegistry(localRegistry, loggerFactory);
-            if (!(await containerRegistry.IsAvailableAsync(cancellationToken).ConfigureAwait(false)))
-            {
-                Console.WriteLine(DiagnosticMessage.ErrorFromResourceWithCode(nameof(Strings.LocalRegistryNotAvailable)));
-                return 7;
-            }
+            case DestinationImageReferenceKind.LocalRegistry:
+                exitCode = await PushToLocalRegistryAsync(
+                    logger,
+                    builtImage,
+                    sourceImageReference,
+                    destinationImageReference,
+                    cancellationToken).ConfigureAwait(false);
+                break;
+            case DestinationImageReferenceKind.RemoteRegistry:
+                exitCode = await PushToRemoteRegistryAsync(
+                    logger,
+                    builtImage,
+                    sourceImageReference,
+                    destinationImageReference,
+                    cancellationToken).ConfigureAwait(false);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
 
-            try
-            {
-                await containerRegistry.LoadAsync(builtImage, sourceImageReference, destinationImageReference, cancellationToken).ConfigureAwait(false);
-                logger.LogInformation(Strings.ContainerBuilder_ImageUploadedToLocalDaemon, destinationImageReference);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(DiagnosticMessage.ErrorFromResourceWithCode(nameof(Strings.RegistryOutputPushFailed), ex.Message));
-                return 1;
-            }
-        }
-        else
+        return exitCode;
+    }
+
+    private static async Task<int> PushToLocalRegistryAsync(ILogger logger, BuiltImage builtImage, SourceImageReference sourceImageReference,
+        DestinationImageReference destinationImageReference,
+        CancellationToken cancellationToken)
+    {
+        ILocalRegistry containerRegistry = destinationImageReference.LocalRegistry!;
+        if (!(await containerRegistry.IsAvailableAsync(cancellationToken).ConfigureAwait(false)))
         {
-            try
-            {
-                if (destinationImageReference.Registry is not null)
-                {
-                    await (destinationImageReference.Registry.PushAsync(
-                        builtImage,
-                        sourceImageReference,
-                        destinationImageReference,
-                        cancellationToken)).ConfigureAwait(false);
-                    logger.LogInformation(Strings.ContainerBuilder_ImageUploadedToRegistry, destinationImageReference, destinationImageReference.Registry.RegistryName);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(DiagnosticMessage.ErrorFromResourceWithCode(nameof(Strings.RegistryOutputPushFailed), e.Message));
-                return 1;
-            }
+            Console.WriteLine(DiagnosticMessage.ErrorFromResourceWithCode(nameof(Strings.LocalRegistryNotAvailable)));
+            return 7;
         }
+
+        try
+        {
+            await containerRegistry.LoadAsync(builtImage, sourceImageReference, destinationImageReference, cancellationToken).ConfigureAwait(false);
+            logger.LogInformation(Strings.ContainerBuilder_ImageUploadedToLocalDaemon, destinationImageReference);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(DiagnosticMessage.ErrorFromResourceWithCode(nameof(Strings.RegistryOutputPushFailed), ex.Message));
+            return 1;
+        }
+
+        return 0;
+    }
+
+    private static async Task<int> PushToRemoteRegistryAsync(ILogger logger, BuiltImage builtImage, SourceImageReference sourceImageReference,
+        DestinationImageReference destinationImageReference,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await (destinationImageReference.RemoteRegistry!.PushAsync(
+                builtImage,
+                sourceImageReference,
+                destinationImageReference,
+                cancellationToken)).ConfigureAwait(false);
+            logger.LogInformation(Strings.ContainerBuilder_ImageUploadedToRegistry, destinationImageReference, destinationImageReference.RemoteRegistry.RegistryName);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(DiagnosticMessage.ErrorFromResourceWithCode(nameof(Strings.RegistryOutputPushFailed), e.Message));
+            return 1;
+        }
+
         return 0;
     }
 }
