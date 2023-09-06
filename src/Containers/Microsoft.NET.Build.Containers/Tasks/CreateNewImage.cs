@@ -4,6 +4,7 @@
 using System.Text.Json;
 using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
+using Microsoft.NET.Build.Containers.LocalDaemons;
 using Microsoft.NET.Build.Containers.Logging;
 using Microsoft.NET.Build.Containers.Resources;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
@@ -115,6 +116,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         GeneratedContainerManifest = JsonSerializer.Serialize(builtImage.Manifest);
         GeneratedContainerConfiguration = builtImage.Config;
         GeneratedContainerDigest = builtImage.Manifest.GetDigest();
+        GeneratedArchiveOutputPath = ArchiveOutputPath;
 
         switch (destinationImageReference.Kind)
         {
@@ -150,7 +152,12 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         try
         {
             await localRegistry.LoadAsync(builtImage, sourceImageReference, destinationImageReference, cancellationToken).ConfigureAwait(false);
-            SafeLog("Pushed image '{0}' to local registry", destinationImageReference);
+            SafeLog("Pushed image '{0}' to {1}", destinationImageReference, localRegistry);
+
+            if (localRegistry is ArchiveFileRegistry archive)
+            {
+                GeneratedArchiveOutputPath = archive.ArchiveOutputPath;
+            }
         }
         catch (AggregateException ex) when (ex.InnerException is DockerLoadException dle)
         {

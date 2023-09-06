@@ -89,14 +89,6 @@ internal readonly record struct DestinationImageReference
     public override string ToString()
     {
         string tagList = string.Join(", ", Tags);
-        switch (Kind)
-        {
-            case DestinationImageReferenceKind.LocalRegistry:
-                return $"{LocalRegistry}/{Repository}:{tagList}";
-            case DestinationImageReferenceKind.RemoteRegistry:
-                return $"{RemoteRegistry}/{Repository}:{tagList}";
-            default:
-                return $"{Kind}/{Repository}:{tagList}";
-        }
+        return $"{Repository}:{tagList}";
     }
 }

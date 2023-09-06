@@ -22,6 +22,11 @@
         <target state="translated">CONTAINER2026: ContainerAppCommand и ContainerAppCommandArgs должны быть пустыми, если ContainerAppCommandInstruction — "{0}".</target>
         <note>{StrBegin="CONTAINER2026: "}</note>
       </trans-unit>
+      <trans-unit id="ArchiveRegistry_PushInfo">
+        <source>local archive at '{0}'</source>
+        <target state="new">local archive at '{0}'</target>
+        <note>{0} is the path to the file written</note>
+      </trans-unit>
       <trans-unit id="BaseEntrypointOverwritten">
         <source>CONTAINER2022: The base image has an entrypoint that will be overwritten to start the application. Set ContainerAppCommandInstruction to 'Entrypoint' if this is desired. To preserve the base image entrypoint, set ContainerAppCommandInstruction to 'DefaultArgs'.</source>
         <target state="translated">CONTAINER2022: базовый образ содержит точку входа, которая будет перезаписана для запуска приложения. При необходимости настройте для ContainerAppCommandInstruction значение "Entrypoint". Чтобы сохранить точку входа базового образа, настройте для ContainerAppCommandInstruction значение "DefaultArgs".</target>
@@ -76,6 +81,11 @@
         <source>CONTAINER2012: Could not recognize registry '{0}'.</source>
         <target state="translated">CONTAINER2012: не удалось распознать реестр "{0}".</target>
         <note>{StrBegin="CONTAINER2012: "}</note>
+      </trans-unit>
+      <trans-unit id="DockerCli_PushInfo">
+        <source>local registry via '{0}'</source>
+        <target state="new">local registry via '{0}'</target>
+        <note>{0} is the command used</note>
       </trans-unit>
       <trans-unit id="DockerInfoFailed">
         <source>CONTAINER3002: Failed to get docker info({0})\n{1}\n{2}</source>

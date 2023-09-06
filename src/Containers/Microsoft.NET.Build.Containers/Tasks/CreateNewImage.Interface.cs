@@ -155,6 +155,9 @@ partial class CreateNewImage
     [Output]
     public string GeneratedContainerDigest { get; set; }
 
+    [Output]
+    public string GeneratedArchiveOutputPath { get; set; }
+
     public CreateNewImage()
     {
         ContainerizeDirectory = "";
@@ -186,6 +189,7 @@ partial class CreateNewImage
         GeneratedContainerConfiguration = "";
         GeneratedContainerManifest = "";
         GeneratedContainerDigest = "";
+        GeneratedArchiveOutputPath = "";
 
         TaskResources = Resource.Manager;
     }

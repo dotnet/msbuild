@@ -311,5 +311,8 @@ internal sealed class DockerCli : ILocalRegistry
         }
     }
 
-    public override string ToString() => _commandPath ?? "unknown local registry";
+    public override string ToString()
+    {
+        return string.Format(Strings.DockerCli_PushInfo, _commandPath);
+    }
 }
