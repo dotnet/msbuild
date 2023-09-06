@@ -21,18 +21,16 @@ internal class ArchiveFileRegistry : ILocalRegistry
         var fullPath = Path.GetFullPath(_archiveOutputPath);
 
         // pointing to a directory? -> append default name
-        if (Directory.Exists(fullPath))
+        if (Directory.Exists(fullPath) || _archiveOutputPath.EndsWith("/"))
         {
-            fullPath = Path.Combine(fullPath, destinationReference.Repository.Length + ".tar.gz");
+            fullPath = Path.Combine(fullPath, destinationReference.Repository + ".tar.gz");
         }
-        // otherwise consider it as full path and ensure parent directory exists
-        else
+
+        // create parent directory if required.
+        var parentDirectory = Path.GetDirectoryName(fullPath);
+        if (parentDirectory != null)
         {
-            var parentDirectory = Path.GetDirectoryName(fullPath);
-            if (parentDirectory != null)
-            {
-                Directory.CreateDirectory(parentDirectory);
-            }
+            Directory.CreateDirectory(parentDirectory);
         }
 
         await using var fileStream = File.Create(fullPath);
