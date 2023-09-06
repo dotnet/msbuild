@@ -58,13 +58,13 @@
         <note>{StrBegin="CONTAINER1001: "}</note>
       </trans-unit>
       <trans-unit id="ContainerBuilder_ImageUploadedToLocalDaemon">
-        <source>Pushed container '{0}' to Docker daemon.</source>
-        <target state="translated">已将容器“{0}”推送到 Docker 守护程序。</target>
+        <source>Pushed image '{0}' to {1}.</source>
+        <target state="new">Pushed image '{0}' to {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContainerBuilder_ImageUploadedToRegistry">
-        <source>Pushed container '{0}' to registry '{1}'.</source>
-        <target state="translated">已将容器“{0}”推送到注册表“{1}”。</target>
+        <source>Pushed image '{0}' to registry '{1}'.</source>
+        <target state="needs-review-translation">已将容器“{0}”推送到注册表“{1}”。</target>
         <note />
       </trans-unit>
       <trans-unit id="ContainerBuilder_StartBuildingImage">

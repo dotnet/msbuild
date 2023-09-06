@@ -169,7 +169,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Pushed container &apos;{0}&apos; to Docker daemon..
+        ///   Looks up a localized string similar to Pushed image &apos;{0}&apos; to {1}..
         /// </summary>
         internal static string ContainerBuilder_ImageUploadedToLocalDaemon {
             get {
@@ -178,7 +178,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Pushed container &apos;{0}&apos; to registry &apos;{1}&apos;..
+        ///   Looks up a localized string similar to Pushed image &apos;{0}&apos; to registry &apos;{1}&apos;..
         /// </summary>
         internal static string ContainerBuilder_ImageUploadedToRegistry {
             get {

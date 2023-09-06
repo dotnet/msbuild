@@ -80,7 +80,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
             return !Log.HasLoggedErrors;
         }
 
-        SafeLog("Building image '{0}' with tags {1} on top of base image {2}", Repository, String.Join(",", ImageTags), sourceImageReference);
+        SafeLog(Strings.ContainerBuilder_StartBuildingImage, Repository, String.Join(",", ImageTags), sourceImageReference);
 
         Layer newLayer = Layer.FromDirectory(PublishDirectory, WorkingDirectory, imageBuilder.IsWindows);
         imageBuilder.AddLayer(newLayer);
@@ -152,7 +152,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         try
         {
             await localRegistry.LoadAsync(builtImage, sourceImageReference, destinationImageReference, cancellationToken).ConfigureAwait(false);
-            SafeLog("Pushed image '{0}' to {1}", destinationImageReference, localRegistry);
+            SafeLog(Strings.ContainerBuilder_ImageUploadedToLocalDaemon, destinationImageReference, localRegistry);
 
             if (localRegistry is ArchiveFileRegistry archive)
             {
@@ -176,7 +176,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                 sourceImageReference,
                 destinationImageReference,
                 cancellationToken).ConfigureAwait(false);
-            SafeLog("Pushed image '{0}' to registry '{1}'", destinationImageReference, OutputRegistry);
+            SafeLog(Strings.ContainerBuilder_ImageUploadedToRegistry, destinationImageReference, OutputRegistry);
         }
         catch (ContainerHttpException e)
         {

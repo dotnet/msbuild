@@ -332,10 +332,10 @@
     <comment>Used only for unit tests</comment>
   </data>
   <data name="ContainerBuilder_ImageUploadedToLocalDaemon" xml:space="preserve">
-    <value>Pushed container '{0}' to Docker daemon.</value>
+    <value>Pushed image '{0}' to {1}.</value>
   </data>
   <data name="ContainerBuilder_ImageUploadedToRegistry" xml:space="preserve">
-    <value>Pushed container '{0}' to registry '{1}'.</value>
+    <value>Pushed image '{0}' to registry '{1}'.</value>
   </data>
   <data name="ContainerBuilder_StartBuildingImage" xml:space="preserve">
     <value>Building image '{0}' with tags '{1}' on top of base image '{2}'.</value>
