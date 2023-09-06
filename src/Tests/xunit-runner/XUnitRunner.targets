@@ -9,7 +9,7 @@
 
     <SDKCustomXUnitArguments Condition="'$(SDKCustomXUnitArguments)' == ''">-nocolor</SDKCustomXUnitArguments>
 
-    <TaskTargetFramework>net6.0</TaskTargetFramework>
+    <TaskTargetFramework>net8.0</TaskTargetFramework>
     <TaskTargetFramework Condition="'$(MSBuildRuntimeType)' != 'Core'">net472</TaskTargetFramework>
 
     <SDKHelixCustomSdkTaskDll>$(ArtifactsDir)\bin\HelixTasks\$(Configuration)\$(TaskTargetFramework)\HelixTasks.dll</SDKHelixCustomSdkTaskDll>
