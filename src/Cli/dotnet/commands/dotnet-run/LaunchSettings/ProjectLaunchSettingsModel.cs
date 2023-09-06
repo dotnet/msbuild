@@ -5,6 +5,8 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 {
     public class ProjectLaunchSettingsModel
     {
+        public string LaunchProfileName { get; set; }
+
         public string CommandLineArgs { get; set; }
 
         public bool LaunchBrowser { get; set; }
