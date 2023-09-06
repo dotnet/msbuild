@@ -78,7 +78,7 @@ namespace Microsoft.Build.BackEnd
             exeName = CurrentHost.GetCurrentHost();
 #endif
 
-            IDetoursEventListener eventListener = null;
+            var eventListener = new DetoursEventListener(_fileAccessManager, nodeId);
             eventListener.SetMessageHandlingFlags(MessageHandlingFlags.DebugMessageNotify | MessageHandlingFlags.FileAccessNotify | MessageHandlingFlags.ProcessDataNotify | MessageHandlingFlags.ProcessDetoursStatusNotify);
 
             var info = new SandboxedProcessInfo(
@@ -142,6 +142,92 @@ namespace Microsoft.Build.BackEnd
             }
 
             return BuildParameters.GetFactory().PopulateFromDictionary(envVars);
+        }
+
+        private sealed class EnvironmentalBuildParameters : BuildParameters.IBuildParameters
+        {
+            private readonly Dictionary<string, string> _envVars;
+
+            private EnvironmentalBuildParameters()
+            {
+                var envVars = new Dictionary<string, string>();
+                foreach (DictionaryEntry baseVar in Environment.GetEnvironmentVariables())
+                {
+                    envVars.Add((string)baseVar.Key, (string)baseVar.Value);
+                }
+
+                _envVars = envVars;
+            }
+
+            private EnvironmentalBuildParameters(Dictionary<string, string> envVars)
+            {
+                _envVars = envVars;
+            }
+
+            public static EnvironmentalBuildParameters Instance { get; } = new EnvironmentalBuildParameters();
+
+            public string this[string key] => _envVars[key];
+
+            public BuildParameters.IBuildParameters Select(IEnumerable<string> keys)
+                => new EnvironmentalBuildParameters(keys.ToDictionary(key => key, key => _envVars[key]));
+
+            public BuildParameters.IBuildParameters Override(IEnumerable<KeyValuePair<string, string>> parameters)
+            {
+                var copy = new Dictionary<string, string>(_envVars);
+                foreach (KeyValuePair<string, string> param in parameters)
+                {
+                    copy[param.Key] = param.Value;
+                }
+
+                return new EnvironmentalBuildParameters(copy);
+            }
+
+            public IReadOnlyDictionary<string, string> ToDictionary() => _envVars;
+
+            public bool ContainsKey(string key) => _envVars.ContainsKey(key);
+        }
+
+        private sealed class DetoursEventListener : IDetoursEventListener
+        {
+            private readonly IFileAccessManager _fileAccessManager;
+            private readonly int _nodeId;
+
+            public DetoursEventListener(IFileAccessManager fileAccessManager, int nodeId)
+            {
+                _fileAccessManager = fileAccessManager;
+                _nodeId = nodeId;
+            }
+
+            public override void HandleDebugMessage(DebugData debugData)
+            {
+            }
+
+            public override void HandleFileAccess(FileAccessData fileAccessData) => _fileAccessManager.ReportFileAccess(
+                new Framework.FileAccess.FileAccessData(
+                    (Framework.FileAccess.ReportedFileOperation)fileAccessData.Operation,
+                    (Framework.FileAccess.RequestedAccess)fileAccessData.RequestedAccess,
+                    fileAccessData.ProcessId,
+                    fileAccessData.Error,
+                    (Framework.FileAccess.DesiredAccess)fileAccessData.DesiredAccess,
+                    (Framework.FileAccess.FlagsAndAttributes)fileAccessData.FlagsAndAttributes,
+                    fileAccessData.Path,
+                    fileAccessData.ProcessArgs,
+                    fileAccessData.IsAnAugmentedFileAccess),
+                _nodeId);
+
+            public override void HandleProcessData(ProcessData processData) => _fileAccessManager.ReportProcess(
+                new Framework.FileAccess.ProcessData(
+                    processData.ProcessName,
+                    processData.ProcessId,
+                    processData.ParentProcessId,
+                    processData.CreationDateTime,
+                    processData.ExitDateTime,
+                    processData.ExitCode),
+                _nodeId);
+
+            public override void HandleProcessDetouringStatus(ProcessDetouringStatusData data)
+            {
+            }
         }
     }
 }
