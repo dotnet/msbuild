@@ -364,7 +364,7 @@ internal sealed class Registry
 
     }
 
-    public async Task PushAsync(BuiltImage builtImage, ImageReference source, ImageReference destination, CancellationToken cancellationToken)
+    public async Task PushAsync(BuiltImage builtImage, SourceImageReference source, DestinationImageReference destination, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         Registry destinationRegistry = destination.Registry!;
@@ -429,8 +429,11 @@ internal sealed class Registry
         _logger.LogInformation(Strings.Registry_ManifestUploaded, RegistryName);
 
         //tag upload
-        _logger.LogInformation(Strings.Registry_TagUploadStarted, destination.Tag, RegistryName);
-        await _registryAPI.Manifest.PutAsync(destination.Repository, destination.Tag, builtImage.Manifest, cancellationToken).ConfigureAwait(false);
-        _logger.LogInformation(Strings.Registry_TagUploaded, destination.Tag, RegistryName);
+        foreach (string tag in destination.Tags)
+        {
+            _logger.LogInformation(Strings.Registry_TagUploadStarted, tag, RegistryName);
+            await _registryAPI.Manifest.PutAsync(destination.Repository, tag, builtImage.Manifest, cancellationToken).ConfigureAwait(false);
+            _logger.LogInformation(Strings.Registry_TagUploaded, tag, RegistryName);
+        }
     }
 }

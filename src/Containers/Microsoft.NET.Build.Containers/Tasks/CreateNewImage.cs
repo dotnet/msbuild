@@ -51,10 +51,10 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         }
 
         Registry? sourceRegistry = IsLocalPull ? null : new Registry(BaseRegistry, logger);
-        ImageReference sourceImageReference = new(sourceRegistry, BaseImageName, BaseImageTag);
+        SourceImageReference sourceImageReference = new(sourceRegistry, BaseImageName, BaseImageTag);
 
         Registry? destinationRegistry = IsLocalPush ? null : new Registry(OutputRegistry, logger);
-        IEnumerable<ImageReference> destinationImageReferences = ImageTags.Select(t => new ImageReference(destinationRegistry, Repository, t));
+        DestinationImageReference destinationImageReference = new DestinationImageReference(destinationRegistry, Repository, ImageTags);
 
         ImageBuilder? imageBuilder;
         if (sourceRegistry is { } registry)
@@ -114,54 +114,51 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         GeneratedContainerConfiguration = builtImage.Config;
         GeneratedContainerDigest = builtImage.Manifest.GetDigest();
 
-        foreach (ImageReference destinationImageReference in destinationImageReferences)
+        if (IsLocalPush)
         {
-            if (IsLocalPush)
+            ILocalRegistry localRegistry = KnownLocalRegistryTypes.CreateLocalRegistry(LocalRegistry, msbuildLoggerFactory);
+            if (!(await localRegistry.IsAvailableAsync(cancellationToken).ConfigureAwait(false)))
             {
-                ILocalRegistry localRegistry = KnownLocalRegistryTypes.CreateLocalRegistry(LocalRegistry, msbuildLoggerFactory);
-                if (!(await localRegistry.IsAvailableAsync(cancellationToken).ConfigureAwait(false)))
+                Log.LogErrorWithCodeFromResources(nameof(Strings.LocalRegistryNotAvailable));
+                return false;
+            }
+            try
+            {
+                await localRegistry.LoadAsync(builtImage, sourceImageReference, destinationImageReference, cancellationToken).ConfigureAwait(false);
+                SafeLog("Pushed image '{0}' to local registry", destinationImageReference);
+            }
+            catch (AggregateException ex) when (ex.InnerException is DockerLoadException dle)
+            {
+                Log.LogErrorFromException(dle, showStackTrace: false);
+            }
+        }
+        else
+        {
+            try
+            {
+                if (destinationImageReference.Registry is not null)
                 {
-                    Log.LogErrorWithCodeFromResources(nameof(Strings.LocalRegistryNotAvailable));
-                    return false;
-                }
-                try
-                {
-                    await localRegistry.LoadAsync(builtImage, sourceImageReference, destinationImageReference, cancellationToken).ConfigureAwait(false);
-                    SafeLog("Pushed image '{0}' to local registry", destinationImageReference.RepositoryAndTag);
-                }
-                catch (AggregateException ex) when (ex.InnerException is DockerLoadException dle)
-                {
-                    Log.LogErrorFromException(dle, showStackTrace: false);
+                    await destinationImageReference.Registry.PushAsync(
+                        builtImage,
+                        sourceImageReference,
+                        destinationImageReference,
+                        cancellationToken).ConfigureAwait(false);
+                    SafeLog("Pushed image '{0}' to registry '{1}'", destinationImageReference, OutputRegistry);
                 }
             }
-            else
+            catch (ContainerHttpException e)
             {
-                try
+                if (BuildEngine != null)
                 {
-                    if (destinationImageReference.Registry is not null)
-                    {
-                        await destinationImageReference.Registry.PushAsync(
-                            builtImage,
-                            sourceImageReference,
-                            destinationImageReference,
-                            cancellationToken).ConfigureAwait(false);
-                        SafeLog("Pushed image '{0}' to registry '{1}'", destinationImageReference, OutputRegistry);
-                    }
+                    Log.LogErrorFromException(e, true);
                 }
-                catch (ContainerHttpException e)
+            }
+            catch (Exception e)
+            {
+                if (BuildEngine != null)
                 {
-                    if (BuildEngine != null)
-                    {
-                        Log.LogErrorFromException(e, true);
-                    }
-                }
-                catch (Exception e)
-                {
-                    if (BuildEngine != null)
-                    {
-                        Log.LogErrorWithCodeFromResources(nameof(Strings.RegistryOutputPushFailed), e.Message);
-                        Log.LogMessage(MessageImportance.Low, "Details: {0}", e);
-                    }
+                    Log.LogErrorWithCodeFromResources(nameof(Strings.RegistryOutputPushFailed), e.Message);
+                    Log.LogMessage(MessageImportance.Low, "Details: {0}", e);
                 }
             }
         }

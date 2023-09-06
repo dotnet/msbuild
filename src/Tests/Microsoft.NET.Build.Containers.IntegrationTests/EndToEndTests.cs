@@ -65,20 +65,23 @@ public class EndToEndTests : IDisposable
         BuiltImage builtImage = imageBuilder.Build();
 
         // Push the image back to the local registry
-        var sourceReference = new ImageReference(registry, DockerRegistryManager.RuntimeBaseImage, DockerRegistryManager.Net8PreviewImageTag);
-        var destinationReference = new ImageReference(registry, NewImageName(), "latest");
+        var sourceReference = new SourceImageReference(registry, DockerRegistryManager.RuntimeBaseImage, DockerRegistryManager.Net8PreviewImageTag);
+        var destinationReference = new DestinationImageReference(registry, NewImageName(), new[] { "latest", "1.0" });
 
         await registry.PushAsync(builtImage, sourceReference, destinationReference, cancellationToken: default).ConfigureAwait(false);
 
-        // pull it back locally
-        ContainerCli.PullCommand(_testOutput, $"{DockerRegistryManager.LocalRegistry}/{NewImageName()}:latest")
-            .Execute()
-            .Should().Pass();
+        foreach (string tag in destinationReference.Tags)
+        {
+            // pull it back locally
+            ContainerCli.PullCommand(_testOutput, $"{DockerRegistryManager.LocalRegistry}/{NewImageName()}:{tag}")
+                .Execute()
+                .Should().Pass();
 
-        // Run the image
-        ContainerCli.RunCommand(_testOutput, "--rm", "--tty", $"{DockerRegistryManager.LocalRegistry}/{NewImageName()}:latest")
-            .Execute()
-            .Should().Pass();
+            // Run the image
+            ContainerCli.RunCommand(_testOutput, "--rm", "--tty", $"{DockerRegistryManager.LocalRegistry}/{NewImageName()}:{tag}")
+                .Execute()
+                .Should().Pass();
+        }
     }
 
     [DockerAvailableFact]
@@ -108,15 +111,18 @@ public class EndToEndTests : IDisposable
         BuiltImage builtImage = imageBuilder.Build();
 
         // Load the image into the local registry
-        var sourceReference = new ImageReference(registry, DockerRegistryManager.RuntimeBaseImage, DockerRegistryManager.Net7ImageTag);
-        var destinationReference = new ImageReference(registry, NewImageName(), "latest");
+        var sourceReference = new SourceImageReference(registry, DockerRegistryManager.RuntimeBaseImage, DockerRegistryManager.Net7ImageTag);
+        var destinationReference = new DestinationImageReference(registry, NewImageName(), new[] { "latest", "1.0" });
 
         await new DockerCli(_loggerFactory).LoadAsync(builtImage, sourceReference, destinationReference, default).ConfigureAwait(false);
 
         // Run the image
-        ContainerCli.RunCommand(_testOutput, "--rm", "--tty", $"{NewImageName()}:latest")
-            .Execute()
-            .Should().Pass();
+        foreach (string tag in destinationReference.Tags)
+        {
+            ContainerCli.RunCommand(_testOutput, "--rm", "--tty", $"{NewImageName()}:{tag}")
+                .Execute()
+                .Should().Pass();
+        }
     }
 
     private string BuildLocalApp([CallerMemberName] string testName = "TestName", string tfm = ToolsetInfo.CurrentTargetFramework, string rid = "linux-x64")
@@ -410,8 +416,8 @@ public class EndToEndTests : IDisposable
         BuiltImage builtImage = imageBuilder.Build();
 
         // Load the image into the local registry
-        var sourceReference = new ImageReference(registry, DockerRegistryManager.RuntimeBaseImage, DockerRegistryManager.Net7ImageTag);
-        var destinationReference = new ImageReference(registry, NewImageName(), rid);
+        var sourceReference = new SourceImageReference(registry, DockerRegistryManager.RuntimeBaseImage, DockerRegistryManager.Net7ImageTag);
+        var destinationReference = new DestinationImageReference(registry, NewImageName(), new[] { rid });
         await new DockerCli(_loggerFactory).LoadAsync(builtImage, sourceReference, destinationReference, default).ConfigureAwait(false);
 
         // Run the image

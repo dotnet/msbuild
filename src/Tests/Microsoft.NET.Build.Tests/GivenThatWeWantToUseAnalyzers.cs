@@ -28,7 +28,7 @@ namespace Microsoft.NET.Build.Tests
                 });
 
             VerifyRequestDelegateGeneratorIsUsed(asset, isEnabled);
-            VerifyInterceptorsFeatureEnabled(asset, isEnabled);
+            VerifyInterceptorsFeatureProperties(asset, isEnabled, "Microsoft.AspNetCore.Http.Generated");
         }
 
         [Theory]
@@ -50,7 +50,7 @@ namespace Microsoft.NET.Build.Tests
                 });
 
             VerifyConfigBindingGeneratorIsUsed(asset, isEnabled);
-            VerifyInterceptorsFeatureEnabled(asset, isEnabled);
+            VerifyInterceptorsFeatureProperties(asset, isEnabled, "Microsoft.Extensions.Configuration.Binder.SourceGeneration");
         }
 
         [Fact]
@@ -67,7 +67,7 @@ namespace Microsoft.NET.Build.Tests
 
             VerifyRequestDelegateGeneratorIsUsed(asset, expectEnabled: true);
             VerifyConfigBindingGeneratorIsUsed(asset, expectEnabled: true);
-            VerifyInterceptorsFeatureEnabled(asset, expectEnabled: true);
+            VerifyInterceptorsFeatureProperties(asset, expectEnabled: true, "Microsoft.AspNetCore.Http.Generated", "Microsoft.Extensions.Configuration.Binder.SourceGeneration");
         }
 
         [Fact]
@@ -84,7 +84,7 @@ namespace Microsoft.NET.Build.Tests
 
             VerifyRequestDelegateGeneratorIsUsed(asset, expectEnabled: true);
             VerifyConfigBindingGeneratorIsUsed(asset, expectEnabled: true);
-            VerifyInterceptorsFeatureEnabled(asset, expectEnabled: true);
+            VerifyInterceptorsFeatureProperties(asset, expectEnabled: true, "Microsoft.AspNetCore.Http.Generated", "Microsoft.Extensions.Configuration.Binder.SourceGeneration");
         }
 
         private void VerifyGeneratorIsUsed(TestAsset asset, bool? expectEnabled, string generatorName)
@@ -112,13 +112,13 @@ namespace Microsoft.NET.Build.Tests
         private void VerifyConfigBindingGeneratorIsUsed(TestAsset asset, bool? expectEnabled)
             => VerifyGeneratorIsUsed(asset, expectEnabled, "Microsoft.Extensions.Configuration.Binder.SourceGeneration.dll");
 
-        private void VerifyInterceptorsFeatureEnabled(TestAsset asset, bool? expectEnabled)
+        private void VerifyInterceptorsFeatureProperties(TestAsset asset, bool? expectEnabled, params string[] expectedNamespaces)
         {
             var command = new GetValuesCommand(
                 Log,
                 asset.Path,
                 ToolsetInfo.CurrentTargetFramework,
-                "Features",
+                "InterceptorsPreviewNamespaces",
                 GetValuesCommand.ValueType.Property);
 
             command
@@ -126,9 +126,9 @@ namespace Microsoft.NET.Build.Tests
                 .Execute()
                 .Should().Pass();
 
-            var features = command.GetValues();
+            var namespaces = command.GetValues();
 
-            Assert.Equal(expectEnabled ?? false, features.Any(feature => feature.Contains("InterceptorsPreview")));
+            Assert.Equal(expectEnabled ?? false, expectedNamespaces.All(expectedNamespace => namespaces.Contains(expectedNamespace)));
         }
 
         [Theory]
