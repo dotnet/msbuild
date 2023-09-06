@@ -484,7 +484,6 @@ namespace Microsoft.Build.Logging
             }
         }
 
-
         private void Write(ProjectImportedEventArgs e)
         {
             Write(BinaryLogRecordKind.ProjectImported);
@@ -697,7 +696,7 @@ namespace Microsoft.Build.Logging
             }
         }
 
-            private void WriteArguments(object[] arguments)
+        private void WriteArguments(object[] arguments)
         {
             if (arguments == null || arguments.Length == 0)
             {

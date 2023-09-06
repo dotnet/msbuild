@@ -946,15 +946,11 @@ namespace Microsoft.Build.Logging
 
         private ExtendedDataFields? ReadExtendedDataFields()
         {
-            ExtendedDataFields? fields = null;
+            string extendedType = ReadOptionalString()!;
+            IDictionary<string, string>? extendedMetadata = ReadStringDictionary();
+            string? extendedData = ReadOptionalString();
 
-            fields = new ExtendedDataFields();
-
-            fields.ExtendedType = ReadOptionalString();
-            fields.ExtendedMetadata = ReadStringDictionary();
-            fields.ExtendedData = ReadOptionalString();
-
-            return fields;
+            return new ExtendedDataFields(extendedType, extendedMetadata, extendedData);
         }
 
         private BuildEventArgsFields ReadBuildEventArgsFields(bool readImportance = false)
