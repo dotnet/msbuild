@@ -144,49 +144,6 @@ namespace Microsoft.Build.BackEnd
             return BuildParameters.GetFactory().PopulateFromDictionary(envVars);
         }
 
-        private sealed class EnvironmentalBuildParameters : BuildParameters.IBuildParameters
-        {
-            private readonly Dictionary<string, string> _envVars;
-
-            private EnvironmentalBuildParameters()
-            {
-                var envVars = new Dictionary<string, string>();
-                foreach (DictionaryEntry baseVar in Environment.GetEnvironmentVariables())
-                {
-                    envVars.Add((string)baseVar.Key, (string)baseVar.Value);
-                }
-
-                _envVars = envVars;
-            }
-
-            private EnvironmentalBuildParameters(Dictionary<string, string> envVars)
-            {
-                _envVars = envVars;
-            }
-
-            public static EnvironmentalBuildParameters Instance { get; } = new EnvironmentalBuildParameters();
-
-            public string this[string key] => _envVars[key];
-
-            public BuildParameters.IBuildParameters Select(IEnumerable<string> keys)
-                => new EnvironmentalBuildParameters(keys.ToDictionary(key => key, key => _envVars[key]));
-
-            public BuildParameters.IBuildParameters Override(IEnumerable<KeyValuePair<string, string>> parameters)
-            {
-                var copy = new Dictionary<string, string>(_envVars);
-                foreach (KeyValuePair<string, string> param in parameters)
-                {
-                    copy[param.Key] = param.Value;
-                }
-
-                return new EnvironmentalBuildParameters(copy);
-            }
-
-            public IReadOnlyDictionary<string, string> ToDictionary() => _envVars;
-
-            public bool ContainsKey(string key) => _envVars.ContainsKey(key);
-        }
-
         private sealed class DetoursEventListener : IDetoursEventListener
         {
             private readonly IFileAccessManager _fileAccessManager;
