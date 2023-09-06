@@ -947,7 +947,7 @@ namespace Microsoft.Build.Logging
         private ExtendedDataFields? ReadExtendedDataFields()
         {
             string extendedType = ReadOptionalString()!;
-            IDictionary<string, string>? extendedMetadata = ReadStringDictionary();
+            IDictionary<string, string?>? extendedMetadata = ReadStringDictionary()!;
             string? extendedData = ReadOptionalString();
 
             return new ExtendedDataFields(extendedType, extendedMetadata, extendedData);

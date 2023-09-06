@@ -7,7 +7,7 @@ namespace Microsoft.Build.Logging;
 
 internal class ExtendedDataFields
 {
-    public ExtendedDataFields(string extendedType, IDictionary<string, string>? extendedMetadata, string? extendedData)
+    public ExtendedDataFields(string extendedType, IDictionary<string, string?>? extendedMetadata, string? extendedData)
     {
         ExtendedType = extendedType;
         ExtendedMetadata = extendedMetadata;
