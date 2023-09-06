@@ -570,16 +570,16 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1170: "}</note>
       </trans-unit>
       <trans-unit id="IsAotCompatibleUnsupported">
-        <source>NETSDK1210: IsAotCompatible is not supported for the target framework. Consider multi-targeting to a supported framework to enable ahead-of-time compilation analysis, and set IsAotCompatible only for the supported frameworks. For example:
+        <source>NETSDK1210: IsAotCompatible and EnableAotAnalyzer are not supported for the target framework. Consider multi-targeting to a supported framework to enable ahead-of-time compilation analysis, and set IsAotCompatible only for the supported frameworks. For example:
 &lt;IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))"&gt;true&lt;/IsAotCompatible&gt;</source>
-        <target state="translated">NETSDK1210: IsAotCompatible não é compatível com a estrutura de destino. Considere o direcionamento múltiplo para uma estrutura com suporte para permitir a análise de compilação antecipada e defina IsAotCompatible apenas para as estruturas com suporte. Por exemplo:
+        <target state="needs-review-translation">NETSDK1210: IsAotCompatible não é compatível com a estrutura de destino. Considere o direcionamento múltiplo para uma estrutura com suporte para permitir a análise de compilação antecipada e defina IsAotCompatible apenas para as estruturas com suporte. Por exemplo:
 &lt;IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))"&gt;verdadeiro&lt;/IsAotCompatible&gt;</target>
         <note>{StrBegin="NETSDK1210: "}</note>
       </trans-unit>
       <trans-unit id="IsTrimmableUnsupported">
-        <source>NETSDK1212: IsTrimmable is not supported for the target framework. Consider multi-targeting to a supported framework to enable trimming, and set IsTrimmable only for the supported frameworks. For example:
+        <source>NETSDK1212: IsTrimmable and EnableTrimAnalyzer are not supported for the target framework. Consider multi-targeting to a supported framework to enable trimming, and set IsTrimmable only for the supported frameworks. For example:
 &lt;IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))"&gt;true&lt;/IsTrimmable&gt;</source>
-        <target state="translated">NETSDK1212: IsTrimmable não é compatível com a estrutura de destino. Considere o direcionamento múltiplo para uma estrutura com suporte para habilitar o corte e defina IsTrimmable somente para as estruturas com suporte. Por exemplo:
+        <target state="needs-review-translation">NETSDK1212: IsTrimmable não é compatível com a estrutura de destino. Considere o direcionamento múltiplo para uma estrutura com suporte para habilitar o corte e defina IsTrimmable somente para as estruturas com suporte. Por exemplo:
 &lt;IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))"&gt;verdadeiro&lt;/IsTrimmable&gt;</target>
         <note>{StrBegin="NETSDK1212: "}</note>
       </trans-unit>

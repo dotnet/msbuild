@@ -570,16 +570,16 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1170: "}</note>
       </trans-unit>
       <trans-unit id="IsAotCompatibleUnsupported">
-        <source>NETSDK1210: IsAotCompatible is not supported for the target framework. Consider multi-targeting to a supported framework to enable ahead-of-time compilation analysis, and set IsAotCompatible only for the supported frameworks. For example:
+        <source>NETSDK1210: IsAotCompatible and EnableAotAnalyzer are not supported for the target framework. Consider multi-targeting to a supported framework to enable ahead-of-time compilation analysis, and set IsAotCompatible only for the supported frameworks. For example:
 &lt;IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))"&gt;true&lt;/IsAotCompatible&gt;</source>
-        <target state="translated">NETSDK1210: IsAotCompatible은 대상 프레임워크에 대해 지원되지 않습니다. 지원되는 프레임워크에 다중 대상을 지정하여 AOT(Ahead-of-time) 컴파일 분석을 사용하도록 설정하고 지원되는 프레임워크에 대해서만 IsAotCompatible을 설정하세요. 예:
+        <target state="needs-review-translation">NETSDK1210: IsAotCompatible은 대상 프레임워크에 대해 지원되지 않습니다. 지원되는 프레임워크에 다중 대상을 지정하여 AOT(Ahead-of-time) 컴파일 분석을 사용하도록 설정하고 지원되는 프레임워크에 대해서만 IsAotCompatible을 설정하세요. 예:
 true &lt;IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))"&gt;&lt;/IsAotCompatible&gt;</target>
         <note>{StrBegin="NETSDK1210: "}</note>
       </trans-unit>
       <trans-unit id="IsTrimmableUnsupported">
-        <source>NETSDK1212: IsTrimmable is not supported for the target framework. Consider multi-targeting to a supported framework to enable trimming, and set IsTrimmable only for the supported frameworks. For example:
+        <source>NETSDK1212: IsTrimmable and EnableTrimAnalyzer are not supported for the target framework. Consider multi-targeting to a supported framework to enable trimming, and set IsTrimmable only for the supported frameworks. For example:
 &lt;IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))"&gt;true&lt;/IsTrimmable&gt;</source>
-        <target state="translated">NETSDK1212: IsTrimmable은 대상 프레임워크에 대해 지원되지 않습니다. 지원되는 프레임워크에 다중 대상을 지정하여 트리밍을 사용하도록 설정하고 지원되는 프레임워크에 대해서만 IsTrimmable을 설정하세요. 예:
+        <target state="needs-review-translation">NETSDK1212: IsTrimmable은 대상 프레임워크에 대해 지원되지 않습니다. 지원되는 프레임워크에 다중 대상을 지정하여 트리밍을 사용하도록 설정하고 지원되는 프레임워크에 대해서만 IsTrimmable을 설정하세요. 예:
 true &lt;IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))"&gt;&lt;/IsTrimmable&gt;</target>
         <note>{StrBegin="NETSDK1212: "}</note>
       </trans-unit>
