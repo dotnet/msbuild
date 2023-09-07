@@ -1,19 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<xliff
-    xmlns="urn:oasis:names:tc:xliff:document:1.2"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    version="1.2"
-    xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file
-      datatype="xml"
-      source-language="en"
-      target-language="pt-BR"
-      original="../Strings.resx">
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pt-BR" original="../Strings.resx">
     <body>
       <trans-unit id="AmazonRegistryFailed">
-        <source>CONTAINER1002: Request to Amazon Elastic Container Registry failed prematurely. This
-          is often caused when the target repository does not exist in the registry.</source>
-        <target state="translated">CONTAINER1002: a solicitação para o Amazon Elastic Container
+        <source>CONTAINER1002: Request to Amazon Elastic Container Registry failed prematurely. This is often caused when the target repository does not exist in the registry.</source>
+        <target state="needs-review-translation">CONTAINER1002: a solicitação para o Amazon Elastic Container
           Registry falhou prematuramente. Isso geralmente é causado quando o repositório de destino
           não existe no registro.</target>
         <note>{StrBegin="CONTAINER1002: "}</note>
@@ -25,16 +16,14 @@
         <note>{StrBegin="CONTAINER2008: "}</note>
       </trans-unit>
       <trans-unit id="AppCommandArgsSetNoAppCommand">
-        <source>CONTAINER2025: ContainerAppCommandArgs are provided without specifying a
-          ContainerAppCommand.</source>
-        <target state="translated">CONTAINER2025: ContainerAppCommandArgs são fornecidos sem
+        <source>CONTAINER2025: ContainerAppCommandArgs are provided without specifying a ContainerAppCommand.</source>
+        <target state="needs-review-translation">CONTAINER2025: ContainerAppCommandArgs são fornecidos sem
           especificar um ContainerAppCommand.</target>
         <note>{StrBegin="CONTAINER2025: "}</note>
       </trans-unit>
       <trans-unit id="AppCommandSetNotUsed">
-        <source>CONTAINER2026: ContainerAppCommand and ContainerAppCommandArgs must be empty when
-          ContainerAppCommandInstruction is '{0}'.</source>
-        <target state="translated">CONTAINER2026: ContainerAppCommand e ContainerAppCommandArgs
+        <source>CONTAINER2026: ContainerAppCommand and ContainerAppCommandArgs must be empty when ContainerAppCommandInstruction is '{0}'.</source>
+        <target state="needs-review-translation">CONTAINER2026: ContainerAppCommand e ContainerAppCommandArgs
           devem estar vazios quando ContainerAppCommandInstruction é '{0}'.</target>
         <note>{StrBegin="CONTAINER2026: "}</note>
       </trans-unit>
@@ -44,10 +33,8 @@
         <note>{0} is the path to the file written</note>
       </trans-unit>
       <trans-unit id="BaseEntrypointOverwritten">
-        <source>CONTAINER2022: The base image has an entrypoint that will be overwritten to start
-          the application. Set ContainerAppCommandInstruction to 'Entrypoint' if this is desired. To
-          preserve the base image entrypoint, set ContainerAppCommandInstruction to 'DefaultArgs'.</source>
-        <target state="translated">CONTAINER2022: A imagem base possui um ponto de entrada que será
+        <source>CONTAINER2022: The base image has an entrypoint that will be overwritten to start the application. Set ContainerAppCommandInstruction to 'Entrypoint' if this is desired. To preserve the base image entrypoint, set ContainerAppCommandInstruction to 'DefaultArgs'.</source>
+        <target state="needs-review-translation">CONTAINER2022: A imagem base possui um ponto de entrada que será
           substituído para iniciar o aplicativo. Defina ContainerAppCommandInstruction como
           'Entrypoint' se desejar. Para preservar o ponto de entrada da imagem base, defina
           ContainerAppCommandInstruction como 'DefaultArgs'.</target>
@@ -59,9 +46,8 @@
         <note>{StrBegin="CONTAINER2009: "}</note>
       </trans-unit>
       <trans-unit id="BaseImageNameRegistryFallback">
-        <source>CONTAINER2020: {0} does not specify a registry and will be pulled from Docker Hub.
-          Please prefix the name with the image registry, for example: '{1}/&lt;image&gt;'.</source>
-        <target state="translated">CONTAINER2020: {0} não especifica um registro e será extraído do
+        <source>CONTAINER2020: {0} does not specify a registry and will be pulled from Docker Hub. Please prefix the name with the image registry, for example: '{1}/&lt;image&gt;'.</source>
+        <target state="needs-review-translation">CONTAINER2020: {0} não especifica um registro e será extraído do
           Docker Hub. Por favor, prefixe o nome com o registro de imagem, por exemplo:
           '{1}/&lt;image&gt;'.</target>
         <note>{StrBegin="CONTAINER2020: "}</note>
@@ -72,9 +58,8 @@
         <note>{StrBegin="CONTAINER2013: "}</note>
       </trans-unit>
       <trans-unit id="BaseImageNotFound">
-        <source>CONTAINER1011: Couldn't find matching base image for {0} that matches
-          RuntimeIdentifier {1}.</source>
-        <target state="translated">CONTAINER1011: Não foi possível encontrar a imagem base
+        <source>CONTAINER1011: Couldn't find matching base image for {0} that matches RuntimeIdentifier {1}.</source>
+        <target state="needs-review-translation">CONTAINER1011: Não foi possível encontrar a imagem base
           correspondente para {0} que corresponda ao RuntimeIdentifier {1}.</target>
         <note>{StrBegin="CONTAINER1011: "}</note>
       </trans-unit>
@@ -128,9 +113,8 @@
       </trans-unit>
       <trans-unit id="ContainerRuntimeProcessCreationFailed">
         <source>CONTAINER3001: Failed creating {0} process.</source>
-        <target state="translated">CONTAINER3001: Falha ao criar {0} processo.</target>
-        <note>CONTAINER3001: {0} is the name of the command we failed to run, usually 'docker' or
-          'podman'.</note>
+        <target state="needs-review-translation">CONTAINER3001: Falha ao criar {0} processo.</target>
+        <note>CONTAINER3001: {0} is the name of the command we failed to run, usually 'docker' or 'podman'.</note>
       </trans-unit>
       <trans-unit id="EmptyOrWhitespacePropertyIgnored">
         <source>CONTAINER4006: Property '{0}' is empty or contains whitespace and will be ignored.</source>
@@ -145,43 +129,36 @@
         <note>{StrBegin="CONTAINER4004: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointAndAppCommandArgsSetNoAppCommandInstruction">
-        <source>CONTAINER2023: A ContainerEntrypoint and ContainerAppCommandArgs are provided.
-          ContainerAppInstruction must be set to configure how the application is started. Valid
-          instructions are {0}.</source>
-        <target state="translated">CONTAINER2023: Um ContainerEntrypoint e ContainerAppCommandArgs
+        <source>CONTAINER2023: A ContainerEntrypoint and ContainerAppCommandArgs are provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</source>
+        <target state="needs-review-translation">CONTAINER2023: Um ContainerEntrypoint e ContainerAppCommandArgs
           são fornecidos. ContainerAppInstruction deve ser definido para configurar como o
           aplicativo é iniciado. As instruções válidas são {0}.</target>
         <note>{StrBegin="CONTAINER2023: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointSetNoAppCommandInstruction">
-        <source>CONTAINER2027: A ContainerEntrypoint is provided. ContainerAppInstruction must be
-          set to configure how the application is started. Valid instructions are {0}.</source>
-        <target state="translated">CONTAINER2027: Um ContainerEntrypoint é fornecido.
+        <source>CONTAINER2027: A ContainerEntrypoint is provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</source>
+        <target state="needs-review-translation">CONTAINER2027: Um ContainerEntrypoint é fornecido.
           ContainerAppInstruction deve ser definido para configurar como o aplicativo é iniciado. As
           instruções válidas são {0}.</target>
         <note>{StrBegin="CONTAINER2027: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointArgsSetNoEntrypoint">
-        <source>CONTAINER2024: ContainerEntrypointArgs are provided without specifying a
-          ContainerEntrypoint.</source>
-        <target state="translated">CONTAINER2024: ContainerEntrypointArgs são fornecidos sem
+        <source>CONTAINER2024: ContainerEntrypointArgs are provided without specifying a ContainerEntrypoint.</source>
+        <target state="needs-review-translation">CONTAINER2024: ContainerEntrypointArgs são fornecidos sem
           especificar um ContainerEntrypoint.</target>
         <note>{StrBegin="CONTAINER2024: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointArgsSetPreferAppCommandArgs">
-        <source>CONTAINER2029: ContainerEntrypointArgsSet are provided. Change to use
-          ContainerAppCommandArgs for arguments that must always be set, or ContainerDefaultArgs for
-          arguments that can be overridden when the container is created.</source>
-        <target state="translated">CONTAINER2029: ContainerEntrypointArgsSet são fornecidos. Altere
+        <source>CONTAINER2029: ContainerEntrypointArgsSet are provided. Change to use ContainerAppCommandArgs for arguments that must always be set, or ContainerDefaultArgs for arguments that can be overridden when the container is created.</source>
+        <target state="needs-review-translation">CONTAINER2029: ContainerEntrypointArgsSet são fornecidos. Altere
           para usar ContainerAppCommandArgs para argumentos que sempre devem ser definidos ou
           ContainerDefaultArgs para argumentos que podem ser substituídos quando o contêiner é
           criado.</target>
         <note>{StrBegin="CONTAINER2029: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointConflictAppCommand">
-        <source>CONTAINER2028: ContainerEntrypoint can not be combined with
-          ContainerAppCommandInstruction '{0}'.</source>
-        <target state="translated">CONTAINER2028: ContainerEntrypoint não pode ser combinado com
+        <source>CONTAINER2028: ContainerEntrypoint can not be combined with ContainerAppCommandInstruction '{0}'.</source>
+        <target state="needs-review-translation">CONTAINER2028: ContainerEntrypoint não pode ser combinado com
           ContainerAppCommandInstruction '{0}'.</target>
         <note>{StrBegin="CONTAINER2028: "}</note>
       </trans-unit>
@@ -214,54 +191,43 @@
         <note>{StrBegin="CONTAINER2015: "}</note>
       </trans-unit>
       <trans-unit id="InvalidImageName_EntireNameIsInvalidCharacters">
-        <source>CONTAINER2005: The inferred image name '{0}' contains entirely invalid characters.
-          The valid characters for an image name are alphanumeric characters, -, /, or _, and the
-          image name must start with an alphanumeric character.</source>
-        <target state="translated">CONTAINER2005: o nome da imagem inferida '{0}' contém caracteres
+        <source>CONTAINER2005: The inferred image name '{0}' contains entirely invalid characters. The valid characters for an image name are alphanumeric characters, -, /, or _, and the image name must start with an alphanumeric character.</source>
+        <target state="needs-review-translation">CONTAINER2005: o nome da imagem inferida '{0}' contém caracteres
           totalmente inválidos. Os caracteres válidos para um nome de imagem são caracteres
           alfanuméricos, -, / ou _, e o nome da imagem deve começar com um caractere alfanumérico.</target>
         <note>{StrBegin="CONTAINER2005: "}</note>
       </trans-unit>
       <trans-unit id="InvalidImageName_NonAlphanumericStartCharacter">
-        <source>CONTAINER2005: The first character of the image name '{0}' must be a lowercase
-          letter or a digit and all characters in the name must be an alphanumeric character, -, /,
-          or _.</source>
-        <target state="translated">CONTAINER2005: o primeiro caractere do nome da imagem '{0}' deve
+        <source>CONTAINER2005: The first character of the image name '{0}' must be a lowercase letter or a digit and all characters in the name must be an alphanumeric character, -, /, or _.</source>
+        <target state="needs-review-translation">CONTAINER2005: o primeiro caractere do nome da imagem '{0}' deve
           ser uma letra minúscula ou um dígito e todos os caracteres do nome devem ser um caractere
           alfanumérico, -, / ou _.</target>
         <note>{StrBegin="CONTAINER2005: "}</note>
       </trans-unit>
       <trans-unit id="InvalidPort_Number">
-        <source>CONTAINER2017: A ContainerPort item was provided with an invalid port number '{0}'.
-          ContainerPort items must have an Include value that is an integer, and a Type value that
-          is either 'tcp' or 'udp'.</source>
-        <target state="translated">CONTAINER2017: Um item ContainerPort foi fornecido com um número
+        <source>CONTAINER2017: A ContainerPort item was provided with an invalid port number '{0}'. ContainerPort items must have an Include value that is an integer, and a Type value that is either 'tcp' or 'udp'.</source>
+        <target state="needs-review-translation">CONTAINER2017: Um item ContainerPort foi fornecido com um número
           de porta inválido '{0}'. Os itens ContainerPort devem ter um valor Include que seja um
           número inteiro e um valor Type que seja 'tcp' ou 'udp'.</target>
         <note>{StrBegin="CONTAINER2017: "}</note>
       </trans-unit>
       <trans-unit id="InvalidPort_NumberAndType">
-        <source>CONTAINER2017: A ContainerPort item was provided with an invalid port number '{0}'
-          and an invalid port type '{1}'. ContainerPort items must have an Include value that is an
-          integer, and a Type value that is either 'tcp' or 'udp'.</source>
-        <target state="translated">CONTAINER2017: Um item ContainerPort foi fornecido com um número
+        <source>CONTAINER2017: A ContainerPort item was provided with an invalid port number '{0}' and an invalid port type '{1}'. ContainerPort items must have an Include value that is an integer, and a Type value that is either 'tcp' or 'udp'.</source>
+        <target state="needs-review-translation">CONTAINER2017: Um item ContainerPort foi fornecido com um número
           de porta inválido '{0}' e um tipo de porta inválido '{1}'. Os itens ContainerPort devem
           ter um valor Include que seja um número inteiro e um valor Type que seja 'tcp' ou 'udp'.</target>
         <note>{StrBegin="CONTAINER2017: "}</note>
       </trans-unit>
       <trans-unit id="InvalidPort_Type">
-        <source>CONTAINER2017: A ContainerPort item was provided with an invalid port type '{0}'.
-          ContainerPort items must have an Include value that is an integer, and a Type value that
-          is either 'tcp' or 'udp'.</source>
-        <target state="translated">CONTAINER2017: Um item ContainerPort foi fornecido com um tipo de
+        <source>CONTAINER2017: A ContainerPort item was provided with an invalid port type '{0}'. ContainerPort items must have an Include value that is an integer, and a Type value that is either 'tcp' or 'udp'.</source>
+        <target state="needs-review-translation">CONTAINER2017: Um item ContainerPort foi fornecido com um tipo de
           porta inválido '{0}'. Os itens ContainerPort devem ter um valor Include que seja um número
           inteiro e um valor Type que seja 'tcp' ou 'udp'.</target>
         <note>{StrBegin="CONTAINER2017: "}</note>
       </trans-unit>
       <trans-unit id="InvalidSdkPrereleaseVersion">
-        <source>CONTAINER2018: Invalid SDK prerelease version '{0}' - only 'rc' and 'preview' are
-          supported.</source>
-        <target state="translated">CONTAINER2018: Versão de pré-lançamento inválida do SDK '{0}' -
+        <source>CONTAINER2018: Invalid SDK prerelease version '{0}' - only 'rc' and 'preview' are supported.</source>
+        <target state="needs-review-translation">CONTAINER2018: Versão de pré-lançamento inválida do SDK '{0}' -
           apenas 'rc' e 'preview' são suportados.</target>
         <note>{StrBegin="CONTAINER2018: "}</note>
       </trans-unit>
@@ -271,16 +237,14 @@
         <note>{StrBegin="CONTAINER2019: "}</note>
       </trans-unit>
       <trans-unit id="InvalidTag">
-        <source>CONTAINER2007: Invalid {0} provided: {1}. Image tags must be alphanumeric,
-          underscore, hyphen, or period.</source>
-        <target state="translated">CONTAINER2007: Inválido {0} fornecido: {1}. As tags de imagem
+        <source>CONTAINER2007: Invalid {0} provided: {1}. Image tags must be alphanumeric, underscore, hyphen, or period.</source>
+        <target state="needs-review-translation">CONTAINER2007: Inválido {0} fornecido: {1}. As tags de imagem
           devem ser alfanuméricas, sublinhado, hífen ou ponto.</target>
         <note>{StrBegin="CONTAINER2007: "}</note>
       </trans-unit>
       <trans-unit id="InvalidTags">
-        <source>CONTAINER2010: Invalid {0} provided: {1}. {0} must be a semicolon-delimited list of
-          valid image tags. Image tags must be alphanumeric, underscore, hyphen, or period.</source>
-        <target state="translated">CONTAINER2010: inválido {0} fornecido: {1}. {0} deve ser uma
+        <source>CONTAINER2010: Invalid {0} provided: {1}. {0} must be a semicolon-delimited list of valid image tags. Image tags must be alphanumeric, underscore, hyphen, or period.</source>
+        <target state="needs-review-translation">CONTAINER2010: inválido {0} fornecido: {1}. {0} deve ser uma
           lista delimitada por ponto-e-vírgula de marcas de imagem válidas. As tags de imagem devem
           ser alfanuméricas, sublinhado, hífen ou ponto.</target>
         <note>{StrBegin="CONTAINER2010: "}</note>
@@ -292,16 +256,14 @@
         <note>{StrBegin="CONTAINER1003: "}</note>
       </trans-unit>
       <trans-unit id="ItemsWithoutMetadata">
-        <source>CONTAINER4005: Item '{0}' contains items without metadata 'Value', and they will be
-          ignored.</source>
-        <target state="translated">CONTAINER4005: O item '{0}' contém itens sem metadados 'Valor' e
+        <source>CONTAINER4005: Item '{0}' contains items without metadata 'Value', and they will be ignored.</source>
+        <target state="needs-review-translation">CONTAINER4005: O item '{0}' contém itens sem metadados 'Valor' e
           eles serão ignorados.</target>
         <note>{StrBegin="CONTAINER4005: "}</note>
       </trans-unit>
       <trans-unit id="LocalRegistryNotAvailable">
-        <source>CONTAINER1012: The local registry is not available, but pushing to a local registry
-          was requested.</source>
-        <target state="translated">CONTAINER1012: O registro local não está disponível, mas o push
+        <source>CONTAINER1012: The local registry is not available, but pushing to a local registry was requested.</source>
+        <target state="needs-review-translation">CONTAINER1012: O registro local não está disponível, mas o push
           para um registro local foi solicitado.</target>
         <note>{StrBegin="CONTAINER1012: "}</note>
       </trans-unit>
@@ -316,17 +278,14 @@
         <note>{0} are the list of messages, each message starts with new line</note>
       </trans-unit>
       <trans-unit id="MissingLinkToRegistry">
-        <source>CONTAINER2004: Unable to download layer with descriptor '{0}' from registry '{1}'
-          because it does not exist.</source>
-        <target state="translated">CONTAINER2004: Não foi possível baixar a camada com o descritor
+        <source>CONTAINER2004: Unable to download layer with descriptor '{0}' from registry '{1}' because it does not exist.</source>
+        <target state="needs-review-translation">CONTAINER2004: Não foi possível baixar a camada com o descritor
           '{0}' do registro '{1}' porque não existe.</target>
         <note>{StrBegin="CONTAINER2004: "}</note>
       </trans-unit>
       <trans-unit id="MissingPortNumber">
-        <source>CONTAINER2016: ContainerPort item '{0}' does not specify the port number. Please
-          ensure the item's Include is a port number, for example '&lt;ContainerPort Include="80"
-          /&gt;'</source>
-        <target state="translated">CONTAINER2016: O item ContainerPort '{0}' não especifica o número
+        <source>CONTAINER2016: ContainerPort item '{0}' does not specify the port number. Please ensure the item's Include is a port number, for example '&lt;ContainerPort Include="80" /&gt;'</source>
+        <target state="needs-review-translation">CONTAINER2016: O item ContainerPort '{0}' não especifica o número
           da porta. Certifique-se de que o Include do item seja um número de porta, por exemplo
           '&lt;ContainerPort Include="80" /&gt;'</target>
         <note>{StrBegin="CONTAINER2016: "}</note>
@@ -430,17 +389,14 @@
         <note>{StrBegin="CONTAINER2021: "}</note>
       </trans-unit>
       <trans-unit id="UnknownLocalRegistryType">
-        <source>CONTAINER2002: Unknown local registry type '{0}'. Valid local container registry
-          types are {1}.</source>
-        <target state="translated">CONTAINER2002: Tipo de registro local desconhecido '{0}'. Os
+        <source>CONTAINER2002: Unknown local registry type '{0}'. Valid local container registry types are {1}.</source>
+        <target state="needs-review-translation">CONTAINER2002: Tipo de registro local desconhecido '{0}'. Os
           tipos de registro de contêiner local válidos são {1}.</target>
         <note>{StrBegin="CONTAINER2002: "}</note>
       </trans-unit>
       <trans-unit id="UnknownMediaType">
-        <source>CONTAINER2003: The manifest for {0}:{1} from registry {2} was an unknown type: {3}.
-          Please raise an issue at https://github.com/dotnet/sdk-container-builds/issues with this
-          message.</source>
-        <target state="translated">CONTAINER2003: O manifesto para {0}:{1} do registro {2} era um
+        <source>CONTAINER2003: The manifest for {0}:{1} from registry {2} was an unknown type: {3}. Please raise an issue at https://github.com/dotnet/sdk-container-builds/issues with this message.</source>
+        <target state="needs-review-translation">CONTAINER2003: O manifesto para {0}:{1} do registro {2} era um
           tipo desconhecido:{3}. Levante um problema em
           https://github.com/dotnet/sdk-container-builds/issues com esta mensagem.</target>
         <note>{StrBegin="CONTAINER2003: "}</note>

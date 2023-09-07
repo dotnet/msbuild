@@ -20,7 +20,7 @@ internal sealed class DockerCli : ILocalRegistry
     private const string Commands = $"{DockerCommand}/{PodmanCommand}";
 
     private readonly ILogger _logger;
-    private string? _commandPath;
+    private string? _command;
     private string? _fullCommandPath;
 
     public DockerCli(string? command, ILoggerFactory loggerFactory)
@@ -32,7 +32,7 @@ internal sealed class DockerCli : ILocalRegistry
             throw new ArgumentException($"{command} is an unknown command.");
         }
 
-        this._commandPath = command;
+        this._command = command;
         this._logger = loggerFactory.CreateLogger<DockerCli>();
     }
 
@@ -110,7 +110,7 @@ internal sealed class DockerCli : ILocalRegistry
 
     public async Task<bool> IsAvailableAsync(CancellationToken cancellationToken)
     {
-        bool commandPathWasUnknown = this._commandPath is null; // avoid running the version command twice.
+        bool commandPathWasUnknown = this._command is null; // avoid running the version command twice.
         string? command = await GetCommandAsync(cancellationToken);
         if (command is null)
         {
@@ -277,9 +277,9 @@ internal sealed class DockerCli : ILocalRegistry
 
     private async ValueTask<string?> GetCommandAsync(CancellationToken cancellationToken)
     {
-        if (_commandPath != null)
+        if (_command != null)
         {
-            return _commandPath;
+            return _command;
         }
 
         // Try to find the docker or podman cli.
@@ -297,18 +297,18 @@ internal sealed class DockerCli : ILocalRegistry
         // be explicit with this check so that we don't do the link target check unless it might actually be a solution.
         if (dockerCommand.Result && podmanCommand.Result && IsPodmanAlias())
         {
-            _commandPath = PodmanCommand;
+            _command = PodmanCommand;
         }
         else if (dockerCommand.Result)
         {
-            _commandPath = DockerCommand;
+            _command = DockerCommand;
         }
         else if (podmanCommand.Result)
         {
-            _commandPath = PodmanCommand;
+            _command = PodmanCommand;
         }
 
-        return _commandPath;
+        return _command;
     }
 
     private static bool IsPodmanAlias()
@@ -356,6 +356,6 @@ internal sealed class DockerCli : ILocalRegistry
 
     public override string ToString()
     {
-        return string.Format(Strings.DockerCli_PushInfo, _commandPath);
+        return string.Format(Strings.DockerCli_PushInfo, _command);
     }
 }
