@@ -20,7 +20,8 @@ internal sealed class DockerCli : ILocalRegistry
     private const string Commands = $"{DockerCommand}/{PodmanCommand}";
 
     private readonly ILogger _logger;
-    private string? _commandPath;
+    private string? _command;
+    private string? _fullCommandPath;
 
     public DockerCli(string? command, ILoggerFactory loggerFactory)
     {
@@ -31,20 +32,15 @@ internal sealed class DockerCli : ILocalRegistry
             throw new ArgumentException($"{command} is an unknown command.");
         }
 
-        this._commandPath = command;
+        this._command = command;
         this._logger = loggerFactory.CreateLogger<DockerCli>();
     }
 
     public DockerCli(ILoggerFactory loggerFactory) : this(null, loggerFactory)
     { }
 
-    private static string? FindFullPathFromPath(string? command)
+    private static string FindFullPathFromPath(string command)
     {
-        if (string.IsNullOrEmpty(command))
-        {
-            return command;
-        }
-
         foreach (string directory in (Environment.GetEnvironmentVariable("PATH") ?? string.Empty).Split(Path.PathSeparator))
         {
             string fullPath = Path.Combine(directory, command + FileNameSuffixes.CurrentPlatform.Exe);
@@ -57,19 +53,32 @@ internal sealed class DockerCli : ILocalRegistry
         return command;
     }
 
+    private async ValueTask<string> FindFullCommandPath(CancellationToken cancellationToken)
+    {
+        if (_fullCommandPath != null)
+        {
+            return _fullCommandPath;
+        }
+
+        string? command = await GetCommandAsync(cancellationToken);
+        if (command is null)
+        {
+            throw new NotImplementedException(Resource.FormatString(Strings.ContainerRuntimeProcessCreationFailed, Commands));
+        }
+
+        _fullCommandPath = FindFullPathFromPath(command);
+
+        return _fullCommandPath;
+    }
+
     public async Task LoadAsync(BuiltImage image, SourceImageReference sourceReference, DestinationImageReference destinationReference, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        string dockerPath = FindFullPathFromPath("docker") ?? "docker";
 
-        string? commandPath = await GetCommandPathAsync(cancellationToken);
-        if (commandPath is null)
-        {
-            throw new NotImplementedException(Resource.FormatString(Strings.DockerProcessCreationFailed, Commands));
-        }
+        string commandPath = await FindFullCommandPath(cancellationToken);
 
         // call `docker load` and get it ready to receive input
-        ProcessStartInfo loadInfo = new(dockerPath, $"load");
+        ProcessStartInfo loadInfo = new(commandPath, $"load");
         loadInfo.RedirectStandardInput = true;
         loadInfo.RedirectStandardOutput = true;
         loadInfo.RedirectStandardError = true;
@@ -78,7 +87,7 @@ internal sealed class DockerCli : ILocalRegistry
 
         if (loadProcess is null)
         {
-            throw new NotImplementedException(Resource.FormatString(Strings.DockerProcessCreationFailed, commandPath));
+            throw new NotImplementedException(Resource.FormatString(Strings.ContainerRuntimeProcessCreationFailed, commandPath));
         }
 
         // Create new stream tarball
@@ -101,9 +110,9 @@ internal sealed class DockerCli : ILocalRegistry
 
     public async Task<bool> IsAvailableAsync(CancellationToken cancellationToken)
     {
-        bool commandPathWasUnknown = this._commandPath is null; // avoid running the version command twice.
-        string? commandPath = await GetCommandPathAsync(cancellationToken);
-        if (commandPath is null)
+        bool commandPathWasUnknown = this._command is null; // avoid running the version command twice.
+        string? command = await GetCommandAsync(cancellationToken);
+        if (command is null)
         {
             _logger.LogError($"Cannot find {Commands} executable.");
             return false;
@@ -111,32 +120,32 @@ internal sealed class DockerCli : ILocalRegistry
 
         try
         {
-            switch (commandPath)
+            switch (command)
             {
                 case DockerCommand:
-                {
-                    JsonDocument config = GetConfig();
+                    {
+                        JsonDocument config = GetDockerConfig();
 
-                    if (!config.RootElement.TryGetProperty("ServerErrors", out JsonElement errorProperty))
-                    {
-                        return true;
+                        if (!config.RootElement.TryGetProperty("ServerErrors", out JsonElement errorProperty))
+                        {
+                            return true;
+                        }
+                        else if (errorProperty.ValueKind == JsonValueKind.Array && errorProperty.GetArrayLength() == 0)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            // we have errors, turn them into a string and log them
+                            string messages = string.Join(Environment.NewLine, errorProperty.EnumerateArray());
+                            _logger.LogError($"The daemon server reported errors: {messages}");
+                            return false;
+                        }
                     }
-                    else if (errorProperty.ValueKind == JsonValueKind.Array && errorProperty.GetArrayLength() == 0)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        // we have errors, turn them into a string and log them
-                        string messages = string.Join(Environment.NewLine, errorProperty.EnumerateArray());
-                        _logger.LogError($"The daemon server reported errors: {messages}");
-                        return false;
-                    }
-                }
                 case PodmanCommand:
                     return commandPathWasUnknown || await TryRunVersionCommandAsync(PodmanCommand, cancellationToken);
                 default:
-                    throw new NotImplementedException($"{commandPath} is an unknown command.");
+                    throw new NotImplementedException($"{command} is an unknown command.");
             }
         }
         catch (Exception ex)
@@ -152,16 +161,16 @@ internal sealed class DockerCli : ILocalRegistry
         => IsAvailableAsync(default).GetAwaiter().GetResult();
 
     public string? GetCommand()
-        => GetCommandPathAsync(default).GetAwaiter().GetResult();
+        => GetCommandAsync(default).GetAwaiter().GetResult();
 
     /// <summary>
     /// Gets docker configuration.
     /// </summary>
     /// <param name="sync">when <see langword="true"/>, the method is executed synchronously.</param>
     /// <exception cref="DockerLoadException">when failed to retrieve docker configuration.</exception>
-    internal static JsonDocument GetConfig()
+    internal static JsonDocument GetDockerConfig()
     {
-        string dockerPath = FindFullPathFromPath("docker") ?? "docker";
+        string dockerPath = FindFullPathFromPath("docker");
         Process proc = new()
         {
             StartInfo = new ProcessStartInfo(dockerPath, "info --format=\"{{json .}}\"")
@@ -266,26 +275,60 @@ internal sealed class DockerCli : ILocalRegistry
         }
     }
 
-    private async ValueTask<string?> GetCommandPathAsync(CancellationToken cancellationToken)
+    private async ValueTask<string?> GetCommandAsync(CancellationToken cancellationToken)
     {
-        if (_commandPath != null)
+        if (_command != null)
         {
-            return _commandPath;
+            return _command;
         }
 
         // Try to find the docker or podman cli.
         // On systems with podman it's not uncommon for docker to be an alias to podman.
-        // We try to find podman first so we can identify those systems to be using podman.
-        foreach (var command in new[] { PodmanCommand, DockerCommand })
+        // We have to attempt to locate both binaries and inspect the output of the 'docker' binary if present to determine
+        // if it is actually podman.
+        var podmanCommand = TryRunVersionCommandAsync(PodmanCommand, cancellationToken);
+        var dockerCommand = TryRunVersionCommandAsync(DockerCommand, cancellationToken);
+
+        await Task.WhenAll(
+            podmanCommand,
+            dockerCommand
+        ).ConfigureAwait(false);
+
+        // be explicit with this check so that we don't do the link target check unless it might actually be a solution.
+        if (dockerCommand.Result && podmanCommand.Result && IsPodmanAlias())
         {
-            if (await TryRunVersionCommandAsync(command, cancellationToken))
-            {
-                _commandPath = command;
-                break;
-            }
+            _command = PodmanCommand;
+        }
+        else if (dockerCommand.Result)
+        {
+            _command = DockerCommand;
+        }
+        else if (podmanCommand.Result)
+        {
+            _command = PodmanCommand;
         }
 
-        return _commandPath;
+        return _command;
+    }
+
+    private static bool IsPodmanAlias()
+    {
+        // If both exist we need to check and see if the docker command is actually docker,
+        // or if it is a podman script in a trenchcoat.
+        try
+        {
+            var dockerinfo = GetDockerConfig().RootElement;
+            // Docker's info output has a 'DockerRootDir' top-level property string that is a good marker,
+            // while Podman has a 'host' top-level property object with a 'buildahVersion' subproperty
+            var hasdockerProperty =
+                dockerinfo.TryGetProperty("DockerRootDir", out var dockerRootDir) && dockerRootDir.GetString() is not null;
+            var hasPodmanProperty = dockerinfo.TryGetProperty("host", out var host) && host.TryGetProperty("buildahVersion", out var buildahVersion) && buildahVersion.GetString() is not null;
+            return !hasdockerProperty && hasPodmanProperty;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private async Task<bool> TryRunVersionCommandAsync(string command, CancellationToken cancellationToken)
@@ -313,6 +356,6 @@ internal sealed class DockerCli : ILocalRegistry
 
     public override string ToString()
     {
-        return string.Format(Strings.DockerCli_PushInfo, _commandPath);
+        return string.Format(Strings.DockerCli_PushInfo, _command);
     }
 }

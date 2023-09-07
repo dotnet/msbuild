@@ -4,7 +4,8 @@
     <body>
       <trans-unit id="AmazonRegistryFailed">
         <source>CONTAINER1002: Request to Amazon Elastic Container Registry failed prematurely. This is often caused when the target repository does not exist in the registry.</source>
-        <target state="translated">CONTAINER1002: Amazon Elastic Container Registry への要求が処理の途中で失敗しました。これは多くの場合、ターゲット リポジトリがレジストリに存在しない場合に発生します。</target>
+        <target state="needs-review-translation">CONTAINER1002: Amazon Elastic Container Registry
+          への要求が処理の途中で失敗しました。これは多くの場合、ターゲット リポジトリがレジストリに存在しない場合に発生します。</target>
         <note>{StrBegin="CONTAINER1002: "}</note>
       </trans-unit>
       <trans-unit id="AmbiguousTags">
@@ -14,12 +15,14 @@
       </trans-unit>
       <trans-unit id="AppCommandArgsSetNoAppCommand">
         <source>CONTAINER2025: ContainerAppCommandArgs are provided without specifying a ContainerAppCommand.</source>
-        <target state="translated">CONTAINER2025: ContainerAppCommandArgs が指定されていますが、ContainerAppCommand が指定されていません。</target>
+        <target state="needs-review-translation">CONTAINER2025: ContainerAppCommandArgs
+          が指定されていますが、ContainerAppCommand が指定されていません。</target>
         <note>{StrBegin="CONTAINER2025: "}</note>
       </trans-unit>
       <trans-unit id="AppCommandSetNotUsed">
         <source>CONTAINER2026: ContainerAppCommand and ContainerAppCommandArgs must be empty when ContainerAppCommandInstruction is '{0}'.</source>
-        <target state="translated">CONTAINER2026: ContainerAppCommandInstruction が '{0}' の場合、ContainerAppCommand と ContainerAppCommandArgs を空にする必要があります。</target>
+        <target state="needs-review-translation">CONTAINER2026: ContainerAppCommandInstruction が '{0}'
+          の場合、ContainerAppCommand と ContainerAppCommandArgs を空にする必要があります。</target>
         <note>{StrBegin="CONTAINER2026: "}</note>
       </trans-unit>
       <trans-unit id="ArchiveRegistry_PushInfo">
@@ -29,7 +32,9 @@
       </trans-unit>
       <trans-unit id="BaseEntrypointOverwritten">
         <source>CONTAINER2022: The base image has an entrypoint that will be overwritten to start the application. Set ContainerAppCommandInstruction to 'Entrypoint' if this is desired. To preserve the base image entrypoint, set ContainerAppCommandInstruction to 'DefaultArgs'.</source>
-        <target state="translated">CONTAINER2022: 基本イメージに、アプリケーションの開始時に上書きされるエントリ ポイントがあります。このまま上書きする場合は、ContainerAppCommandInstruction を 'Entrypoint' に設定します。基本イメージのエントリ ポイントを保持するには、ContainerAppCommandInstruction を 'DefaultArgs' に設定します。</target>
+        <target state="needs-review-translation">CONTAINER2022: 基本イメージに、アプリケーションの開始時に上書きされるエントリ
+          ポイントがあります。このまま上書きする場合は、ContainerAppCommandInstruction を 'Entrypoint' に設定します。基本イメージのエントリ
+          ポイントを保持するには、ContainerAppCommandInstruction を 'DefaultArgs' に設定します。</target>
         <note>{StrBegin="CONTAINER2022: "}</note>
       </trans-unit>
       <trans-unit id="BaseImageNameParsingFailed">
@@ -39,7 +44,8 @@
       </trans-unit>
       <trans-unit id="BaseImageNameRegistryFallback">
         <source>CONTAINER2020: {0} does not specify a registry and will be pulled from Docker Hub. Please prefix the name with the image registry, for example: '{1}/&lt;image&gt;'.</source>
-        <target state="translated">CONTAINER2020: {0} でレジストリが指定されていないため、Docker Hub からプルされます。名前の前にイメージ レジストリを付けてください。例: '{1}/&lt;image&gt;'。</target>
+        <target state="needs-review-translation">CONTAINER2020: {0} でレジストリが指定されていないため、Docker Hub
+          からプルされます。名前の前にイメージ レジストリを付けてください。例: '{1}/&lt;image&gt;'。</target>
         <note>{StrBegin="CONTAINER2020: "}</note>
       </trans-unit>
       <trans-unit id="BaseImageNameWithSpaces">
@@ -49,12 +55,14 @@
       </trans-unit>
       <trans-unit id="BaseImageNotFound">
         <source>CONTAINER1011: Couldn't find matching base image for {0} that matches RuntimeIdentifier {1}.</source>
-        <target state="translated">CONTAINER1011: RuntimeIdentifier {1} に一致する {0} に一致する基本イメージが見つかりませんでした。</target>
+        <target state="needs-review-translation">CONTAINER1011: RuntimeIdentifier {1} に一致する {0}
+          に一致する基本イメージが見つかりませんでした。</target>
         <note>{StrBegin="CONTAINER1011: "}</note>
       </trans-unit>
       <trans-unit id="BlobUploadFailed">
         <source>CONTAINER1001: Failed to upload blob using {0}; received status code '{1}'.</source>
-        <target state="translated">CONTAINER1001: {0} を使用して BLOB をアップロードできませんでした; 状態コード '{1}' を受信しました。</target>
+        <target state="translated">CONTAINER1001: {0} を使用して BLOB をアップロードできませんでした; 状態コード '{1}'
+          を受信しました。</target>
         <note>{StrBegin="CONTAINER1001: "}</note>
       </trans-unit>
       <trans-unit id="ContainerBuilder_ImageUploadedToLocalDaemon">
@@ -97,9 +105,9 @@
         <target state="translated">CONTAINER3002: Docker 情報を取得できませんでした: {0}</target>
         <note>{StrBegin="CONTAINER3002: "}</note>
       </trans-unit>
-      <trans-unit id="DockerProcessCreationFailed">
+      <trans-unit id="ContainerRuntimeProcessCreationFailed">
         <source>CONTAINER3001: Failed creating {0} process.</source>
-        <target state="translated">CONTAINER3001: {0} プロセスを作成できませんでした。</target>
+        <target state="needs-review-translation">CONTAINER3001: {0} プロセスを作成できませんでした。</target>
         <note>CONTAINER3001: {0} is the name of the command we failed to run, usually 'docker' or 'podman'.</note>
       </trans-unit>
       <trans-unit id="EmptyOrWhitespacePropertyIgnored">
@@ -114,27 +122,33 @@
       </trans-unit>
       <trans-unit id="EntrypointAndAppCommandArgsSetNoAppCommandInstruction">
         <source>CONTAINER2023: A ContainerEntrypoint and ContainerAppCommandArgs are provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</source>
-        <target state="translated">CONTAINER2023: ContainerEntrypoint と ContainerAppCommandArgs が指定されています。アプリケーションの開始方法を構成するには、ContainerAppInstruction を設定する必要があります。有効な手順は {0} です。</target>
+        <target state="needs-review-translation">CONTAINER2023: ContainerEntrypoint と ContainerAppCommandArgs
+          が指定されています。アプリケーションの開始方法を構成するには、ContainerAppInstruction を設定する必要があります。有効な手順は {0} です。</target>
         <note>{StrBegin="CONTAINER2023: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointSetNoAppCommandInstruction">
         <source>CONTAINER2027: A ContainerEntrypoint is provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</source>
-        <target state="translated">CONTAINER2027: ContainerEntrypoint が指定されています。アプリケーションの開始方法を構成するには、ContainerAppInstruction を設定する必要があります。有効な手順は {0} です。</target>
+        <target state="needs-review-translation">CONTAINER2027: ContainerEntrypoint
+          が指定されています。アプリケーションの開始方法を構成するには、ContainerAppInstruction を設定する必要があります。有効な手順は {0} です。</target>
         <note>{StrBegin="CONTAINER2027: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointArgsSetNoEntrypoint">
         <source>CONTAINER2024: ContainerEntrypointArgs are provided without specifying a ContainerEntrypoint.</source>
-        <target state="translated">CONTAINER2024: ContainerEntrypointArgs が指定されていますが、ContainerEntrypoint が指定されていません。</target>
+        <target state="needs-review-translation">CONTAINER2024: ContainerEntrypointArgs
+          が指定されていますが、ContainerEntrypoint が指定されていません。</target>
         <note>{StrBegin="CONTAINER2024: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointArgsSetPreferAppCommandArgs">
         <source>CONTAINER2029: ContainerEntrypointArgsSet are provided. Change to use ContainerAppCommandArgs for arguments that must always be set, or ContainerDefaultArgs for arguments that can be overridden when the container is created.</source>
-        <target state="translated">CONTAINER2029: ContainerEntrypointArgsSet が使用されています。常に設定されている必要がある引数の場合 ContainerAppCommandArgs を使用するか、コンテナーの作成時にオーバーライドできる引数の場合 ContainerDefaultArgs を使用するように変更してください。</target>
+        <target state="needs-review-translation">CONTAINER2029: ContainerEntrypointArgsSet
+          が使用されています。常に設定されている必要がある引数の場合 ContainerAppCommandArgs を使用するか、コンテナーの作成時にオーバーライドできる引数の場合
+          ContainerDefaultArgs を使用するように変更してください。</target>
         <note>{StrBegin="CONTAINER2029: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointConflictAppCommand">
         <source>CONTAINER2028: ContainerEntrypoint can not be combined with ContainerAppCommandInstruction '{0}'.</source>
-        <target state="translated">CONTAINER2028: ContainerEntrypoint を ContainerAppCommandInstruction '{0}' と組み合わせることはできません。</target>
+        <target state="needs-review-translation">CONTAINER2028: ContainerEntrypoint を
+          ContainerAppCommandInstruction '{0}' と組み合わせることはできません。</target>
         <note>{StrBegin="CONTAINER2028: "}</note>
       </trans-unit>
       <trans-unit id="FailedRetrievingCredentials">
@@ -164,32 +178,39 @@
       </trans-unit>
       <trans-unit id="InvalidImageName_EntireNameIsInvalidCharacters">
         <source>CONTAINER2005: The inferred image name '{0}' contains entirely invalid characters. The valid characters for an image name are alphanumeric characters, -, /, or _, and the image name must start with an alphanumeric character.</source>
-        <target state="translated">CONTAINER2005: 推定されたイメージ名 '{0}' に、完全に無効な文字が含まれています。イメージ名に有効な文字は英数字、-、/、または _で、イメージ名の先頭には英数字を使用する必要があります。</target>
+        <target state="needs-review-translation">CONTAINER2005: 推定されたイメージ名 '{0}'
+          に、完全に無効な文字が含まれています。イメージ名に有効な文字は英数字、-、/、または _で、イメージ名の先頭には英数字を使用する必要があります。</target>
         <note>{StrBegin="CONTAINER2005: "}</note>
       </trans-unit>
       <trans-unit id="InvalidImageName_NonAlphanumericStartCharacter">
         <source>CONTAINER2005: The first character of the image name '{0}' must be a lowercase letter or a digit and all characters in the name must be an alphanumeric character, -, /, or _.</source>
-        <target state="translated">CONTAINER2005: イメージ名 '{0}' は小文字は数字で、名前に含まれるすべての文字は英数字、-、または _ である必要があります。</target>
+        <target state="needs-review-translation">CONTAINER2005: イメージ名 '{0}' は小文字は数字で、名前に含まれるすべての文字は英数字、-、または _
+          である必要があります。</target>
         <note>{StrBegin="CONTAINER2005: "}</note>
       </trans-unit>
       <trans-unit id="InvalidPort_Number">
         <source>CONTAINER2017: A ContainerPort item was provided with an invalid port number '{0}'. ContainerPort items must have an Include value that is an integer, and a Type value that is either 'tcp' or 'udp'.</source>
-        <target state="translated">CONTAINER2017: 無効なポート場合 '{0}' を使用して ContainerPort 項目が指定されました。ContainerPort 項目には、整数である Include 値と、'tcp' または 'udp' のいずれかである Type 値が必要です。</target>
+        <target state="needs-review-translation">CONTAINER2017: 無効なポート場合 '{0}' を使用して ContainerPort
+          項目が指定されました。ContainerPort 項目には、整数である Include 値と、'tcp' または 'udp' のいずれかである Type 値が必要です。</target>
         <note>{StrBegin="CONTAINER2017: "}</note>
       </trans-unit>
       <trans-unit id="InvalidPort_NumberAndType">
         <source>CONTAINER2017: A ContainerPort item was provided with an invalid port number '{0}' and an invalid port type '{1}'. ContainerPort items must have an Include value that is an integer, and a Type value that is either 'tcp' or 'udp'.</source>
-        <target state="translated">CONTAINER2017: 無効なポート番号 '{0}' と無効なポートの種類 '{1}' を使用して ContainerPort 項目が指定されました。ContainerPort 項目には、整数である Include 値と、'tcp' または 'udp' のいずれかである Type 値が必要です。</target>
+        <target state="needs-review-translation">CONTAINER2017: 無効なポート番号 '{0}' と無効なポートの種類 '{1}' を使用して
+          ContainerPort 項目が指定されました。ContainerPort 項目には、整数である Include 値と、'tcp' または 'udp' のいずれかである Type
+          値が必要です。</target>
         <note>{StrBegin="CONTAINER2017: "}</note>
       </trans-unit>
       <trans-unit id="InvalidPort_Type">
         <source>CONTAINER2017: A ContainerPort item was provided with an invalid port type '{0}'. ContainerPort items must have an Include value that is an integer, and a Type value that is either 'tcp' or 'udp'.</source>
-        <target state="translated">CONTAINER2017: 無効なポートの種類 '{0}' を使用して ContainerPort 項目が指定されました。ContainerPort 項目には、整数である Include 値と、'tcp' または 'udp' のいずれかである Type 値が必要です。</target>
+        <target state="needs-review-translation">CONTAINER2017: 無効なポートの種類 '{0}' を使用して ContainerPort
+          項目が指定されました。ContainerPort 項目には、整数である Include 値と、'tcp' または 'udp' のいずれかである Type 値が必要です。</target>
         <note>{StrBegin="CONTAINER2017: "}</note>
       </trans-unit>
       <trans-unit id="InvalidSdkPrereleaseVersion">
         <source>CONTAINER2018: Invalid SDK prerelease version '{0}' - only 'rc' and 'preview' are supported.</source>
-        <target state="translated">CONTAINER2018: SDK プレリリース バージョン '{0}' が無効です。'rc' と 'preview' のみがサポートされています。</target>
+        <target state="needs-review-translation">CONTAINER2018: SDK プレリリース バージョン '{0}' が無効です。'rc' と 'preview'
+          のみがサポートされています。</target>
         <note>{StrBegin="CONTAINER2018: "}</note>
       </trans-unit>
       <trans-unit id="InvalidSdkVersion">
@@ -199,12 +220,14 @@
       </trans-unit>
       <trans-unit id="InvalidTag">
         <source>CONTAINER2007: Invalid {0} provided: {1}. Image tags must be alphanumeric, underscore, hyphen, or period.</source>
-        <target state="translated">CONTAINER2007: 無効な {0} が指定されました: {1}。イメージ タグは、英数字、アンダースコア、ハイフン、またはピリオドである必要があります。</target>
+        <target state="needs-review-translation">CONTAINER2007: 無効な {0} が指定されました: {1}。イメージ
+          タグは、英数字、アンダースコア、ハイフン、またはピリオドである必要があります。</target>
         <note>{StrBegin="CONTAINER2007: "}</note>
       </trans-unit>
       <trans-unit id="InvalidTags">
         <source>CONTAINER2010: Invalid {0} provided: {1}. {0} must be a semicolon-delimited list of valid image tags. Image tags must be alphanumeric, underscore, hyphen, or period.</source>
-        <target state="translated">CONTAINER2010: 無効な {0} が指定されました: {1}。{0} は、セミコロンで区切られた有効なイメージ タグのリストである必要があります。イメージ タグは、英数字、アンダースコア、ハイフン、またはピリオドである必要があります。</target>
+        <target state="needs-review-translation">CONTAINER2010: 無効な {0} が指定されました: {1}。{0} は、セミコロンで区切られた有効なイメージ
+          タグのリストである必要があります。イメージ タグは、英数字、アンダースコア、ハイフン、またはピリオドである必要があります。</target>
         <note>{StrBegin="CONTAINER2010: "}</note>
       </trans-unit>
       <trans-unit id="InvalidTokenResponse">
@@ -214,12 +237,12 @@
       </trans-unit>
       <trans-unit id="ItemsWithoutMetadata">
         <source>CONTAINER4005: Item '{0}' contains items without metadata 'Value', and they will be ignored.</source>
-        <target state="translated">CONTAINER4005: 項目 '{0}' にメタデータ 'Value' のない項目が含まれており、これらは無視されます。</target>
+        <target state="needs-review-translation">CONTAINER4005: 項目 '{0}' にメタデータ 'Value' のない項目が含まれており、これらは無視されます。</target>
         <note>{StrBegin="CONTAINER4005: "}</note>
       </trans-unit>
       <trans-unit id="LocalRegistryNotAvailable">
         <source>CONTAINER1012: The local registry is not available, but pushing to a local registry was requested.</source>
-        <target state="translated">CONTAINER1012: ローカル レジストリが使用できませんが、ローカル レジストリへのプッシュが要求されました。</target>
+        <target state="needs-review-translation">CONTAINER1012: ローカル レジストリが使用できませんが、ローカル レジストリへのプッシュが要求されました。</target>
         <note>{StrBegin="CONTAINER1012: "}</note>
       </trans-unit>
       <trans-unit id="LocalDocker_FailedToGetConfig">
@@ -234,12 +257,14 @@
       </trans-unit>
       <trans-unit id="MissingLinkToRegistry">
         <source>CONTAINER2004: Unable to download layer with descriptor '{0}' from registry '{1}' because it does not exist.</source>
-        <target state="translated">CONTAINER2004: レジストリ '{1}' 内の記述子 '{0}' を持つレイヤーは存在しないため、ダウンロードできません。</target>
+        <target state="needs-review-translation">CONTAINER2004: レジストリ '{1}' 内の記述子 '{0}'
+          を持つレイヤーは存在しないため、ダウンロードできません。</target>
         <note>{StrBegin="CONTAINER2004: "}</note>
       </trans-unit>
       <trans-unit id="MissingPortNumber">
         <source>CONTAINER2016: ContainerPort item '{0}' does not specify the port number. Please ensure the item's Include is a port number, for example '&lt;ContainerPort Include="80" /&gt;'</source>
-        <target state="translated">CONTAINER2016: ContainerPort 項目 '{0}' でポート番号が指定されていません。項目の Include がポート番号 (e '&lt;ContainerPort Include="80" /&gt;' など) であることを確認してください</target>
+        <target state="needs-review-translation">CONTAINER2016: ContainerPort 項目 '{0}' でポート番号が指定されていません。項目の
+          Include がポート番号 (e '&lt;ContainerPort Include="80" /&gt;' など) であることを確認してください</target>
         <note>{StrBegin="CONTAINER2016: "}</note>
       </trans-unit>
       <trans-unit id="NoRequestUriSpecified">
@@ -359,12 +384,14 @@
       </trans-unit>
       <trans-unit id="UnknownLocalRegistryType">
         <source>CONTAINER2002: Unknown local registry type '{0}'. Valid local container registry types are {1}.</source>
-        <target state="translated">CONTAINER2002: 不明なローカル レジストリの種類 '{0}'。有効なローカル コンテナー レジストリの種類は {1} です。</target>
+        <target state="needs-review-translation">CONTAINER2002: 不明なローカル レジストリの種類 '{0}'。有効なローカル コンテナー レジストリの種類は {1}
+          です。</target>
         <note>{StrBegin="CONTAINER2002: "}</note>
       </trans-unit>
       <trans-unit id="UnknownMediaType">
         <source>CONTAINER2003: The manifest for {0}:{1} from registry {2} was an unknown type: {3}. Please raise an issue at https://github.com/dotnet/sdk-container-builds/issues with this message.</source>
-        <target state="translated">CONTAINER2003: レジストリ {0} からの {1}:{2} のマニフェストは不明な種類でした: {3}。このメッセージを使用して https://github.com/dotnet/sdk-container-builds/issues で問題を発生させてください。</target>
+        <target state="needs-review-translation">CONTAINER2003: レジストリ {0} からの {1}:{2} のマニフェストは不明な種類でした:
+          {3}。このメッセージを使用して https://github.com/dotnet/sdk-container-builds/issues で問題を発生させてください。</target>
         <note>{StrBegin="CONTAINER2003: "}</note>
       </trans-unit>
       <trans-unit id="UnrecognizedMediaType">

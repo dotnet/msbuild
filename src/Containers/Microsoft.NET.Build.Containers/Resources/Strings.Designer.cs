@@ -292,11 +292,11 @@ namespace Microsoft.NET.Build.Containers.Resources
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER3001: Failed creating {0} process..
         /// </summary>
-        internal static string DockerProcessCreationFailed
+        internal static string ContainerRuntimeProcessCreationFailed
         {
             get
             {
-                return ResourceManager.GetString("DockerProcessCreationFailed", resourceCulture);
+                return ResourceManager.GetString("ContainerRuntimeProcessCreationFailed", resourceCulture);
             }
         }
 
