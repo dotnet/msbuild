@@ -62,12 +62,30 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         ImageBuilder? imageBuilder;
         if (sourceRegistry is { } registry)
         {
-            imageBuilder = await registry.GetImageManifestAsync(
-                BaseImageName,
-                BaseImageTag,
-                ContainerRuntimeIdentifier,
-                RuntimeIdentifierGraphPath,
-                cancellationToken).ConfigureAwait(false);
+            try
+            {
+                imageBuilder = await registry.GetImageManifestAsync(
+                    BaseImageName,
+                    BaseImageTag,
+                    ContainerRuntimeIdentifier,
+                    RuntimeIdentifierGraphPath,
+                    cancellationToken).ConfigureAwait(false);
+            }
+            catch (RepositoryNotFoundException)
+            {
+                Log.LogErrorWithCodeFromResources(nameof(Strings.RepositoryNotFound), BaseImageName, BaseImageTag, registry.RegistryName);
+                return !Log.HasLoggedErrors;
+            }
+            catch (UnableToAccessRepositoryException)
+            {
+                Log.LogErrorWithCodeFromResources(nameof(Strings.UnableToAccessRepository), BaseImageName, registry.RegistryName);
+                return !Log.HasLoggedErrors;
+            }
+            catch (ContainerHttpException e)
+            {
+                Log.LogErrorFromException(e, showStackTrace: false, showDetail: true, file: null);
+                return !Log.HasLoggedErrors;
+            }
         }
         else
         {
@@ -159,6 +177,13 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                 GeneratedArchiveOutputPath = archive.ArchiveOutputPath;
             }
         }
+        catch (ContainerHttpException e)
+        {
+            if (BuildEngine != null)
+            {
+                Log.LogErrorFromException(e, true);
+            }
+        }
         catch (AggregateException ex) when (ex.InnerException is DockerLoadException dle)
         {
             Log.LogErrorFromException(dle, showStackTrace: false);
@@ -177,6 +202,13 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                 destinationImageReference,
                 cancellationToken).ConfigureAwait(false);
             SafeLog(Strings.ContainerBuilder_ImageUploadedToRegistry, destinationImageReference, OutputRegistry);
+        }
+        catch (UnableToAccessRepositoryException)
+        {
+            if (BuildEngine != null)
+            {
+                Log.LogErrorWithCodeFromResources(nameof(Strings.UnableToAccessRepository), destinationImageReference.Repository, destinationImageReference.RemoteRegistry!.RegistryName);
+            }
         }
         catch (ContainerHttpException e)
         {
@@ -241,8 +273,9 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         }
     }
 
-    private void SafeLog(string message, params object[] formatParams) {
-        if(BuildEngine != null) Log.LogMessage(MessageImportance.High, message, formatParams);
+    private void SafeLog(string message, params object[] formatParams)
+    {
+        if (BuildEngine != null) Log.LogMessage(MessageImportance.High, message, formatParams);
     }
 
     public void Dispose()

@@ -20,8 +20,8 @@ internal class DefaultRegistryAPI : IRegistryAPI
         _baseUri = baseUri;
         _logger = logger;
         _client = CreateClient(registryName, baseUri, logger, isAmazonECRRegistry);
-        Manifest = new DefaultManifestOperations(_baseUri, _client, _logger);
-        Blob = new DefaultBlobOperations(_baseUri, _client, _logger);
+        Manifest = new DefaultManifestOperations(_baseUri, registryName, _client, _logger);
+        Blob = new DefaultBlobOperations(_baseUri, registryName, _client, _logger);
     }
 
     public IBlobOperations Blob { get; }

@@ -57,12 +57,30 @@ public static class ContainerBuilder
         ImageBuilder? imageBuilder;
         if (sourceRegistry is { } registry)
         {
-            imageBuilder = await registry.GetImageManifestAsync(
-                baseImageName,
-                baseImageTag,
-                containerRuntimeIdentifier,
-                ridGraphPath,
-                cancellationToken).ConfigureAwait(false);
+            try
+            {
+                imageBuilder = await registry.GetImageManifestAsync(
+                    baseImageName,
+                    baseImageTag,
+                    containerRuntimeIdentifier,
+                    ridGraphPath,
+                    cancellationToken).ConfigureAwait(false);
+            }
+            catch (RepositoryNotFoundException)
+            {
+                logger.LogError(Resource.FormatString(nameof(Strings.RepositoryNotFound), baseImageName, baseImageTag, registry.RegistryName));
+                return 1;
+            }
+            catch (UnableToAccessRepositoryException)
+            {
+                logger.LogError(Resource.FormatString(nameof(Strings.UnableToAccessRepository), baseImageName, registry.RegistryName));
+                return 1;
+            }
+            catch (ContainerHttpException e)
+            {
+                logger.LogError(e.Message);
+                return 1;
+            }
         }
         else
         {
@@ -87,7 +105,8 @@ public static class ContainerBuilder
             {
                 logger.LogWarning(Resource.GetString(nameof(s)));
             },
-            logError: (s, a) => {
+            logError: (s, a) =>
+            {
                 hasErrors = true;
                 if (a is null)
                 {
@@ -158,7 +177,7 @@ public static class ContainerBuilder
         ILocalRegistry containerRegistry = destinationImageReference.LocalRegistry!;
         if (!(await containerRegistry.IsAvailableAsync(cancellationToken).ConfigureAwait(false)))
         {
-            Console.WriteLine(DiagnosticMessage.ErrorFromResourceWithCode(nameof(Strings.LocalRegistryNotAvailable)));
+            logger.LogError(Resource.FormatString(nameof(Strings.LocalRegistryNotAvailable)));
             return 7;
         }
 
@@ -169,7 +188,7 @@ public static class ContainerBuilder
         }
         catch (Exception ex)
         {
-            Console.WriteLine(DiagnosticMessage.ErrorFromResourceWithCode(nameof(Strings.RegistryOutputPushFailed), ex.Message));
+            logger.LogError(Resource.FormatString(nameof(Strings.RegistryOutputPushFailed), ex.Message));
             return 1;
         }
 
@@ -189,9 +208,14 @@ public static class ContainerBuilder
                 cancellationToken)).ConfigureAwait(false);
             logger.LogInformation(Strings.ContainerBuilder_ImageUploadedToRegistry, destinationImageReference, destinationImageReference.RemoteRegistry.RegistryName);
         }
+        catch (UnableToAccessRepositoryException)
+        {
+            logger.LogError(Resource.FormatString(nameof(Strings.UnableToAccessRepository), destinationImageReference.Repository, destinationImageReference.RemoteRegistry!.RegistryName));
+            return 1;
+        }
         catch (Exception e)
         {
-            Console.WriteLine(DiagnosticMessage.ErrorFromResourceWithCode(nameof(Strings.RegistryOutputPushFailed), e.Message));
+            logger.LogError(Resource.FormatString(nameof(Strings.RegistryOutputPushFailed), e.Message));
             return 1;
         }
 

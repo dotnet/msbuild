@@ -55,7 +55,6 @@
     <Compile Include="Resources\Resource.cs" />
     <Compile Include="Resources\Strings.Designer.cs" />
     <Compile Include="Globals.cs" />
-    <Compile Include="DiagnosticMessage.cs" />
   </ItemGroup>
 
   <!-- core remove files specific to net472 workarounds -->
