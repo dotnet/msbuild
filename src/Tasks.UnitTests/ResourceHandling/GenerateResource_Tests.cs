@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
+using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
@@ -338,7 +339,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             /* Unmerged change from project 'Microsoft.Build.Tasks.UnitTests (net7.0)'
             Before:
             Utilities.AssertLogContainsResource(t, "GenerateResource.OutputDoesntExist", t.OutputResources[0].ItemSpec);
-            
+
             Utilities.AssertStateFileWasWritten(t);
             After:
             Utilities.AssertLogContainsResource(t, "GenerateResource.OutputDoesntExist", t.OutputResources[0].ItemSpec);
@@ -1718,7 +1719,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 /* Unmerged change from project 'Microsoft.Build.Tasks.UnitTests (net7.0)'
                 Before:
                 Assert.False(success);
-                
+
                 Utilities.AssertStateFileWasWritten(t);
                 After:
                 Assert.False(success);
@@ -1797,7 +1798,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 /* Unmerged change from project 'Microsoft.Build.Tasks.UnitTests (net7.0)'
                 Before:
                 Assert.False(success);
-                
+
                 Utilities.AssertStateFileWasWritten(t);
                 After:
                 Assert.False(success);
@@ -2317,7 +2318,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 /* Unmerged change from project 'Microsoft.Build.Tasks.UnitTests (net7.0)'
                 Before:
                 Assert.Equal(t.FilesWritten[2].ItemSpec, Path.ChangeExtension(t.Sources[3].ItemSpec, ".resources"));
-                
+
                 Utilities.AssertStateFileWasWritten(t);
                 After:
                 Assert.Equal(t.FilesWritten[2].ItemSpec, Path.ChangeExtension(t.Sources[3].ItemSpec, ".resources"));
@@ -3652,6 +3653,22 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 Utilities.FileUpdated(resourcesFile, initialWriteTime).ShouldBeFalse();
             }
+        }
+
+        private readonly ITestOutputHelper _testOutputHelper;
+
+        /// <summary>
+        /// https://github.com/dotnet/msbuild/issues/9199
+        /// </summary>
+        [Fact]
+        public void NotValidSources()
+        {
+            GenerateResource t = new GenerateResource { BuildEngine = new MockEngine(_testOutputHelper) };
+            t.Sources = new ITaskItem[] { new TaskItem("non-existent") };
+            t.OutputResources = new ITaskItem[] { new TaskItem("out") };
+            Assert.False(t.Execute());
+            ((MockEngine)t.BuildEngine).AssertLogContains("MSB3552");
+            Assert.Equal(1, ((MockEngine)t.BuildEngine).Errors);
         }
     }
 }

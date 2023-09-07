@@ -714,14 +714,22 @@ namespace Microsoft.Build.Tasks
 
                 GetResourcesToProcess(out inputsToProcess, out outputsToProcess, out cachedOutputFiles);
 
-                if (inputsToProcess.Count == 0 && !Log.HasLoggedErrors)
+                if (inputsToProcess.Count == 0)
                 {
-                    if (cachedOutputFiles.Count > 0)
+                    if (!Log.HasLoggedErrors)
                     {
-                        OutputResources = cachedOutputFiles.ToArray();
-                    }
+                        if (cachedOutputFiles.Count > 0)
+                        {
+                            OutputResources = cachedOutputFiles.ToArray();
+                        }
 
-                    Log.LogMessageFromResources("GenerateResource.NothingOutOfDate");
+                        Log.LogMessageFromResources("GenerateResource.NothingOutOfDate");
+                    }
+                    else
+                    {
+                        // No valid sources found
+                        return false;
+                    }
                 }
                 else if (FailIfNotIncremental)
                 {
@@ -729,6 +737,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
+
                     if (!ComputePathToResGen())
                     {
                         // unable to compute the path to resgen.exe and that is necessary to
