@@ -22,6 +22,11 @@
         <target state="translated">CONTAINER2026: ContainerAppCommand und ContainerAppCommandArgs müssen leer sein, wenn "ContainerAppCommandInstruction" den Wert "{0}" aufweist.</target>
         <note>{StrBegin="CONTAINER2026: "}</note>
       </trans-unit>
+      <trans-unit id="ArchiveRegistry_PushInfo">
+        <source>local archive at '{0}'</source>
+        <target state="new">local archive at '{0}'</target>
+        <note>{0} is the path to the file written</note>
+      </trans-unit>
       <trans-unit id="BaseEntrypointOverwritten">
         <source>CONTAINER2022: The base image has an entrypoint that will be overwritten to start the application. Set ContainerAppCommandInstruction to 'Entrypoint' if this is desired. To preserve the base image entrypoint, set ContainerAppCommandInstruction to 'DefaultArgs'.</source>
         <target state="translated">CONTAINER2022: Das Basisimage verfügt über einen Einstiegspunkt, der überschrieben wird, um die Anwendung zu starten. Legen Sie "ContainerAppCommandInstruction" auf "Entrypoint" fest, wenn dies gewünscht ist. Um den Einstiegspunkt des Basisimages beizubehalten, legen Sie "ContainerAppCommandInstruction" auf "DefaultArgs" fest.</target>
@@ -53,13 +58,13 @@
         <note>{StrBegin="CONTAINER1001: "}</note>
       </trans-unit>
       <trans-unit id="ContainerBuilder_ImageUploadedToLocalDaemon">
-        <source>Pushed container '{0}' to Docker daemon.</source>
-        <target state="translated">Der Container „{0}“ wurde per Push an den Docker-Daemon übertragen.</target>
+        <source>Pushed image '{0}' to {1}.</source>
+        <target state="new">Pushed image '{0}' to {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContainerBuilder_ImageUploadedToRegistry">
-        <source>Pushed container '{0}' to registry '{1}'.</source>
-        <target state="translated">Der Container „{0}“ wurde in die Registrierung „{1}“ gepusht.</target>
+        <source>Pushed image '{0}' to registry '{1}'.</source>
+        <target state="needs-review-translation">Der Container „{0}“ wurde in die Registrierung „{1}“ gepusht.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContainerBuilder_StartBuildingImage">
@@ -76,6 +81,11 @@
         <source>CONTAINER2012: Could not recognize registry '{0}'.</source>
         <target state="translated">CONTAINER2012: Die Registrierung „{0}“ wurde nicht erkannt.</target>
         <note>{StrBegin="CONTAINER2012: "}</note>
+      </trans-unit>
+      <trans-unit id="DockerCli_PushInfo">
+        <source>local registry via '{0}'</source>
+        <target state="new">local registry via '{0}'</target>
+        <note>{0} is the command used</note>
       </trans-unit>
       <trans-unit id="DockerInfoFailed">
         <source>CONTAINER3002: Failed to get docker info({0})\n{1}\n{2}</source>

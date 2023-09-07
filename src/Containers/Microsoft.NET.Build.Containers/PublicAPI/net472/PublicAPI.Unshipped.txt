@@ -66,6 +66,8 @@ Microsoft.NET.Build.Containers.Tasks.CreateNewImage.GeneratedContainerManifest.g
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.GeneratedContainerManifest.set -> void
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.GeneratedContainerDigest.get -> string!
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.GeneratedContainerDigest.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.GeneratedArchiveOutputPath.get -> string!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.GeneratedArchiveOutputPath.set -> void
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.Repository.get -> string!
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.Repository.set -> void
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ImageTags.get -> string![]!
@@ -76,6 +78,8 @@ Microsoft.NET.Build.Containers.Tasks.CreateNewImage.LocalRegistry.get -> string!
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.LocalRegistry.set -> void
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.OutputRegistry.get -> string!
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.OutputRegistry.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ArchiveOutputPath.get -> string!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ArchiveOutputPath.set -> void
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.PublishDirectory.get -> string!
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.PublishDirectory.set -> void
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.RuntimeIdentifierGraphPath.get -> string!

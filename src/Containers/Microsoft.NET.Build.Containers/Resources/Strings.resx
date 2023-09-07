@@ -332,10 +332,10 @@
     <comment>Used only for unit tests</comment>
   </data>
   <data name="ContainerBuilder_ImageUploadedToLocalDaemon" xml:space="preserve">
-    <value>Pushed container '{0}' to Docker daemon.</value>
+    <value>Pushed image '{0}' to {1}.</value>
   </data>
   <data name="ContainerBuilder_ImageUploadedToRegistry" xml:space="preserve">
-    <value>Pushed container '{0}' to registry '{1}'.</value>
+    <value>Pushed image '{0}' to registry '{1}'.</value>
   </data>
   <data name="ContainerBuilder_StartBuildingImage" xml:space="preserve">
     <value>Building image '{0}' with tags '{1}' on top of base image '{2}'.</value>
@@ -384,5 +384,13 @@
   <data name="InvalidImageName_EntireNameIsInvalidCharacters" xml:space="preserve">
     <value>CONTAINER2005: The inferred image name '{0}' contains entirely invalid characters. The valid characters for an image name are alphanumeric characters, -, /, or _, and the image name must start with an alphanumeric character.</value>
     <comment>{StrBegin="CONTAINER2005: "}</comment>
+  </data>
+  <data name="ArchiveRegistry_PushInfo" xml:space="preserve">
+    <value>local archive at '{0}'</value>
+    <comment>{0} is the path to the file written</comment>
+  </data>
+  <data name="DockerCli_PushInfo" xml:space="preserve">
+    <value>local registry via '{0}'</value>
+    <comment>{0} is the command used</comment>
   </data>
 </root>

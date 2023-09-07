@@ -364,7 +364,7 @@ internal sealed class Registry
     public async Task PushAsync(BuiltImage builtImage, SourceImageReference source, DestinationImageReference destination, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        Registry destinationRegistry = destination.Registry!;
+        Registry destinationRegistry = destination.RemoteRegistry!;
 
         Func<Descriptor, Task> uploadLayerFunc = async (descriptor) =>
         {
