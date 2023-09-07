@@ -111,13 +111,18 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         /// <summary>
         /// Installs test template to dotnet new.
         /// </summary>
-        /// <param name="templateName">The name of the test tempalte to install.</param>
+        /// <param name="templateNameOrPath">The name or path of the test tempalte to install.</param>
         /// <param name="log">Test logger.</param>
         /// <param name="homeDirectory">The settings path for dotnet new.</param>
         /// <param name="workingDirectory">The working directory to use.</param>
-        internal static string InstallTestTemplate(string templateName, ITestOutputHelper log, string homeDirectory, string? workingDirectory = null)
+        internal string InstallTestTemplate(string templateNameOrPath, ITestOutputHelper log, string homeDirectory, string? workingDirectory = null)
         {
-            string testTemplate = GetTestTemplateLocation(templateName);
+            string testTemplate = GetTestTemplateLocation(templateNameOrPath);
+
+            if (Directory.Exists(templateNameOrPath))
+            {
+                testTemplate = templateNameOrPath;
+            }
 
             DotnetNewCommand command = new DotnetNewCommand(log, "install", testTemplate)
                 .WithCustomHive(homeDirectory);
