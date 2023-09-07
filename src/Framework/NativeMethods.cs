@@ -1488,7 +1488,7 @@ internal static class NativeMethods
     }
 
 #if !CLR2COMPATIBILITY
-    internal static (bool acceptAnsiColorCodes, bool outputIsScreen, uint? originalConsoleMode) QueryIsScreenAndTryEnableAnsiColorCodes(StreamHandleType handleType)
+    internal static (bool acceptAnsiColorCodes, bool outputIsScreen, uint? originalConsoleMode) QueryIsScreenAndTryEnableAnsiColorCodes(StreamHandleType handleType = StreamHandleType.StdOut)
     {
         if (Console.IsOutputRedirected)
         {
@@ -1544,7 +1544,7 @@ internal static class NativeMethods
         return (acceptAnsiColorCodes, outputIsScreen, originalConsoleMode);
     }
 
-    internal static void RestoreConsoleMode(uint? originalConsoleMode, StreamHandleType handleType)
+    internal static void RestoreConsoleMode(uint? originalConsoleMode, StreamHandleType handleType = StreamHandleType.StdOut)
     {
         if (IsWindows && originalConsoleMode is not null)
         {

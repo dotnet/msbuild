@@ -229,7 +229,7 @@ namespace Microsoft.Build.Experimental
                 CommunicationsUtilities.Trace("Build finished.");
             }
 
-            NativeMethodsShared.RestoreConsoleMode(_originalConsoleMode, Framework.NativeMethods.StreamHandleType.StdOut);
+            NativeMethodsShared.RestoreConsoleMode(_originalConsoleMode);
 
             return _exitResult;
         }
@@ -373,7 +373,7 @@ namespace Microsoft.Build.Experimental
 
         private void ConfigureAndQueryConsoleProperties()
         {
-            (var acceptAnsiColorCodes, var outputIsScreen, _originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes(NativeMethodsShared.StreamHandleType.StdOut);
+            (var acceptAnsiColorCodes, var outputIsScreen, _originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
             int bufferWidth = QueryConsoleBufferWidth();
             ConsoleColor backgroundColor = QueryConsoleBackgroundColor();
 

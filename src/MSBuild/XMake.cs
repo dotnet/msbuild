@@ -1002,7 +1002,7 @@ namespace Microsoft.Build.CommandLine
                 // Wait for any pending cancel, so that we get any remaining messages
                 s_cancelComplete.WaitOne();
 
-                NativeMethodsShared.RestoreConsoleMode(s_originalConsoleMode, NativeMethodsShared.StreamHandleType.StdOut);
+                NativeMethodsShared.RestoreConsoleMode(s_originalConsoleMode);
 
 #if FEATURE_GET_COMMANDLINE
                 MSBuildEventSource.Log.MSBuildExeStop(commandLine);
@@ -2698,7 +2698,7 @@ namespace Microsoft.Build.CommandLine
 
             static bool DoesEnvironmentSupportTerminalLogger()
             {
-                (var acceptAnsiColorCodes, var outputIsScreen, s_originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes(NativeMethodsShared.StreamHandleType.StdOut);
+                (var acceptAnsiColorCodes, var outputIsScreen, s_originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
 
                 if (!outputIsScreen)
                 {
