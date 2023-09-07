@@ -205,7 +205,10 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         }
         catch (UnableToAccessRepositoryException)
         {
-            Log.LogErrorWithCodeFromResources(nameof(Strings.UnableToAccessRepository), destinationImageReference.Repository, destinationImageReference.RemoteRegistry!.RegistryName);
+            if (BuildEngine != null)
+            {
+                Log.LogErrorWithCodeFromResources(nameof(Strings.UnableToAccessRepository), destinationImageReference.Repository, destinationImageReference.RemoteRegistry!.RegistryName);
+            }
         }
         catch (ContainerHttpException e)
         {
