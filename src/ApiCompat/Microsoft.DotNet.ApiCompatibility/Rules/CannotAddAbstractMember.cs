@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                         leftMetadata,
                         rightMetadata,
                         DiagnosticIds.CannotAddAbstractMember,
-                        string.Format(Resources.CannotAddAbstractMember, right.ToDisplayString(), rightMetadata, leftMetadata),
+                        string.Format(Resources.CannotAddAbstractMember, right.ToDisplayString(SymbolExtensions.DisplayFormat), rightMetadata, leftMetadata),
                         DifferenceType.Added,
                         right));
                 }

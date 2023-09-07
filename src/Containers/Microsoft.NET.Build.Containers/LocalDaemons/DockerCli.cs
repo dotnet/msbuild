@@ -22,7 +22,7 @@ internal sealed class DockerCli : ILocalRegistry
     private readonly ILogger _logger;
     private string? _commandPath;
 
-    public DockerCli(string? command, ILoggerFactory logger)
+    public DockerCli(string? command, ILoggerFactory loggerFactory)
     {
         if (!(command == null ||
               command == PodmanCommand ||
@@ -32,7 +32,7 @@ internal sealed class DockerCli : ILocalRegistry
         }
 
         this._commandPath = command;
-        this._logger = logger.CreateLogger<DockerCli>();
+        this._logger = loggerFactory.CreateLogger<DockerCli>();
     }
 
     public DockerCli(ILoggerFactory loggerFactory) : this(null, loggerFactory)
@@ -57,7 +57,7 @@ internal sealed class DockerCli : ILocalRegistry
         return command;
     }
 
-    public async Task LoadAsync(BuiltImage image, ImageReference sourceReference, ImageReference destinationReference, CancellationToken cancellationToken)
+    public async Task LoadAsync(BuiltImage image, SourceImageReference sourceReference, DestinationImageReference destinationReference, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         string dockerPath = FindFullPathFromPath("docker") ?? "docker";
@@ -196,7 +196,7 @@ internal sealed class DockerCli : ILocalRegistry
 
     private static void Proc_OutputDataReceived(object sender, DataReceivedEventArgs e) => throw new NotImplementedException();
 
-    private static async Task WriteImageToStreamAsync(BuiltImage image, ImageReference sourceReference, ImageReference destinationReference, Stream imageStream, CancellationToken cancellationToken)
+    public static async Task WriteImageToStreamAsync(BuiltImage image, SourceImageReference sourceReference, DestinationImageReference destinationReference, Stream imageStream, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         using TarWriter writer = new(imageStream, TarEntryFormat.Pax, leaveOpen: true);
@@ -241,10 +241,11 @@ internal sealed class DockerCli : ILocalRegistry
         }
 
         // Add manifest
-        JsonArray tagsNode = new()
+        JsonArray tagsNode = new();
+        foreach (string tag in destinationReference.Tags)
         {
-            destinationReference.RepositoryAndTag
-        };
+            tagsNode.Add($"{destinationReference.Repository}:{tag}");
+        }
 
         JsonNode manifestNode = new JsonArray(new JsonObject
         {
@@ -310,4 +311,8 @@ internal sealed class DockerCli : ILocalRegistry
         }
     }
 
+    public override string ToString()
+    {
+        return string.Format(Strings.DockerCli_PushInfo, _commandPath);
+    }
 }

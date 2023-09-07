@@ -61,6 +61,8 @@ namespace Microsoft.DotNet.Tools.Run
                         targetCommand.EnvironmentVariable("ASPNETCORE_URLS", launchSettings.ApplicationUrl);
                     }
 
+                    targetCommand.EnvironmentVariable("DOTNET_LAUNCH_PROFILE", launchSettings.LaunchProfileName);
+
                     foreach (var entry in launchSettings.EnvironmentVariables)
                     {
                         string value = Environment.ExpandEnvironmentVariables(entry.Value);

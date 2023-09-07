@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Cli
 
         internal static void ShowWorkloadsInfo(ParseResult parseResult = null, IWorkloadInfoHelper workloadInfoHelper = null, IReporter reporter = null, string dotnetDir = null)
         {
-            if(workloadInfoHelper != null)
+            if (workloadInfoHelper != null)
             {
                 workloadInfoHelper ??= new WorkloadInfoHelper(parseResult != null ? parseResult.HasOption(SharedOptions.InteractiveOption) : false);
             }
@@ -43,13 +43,13 @@ namespace Microsoft.DotNet.Cli
             reporter ??= Cli.Utils.Reporter.Output;
             string dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
 
-            if (!installedList.Any())
+            if (installedWorkloads.Count == 0)
             {
                 reporter.WriteLine(CommonStrings.NoWorkloadsInstalledInfoWarning);
                 return;
             }
 
-            var manifestInfoDict =  workloadInfoHelper.WorkloadResolver.GetInstalledManifests().ToDictionary(info => info.Id, StringComparer.OrdinalIgnoreCase);
+            var manifestInfoDict = workloadInfoHelper.WorkloadResolver.GetInstalledManifests().ToDictionary(info => info.Id, StringComparer.OrdinalIgnoreCase);
 
             foreach (var workload in installedWorkloads.AsEnumerable())
             {

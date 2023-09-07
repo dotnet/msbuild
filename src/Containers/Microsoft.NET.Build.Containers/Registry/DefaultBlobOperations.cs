@@ -32,11 +32,12 @@ internal class DefaultBlobOperations : IBlobOperations
     {
         cancellationToken.ThrowIfCancellationRequested();
         HttpResponseMessage response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Head, new Uri(_baseUri, $"/v2/{repositoryName}/blobs/{digest}")), cancellationToken).ConfigureAwait(false);
-        return response.StatusCode switch {
+        return response.StatusCode switch
+        {
             HttpStatusCode.OK => true,
             HttpStatusCode.NotFound => false,
-            HttpStatusCode.Unauthorized  => throw new UnableToAccessRepositoryException(_registryName, repositoryName),
-            _ => throw new ContainerHttpException(Resource.GetString(nameof(Strings.RegistryOperationFailed)), response.RequestMessage?.RequestUri?.ToString(), await response.Content.ReadAsStringAsync().ConfigureAwait(false))
+            HttpStatusCode.Unauthorized => throw new UnableToAccessRepositoryException(_registryName, repositoryName),
+            _ => await LogAndThrowContainerHttpException<bool>(response, cancellationToken).ConfigureAwait(false)
         };
     }
 
@@ -68,7 +69,13 @@ internal class DefaultBlobOperations : IBlobOperations
         {
             HttpStatusCode.OK => response,
             HttpStatusCode.Unauthorized => throw new UnableToAccessRepositoryException(_registryName, repositoryName),
-            _ => throw new ContainerHttpException(Resource.GetString(nameof(Strings.RegistryOperationFailed)), response.RequestMessage?.RequestUri?.ToString(), await response.Content.ReadAsStringAsync().ConfigureAwait(false))
+            _ => await LogAndThrowContainerHttpException<HttpResponseMessage>(response, cancellationToken).ConfigureAwait(false)
         };
+    }
+
+    private async Task<T> LogAndThrowContainerHttpException<T>(HttpResponseMessage response, CancellationToken cancellationToken)
+    {
+        await response.LogHttpResponseAsync(_logger, cancellationToken).ConfigureAwait(false);
+        throw new ContainerHttpException(Resource.GetString(nameof(Strings.RegistryPullFailed)), response.RequestMessage?.RequestUri?.ToString());
     }
 }

@@ -29,11 +29,12 @@ internal class DefaultManifestOperations : IManifestOperations
         cancellationToken.ThrowIfCancellationRequested();
         using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(_baseUri, $"/v2/{repositoryName}/manifests/{reference}")).AcceptManifestFormats();
         HttpResponseMessage response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
-        return response.StatusCode switch {
+        return response.StatusCode switch
+        {
             HttpStatusCode.OK => response,
             HttpStatusCode.NotFound => throw new RepositoryNotFoundException(_registryName, repositoryName, reference),
-            HttpStatusCode.Unauthorized  => throw new UnableToAccessRepositoryException(_registryName, repositoryName),
-            _ => throw new ContainerHttpException(Resource.GetString(nameof(Strings.RegistryPullFailed)), response.RequestMessage?.RequestUri?.ToString(), await response.Content.ReadAsStringAsync().ConfigureAwait(false))
+            HttpStatusCode.Unauthorized => throw new UnableToAccessRepositoryException(_registryName, repositoryName),
+            _ => await LogAndThrowContainerHttpException<HttpResponseMessage>(response, cancellationToken).ConfigureAwait(false)
         };
     }
 
@@ -43,11 +44,18 @@ internal class DefaultManifestOperations : IManifestOperations
         HttpContent manifestUploadContent = new StringContent(jsonString);
         manifestUploadContent.Headers.ContentType = new MediaTypeHeaderValue(SchemaTypes.DockerManifestV2);
 
-        HttpResponseMessage putResponse =  await _client.PutAsync(new Uri(_baseUri, $"/v2/{repositoryName}/manifests/{reference}"), manifestUploadContent, cancellationToken).ConfigureAwait(false);
+        HttpResponseMessage putResponse = await _client.PutAsync(new Uri(_baseUri, $"/v2/{repositoryName}/manifests/{reference}"), manifestUploadContent, cancellationToken).ConfigureAwait(false);
 
         if (!putResponse.IsSuccessStatusCode)
         {
-            throw new ContainerHttpException(Resource.GetString(nameof(Strings.RegistryPushFailed)), putResponse.RequestMessage?.RequestUri?.ToString(), await putResponse.Content.ReadAsStringAsync().ConfigureAwait(false));
+            await putResponse.LogHttpResponseAsync(_logger, cancellationToken).ConfigureAwait(false);
+            throw new ContainerHttpException(Resource.FormatString(nameof(Strings.RegistryPushFailed), putResponse.StatusCode), putResponse.RequestMessage?.RequestUri?.ToString());
         }
+    }
+
+    private async Task<T> LogAndThrowContainerHttpException<T>(HttpResponseMessage response, CancellationToken cancellationToken)
+    {
+        await response.LogHttpResponseAsync(_logger, cancellationToken).ConfigureAwait(false);
+        throw new ContainerHttpException(Resource.GetString(nameof(Strings.RegistryPullFailed)), response.RequestMessage?.RequestUri?.ToString());
     }
 }
