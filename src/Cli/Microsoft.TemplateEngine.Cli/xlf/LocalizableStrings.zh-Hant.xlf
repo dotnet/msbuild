@@ -470,12 +470,12 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">套件版本</target>
         <note />
       </trans-unit>
-      <trans-unit id="DetailsCommand_UnableToLoadResorce">
+      <trans-unit id="DetailsCommand_UnableToLoadResource">
         <source>Could not parse NuGet source '{0}', so it was discarded</source>
         <target state="translated">無法剖析 NuGet 來源 '{0}'，因此已捨棄</target>
         <note />
       </trans-unit>
-      <trans-unit id="DetailsCommand_UnableToLoadResorces">
+      <trans-unit id="DetailsCommand_UnableToLoadResources">
         <source>Failed to load NuGet sources configured for the folder {0}</source>
         <target state="translated">無法載入為資料夾 {0} 設定的 NuGet 來源。</target>
         <note />

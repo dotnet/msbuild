@@ -470,12 +470,12 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">패키지 버전</target>
         <note />
       </trans-unit>
-      <trans-unit id="DetailsCommand_UnableToLoadResorce">
+      <trans-unit id="DetailsCommand_UnableToLoadResource">
         <source>Could not parse NuGet source '{0}', so it was discarded</source>
         <target state="translated">'{0}' NuGet 원본을 구문 분석할 수 없어 삭제했습니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="DetailsCommand_UnableToLoadResorces">
+      <trans-unit id="DetailsCommand_UnableToLoadResources">
         <source>Failed to load NuGet sources configured for the folder {0}</source>
         <target state="translated">{0} 폴더에 대해 구성된 NuGet 원본을 로드하지 못했습니다.</target>
         <note />
