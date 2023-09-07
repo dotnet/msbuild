@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AmazonRegistryFailed">
         <source>CONTAINER1002: Request to Amazon Elastic Container Registry failed prematurely. This is often caused when the target repository does not exist in the registry.</source>
-        <target state="translated">CONTAINER1002: 对 Amazon 弹性容器注册表的请求过早失败。当注册表中不存在目标存储库时，通常会导致这种情况。</target>
+        <target state="needs-review-translation">CONTAINER1002: 对 Amazon 弹性容器注册表的请求过早失败。当注册表中不存在目标存储库时，通常会导致这种情况。</target>
         <note>{StrBegin="CONTAINER1002: "}</note>
       </trans-unit>
       <trans-unit id="AmbiguousTags">
@@ -14,12 +14,14 @@
       </trans-unit>
       <trans-unit id="AppCommandArgsSetNoAppCommand">
         <source>CONTAINER2025: ContainerAppCommandArgs are provided without specifying a ContainerAppCommand.</source>
-        <target state="translated">CONTAINER2025: 提供了 ContainerAppCommandArgs，但未指定 ContainerAppCommand。</target>
+        <target state="needs-review-translation">CONTAINER2025: 提供了 ContainerAppCommandArgs，但未指定
+          ContainerAppCommand。</target>
         <note>{StrBegin="CONTAINER2025: "}</note>
       </trans-unit>
       <trans-unit id="AppCommandSetNotUsed">
         <source>CONTAINER2026: ContainerAppCommand and ContainerAppCommandArgs must be empty when ContainerAppCommandInstruction is '{0}'.</source>
-        <target state="translated">CONTAINER2026: 当 ContainerAppCommandInstruction 为“{0}”时，ContainerAppCommand 和 ContainerAppCommandArgs 必须为空。</target>
+        <target state="needs-review-translation">CONTAINER2026: 当 ContainerAppCommandInstruction
+          为“{0}”时，ContainerAppCommand 和 ContainerAppCommandArgs 必须为空。</target>
         <note>{StrBegin="CONTAINER2026: "}</note>
       </trans-unit>
       <trans-unit id="ArchiveRegistry_PushInfo">
@@ -29,7 +31,9 @@
       </trans-unit>
       <trans-unit id="BaseEntrypointOverwritten">
         <source>CONTAINER2022: The base image has an entrypoint that will be overwritten to start the application. Set ContainerAppCommandInstruction to 'Entrypoint' if this is desired. To preserve the base image entrypoint, set ContainerAppCommandInstruction to 'DefaultArgs'.</source>
-        <target state="translated">CONTAINER2022: 基础映像具有一个入口点，该入口点将被覆盖以启动应用程序。如果需要，请将 ContainerAppCommandInstruction 设置为 "Entrypoint"。若要保留基础映像入口点，请将 ContainerAppCommandInstruction 设置为 "DefaultArgs"。</target>
+        <target state="needs-review-translation">CONTAINER2022: 基础映像具有一个入口点，该入口点将被覆盖以启动应用程序。如果需要，请将
+          ContainerAppCommandInstruction 设置为 "Entrypoint"。若要保留基础映像入口点，请将
+          ContainerAppCommandInstruction 设置为 "DefaultArgs"。</target>
         <note>{StrBegin="CONTAINER2022: "}</note>
       </trans-unit>
       <trans-unit id="BaseImageNameParsingFailed">
@@ -39,7 +43,8 @@
       </trans-unit>
       <trans-unit id="BaseImageNameRegistryFallback">
         <source>CONTAINER2020: {0} does not specify a registry and will be pulled from Docker Hub. Please prefix the name with the image registry, for example: '{1}/&lt;image&gt;'.</source>
-        <target state="translated">CONTAINER2020: {0} 未指定注册表，将从 Docker Hub 中拉取。请在名称前面添加映像注册表，例如: "{1}/&lt;image&gt;"。</target>
+        <target state="needs-review-translation">CONTAINER2020: {0} 未指定注册表，将从 Docker Hub 中拉取。请在名称前面添加映像注册表，例如:
+          "{1}/&lt;image&gt;"。</target>
         <note>{StrBegin="CONTAINER2020: "}</note>
       </trans-unit>
       <trans-unit id="BaseImageNameWithSpaces">
@@ -49,7 +54,7 @@
       </trans-unit>
       <trans-unit id="BaseImageNotFound">
         <source>CONTAINER1011: Couldn't find matching base image for {0} that matches RuntimeIdentifier {1}.</source>
-        <target state="translated">CONTAINER1011: 找不到与 RuntimeIdentifier 匹配的 {0} 匹配基映像 {1}。</target>
+        <target state="needs-review-translation">CONTAINER1011: 找不到与 RuntimeIdentifier 匹配的 {0} 匹配基映像 {1}。</target>
         <note>{StrBegin="CONTAINER1011: "}</note>
       </trans-unit>
       <trans-unit id="BlobUploadFailed">
@@ -97,9 +102,9 @@
         <target state="translated">CONTAINER3002: 无法获取 docker 信息: {0}</target>
         <note>{StrBegin="CONTAINER3002: "}</note>
       </trans-unit>
-      <trans-unit id="DockerProcessCreationFailed">
+      <trans-unit id="ContainerRuntimeProcessCreationFailed">
         <source>CONTAINER3001: Failed creating {0} process.</source>
-        <target state="translated">CONTAINER3001: 未能创建 {0} 进程。</target>
+        <target state="needs-review-translation">CONTAINER3001: 未能创建 {0} 进程。</target>
         <note>CONTAINER3001: {0} is the name of the command we failed to run, usually 'docker' or 'podman'.</note>
       </trans-unit>
       <trans-unit id="EmptyOrWhitespacePropertyIgnored">
@@ -114,27 +119,32 @@
       </trans-unit>
       <trans-unit id="EntrypointAndAppCommandArgsSetNoAppCommandInstruction">
         <source>CONTAINER2023: A ContainerEntrypoint and ContainerAppCommandArgs are provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</source>
-        <target state="translated">CONTAINER2023: 提供了 ContainerEntrypoint 和 ContainerAppCommandArgs。必须设置 ContainerAppInstruction 以配置应用程序的启动方式。有效说明为 {0}。</target>
+        <target state="needs-review-translation">CONTAINER2023: 提供了 ContainerEntrypoint 和
+          ContainerAppCommandArgs。必须设置 ContainerAppInstruction 以配置应用程序的启动方式。有效说明为 {0}。</target>
         <note>{StrBegin="CONTAINER2023: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointSetNoAppCommandInstruction">
         <source>CONTAINER2027: A ContainerEntrypoint is provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</source>
-        <target state="translated">CONTAINER2027: 提供了 ContainerEntrypoint。必须设置 ContainerAppInstruction 以配置应用程序的启动方式。有效说明为 {0}。</target>
+        <target state="needs-review-translation">CONTAINER2027: 提供了 ContainerEntrypoint。必须设置
+          ContainerAppInstruction 以配置应用程序的启动方式。有效说明为 {0}。</target>
         <note>{StrBegin="CONTAINER2027: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointArgsSetNoEntrypoint">
         <source>CONTAINER2024: ContainerEntrypointArgs are provided without specifying a ContainerEntrypoint.</source>
-        <target state="translated">CONTAINER2024: 提供了 ContainerEntrypointArgs，但未指定 ContainerEntrypoint。</target>
+        <target state="needs-review-translation">CONTAINER2024: 提供了 ContainerEntrypointArgs，但未指定
+          ContainerEntrypoint。</target>
         <note>{StrBegin="CONTAINER2024: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointArgsSetPreferAppCommandArgs">
         <source>CONTAINER2029: ContainerEntrypointArgsSet are provided. Change to use ContainerAppCommandArgs for arguments that must always be set, or ContainerDefaultArgs for arguments that can be overridden when the container is created.</source>
-        <target state="translated">CONTAINER2029: 提供了 ContainerEntrypointArgsSet。对于必须始终设置的参数，请更改为使用 ContainerAppCommandArgs；对于可在创建容器时替代的参数，请更改为使用 ContainerDefaultArgs。</target>
+        <target state="needs-review-translation">CONTAINER2029: 提供了 ContainerEntrypointArgsSet。对于必须始终设置的参数，请更改为使用
+          ContainerAppCommandArgs；对于可在创建容器时替代的参数，请更改为使用 ContainerDefaultArgs。</target>
         <note>{StrBegin="CONTAINER2029: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointConflictAppCommand">
         <source>CONTAINER2028: ContainerEntrypoint can not be combined with ContainerAppCommandInstruction '{0}'.</source>
-        <target state="translated">CONTAINER2028: ContainerEntrypoint 不能与 ContainerAppCommandInstruction“{0}”一起使用。</target>
+        <target state="needs-review-translation">CONTAINER2028: ContainerEntrypoint 不能与
+          ContainerAppCommandInstruction“{0}”一起使用。</target>
         <note>{StrBegin="CONTAINER2028: "}</note>
       </trans-unit>
       <trans-unit id="FailedRetrievingCredentials">
@@ -164,32 +174,37 @@
       </trans-unit>
       <trans-unit id="InvalidImageName_EntireNameIsInvalidCharacters">
         <source>CONTAINER2005: The inferred image name '{0}' contains entirely invalid characters. The valid characters for an image name are alphanumeric characters, -, /, or _, and the image name must start with an alphanumeric character.</source>
-        <target state="translated">CONTAINER2005: 推断的图像名称“{0}”包含完全无效的字符。图像名称的有效字符包括字母数字字符、-、/ 或 _，图像名称必须以字母数字字符开头。</target>
+        <target state="needs-review-translation">CONTAINER2005: 推断的图像名称“{0}”包含完全无效的字符。图像名称的有效字符包括字母数字字符、-、/ 或
+          _，图像名称必须以字母数字字符开头。</target>
         <note>{StrBegin="CONTAINER2005: "}</note>
       </trans-unit>
       <trans-unit id="InvalidImageName_NonAlphanumericStartCharacter">
         <source>CONTAINER2005: The first character of the image name '{0}' must be a lowercase letter or a digit and all characters in the name must be an alphanumeric character, -, /, or _.</source>
-        <target state="translated">CONTAINER2005: 图像名称“{0}”的第一个字符必须是小写字母或数字，并且名称中的所有字符都必须是字母数字字符、-、/ 或 _。</target>
+        <target state="needs-review-translation">CONTAINER2005: 图像名称“{0}”的第一个字符必须是小写字母或数字，并且名称中的所有字符都必须是字母数字字符、-、/
+          或 _。</target>
         <note>{StrBegin="CONTAINER2005: "}</note>
       </trans-unit>
       <trans-unit id="InvalidPort_Number">
         <source>CONTAINER2017: A ContainerPort item was provided with an invalid port number '{0}'. ContainerPort items must have an Include value that is an integer, and a Type value that is either 'tcp' or 'udp'.</source>
-        <target state="translated">CONTAINER2017: 为 ContainerPort 项提供了无效的端口数字 "{0}"。ContainerPort 项必须具有作为整数的 Include 值，以及 "tcp" 或 "udp" 的 Type 值。</target>
+        <target state="needs-review-translation">CONTAINER2017: 为 ContainerPort 项提供了无效的端口数字 "{0}"。ContainerPort
+          项必须具有作为整数的 Include 值，以及 "tcp" 或 "udp" 的 Type 值。</target>
         <note>{StrBegin="CONTAINER2017: "}</note>
       </trans-unit>
       <trans-unit id="InvalidPort_NumberAndType">
         <source>CONTAINER2017: A ContainerPort item was provided with an invalid port number '{0}' and an invalid port type '{1}'. ContainerPort items must have an Include value that is an integer, and a Type value that is either 'tcp' or 'udp'.</source>
-        <target state="translated">CONTAINER2017: 为 ContainerPort 项提供了无效的端口号 {0} 和无效的端口类型 "{1}"。ContainerPort 项必须具有作为整数的 Include 值，以及“tcp”或“udp”的 Type 值。</target>
+        <target state="needs-review-translation">CONTAINER2017: 为 ContainerPort 项提供了无效的端口号 {0} 和无效的端口类型
+          "{1}"。ContainerPort 项必须具有作为整数的 Include 值，以及“tcp”或“udp”的 Type 值。</target>
         <note>{StrBegin="CONTAINER2017: "}</note>
       </trans-unit>
       <trans-unit id="InvalidPort_Type">
         <source>CONTAINER2017: A ContainerPort item was provided with an invalid port type '{0}'. ContainerPort items must have an Include value that is an integer, and a Type value that is either 'tcp' or 'udp'.</source>
-        <target state="translated">CONTAINER2017: 为 ContainerPort 项提供了无效的端口类型 "{0}"。ContainerPort 项必须具有作为整数的 Include 值，以及 "tcp" 或 "udp" 的 Type 值。</target>
+        <target state="needs-review-translation">CONTAINER2017: 为 ContainerPort 项提供了无效的端口类型 "{0}"。ContainerPort
+          项必须具有作为整数的 Include 值，以及 "tcp" 或 "udp" 的 Type 值。</target>
         <note>{StrBegin="CONTAINER2017: "}</note>
       </trans-unit>
       <trans-unit id="InvalidSdkPrereleaseVersion">
         <source>CONTAINER2018: Invalid SDK prerelease version '{0}' - only 'rc' and 'preview' are supported.</source>
-        <target state="translated">CONTAINER2018: SDK 预发行版本“{0}”无效 - 仅支持“rc”和“preview”。</target>
+        <target state="needs-review-translation">CONTAINER2018: SDK 预发行版本“{0}”无效 - 仅支持“rc”和“preview”。</target>
         <note>{StrBegin="CONTAINER2018: "}</note>
       </trans-unit>
       <trans-unit id="InvalidSdkVersion">
@@ -199,12 +214,13 @@
       </trans-unit>
       <trans-unit id="InvalidTag">
         <source>CONTAINER2007: Invalid {0} provided: {1}. Image tags must be alphanumeric, underscore, hyphen, or period.</source>
-        <target state="translated">CONTAINER2007: 提供的 {0} 无效: {1}。图像标记必须是字母数字、下划线、连字符或句点。</target>
+        <target state="needs-review-translation">CONTAINER2007: 提供的 {0} 无效: {1}。图像标记必须是字母数字、下划线、连字符或句点。</target>
         <note>{StrBegin="CONTAINER2007: "}</note>
       </trans-unit>
       <trans-unit id="InvalidTags">
         <source>CONTAINER2010: Invalid {0} provided: {1}. {0} must be a semicolon-delimited list of valid image tags. Image tags must be alphanumeric, underscore, hyphen, or period.</source>
-        <target state="translated">CONTAINER2010: 提供的 {0} 无效: {1}。{0} 必须是有效图像标记的分号分隔列表。图像标记必须是字母数字、下划线、连字符或句点。</target>
+        <target state="needs-review-translation">CONTAINER2010: 提供的 {0} 无效: {1}。{0}
+          必须是有效图像标记的分号分隔列表。图像标记必须是字母数字、下划线、连字符或句点。</target>
         <note>{StrBegin="CONTAINER2010: "}</note>
       </trans-unit>
       <trans-unit id="InvalidTokenResponse">
@@ -214,12 +230,12 @@
       </trans-unit>
       <trans-unit id="ItemsWithoutMetadata">
         <source>CONTAINER4005: Item '{0}' contains items without metadata 'Value', and they will be ignored.</source>
-        <target state="translated">CONTAINER4005: 项 "{0}" 包含没有元数据 "Value" 的项，它们将被忽略。</target>
+        <target state="needs-review-translation">CONTAINER4005: 项 "{0}" 包含没有元数据 "Value" 的项，它们将被忽略。</target>
         <note>{StrBegin="CONTAINER4005: "}</note>
       </trans-unit>
       <trans-unit id="LocalRegistryNotAvailable">
         <source>CONTAINER1012: The local registry is not available, but pushing to a local registry was requested.</source>
-        <target state="translated">CONTAINER1012: 本地注册表不可用，但请求推送到本地注册表。</target>
+        <target state="needs-review-translation">CONTAINER1012: 本地注册表不可用，但请求推送到本地注册表。</target>
         <note>{StrBegin="CONTAINER1012: "}</note>
       </trans-unit>
       <trans-unit id="LocalDocker_FailedToGetConfig">
@@ -234,12 +250,13 @@
       </trans-unit>
       <trans-unit id="MissingLinkToRegistry">
         <source>CONTAINER2004: Unable to download layer with descriptor '{0}' from registry '{1}' because it does not exist.</source>
-        <target state="translated">CONTAINER2004: 无法从注册表“{1}”下载描述符为“{0}”的层，因为它不存在。</target>
+        <target state="needs-review-translation">CONTAINER2004: 无法从注册表“{1}”下载描述符为“{0}”的层，因为它不存在。</target>
         <note>{StrBegin="CONTAINER2004: "}</note>
       </trans-unit>
       <trans-unit id="MissingPortNumber">
         <source>CONTAINER2016: ContainerPort item '{0}' does not specify the port number. Please ensure the item's Include is a port number, for example '&lt;ContainerPort Include="80" /&gt;'</source>
-        <target state="translated">CONTAINER2016: ContainerPort 项“{0}”未指定端口号。请确保项的 Include 是端口号，例如 "&lt;ContainerPort Include="80" /&gt;"</target>
+        <target state="needs-review-translation">CONTAINER2016: ContainerPort 项“{0}”未指定端口号。请确保项的 Include 是端口号，例如
+          "&lt;ContainerPort Include="80" /&gt;"</target>
         <note>{StrBegin="CONTAINER2016: "}</note>
       </trans-unit>
       <trans-unit id="NoRequestUriSpecified">
@@ -339,12 +356,13 @@
       </trans-unit>
       <trans-unit id="UnknownLocalRegistryType">
         <source>CONTAINER2002: Unknown local registry type '{0}'. Valid local container registry types are {1}.</source>
-        <target state="translated">CONTAINER2002: 本地注册表类型“{0}”未知。有效的本地容器注册表类型为 {1}。</target>
+        <target state="needs-review-translation">CONTAINER2002: 本地注册表类型“{0}”未知。有效的本地容器注册表类型为 {1}。</target>
         <note>{StrBegin="CONTAINER2002: "}</note>
       </trans-unit>
       <trans-unit id="UnknownMediaType">
         <source>CONTAINER2003: The manifest for {0}:{1} from registry {2} was an unknown type: {3}. Please raise an issue at https://github.com/dotnet/sdk-container-builds/issues with this message.</source>
-        <target state="translated">CONTAINER2003: 注册表 {2} 中 {0} {1} 的清单是未知类型: {3}。请在 https://github.com/dotnet/sdk-container-builds/issues 上提出问题，并附上此消息。</target>
+        <target state="needs-review-translation">CONTAINER2003: 注册表 {2} 中 {0} {1} 的清单是未知类型: {3}。请在
+          https://github.com/dotnet/sdk-container-builds/issues 上提出问题，并附上此消息。</target>
         <note>{StrBegin="CONTAINER2003: "}</note>
       </trans-unit>
       <trans-unit id="UnrecognizedMediaType">

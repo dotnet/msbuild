@@ -4,22 +4,27 @@
     <body>
       <trans-unit id="AmazonRegistryFailed">
         <source>CONTAINER1002: Request to Amazon Elastic Container Registry failed prematurely. This is often caused when the target repository does not exist in the registry.</source>
-        <target state="translated">CONTAINER1002: la demande à Amazon Elastic Container Registry a échoué prématurément. Cela est souvent dû au fait que le dépôt cible n’existe pas dans le Registre.</target>
+        <target state="needs-review-translation">CONTAINER1002: la demande à Amazon Elastic Container Registry a
+          échoué prématurément. Cela est souvent dû au fait que le dépôt cible n’existe pas dans le
+          Registre.</target>
         <note>{StrBegin="CONTAINER1002: "}</note>
       </trans-unit>
       <trans-unit id="AmbiguousTags">
         <source>CONTAINER2008: Both {0} and {1} were provided, but only one or the other is allowed.</source>
-        <target state="translated">CONTAINER2008: {0} et {1} ont été fournis, mais seul l’un ou l’autre est autorisé.</target>
+        <target state="translated">CONTAINER2008: {0} et {1} ont été fournis, mais seul l’un ou
+          l’autre est autorisé.</target>
         <note>{StrBegin="CONTAINER2008: "}</note>
       </trans-unit>
       <trans-unit id="AppCommandArgsSetNoAppCommand">
         <source>CONTAINER2025: ContainerAppCommandArgs are provided without specifying a ContainerAppCommand.</source>
-        <target state="translated">CONTAINER2025: les ContainerAppCommandArgs sont fournis sans spécifier de ContainerAppCommand.</target>
+        <target state="needs-review-translation">CONTAINER2025: les ContainerAppCommandArgs sont fournis sans
+          spécifier de ContainerAppCommand.</target>
         <note>{StrBegin="CONTAINER2025: "}</note>
       </trans-unit>
       <trans-unit id="AppCommandSetNotUsed">
         <source>CONTAINER2026: ContainerAppCommand and ContainerAppCommandArgs must be empty when ContainerAppCommandInstruction is '{0}'.</source>
-        <target state="translated">CONTAINER2026: ContainerAppCommand et ContainerAppCommandArgs doivent être vides lorsque ContainerAppCommandInstruction est '{0}'.</target>
+        <target state="needs-review-translation">CONTAINER2026: ContainerAppCommand et ContainerAppCommandArgs
+          doivent être vides lorsque ContainerAppCommandInstruction est '{0}'.</target>
         <note>{StrBegin="CONTAINER2026: "}</note>
       </trans-unit>
       <trans-unit id="ArchiveRegistry_PushInfo">
@@ -29,7 +34,10 @@
       </trans-unit>
       <trans-unit id="BaseEntrypointOverwritten">
         <source>CONTAINER2022: The base image has an entrypoint that will be overwritten to start the application. Set ContainerAppCommandInstruction to 'Entrypoint' if this is desired. To preserve the base image entrypoint, set ContainerAppCommandInstruction to 'DefaultArgs'.</source>
-        <target state="translated">CONTAINER2022: L'image de base a un point d'entrée qui sera écrasé pour démarrer l'application. Définissez ContainerAppCommandInstruction sur 'Entrypoint' si vous le souhaitez. Pour conserver le point d'entrée de l'image de base, définissez ContainerAppCommandInstruction sur "DefaultArgs".</target>
+        <target state="needs-review-translation">CONTAINER2022: L'image de base a un point d'entrée qui sera
+          écrasé pour démarrer l'application. Définissez ContainerAppCommandInstruction sur
+          'Entrypoint' si vous le souhaitez. Pour conserver le point d'entrée de l'image de base,
+          définissez ContainerAppCommandInstruction sur "DefaultArgs".</target>
         <note>{StrBegin="CONTAINER2022: "}</note>
       </trans-unit>
       <trans-unit id="BaseImageNameParsingFailed">
@@ -39,22 +47,27 @@
       </trans-unit>
       <trans-unit id="BaseImageNameRegistryFallback">
         <source>CONTAINER2020: {0} does not specify a registry and will be pulled from Docker Hub. Please prefix the name with the image registry, for example: '{1}/&lt;image&gt;'.</source>
-        <target state="translated">CONTAINER2020: {0} ne spécifie pas de registre et sera extrait de Docker Hub. Veuillez préfixer le nom avec le registre d'images, par exemple : '{1}/&lt;image&gt;'.</target>
+        <target state="needs-review-translation">CONTAINER2020: {0} ne spécifie pas de registre et sera extrait de
+          Docker Hub. Veuillez préfixer le nom avec le registre d'images, par exemple :
+          '{1}/&lt;image&gt;'.</target>
         <note>{StrBegin="CONTAINER2020: "}</note>
       </trans-unit>
       <trans-unit id="BaseImageNameWithSpaces">
         <source>CONTAINER2013: {0} had spaces in it, replacing with dashes.</source>
-        <target state="translated">CONTAINER2013: {0} contenait des espaces, remplacés par des tirets.</target>
+        <target state="translated">CONTAINER2013: {0} contenait des espaces, remplacés par des
+          tirets.</target>
         <note>{StrBegin="CONTAINER2013: "}</note>
       </trans-unit>
       <trans-unit id="BaseImageNotFound">
         <source>CONTAINER1011: Couldn't find matching base image for {0} that matches RuntimeIdentifier {1}.</source>
-        <target state="translated">CONTAINER1011: impossible de trouver une image de base correspondante pour {0} qui correspond à RuntimeIdentifier {1}.</target>
+        <target state="needs-review-translation">CONTAINER1011: impossible de trouver une image de base
+          correspondante pour {0} qui correspond à RuntimeIdentifier {1}.</target>
         <note>{StrBegin="CONTAINER1011: "}</note>
       </trans-unit>
       <trans-unit id="BlobUploadFailed">
         <source>CONTAINER1001: Failed to upload blob using {0}; received status code '{1}'.</source>
-        <target state="translated">CONTAINER1001: échec du chargement de l’objet blob à l’aide de {0}; le code d’état «{1}» a été reçu.</target>
+        <target state="translated">CONTAINER1001: échec du chargement de l’objet blob à l’aide de
+          {0}; le code d’état «{1}» a été reçu.</target>
         <note>{StrBegin="CONTAINER1001: "}</note>
       </trans-unit>
       <trans-unit id="ContainerBuilder_ImageUploadedToLocalDaemon">
@@ -69,12 +82,14 @@
       </trans-unit>
       <trans-unit id="ContainerBuilder_StartBuildingImage">
         <source>Building image '{0}' with tags '{1}' on top of base image '{2}'.</source>
-        <target state="translated">Génération de l’image «{0}» avec des balises «{1}» au-dessus de l’image de base «{2}».</target>
+        <target state="translated">Génération de l’image «{0}» avec des balises «{1}» au-dessus de
+          l’image de base «{2}».</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldntDeserializeJsonToken">
         <source>CONTAINER1007: Could not deserialize token from JSON.</source>
-        <target state="translated">CONTAINER1007: impossible de désérialiser le jeton à partir de JSON.</target>
+        <target state="translated">CONTAINER1007: impossible de désérialiser le jeton à partir de
+          JSON.</target>
         <note>{StrBegin="CONTAINER1007: "}</note>
       </trans-unit>
       <trans-unit id="CouldntRecognizeRegistry">
@@ -89,7 +104,8 @@
       </trans-unit>
       <trans-unit id="DockerInfoFailed">
         <source>CONTAINER3002: Failed to get docker info({0})\n{1}\n{2}</source>
-        <target state="translated">CONTAINER3002: échec de l’obtention des informations docker ({0})\n{1}\n{2}</target>
+        <target state="translated">CONTAINER3002: échec de l’obtention des informations docker
+          ({0})\n{1}\n{2}</target>
         <note>{StrBegin="CONTAINER3002: "}</note>
       </trans-unit>
       <trans-unit id="DockerInfoFailed_Ex">
@@ -97,49 +113,61 @@
         <target state="translated">CONTAINER3002: échec de l’obtention des informations docker : {0}</target>
         <note>{StrBegin="CONTAINER3002: "}</note>
       </trans-unit>
-      <trans-unit id="DockerProcessCreationFailed">
+      <trans-unit id="ContainerRuntimeProcessCreationFailed">
         <source>CONTAINER3001: Failed creating {0} process.</source>
-        <target state="translated">CONTAINER3001: Échec du processus de création {0}.</target>
+        <target state="needs-review-translation">CONTAINER3001: Échec du processus de création {0}.</target>
         <note>CONTAINER3001: {0} is the name of the command we failed to run, usually 'docker' or 'podman'.</note>
       </trans-unit>
       <trans-unit id="EmptyOrWhitespacePropertyIgnored">
         <source>CONTAINER4006: Property '{0}' is empty or contains whitespace and will be ignored.</source>
-        <target state="translated">CONTAINER4006: la propriété '{0}' est vide ou contient un espace blanc et sera ignorée.</target>
+        <target state="translated">CONTAINER4006: la propriété '{0}' est vide ou contient un espace
+          blanc et sera ignorée.</target>
         <note>{StrBegin="CONTAINER4006: "}</note>
       </trans-unit>
       <trans-unit id="EmptyValuesIgnored">
         <source>CONTAINER4004: Items '{0}' contain empty item(s) which will be ignored.</source>
-        <target state="translated">CONTAINER4004: les éléments '{0}' contiennent un ou plusieurs éléments vides qui seront ignorés.</target>
+        <target state="translated">CONTAINER4004: les éléments '{0}' contiennent un ou plusieurs
+          éléments vides qui seront ignorés.</target>
         <note>{StrBegin="CONTAINER4004: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointAndAppCommandArgsSetNoAppCommandInstruction">
         <source>CONTAINER2023: A ContainerEntrypoint and ContainerAppCommandArgs are provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</source>
-        <target state="translated">CONTAINER2023: Un ContainerEntrypoint et ContainerAppCommandArgs sont fournis. ContainerAppInstruction doit être défini pour configurer le mode de démarrage de l'application. Les instructions valides sont {0}.</target>
+        <target state="needs-review-translation">CONTAINER2023: Un ContainerEntrypoint et ContainerAppCommandArgs
+          sont fournis. ContainerAppInstruction doit être défini pour configurer le mode de
+          démarrage de l'application. Les instructions valides sont {0}.</target>
         <note>{StrBegin="CONTAINER2023: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointSetNoAppCommandInstruction">
         <source>CONTAINER2027: A ContainerEntrypoint is provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</source>
-        <target state="translated">CONTAINER2027: Un ContainerEntrypoint est fourni. ContainerAppInstruction doit être défini pour configurer le mode de démarrage de l'application. Les instructions valides sont {0}.</target>
+        <target state="needs-review-translation">CONTAINER2027: Un ContainerEntrypoint est fourni.
+          ContainerAppInstruction doit être défini pour configurer le mode de démarrage de
+          l'application. Les instructions valides sont {0}.</target>
         <note>{StrBegin="CONTAINER2027: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointArgsSetNoEntrypoint">
         <source>CONTAINER2024: ContainerEntrypointArgs are provided without specifying a ContainerEntrypoint.</source>
-        <target state="translated">CONTAINER2024: les ContainerEntrypointArgs sont fournis sans spécifier de ContainerEntrypoint.</target>
+        <target state="needs-review-translation">CONTAINER2024: les ContainerEntrypointArgs sont fournis sans
+          spécifier de ContainerEntrypoint.</target>
         <note>{StrBegin="CONTAINER2024: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointArgsSetPreferAppCommandArgs">
         <source>CONTAINER2029: ContainerEntrypointArgsSet are provided. Change to use ContainerAppCommandArgs for arguments that must always be set, or ContainerDefaultArgs for arguments that can be overridden when the container is created.</source>
-        <target state="translated">CONTAINER2029: ContainerEntrypointArgsSet est fourni. Changez pour utiliser ContainerAppCommandArgs pour les arguments qui doivent toujours être définis, ou ContainerDefaultArgs pour les arguments qui peuvent être remplacés lors de la création du conteneur.</target>
+        <target state="needs-review-translation">CONTAINER2029: ContainerEntrypointArgsSet est fourni. Changez
+          pour utiliser ContainerAppCommandArgs pour les arguments qui doivent toujours être
+          définis, ou ContainerDefaultArgs pour les arguments qui peuvent être remplacés lors de la
+          création du conteneur.</target>
         <note>{StrBegin="CONTAINER2029: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointConflictAppCommand">
         <source>CONTAINER2028: ContainerEntrypoint can not be combined with ContainerAppCommandInstruction '{0}'.</source>
-        <target state="translated">CONTAINER2028: ContainerEntrypoint ne peut pas être combiné avec ContainerAppCommandInstruction '{0}'.</target>
+        <target state="needs-review-translation">CONTAINER2028: ContainerEntrypoint ne peut pas être combiné avec
+          ContainerAppCommandInstruction '{0}'.</target>
         <note>{StrBegin="CONTAINER2028: "}</note>
       </trans-unit>
       <trans-unit id="FailedRetrievingCredentials">
         <source>CONTAINER1008: Failed retrieving credentials for "{0}": {1}</source>
-        <target state="translated">CONTAINER1008: échec de la récupération des informations d’identification pour «{0}» : {1}</target>
+        <target state="translated">CONTAINER1008: échec de la récupération des informations
+          d’identification pour «{0}» : {1}</target>
         <note>{StrBegin="CONTAINER1008: "}</note>
       </trans-unit>
       <trans-unit id="HostObjectNotDetected">
@@ -149,47 +177,63 @@
       </trans-unit>
       <trans-unit id="ImageLoadFailed">
         <source>CONTAINER1009: Failed to load image from local registry. stdout: {0}</source>
-        <target state="translated">CONTAINER1009: Échec du chargement de l'image à partir du registre local. sortie standard : {0}</target>
+        <target state="translated">CONTAINER1009: Échec du chargement de l'image à partir du
+          registre local. sortie standard : {0}</target>
         <note>{StrBegin="CONTAINER1009: "}</note>
       </trans-unit>
       <trans-unit id="ImagePullNotSupported">
         <source>CONTAINER1010: Pulling images from local registry is not supported.</source>
-        <target state="translated">CONTAINER1010: L'extraction d'images à partir du registre local n'est pas prise en charge.</target>
+        <target state="translated">CONTAINER1010: L'extraction d'images à partir du registre local
+          n'est pas prise en charge.</target>
         <note>{StrBegin="CONTAINER1010: "}</note>
       </trans-unit>
       <trans-unit id="InvalidEnvVar">
         <source>CONTAINER2015: {0}: '{1}' was not a valid Environment Variable. Ignoring.</source>
-        <target state="translated">CONTAINER2015: {0} : '{1}' n’était pas une variable d’environnement valide. Ignorant.</target>
+        <target state="translated">CONTAINER2015: {0} : '{1}' n’était pas une variable
+          d’environnement valide. Ignorant.</target>
         <note>{StrBegin="CONTAINER2015: "}</note>
       </trans-unit>
       <trans-unit id="InvalidImageName_EntireNameIsInvalidCharacters">
         <source>CONTAINER2005: The inferred image name '{0}' contains entirely invalid characters. The valid characters for an image name are alphanumeric characters, -, /, or _, and the image name must start with an alphanumeric character.</source>
-        <target state="translated">CONTAINER2005: le nom d'image déduit '{0}' contient des caractères entièrement non valides. Les caractères valides pour un nom d'image sont les caractères alphanumériques, -, / ou _, et le nom de l'image doit commencer par un caractère alphanumérique.</target>
+        <target state="needs-review-translation">CONTAINER2005: le nom d'image déduit '{0}' contient des
+          caractères entièrement non valides. Les caractères valides pour un nom d'image sont les
+          caractères alphanumériques, -, / ou _, et le nom de l'image doit commencer par un
+          caractère alphanumérique.</target>
         <note>{StrBegin="CONTAINER2005: "}</note>
       </trans-unit>
       <trans-unit id="InvalidImageName_NonAlphanumericStartCharacter">
         <source>CONTAINER2005: The first character of the image name '{0}' must be a lowercase letter or a digit and all characters in the name must be an alphanumeric character, -, /, or _.</source>
-        <target state="translated">CONTAINER2005: le premier caractère du nom de l'image '{0}' doit être une lettre minuscule ou un chiffre et tous les caractères du nom doivent être un caractère alphanumérique, -, / ou _.</target>
+        <target state="needs-review-translation">CONTAINER2005: le premier caractère du nom de l'image '{0}' doit
+          être une lettre minuscule ou un chiffre et tous les caractères du nom doivent être un
+          caractère alphanumérique, -, / ou _.</target>
         <note>{StrBegin="CONTAINER2005: "}</note>
       </trans-unit>
       <trans-unit id="InvalidPort_Number">
         <source>CONTAINER2017: A ContainerPort item was provided with an invalid port number '{0}'. ContainerPort items must have an Include value that is an integer, and a Type value that is either 'tcp' or 'udp'.</source>
-        <target state="translated">CONTAINER2017: un élément ContainerPort a été fourni avec un numéro de port non valide «{0}». Les éléments ContainerPort doivent avoir une valeur Include qui est un entier et une valeur Type qui est 'tcp' ou 'udp'.</target>
+        <target state="needs-review-translation">CONTAINER2017: un élément ContainerPort a été fourni avec un
+          numéro de port non valide «{0}». Les éléments ContainerPort doivent avoir une valeur
+          Include qui est un entier et une valeur Type qui est 'tcp' ou 'udp'.</target>
         <note>{StrBegin="CONTAINER2017: "}</note>
       </trans-unit>
       <trans-unit id="InvalidPort_NumberAndType">
         <source>CONTAINER2017: A ContainerPort item was provided with an invalid port number '{0}' and an invalid port type '{1}'. ContainerPort items must have an Include value that is an integer, and a Type value that is either 'tcp' or 'udp'.</source>
-        <target state="translated">CONTAINER2017: un élément ContainerPort a été fourni avec un numéro de port non valide '{0}' et un type de port non valide '{1}'. Les éléments ContainerPort doivent avoir une valeur Include qui est un entier et une valeur Type qui est 'tcp' ou 'udp'.</target>
+        <target state="needs-review-translation">CONTAINER2017: un élément ContainerPort a été fourni avec un
+          numéro de port non valide '{0}' et un type de port non valide '{1}'. Les éléments
+          ContainerPort doivent avoir une valeur Include qui est un entier et une valeur Type qui
+          est 'tcp' ou 'udp'.</target>
         <note>{StrBegin="CONTAINER2017: "}</note>
       </trans-unit>
       <trans-unit id="InvalidPort_Type">
         <source>CONTAINER2017: A ContainerPort item was provided with an invalid port type '{0}'. ContainerPort items must have an Include value that is an integer, and a Type value that is either 'tcp' or 'udp'.</source>
-        <target state="translated">CONTAINER2017: un élément ContainerPort a été fourni avec un type de port non valide «{0}». Les éléments ContainerPort doivent avoir une valeur Include qui est un entier et une valeur Type qui est 'tcp' ou 'udp'.</target>
+        <target state="needs-review-translation">CONTAINER2017: un élément ContainerPort a été fourni avec un type
+          de port non valide «{0}». Les éléments ContainerPort doivent avoir une valeur Include qui
+          est un entier et une valeur Type qui est 'tcp' ou 'udp'.</target>
         <note>{StrBegin="CONTAINER2017: "}</note>
       </trans-unit>
       <trans-unit id="InvalidSdkPrereleaseVersion">
         <source>CONTAINER2018: Invalid SDK prerelease version '{0}' - only 'rc' and 'preview' are supported.</source>
-        <target state="translated">CONTAINER2018: version préliminaire du SDK non valide '{0}' - seuls 'rc' et 'preview' sont pris en charge.</target>
+        <target state="needs-review-translation">CONTAINER2018: version préliminaire du SDK non valide '{0}' -
+          seuls 'rc' et 'preview' sont pris en charge.</target>
         <note>{StrBegin="CONTAINER2018: "}</note>
       </trans-unit>
       <trans-unit id="InvalidSdkVersion">
@@ -199,27 +243,33 @@
       </trans-unit>
       <trans-unit id="InvalidTag">
         <source>CONTAINER2007: Invalid {0} provided: {1}. Image tags must be alphanumeric, underscore, hyphen, or period.</source>
-        <target state="translated">CONTAINER2007: {0} non valide fournie : {1}. Les balises d’image doivent être alphanumériques, traits de soulignement, traits d’union ou point.</target>
+        <target state="needs-review-translation">CONTAINER2007: {0} non valide fournie : {1}. Les balises d’image
+          doivent être alphanumériques, traits de soulignement, traits d’union ou point.</target>
         <note>{StrBegin="CONTAINER2007: "}</note>
       </trans-unit>
       <trans-unit id="InvalidTags">
         <source>CONTAINER2010: Invalid {0} provided: {1}. {0} must be a semicolon-delimited list of valid image tags. Image tags must be alphanumeric, underscore, hyphen, or period.</source>
-        <target state="translated">CONTAINER2010: {0} non valide fournie : {1}. {0} doit être une liste de balises d’image valides délimitées par des points-virgules. Les balises d’image doivent être alphanumériques, traits de soulignement, traits d’union ou point.</target>
+        <target state="needs-review-translation">CONTAINER2010: {0} non valide fournie : {1}. {0} doit être une
+          liste de balises d’image valides délimitées par des points-virgules. Les balises d’image
+          doivent être alphanumériques, traits de soulignement, traits d’union ou point.</target>
         <note>{StrBegin="CONTAINER2010: "}</note>
       </trans-unit>
       <trans-unit id="InvalidTokenResponse">
         <source>CONTAINER1003: Token response had neither token nor access_token.</source>
-        <target state="translated">CONTAINER1003: la réponse de jeton n’avait ni jeton ni access_token.</target>
+        <target state="translated">CONTAINER1003: la réponse de jeton n’avait ni jeton ni
+          access_token.</target>
         <note>{StrBegin="CONTAINER1003: "}</note>
       </trans-unit>
       <trans-unit id="ItemsWithoutMetadata">
         <source>CONTAINER4005: Item '{0}' contains items without metadata 'Value', and they will be ignored.</source>
-        <target state="translated">CONTAINER4005: l’élément '{0}' contient des éléments sans métadonnées 'Value'. Ils seront ignorés.</target>
+        <target state="needs-review-translation">CONTAINER4005: l’élément '{0}' contient des éléments sans
+          métadonnées 'Value'. Ils seront ignorés.</target>
         <note>{StrBegin="CONTAINER4005: "}</note>
       </trans-unit>
       <trans-unit id="LocalRegistryNotAvailable">
         <source>CONTAINER1012: The local registry is not available, but pushing to a local registry was requested.</source>
-        <target state="translated">CONTAINER1012: Le registre local n'est pas disponible, mais la transmission vers un registre local a été demandée.</target>
+        <target state="needs-review-translation">CONTAINER1012: Le registre local n'est pas disponible, mais la
+          transmission vers un registre local a été demandée.</target>
         <note>{StrBegin="CONTAINER1012: "}</note>
       </trans-unit>
       <trans-unit id="LocalDocker_FailedToGetConfig">
@@ -234,12 +284,15 @@
       </trans-unit>
       <trans-unit id="MissingLinkToRegistry">
         <source>CONTAINER2004: Unable to download layer with descriptor '{0}' from registry '{1}' because it does not exist.</source>
-        <target state="translated">CONTAINER2004: impossible de télécharger la couche avec le descripteur '{0}' à partir du Registre '{1}', car elle n’existe pas.</target>
+        <target state="needs-review-translation">CONTAINER2004: impossible de télécharger la couche avec le
+          descripteur '{0}' à partir du Registre '{1}', car elle n’existe pas.</target>
         <note>{StrBegin="CONTAINER2004: "}</note>
       </trans-unit>
       <trans-unit id="MissingPortNumber">
         <source>CONTAINER2016: ContainerPort item '{0}' does not specify the port number. Please ensure the item's Include is a port number, for example '&lt;ContainerPort Include="80" /&gt;'</source>
-        <target state="translated">CONTAINER2016: l’élément ContainerPort '{0}' ne spécifie pas le numéro de port. Vérifiez que l’élément Include est un numéro de port, par exemple '&lt;ContainerPort Include="80" /&gt;'</target>
+        <target state="needs-review-translation">CONTAINER2016: l’élément ContainerPort '{0}' ne spécifie pas le
+          numéro de port. Vérifiez que l’élément Include est un numéro de port, par exemple
+          '&lt;ContainerPort Include="80" /&gt;'</target>
         <note>{StrBegin="CONTAINER2016: "}</note>
       </trans-unit>
       <trans-unit id="NoRequestUriSpecified">
@@ -249,7 +302,8 @@
       </trans-unit>
       <trans-unit id="NormalizedContainerName">
         <source>'{0}' was not a valid container image name, it was normalized to '{1}'</source>
-        <target state="translated">'{0}' n’était pas un nom d’image conteneur valide, il a été normalisé pour '{1}'</target>
+        <target state="translated">'{0}' n’était pas un nom d’image conteneur valide, il a été
+          normalisé pour '{1}'</target>
         <note />
       </trans-unit>
       <trans-unit id="PublishDirectoryDoesntExist">
@@ -259,7 +313,8 @@
       </trans-unit>
       <trans-unit id="RegistryOutputPushFailed">
         <source>CONTAINER1013: Failed to push to the output registry: {0}</source>
-        <target state="translated">CONTAINER1013: échec de l’envoi (push) vers le Registre de sortie : {0}</target>
+        <target state="translated">CONTAINER1013: échec de l’envoi (push) vers le Registre de sortie
+          : {0}</target>
         <note>{StrBegin="CONTAINER1013: "}</note>
       </trans-unit>
       <trans-unit id="RegistryPushFailed">
@@ -269,7 +324,8 @@
       </trans-unit>
       <trans-unit id="Registry_ConfigUploadStarted">
         <source>Uploading config to registry at blob '{0}',</source>
-        <target state="translated">Chargement de la configuration dans le Registre sur l’objet blob «{0}»,</target>
+        <target state="translated">Chargement de la configuration dans le Registre sur l’objet blob
+          «{0}»,</target>
         <note />
       </trans-unit>
       <trans-unit id="Registry_ConfigUploaded">
@@ -294,7 +350,8 @@
       </trans-unit>
       <trans-unit id="Registry_ManifestUploadStarted">
         <source>Uploading manifest to registry '{0}' as blob '{1}'.</source>
-        <target state="translated">Chargement du manifeste dans le Registre '{0}' en tant qu’objet blob '{1}'.</target>
+        <target state="translated">Chargement du manifeste dans le Registre '{0}' en tant qu’objet
+          blob '{1}'.</target>
         <note>{0} is the registry name</note>
       </trans-unit>
       <trans-unit id="Registry_ManifestUploaded">
@@ -314,17 +371,20 @@
       </trans-unit>
       <trans-unit id="RequiredItemsContainsEmptyItems">
         <source>CONTAINER4003: Required '{0}' items contain empty items.</source>
-        <target state="translated">CONTAINER4003: les éléments de '{0}' obligatoires contiennent des éléments vides.</target>
+        <target state="translated">CONTAINER4003: les éléments de '{0}' obligatoires contiennent des
+          éléments vides.</target>
         <note>{StrBegin="CONTAINER4003: "}</note>
       </trans-unit>
       <trans-unit id="RequiredItemsNotSet">
         <source>CONTAINER4002: Required '{0}' items were not set.</source>
-        <target state="translated">CONTAINER4002: les éléments de '{0}' requis n’ont pas été définis.</target>
+        <target state="translated">CONTAINER4002: les éléments de '{0}' requis n’ont pas été
+          définis.</target>
         <note>{StrBegin="CONTAINER4002: "}</note>
       </trans-unit>
       <trans-unit id="RequiredPropertyNotSetOrEmpty">
         <source>CONTAINER4001: Required property '{0}' was not set or empty.</source>
-        <target state="translated">CONTAINER4001: la propriété requise '{0}' n’a pas été définie ou vide.</target>
+        <target state="translated">CONTAINER4001: la propriété requise '{0}' n’a pas été définie ou
+          vide.</target>
         <note>{StrBegin="CONTAINER4001: "}</note>
       </trans-unit>
       <trans-unit id="TooManyRetries">
@@ -334,17 +394,21 @@
       </trans-unit>
       <trans-unit id="UnknownAppCommandInstruction">
         <source>CONTAINER2021: Unknown AppCommandInstruction '{0}'. Valid instructions are {1}.</source>
-        <target state="translated">CONTAINER2021: instruction de commande d'application inconnue '{0}'. Les instructions valides sont {1}.</target>
+        <target state="translated">CONTAINER2021: instruction de commande d'application
+          inconnue '{0}'. Les instructions valides sont {1}.</target>
         <note>{StrBegin="CONTAINER2021: "}</note>
       </trans-unit>
       <trans-unit id="UnknownLocalRegistryType">
         <source>CONTAINER2002: Unknown local registry type '{0}'. Valid local container registry types are {1}.</source>
-        <target state="translated">CONTAINER2002: type de registre local inconnu '{0}'. Les types de registre de conteneurs locaux valides sont {1}.</target>
+        <target state="needs-review-translation">CONTAINER2002: type de registre local inconnu '{0}'. Les types de
+          registre de conteneurs locaux valides sont {1}.</target>
         <note>{StrBegin="CONTAINER2002: "}</note>
       </trans-unit>
       <trans-unit id="UnknownMediaType">
         <source>CONTAINER2003: The manifest for {0}:{1} from registry {2} was an unknown type: {3}. Please raise an issue at https://github.com/dotnet/sdk-container-builds/issues with this message.</source>
-        <target state="translated">CONTAINER2003: le manifeste pour {0}:{1} du Registre {2} était d’un type inconnu : {3}. Veuillez lever un problème au https://github.com/dotnet/sdk-container-builds/issues avec ce message.</target>
+        <target state="needs-review-translation">CONTAINER2003: le manifeste pour {0}:{1} du Registre {2} était
+          d’un type inconnu : {3}. Veuillez lever un problème au
+          https://github.com/dotnet/sdk-container-builds/issues avec ce message.</target>
         <note>{StrBegin="CONTAINER2003: "}</note>
       </trans-unit>
       <trans-unit id="UnrecognizedMediaType">
