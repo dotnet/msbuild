@@ -63,7 +63,7 @@ internal sealed class DockerCli : ILocalRegistry
         string? command = await GetCommandAsync(cancellationToken);
         if (command is null)
         {
-            throw new NotImplementedException(Resource.FormatString(Strings.DockerProcessCreationFailed, Commands));
+            throw new NotImplementedException(Resource.FormatString(Strings.ContainerRuntimeProcessCreationFailed, Commands));
         }
 
         _fullCommandPath = FindFullPathFromPath(command);
@@ -87,7 +87,7 @@ internal sealed class DockerCli : ILocalRegistry
 
         if (loadProcess is null)
         {
-            throw new NotImplementedException(Resource.FormatString(Strings.DockerProcessCreationFailed, commandPath));
+            throw new NotImplementedException(Resource.FormatString(Strings.ContainerRuntimeProcessCreationFailed, commandPath));
         }
 
         // Create new stream tarball
@@ -284,7 +284,8 @@ internal sealed class DockerCli : ILocalRegistry
 
         // Try to find the docker or podman cli.
         // On systems with podman it's not uncommon for docker to be an alias to podman.
-        // We try to find podman first so we can identify those systems to be using podman.
+        // We have to attempt to locate both binaries and inspect the output of the 'docker' binary if present to determine
+        // if it is actually podman.
         var podmanCommand = TryRunVersionCommandAsync(PodmanCommand, cancellationToken);
         var dockerCommand = TryRunVersionCommandAsync(DockerCommand, cancellationToken);
 
