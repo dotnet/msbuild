@@ -3655,15 +3655,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
         }
 
-        private readonly ITestOutputHelper _testOutputHelper;
-
         /// <summary>
         /// https://github.com/dotnet/msbuild/issues/9199
         /// </summary>
         [Fact]
         public void NotValidSources()
         {
-            GenerateResource t = new GenerateResource { BuildEngine = new MockEngine(_testOutputHelper) };
+            GenerateResource t = new GenerateResource { BuildEngine = new MockEngine(_output) };
             t.Sources = new ITaskItem[] { new TaskItem("non-existent") };
             t.OutputResources = new ITaskItem[] { new TaskItem("out") };
             Assert.False(t.Execute());
