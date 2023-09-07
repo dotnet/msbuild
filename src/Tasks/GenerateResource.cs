@@ -737,7 +737,6 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-
                     if (!ComputePathToResGen())
                     {
                         // unable to compute the path to resgen.exe and that is necessary to
