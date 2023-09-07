@@ -22,6 +22,11 @@
         <target state="translated">CONTAINER2026: ContainerAppCommandInstruction이 '{0}'인 경우 ContainerAppCommand 및 ContainerAppCommandArgs가 비어 있어야 합니다.</target>
         <note>{StrBegin="CONTAINER2026: "}</note>
       </trans-unit>
+      <trans-unit id="ArchiveRegistry_PushInfo">
+        <source>local archive at '{0}'</source>
+        <target state="new">local archive at '{0}'</target>
+        <note>{0} is the path to the file written</note>
+      </trans-unit>
       <trans-unit id="BaseEntrypointOverwritten">
         <source>CONTAINER2022: The base image has an entrypoint that will be overwritten to start the application. Set ContainerAppCommandInstruction to 'Entrypoint' if this is desired. To preserve the base image entrypoint, set ContainerAppCommandInstruction to 'DefaultArgs'.</source>
         <target state="translated">CONTAINER2022: 기본 이미지에 응용 프로그램을 시작하기 위해 덮어쓸 진입점이 있습니다. 필요한 경우 ContainerAppCommandInstruction을 'Entrypoint'로 설정합니다. 기본 이미지 진입점을 유지하려면 ContainerAppCommandInstruction을 'DefaultArgs'로 설정하세요.</target>
@@ -53,13 +58,13 @@
         <note>{StrBegin="CONTAINER1001: "}</note>
       </trans-unit>
       <trans-unit id="ContainerBuilder_ImageUploadedToLocalDaemon">
-        <source>Pushed container '{0}' to Docker daemon.</source>
-        <target state="translated">Docker 디먼에 '{0}' 컨테이너를 푸시했습니다.</target>
+        <source>Pushed image '{0}' to {1}.</source>
+        <target state="new">Pushed image '{0}' to {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContainerBuilder_ImageUploadedToRegistry">
-        <source>Pushed container '{0}' to registry '{1}'.</source>
-        <target state="translated">'{1}' 레지스트리에 '{0}' 컨테이너를 푸시했습니다.</target>
+        <source>Pushed image '{0}' to registry '{1}'.</source>
+        <target state="needs-review-translation">'{1}' 레지스트리에 '{0}' 컨테이너를 푸시했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContainerBuilder_StartBuildingImage">
@@ -76,6 +81,11 @@
         <source>CONTAINER2012: Could not recognize registry '{0}'.</source>
         <target state="translated">CONTAINER2012: 레지스트리 '{0}'을(를) 인식할 수 없습니다.</target>
         <note>{StrBegin="CONTAINER2012: "}</note>
+      </trans-unit>
+      <trans-unit id="DockerCli_PushInfo">
+        <source>local registry via '{0}'</source>
+        <target state="new">local registry via '{0}'</target>
+        <note>{0} is the command used</note>
       </trans-unit>
       <trans-unit id="DockerInfoFailed">
         <source>CONTAINER3002: Failed to get docker info({0})\n{1}\n{2}</source>
@@ -254,7 +264,7 @@
       </trans-unit>
       <trans-unit id="RegistryPushFailed">
         <source>CONTAINER1005: Registry push failed; received status code '{0}'.</source>
-        <target state="new">CONTAINER1005: Registry push failed; received status code '{0}'.</target>
+        <target state="translated">CONTAINER1005: 레지스트리 푸시에 실패했습니다. 상태 코드 '{0}'을(를) 받았습니다.</target>
         <note>{StrBegin="CONTAINER1005: "}</note>
       </trans-unit>
       <trans-unit id="Registry_ConfigUploadStarted">

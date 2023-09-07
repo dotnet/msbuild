@@ -22,6 +22,11 @@
         <target state="translated">CONTAINER2026: 当 ContainerAppCommandInstruction 为“{0}”时，ContainerAppCommand 和 ContainerAppCommandArgs 必须为空。</target>
         <note>{StrBegin="CONTAINER2026: "}</note>
       </trans-unit>
+      <trans-unit id="ArchiveRegistry_PushInfo">
+        <source>local archive at '{0}'</source>
+        <target state="new">local archive at '{0}'</target>
+        <note>{0} is the path to the file written</note>
+      </trans-unit>
       <trans-unit id="BaseEntrypointOverwritten">
         <source>CONTAINER2022: The base image has an entrypoint that will be overwritten to start the application. Set ContainerAppCommandInstruction to 'Entrypoint' if this is desired. To preserve the base image entrypoint, set ContainerAppCommandInstruction to 'DefaultArgs'.</source>
         <target state="translated">CONTAINER2022: 基础映像具有一个入口点，该入口点将被覆盖以启动应用程序。如果需要，请将 ContainerAppCommandInstruction 设置为 "Entrypoint"。若要保留基础映像入口点，请将 ContainerAppCommandInstruction 设置为 "DefaultArgs"。</target>
@@ -53,13 +58,13 @@
         <note>{StrBegin="CONTAINER1001: "}</note>
       </trans-unit>
       <trans-unit id="ContainerBuilder_ImageUploadedToLocalDaemon">
-        <source>Pushed container '{0}' to Docker daemon.</source>
-        <target state="translated">已将容器“{0}”推送到 Docker 守护程序。</target>
+        <source>Pushed image '{0}' to {1}.</source>
+        <target state="new">Pushed image '{0}' to {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContainerBuilder_ImageUploadedToRegistry">
-        <source>Pushed container '{0}' to registry '{1}'.</source>
-        <target state="translated">已将容器“{0}”推送到注册表“{1}”。</target>
+        <source>Pushed image '{0}' to registry '{1}'.</source>
+        <target state="needs-review-translation">已将容器“{0}”推送到注册表“{1}”。</target>
         <note />
       </trans-unit>
       <trans-unit id="ContainerBuilder_StartBuildingImage">
@@ -76,6 +81,11 @@
         <source>CONTAINER2012: Could not recognize registry '{0}'.</source>
         <target state="translated">CONTAINER2012: 无法识别注册表“{0}”。</target>
         <note>{StrBegin="CONTAINER2012: "}</note>
+      </trans-unit>
+      <trans-unit id="DockerCli_PushInfo">
+        <source>local registry via '{0}'</source>
+        <target state="new">local registry via '{0}'</target>
+        <note>{0} is the command used</note>
       </trans-unit>
       <trans-unit id="DockerInfoFailed">
         <source>CONTAINER3002: Failed to get docker info({0})\n{1}\n{2}</source>
@@ -254,7 +264,7 @@
       </trans-unit>
       <trans-unit id="RegistryPushFailed">
         <source>CONTAINER1005: Registry push failed; received status code '{0}'.</source>
-        <target state="new">CONTAINER1005: Registry push failed; received status code '{0}'.</target>
+        <target state="translated">CONTAINER1005: 注册表推送失败，已收到状态代码“{0}”。</target>
         <note>{StrBegin="CONTAINER1005: "}</note>
       </trans-unit>
       <trans-unit id="Registry_ConfigUploadStarted">
