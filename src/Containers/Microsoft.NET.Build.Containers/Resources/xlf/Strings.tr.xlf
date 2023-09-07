@@ -38,6 +38,11 @@
           ContainerAppCommand ve ContainerAppCommandArgs komutları boş olmalıdır.</target>
         <note>{StrBegin="CONTAINER2026: "}</note>
       </trans-unit>
+      <trans-unit id="ArchiveRegistry_PushInfo">
+        <source>local archive at '{0}'</source>
+        <target state="new">local archive at '{0}'</target>
+        <note>{0} is the path to the file written</note>
+      </trans-unit>
       <trans-unit id="BaseEntrypointOverwritten">
         <source>CONTAINER2022: The base image has an entrypoint that will be overwritten to start
           the application. Set ContainerAppCommandInstruction to 'Entrypoint' if this is desired. To
@@ -81,13 +86,13 @@
         <note>{StrBegin="CONTAINER1001: "}</note>
       </trans-unit>
       <trans-unit id="ContainerBuilder_ImageUploadedToLocalDaemon">
-        <source>Pushed container '{0}' to Docker daemon.</source>
-        <target state="translated">'{0}' kapsayıcısı, Docker daemon'a gönderildi.</target>
+        <source>Pushed image '{0}' to {1}.</source>
+        <target state="new">Pushed image '{0}' to {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContainerBuilder_ImageUploadedToRegistry">
-        <source>Pushed container '{0}' to registry '{1}'.</source>
-        <target state="translated">'{0}' kapsayıcısı, '{1}' kayıt defterine gönderildi.</target>
+        <source>Pushed image '{0}' to registry '{1}'.</source>
+        <target state="needs-review-translation">'{0}' kapsayıcısı, '{1}' kayıt defterine gönderildi.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContainerBuilder_StartBuildingImage">
@@ -105,6 +110,11 @@
         <source>CONTAINER2012: Could not recognize registry '{0}'.</source>
         <target state="translated">CONTAINER2012: '{0}' kayıt defteri tanınamadı.</target>
         <note>{StrBegin="CONTAINER2012: "}</note>
+      </trans-unit>
+      <trans-unit id="DockerCli_PushInfo">
+        <source>local registry via '{0}'</source>
+        <target state="new">local registry via '{0}'</target>
+        <note>{0} is the command used</note>
       </trans-unit>
       <trans-unit id="DockerInfoFailed">
         <source>CONTAINER3002: Failed to get docker info({0})\n{1}\n{2}</source>
@@ -343,7 +353,7 @@
       </trans-unit>
       <trans-unit id="RegistryPushFailed">
         <source>CONTAINER1005: Registry push failed; received status code '{0}'.</source>
-        <target state="new">CONTAINER1005: Registry push failed; received status code '{0}'.</target>
+        <target state="translated">CONTAINER1005: Kayıt defteri gönderilemedi; '{0}' durum kodu alındı.</target>
         <note>{StrBegin="CONTAINER1005: "}</note>
       </trans-unit>
       <trans-unit id="Registry_ConfigUploadStarted">

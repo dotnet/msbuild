@@ -43,6 +43,11 @@ partial class CreateNewImage
     public string OutputRegistry { get; set; }
 
     /// <summary>
+    /// The file path to which to write a tar.gz archive of the container image.
+    /// </summary>
+    public string ArchiveOutputPath { get; set; }
+
+    /// <summary>
     /// The kind of local registry to use, if any.
     /// </summary>
     public string LocalRegistry { get; set; }
@@ -150,6 +155,9 @@ partial class CreateNewImage
     [Output]
     public string GeneratedContainerDigest { get; set; }
 
+    [Output]
+    public string GeneratedArchiveOutputPath { get; set; }
+
     public CreateNewImage()
     {
         ContainerizeDirectory = "";
@@ -159,6 +167,7 @@ partial class CreateNewImage
         BaseImageName = "";
         BaseImageTag = "";
         OutputRegistry = "";
+        ArchiveOutputPath = "";
         Repository = "";
         ImageTags = Array.Empty<string>();
         PublishDirectory = "";
@@ -180,6 +189,7 @@ partial class CreateNewImage
         GeneratedContainerConfiguration = "";
         GeneratedContainerManifest = "";
         GeneratedContainerDigest = "";
+        GeneratedArchiveOutputPath = "";
 
         TaskResources = Resource.Manager;
     }

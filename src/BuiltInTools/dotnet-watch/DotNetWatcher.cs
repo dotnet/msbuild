@@ -71,6 +71,7 @@ namespace Microsoft.DotNet.Watcher
                 context.RequiresMSBuildRevaluation = false;
 
                 processSpec.EnvironmentVariables["DOTNET_WATCH_ITERATION"] = (context.Iteration + 1).ToString(CultureInfo.InvariantCulture);
+                processSpec.EnvironmentVariables["DOTNET_LAUNCH_PROFILE"] = context.LaunchSettingsProfile?.LaunchProfileName ?? string.Empty;
 
                 var fileSet = context.FileSet;
                 if (fileSet == null)

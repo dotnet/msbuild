@@ -103,6 +103,42 @@ namespace Microsoft.NET.Build.Containers.Resources
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2025: ContainerAppCommandArgs are provided without specifying a ContainerAppCommand..
+        /// </summary>
+        internal static string AppCommandArgsSetNoAppCommand {
+            get {
+                return ResourceManager.GetString("AppCommandArgsSetNoAppCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2026: ContainerAppCommand and ContainerAppCommandArgs must be empty when ContainerAppCommandInstruction is &apos;{0}&apos;..
+        /// </summary>
+        internal static string AppCommandSetNotUsed {
+            get {
+                return ResourceManager.GetString("AppCommandSetNotUsed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to local archive at &apos;{0}&apos;.
+        /// </summary>
+        internal static string ArchiveRegistry_PushInfo {
+            get {
+                return ResourceManager.GetString("ArchiveRegistry_PushInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2022: The base image has an entrypoint that will be overwritten to start the application. Set ContainerAppCommandInstruction to &apos;Entrypoint&apos; if this is desired. To preserve the base image entrypoint, set ContainerAppCommandInstruction to &apos;DefaultArgs&apos;..
+        /// </summary>
+        internal static string BaseEntrypointOverwritten {
+            get {
+                return ResourceManager.GetString("BaseEntrypointOverwritten", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CONTAINER2009: Could not parse {0}: {1}.
         /// </summary>
         internal static string BaseImageNameParsingFailed
@@ -114,27 +150,23 @@ namespace Microsoft.NET.Build.Containers.Resources
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to CONTAINER2013: {0} had spaces in it, replacing with dashes..
+        ///   Looks up a localized string similar to CONTAINER2020: {0} does not specify a registry and will be pulled from Docker Hub. Please prefix the name with the image registry, for example: &apos;{1}/&lt;image&gt;&apos;..
         /// </summary>
-        internal static string BaseImageNameWithSpaces
-        {
-            get
-            {
-                return ResourceManager.GetString("BaseImageNameWithSpaces", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to CONTAINER2020: {0} does not specify a registry and will be pulled from Docker Hub. Please prefix the name with the image registry, for example: '{1}/<image>'..
-        /// </summary>
-        internal static string BaseImageNameRegistryFallback
-        {
-            get
-            {
+        internal static string BaseImageNameRegistryFallback {
+            get {
                 return ResourceManager.GetString("BaseImageNameRegistryFallback", resourceCulture);
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2013: {0} had spaces in it, replacing with dashes..
+        /// </summary>
+        internal static string BaseImageNameWithSpaces {
+            get {
+                return ResourceManager.GetString("BaseImageNameWithSpaces", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER1011: Couldn&apos;t find matching base image for {0} that matches RuntimeIdentifier {1}..
         /// </summary>
@@ -158,7 +190,7 @@ namespace Microsoft.NET.Build.Containers.Resources
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Pushed container &apos;{0}&apos; to Docker daemon..
+        ///   Looks up a localized string similar to Pushed image &apos;{0}&apos; to {1}..
         /// </summary>
         internal static string ContainerBuilder_ImageUploadedToLocalDaemon
         {
@@ -169,7 +201,7 @@ namespace Microsoft.NET.Build.Containers.Resources
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Pushed container &apos;{0}&apos; to registry &apos;{1}&apos;..
+        ///   Looks up a localized string similar to Pushed image &apos;{0}&apos; to registry &apos;{1}&apos;..
         /// </summary>
         internal static string ContainerBuilder_ImageUploadedToRegistry
         {
@@ -213,6 +245,15 @@ namespace Microsoft.NET.Build.Containers.Resources
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to local registry via &apos;{0}&apos;.
+        /// </summary>
+        internal static string DockerCli_PushInfo {
+            get {
+                return ResourceManager.GetString("DockerCli_PushInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CONTAINER3002: Failed to get docker info({0})\n{1}\n{2}.
         /// </summary>
         internal static string DockerInfoFailed
@@ -235,7 +276,7 @@ namespace Microsoft.NET.Build.Containers.Resources
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to CONTAINER3001: Failed creating docker process..
+        ///   Looks up a localized string similar to CONTAINER3001: Failed creating {0} process..
         /// </summary>
         internal static string ContainerRuntimeProcessCreationFailed
         {
@@ -268,6 +309,51 @@ namespace Microsoft.NET.Build.Containers.Resources
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2023: A ContainerEntrypoint and ContainerAppCommandArgs are provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}..
+        /// </summary>
+        internal static string EntrypointAndAppCommandArgsSetNoAppCommandInstruction {
+            get {
+                return ResourceManager.GetString("EntrypointAndAppCommandArgsSetNoAppCommandInstruction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2024: ContainerEntrypointArgs are provided without specifying a ContainerEntrypoint..
+        /// </summary>
+        internal static string EntrypointArgsSetNoEntrypoint {
+            get {
+                return ResourceManager.GetString("EntrypointArgsSetNoEntrypoint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2029: ContainerEntrypointArgsSet are provided. Change to use ContainerAppCommandArgs for arguments that must always be set, or ContainerDefaultArgs for arguments that can be overridden when the container is created..
+        /// </summary>
+        internal static string EntrypointArgsSetPreferAppCommandArgs {
+            get {
+                return ResourceManager.GetString("EntrypointArgsSetPreferAppCommandArgs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2028: ContainerEntrypoint can not be combined with ContainerAppCommandInstruction &apos;{0}&apos;..
+        /// </summary>
+        internal static string EntrypointConflictAppCommand {
+            get {
+                return ResourceManager.GetString("EntrypointConflictAppCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2027: A ContainerEntrypoint is provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}..
+        /// </summary>
+        internal static string EntrypointSetNoAppCommandInstruction {
+            get {
+                return ResourceManager.GetString("EntrypointSetNoAppCommandInstruction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CONTAINER1008: Failed retrieving credentials for &quot;{0}&quot;: {1}.
         /// </summary>
         internal static string FailedRetrievingCredentials
@@ -290,7 +376,7 @@ namespace Microsoft.NET.Build.Containers.Resources
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to CONTAINER1009: Failed to load image to local registry. stdout: {0}.
+        ///   Looks up a localized string similar to CONTAINER1009: Failed to load image from local registry. stdout: {0}.
         /// </summary>
         internal static string ImageLoadFailed
         {
@@ -444,17 +530,6 @@ namespace Microsoft.NET.Build.Containers.Resources
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to CONTAINER1012: The local registry is not available, but pushing to a local registry was requested.
-        /// </summary>
-        internal static string LocalRegistryNotAvailable
-        {
-            get
-            {
-                return ResourceManager.GetString("LocalRegistryNotAvailable", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   Looks up a localized string similar to Error while reading daemon config: {0}.
         /// </summary>
         internal static string LocalDocker_FailedToGetConfig
@@ -476,6 +551,15 @@ namespace Microsoft.NET.Build.Containers.Resources
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER1012: The local registry is not available, but pushing to a local registry was requested..
+        /// </summary>
+        internal static string LocalRegistryNotAvailable {
+            get {
+                return ResourceManager.GetString("LocalRegistryNotAvailable", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER2004: Unable to download layer with descriptor &apos;{0}&apos; from registry &apos;{1}&apos; because it does not exist..
         /// </summary>
@@ -642,7 +726,7 @@ namespace Microsoft.NET.Build.Containers.Resources
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to CONTAINER1005: Registry push failed..
+        ///   Looks up a localized string similar to CONTAINER1005: Registry push failed; received status code &apos;{0}&apos;..
         /// </summary>
         internal static string RegistryPushFailed
         {
@@ -697,6 +781,15 @@ namespace Microsoft.NET.Build.Containers.Resources
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2021: Unknown AppCommandInstruction &apos;{0}&apos;. Valid instructions are {1}..
+        /// </summary>
+        internal static string UnknownAppCommandInstruction {
+            get {
+                return ResourceManager.GetString("UnknownAppCommandInstruction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CONTAINER2002: Unknown local registry type &apos;{0}&apos;. Valid local container registry types are {1}..
         /// </summary>
         internal static string UnknownLocalRegistryType
@@ -726,78 +819,6 @@ namespace Microsoft.NET.Build.Containers.Resources
             get
             {
                 return ResourceManager.GetString("UnrecognizedMediaType", resourceCulture);
-            }
-        }
-
-        internal static string UnknownAppCommandInstruction
-        {
-            get
-            {
-                return ResourceManager.GetString("UnknownAppCommandInstruction", resourceCulture);
-            }
-        }
-
-        internal static string BaseEntrypointOverwritten
-        {
-            get
-            {
-                return ResourceManager.GetString("BaseEntrypointOverwritten", resourceCulture);
-            }
-        }
-
-        internal static string EntrypointAndAppCommandArgsSetNoAppCommandInstruction
-        {
-            get
-            {
-                return ResourceManager.GetString("EntrypointAndAppCommandArgsSetNoAppCommandInstruction", resourceCulture);
-            }
-        }
-
-        internal static string EntrypointArgsSetNoEntrypoint
-        {
-            get
-            {
-                return ResourceManager.GetString("EntrypointArgsSetNoEntrypoint", resourceCulture);
-            }
-        }
-
-        internal static string AppCommandArgsSetNoAppCommand
-        {
-            get
-            {
-                return ResourceManager.GetString("AppCommandArgsSetNoAppCommand", resourceCulture);
-            }
-        }
-
-        internal static string AppCommandSetNotUsed
-        {
-            get
-            {
-                return ResourceManager.GetString("AppCommandSetNotUsed", resourceCulture);
-            }
-        }
-
-        internal static string EntrypointSetNoAppCommandInstruction
-        {
-            get
-            {
-                return ResourceManager.GetString("EntrypointSetNoAppCommandInstruction", resourceCulture);
-            }
-        }
-
-        internal static string EntrypointConflictAppCommand
-        {
-            get
-            {
-                return ResourceManager.GetString("EntrypointConflictAppCommand", resourceCulture);
-            }
-        }
-
-        internal static string EntrypointArgsSetPreferAppCommandArgs
-        {
-            get
-            {
-                return ResourceManager.GetString("EntrypointArgsSetPreferAppCommandArgs", resourceCulture);
             }
         }
     }

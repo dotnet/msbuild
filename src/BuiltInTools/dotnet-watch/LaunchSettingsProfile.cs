@@ -3,12 +3,15 @@
 
 
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
     internal sealed class LaunchSettingsProfile
     {
+        [JsonIgnore]
+        public string? LaunchProfileName { get; set; }
         public string? ApplicationUrl { get; init; }
         public string? CommandName { get; init; }
         public bool LaunchBrowser { get; init; }
@@ -64,18 +67,21 @@ namespace Microsoft.DotNet.Watcher.Tools
             }
 
             reporter.Verbose($"Found named launch profile '{launchProfileName}'.");
+            namedProfile.LaunchProfileName = launchProfileName;
             return namedProfile;
         }
 
         private static LaunchSettingsProfile? ReadDefaultLaunchProfile(LaunchSettingsJson? launchSettings, IReporter reporter)
         {
-            var defaultProfile = launchSettings?.Profiles?.FirstOrDefault(f => f.Value.CommandName == "Project").Value;
-
-            if (defaultProfile is null)
+            if (launchSettings is null || launchSettings.Profiles is null)
             {
                 reporter.Verbose("Unable to find default launch profile.");
+                return null;
             }
 
+            var defaultProfileKey = launchSettings.Profiles.FirstOrDefault(f => f.Value.CommandName == "Project").Key;
+            var defaultProfile = launchSettings.Profiles[defaultProfileKey];
+            defaultProfile.LaunchProfileName = defaultProfileKey;
             return defaultProfile;
         }
 
