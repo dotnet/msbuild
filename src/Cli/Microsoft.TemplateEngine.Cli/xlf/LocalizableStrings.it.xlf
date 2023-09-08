@@ -470,12 +470,12 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
         <target state="translated">Versione del pacchetto</target>
         <note />
       </trans-unit>
-      <trans-unit id="DetailsCommand_UnableToLoadResorce">
+      <trans-unit id="DetailsCommand_UnableToLoadResource">
         <source>Could not parse NuGet source '{0}', so it was discarded</source>
         <target state="translated">Non è stato possibile analizzare l'origine NuGet '{0}', quindi è stata eliminata.</target>
         <note />
       </trans-unit>
-      <trans-unit id="DetailsCommand_UnableToLoadResorces">
+      <trans-unit id="DetailsCommand_UnableToLoadResources">
         <source>Failed to load NuGet sources configured for the folder {0}</source>
         <target state="translated">Non è stato possibile caricare le origini NuGet configurate per la cartella {0}</target>
         <note />

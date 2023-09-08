@@ -470,12 +470,12 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
         <target state="translated">Paket sürümü</target>
         <note />
       </trans-unit>
-      <trans-unit id="DetailsCommand_UnableToLoadResorce">
+      <trans-unit id="DetailsCommand_UnableToLoadResource">
         <source>Could not parse NuGet source '{0}', so it was discarded</source>
         <target state="translated">'{0}' NuGet kaynağı ayrıştırılamadı, bu nedenle atıldı</target>
         <note />
       </trans-unit>
-      <trans-unit id="DetailsCommand_UnableToLoadResorces">
+      <trans-unit id="DetailsCommand_UnableToLoadResources">
         <source>Failed to load NuGet sources configured for the folder {0}</source>
         <target state="translated">{0} klasörü için yapılandırılan NuGet kaynakları yüklenemedi.</target>
         <note />

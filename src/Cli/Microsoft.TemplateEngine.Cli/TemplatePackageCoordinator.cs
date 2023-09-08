@@ -1102,7 +1102,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             catch (Exception ex)
             {
-                throw new Exception(string.Format(LocalizableStrings.DetailsCommand_UnableToLoadResorces, currentDirectory), ex);
+                throw new Exception(string.Format(LocalizableStrings.DetailsCommand_UnableToLoadResources, currentDirectory), ex);
             }
 
             if (additionalSources == null || !additionalSources.Any())
@@ -1129,7 +1129,7 @@ namespace Microsoft.TemplateEngine.Cli
                 PackageSource packageSource = new PackageSource(source);
                 if (packageSource.TrySourceAsUri == null)
                 {
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.DetailsCommand_UnableToLoadResorce, source));
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.DetailsCommand_UnableToLoadResource, source));
                     continue;
                 }
                 customSources.Add(packageSource);
