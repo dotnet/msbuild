@@ -32,10 +32,9 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <PackageReference Include="System.Security.Permissions" />
     <PackageReference Include="System.Text.Encoding.CodePages" />
   </ItemGroup>
-  
+
   <ItemGroup Label="Shared Code">
     <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersEx.cs">
       <Link>Shared\AssemblyFolders\AssemblyFoldersEx.cs</Link>
