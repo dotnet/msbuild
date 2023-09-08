@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="es" original="../Strings.resx">
     <body>
@@ -64,18 +64,13 @@
       </trans-unit>
       <trans-unit id="ContainerBuilder_ImageUploadedToRegistry">
         <source>Pushed image '{0}' to registry '{1}'.</source>
-        <target state="needs-review-translation">Se insertó el contenedor "{0}" en el registro "{1}".</target>
+        <target state="new">Pushed image '{0}' to registry '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContainerBuilder_StartBuildingImage">
         <source>Building image '{0}' with tags '{1}' on top of base image '{2}'.</source>
         <target state="translated">Compilando imagen "{0}" con etiquetas "{1}" encima de la imagen base "{2}".</target>
         <note />
-      </trans-unit>
-      <trans-unit id="ContainerRuntimeProcessCreationFailed">
-        <source>CONTAINER3001: Failed creating {0} process.</source>
-        <target state="new">CONTAINER3001: Failed creating {0} process.</target>
-        <note>CONTAINER3001: {0} is the name of the command we failed to run, usually 'docker' or 'podman'.</note>
       </trans-unit>
       <trans-unit id="CouldntDeserializeJsonToken">
         <source>CONTAINER1007: Could not deserialize token from JSON.</source>
@@ -101,6 +96,11 @@
         <source>CONTAINER3002: Failed to get docker info: {0}</source>
         <target state="translated">CONTAINER3002: No se pudo obtener la información de docker: {0}</target>
         <note>{StrBegin="CONTAINER3002: "}</note>
+      </trans-unit>
+      <trans-unit id="ContainerRuntimeProcessCreationFailed">
+        <source>CONTAINER3001: Failed creating {0} process.</source>
+        <target state="new">CONTAINER3001: Failed creating {0} process.</target>
+        <note>CONTAINER3001: {0} is the name of the command we failed to run, usually 'docker' or 'podman'.</note>
       </trans-unit>
       <trans-unit id="EmptyOrWhitespacePropertyIgnored">
         <source>CONTAINER4006: Property '{0}' is empty or contains whitespace and will be ignored.</source>
