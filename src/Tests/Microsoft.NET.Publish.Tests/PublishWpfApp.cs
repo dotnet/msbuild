@@ -44,7 +44,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var publishCommand = new PublishCommand(Log, testDir.Path);
 
-            publishCommand.Execute($"/p:RuntimeIdentifier={rid}")
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true")
                 .Should()
                 .Pass();
 
