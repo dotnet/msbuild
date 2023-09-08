@@ -3,7 +3,6 @@
 
 using System.Text.Json.Nodes;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.NET.TestFramework;
 using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
