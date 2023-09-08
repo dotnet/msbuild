@@ -4422,7 +4422,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_ClickOnceRuntimeCopyLocalItems Include="@(NativeCopyLocalItems)"
                                       Condition="'%(NativeCopyLocalItems.CopyLocal)' == 'true'" />
       <_ClickOnceRuntimeCopyLocalItems Remove="@(_DeploymentReferencePaths)" />
-      <_ClickOnceFiles Include="@(ContentWithTargetPath);@(_DeploymentManifestIconFile);@(AppConfigWithTargetPath);@(NetCoreRuntimeJsonFilesForClickOnce);@(_ClickOnceRuntimeCopyLocalItems)"/>
+
+      <!-- Include items from None itemgroup for publishing -->
+      <_ClickOnceNoneItems Include="@(_NoneWithTargetPath->'%(FullPath)')" Condition="'%(_NoneWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
+      <_ClickOnceNoneItems Include="@(_NoneWithTargetPath->'%(FullPath)')" Condition="'%(_NoneWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
+
+      <_ClickOnceFiles Include="@(ContentWithTargetPath);@(_DeploymentManifestIconFile);@(AppConfigWithTargetPath);@(NetCoreRuntimeJsonFilesForClickOnce);@(_ClickOnceRuntimeCopyLocalItems);@(_ClickOnceNoneItems)"/>
     </ItemGroup>
 
     <!-- For single file publish, we need to include the SF bundle EXE, application icon file and files excluded from the bundle EXE in the clickonce manifest -->
