@@ -258,8 +258,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("PostActions/RestoreNuGet/Files_PatternWithWildcard", "TestAssets.PostActions.RestoreNuGet.Files_PatternWithWildcard", "Tool.Library/Tool.Library.csproj;Tool.Test/Tool.Test.csproj", "Tool/Tool.csproj")]
         [InlineData("PostActions/RestoreNuGet/Files_PatternWithGlobstar", "TestAssets.PostActions.RestoreNuGet.Files_PatternWithGlobstar", "Tool.Library/Tool.Library.csproj", "Tool/Tool.csproj;Tool.Test/Tool.Test.csproj")]
         [InlineData("PostActions/RestoreNuGet/Files_SupportSemicolonDelimitedList", "TestAssets.PostActions.RestoreNuGet.Files_SupportSemicolonDelimitedList", "Tool.Library/Tool.Library.csproj;Tool/Tool.csproj", "Tool.Test/Tool.Test.csproj")]
-        public void Restore_FilesTest(string templateLocation, string templateName, string expectedRestoredProjects, string unexpectedRestoredProjects)
+        public void Restore_FilesTest(string templatePartLocation, string templateName, string expectedRestoredProjects, string unexpectedRestoredProjects)
         {
+            string templateLocation = _testAssetsManager.CopyTestAsset(templatePartLocation, testAssetSubdirectory: DotnetNewTestTemplatesBasePath).WithSource().Path;
             expectedRestoredProjects = expectedRestoredProjects.Replace('/', Path.DirectorySeparatorChar);
             unexpectedRestoredProjects = unexpectedRestoredProjects.Replace('/', Path.DirectorySeparatorChar);
             string sourceName = "Tool";
