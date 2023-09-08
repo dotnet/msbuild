@@ -161,7 +161,7 @@
     <value>CONTAINER3002: Failed to get docker info: {0}</value>
     <comment>{StrBegin="CONTAINER3002: "}</comment>
   </data>
-  <data name="DockerProcessCreationFailed" xml:space="preserve">
+  <data name="ContainerRuntimeProcessCreationFailed" xml:space="preserve">
     <value>CONTAINER3001: Failed creating {0} process.</value>
     <comment>CONTAINER3001: {0} is the name of the command we failed to run, usually 'docker' or 'podman'.</comment>
   </data>
@@ -260,7 +260,7 @@
     <comment>{StrBegin="CONTAINER1013: "}</comment>
   </data>
   <data name="RegistryPushFailed" xml:space="preserve">
-    <value>CONTAINER1005: Registry push failed.</value>
+    <value>CONTAINER1005: Registry push failed; received status code '{0}'.</value>
     <comment>{StrBegin="CONTAINER1005: "}</comment>
   </data>
   <data name="RequiredItemsContainsEmptyItems" xml:space="preserve">
@@ -332,10 +332,10 @@
     <comment>Used only for unit tests</comment>
   </data>
   <data name="ContainerBuilder_ImageUploadedToLocalDaemon" xml:space="preserve">
-    <value>Pushed container '{0}' to Docker daemon.</value>
+    <value>Pushed image '{0}' to {1}.</value>
   </data>
   <data name="ContainerBuilder_ImageUploadedToRegistry" xml:space="preserve">
-    <value>Pushed container '{0}' to registry '{1}'.</value>
+    <value>Pushed image '{0}' to registry '{1}'.</value>
   </data>
   <data name="ContainerBuilder_StartBuildingImage" xml:space="preserve">
     <value>Building image '{0}' with tags '{1}' on top of base image '{2}'.</value>
@@ -381,8 +381,32 @@
     <value>Uploading tag '{0}' to '{1}'.</value>
     <comment>{1} is the registry name</comment>
   </data>
+  <data name="RegistryPullFailed" xml:space="preserve">
+    <value>CONTAINER1014: Manifest pull failed.</value>
+    <comment>{StrBegin="CONTAINER1014: "}</comment>
+  </data>
+  <data name="RegistryOperationFailed" xml:space="preserve">
+    <value>CONTAINER1017: Unable to communicate with the registry '{0}'.</value>
+    <comment>{StrBegin="CONTAINER1017:" }</comment>
+  </data>
+  <data name="RepositoryNotFound" xml:space="preserve">
+    <value>CONTAINER1015: Unable to access the repository '{0}' at tag '{1}' in the registry '{2}'. Please confirm that this name and tag are present in the registry.</value>
+    <comment>{StrBegin="CONTAINER1015: "}</comment>
+  </data>
+  <data name="UnableToAccessRepository" xml:space="preserve">
+    <value>CONTAINER1016: Unable to access the repository '{0}' in the registry '{1}'. Please confirm your credentials are correct and that you have access to this repository and registry.</value>
+    <comment>{StrBegin="CONTAINER1016:" }</comment>
+  </data>
   <data name="InvalidImageName_EntireNameIsInvalidCharacters" xml:space="preserve">
     <value>CONTAINER2005: The inferred image name '{0}' contains entirely invalid characters. The valid characters for an image name are alphanumeric characters, -, /, or _, and the image name must start with an alphanumeric character.</value>
     <comment>{StrBegin="CONTAINER2005: "}</comment>
+  </data>
+  <data name="ArchiveRegistry_PushInfo" xml:space="preserve">
+    <value>local archive at '{0}'</value>
+    <comment>{0} is the path to the file written</comment>
+  </data>
+  <data name="DockerCli_PushInfo" xml:space="preserve">
+    <value>local registry via '{0}'</value>
+    <comment>{0} is the command used</comment>
   </data>
 </root>

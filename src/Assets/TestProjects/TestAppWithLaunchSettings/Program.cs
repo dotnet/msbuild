@@ -11,6 +11,7 @@ namespace ConsoleApplication
         {
             Console.WriteLine("Hello world");
             Console.WriteLine($"MyCoolEnvironmentVariableKey={Environment.GetEnvironmentVariable("MyCoolEnvironmentVariableKey")}");
+            Console.WriteLine($"DOTNET_LAUNCH_PROFILE={Environment.GetEnvironmentVariable("DOTNET_LAUNCH_PROFILE")}");
             if (args.Length > 0)
             {
                 Console.WriteLine(args[0]);

@@ -41,6 +41,12 @@ internal class ContainerizeCommand : CliRootCommand
         Required = false
     };
 
+    internal CliOption<string> ArchiveOutputPathOption { get; } = new("--archiveoutputpath")
+    {
+        Description = "The file path to which to write a tar.gz archive of the container image.",
+        Required = false
+    };
+
     internal CliOption<string> RepositoryOption { get; } = new("--repository")
     {
         Description = "The name of the output container repository that will be pushed to the registry.",
@@ -187,6 +193,7 @@ internal class ContainerizeCommand : CliRootCommand
         this.Options.Add(BaseImageNameOption);
         this.Options.Add(BaseImageTagOption);
         this.Options.Add(OutputRegistryOption);
+        this.Options.Add(ArchiveOutputPathOption);
         this.Options.Add(RepositoryOption);
         this.Options.Add(ImageTagsOption);
         this.Options.Add(WorkingDirectoryOption);
@@ -212,6 +219,7 @@ internal class ContainerizeCommand : CliRootCommand
             string _baseName = parseResult.GetValue(BaseImageNameOption)!;
             string _baseTag = parseResult.GetValue(BaseImageTagOption)!;
             string? _outputReg = parseResult.GetValue(OutputRegistryOption);
+            string? _archiveOutputPath = parseResult.GetValue(ArchiveOutputPathOption);
             string _name = parseResult.GetValue(RepositoryOption)!;
             string[] _tags = parseResult.GetValue(ImageTagsOption)!;
             string _workingDir = parseResult.GetValue(WorkingDirectoryOption)!;
@@ -256,6 +264,7 @@ internal class ContainerizeCommand : CliRootCommand
                 _ridGraphPath,
                 _localContainerDaemon,
                 _containerUser,
+                _archiveOutputPath,
                 loggerFactory,
                 cancellationToken).ConfigureAwait(false);
         });

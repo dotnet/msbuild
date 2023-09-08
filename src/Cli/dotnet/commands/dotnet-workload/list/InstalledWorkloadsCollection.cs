@@ -10,6 +10,11 @@ namespace Microsoft.DotNet.Workloads.Workload.List
         private Dictionary<string, string> _workloads;
 
         /// <summary>
+        /// Gets the number of workloads in the collection.
+        /// </summary>
+        public int Count => _workloads.Count;
+
+        /// <summary>
         /// Creates a new <see cref="InstalledWorkloadsCollection"/> instance using a collection of workload IDs
         /// and a common installation source.
         /// </summary>

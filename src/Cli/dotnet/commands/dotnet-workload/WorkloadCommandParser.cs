@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Cli
             reporter ??= Cli.Utils.Reporter.Output;
             string dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
 
-            if (!installedList.Any())
+            if (installedWorkloads.Count == 0)
             {
                 reporter.WriteLine(CommonStrings.NoWorkloadsInstalledInfoWarning);
                 return;

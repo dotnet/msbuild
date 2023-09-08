@@ -470,12 +470,12 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
         <target state="translated">Version du package</target>
         <note />
       </trans-unit>
-      <trans-unit id="DetailsCommand_UnableToLoadResorce">
+      <trans-unit id="DetailsCommand_UnableToLoadResource">
         <source>Could not parse NuGet source '{0}', so it was discarded</source>
         <target state="translated">Impossible d'analyser la source NuGet '{0}', elle a donc été supprimée</target>
         <note />
       </trans-unit>
-      <trans-unit id="DetailsCommand_UnableToLoadResorces">
+      <trans-unit id="DetailsCommand_UnableToLoadResources">
         <source>Failed to load NuGet sources configured for the folder {0}</source>
         <target state="translated">Échec du chargement des sources NuGet configurées pour le dossier {0}</target>
         <note />

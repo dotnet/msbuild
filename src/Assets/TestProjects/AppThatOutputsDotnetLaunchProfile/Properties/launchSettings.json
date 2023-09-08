@@ -1,0 +1,30 @@
+{
+  // This comment is to verify proper comment handling by dotnet run. Do not remove.
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:49850/",
+      "sslPort": 0
+    }
+  },
+  "profiles": {
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "First": {
+      "commandName": "Project",
+      "environmentVariables": {
+      }
+    },
+    "Second": {
+      "commandName": "Project",
+      "environmentVariables": {
+      }
+    }
+  }
+}

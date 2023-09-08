@@ -30,6 +30,7 @@ public static class ContainerBuilder
         string ridGraphPath,
         string localRegistry,
         string? containerUser,
+        string? archiveOutputPath,
         ILoggerFactory loggerFactory,
         CancellationToken cancellationToken)
     {
@@ -43,21 +44,43 @@ public static class ContainerBuilder
 
         bool isLocalPull = string.IsNullOrEmpty(baseRegistry);
         Registry? sourceRegistry = isLocalPull ? null : new Registry(baseRegistry, logger);
-        ImageReference sourceImageReference = new(sourceRegistry, baseImageName, baseImageTag);
+        SourceImageReference sourceImageReference = new(sourceRegistry, baseImageName, baseImageTag);
 
-        bool isLocalPush = string.IsNullOrEmpty(outputRegistry);
-        Registry? destinationRegistry = isLocalPush ? null : new Registry(outputRegistry!, logger);
-        IEnumerable<ImageReference> destinationImageReferences = imageTags.Select(t => new ImageReference(destinationRegistry, imageName, t));
+        DestinationImageReference destinationImageReference = DestinationImageReference.CreateFromSettings(
+            imageName,
+            imageTags,
+            loggerFactory,
+            archiveOutputPath,
+            outputRegistry,
+            localRegistry);
 
         ImageBuilder? imageBuilder;
         if (sourceRegistry is { } registry)
         {
-            imageBuilder = await registry.GetImageManifestAsync(
-                baseImageName,
-                baseImageTag,
-                containerRuntimeIdentifier,
-                ridGraphPath,
-                cancellationToken).ConfigureAwait(false);
+            try
+            {
+                imageBuilder = await registry.GetImageManifestAsync(
+                    baseImageName,
+                    baseImageTag,
+                    containerRuntimeIdentifier,
+                    ridGraphPath,
+                    cancellationToken).ConfigureAwait(false);
+            }
+            catch (RepositoryNotFoundException)
+            {
+                logger.LogError(Resource.FormatString(nameof(Strings.RepositoryNotFound), baseImageName, baseImageTag, registry.RegistryName));
+                return 1;
+            }
+            catch (UnableToAccessRepositoryException)
+            {
+                logger.LogError(Resource.FormatString(nameof(Strings.UnableToAccessRepository), baseImageName, registry.RegistryName));
+                return 1;
+            }
+            catch (ContainerHttpException e)
+            {
+                logger.LogError(e.Message);
+                return 1;
+            }
         }
         else
         {
@@ -121,49 +144,81 @@ public static class ContainerBuilder
         BuiltImage builtImage = imageBuilder.Build();
         cancellationToken.ThrowIfCancellationRequested();
 
-        foreach (ImageReference destinationImageReference in destinationImageReferences)
+        int exitCode;
+        switch (destinationImageReference.Kind)
         {
-            if (isLocalPush)
-            {
-                ILocalRegistry containerRegistry = KnownLocalRegistryTypes.CreateLocalRegistry(localRegistry, loggerFactory);
-                if (!(await containerRegistry.IsAvailableAsync(cancellationToken).ConfigureAwait(false)))
-                {
-                    Console.WriteLine(DiagnosticMessage.ErrorFromResourceWithCode(nameof(Strings.LocalRegistryNotAvailable)));
-                    return 7;
-                }
-
-                try
-                {
-                    await containerRegistry.LoadAsync(builtImage, sourceImageReference, destinationImageReference, cancellationToken).ConfigureAwait(false);
-                    logger.LogInformation(Strings.ContainerBuilder_ImageUploadedToLocalDaemon, destinationImageReference.RepositoryAndTag);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(DiagnosticMessage.ErrorFromResourceWithCode(nameof(Strings.RegistryOutputPushFailed), ex.Message));
-                    return 1;
-                }
-            }
-            else
-            {
-                try
-                {
-                    if (destinationImageReference.Registry is not null)
-                    {
-                        await (destinationImageReference.Registry.PushAsync(
-                            builtImage,
-                            sourceImageReference,
-                            destinationImageReference,
-                            cancellationToken)).ConfigureAwait(false);
-                        logger.LogInformation(Strings.ContainerBuilder_ImageUploadedToRegistry, destinationImageReference.RepositoryAndTag, destinationImageReference.Registry.RegistryName);
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(DiagnosticMessage.ErrorFromResourceWithCode(nameof(Strings.RegistryOutputPushFailed), e.Message));
-                    return 1;
-                }
-            }
+            case DestinationImageReferenceKind.LocalRegistry:
+                exitCode = await PushToLocalRegistryAsync(
+                    logger,
+                    builtImage,
+                    sourceImageReference,
+                    destinationImageReference,
+                    cancellationToken).ConfigureAwait(false);
+                break;
+            case DestinationImageReferenceKind.RemoteRegistry:
+                exitCode = await PushToRemoteRegistryAsync(
+                    logger,
+                    builtImage,
+                    sourceImageReference,
+                    destinationImageReference,
+                    cancellationToken).ConfigureAwait(false);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
+
+        return exitCode;
+    }
+
+    private static async Task<int> PushToLocalRegistryAsync(ILogger logger, BuiltImage builtImage, SourceImageReference sourceImageReference,
+        DestinationImageReference destinationImageReference,
+        CancellationToken cancellationToken)
+    {
+        ILocalRegistry containerRegistry = destinationImageReference.LocalRegistry!;
+        if (!(await containerRegistry.IsAvailableAsync(cancellationToken).ConfigureAwait(false)))
+        {
+            logger.LogError(Resource.FormatString(nameof(Strings.LocalRegistryNotAvailable)));
+            return 7;
+        }
+
+        try
+        {
+            await containerRegistry.LoadAsync(builtImage, sourceImageReference, destinationImageReference, cancellationToken).ConfigureAwait(false);
+            logger.LogInformation(Strings.ContainerBuilder_ImageUploadedToLocalDaemon, destinationImageReference, containerRegistry);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(Resource.FormatString(nameof(Strings.RegistryOutputPushFailed), ex.Message));
+            return 1;
+        }
+
+        return 0;
+    }
+
+    private static async Task<int> PushToRemoteRegistryAsync(ILogger logger, BuiltImage builtImage, SourceImageReference sourceImageReference,
+        DestinationImageReference destinationImageReference,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await (destinationImageReference.RemoteRegistry!.PushAsync(
+                builtImage,
+                sourceImageReference,
+                destinationImageReference,
+                cancellationToken)).ConfigureAwait(false);
+            logger.LogInformation(Strings.ContainerBuilder_ImageUploadedToRegistry, destinationImageReference, destinationImageReference.RemoteRegistry.RegistryName);
+        }
+        catch (UnableToAccessRepositoryException)
+        {
+            logger.LogError(Resource.FormatString(nameof(Strings.UnableToAccessRepository), destinationImageReference.Repository, destinationImageReference.RemoteRegistry!.RegistryName));
+            return 1;
+        }
+        catch (Exception e)
+        {
+            logger.LogError(Resource.FormatString(nameof(Strings.RegistryOutputPushFailed), e.Message));
+            return 1;
+        }
+
         return 0;
     }
 }

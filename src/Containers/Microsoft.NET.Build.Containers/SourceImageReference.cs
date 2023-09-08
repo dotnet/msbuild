@@ -6,15 +6,15 @@ namespace Microsoft.NET.Build.Containers;
 /// <summary>
 /// Represents a reference to a Docker image. A reference is made of a registry, a repository (aka the image name) and a tag.
 /// </summary>
-internal readonly record struct ImageReference(Registry? Registry, string Repository, string Tag)
+internal readonly record struct SourceImageReference(Registry? Registry, string Repository, string Tag)
 {
     public override string ToString()
     {
-        if (Registry is { } reg)
+        if (Registry is { } reg) 
         {
             return $"{reg.RegistryName}/{Repository}:{Tag}";
-        }
-        else
+        } 
+        else 
         {
             return RepositoryAndTag;
         }

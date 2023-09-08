@@ -75,17 +75,18 @@
 /src/BuiltInTools/*   @tmat @arkalyanms @dotnet/roslyn-ide
 /src/BuiltInTools/BrowserRefresh   @dotnet/aspnet-blazor-eng
 
-# ApiCompat tools owned by runtime team
+# Compatibility tools (APICompat & GenAPI) owned by runtime team
+/src/Microsoft.DotNet.ApiSymbolExtensions/ @dotnet/area-infrastructure-libraries @andriipatsula
+
 # Area-ApiCompat
-/src/ApiCompat/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 
-/src/Tests/Microsoft.DotNet.ApiCompatibility*/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 
-/src/Tests/Microsoft.DotNet.ApiCompat*/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 
-/src/Tests/Microsoft.DotNet.PackageValidation*/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 
+/src/ApiCompat/ @dotnet/area-infrastructure-libraries
+/src/Tests/Microsoft.DotNet.ApiCompatibility*/ @dotnet/area-infrastructure-libraries
+/src/Tests/Microsoft.DotNet.ApiCompat*/ @dotnet/area-infrastructure-libraries
+/src/Tests/Microsoft.DotNet.PackageValidation*/ @dotnet/area-infrastructure-libraries
 
 # Area-GenAPI
-/src/GenAPI/ @andriipatsula @dotnet/area-infrastructure-libraries
-/src/Tests/Microsoft.DotNet.GenAPI/ @andriipatsula @dotnet/area-infrastructure-libraries
-/src/Microsoft.DotNet.ApiSymbolExtensions/ @andriipatsula @dotnet/area-infrastructure-libraries
+/src/GenAPI/ @dotnet/area-infrastructure-libraries @andriipatsula
+/src/Tests/Microsoft.DotNet.GenAPI/ @dotnet/area-infrastructure-libraries @andriipatsula
 
 # Area: dotnet containers
 /src/Cli/Containers @dotnet/sdk-container-builds-maintainers
