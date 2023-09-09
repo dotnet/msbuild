@@ -4424,8 +4424,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_ClickOnceRuntimeCopyLocalItems Remove="@(_DeploymentReferencePaths)" />
 
       <!-- Include items from None itemgroup for publishing -->
-      <_ClickOnceNoneItems Include="@(_NoneWithTargetPath->'%(FullPath)')" Condition="'%(_NoneWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
-      <_ClickOnceNoneItems Include="@(_NoneWithTargetPath->'%(FullPath)')" Condition="'%(_NoneWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
+      <_ClickOnceNoneItems Include="@(_NoneWithTargetPath->'%(FullPath)')" Condition="'%(_NoneWithTargetPath.CopyToOutputDirectory)'=='Always' or '%(_NoneWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
 
       <_ClickOnceFiles Include="@(ContentWithTargetPath);@(_DeploymentManifestIconFile);@(AppConfigWithTargetPath);@(NetCoreRuntimeJsonFilesForClickOnce);@(_ClickOnceRuntimeCopyLocalItems);@(_ClickOnceNoneItems)"/>
     </ItemGroup>
