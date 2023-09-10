@@ -68,11 +68,10 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public async Task<string> GetOutputLineAsync(Predicate<string> success, Predicate<string> failure)
         {
-            bool failed = false;
-
             using var cancellationOnFailure = new CancellationTokenSource();
 
-            while (!_source.Completion.IsCompleted && !failed)
+            var failedLineCount = 0;
+            while (!_source.Completion.IsCompleted && failedLineCount == 0)
             {
                 try
                 {
@@ -87,14 +86,22 @@ namespace Microsoft.DotNet.Watcher.Tools
 
                         if (failure(line))
                         {
-                            failed = true;
+                            if (failedLineCount == 0)
+                            {
+                                // Limit the time to collect remaining output after a failure to avoid hangs:
+                                cancellationOnFailure.CancelAfter(TimeSpan.FromSeconds(1));
+                            }
 
-                            // Limit the time to collect remaining output after a failure to avoid hangs:
-                            cancellationOnFailure.CancelAfter(TimeSpan.FromSeconds(1));
+                            if (failedLineCount > 100)
+                            {
+                                break;
+                            }
+
+                            failedLineCount++;
                         }
                     }
                 }
-                catch (OperationCanceledException) when (failed)
+                catch (OperationCanceledException) when (failedLineCount > 0)
                 {
                     break;
                 }

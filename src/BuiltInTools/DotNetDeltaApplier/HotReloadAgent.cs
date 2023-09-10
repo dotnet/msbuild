@@ -252,15 +252,21 @@ namespace Microsoft.Extensions.HotReload
                     continue;
                 }
 
-                var assemblyTypes = assembly.GetTypes();
-
                 foreach (var updatedType in delta.UpdatedTypes)
                 {
-                    var type = assemblyTypes.FirstOrDefault(t => t.MetadataToken == updatedType);
-                    if (type != null)
+                    // Must be a TypeDef.
+                    Debug.Assert(updatedType >> 24 == 0x02);
+
+                    // The type has to be in the manifest module since Hot Reload does not support multi-module assemblies:
+                    try
                     {
+                        var type = assembly.ManifestModule.ResolveType(updatedType);
                         types ??= new();
                         types.Add(type);
+                    }
+                    catch (Exception e)
+                    {
+                        _log($"Failed to load type 0x{updatedType:X8}: {e.Message}");
                     }
                 }
             }
