@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="ArchiveRegistry_PushInfo">
         <source>local archive at '{0}'</source>
-        <target state="new">local archive at '{0}'</target>
+        <target state="translated">Lokales Archiv bei "{0}"</target>
         <note>{0} is the path to the file written</note>
       </trans-unit>
       <trans-unit id="BaseEntrypointOverwritten">
@@ -59,12 +59,12 @@
       </trans-unit>
       <trans-unit id="ContainerBuilder_ImageUploadedToLocalDaemon">
         <source>Pushed image '{0}' to {1}.</source>
-        <target state="new">Pushed image '{0}' to {1}.</target>
+        <target state="translated">Bild "{0}" wurde in {1} gepusht.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContainerBuilder_ImageUploadedToRegistry">
         <source>Pushed image '{0}' to registry '{1}'.</source>
-        <target state="new">Pushed image '{0}' to registry '{1}'.</target>
+        <target state="translated">Bild "{0}" wurde in die Registrierung "{1}" gepusht.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContainerBuilder_StartBuildingImage">
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="DockerCli_PushInfo">
         <source>local registry via '{0}'</source>
-        <target state="new">local registry via '{0}'</target>
+        <target state="translated">lokale Registrierung über "{0}"</target>
         <note>{0} is the command used</note>
       </trans-unit>
       <trans-unit id="DockerInfoFailed">
@@ -99,7 +99,7 @@
       </trans-unit>
       <trans-unit id="ContainerRuntimeProcessCreationFailed">
         <source>CONTAINER3001: Failed creating {0} process.</source>
-        <target state="new">CONTAINER3001: Failed creating {0} process.</target>
+        <target state="translated">CONTAINER3001: Fehler beim Erstellen des {0}-Prozesses.</target>
         <note>CONTAINER3001: {0} is the name of the command we failed to run, usually 'docker' or 'podman'.</note>
       </trans-unit>
       <trans-unit id="EmptyOrWhitespacePropertyIgnored">
