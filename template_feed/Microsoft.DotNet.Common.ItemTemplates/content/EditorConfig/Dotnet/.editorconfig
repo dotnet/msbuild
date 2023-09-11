@@ -76,6 +76,7 @@ dotnet_remove_unnecessary_suppression_exclusions = none
 
 #### C# Coding Conventions ####
 [*.cs]
+
 # namespace style
 csharp_style_namespace_declarations=file_scoped:suggestion
 
