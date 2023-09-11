@@ -1,6 +1,6 @@
 ﻿The template "TestAssets.PostActions.AddPackageReference.Basic" was created successfully.
 
 Processing post-creation actions...
-Adding a package reference Newtonsoft.Json (version: 13.0.1) to project file %working directory%/MyProject.csproj:
+Adding a package reference Newtonsoft.Json (version: 13.0.3) to project file %working directory%/MyProject.csproj:
 %CALLBACK OUTPUT%
 Successfully added a reference to the project file.
