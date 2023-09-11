@@ -259,7 +259,7 @@
       </trans-unit>
       <trans-unit id="RegistryOperationFailed">
         <source>CONTAINER1017: Unable to communicate with the registry '{0}'.</source>
-        <target state="new">CONTAINER1017: Unable to communicate with the registry '{0}'.</target>
+        <target state="translated">CONTAINER1017: 無法與登錄 '{0}' 通訊。</target>
         <note>{StrBegin="CONTAINER1017:" }</note>
       </trans-unit>
       <trans-unit id="RegistryOutputPushFailed">
@@ -269,7 +269,7 @@
       </trans-unit>
       <trans-unit id="RegistryPullFailed">
         <source>CONTAINER1014: Manifest pull failed.</source>
-        <target state="new">CONTAINER1014: Manifest pull failed.</target>
+        <target state="translated">CONTAINER1014: 資訊清單提取失敗。</target>
         <note>{StrBegin="CONTAINER1014: "}</note>
       </trans-unit>
       <trans-unit id="RegistryPushFailed">
@@ -324,7 +324,7 @@
       </trans-unit>
       <trans-unit id="RepositoryNotFound">
         <source>CONTAINER1015: Unable to access the repository '{0}' at tag '{1}' in the registry '{2}'. Please confirm that this name and tag are present in the registry.</source>
-        <target state="new">CONTAINER1015: Unable to access the repository '{0}' at tag '{1}' in the registry '{2}'. Please confirm that this name and tag are present in the registry.</target>
+        <target state="translated">CONTAINER1015: 無法存取登錄 '{2}' 中標籤 '{1}' 的存放庫 '{0}'。請確認此名稱和標籤存在於登錄中。</target>
         <note>{StrBegin="CONTAINER1015: "}</note>
       </trans-unit>
       <trans-unit id="RequiredItemsContainsEmptyItems">
@@ -349,7 +349,7 @@
       </trans-unit>
       <trans-unit id="UnableToAccessRepository">
         <source>CONTAINER1016: Unable to access the repository '{0}' in the registry '{1}'. Please confirm your credentials are correct and that you have access to this repository and registry.</source>
-        <target state="new">CONTAINER1016: Unable to access the repository '{0}' in the registry '{1}'. Please confirm your credentials are correct and that you have access to this repository and registry.</target>
+        <target state="translated">CONTAINER1016: 無法存取登錄 '{1}' 中的存放庫 '{0}'。請確認您的認證正確，且您擁有此存放庫和登錄的存取權。</target>
         <note>{StrBegin="CONTAINER1016:" }</note>
       </trans-unit>
       <trans-unit id="UnknownAppCommandInstruction">
