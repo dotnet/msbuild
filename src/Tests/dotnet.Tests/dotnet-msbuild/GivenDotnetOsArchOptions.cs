@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 var expectedArch = RuntimeInformation.ProcessArchitecture.Equals(Architecture.Arm64) ? "arm64" : Environment.Is64BitOperatingSystem ? "x64" : "x86";
                 command.GetArgumentsToMSBuild()
                     .Should()
-                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=os-{expectedArch} -property:SelfContained=false");
+                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=os-{expectedArch}");
             });
         }
 
@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 }
                 command.GetArgumentsToMSBuild()
                     .Should()
-                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier={expectedOs}-arch -property:SelfContained=false");
+                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier={expectedOs}-arch");
             });
         }
 
@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 var command = BuildCommand.FromArgs(new string[] { "--arch", "arch", "--os", "os" }, msbuildPath);
                 command.GetArgumentsToMSBuild()
                     .Should()
-                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=os-arch -property:SelfContained=false");
+                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=os-arch");
             });
         }
 
@@ -145,7 +145,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 var command = BuildCommand.FromArgs(new string[] { "--arch", "amd64", "--os", "os" }, msbuildPath);
                 command.GetArgumentsToMSBuild()
                     .Should()
-                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=os-x64 -property:SelfContained=false");
+                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=os-x64");
             });
         }
     }
