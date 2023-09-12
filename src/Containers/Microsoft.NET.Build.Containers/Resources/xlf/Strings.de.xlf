@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="ArchiveRegistry_PushInfo">
         <source>local archive at '{0}'</source>
-        <target state="new">local archive at '{0}'</target>
+        <target state="translated">Lokales Archiv bei "{0}"</target>
         <note>{0} is the path to the file written</note>
       </trans-unit>
       <trans-unit id="BaseEntrypointOverwritten">
@@ -59,12 +59,12 @@
       </trans-unit>
       <trans-unit id="ContainerBuilder_ImageUploadedToLocalDaemon">
         <source>Pushed image '{0}' to {1}.</source>
-        <target state="new">Pushed image '{0}' to {1}.</target>
+        <target state="translated">Bild "{0}" wurde in {1} gepusht.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContainerBuilder_ImageUploadedToRegistry">
         <source>Pushed image '{0}' to registry '{1}'.</source>
-        <target state="new">Pushed image '{0}' to registry '{1}'.</target>
+        <target state="translated">Bild "{0}" wurde in die Registrierung "{1}" gepusht.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContainerBuilder_StartBuildingImage">
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="DockerCli_PushInfo">
         <source>local registry via '{0}'</source>
-        <target state="new">local registry via '{0}'</target>
+        <target state="translated">lokale Registrierung über "{0}"</target>
         <note>{0} is the command used</note>
       </trans-unit>
       <trans-unit id="DockerInfoFailed">
@@ -99,7 +99,7 @@
       </trans-unit>
       <trans-unit id="ContainerRuntimeProcessCreationFailed">
         <source>CONTAINER3001: Failed creating {0} process.</source>
-        <target state="new">CONTAINER3001: Failed creating {0} process.</target>
+        <target state="translated">CONTAINER3001: Fehler beim Erstellen des {0}-Prozesses.</target>
         <note>CONTAINER3001: {0} is the name of the command we failed to run, usually 'docker' or 'podman'.</note>
       </trans-unit>
       <trans-unit id="EmptyOrWhitespacePropertyIgnored">
@@ -259,7 +259,7 @@
       </trans-unit>
       <trans-unit id="RegistryOperationFailed">
         <source>CONTAINER1017: Unable to communicate with the registry '{0}'.</source>
-        <target state="new">CONTAINER1017: Unable to communicate with the registry '{0}'.</target>
+        <target state="translated">CONTAINER1017: Die Kommunikation mit der Registrierung "{0}" ist nicht möglich.</target>
         <note>{StrBegin="CONTAINER1017:" }</note>
       </trans-unit>
       <trans-unit id="RegistryOutputPushFailed">
@@ -269,7 +269,7 @@
       </trans-unit>
       <trans-unit id="RegistryPullFailed">
         <source>CONTAINER1014: Manifest pull failed.</source>
-        <target state="new">CONTAINER1014: Manifest pull failed.</target>
+        <target state="translated">CONTAINER1014: Fehler beim Abrufen des Manifests.</target>
         <note>{StrBegin="CONTAINER1014: "}</note>
       </trans-unit>
       <trans-unit id="RegistryPushFailed">
@@ -324,7 +324,7 @@
       </trans-unit>
       <trans-unit id="RepositoryNotFound">
         <source>CONTAINER1015: Unable to access the repository '{0}' at tag '{1}' in the registry '{2}'. Please confirm that this name and tag are present in the registry.</source>
-        <target state="new">CONTAINER1015: Unable to access the repository '{0}' at tag '{1}' in the registry '{2}'. Please confirm that this name and tag are present in the registry.</target>
+        <target state="translated">CONTAINER1015: Auf das Repository "{0}" am Tag "{1}" in der Registrierung "{2}" kann nicht zugegriffen werden. Vergewissern Sie sich, dass dieser Name und dieses Tag in der Registrierung vorhanden sind.</target>
         <note>{StrBegin="CONTAINER1015: "}</note>
       </trans-unit>
       <trans-unit id="RequiredItemsContainsEmptyItems">
@@ -349,7 +349,7 @@
       </trans-unit>
       <trans-unit id="UnableToAccessRepository">
         <source>CONTAINER1016: Unable to access the repository '{0}' in the registry '{1}'. Please confirm your credentials are correct and that you have access to this repository and registry.</source>
-        <target state="new">CONTAINER1016: Unable to access the repository '{0}' in the registry '{1}'. Please confirm your credentials are correct and that you have access to this repository and registry.</target>
+        <target state="translated">CONTAINER1016: Auf das Repository "{0}" in der Registrierung "{1}" kann nicht zugegriffen werden. Vergewissern Sie sich, dass Ihre Anmeldeinformationen korrekt sind und dass Sie Zugriff auf dieses Repository und die Registrierung haben.</target>
         <note>{StrBegin="CONTAINER1016:" }</note>
       </trans-unit>
       <trans-unit id="UnknownAppCommandInstruction">
