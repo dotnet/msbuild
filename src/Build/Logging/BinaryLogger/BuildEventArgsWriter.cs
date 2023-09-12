@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -210,20 +211,15 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        public void WriteBlob(BinaryLogRecordKind kind, byte[] bytes)
-        {
-            // write the blob directly to the underlying writer,
-            // bypassing the memory stream
-            using var redirection = RedirectWritesToOriginalWriter();
-
-            Write(kind);
-            Write(bytes.Length);
-            Write(bytes);
-        }
+        public void WriteBlob(BinaryLogRecordKind kind, Stream stream, int length)
+            => WriteBlobImpl(kind, stream, length);
 
         public void WriteBlob(BinaryLogRecordKind kind, Stream stream)
+            => WriteBlobImpl(kind, stream, null);
+
+        private void WriteBlobImpl(BinaryLogRecordKind kind, Stream stream, int? length)
         {
-            if (stream.Length > int.MaxValue)
+            if (stream.CanSeek && stream.Length > int.MaxValue)
             {
                 throw new ArgumentOutOfRangeException(nameof(stream));
             }
@@ -233,8 +229,8 @@ namespace Microsoft.Build.Logging
             using var redirection = RedirectWritesToOriginalWriter();
 
             Write(kind);
-            Write((int)stream.Length);
-            Write(stream);
+            Write(length ?? (int)stream.Length);
+            Write(stream, length);
         }
 
         /// <summary>
@@ -298,15 +294,7 @@ namespace Microsoft.Build.Logging
             WriteBuildEventArgsFields(e, writeMessage: false);
             WriteDeduplicatedString(e.ProjectFile);
 
-            if (e.GlobalProperties == null)
-            {
-                Write(false);
-            }
-            else
-            {
-                Write(true);
-                WriteProperties(e.GlobalProperties);
-            }
+            WriteProperties(e.GlobalProperties);
 
             WriteProperties(e.Properties);
 
@@ -347,15 +335,7 @@ namespace Microsoft.Build.Logging
             WriteDeduplicatedString(e.TargetNames);
             WriteDeduplicatedString(e.ToolsVersion);
 
-            if (e.GlobalProperties == null)
-            {
-                Write(false);
-            }
-            else
-            {
-                Write(true);
-                Write(e.GlobalProperties);
-            }
+            Write(e.GlobalProperties);
 
             WriteProperties(e.Properties);
 
@@ -1095,7 +1075,7 @@ namespace Microsoft.Build.Logging
             Write((int)kind);
         }
 
-        private void Write(int value)
+        internal void Write(int value)
         {
             BinaryWriterExtensions.Write7BitEncodedInt(binaryWriter, value);
         }
@@ -1110,9 +1090,34 @@ namespace Microsoft.Build.Logging
             binaryWriter.Write(bytes);
         }
 
-        private void Write(Stream stream)
+        private void Write(Stream stream, int? length)
         {
-            stream.CopyTo(binaryWriter.BaseStream);
+            if (length == null)
+            {
+                stream.CopyTo(binaryWriter.BaseStream);
+                return;
+            }
+
+            // borrowed from runtime from Stream.cs
+            const int defaultCopyBufferSize = 81920;
+            int bufferSize = Math.Min(defaultCopyBufferSize, length.Value);
+
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+            try
+            {
+                int bytesRead;
+                while (
+                    length > 0 &&
+                    (bytesRead = stream.Read(buffer, 0, Math.Min(buffer.Length, length.Value))) != 0)
+                {
+                    binaryWriter.BaseStream.Write(buffer, 0, bytesRead);
+                    length -= bytesRead;
+                }
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
+            }
         }
 
         private void Write(byte b)
