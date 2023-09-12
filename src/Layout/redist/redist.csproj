@@ -9,6 +9,9 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <!-- do not import analyzer assemblies from the sdk as they will be double loaded -->
     <EnableNETAnalyzers>false</EnableNETAnalyzers>
+    <!-- Disable the fast up-to-date check as it relies on the redist.dll, which we delete as part of the build process in GereateLayout.targets. -->
+    <!-- Property info: https://github.com/dotnet/project-system/blob/main/docs/up-to-date-check.md#disabling-the-up-to-date-check -->
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
   </PropertyGroup>
 
   <Import Project="targets\BuildToolsetTasks.targets" />
@@ -55,8 +58,8 @@
     <ProjectReference Include="..\tool_msbuild\tool_msbuild.csproj" />
     <ProjectReference Include="..\tool_nuget\tool_nuget.csproj" />
     <ProjectReference Include="..\..\Cli\dotnet\dotnet.csproj" />
-    <ProjectReference Include="..\..\Tasks\Microsoft.NET.Build.Tasks\Microsoft.NET.Build.Tasks.csproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
-    <ProjectReference Include="..\..\Tasks\Microsoft.NET.Build.Extensions.Tasks\Microsoft.NET.Build.Extensions.Tasks.csproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
+    <ProjectReference Include="..\..\Tasks\Microsoft.NET.Build.Tasks\Microsoft.NET.Build.Tasks.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\Tasks\Microsoft.NET.Build.Extensions.Tasks\Microsoft.NET.Build.Extensions.Tasks.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\Resolvers\Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver\Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver.csproj" />
     <ProjectReference Include="$(RepoRoot)src\BuiltInTools\dotnet-watch\dotnet-watch.csproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" Private="false" />
   </ItemGroup>
