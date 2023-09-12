@@ -6,6 +6,10 @@
       <Sha>184a0cf0c6410d3746661072fbc0b4c9e3947cce</Sha>
       <SourceBuild RepoName="templating" ManagedOnly="true" />
     </Dependency>
+    <Dependency Name="Microsoft.TemplateEngine.Mocks" Version="8.0.100-rc.2.23462.2">
+      <Uri>https://github.com/dotnet/templating</Uri>
+      <Sha>184a0cf0c6410d3746661072fbc0b4c9e3947cce</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Ref" Version="8.0.0-rc.2.23457.7">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>da3500bb02343b1d0424c74ccdddbc592b5b3f4f</Sha>
