@@ -70,6 +70,9 @@ namespace Microsoft.DotNet.Watcher.Tools
         {
             using var cancellationOnFailure = new CancellationTokenSource();
 
+            // cancel just before we hit 2 minute time out used on CI (sdk\src\Tests\UnitTests.proj)
+            cancellationOnFailure.CancelAfter(TimeSpan.FromSeconds(110));
+
             var failedLineCount = 0;
             while (!_source.Completion.IsCompleted && failedLineCount == 0)
             {

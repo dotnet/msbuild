@@ -20,15 +20,14 @@ namespace Microsoft.DotNet.Watcher.Tests
         public async Task ChangeCompiledFile(bool usePollingWatcher)
         {
             var testAsset = TestAssets.CopyTestAsset(AppName, identifier: usePollingWatcher.ToString())
-               .WithSource()
-               .Path;
+               .WithSource();
 
             App.UsePollingWatcher = usePollingWatcher;
             await App.StartWatcherAsync(testAsset);
 
             await AssertCompiledAppDefinedTypes(expected: 2);
 
-            var fileToChange = Path.Combine(testAsset, "include", "Foo.cs");
+            var fileToChange = Path.Combine(testAsset.Path, "include", "Foo.cs");
             var programCs = File.ReadAllText(fileToChange);
             File.WriteAllText(fileToChange, programCs);
 
@@ -41,14 +40,13 @@ namespace Microsoft.DotNet.Watcher.Tests
         public async Task DeleteCompiledFile()
         {
             var testAsset = TestAssets.CopyTestAsset(AppName)
-               .WithSource()
-               .Path;
+               .WithSource();
 
             await App.StartWatcherAsync(testAsset);
 
             await AssertCompiledAppDefinedTypes(expected: 2);
 
-            var fileToChange = Path.Combine(testAsset, "include", "Foo.cs");
+            var fileToChange = Path.Combine(testAsset.Path, "include", "Foo.cs");
             File.Delete(fileToChange);
 
             await App.AssertRestarted();
@@ -59,14 +57,13 @@ namespace Microsoft.DotNet.Watcher.Tests
         public async Task DeleteSourceFolder()
         {
             var testAsset = TestAssets.CopyTestAsset(AppName)
-               .WithSource()
-               .Path;
+               .WithSource();
 
             await App.StartWatcherAsync(testAsset);
 
             await AssertCompiledAppDefinedTypes(expected: 2);
 
-            var folderToDelete = Path.Combine(testAsset, "include");
+            var folderToDelete = Path.Combine(testAsset.Path, "include");
             Directory.Delete(folderToDelete, recursive: true);
 
             await App.AssertRestarted();
@@ -77,13 +74,12 @@ namespace Microsoft.DotNet.Watcher.Tests
         public async Task RenameCompiledFile()
         {
             var testAsset = TestAssets.CopyTestAsset(AppName)
-               .WithSource()
-               .Path;
+               .WithSource();
 
             await App.StartWatcherAsync(testAsset);
 
-            var oldFile = Path.Combine(testAsset, "include", "Foo.cs");
-            var newFile = Path.Combine(testAsset, "include", "Foo_new.cs");
+            var oldFile = Path.Combine(testAsset.Path, "include", "Foo.cs");
+            var newFile = Path.Combine(testAsset.Path, "include", "Foo_new.cs");
             File.Move(oldFile, newFile);
 
             await App.AssertRestarted();
@@ -93,12 +89,11 @@ namespace Microsoft.DotNet.Watcher.Tests
         public async Task ChangeExcludedFile()
         {
             var testAsset = TestAssets.CopyTestAsset(AppName)
-               .WithSource()
-               .Path;
+               .WithSource();
 
             await App.StartWatcherAsync(testAsset);
 
-            var changedFile = Path.Combine(testAsset, "exclude", "Baz.cs");
+            var changedFile = Path.Combine(testAsset.Path, "exclude", "Baz.cs");
             File.WriteAllText(changedFile, "");
 
             var fileChanged = App.AssertFileChanged();
@@ -110,15 +105,15 @@ namespace Microsoft.DotNet.Watcher.Tests
         public async Task ListsFiles()
         {
             var testAsset = TestAssets.CopyTestAsset(AppName)
-               .WithSource()
-               .Path;
+               .WithSource();
 
+            App.DotnetWatchArgs.Clear();
             App.Start(testAsset, new[] { "--list" });
             var lines = await App.Process.GetAllOutputLinesAsync(CancellationToken.None);
             var files = lines.Where(l => !l.StartsWith("watch :"));
 
             AssertEx.EqualFileList(
-                testAsset,
+                testAsset.Path,
                 new[]
                 {
                     "Program.cs",

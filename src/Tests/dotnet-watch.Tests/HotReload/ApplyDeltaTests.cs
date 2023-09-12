@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.DotNet.Watcher.Tests
@@ -14,14 +14,13 @@ namespace Microsoft.DotNet.Watcher.Tests
         public async Task ChangeFileInDependency()
         {
             var testAsset = TestAssets.CopyTestAsset("WatchAppWithProjectDeps")
-                .WithSource()
-                .Path;
+                .WithSource();
 
-            var projectDir = Path.Combine(testAsset, "AppWithDeps");
-            var dependencyDir = Path.Combine(testAsset, "Dependency");
+            var dependencyDir = Path.Combine(testAsset.Path, "Dependency");
 
-            await App.StartWatcherAsync(projectDir);
-            await App.AssertOutputLineStartsWith("Hello!");
+            await App.StartWatcherAsync(testAsset, "AppWithDeps");
+
+            await App.WaitForSessionStarted();
 
             var newSrc = """
                 public class Lib
@@ -35,18 +34,15 @@ namespace Microsoft.DotNet.Watcher.Tests
             await App.AssertOutputLineStartsWith("Changed!");
         }
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/35264")]
+        [Fact]
         public async Task HandleTypeLoadFailure()
         {
             var testAsset = TestAssets.CopyTestAsset("WatchAppTypeLoadFailure")
-                .WithSource()
-                .Path;
+                .WithSource();
 
-            var projectDir = Path.Combine(testAsset, "App");
+            await App.StartWatcherAsync(testAsset, "App");
 
-            App.DotnetWatchArgs.Add("--verbose");
-            await App.StartWatcherAsync(projectDir);
-            await App.AssertOutputLineStartsWith("Hello!");
+            await App.WaitForSessionStarted();
 
             var newSrc = """
                 class DepSubType : Dep
@@ -61,9 +57,9 @@ namespace Microsoft.DotNet.Watcher.Tests
                         Console.WriteLine("Changed!");
                     }
                 }
-                """;
+                """;    
 
-            File.WriteAllText(Path.Combine(projectDir, "Update.cs"), newSrc);
+            File.WriteAllText(Path.Combine(testAsset.Path, "App", "Update.cs"), newSrc);
 
             await App.AssertOutputLineStartsWith("Updated types: Printer");
         }
