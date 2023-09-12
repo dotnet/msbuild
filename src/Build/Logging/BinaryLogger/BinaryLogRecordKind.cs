@@ -24,7 +24,7 @@ namespace Microsoft.Build.Logging
         ProjectEvaluationStarted,
         ProjectEvaluationFinished,
         ProjectImported,
-        ProjectImportArchive,
+        ProjectImportArchive = 17,
         TargetSkipped,
         PropertyReassignment,
         UninitializedPropertyRead,

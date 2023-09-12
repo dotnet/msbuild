@@ -63,6 +63,8 @@ namespace Microsoft.Build.Logging
         //   - AssemblyLoadBuildEventArgs
         // version 17:
         //   - Added extended data for types implementing IExtendedBuildEventArgs
+        //   - Making ProjectStartedEventArgs, ProjectEvaluationFinishedEventArgs, AssemblyLoadBuildEventArgs equal
+        //     between de/serialization roundtrips.
         internal const int FileFormatVersion = 17;
 
         private Stream stream;
@@ -117,7 +119,12 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Initializes the logger by subscribing to events of the specified event source.
         /// </summary>
-        public void Initialize(IEventSource eventSource)
+        public void Initialize(IEventSource eventSource) => Initialize(eventSource, null);
+
+        /// <summary>
+        /// Initializes the logger by subscribing to events of the specified event source and embedded content source.
+        /// </summary>
+        public void Initialize(IEventSource eventSource, IEmbeddedContentSource embeddedFilesSource)
         {
             _initialTargetOutputLogging = Environment.GetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING");
             _initialLogImports = Traits.Instance.EscapeHatches.LogProjectImports;
@@ -131,6 +138,13 @@ namespace Microsoft.Build.Logging
             bool logPropertiesAndItemsAfterEvaluation = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation ?? true;
 
             ProcessParameters();
+
+            if (embeddedFilesSource != null)
+            {
+                CollectProjectImports = ProjectImportsCollectionMode.None;
+                embeddedFilesSource.EmbeddedContentRead += args =>
+                    eventArgsWriter.WriteBlob(args.ContentKind.ToBinaryLogRecordKind(), args.ContentStream, args.Length);
+            }
 
             try
             {
@@ -180,7 +194,9 @@ namespace Microsoft.Build.Logging
             // wrapping the GZipStream in a buffered stream significantly improves performance
             // and the max throughput is reached with a 32K buffer. See details here:
             // https://github.com/dotnet/runtime/issues/39233#issuecomment-745598847
-            stream = new BufferedStream(stream, bufferSize: 32768);
+            stream = Traits.Instance.DeterministicBinlogStreamBuffering ?
+                new GreedyBufferedStream(stream, bufferSize: 32768) :
+                new BufferedStream(stream, bufferSize: 32768);
             binaryWriter = new BinaryWriter(stream);
             eventArgsWriter = new BuildEventArgsWriter(binaryWriter);
 
@@ -189,9 +205,15 @@ namespace Microsoft.Build.Logging
                 eventArgsWriter.EmbedFile += EventArgsWriter_EmbedFile;
             }
 
-            binaryWriter.Write(FileFormatVersion);
-
-            LogInitialInfo();
+            if (embeddedFilesSource == null)
+            {
+                binaryWriter.Write(FileFormatVersion);
+                LogInitialInfo();
+            }
+            else
+            {
+                binaryWriter.Write(embeddedFilesSource.FileFormatVersion);
+            }
 
             eventSource.AnyEventRaised += EventSource_AnyEventRaised;
 

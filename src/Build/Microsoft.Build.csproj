@@ -160,10 +160,6 @@
     <Compile Include="FileAccess\ProcessData.cs" />
     <Compile Include="FileAccess\ReportedFileOperation.cs" />
     <Compile Include="FileAccess\RequestedAccess.cs" />
-    <Compile Include="Logging\BinaryLogger\ExtendedDataFields.cs" />
-    <Compile Include="Logging\BinaryLogger\IBuildEventArgsReaderNotifications.cs" />
-    <Compile Include="Logging\BinaryLogger\IBuildEventStringsReader.cs" />
-    <Compile Include="Logging\BinaryLogger\StringReadEventArgs.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />
@@ -527,6 +523,8 @@
     <Compile Include="Logging\BinaryLogger\BuildEventArgsReader.cs" />
     <Compile Include="Logging\BinaryLogger\BuildEventArgsWriter.cs" />
     <Compile Include="Logging\BinaryLogger\ProjectImportsCollector.cs" />
+    <Compile Include="Logging\BinaryLogger\ExtendedDataFields.cs" />
+    <Compile Include="Logging\BinaryLogger\Postprocessing\*.cs" />
     <Compile Include="Logging\ConsoleLogger.cs" />
     <Compile Include="Logging\DistributedLoggers\DistributedFileLogger.cs" />
     <Compile Include="Logging\DistributedLoggers\ConfigurableForwardingLogger.cs" />

@@ -63,9 +63,19 @@ namespace Microsoft.Build.Logging
             this.fileFormatVersion = fileFormatVersion;
         }
 
+        /// <summary>
+        /// Directs whether the passed <see cref="BinaryReader"/> should be closed when this instance is disposed.
+        /// Defaults to "false".
+        /// </summary>
+        public bool CloseInput { private get; set; } = false;
+
         public void Dispose()
         {
             stringStorage.Dispose();
+            if (CloseInput)
+            {
+                binaryReader.Dispose();
+            }
         }
 
         /// <summary>
@@ -81,11 +91,14 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public event Action? StringEncountered;
 
+        public int FileFormatVersion => fileFormatVersion;
+
         /// <summary>
-        /// Raised when the log reader encounters a binary blob embedded in the stream.
-        /// The arguments include the blob kind and the byte buffer with the contents.
+        /// Raised when the log reader encounters a project import archive (embedded content) in the stream.
+        /// The subscriber must read the exactly given length of binary data from the stream - otherwise exception is raised.
+        /// If no subscriber is attached, the data is skipped.
         /// </summary>
-        internal event Action<BinaryLogRecordKind, byte[]>? OnBlobRead;
+        public event Action<EmbeddedContentEventArgs>? EmbeddedContentRead;
 
         /// <summary>
         /// Reads the next log record from the <see cref="BinaryReader"/>.
@@ -113,7 +126,7 @@ namespace Microsoft.Build.Logging
                 }
                 else if (recordKind == BinaryLogRecordKind.ProjectImportArchive)
                 {
-                    ReadBlob(recordKind);
+                    ReadEmbeddedContent(recordKind);
                 }
 
                 recordNumber += 1;
@@ -212,11 +225,30 @@ namespace Microsoft.Build.Logging
                 || recordKind == BinaryLogRecordKind.ProjectImportArchive;
         }
 
-        private void ReadBlob(BinaryLogRecordKind kind)
+        private void ReadEmbeddedContent(BinaryLogRecordKind recordKind)
         {
             int length = ReadInt32();
-            byte[] bytes = binaryReader.ReadBytes(length);
-            OnBlobRead?.Invoke(kind, bytes);
+            if (EmbeddedContentRead != null)
+            {
+                long preEventPosition = binaryReader.BaseStream.CanSeek ? binaryReader.BaseStream.Position : 0;
+                EmbeddedContentRead(new EmbeddedContentEventArgs(recordKind.ToEmbeddedContentKind(), binaryReader.BaseStream, length));
+                long postEventPosition = binaryReader.BaseStream.CanSeek ? binaryReader.BaseStream.Position : length;
+                if (postEventPosition - preEventPosition != length)
+                {
+                    throw new InvalidDataException($"The {nameof(EmbeddedContentRead)} event handler must read exactly {length} bytes from the stream.");
+                }
+            }
+            else
+            {
+                if (binaryReader.BaseStream.CanSeek)
+                {
+                    binaryReader.BaseStream.Seek(length, SeekOrigin.Current);
+                }
+                else
+                {
+                    binaryReader.ReadBytes(length);
+                }
+            }
         }
 
         private void ReadNameValueList()
@@ -419,11 +451,12 @@ namespace Microsoft.Build.Logging
 
             if (fileFormatVersion >= 12)
             {
-                IEnumerable? globalProperties = null;
-                if (ReadBoolean())
+                if (fileFormatVersion < 17)
                 {
-                    globalProperties = ReadStringDictionary();
+                    // Throw away, but need to advance past it
+                    ReadBoolean();
                 }
+                IEnumerable? globalProperties = ReadStringDictionary();
 
                 var propertyList = ReadPropertyList();
                 var itemList = ReadProjectItems();
@@ -474,10 +507,12 @@ namespace Microsoft.Build.Logging
 
             if (fileFormatVersion > 6)
             {
-                if (ReadBoolean())
+                if (fileFormatVersion < 17)
                 {
-                    globalProperties = ReadStringDictionary();
+                    // Throw away, but need to advance past it
+                    ReadBoolean();
                 }
+                globalProperties = ReadStringDictionary();
             }
 
             var propertyList = ReadPropertyList();
@@ -950,6 +985,7 @@ namespace Microsoft.Build.Logging
                 mvid,
                 appDomainName);
             SetCommonFields(e, fields);
+            e.ProjectFile = fields.ProjectFile;
 
             return e;
         }

@@ -6,7 +6,7 @@ namespace Microsoft.Build.Logging
     /// <summary>
     /// An interface for notifications from BuildEventArgsReader
     /// </summary>
-    public interface IBuildEventArgsReaderNotifications : IBuildEventStringsReader
+    public interface IBuildEventArgsReaderNotifications : IBuildEventStringsReader, IEmbeddedContentSource
     {
         /* For future use */
     }

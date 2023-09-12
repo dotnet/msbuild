@@ -121,6 +121,12 @@ namespace Microsoft.Build.Framework
         public readonly int LogPropertyTracking = ParseIntFromEnvironmentVariableOrDefault("MsBuildLogPropertyTracking", 0); // Default to logging nothing via the property tracker.
 
         /// <summary>
+        /// Turn on greedy buffering stream decorator for binlog writer.
+        /// This will ensure that 2 identical binlog contents will result into identical binlog files (as writing different chunks to GZipStream can lead to different result).
+        /// </summary>
+        public readonly bool DeterministicBinlogStreamBuffering = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDETERMNISTICBINLOG"));
+
+        /// <summary>
         /// When evaluating items, this is the minimum number of items on the running list to use a dictionary-based remove optimization.
         /// </summary>
         public readonly int DictionaryBasedItemRemoveThreshold = ParseIntFromEnvironmentVariableOrDefault("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", 100);
