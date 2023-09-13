@@ -11,7 +11,8 @@ namespace Microsoft.DotNet.Cli.Utils
         Darwin = 3,
         FreeBSD = 4,
         illumos = 5,
-        Solaris = 6
+        Solaris = 6,
+        Haiku = 7
     }
 
     internal static class RuntimeEnvironment
@@ -45,6 +46,8 @@ namespace Microsoft.DotNet.Cli.Utils
                     return GetDistroId() ?? nameof(Platform.illumos);
                 case Platform.Solaris:
                     return nameof(Platform.Solaris);
+                case Platform.Haiku:
+                    return nameof(Platform.Haiku);
                 default:
                     return nameof(Platform.Unknown);
             }
@@ -67,6 +70,8 @@ namespace Microsoft.DotNet.Cli.Utils
                     // RuntimeInformation.OSDescription example on Solaris 11.3:      SunOS 5.11 11.3
                     // we only need the major version; 11
                     return RuntimeInformation.OSDescription.Split(' ')[2].Split('.')[0];
+                case Platform.Haiku:
+                    return Environment.OSVersion.Version.ToString(1);
                 default:
                     return string.Empty;
             }
@@ -250,6 +255,10 @@ namespace Microsoft.DotNet.Cli.Utils
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Create("SOLARIS")))
             {
                 return Platform.Solaris;
+            }
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Create("HAIKU")))
+            {
+                return Platform.Haiku;
             }
 #endif
 
