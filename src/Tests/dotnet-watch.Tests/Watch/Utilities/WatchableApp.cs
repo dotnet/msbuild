@@ -15,6 +15,7 @@ namespace Microsoft.DotNet.Watcher.Tests
         private const string WatchErrorOutputEmoji = "❌";
         private const string WaitingForFileChangeMessage = "dotnet watch ⏳ Waiting for a file to change";
         private const string WatchFileChanged = "dotnet watch ⌚ File changed:";
+        private const string HotReloadSessionStarted = "dotnet watch 🔥 Hot Reload session started.";
 
         public readonly ITestOutputHelper Logger;
         private bool _prepared;
@@ -26,7 +27,7 @@ namespace Microsoft.DotNet.Watcher.Tests
 
         public AwaitableProcess Process { get; private set; }
 
-        public List<string> DotnetWatchArgs { get; } = new List<string>();
+        public List<string> DotnetWatchArgs { get; } = new() { "--verbose" };
 
         public Dictionary<string, string> EnvironmentVariables { get; } = new Dictionary<string, string>();
 
@@ -41,6 +42,11 @@ namespace Microsoft.DotNet.Watcher.Tests
                 success: line => line.StartsWith(expectedPrefix, StringComparison.Ordinal),
                 failure: failure ?? new Predicate<string>(line => line.Contains(WatchErrorOutputEmoji, StringComparison.Ordinal)));
 
+            if (line == null && failure != null)
+            {
+                Assert.Fail($"Failed to find expected text: '{expectedPrefix}'");
+            }
+
             Assert.StartsWith(expectedPrefix, line, StringComparison.Ordinal);
 
             return line.Substring(expectedPrefix.Length);
@@ -51,6 +57,14 @@ namespace Microsoft.DotNet.Watcher.Tests
 
         public Task AssertRestarted()
             => AssertOutputLineEquals(StartedMessage);
+
+        /// <summary>
+        ///  Must be called before updating any source files.
+        ///  Document content is captured at session start and if any source files are updated before that
+        ///  changes will not be detected since the captured file content won't match the PDB checksums.
+        /// </summary>
+        public Task WaitForSessionStarted()
+            => AssertOutputLineStartsWith(HotReloadSessionStarted);
 
         public Task AssertWaitingForFileChange()
             => AssertOutputLineStartsWith(WaitingForFileChangeMessage);
@@ -64,22 +78,24 @@ namespace Microsoft.DotNet.Watcher.Tests
             await AssertOutputLineStartsWith(WatchExitedMessage);
         }
 
-        private void Prepare(string projectRootPath)
+        private void Prepare(string projectDirectory)
         {
             if (_prepared)
             {
                 return;
             }
 
-            var buildCommand = new BuildCommand(Logger, projectRootPath);
+            var buildCommand = new BuildCommand(Logger, projectDirectory);
             buildCommand.Execute().Should().Pass();
 
             _prepared = true;
         }
 
-        public void Start(string projectRootPath, IEnumerable<string> arguments, string workingDirectory = null, TestFlags testFlags = TestFlags.RunningAsTest, string name = null)
+        public void Start(TestAsset asset, IEnumerable<string> arguments, string relativeProjectDirectory = null, string workingDirectory = null, TestFlags testFlags = TestFlags.RunningAsTest)
         {
-            Prepare(projectRootPath);
+            var projectDirectory = (relativeProjectDirectory != null) ? Path.Combine(asset.Path, relativeProjectDirectory) : asset.Path;
+
+            Prepare(projectDirectory);
 
             var args = new List<string>
             {
@@ -90,11 +106,17 @@ namespace Microsoft.DotNet.Watcher.Tests
 
             var commandSpec = new DotnetCommand(Logger, args.ToArray())
             {
-                WorkingDirectory = workingDirectory ?? projectRootPath,
+                WorkingDirectory = workingDirectory ?? projectDirectory,
             };
 
             commandSpec.WithEnvironmentVariable("DOTNET_USE_POLLING_FILE_WATCHER", "true");
             commandSpec.WithEnvironmentVariable("__DOTNET_WATCH_TEST_FLAGS", testFlags.ToString());
+
+            var encLogPath = Environment.GetEnvironmentVariable("HELIX_WORKITEM_UPLOAD_ROOT") is { } ciOutputRoot
+                ? Path.Combine(ciOutputRoot, ".hotreload", asset.Name)
+                : Path.Combine(asset.Path, ".hotreload");
+
+            commandSpec.WithEnvironmentVariable("Microsoft_CodeAnalysis_EditAndContinue_LogDir", encLogPath);
 
             foreach (var env in EnvironmentVariables)
             {
@@ -106,11 +128,11 @@ namespace Microsoft.DotNet.Watcher.Tests
         }
 
         public async Task StartWatcherAsync(
-            string projectRootPath,
+            TestAsset asset,
+            string relativeProjectDirectory = null,
             IEnumerable<string> applicationArguments = null,
             string workingDirectory = null,
-            TestFlags testFlags = TestFlags.RunningAsTest,
-            [CallerMemberName] string name = null)
+            TestFlags testFlags = TestFlags.RunningAsTest)
         {
             var args = new[] { "run", "--" };
             if (applicationArguments != null)
@@ -118,7 +140,7 @@ namespace Microsoft.DotNet.Watcher.Tests
                 args = args.Concat(applicationArguments).ToArray();
             }
 
-            Start(projectRootPath, args, workingDirectory, testFlags, name);
+            Start(asset, args, relativeProjectDirectory, workingDirectory, testFlags);
 
             await AssertOutputLineStartsWith(WatchStartedMessage);
         }

@@ -1,12 +1,13 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.DotNet.Watcher.Tools;
 using Microsoft.Extensions.Tools.Internal;
 using Moq;
 
-namespace Microsoft.DotNet.Watcher.Tools
+namespace Microsoft.DotNet.Watcher.Tests
 {
-    public class DefaultDeltaApplierTest
+    public class DefaultDeltaApplierTests
     {
         [Fact]
         public void Initialize_ConfiguresEnvironmentVariables()

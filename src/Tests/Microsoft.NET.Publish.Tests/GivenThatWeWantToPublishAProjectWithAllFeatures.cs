@@ -36,7 +36,7 @@ namespace Microsoft.NET.Publish.Tests
                 // TestLibrary has a hard dependency on Newtonsoft.Json.
                 // TestApp has a PrivateAssets=All dependency on Microsoft.Extensions.DependencyModel, which depends on Newtonsoft.Json.
                 // This verifies that P2P references get walked correctly when doing PrivateAssets exclusion.
-                VerifyDependency(dependencyContext, "Newtonsoft.Json", targetFramework == "net6.0" ? "lib/netstandard2.0/" : "lib/netstandard1.3/", null);
+                VerifyDependency(dependencyContext, "Newtonsoft.Json", targetFramework == "net6.0" ? "lib/net6.0/" : "lib/netstandard1.3/", null);
 
                 // Verify P2P references get created correctly in the .deps.json file.
                 VerifyDependency(dependencyContext, "TestLibrary", "", null,

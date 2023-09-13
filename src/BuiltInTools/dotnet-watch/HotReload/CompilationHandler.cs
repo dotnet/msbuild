@@ -111,6 +111,8 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var hotReloadService = new WatchHotReloadService(services, hotReloadCapabilities);
             await hotReloadService.StartSessionAsync(initialSolution, cancellationToken);
+
+            reporter.Verbose("Hot Reload session started.", emoji: "🔥");
             return hotReloadService;
         }
 
