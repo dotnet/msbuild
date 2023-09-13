@@ -133,4 +133,39 @@ function InstallDotNetSharedFramework([string]$version) {
   }
 }
 
+# Let's clear out the stage-zero folders that map to the current runtime to keep stage 2 clean
+function CleanOutStage0ToolsetsAndRuntimes {
+  $GlobalJson = Get-Content -Raw -Path (Join-Path $RepoRoot 'global.json') | ConvertFrom-Json
+  $dotnetSdkVersion = $GlobalJson.tools.dotnet
+  $dotnetRoot = $env:DOTNET_INSTALL_DIR
+  $versionPath = Join-Path $dotnetRoot '.version'
+  $aspnetRuntimePath = [IO.Path]::Combine( $dotnetRoot, 'shared' ,'Microsoft.AspNetCore.App')
+  $coreRuntimePath = [IO.Path]::Combine( $dotnetRoot, 'shared' ,'Microsoft.NETCore.App')
+  $wdRuntimePath = [IO.Path]::Combine( $dotnetRoot, 'shared', 'Microsoft.WindowsDesktop.App')
+  $sdkPath = Join-Path $dotnetRoot 'sdk'
+  $majorVersion = $dotnetSdkVersion.Substring(0,1)
+
+  if (Test-Path($versionPath)) {
+    $lastInstalledSDK = Get-Content -Raw -Path ($versionPath)
+    if ($lastInstalledSDK -ne $dotnetSdkVersion)
+    {
+      $dotnetSdkVersion | Out-File -FilePath $versionPath -NoNewline
+      Remove-Item (Join-Path $aspnetRuntimePath "$majorVersion.*") -Recurse
+      Remove-Item (Join-Path $coreRuntimePath "$majorVersion.*") -Recurse
+      Remove-Item (Join-Path $wdRuntimePath "$majorVersion.*") -Recurse
+      Remove-Item (Join-Path $sdkPath "$majorVersion.*") -Recurse
+      Remove-Item (Join-Path $dotnetRoot "packs") -Recurse
+      Remove-Item (Join-Path $dotnetRoot "sdk-manifests") -Recurse
+      Remove-Item (Join-Path $dotnetRoot "templates") -Recurse
+      throw "Installed a new SDK, deleting existing shared frameworks and sdk folders. Please rerun build"
+    }
+  }
+  else
+  {
+    $dotnetSdkVersion | Out-File -FilePath $versionPath -NoNewline
+  }
+}
+
 InitializeCustomSDKToolset
+
+CleanOutStage0ToolsetsAndRuntimes

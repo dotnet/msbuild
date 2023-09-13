@@ -15,11 +15,16 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             new(StringComparer.OrdinalIgnoreCase)
             {
                 "3F9001EA83C560D712C24CF213C3D312CB3BFF51EE89435D3430BD06B5D0EECE",
-                "AA12DA22A49BCE7D5C1AE64CC1F3D892F150DA76140F210ABD2CBFFCA2C18A27"
+                "AA12DA22A49BCE7D5C1AE64CC1F3D892F150DA76140F210ABD2CBFFCA2C18A27",
+                "566A31882BE208BE4422F7CFD66ED09F5D4524A5994F50CCC8B05EC0528C1353"
             };
 
         private readonly HashSet<string> _upperFirstPartyCertificateThumbprints =
-            new(StringComparer.OrdinalIgnoreCase) {"51044706BD237B91B89B781337E6D62656C69F0FCFFBE8E43741367948127862"};
+            new(StringComparer.OrdinalIgnoreCase)
+            {
+                "51044706BD237B91B89B781337E6D62656C69F0FCFFBE8E43741367948127862",
+                "46011EDE1C147EB2BC731A539B7C047B7EE93E48B9D3C3BA710CE132BBDFAC6B"
+            };
 
         private const string FirstPartyCertificateSubject =
             "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US";
