@@ -52,6 +52,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyModel" VersionOverride="8.0.0-rc.1.23414.4"/>
     <PackageReference Include="Microsoft.NET.HostModel" VersionOverride="8.0.0-rc.1.23414.4"/>
     <PackageReference Include="System.Text.Json" VersionOverride="8.0.0-rc.1.23414.4"/>
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" VersionOverride="8.0.0-rc.1.23414.4"/>
     <PackageReference Include="NuGet.ProjectModel" />
     <PackageReference Include="NuGet.Build.Tasks.Pack" ExcludeAssets="All" />
     <PackageReference Include="Microsoft.Deployment.DotNet.Releases" />
