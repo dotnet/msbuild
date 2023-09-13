@@ -10,7 +10,6 @@
 
   <ItemGroup>
     <PackageReference Include="FluentAssertions" />
-    <PackageReference Include="System.Security.Cryptography.X509Certificates" />
   </ItemGroup>
 
   <ItemGroup>

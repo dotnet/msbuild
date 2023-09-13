@@ -21,7 +21,6 @@
     <PackageReference Include="xunit" />
     <PackageReference Include="Microsoft.Build" />
     <PackageReference Include="System.Net.Http" />
-    <PackageReference Include="System.Security.Cryptography.X509Certificates" />
   </ItemGroup>
 
 </Project>
