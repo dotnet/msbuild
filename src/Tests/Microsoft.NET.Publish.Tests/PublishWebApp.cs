@@ -36,7 +36,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var publishCommand = new PublishCommand(testAsset);
 
-            publishCommand.Execute()
+            publishCommand.Execute("-p:SelfContained=True")
                 .Should()
                 .Pass();
 
