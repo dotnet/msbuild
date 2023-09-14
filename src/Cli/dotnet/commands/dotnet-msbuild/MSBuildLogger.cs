@@ -101,7 +101,9 @@ namespace Microsoft.DotNet.Tools.MSBuild
                             RuntimeIdentifierTelemetryPropertyKey,
                             SelfContainedTelemetryPropertyKey,
                             UseApphostTelemetryPropertyKey,
-                            OutputTypeTelemetryPropertyKey
+                            OutputTypeTelemetryPropertyKey,
+                            UseArtifactsOutputTelemetryPropertyKey,
+                            ArtifactsPathLocationTypeTelemetryPropertyKey
                         })
                         {
                             if (args.Properties.TryGetValue(key, out string value))
