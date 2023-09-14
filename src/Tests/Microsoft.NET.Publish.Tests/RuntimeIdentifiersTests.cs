@@ -392,6 +392,7 @@ namespace Microsoft.NET.Publish.Tests
             };
 
             testProject.AdditionalProperties["PublishAot"] = "true";
+            testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "false"; // Make sure the RuntimeIdentifier isn't inferred
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var publishCommand = new DotnetPublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
@@ -415,6 +416,7 @@ namespace Microsoft.NET.Publish.Tests
 
             testProject.AdditionalProperties["PublishAot"] = "true";
             testProject.AdditionalProperties["AllowPublishAotWithoutRuntimeIdentifier"] = "true";
+            testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "false"; // Make sure the RuntimeIdentifier isn't inferred
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var publishCommand = new DotnetPublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
