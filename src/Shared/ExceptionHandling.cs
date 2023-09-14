@@ -167,7 +167,7 @@ namespace Microsoft.Build.Shared
         internal static bool IsXmlException(Exception e)
         {
             return e is XmlException
-#if NETFRAMEWORK
+#if FEATURE_SECURITY_PERMISSIONS
                 || e is System.Security.XmlSyntaxException
 #endif
                 || e is XmlSchemaException
