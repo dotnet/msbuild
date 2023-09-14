@@ -9,11 +9,6 @@
     <UsagePattern IdentityGlob="Nuget.*/*" />
     <UsagePattern IdentityGlob="Microsoft.Build.NuGetSdkResolver/*" />
 
-    <!-- TODO: Figure out what to do about the netcoreapp ref packages (these are probably being pulled
-         in via implicit versions and net6 targeting projects (e.g. tests)
-         https://github.com/dotnet/source-build/issues/3356 -->
-    <UsagePattern IdentityGlob="Microsoft.*.App.Ref/*6.0*" />
-
     <!-- These are coming in transitively from verious repos (aspnetcore & format). Needs evaluation.
          https://github.com/dotnet/source-build/issues/3358. -->
     <UsagePattern IdentityGlob="Microsoft.CodeAnalysis.AnalyzerUtilities/*3.3.0*" />

@@ -259,7 +259,7 @@
       </trans-unit>
       <trans-unit id="RegistryOperationFailed">
         <source>CONTAINER1017: Unable to communicate with the registry '{0}'.</source>
-        <target state="new">CONTAINER1017: Unable to communicate with the registry '{0}'.</target>
+        <target state="translated">CONTAINER1017: nous n’avons pas pu communiquer avec le Registre '{0}'.</target>
         <note>{StrBegin="CONTAINER1017:" }</note>
       </trans-unit>
       <trans-unit id="RegistryOutputPushFailed">
@@ -269,7 +269,7 @@
       </trans-unit>
       <trans-unit id="RegistryPullFailed">
         <source>CONTAINER1014: Manifest pull failed.</source>
-        <target state="new">CONTAINER1014: Manifest pull failed.</target>
+        <target state="translated">CONTAINER1014: échec du tirage (pull) du manifeste.</target>
         <note>{StrBegin="CONTAINER1014: "}</note>
       </trans-unit>
       <trans-unit id="RegistryPushFailed">
@@ -324,7 +324,7 @@
       </trans-unit>
       <trans-unit id="RepositoryNotFound">
         <source>CONTAINER1015: Unable to access the repository '{0}' at tag '{1}' in the registry '{2}'. Please confirm that this name and tag are present in the registry.</source>
-        <target state="new">CONTAINER1015: Unable to access the repository '{0}' at tag '{1}' in the registry '{2}'. Please confirm that this name and tag are present in the registry.</target>
+        <target state="translated">CONTAINER1015: nous n’avons pas pu accéder au référentiel '{0}' à la balise '{1}' dans le Registre '{2}'. Veuillez confirmer que ce nom et cette balise sont présents dans le Registre.</target>
         <note>{StrBegin="CONTAINER1015: "}</note>
       </trans-unit>
       <trans-unit id="RequiredItemsContainsEmptyItems">
@@ -349,7 +349,7 @@
       </trans-unit>
       <trans-unit id="UnableToAccessRepository">
         <source>CONTAINER1016: Unable to access the repository '{0}' in the registry '{1}'. Please confirm your credentials are correct and that you have access to this repository and registry.</source>
-        <target state="new">CONTAINER1016: Unable to access the repository '{0}' in the registry '{1}'. Please confirm your credentials are correct and that you have access to this repository and registry.</target>
+        <target state="translated">CONTAINER1016: nous n’avons pas pu accéder au référentiel '{0}' dans le Registre '{1}'. Confirmez que vos informations d’identification sont correctes et que vous avez accès à ce référentiel et à ce Registre.</target>
         <note>{StrBegin="CONTAINER1016:" }</note>
       </trans-unit>
       <trans-unit id="UnknownAppCommandInstruction">
