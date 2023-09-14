@@ -57,6 +57,11 @@
         <target state="translated">MSB6003: 지정한 작업 실행 파일 "{0}"을(를) 실행할 수 없습니다. {1}</target>
         <note>{StrBegin="MSB6003: "}</note>
       </trans-unit>
+      <trans-unit id="ToolTask.InvalidTerminationTimeout">
+        <source>Specified termination timeout ({0}) is invalid - expecting value greater or equal to -1.</source>
+        <target state="new">Specified termination timeout ({0}) is invalid - expecting value greater or equal to -1.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ToolTask.NotUpToDate">
         <source>Unable to skip task because it is not up-to-date.</source>
         <target state="translated">작업이 최신 상태가 아니므로 건너뛸 수 없습니다.</target>

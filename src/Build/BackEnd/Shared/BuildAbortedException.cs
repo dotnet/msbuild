@@ -91,6 +91,9 @@ namespace Microsoft.Build.Exceptions
         /// Protected constructor used for (de)serialization. 
         /// If we ever add new members to this class, we'll need to update this.
         /// </summary>
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
         protected BuildAbortedException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -109,6 +112,9 @@ namespace Microsoft.Build.Exceptions
         /// </summary>
 #if FEATURE_SECURITY_PERMISSIONS
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+#endif
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
 #endif
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {

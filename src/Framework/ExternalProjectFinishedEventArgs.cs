@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -16,6 +18,8 @@ namespace Microsoft.Build.Framework
     // immutable; adding new fields in the next version of the type
     // without following certain special FX guidelines, can break both
     // forward and backward compatibility
+    // NOTE: Although this class has been modified and do not longer relay on [Serializable]
+    // and BinaryFormatter. We have left it [Serializable] for backward compatibility reasons.
     [Serializable]
     public class ExternalProjectFinishedEventArgs : CustomBuildEventArgs
     {
@@ -92,6 +96,20 @@ namespace Microsoft.Build.Framework
             {
                 return succeeded;
             }
+        }
+
+        internal override void WriteToStream(BinaryWriter writer)
+        {
+            base.WriteToStream(writer);
+            writer.WriteOptionalString(projectFile);
+            writer.Write(succeeded);
+        }
+
+        internal override void CreateFromStream(BinaryReader reader, int version)
+        {
+            base.CreateFromStream(reader, version);
+            projectFile = reader.ReadOptionalString();
+            succeeded = reader.ReadBoolean();
         }
     }
 }

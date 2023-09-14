@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -191,6 +192,8 @@ namespace Microsoft.Build.Logging
             LogInitialInfo();
 
             eventSource.AnyEventRaised += EventSource_AnyEventRaised;
+
+            KnownTelemetry.LoggingConfigurationTelemetry.BinaryLogger = true;
         }
 
         private void EventArgsWriter_EmbedFile(string filePath)
@@ -239,7 +242,14 @@ namespace Microsoft.Build.Logging
                     {
                         using (FileStream fileStream = File.OpenRead(archiveFilePath))
                         {
-                            eventArgsWriter.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, fileStream);
+                            if (fileStream.Length > int.MaxValue)
+                            {
+                                LogMessage("Imported files archive exceeded 2GB limit and it's not embedded.");
+                            }
+                            else
+                            {
+                                eventArgsWriter.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, fileStream);
+                            }
                         }
 
                         File.Delete(archiveFilePath);
@@ -349,6 +359,7 @@ namespace Microsoft.Build.Logging
             {
                 FilePath = "msbuild.binlog";
             }
+            KnownTelemetry.LoggingConfigurationTelemetry.BinaryLoggerUsedDefaultName = FilePath == "msbuild.binlog";
 
             try
             {

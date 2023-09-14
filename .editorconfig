@@ -15,6 +15,9 @@ trim_trailing_whitespace = true
 [project.json]
 indent_size = 2
 
+[*.txt]
+insert_final_newline = false
+
 # C# files
 [*.cs]
 # New line preferences
@@ -210,7 +213,7 @@ dotnet_analyzer_diagnostic.category-Style.severity = warning
 dotnet_diagnostic.IDE0004.severity = suggestion
 
 # IDE0005: Remove unnecessary usings/imports
-dotnet_diagnostic.IDE0005.severity = warning
+dotnet_diagnostic.IDE0005.severity = none
 
 # Use explicit type instead of 'var'
 dotnet_diagnostic.IDE0008.severity = suggestion

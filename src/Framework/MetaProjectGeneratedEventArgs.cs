@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using Microsoft.Build.Shared;
+using System.IO;
 
 #nullable disable
 
@@ -26,6 +28,20 @@ namespace Microsoft.Build.Framework
         {
             this.metaprojectXml = metaprojectXml;
             this.ProjectFile = metaprojectPath;
+        }
+
+        internal override void WriteToStream(BinaryWriter writer)
+        {
+            base.WriteToStream(writer);
+
+            writer.WriteOptionalString(metaprojectXml);
+        }
+
+        internal override void CreateFromStream(BinaryReader reader, int version)
+        {
+            base.CreateFromStream(reader, version);
+
+            metaprojectXml = reader.ReadOptionalString();
         }
     }
 }

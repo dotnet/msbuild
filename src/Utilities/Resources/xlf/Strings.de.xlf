@@ -57,6 +57,11 @@
         <target state="translated">MSB6003: Die angegebene ausführbare Datei der Aufgabe "{0}" konnte nicht ausgeführt werden. {1}</target>
         <note>{StrBegin="MSB6003: "}</note>
       </trans-unit>
+      <trans-unit id="ToolTask.InvalidTerminationTimeout">
+        <source>Specified termination timeout ({0}) is invalid - expecting value greater or equal to -1.</source>
+        <target state="translated">Das angegebene Beendigungstimeout ({0}) ist ungültig. Es wird ein Wert größer oder gleich -1 erwartet.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ToolTask.NotUpToDate">
         <source>Unable to skip task because it is not up-to-date.</source>
         <target state="translated">Die Aufgabe kann nicht übersprungen werden, da sie nicht auf dem neuesten Stand ist.</target>

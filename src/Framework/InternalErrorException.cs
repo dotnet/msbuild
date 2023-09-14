@@ -75,6 +75,9 @@ namespace Microsoft.Build.Framework
         /// Private constructor used for (de)serialization. The constructor is private as this class is sealed
         /// If we ever add new members to this class, we'll need to update this.
         /// </summary>
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
         private InternalErrorException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {

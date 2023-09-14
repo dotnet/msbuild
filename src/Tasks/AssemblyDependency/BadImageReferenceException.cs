@@ -25,6 +25,9 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct
         /// </summary>
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
         private BadImageReferenceException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {

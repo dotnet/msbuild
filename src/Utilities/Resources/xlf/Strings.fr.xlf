@@ -57,6 +57,11 @@
         <target state="translated">MSB6003: Impossible d'exécuter la tâche exécutable spécifiée "{0}". {1}</target>
         <note>{StrBegin="MSB6003: "}</note>
       </trans-unit>
+      <trans-unit id="ToolTask.InvalidTerminationTimeout">
+        <source>Specified termination timeout ({0}) is invalid - expecting value greater or equal to -1.</source>
+        <target state="new">Specified termination timeout ({0}) is invalid - expecting value greater or equal to -1.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ToolTask.NotUpToDate">
         <source>Unable to skip task because it is not up-to-date.</source>
         <target state="translated">Nous n’avons pas pu ignorer la tâche, car elle n’est pas à jour.</target>

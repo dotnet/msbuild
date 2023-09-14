@@ -17,7 +17,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Initialize a new instance of the ResponseFileUsedEventArgs class.
         /// </summary>
-        public ResponseFileUsedEventArgs(string responseFilePath) : base()
+        public ResponseFileUsedEventArgs(string? responseFilePath) : base()
         {
             ResponseFilePath = responseFilePath;
         }

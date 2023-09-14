@@ -22,6 +22,11 @@
         <target state="translated">MSB4008: в "{1}" обнаружена сборка, конфликтующая со сборкой задачи "{0}".</target>
         <note>{StrBegin="MSB4008: "}UE: This message is shown when the type/class of a task cannot be resolved uniquely from a single assembly.</note>
       </trans-unit>
+      <trans-unit id="DeprecatedEventSerialization">
+        <source>Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
+        <target state="translated">Использование небезопасного BinaryFormatter во время сериализации настраиваемого типа события "{0}". Скоро этот параметр станет нерекомендуемым. Вместо этого используйте Extended*EventArgs. Дополнительные сведения: https://aka.ms/msbuild/eventargs</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ExpectedEventToBeSerializable">
         <source>Event type "{0}" was expected to be serializable using the .NET serializer. The event was not serializable and has been ignored.</source>
         <target state="translated">Необходимо, чтобы тип события "{0}" был сериализуемым с помощью сериализатора .NET. Событие не было сериализуемым и было пропущено.</target>
@@ -34,7 +39,7 @@
       </trans-unit>
       <trans-unit id="LoggingBeforeTaskInitialization">
         <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
-        <target state="new">MSB6005: Task attempted to log before it was initialized. Message was: {0}</target>
+        <target state="translated">MSB6005: задачей предпринята попытка вести журнал до своей инициализации. Сообщение: {0}</target>
         <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
       </trans-unit>
       <trans-unit id="ModifyingTaskHostEnvironmentHeader">

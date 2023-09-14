@@ -49,6 +49,9 @@ namespace Microsoft.Build.Framework
 
         IEnumerable<KeyValuePair<string, string>> IMetadataContainer.EnumerateMetadata() => Metadata;
 
+        void IMetadataContainer.ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata)
+            => throw new InvalidOperationException($"{nameof(TaskItemData)} does not support write operations");
+
         public int MetadataCount => Metadata.Count;
 
         public ICollection MetadataNames => (ICollection)Metadata.Keys;

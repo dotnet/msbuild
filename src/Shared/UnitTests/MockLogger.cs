@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests
      * up a raw string (fullLog) that contains all messages, warnings, errors.
      * Thread-safe.
      */
-    internal sealed class MockLogger : ILogger
+    public sealed class MockLogger : ILogger
     {
         #region Properties
 
@@ -138,6 +138,11 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal List<BuildFinishedEventArgs> BuildFinishedEvents { get; } = new List<BuildFinishedEventArgs>();
 
+        /// <summary>
+        /// List of Telemetry events
+        /// </summary>
+        internal List<TelemetryEventArgs> TelemetryEvents { get; } = new();
+
         internal List<BuildEventArgs> AllBuildEvents { get; } = new List<BuildEventArgs>();
 
         /*
@@ -175,11 +180,7 @@ namespace Microsoft.Build.UnitTests
          * The mock logger does not take parameters.
          * 
          */
-        public string Parameters
-        {
-            get => null;
-            set {/* do nothing */}
-        }
+        public string Parameters { get; set; }
 
         /*
          * Method:  Initialize
@@ -190,12 +191,22 @@ namespace Microsoft.Build.UnitTests
         public void Initialize(IEventSource eventSource)
         {
             eventSource.AnyEventRaised += LoggerEventHandler;
+            if (eventSource is IEventSource2 eventSource2)
+            {
+                eventSource2.TelemetryLogged += TelemetryEventHandler;
+            }
 
             if (_profileEvaluation)
             {
                 var eventSource3 = eventSource as IEventSource3;
                 eventSource3.ShouldNotBeNull();
                 eventSource3.IncludeEvaluationProfiles();
+            }
+
+            // Apply parameters
+            if (Parameters?.IndexOf("reporttelemetry", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                _reportTelemetry = true;
             }
         }
 
@@ -221,6 +232,10 @@ namespace Microsoft.Build.UnitTests
             // do nothing
         }
         #endregion
+
+        public MockLogger() : this(null)
+        {
+        }
 
         public MockLogger(ITestOutputHelper testOutputHelper = null, bool profileEvaluation = false, bool printEventsToStdout = true, LoggerVerbosity verbosity = LoggerVerbosity.Normal)
         {
@@ -383,6 +398,27 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        internal void TelemetryEventHandler(object sender, BuildEventArgs eventArgs)
+        {
+            lock (_lockObj)
+            {
+                if (eventArgs is TelemetryEventArgs telemetryEventArgs)
+                {
+                    TelemetryEvents.Add(telemetryEventArgs);
+
+                    if (_reportTelemetry)
+                    {
+                        // Log telemetry events to the full log so we can verify them in end-to-end tests by captured outputs.
+                        _fullLog.AppendLine($"Telemetry:{telemetryEventArgs.EventName}");
+                        foreach (KeyValuePair<string, string> pair in telemetryEventArgs.Properties)
+                        {
+                            _fullLog.AppendLine($"    {telemetryEventArgs.EventName}:{pair.Key}={pair.Value}");
+                        }
+                    }
+                }
+            }
+        }
+
         private void PrintFullLog()
         {
             if (_printEventsToStdout)
@@ -397,6 +433,7 @@ namespace Microsoft.Build.UnitTests
             typeof(ProjectCollection).GetTypeInfo().Assembly));
 
         private static ResourceManager s_engineResourceManager;
+        private bool _reportTelemetry;
 
         // Gets the resource string given the resource ID
         public static string GetString(string stringId) => EngineResourceManager.GetString(stringId, CultureInfo.CurrentUICulture);

@@ -612,8 +612,10 @@ namespace System.Deployment.Internal.CodeSigning
                 {
                     XmlReaderSettings settings = new XmlReaderSettings();
                     settings.DtdProcessing = DtdProcessing.Parse;
-                    XmlReader reader = XmlReader.Create(stringReader, settings, manifestDom.BaseURI);
-                    normalizedDom.Load(reader);
+                    using (XmlReader reader = XmlReader.Create(stringReader, settings, manifestDom.BaseURI))
+                    {
+                        normalizedDom.Load(reader);
+                    }
                 }
 
                 XmlDsigExcC14NTransform exc = new XmlDsigExcC14NTransform();

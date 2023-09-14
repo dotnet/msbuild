@@ -57,7 +57,7 @@
       </trans-unit>
       <trans-unit id="CannotCopyFromElementOfThatType">
         <source>MSB4277: Cannot copy from object of that type.</source>
-        <target state="new">MSB4277: Cannot copy from object of that type.</target>
+        <target state="translated">MSB4277: その型のオブジェクトからコピーできません。</target>
         <note>{StrBegin="MSB4277: "}</note>
       </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
@@ -141,7 +141,7 @@
       </trans-unit>
       <trans-unit id="General.TwoVectorsMustHaveSameLength">
         <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
-        <target state="new">MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</target>
+        <target state="translated">MSB3094: "{2}" は {0} 項目を参照し、"{3}" は {1} 項目を参照します。これらは同じ項目数を持たなければなりません。</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
@@ -467,7 +467,7 @@
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="needs-review-translation">これは MSBuild でハンドルされない例外です -- 既存の問題に賛成票を投じるか、https://aka.ms/msbuild/unhandled で新しい問題を提起してください。
+        <target state="translated">これは MSBuild でハンドルされない例外です -- 既存の問題に賛成票を投じるか、https://aka.ms/msbuild/unhandled で新しい問題を提起してください。
     {0}</target>
         <note />
       </trans-unit>

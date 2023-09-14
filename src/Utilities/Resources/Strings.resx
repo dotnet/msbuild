@@ -290,6 +290,9 @@
     <value>MSB6012: The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</value>
     <comment>{StrBegin="MSB6012: "}</comment>
   </data>
+  <data name="ToolTask.InvalidTerminationTimeout" xml:space="preserve">
+    <value>Specified termination timeout ({0}) is invalid - expecting value greater or equal to -1.</value>
+  </data>
   <!--
         The Utilities message bucket is: MSB6001 - MSB6200
 

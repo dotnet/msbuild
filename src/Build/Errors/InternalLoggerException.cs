@@ -108,6 +108,9 @@ namespace Microsoft.Build.Exceptions
         /// </summary>
         /// <param name="info"></param>
         /// <param name="context"></param>
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
         private InternalLoggerException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -125,6 +128,9 @@ namespace Microsoft.Build.Exceptions
         /// <param name="context"></param>
 #if FEATURE_SECURITY_PERMISSIONS
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+#endif
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
 #endif
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {

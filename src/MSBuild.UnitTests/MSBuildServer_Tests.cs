@@ -71,10 +71,12 @@ namespace Microsoft.Build.Engine.UnitTests
         <Message Text=""Server ID is $(PID)"" Importance=""High"" />
     </Target>
 </Project>";
-        private static string sleepingTaskContents = @$"
+        private static string sleepingTaskContentsFormat = @$"
 <Project>
 <UsingTask TaskName=""SleepingTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
     <Target Name='Sleep'>
+        <!-- create a marker file that represents the build is started. -->
+        <WriteLinesToFile File=""{{0}}"" />
         <SleepingTask SleepTime=""100000"" />
     </Target>
 </Project>";
@@ -106,21 +108,22 @@ namespace Microsoft.Build.Engine.UnitTests
             pidOfServerProcess.ShouldBe(ParseNumber(output, "Server ID is "), "Node used by both the first and second build should be the same.");
 
             // Prep to kill the long-lived task we're about to start.
-            Task t = Task.Run(() =>
+            TransientTestFile markerFile = _env.ExpectFile();
+            string? dir = Path.GetDirectoryName(markerFile.Path);
+            using var watcher = new System.IO.FileSystemWatcher(dir!);
+            watcher.Created += (o, e) =>
             {
-                // Wait for the long-lived task to start
-                // If this test seems to fail randomly, increase this time.
-                Thread.Sleep(1000);
-
+                _output.WriteLine($"The marker file {markerFile.Path} was created. The build task has been started. Ready to kill the server.");
                 // Kill the server
                 Process.GetProcessById(pidOfServerProcess).KillTree(1000);
-            });
+                _output.WriteLine($"The old server was killed.");
+            };
+            watcher.Filter = Path.GetFileName(markerFile.Path);
+            watcher.EnableRaisingEvents = true;
 
             // Start long-lived task execution
-            TransientTestFile sleepProject = _env.CreateFile("napProject.proj", sleepingTaskContents);
+            TransientTestFile sleepProject = _env.CreateFile("napProject.proj", string.Format(sleepingTaskContentsFormat, markerFile.Path));
             RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, sleepProject.Path, out _);
-
-            t.Wait();
 
             // Ensure that a new build can still succeed and that its server node is different.
             output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
@@ -176,7 +179,9 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
-            TransientTestFile sleepProject = _env.CreateFile("napProject.proj", sleepingTaskContents);
+
+            TransientTestFile markerFile = _env.ExpectFile();
+            TransientTestFile sleepProject = _env.CreateFile("napProject.proj", string.Format(sleepingTaskContentsFormat, markerFile.Path));
 
             int pidOfServerProcess;
             Task t;
@@ -185,13 +190,25 @@ namespace Microsoft.Build.Engine.UnitTests
             pidOfServerProcess = ParseNumber(output, "Server ID is ");
             _env.WithTransientProcess(pidOfServerProcess);
 
+            string? dir = Path.GetDirectoryName(markerFile.Path);
+            using var watcher = new System.IO.FileSystemWatcher(dir!);
+            ManualResetEvent mre = new ManualResetEvent(false);
+            watcher.Created += (o, e) =>
+            {
+                _output.WriteLine($"The marker file {markerFile.Path} was created. The build task has been started.");
+                mre.Set();
+            };
+            watcher.Filter = Path.GetFileName(markerFile.Path);
+            watcher.EnableRaisingEvents = true;
             t = Task.Run(() =>
             {
                 RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, sleepProject.Path, out _, false, _output);
             });
 
             // The server will soon be in use; make sure we don't try to use it before that happens.
-            Thread.Sleep(1000);
+            _output.WriteLine("Waiting for the server to be in use.");
+            mre.WaitOne();
+            _output.WriteLine("It's OK to go ahead.");
 
             Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
 
