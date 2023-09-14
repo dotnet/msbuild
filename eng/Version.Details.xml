@@ -180,18 +180,18 @@
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>f47eb5771ee3f9a100d0b31d82ccb5ee600a56ed</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Test.Sdk" Version="17.8.0-preview-23421-06">
+    <Dependency Name="Microsoft.NET.Test.Sdk" Version="17.8.0-preview-23456-01">
       <Uri>https://github.com/microsoft/vstest</Uri>
-      <Sha>5672d0f0d9433a9e2d97b9b7575fb2cc48579519</Sha>
+      <Sha>bb99e3ea07aaecd62d5c59568524133317d081b4</Sha>
       <SourceBuild RepoName="vstest" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.TestPlatform.CLI" Version="17.8.0-preview-23421-06">
+    <Dependency Name="Microsoft.TestPlatform.CLI" Version="17.8.0-preview-23456-01">
       <Uri>https://github.com/microsoft/vstest</Uri>
-      <Sha>5672d0f0d9433a9e2d97b9b7575fb2cc48579519</Sha>
+      <Sha>bb99e3ea07aaecd62d5c59568524133317d081b4</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TestPlatform.Build" Version="17.8.0-preview-23421-06">
+    <Dependency Name="Microsoft.TestPlatform.Build" Version="17.8.0-preview-23456-01">
       <Uri>https://github.com/microsoft/vstest</Uri>
-      <Sha>5672d0f0d9433a9e2d97b9b7575fb2cc48579519</Sha>
+      <Sha>bb99e3ea07aaecd62d5c59568524133317d081b4</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="8.0.0-rc.2.23457.7">
       <Uri>https://github.com/dotnet/runtime</Uri>
@@ -312,17 +312,17 @@
       <Sha>9a1c3e1b7f0c8763d4c96e593961a61a72679a7b</Sha>
       <SourceBuild RepoName="xdt" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0-preview.23420.2">
+    <Dependency Name="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0-preview.23458.2">
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
-      <Sha>76d99c5f3e11f0600fae074270c0d89042c360f0</Sha>
+      <Sha>249601bb0afe8c481f01300012610f1ac182dfa5</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.11.0-beta1.23420.2">
+    <Dependency Name="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.11.0-beta1.23458.2">
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
-      <Sha>76d99c5f3e11f0600fae074270c0d89042c360f0</Sha>
+      <Sha>249601bb0afe8c481f01300012610f1ac182dfa5</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.roslyn-analyzers" Version="3.11.0-beta1.23420.2">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.roslyn-analyzers" Version="3.11.0-beta1.23458.2">
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
-      <Sha>76d99c5f3e11f0600fae074270c0d89042c360f0</Sha>
+      <Sha>249601bb0afe8c481f01300012610f1ac182dfa5</Sha>
       <SourceBuild RepoName="roslyn-analyzers" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="System.CommandLine" Version="2.0.0-beta4.23307.1">
@@ -423,9 +423,9 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>da3500bb02343b1d0424c74ccdddbc592b5b3f4f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XliffTasks" Version="1.0.0-beta.23415.1" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
+    <Dependency Name="Microsoft.DotNet.XliffTasks" Version="1.0.0-beta.23426.1" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
       <Uri>https://github.com/dotnet/xliff-tasks</Uri>
-      <Sha>649a1e75101b701d753ee41efbe9038f9b23a0db</Sha>
+      <Sha>194f32828726c3f1f63f79f3dc09b9e99c157b11</Sha>
       <SourceBuild RepoName="xliff-tasks" ManagedOnly="true" />
     </Dependency>
   </ToolsetDependencies>
