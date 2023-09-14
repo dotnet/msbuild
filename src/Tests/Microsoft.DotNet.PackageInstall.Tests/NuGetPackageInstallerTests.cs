@@ -288,10 +288,12 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         {
             var iosSamplePackage = DownloadSamplePackage(new PackageId("Microsoft.iOS.Ref"));
             var androidSamplePackage = DownloadSamplePackage(new PackageId("Microsoft.Android.Ref"));
+            var mauiSamplePackage = DownloadSamplePackage(new PackageId("Microsoft.NET.Sdk.Maui.Manifest-8.0.100-rc.1.Msi.x64"));
 
             var package = new FirstPartyNuGetPackageSigningVerifier();
             package.IsFirstParty(new FilePath(iosSamplePackage)).Should().BeTrue();
             package.IsFirstParty(new FilePath(androidSamplePackage)).Should().BeTrue();
+            package.IsFirstParty(new FilePath(mauiSamplePackage)).Should().BeTrue();
         }
 
         private string GetShaFromSamplePackage(string samplePackage)
