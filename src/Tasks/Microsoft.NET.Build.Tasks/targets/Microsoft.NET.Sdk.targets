@@ -504,6 +504,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                                     Value="$(DebuggerSupport)"
                                     Trim="true" />
 
+    <RuntimeHostConfigurationOption Include="System.Diagnostics.Metrics.Meter.IsSupported"
+                                    Condition="'$(MetricsSupport)' != ''"
+                                    Value="$(MetricsSupport)" />
+
     <RuntimeHostConfigurationOption Include="System.Diagnostics.Tracing.EventSource.IsSupported"
                                     Condition="'$(EventSourceSupport)' != ''"
                                     Value="$(EventSourceSupport)"
