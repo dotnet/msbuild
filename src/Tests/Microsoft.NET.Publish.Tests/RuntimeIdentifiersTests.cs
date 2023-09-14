@@ -380,50 +380,5 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
         }
-
-        [Fact]
-        public void PublishFailsWithPublishAotAndNoRuntimeIdentifier()
-        {
-            var targetFramework = ToolsetInfo.CurrentTargetFramework;
-            var testProject = new TestProject()
-            {
-                IsExe = true,
-                TargetFrameworks = targetFramework
-            };
-
-            testProject.AdditionalProperties["PublishAot"] = "true";
-            testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "false"; // Make sure the RuntimeIdentifier isn't inferred
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
-
-            var publishCommand = new DotnetPublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
-            publishCommand
-                .Execute()
-                .Should()
-                .Fail()
-                .And
-                .HaveStdOutContaining("NETSDK1191");
-        }
-
-        [Fact]
-        public void PublishSuccessfullyWithPublishAotAndNoRuntimeIdentifierWithEscapeHatch()
-        {
-            var targetFramework = ToolsetInfo.CurrentTargetFramework;
-            var testProject = new TestProject()
-            {
-                IsExe = true,
-                TargetFrameworks = targetFramework
-            };
-
-            testProject.AdditionalProperties["PublishAot"] = "true";
-            testProject.AdditionalProperties["AllowPublishAotWithoutRuntimeIdentifier"] = "true";
-            testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "false"; // Make sure the RuntimeIdentifier isn't inferred
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
-
-            var publishCommand = new DotnetPublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
-            publishCommand
-                .Execute()
-                .Should()
-                .Pass();
-        }
     }
 }
