@@ -40,6 +40,8 @@ variables:
     value: true
   - name: Codeql.Enabled
     value: true
+  - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+    - group: DotNet-MSBuild-SDLValidation-Params
 
 stages:
 - stage: build
@@ -294,3 +296,16 @@ stages:
       enableSymbolValidation: false
       enableSourceLinkValidation: false
       enableNugetValidation: false
+      SDLValidationParameters:
+        enable: true
+        continueOnError: false
+        params: ' -SourceToolsList @("policheck","credscan")
+        -TsaInstanceURL "$(_TsaInstanceURL)"
+        -TsaProjectName "$(_TsaProjectName)"
+        -TsaNotificationEmail "$(_TsaNotificationEmail)"
+        -TsaCodebaseAdmin "$(_TsaCodebaseAdmin)"
+        -TsaBugAreaPath "$(_TsaBugAreaPath)"
+        -TsaIterationPath "$(_TsaIterationPath)"
+        -TsaRepositoryName "dotnet-msbuild"
+        -TsaCodebaseName "dotnet-msbuild"
+        -TsaPublish $True'
