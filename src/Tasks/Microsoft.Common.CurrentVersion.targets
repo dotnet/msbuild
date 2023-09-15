@@ -1524,7 +1524,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     BeforeTargets="AssignProjectConfiguration"
     Condition="$([MSBuild]::AreFeaturesEnabled('17.8'))">
       <ItemGroup>
-        <ProjectReference Condition="'%(Extension)' == '.esproj'">
+        <ProjectReference Condition="'%(ProjectReference.Extension)' == '.esproj' and '%(ProjectReference.ReferenceOutputAssembly)' == ''">
           <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
         </ProjectReference>
       </ItemGroup>
