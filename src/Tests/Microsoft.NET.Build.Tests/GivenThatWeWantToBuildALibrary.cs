@@ -914,7 +914,7 @@ class Program
                 testProj.AdditionalProperties["MetricsSupport"] = value;
             }
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProj, identifier: $"{ToolsetInfo.CurrentTargetFramework}{value}");
+            var testAsset = _testAssetsManager.CreateTestProject(testProj, identifier: value);
             var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute()
