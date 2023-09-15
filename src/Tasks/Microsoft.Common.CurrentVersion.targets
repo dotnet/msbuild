@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 Microsoft.Common.CurrentVersion.targets
 
@@ -1516,11 +1516,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
                                         IgnoreJavaScriptOutputAssembly
 
-    esproj are JavaScript or TypeScript Projects that never produce an assembly. 
+    esproj are JavaScript or TypeScript Projects that never produce an assembly.
     Set ReferenceOutputAssembly to false in any reference to an esproj.
     ============================================================
     -->
-  <Target Name="IgnoreJavaScriptOutputAssembly" BeforeTargets="AssignProjectConfiguration">
+  <Target Name="IgnoreJavaScriptOutputAssembly"
+    BeforeTargets="AssignProjectConfiguration"
+    Condition="$([MSBuild]::AreFeaturesEnabled('17.8'))">
       <ItemGroup>
         <ProjectReference Condition="'%(Extension)' == '.esproj'">
           <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
