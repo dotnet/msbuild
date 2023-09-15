@@ -897,6 +897,50 @@ class Program
         }
 
         [Theory]
+        [InlineData("True")]
+        [InlineData("False")]
+        [InlineData(null)]
+        public void It_can_evaluate_metrics_support(string value)
+        {
+            var testProj = new TestProject()
+            {
+                Name = "CheckMetricsSupport",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true,
+            };
+
+            if (value is not null)
+            {
+                testProj.AdditionalProperties["MetricsSupport"] = value;
+            }
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProj, identifier: value);
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            string runtimeConfigName = $"{testProj.Name}.runtimeconfig.json";
+            var outputDirectory = buildCommand.GetOutputDirectory(testProj.TargetFrameworks);
+            outputDirectory.Should().HaveFile(runtimeConfigName);
+
+            string runtimeConfigFile = Path.Combine(outputDirectory.FullName, runtimeConfigName);
+            string runtimeConfigContents = File.ReadAllText(runtimeConfigFile);
+            JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
+            JToken metricsSupport = runtimeConfig["runtimeOptions"]["configProperties"]["System.Diagnostics.Metrics.Meter.IsSupported"];
+
+            if (value is null)
+            {
+                metricsSupport.Should().BeNull();
+            }
+            else
+            {
+                metricsSupport.Value<string>().Should().Be(value);
+            }
+        }
+
+        [Theory]
         [InlineData("netcoreapp2.2", null, false, null, false)]
         [InlineData(ToolsetInfo.CurrentTargetFramework, null, true, null, true)]
         [InlineData(ToolsetInfo.CurrentTargetFramework, "LatestMajor", true, null, true)]

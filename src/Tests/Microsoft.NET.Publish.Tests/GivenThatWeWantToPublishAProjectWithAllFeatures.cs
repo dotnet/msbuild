@@ -60,6 +60,7 @@ namespace Microsoft.NET.Publish.Tests
             ""System.AggressiveAttributeTrimming"": true,
             ""System.ComponentModel.TypeConverter.EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization"": false,
             ""System.Diagnostics.Debugger.IsSupported"": true,
+            ""System.Diagnostics.Metrics.Meter.IsSupported"": false,
             ""System.Diagnostics.Tracing.EventSource.IsSupported"": false,
             ""System.Globalization.Invariant"": true,
             ""System.Globalization.PredefinedCulturesOnly"": true,
@@ -101,7 +102,7 @@ namespace Microsoft.NET.Publish.Tests
             baselineConfigJsonObject["runtimeOptions"]["tfm"] = targetFramework;
             baselineConfigJsonObject["runtimeOptions"]["framework"]["version"] =
                 targetFramework == "net6.0" ? "6.0.0" : "1.1.2";
-            
+
             runtimeConfigJsonObject
                 .Should()
                 .BeEquivalentTo(baselineConfigJsonObject);
