@@ -506,7 +506,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <RuntimeHostConfigurationOption Include="System.Diagnostics.Metrics.Meter.IsSupported"
                                     Condition="'$(MetricsSupport)' != ''"
-                                    Value="$(MetricsSupport)" />
+                                    Value="$(MetricsSupport)"
+                                    Trim="true" />
 
     <RuntimeHostConfigurationOption Include="System.Diagnostics.Tracing.EventSource.IsSupported"
                                     Condition="'$(EventSourceSupport)' != ''"
