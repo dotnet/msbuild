@@ -16,7 +16,7 @@ namespace Microsoft.Build.Logging
     /// by implementing IEventSource and raising corresponding events.
     /// </summary>
     /// <remarks>The class is public so that we can call it from MSBuild.exe when replaying a log file.</remarks>
-    public sealed class BinaryLogReplayEventSource : EventArgsDispatcher
+    public sealed class BinaryLogReplayEventSource : EventArgsDispatcher, IEmbeddedContentSource
     {
         /// Touches the <see cref="ItemGroupLoggingHelper"/> static constructor
         /// to ensure it initializes <see cref="TaskParameterEventArgs.MessageGetter"/>
@@ -125,10 +125,29 @@ namespace Microsoft.Build.Logging
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
         public void Replay(BuildEventArgsReader reader, CancellationToken cancellationToken)
         {
+            _fileFormatVersionRead?.Invoke(reader.FileFormatVersion);
+            reader.EmbeddedContentRead += _embeddedContentRead;
+
             while (!cancellationToken.IsCancellationRequested && reader.Read() is { } instance)
             {
                 Dispatch(instance);
             }
+        }
+
+        private Action<int>? _fileFormatVersionRead;
+        event Action<int> ILogVersionInfo.FileFormatVersionRead
+        {
+            add => _fileFormatVersionRead += value;
+            remove => _fileFormatVersionRead -= value;
+        }
+        private Action<EmbeddedContentEventArgs>? _embeddedContentRead;
+        /// <inheritdoc cref="IEmbeddedContentSource.EmbeddedContentRead"/>
+        event Action<EmbeddedContentEventArgs>? IEmbeddedContentSource.EmbeddedContentRead
+        {
+            // Explicitly implemented event has to declare explicit add/remove accessors
+            //  https://stackoverflow.com/a/2268472/2308106
+            add => _embeddedContentRead += value;
+            remove => _embeddedContentRead -= value;
         }
     }
 }

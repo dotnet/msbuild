@@ -230,13 +230,7 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        public void WriteBlob(BinaryLogRecordKind kind, Stream stream, int length)
-            => WriteBlobImpl(kind, stream, length);
-
-        public void WriteBlob(BinaryLogRecordKind kind, Stream stream)
-            => WriteBlobImpl(kind, stream, null);
-
-        private void WriteBlobImpl(BinaryLogRecordKind kind, Stream stream, int? length)
+        public void WriteBlob(BinaryLogRecordKind kind, Stream stream, int? length = null)
         {
             if (stream.CanSeek && stream.Length > int.MaxValue)
             {
@@ -1121,9 +1115,10 @@ namespace Microsoft.Build.Logging
 
         private void Write(Stream stream, int? length)
         {
+            Stream destinationStream = binaryWriter.BaseStream;
             if (length == null)
             {
-                stream.CopyTo(binaryWriter.BaseStream);
+                stream.CopyTo(destinationStream);
                 return;
             }
 
@@ -1139,7 +1134,7 @@ namespace Microsoft.Build.Logging
                     length > 0 &&
                     (bytesRead = stream.Read(buffer, 0, Math.Min(buffer.Length, length.Value))) != 0)
                 {
-                    binaryWriter.BaseStream.Write(buffer, 0, bytesRead);
+                    destinationStream.Write(buffer, 0, bytesRead);
                     length -= bytesRead;
                 }
             }

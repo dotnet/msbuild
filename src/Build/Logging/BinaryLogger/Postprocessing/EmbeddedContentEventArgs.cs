@@ -15,8 +15,14 @@ namespace Microsoft.Build.Logging
             Length = length;
         }
 
+        public EmbeddedContentEventArgs(EmbeddedContentKind contentKind, Stream contentStream)
+        {
+            ContentKind = contentKind;
+            ContentStream = contentStream;
+        }
+
         public EmbeddedContentKind ContentKind { get; }
         public Stream ContentStream { get; }
-        public int Length { get; }
+        public int? Length { get; }
     }
 }

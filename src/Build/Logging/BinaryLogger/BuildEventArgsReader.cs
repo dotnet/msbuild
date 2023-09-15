@@ -5,6 +5,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using Microsoft.Build.BackEnd;
@@ -98,7 +100,10 @@ namespace Microsoft.Build.Logging
         /// The subscriber must read the exactly given length of binary data from the stream - otherwise exception is raised.
         /// If no subscriber is attached, the data is skipped.
         /// </summary>
-        public event Action<EmbeddedContentEventArgs>? EmbeddedContentRead;
+        internal event Action<EmbeddedContentEventArgs>? EmbeddedContentRead;
+
+        /// <inheritdoc cref="IBuildFileReader.ArchiveFileEncountered"/>
+        public event Action<ArchiveFileEventArgs>? ArchiveFileEncountered;
 
         /// <summary>
         /// Reads the next log record from the <see cref="BinaryReader"/>.
@@ -228,15 +233,71 @@ namespace Microsoft.Build.Logging
         private void ReadEmbeddedContent(BinaryLogRecordKind recordKind)
         {
             int length = ReadInt32();
-            if (EmbeddedContentRead != null)
+
+            if (ArchiveFileEncountered != null)
             {
-                long preEventPosition = binaryReader.BaseStream.CanSeek ? binaryReader.BaseStream.Position : 0;
-                EmbeddedContentRead(new EmbeddedContentEventArgs(recordKind.ToEmbeddedContentKind(), binaryReader.BaseStream, length));
-                long postEventPosition = binaryReader.BaseStream.CanSeek ? binaryReader.BaseStream.Position : length;
-                if (postEventPosition - preEventPosition != length)
+                // We could create ZipArchive over the target stream, and write to that directly,
+                //  however, binlog format needs to know stream size upfront - which is unknown,
+                //  so we would need to write the size after - and that would require the target stream to be seekable (which it's not)
+                ProjectImportsCollector? projectImportsCollector = null;
+
+                if (EmbeddedContentRead != null)
                 {
-                    throw new InvalidDataException($"The {nameof(EmbeddedContentRead)} event handler must read exactly {length} bytes from the stream.");
+                    projectImportsCollector =
+                        new ProjectImportsCollector(Path.GetRandomFileName(), false, runOnBackground: false);
                 }
+
+                Stream embeddedStream = new SubStream(binaryReader.BaseStream, length);
+
+                // We are intentionally not grace handling corrupt embedded stream
+
+                using var zipArchive = new ZipArchive(embeddedStream, ZipArchiveMode.Read);
+
+                foreach (var entry in zipArchive.Entries/*.OrderBy(e => e.LastWriteTime)*/)
+                {
+                    var file = ArchiveFile.From(entry);
+                    ArchiveFileEventArgs archiveFileEventArgs = new(file);
+                    // ArchiveFileEventArgs is not IDisposable as we do not want to clutter exposed API
+                    using var cleanupScope = new CleanupScope(archiveFileEventArgs.Dispose);
+                    ArchiveFileEncountered(archiveFileEventArgs);
+
+                    if (projectImportsCollector != null)
+                    {
+                        var resultFile = archiveFileEventArgs.ObtainArchiveFile();
+
+                        if (resultFile.CanUseReader)
+                        {
+                            projectImportsCollector.AddFileFromMemory(
+                                resultFile.FullPath,
+                                resultFile.GetContentReader().BaseStream,
+                                makePathAbsolute: false,
+                                entryCreationStamp: entry.LastWriteTime);
+                        }
+                        else
+                        {
+                            projectImportsCollector.AddFileFromMemory(
+                                resultFile.FullPath,
+                                resultFile.GetContent(),
+                                encoding: resultFile.Encoding,
+                                makePathAbsolute: false,
+                                entryCreationStamp: entry.LastWriteTime);
+                        }
+                    }
+                }
+
+                if (EmbeddedContentRead != null)
+                {
+                    projectImportsCollector!.ProcessResult(
+                        streamToEmbed => EmbeddedContentRead(new EmbeddedContentEventArgs(EmbeddedContentKind.ProjectImportArchive, streamToEmbed)),
+                        error => throw new InvalidDataException(error));
+                    projectImportsCollector.DeleteArchive();
+                }
+            }
+            else if (EmbeddedContentRead != null)
+            {
+                EmbeddedContentRead(new EmbeddedContentEventArgs(
+                    recordKind.ToEmbeddedContentKind(),
+                    new SubStream(binaryReader.BaseStream, length)));
             }
             else
             {

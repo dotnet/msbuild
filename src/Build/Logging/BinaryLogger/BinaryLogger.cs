@@ -94,7 +94,12 @@ namespace Microsoft.Build.Logging
             /// <summary>
             /// Create an external .ProjectImports.zip archive for the project files.
             /// </summary>
-            ZipFile
+            ZipFile,
+
+            /// <summary>
+            /// Don't collect any files from build events, but instead replay them from the given event source (if that one supports it).
+            /// </summary>
+            Replay,
         }
 
         /// <summary>
@@ -117,14 +122,9 @@ namespace Microsoft.Build.Logging
         public string Parameters { get; set; }
 
         /// <summary>
-        /// Initializes the logger by subscribing to events of the specified event source.
-        /// </summary>
-        public void Initialize(IEventSource eventSource) => Initialize(eventSource, null);
-
-        /// <summary>
         /// Initializes the logger by subscribing to events of the specified event source and embedded content source.
         /// </summary>
-        public void Initialize(IEventSource eventSource, IEmbeddedContentSource embeddedFilesSource)
+        public void Initialize(IEventSource eventSource)
         {
             _initialTargetOutputLogging = Environment.GetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING");
             _initialLogImports = Traits.Instance.EscapeHatches.LogProjectImports;
@@ -137,14 +137,9 @@ namespace Microsoft.Build.Logging
             Traits.Instance.EscapeHatches.LogProjectImports = true;
             bool logPropertiesAndItemsAfterEvaluation = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation ?? true;
 
-            ProcessParameters();
-
-            if (embeddedFilesSource != null)
-            {
-                CollectProjectImports = ProjectImportsCollectionMode.None;
-                embeddedFilesSource.EmbeddedContentRead += args =>
-                    eventArgsWriter.WriteBlob(args.ContentKind.ToBinaryLogRecordKind(), args.ContentStream, args.Length);
-            }
+            bool replayInitialInfo;
+            ILogVersionInfo versionInfo = null;
+            ProcessParameters(out replayInitialInfo);
 
             try
             {
@@ -166,7 +161,7 @@ namespace Microsoft.Build.Logging
 
                 stream = new FileStream(FilePath, FileMode.Create);
 
-                if (CollectProjectImports != ProjectImportsCollectionMode.None)
+                if (CollectProjectImports != ProjectImportsCollectionMode.None && CollectProjectImports != ProjectImportsCollectionMode.Replay)
                 {
                     projectImportsCollector = new ProjectImportsCollector(FilePath, CollectProjectImports == ProjectImportsCollectionMode.ZipFile);
                 }
@@ -179,6 +174,20 @@ namespace Microsoft.Build.Logging
                 if (logPropertiesAndItemsAfterEvaluation && eventSource is IEventSource4 eventSource4)
                 {
                     eventSource4.IncludeEvaluationPropertiesAndItems();
+                }
+
+                if (eventSource is IEmbeddedContentSource embeddedFilesSource)
+                {
+                    if (CollectProjectImports == ProjectImportsCollectionMode.Replay)
+                    {
+                        embeddedFilesSource.EmbeddedContentRead += args =>
+                            eventArgsWriter.WriteBlob(args.ContentKind.ToBinaryLogRecordKind(), args.ContentStream, args.Length);
+                    }
+
+                    if (replayInitialInfo)
+                    {
+                        versionInfo = embeddedFilesSource;
+                    }
                 }
             }
             catch (Exception e)
@@ -205,14 +214,14 @@ namespace Microsoft.Build.Logging
                 eventArgsWriter.EmbedFile += EventArgsWriter_EmbedFile;
             }
 
-            if (embeddedFilesSource == null)
+            if (versionInfo == null)
             {
                 binaryWriter.Write(FileFormatVersion);
                 LogInitialInfo();
             }
             else
             {
-                binaryWriter.Write(embeddedFilesSource.FileFormatVersion);
+                versionInfo.FileFormatVersionRead += version => binaryWriter.Write(version);
             }
 
             eventSource.AnyEventRaised += EventSource_AnyEventRaised;
@@ -252,32 +261,18 @@ namespace Microsoft.Build.Logging
 
             Traits.Instance.EscapeHatches.LogProjectImports = _initialLogImports;
 
+
             if (projectImportsCollector != null)
             {
                 projectImportsCollector.Close();
 
                 if (CollectProjectImports == ProjectImportsCollectionMode.Embed)
                 {
-                    var archiveFilePath = projectImportsCollector.ArchiveFilePath;
+                    projectImportsCollector.ProcessResult(
+                        streamToEmbed => eventArgsWriter.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, streamToEmbed),
+                        LogMessage);
 
-                    // It is possible that the archive couldn't be created for some reason.
-                    // Only embed it if it actually exists.
-                    if (FileSystems.Default.FileExists(archiveFilePath))
-                    {
-                        using (FileStream fileStream = File.OpenRead(archiveFilePath))
-                        {
-                            if (fileStream.Length > int.MaxValue)
-                            {
-                                LogMessage("Imported files archive exceeded 2GB limit and it's not embedded.");
-                            }
-                            else
-                            {
-                                eventArgsWriter.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, fileStream);
-                            }
-                        }
-
-                        File.Delete(archiveFilePath);
-                    }
+                    projectImportsCollector.DeleteArchive();
                 }
 
                 projectImportsCollector = null;
@@ -326,7 +321,7 @@ namespace Microsoft.Build.Logging
             {
                 projectImportsCollector.AddFile(projectArgs.ProjectFile);
             }
-            else if (e is MetaprojectGeneratedEventArgs metaprojectArgs)
+            else if (e is MetaprojectGeneratedEventArgs { metaprojectXml: { } } metaprojectArgs)
             {
                 projectImportsCollector.AddFileFromMemory(metaprojectArgs.ProjectFile, metaprojectArgs.metaprojectXml);
             }
@@ -341,13 +336,14 @@ namespace Microsoft.Build.Logging
         /// </summary>
         /// <exception cref="LoggerException">
         /// </exception>
-        private void ProcessParameters()
+        private void ProcessParameters(out bool replayInitialInfo)
         {
             if (Parameters == null)
             {
                 throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", ""));
             }
 
+            replayInitialInfo = false;
             var parameters = Parameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
             foreach (var parameter in parameters)
             {
@@ -362,6 +358,14 @@ namespace Microsoft.Build.Logging
                 else if (string.Equals(parameter, "ProjectImports=ZipFile", StringComparison.OrdinalIgnoreCase))
                 {
                     CollectProjectImports = ProjectImportsCollectionMode.ZipFile;
+                }
+                else if (string.Equals(parameter, "ProjectImports=Replay", StringComparison.OrdinalIgnoreCase))
+                {
+                    CollectProjectImports = ProjectImportsCollectionMode.Replay;
+                }
+                else if (string.Equals(parameter, "ReplayInitialInfo", StringComparison.OrdinalIgnoreCase))
+                {
+                    replayInitialInfo = true;
                 }
                 else if (parameter.EndsWith(".binlog", StringComparison.OrdinalIgnoreCase))
                 {
