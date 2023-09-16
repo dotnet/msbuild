@@ -10,12 +10,17 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// Arguments for custom build events.
     /// </summary>
-    // WARNING: marking a type [Serializable] without implementing
-    // ISerializable imposes a serialization contract -- it is a
-    // promise to never change the type's fields i.e. the type is
-    // immutable; adding new fields in the next version of the type
-    // without following certain special FX guidelines, can break both
-    // forward and backward compatibility
+    /// <remarks>
+    /// In .NET 8 and later, this type is deprecated; instead use <see cref="ExtendedCustomBuildEventArgs"/>.
+    /// For more information, see <see href="https://learn.microsoft.com/dotnet/core/compatibility/sdk/8.0/custombuildeventargs"/>
+    ///
+    /// WARNING: marking a type [Serializable] without implementing
+    /// ISerializable imposes a serialization contract -- it is a
+    /// promise to never change the type's fields i.e. the type is
+    /// immutable; adding new fields in the next version of the type
+    /// without following certain special FX guidelines, can break both
+    /// forward and backward compatibility
+    /// </remarks>
     [Serializable]
     public abstract class CustomBuildEventArgs : LazyFormattedBuildEventArgs
     {
