@@ -769,6 +769,12 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
+                    if (!sourceFileState.FileExists)
+                    {
+                        Log.LogErrorWithCodeFromResources("Copy.SourceFileNotFound", sourceFileState.Name);
+                        success = false;
+                    }
+
                     MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Name, true);
                 }
             }
