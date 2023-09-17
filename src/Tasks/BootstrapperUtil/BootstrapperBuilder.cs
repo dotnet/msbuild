@@ -532,14 +532,15 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 foreach (string subDirectory in Directory.GetDirectories(startDirectory))
                 {
                     string resourceDirectory = System.IO.Path.Combine(startDirectory, subDirectory);
-                    string resourceFile = System.IO.Path.Combine(resourceDirectory, SETUP_RESOURCES_FILE);
-                    if (FileSystems.Default.FileExists(resourceFile))
+                    string resourceFilePath = System.IO.Path.Combine(resourceDirectory, SETUP_RESOURCES_FILE);
+                    if (FileSystems.Default.FileExists(resourceFilePath))
                     {
                         var resourceDoc = new XmlDocument();
                         try
                         {
-                            var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                            using (var xr = XmlReader.Create(resourceFile, xrs))
+                            var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+                            FileStream fs = File.OpenRead(resourceFilePath);
+                            using (var xr = XmlReader.Create(fs, xrs))
                             {
                                 resourceDoc.Load(xr);
                             }
@@ -836,8 +837,9 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 #pragma warning disable 618 // Using XmlValidatingReader. TODO: We need to switch to using XmlReader.Create() with validation.
                         var validatingReader = new XmlValidatingReader(xmlReader);
 #pragma warning restore 618
-                        var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                        using (XmlReader xr = XmlReader.Create(schemaPath, xrSettings))
+                        var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+                        FileStream fs = File.OpenRead(schemaPath);
+                        using (XmlReader xr = XmlReader.Create(fs, xrSettings))
                         {
                             try
                             {

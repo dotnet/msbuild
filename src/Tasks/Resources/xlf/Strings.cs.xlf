@@ -121,6 +121,16 @@
         <target state="translated">MSB3654: Pozdržené podepisování požaduje, aby byl určen alespoň veřejný klíč.  Zadejte veřejný klíč pomocí vlastnosti KeyFile nebo KeyContainer, nebo zakažte pozdržené podepisování.</target>
         <note>{StrBegin="MSB3654: "}</note>
       </trans-unit>
+      <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
+        <source>MSB3991: '{0}' is not set or empty. When {1} is false, make sure to set a non-empty value for '{0}'.</source>
+        <target state="translated">MSB3991: Hodnota {0} není nastavena nebo je prázdná. Pokud {1} má hodnotu false, nezapomeňte pro hodnotu {0} nastavit neprázdnou hodnotu.</target>
+        <note>{StrBegin="MSB3991: "}</note>
+      </trans-unit>
+      <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullRootElementName">
+        <source>MSB3992: '{0}' is not set. When {1} is true, make sure to set a value for '{0}'.</source>
+        <target state="translated">MSB3992: Hodnota {0} není nastaven. Pokud {1} má hodnotu true, nezapomeňte nastavit hodnotu pro {0}.</target>
+        <note>{StrBegin="MSB3992: "}</note>
+      </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
         <source>MSB3881: Fatal Error: more than {0} command line arguments.</source>
         <target state="translated">MSB3881: Závažná chyba: víc než {0} argumentů příkazového řádku</target>

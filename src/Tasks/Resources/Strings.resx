@@ -2985,6 +2985,18 @@
   <data name="ResolveKeySource.PfxUnsupported" xml:space="preserve">
     <value>PFX signing not supported on .NET Core.</value>
   </data>
+
+  <!--
+        MSB3991 - MSB3999   Task: CombineTargetFrameworkInfoProperties
+  -->
+  <data name="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
+    <value>MSB3991: '{0}' is not set or empty. When {1} is false, make sure to set a non-empty value for '{0}'.</value>
+    <comment>{StrBegin="MSB3991: "}</comment>
+  </data>
+  <data name="CombineTargetFrameworkInfoProperties.NotNullRootElementName">
+    <value>MSB3992: '{0}' is not set. When {1} is true, make sure to set a value for '{0}'.</value>
+    <comment>{StrBegin="MSB3992: "}</comment>
+  </data>
   <!--
         The tasks message bucket is: MSB3001 - MSB3999
 
@@ -3071,6 +3083,7 @@
             MSB3961 - MSB3970   Task: GenerateLauncher
             MSB3971 - MSB3980   Task: GetReferenceAssemblyPaths overflow
             MSB3981 - MSB3990   Task: GetCompatiblePlatform
+            MSB3991 - MSB3999   Task: CombineTargetFrameworkInfoProperties
 
             MSB4000 - MSB4200   Portable targets & tasks (vsproject\flavors\portable\msbuild)
             MSB9000 - MSB9900   MSBuild targets files (C++)

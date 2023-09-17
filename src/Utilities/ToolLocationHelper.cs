@@ -3116,10 +3116,10 @@ namespace Microsoft.Build.Utilities
 
             // Make sure we have a directory with a redist list folder and a FrameworkList.xml file in there as this is what we will use for chaining.
             string redistListFolder = Path.Combine(path, "RedistList");
-            string redistFile = Path.Combine(redistListFolder, "FrameworkList.xml");
+            string redistFilePath = Path.Combine(redistListFolder, "FrameworkList.xml");
 
             // If the redist list does not exist then the entire chain is incorrect.
-            if (!FileSystems.Default.FileExists(redistFile))
+            if (!FileSystems.Default.FileExists(redistFilePath))
             {
                 // Under MONO a directory may chain to one that has no redist list
                 var chainReference = NativeMethodsShared.IsMono ? string.Empty : null;
@@ -3139,10 +3139,9 @@ namespace Microsoft.Build.Utilities
             try
             {
                 // Read in the xml file looking for the includeFramework inorder to chain.
-                XmlReaderSettings readerSettings = new XmlReaderSettings();
-                readerSettings.DtdProcessing = DtdProcessing.Ignore;
-
-                using (XmlReader reader = XmlReader.Create(redistFile, readerSettings))
+                XmlReaderSettings readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+                FileStream fs = File.OpenRead(redistFilePath);
+                using (XmlReader reader = XmlReader.Create(fs, readerSettings))
                 {
                     while (reader.Read())
                     {
@@ -3182,11 +3181,11 @@ namespace Microsoft.Build.Utilities
             }
             catch (XmlException ex)
             {
-                ErrorUtilities.ThrowInvalidOperation("ToolsLocationHelper.InvalidRedistFile", redistFile, ex.Message);
+                ErrorUtilities.ThrowInvalidOperation("ToolsLocationHelper.InvalidRedistFile", redistFilePath, ex.Message);
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                ErrorUtilities.ThrowInvalidOperation("ToolsLocationHelper.InvalidRedistFile", redistFile, ex.Message);
+                ErrorUtilities.ThrowInvalidOperation("ToolsLocationHelper.InvalidRedistFile", redistFilePath, ex.Message);
             }
 
             // Cache the display name if we have one

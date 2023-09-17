@@ -143,7 +143,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             ProjectRootElement project = ProjectRootElement.Create();
 
-            Assert.Null(project.Imports.GetEnumerator().Current);
+            Assert.Empty(project.Imports);
         }
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectImportGroupElement importGroup = (ProjectImportGroupElement)Helpers.GetFirst(project.ImportGroups);
 
-            Assert.Null(project.Imports.GetEnumerator().Current);
+            Assert.Empty(project.Imports);
             Assert.Equal(0, Helpers.Count(importGroup.Imports));
         }
 

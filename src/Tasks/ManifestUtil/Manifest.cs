@@ -376,8 +376,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         internal static void UpdateEntryPoint(string inputPath, string outputPath, string updatedApplicationPath, string applicationManifestPath, string targetFrameworkVersion)
         {
             var document = new XmlDocument();
-            var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-            using (XmlReader xr = XmlReader.Create(inputPath, xrSettings))
+            var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+            FileStream fs = File.OpenRead(inputPath);
+            using (XmlReader xr = XmlReader.Create(fs, xrSettings))
             {
                 document.Load(xr);
             }

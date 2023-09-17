@@ -1,0 +1,5 @@
+﻿  project [33;1msucceeded with warnings[m (0.0s)
+    directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mAA0000[m: Warning!
+[?25l[1F
+[?25h
+Build [33;1msucceeded with warnings[m in 0.0s

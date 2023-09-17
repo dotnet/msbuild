@@ -28,7 +28,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             ProjectRootElement project = ProjectRootElement.Create();
 
-            Assert.Null(project.Imports.GetEnumerator().Current);
+            Assert.Empty(project.Imports);
         }
 
         /// <summary>

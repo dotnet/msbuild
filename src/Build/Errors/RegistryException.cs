@@ -57,6 +57,9 @@ namespace Microsoft.Build.Exceptions
         /// <summary>
         /// Since this class implements Iserializable this constructor is required to be implemented.
         /// </summary>
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
         protected RegistryException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
             // We don't have any reason at the moment to do any custom serizlization or deserialization, this methods was added

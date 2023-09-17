@@ -299,10 +299,11 @@ namespace Microsoft.Build.Construction
             try
             {
                 // Read project thru a XmlReader with proper setting to avoid DTD processing
-                var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+                var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
                 var projectDocument = new XmlDocument();
 
-                using (XmlReader xmlReader = XmlReader.Create(AbsolutePath, xrSettings))
+                FileStream fs = File.OpenRead(AbsolutePath);
+                using (XmlReader xmlReader = XmlReader.Create(fs, xrSettings))
                 {
                     // Load the project file and get the first node    
                     projectDocument.Load(xmlReader);

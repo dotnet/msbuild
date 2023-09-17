@@ -2182,18 +2182,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ? new TaskRegistry(toolset, ProjectCollection.GlobalProjectCollection.ProjectRootElementCache)
                 : new TaskRegistry(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
 
-            foreach (ProjectUsingTaskElement projectUsingTaskElement in usingTaskElements)
-            {
-                TaskRegistry.RegisterTasksFromUsingTaskElement(
-                        _loggingService,
-                        _loggerContext,
-                        Directory.GetCurrentDirectory(),
-                        projectUsingTaskElement,
-                        registry,
-                        RegistryExpander,
-                        ExpanderOptions.ExpandPropertiesAndItems,
-                        FileSystems.Default);
-            }
+            string currentDir = Directory.GetCurrentDirectory();
+            TaskRegistry.InitializeTaskRegistryFromUsingTaskElements(
+                _loggingService,
+                _loggerContext,
+                usingTaskElements.Select(el => (el, currentDir)),
+                registry,
+                RegistryExpander,
+                ExpanderOptions.ExpandPropertiesAndItems,
+                FileSystems.Default);
 
             return registry;
         }

@@ -1,17 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-
-/******************************************************************************
- * 
- *                              !! WARNING !!
- * 
- * This class depends on the build engine assembly! Do not share this class
- * into any assembly that is not supposed to take a dependency on the build
- * engine assembly!
- * 
- * 
- ******************************************************************************/
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -36,10 +25,7 @@ namespace Microsoft.Build.Shared
         /// <param name="condition">The condition to check.</param>
         /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
-        internal static void VerifyThrowInvalidProject(
-            bool condition,
-            IElementLocation elementLocation,
-            string resourceName)
+        internal static void VerifyThrowInvalidProject(bool condition, IElementLocation elementLocation, string resourceName)
         {
             VerifyThrowInvalidProject(condition, null, elementLocation, resourceName);
         }
@@ -50,10 +36,7 @@ namespace Microsoft.Build.Shared
         /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
-        internal static void ThrowInvalidProject<T1>(
-            IElementLocation elementLocation,
-            string resourceName,
-            T1 arg0)
+        internal static void ThrowInvalidProject<T1>(IElementLocation elementLocation, string resourceName, T1 arg0)
         {
             ThrowInvalidProject(null, elementLocation, resourceName, arg0);
         }
@@ -65,11 +48,7 @@ namespace Microsoft.Build.Shared
         /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
-        internal static void VerifyThrowInvalidProject<T1>(
-            bool condition,
-            IElementLocation elementLocation,
-            string resourceName,
-            T1 arg0)
+        internal static void VerifyThrowInvalidProject<T1>(bool condition, IElementLocation elementLocation, string resourceName, T1 arg0)
         {
             VerifyThrowInvalidProject(condition, null, elementLocation, resourceName, arg0);
         }
@@ -81,11 +60,7 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
-        internal static void ThrowInvalidProject<T1, T2>(
-            IElementLocation elementLocation,
-            string resourceName,
-            T1 arg0,
-            T2 arg1)
+        internal static void ThrowInvalidProject<T1, T2>(IElementLocation elementLocation, string resourceName, T1 arg0, T2 arg1)
         {
             ThrowInvalidProject(null, elementLocation, resourceName, arg0, arg1);
         }
@@ -98,12 +73,7 @@ namespace Microsoft.Build.Shared
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
-        internal static void ThrowInvalidProject<T1, T2, T3>(
-            IElementLocation elementLocation,
-            string resourceName,
-            T1 arg0,
-            T2 arg1,
-            T3 arg2)
+        internal static void ThrowInvalidProject<T1, T2, T3>(IElementLocation elementLocation, string resourceName, T1 arg0, T2 arg1, T3 arg2)
         {
             ThrowInvalidProject(null, elementLocation, resourceName, arg0, arg1, arg2);
         }
@@ -117,13 +87,7 @@ namespace Microsoft.Build.Shared
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
         /// <param name="arg3"></param>
-        internal static void ThrowInvalidProject<T1, T2, T3, T4>(
-            IElementLocation elementLocation,
-            string resourceName,
-            T1 arg0,
-            T2 arg1,
-            T3 arg2,
-            T4 arg3)
+        internal static void ThrowInvalidProject<T1, T2, T3, T4>(IElementLocation elementLocation, string resourceName, T1 arg0, T2 arg1, T3 arg2, T4 arg3)
         {
             ThrowInvalidProject(null, elementLocation, resourceName, arg0, arg1, arg2, arg3);
         }
@@ -134,10 +98,7 @@ namespace Microsoft.Build.Shared
         /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="args"></param>
-        internal static void ThrowInvalidProject(
-            IElementLocation elementLocation,
-            string resourceName,
-            params object[] args)
+        internal static void ThrowInvalidProject(IElementLocation elementLocation, string resourceName, params object[] args)
         {
             ThrowInvalidProject(null, elementLocation, resourceName, args);
         }
@@ -150,12 +111,7 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
-        internal static void VerifyThrowInvalidProject<T1, T2>(
-            bool condition,
-            IElementLocation elementLocation,
-            string resourceName,
-            T1 arg0,
-            T2 arg1)
+        internal static void VerifyThrowInvalidProject<T1, T2>(bool condition, IElementLocation elementLocation, string resourceName, T1 arg0, T2 arg1)
         {
             VerifyThrowInvalidProject(condition, null, elementLocation, resourceName, arg0, arg1);
         }
@@ -169,13 +125,7 @@ namespace Microsoft.Build.Shared
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
-        internal static void VerifyThrowInvalidProject<T1, T2, T3>(
-            bool condition,
-            IElementLocation elementLocation,
-            string resourceName,
-            T1 arg0,
-            T2 arg1,
-            T3 arg2)
+        internal static void VerifyThrowInvalidProject<T1, T2, T3>(bool condition, IElementLocation elementLocation, string resourceName, T1 arg0, T2 arg1, T3 arg2)
         {
             VerifyThrowInvalidProject(condition, null, elementLocation, resourceName, arg0, arg1, arg2);
         }
@@ -190,14 +140,7 @@ namespace Microsoft.Build.Shared
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
         /// <param name="arg3"></param>
-        internal static void VerifyThrowInvalidProject<T1, T2, T3, T4>(
-            bool condition,
-            IElementLocation elementLocation,
-            string resourceName,
-            T1 arg0,
-            T2 arg1,
-            T3 arg2,
-            T4 arg3)
+        internal static void VerifyThrowInvalidProject<T1, T2, T3, T4>(bool condition, IElementLocation elementLocation, string resourceName, T1 arg0, T2 arg1, T3 arg2, T4 arg3)
         {
             VerifyThrowInvalidProject(condition, null, elementLocation, resourceName, arg0, arg1, arg2, arg3);
         }
@@ -212,16 +155,10 @@ namespace Microsoft.Build.Shared
         /// error sub-category (can be null).</param>
         /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
-        internal static void VerifyThrowInvalidProject(
-            bool condition,
-            string errorSubCategoryResourceName,
-            IElementLocation elementLocation,
-            string resourceName)
+        internal static void VerifyThrowInvalidProject(bool condition, string errorSubCategoryResourceName, IElementLocation elementLocation, string resourceName)
         {
             if (!condition)
             {
-                // PERF NOTE: explicitly passing null for the arguments array
-                // prevents memory allocation
                 ThrowInvalidProject(errorSubCategoryResourceName, elementLocation, resourceName, null);
             }
         }
@@ -235,16 +172,8 @@ namespace Microsoft.Build.Shared
         /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
-        internal static void VerifyThrowInvalidProject<T1>(
-            bool condition,
-            string errorSubCategoryResourceName,
-            IElementLocation elementLocation,
-            string resourceName,
-            T1 arg0)
+        internal static void VerifyThrowInvalidProject<T1>(bool condition, string errorSubCategoryResourceName, IElementLocation elementLocation, string resourceName, T1 arg0)
         {
-            // PERF NOTE: check the condition here instead of pushing it into
-            // the ThrowInvalidProject() method, because that method always
-            // allocates memory for its variable array of arguments
             if (!condition)
             {
                 ThrowInvalidProject(errorSubCategoryResourceName, elementLocation, resourceName, arg0);
@@ -261,17 +190,8 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
-        internal static void VerifyThrowInvalidProject<T1, T2>(
-            bool condition,
-            string errorSubCategoryResourceName,
-            IElementLocation elementLocation,
-            string resourceName,
-            T1 arg0,
-            T2 arg1)
+        internal static void VerifyThrowInvalidProject<T1, T2>(bool condition, string errorSubCategoryResourceName, IElementLocation elementLocation, string resourceName, T1 arg0, T2 arg1)
         {
-            // PERF NOTE: check the condition here instead of pushing it into
-            // the ThrowInvalidProject() method, because that method always
-            // allocates memory for its variable array of arguments
             if (!condition)
             {
                 ThrowInvalidProject(errorSubCategoryResourceName, elementLocation, resourceName, arg0, arg1);
@@ -289,18 +209,8 @@ namespace Microsoft.Build.Shared
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
-        internal static void VerifyThrowInvalidProject<T1, T2, T3>(
-            bool condition,
-            string errorSubCategoryResourceName,
-            IElementLocation elementLocation,
-            string resourceName,
-            T1 arg0,
-            T2 arg1,
-            T3 arg2)
+        internal static void VerifyThrowInvalidProject<T1, T2, T3>(bool condition, string errorSubCategoryResourceName, IElementLocation elementLocation, string resourceName, T1 arg0, T2 arg1, T3 arg2)
         {
-            // PERF NOTE: check the condition here instead of pushing it into
-            // the ThrowInvalidProject() method, because that method always
-            // allocates memory for its variable array of arguments
             if (!condition)
             {
                 ThrowInvalidProject(errorSubCategoryResourceName, elementLocation, resourceName, arg0, arg1, arg2);
@@ -319,19 +229,8 @@ namespace Microsoft.Build.Shared
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
         /// <param name="arg3"></param>
-        internal static void VerifyThrowInvalidProject<T1, T2, T3, T4>(
-            bool condition,
-            string errorSubCategoryResourceName,
-            IElementLocation elementLocation,
-            string resourceName,
-            T1 arg0,
-            T2 arg1,
-            T3 arg2,
-            T4 arg3)
+        internal static void VerifyThrowInvalidProject<T1, T2, T3, T4>(bool condition, string errorSubCategoryResourceName, IElementLocation elementLocation, string resourceName, T1 arg0, T2 arg1, T3 arg2, T4 arg3)
         {
-            // PERF NOTE: check the condition here instead of pushing it into
-            // the ThrowInvalidProject() method, because that method always
-            // allocates memory for its variable array of arguments
             if (!condition)
             {
                 ThrowInvalidProject(errorSubCategoryResourceName, elementLocation, resourceName, arg0, arg1, arg2, arg3);
@@ -351,11 +250,7 @@ namespace Microsoft.Build.Shared
         /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="args">Extra arguments for formatting the error message.</param>
-        private static void ThrowInvalidProject(
-            string errorSubCategoryResourceName,
-            IElementLocation elementLocation,
-            string resourceName,
-            params object[] args)
+        private static void ThrowInvalidProject(string errorSubCategoryResourceName, IElementLocation elementLocation, string resourceName, params object[] args)
         {
             ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
 #if DEBUG

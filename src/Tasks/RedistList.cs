@@ -659,8 +659,10 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                reader = XmlReader.Create(path, readerSettings);
+                var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+                FileStream fs = File.OpenRead(path);
+
+                reader = XmlReader.Create(fs, readerSettings);
 
                 while (reader.Read())
                 {

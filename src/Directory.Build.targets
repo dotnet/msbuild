@@ -49,12 +49,6 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(IsUnitTestProject)' == 'true'">
-    <!-- MSBuild isn't xunit analyzer clean, so remove the reference to the xunit package added by the repo toolset and
-         replace it with references to xunit.core and xunit.assert. -->
-    <PackageReference Remove="xunit" />
-    <PackageReference Include="xunit.core" />
-    <PackageReference Include="xunit.assert" />
-
     <!-- Force updated reference to this package because xunit and shouldly
          are netstandard1.6 and transitively bring in an old reference -->
     <PackageReference Include="System.Security.Cryptography.X509Certificates" />
@@ -79,7 +73,7 @@
     <PackageReference Update="Microsoft.NETCore.App" PrivateAssets="All" />
 
     <!-- Configure analyzer to forbid certain API calls -->
-    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" Condition=" '$(IsUnitTestProject)' != 'true' " />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(GenerateReferenceAssemblySource)' == 'true'">

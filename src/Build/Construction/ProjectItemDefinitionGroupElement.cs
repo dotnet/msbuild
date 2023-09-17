@@ -3,9 +3,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Xml;
-using Microsoft.Build.Collections;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
@@ -47,7 +45,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Get a list of child item definitions.
         /// </summary>
-        public ICollection<ProjectItemDefinitionElement> ItemDefinitions => new ReadOnlyCollection<ProjectItemDefinitionElement>(Children.OfType<ProjectItemDefinitionElement>());
+        public ICollection<ProjectItemDefinitionElement> ItemDefinitions => GetChildrenOfType<ProjectItemDefinitionElement>();
 
         /// <summary>
         /// Convenience method that picks a location based on a heuristic:

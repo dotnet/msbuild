@@ -68,6 +68,9 @@
     <ItemGroup>
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.targets" />
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.props" />
+      <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\Tracker*.dll" />
+      <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\Tracker*.exe" />
+      <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\FileTracker*.dll" />
       <SdkResolverFiles Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\**\*.*" />
       <NuGetSdkResolverManifest Include= "$(RepoRoot)src\MSBuild\SdkResolvers\VS\Microsoft.Build.NuGetSdkResolver.xml" Condition="'$(MonoBuild)' != 'true'" />
       <NuGetSdkResolverManifest Include= "$(RepoRoot)src\MSBuild\SdkResolvers\Standalone\Microsoft.Build.NuGetSdkResolver.xml" Condition="'$(MonoBuild)' == 'true'" />
@@ -245,6 +248,9 @@
 
     <Copy SourceFiles="$(RepoRoot)src\MSBuild.Bootstrap\RedirectNuGetConsoleProcess.After.Microsoft.Common.targets"
           DestinationFolder="$(BootstrapDestination)\Current\Microsoft.Common.targets\ImportAfter" />
+
+    <Copy SourceFiles="$(RepoRoot)src\MSBuild.Bootstrap\RedirectNuGetConsoleProcess.After.Microsoft.Common.targets"
+          DestinationFolder="$(BootstrapDestination)\Current\SolutionFile\ImportAfter" />
 
     <!-- Disable workload resolver until we can figure out whether it can work in the bootstrap
          https://github.com/dotnet/msbuild/issues/6566 -->

@@ -97,36 +97,38 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             Util.CopyStream(input, clonedInput);
 
             int t4 = Environment.TickCount;
-            XmlReader xml = XmlReader.Create(clonedInput);
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "new XmlReader(2) t={0}", Environment.TickCount - t4));
-
-            XsltArgumentList args = null;
-            if (entries.Length > 0)
+            using (XmlReader reader = XmlReader.Create(clonedInput))
             {
-                args = new XsltArgumentList();
-                foreach (DictionaryEntry entry in entries)
+                Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "new XmlReader(2) t={0}", Environment.TickCount - t4));
+
+                XsltArgumentList args = null;
+                if (entries.Length > 0)
                 {
-                    string key = entry.Key.ToString();
-                    object val = entry.Value.ToString();
-                    args.AddParam(key, "", val);
-                    Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "arg: key='{0}' value='{1}'", key, val.ToString()));
+                    args = new XsltArgumentList();
+                    foreach (DictionaryEntry entry in entries)
+                    {
+                        string key = entry.Key.ToString();
+                        object val = entry.Value.ToString();
+                        args.AddParam(key, "", val);
+                        Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "arg: key='{0}' value='{1}'", key, val.ToString()));
+                    }
                 }
+
+                var m = new MemoryStream();
+                var w = new XmlTextWriter(m, Encoding.UTF8);
+                w.WriteStartDocument();
+
+                int t5 = Environment.TickCount;
+                xslc.Transform(reader, args, w, s_resolver);
+                Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "XslCompiledTransform.Transform t={0}", Environment.TickCount - t4));
+
+                w.WriteEndDocument();
+                w.Flush();
+                m.Position = 0;
+
+                Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "XslCompiledTransform(\"{0}\") t={1}", resource, Environment.TickCount - t1));
+                return m;
             }
-
-            var m = new MemoryStream();
-            var w = new XmlTextWriter(m, Encoding.UTF8);
-            w.WriteStartDocument();
-
-            int t5 = Environment.TickCount;
-            xslc.Transform(xml, args, w, s_resolver);
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "XslCompiledTransform.Transform t={0}", Environment.TickCount - t4));
-
-            w.WriteEndDocument();
-            w.Flush();
-            m.Position = 0;
-
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "XslCompiledTransform(\"{0}\") t={1}", resource, Environment.TickCount - t1));
-            return m;
         }
 
         private class ResourceResolver : XmlUrlResolver

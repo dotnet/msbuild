@@ -20,6 +20,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
             public bool Equals(TaskRegistry x, TaskRegistry y)
             {
                 Assert.Equal(x.Toolset, y.Toolset, new ToolsetComparer());
+                Assert.Equal(x.NextRegistrationOrderId, y.NextRegistrationOrderId);
 
                 Helpers.AssertDictionariesEqual(
                     x.TaskRegistrations,
