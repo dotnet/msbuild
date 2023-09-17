@@ -283,8 +283,8 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool NotExpectedRegistryException(Exception e)
         {
-            if (e is UnauthorizedAccessException
-             || e is SecurityException
+            if (e is SecurityException
+             || e is UnauthorizedAccessException
              || e is IOException
              || e is ObjectDisposedException
              || e is ArgumentException)
