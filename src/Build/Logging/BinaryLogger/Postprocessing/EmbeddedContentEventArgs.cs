@@ -6,7 +6,7 @@ using System.IO;
 
 namespace Microsoft.Build.Logging
 {
-    public sealed class EmbeddedContentEventArgs : EventArgs
+    internal sealed class EmbeddedContentEventArgs : EventArgs
     {
         public EmbeddedContentEventArgs(EmbeddedContentKind contentKind, Stream contentStream, int length)
         {

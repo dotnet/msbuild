@@ -6,7 +6,6 @@ namespace Microsoft.Build.Logging
     /// <summary>
     /// An interface for notifications from BuildEventArgsReader
     /// </summary>
-    // todo: IEmbeddedContentSource should not be here ideally
     public interface IBuildEventArgsReaderNotifications : IBuildEventStringsReader, IBuildFileReader
     {
         /* For future use */

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Logging
 {
-    public enum EmbeddedContentKind
+    internal enum EmbeddedContentKind
     {
         Unknown = -1,
         ProjectImportArchive = 17,
