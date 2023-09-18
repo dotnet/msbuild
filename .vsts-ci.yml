@@ -144,7 +144,7 @@ stages:
             vmImage: 'ubuntu-22.04'
           ${{ if ne(variables['System.TeamProject'], 'public') }}:
             name: $(DncEngInternalBuildPool)
-            demands: ImageOverride -equals 1es-ubuntu-2204
+            demands: ImageOverride -equals build.ubuntu.2204.amd64
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
           helixTargetQueue: ubuntu.2204.amd64.open
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
