@@ -1930,6 +1930,11 @@
         <target state="translated">Ungültige PE-Kopfzeile gefunden. Die Implementierungsdatei wird nicht verwendet.</target>
         <note>This message can be used as the {1} in MSB3272</note>
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.UnifiedReferenceDependsOn">
+        <source>References which depend on or have been unified to "{0}" [{1}].</source>
+        <target state="new">References which depend on or have been unified to "{0}" [{1}].</target>
+        <note> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
+      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnknownProcessorArchitecture">
         <source>MSB3273: Unknown processor architecture. The implementation file "{0}" for "{1}" had an ImageFileMachine value of "0x{2}". If you wish to use this implementation file make sure the "ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch" property in your project is set to "Warning" or "None".</source>
         <target state="translated">MSB3273: Unbekannte Prozessorarchitektur. Die Implementierungsdatei "{0}" für "{1}" wies den ImageFileMachine-Wert "0x{2}" auf. Stellen Sie bei der Verwendung dieser Implementierungsdatei sicher, dass die "ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch"-Eigenschaft im Projekt auf "Warning" oder "None" festgelegt ist.</target>

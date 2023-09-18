@@ -1123,7 +1123,7 @@ namespace Microsoft.Build.Tasks
                             LogReferenceDependenciesAndSourceItemsToStringBuilder(conflictCandidate.ConflictVictorName.FullName, victor, logDependencies);
 
                             // Log the reference which lost the conflict and the dependencies and source items which caused it.
-                            LogReferenceDependenciesAndSourceItemsToStringBuilder(fusionName, conflictCandidate, logDependencies.AppendLine());
+                            LogReferenceDependenciesAndSourceItemsToStringBuilder(fusionName, conflictCandidate, logDependencies.AppendLine(), referenceIsUnified: true);
 
                             string output = StringBuilderCache.GetStringAndRelease(logConflict);
                             string details = string.Empty;
@@ -1320,11 +1320,14 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Log the source items and dependencies which lead to a given item.
         /// </summary>
-        private void LogReferenceDependenciesAndSourceItemsToStringBuilder(string fusionName, Reference conflictCandidate, StringBuilder log)
+        private void LogReferenceDependenciesAndSourceItemsToStringBuilder(string fusionName, Reference conflictCandidate, StringBuilder log, bool referenceIsUnified = false)
         {
             ErrorUtilities.VerifyThrowInternalNull(conflictCandidate, nameof(conflictCandidate));
             log.Append(Strings.FourSpaces);
-            log.Append(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ReferenceDependsOn", fusionName, conflictCandidate.FullPath));
+
+            string resource = referenceIsUnified ? "ResolveAssemblyReference.UnifiedReferenceDependsOn" : "ResolveAssemblyReference.ReferenceDependsOn";
+
+            log.Append(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(resource, fusionName, conflictCandidate.FullPath));
 
             if (conflictCandidate.IsPrimary)
             {
