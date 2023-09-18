@@ -9,11 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- We carry NuGet as part of the package in case the package is used with an older SDKs or with full framework MSBuild. -->
-    <PackageReference Include="NuGet.Frameworks" />
-    <PackageReference Include="NuGet.Packaging" />
-    <PackageReference Include="NuGet.Protocol" />
+    <PackageReference Include="NuGet.Packaging" ExcludeAssets="Runtime" />
     <ProjectReference Include="..\Microsoft.DotNet.ApiCompatibility\Microsoft.DotNet.ApiCompatibility.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <Reference Include="System.IO.Compression" />
   </ItemGroup>
 
   <ItemGroup>

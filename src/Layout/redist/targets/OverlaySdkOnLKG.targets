@@ -60,7 +60,7 @@
     <!-- If the stage 0 SDK doesn't have KnownWorkloadManifests.txt, then write a default version -->
     <WriteLinesToFile File="$(SdkOutputDirectory)\KnownWorkloadManifests.txt"
                       Condition="!Exists('$(Stage0KnownWorkloadManifestsFile)')"
-                      Lines="microsoft.net.sdk.android;microsoft.net.sdk.ios;microsoft.net.sdk.maccatalyst;microsoft.net.sdk.macos;microsoft.net.sdk.maui;microsoft.net.sdk.tvos;microsoft.net.workload.mono.toolchain.current;microsoft.net.workload.emscripten.current;microsoft.net.workload.emscripten.net6;microsoft.net.workload.emscripten.net7;microsoft.net.workload.mono.toolchain.net6;microsoft.net.workload.mono.toolchain.net7"/>
+                      Lines="microsoft.net.sdk.android;microsoft.net.sdk.aspire;microsoft.net.sdk.ios;microsoft.net.sdk.maccatalyst;microsoft.net.sdk.macos;microsoft.net.sdk.maui;microsoft.net.sdk.tvos;microsoft.net.workload.mono.toolchain.current;microsoft.net.workload.emscripten.current;microsoft.net.workload.emscripten.net6;microsoft.net.workload.emscripten.net7;microsoft.net.workload.mono.toolchain.net6;microsoft.net.workload.mono.toolchain.net7"/>
 
     <ItemGroup>
       <WasmWorkloads Include="microsoft.net.workload.mono.toolchain.current" Version="$(MonoWorkloadManifestVersion)/$(MonoWorkloadFeatureBand)"/>

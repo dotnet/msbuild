@@ -6,10 +6,7 @@
     <TargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">net8.0;net472</TargetFrameworks>
     <StrongNameKeyId>Open</StrongNameKeyId>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <!-- We pin the code analysis version when not in source build as we need to support running on older
-    SDKs when the OOB package is used. -->
-    <_MicrosoftCodeAnalysisVersion>4.0.1</_MicrosoftCodeAnalysisVersion>
-    <_MicrosoftCodeAnalysisVersion Condition="'$(DotNetBuildFromSource)' == 'true'">$(MicrosoftCodeAnalysisPackageVersion)</_MicrosoftCodeAnalysisVersion>
+    <MicrosoftCodeAnalysisMinimumVersion>4.0.1</MicrosoftCodeAnalysisMinimumVersion>
   </PropertyGroup>
 
   <!-- Exclude files that depend on Microsoft.Build.Framework and Microsoft.Build.Utilities.Core. These will be included by users of this package. -->
@@ -18,8 +15,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" VersionOverride="$(_MicrosoftCodeAnalysisVersion)" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" VersionOverride="$(_MicrosoftCodeAnalysisVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" ExcludeAssets="Runtime" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true'">
+    <!-- We pin the code analysis version when not in source build as we need to support running on older
+    SDKs when the OOB package is used. -->
+    <PackageReference Update="Microsoft.CodeAnalysis.CSharp" VersionOverride="$(MicrosoftCodeAnalysisMinimumVersion)" />
   </ItemGroup>
 
   <ItemGroup>

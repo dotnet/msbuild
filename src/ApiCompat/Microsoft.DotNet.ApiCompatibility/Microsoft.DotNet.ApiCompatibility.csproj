@@ -22,8 +22,4 @@
     <EmbeddedResource Update="Resources.resx" GenerateSource="True" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <Reference Include="System.IO.Compression" />
-  </ItemGroup>
-
 </Project>

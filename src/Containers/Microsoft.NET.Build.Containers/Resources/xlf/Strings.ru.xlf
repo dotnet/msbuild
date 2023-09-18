@@ -99,7 +99,7 @@
       </trans-unit>
       <trans-unit id="ContainerRuntimeProcessCreationFailed">
         <source>CONTAINER3001: Failed creating {0} process.</source>
-        <target state="new">CONTAINER3001: Failed creating {0} process.</target>
+        <target state="translated">CONTAINER3001: не удалось создать процесс {0}.</target>
         <note>CONTAINER3001: {0} is the name of the command we failed to run, usually 'docker' or 'podman'.</note>
       </trans-unit>
       <trans-unit id="EmptyOrWhitespacePropertyIgnored">
@@ -259,7 +259,7 @@
       </trans-unit>
       <trans-unit id="RegistryOperationFailed">
         <source>CONTAINER1017: Unable to communicate with the registry '{0}'.</source>
-        <target state="new">CONTAINER1017: Unable to communicate with the registry '{0}'.</target>
+        <target state="translated">CONTAINER1017: не удается связаться с реестром "{0}".</target>
         <note>{StrBegin="CONTAINER1017:" }</note>
       </trans-unit>
       <trans-unit id="RegistryOutputPushFailed">
@@ -269,7 +269,7 @@
       </trans-unit>
       <trans-unit id="RegistryPullFailed">
         <source>CONTAINER1014: Manifest pull failed.</source>
-        <target state="new">CONTAINER1014: Manifest pull failed.</target>
+        <target state="translated">CONTAINER1014: сбой вытягивания манифеста.</target>
         <note>{StrBegin="CONTAINER1014: "}</note>
       </trans-unit>
       <trans-unit id="RegistryPushFailed">
@@ -324,7 +324,7 @@
       </trans-unit>
       <trans-unit id="RepositoryNotFound">
         <source>CONTAINER1015: Unable to access the repository '{0}' at tag '{1}' in the registry '{2}'. Please confirm that this name and tag are present in the registry.</source>
-        <target state="new">CONTAINER1015: Unable to access the repository '{0}' at tag '{1}' in the registry '{2}'. Please confirm that this name and tag are present in the registry.</target>
+        <target state="translated">CONTAINER1015: не удается получить доступ к репозиторию "{0}" тега "{1}" в реестре "{2}". Подтвердите, что это имя и тег присутствуют в реестре.</target>
         <note>{StrBegin="CONTAINER1015: "}</note>
       </trans-unit>
       <trans-unit id="RequiredItemsContainsEmptyItems">
@@ -349,7 +349,7 @@
       </trans-unit>
       <trans-unit id="UnableToAccessRepository">
         <source>CONTAINER1016: Unable to access the repository '{0}' in the registry '{1}'. Please confirm your credentials are correct and that you have access to this repository and registry.</source>
-        <target state="new">CONTAINER1016: Unable to access the repository '{0}' in the registry '{1}'. Please confirm your credentials are correct and that you have access to this repository and registry.</target>
+        <target state="translated">CONTAINER1016: не удается получить доступ к репозиторию "{0}" в реестре "{1}". Убедитесь, что ваши учетные данные верны и что у вас есть доступ к этому репозиторию и реестру.</target>
         <note>{StrBegin="CONTAINER1016:" }</note>
       </trans-unit>
       <trans-unit id="UnknownAppCommandInstruction">
