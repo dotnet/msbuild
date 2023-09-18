@@ -3608,8 +3608,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             bool result = Execute(t);
 
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.UnifiedReferenceDependsOn", "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null", String.Empty);
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.ReferenceDependsOn", "A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_V2_ADllPath);
+            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.ReferenceDependsOn", "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null", String.Empty);
+            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.UnifiedReferenceDependsOn", "A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_V2_ADllPath);
             engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.UnResolvedPrimaryItemSpec", "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null");
             engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_DDllPath);
             engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_BDllPath);
