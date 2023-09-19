@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Microsoft.Build.Logging
 {
-    public class ArchiveFile
+    public sealed class ArchiveFile
     {
         public ArchiveFile(string fullPath, Stream contentStream)
         {

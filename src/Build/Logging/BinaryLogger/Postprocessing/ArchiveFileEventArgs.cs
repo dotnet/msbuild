@@ -6,7 +6,7 @@ using System.IO;
 
 namespace Microsoft.Build.Logging;
 
-public class ArchiveFileEventArgs : EventArgs
+public sealed class ArchiveFileEventArgs : EventArgs
 {
     private ArchiveFile  _archiveFile;
     private bool _resultSet;
