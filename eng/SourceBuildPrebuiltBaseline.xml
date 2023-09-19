@@ -32,5 +32,10 @@
     <UsagePattern IdentityGlob="System.Diagnostics.EventLog/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Reflection.MetadataLoadContext/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Security.Cryptography.ProtectedData/*7.0.0*" />
+    
+    <!-- msbuild is still on 8.0 versions of these so we have to pin in SDK main for now or tasks will fail -->
+    <UsagePattern IdentityGlob="Microsoft.NET.HostModel/*8.0.0*" />
+    <UsagePattern IdentityGlob="Microsoft.Extensions.DependencyModel/*8.0.0*" />
+    <UsagePattern IdentityGlob="Microsoft.Bcl.AsyncInterfaces/*8.0.0*" />
   </IgnorePatterns>
 </UsageData>
