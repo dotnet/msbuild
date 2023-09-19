@@ -20,6 +20,8 @@ namespace Microsoft.Build.Shared
         // Lower order bits correspond to the same for "group" or "other" users.
         private const int userRWX = 0x100 | 0x80 | 0x40;
         private static string tempFileDirectory = null;
+        private const string msbuildTempFolderPrefix = "MSBuildTemp";
+
         internal static string TempFileDirectory
         {
             get
@@ -36,7 +38,18 @@ namespace Microsoft.Build.Shared
         // For all native calls, directly check their return values to prevent bad actors from getting in between checking if a directory exists and returning it.
         private static string CreateFolderUnderTemp()
         {
-            string basePath = Path.Combine(Path.GetTempPath(), $"MSBuildTemp{Environment.UserName}");
+            string msbuildTempFolder;
+            // On windows Username with Unicode chars can give issues, so we dont append username to the temp folder name.
+            if (NativeMethodsShared.IsWindows)
+            {
+                msbuildTempFolder = msbuildTempFolderPrefix;
+            }
+            else
+            {
+                msbuildTempFolder = msbuildTempFolderPrefix + Environment.UserName;
+            }
+
+            string basePath = Path.Combine(Path.GetTempPath(), msbuildTempFolder);
 
             if (NativeMethodsShared.IsLinux && NativeMethodsShared.mkdir(basePath, userRWX) != 0)
             {
