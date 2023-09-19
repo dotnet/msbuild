@@ -1408,6 +1408,36 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Copying a file on top of itself should be a success (no-op) whether
+        /// or not skipUnchangedFiles is true or false.
+        /// </summary>
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void CopyFileItselfNonExistentFile(bool isUseHardLinks, bool isUseSymbolicLinks)
+        {
+            string temp = Path.GetTempPath();
+            string file = Path.Combine(temp, "FileThatDoesNotExist");
+
+            var engine = new MockEngine(_testOutputHelper);
+            var t = new Copy
+            {
+                RetryDelayMilliseconds = 1, // speed up tests!
+                BuildEngine = engine,
+                SourceFiles = new ITaskItem[] { new TaskItem(file) },
+                DestinationFiles = new ITaskItem[] { new TaskItem(file) },
+                SkipUnchangedFiles = false,
+                UseHardlinksIfPossible = isUseHardLinks,
+                UseSymboliclinksIfPossible = isUseSymbolicLinks,
+            };
+
+            bool success = t.Execute();
+
+            Assert.False(success);
+
+            ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries, nothing to do
+        }
+
+        /// <summary>
+        /// Copying a file on top of itself should be a success (no-op) whether
         /// or not skipUnchangedFiles is true or false. Variation with a second copy failure.
         /// </summary>
         [Theory]
