@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -142,10 +142,10 @@
     <value>{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</value>
   </data>
   <data name="ElementShouldNotBeNullAtIndex" xml:space="preserve">
-    <value>Element should not be null. Found null at index: {0}.</value>
+    <value>Element at index {0} should not be null.</value>
   </data>
   <data name="IndexShouldBeWithinSetSizeRange" xml:space="preserve">
-    <value>The index should be within the right set size range.</value>
+    <value>The {0} index should be in the range zero through {1} inclusive.</value>
   </data>
   <data name="MatchingAssemblyNotFound" xml:space="preserve">
     <value>Could not find matching assembly: '{0}' in any of the search directories.</value>
@@ -160,13 +160,10 @@
     <value>Should at least contain one right name.</value>
   </data>
   <data name="ShouldBeGreaterThanZero" xml:space="preserve">
-    <value>Value should be greater than 0.</value>
+    <value>Value of '{0}' should be greater than 0.</value>
   </data>
   <data name="TypeMissingOnSide" xml:space="preserve">
     <value>Type '{0}' exists on {1} but not on {2}</value>
-  </data>
-  <data name="VisitorRightCountShouldMatchMappersSetSize" xml:space="preserve">
-    <value>The provided right count when creating the visitor should match the right set size specified for the mappers.</value>
   </data>
   <data name="CannotAddMemberToInterface" xml:space="preserve">
     <value>Cannot add interface member '{0}' to {1} because it does not exist on {2}</value>

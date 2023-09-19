@@ -118,8 +118,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ElementShouldNotBeNullAtIndex">
-        <source>Element should not be null. Found null at index: {0}.</source>
-        <target state="translated">Element by neměl mít hodnotu null. V indexu byla nalezena hodnota null: {0}.</target>
+        <source>Element at index {0} should not be null.</source>
+        <target state="needs-review-translation">Element by neměl mít hodnotu null. V indexu byla nalezena hodnota null: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnumTypesMustMatch">
@@ -133,8 +133,8 @@
         <note />
       </trans-unit>
       <trans-unit id="IndexShouldBeWithinSetSizeRange">
-        <source>The index should be within the right set size range.</source>
-        <target state="translated">Index by měl být ve správném rozsahu velikosti sady.</target>
+        <source>The {0} index should be in the range zero through {1} inclusive.</source>
+        <target state="new">The {0} index should be in the range zero through {1} inclusive.</target>
         <note />
       </trans-unit>
       <trans-unit id="MatchingAssemblyNotFound">
@@ -158,8 +158,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ShouldBeGreaterThanZero">
-        <source>Value should be greater than 0.</source>
-        <target state="translated">Hodnota by měla být větší než 0.</target>
+        <source>Value of '{0}' should be greater than 0.</source>
+        <target state="new">Value of '{0}' should be greater than 0.</target>
         <note />
       </trans-unit>
       <trans-unit id="TypeIsActuallySealed">
@@ -175,11 +175,6 @@
       <trans-unit id="TypeMissingOnSide">
         <source>Type '{0}' exists on {1} but not on {2}</source>
         <target state="translated">Typ {0} existuje v {1}, ale ne v {2}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="VisitorRightCountShouldMatchMappersSetSize">
-        <source>The provided right count when creating the visitor should match the right set size specified for the mappers.</source>
-        <target state="translated">Pravý počet zadaný při vytváření návštěvníka by měl odpovídat pravé velikosti sady určené pro mapovače.</target>
         <note />
       </trans-unit>
     </body>

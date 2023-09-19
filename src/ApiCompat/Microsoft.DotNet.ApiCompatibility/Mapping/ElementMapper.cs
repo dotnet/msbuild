@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Mapping
             int rightSetSize)
         {
             if (rightSetSize < 1)
-                throw new ArgumentOutOfRangeException(nameof(rightSetSize), Resources.ShouldBeGreaterThanZero);
+                throw new ArgumentOutOfRangeException(nameof(rightSetSize), string.Format(Resources.ShouldBeGreaterThanZero, nameof(rightSetSize)));
 
             RuleRunner = ruleRunner;
             Settings = settings;
@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Mapping
             else
             {
                 if ((uint)setIndex >= Right.Length)
-                    throw new ArgumentOutOfRangeException(nameof(setIndex), Resources.IndexShouldBeWithinSetSizeRange);
+                    throw new ArgumentOutOfRangeException(nameof(setIndex), string.Format(Resources.IndexShouldBeWithinSetSizeRange, nameof(Right), Right.Length - 1));
 
                 Right[setIndex] = element;
             }
