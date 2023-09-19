@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Framework" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.NETCore.DotNetHostResolver" PrivateAssets="All" />
     <ProjectReference Include="..\Microsoft.DotNet.NativeWrapper\Microsoft.DotNet.NativeWrapper.csproj" />
     <PackageReference Include="Microsoft.NETCore.Targets" PrivateAssets="all" />
   </ItemGroup>
@@ -26,15 +25,18 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="All" ExcludeAssets="Runtime" />
+    <!-- Used by ResolveHostfxrCopyLocalContent below -->
+    <PackageDownload Include="Microsoft.NETCore.App.Runtime.win-x86" Version="[$(MicrosoftNETCoreAppRuntimePackageVersion)]" />
+    <PackageDownload Include="Microsoft.NETCore.App.Runtime.win-x64" Version="[$(MicrosoftNETCoreAppRuntimePackageVersion)]" />
   </ItemGroup>
 
-  <Target Name="ResolveHostfxrCopyLocalContent" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" DependsOnTargets="RunResolvePackageDependencies" BeforeTargets="AssignTargetPaths">
+  <Target Name="ResolveHostfxrCopyLocalContent" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" BeforeTargets="AssignTargetPaths">
     <ItemGroup>
-      <Content Include="@(FileDefinitions->'%(ResolvedPath)')" Condition="'%(FileDefinitions.Path)' == 'runtimes/win-x86/native/hostfxr.dll'">
+      <Content Include="$(NuGetPackageRoot)/microsoft.netcore.app.runtime.win-x86/$(MicrosoftNETCoreAppRuntimePackageVersion)/runtimes/win-x86/native/hostfxr.dll">
         <Link>x86/hostfxr.dll</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
-      <Content Include="@(FileDefinitions->'%(ResolvedPath)')" Condition="'%(FileDefinitions.Path)' == 'runtimes/win-x64/native/hostfxr.dll'">
+      <Content Include="$(NuGetPackageRoot)/microsoft.netcore.app.runtime.win-x64/$(MicrosoftNETCoreAppRuntimePackageVersion)/runtimes/win-x64/native/hostfxr.dll">
         <Link>x64/hostfxr.dll</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
