@@ -56,25 +56,25 @@ namespace Microsoft.Build.Logging.SimpleErrorLogger
         private void HandleErrorEvent(object sender, BuildErrorEventArgs e)
         {
             HasLoggedErrors = true;
-            LogErrorEvent(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true), "\x1b[31;1m");
+            LogWithColor(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true),
+                TerminalColor.Red);
         }
 
         private void HandleWarningEvent(object sender, BuildWarningEventArgs e)
         {
-            LogErrorEvent(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true), "\x1b[33;1m");
+            LogWithColor(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true),
+                TerminalColor.Yellow);
         }
 
-        private void LogErrorEvent(string s, string color)
+        private void LogWithColor(string message, TerminalColor color)
         {
             if (acceptAnsiColorCodes)
             {
-                Console.Error.Write(color);
-                Console.Error.Write(s);
-                Console.Error.WriteLine("\x1b[m");
+                Console.Error.Write(AnsiCodes.Colorize(message, color));
             }
             else
             {
-                Console.Error.Write(s);
+                Console.Error.Write(message);
             }
         }
 
