@@ -41,7 +41,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target
     Name="_GenerateDesignerDepsFile"
-    Inputs="$(MSBuildAllProjectFiles);$(ProjectAssetsFile)"
+    Inputs="$(MSBuildAllProjects);$(ProjectAssetsFile)"
     Outputs="$(_DesignerDepsFilePath)"
     Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
     >
@@ -85,7 +85,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target
     Name="_GenerateDesignerRuntimeConfigFile"
-    Inputs="$(MSBuildAllProjectFiles);$(ProjectAssetsFile)"
+    Inputs="$(MSBuildAllProjects);$(ProjectAssetsFile)"
     Outputs="$(_DesignerRuntimeConfigFilePath)"
     Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
     >
