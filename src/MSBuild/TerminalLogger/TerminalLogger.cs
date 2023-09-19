@@ -9,7 +9,6 @@ using System.Text;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Runtime.InteropServices;
 #if NETFRAMEWORK
 using Microsoft.IO;
 #else
