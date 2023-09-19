@@ -38,7 +38,6 @@
     <SystemReflectionMetadataLoadContextVersion>7.0.0</SystemReflectionMetadataLoadContextVersion>
     <SystemReflectionMetadataVersion>7.0.0</SystemReflectionMetadataVersion>
     <SystemResourcesExtensionsPackageVersion>7.0.0</SystemResourcesExtensionsPackageVersion>
-    <SystemSecurityPermissionsVersion>7.0.0</SystemSecurityPermissionsVersion>
     <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
     <SystemTextEncodingCodePagesVersion>7.0.0</SystemTextEncodingCodePagesVersion>
   </PropertyGroup>
