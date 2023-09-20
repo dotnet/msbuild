@@ -15,6 +15,13 @@ public sealed class ArchiveFileEventArgs : EventArgs
     public ArchiveFileEventArgs(ArchiveFile archiveFile) =>
         (_archiveFile, _resultSet, _disposeAction) = (archiveFile, true, archiveFile.Dispose);
 
+    /// <summary>
+    /// Acquires the <see cref="ArchiveFile"/> instance. This method can only be called once and
+    /// <see cref="SetResult(string,Stream)"/> or <see cref="SetResult(string,string)"/> must be called afterwards
+    /// (this is because the embedded files are stored as forward only stream - reading them prevents re-reads).
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
     public ArchiveFile ObtainArchiveFile()
     {
         if (!_resultSet)
