@@ -20,6 +20,10 @@ parameters:
     type: string
     default: 'default'
 
+variables:
+  - name: _MsBuildCiPipelineId
+    value: 9434
+
 pool:
   vmImage: windows-latest
 
@@ -47,7 +51,7 @@ steps:
     inputs:
       buildType: specific
       project: DevDiv
-      pipeline: 9434 # MSBuild Build CI
+      pipeline: $(_MsBuildCiPipelineId) 
       buildVersionToDownload: latestFromBranch
       branchName: '${{parameters.MSBuildBranch}}'  
       artifactName: bin
@@ -61,7 +65,7 @@ steps:
     inputs:
       buildType: specific
       project: DevDiv
-      pipeline: 9434 # MSBuild Build CI
+      pipeline: $(_MsBuildCiPipelineId) 
       buildVersionToDownload: specific
       buildId: ${{parameters.MSBuildBuildID}} 
       artifactName: bin
