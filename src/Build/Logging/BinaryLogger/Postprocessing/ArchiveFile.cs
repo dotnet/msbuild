@@ -27,7 +27,7 @@ namespace Microsoft.Build.Logging
             _stringEncoding = contentEncoding ?? Encoding.UTF8;
         }
 
-        public static ArchiveFile From(ZipArchiveEntry entry)
+        internal static ArchiveFile From(ZipArchiveEntry entry)
         {
             return new ArchiveFile(entry.FullName, entry.Open());
         }
@@ -39,6 +39,12 @@ namespace Microsoft.Build.Logging
         public bool CanUseReader => !_stringAcquired;
         public bool CanUseString => !_streamAcquired;
 
+        /// <summary>
+        /// Fetches the file content as a stream reader (forward only).
+        /// This prevents the content to be read as string.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public StreamReader GetContentReader()
         {
             if (_stringAcquired)
@@ -50,6 +56,12 @@ namespace Microsoft.Build.Logging
             return _contentReader;
         }
 
+        /// <summary>
+        /// Fetches the file content as a string.
+        /// This prevents the content to be fetched via StreamReader.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public string GetContent()
         {
             if (_streamAcquired)
