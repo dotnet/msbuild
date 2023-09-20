@@ -146,16 +146,6 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
-      <trans-unit id="InvalidReportFileAccessesValue">
-        <source>MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</target>
-        <note>
-      {StrBegin="MSBUILD : error MSB1063: "}
-      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
-    </note>
-      </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
         <target state="translated">Версия MSBuild {0} для {1}</target>
