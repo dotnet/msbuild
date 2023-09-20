@@ -32,7 +32,6 @@
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="xunit" />
-    <PackageReference Include="System.Security.Cryptography.X509Certificates" />
     <PackageReference Include="Microsoft.Extensions.Logging"  />
     <PackageReference Include="Microsoft.Extensions.Logging.Console"  />
   </ItemGroup>

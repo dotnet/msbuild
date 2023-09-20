@@ -44,6 +44,10 @@ namespace Microsoft.NET.TestFramework
                         targetFrameworks.Value = targetFrameworks.Value.Replace("$(AspNetTestTfm)", overrideTfm ?? DefaultTfm);
                     }
                 });
+
+            foreach (string assetPath in Directory.EnumerateFiles(Path.Combine(_testAssetsManager.TestAssetsRoot, "WasmOverride")))
+                File.Copy(assetPath, Path.Combine(projectDirectory.Path, Path.GetFileName(assetPath)));
+
             return projectDirectory;
         }
 

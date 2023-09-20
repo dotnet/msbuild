@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Framework;
+using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Build.Tasks
 {
@@ -56,9 +57,24 @@ namespace Microsoft.DotNet.Build.Tasks
 
             propertyGroup.Element(ns + "NETCoreSdkVersion").Value = newSDKVersion;
 
-            var originalBundledNETCoreAppPackageVersion =
-                propertyGroup.Element(ns + "BundledNETCoreAppPackageVersion").Value;
-            propertyGroup.Element(ns + "BundledNETCoreAppPackageVersion").Value = microsoftNETCoreAppRefPackageVersion;
+
+            var originalBundledNETCoreAppPackageVersion = propertyGroup.Element(ns + "BundledNETCoreAppPackageVersion").Value;
+            var parsedOriginalBundledPackageVersion = SemanticVersion.Parse(originalBundledNETCoreAppPackageVersion);
+            var parsedMicrosoftNETCoreAppRefPackageVersion =
+                SemanticVersion.Parse(microsoftNETCoreAppRefPackageVersion);
+
+            // In the case where we have a new major version, it'll come in first through the dotnet/runtime flow of the
+            // SDK's own package references. The Stage0 SDK's bundled version props file will still be on the older major version
+            // (and the older TFM that goes along with that). If we just replaced the bundled version with the new major version,
+            // apps that target the 'older' TFM would fail to build. So we need to keep the bundled version from the existing
+            // bundledversions.props in this one specific case.
+
+            var newBundledPackageVersion =
+                parsedOriginalBundledPackageVersion.Major == parsedMicrosoftNETCoreAppRefPackageVersion.Major
+                ? microsoftNETCoreAppRefPackageVersion
+                : originalBundledNETCoreAppPackageVersion;
+
+            propertyGroup.Element(ns + "BundledNETCoreAppPackageVersion").Value = newBundledPackageVersion;
 
             void CheckAndReplaceElement(XElement element)
             {
@@ -69,7 +85,7 @@ namespace Microsoft.DotNet.Build.Tasks
                         element.ToString(), element.Value, originalBundledNETCoreAppPackageVersion));
                 }
 
-                element.Value = microsoftNETCoreAppRefPackageVersion;
+                element.Value = newBundledPackageVersion;
             }
 
             void CheckAndReplaceAttribute(XAttribute attribute)
@@ -82,7 +98,7 @@ namespace Microsoft.DotNet.Build.Tasks
                         originalBundledNETCoreAppPackageVersion));
                 }
 
-                attribute.Value = microsoftNETCoreAppRefPackageVersion;
+                attribute.Value = newBundledPackageVersion;
             }
 
             if (!isSDKServicing)

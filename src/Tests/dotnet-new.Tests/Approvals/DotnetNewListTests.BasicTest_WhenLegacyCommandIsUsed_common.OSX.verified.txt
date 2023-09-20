@@ -14,7 +14,7 @@ ASP.NET Core Web API (native AOT)             webapiaot                   [C#]  
 ASP.NET Core Web App                          webapp,razor                [C#]        Web/MVC/Razor Pages             
 ASP.NET Core Web App (Model-View-Controller)  mvc                         [C#],F#     Web/MVC                         
 Blazor Server App                             blazorserver                [C#]        Web/Blazor                      
-Blazor Web App                                blazor                      [C#]        Web/Blazor/WebAssembly/PWA      
+Blazor Web App                                blazor                      [C#]        Web/Blazor/WebAssembly          
 Blazor WebAssembly App                        blazorwasm                  [C#]        Web/Blazor/WebAssembly/PWA      
 Blazor WebAssembly App Empty                  blazorwasm-empty            [C#]        Web/Blazor/WebAssembly/PWA/Empty
 Class Library                                 classlib                    [C#],F#,VB  Common/Library                  

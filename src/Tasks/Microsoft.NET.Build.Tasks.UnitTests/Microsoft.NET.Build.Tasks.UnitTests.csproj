@@ -20,9 +20,12 @@
     <PackageReference Include="Microsoft.Build.Utilities.Core" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" />
     <PackageReference Include="NuGet.ProjectModel" />
+  </ItemGroup>
+
+  <!-- Packages that are in-box for .NET Core, so we only need to reference them for .NET Framework -->
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PackageReference Include="System.Reflection.Metadata" VersionOverride="$(SystemReflectionMetadataVersion)" />
     <PackageReference Include="System.Reflection.MetadataLoadContext" VersionOverride="$(SystemReflectionMetadataVersion)" />
-    <PackageReference Include="System.Security.Cryptography.X509Certificates" />
   </ItemGroup>
 
   <ItemGroup>

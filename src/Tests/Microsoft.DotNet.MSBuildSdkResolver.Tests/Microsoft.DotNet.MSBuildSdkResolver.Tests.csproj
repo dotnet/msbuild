@@ -30,7 +30,7 @@
     <ProjectReference Include="..\..\Resolvers\Microsoft.DotNet.NativeWrapper\Microsoft.DotNet.NativeWrapper.csproj">
       <Aliases>nativeWrapper</Aliases>
     </ProjectReference>
-    
+
     <ProjectReference Include="..\..\Resolvers\Microsoft.NET.Sdk.WorkloadManifestReader\Microsoft.NET.Sdk.WorkloadManifestReader.csproj" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
     <!--<ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.Utilities\Microsoft.DotNet.Tools.Tests.Utilities.csproj" />-->
@@ -38,9 +38,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Framework" />
-    <PackageReference Include="runtime.linux-x64.Microsoft.NETCore.DotNetHostResolver" />
-    <PackageReference Include="runtime.osx-x64.Microsoft.NETCore.DotNetHostResolver" />
-    <PackageReference Include="runtime.linux-musl-x64.Microsoft.NETCore.DotNetHostResolver" />
   </ItemGroup>
 
   <ItemGroup>

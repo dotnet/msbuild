@@ -64,7 +64,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Framework" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.NETCore.DotNetHostResolver" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Deployment.DotNet.Releases" />
   </ItemGroup>
 
@@ -92,6 +91,10 @@
     <Reference Include="System.Core" />
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="All" ExcludeAssets="Runtime" />
     <PackageReference Include="System.Collections.Immutable" VersionOverride="$(SystemCollectionsImmutablePackageVersion)" />
+    <!-- Used by ResolveHostfxrCopyLocalContent below -->
+    <PackageDownload Include="Microsoft.NETCore.App.Runtime.win-x86" Version="[$(MicrosoftNETCoreAppRuntimePackageVersion)]" />
+    <PackageDownload Include="Microsoft.NETCore.App.Runtime.win-x64" Version="[$(MicrosoftNETCoreAppRuntimePackageVersion)]" />
+    <PackageDownload Include="Microsoft.NETCore.App.Runtime.win-arm64" Version="[$(MicrosoftNETCoreAppRuntimePackageVersion)]" />
   </ItemGroup>
 
   <ItemGroup>
@@ -102,17 +105,17 @@
     <PackageReference Include="Microsoft.NETCore.Targets" ExcludeAssets="all" PrivateAssets="all" />
   </ItemGroup>
 
-  <Target Name="ResolveHostfxrCopyLocalContent" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" DependsOnTargets="RunResolvePackageDependencies" BeforeTargets="AssignTargetPaths">
+  <Target Name="ResolveHostfxrCopyLocalContent" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" BeforeTargets="AssignTargetPaths">
     <ItemGroup>
-      <Content Include="@(FileDefinitions->'%(ResolvedPath)')" Condition="'%(FileDefinitions.Path)' == 'runtimes/win-x86/native/hostfxr.dll'">
+      <Content Include="$(NuGetPackageRoot)/microsoft.netcore.app.runtime.win-x86/$(MicrosoftNETCoreAppRuntimePackageVersion)/runtimes/win-x86/native/hostfxr.dll">
         <Link>x86/hostfxr.dll</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
-      <Content Include="@(FileDefinitions->'%(ResolvedPath)')" Condition="'%(FileDefinitions.Path)' == 'runtimes/win-x64/native/hostfxr.dll'">
+      <Content Include="$(NuGetPackageRoot)/microsoft.netcore.app.runtime.win-x64/$(MicrosoftNETCoreAppRuntimePackageVersion)/runtimes/win-x64/native/hostfxr.dll">
         <Link>x64/hostfxr.dll</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
-      <Content Include="@(FileDefinitions->'%(ResolvedPath)')" Condition="'%(FileDefinitions.Path)' == 'runtimes/win-arm64/native/hostfxr.dll'">
+      <Content Include="$(NuGetPackageRoot)/microsoft.netcore.app.runtime.win-arm64/$(MicrosoftNETCoreAppRuntimePackageVersion)/runtimes/win-arm64/native/hostfxr.dll">
         <Link>arm64/hostfxr.dll</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>

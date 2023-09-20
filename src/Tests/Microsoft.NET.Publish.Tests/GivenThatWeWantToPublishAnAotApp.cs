@@ -755,10 +755,8 @@ namespace Microsoft.NET.Publish.Tests
         [Theory]
         [InlineData("Static")]
         [InlineData("Shared")]
-        public void NativeAotLib_errors_out_when_eventpipe_is_enabled(string libType)
+        public void NativeAotLib_warns_when_eventpipe_is_enabled(string libType)
         {
-            // Revisit once the issue is fixed
-            // https://github.com/dotnet/runtime/issues/89346
             var projectName = "AotStaticLibraryPublishWithEventPipe";
             var rid = EnvironmentInfo.GetCompatibleRid(ToolsetInfo.CurrentTargetFramework);
 
@@ -771,10 +769,13 @@ namespace Microsoft.NET.Publish.Tests
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            // Revisit once the issue is fixed
+            // https://github.com/dotnet/runtime/issues/89346
             publishCommand
                 .Execute()
-                .Should().Fail()
-                .And.HaveStdOutContaining("EventSource is not supported");
+                .Should().Pass();
+            // Comment in the following code when https://github.com/dotnet/sdk/issues/34839 gets fixed
+            // .And.HaveStdOutContaining("EventSource is not supported or recommended when compiling to a native library");
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]

@@ -1,0 +1,4 @@
+<Project>
+  <!-- Overriding only when workload is installed, and targeting net8.0 -->
+  <Import Project="WasmOverridePacks.targets" Condition="'$(WasmNativeWorkload)' == 'true' and '$(RuntimeIdentifier)' == 'browser-wasm' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionEquals('$(TargetFrameworkVersion)', '8.0'))" />
+</Project>
