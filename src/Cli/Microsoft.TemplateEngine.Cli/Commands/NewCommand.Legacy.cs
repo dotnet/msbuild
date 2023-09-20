@@ -135,33 +135,33 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         private void BuildLegacySymbols(Func<ParseResult, ITemplateEngineHost> hostBuilder)
         {
-            this.Arguments.Add(ShortNameArgument);
-            this.Arguments.Add(RemainingArguments);
+            Arguments.Add(ShortNameArgument);
+            Arguments.Add(RemainingArguments);
 
             //legacy options
             Dictionary<FilterOptionDefinition, CliOption> options = new();
             foreach (var filterDef in LegacyFilterDefinitions)
             {
                 options[filterDef] = filterDef.OptionFactory().AsHidden();
-                this.Options.Add(options[filterDef]);
+                Options.Add(options[filterDef]);
             }
             LegacyFilters = options;
 
-            this.Options.Add(InteractiveOption);
-            this.Options.Add(AddSourceOption);
-            this.Options.Add(ColumnsAllOption);
-            this.Options.Add(ColumnsOption);
+            Options.Add(InteractiveOption);
+            Options.Add(AddSourceOption);
+            Options.Add(ColumnsAllOption);
+            Options.Add(ColumnsOption);
 
-            this.TreatUnmatchedTokensAsErrors = true;
+            TreatUnmatchedTokensAsErrors = true;
 
-            this.Add(new LegacyInstallCommand(this, hostBuilder));
-            this.Add(new LegacyUninstallCommand(this, hostBuilder));
-            this.Add(new LegacyUpdateCheckCommand(this, hostBuilder));
-            this.Add(new LegacyUpdateApplyCommand(this, hostBuilder));
-            this.Add(new LegacySearchCommand(this, hostBuilder));
-            this.Add(new LegacyListCommand(this, hostBuilder));
-            this.Add(new LegacyAliasAddCommand(hostBuilder));
-            this.Add(new LegacyAliasShowCommand(hostBuilder));
+            Add(new LegacyInstallCommand(this, hostBuilder));
+            Add(new LegacyUninstallCommand(this, hostBuilder));
+            Add(new LegacyUpdateCheckCommand(this, hostBuilder));
+            Add(new LegacyUpdateApplyCommand(this, hostBuilder));
+            Add(new LegacySearchCommand(this, hostBuilder));
+            Add(new LegacyListCommand(this, hostBuilder));
+            Add(new LegacyAliasAddCommand(hostBuilder));
+            Add(new LegacyAliasShowCommand(hostBuilder));
         }
     }
 }

@@ -188,31 +188,31 @@ internal class ContainerizeCommand : CliRootCommand
     internal ContainerizeCommand() : base("Containerize an application without Docker.")
     {
         PublishDirectoryArgument.AcceptLegalFilePathsOnly();
-        this.Arguments.Add(PublishDirectoryArgument);
-        this.Options.Add(BaseRegistryOption);
-        this.Options.Add(BaseImageNameOption);
-        this.Options.Add(BaseImageTagOption);
-        this.Options.Add(OutputRegistryOption);
-        this.Options.Add(ArchiveOutputPathOption);
-        this.Options.Add(RepositoryOption);
-        this.Options.Add(ImageTagsOption);
-        this.Options.Add(WorkingDirectoryOption);
-        this.Options.Add(EntrypointOption);
-        this.Options.Add(EntrypointArgsOption);
-        this.Options.Add(DefaultArgsOption);
-        this.Options.Add(AppCommandOption);
-        this.Options.Add(AppCommandArgsOption);
-        this.Options.Add(AppCommandInstructionOption);
-        this.Options.Add(LabelsOption);
-        this.Options.Add(PortsOption);
-        this.Options.Add(EnvVarsOption);
-        this.Options.Add(RidOption);
-        this.Options.Add(RidGraphPathOption);
+        Arguments.Add(PublishDirectoryArgument);
+        Options.Add(BaseRegistryOption);
+        Options.Add(BaseImageNameOption);
+        Options.Add(BaseImageTagOption);
+        Options.Add(OutputRegistryOption);
+        Options.Add(ArchiveOutputPathOption);
+        Options.Add(RepositoryOption);
+        Options.Add(ImageTagsOption);
+        Options.Add(WorkingDirectoryOption);
+        Options.Add(EntrypointOption);
+        Options.Add(EntrypointArgsOption);
+        Options.Add(DefaultArgsOption);
+        Options.Add(AppCommandOption);
+        Options.Add(AppCommandArgsOption);
+        Options.Add(AppCommandInstructionOption);
+        Options.Add(LabelsOption);
+        Options.Add(PortsOption);
+        Options.Add(EnvVarsOption);
+        Options.Add(RidOption);
+        Options.Add(RidGraphPathOption);
         LocalRegistryOption.AcceptOnlyFromAmong(KnownLocalRegistryTypes.SupportedLocalRegistryTypes);
-        this.Options.Add(LocalRegistryOption);
-        this.Options.Add(ContainerUserOption);
+        Options.Add(LocalRegistryOption);
+        Options.Add(ContainerUserOption);
 
-        this.SetAction(async (parseResult, cancellationToken) =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
             DirectoryInfo _publishDir = parseResult.GetValue(PublishDirectoryArgument)!;
             string _baseReg = parseResult.GetValue(BaseRegistryOption)!;

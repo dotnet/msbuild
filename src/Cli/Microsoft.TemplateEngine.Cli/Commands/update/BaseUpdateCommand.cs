@@ -17,8 +17,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             : base(hostBuilder, commandName, description)
         {
             ParentCommand = parentCommand;
-            this.Options.Add(InteractiveOption);
-            this.Options.Add(AddSourceOption);
+            Options.Add(InteractiveOption);
+            Options.Add(AddSourceOption);
         }
 
         internal virtual CliOption<bool> InteractiveOption { get; } = SharedOptionsFactory.CreateInteractiveOption();

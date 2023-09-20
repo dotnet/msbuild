@@ -15,9 +15,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Func<ParseResult, ITemplateEngineHost> hostBuilder)
             : base(parentCommand, hostBuilder, "--list")
         {
-            this.Hidden = true;
-            this.Aliases.Add("-l");
-            this.Validators.Add(ValidateParentCommandArguments);
+            Hidden = true;
+            Aliases.Add("-l");
+            Validators.Add(ValidateParentCommandArguments);
 
             parentCommand.AddNoLegacyUsageValidators(this, except: Filters.Values.Concat(new CliSymbol[] { ColumnsAllOption, ColumnsOption, NewCommand.ShortNameArgument }).ToArray());
         }

@@ -341,7 +341,7 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     foreach (var runtimeIdentifier in RuntimeIdentifiers)
                     {
-                        if (processedPrimaryRuntimeIdentifier && runtimeIdentifier == this.RuntimeIdentifier)
+                        if (processedPrimaryRuntimeIdentifier && runtimeIdentifier == RuntimeIdentifier)
                         {
                             //  We've already processed this RID
                             continue;

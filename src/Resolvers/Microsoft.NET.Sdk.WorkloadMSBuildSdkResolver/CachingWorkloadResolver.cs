@@ -95,7 +95,7 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
                         return null;
                 }
 
-                throw new InvalidOperationException("Unknown resolutionResult type: " + this.GetType());
+                throw new InvalidOperationException("Unknown resolutionResult type: " + GetType());
             }
         }
 

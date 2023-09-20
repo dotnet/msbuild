@@ -12,8 +12,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         public LegacyInstallCommand(NewCommand parentCommand, Func<ParseResult, ITemplateEngineHost> hostBuilder)
             : base(parentCommand, hostBuilder, "--install")
         {
-            this.Hidden = true;
-            this.Aliases.Add("-i");
+            Hidden = true;
+            Aliases.Add("-i");
 
             parentCommand.AddNoLegacyUsageValidators(this, except: new CliOption[] { InteractiveOption, AddSourceOption });
         }

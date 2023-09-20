@@ -15,33 +15,33 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Func<ParseResult, ITemplateEngineHost> hostBuilder)
             : base(hostBuilder, commandName, SymbolStrings.Command_New_Description)
         {
-            this.TreatUnmatchedTokensAsErrors = true;
+            TreatUnmatchedTokensAsErrors = true;
 
             //it is important that legacy commands are built before non-legacy, as non legacy commands are building validators that rely on legacy stuff
             BuildLegacySymbols(hostBuilder);
 
-            this.Add(new InstantiateCommand(this, hostBuilder));
-            this.Add(new InstallCommand(this, hostBuilder));
-            this.Add(new UninstallCommand(this, hostBuilder));
-            this.Add(new UpdateCommand(this, hostBuilder));
-            this.Add(new SearchCommand(this, hostBuilder));
-            this.Add(new ListCommand(this, hostBuilder));
-            this.Add(new AliasCommand(hostBuilder));
-            this.Add(new DetailsCommand(hostBuilder));
+            Add(new InstantiateCommand(this, hostBuilder));
+            Add(new InstallCommand(this, hostBuilder));
+            Add(new UninstallCommand(this, hostBuilder));
+            Add(new UpdateCommand(this, hostBuilder));
+            Add(new SearchCommand(this, hostBuilder));
+            Add(new ListCommand(this, hostBuilder));
+            Add(new AliasCommand(hostBuilder));
+            Add(new DetailsCommand(hostBuilder));
 
-            this.Options.Add(DebugCustomSettingsLocationOption);
-            this.Options.Add(DebugVirtualizeSettingsOption);
-            this.Options.Add(DebugAttachOption);
-            this.Options.Add(DebugReinitOption);
-            this.Options.Add(DebugRebuildCacheOption);
-            this.Options.Add(DebugShowConfigOption);
+            Options.Add(DebugCustomSettingsLocationOption);
+            Options.Add(DebugVirtualizeSettingsOption);
+            Options.Add(DebugAttachOption);
+            Options.Add(DebugReinitOption);
+            Options.Add(DebugRebuildCacheOption);
+            Options.Add(DebugShowConfigOption);
 
-            this.Options.Add(SharedOptions.OutputOption);
-            this.Options.Add(SharedOptions.NameOption);
-            this.Options.Add(SharedOptions.DryRunOption);
-            this.Options.Add(SharedOptions.ForceOption);
-            this.Options.Add(SharedOptions.NoUpdateCheckOption);
-            this.Options.Add(SharedOptions.ProjectPathOption);
+            Options.Add(SharedOptions.OutputOption);
+            Options.Add(SharedOptions.NameOption);
+            Options.Add(SharedOptions.DryRunOption);
+            Options.Add(SharedOptions.ForceOption);
+            Options.Add(SharedOptions.NoUpdateCheckOption);
+            Options.Add(SharedOptions.ProjectPathOption);
         }
 
         internal static CliOption<string?> DebugCustomSettingsLocationOption { get; } = new("--debug:custom-hive")

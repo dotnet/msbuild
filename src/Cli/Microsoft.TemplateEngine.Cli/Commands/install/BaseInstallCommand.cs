@@ -16,10 +16,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             : base(hostBuilder, commandName, SymbolStrings.Command_Install_Description)
         {
             ParentCommand = parentCommand;
-            this.Arguments.Add(NameArgument);
-            this.Options.Add(InteractiveOption);
-            this.Options.Add(AddSourceOption);
-            this.Options.Add(ForceOption);
+            Arguments.Add(NameArgument);
+            Options.Add(InteractiveOption);
+            Options.Add(AddSourceOption);
+            Options.Add(ForceOption);
         }
 
         internal static CliArgument<string[]> NameArgument { get; } = new("package")

@@ -49,11 +49,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 Aliases.Add(item);
             }
 
-            this.Options.Add(SharedOptions.OutputOption);
-            this.Options.Add(SharedOptions.NameOption);
-            this.Options.Add(SharedOptions.DryRunOption);
-            this.Options.Add(SharedOptions.ForceOption);
-            this.Options.Add(SharedOptions.NoUpdateCheckOption);
+            Options.Add(SharedOptions.OutputOption);
+            Options.Add(SharedOptions.NameOption);
+            Options.Add(SharedOptions.DryRunOption);
+            Options.Add(SharedOptions.ForceOption);
+            Options.Add(SharedOptions.NoUpdateCheckOption);
 
             string? templateLanguage = template.GetLanguage();
             string? defaultLanguage = environmentSettings.GetDefaultLanguage();
@@ -77,7 +77,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     }
                     );
                 }
-                this.Options.Add(LanguageOption);
+                Options.Add(LanguageOption);
             }
 
             string? templateType = template.GetTemplateType();
@@ -87,7 +87,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 TypeOption = SharedOptionsFactory.CreateTypeOption();
                 TypeOption.Description = SymbolStrings.TemplateCommand_Option_Type;
                 TypeOption.FromAmongCaseInsensitive(new[] { templateType });
-                this.Options.Add(TypeOption);
+                Options.Add(TypeOption);
             }
 
             if (template.BaselineInfo.Any(b => !string.IsNullOrWhiteSpace(b.Key)))
@@ -95,7 +95,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 BaselineOption = SharedOptionsFactory.CreateBaselineOption();
                 BaselineOption.Description = SymbolStrings.TemplateCommand_Option_Baseline;
                 BaselineOption.FromAmongCaseInsensitive(template.BaselineInfo.Select(b => b.Key).Where(b => !string.IsNullOrWhiteSpace(b)).ToArray());
-                this.Options.Add(BaselineOption);
+                Options.Add(BaselineOption);
             }
 
             if (HasRunScriptPostActionDefined(template))
@@ -106,7 +106,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     Arity = new ArgumentArity(1, 1)
                 };
                 AllowScriptsOption.DefaultValueFactory = (_) => AllowRunScripts.Prompt;
-                this.Options.Add(AllowScriptsOption);
+                Options.Add(AllowScriptsOption);
             }
 
             AddTemplateOptionsToCommand(template);
@@ -311,7 +311,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             foreach ((CliTemplateParameter parameter, IReadOnlySet<string> aliases, IReadOnlyList<string> _) in parametersWithAliasAssignments)
             {
                 TemplateOption option = new TemplateOption(parameter, aliases);
-                this.Options.Add(option.Option);
+                Options.Add(option.Option);
                 _templateSpecificOptions[parameter.Name] = option;
             }
         }

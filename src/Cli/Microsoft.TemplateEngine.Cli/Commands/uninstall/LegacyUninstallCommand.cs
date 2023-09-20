@@ -14,8 +14,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Func<ParseResult, ITemplateEngineHost> hostBuilder)
             : base(hostBuilder, "--uninstall")
         {
-            this.Hidden = true;
-            this.Aliases.Add("-u");
+            Hidden = true;
+            Aliases.Add("-u");
 
             parentCommand.AddNoLegacyUsageValidators(this);
         }

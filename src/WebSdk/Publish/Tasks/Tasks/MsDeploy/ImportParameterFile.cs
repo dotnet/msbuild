@@ -29,7 +29,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tasks.MsDeploy
         [Framework.Output]
         public Framework.ITaskItem[] Result
         {
-            get { return this.m_parametersList.ToArray(); }
+            get { return m_parametersList.ToArray(); }
         }
 
 

@@ -15,7 +15,7 @@ public class SharedTestOutputHelper : ITestOutputHelper
 
     public SharedTestOutputHelper(IMessageSink sink)
     {
-        this._sink = sink;
+        _sink = sink;
     }
 
     public void WriteLine(string message)

@@ -296,33 +296,33 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
         public string DisableRule
         {
-            get { return this.m_disableRule; }
-            set { this.m_disableRule = value; }
+            get { return m_disableRule; }
+            set { m_disableRule = value; }
         }
 
         [Framework.Required]
         public string Verb
         {
-            get { return this.m_verb; }
-            set { this.m_verb = value; }
+            get { return m_verb; }
+            set { m_verb = value; }
         }
 
         [Framework.Required]
         public Framework.ITaskItem[] Source
         {
-            get { return this.m_sourceITaskItem; }
-            set { this.m_sourceITaskItem = value; }
+            get { return m_sourceITaskItem; }
+            set { m_sourceITaskItem = value; }
         }
 
         public Framework.ITaskItem[] Destination
         {
-            get { return this.m_destITaskItem; }
-            set { this.m_destITaskItem = value; }
+            get { return m_destITaskItem; }
+            set { m_destITaskItem = value; }
         }
         public bool WhatIf
         {
-            get { return this.m_whatif; }
-            set { this.m_whatif = value; }
+            get { return m_whatif; }
+            set { m_whatif = value; }
         }
 
         public bool OptimisticParameterDefaultValue { get; set; }
@@ -335,79 +335,79 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
         public bool AllowUntrusted
         {
-            get { return this.m_allowUntrusted; }
-            set { this.m_allowUntrusted = value; }
+            get { return m_allowUntrusted; }
+            set { m_allowUntrusted = value; }
         }
 
         public bool Verbose
         {
-            get { return this.m_verbose; }
-            set { this.m_verbose = value; }
+            get { return m_verbose; }
+            set { m_verbose = value; }
         }
         public string FailureLevel
         {
-            get { return this.m_failureLevel; }
-            set { this.m_failureLevel = value; }
+            get { return m_failureLevel; }
+            set { m_failureLevel = value; }
         }
         public bool Xml
         {
-            get { return this.m_xml; }
-            set { this.m_xml = value; }
+            get { return m_xml; }
+            set { m_xml = value; }
         }
         public string XPath
         {
-            get { return this.m_xpath; }
-            set { this.m_xpath = value; }
+            get { return m_xpath; }
+            set { m_xpath = value; }
         }
         public string EnableRule
         {
-            get { return this.m_enableRule; }
-            set { this.m_enableRule = value; }
+            get { return m_enableRule; }
+            set { m_enableRule = value; }
         }
         public string Replace
         {
-            get { return this.m_replace; }
-            set { this.m_replace = value; }
+            get { return m_replace; }
+            set { m_replace = value; }
         }
         public string Skip
         {
-            get { return this.m_skip; }
-            set { this.m_skip = value; }
+            get { return m_skip; }
+            set { m_skip = value; }
         }
         public string DisableLink
         {
-            get { return this.m_disableLink; }
-            set { this.m_disableLink = value; }
+            get { return m_disableLink; }
+            set { m_disableLink = value; }
         }
 
         public string EnableLink
         {
-            get { return this.m_enableLink; }
-            set { this.m_enableLink = value; }
+            get { return m_enableLink; }
+            set { m_enableLink = value; }
         }
 
         public bool EnableTransaction
         {
-            get { return this.m_enableTransaction; }
-            set { this.m_enableTransaction = value; }
+            get { return m_enableTransaction; }
+            set { m_enableTransaction = value; }
         }
         public int RetryAttempts
         {
-            get { return this.m_retryAttempts; }
-            set { this.m_retryAttempts = value; }
+            get { return m_retryAttempts; }
+            set { m_retryAttempts = value; }
         }
         public int RetryInterval
         {
-            get { return this.m_retryInterval; }
-            set { this.m_retryInterval = value; }
+            get { return m_retryInterval; }
+            set { m_retryInterval = value; }
         }
 
         public bool UseDoubleQuoteForValue
         {
-            get { return this.m_useDoubleQuoteForValue; }
+            get { return m_useDoubleQuoteForValue; }
             set
             {
-                this.m_useDoubleQuoteForValue = value;
+                m_useDoubleQuoteForValue = value;
                 m_strValueQuote = (m_useDoubleQuoteForValue) ? "\"" : null;
             }
         }
@@ -415,56 +415,56 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         public Framework.ITaskItem[] ReplaceRuleItems
         {
             get { return m_replaceRuleItemsITaskItem; }
-            set { this.m_replaceRuleItemsITaskItem = value; }
+            set { m_replaceRuleItemsITaskItem = value; }
         }
 
         public Framework.ITaskItem[] SkipRuleItems
         {
             get { return m_skipRuleItemsITaskItem; }
-            set { this.m_skipRuleItemsITaskItem = value; }
+            set { m_skipRuleItemsITaskItem = value; }
         }
 
         public string DisableSkipDirective
         {
             get { return m_disableSkipDirective; }
-            set { this.m_disableSkipDirective = value; }
+            set { m_disableSkipDirective = value; }
         }
 
         public string EnableSkipDirective
         {
             get { return m_enableSkipDirective; }
-            set { this.m_enableSkipDirective = value; }
+            set { m_enableSkipDirective = value; }
         }
 
         public Framework.ITaskItem[] DeclareParameterItems
         {
             get { return m_declareParameterItems; }
-            set { this.m_declareParameterItems = value; }
+            set { m_declareParameterItems = value; }
         }
         public Framework.ITaskItem[] ImportDeclareParametersItems
         {
             get { return m_importDeclareParametersItems; }
-            set { this.m_importDeclareParametersItems = value; }
+            set { m_importDeclareParametersItems = value; }
         }
 
 
         public Framework.ITaskItem[] ImportSetParametersItems
         {
             get { return m_importSetParametersItems; }
-            set { this.m_importSetParametersItems = value; }
+            set { m_importSetParametersItems = value; }
         }
 
         public Framework.ITaskItem[] SimpleSetParameterItems
         {
             get { return m_simpleSetParamterItems; }
-            set { this.m_simpleSetParamterItems = value; }
+            set { m_simpleSetParamterItems = value; }
         }
 
 
         public Framework.ITaskItem[] SetParameterItems
         {
             get { return m_setParamterItems; }
-            set { this.m_setParamterItems = value; }
+            set { m_setParamterItems = value; }
         }
 
         public Framework.ITaskItem[] AdditionalDestinationProviderOptions { get; set; }
@@ -516,18 +516,18 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         {
             get
             {
-                return this.m_previewOnly;
+                return m_previewOnly;
             }
             set
             {
-                this.m_previewOnly = value;
+                m_previewOnly = value;
             }
         }
 
         // controlling whether a task should be execute.
         protected override bool SkipTaskExecution()
         {
-            if (this.PreviewCommandLineOnly)
+            if (PreviewCommandLineOnly)
                 return true;
             else
                 return base.SkipTaskExecution();
@@ -549,7 +549,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         public override bool Execute()
         {
             bool bSuccess = false;
-            if (this.PreviewCommandLineOnly)
+            if (PreviewCommandLineOnly)
             {
                 // useful information about what was wrong with the parameters.
                 if (!ValidateParameters())
@@ -579,14 +579,14 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 string type = string.Empty;
                 string path = string.Empty;
                 Framework.ITaskItem taskItem = null;
-                if (this.Destination != null && this.Destination.GetLength(0) == 1)
+                if (Destination != null && Destination.GetLength(0) == 1)
                 {
-                    taskItem = this.Destination[0];
+                    taskItem = Destination[0];
                 }
                 else
                 {
-                    if (this.Source != null)
-                        taskItem = this.Source[0];
+                    if (Source != null)
+                        taskItem = Source[0];
                 }
                 if (taskItem != null)
                 {
@@ -990,9 +990,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         protected override string GenerateCommandLineCommands()
         {
             Utilities.CommandLineBuilder commandLine = new Utilities.CommandLineBuilder();
-            IncorporateSettingsFromHostObject(ref m_skipRuleItemsITaskItem, this.Destination, HostObject as System.Collections.Generic.IEnumerable<Framework.ITaskItem>);
-            AddDestinationProviderSettingToObject(commandLine, "-source:", this.Source, m_strValueQuote, null, this);
-            AddDestinationProviderSettingToObject(commandLine, "-dest:", this.Destination, m_strValueQuote, AdditionalDestinationProviderOptions, this);
+            IncorporateSettingsFromHostObject(ref m_skipRuleItemsITaskItem, Destination, HostObject as System.Collections.Generic.IEnumerable<Framework.ITaskItem>);
+            AddDestinationProviderSettingToObject(commandLine, "-source:", Source, m_strValueQuote, null, this);
+            AddDestinationProviderSettingToObject(commandLine, "-dest:", Destination, m_strValueQuote, AdditionalDestinationProviderOptions, this);
 
             commandLine.AppendSwitchUnquotedIfNotNull("-verb:", m_verb);
             commandLine.AppendSwitchUnquotedIfNotNull("-failureLevel:", m_failureLevel);
@@ -1080,13 +1080,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// <returns>true if arguments are corrent enough to continue processing, false otherwise</returns>
         protected override bool ValidateParameters()
         {
-            if (this.Source != null && this.Source.GetLength(0) > 1)
+            if (Source != null && Source.GetLength(0) > 1)
             {
                 Log.LogError(string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.MSDEPLOY_InvalidSourceCount, Source.GetLength(0)), null);
                 return false;
             }
 
-            if (this.Destination != null && this.Destination.GetLength(0) > 1)
+            if (Destination != null && Destination.GetLength(0) > 1)
             {
                 Log.LogError(string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.MSDEPLOY_InvalidDestinationCount, Destination.GetLength(0)), null);
                 return false;
@@ -1095,7 +1095,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             {
                 string[] validVerbs = null;
                 bool fNullDestination = false;
-                if (this.Destination == null || this.Destination.GetLength(0) == 0)
+                if (Destination == null || Destination.GetLength(0) == 0)
                 {
                     fNullDestination = true;
                     validVerbs = new string[] {
@@ -1105,7 +1105,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                         "getSystemInfo",
                     };
                 }
-                if (this.Source == null || this.Source.GetLength(0) == 0)
+                if (Source == null || Source.GetLength(0) == 0)
                 {
                     validVerbs = new string[] {
                         "delete",
@@ -1123,13 +1123,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 {
                     foreach (string verb in validVerbs)
                     {
-                        if (string.Compare(this.Verb, verb, System.StringComparison.OrdinalIgnoreCase) == 0)
+                        if (string.Compare(Verb, verb, System.StringComparison.OrdinalIgnoreCase) == 0)
                         {
                             return true;
                         }
                     }
                 }
-                Log.LogError(string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.MSDEPLOY_InvalidVerbForTheInput, this.Verb, this.Source[0].ItemSpec, (fNullDestination) ? null : this.Destination[0].ItemSpec), null);
+                Log.LogError(string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.MSDEPLOY_InvalidVerbForTheInput, Verb, Source[0].ItemSpec, (fNullDestination) ? null : Destination[0].ItemSpec), null);
                 return false;
             }
         }

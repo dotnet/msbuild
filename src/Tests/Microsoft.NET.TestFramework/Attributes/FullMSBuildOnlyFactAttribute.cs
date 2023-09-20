@@ -9,7 +9,7 @@ namespace Microsoft.NET.TestFramework
         {
             if (!TestContext.Current.ToolsetUnderTest.ShouldUseFullFrameworkMSBuild)
             {
-                this.Skip = "This test requires Full MSBuild to run";
+                Skip = "This test requires Full MSBuild to run";
             }
         }
     }

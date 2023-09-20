@@ -602,7 +602,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             : base(src, dest, host)
         {
             if (host.GetProperty("HighImportanceEventTypes") != null)
-                this.HighImportanceEventTypes = host.GetProperty("HighImportanceEventTypes").ToString();
+                HighImportanceEventTypes = host.GetProperty("HighImportanceEventTypes").ToString();
         }
     }
 
@@ -642,8 +642,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         [Framework.Required]
         public Framework.ITaskItem[] Source
         {
-            get { return this.m_sourceITaskItem; }
-            set { this.m_sourceITaskItem = value; }
+            get { return m_sourceITaskItem; }
+            set { m_sourceITaskItem = value; }
         }
 
         public string HighImportanceEventTypes
@@ -654,8 +654,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
         public Framework.ITaskItem[] Destination
         {
-            get { return this.m_destITaskItem; }
-            set { this.m_destITaskItem = value; }
+            get { return m_destITaskItem; }
+            set { m_destITaskItem = value; }
         }
 
         public bool AllowUntrustedCertificate
@@ -718,46 +718,46 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         public string DisableSkipDirective
         {
             get { return _disableSkipDirective; }
-            set { this._disableSkipDirective = value; }
+            set { _disableSkipDirective = value; }
         }
 
         public string EnableSkipDirective
         {
             get { return _enableSkipDirective; }
-            set { this._enableSkipDirective = value; }
+            set { _enableSkipDirective = value; }
         }
 
         public int RetryAttempts
         {
-            get { return this.m_retryAttempts; }
-            set { this.m_retryAttempts = value; }
+            get { return m_retryAttempts; }
+            set { m_retryAttempts = value; }
         }
 
         public int RetryInterval
         {
-            get { return this.m_retryInterval; }
-            set { this.m_retryInterval = value; }
+            get { return m_retryInterval; }
+            set { m_retryInterval = value; }
         }
 
 
         public Framework.ITaskItem[] ReplaceRuleItems
         {
             get { return m_replaceRuleItemsITaskItem; }
-            set { this.m_replaceRuleItemsITaskItem = value; }
+            set { m_replaceRuleItemsITaskItem = value; }
         }
 
 
         public Framework.ITaskItem[] SkipRuleItems
         {
             get { return m_skipRuleItemsITaskItem; }
-            set { this.m_skipRuleItemsITaskItem = value; }
+            set { m_skipRuleItemsITaskItem = value; }
         }
 
 
         public Framework.ITaskItem[] DeclareParameterItems
         {
-            get { return this.m_declareParameterItems; }
-            set { this.m_declareParameterItems = value; }
+            get { return m_declareParameterItems; }
+            set { m_declareParameterItems = value; }
         }
 
         public bool OptimisticParameterDefaultValue { get; set; }
@@ -766,25 +766,25 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         public Framework.ITaskItem[] ImportDeclareParametersItems
         {
             get { return m_importDeclareParametersItems; }
-            set { this.m_importDeclareParametersItems = value; }
+            set { m_importDeclareParametersItems = value; }
         }
 
         public Framework.ITaskItem[] SimpleSetParameterItems
         {
             get { return m_simpleSetParamterItems; }
-            set { this.m_simpleSetParamterItems = value; }
+            set { m_simpleSetParamterItems = value; }
         }
 
         public Framework.ITaskItem[] ImportSetParametersItems
         {
             get { return m_importSetParametersItems; }
-            set { this.m_importSetParametersItems = value; }
+            set { m_importSetParametersItems = value; }
         }
 
         public Framework.ITaskItem[] SetParameterItems
         {
             get { return m_setParamterItems; }
-            set { this.m_setParamterItems = value; }
+            set { m_setParamterItems = value; }
         }
 
         public bool EnableMSDeployBackup { get; set; }
@@ -847,35 +847,35 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
             catch (System.Exception exception)
             {
-                this.Log.LogErrorFromException(exception);
+                Log.LogErrorFromException(exception);
                 return false; // failed the task
             }
 
             string errorMessage = null;
-            if (!MsDeploy.Utility.CheckMSDeploymentVersion(this.Log, out errorMessage))
+            if (!MsDeploy.Utility.CheckMSDeploymentVersion(Log, out errorMessage))
                 return false;
 
             VSMSDeployObject src = null;
             VSMSDeployObject dest = null;
 
-            if (this.Source == null || this.Source.GetLength(0) != 1)
+            if (Source == null || Source.GetLength(0) != 1)
             {
-                this.Log.LogError("Source must be 1 item");
+                Log.LogError("Source must be 1 item");
                 return false;
             }
             else
             {
-                src = VSMSDeployObjectFactory.CreateVSMSDeployObject(this.Source[0]);
+                src = VSMSDeployObjectFactory.CreateVSMSDeployObject(Source[0]);
             }
 
-            if (this.Destination == null || this.Destination.GetLength(0) != 1)
+            if (Destination == null || Destination.GetLength(0) != 1)
             {
-                this.Log.LogError("Destination must be 1 item");
+                Log.LogError("Destination must be 1 item");
                 return false;
             }
             else
             {
-                dest = VSMSDeployObjectFactory.CreateVSMSDeployObject(this.Destination[0]);
+                dest = VSMSDeployObjectFactory.CreateVSMSDeployObject(Destination[0]);
                 VSHostObject hostObj = new VSHostObject(HostObject as System.Collections.Generic.IEnumerable<Framework.ITaskItem>);
                 string username, password;
                 if (hostObj.ExtractCredentials(out username, out password))
@@ -886,21 +886,21 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
 
             //$Todo, Should we split the Disable Link to two set of setting, one for source, one for destination
-            src.DisableLinks = this.DisableLink;
-            dest.DisableLinks = this.DisableLink;
-            src.EnableLinks = this.EnableLink;
-            dest.EnableLinks = this.EnableLink;
-            if (this.RetryAttempts >= 0)
+            src.DisableLinks = DisableLink;
+            dest.DisableLinks = DisableLink;
+            src.EnableLinks = EnableLink;
+            dest.EnableLinks = EnableLink;
+            if (RetryAttempts >= 0)
             {
-                src.RetryAttempts = this.RetryAttempts;
-                dest.RetryAttempts = this.RetryAttempts;
+                src.RetryAttempts = RetryAttempts;
+                dest.RetryAttempts = RetryAttempts;
             }
-            if (this.RetryInterval >= 0)
+            if (RetryInterval >= 0)
             {
-                src.RetryInterval = this.RetryInterval;
-                dest.RetryInterval = this.RetryInterval;
+                src.RetryInterval = RetryInterval;
+                dest.RetryInterval = RetryInterval;
             }
-            dest.UserAgent = this.UserAgent;
+            dest.UserAgent = UserAgent;
 
             SetupPublishRelatedProperties(ref dest);
 
@@ -1132,9 +1132,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             switch (lowerName)
             {
                 case "msdeployversionstotry":
-                    return this.MSDeployVersionsToTry;
+                    return MSDeployVersionsToTry;
                 case "highimportanceeventtypes":
-                    return this.HighImportanceEventTypes;
+                    return HighImportanceEventTypes;
                 default:
                     break;
             }

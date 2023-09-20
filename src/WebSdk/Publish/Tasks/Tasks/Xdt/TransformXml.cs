@@ -60,7 +60,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Xdt
             {
                 if (string.IsNullOrEmpty(_transformRootPath))
                 {
-                    return this.SourceRootPath;
+                    return SourceRootPath;
                 }
                 else
                 {

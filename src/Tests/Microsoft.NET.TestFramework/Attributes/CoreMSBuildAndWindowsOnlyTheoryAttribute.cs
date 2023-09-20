@@ -9,7 +9,7 @@ namespace Microsoft.NET.TestFramework
         {
             if (TestContext.Current.ToolsetUnderTest.ShouldUseFullFrameworkMSBuild || !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                this.Skip = "This test requires Core MSBuild and Windows to run";
+                Skip = "This test requires Core MSBuild and Windows to run";
             }
         }
     }
