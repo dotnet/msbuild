@@ -108,13 +108,13 @@
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>dcd3e6912b2d7b10bf3ab64488872113e25ec0a3</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="9.0.0-alpha.1.23469.1">
+    <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="9.0.0-alpha.1.23470.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>57d703606439dccabec92c2a0d5e4fa618985cd8</Sha>
+      <Sha>fa54329186df2e11b40bdfec4ae08f16fdbe9d99</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.TestHost" Version="9.0.0-alpha.1.23469.1">
+    <Dependency Name="Microsoft.AspNetCore.TestHost" Version="9.0.0-alpha.1.23470.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>57d703606439dccabec92c2a0d5e4fa618985cd8</Sha>
+      <Sha>fa54329186df2e11b40bdfec4ae08f16fdbe9d99</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Build.NuGetSdkResolver" Version="6.8.0-rc.112">
       <Uri>https://github.com/nuget/nuget.client</Uri>
@@ -233,50 +233,50 @@
       <Uri>https://github.com/dotnet/wpf</Uri>
       <Sha>3a8376ca92de4c85dd92b05fba8a1c0a49b14cb9</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.App.Ref" Version="9.0.0-alpha.1.23469.1">
+    <Dependency Name="Microsoft.AspNetCore.App.Ref" Version="9.0.0-alpha.1.23470.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>57d703606439dccabec92c2a0d5e4fa618985cd8</Sha>
+      <Sha>fa54329186df2e11b40bdfec4ae08f16fdbe9d99</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.App.Ref.Internal" Version="9.0.0-alpha.1.23469.1">
+    <Dependency Name="Microsoft.AspNetCore.App.Ref.Internal" Version="9.0.0-alpha.1.23470.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>57d703606439dccabec92c2a0d5e4fa618985cd8</Sha>
+      <Sha>fa54329186df2e11b40bdfec4ae08f16fdbe9d99</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.App.Runtime.win-x64" Version="9.0.0-alpha.1.23469.1">
+    <Dependency Name="Microsoft.AspNetCore.App.Runtime.win-x64" Version="9.0.0-alpha.1.23470.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>57d703606439dccabec92c2a0d5e4fa618985cd8</Sha>
+      <Sha>fa54329186df2e11b40bdfec4ae08f16fdbe9d99</Sha>
     </Dependency>
-    <Dependency Name="VS.Redist.Common.AspNetCore.SharedFramework.x64.9.0" Version="9.0.0-alpha.1.23469.1">
+    <Dependency Name="VS.Redist.Common.AspNetCore.SharedFramework.x64.9.0" Version="9.0.0-alpha.1.23470.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>57d703606439dccabec92c2a0d5e4fa618985cd8</Sha>
+      <Sha>fa54329186df2e11b40bdfec4ae08f16fdbe9d99</Sha>
       <SourceBuild RepoName="aspnetcore" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="dotnet-dev-certs" Version="9.0.0-alpha.1.23469.1">
+    <Dependency Name="dotnet-dev-certs" Version="9.0.0-alpha.1.23470.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>57d703606439dccabec92c2a0d5e4fa618985cd8</Sha>
+      <Sha>fa54329186df2e11b40bdfec4ae08f16fdbe9d99</Sha>
     </Dependency>
-    <Dependency Name="dotnet-user-jwts" Version="9.0.0-alpha.1.23469.1">
+    <Dependency Name="dotnet-user-jwts" Version="9.0.0-alpha.1.23470.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>57d703606439dccabec92c2a0d5e4fa618985cd8</Sha>
+      <Sha>fa54329186df2e11b40bdfec4ae08f16fdbe9d99</Sha>
     </Dependency>
-    <Dependency Name="dotnet-user-secrets" Version="9.0.0-alpha.1.23469.1">
+    <Dependency Name="dotnet-user-secrets" Version="9.0.0-alpha.1.23470.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>57d703606439dccabec92c2a0d5e4fa618985cd8</Sha>
+      <Sha>fa54329186df2e11b40bdfec4ae08f16fdbe9d99</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Analyzers" Version="9.0.0-alpha.1.23469.1">
+    <Dependency Name="Microsoft.AspNetCore.Analyzers" Version="9.0.0-alpha.1.23470.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>57d703606439dccabec92c2a0d5e4fa618985cd8</Sha>
+      <Sha>fa54329186df2e11b40bdfec4ae08f16fdbe9d99</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Components.SdkAnalyzers" Version="9.0.0-alpha.1.23469.1">
+    <Dependency Name="Microsoft.AspNetCore.Components.SdkAnalyzers" Version="9.0.0-alpha.1.23470.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>57d703606439dccabec92c2a0d5e4fa618985cd8</Sha>
+      <Sha>fa54329186df2e11b40bdfec4ae08f16fdbe9d99</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Mvc.Analyzers" Version="9.0.0-alpha.1.23469.1">
+    <Dependency Name="Microsoft.AspNetCore.Mvc.Analyzers" Version="9.0.0-alpha.1.23470.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>57d703606439dccabec92c2a0d5e4fa618985cd8</Sha>
+      <Sha>fa54329186df2e11b40bdfec4ae08f16fdbe9d99</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Mvc.Api.Analyzers" Version="9.0.0-alpha.1.23469.1">
+    <Dependency Name="Microsoft.AspNetCore.Mvc.Api.Analyzers" Version="9.0.0-alpha.1.23470.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>57d703606439dccabec92c2a0d5e4fa618985cd8</Sha>
+      <Sha>fa54329186df2e11b40bdfec4ae08f16fdbe9d99</Sha>
     </Dependency>
     <Dependency Name="Microsoft.CodeAnalysis.Razor.Tooling.Internal" Version="7.0.0-preview.23469.3">
       <Uri>https://github.com/dotnet/razor</Uri>
@@ -291,21 +291,21 @@
       <Uri>https://github.com/dotnet/razor</Uri>
       <Sha>284c4be6883fbfcb05c0f6e83a8cb68304c44311</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="9.0.0-alpha.1.23469.1">
+    <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="9.0.0-alpha.1.23470.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>57d703606439dccabec92c2a0d5e4fa618985cd8</Sha>
+      <Sha>fa54329186df2e11b40bdfec4ae08f16fdbe9d99</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Authorization" Version="9.0.0-alpha.1.23469.1">
+    <Dependency Name="Microsoft.AspNetCore.Authorization" Version="9.0.0-alpha.1.23470.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>57d703606439dccabec92c2a0d5e4fa618985cd8</Sha>
+      <Sha>fa54329186df2e11b40bdfec4ae08f16fdbe9d99</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Components.Web" Version="9.0.0-alpha.1.23469.1">
+    <Dependency Name="Microsoft.AspNetCore.Components.Web" Version="9.0.0-alpha.1.23470.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>57d703606439dccabec92c2a0d5e4fa618985cd8</Sha>
+      <Sha>fa54329186df2e11b40bdfec4ae08f16fdbe9d99</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.JSInterop" Version="9.0.0-alpha.1.23469.1">
+    <Dependency Name="Microsoft.JSInterop" Version="9.0.0-alpha.1.23470.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>57d703606439dccabec92c2a0d5e4fa618985cd8</Sha>
+      <Sha>fa54329186df2e11b40bdfec4ae08f16fdbe9d99</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Web.Xdt" Version="7.0.0-preview.22423.2" Pinned="true">
       <Uri>https://github.com/dotnet/xdt</Uri>
