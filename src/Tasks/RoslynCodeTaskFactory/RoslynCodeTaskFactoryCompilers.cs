@@ -120,7 +120,6 @@ namespace Microsoft.Build.Tasks
             }
 
 #if RUNTIME_TYPE_NETCORE
-            Log.LogMessageFromText($"dotnet path is {dotnetCliPath}", StandardOutputImportanceToUse);
             return dotnetCliPath;
 #else
             return _executablePath.Value;
