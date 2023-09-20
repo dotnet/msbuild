@@ -15,7 +15,7 @@ namespace Microsoft.Build.Tasks
     internal abstract class RoslynCodeTaskFactoryCompilerBase : ToolTaskExtension
     {
 #if RUNTIME_TYPE_NETCORE
-        private readonly string dotnetCliPath;
+        private readonly string _dotnetCliPath;
 #endif
 
         private readonly Lazy<string> _executablePath;
@@ -48,20 +48,20 @@ namespace Microsoft.Build.Tasks
 #if RUNTIME_TYPE_NETCORE
             // Tools and MSBuild Tasks within the SDK that invoke binaries via the dotnet host are expected
             // to honor the environment variable DOTNET_HOST_PATH to ensure a consistent experience.
-            dotnetCliPath = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
-            if (string.IsNullOrEmpty(dotnetCliPath))
+            _dotnetCliPath = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
+            if (string.IsNullOrEmpty(_dotnetCliPath))
             {
                 // Fallback to get dotnet path from current process which might be dotnet executable.
-                dotnetCliPath = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+                _dotnetCliPath = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
             }
 
             // If dotnet path is not found, rely on dotnet via the system's PATH
             bool runningOnWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
             string exeSuffix = runningOnWindows ? ".exe" : string.Empty;
             var dotnetFileName = $"dotnet{exeSuffix}";
-            if (!dotnetCliPath.EndsWith(dotnetFileName, StringComparison.OrdinalIgnoreCase))
+            if (!_dotnetCliPath.EndsWith(dotnetFileName, StringComparison.OrdinalIgnoreCase))
             {
-                dotnetCliPath = "dotnet";
+                _dotnetCliPath = "dotnet";
             }
 #endif
         }
@@ -120,7 +120,7 @@ namespace Microsoft.Build.Tasks
             }
 
 #if RUNTIME_TYPE_NETCORE
-            return dotnetCliPath;
+            return _dotnetCliPath;
 #else
             return _executablePath.Value;
 #endif

@@ -1106,8 +1106,7 @@ namespace InlineTask
             var logger = project.BuildProjectExpectSuccess();
             var logLines = logger.AllBuildEvents.Select(a => a.Message);
             var log = string.Join("\n", logLines);
-            var messages = logLines.Where(l => l.Contains(dotnetPath)).ToList();
-            messages.Count.ShouldBe(1, log);
+            logLines.Where(l => l.Contains(dotnetPath)).Count().ShouldBe(1, log);
         }
 #endif
 
