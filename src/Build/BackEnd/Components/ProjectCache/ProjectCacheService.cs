@@ -99,18 +99,24 @@ namespace Microsoft.Build.Experimental.ProjectCache
         {
             EnsureNotDisposed();
 
-            Parallel.ForEach(
-                projectGraph.ProjectNodes,
-                s_parallelOptions,
-                node =>
+            // Performing this in a Task.Run to break away from the main thread and prevent hangs
+            Task.Run(
+                () =>
                 {
-                    foreach (ProjectCacheDescriptor projectCacheDescriptor in GetProjectCacheDescriptors(node.ProjectInstance))
-                    {
-                        // Intentionally fire-and-forget to asynchronously initialize the plugin. Any exceptions will bubble up later when querying.
-                        _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph, buildRequestConfiguration: null, cancellationToken)
-                            .ContinueWith(t => { }, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted);
-                    }
-                });
+                    Parallel.ForEach(
+                        projectGraph.ProjectNodes,
+                        s_parallelOptions,
+                        node =>
+                        {
+                            foreach (ProjectCacheDescriptor projectCacheDescriptor in GetProjectCacheDescriptors(node.ProjectInstance))
+                            {
+                                // Intentionally fire-and-forget to asynchronously initialize the plugin. Any exceptions will bubble up later when querying.
+                                _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph, buildRequestConfiguration: null, cancellationToken)
+                                    .ContinueWith(t => { }, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted);
+                            }
+                        });
+                },
+                cancellationToken);
         }
 
         public void InitializePluginsForVsScenario(
@@ -128,15 +134,21 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 return;
             }
 
-            Parallel.ForEach(
-                projectCacheDescriptors,
-                s_parallelOptions,
-                projectCacheDescriptor =>
+            // Performing this in a Task.Run to break away from the main thread and prevent hangs
+            Task.Run(
+                () =>
                 {
-                    // Intentionally fire-and-forget to asynchronously initialize the plugin. Any exceptions will bubble up later when querying.
-                    _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph: null, buildRequestConfiguration, cancellationToken)
-                        .ContinueWith(t => { }, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted);
-                });
+                    Parallel.ForEach(
+                        projectCacheDescriptors,
+                        s_parallelOptions,
+                        projectCacheDescriptor =>
+                        {
+                            // Intentionally fire-and-forget to asynchronously initialize the plugin. Any exceptions will bubble up later when querying.
+                            _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph: null, buildRequestConfiguration, cancellationToken)
+                                .ContinueWith(t => { }, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted);
+                        });
+                },
+                cancellationToken);
         }
 
         private Task<ProjectCachePlugin> GetProjectCachePluginAsync(
