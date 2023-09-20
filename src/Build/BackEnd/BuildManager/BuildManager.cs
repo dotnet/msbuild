@@ -728,6 +728,9 @@ namespace Microsoft.Build.Execution
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void EnableDetouredNodeLauncher()
         {
+            // Currently BuildXL only supports x64. Once this feature moves out of the experimental phase, this will need to be addressed.
+            ErrorUtilities.VerifyThrowInvalidOperation(NativeMethodsShared.ProcessorArchitecture == NativeMethodsShared.ProcessorArchitectures.X64, "ReportFileAccessesX64Only");
+
             // To properly report file access, we need to disable the in-proc node which won't be detoured.
             _buildParameters.DisableInProcNode = true;
 
