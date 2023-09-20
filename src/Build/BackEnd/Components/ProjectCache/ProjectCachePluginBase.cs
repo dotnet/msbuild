@@ -1,9 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework.FileAccess;
 
 namespace Microsoft.Build.Experimental.ProjectCache
 {
@@ -39,5 +41,32 @@ namespace Microsoft.Build.Experimental.ProjectCache
         ///     Errors are checked via <see cref="PluginLoggerBase.HasLoggedErrors" />.
         /// </summary>
         public abstract Task EndBuildAsync(PluginLoggerBase logger, CancellationToken cancellationToken);
+
+        /// <summary>
+        ///     Called for each file access from an MSBuild node or one of its children.
+        /// </summary>
+        [CLSCompliant(false)]
+        public virtual void HandleFileAccess(FileAccessContext fileAccessContext, FileAccessData fileAccessData)
+        {
+        }
+
+        /// <summary>
+        ///     Called for each new child process created by an MSBuild node or one of its children.
+        /// </summary>
+        [CLSCompliant(false)]
+        public virtual void HandleProcess(FileAccessContext fileAccessContext, ProcessData processData)
+        {
+        }
+
+        /// <summary>
+        ///     Called when a build request finishes execution. This provides an opportunity for the plugin to take action on the
+        ///     aggregated file access reports from <see cref="HandleFileAccess(FileAccessContext, FileAccessData)"/>.
+        ///     Errors are checked via <see cref="PluginLoggerBase.HasLoggedErrors" />.
+        /// </summary>
+        public virtual Task HandleProjectFinishedAsync(
+            FileAccessContext fileAccessContext,
+            BuildResult buildResult,
+            PluginLoggerBase logger,
+            CancellationToken cancellationToken) => Task.CompletedTask;
     }
 }
