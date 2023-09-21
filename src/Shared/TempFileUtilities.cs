@@ -38,16 +38,10 @@ namespace Microsoft.Build.Shared
         // For all native calls, directly check their return values to prevent bad actors from getting in between checking if a directory exists and returning it.
         private static string CreateFolderUnderTemp()
         {
-            string msbuildTempFolder;
             // On windows Username with Unicode chars can give issues, so we dont append username to the temp folder name.
-            if (NativeMethodsShared.IsWindows)
-            {
-                msbuildTempFolder = msbuildTempFolderPrefix;
-            }
-            else
-            {
-                msbuildTempFolder = msbuildTempFolderPrefix + Environment.UserName;
-            }
+            string msbuildTempFolder = NativeMethodsShared.IsWindows ?
+                msbuildTempFolderPrefix :
+                msbuildTempFolderPrefix + Environment.UserName;
 
             string basePath = Path.Combine(Path.GetTempPath(), msbuildTempFolder);
 
