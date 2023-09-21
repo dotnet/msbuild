@@ -10,12 +10,15 @@ namespace Microsoft.Build.Logging
 {
     public sealed class ArchiveFile
     {
+        // We need to specify encoding without preamble - as then StreamReader will
+        //  automatically adjust the encoding to match the preamble (if present).
+        // It will as well change to other encoding if detected.
+        private static readonly Encoding s_utf8WithoutPreamble = new UTF8Encoding(false);
+
         public ArchiveFile(string fullPath, Stream contentStream)
         {
             FullPath = fullPath;
-            // We need to specify encoding without preamble - as then StreamReader will
-            //  automatically adjust the encoding to match the preamble (if present).
-            _contentReader = new StreamReader(contentStream, new System.Text.UTF8Encoding(false));
+            _contentReader = new StreamReader(contentStream, s_utf8WithoutPreamble);
         }
 
         public ArchiveFile(string fullPath, string content, Encoding? contentEncoding = null)
