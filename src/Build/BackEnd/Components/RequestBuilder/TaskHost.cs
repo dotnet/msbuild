@@ -6,24 +6,22 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 #if FEATURE_APPDOMAIN
-using System.Runtime.Remoting;
 using System.Runtime.Remoting.Lifetime;
+using System.Runtime.Remoting;
 #endif
-using System.Diagnostics;
-using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Build.BackEnd.Components.Caching;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Eventing;
-using Microsoft.Build.Execution;
-using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Framework.FileAccess;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Execution;
+using System.Diagnostics;
+using Microsoft.Build.Collections;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
+using System.Threading.Tasks;
+using Microsoft.Build.BackEnd.Components.Caching;
+using System.Reflection;
+using Microsoft.Build.Eventing;
 
 #nullable disable
 
@@ -345,14 +343,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void Yield()
         {
-#if FEATURE_REPORTFILEACCESSES
-            // If file accesses are being reported we should not yield as file access will be attributed to the wrong project.
-            if (_host.BuildParameters.ReportFileAccesses)
-            {
-                return;
-            }
-#endif
-
             lock (_callbackMonitor)
             {
                 IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
@@ -374,14 +364,6 @@ namespace Microsoft.Build.BackEnd
             // to release explicitly granted cores when reacquiring the node may lead to deadlocks.
             ReleaseAllCores();
 
-#if FEATURE_REPORTFILEACCESSES
-            // If file accesses are being reported yielding is a no-op so reacquire should be too.
-            if (_host.BuildParameters.ReportFileAccesses)
-            {
-                return;
-            }
-#endif
-
             lock (_callbackMonitor)
             {
                 IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
@@ -395,7 +377,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-#endregion
+        #endregion
 
         #region IBuildEngine Members
 
@@ -938,23 +920,11 @@ namespace Microsoft.Build.BackEnd
 
             /// <inheritdoc/>
             public override bool IsTaskInputLoggingEnabled => _taskHost._host.BuildParameters.LogTaskInputs;
-
-            /// <inheritdoc/>
-            public override void ReportFileAccess(FileAccessData fileAccessData)
-            {
-#if FEATURE_REPORTFILEACCESSES
-                IBuildComponentHost buildComponentHost = _taskHost._host;
-                if (buildComponentHost.BuildParameters.ReportFileAccesses)
-                {
-                    ((IFileAccessManager)buildComponentHost.GetComponent(BuildComponentType.FileAccessManager)).ReportFileAccess(fileAccessData, buildComponentHost.BuildParameters.NodeId);
-                }
-#endif
-            }
         }
 
         public EngineServices EngineServices { get; }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Called by the internal MSBuild task.

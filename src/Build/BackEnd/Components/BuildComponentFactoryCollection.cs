@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.SdkResolution;
-using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -62,7 +61,6 @@ namespace Microsoft.Build.BackEnd
             _componentEntriesByType[BuildComponentType.NodeManager] = new BuildComponentEntry(BuildComponentType.NodeManager, NodeManager.CreateComponent, CreationPattern.Singleton);
             _componentEntriesByType[BuildComponentType.TaskHostNodeManager] = new BuildComponentEntry(BuildComponentType.TaskHostNodeManager, TaskHostNodeManager.CreateComponent, CreationPattern.Singleton);
 
-            _componentEntriesByType[BuildComponentType.NodeLauncher] = new BuildComponentEntry(BuildComponentType.NodeLauncher, NodeLauncher.CreateComponent, CreationPattern.Singleton);
             _componentEntriesByType[BuildComponentType.InProcNodeProvider] = new BuildComponentEntry(BuildComponentType.InProcNodeProvider, NodeProviderInProc.CreateComponent, CreationPattern.Singleton);
             _componentEntriesByType[BuildComponentType.OutOfProcNodeProvider] = new BuildComponentEntry(BuildComponentType.OutOfProcNodeProvider, NodeProviderOutOfProc.CreateComponent, CreationPattern.Singleton);
             _componentEntriesByType[BuildComponentType.OutOfProcTaskHostNodeProvider] = new BuildComponentEntry(BuildComponentType.OutOfProcTaskHostNodeProvider, NodeProviderOutOfProcTaskHost.CreateComponent, CreationPattern.Singleton);
@@ -82,10 +80,6 @@ namespace Microsoft.Build.BackEnd
 
             // SDK resolution
             _componentEntriesByType[BuildComponentType.SdkResolverService] = new BuildComponentEntry(BuildComponentType.SdkResolverService, MainNodeSdkResolverService.CreateComponent, CreationPattern.Singleton);
-
-#if FEATURE_REPORTFILEACCESSES
-            _componentEntriesByType[BuildComponentType.FileAccessManager] = new BuildComponentEntry(BuildComponentType.FileAccessManager, FileAccessManager.CreateComponent, CreationPattern.Singleton);
-#endif
         }
 
         /// <summary>

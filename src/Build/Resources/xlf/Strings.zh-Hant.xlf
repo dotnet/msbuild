@@ -264,11 +264,6 @@
         <target state="translated">MSB4273: 專案快取從 {0} 方法擲回未處理的例外狀況。</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectCacheHandleBuildResultFailed">
-        <source>MSB4269: The project cache failed while handling a build result for the following project: {0}.</source>
-        <target state="new">MSB4269: The project cache failed while handling a build result for the following project: {0}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ProjectCacheHitWithDefaultTargets">
         <source>Project cache hit for "{0}" (default targets).</source>
         <target state="translated">"{0}" 的專案快取命中 (預設目標)。</target>
