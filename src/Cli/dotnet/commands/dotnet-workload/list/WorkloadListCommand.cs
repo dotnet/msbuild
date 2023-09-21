@@ -35,12 +35,15 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             IWorkloadResolver workloadResolver = null
         ) : base(parseResult, CommonOptions.HiddenVerbosityOption, reporter, tempDirPath, nugetPackageDownloader)
         {
+            _machineReadableOption = parseResult.GetValue(WorkloadListCommandParser.MachineReadableOption);
+
+            var resolvedReporter = _machineReadableOption ? NullReporter.Instance : Reporter;
             _workloadListHelper = new WorkloadInfoHelper(
                 parseResult.HasOption(SharedOptions.InteractiveOption),
                 Verbosity,
                 parseResult?.GetValue(WorkloadListCommandParser.VersionOption) ?? null,
                 VerifySignatures,
-                Reporter,
+                resolvedReporter,
                 workloadRecordRepo,
                 currentSdkVersion,
                 dotnetDir,
@@ -48,12 +51,10 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                 workloadResolver
             );
 
-            _machineReadableOption = parseResult.GetValue(WorkloadListCommandParser.MachineReadableOption);
-
             _includePreviews = parseResult.GetValue(WorkloadListCommandParser.IncludePreviewsOption);
             string userProfileDir1 = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
 
-            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(Reporter,
+            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(resolvedReporter,
                 _workloadListHelper.WorkloadResolver, PackageDownloader, userProfileDir1, TempDirectoryPath, _workloadListHelper.WorkloadRecordRepo, _workloadListHelper.Installer);
         }
 
@@ -69,11 +70,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                 ListOutput listOutput = new(installedList.Select(id => id.ToString()).ToArray(),
                     updateAvailable);
 
-                Reporter.WriteLine("==workloadListJsonOutputStart==");
-                Reporter.WriteLine(
-                    JsonSerializer.Serialize(listOutput,
-                        new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
-                Reporter.WriteLine("==workloadListJsonOutputEnd==");
+                Reporter.WriteLine(JsonSerializer.Serialize(listOutput, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
             }
             else
             {

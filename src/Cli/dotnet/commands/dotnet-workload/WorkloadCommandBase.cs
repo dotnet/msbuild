@@ -111,6 +111,7 @@ namespace Microsoft.DotNet.Workloads.Workload
                 filePermissionSetter: null,
                 new FirstPartyNuGetPackageSigningVerifier(),
                 nugetLogger,
+                Reporter,
                 restoreActionConfig: RestoreActionConfiguration,
                 verifySignatures: VerifySignatures);
         }
