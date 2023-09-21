@@ -4046,7 +4046,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Fact(Skip = "Investigating failing PR pipeline")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/9245")]
         public void IdenticalSubmissionsShouldCompleteAndNotHangTheBuildOnMissingTargetExceptions()
         {
             var projectContents =
