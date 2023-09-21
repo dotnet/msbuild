@@ -375,6 +375,11 @@
         <target state="translated">MSB4274: プロキシ・ビルド要求を出すプロジェクト キャッシュ プラグインを使用する場合、InProc ノードを無効にするとパフォーマンスが低下します。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ReportFileAccessesX64Only">
+        <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
+        <target state="new">Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
         <source>MSB4242: SDK Resolver Failure: "{0}"</source>
         <target state="translated">MSB4242: SDK リゾルバー エラー: "{0}"</target>

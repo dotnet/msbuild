@@ -1998,6 +1998,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>MSB4277: Cannot copy from object of that type.</value>
     <comment>{StrBegin="MSB4277: "}</comment>
   </data>
+  <data name="ReportFileAccessesX64Only" xml:space="preserve">
+    <value>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</value>
+  </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999
 
