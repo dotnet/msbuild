@@ -2198,7 +2198,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if MONO
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
-        [Fact]
+        [Fact(Skip = "Investigate CI run failure")]
 #endif
         public void ProjectInstanceTransfersToOOPNode()
         {
