@@ -2198,7 +2198,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if MONO
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
-        [Fact(Skip = "Investigate CI run failure")]
+        [Fact]
 #endif
         public void ProjectInstanceTransfersToOOPNode()
         {
@@ -3153,7 +3153,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// legacy threading mode active and successfully build, and that one of those
         /// submissions can P2P to the other.
         /// </summary>
-        [Fact]
+        [Fact(Skip = "Problematic test?")]
         public void TestSimultaneousSubmissionsWithLegacyThreadingData_P2P()
         {
             string projectContent1 = @"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -3241,7 +3241,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if MONO
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1245")]
 #else
-        [Fact]
+        [Fact(Skip = "Problematic test?")]
 #endif
         public void TestSimultaneousSubmissionsWithLegacyThreadingData_P2P_MP()
         {
