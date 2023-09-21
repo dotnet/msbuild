@@ -266,7 +266,7 @@
       </trans-unit>
       <trans-unit id="ProjectCacheHandleBuildResultFailed">
         <source>MSB4269: The project cache failed while handling a build result for the following project: {0}.</source>
-        <target state="new">MSB4269: The project cache failed while handling a build result for the following project: {0}.</target>
+        <target state="translated">MSB4269: {0} 프로젝트에 대한 빌드 결과를 처리하는 동안 프로젝트 캐시가 실패했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheHitWithDefaultTargets">

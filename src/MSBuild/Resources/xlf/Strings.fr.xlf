@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="BuildFailedWithPropertiesItemsOrTargetResultsRequested">
         <source>Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</source>
-        <target state="new">Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</target>
+        <target state="translated">Échec de la génération. Impossible d’obtenir les propriétés, les éléments et les résultats cibles. Consultez les détails dans stderr ci-dessus.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
