@@ -1055,7 +1055,7 @@ namespace Microsoft.Build.Evaluation
                             _metadata is IItemTypeDefinition itemMetadata &&
                             (string.IsNullOrEmpty(itemType) || string.Equals(itemType, itemMetadata.ItemType, StringComparison.Ordinal)))
                         {
-                            _loggingContext.LogComment(MessageImportance.High, new BuildEventFileInfo(_elementLocation),
+                            _loggingContext.LogComment(MessageImportance.Low, new BuildEventFileInfo(_elementLocation),
                                 "ItemReferencingSelfInTarget", itemMetadata.ItemType, metadataName);
                         }
 

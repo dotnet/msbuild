@@ -2781,6 +2781,14 @@
     <value>MSB3893: Could not use a link to copy "{0}" to "{1}".</value>
     <comment>{StrBegin="MSB3893: "} LOCALIZATION: {0} and {1} are paths.</comment>
   </data>
+  <data name="Copy.IOException">
+    <value>MSB3894: "Got {0} copying {1} to {2} and HR is {3}"</value>
+    <comment>{StrBegin="MSB3894: "} LOCALIZATION: {0} is exception.ToString(), {1} and {2} are paths, {3} is a number")</comment>
+  </data>
+  <data name="Copy.RetryingOnAccessDenied">
+    <value>"MSB3895: Retrying on ERROR_ACCESS_DENIED because environment variable MSBUILDALWAYSRETRY = 1"</value>
+    <comment>{StrBegin="MSB3895: "} LOCALIZATION: Do NOT translate MSBUILDALWAYSRETRY")</comment>
+  </data>
 
   <!--
         MSB3901 - MSB3910   Task: Telemetry

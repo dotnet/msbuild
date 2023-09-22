@@ -32,3 +32,6 @@ using System.Security.Permissions;
 
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(true)]
+
+[assembly: Dependency("BuildXL.Utilities.Core", LoadHint.Sometimes)]
+[assembly: Dependency("BuildXL.Processes", LoadHint.Sometimes)]

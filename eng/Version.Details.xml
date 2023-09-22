@@ -52,11 +52,6 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
     </Dependency>
-    <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Security.Permissions" Version="7.0.0">
-      <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
-    </Dependency>
     <Dependency Name="System.Text.Json" Version="7.0.3">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>5b20af47d99620150c53eaf5db8636fdf730b126</Sha>
@@ -73,13 +68,13 @@
       <Sha>ed9a83526483c094fb51e7000b6f816ce6cb0325</Sha>
       <SourceBuild RepoName="xliff-tasks" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.8.0-preview.1.82">
+    <Dependency Name="NuGet.Build.Tasks" Version="6.8.0-rc.112">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>7bb6ca5f6930d23fd93820dfc9c6a4373c8fd691</Sha>
+      <Sha>f47eb5771ee3f9a100d0b31d82ccb5ee600a56ed</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.8.0-2.23426.1">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.8.0-3.23465.5">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>34268d1bb9370c7b01c742303a895a99daf10d6a</Sha>
+      <Sha>dc3d0694a4b31b8e27038431888cd4e8dd5b6cb6</Sha>
       <SourceBuild RepoName="roslyn" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="8.0.0-beta.23425.2">
