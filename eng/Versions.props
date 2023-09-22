@@ -4,7 +4,7 @@
   <PropertyGroup>
     <VersionPrefix>17.8.0</VersionPrefix>
     <DotNetFinalVersionKind>release</DotNetFinalVersionKind>
-    <PackageValidationBaselineVersion>17.7.3</PackageValidationBaselineVersion>
+    <PackageValidationBaselineVersion>17.7.0</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
