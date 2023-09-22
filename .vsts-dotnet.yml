@@ -308,4 +308,5 @@ stages:
         -TsaIterationPath "$(_TsaIterationPath)"
         -TsaRepositoryName "dotnet-msbuild"
         -TsaCodebaseName "dotnet-msbuild"
-        -TsaPublish $True'
+        -TsaPublish $True
+        -PoliCheckAdditionalRunConfigParams @("UserExclusionPath < $(Build.SourcesDirectory)\eng\policheck_exclusions.xml")'
