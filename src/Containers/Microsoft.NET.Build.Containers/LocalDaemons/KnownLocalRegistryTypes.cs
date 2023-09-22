@@ -22,13 +22,13 @@ public static class KnownLocalRegistryTypes
 
         return type switch
         {
-            KnownLocalRegistryTypes.Podman => new DockerCli(DockerCli.PodmanCommand, loggerFactory),
-            KnownLocalRegistryTypes.Docker => new DockerCli(DockerCli.DockerCommand, loggerFactory),
+            Podman => new DockerCli(DockerCli.PodmanCommand, loggerFactory),
+            Docker => new DockerCli(DockerCli.DockerCommand, loggerFactory),
             _ => throw new NotSupportedException(
                 Resource.FormatString(
                     nameof(Strings.UnknownLocalRegistryType),
                     type,
-                    string.Join(",", KnownLocalRegistryTypes.SupportedLocalRegistryTypes)))
+                    string.Join(",", SupportedLocalRegistryTypes)))
         };
     }
 }

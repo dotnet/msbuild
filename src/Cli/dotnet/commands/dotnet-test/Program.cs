@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.Tools.Test
 
         public static TestCommand FromArgs(string[] args, string testSessionCorrelationId = null, string msbuildPath = null)
         {
-            var parser = Microsoft.DotNet.Cli.Parser.Instance;
+            var parser = Parser.Instance;
             var parseResult = parser.ParseFrom("dotnet test", args);
 
             // settings parameters are after -- (including --), these should not be considered by the parser

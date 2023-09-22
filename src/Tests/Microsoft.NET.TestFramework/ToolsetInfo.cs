@@ -190,7 +190,7 @@ namespace Microsoft.NET.TestFramework
 
             //  We set this environment variable for in-process tests, but we don't want it to flow to out of process tests
             //  (especially if we're trying to run on full Framework MSBuild)
-            environment[DotNet.Cli.Utils.Constants.MSBUILD_EXE_PATH] = "";
+            environment[Constants.MSBUILD_EXE_PATH] = "";
 
         }
 

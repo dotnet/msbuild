@@ -88,7 +88,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             try
             {
-                var manifestUpdater = WorkloadManifestUpdater.GetInstance(userProfileDir);
+                var manifestUpdater = GetInstance(userProfileDir);
                 await manifestUpdater.BackgroundUpdateAdvertisingManifestsWhenRequiredAsync();
             }
             catch (Exception)

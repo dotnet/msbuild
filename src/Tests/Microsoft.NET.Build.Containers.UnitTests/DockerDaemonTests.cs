@@ -31,7 +31,7 @@ public class DockerDaemonTests : IDisposable
         // mimic no daemon running by setting the DOCKER_HOST to a nonexistent socket
         try
         {
-            System.Environment.SetEnvironmentVariable("DOCKER_HOST", "tcp://123.123.123.123:12345");
+            Environment.SetEnvironmentVariable("DOCKER_HOST", "tcp://123.123.123.123:12345");
             var available = await new DockerCli(_loggerFactory).IsAvailableAsync(default).ConfigureAwait(false);
             Assert.False(available, "No daemon should be listening at that port");
         }

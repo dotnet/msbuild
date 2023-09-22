@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
         internal string GetArgumentsToMSBuild()
         {
             var argumentsUnescaped = _forwardingAppWithoutLogging.GetAllArguments();
-            return Cli.Utils.ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(argumentsUnescaped);
+            return ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(argumentsUnescaped);
         }
 
         public virtual int Execute()

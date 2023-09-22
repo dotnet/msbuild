@@ -74,14 +74,14 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
                                     {
                                         lock (_syncObject)
                                         {
-                                            _logger.LogMessage(Microsoft.Build.Framework.MessageImportance.High, String.Format(Resources.KUDUDEPLOY_AddingFileFailed, ConnectionInfo.SiteName + "/" + relUrl, response.ReasonPhrase));
+                                            _logger.LogMessage(Build.Framework.MessageImportance.High, String.Format(Resources.KUDUDEPLOY_AddingFileFailed, ConnectionInfo.SiteName + "/" + relUrl, response.ReasonPhrase));
                                         }
                                     }
                                     else
                                     {
                                         lock (_syncObject)
                                         {
-                                            _logger.LogMessage(Microsoft.Build.Framework.MessageImportance.High, String.Format(Resources.KUDUDEPLOY_AddingFile, ConnectionInfo.SiteName + "/" + relUrl));
+                                            _logger.LogMessage(Build.Framework.MessageImportance.High, String.Format(Resources.KUDUDEPLOY_AddingFile, ConnectionInfo.SiteName + "/" + relUrl));
                                         }
                                     }
                                 }

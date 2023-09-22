@@ -58,7 +58,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
                         req.Headers.Add("Authorization", "Basic " + AuthorizationInfo);
                         req.Content = content;
 
-                        _logger.LogMessage(Microsoft.Build.Framework.MessageImportance.High, Resources.KUDUDEPLOY_PublishAzure);
+                        _logger.LogMessage(Build.Framework.MessageImportance.High, Resources.KUDUDEPLOY_PublishAzure);
                         using (var response = await client.SendAsync(req))
                         {
                             if (!response.IsSuccessStatusCode)

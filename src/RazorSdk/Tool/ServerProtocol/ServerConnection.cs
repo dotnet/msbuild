@@ -286,7 +286,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
             if (string.IsNullOrEmpty(expectedPath))
             {
 #if NET
-                expectedPath = System.Environment.ProcessPath;
+                expectedPath = Environment.ProcessPath;
 #else
                 expectedPath = Process.GetCurrentProcess().MainModule.FileName;
 #endif

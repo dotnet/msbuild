@@ -348,7 +348,7 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
         }
 
         internal bool HasSourceId(string source) =>
-            StaticWebAsset.HasSourceId(SourceId, source);
+            HasSourceId(SourceId, source);
 
         public void Normalize()
         {

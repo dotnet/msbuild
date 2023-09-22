@@ -24,7 +24,7 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
                 Log.LogMessage(MessageImportance.Low, "Created directory '{0}'.", outputDirectory);
             }
 
-            System.Threading.Tasks.Parallel.For(0, FilesToCompress.Length, i =>
+            Parallel.For(0, FilesToCompress.Length, i =>
             {
                 var file = FilesToCompress[i];
                 var outputRelativePath = file.ItemSpec;

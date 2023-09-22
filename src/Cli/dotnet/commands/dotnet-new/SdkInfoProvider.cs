@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Tools.New
         public Task<IEnumerable<string>> GetInstalledVersionsAsync(CancellationToken cancellationToken)
         {
             // Get the dotnet directory, while ignoring custom msbuild resolvers
-            string dotnetDir = Microsoft.DotNet.NativeWrapper.EnvironmentProvider.GetDotnetExeDirectory(
+            string dotnetDir = NativeWrapper.EnvironmentProvider.GetDotnetExeDirectory(
                 key =>
                     key.Equals("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", StringComparison.InvariantCultureIgnoreCase)
                         ? null

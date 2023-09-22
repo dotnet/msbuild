@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.Workloads.Workload
                     DirectoryPath downloadFolderDirectoryPath = new DirectoryPath(downloadFolder);
                     foreach (var packDownload in packDownloads)
                     {
-                        Reporter.WriteLine(string.Format(Install.LocalizableStrings.DownloadingPackToCacheMessage, packDownload.NuGetPackageId, packDownload.NuGetPackageVersion, downloadFolder));
+                        Reporter.WriteLine(string.Format(Strings.DownloadingPackToCacheMessage, packDownload.NuGetPackageId, packDownload.NuGetPackageVersion, downloadFolder));
 
                         await PackageDownloader.DownloadPackageAsync(new PackageId(packDownload.NuGetPackageId), new NuGetVersion(packDownload.NuGetPackageVersion),
                             _packageSourceLocation, downloadFolder: downloadFolderDirectoryPath);

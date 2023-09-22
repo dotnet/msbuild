@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Tools.Format
 
         public static FormatCommand FromArgs(string[] args)
         {
-            var parser = Cli.Parser.Instance;
+            var parser = Parser.Instance;
             var result = parser.ParseFrom("dotnet format", args);
             return FromParseResult(result);
         }

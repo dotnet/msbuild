@@ -108,7 +108,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                         foreach (var previouslyUnresolvedItem in previouslyUnresolvedConflicts)
                         {
                             //  Don't re-report the item that just lost and was already reported
-                            if (object.ReferenceEquals(previouslyUnresolvedItem, loser))
+                            if (ReferenceEquals(previouslyUnresolvedItem, loser))
                             {
                                 continue;
                             }

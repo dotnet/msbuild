@@ -96,7 +96,7 @@ namespace Microsoft.DotNet.Cli.Utils
         private string GetHostExeName()
         {
             // Should instead make this a full path to dotnet
-            return System.Environment.ProcessPath;
+            return Environment.ProcessPath;
         }
     }
 }

@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Cli.Utils
             int maxRetryCount = 3,
             Func<IEnumerable<Task>> timer = null)
         {
-            timer = timer == null ? () => ExponentialRetry.Timer(ExponentialRetry.Intervals) : timer;
+            timer = timer == null ? () => Timer(Intervals) : timer;
             return await ExecuteAsyncWithRetry(action, result => result != null && !result.Equals(default), maxRetryCount, timer);
         }
 

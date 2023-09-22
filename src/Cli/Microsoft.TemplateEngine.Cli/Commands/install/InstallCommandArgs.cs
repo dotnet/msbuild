@@ -9,13 +9,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         public InstallCommandArgs(BaseInstallCommand installCommand, ParseResult parseResult) : base(installCommand, parseResult)
         {
-            var nameResult = parseResult.GetResult(InstallCommand.NameArgument);
+            var nameResult = parseResult.GetResult(BaseInstallCommand.NameArgument);
             if (nameResult is null || nameResult.Errors.Any())
             {
-                throw new ArgumentException($"{nameof(parseResult)} should contain at least one argument for {nameof(InstallCommand.NameArgument)}", nameof(parseResult));
+                throw new ArgumentException($"{nameof(parseResult)} should contain at least one argument for {nameof(BaseInstallCommand.NameArgument)}", nameof(parseResult));
             }
 
-            TemplatePackages = parseResult.GetValue(InstallCommand.NameArgument)!;
+            TemplatePackages = parseResult.GetValue(BaseInstallCommand.NameArgument)!;
 
             //workaround for --install source1 --install source2 case
             if (installCommand is LegacyInstallCommand && (TemplatePackages.Contains(installCommand.Name) || installCommand.Aliases.Any(alias => TemplatePackages.Contains(alias))))
@@ -25,7 +25,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             if (!TemplatePackages.Any())
             {
-                throw new ArgumentException($"{nameof(parseResult)} should contain at least one argument for {nameof(InstallCommand.NameArgument)}", nameof(parseResult));
+                throw new ArgumentException($"{nameof(parseResult)} should contain at least one argument for {nameof(BaseInstallCommand.NameArgument)}", nameof(parseResult));
             }
 
             Interactive = parseResult.GetValue(installCommand.InteractiveOption);

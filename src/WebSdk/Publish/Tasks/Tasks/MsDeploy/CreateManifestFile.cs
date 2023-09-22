@@ -81,7 +81,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
 
             // Save the UTF8 and Indented 
-            Utility.SaveDocument(document, outputFileName, System.Text.Encoding.UTF8);
+            Utility.SaveDocument(document, outputFileName, Encoding.UTF8);
         }
 
         /// <summary>

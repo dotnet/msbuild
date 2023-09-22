@@ -78,18 +78,18 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                     }
                     else
                     {
-                        if (string.Compare(tempUrl, "localhost", System.StringComparison.OrdinalIgnoreCase) == 0 ||
-                            string.Compare(tempUrl, "http://localhost", System.StringComparison.OrdinalIgnoreCase) == 0)
+                        if (string.Compare(tempUrl, "localhost", StringComparison.OrdinalIgnoreCase) == 0 ||
+                            string.Compare(tempUrl, "http://localhost", StringComparison.OrdinalIgnoreCase) == 0)
                         {
                             _resultUrl = string.Empty;//through in proc and don't need server name at all.
                         }
                         else
                         {
-                            if (tempUrl.StartsWith("localhost:", System.StringComparison.OrdinalIgnoreCase))
+                            if (tempUrl.StartsWith("localhost:", StringComparison.OrdinalIgnoreCase))
                             {
                                 _resultUrl = string.Concat("http://", tempUrl);
                             }
-                            else if (tempUrl.StartsWith("http://localhost:", System.StringComparison.OrdinalIgnoreCase))
+                            else if (tempUrl.StartsWith("http://localhost:", StringComparison.OrdinalIgnoreCase))
                             {
                                 _resultUrl = tempUrl;
                             }
@@ -170,13 +170,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             // It needs to start with http:// 
             // It needs to then have the computer name
             // It should then be "/MSDEPLOYAGENTSERVICE" 
-            if (serviceUrl.StartsWith("http://", System.StringComparison.OrdinalIgnoreCase))
+            if (serviceUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase))
             {
                 iSpot = "http://".Length;
             }
             url.Append(serviceUrl.Substring(iSpot));
 
-            int msdepSpot = serviceUrl.IndexOf("/MSDEPLOYAGENTSERVICE", System.StringComparison.OrdinalIgnoreCase);
+            int msdepSpot = serviceUrl.IndexOf("/MSDEPLOYAGENTSERVICE", StringComparison.OrdinalIgnoreCase);
             if (msdepSpot < 0)
             {
                 url.Append("/MSDEPLOYAGENTSERVICE");

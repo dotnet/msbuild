@@ -38,7 +38,7 @@ public class TargetsTests
             [ContainerImageName] = customImageName
         });
         using var _ = d;
-        var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
+        var instance = project.CreateProjectInstance(ProjectInstanceSettings.None);
         instance.Build(new[] { ComputeContainerConfig }, new[] { logger });
         logger.Warnings.Should().HaveCount(1, "a warning for the use of the old ContainerImageName property should have been created");
         logger.Warnings[0].Code.Should().Be(KnownStrings.ErrorCodes.CONTAINER003);
@@ -58,7 +58,7 @@ public class TargetsTests
             [AssemblyName] = projectName
         }, projectName: $"{nameof(CanNormalizeInputContainerNames)}_{projectName}_{expectedContainerImageName}_{shouldPass}");
         using var _ = d;
-        var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
+        var instance = project.CreateProjectInstance(ProjectInstanceSettings.None);
         instance.Build(new[] { ComputeContainerConfig }, new[] { logger }, null, out var outputs).Should().Be(shouldPass, String.Join(Environment.NewLine, logger.AllMessages));
         Assert.Equal(expectedContainerImageName, instance.GetPropertyValue(ContainerRepository));
     }
@@ -78,7 +78,7 @@ public class TargetsTests
             ["PublishProfile"] = "DefaultContainer"
         }, projectName: $"{nameof(CanWarnOnInvalidSDKVersions)}_{sdkVersion}_{isAllowed}");
         using var _ = d;
-        var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
+        var instance = project.CreateProjectInstance(ProjectInstanceSettings.None);
         instance.Build(new[] { "_ContainerVerifySDKVersion" }, new[] { logger }, null, out var outputs).Should().Be(isAllowed);
         var derivedIsAllowed = Boolean.Parse(project.GetProperty("_IsSDKContainerAllowedVersion").EvaluatedValue);
         if (isAllowed)
@@ -103,7 +103,7 @@ public class TargetsTests
             [ContainerGenerateLabels] = shouldEvaluateLabels.ToString()
         }, projectName: $"{nameof(GetsConventionalLabelsByDefault)}_{shouldEvaluateLabels}");
         using var _ = d;
-        var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
+        var instance = project.CreateProjectInstance(ProjectInstanceSettings.None);
         instance.Build(new[] { ComputeContainerConfig }, new[] { logger }, null, out var outputs).Should().BeTrue("Build should have succeeded");
         if (shouldEvaluateLabels)
         {
@@ -132,7 +132,7 @@ public class TargetsTests
             ["SourceRevisionId"] = commitHash
         }, projectName: $"{nameof(ShouldNotIncludeSourceControlLabelsUnlessUserOptsIn)}_{includeSourceControl}");
         using var _ = d;
-        var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
+        var instance = project.CreateProjectInstance(ProjectInstanceSettings.None);
         instance.Build(new[] { ComputeContainerConfig }, new[] { logger }, null, out var outputs).Should().BeTrue("Build should have succeeded but failed due to {0}", String.Join("\n", logger.AllMessages));
         var labels = instance.GetItems(ContainerLabel);
         if (includeSourceControl)
@@ -178,7 +178,7 @@ public class TargetsTests
             ["PublishProfile"] = "DefaultContainer"
         }, projectName: $"{nameof(CanComputeTagsForSupportedSDKVersions)}_{sdkVersion}_{tfm}_{expectedTag}");
         using var _ = d;
-        var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
+        var instance = project.CreateProjectInstance(ProjectInstanceSettings.None);
         instance.Build(new[] { "_ComputeContainerBaseImageTag" }, new[] { logger }, null, out var outputs).Should().BeTrue(String.Join(Environment.NewLine, logger.Errors));
         var computedTag = instance.GetProperty("_ContainerBaseImageTag").EvaluatedValue;
         computedTag.Should().Be(expectedTag);
@@ -201,7 +201,7 @@ public class TargetsTests
             ["ContainerRuntimeIdentifier"] = rid
         }, projectName: $"{nameof(CanComputeContainerUser)}_{tfm}_{rid}_{expectedUser}");
         using var _ = d;
-        var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
+        var instance = project.CreateProjectInstance(ProjectInstanceSettings.None);
         instance.Build(new[] { ComputeContainerConfig }, new[] { logger }, null, out var outputs).Should().BeTrue(String.Join(Environment.NewLine, logger.Errors));
         var computedTag = instance.GetProperty("ContainerUser")?.EvaluatedValue;
         computedTag.Should().Be(expectedUser);
@@ -220,9 +220,9 @@ public class TargetsTests
             ["NETCoreSdkPortableRuntimeIdentifier"] = sdkPortableRid
         }, projectName: $"{nameof(WindowsUsersGetLinuxContainers)}_{sdkPortableRid}_{expectedRid}");
         using var _ = d;
-        var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
+        var instance = project.CreateProjectInstance(ProjectInstanceSettings.None);
         instance.Build(new[] { ComputeContainerConfig }, null, null, out var outputs).Should().BeTrue(String.Join(Environment.NewLine, logger.Errors));
-        var computedRid = instance.GetProperty(KnownStrings.Properties.ContainerRuntimeIdentifier)?.EvaluatedValue;
+        var computedRid = instance.GetProperty(ContainerRuntimeIdentifier)?.EvaluatedValue;
         computedRid.Should().Be(expectedRid);
     }
 
@@ -239,12 +239,12 @@ public class TargetsTests
         {
             ["NetCoreSdkVersion"] = sdkVersion,
             ["TargetFrameworkVersion"] = tfmMajMin,
-            [KnownStrings.Properties.ContainerFamily] = containerFamily,
+            [ContainerFamily] = containerFamily,
         }, projectName: $"{nameof(CanTakeContainerBaseFamilyIntoAccount)}_{sdkVersion}_{tfmMajMin}_{containerFamily}_{expectedTag}");
         using var _ = d;
-        var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
+        var instance = project.CreateProjectInstance(ProjectInstanceSettings.None);
         instance.Build(new[] { _ComputeContainerBaseImageTag }, null, null, out var outputs).Should().BeTrue(String.Join(Environment.NewLine, logger.Errors));
-        var computedBaseImageTag = instance.GetProperty(KnownStrings.Properties._ContainerBaseImageTag)?.EvaluatedValue;
+        var computedBaseImageTag = instance.GetProperty(_ContainerBaseImageTag)?.EvaluatedValue;
         computedBaseImageTag.Should().Be(expectedTag);
     }
 }

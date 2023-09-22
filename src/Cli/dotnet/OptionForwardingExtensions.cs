@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Cli
         public static ForwardedOption<string[]> ForwardAsProperty(this ForwardedOption<string[]> option) => option
             .SetForwardingFunction((optionVals) =>
                 optionVals
-                    .SelectMany(Microsoft.DotNet.Cli.Utils.MSBuildPropertyParser.ParseProperties)
+                    .SelectMany(Utils.MSBuildPropertyParser.ParseProperties)
                     .Select(keyValue => $"{option.Name}:{keyValue.key}={keyValue.value}")
                 );
 

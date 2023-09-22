@@ -21,7 +21,7 @@ namespace Microsoft.NET.Restore.Tests
         [InlineData("4.8")]
         public void It_restores_net_framework_project_successfully(string version)
         {
-            var targetFrameworkVersion = (TargetDotNetFrameworkVersion)System.Enum.Parse(typeof(TargetDotNetFrameworkVersion), "Version" + string.Join("", version.Split('.')));
+            var targetFrameworkVersion = (TargetDotNetFrameworkVersion)Enum.Parse(typeof(TargetDotNetFrameworkVersion), "Version" + string.Join("", version.Split('.')));
             var targetFramework = "net" + string.Join("", version.Split('.'));
             var testProject = new TestProject()
             {
