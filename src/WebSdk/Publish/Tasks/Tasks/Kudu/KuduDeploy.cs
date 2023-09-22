@@ -64,7 +64,6 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
             KuduConnectionInfo connectionInfo = new KuduConnectionInfo
             {
                 DestinationUrl = PublishUrl,
-
                 UserName = UserName,
                 Password = Password,
                 SiteName = PublishSiteName

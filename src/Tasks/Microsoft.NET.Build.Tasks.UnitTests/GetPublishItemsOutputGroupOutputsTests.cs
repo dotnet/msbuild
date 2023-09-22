@@ -35,9 +35,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             {
                 PublishDir = @"bin\Debug\net5.0\publish\",
                 ResolvedFileToPublish = new[]
-            {
-                _apphost, _dll, _dll
-            }
+                {
+                    _apphost, _dll, _dll
+                }
             };
 
             task.Execute().Should().BeTrue();

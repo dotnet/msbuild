@@ -144,9 +144,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             {
                 BuildEngine = buildEngine,
                 FrameworkReferences = DefaultFrameworkReferences(),
-
                 ResolvedTargetingPacks = DefaultTargetingPacks(mockPackageDirectory),
-
                 ProjectLanguage = "C#"
             };
 

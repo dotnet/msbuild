@@ -62,16 +62,18 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             var task = new CollectSDKReferencesDesignTime
             {
-                SdkReferences = new[] {
-                sdkReference1,
-                sdkReference2
-            },
-                PackageReferences = new ITaskItem[] {
-                packageReference1,
-                packageReference2,
-                packageReference3,
-                defaultImplicitPackage1
-            },
+                SdkReferences = new[]
+                {
+                    sdkReference1,
+                    sdkReference2
+                },
+                PackageReferences = new ITaskItem[]
+                {
+                    packageReference1,
+                    packageReference2,
+                    packageReference3,
+                    defaultImplicitPackage1
+                },
                 DefaultImplicitPackages = "DefaultImplicitPackage1;SomeOtherImplicitPackage"
             };
 
