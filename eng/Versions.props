@@ -3,7 +3,8 @@
 <Project>
   <PropertyGroup>
     <VersionPrefix>17.8.0</VersionPrefix>
-    <PackageValidationBaselineVersion>17.7.0</PackageValidationBaselineVersion>
+    <DotNetFinalVersionKind>release</DotNetFinalVersionKind>
+    <PackageValidationBaselineVersion>17.7.3</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
