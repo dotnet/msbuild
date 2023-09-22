@@ -14,7 +14,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             string commandName)
             : base(hostBuilder, commandName, SymbolStrings.Command_Uninstall_Description)
         {
-            this.Arguments.Add(NameArgument);
+            Arguments.Add(NameArgument);
         }
 
         internal static CliArgument<string[]> NameArgument { get; } = new("package")

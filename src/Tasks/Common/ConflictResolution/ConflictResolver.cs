@@ -27,9 +27,9 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
         public ConflictResolver(PackageRank packageRank, PackageOverrideResolver<TConflictItem> packageOverrideResolver, Logger log)
         {
-            this._log = log;
-            this._packageRank = packageRank;
-            this._packageOverrideResolver = packageOverrideResolver;
+            _log = log;
+            _packageRank = packageRank;
+            _packageOverrideResolver = packageOverrideResolver;
         }
 
         public void ResolveConflicts(IEnumerable<TConflictItem> conflictItems, Func<TConflictItem, string> getItemKey,

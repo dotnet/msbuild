@@ -99,10 +99,10 @@ namespace Microsoft.NET.TestFramework
 
             foreach (string[] property in Properties)
             {
-                this.UpdateProjProperty(property[0], property[1], property[2]);
+                UpdateProjProperty(property[0], property[1], property[2]);
             }
 
-            this.ReplaceTheNewtonsoftJsonPackageVersionVariable();
+            ReplaceTheNewtonsoftJsonPackageVersionVariable();
 
             return this;
         }

@@ -21,11 +21,11 @@ namespace Dotnet_new3
 
         internal CompleteCommand() : base("complete", "tab completion")
         {
-            this.Arguments.Add(PathArgument);
-            this.Options.Add(PositionOption);
+            Arguments.Add(PathArgument);
+            Options.Add(PositionOption);
 
-            this.SetAction(Run);
-            this.Hidden = true;
+            SetAction(Run);
+            Hidden = true;
         }
 
         public Task<int> Run(ParseResult result, CancellationToken cancellationToken)

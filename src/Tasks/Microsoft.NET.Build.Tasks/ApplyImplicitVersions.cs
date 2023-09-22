@@ -66,7 +66,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 var implicitPackageReferenceVersion = new ImplicitPackageReferenceVersion(item);
 
-                if (implicitPackageReferenceVersion.TargetFrameworkVersion == this.TargetFrameworkVersion)
+                if (implicitPackageReferenceVersion.TargetFrameworkVersion == TargetFrameworkVersion)
                 {
                     result.Add(implicitPackageReferenceVersion.Name, implicitPackageReferenceVersion);
                 }

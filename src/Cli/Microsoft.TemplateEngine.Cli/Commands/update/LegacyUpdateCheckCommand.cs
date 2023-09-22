@@ -14,7 +14,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Func<ParseResult, ITemplateEngineHost> hostBuilder)
             : base(parentCommand, hostBuilder, "--update-check", SymbolStrings.Command_Update_Description)
         {
-            this.Hidden = true;
+            Hidden = true;
             parentCommand.AddNoLegacyUsageValidators(this, except: new CliOption[] { InteractiveOption, AddSourceOption });
         }
 

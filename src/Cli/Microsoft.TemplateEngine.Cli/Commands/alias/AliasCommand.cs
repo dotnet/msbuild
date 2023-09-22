@@ -14,8 +14,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             : base(hostBuilder, "alias", SymbolStrings.Command_Alias_Description)
         {
             Hidden = true;
-            this.Add(new AliasAddCommand(hostBuilder));
-            this.Add(new AliasShowCommand(hostBuilder));
+            Add(new AliasAddCommand(hostBuilder));
+            Add(new AliasShowCommand(hostBuilder));
         }
 
         protected override Task<NewCommandStatus> ExecuteAsync(

@@ -278,7 +278,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                         else
                         {
                             // these are provider option
-                            this.SetProviderOption(m_provider, name, value);
+                            SetProviderOption(m_provider, name, value);
                         }
                     }
                 }
@@ -354,38 +354,38 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         // property used to call Deployment.DeploymentManager.CreateObject
         public virtual string Root
         {
-            get { return this.m_root; }
-            set { this.m_root = value; }
+            get { return m_root; }
+            set { m_root = value; }
         }
         public virtual string Provider
         {
-            get { return this.m_provider; }
-            set { this.m_provider = value; }
+            get { return m_provider; }
+            set { m_provider = value; }
         }
 
 
         // property use to create the LocationInfo
         public virtual bool IsLocal
         {
-            get { return string.IsNullOrEmpty(this.ComputerName) && string.IsNullOrEmpty(this.MSDeployServiceUrl); }
+            get { return string.IsNullOrEmpty(ComputerName) && string.IsNullOrEmpty(MSDeployServiceUrl); }
 
         }
         public virtual bool UseSeparatedCredential
         {
-            get { return !string.IsNullOrEmpty(this.UserName); }
+            get { return !string.IsNullOrEmpty(UserName); }
         }
 
 
         public virtual string DisableLinks
         {
-            get { return this.m_disableLinks; }
-            set { this.m_disableLinks = value; }
+            get { return m_disableLinks; }
+            set { m_disableLinks = value; }
         }
 
         public virtual string EnableLinks
         {
-            get { return this.m_enableLinks; }
-            set { this.m_enableLinks = value; }
+            get { return m_enableLinks; }
+            set { m_enableLinks = value; }
         }
 
 
@@ -491,14 +491,14 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
         public int RetryAttempts
         {
-            get { return this.m_retryAttempts; }
-            set { this.m_retryAttempts = value; }
+            get { return m_retryAttempts; }
+            set { m_retryAttempts = value; }
         }
 
         public int RetryInterval
         {
-            get { return this.m_retryInterval; }
-            set { this.m_retryInterval = value; }
+            get { return m_retryInterval; }
+            set { m_retryInterval = value; }
         }
 
         public string UserAgent { get; set; }
@@ -572,18 +572,18 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             //$BUGBUG lmchen, there is only set to source provider?
             // set up the provider setting
             /*Deployment.DeploymentProviderOptions*/
-            dynamic srcProviderConfig = MSWebDeploymentAssembly.DynamicAssembly.CreateObject("Microsoft.Web.Deployment.DeploymentProviderOptions", new object[]{this.Provider.ToString()});
-            srcProviderConfig.Path = this.Root;
-            MsDeploy.Utility.AddProviderOptions(srcProviderConfig, this.ProviderOptions, _host);
+            dynamic srcProviderConfig = MSWebDeploymentAssembly.DynamicAssembly.CreateObject("Microsoft.Web.Deployment.DeploymentProviderOptions", new object[]{Provider.ToString()});
+            srcProviderConfig.Path = Root;
+            MsDeploy.Utility.AddProviderOptions(srcProviderConfig, ProviderOptions, _host);
 
-            using (/*Deployment.DeploymentObject*/ dynamic srcObj =  MSWebDeploymentAssembly.DynamicAssembly.CallStaticMethod("Microsoft.Web.Deployment.DeploymentManager", "CreateObject", new object[]{srcProviderConfig, this.BaseOptions}))
+            using (/*Deployment.DeploymentObject*/ dynamic srcObj =  MSWebDeploymentAssembly.DynamicAssembly.CallStaticMethod("Microsoft.Web.Deployment.DeploymentManager", "CreateObject", new object[]{srcProviderConfig, BaseOptions}))
             {
 
                 //$BUGBUG lmchen, there is only set to source provider?
                 // set up the parameter
-                MsDeploy.Utility.AddSetParametersFilesToObject(srcObj, this.SetParametersFiles, _host);
-                MsDeploy.Utility.AddSimpleSetParametersToObject(srcObj, this.Parameters, _host);
-                MsDeploy.Utility.AddSetParametersToObject(srcObj, this.EntryParameters, _host);
+                MsDeploy.Utility.AddSetParametersFilesToObject(srcObj, SetParametersFiles, _host);
+                MsDeploy.Utility.AddSimpleSetParametersToObject(srcObj, Parameters, _host);
+                MsDeploy.Utility.AddSetParametersToObject(srcObj, EntryParameters, _host);
                 
                 /*Deployment.DeploymentProviderOptions*/ dynamic destProviderConfig = MSWebDeploymentAssembly.DynamicAssembly.CreateObject("Microsoft.Web.Deployment.DeploymentProviderOptions", new object[]{destObject.Provider.ToString()});
                 destProviderConfig.Path = destObject.Root;

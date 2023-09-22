@@ -14,8 +14,8 @@ namespace Microsoft.DotNet.Tools.New
 
         internal OptionalWorkloadProvider(ITemplatePackageProviderFactory factory, IEngineEnvironmentSettings settings)
         {
-            this.Factory = factory;
-            this._environmentSettings = settings;
+            Factory = factory;
+            _environmentSettings = settings;
         }
 
         public ITemplatePackageProviderFactory Factory { get; }

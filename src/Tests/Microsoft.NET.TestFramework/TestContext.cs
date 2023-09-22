@@ -271,7 +271,7 @@ namespace Microsoft.NET.TestFramework
 
         public void WriteGlobalJson(string path)
         {
-            WriteGlobalJson(path, this.SdkVersion);
+            WriteGlobalJson(path, SdkVersion);
         }
 
         public static void WriteGlobalJson(string path, string sdkVersion)

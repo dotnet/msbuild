@@ -167,7 +167,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             {
                 if (ActionCalledTime != ActionCalledTime.FirstRun && _tellTheActionIsRun())
                 {
-                    this.ActionCalledTime = ActionCalledTime.SecondRun;
+                    ActionCalledTime = ActionCalledTime.SecondRun;
                 }
             }
 

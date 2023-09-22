@@ -9,7 +9,7 @@ namespace Microsoft.NET.TestFramework
         {
             if (PlatformSpecificFact.ShouldSkip(platforms))
             {
-                this.Skip = "This test is not supported on this platform.";
+                Skip = "This test is not supported on this platform.";
             }
         }
     }

@@ -27,37 +27,37 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         [Required]
         public string ServiceUrl
         {
-            get { return this._serviceUrl; }
-            set { this._serviceUrl = value; }
+            get { return _serviceUrl; }
+            set { _serviceUrl = value; }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "WMSVC", Justification = "Special term that used by MSDeploy team for remote service")]
         [Required]
         public bool UseWMSVC
         {
-            get { return this._useWMSVC; }
-            set { this._useWMSVC = value; }
+            get { return _useWMSVC; }
+            set { _useWMSVC = value; }
         }
 
         [Required]
         public bool UseRemoteAgent
         {
-            get { return this._useRemoteAgent; }
-            set { this._useRemoteAgent = value; }
+            get { return _useRemoteAgent; }
+            set { _useRemoteAgent = value; }
         }
 
         [Required]
         public string SiteName
         {
-            get { return this._siteName; }
-            set { this._siteName = value; }
+            get { return _siteName; }
+            set { _siteName = value; }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings", Justification = "This is interface with the Msbuild method, all argument is basically pass by string")]
         [Output]
         public string ResultUrl
         {
-            get { return this._resultUrl; }
+            get { return _resultUrl; }
         }
 
         public override bool Execute()

@@ -32,8 +32,8 @@ internal sealed class DockerCli : ILocalRegistry
             throw new ArgumentException($"{command} is an unknown command.");
         }
 
-        this._command = command;
-        this._logger = loggerFactory.CreateLogger<DockerCli>();
+        _command = command;
+        _logger = loggerFactory.CreateLogger<DockerCli>();
     }
 
     public DockerCli(ILoggerFactory loggerFactory) : this(null, loggerFactory)
@@ -110,7 +110,7 @@ internal sealed class DockerCli : ILocalRegistry
 
     public async Task<bool> IsAvailableAsync(CancellationToken cancellationToken)
     {
-        bool commandPathWasUnknown = this._command is null; // avoid running the version command twice.
+        bool commandPathWasUnknown = _command is null; // avoid running the version command twice.
         string? command = await GetCommandAsync(cancellationToken);
         if (command is null)
         {

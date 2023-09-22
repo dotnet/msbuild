@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
         [Fact]
         public void GivenADllAndMultipleTestRunParametersItPassesThemToVStestConsoleInTheCorrectFormat()
         {
-            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("1");
+            var testProjectDirectory = CopyAndRestoreVSTestDotNetCoreTestApp("1");
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
@@ -121,7 +121,7 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
         [Fact]
         public void ItShouldAcceptMultipleLoggers()
         {
-            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp();
+            var testProjectDirectory = CopyAndRestoreVSTestDotNetCoreTestApp();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
@@ -164,7 +164,7 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
         [Fact]
         public void ItShouldAcceptNoLoggers()
         {
-            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp();
+            var testProjectDirectory = CopyAndRestoreVSTestDotNetCoreTestApp();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 

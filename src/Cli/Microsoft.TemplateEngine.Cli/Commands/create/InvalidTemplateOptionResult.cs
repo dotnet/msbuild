@@ -78,7 +78,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         public bool Equals(InvalidTemplateOptionResult? other)
         {
-            return this.Equals(other as object);
+            return Equals(other as object);
         }
 
         internal static InvalidTemplateOptionResult FromParseError(TemplateOption option, ParseResult parseResult, ParseError error)

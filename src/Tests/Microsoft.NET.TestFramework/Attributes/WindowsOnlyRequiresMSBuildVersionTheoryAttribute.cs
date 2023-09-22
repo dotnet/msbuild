@@ -9,7 +9,7 @@ namespace Microsoft.NET.TestFramework
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                this.Skip = "This test requires Windows to run";
+                Skip = "This test requires Windows to run";
             }
 
             RequiresMSBuildVersionTheoryAttribute.CheckForRequiredMSBuildVersion(this, version);

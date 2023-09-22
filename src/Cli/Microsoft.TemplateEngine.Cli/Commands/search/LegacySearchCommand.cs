@@ -13,8 +13,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         public LegacySearchCommand(NewCommand parentCommand, Func<ParseResult, ITemplateEngineHost> hostBuilder)
             : base(parentCommand, hostBuilder, "--search")
         {
-            this.Hidden = true;
-            this.Validators.Add(ValidateParentCommandArguments);
+            Hidden = true;
+            Validators.Add(ValidateParentCommandArguments);
 
             parentCommand.AddNoLegacyUsageValidators(this, except: Filters.Values.Concat(new CliSymbol[] { ColumnsAllOption, ColumnsOption, NewCommand.ShortNameArgument }).ToArray());
         }
