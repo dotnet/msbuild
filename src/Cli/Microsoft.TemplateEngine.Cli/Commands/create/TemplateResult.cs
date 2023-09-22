@@ -39,10 +39,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal static TemplateResult FromParseResult(TemplateCommand templateCommand, ParseResult parseResult)
         {
-            TemplateResult result = new TemplateResult(templateCommand, parseResult);
-            result.IsLanguageMatch = templateCommand.LanguageOption == null || !parseResult.HasErrorFor(templateCommand.LanguageOption, out _);
-            result.IsTypeMatch = templateCommand.TypeOption == null || !parseResult.HasErrorFor(templateCommand.TypeOption, out _);
-            result.IsBaselineMatch = templateCommand.BaselineOption == null || !parseResult.HasErrorFor(templateCommand.BaselineOption, out _);
+            TemplateResult result = new TemplateResult(templateCommand, parseResult)
+            {
+                IsLanguageMatch = templateCommand.LanguageOption == null || !parseResult.HasErrorFor(templateCommand.LanguageOption, out _),
+                IsTypeMatch = templateCommand.TypeOption == null || !parseResult.HasErrorFor(templateCommand.TypeOption, out _),
+                IsBaselineMatch = templateCommand.BaselineOption == null || !parseResult.HasErrorFor(templateCommand.BaselineOption, out _)
+            };
 
             if (templateCommand.LanguageOption != null && result.IsTemplateMatch)
             {

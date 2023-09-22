@@ -60,18 +60,20 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     { MetadataKeys.Version, "1.2.3" }
                 });
 
-            var task = new CollectSDKReferencesDesignTime();
-            task.SdkReferences = new[] {
+            var task = new CollectSDKReferencesDesignTime
+            {
+                SdkReferences = new[] {
                 sdkReference1,
                 sdkReference2
-            };
-            task.PackageReferences = new ITaskItem[] {
+            },
+                PackageReferences = new ITaskItem[] {
                 packageReference1,
                 packageReference2,
                 packageReference3,
                 defaultImplicitPackage1
+            },
+                DefaultImplicitPackages = "DefaultImplicitPackage1;SomeOtherImplicitPackage"
             };
-            task.DefaultImplicitPackages = "DefaultImplicitPackage1;SomeOtherImplicitPackage";
 
             // Act
             var result = task.Execute();

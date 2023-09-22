@@ -140,16 +140,15 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
         private ResolveTargetingPackAssets InitializeTask(string mockPackageDirectory, IBuildEngine buildEngine)
         {
-            var task = new ResolveTargetingPackAssets()
+            var task = new ResolveTargetingPackAssets
             {
                 BuildEngine = buildEngine,
+                FrameworkReferences = DefaultFrameworkReferences(),
+
+                ResolvedTargetingPacks = DefaultTargetingPacks(mockPackageDirectory),
+
+                ProjectLanguage = "C#"
             };
-
-            task.FrameworkReferences = DefaultFrameworkReferences();
-
-            task.ResolvedTargetingPacks = DefaultTargetingPacks(mockPackageDirectory);
-
-            task.ProjectLanguage = "C#";
 
             return task;
         }

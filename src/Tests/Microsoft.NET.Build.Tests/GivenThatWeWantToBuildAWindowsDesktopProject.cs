@@ -455,9 +455,11 @@ namespace Microsoft.NET.Build.Tests
 
         private string GetReferencedWindowsSdkVersion(TestAsset testAsset)
         {
-            var getValueCommand = new GetValuesCommand(testAsset, "PackageDownload", GetValuesCommand.ValueType.Item);
-            getValueCommand.ShouldRestore = false;
-            getValueCommand.DependsOnTargets = "_CheckForInvalidConfigurationAndPlatform;CollectPackageDownloads";
+            var getValueCommand = new GetValuesCommand(testAsset, "PackageDownload", GetValuesCommand.ValueType.Item)
+            {
+                ShouldRestore = false,
+                DependsOnTargets = "_CheckForInvalidConfigurationAndPlatform;CollectPackageDownloads"
+            };
             getValueCommand.MetadataNames.Add("Version");
             getValueCommand.Execute()
                 .Should()

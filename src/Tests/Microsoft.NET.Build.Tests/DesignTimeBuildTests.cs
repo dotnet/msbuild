@@ -41,8 +41,10 @@ namespace Microsoft.NET.Build.Tests
 
             var projectDirectory = Path.Combine(testAsset.TestRoot, relativeProjectPath);
 
-            var command = new MSBuildCommand(Log, "ResolveAssemblyReferencesDesignTime", projectDirectory);
-            command.WorkingDirectory = projectDirectory;
+            var command = new MSBuildCommand(Log, "ResolveAssemblyReferencesDesignTime", projectDirectory)
+            {
+                WorkingDirectory = projectDirectory
+            };
             var result = command.Execute(args);
 
             result.Should().Pass();
@@ -109,8 +111,10 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
-            var getValuesCommand = new GetValuesCommand(testAsset, "_PackageDependenciesDesignTime", GetValuesCommand.ValueType.Item);
-            getValuesCommand.DependsOnTargets = "ResolvePackageDependenciesDesignTime";
+            var getValuesCommand = new GetValuesCommand(testAsset, "_PackageDependenciesDesignTime", GetValuesCommand.ValueType.Item)
+            {
+                DependsOnTargets = "ResolvePackageDependenciesDesignTime"
+            };
 
             getValuesCommand.Execute()
                 .Should()
@@ -154,10 +158,12 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Fail();
 
-            var getValuesCommand = new GetValuesCommand(testAsset, "_PackageDependenciesDesignTime", GetValuesCommand.ValueType.Item);
-            getValuesCommand.ShouldRestore = false;
-            getValuesCommand.DependsOnTargets = "ResolvePackageDependenciesDesignTime";
-            getValuesCommand.MetadataNames = new List<string>() { "DiagnosticLevel" };
+            var getValuesCommand = new GetValuesCommand(testAsset, "_PackageDependenciesDesignTime", GetValuesCommand.ValueType.Item)
+            {
+                ShouldRestore = false,
+                DependsOnTargets = "ResolvePackageDependenciesDesignTime",
+                MetadataNames = new List<string>() { "DiagnosticLevel" }
+            };
 
             getValuesCommand
                 .WithWorkingDirectory(testAsset.TestRoot)
@@ -206,8 +212,10 @@ namespace Microsoft.NET.Build.Tests
 
             string projectFolder = Path.Combine(testAsset.TestRoot, testProject.Name);
 
-            var buildCommand = new MSBuildCommand(Log, null, projectFolder);
-            buildCommand.WorkingDirectory = projectFolder;
+            var buildCommand = new MSBuildCommand(Log, null, projectFolder)
+            {
+                WorkingDirectory = projectFolder
+            };
 
             buildCommand
                 .Execute()

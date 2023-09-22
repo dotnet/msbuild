@@ -105,9 +105,11 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
 
         public static SlnFile Read(string file)
         {
-            SlnFile slnFile = new SlnFile();
-            slnFile.FullPath = Path.GetFullPath(file);
-            slnFile._format = FileUtil.GetTextFormatInfo(file);
+            SlnFile slnFile = new SlnFile
+            {
+                FullPath = Path.GetFullPath(file),
+                _format = FileUtil.GetTextFormatInfo(file)
+            };
 
             using (var sr = new StreamReader(new FileStream(file, FileMode.Open, FileAccess.Read)))
             {
@@ -429,8 +431,10 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             {
                 if (_properties == null)
                 {
-                    _properties = new SlnPropertySet();
-                    _properties.ParentSection = this;
+                    _properties = new SlnPropertySet
+                    {
+                        ParentSection = this
+                    };
                     if (_sectionLines != null)
                     {
                         foreach (var line in _sectionLines)
@@ -1066,8 +1070,11 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             var sec = this.FirstOrDefault(s => s.Id == id);
             if (sec == null)
             {
-                sec = new SlnSection { Id = id };
-                sec.SectionType = sectionType;
+                sec = new SlnSection
+                {
+                    Id = id,
+                    SectionType = sectionType
+                };
                 Add(sec);
             }
             return sec;

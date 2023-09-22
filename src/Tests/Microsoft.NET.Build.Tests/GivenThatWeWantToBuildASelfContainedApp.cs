@@ -160,10 +160,12 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var getValuesCommand = new GetValuesCommand(testAsset, "RuntimePack", GetValuesCommand.ValueType.Item);
-            getValuesCommand.MetadataNames = new List<string>() { "NuGetPackageId", "NuGetPackageVersion" };
-            getValuesCommand.DependsOnTargets = "ProcessFrameworkReferences";
-            getValuesCommand.ShouldRestore = false;
+            var getValuesCommand = new GetValuesCommand(testAsset, "RuntimePack", GetValuesCommand.ValueType.Item)
+            {
+                MetadataNames = new List<string>() { "NuGetPackageId", "NuGetPackageVersion" },
+                DependsOnTargets = "ProcessFrameworkReferences",
+                ShouldRestore = false
+            };
 
             getValuesCommand.Execute()
                 .Should()

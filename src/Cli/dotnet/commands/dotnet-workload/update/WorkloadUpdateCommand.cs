@@ -130,16 +130,17 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             DirectoryPath? offlineCache = null)
         {
 
-            var transaction = new CliTransaction();
-
-            transaction.RollbackStarted = () =>
+            var transaction = new CliTransaction
             {
-                Reporter.WriteLine(LocalizableStrings.RollingBackInstall);
-            };
-            // Don't hide the original error if roll back fails, but do log the rollback failure
-            transaction.RollbackFailed = ex =>
-            {
-                Reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, ex.Message));
+                RollbackStarted = () =>
+                {
+                    Reporter.WriteLine(LocalizableStrings.RollingBackInstall);
+                },
+                // Don't hide the original error if roll back fails, but do log the rollback failure
+                RollbackFailed = ex =>
+                {
+                    Reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, ex.Message));
+                }
             };
 
             transaction.Run(

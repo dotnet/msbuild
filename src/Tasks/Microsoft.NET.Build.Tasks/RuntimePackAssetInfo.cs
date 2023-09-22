@@ -21,9 +21,11 @@ namespace Microsoft.NET.Build.Tasks
 
         public static RuntimePackAssetInfo FromItem(ITaskItem item)
         {
-            var assetInfo = new RuntimePackAssetInfo();
-            assetInfo.SourcePath = item.ItemSpec;
-            assetInfo.DestinationSubPath = item.GetMetadata(MetadataKeys.DestinationSubPath);
+            var assetInfo = new RuntimePackAssetInfo
+            {
+                SourcePath = item.ItemSpec,
+                DestinationSubPath = item.GetMetadata(MetadataKeys.DestinationSubPath)
+            };
 
             string assetTypeString = item.GetMetadata(MetadataKeys.AssetType);
             if (assetTypeString.Equals("runtime", StringComparison.OrdinalIgnoreCase))

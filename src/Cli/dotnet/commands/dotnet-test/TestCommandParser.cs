@@ -159,8 +159,10 @@ namespace Microsoft.DotNet.Cli
 
         private static CliCommand ConstructCommand()
         {
-            DocumentedCommand command = new("test", DocsLink, LocalizableStrings.AppFullName);
-            command.TreatUnmatchedTokensAsErrors = false;
+            DocumentedCommand command = new("test", DocsLink, LocalizableStrings.AppFullName)
+            {
+                TreatUnmatchedTokensAsErrors = false
+            };
 
             // We are on purpose not capturing the solution, project or directory here. We want to pass it to the
             // MSBuild command so we are letting it flow.

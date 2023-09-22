@@ -31,12 +31,13 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         [WindowsOnlyFact]
         public void It_can_expand_OutputPath()
         {
-            var task = new GetPublishItemsOutputGroupOutputs();
-
-            task.PublishDir = @"bin\Debug\net5.0\publish\";
-            task.ResolvedFileToPublish = new[]
+            var task = new GetPublishItemsOutputGroupOutputs
+            {
+                PublishDir = @"bin\Debug\net5.0\publish\",
+                ResolvedFileToPublish = new[]
             {
                 _apphost, _dll, _dll
+            }
             };
 
             task.Execute().Should().BeTrue();

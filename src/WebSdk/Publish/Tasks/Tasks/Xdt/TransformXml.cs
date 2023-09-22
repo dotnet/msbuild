@@ -202,9 +202,10 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Xdt
         {
             try
             {
-                XmlTransformableDocument document = new XmlTransformableDocument();
-
-                document.PreserveWhitespace = true;
+                XmlTransformableDocument document = new XmlTransformableDocument
+                {
+                    PreserveWhitespace = true
+                };
                 document.Load(sourceFile);
 
                 return document;

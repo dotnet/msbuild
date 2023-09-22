@@ -15,8 +15,10 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
 
         public LaunchSettingsApplyResult TryGetLaunchSettings(string? launchProfileName, JsonElement model)
         {
-            var config = new ProjectLaunchSettingsModel();
-            config.LaunchProfileName = launchProfileName;
+            var config = new ProjectLaunchSettingsModel
+            {
+                LaunchProfileName = launchProfileName
+            };
 
             foreach (var property in model.EnumerateObject())
             {
