@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="BuildFailedWithPropertiesItemsOrTargetResultsRequested">
         <source>Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</source>
-        <target state="translated">生成失败。无法获取属性、项目和目标结果。在上面的 stderr 中查看详细信息。</target>
+        <target state="new">Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -116,16 +116,6 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
-      <trans-unit id="InvalidReportFileAccessesValue">
-        <source>MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</target>
-        <note>
-      {StrBegin="MSBUILD : error MSB1063: "}
-      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
-    </note>
-      </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1064: 低优先级值无效。{0}</target>
@@ -138,11 +128,21 @@
       </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
-        <target state="translated">MSBUILD : error MSB1065: 终端记录器值无效。它应为 "auto"、"true" 或 "false" 之一。{0}</target>
+        <target state="new">MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidReportFileAccessesValue">
+        <source>MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</source>
+        <target state="new">MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1063: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -1316,7 +1316,7 @@
       </trans-unit>
       <trans-unit id="MissingGetItemError">
         <source>MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</source>
-        <target state="translated">MSBUILD : error MSB1014: 必须为 getItem 开关提供项名称。</target>
+        <target state="new">MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1014: "}UE: This happens if the user does something like "msbuild.exe -getItem". The user must pass in an actual item name
       following the switch, as in "msbuild.exe -getItem:blah".
@@ -1325,7 +1325,7 @@
       </trans-unit>
       <trans-unit id="MissingGetPropertyError">
         <source>MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</source>
-        <target state="translated">MSBUILD : error MSB1010: 必须为 getProperty 开关提供属性名称。</target>
+        <target state="new">MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1010: "}UE: This happens if the user does something like "msbuild.exe -getProperty". The user must pass in an actual property name
       following the switch, as in "msbuild.exe -getProperty:blah".
@@ -1334,7 +1334,7 @@
       </trans-unit>
       <trans-unit id="MissingGetTargetResultError">
         <source>MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</source>
-        <target state="translated">MSBUILD : error MSB1017: 必须为 getTargetResult 开关提供目标名称。</target>
+        <target state="new">MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1017: "}UE: This happens if the user does something like "msbuild.exe -getTargetResult". The user must pass in an actual target name
       following the switch, as in "msbuild.exe -getTargetResult:blah".
@@ -1396,7 +1396,7 @@
       </trans-unit>
       <trans-unit id="MissingTerminalLoggerParameterError">
         <source>MSBUILD : error MSB1066: Specify one or more parameters for the terminal logger if using the -terminalLoggerParameters switch</source>
-        <target state="translated">MSBUILD : error MSB1066: 为终端记录器指定一个或多个参数 (如果使用 -terminalLoggerParameters 开关)</target>
+        <target state="new">MSBUILD : error MSB1066: Specify one or more parameters for the terminal logger if using the -terminalLoggerParameters switch</target>
         <note>
       {StrBegin="MSBUILD : error MSB1066: "}
       UE: This happens if the user does something like "msbuild.exe -termionalLoggerParameters:". The user must pass in one or more parameters
@@ -1442,7 +1442,7 @@
       </trans-unit>
       <trans-unit id="NameInvalid">
         <source>MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</source>
-        <target state="translated">MSBUILD : error MSB5016: 名称“{0}”包含无效字符“{1}”。</target>
+        <target state="new">MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</target>
         <note>
       {StrBegin="MSBUILD : error MSB5016: "}
     </note>
@@ -1621,7 +1621,7 @@
       </trans-unit>
       <trans-unit id="SolutionBuildInvalidForCommandLineEvaluation">
         <source>MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</source>
-        <target state="translated">MSBUILD : error MSB1063: 生成解决方案文件或解决方案筛选器文件时无法访问属性或项。此功能仅在生成单个项目时可用。</target>
+        <target state="new">MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1063: "}UE: This happens if the user passes in a solution file when trying to access individual properties or items. The user must pass in a project file.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
@@ -1643,17 +1643,17 @@
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
-        <target state="translated">未使用终端记录器，因为生成是在请求直接访问 stdout 流的进程的上下文中运行的(如“dotnet test”)。</target>
+        <target state="new">Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedNotSupported">
         <source>Terminal Logger was not used because the output is not supported.</source>
-        <target state="translated">未使用终端记录器，因为不支持输出。</target>
+        <target state="new">Terminal Logger was not used because the output is not supported.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedRedirected">
         <source>Terminal Logger was not used because the output is being redirected to a file.</source>
-        <target state="translated">未使用终端记录器，因为正在将输出重定向到文件。</target>
+        <target state="new">Terminal Logger was not used because the output is being redirected to a file.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
