@@ -400,6 +400,27 @@ namespace Microsoft.Build.Framework
             }
         }
 
+        private bool? _isBinaryFormatterSerializationAllowed;
+        public bool IsBinaryFormatterSerializationAllowed
+        {
+            get
+            {
+                if (!_isBinaryFormatterSerializationAllowed.HasValue)
+                {
+#if RUNTIME_TYPE_NETCORE
+                    AppContext.TryGetSwitch("System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization",
+                        out bool enabled);
+                    _isBinaryFormatterSerializationAllowed = enabled;
+#else
+                    _isBinaryFormatterSerializationAllowed = true;
+#endif
+                }
+
+                return _isBinaryFormatterSerializationAllowed.Value;
+            }
+        }
+
+
         private static bool? ParseNullableBoolFromEnvironmentVariable(string environmentVariable)
         {
             var value = Environment.GetEnvironmentVariable(environmentVariable);
