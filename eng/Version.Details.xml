@@ -23,7 +23,7 @@
       <Sha>736dabeca728ccf8b911d96d1b4c575b4d0db7d2</Sha>
       <SourceBuild RepoName="runtime" ManagedOnly="false" />
     </Dependency>
-    <Dependency Name="VS.Redist.Common.NetCore.TargetingPack.x64.9.0" Version="9.0.0-alpha.1.23470.1">
+    <Dependency Name="VS.Redist.Common.NetCore.TargetingPack.x64.9.0" Version="9.0.0-alpha.1.23470.17">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>f8c110b8003d68cc635add4ca791d6cf2e645561</Sha>
     </Dependency>
