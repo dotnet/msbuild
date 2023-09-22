@@ -12,6 +12,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.NetCore.Extensions;
@@ -24,12 +25,19 @@ namespace Microsoft.Build.UnitTests.OM.Instance
     /// <summary>
     /// Tests for ProjectItemInstance public members
     /// </summary>
-    public class ProjectItemInstance_Tests
+    public class ProjectItemInstance_Tests : IDisposable
     {
+        public void Dispose()
+        {
+            _mappedDrive?.Dispose();
+        }
+
         /// <summary>
         /// The number of built-in metadata for items.
         /// </summary>
         public const int BuiltInMetadataCount = 15;
+
+        private DummyMappedDrive _mappedDrive = null;
 
         internal const string TargetItemWithInclude = @"
             <Project>
@@ -126,7 +134,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             item.SetMetadata("m1", "v1");
             item.SetMetadata("m2", "v0");
 
-            ((IMetadataContainer) item).ImportMetadata(new Dictionary<string, string>
+            ((IMetadataContainer)item).ImportMetadata(new Dictionary<string, string>
             {
                 { "m2", "v2" },
                 { "m3", "v3" },
@@ -1002,29 +1010,33 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         [WindowsOnlyTheory]
         [InlineData(
             TargetItemWithIncludeAndExclude,
-            @"z:$(Microsoft_WindowsAzure_EngSys)\**\*",
+            @"%DRIVE%:$(Microsoft_WindowsAzure_EngSys)\**\*",
             @"$(Microsoft_WindowsAzure_EngSys)\*.pdb;$(Microsoft_WindowsAzure_EngSys)\Microsoft.WindowsAzure.Storage.dll;$(Microsoft_WindowsAzure_EngSys)\Certificates\**\*")]
 
         [InlineData(
             TargetItemWithIncludeAndExclude,
             @"$(Microsoft_WindowsAzure_EngSys)\*.pdb",
-            @"z:$(Microsoft_WindowsAzure_EngSys)\**\*")]
+            @"%DRIVE%:$(Microsoft_WindowsAzure_EngSys)\**\*")]
 
         [InlineData(
             TargetWithDefinedPropertyAndItemWithInclude,
             @"$(Microsoft_WindowsAzure_EngSys)**",
             null,
             "Microsoft_WindowsAzure_EngSys",
-            @"z:\")]
+            @"%DRIVE%:\")]
 
         [InlineData(
             TargetWithDefinedPropertyAndItemWithInclude,
             @"$(Microsoft_WindowsAzure_EngSys)\**\*",
             null,
             "Microsoft_WindowsAzure_EngSys",
-            @"z:")]
+            @"%DRIVE%:")]
         public void LogWindowsWarningUponBuildingProjectWithDriveEnumeration(string content, string include, string exclude = null, string property = null, string propertyValue = null)
         {
+            var mappedDrive = GetDummyMappedDrive();
+            include = UpdatePathToMappedDrive(include, mappedDrive.MappedDriveLetter);
+            exclude = UpdatePathToMappedDrive(exclude, mappedDrive.MappedDriveLetter);
+            propertyValue = UpdatePathToMappedDrive(propertyValue, mappedDrive.MappedDriveLetter);
             content = (string.IsNullOrEmpty(property) && string.IsNullOrEmpty(propertyValue)) ?
                 string.Format(content, include, exclude) :
                 string.Format(content, property, propertyValue, include);
@@ -1196,6 +1208,28 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 Assert.Equal(expected[key], item.GetMetadataValue(key));
             }
+        }
+
+        private DummyMappedDrive GetDummyMappedDrive()
+        {
+            if (NativeMethods.IsWindows)
+            {
+                // let's create the mapped drive only once it's needed by any test, then let's reuse;
+                _mappedDrive ??= new DummyMappedDrive();
+            }
+
+            return _mappedDrive;
+        }
+
+        private static string UpdatePathToMappedDrive(string path, char driveLetter)
+        {
+            const string drivePlaceholder = "%DRIVE%";
+            // if this seems to be rooted path - replace with the dummy mount
+            if (!string.IsNullOrEmpty(path) && path.StartsWith(drivePlaceholder))
+            {
+                path = driveLetter + path.Substring(drivePlaceholder.Length);
+            }
+            return path;
         }
     }
 }
