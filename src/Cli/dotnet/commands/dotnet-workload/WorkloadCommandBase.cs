@@ -71,6 +71,8 @@ namespace Microsoft.DotNet.Workloads.Workload
             get;
         }
 
+        protected bool IsPackageDownloaderProvided { get; }
+
         /// <summary>
         /// Initializes a new <see cref="WorkloadCommandBase"/> instance.
         /// </summary>
@@ -107,7 +109,8 @@ namespace Microsoft.DotNet.Workloads.Workload
 
             TempPackagesDirectory = new DirectoryPath(Path.Combine(TempDirectoryPath, "dotnet-sdk-advertising-temp"));
 
-            PackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(TempPackagesDirectory,
+            IsPackageDownloaderProvided = nugetPackageDownloader != null;
+            PackageDownloader = IsPackageDownloaderProvided ? nugetPackageDownloader : new NuGetPackageDownloader(TempPackagesDirectory,
                 filePermissionSetter: null,
                 new FirstPartyNuGetPackageSigningVerifier(),
                 nugetLogger,

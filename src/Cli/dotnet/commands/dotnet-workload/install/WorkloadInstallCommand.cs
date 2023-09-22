@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             bool usedRollback = !string.IsNullOrWhiteSpace(_fromRollbackDefinition);
             if (_printDownloadLinkOnly)
             {
-                var packageDownloader = new NuGetPackageDownloader(
+                var packageDownloader = IsPackageDownloaderProvided ? PackageDownloader : new NuGetPackageDownloader(
                     TempPackagesDirectory,
                     filePermissionSetter: null,
                     new FirstPartyNuGetPackageSigningVerifier(),
