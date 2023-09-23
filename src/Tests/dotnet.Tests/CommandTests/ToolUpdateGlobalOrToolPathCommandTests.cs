@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         private readonly IFileSystem _fileSystem;
         private readonly EnvironmentPathInstructionMock _environmentPathInstructionMock;
         private readonly ToolPackageStoreMock _store;
-        private readonly PackageId _packageId = new PackageId("global.tool.console.demo");
+        private readonly PackageId _packageId = new("global.tool.console.demo");
         private readonly List<MockFeed> _mockFeeds;
         private const string LowerPackageVersion = "1.0.4";
         private const string HigherPackageVersion = "1.0.5";

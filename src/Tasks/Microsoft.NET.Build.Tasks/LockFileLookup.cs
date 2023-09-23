@@ -77,7 +77,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private class PackageCacheKeyComparer : IEqualityComparer<KeyValuePair<string, NuGetVersion>>
         {
-            public static readonly PackageCacheKeyComparer Instance = new PackageCacheKeyComparer();
+            public static readonly PackageCacheKeyComparer Instance = new();
 
             private PackageCacheKeyComparer()
             {

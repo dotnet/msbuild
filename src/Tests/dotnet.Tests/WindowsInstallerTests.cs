@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Tests
         private void LogTask(string pipeName)
         {
             using NamedPipeServerStream serverPipe = CreateServerPipe(pipeName);
-            PipeStreamSetupLogger logger = new PipeStreamSetupLogger(serverPipe, pipeName);
+            PipeStreamSetupLogger logger = new(serverPipe, pipeName);
 
             logger.Connect();
 
@@ -58,14 +58,14 @@ namespace Microsoft.DotNet.Tests
         {
             string pipeName = Guid.NewGuid().ToString();
             NamedPipeServerStream serverPipe = CreateServerPipe(pipeName);
-            NamedPipeClientStream clientPipe = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut);
+            NamedPipeClientStream clientPipe = new(".", pipeName, PipeDirection.InOut);
 
             InstallMessageDispatcher sd = new(serverPipe);
             InstallMessageDispatcher cd = new(clientPipe);
 
             Task.Run(() =>
             {
-                ServerDispatcher server = new ServerDispatcher(sd);
+                ServerDispatcher server = new(sd);
                 server.Run();
             });
 
@@ -100,7 +100,7 @@ namespace Microsoft.DotNet.Tests
         public void RelatedProductExcludesMaxVersion(string maxVersion, UpgradeAttributes attributes, string installedVersionValue,
             bool expectedResult)
         {
-            Version installedVersion = new Version(installedVersionValue);
+            Version installedVersion = new(installedVersionValue);
 
             RelatedProduct rp = new()
             {
@@ -118,7 +118,7 @@ namespace Microsoft.DotNet.Tests
         public void RelatedProductExcludesMinVersion(string minVersion, UpgradeAttributes attributes, string installedVersionValue,
             bool expectedResult)
         {
-            Version installedVersion = new Version(installedVersionValue);
+            Version installedVersion = new(installedVersionValue);
 
             RelatedProduct rp = new()
             {

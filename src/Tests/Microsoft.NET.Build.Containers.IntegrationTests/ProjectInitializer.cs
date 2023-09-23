@@ -58,7 +58,7 @@ public sealed class ProjectInitializer
             new global::Microsoft.Build.Logging.BinaryLogger() {CollectProjectImports = global::Microsoft.Build.Logging.BinaryLogger.ProjectImportsCollectionMode.Embed, Verbosity = LoggerVerbosity.Diagnostic, Parameters = $"LogFile={safeBinlogFileName}.binlog" },
             new global::Microsoft.Build.Logging.ConsoleLogger(LoggerVerbosity.Detailed)
         };
-        CapturingLogger logs = new CapturingLogger();
+        CapturingLogger logs = new();
         loggers.Add(logs);
 
         var collection = new ProjectCollection(null, loggers, ToolsetDefinitionLocations.Default);

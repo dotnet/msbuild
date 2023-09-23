@@ -10,7 +10,7 @@ namespace Microsoft.NET.Build.Tasks
     /// </summary>
     internal class UnreferencedProjectInfo : SingleProjectInfo
     {
-        internal static UnreferencedProjectInfo Default = new UnreferencedProjectInfo();
+        internal static UnreferencedProjectInfo Default = new();
 
         private UnreferencedProjectInfo() : base(string.Empty, string.Empty, string.Empty, string.Empty, new List<ReferenceInfo>(), new List<ResourceAssemblyInfo>())
         {
@@ -52,7 +52,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public static SingleProjectInfo Create(string projectPath, string name, string fileExtension, string version, ITaskItem[] satelliteAssemblies)
         {
-            List<ResourceAssemblyInfo> resourceAssemblies = new List<ResourceAssemblyInfo>();
+            List<ResourceAssemblyInfo> resourceAssemblies = new();
 
             foreach (ITaskItem satelliteAssembly in satelliteAssemblies)
             {
@@ -71,7 +71,7 @@ namespace Microsoft.NET.Build.Tasks
             IEnumerable<ITaskItem> referenceSatellitePaths,
             Func<ITaskItem, bool> isRuntimeAssembly)
         {
-            Dictionary<string, SingleProjectInfo> projectReferences = new Dictionary<string, SingleProjectInfo>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, SingleProjectInfo> projectReferences = new(StringComparer.OrdinalIgnoreCase);
 
             IEnumerable<ITaskItem> projectReferencePaths = referencePaths
                 .Where(r => ReferenceInfo.IsProjectReference(r) && isRuntimeAssembly(r));

@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         private readonly Func<string> _getCurrentProcessPath;
         private readonly NETCoreSdkResolver _netCoreSdkResolver;
 
-        private static CachingWorkloadResolver _staticWorkloadResolver = new CachingWorkloadResolver();
+        private static CachingWorkloadResolver _staticWorkloadResolver = new();
 
         private bool _shouldLog = false;
 
@@ -343,7 +343,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
         class ResolverLogger
         {
-            public List<object> Messages = new List<object>();
+            public List<object> Messages = new();
 
             public ResolverLogger()
             {

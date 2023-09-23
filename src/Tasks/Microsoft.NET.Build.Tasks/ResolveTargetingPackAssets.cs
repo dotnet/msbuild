@@ -107,12 +107,12 @@ namespace Microsoft.NET.Build.Tasks
 
         private static ResolvedAssetsCacheEntry Resolve(StronglyTypedInputs inputs, IBuildEngine4 buildEngine)
         {
-            List<TaskItem> referencesToAdd = new List<TaskItem>();
-            List<TaskItem> analyzersToAdd = new List<TaskItem>();
-            List<TaskItem> platformManifests = new List<TaskItem>();
-            List<TaskItem> packageConflictOverrides = new List<TaskItem>();
-            List<string> preferredPackages = new List<string>();
-            List<string> errors = new List<string>();
+            List<TaskItem> referencesToAdd = new();
+            List<TaskItem> analyzersToAdd = new();
+            List<TaskItem> platformManifests = new();
+            List<TaskItem> packageConflictOverrides = new();
+            List<string> preferredPackages = new();
+            List<string> errors = new();
 
             var resolvedTargetingPacks = inputs.ResolvedTargetingPacks
                 .ToDictionary(
@@ -228,7 +228,7 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             //  Calculate which RuntimeFramework items should actually be used based on framework references
-            HashSet<string> frameworkReferenceNames = new HashSet<string>(frameworkReferences.Select(fr => fr.Name), StringComparer.OrdinalIgnoreCase);
+            HashSet<string> frameworkReferenceNames = new(frameworkReferences.Select(fr => fr.Name), StringComparer.OrdinalIgnoreCase);
 
             //  Filter out duplicate references (which can happen when referencing two different profiles that overlap)
             List<TaskItem> deduplicatedReferences = DeduplicateItems(referencesToAdd);
@@ -252,8 +252,8 @@ namespace Microsoft.NET.Build.Tasks
         //  Get distinct items based on case-insensitive ItemSpec comparison
         private static List<TaskItem> DeduplicateItems(List<TaskItem> items)
         {
-            HashSet<string> seenItemSpecs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            List<TaskItem> deduplicatedItems = new List<TaskItem>(items.Count);
+            HashSet<string> seenItemSpecs = new(StringComparer.OrdinalIgnoreCase);
+            List<TaskItem> deduplicatedItems = new(items.Count);
             foreach (var item in items)
             {
                 if (seenItemSpecs.Add(item.ItemSpec))
@@ -266,7 +266,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private static TaskItem CreatePackageOverride(string runtimeFrameworkName, string packageOverridesPath)
         {
-            TaskItem packageOverride = new TaskItem(runtimeFrameworkName);
+            TaskItem packageOverride = new(runtimeFrameworkName);
             packageOverride.SetMetadata("OverriddenPackages", File.ReadAllText(packageOverridesPath));
             return packageOverride;
         }
@@ -318,8 +318,8 @@ namespace Microsoft.NET.Build.Tasks
             bool usePathElementsInFrameworkListAsFallBack =
                 TestFirstFileInFrameworkListUsingAssemblyNameConvention(definition.TargetingPackDllFolder, frameworkListDoc);
 
-            List<TaskItem> referenceItemsFromThisFramework = new List<TaskItem>();
-            List<TaskItem> analyzerItemsFromThisFramework = new List<TaskItem>();
+            List<TaskItem> referenceItemsFromThisFramework = new();
+            List<TaskItem> analyzerItemsFromThisFramework = new();
 
             foreach (var fileElement in frameworkListDoc.Root.Elements("File"))
             {

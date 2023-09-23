@@ -80,7 +80,7 @@ namespace Microsoft.NET.TestFramework
             //  one running the tests, it won't interfere
             Environment.SetEnvironmentVariable("MSBuildSdksPath", null);
 
-            TestContext testContext = new TestContext();
+            TestContext testContext = new();
 
             bool runAsTool = false;
             if (Directory.Exists(Path.Combine(AppContext.BaseDirectory, "Assets")))

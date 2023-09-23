@@ -16,7 +16,7 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "TestProjWithPackageDependencies";
 
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = ProjectName,
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
@@ -59,7 +59,7 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "TestProjWithPackageDependencies";
 
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = ProjectName,
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
@@ -94,7 +94,7 @@ namespace Microsoft.NET.Build.Tests
 
             var rid = EnvironmentInfo.GetCompatibleRid(ToolsetInfo.CurrentTargetFramework);
 
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = ProjectName,
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
@@ -134,7 +134,7 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "TestProjWithPackageDependencies";
 
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = ProjectName,
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
@@ -166,7 +166,7 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "TestProjWithPackageDependencies";
 
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = ProjectName,
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
@@ -204,7 +204,7 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "TestProjWithPackageDependencies";
 
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = ProjectName,
                 TargetFrameworks = "netstandard2.0"
@@ -235,7 +235,7 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "TestProjWithPackageDependencies";
 
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = ProjectName,
                 TargetFrameworks = "netstandard2.0"
@@ -273,7 +273,7 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "TestProjWithPackageDependencies";
 
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = ProjectName,
                 TargetFrameworks = "net46"
@@ -306,7 +306,7 @@ namespace Microsoft.NET.Build.Tests
 
             var rid = EnvironmentInfo.GetCompatibleRid(ToolsetInfo.CurrentTargetFramework);
 
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = ProjectName,
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,

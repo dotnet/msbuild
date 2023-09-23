@@ -17,7 +17,7 @@ namespace Microsoft.NET.Build.Tests
             try
             {
                 Environment.SetEnvironmentVariable("MSBUILDINCLUDEDEFAULTSDKRESOLVER", "false");
-                TestProject testProject = new TestProject()
+                TestProject testProject = new()
                 {
                     Name = "FailedResolution",
                     TargetFrameworks = "net5.0"

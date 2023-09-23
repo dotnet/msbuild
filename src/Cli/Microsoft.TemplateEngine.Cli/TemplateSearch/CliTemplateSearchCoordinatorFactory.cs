@@ -11,7 +11,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
         internal static TemplateSearchCoordinator CreateCliTemplateSearchCoordinator(
             IEngineEnvironmentSettings environmentSettings)
         {
-            Dictionary<string, Func<object, object>> dataReaders = new Dictionary<string, Func<object, object>>()
+            Dictionary<string, Func<object, object>> dataReaders = new()
             {
                 { CliHostSearchCacheData.DataName, CliHostSearchCacheData.Reader }
             };

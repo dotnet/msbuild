@@ -156,9 +156,9 @@ namespace Microsoft.DotNet.Cli
             }
 
             _isHandlingSolution = true;
-            List<ProjectInstance> configuredProjects = new List<ProjectInstance>();
-            HashSet<string> configValues = new HashSet<string>();
-            object projectDataLock = new object();
+            List<ProjectInstance> configuredProjects = new();
+            HashSet<string> configValues = new();
+            object projectDataLock = new();
 
             if (String.Equals(Environment.GetEnvironmentVariable(EnvironmentVariableNames.DOTNET_CLI_LAZY_PUBLISH_AND_PACK_RELEASE_FOR_SOLUTIONS), "true", StringComparison.OrdinalIgnoreCase))
             {
@@ -269,7 +269,7 @@ namespace Microsoft.DotNet.Cli
         /// <returns>A case-insensitive dictionary of any properties passed from the user and their values.</returns>
         private Dictionary<string, string> GetUserSpecifiedExplicitMSBuildProperties()
         {
-            Dictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> globalProperties = new(StringComparer.OrdinalIgnoreCase);
 
             string[] globalPropEnumerable = _parseResult.GetValue(CommonOptions.PropertiesOption);
 

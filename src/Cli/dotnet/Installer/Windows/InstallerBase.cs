@@ -133,7 +133,7 @@ namespace Microsoft.DotNet.Installer.Windows
         {
             if (!Error.Success(error))
             {
-                StringBuilder sb = new StringBuilder(2048);
+                StringBuilder sb = new(2048);
                 NativeMethods.FormatMessage((uint)(FormatMessage.FromSystem | FormatMessage.IgnoreInserts),
                     IntPtr.Zero, error, 0, sb, (uint)sb.Capacity, IntPtr.Zero);
                 string errorDetail = sb.ToString().TrimEnd(Environment.NewLine.ToCharArray());

@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         protected override SdkCommandSpec CreateCommand(IEnumerable<string> args)
         {
-            List<string> newArgs = new List<string>()
+            List<string> newArgs = new()
             {
                 "build-server"
             };

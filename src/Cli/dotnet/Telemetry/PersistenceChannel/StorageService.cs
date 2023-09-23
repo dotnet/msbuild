@@ -10,10 +10,10 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel
     internal sealed class StorageService : BaseStorageService
     {
         private const string DefaultStorageFolderName = "TelemetryStorageService";
-        private readonly FixedSizeQueue<string> _deletedFilesQueue = new FixedSizeQueue<string>(10);
+        private readonly FixedSizeQueue<string> _deletedFilesQueue = new(10);
 
-        private readonly object _peekLockObj = new object();
-        private readonly object _storageFolderLock = new object();
+        private readonly object _peekLockObj = new();
+        private readonly object _storageFolderLock = new();
         private string _storageDirectoryPath;
         private string _storageDirectoryPathUsed;
         private long _storageCountFiles;

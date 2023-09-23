@@ -15,7 +15,7 @@ namespace Microsoft.NET.TestFramework.Commands
 
         protected override SdkCommandSpec CreateCommand(IEnumerable<string> args)
         {
-            List<string> newArgs = new List<string>(args);
+            List<string> newArgs = new(args);
             if (!string.IsNullOrEmpty(_runtime))
             {
                 newArgs.Add("-r");

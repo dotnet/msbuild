@@ -189,7 +189,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
 
         private Dictionary<string, double> GetEventMeasures(IDictionary<string, double> measurements)
         {
-            Dictionary<string, double> eventMeasurements = new Dictionary<string, double>(_commonMeasurements);
+            Dictionary<string, double> eventMeasurements = new(_commonMeasurements);
             if (measurements != null)
             {
                 foreach (KeyValuePair<string, double> measurement in measurements)

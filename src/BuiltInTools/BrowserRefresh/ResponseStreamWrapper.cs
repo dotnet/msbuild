@@ -15,7 +15,7 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
     /// </summary>
     public class ResponseStreamWrapper : Stream
     {
-        private static readonly MediaTypeHeaderValue _textHtmlMediaType = new MediaTypeHeaderValue("text/html");
+        private static readonly MediaTypeHeaderValue _textHtmlMediaType = new("text/html");
         private readonly Stream _baseStream;
         private readonly HttpContext _context;
         private readonly ILogger _logger;

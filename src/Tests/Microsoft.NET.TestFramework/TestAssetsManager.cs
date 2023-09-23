@@ -127,8 +127,8 @@ namespace Microsoft.NET.TestFramework
         {
             var testAsset = new TestAsset(testDestinationDirectory, TestContext.Current.SdkVersion, Log);
 
-            Stack<TestProject> projectStack = new Stack<TestProject>(testProjects);
-            HashSet<TestProject> createdProjects = new HashSet<TestProject>();
+            Stack<TestProject> projectStack = new(testProjects);
+            HashSet<TestProject> createdProjects = new();
 
             while (projectStack.Count > 0)
             {

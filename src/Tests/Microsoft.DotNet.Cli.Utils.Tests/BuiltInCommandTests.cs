@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             const int exitCode = 29;
 
-            TestBuiltInCommandEnvironment environment = new TestBuiltInCommandEnvironment();
+            TestBuiltInCommandEnvironment environment = new();
 
             Func<string[], int> testCommand = args =>
             {

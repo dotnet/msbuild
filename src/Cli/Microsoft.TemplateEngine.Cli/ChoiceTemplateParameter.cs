@@ -16,7 +16,7 @@ namespace Microsoft.TemplateEngine.Cli
     /// </summary>
     internal class ChoiceTemplateParameter : CliTemplateParameter
     {
-        private Dictionary<string, ParameterChoice> _choices = new Dictionary<string, ParameterChoice>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, ParameterChoice> _choices = new(StringComparer.OrdinalIgnoreCase);
 
         internal ChoiceTemplateParameter(ITemplateParameter parameter, HostSpecificTemplateData data) : base(parameter, data)
         {
@@ -177,7 +177,7 @@ namespace Microsoft.TemplateEngine.Cli
             parsedValue = string.Empty;
             error = string.Empty;
 
-            List<string> parsedValues = new List<string>();
+            List<string> parsedValues = new();
             foreach (string val in values)
             {
                 if (!TryConvertSingleValueToChoice(val, parameter, out string value, out error))

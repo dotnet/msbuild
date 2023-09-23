@@ -247,7 +247,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             _directoryExistOverride = directoryExists;
         }
 
-        private PackInfo CreatePackInfo(WorkloadPack pack, string aliasedPath, WorkloadPackId resolvedPackageId) => new PackInfo(
+        private PackInfo CreatePackInfo(WorkloadPack pack, string aliasedPath, WorkloadPackId resolvedPackageId) => new(
                 pack.Id,
                 pack.Version,
                 pack.Kind,

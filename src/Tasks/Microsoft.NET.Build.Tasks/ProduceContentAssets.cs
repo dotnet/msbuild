@@ -14,9 +14,9 @@ namespace Microsoft.NET.Build.Tasks
     /// </summary>
     public sealed class ProduceContentAssets : TaskBase
     {
-        private readonly List<ITaskItem> _contentItems = new List<ITaskItem>();
-        private readonly List<ITaskItem> _fileWrites = new List<ITaskItem>();
-        private readonly List<ITaskItem> _copyLocalItems = new List<ITaskItem>();
+        private readonly List<ITaskItem> _contentItems = new();
+        private readonly List<ITaskItem> _fileWrites = new();
+        private readonly List<ITaskItem> _copyLocalItems = new();
         private IContentAssetPreprocessor _assetPreprocessor;
 
         #region Output Items

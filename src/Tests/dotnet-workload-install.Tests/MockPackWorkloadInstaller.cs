@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
     internal class MockPackWorkloadInstaller : IInstaller
     {
         public IList<PackInfo> InstalledPacks;
-        public List<PackInfo> RolledBackPacks = new List<PackInfo>();
+        public List<PackInfo> RolledBackPacks = new();
         public IList<(ManifestVersionUpdate manifestUpdate, DirectoryPath? offlineCache)> InstalledManifests =
             new List<(ManifestVersionUpdate manifestUpdate, DirectoryPath?)>();
         public string CachePath;
@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
         public void InstallWorkloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, ITransactionContext transactionContext, DirectoryPath? offlineCache = null)
         {
-            List<PackInfo> packs = new List<PackInfo>();
+            List<PackInfo> packs = new();
 
             transactionContext.Run(action: () =>
             {

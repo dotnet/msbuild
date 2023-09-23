@@ -123,13 +123,13 @@ namespace ManifestReaderTests
         public static void SuggestionsArePermutedCorrectly()
         {
             static HashSet<WorkloadPackId> ConstructPackHash(params string[] packIds)
-                => new HashSet<WorkloadPackId>(packIds.Select(id => new WorkloadPackId(id)));
+                => new(packIds.Select(id => new WorkloadPackId(id)));
 
             static HashSet<WorkloadId> ConstructWorkloadHash(params string[] workloadIds)
-                => new HashSet<WorkloadId>(workloadIds.Select(id => new WorkloadId(id)));
+                => new(workloadIds.Select(id => new WorkloadId(id)));
 
             static WorkloadSuggestionCandidate ConstructCandidate(string[] workloadIds, string[] packIds, string[] unsatisfiedPackIds)
-                => new WorkloadSuggestionCandidate(ConstructWorkloadHash(workloadIds), ConstructPackHash(packIds), ConstructPackHash(unsatisfiedPackIds));
+                => new(ConstructWorkloadHash(workloadIds), ConstructPackHash(packIds), ConstructPackHash(unsatisfiedPackIds));
 
             //we're looking for suggestions with "pack1", "pack2", "pack3"
             var partialSuggestions = new List<WorkloadSuggestionCandidate>
@@ -171,7 +171,7 @@ namespace ManifestReaderTests
         public static void CanDetermineBestSuggestion()
         {
             static WorkloadSuggestionFinder.WorkloadSuggestion Suggestion(int extraPacks, params string[] workloadIds)
-                => new WorkloadSuggestionFinder.WorkloadSuggestion(new HashSet<WorkloadId>(workloadIds.Select(id => new WorkloadId(id))), extraPacks);
+                => new(new HashSet<WorkloadId>(workloadIds.Select(id => new WorkloadId(id))), extraPacks);
 
             var suggestions = new[]
             {

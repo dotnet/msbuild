@@ -266,7 +266,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 
             _firstTimeUseNoticeSentinelMock.Setup(n => n.Exists()).Returns(false);
 
-            Dictionary<string, double> measurements = new Dictionary<string, double>();
+            Dictionary<string, double> measurements = new();
             var dotnetFirstTimeUseConfigurer = new DotnetFirstTimeUseConfigurer(
                 _firstTimeUseNoticeSentinelMock.Object,
                 _aspNetCertificateSentinelMock.Object,
@@ -306,7 +306,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 
             _firstTimeUseNoticeSentinelMock.Setup(n => n.Exists()).Returns(true);
 
-            Dictionary<string, double> measurements = new Dictionary<string, double>();
+            Dictionary<string, double> measurements = new();
             var dotnetFirstTimeUseConfigurer = new DotnetFirstTimeUseConfigurer(
                 _firstTimeUseNoticeSentinelMock.Object,
                 _aspNetCertificateSentinelMock.Object,

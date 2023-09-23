@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
     public class GivenAnMsiInstallation : IDisposable
     {
         // Override HKLM to HKCU so we can run tests without needing elevation
-        private static RegistryWorkloadInstallationRecordRepository RecordManager = new RegistryWorkloadInstallationRecordRepository(
+        private static RegistryWorkloadInstallationRecordRepository RecordManager = new(
             new TestElevationContext(),
             null,
             Registry.CurrentUser,

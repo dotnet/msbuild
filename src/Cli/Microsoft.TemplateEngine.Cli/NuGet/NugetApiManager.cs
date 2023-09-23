@@ -13,9 +13,9 @@ namespace Microsoft.TemplateEngine.Cli.NuGet
     internal class NugetApiManager
     {
         private const string _nugetOrgFeed = "https://api.nuget.org/v3/index.json";
-        private readonly PackageSource _nugetOrgSource = new PackageSource(_nugetOrgFeed);
+        private readonly PackageSource _nugetOrgSource = new(_nugetOrgFeed);
         private readonly IDictionary<PackageSource, SourceRepository> _sourceRepositories;
-        private readonly SourceCacheContext _cacheSettings = new SourceCacheContext()
+        private readonly SourceCacheContext _cacheSettings = new()
         {
             NoCache = true,
             DirectDownload = true

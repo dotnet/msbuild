@@ -30,7 +30,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// <returns></returns>
         public static VSMSDeployObject CreateVSMSDeployObject(Build.Framework.ITaskItem taskItem)
         {
-            VSMSDeployObject src = new VSMSDeployObject(taskItem);
+            VSMSDeployObject src = new(taskItem);
             return src;
         }
 
@@ -42,7 +42,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// <returns></returns>
         public static VSMSDeployObject CreateVSMSDeployObject(string provider, string path)
         {
-            VSMSDeployObject src = new VSMSDeployObject(provider, path);
+            VSMSDeployObject src = new(provider, path);
             return src;
         }
 
@@ -139,7 +139,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             {
                 linkExtensionsInfo = linkExtensionsString;
                 string[] linksArray = linkExtensionsInfo.Split(new char[] { ';' });
-                Generic.List<string> linksList = new Generic.List<string>(linksArray);
+                Generic.List<string> linksList = new(linksArray);
                 return linksList;
             }
             else
@@ -189,8 +189,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 foreach (string linkExtObj in linkExtensions)
                 {
 
-                    RegularExpressions.Regex match = new RegularExpressions.Regex(linkExtObj, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-                    Generic.List<object> matchedList = new Generic.List<object>();
+                    RegularExpressions.Regex match = new(linkExtObj, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                    Generic.List<object> matchedList = new();
 
                     foreach (/*Deployment.DeploymentLinkExtension*/dynamic linkExtension in baseOptions.LinkExtensions)
                     {
@@ -340,7 +340,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         Generic.IList<MsDeploy.ParameterInfoWithEntry> m_iListParameterWithEntry = new Generic.List<MsDeploy.ParameterInfoWithEntry>();
         Generic.IList<string> m_iListSetParametersFiles = new Generic.List<string>();
 
-        private System.Collections.Generic.Dictionary<string, string> m_NameValueDictionary = new System.Collections.Generic.Dictionary<string, string>(10, System.StringComparer.OrdinalIgnoreCase);
+        private System.Collections.Generic.Dictionary<string, string> m_NameValueDictionary = new(10, System.StringComparer.OrdinalIgnoreCase);
 
         protected /*Deployment.DeploymentBaseOptions*/ dynamic m_deploymentBaseOptions = null;
 

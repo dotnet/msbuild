@@ -61,7 +61,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
 
         internal KuduConnectionInfo GetConnectionInfo()
         {
-            KuduConnectionInfo connectionInfo = new KuduConnectionInfo();
+            KuduConnectionInfo connectionInfo = new();
             connectionInfo.DestinationUrl = PublishUrl;
 
             connectionInfo.UserName = UserName;
@@ -102,7 +102,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
 
         internal bool DeployFiles(KuduConnectionInfo connectionInfo)
         {
-            KuduVfsDeploy fileDeploy = new KuduVfsDeploy(connectionInfo, Log);
+            KuduVfsDeploy fileDeploy = new(connectionInfo, Log);
 
             bool success;
             if (!DeployIndividualFiles)
@@ -135,7 +135,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
         internal bool DeployZipFile(KuduConnectionInfo connectionInfo)
         {
             bool success;
-            KuduZipDeploy zipDeploy = new KuduZipDeploy(connectionInfo, Log);
+            KuduZipDeploy zipDeploy = new(connectionInfo, Log);
 
             string zipFileFullPath = CreateZipFile(PublishIntermediateOutputPath);
             System.Threading.Tasks.Task<bool> zipTask = zipDeploy.DeployAsync(zipFileFullPath);

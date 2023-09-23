@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                    }
                }));
 
-            VerificationEngine engine = new VerificationEngine(_logger);
+            VerificationEngine engine = new(_logger);
             await engine.Execute(options).ConfigureAwait(false);
 
             ValidateInstantiatedProject(workingDir);
@@ -172,7 +172,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                    }
                }));
 
-            VerificationEngine engine = new VerificationEngine(_logger);
+            VerificationEngine engine = new(_logger);
             await engine.Execute(options).ConfigureAwait(false);
 
             ValidateInstantiatedProject(workingDir);
@@ -241,7 +241,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 
         private string GetFolderName(string templateShortName, string langVersion, string targetFramework)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             sb.Append($"{templateShortName}");
 
             if (!string.IsNullOrEmpty(langVersion))

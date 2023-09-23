@@ -11,7 +11,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             typeLibraryIdMap = null;
             errors = Enumerable.Empty<string>();
-            List<string> errorsLocal = new List<string>();
+            List<string> errorsLocal = new();
             if (typeLibraries is null || typeLibraries.Length == 0)
             {
                 return true;

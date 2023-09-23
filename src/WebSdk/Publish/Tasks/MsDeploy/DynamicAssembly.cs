@@ -38,7 +38,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             get
             {
                 string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-                UriBuilder uri = new UriBuilder(codeBase);
+                UriBuilder uri = new(codeBase);
                 string path = Uri.UnescapeDataString(uri.Path);
                 return Path.GetDirectoryName(path);
             }

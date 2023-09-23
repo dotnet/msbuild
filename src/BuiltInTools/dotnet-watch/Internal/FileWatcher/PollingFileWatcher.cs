@@ -15,9 +15,9 @@ namespace Microsoft.DotNet.Watcher.Internal
 
         private readonly DirectoryInfo _watchedDirectory;
 
-        private Dictionary<string, FileMeta> _knownEntities = new Dictionary<string, FileMeta>();
-        private Dictionary<string, FileMeta> _tempDictionary = new Dictionary<string, FileMeta>();
-        private HashSet<string> _changes = new HashSet<string>();
+        private Dictionary<string, FileMeta> _knownEntities = new();
+        private Dictionary<string, FileMeta> _tempDictionary = new();
+        private HashSet<string> _changes = new();
 
         private Thread _pollingThread;
         private bool _raiseEvents;

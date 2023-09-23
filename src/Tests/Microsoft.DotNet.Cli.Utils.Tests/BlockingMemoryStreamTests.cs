@@ -68,10 +68,10 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             using (var stream = new BlockingMemoryStream())
             {
-                ManualResetEvent readerThreadExecuting = new ManualResetEvent(false);
+                ManualResetEvent readerThreadExecuting = new(false);
                 bool readerThreadSuccessful = false;
 
-                Thread readerThread = new Thread(() =>
+                Thread readerThread = new(() =>
                 {
                     byte[] buffer = new byte[10];
                     readerThreadExecuting.Set();

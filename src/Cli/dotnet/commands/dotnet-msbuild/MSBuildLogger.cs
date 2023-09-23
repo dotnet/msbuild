@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
                 case TargetFrameworkTelemetryEventName:
                     {
                         var newEventName = $"msbuild/{TargetFrameworkTelemetryEventName}";
-                        Dictionary<string, string> maskedProperties = new Dictionary<string, string>();
+                        Dictionary<string, string> maskedProperties = new();
 
                         foreach (var key in new[] {
                             TargetFrameworkVersionTelemetryPropertyKey,

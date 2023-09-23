@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Installer.Windows
         /// <summary>
         /// Track messages that should never be reported more than once.
         /// </summary>
-        private HashSet<string> _reportedMessages = new HashSet<string>();
+        private HashSet<string> _reportedMessages = new();
 
         /// <summary>
         /// Backing field for the install location of .NET
@@ -129,7 +129,7 @@ namespace Microsoft.DotNet.Installer.Windows
                     {
                         using RegistryKey packVersionKey = packKey.OpenSubKey(packVersion);
 
-                        WorkloadPackRecord record = new WorkloadPackRecord
+                        WorkloadPackRecord record = new()
                         {
                             MsiId = packId,
                             MsiNuGetVersion = packVersion,
@@ -158,7 +158,7 @@ namespace Microsoft.DotNet.Installer.Windows
                     {
                         using RegistryKey packGroupVersionKey = packGroupKey.OpenSubKey(packGroupVersion);
 
-                        WorkloadPackRecord record = new WorkloadPackRecord
+                        WorkloadPackRecord record = new()
                         {
                             MsiId = packGroupId,
                             MsiNuGetVersion = packGroupVersion
@@ -450,7 +450,7 @@ namespace Microsoft.DotNet.Installer.Windows
         /// <param name="dependent">The dependent to add or remove.</param>
         protected void UpdateDependent(InstallRequestType requestType, string providerKeyName, string dependent)
         {
-            DependencyProvider provider = new DependencyProvider(providerKeyName, allUsers: true);
+            DependencyProvider provider = new(providerKeyName, allUsers: true);
 
             if (provider.Dependents.Contains(dependent) && requestType == InstallRequestType.AddDependent)
             {

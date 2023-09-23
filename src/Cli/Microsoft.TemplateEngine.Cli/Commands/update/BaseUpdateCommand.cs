@@ -34,7 +34,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             ParseResult context,
             CancellationToken cancellationToken)
         {
-            TemplatePackageCoordinator templatePackageCoordinator = new TemplatePackageCoordinator(environmentSettings, templatePackageManager);
+            TemplatePackageCoordinator templatePackageCoordinator = new(environmentSettings, templatePackageManager);
 
             return templatePackageCoordinator.EnterUpdateFlowAsync(args, cancellationToken);
         }

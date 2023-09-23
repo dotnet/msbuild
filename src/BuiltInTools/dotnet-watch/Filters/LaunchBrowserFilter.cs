@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 {
     internal sealed class LaunchBrowserFilter : IWatchFilter, IAsyncDisposable
     {
-        private static readonly Regex NowListeningRegex = new Regex(@"Now listening on: (?<url>.*)\s*$", RegexOptions.None | RegexOptions.Compiled, TimeSpan.FromSeconds(10));
+        private static readonly Regex NowListeningRegex = new(@"Now listening on: (?<url>.*)\s*$", RegexOptions.None | RegexOptions.Compiled, TimeSpan.FromSeconds(10));
         private readonly DotNetWatchOptions _options;
         private readonly string? _browserPath;
         private bool _attemptedBrowserLaunch;

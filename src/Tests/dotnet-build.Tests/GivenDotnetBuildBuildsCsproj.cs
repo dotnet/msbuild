@@ -356,7 +356,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             }
         }
 
-        static readonly List<string> nugetRoots = new List<string>()
+        static readonly List<string> nugetRoots = new()
         {
             TestContext.Current.NuGetCachePath,
             Path.Combine(FileConstants.UserProfileFolder, ".dotnet", "NuGetFallbackFolder")

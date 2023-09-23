@@ -22,7 +22,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 try
                 {
-                    using (PEReader peReader = new PEReader(assemblyStream))
+                    using (PEReader peReader = new(assemblyStream))
                     {
                         if (peReader.HasMetadata)
                         {

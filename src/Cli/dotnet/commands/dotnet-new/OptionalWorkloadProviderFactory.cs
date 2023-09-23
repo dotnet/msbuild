@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Tools.New
     /// </summary>
     internal class OptionalWorkloadProviderFactory : ITemplatePackageProviderFactory
     {
-        public static readonly Guid FactoryId = new Guid("{FAE2BB7C-054D-481B-B75C-E9F524193D56}");
+        public static readonly Guid FactoryId = new("{FAE2BB7C-054D-481B-B75C-E9F524193D56}");
 
         public Guid Id => FactoryId;
 

@@ -38,7 +38,7 @@ namespace Microsoft.NET.Build.Tasks
                     continue;
                 }
 
-                TaskItem resolvedFrameworkReference = new TaskItem(frameworkReference.ItemSpec);
+                TaskItem resolvedFrameworkReference = new(frameworkReference.ItemSpec);
                 resolvedFrameworkReference.SetMetadata(MetadataKeys.OriginalItemSpec, frameworkReference.ItemSpec);
                 resolvedFrameworkReference.SetMetadata(MetadataKeys.IsImplicitlyDefined, frameworkReference.GetMetadata(MetadataKeys.IsImplicitlyDefined));
 

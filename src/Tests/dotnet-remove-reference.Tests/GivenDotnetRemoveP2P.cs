@@ -142,7 +142,7 @@ Options:
         [InlineData("unknownCommandName")]
         public void WhenNoCommandIsPassedItPrintsError(string commandName)
         {
-            List<string> args = new List<string>();
+            List<string> args = new();
             args.Add("remove");
             if (commandName != null)
             {

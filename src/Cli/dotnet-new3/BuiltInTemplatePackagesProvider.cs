@@ -13,7 +13,7 @@ namespace Dotnet_new3
     /// </summary>
     internal class BuiltInTemplatePackagesProviderFactory : ITemplatePackageProviderFactory
     {
-        public static readonly Guid FactoryId = new Guid("{3227D09D-C1EA-48F1-A33B-1F132BFD9F06}");
+        public static readonly Guid FactoryId = new("{3227D09D-C1EA-48F1-A33B-1F132BFD9F06}");
 
         public string DisplayName => "new3 built-in";
 
@@ -44,7 +44,7 @@ namespace Dotnet_new3
 
             public Task<IReadOnlyList<ITemplatePackage>> GetAllTemplatePackagesAsync(CancellationToken cancellationToken)
             {
-                List<ITemplatePackage> templatePackages = new List<ITemplatePackage>();
+                List<ITemplatePackage> templatePackages = new();
                 string? assemblyLocation = Path.GetDirectoryName(typeof(Program).Assembly.Location);
                 string? dn3Path = _settings.Environment.GetEnvironmentVariable("DN3");
 

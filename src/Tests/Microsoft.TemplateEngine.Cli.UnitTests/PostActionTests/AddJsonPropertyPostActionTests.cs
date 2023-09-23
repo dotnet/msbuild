@@ -41,14 +41,14 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.PostActionTests
                 }
             };
 
-            Mock<IReporter> mockReporter = new Mock<IReporter>();
+            Mock<IReporter> mockReporter = new();
 
             mockReporter.Setup(r => r.WriteLine(It.IsAny<string>()))
                 .Verifiable();
 
             Reporter.SetError(mockReporter.Object);
 
-            AddJsonPropertyPostActionProcessor processor = new AddJsonPropertyPostActionProcessor();
+            AddJsonPropertyPostActionProcessor processor = new();
 
             bool result = processor.Process(
                 _engineEnvironmentSettings,
@@ -82,7 +82,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.PostActionTests
                 }
             };
 
-            AddJsonPropertyPostActionProcessor processor = new AddJsonPropertyPostActionProcessor();
+            AddJsonPropertyPostActionProcessor processor = new();
 
             bool result = processor.Process(
                 _engineEnvironmentSettings,
@@ -110,14 +110,14 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.PostActionTests
                 Args = testCase.PostActionArgs
             };
 
-            Mock<IReporter> mockReporter = new Mock<IReporter>();
+            Mock<IReporter> mockReporter = new();
 
             mockReporter.Setup(r => r.WriteLine(It.IsAny<string>()))
                 .Verifiable();
 
             Reporter.SetError(mockReporter.Object);
 
-            AddJsonPropertyPostActionProcessor processor = new AddJsonPropertyPostActionProcessor();
+            AddJsonPropertyPostActionProcessor processor = new();
 
             bool result = processor.Process(
                 _engineEnvironmentSettings,
@@ -149,7 +149,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.PostActionTests
                 Args = testCase.PostActionArgs
             };
 
-            AddJsonPropertyPostActionProcessor processor = new AddJsonPropertyPostActionProcessor();
+            AddJsonPropertyPostActionProcessor processor = new();
 
             bool result = processor.Process(
                 _engineEnvironmentSettings,

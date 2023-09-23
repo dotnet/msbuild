@@ -73,15 +73,15 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
 
         private sealed class AssemblyInfoBuilder
         {
-            private readonly List<Partition> _partitionList = new List<Partition>();
-            private readonly List<AssemblyPartitionInfo> _assemblyInfoList = new List<AssemblyPartitionInfo>();
-            private readonly StringBuilder _builder = new StringBuilder();
+            private readonly List<Partition> _partitionList = new();
+            private readonly List<AssemblyPartitionInfo> _assemblyInfoList = new();
+            private readonly StringBuilder _builder = new();
             private readonly string _assemblyPath;
             private readonly int _methodLimit;
             private readonly bool _hasEventListenerGuard;
             private readonly bool _netFramework;
             private int _currentId;
-            private List<TypeInfo> _currentTypeInfoList = new List<TypeInfo>();
+            private List<TypeInfo> _currentTypeInfoList = new();
 
             private AssemblyInfoBuilder(string assemblyPath, int methodLimit, bool hasEventListenerGuard, bool netFramework = false)
             {

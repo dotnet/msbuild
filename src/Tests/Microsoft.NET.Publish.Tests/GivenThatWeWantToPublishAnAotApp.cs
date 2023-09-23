@@ -1049,7 +1049,7 @@ public class NativeLibraryClass
         {
             try
             {
-                using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
+                using (FileStream fs = new(path, FileMode.Open, FileAccess.Read))
                 using (var peReader = new PEReader(fs))
                 {
                     return !peReader.HasMetadata;

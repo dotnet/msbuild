@@ -228,7 +228,7 @@ public class NETFramework
         [WindowsOnlyFact]
         public void It_resolves_assembly_conflicts_with_a_NETFramework_library()
         {
-            TestProject project = new TestProject()
+            TestProject project = new()
             {
                 Name = "NETFrameworkLibrary",
                 TargetFrameworks = "net462",
@@ -279,7 +279,7 @@ public static class {project.Name}
         [InlineData(true)]
         public void It_uses_hintpath_when_replacing_simple_name_references(bool useFacades)
         {
-            TestProject project = new TestProject()
+            TestProject project = new()
             {
                 Name = "NETFrameworkLibrary",
                 TargetFrameworks = "net462",
@@ -359,7 +359,7 @@ public static class {project.Name}
         {
             string hintPath = BuildReferencedBuildAndReturnOutputDllPath();
 
-            TestProject project = new TestProject()
+            TestProject project = new()
             {
                 Name = "NETFrameworkLibrary",
                 TargetFrameworks = "net462",
@@ -387,7 +387,7 @@ public static class {project.Name}
 
         private string BuildReferencedBuildAndReturnOutputDllPath()
         {
-            TestProject referencedProject = new TestProject()
+            TestProject referencedProject = new()
             {
                 Name = "NETFrameworkLibrary",
                 TargetFrameworks = "net462",
@@ -410,7 +410,7 @@ public static class {project.Name}
         [WindowsOnlyFact]
         public void A_target_can_depend_on_RunResolvePublishAssemblies()
         {
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "DependsOnPublish",
                 TargetFrameworks = "net462",

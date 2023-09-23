@@ -8,7 +8,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool.Tests
 {
     public class ServerLifecycleTest
     {
-        private static ServerRequest EmptyServerRequest => new ServerRequest(1, Array.Empty<RequestArgument>());
+        private static ServerRequest EmptyServerRequest => new(1, Array.Empty<RequestArgument>());
 
         private static ServerResponse EmptyServerResponse => new CompletedServerResponse(
             returnCode: 0,

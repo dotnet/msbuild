@@ -85,7 +85,7 @@ public sealed class LayerEndToEndTests : IDisposable
 
             fs.Position = 0;
 
-            using (GZipStream decompressionStream = new GZipStream(fs, CompressionMode.Decompress))
+            using (GZipStream decompressionStream = new(fs, CompressionMode.Decompress))
             {
                 uncompressedHashBytes = SHA256.HashData(decompressionStream);
             }

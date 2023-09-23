@@ -193,7 +193,7 @@ namespace Microsoft.Net.Sdk.Publish.Tasks.Tests
         }
 
 
-        private static readonly List<object[]> testData = new List<object[]>
+        private static readonly List<object[]> testData = new()
         {
             new object[] {new XDocument(WebConfigTransformTemplates.WebConfigTemplateWithoutLocation) },
             new object[] {new XDocument(WebConfigTransformTemplates.WebConfigTemplateWithNonRelevantLocationFirst) },

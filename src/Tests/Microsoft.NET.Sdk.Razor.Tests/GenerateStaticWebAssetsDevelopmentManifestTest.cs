@@ -520,12 +520,12 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             };
         }
 
-        private static StaticWebAssetNode CreateIntermediateNode(params (string key, StaticWebAssetNode node)[] children) => new StaticWebAssetNode
+        private static StaticWebAssetNode CreateIntermediateNode(params (string key, StaticWebAssetNode node)[] children) => new()
         {
             Children = children.Length == 0 ? null : children.ToDictionary(pair => pair.key, pair => pair.node)
         };
 
-        private static StaticWebAssetNode CreateMatchNode(int index, string subpath) => new StaticWebAssetNode
+        private static StaticWebAssetNode CreateMatchNode(int index, string subpath) => new()
         {
             Asset = new StaticWebAssetMatch { ContentRootIndex = index, SubPath = subpath }
         };

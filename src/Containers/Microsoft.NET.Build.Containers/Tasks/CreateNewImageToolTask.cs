@@ -43,7 +43,7 @@ public partial class CreateNewImage : ToolTask, ICancelableTask
     /// <returns></returns>
     protected override ProcessStartInfo GetProcessStartInfo(string pathToTool, string commandLineCommands, string responseFileSwitch)
     {
-        VSHostObject hostObj = new VSHostObject(HostObject as System.Collections.Generic.IEnumerable<ITaskItem>);
+        VSHostObject hostObj = new(HostObject as System.Collections.Generic.IEnumerable<ITaskItem>);
         if (hostObj.ExtractCredentials(out string user, out string pass, (string s) => Log.LogWarning(s)))
         {
             extractionInfo = (true, user, pass);

@@ -10,7 +10,7 @@ namespace Microsoft.CodeAnalysis.Razor.Serialization
 {
     internal class RazorDiagnosticJsonConverter : JsonConverter
     {
-        public static readonly RazorDiagnosticJsonConverter Instance = new RazorDiagnosticJsonConverter();
+        public static readonly RazorDiagnosticJsonConverter Instance = new();
         private const string RazorDiagnosticMessageKey = "Message";
 
         public override bool CanConvert(Type objectType)

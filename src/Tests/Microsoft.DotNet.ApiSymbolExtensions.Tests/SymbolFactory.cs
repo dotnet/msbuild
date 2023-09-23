@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.ApiSymbolExtensions.Tests
 
             Assert.Empty(compilation.GetDiagnostics());
 
-            MemoryStream stream = new MemoryStream();
+            MemoryStream stream = new();
             compilation.Emit(stream);
             stream.Seek(0, SeekOrigin.Begin);
             return stream;

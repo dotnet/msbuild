@@ -191,7 +191,7 @@ namespace SDDLTests
             string expectedGroupSID, int expectedNumberOfACEsInDACL, params string[] expectedACEs)
         {
             Console.WriteLine($"Verifying directory expectations for {path}");
-            DirectorySecurity ds = new DirectorySecurity(path, s_accessControlSections);
+            DirectorySecurity ds = new(path, s_accessControlSections);
             string descriptor = ds.GetSecurityDescriptorSddlForm(s_accessControlSections);
             VerifySecurityDescriptor(descriptor, expectedOwnerSID, expectedGroupSID, expectedNumberOfACEsInDACL, expectedACEs);
         }
@@ -208,7 +208,7 @@ namespace SDDLTests
             string expectedGroupSID, int expectedNumberOfACEsInDACL, params string[] expectedACEs)
         {
             Console.WriteLine($"Verifying file expectations for {path}");
-            FileSecurity ds = new FileSecurity(path, s_accessControlSections);
+            FileSecurity ds = new(path, s_accessControlSections);
             string descriptor = ds.GetSecurityDescriptorSddlForm(s_accessControlSections);
             VerifySecurityDescriptor(descriptor, expectedOwnerSID, expectedGroupSID, expectedNumberOfACEsInDACL, expectedACEs);
         }
@@ -219,7 +219,7 @@ namespace SDDLTests
         private static void VerifyDescriptors()
         {
             // Dump the descriptor of ProgramData since it's useful for analyzing.
-            DirectorySecurity ds = new DirectorySecurity(s_programData, s_accessControlSections);
+            DirectorySecurity ds = new(s_programData, s_accessControlSections);
             string descriptor = ds.GetSecurityDescriptorSddlForm(s_accessControlSections);
             Console.WriteLine($" Directory: {s_programData}");
             Console.WriteLine($"Descriptor: {descriptor}");

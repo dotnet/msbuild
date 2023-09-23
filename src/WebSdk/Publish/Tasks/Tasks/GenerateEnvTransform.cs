@@ -29,7 +29,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
 
             bool isSuccess = true;
 
-            List<string> generatedFiles = new List<string>();
+            List<string> generatedFiles = new();
             foreach (var envTransformTemplatePath in EnvTransformTemplatePaths)
             {
                 if (File.Exists(envTransformTemplatePath))

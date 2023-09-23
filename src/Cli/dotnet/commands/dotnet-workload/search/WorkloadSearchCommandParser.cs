@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Cli
     internal static class WorkloadSearchCommandParser
     {
         public static readonly CliArgument<string> WorkloadIdStubArgument =
-            new CliArgument<string>(LocalizableStrings.WorkloadIdStubArgumentName)
+            new(LocalizableStrings.WorkloadIdStubArgumentName)
             {
                 Arity = ArgumentArity.ZeroOrOne,
                 Description = LocalizableStrings.WorkloadIdStubArgumentDescription

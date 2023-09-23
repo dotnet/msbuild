@@ -19,7 +19,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 if (_message == null)
                 {
-                    StringBuilder stringBuilder = new StringBuilder();
+                    StringBuilder stringBuilder = new();
                     stringBuilder.Append(string.Format(LocalizableStrings.Exception_InvalidTemplateParameters_MessageHeader, Template.Identity, Template.ShortNameList[0]));
 
                     foreach (var error in ParameterErrors)

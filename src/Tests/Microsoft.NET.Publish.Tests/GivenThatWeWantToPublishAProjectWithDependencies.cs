@@ -20,7 +20,7 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset("SimpleDependencies")
                 .WithSource();
 
-            PublishCommand publishCommand = new PublishCommand(simpleDependenciesAsset);
+            PublishCommand publishCommand = new(simpleDependenciesAsset);
             publishCommand
                 .Execute()
                 .Should()
@@ -62,7 +62,7 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset("DesktopNeedsBindingRedirects")
                 .WithSource();
 
-            PublishCommand publishCommand = new PublishCommand(testAsset);
+            PublishCommand publishCommand = new(testAsset);
             publishCommand
                 .Execute()
                 .Should()
@@ -90,7 +90,7 @@ namespace Microsoft.NET.Publish.Tests
                 .WithSource();
 
             var appProjectDirectory = Path.Combine(testAsset.TestRoot, "App");
-            PublishCommand publishCommand = new PublishCommand(Log, appProjectDirectory);
+            PublishCommand publishCommand = new(Log, appProjectDirectory);
             publishCommand
                 .Execute()
                 .Should()
@@ -120,7 +120,7 @@ namespace Microsoft.NET.Publish.Tests
             string manifestFile1 = Path.Combine(filterProjDir, manifestFileName1);
             string manifestFile2 = Path.Combine(filterProjDir, manifestFileName2);
 
-            PublishCommand publishCommand = new PublishCommand(simpleDependenciesAsset);
+            PublishCommand publishCommand = new(simpleDependenciesAsset);
             publishCommand
                 .Execute($"/p:TargetManifestFiles={manifestFile1}%3b{manifestFile2}")
                 .Should()
@@ -168,7 +168,7 @@ namespace Microsoft.NET.Publish.Tests
             // since this scenario is not supported. Running the published app doesn't work currently.
             // This test should be updated when that bug is fixed.
 
-            PublishCommand publishCommand = new PublishCommand(simpleDependenciesAsset);
+            PublishCommand publishCommand = new(simpleDependenciesAsset);
             publishCommand
                 .Execute($"/p:RuntimeIdentifier={rid}", $"/p:TargetManifestFiles={manifestFile}")
                 .Should()
@@ -277,9 +277,9 @@ namespace Microsoft.NET.Publish.Tests
 
         private static JObject ReadJson(string path)
         {
-            using (JsonTextReader jsonReader = new JsonTextReader(File.OpenText(path)))
+            using (JsonTextReader jsonReader = new(File.OpenText(path)))
             {
-                JsonSerializer serializer = new JsonSerializer();
+                JsonSerializer serializer = new();
                 return serializer.Deserialize<JObject>(jsonReader);
             }
         }

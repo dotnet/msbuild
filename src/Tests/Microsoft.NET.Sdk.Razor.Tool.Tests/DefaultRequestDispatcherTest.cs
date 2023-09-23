@@ -7,7 +7,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool.Tests
 {
     public class DefaultRequestDispatcherTest
     {
-        private static ServerRequest EmptyServerRequest => new ServerRequest(1, Array.Empty<RequestArgument>());
+        private static ServerRequest EmptyServerRequest => new(1, Array.Empty<RequestArgument>());
 
         private static ServerResponse EmptyServerResponse => new CompletedServerResponse(
             returnCode: 0,
@@ -514,8 +514,8 @@ namespace Microsoft.NET.Sdk.Razor.Tool.Tests
 
         private class TestableStream : Stream
         {
-            internal readonly MemoryStream ReadStream = new MemoryStream();
-            internal readonly MemoryStream WriteStream = new MemoryStream();
+            internal readonly MemoryStream ReadStream = new();
+            internal readonly MemoryStream WriteStream = new();
 
             public override bool CanRead => true;
             public override bool CanSeek => false;

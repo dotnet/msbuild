@@ -12,14 +12,14 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_builds_successfully()
         {
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "ExcludeMainProjectFromDeps",
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
             };
 
-            TestProject referencedProject = new TestProject()
+            TestProject referencedProject = new()
             {
                 Name = "ReferencedProject",
                 TargetFrameworks = "netstandard2.0",

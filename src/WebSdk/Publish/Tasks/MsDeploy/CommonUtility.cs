@@ -462,14 +462,14 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         public static void SaveDocument(Xml.XmlDocument document, string outputFileName, System.Text.Encoding encode)
         {
 #if NET472
-            Xml.XmlTextWriter textWriter = new Xml.XmlTextWriter(outputFileName, encode);
+            Xml.XmlTextWriter textWriter = new(outputFileName, encode);
             textWriter.Formatting = System.Xml.Formatting.Indented;
             document.Save(textWriter);
             textWriter.Close();
 #else
-            using (FileStream fs = new FileStream(outputFileName, FileMode.OpenOrCreate))
+            using (FileStream fs = new(outputFileName, FileMode.OpenOrCreate))
             {
-                using (StreamWriter writer = new StreamWriter(fs, encode))
+                using (StreamWriter writer = new(fs, encode))
                 {
                     XmlDeclaration xmldecl;
                     xmldecl = document.CreateXmlDeclaration("1.0", null, null);
@@ -540,7 +540,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             if (MSWebDeploymentAssembly.DynamicAssembly != null && MSWebDeploymentAssembly.DynamicAssembly.Assembly != null)
             {
                 System.Reflection.AssemblyName assemblyName = MSWebDeploymentAssembly.DynamicAssembly.Assembly.GetName();
-                System.Version minVersion = new System.Version(currentMinVersion.Major, currentMinVersion.Minor);
+                System.Version minVersion = new(currentMinVersion.Major, currentMinVersion.Minor);
                 System.Version assemblyVersion = assemblyName.Version; // assembly version only accurate to the minor version
                 bool fMinVersionNotMeet = false;
 
@@ -597,7 +597,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             string searchPath = xmlPath;
             if (!string.IsNullOrEmpty(defaultNamespace))
             {
-                RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"([\w]+)");
+                RegularExpressions.Regex regex = new(@"([\w]+)");
                 searchPath = regex.Replace(xmlPath, defaultNamespace + @":$1");
             }
 
@@ -830,7 +830,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             string absUriPath = string.Empty;
             try
             {
-                System.Uri uri = new System.Uri(physicalPath);
+                System.Uri uri = new(physicalPath);
                 if (uri.IsAbsoluteUri)
                     absUriPath = uri.AbsoluteUri;
             }
@@ -909,7 +909,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         {
             if (baseOptions != null && skipRuleItems != null)
             {
-                System.Collections.Generic.List<string> arguments = new System.Collections.Generic.List<string>(6);
+                System.Collections.Generic.List<string> arguments = new(6);
 
                 foreach (Framework.ITaskItem item in skipRuleItems)
                 {
@@ -1150,7 +1150,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         {
             if (deploymentObject != null && parameters != null)
             {
-                Generic.Dictionary<string, string> nameValueDictionary = new System.Collections.Generic.Dictionary<string, string>(parameters.Count, System.StringComparer.OrdinalIgnoreCase);
+                Generic.Dictionary<string, string> nameValueDictionary = new(parameters.Count, System.StringComparer.OrdinalIgnoreCase);
                 foreach (ParameterInfo item in parameters)
                 {
                     string name = item.Name;
@@ -1202,8 +1202,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         {
             if (deploymentObject != null && parameters != null)
             {
-                Generic.Dictionary<string, string> nameValueDictionary = new System.Collections.Generic.Dictionary<string, string>(parameters.Count, System.StringComparer.OrdinalIgnoreCase);
-                Generic.Dictionary<string, string> entryIdentityDictionary = new System.Collections.Generic.Dictionary<string, string>(parameters.Count);
+                Generic.Dictionary<string, string> nameValueDictionary = new(parameters.Count, System.StringComparer.OrdinalIgnoreCase);
+                Generic.Dictionary<string, string> entryIdentityDictionary = new(parameters.Count);
 
                 foreach (ParameterInfoWithEntry item in parameters)
                 {
@@ -1422,7 +1422,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         {
             if (!string.IsNullOrEmpty(dirPath) && IO.Directory.Exists(dirPath))
             {
-                IO.DirectoryInfo dirInfo = new System.IO.DirectoryInfo(dirPath);
+                IO.DirectoryInfo dirInfo = new(dirPath);
                 RemoveAllEmptyDirectories(dirInfo, Log);
             }
         }
@@ -1472,9 +1472,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
             else
             {
-                Generic.List<Framework.ITaskItem> optimizedValueList = new System.Collections.Generic.List<Microsoft.Build.Framework.ITaskItem>(sortedList);
+                Generic.List<Framework.ITaskItem> optimizedValueList = new(sortedList);
 
-                Generic.Dictionary<string, bool> FoundDictionary = new System.Collections.Generic.Dictionary<string, bool>(optimizedValueList.Count, System.StringComparer.OrdinalIgnoreCase);
+                Generic.Dictionary<string, bool> FoundDictionary = new(optimizedValueList.Count, System.StringComparer.OrdinalIgnoreCase);
 
                 int maxCount = sortedList.Count;
                 int i = 0;
@@ -1509,7 +1509,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                                     if (!string.IsNullOrEmpty(itemData))
                                     {
                                         // Get the data from the next best data
-                                        Utilities.TaskItem newItem = new Microsoft.Build.Utilities.TaskItem(item);
+                                        Utilities.TaskItem newItem = new(item);
                                         newItem.SetMetadata(PropertyName, itemData);
                                         optimizedValueList[currentItemIndex] = newItem;
                                         FoundDictionary[itemSpec] = true; // mark that we already fond teh item;
@@ -1607,7 +1607,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                     e = e.InnerException;
             }
 
-            System.Text.StringBuilder strBuilder = new System.Text.StringBuilder(e.Message.Length * 4);
+            System.Text.StringBuilder strBuilder = new(e.Message.Length * 4);
             System.Type t = e.GetType();
             if (IsType(t, MSWebDeploymentAssembly.DynamicAssembly.GetType(MSDeploy.TypeName.DeploymentEncryptionException)))
             {
@@ -1748,7 +1748,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         {
             int count = taskItems != null ? taskItems.GetLength(0) : 0;
             Generic.SortedList<Generic.KeyValuePair<int, int>, Framework.ITaskItem> sortedList =
-                new System.Collections.Generic.SortedList<System.Collections.Generic.KeyValuePair<int, int>, Microsoft.Build.Framework.ITaskItem>(count, ParameterTaskComparer);
+                new(count, ParameterTaskComparer);
 
             for (int i = 0; i < count; i++)
             {
@@ -1789,7 +1789,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
         static public string EnsureTrailingSlashes(string rootPath, char slash)
         {
-            string directorySeparator = new string(slash, 1);
+            string directorySeparator = new(slash, 1);
             string rootPathWithSlash = string.Concat(rootPath, rootPath.EndsWith(directorySeparator, System.StringComparison.Ordinal) ? string.Empty : directorySeparator);
             return rootPathWithSlash;
         }
@@ -1854,7 +1854,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         {
             // Mark the assembly version.
             // System.Version version1_1 = new System.Version("7.1");
-            Generic.Dictionary<string, string> versionsList = new System.Collections.Generic.Dictionary<string, string>();
+            Generic.Dictionary<string, string> versionsList = new();
             if (!string.IsNullOrEmpty(strVersionsToTry))
             {
                 foreach (string str in strVersionsToTry.Split(';'))
@@ -1909,7 +1909,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         {
             if (!string.IsNullOrEmpty(text) && text.IndexOfAny(@"$%".ToArray()) >= 0)
             {
-                System.Text.StringBuilder stringBuilder = new Text.StringBuilder(text.Length * 2);
+                System.Text.StringBuilder stringBuilder = new(text.Length * 2);
                 char[] chars = text.ToCharArray();
                 int i = 0;
                 for (i = 0; i < chars.Count() - 2; i++)

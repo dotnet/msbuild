@@ -9,7 +9,7 @@ namespace Microsoft.NET.TestFramework.Utilities
         {
             XNamespace ns = project.Root.Name.Namespace;
 
-            XElement target = new XElement(ns + "Target", new XAttribute("Name", "DisplayMessages"),
+            XElement target = new(ns + "Target", new XAttribute("Name", "DisplayMessages"),
                 new XAttribute("BeforeTargets", beforeTargets));
             project.Root.Add(target);
 

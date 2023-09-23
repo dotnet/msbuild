@@ -61,7 +61,7 @@ namespace Microsoft.Win32.Msi.Manual.Tests
         void InstallMsi(string path)
         {
             // Configure event handler for install messages
-            UserInterfaceHandler ux = new UserInterfaceHandler(InstallLogMode.ACTIONDATA | InstallLogMode.ACTIONSTART | InstallLogMode.PROGRESS);
+            UserInterfaceHandler ux = new(InstallLogMode.ACTIONDATA | InstallLogMode.ACTIONSTART | InstallLogMode.PROGRESS);
 
             ux.ActionData += OnActionData;
             ux.ActionStart += OnActionStart;

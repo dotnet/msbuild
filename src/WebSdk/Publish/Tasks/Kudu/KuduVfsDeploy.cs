@@ -9,7 +9,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
 {
     public class KuduVfsDeploy : KuduConnect
     {
-        private object _syncObject = new object();
+        private object _syncObject = new();
         private TaskLoggingHelper _logger;
         private List<System.Threading.Tasks.Task> _postTasks;
 

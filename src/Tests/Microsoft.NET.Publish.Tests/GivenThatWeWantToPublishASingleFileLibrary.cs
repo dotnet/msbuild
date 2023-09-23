@@ -15,13 +15,13 @@ namespace Microsoft.NET.Publish.Tests
         public void ItPublishesSuccessfullyWithRIDAndPublishSingleFileLibrary()
         {
             var targetFramework = ToolsetInfo.CurrentTargetFramework;
-            TestProject referencedProject = new TestProject("Library")
+            TestProject referencedProject = new("Library")
             {
                 TargetFrameworks = targetFramework,
                 IsExe = false
             };
 
-            TestProject testProject = new TestProject("MainProject")
+            TestProject testProject = new("MainProject")
             {
                 TargetFrameworks = targetFramework,
                 IsExe = true
@@ -31,7 +31,7 @@ namespace Microsoft.NET.Publish.Tests
             referencedProject.RecordProperties("RuntimeIdentifier");
 
             string rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
-            List<string> args = new List<string> { "/p:PublishSingleFile=true", $"/p:RuntimeIdentifier={rid}" };
+            List<string> args = new() { "/p:PublishSingleFile=true", $"/p:RuntimeIdentifier={rid}" };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
             new PublishCommand(testAsset)

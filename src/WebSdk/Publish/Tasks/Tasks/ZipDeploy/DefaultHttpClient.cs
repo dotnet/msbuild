@@ -8,7 +8,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
 {
     internal class DefaultHttpClient : IHttpClient, IDisposable
     {
-        private readonly HttpClient _httpClient = new HttpClient()
+        private readonly HttpClient _httpClient = new()
         {
             Timeout = Timeout.InfiniteTimeSpan
         };

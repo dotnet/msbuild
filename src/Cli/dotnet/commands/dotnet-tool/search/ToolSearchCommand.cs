@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Tool.Search
         public override int Execute()
         {
             var isDetailed = _parseResult.GetValue(ToolSearchCommandParser.DetailOption);
-            NugetSearchApiParameter nugetSearchApiParameter = new NugetSearchApiParameter(_parseResult);
+            NugetSearchApiParameter nugetSearchApiParameter = new(_parseResult);
             IReadOnlyCollection<SearchResultPackage> searchResultPackages =
                 NugetSearchApiResultDeserializer.Deserialize(
                     _nugetToolSearchApiRequest.GetResult(nugetSearchApiParameter).GetAwaiter().GetResult());

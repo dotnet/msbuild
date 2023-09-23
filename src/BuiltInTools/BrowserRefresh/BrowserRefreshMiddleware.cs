@@ -11,7 +11,7 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
 {
     public class BrowserRefreshMiddleware
     {
-        private static readonly MediaTypeHeaderValue _textHtmlMediaType = new MediaTypeHeaderValue("text/html");
+        private static readonly MediaTypeHeaderValue _textHtmlMediaType = new("text/html");
         private readonly RequestDelegate _next;
         private readonly ILogger _logger;
 

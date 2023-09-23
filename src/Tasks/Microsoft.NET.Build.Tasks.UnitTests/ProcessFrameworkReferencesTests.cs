@@ -10,7 +10,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
     public class ProcessFrameworkReferencesTests
     {
         private MockTaskItem _validWindowsSDKKnownFrameworkReference
-            = new MockTaskItem("Microsoft.Windows.SDK.NET.Ref",
+            = new("Microsoft.Windows.SDK.NET.Ref",
                 new Dictionary<string, string>
                 {
                     {"TargetFramework", "net5.0-windows10.0.18362"},
@@ -27,7 +27,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
 
         private MockTaskItem _netcoreAppKnownFrameworkReference =
-            new MockTaskItem("Microsoft.NETCore.App",
+            new("Microsoft.NETCore.App",
                 new Dictionary<string, string>
                 {
                     {"TargetFramework", "net5.0"},

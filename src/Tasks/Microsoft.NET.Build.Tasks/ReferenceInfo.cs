@@ -38,7 +38,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public static IEnumerable<ReferenceInfo> CreateReferenceInfos(IEnumerable<ITaskItem> referencePaths)
         {
-            List<ReferenceInfo> referenceInfos = new List<ReferenceInfo>();
+            List<ReferenceInfo> referenceInfos = new();
             foreach (ITaskItem referencePath in referencePaths)
             {
                 referenceInfos.Add(CreateReferenceInfo(referencePath));
@@ -123,7 +123,7 @@ namespace Microsoft.NET.Build.Tasks
             IEnumerable<ITaskItem> referencePaths,
             IEnumerable<ITaskItem> referenceSatellitePaths)
         {
-            Dictionary<string, ReferenceInfo> directReferences = new Dictionary<string, ReferenceInfo>();
+            Dictionary<string, ReferenceInfo> directReferences = new();
 
             foreach (ITaskItem referencePath in referencePaths)
             {
@@ -174,7 +174,7 @@ namespace Microsoft.NET.Build.Tasks
                 string fusionName = referencePath.GetMetadata("FusionName");
                 if (!string.IsNullOrEmpty(fusionName))
                 {
-                    AssemblyName assemblyName = new AssemblyName(fusionName);
+                    AssemblyName assemblyName = new(fusionName);
                     version = assemblyName.Version?.ToString();
                 }
 

@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Tools.New
     /// </summary>
     internal class BuiltInTemplatePackageProviderFactory : ITemplatePackageProviderFactory
     {
-        public static readonly Guid FactoryId = new Guid("{4B11226E-4594-43A4-B843-EB97447B6455}");
+        public static readonly Guid FactoryId = new("{4B11226E-4594-43A4-B843-EB97447B6455}");
 
         public string DisplayName => ".NET SDK";
 

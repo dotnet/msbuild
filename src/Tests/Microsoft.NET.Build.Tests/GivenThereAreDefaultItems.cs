@@ -107,7 +107,7 @@ namespace Microsoft.NET.Build.Tests
 
                 project.Root.Element(ns + "PropertyGroup").Add(new XElement(ns + "EnableDefaultItems", "False"));
 
-                XElement itemGroup = new XElement(ns + "ItemGroup");
+                XElement itemGroup = new(ns + "ItemGroup");
                 project.Root.Add(itemGroup);
                 itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", "**\\*.cs")));
             };
@@ -149,7 +149,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 var ns = project.Root.Name.Namespace;
 
-                XElement itemGroup = new XElement(ns + "ItemGroup");
+                XElement itemGroup = new(ns + "ItemGroup");
                 project.Root.Add(itemGroup);
                 itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", "..\\Shared\\**\\*.cs")));
             };
@@ -185,7 +185,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 var ns = project.Root.Name.Namespace;
 
-                XElement itemGroup = new XElement(ns + "ItemGroup");
+                XElement itemGroup = new(ns + "ItemGroup");
                 project.Root.Add(itemGroup);
                 itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Remove", "Excluded\\**\\*.cs")));
             };
@@ -222,7 +222,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 var ns = project.Root.Name.Namespace;
 
-                XElement itemGroup = new XElement(ns + "ItemGroup");
+                XElement itemGroup = new(ns + "ItemGroup");
                 project.Root.Add(itemGroup);
                 itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", "obj\\Class2.cs")));
             };
@@ -258,7 +258,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 var ns = project.Root.Name.Namespace;
 
-                XElement itemGroup = new XElement(ns + "ItemGroup");
+                XElement itemGroup = new(ns + "ItemGroup");
                 project.Root.Add(itemGroup);
                 itemGroup.Add(new XElement(ns + "EmbeddedResource", new XAttribute("Include", "CSharpAsResource.cs")));
                 itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Remove", "CSharpAsResource.cs")));
@@ -308,7 +308,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 var ns = project.Root.Name.Namespace;
 
-                XElement itemGroup = new XElement(ns + "ItemGroup");
+                XElement itemGroup = new(ns + "ItemGroup");
                 project.Root.Add(itemGroup);
                 itemGroup.Add(new XElement(ns + "Content", new XAttribute("Include", "CSharpAsContent.cs"),
                     new XAttribute("CopyToOutputDirectory", "true")));
@@ -376,7 +376,7 @@ namespace Microsoft.NET.Build.Tests
                 {
                     // "Manual" include via project file modification.
                     var ns = project.Root.Name.Namespace;
-                    XElement itemGroup = new XElement(ns + "ItemGroup");
+                    XElement itemGroup = new(ns + "ItemGroup");
                     project.Root.Add(itemGroup);
                     itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", testProject.Name + ".cs")));
                     itemGroup.Add(new XElement(ns + "Compile", new XAttribute("Include", testProject.Name + "Program.cs")));
@@ -815,7 +815,7 @@ public class Class1
             var projectFolder = Path.Combine(testAsset.TestRoot, testProject.Name);
 
             File.WriteAllText(Path.Combine(projectFolder, "ResourcesResw.resw"), "<root/>");
-            List<string> imageFiles = new List<string> { "TestImage1.png", "TestImage2.bmp", "TestImage3.jpg", "TestImage4.dds", "TestImage5.tif", "TestImage6.tga", "TestImage7.gif" };
+            List<string> imageFiles = new() { "TestImage1.png", "TestImage2.bmp", "TestImage3.jpg", "TestImage4.dds", "TestImage5.tif", "TestImage6.tga", "TestImage7.gif" };
             foreach (string fileName in imageFiles)
             {
                 File.WriteAllText(Path.Combine(projectFolder, fileName), "");

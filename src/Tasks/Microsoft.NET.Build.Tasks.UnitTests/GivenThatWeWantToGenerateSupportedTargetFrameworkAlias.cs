@@ -10,7 +10,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 {
     public class GivenThatWeWantToGenerateSupportedTargetFrameworkAlias
     {
-        private static List<(string targetFrameworkMoniker, string displayName)> MockSupportedTargetFramework = new List<(string, string)>()
+        private static List<(string targetFrameworkMoniker, string displayName)> MockSupportedTargetFramework = new()
             {
                 ( ".NETCoreApp,Version=v3.0", ".NET Core 3.0"),
                 ( ".NETCoreApp,Version=v3.1", ".NET Core 3.1"),

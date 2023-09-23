@@ -137,7 +137,7 @@ namespace Microsoft.DotNet.Workloads.Workload
 
                 if (downloadFolder != null)
                 {
-                    DirectoryPath downloadFolderDirectoryPath = new DirectoryPath(downloadFolder);
+                    DirectoryPath downloadFolderDirectoryPath = new(downloadFolder);
                     foreach (var packDownload in packDownloads)
                     {
                         Reporter.WriteLine(string.Format(Install.LocalizableStrings.DownloadingPackToCacheMessage, packDownload.NuGetPackageId, packDownload.NuGetPackageVersion, downloadFolder));

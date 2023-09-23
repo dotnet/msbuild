@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
             int peekCounts = 0;
 
             // Setup transmission.SendAsync() to throw WebException with ProxyNameResolutionFailure failure
-            WebException webException = new WebException(
+            WebException webException = new(
                 string.Empty,
                 new Exception(),
                 WebExceptionStatus.ProxyNameResolutionFailure,
@@ -128,10 +128,10 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
 
         private WebException GenerateWebException(HttpStatusCode httpStatusCode)
         {
-            Mock<HttpWebResponse> httpWebResponse = new Mock<HttpWebResponse>();
+            Mock<HttpWebResponse> httpWebResponse = new();
             httpWebResponse.SetupGet(webResponse => webResponse.StatusCode).Returns(httpStatusCode);
 
-            WebException webException = new WebException(string.Empty, new Exception(), WebExceptionStatus.SendFailure,
+            WebException webException = new(string.Empty, new Exception(), WebExceptionStatus.SendFailure,
                 httpWebResponse.Object);
 
             return webException;
@@ -167,7 +167,7 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
         private StorageService CreateStorageService([CallerMemberName] string testName = null)
         {
             string tempPath = Path.Combine(_testAssetsManager.CreateTestDirectory("TestStorageService", identifier: testName).Path, Path.GetTempFileName());
-            StorageService storageService = new StorageService();
+            StorageService storageService = new();
             storageService.Init(tempPath);
             return storageService;
         }
@@ -175,7 +175,7 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
         private SenderUnderTest GetSenderUnderTest([CallerMemberName] string testName = null)
         {
             StorageService storageService = CreateStorageService(testName);
-            PersistenceTransmitter transmitter = new PersistenceTransmitter(storageService, 0);
+            PersistenceTransmitter transmitter = new(storageService, 0);
             return new SenderUnderTest(StorageBaseMock.Object, transmitter);
         }
     }

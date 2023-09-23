@@ -123,7 +123,7 @@ namespace Microsoft.DotNet.CommandFactory
                 ProjectToolsCommandResolverName,
                 string.Join(Environment.NewLine, possiblePackageRoots.Select((p) => $"- {p}"))));
 
-            List<NuGetFramework> toolFrameworksToCheck = new List<NuGetFramework>();
+            List<NuGetFramework> toolFrameworksToCheck = new();
             toolFrameworksToCheck.Add(project.DotnetCliToolTargetFramework);
 
             //  NuGet restore in Visual Studio may restore for netcoreapp1.0.  So if that happens, fall back to

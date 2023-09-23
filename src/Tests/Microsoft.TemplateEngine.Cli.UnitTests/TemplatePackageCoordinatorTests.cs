@@ -25,7 +25,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             TemplatePackageManager templatePackageManager = A.Fake<TemplatePackageManager>();
             var packageCoordinator = new TemplatePackageCoordinator(settings, templatePackageManager);
-            BufferedReporter bufferedReporter = new BufferedReporter();
+            BufferedReporter bufferedReporter = new();
 
             var localPackage = A.Fake<IManagedTemplatePackage>();
             A.CallTo(() => localPackage.Identifier).Returns("testPackage");
@@ -52,7 +52,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             TemplatePackageManager templatePackageManager = A.Fake<TemplatePackageManager>();
             var packageCoordinator = new TemplatePackageCoordinator(settings, templatePackageManager);
-            BufferedReporter bufferedReporter = new BufferedReporter();
+            BufferedReporter bufferedReporter = new();
 
             var localPackage = A.Fake<IManagedTemplatePackage>();
             A.CallTo(() => localPackage.Identifier).Returns("testPackage");
@@ -72,7 +72,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             TemplatePackageManager templatePackageManager = A.Fake<TemplatePackageManager>();
             var packageCoordinator = new TemplatePackageCoordinator(settings, templatePackageManager);
-            BufferedReporter bufferedReporter = new BufferedReporter();
+            BufferedReporter bufferedReporter = new();
 
             var version = new NuGetVersion("1.5.24");
             var identity = new PackageIdentity("PackageId", version);
@@ -118,7 +118,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             TemplatePackageManager templatePackageManager = A.Fake<TemplatePackageManager>();
             var packageCoordinator = new TemplatePackageCoordinator(settings, templatePackageManager);
-            BufferedReporter bufferedReporter = new BufferedReporter();
+            BufferedReporter bufferedReporter = new();
 
             var version = new NuGetVersion("1.5.24");
             var identity = new PackageIdentity("PackageId", version);
@@ -165,7 +165,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             TemplatePackageManager templatePackageManager = A.Fake<TemplatePackageManager>();
             var packageCoordinator = new TemplatePackageCoordinator(settings, templatePackageManager);
-            BufferedReporter bufferedReporter = new BufferedReporter();
+            BufferedReporter bufferedReporter = new();
 
             var version = new NuGetVersion("1.5.24");
             var identity = new PackageIdentity("PackageId", version);
@@ -208,7 +208,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             TemplatePackageManager templatePackageManager = A.Fake<TemplatePackageManager>();
             var packageCoordinator = new TemplatePackageCoordinator(settings, templatePackageManager);
-            BufferedReporter bufferedReporter = new BufferedReporter();
+            BufferedReporter bufferedReporter = new();
 
             var version = new NuGetVersion("1.5.24");
             var identity = new PackageIdentity("PackageId", version);

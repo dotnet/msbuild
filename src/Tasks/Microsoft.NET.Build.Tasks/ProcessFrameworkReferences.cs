@@ -164,7 +164,7 @@ namespace Microsoft.NET.Build.Tasks
 
             var frameworkReferenceMap = FrameworkReferences.ToDictionary(fr => fr.ItemSpec, StringComparer.OrdinalIgnoreCase);
 
-            HashSet<string> unrecognizedRuntimeIdentifiers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            HashSet<string> unrecognizedRuntimeIdentifiers = new(StringComparer.OrdinalIgnoreCase);
 
             bool windowsOnlyErrorLogged = false;
             foreach (var knownFrameworkReference in knownFrameworkReferencesForTargetFramework)
@@ -207,7 +207,7 @@ namespace Microsoft.NET.Build.Tasks
                     }
                 }
 
-                TaskItem targetingPack = new TaskItem(knownFrameworkReference.Name);
+                TaskItem targetingPack = new(knownFrameworkReference.Name);
                 targetingPack.SetMetadata(MetadataKeys.NuGetPackageId, knownFrameworkReference.TargetingPackName);
                 targetingPack.SetMetadata(MetadataKeys.PackageConflictPreferredPackages, string.Join(";", preferredPackages));
 
@@ -255,7 +255,7 @@ namespace Microsoft.NET.Build.Tasks
                         !(DisableTransitiveFrameworkReferenceDownloads && frameworkReference == null))
                     {
                         //  Download targeting pack
-                        TaskItem packageToDownload = new TaskItem(knownFrameworkReference.TargetingPackName);
+                        TaskItem packageToDownload = new(knownFrameworkReference.TargetingPackName);
                         packageToDownload.SetMetadata(MetadataKeys.Version, targetingPackVersion);
 
                         packagesToDownload.Add(packageToDownload);
@@ -357,7 +357,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 if (!string.IsNullOrEmpty(knownFrameworkReference.RuntimeFrameworkName) && !knownFrameworkReference.RuntimePackAlwaysCopyLocal)
                 {
-                    TaskItem runtimeFramework = new TaskItem(knownFrameworkReference.RuntimeFrameworkName);
+                    TaskItem runtimeFramework = new(knownFrameworkReference.RuntimeFrameworkName);
 
                     runtimeFramework.SetMetadata(MetadataKeys.Version, runtimeFrameworkVersion);
                     runtimeFramework.SetMetadata(MetadataKeys.FrameworkName, knownFrameworkReference.Name);
@@ -399,7 +399,7 @@ namespace Microsoft.NET.Build.Tasks
             _normalizedTargetFrameworkVersion ??= NormalizeVersion(new Version(TargetFrameworkVersion));
             packagesToDownload ??= new List<ITaskItem>();
 
-            List<ITaskItem> implicitPackageReferences = new List<ITaskItem>();
+            List<ITaskItem> implicitPackageReferences = new();
 
             if (ReadyToRunEnabled && ReadyToRunUseCrossgen2)
             {
@@ -507,7 +507,7 @@ namespace Microsoft.NET.Build.Tasks
             if (knownRuntimePacksForTargetFramework?.Any() == true)
             {
                 // Determine the known runtime identifier platforms based on all available Microsoft.NETCore.App packs
-                HashSet<string> knownRuntimeIdentifierPlatforms = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                HashSet<string> knownRuntimeIdentifierPlatforms = new(StringComparer.OrdinalIgnoreCase);
                 var netCoreAppPacks = knownRuntimePacksForTargetFramework!.Where(krp => krp.Name.Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase));
                 foreach (KnownRuntimePack netCoreAppPack in netCoreAppPacks)
                 {
@@ -659,7 +659,7 @@ namespace Microsoft.NET.Build.Tasks
 
                     if (runtimePacks != null)
                     {
-                        TaskItem runtimePackItem = new TaskItem(runtimePackName);
+                        TaskItem runtimePackItem = new(runtimePackName);
                         runtimePackItem.SetMetadata(MetadataKeys.NuGetPackageId, runtimePackName);
                         runtimePackItem.SetMetadata(MetadataKeys.NuGetPackageVersion, resolvedRuntimePackVersion);
                         runtimePackItem.SetMetadata(MetadataKeys.FrameworkName, selectedRuntimePack.Name);
@@ -688,7 +688,7 @@ namespace Microsoft.NET.Build.Tasks
                         runtimePackPath == null &&
                         (wasReferencedDirectly || !DisableTransitiveFrameworkReferenceDownloads))
                     {
-                        TaskItem packageToDownload = new TaskItem(runtimePackName);
+                        TaskItem packageToDownload = new(runtimePackName);
                         packageToDownload.SetMetadata(MetadataKeys.Version, resolvedRuntimePackVersion);
 
                         packagesToDownload.Add(packageToDownload);

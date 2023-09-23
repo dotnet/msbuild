@@ -81,7 +81,7 @@ namespace Microsoft.NET.Build.Tasks
 
             char current;
 
-            StringBuilder builder = new StringBuilder(path.Length);
+            StringBuilder builder = new(path.Length);
 
             int start = 0;
             if (IsDirectorySeparator(path[start]))

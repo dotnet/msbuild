@@ -12,7 +12,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         public CliEnvironment()
         {
-            Dictionary<string, string> variables = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            Dictionary<string, string> variables = new(StringComparer.OrdinalIgnoreCase)
             {
                 { "TEMPLATE_ENGINE_DISABLE_FILEWATCHER", "1" }
             };

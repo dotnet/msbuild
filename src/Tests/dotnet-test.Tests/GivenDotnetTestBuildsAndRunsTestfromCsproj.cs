@@ -465,7 +465,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             }
 
             // Verify coverage file.
-            DirectoryInfo d = new DirectoryInfo(resultsDirectory);
+            DirectoryInfo d = new(resultsDirectory);
             FileInfo[] coverageFileInfos = d.GetFiles("*.coverage", SearchOption.AllDirectories);
             Assert.Single(coverageFileInfos);
 
@@ -501,7 +501,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             }
 
             // Verify coverage file.
-            DirectoryInfo d = new DirectoryInfo(resultsDirectory);
+            DirectoryInfo d = new(resultsDirectory);
             FileInfo[] coverageFileInfos = d.GetFiles("*.coverage", SearchOption.AllDirectories);
             Assert.Single(coverageFileInfos);
 
@@ -537,7 +537,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             }
 
             // Verify coverage file.
-            DirectoryInfo d = new DirectoryInfo(resultsDirectory);
+            DirectoryInfo d = new(resultsDirectory);
             FileInfo[] coverageFileInfos = d.GetFiles("*.cobertura.xml", SearchOption.AllDirectories);
             Assert.Single(coverageFileInfos);
 
@@ -578,7 +578,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             }
 
             // Verify coverage file.
-            DirectoryInfo d = new DirectoryInfo(resultsDirectory);
+            DirectoryInfo d = new(resultsDirectory);
             FileInfo[] coverageFileInfos = d.GetFiles("*.coverage", SearchOption.AllDirectories);
             Assert.Empty(coverageFileInfos);
 

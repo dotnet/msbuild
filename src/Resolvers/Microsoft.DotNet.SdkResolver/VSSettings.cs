@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.DotNetSdkResolver
 {
     public sealed class VSSettings
     {
-        private readonly object _lock = new object();
+        private readonly object _lock = new();
         private readonly string _settingsFilePath;
         private readonly bool _disallowPrereleaseByDefault;
         private FileInfo _settingsFile;
@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.DotNetSdkResolver
 
         // In the product, this singleton is used. It must be safe to use in parallel on multiple threads.
         // In tests, mock instances can be created with the test constructor below.
-        public static readonly VSSettings Ambient = new VSSettings();
+        public static readonly VSSettings Ambient = new();
 
         private VSSettings()
         {

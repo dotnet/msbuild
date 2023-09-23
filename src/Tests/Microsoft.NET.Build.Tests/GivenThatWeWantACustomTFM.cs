@@ -13,7 +13,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var targetFramework = ToolsetInfo.CurrentTargetFramework;
             var runtimeIdentifier = $"{ToolsetInfo.LatestMacRuntimeIdentifier}-x64";
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "CustomTFMProject",
                 IsExe = true,

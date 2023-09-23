@@ -167,7 +167,7 @@ public class CreateNewImageTests
         pcp.ContainerRepository = "dotnet/envvarvalidation";
         pcp.ContainerImageTag = "latest";
 
-        Dictionary<string, string> dict = new Dictionary<string, string>();
+        Dictionary<string, string> dict = new();
         dict.Add("Value", "Foo");
 
         pcp.ContainerEnvironmentVariables = new[] { new TaskItem("B@dEnv.Var", dict), new TaskItem("GoodEnvVar", dict) };
@@ -226,7 +226,7 @@ public class CreateNewImageTests
         var logger = loggerFactory.CreateLogger(nameof(CreateNewImage_RootlessBaseImage));
 
         // Build a rootless base runtime image.
-        Registry registry = new Registry(DockerRegistryManager.LocalRegistry, logger);
+        Registry registry = new(DockerRegistryManager.LocalRegistry, logger);
 
         ImageBuilder imageBuilder = await registry.GetImageManifestAsync(
             DockerRegistryManager.RuntimeBaseImage,
@@ -246,7 +246,7 @@ public class CreateNewImageTests
         await registry.PushAsync(builtImage, sourceReference, destinationReference, cancellationToken: default).ConfigureAwait(false);
 
         // Build an application image on top of the rootless base runtime image.
-        DirectoryInfo newProjectDir = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, nameof(CreateNewImage_RootlessBaseImage)));
+        DirectoryInfo newProjectDir = new(Path.Combine(TestSettings.TestArtifactsDirectory, nameof(CreateNewImage_RootlessBaseImage)));
 
         if (newProjectDir.Exists)
         {
@@ -266,7 +266,7 @@ public class CreateNewImageTests
             .Execute()
             .Should().Pass();
 
-        CreateNewImage task = new CreateNewImage();
+        CreateNewImage task = new();
         var (buildEngine, errors) = SetupBuildEngine();
         task.BuildEngine = buildEngine;
         task.BaseRegistry = "localhost:5010";

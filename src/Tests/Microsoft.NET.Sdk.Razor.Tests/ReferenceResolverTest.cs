@@ -203,7 +203,7 @@ namespace Microsoft.NET.Sdk.Razor.Test
 
         private class TestReferencesToMvcResolver : ReferenceResolver
         {
-            private readonly Dictionary<string, string[]> _references = new Dictionary<string, string[]>();
+            private readonly Dictionary<string, string[]> _references = new();
 
             public TestReferencesToMvcResolver(AssemblyItem[] referenceItems)
                 : base(MvcAssemblies, referenceItems)

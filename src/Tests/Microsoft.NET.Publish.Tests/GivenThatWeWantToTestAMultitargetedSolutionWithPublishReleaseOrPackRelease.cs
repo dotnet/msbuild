@@ -38,7 +38,7 @@ namespace Microsoft.NET.Publish.Tests
             string exePReleaseValue, string libraryPReleaseValue, [CallerMemberName] string callingMethod = "", string identifier = "")
         {
             // Project Setup
-            List<TestProject> testProjects = new List<TestProject>();
+            List<TestProject> testProjects = new();
             var testProject = new TestProject("TestProject")
             {
                 TargetFrameworks = String.Join(";", exeProjTfms),

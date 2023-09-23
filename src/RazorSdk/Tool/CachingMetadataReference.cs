@@ -7,7 +7,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
 {
     internal sealed class CachingMetadataReference : PortableExecutableReference
     {
-        private static readonly MetadataCache _metadataCache = new MetadataCache();
+        private static readonly MetadataCache _metadataCache = new();
 
         public CachingMetadataReference(string fullPath, MetadataReferenceProperties properties)
             : base(properties, fullPath)

@@ -98,7 +98,7 @@ namespace Microsoft.NET.Build.Tests
 
             commandResult.Should().Pass();
 
-            Dictionary<string, string> cultureValueMap = new Dictionary<string, string>()
+            Dictionary<string, string> cultureValueMap = new()
             {
                 {"", "Welcome to .Net!"},
                 {"da", "Velkommen til .Net!"},

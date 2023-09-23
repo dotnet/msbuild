@@ -10,7 +10,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 {
     internal class ChmodPostActionProcessor : PostActionProcessorBase
     {
-        private static readonly Guid ActionProcessorId = new Guid("cb9a6cf3-4f5c-4860-b9d2-03a574959774");
+        private static readonly Guid ActionProcessorId = new("cb9a6cf3-4f5c-4860-b9d2-03a574959774");
 
         public override Guid Id => ActionProcessorId;
 

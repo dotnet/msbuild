@@ -14,7 +14,7 @@ namespace Microsoft.NET.Restore.Tests
         {
             const string obsoletePackageId = "Banana.CommandLineTool";
 
-            TestProject toolProject = new TestProject()
+            TestProject toolProject = new()
             {
                 Name = "ObsoleteCliToolRefRestoreProject",
                 TargetFrameworks = "netstandard2.0",

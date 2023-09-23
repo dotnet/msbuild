@@ -33,14 +33,14 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy.Tests
                 Assert.True(result);
             };
 
-            Mock<IHttpClient> client = new Mock<IHttpClient>();
-            HttpRequestMessage requestMessage = new HttpRequestMessage();
+            Mock<IHttpClient> client = new();
+            HttpRequestMessage requestMessage = new();
             client.Setup(x => x.DefaultRequestHeaders).Returns(requestMessage.Headers);
             client.Setup(c => c.GetAsync(new Uri(deployUrl, UriKind.RelativeOrAbsolute), It.IsAny<CancellationToken>())).Returns(() =>
             {
                 return Task.FromResult(new HttpResponseMessage(responseStatusCode));
             });
-            ZipDeploymentStatus deploymentStatus = new ZipDeploymentStatus(client.Object, $"{UserAgentName}/{UserAgentVersion}", null, false);
+            ZipDeploymentStatus deploymentStatus = new(client.Object, $"{UserAgentName}/{UserAgentVersion}", null, false);
 
             // Act
             var actualdeployStatus = await deploymentStatus.PollDeploymentStatusAsync(deployUrl, userName, password);
@@ -75,21 +75,21 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy.Tests
                 LogUrl = "https://mywebapp.scm.azurewebsites.net/api/deployments/latest/log",
             };
 
-            Mock<IHttpClient> client = new Mock<IHttpClient>();
-            HttpRequestMessage requestMessage = new HttpRequestMessage();
+            Mock<IHttpClient> client = new();
+            HttpRequestMessage requestMessage = new();
             client.Setup(x => x.DefaultRequestHeaders).Returns(requestMessage.Headers);
             client.Setup(c => c.GetAsync(new Uri(deployUrl, UriKind.RelativeOrAbsolute), It.IsAny<CancellationToken>())).Returns(() =>
             {
                 string statusJson = JsonSerializer.Serialize(deploymentResponse);
 
                 HttpContent httpContent = new StringContent(statusJson, Encoding.UTF8, "application/json");
-                HttpResponseMessage responseMessage = new HttpResponseMessage(responseStatusCode)
+                HttpResponseMessage responseMessage = new(responseStatusCode)
                 {
                     Content = httpContent
                 };
                 return Task.FromResult(responseMessage);
             });
-            ZipDeploymentStatus deploymentStatus = new ZipDeploymentStatus(client.Object, $"{UserAgentName}/{UserAgentVersion}", null, false);
+            ZipDeploymentStatus deploymentStatus = new(client.Object, $"{UserAgentName}/{UserAgentVersion}", null, false);
 
             // Act
             var actualdeployStatus = await deploymentStatus.PollDeploymentStatusAsync(deployUrl, userName, password);

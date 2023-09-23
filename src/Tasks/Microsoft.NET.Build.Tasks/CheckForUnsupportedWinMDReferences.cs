@@ -18,7 +18,7 @@ namespace Microsoft.NET.Build.Tasks
         protected override void ExecuteCore()
         {
             //  Check if there are referenced WinMD files.  If so, we will generate an error
-            List<ITaskItem> winMDReferences = new List<ITaskItem>();
+            List<ITaskItem> winMDReferences = new();
             foreach (var referencePath in ReferencePaths)
             {
                 if (Path.GetExtension(referencePath.ItemSpec).Equals(".winmd", StringComparison.OrdinalIgnoreCase))
@@ -80,7 +80,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 try
                 {
-                    using (PEReader peReader = new PEReader(assemblyStream, PEStreamOptions.LeaveOpen))
+                    using (PEReader peReader = new(assemblyStream, PEStreamOptions.LeaveOpen))
                     {
                         if (peReader.HasMetadata)
                         {

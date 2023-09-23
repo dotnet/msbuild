@@ -8,7 +8,7 @@ namespace Microsoft.CodeAnalysis.Razor.Serialization
 {
     internal class TagHelperDescriptorJsonConverter : JsonConverter
     {
-        public static readonly TagHelperDescriptorJsonConverter Instance = new TagHelperDescriptorJsonConverter();
+        public static readonly TagHelperDescriptorJsonConverter Instance = new();
 
         public override bool CanConvert(Type objectType)
         {

@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Installer.Windows
         /// <summary>
         /// Queue to track log requests issued before the pipestream is connected.
         /// </summary>
-        private readonly Queue<string> _messageQueue = new Queue<string>();
+        private readonly Queue<string> _messageQueue = new();
 
         public string LogPath
         {

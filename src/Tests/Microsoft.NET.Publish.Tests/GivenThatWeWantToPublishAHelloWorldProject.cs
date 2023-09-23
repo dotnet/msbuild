@@ -130,7 +130,7 @@ namespace Microsoft.NET.Publish.Tests
             var targetFramework = ToolsetInfo.CurrentTargetFramework;
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "Hello.World",
                 TargetFrameworks = targetFramework,
@@ -171,7 +171,7 @@ public static class Program
 
             var targetFramework = "netcoreapp2.0";
 
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "Hello",
                 TargetFrameworks = targetFramework,
@@ -257,7 +257,7 @@ public static class Program
             }
             var rid = ridSpecific ? EnvironmentInfo.GetCompatibleRid(targetFramework) : null;
 
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = selfContained ? "SelfContainedWithConflicts" :
                     (ridSpecific ? "RidSpecificSharedConflicts" : "PortableWithConflicts"),

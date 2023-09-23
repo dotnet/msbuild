@@ -9,7 +9,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     internal class TemplateCommandArgs : ICommandArgs
     {
         private readonly TemplateCommand _command;
-        private Dictionary<string, OptionResult> _templateOptions = new Dictionary<string, OptionResult>();
+        private Dictionary<string, OptionResult> _templateOptions = new();
 
         public TemplateCommandArgs(TemplateCommand command, BaseCommand parentCommand, ParseResult parseResult)
         {

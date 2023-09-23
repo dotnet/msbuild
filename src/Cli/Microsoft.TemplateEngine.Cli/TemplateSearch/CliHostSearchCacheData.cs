@@ -26,7 +26,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                 }
 
                 //fallback to old behavior
-                Dictionary<string, HostSpecificTemplateData> cliData = new Dictionary<string, HostSpecificTemplateData>();
+                Dictionary<string, HostSpecificTemplateData> cliData = new();
                 foreach (JProperty data in cacheObject.Properties())
                 {
                     try

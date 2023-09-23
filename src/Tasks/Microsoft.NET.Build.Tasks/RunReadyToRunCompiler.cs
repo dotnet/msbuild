@@ -215,7 +215,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private string GetAssemblyReferencesCommands()
         {
-            StringBuilder result = new StringBuilder();
+            StringBuilder result = new();
 
             var references = _createCompositeImage ? ReadyToRunCompositeBuildReferences : ImplementationAssemblyReferences;
 
@@ -265,7 +265,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private string GenerateCrossgenResponseFile()
         {
-            StringBuilder result = new StringBuilder();
+            StringBuilder result = new();
 
             result.AppendLine("/nologo");
 
@@ -295,7 +295,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private string GenerateCrossgen2ResponseFile()
         {
-            StringBuilder result = new StringBuilder();
+            StringBuilder result = new();
 
             string jitPath = Crossgen2Tool.GetMetadata(MetadataKeys.JitPath);
             if (!string.IsNullOrEmpty(jitPath))

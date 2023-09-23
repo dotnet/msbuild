@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Cli
         private static string SdkRootFolder => Path.Combine(typeof(DotnetFiles).GetTypeInfo().Assembly.Location, "..");
 
         private static Lazy<DotnetVersionFile> s_versionFileObject =
-            new Lazy<DotnetVersionFile>(() => new DotnetVersionFile(VersionFile));
+            new(() => new DotnetVersionFile(VersionFile));
 
         /// <summary>
         /// The SDK ships with a .version file that stores the commit information and SDK version

@@ -690,7 +690,7 @@ Commands:
             var lib = new ProjDir(setup.LibDir);
             var net45lib = new ProjDir(Path.Combine(setup.TestRoot, "Net45Lib"));
 
-            List<string> args = new List<string>();
+            List<string> args = new();
             if (useFrameworkArg)
             {
                 args.Add("-f");

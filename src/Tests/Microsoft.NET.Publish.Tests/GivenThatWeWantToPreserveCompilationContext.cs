@@ -219,7 +219,7 @@ namespace Microsoft.NET.Publish.Tests
             refsDirectory.Should().NotHaveFile("Newtonsoft.Json.dll");
         }
 
-        Dictionary<string, string> CompileLibraryNames = new Dictionary<string, string>()
+        Dictionary<string, string> CompileLibraryNames = new()
         {
             { "net46",
 @"TestApp.exe

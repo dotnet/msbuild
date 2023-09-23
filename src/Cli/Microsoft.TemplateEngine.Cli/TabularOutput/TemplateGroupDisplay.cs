@@ -71,11 +71,11 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
         {
             var groupedTemplates = GetAuthorBasedGroups(templateGroup);
 
-            List<string> languageGroups = new List<string>();
+            List<string> languageGroups = new();
             foreach (var templates in groupedTemplates)
             {
-                List<string> languagesForDisplay = new List<string>();
-                HashSet<string> uniqueLanguages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                List<string> languagesForDisplay = new();
+                HashSet<string> uniqueLanguages = new(StringComparer.OrdinalIgnoreCase);
                 string defaultLanguageDisplay = string.Empty;
                 foreach (ITemplateInfo template in templates)
                 {
@@ -138,14 +138,14 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
             string? defaultLanguage,
             IEnvironment environment)
         {
-            List<TemplateGroupTableRow> templateGroupsForDisplay = new List<TemplateGroupTableRow>();
+            List<TemplateGroupTableRow> templateGroupsForDisplay = new();
             IEnumerable<IGrouping<string?, ITemplateInfo>> groupedTemplateList = templateList.GroupBy(x => x.GroupIdentity, x => !string.IsNullOrEmpty(x.GroupIdentity), StringComparer.OrdinalIgnoreCase);
             foreach (IGrouping<string?, ITemplateInfo> templateGroup in groupedTemplateList)
             {
                 ITemplateInfo highestPrecedenceTemplate = templateGroup.OrderByDescending(x => x.Precedence).First();
                 string shortNames = string.Join(",", templateGroup.SelectMany(t => t.ShortNameList).Distinct(StringComparer.OrdinalIgnoreCase));
 
-                TemplateGroupTableRow groupDisplayInfo = new TemplateGroupTableRow
+                TemplateGroupTableRow groupDisplayInfo = new()
                 {
                     Name = highestPrecedenceTemplate.Name,
                     ShortNames = shortNames,
@@ -167,7 +167,7 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
         {
             var groupedTemplates = GetAuthorBasedGroups(templateGroup);
 
-            List<string> classificationGroups = new List<string>();
+            List<string> classificationGroups = new();
             foreach (var templates in groupedTemplates)
             {
                 classificationGroups.Add(
@@ -202,11 +202,11 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
             string? defaultLanguage,
             IEnvironment environment)
         {
-            List<TemplateGroupTableRow> templateGroupsForDisplay = new List<TemplateGroupTableRow>();
+            List<TemplateGroupTableRow> templateGroupsForDisplay = new();
             foreach (TemplateGroup templateGroup in templateGroupList)
             {
                 ITemplateInfo highestPrecedenceTemplate = templateGroup.Templates.OrderByDescending(x => x.Precedence).First();
-                TemplateGroupTableRow groupDisplayInfo = new TemplateGroupTableRow
+                TemplateGroupTableRow groupDisplayInfo = new()
                 {
                     Name = highestPrecedenceTemplate.Name,
                     ShortNames = string.Join(",", templateGroup.ShortNames),
@@ -252,7 +252,7 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
         {
             var groupedTemplates = GetAuthorBasedGroups(templateGroup);
 
-            List<string> typesGroups = new List<string>();
+            List<string> typesGroups = new();
             foreach (var templates in groupedTemplates)
             {
                 typesGroups.Add(

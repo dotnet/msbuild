@@ -68,7 +68,7 @@ public class ImageBuilderTests
         JsonNode? node = JsonNode.Parse(simpleImageConfig);
         Assert.NotNull(node);
 
-        ImageConfig baseConfig = new ImageConfig(node);
+        ImageConfig baseConfig = new(node);
 
         baseConfig.AddLabel("testLabel1", "v1");
         baseConfig.AddLabel("testLabel2", "v2");
@@ -139,7 +139,7 @@ public class ImageBuilderTests
         JsonNode? node = JsonNode.Parse(simpleImageConfig);
         Assert.NotNull(node);
 
-        ImageConfig baseConfig = new ImageConfig(node);
+        ImageConfig baseConfig = new(node);
 
         baseConfig.AddLabel("testLabel1", "v1");
         baseConfig.AddLabel("existing2", "v2");
@@ -207,7 +207,7 @@ public class ImageBuilderTests
         JsonNode? node = JsonNode.Parse(simpleImageConfig);
         Assert.NotNull(node);
 
-        ImageConfig baseConfig = new ImageConfig(node);
+        ImageConfig baseConfig = new(node);
 
         baseConfig.ExposePort(6000, PortType.tcp);
         baseConfig.ExposePort(6010, PortType.udp);
@@ -279,7 +279,7 @@ public class ImageBuilderTests
         JsonNode? node = JsonNode.Parse(simpleImageConfig);
         Assert.NotNull(node);
 
-        ImageConfig baseConfig = new ImageConfig(node);
+        ImageConfig baseConfig = new(node);
 
         baseConfig.ExposePort(6000, PortType.tcp);
         baseConfig.ExposePort(6010, PortType.udp);

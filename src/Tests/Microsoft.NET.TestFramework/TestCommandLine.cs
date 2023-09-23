@@ -37,9 +37,9 @@ namespace Microsoft.NET.TestFramework
 
         public static TestCommandLine Parse(string[] args)
         {
-            TestCommandLine ret = new TestCommandLine();
+            TestCommandLine ret = new();
             ret.RemainingArgs = new List<string>();
-            Stack<string> argStack = new Stack<string>(args.Reverse());
+            Stack<string> argStack = new(args.Reverse());
 
             while (argStack.Any())
             {
@@ -125,10 +125,10 @@ namespace Microsoft.NET.TestFramework
 
         public List<string> GetXunitArgsFromTestConfig()
         {
-            List<TestSpecifier> testsToSkip = new List<TestSpecifier>();
-            List<TestList> testLists = new List<TestList>();
+            List<TestSpecifier> testsToSkip = new();
+            List<TestList> testLists = new();
 
-            List<string> ret = new List<string>();
+            List<string> ret = new();
             foreach (var testConfigFile in TestConfigFiles)
             {
                 var testConfig = XDocument.Load(testConfigFile);
@@ -210,7 +210,7 @@ namespace Microsoft.NET.TestFramework
 
             public static TestList Parse(XElement element)
             {
-                TestList group = new TestList();
+                TestList group = new();
 
                 group.Name = element.Attribute("Name")?.Value;
 
@@ -237,7 +237,7 @@ namespace Microsoft.NET.TestFramework
 
             public static TestSpecifier Parse(XElement element)
             {
-                TestSpecifier spec = new TestSpecifier();
+                TestSpecifier spec = new();
                 switch (element.Name.LocalName.ToLowerInvariant())
                 {
                     case "method":

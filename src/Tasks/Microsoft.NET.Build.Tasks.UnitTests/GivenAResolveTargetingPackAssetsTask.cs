@@ -280,7 +280,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             FrameworkListDefinition defaultObject = (FrameworkListDefinition)constructor.Invoke(args);
 
-            List<string> seenKeys = new List<string>(args.Length + 1);
+            List<string> seenKeys = new(args.Length + 1);
 
             seenKeys.Add(defaultObject.CacheKey());
 

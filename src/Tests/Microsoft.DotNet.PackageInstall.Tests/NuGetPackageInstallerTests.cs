@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
     {
         private const string TestPackageVersion = "1.0.4";
         private const string TestPreviewPackageVersion = "2.0.1-preview1";
-        private static readonly PackageId TestPackageId = new PackageId("global.tool.console.demo");
+        private static readonly PackageId TestPackageId = new("global.tool.console.demo");
         private readonly NuGetPackageDownloader _installer;
 
         private readonly DirectoryPath _tempDirectory;
@@ -88,7 +88,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         public async Task GivenNugetConfigInstallSucceeds()
         {
             FilePath nugetConfigPath = GenerateRandomNugetConfigFilePath();
-            FileSystemWrapper fileSystem = new FileSystemWrapper();
+            FileSystemWrapper fileSystem = new();
             WriteNugetConfigFileToPointToTheFeed(fileSystem, nugetConfigPath);
 
             string packagePath = await _installer.DownloadPackageAsync(
@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                 new DirectoryPath(Path.GetTempPath()).WithSubDirectories(Path.GetRandomFileName());
 
             FilePath validNugetConfigPath = GenerateRandomNugetConfigFilePath();
-            FileSystemWrapper fileSystem = new FileSystemWrapper();
+            FileSystemWrapper fileSystem = new();
             WriteNugetConfigFileToPointToTheFeed(fileSystem, validNugetConfigPath);
 
             // "source" option will override everything like nuget.config just like "dotner restore --source ..."
@@ -124,7 +124,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             DirectoryPath directoryBelowNugetConfig = nugetConfigPath.GetDirectoryPath().WithSubDirectories("subDir");
             Directory.CreateDirectory(directoryBelowNugetConfig.Value);
 
-            FileSystemWrapper fileSystem = new FileSystemWrapper();
+            FileSystemWrapper fileSystem = new();
             WriteNugetConfigFileToPointToTheFeed(fileSystem, nugetConfigPath);
 
             string packagePath = await _installer.DownloadPackageAsync(
@@ -176,8 +176,8 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         [WindowsOnlyFact]
         public async Task GivenANonSignedSdkItShouldPrintMessageOnce()
         {
-            BufferedReporter bufferedReporter = new BufferedReporter();
-            NuGetPackageDownloader nuGetPackageDownloader = new NuGetPackageDownloader(_tempDirectory, null,
+            BufferedReporter bufferedReporter = new();
+            NuGetPackageDownloader nuGetPackageDownloader = new(_tempDirectory, null,
                 new MockFirstPartyNuGetPackageSigningVerifier(),
                 _logger, bufferedReporter, restoreActionConfig: new RestoreActionConfig(NoCache: true));
             await nuGetPackageDownloader.DownloadPackageAsync(
@@ -201,7 +201,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         public async Task WhenCalledWithNotSignedPackageItShouldThrowWithCommandOutput()
         {
             string commandOutput = "COMMAND OUTPUT";
-            NuGetPackageDownloader nuGetPackageDownloader = new NuGetPackageDownloader(_tempDirectory, null,
+            NuGetPackageDownloader nuGetPackageDownloader = new(_tempDirectory, null,
                 new MockFirstPartyNuGetPackageSigningVerifier(verifyResult: false, commandOutput: commandOutput),
                 _logger, restoreActionConfig: new RestoreActionConfig(NoCache: true), verifySignatures: true);
 
@@ -217,8 +217,8 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         [UnixOnlyFact]
         public async Task GivenANonWindowsMachineItShouldPrintMessageOnce()
         {
-            BufferedReporter bufferedReporter = new BufferedReporter();
-            NuGetPackageDownloader nuGetPackageDownloader = new NuGetPackageDownloader(_tempDirectory, null,
+            BufferedReporter bufferedReporter = new();
+            NuGetPackageDownloader nuGetPackageDownloader = new(_tempDirectory, null,
                 new MockFirstPartyNuGetPackageSigningVerifier(),
                 _logger, bufferedReporter, restoreActionConfig: new RestoreActionConfig(NoCache: true));
             await nuGetPackageDownloader.DownloadPackageAsync(
@@ -254,7 +254,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
 
         private string DownloadSamplePackage(PackageId packageId)
         {
-            NuGetPackageDownloader nuGetPackageDownloader = new NuGetPackageDownloader(_tempDirectory, null,
+            NuGetPackageDownloader nuGetPackageDownloader = new(_tempDirectory, null,
                 new MockFirstPartyNuGetPackageSigningVerifier(),
                 _logger, restoreActionConfig: new RestoreActionConfig(NoCache: true));
 
@@ -349,7 +349,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                     Path.GetRandomFileName() + " " + Path.GetRandomFileName());
 
             FilePath nugetConfigFullPath =
-                new FilePath(Path.GetFullPath(Path.Combine(tempPathForNugetConfigWithWhiteSpace, nugetConfigName)));
+                new(Path.GetFullPath(Path.Combine(tempPathForNugetConfigWithWhiteSpace, nugetConfigName)));
             return nugetConfigFullPath;
         }
 

@@ -47,7 +47,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid();
 
-            List<string> arguments = new List<string>();
+            List<string> arguments = new();
             if (passSelfContained)
             {
                 arguments.Add("--self-contained");

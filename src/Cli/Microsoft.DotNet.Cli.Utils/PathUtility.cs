@@ -230,7 +230,7 @@ namespace Microsoft.DotNet.Tools.Common
                 throw new ArgumentNullException(nameof(relativePath));
             }
 
-            Uri resultUri = new Uri(new Uri(basePath), new Uri(relativePath, UriKind.Relative));
+            Uri resultUri = new(new Uri(basePath), new Uri(relativePath, UriKind.Relative));
             return resultUri.LocalPath;
         }
 

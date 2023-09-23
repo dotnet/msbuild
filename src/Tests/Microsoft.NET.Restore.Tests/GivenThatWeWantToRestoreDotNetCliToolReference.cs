@@ -19,7 +19,7 @@ namespace Microsoft.NET.Restore.Tests
         [Fact]
         public void It_can_restore_with_netcoreapp2_2()
         {
-            TestProject toolProject = new TestProject()
+            TestProject toolProject = new()
             {
                 Name = "TestTool" + nameof(It_can_restore_with_netcoreapp2_2),
                 TargetFrameworks = "netcoreapp1.0",
@@ -34,7 +34,7 @@ namespace Microsoft.NET.Restore.Tests
 
             string nupkgPath = Path.Combine(packCommand.ProjectRootPath, "bin", "Debug");
 
-            TestProject toolReferenceProject = new TestProject()
+            TestProject toolReferenceProject = new()
             {
                 Name = "DotNetCliToolReferenceProject",
                 IsExe = true,

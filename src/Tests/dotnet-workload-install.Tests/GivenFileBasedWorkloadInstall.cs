@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
         static PackInfo CreatePackInfo(string id, string version, WorkloadPackKind kind, string path, string resolvedPackageId)
-            => new PackInfo(new WorkloadPackId(id), version, kind, path, resolvedPackageId);
+            => new(new WorkloadPackId(id), version, kind, path, resolvedPackageId);
 
         [Fact]
         public void GivenManagedInstallItCanInstallDirectoryPacks()

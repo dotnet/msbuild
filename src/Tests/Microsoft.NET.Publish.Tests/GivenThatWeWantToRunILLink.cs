@@ -939,7 +939,7 @@ namespace Microsoft.NET.Publish.Tests
                 }
             }
 
-            StringBuilder errorMessage = new StringBuilder();
+            StringBuilder errorMessage = new();
 
             if (extraWarnings.Any())
             {
@@ -1757,7 +1757,7 @@ namespace Microsoft.NET.Publish.Tests
 
         private static bool DoesImageHaveMethod(string path, string methodNameToCheck)
         {
-            using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
+            using (FileStream fs = new(path, FileMode.Open, FileAccess.Read))
             using (var peReader = new PEReader(fs))
             {
                 var metadataReader = peReader.GetMetadataReader();

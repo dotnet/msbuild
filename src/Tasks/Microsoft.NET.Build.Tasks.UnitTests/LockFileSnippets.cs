@@ -167,7 +167,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             string[] runtimeTargets = null,
             string[] contentFiles = null)
         {
-            List<string> parts = new List<string>();
+            List<string> parts = new();
             parts.Add($"\"type\": \"{type}\"");
 
             if (frameworkAssemblies != null)
@@ -213,7 +213,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             string warningLevel = "0",
             string[] targetGraphs = null)
         {
-            List<string> parts = new List<string>();
+            List<string> parts = new();
 
             parts.Add($"\"code\": \"{code}\"");
             parts.Add($"\"level\": \"{level}\"");

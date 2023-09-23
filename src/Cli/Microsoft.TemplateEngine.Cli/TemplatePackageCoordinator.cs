@@ -203,7 +203,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             // In future we might want give user ability to pick IManagerSourceProvider by Name or GUID
             var managedSourceProvider = _templatePackageManager.GetBuiltInManagedProvider(InstallationScope.Global);
-            List<InstallRequest> installRequests = new List<InstallRequest>();
+            List<InstallRequest> installRequests = new();
 
             foreach (string installArg in args.TemplatePackages)
             {
@@ -223,7 +223,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             //validate if installation requests have unique identifier
-            HashSet<string> identifiers = new HashSet<string>();
+            HashSet<string> identifiers = new();
             foreach (InstallRequest installRequest in installRequests)
             {
                 if (identifiers.Add(installRequest.PackageIdentifier))
@@ -653,7 +653,7 @@ namespace Microsoft.TemplateEngine.Cli
             IReadOnlyList<IManagedTemplatePackage> templatePackages = await _templatePackageManager.GetManagedTemplatePackagesAsync(false, cancellationToken).ConfigureAwait(false);
 
             var packagesToUninstall = new Dictionary<IManagedTemplatePackageProvider, List<IManagedTemplatePackage>>();
-            List<string> notFoundPackages = new List<string>();
+            List<string> notFoundPackages = new();
             foreach (var requestedPackageIdentifier in commandArgs.TemplatePackages)
             {
                 bool templatePackageIdentified = false;
@@ -1092,7 +1092,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 currentDirectory = Directory.GetCurrentDirectory();
                 ISettings settings = global::NuGet.Configuration.Settings.LoadDefaultSettings(currentDirectory);
-                PackageSourceProvider packageSourceProvider = new PackageSourceProvider(settings);
+                PackageSourceProvider packageSourceProvider = new(settings);
                 defaultSources = packageSourceProvider.LoadPackageSources().Where(source => source.IsEnabled);
                 if (includeNuGetFeed)
                 {
@@ -1114,7 +1114,7 @@ namespace Microsoft.TemplateEngine.Cli
                 return defaultSources;
             }
 
-            List<PackageSource> customSources = new List<PackageSource>();
+            List<PackageSource> customSources = new();
             foreach (string source in additionalSources)
             {
                 if (string.IsNullOrWhiteSpace(source))
@@ -1126,7 +1126,7 @@ namespace Microsoft.TemplateEngine.Cli
                     Reporter.Verbose.WriteLine($"Custom source {source} is already loaded from default configuration.");
                     continue;
                 }
-                PackageSource packageSource = new PackageSource(source);
+                PackageSource packageSource = new(source);
                 if (packageSource.TrySourceAsUri == null)
                 {
                     Reporter.Output.WriteLine(string.Format(LocalizableStrings.DetailsCommand_UnableToLoadResource, source));

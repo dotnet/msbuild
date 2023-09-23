@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Tools.Build
 
             bool noRestore = parseResult.GetResult(BuildCommandParser.NoRestoreOption) is not null;
 
-            BuildCommand command = new BuildCommand(
+            BuildCommand command = new(
                 msbuildArgs,
                 noRestore,
                 msbuildPath);

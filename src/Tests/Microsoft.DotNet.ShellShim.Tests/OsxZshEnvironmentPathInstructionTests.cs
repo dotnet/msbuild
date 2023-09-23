@@ -13,12 +13,12 @@ namespace Microsoft.DotNet.ShellShim.Tests
         [UnixOnlyFact]
         public void GivenPathNotSetItPrintsManualInstructions()
         {
-            BufferedReporter reporter = new BufferedReporter();
-            BashPathUnderHomeDirectory toolsPath = new BashPathUnderHomeDirectory(
+            BufferedReporter reporter = new();
+            BashPathUnderHomeDirectory toolsPath = new(
                 "/home/user",
                 ".dotnet/tools");
             string pathValue = @"/usr/bin";
-            Mock<IEnvironmentProvider> provider = new Mock<IEnvironmentProvider>(MockBehavior.Strict);
+            Mock<IEnvironmentProvider> provider = new(MockBehavior.Strict);
 
             provider
                 .Setup(p => p.GetEnvironmentVariable("PATH"))
@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
                 .Setup(p => p.GetEnvironmentVariable("SHELL"))
                 .Returns("/bin/bash");
 
-            OsxZshEnvironmentPathInstruction environmentPath = new OsxZshEnvironmentPathInstruction(
+            OsxZshEnvironmentPathInstruction environmentPath = new(
                 toolsPath,
                 reporter,
                 provider.Object);
@@ -45,18 +45,18 @@ namespace Microsoft.DotNet.ShellShim.Tests
         [InlineData("/home/user/.dotnet/tools")]
         public void GivenPathSetItPrintsNothing(string toolsDirectoryOnPath)
         {
-            BufferedReporter reporter = new BufferedReporter();
-            BashPathUnderHomeDirectory toolsPath = new BashPathUnderHomeDirectory(
+            BufferedReporter reporter = new();
+            BashPathUnderHomeDirectory toolsPath = new(
                 "/home/user",
                 ".dotnet/tools");
             string pathValue = @"/usr/bin";
-            Mock<IEnvironmentProvider> provider = new Mock<IEnvironmentProvider>(MockBehavior.Strict);
+            Mock<IEnvironmentProvider> provider = new(MockBehavior.Strict);
 
             provider
                 .Setup(p => p.GetEnvironmentVariable("PATH"))
                 .Returns(pathValue + ":" + toolsDirectoryOnPath);
 
-            OsxZshEnvironmentPathInstruction environmentPath = new OsxZshEnvironmentPathInstruction(
+            OsxZshEnvironmentPathInstruction environmentPath = new(
                 toolsPath,
                 reporter,
                 provider.Object);
@@ -70,12 +70,12 @@ namespace Microsoft.DotNet.ShellShim.Tests
         [InlineData("~/.dotnet/tools")]
         public void GivenPathSetItPrintsInstruction(string toolsDirectoryOnPath)
         {
-            BufferedReporter reporter = new BufferedReporter();
-            BashPathUnderHomeDirectory toolsPath = new BashPathUnderHomeDirectory(
+            BufferedReporter reporter = new();
+            BashPathUnderHomeDirectory toolsPath = new(
                 "/home/user",
                 ".dotnet/tools");
             string pathValue = @"/usr/bin";
-            Mock<IEnvironmentProvider> provider = new Mock<IEnvironmentProvider>(MockBehavior.Strict);
+            Mock<IEnvironmentProvider> provider = new(MockBehavior.Strict);
 
             provider
                 .Setup(p => p.GetEnvironmentVariable("PATH"))
@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
                 .Setup(p => p.GetEnvironmentVariable("SHELL"))
                 .Returns("/bin/zsh");
 
-            OsxZshEnvironmentPathInstruction environmentPath = new OsxZshEnvironmentPathInstruction(
+            OsxZshEnvironmentPathInstruction environmentPath = new(
                 toolsPath,
                 reporter,
                 provider.Object);

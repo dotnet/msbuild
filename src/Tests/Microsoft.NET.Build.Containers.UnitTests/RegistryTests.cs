@@ -30,7 +30,7 @@ public class RegistryTests : IDisposable
     public void CheckIfGoogleArtifactRegistry(string registryName, bool isECR)
     {
         ILogger logger = _loggerFactory.CreateLogger(nameof(CheckIfGoogleArtifactRegistry));
-        Registry registry = new Registry(registryName, logger);
+        Registry registry = new(registryName, logger);
         Assert.Equal(isECR, registry.IsGoogleArtifactRegistry);
     }
 
@@ -38,7 +38,7 @@ public class RegistryTests : IDisposable
     public void DockerIoAlias()
     {
         ILogger logger = _loggerFactory.CreateLogger(nameof(DockerIoAlias));
-        Registry registry = new Registry("docker.io", logger);
+        Registry registry = new("docker.io", logger);
         Assert.True(registry.IsDockerHub);
         Assert.Equal("docker.io", registry.RegistryName);
         Assert.Equal("registry-1.docker.io", registry.BaseUri.Host);

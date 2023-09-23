@@ -15,7 +15,7 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public override CommandResult Execute(IEnumerable<string> args)
         {
-            List<string> newArgs = new List<string>();
+            List<string> newArgs = new();
             newArgs.Add("remove");
             if (!string.IsNullOrEmpty(_projectName))
             {

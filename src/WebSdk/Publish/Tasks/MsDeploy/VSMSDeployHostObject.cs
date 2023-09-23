@@ -33,7 +33,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         {
             if (!string.IsNullOrEmpty(userName))
             {
-                TaskItem credentialItem = new TaskItem(CredentailItemSpecName);
+                TaskItem credentialItem = new(CredentailItemSpecName);
                 ITaskItem2 iTaskItem2 = (credentialItem as ITaskItem2);
                 iTaskItem2.SetMetadataValueLiteral(UserMetaDataName, userName);
                 iTaskItem2.SetMetadataValueLiteral(PasswordMetaDataName, password);
@@ -46,13 +46,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         {
             foreach (FileSkipData p in fileSkipInfos)
             {
-                TaskItem srcSkipRuleItem = new TaskItem(SkipFileItemSpecName);
+                TaskItem srcSkipRuleItem = new(SkipFileItemSpecName);
                 srcSkipRuleItem.SetMetadata("ObjectName", p.sourceProvider);
                 srcSkipRuleItem.SetMetadata("AbsolutePath", System.Text.RegularExpressions.Regex.Escape(Path.Combine(rootFolderOfFileToPublish, p.sourceFilePath)) + "$");
                 srcSkipRuleItem.SetMetadata(SkipApplyMetadataName, SourceDeployObject);
                 _items.Add(srcSkipRuleItem);
 
-                TaskItem destSkipRuleItem = new TaskItem(SkipFileItemSpecName);
+                TaskItem destSkipRuleItem = new(SkipFileItemSpecName);
                 destSkipRuleItem.SetMetadata("ObjectName", p.destinationProvider);
                 destSkipRuleItem.SetMetadata("AbsolutePath", System.Text.RegularExpressions.Regex.Escape(p.destinationFilePath) + "$");
                 destSkipRuleItem.SetMetadata(SkipApplyMetadataName, DestinationDeployObject);

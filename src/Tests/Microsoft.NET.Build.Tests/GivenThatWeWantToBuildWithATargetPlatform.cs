@@ -76,7 +76,7 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_fails_on_unsupported_os()
         {
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "UnsupportedOS",
                 TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-unsupported"

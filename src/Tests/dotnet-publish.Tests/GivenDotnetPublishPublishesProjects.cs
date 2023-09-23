@@ -171,7 +171,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: $"PSC-OVERRIDES-{publishSelfContained}-{selfContainedIsGlobal}-{publishSelfContainedIsGlobal}");
             var publishCommand = new DotnetCommand(Log);
-            List<string> args = new List<string>
+            List<string> args = new()
             {
                 "publish",
                 selfContainedIsGlobal ? $"/p:SelfContained={selfContained}" : "",

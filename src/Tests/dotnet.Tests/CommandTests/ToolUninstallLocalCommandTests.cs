@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         private readonly BufferedReporter _reporter;
         private readonly string _temporaryDirectory;
         private readonly string _manifestFilePath;
-        private readonly PackageId _packageIdDotnsay = new PackageId("dotnetsay");
+        private readonly PackageId _packageIdDotnsay = new("dotnetsay");
         private readonly ToolManifestFinder _toolManifestFinder;
         private readonly ToolManifestEditor _toolManifestEditor;
         private readonly ToolUninstallLocalCommand _defaultToolUninstallLocalCommand;

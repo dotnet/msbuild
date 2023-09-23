@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Installer.Windows
         /// <summary>
         /// Thread safe queue use to store incoming log request messages.
         /// </summary>
-        private readonly BlockingCollection<string> _messageQueue = new BlockingCollection<string>();
+        private readonly BlockingCollection<string> _messageQueue = new();
 
         private bool _disposed;
         private readonly StreamWriter _stream;
@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Installer.Windows
             // Spin up additional threads to listen for log requests coming in from external processes.
             foreach (string logPipeName in logPipeNames)
             {
-                Thread logRequestThread = new Thread(ProcessLogRequests) { IsBackground = true };
+                Thread logRequestThread = new(ProcessLogRequests) { IsBackground = true };
                 logRequestThread.Start(logPipeName);
             }
 
@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.Installer.Windows
         /// <param name="pipeName">The name of the pipe.</param>
         public void AddNamedPipe(string pipeName)
         {
-            Thread logRequestThread = new Thread(ProcessLogRequests) { IsBackground = true };
+            Thread logRequestThread = new(ProcessLogRequests) { IsBackground = true };
             logRequestThread.Start(pipeName);
         }
 
@@ -121,7 +121,7 @@ namespace Microsoft.DotNet.Installer.Windows
         /// <param name="logPipeName"></param>
         private void ProcessLogRequests(object logPipeName)
         {
-            NamedPipeClientStream logPipe = new NamedPipeClientStream(".", (string)logPipeName, PipeDirection.InOut);
+            NamedPipeClientStream logPipe = new(".", (string)logPipeName, PipeDirection.InOut);
             PipeStreamMessageDispatcherBase dispatcher = new(logPipe);
             dispatcher.Connect();
             LogMessage($"Log connected: {logPipeName}.");

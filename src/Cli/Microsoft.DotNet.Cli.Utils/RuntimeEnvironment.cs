@@ -17,8 +17,8 @@ namespace Microsoft.DotNet.Cli.Utils
 
     internal static class RuntimeEnvironment
     {
-        private static readonly Lazy<Platform> _platform = new Lazy<Platform>(DetermineOSPlatform);
-        private static readonly Lazy<DistroInfo> _distroInfo = new Lazy<DistroInfo>(LoadDistroInfo);
+        private static readonly Lazy<Platform> _platform = new(DetermineOSPlatform);
+        private static readonly Lazy<DistroInfo> _distroInfo = new(LoadDistroInfo);
 
         public static Platform OperatingSystemPlatform { get; } = GetOSPlatform();
         public static string OperatingSystemVersion { get; } = GetOSVersion();

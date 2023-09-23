@@ -16,7 +16,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     partial class WorkloadManifestReader
     {
         private static LocalizationCatalog ReadLocalizationCatalog(ref Utf8JsonStreamReader reader)
-            => new LocalizationCatalog(ReadStringDictionary(ref reader));
+            => new(ReadStringDictionary(ref reader));
 
         public static string? GetLocalizationCatalogFilePath(string manifestFilePath, CultureInfo? culture = null)
             => GetLocalizationCatalogFilePath(manifestFilePath, culture ?? CultureInfo.CurrentUICulture, _fileExists);

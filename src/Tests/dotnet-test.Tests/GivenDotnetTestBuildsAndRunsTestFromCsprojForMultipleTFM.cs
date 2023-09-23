@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                                        .Execute("--collect", "Code Coverage", "--results-directory", resultsDirectory);
 
             // Verify
-            DirectoryInfo d = new DirectoryInfo(resultsDirectory);
+            DirectoryInfo d = new(resultsDirectory);
             FileInfo[] coverageFileInfos = d.GetFiles("*.coverage", SearchOption.AllDirectories);
             Assert.Single(coverageFileInfos);
         }

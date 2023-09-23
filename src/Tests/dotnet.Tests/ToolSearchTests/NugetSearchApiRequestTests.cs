@@ -7,7 +7,7 @@ namespace dotnet.Tests.ToolSearchTests
 {
     public class NugetSearchApiRequestTests
     {
-        private readonly Uri _domainAndPathOverride = new Uri("https://azuresearch-usnc.nuget.org/query");
+        private readonly Uri _domainAndPathOverride = new("https://azuresearch-usnc.nuget.org/query");
 
         [Fact]
         public void WhenPassedInRequestParametersItCanConstructTheUrl()

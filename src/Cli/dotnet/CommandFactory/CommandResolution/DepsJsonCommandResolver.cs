@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.CommandFactory
         public DependencyContext LoadDependencyContextFromFile(string depsJsonFile)
         {
             DependencyContext dependencyContext = null;
-            DependencyContextJsonReader contextReader = new DependencyContextJsonReader();
+            DependencyContextJsonReader contextReader = new();
 
             using (var contextStream = File.OpenRead(depsJsonFile))
             {

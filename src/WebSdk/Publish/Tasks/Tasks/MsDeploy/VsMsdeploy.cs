@@ -345,7 +345,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         {
         }
 
-        Collections.Specialized.HybridDictionary m_hybridDictionary = new System.Collections.Specialized.HybridDictionary(10);
+        Collections.Specialized.HybridDictionary m_hybridDictionary = new(10);
         #region IDictionary Members 
         // Delegate everything to m_hybridDictionary
 
@@ -562,7 +562,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 }
             }
             // additionally we fire the Custom event for the detail information
-            CustomBuildWithPropertiesEventArgs customBuildWithPropertiesEventArg = new CustomBuildWithPropertiesEventArgs(args.Message, null, TaskName);
+            CustomBuildWithPropertiesEventArgs customBuildWithPropertiesEventArg = new(args.Message, null, TaskName);
 
             customBuildWithPropertiesEventArg.Add("TaskName", TaskName);
             customBuildWithPropertiesEventArg.Add("EventType", strEventType);
@@ -876,7 +876,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             else
             {
                 dest = VSMSDeployObjectFactory.CreateVSMSDeployObject(Destination[0]);
-                VSHostObject hostObj = new VSHostObject(HostObject as System.Collections.Generic.IEnumerable<Framework.ITaskItem>);
+                VSHostObject hostObj = new(HostObject as System.Collections.Generic.IEnumerable<Framework.ITaskItem>);
                 string username, password;
                 if (hostObj.ExtractCredentials(out username, out password))
                 {
@@ -990,7 +990,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             Collections.Generic.List<string> enableSkipDirectiveList = MSDeployUtility.ConvertStringIntoList(EnableSkipDirective);
             Collections.Generic.List<string> disableSkipDirectiveList = MSDeployUtility.ConvertStringIntoList(DisableSkipDirective);
 
-            VSHostObject hostObject = new VSHostObject(HostObject as System.Collections.Generic.IEnumerable<Framework.ITaskItem>);
+            VSHostObject hostObject = new(HostObject as System.Collections.Generic.IEnumerable<Framework.ITaskItem>);
             Framework.ITaskItem[] srcSkipItems, destSkipsItems;
 
             // Add FileSkip rules from Host Object

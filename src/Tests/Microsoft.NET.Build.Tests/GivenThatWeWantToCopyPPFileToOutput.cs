@@ -13,7 +13,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var packageReference = GetPackageReference();
 
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "CopyPPToOutputTest",
                 IsExe = true,
@@ -61,7 +61,7 @@ namespace Microsoft.NET.Build.Tests
         private void AddContent(XDocument package)
         {
             var ns = package.Root.Name.Namespace;
-            XElement itemGroup = new XElement(ns + "ItemGroup");
+            XElement itemGroup = new(ns + "ItemGroup");
             itemGroup.Add(new XElement(ns + "Content", new XAttribute("Include", "Nontransformed.ps1"),
                 new XAttribute("PackageCopyToOutput", "true")));
             itemGroup.Add(new XElement(ns + "Content", new XAttribute("Include", "Test.ps1.pp"),

@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public struct CommandResult
     {
-        public static readonly CommandResult Empty = new CommandResult();
+        public static readonly CommandResult Empty = new();
 
         public ProcessStartInfo StartInfo { get; }
         public int ExitCode { get; }

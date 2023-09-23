@@ -39,11 +39,11 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
 {
     public class SlnFile
     {
-        private SlnProjectCollection _projects = new SlnProjectCollection();
-        private SlnSectionCollection _sections = new SlnSectionCollection();
-        private SlnPropertySet _metadata = new SlnPropertySet(true);
+        private SlnProjectCollection _projects = new();
+        private SlnSectionCollection _sections = new();
+        private SlnPropertySet _metadata = new(true);
         private int _prefixBlankLines = 1;
-        private TextFormatInfo _format = new TextFormatInfo();
+        private TextFormatInfo _format = new();
 
         public string FormatVersion { get; set; }
         public string ProductDescription { get; set; }
@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
 
         public static SlnFile Read(string file)
         {
-            SlnFile slnFile = new SlnFile();
+            SlnFile slnFile = new();
             slnFile.FullPath = Path.GetFullPath(file);
             slnFile._format = FileUtil.GetTextFormatInfo(file);
 
@@ -152,7 +152,7 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
                 }
                 else if (line.StartsWith("Project", StringComparison.Ordinal))
                 {
-                    SlnProject p = new SlnProject();
+                    SlnProject p = new();
                     p.Read(reader, line, ref curLineNum);
                     _projects.Add(p);
                 }
@@ -241,7 +241,7 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
 
     public class SlnProject
     {
-        private SlnSectionCollection _sections = new SlnSectionCollection();
+        private SlnSectionCollection _sections = new();
 
         private SlnFile _parentFile;
 
@@ -635,7 +635,7 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
     /// </summary>
     public class SlnPropertySet : IDictionary<string, string>
     {
-        private OrderedDictionary _values = new OrderedDictionary();
+        private OrderedDictionary _values = new();
         private bool _isMetadata;
 
         internal bool Processed { get; set; }

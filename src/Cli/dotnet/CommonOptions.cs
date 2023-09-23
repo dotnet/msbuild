@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.Cli
                 HelpName = CommonLocalizableStrings.VersionSuffixArgumentName
             }.ForwardAsSingle(o => $"-property:VersionSuffix={o}");
 
-        public static Lazy<string> NormalizedCurrentDirectory = new Lazy<string>(() => PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()));
+        public static Lazy<string> NormalizedCurrentDirectory = new(() => PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()));
 
         public static CliArgument<string> DefaultToCurrentDirectory(this CliArgument<string> arg)
         {
@@ -119,7 +119,7 @@ namespace Microsoft.DotNet.Cli
             }.ForwardAs("-property:NuGetInteractive=true");
 
         public static CliOption<bool> InteractiveOption =
-            new CliOption<bool>("--interactive")
+            new("--interactive")
             {
                 Description = CommonLocalizableStrings.CommandInteractiveOptionDescription
             };
@@ -157,7 +157,7 @@ namespace Microsoft.DotNet.Cli
                 HelpName = CommonLocalizableStrings.OSArgumentName
             }.SetForwardingFunction(ResolveOsOptionToRuntimeIdentifier);
 
-        public static CliOption<bool> DebugOption = new CliOption<bool>("--debug");
+        public static CliOption<bool> DebugOption = new("--debug");
 
         public static CliOption<bool> SelfContainedOption =
             new ForwardedOption<bool>("--self-contained", "--sc")
@@ -174,9 +174,9 @@ namespace Microsoft.DotNet.Cli
             // Flip the argument so that if this option is specified we get selfcontained=false
             .SetForwardingFunction((arg, p) => ForwardSelfContainedOptions(!arg, p));
 
-        public static readonly CliOption<string> TestPlatformOption = new CliOption<string>("--Platform");
+        public static readonly CliOption<string> TestPlatformOption = new("--Platform");
 
-        public static readonly CliOption<string> TestFrameworkOption = new CliOption<string>("--Framework");
+        public static readonly CliOption<string> TestFrameworkOption = new("--Framework");
 
         public static readonly CliOption<string[]> TestLoggerOption = new("--logger");
 

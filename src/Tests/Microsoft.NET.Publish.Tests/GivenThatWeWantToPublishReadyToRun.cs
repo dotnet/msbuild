@@ -475,9 +475,9 @@ public class Program
                 }
 
                 // Legacy perfmap file naming prior to .NET 6
-                using (FileStream fs = new FileStream(assemblyFile, FileMode.Open, FileAccess.Read))
+                using (FileStream fs = new(assemblyFile, FileMode.Open, FileAccess.Read))
                 {
-                    PEReader pereader = new PEReader(fs);
+                    PEReader pereader = new(fs);
                     MetadataReader mdReader = pereader.GetMetadataReader();
                     Guid mvid = mdReader.GetGuid(mdReader.GetModuleDefinition().Mvid);
 
@@ -490,7 +490,7 @@ public class Program
 
         public static bool DoesImageHaveR2RInfo(string path)
         {
-            using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
+            using (FileStream fs = new(path, FileMode.Open, FileAccess.Read))
             {
                 using (var pereader = new PEReader(fs))
                 {
