@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdErrContaining(String.Format(Workloads.Workload.Install.LocalizableStrings.WorkloadNotRecognized, "fake"));
+                .HaveStdErrContaining(string.Format(Workloads.Workload.Install.LocalizableStrings.WorkloadNotRecognized, "fake"));
         }
 
         [Fact(Skip = "https://github.com/dotnet/sdk/issues/26624")]
@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdErrContaining(String.Format(Workloads.Workload.Install.LocalizableStrings.CannotCombineSkipManifestAndRollback, "skip-manifest-update", "from-rollback-file", "skip-manifest-update", "from-rollback-file"));
+                .HaveStdErrContaining(string.Format(Workloads.Workload.Install.LocalizableStrings.CannotCombineSkipManifestAndRollback, "skip-manifest-update", "from-rollback-file", "skip-manifest-update", "from-rollback-file"));
         }
 
 
@@ -328,7 +328,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             var exceptionThrown = Assert.Throws<GracefulException>(() => new WorkloadInstallCommand(parseResult, reporter: _reporter, workloadResolver: workloadResolver, workloadInstaller: installer,
                 nugetPackageDownloader: nugetDownloader, workloadManifestUpdater: manifestUpdater, userProfileDir: testDirectory, dotnetDir: dotnetRoot, version: "6.0.100", installedFeatureBand: "6.0.100"));
-            exceptionThrown.Message.Should().Be(String.Format(Workloads.Workload.Install.LocalizableStrings.WorkloadNotSupportedOnPlatform, mockWorkloadId));
+            exceptionThrown.Message.Should().Be(string.Format(Workloads.Workload.Install.LocalizableStrings.WorkloadNotSupportedOnPlatform, mockWorkloadId));
         }
 
         [Theory]
@@ -583,7 +583,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             installManager.InstallWorkloads(new List<WorkloadId>(), false); // Don't actually do any installs, just update manifests
 
             string.Join(" ", _reporter.Lines).Should().Contain(Workloads.Workload.Install.LocalizableStrings.CheckForUpdatedWorkloadManifests);
-            string.Join(" ", _reporter.Lines).Should().Contain(String.Format(Workloads.Workload.Install.LocalizableStrings.CheckForUpdatedWorkloadManifests, "mock-manifest"));
+            string.Join(" ", _reporter.Lines).Should().Contain(string.Format(Workloads.Workload.Install.LocalizableStrings.CheckForUpdatedWorkloadManifests, "mock-manifest"));
         }
 
         private string AppendForUserLocal(string identifier, bool userLocal)

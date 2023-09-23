@@ -41,7 +41,7 @@ namespace Microsoft.NET.Publish.Tests
             var targetFramework = testProject.TargetFrameworks;
             var publishDepsFilePath = GetPropertyValue(projectPath, targetFramework, "PublishDepsFilePath");
 
-            String.IsNullOrEmpty(publishDepsFilePath).Should().BeTrue();
+            string.IsNullOrEmpty(publishDepsFilePath).Should().BeTrue();
         }
 
         string GetPropertyValue(string projectPath, string targetFramework, string property)

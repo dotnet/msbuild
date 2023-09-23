@@ -504,7 +504,7 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
             }
             throw new InvalidSolutionFormatException(
                 curLineNum,
-                String.Format(LocalizableStrings.InvalidSectionTypeError, s));
+                string.Format(LocalizableStrings.InvalidSectionTypeError, s));
         }
 
         private string FromSectionType(bool isProjectSection, SlnSectionType type)

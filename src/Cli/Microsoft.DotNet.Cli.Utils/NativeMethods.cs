@@ -23,26 +23,26 @@ namespace Microsoft.DotNet.Cli.Utils
             [StructLayout(LayoutKind.Sequential)]
             internal struct JobObjectBasicLimitInformation
             {
-                public Int64 PerProcessUserTimeLimit;
-                public Int64 PerJobUserTimeLimit;
+                public long PerProcessUserTimeLimit;
+                public long PerJobUserTimeLimit;
                 public JobObjectLimitFlags LimitFlags;
                 public UIntPtr MinimumWorkingSetSize;
                 public UIntPtr MaximumWorkingSetSize;
-                public UInt32 ActiveProcessLimit;
+                public uint ActiveProcessLimit;
                 public UIntPtr Affinity;
-                public UInt32 PriorityClass;
-                public UInt32 SchedulingClass;
+                public uint PriorityClass;
+                public uint SchedulingClass;
             }
 
             [StructLayout(LayoutKind.Sequential)]
             internal struct IoCounters
             {
-                public UInt64 ReadOperationCount;
-                public UInt64 WriteOperationCount;
-                public UInt64 OtherOperationCount;
-                public UInt64 ReadTransferCount;
-                public UInt64 WriteTransferCount;
-                public UInt64 OtherTransferCount;
+                public ulong ReadOperationCount;
+                public ulong WriteOperationCount;
+                public ulong OtherOperationCount;
+                public ulong ReadTransferCount;
+                public ulong WriteTransferCount;
+                public ulong OtherTransferCount;
             }
 
             [StructLayout(LayoutKind.Sequential)]
@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Cli.Utils
             internal static extern SafeWaitHandle CreateJobObjectW(IntPtr lpJobAttributes, string lpName);
 
             [DllImport("kernel32.dll", SetLastError = true)]
-            internal static extern bool SetInformationJobObject(IntPtr hJob, JobObjectInfoClass jobObjectInformationClass, IntPtr lpJobObjectInformation, UInt32 cbJobObjectInformationLength);
+            internal static extern bool SetInformationJobObject(IntPtr hJob, JobObjectInfoClass jobObjectInformationClass, IntPtr lpJobObjectInformation, uint cbJobObjectInformationLength);
 
             [DllImport("kernel32.dll", SetLastError = true)]
             internal static extern bool AssignProcessToJobObject(IntPtr hJob, IntPtr hProcess);

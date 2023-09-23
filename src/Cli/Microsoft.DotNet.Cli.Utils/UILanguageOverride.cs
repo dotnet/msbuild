@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private static bool ForceUniversalEncodingOptInEnabled()
         {
-            return String.Equals(Environment.GetEnvironmentVariable("DOTNET_CLI_FORCE_UTF8_ENCODING"), "true", StringComparison.OrdinalIgnoreCase);
+            return string.Equals(Environment.GetEnvironmentVariable("DOTNET_CLI_FORCE_UTF8_ENCODING"), "true", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

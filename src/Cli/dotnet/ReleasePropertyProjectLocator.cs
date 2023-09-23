@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Cli
             // Setup
             Debug.Assert(_propertyToCheck == MSBuildPropertyNames.PUBLISH_RELEASE || _propertyToCheck == MSBuildPropertyNames.PACK_RELEASE, "Only PackRelease or PublishRelease are currently expected.");
             var nothing = Enumerable.Empty<string>();
-            if (String.Equals(Environment.GetEnvironmentVariable(EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE), "true", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(Environment.GetEnvironmentVariable(EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE), "true", StringComparison.OrdinalIgnoreCase))
             {
                 return nothing;
             }
@@ -160,7 +160,7 @@ namespace Microsoft.DotNet.Cli
             HashSet<string> configValues = new HashSet<string>();
             object projectDataLock = new object();
 
-            if (String.Equals(Environment.GetEnvironmentVariable(EnvironmentVariableNames.DOTNET_CLI_LAZY_PUBLISH_AND_PACK_RELEASE_FOR_SOLUTIONS), "true", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(Environment.GetEnvironmentVariable(EnvironmentVariableNames.DOTNET_CLI_LAZY_PUBLISH_AND_PACK_RELEASE_FOR_SOLUTIONS), "true", StringComparison.OrdinalIgnoreCase))
             {
                 // Evaluate only one project for speed if this environment variable is used. Will break more customers if enabled (adding 8.0 project to SLN with other project TFMs with no Publish or PackRelease.)
                 return GetSingleProjectFromSolution(sln, globalProps);
@@ -197,7 +197,7 @@ namespace Microsoft.DotNet.Cli
                 // 1) This error should not be thrown in VS because it is part of the SDK CLI code
                 // 2) If PublishRelease or PackRelease is disabled via opt out, or Configuration is specified, we won't get to this code, so we won't error
                 // 3) This code only gets hit if we are in a solution publish setting, so we don't need to worry about it failing other publish scenarios
-                throw new GracefulException(Strings.SolutionProjectConfigurationsConflict, _propertyToCheck, String.Join("\n", (configuredProjects).Select(x => x.FullPath)));
+                throw new GracefulException(Strings.SolutionProjectConfigurationsConflict, _propertyToCheck, string.Join("\n", (configuredProjects).Select(x => x.FullPath)));
             }
             return configuredProjects.FirstOrDefault();
         }

@@ -17,7 +17,7 @@ namespace Microsoft.NET.TestFramework.Assertions
         public static AndConstraint<StringAssertions> BeVisuallyEquivalentTo(this StringAssertions assertions, string expected, string because = "", params object[] becauseArgs)
         {
             Execute.Assertion
-                .ForCondition(String.Compare(NormalizeLineEndings(assertions.Subject), NormalizeLineEndings(expected), CultureInfo.CurrentCulture, CompareOptions.IgnoreSymbols) == 0)
+                .ForCondition(string.Compare(NormalizeLineEndings(assertions.Subject), NormalizeLineEndings(expected), CultureInfo.CurrentCulture, CompareOptions.IgnoreSymbols) == 0)
                 .BecauseOf(because, becauseArgs)
                 .FailWith($"String \"{assertions.Subject}\" is not visually equivalent to expected string \"{expected}\".");
 

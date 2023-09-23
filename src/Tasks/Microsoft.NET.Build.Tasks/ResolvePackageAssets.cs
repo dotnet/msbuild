@@ -1813,7 +1813,7 @@ namespace Microsoft.NET.Build.Tasks
 
                         // If the platform library is not Microsoft.NETCore.App, treat it as an implicit dependency.
                         // This makes it so Microsoft.AspNet.* 2.x platforms also exclude Microsoft.NETCore.App files.
-                        if (!String.Equals(platformLibrary.Name, NetCorePlatformLibrary, StringComparison.OrdinalIgnoreCase))
+                        if (!string.Equals(platformLibrary.Name, NetCorePlatformLibrary, StringComparison.OrdinalIgnoreCase))
                         {
                             var library = _runtimeTarget.GetLibrary(NetCorePlatformLibrary);
                             if (library != null)

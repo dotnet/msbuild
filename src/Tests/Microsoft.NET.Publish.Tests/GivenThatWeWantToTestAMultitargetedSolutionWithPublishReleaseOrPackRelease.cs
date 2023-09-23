@@ -41,7 +41,7 @@ namespace Microsoft.NET.Publish.Tests
             List<TestProject> testProjects = new List<TestProject>();
             var testProject = new TestProject("TestProject")
             {
-                TargetFrameworks = String.Join(";", exeProjTfms),
+                TargetFrameworks = string.Join(";", exeProjTfms),
                 IsExe = true
             };
             testProject.RecordProperties("Configuration", "Optimize", PReleaseProperty);
@@ -52,7 +52,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var libraryProject = new TestProject("LibraryProject")
             {
-                TargetFrameworks = String.Join(";", libraryProjTfms),
+                TargetFrameworks = string.Join(";", libraryProjTfms),
                 IsExe = false
             };
             libraryProject.RecordProperties("Configuration", "Optimize", PReleaseProperty);
@@ -271,7 +271,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdErrContaining(String.Format(Strings.SolutionProjectConfigurationsConflict, PublishRelease, "")); ;
+                .HaveStdErrContaining(string.Format(Strings.SolutionProjectConfigurationsConflict, PublishRelease, "")); ;
         }
 
         [Fact]

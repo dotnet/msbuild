@@ -74,7 +74,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 else
                 {
-                    Boolean.TryParse(isImplicitlyDefinedString, out isImplicitlyDefined);
+                    bool.TryParse(isImplicitlyDefinedString, out isImplicitlyDefined);
                 }
 
                 if (isImplicitlyDefined)

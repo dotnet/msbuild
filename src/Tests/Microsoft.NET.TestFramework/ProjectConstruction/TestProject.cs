@@ -278,7 +278,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
             if (SelfContained != "")
             {
-                propertyGroup.Add(new XElement(ns + "SelfContained", String.Equals(SelfContained, "true", StringComparison.OrdinalIgnoreCase) ? "true" : "false"));
+                propertyGroup.Add(new XElement(ns + "SelfContained", string.Equals(SelfContained, "true", StringComparison.OrdinalIgnoreCase) ? "true" : "false"));
             }
 
             if (ReferencedProjects.Any())
@@ -497,7 +497,7 @@ namespace {safeThisName}
                 if (colonIndex > 0)
                 {
                     string propertyName = line.Substring(0, colonIndex);
-                    string propertyValue = line.Length == colonIndex + 1 ? String.Empty : line.Substring(colonIndex + 2);
+                    string propertyValue = line.Length == colonIndex + 1 ? string.Empty : line.Substring(colonIndex + 2);
                     propertyValues[propertyName] = propertyValue;
                 }
             }

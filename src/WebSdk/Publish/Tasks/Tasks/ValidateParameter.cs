@@ -16,9 +16,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
 
         public override bool Execute()
         {
-            if (String.IsNullOrEmpty(ParameterValue))
+            if (string.IsNullOrEmpty(ParameterValue))
             {
-                Log.LogError(String.Format(CultureInfo.CurrentCulture, Resources.ValidateParameter_ArgumentNullError, ParameterName));
+                Log.LogError(string.Format(CultureInfo.CurrentCulture, Resources.ValidateParameter_ArgumentNullError, ParameterName));
                 return false;
             }
 
