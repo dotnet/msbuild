@@ -27,7 +27,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 Items = compile,
                 ItemName = "Compile",
                 PropertyNameToDisableDefaultItems = "PropertyNameToDisableDefaultItems",
-                MoreInformationLink = "MoreInformationLink"
+                MoreInformationLink = "MoreInformationLink",
+                DefaultItemsEnabled = true,
+                DefaultItemsOfThisTypeEnabled = true
             };
             task.Execute().Should().BeTrue();
 
@@ -49,12 +51,13 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 Items = compile,
                 ItemName = "Compile",
                 PropertyNameToDisableDefaultItems = "PropertyNameToDisableDefaultItems",
-                MoreInformationLink = "MoreInformationLink"
+                MoreInformationLink = "MoreInformationLink",
+                DefaultItemsEnabled = true,
+                DefaultItemsOfThisTypeEnabled = true
             };
             task.Execute().Should().BeFalse();
 
             task.DeduplicatedItems.Length.Should().Be(1);
         }
-
     }
 }
