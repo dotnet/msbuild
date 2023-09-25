@@ -49,7 +49,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             // execute task
             var task = new CheckForDuplicateItems()
             {
-                engine = engine,
+                BuildEngine = engine,
                 Items = compile,
                 ItemName = "Compile",
                 PropertyNameToDisableDefaultItems = "PropertyNameToDisableDefaultItems",
