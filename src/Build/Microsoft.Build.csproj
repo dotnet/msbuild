@@ -86,9 +86,6 @@
     <Compile Include="..\Shared\NGen.cs">
       <Link>SharedUtilities\NGen.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\Pair.cs">
-      <Link>SharedUtilities\Pair.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\PropertyParser.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\PropertyParser.cs</Link>
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
