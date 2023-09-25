@@ -44,10 +44,12 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 new TaskItem("foo.cs"),
                 new TaskItem("FOO.cs"),
             };
+            var engine = new MockBuildEngine();
 
             // execute task
             var task = new CheckForDuplicateItems()
             {
+                engine = engine,
                 Items = compile,
                 ItemName = "Compile",
                 PropertyNameToDisableDefaultItems = "PropertyNameToDisableDefaultItems",
@@ -56,6 +58,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 DefaultItemsOfThisTypeEnabled = true
             };
             task.Execute().Should().BeFalse();
+
+            engine.Errors.Count.Should().Be(1);
+            engine.Errors[0].Message.Should().Be("Duplicate 'Compile' items were included. The .NET SDK includes 'Compile' items from your project directory by default. You can either remove these items from your project file, or set the 'PropertyNameToDisableDefaultItems' property to 'false' if you want to explicitly include them in your project file. For more information, see MoreInformationLink. The duplicate items were: 'foo.cs'");
 
             task.DeduplicatedItems.Length.Should().Be(1);
         }
