@@ -7,7 +7,13 @@ parameters:
   # Dotnet installer channel from where to take the latest dotnet bits.
   - name: DotnetInstallerChannel
     displayName: Dotnet installer channel
+    type: string  
+    default: 'none'
+  # VS version from which to take the latest MSBuild bits.
+  - name: VSVersionName
+    displayName: VS Version
     type: string
+    default: 'none'
   # Branch from the MSBuild Build CI pipeline. Default: main
   # Top run for the branch would be used to create an experimental insertion. 
   - name: MSBuildBranch
@@ -23,105 +29,194 @@ parameters:
 variables:
   - name: _MsBuildCiPipelineId
     value: 9434
-
+  - name: _DropExeUri
+    value: "https://artifacts.dev.azure.com/CloudBuild/_apis/drop/client/exe"
+  - name: _MSBuildConfigFilePath
+    value: "config/batmon/Q-Prod-Co3/Coordinator/ToolsReleaseConfig-GeneralPublic.json"
+  - name: VSVersion
+    value: ${{parameters.VSVersionName}}
 pool:
   vmImage: windows-latest
 
-steps:
-- powershell: |
-    mkdir '$(System.ArtifactsDirectory)/installer'
+resources:
+  repositories: 
+    - repository: CloudBuildConfig
+      type: git
+      name: CloudBuild/CloudBuildConfig
+      endpoint: CloudBuild_Test
+      ref: refs/heads/main 
 
-    $dotnetChannel = '${{parameters.DotnetInstallerChannel}}'
-    $sdks = "dotnet-sdk-win-x64.zip", "dotnet-sdk-linux-x64.tar.gz"
+jobs:
+- job: CreateExpDotnet
+  displayName: Create Experimental Dotnet
+  condition: ne('${{ parameters.DotnetInstallerChannel }}', 'none')
+  steps:
+  - powershell: |
+      mkdir '$(System.ArtifactsDirectory)/installer'
 
-    foreach ($sdk in $sdks)
-    {
-      Write-Host "Downloading dotnet $sdk from channel $dotnetChannel"
-      Invoke-WebRequest `
-        -Uri "https://aka.ms/dotnet/$dotnetChannel/daily/$sdk" `
-        -OutFile "$(System.ArtifactsDirectory)/installer/$sdk"
-    }
-    mkdir '$(Pipeline.Workspace)/artifacts'
-    
-  displayName: Download latest dotnet sdks
+      $dotnetChannel = '${{parameters.DotnetInstallerChannel}}'
+      $sdks = "dotnet-sdk-win-x64.zip", "dotnet-sdk-linux-x64.tar.gz"
 
-# Download latest build artifacts for a branch from MSBuild Build CI
-- ${{ if eq(parameters.MSBuildBuildID, 'default') }}:
+      foreach ($sdk in $sdks)
+      {
+        Write-Host "Downloading dotnet $sdk from channel $dotnetChannel"
+        Invoke-WebRequest `
+          -Uri "https://aka.ms/dotnet/$dotnetChannel/daily/$sdk" `
+          -OutFile "$(System.ArtifactsDirectory)/installer/$sdk"
+      }
+      mkdir '$(Pipeline.Workspace)/artifacts'
+    displayName: Download latest dotnet sdks
+
+  # Download latest build artifacts for a branch from MSBuild Build CI
   - task: DownloadBuildArtifacts@1
     inputs:
       buildType: specific
       project: DevDiv
       pipeline: $(_MsBuildCiPipelineId) 
-      buildVersionToDownload: latestFromBranch
-      branchName: '${{parameters.MSBuildBranch}}'  
+      ${{ if eq(parameters.MSBuildBuildID, 'default') }}: 
+        buildVersionToDownload: latestFromBranch
+        branchName: '${{parameters.MSBuildBranch}}'
+      ${{ else }}:
+        buildVersionToDownload: specific
+        buildId: ${{parameters.MSBuildBuildID}} 
       artifactName: bin
       downloadPath: '$(System.ArtifactsDirectory)/msbuild/artifacts/bin'
-      itemPattern: "MSBuild.Bootstrap/**"  
     displayName: Download latest msbuild from branch
 
-# Download build artifacts for MSBuild Build CI specific build
-- ${{ if ne(parameters.MSBuildBuildID, 'default') }}:
+  - powershell: |
+      $sdk = "dotnet-sdk-win-x64"
+
+      Write-Host "Extracting $(System.ArtifactsDirectory)/installer/$sdk.zip"
+      Expand-Archive "$(System.ArtifactsDirectory)/installer/$sdk.zip" -DestinationPath "$(Pipeline.Workspace)/exp-dotnet/$sdk"
+    
+      $dotnetDirectory = Get-ChildItem -Directory -Path "$(Pipeline.Workspace)/exp-dotnet/$sdk/sdk"
+      $dotnetVersion = $dotnetDirectory.Name
+      Write-Host "Detected dotnet version: $dotnetVersion"
+    
+      Write-Host "Updating MSBuild dlls."
+      $(Build.SourcesDirectory)/scripts/Deploy-MSBuild.ps1 `
+        -destination "$(Pipeline.Workspace)/exp-dotnet/$sdk/sdk/$dotnetVersion" `
+        -binDirectory "$(System.ArtifactsDirectory)/msbuild/artifacts/bin" `
+        -configuration Release `
+        -makeBackup $false
+    
+      Write-Host "Compressing dotnet sdk files"
+      Get-ChildItem -Path "$(Pipeline.Workspace)/exp-dotnet/$sdk" | Compress-Archive -DestinationPath "$(Pipeline.Workspace)/artifacts/$sdk.zip"
+
+    displayName: Dogfood msbuild dlls to dotnet sdk win-x64
+
+  - powershell: |
+      $sdk = "dotnet-sdk-linux-x64"
+    
+      mkdir "$(Pipeline.Workspace)/exp-dotnet/$sdk"
+
+      Write-Host "Extracting $(System.ArtifactsDirectory)/installer/$sdk.tar.gz"
+      tar -xzvf "$(System.ArtifactsDirectory)/installer/$sdk.tar.gz" -C "$(Pipeline.Workspace)/exp-dotnet/$sdk"
+
+      $dotnetDirectory = Get-ChildItem -Directory -Path $(Pipeline.Workspace)/exp-dotnet/$sdk/sdk
+      $dotnetVersion = $dotnetDirectory.Name
+      Write-Host "Detected dotnet version: $dotnetVersion"
+    
+      Write-Host "Updating MSBuild dlls."
+      $(Build.SourcesDirectory)/scripts/Deploy-MSBuild.ps1 `
+        -destination "$(Pipeline.Workspace)/exp-dotnet/$sdk/sdk/$dotnetVersion" `
+        -binDirectory "$(System.ArtifactsDirectory)/msbuild/artifacts/bin" `
+        -configuration Release `
+        -makeBackup $false
+    
+      Write-Host "Compressing dotnet sdk files"
+      tar -czvf "$(Pipeline.Workspace)/artifacts/$sdk.tar.gz" -C "$(Pipeline.Workspace)/exp-dotnet/$sdk" .
+    displayName: Dogfood msbuild dlls to dotnet sdk linux-x64
+
+  - task: PublishPipelineArtifact@1
+    inputs:
+      targetPath: '$(Pipeline.Workspace)/artifacts'
+      artifactName: ExperimentalDotnet
+      parallel: true
+    condition: always()
+    displayName: Publish crank assests artifacts
+
+
+- job: CreateExpMSBuild
+  displayName: "Create Experimental MSBuild"
+  condition: ne('${{ parameters.VSVersionName }}', 'none')
+  steps:
+  - checkout: self
+
+  - checkout: CloudBuildConfig
+
+  - powershell: |
+      $json = (Get-Content "$(Build.SourcesDirectory)/CloudBuildConfig/$(_MSBuildConfigFilePath)" -Raw) | ConvertFrom-Json 
+      $MSBuildDropPath = $json.Tools.MSBuild.Locations
+      Write-Host "##vso[task.setvariable variable=MSBuildDropPath]$MSBuildDropPath"
+      Write-Host "MSBuild Drop Path directory: $MSBuildDropPath"
+    displayName: Get Retail MSBuild Drop Path
+
+  # - task: AzureKeyVault@2
+  #   inputs:
+  #     azureSubscription: 'DDFun IaaS Dev Shared Public - DotnetPerfstar'
+  #     KeyVaultName: 'dotnet-perfstar-keyVault'
+  #     SecretsFilter: '*'
+  #     RunAsPreJob: false
+      
+  - powershell: |
+      mkdir "$(Pipeline.Workspace)/artifacts"
+      
+      $ToolsFolder = "$(Pipeline.Workspace)/tools"
+      mkdir "$ToolsFolder"
+      $DropZipFile = "$ToolsFolder/drop.zip"
+      $DropExePath = "$ToolsFolder/drop/lib/net45/drop.exe"
+      
+      Write-Host "Downloading drop.exe"
+      $webClient = New-Object 'System.Net.WebClient'
+      $webClient.Downloadfile("$(_DropExeUri)", $DropZipFile)
+      Expand-Archive -LiteralPath $DropZipFile -DestinationPath "$ToolsFolder/drop" -Force
+      Write-Host "Download of drop.exe finished"
+      
+      Write-Host "Downloading VS msbuild"
+      & "$DropExePath" get --patAuthEnvVar 'cloudbuild-token' -u "$(MSBuildDropPath)\$(VSVersion)" -d "$(System.ArtifactsDirectory)/VSMSBuildDrop"
+      Write-Host "Download of VS msbuild finished"
+
+      Write-Host "Copying VS msbuild to $(Pipeline.Workspace)/VSMSBuild"
+      Copy-Item -Path "$(System.ArtifactsDirectory)/VSMSBuildDrop/*" -Destination "$(Pipeline.Workspace)/VSMSBuild" -Recurse
+      Write-Host "Copy of VS msbuild finished"
+    displayName: Download msbuild vs drop
+    env:
+      cloudbuild-token: $(cloudbuild-token)
+      
+  # Download latest build artifacts for a branch from MSBuild Build CI
   - task: DownloadBuildArtifacts@1
     inputs:
       buildType: specific
       project: DevDiv
       pipeline: $(_MsBuildCiPipelineId) 
-      buildVersionToDownload: specific
-      buildId: ${{parameters.MSBuildBuildID}} 
+      ${{ if eq(parameters.MSBuildBuildID, 'default') }}: 
+        buildVersionToDownload: latestFromBranch
+        branchName: '${{parameters.MSBuildBranch}}'
+      ${{ else }}:
+        buildVersionToDownload: specific
+        buildId: ${{parameters.MSBuildBuildID}} 
       artifactName: bin
       downloadPath: '$(System.ArtifactsDirectory)/msbuild/artifacts/bin'
-      itemPattern: "MSBuild.Bootstrap/**"
-    displayName: Download specified msbuild build
-    
-- powershell: |
-    $sdk = "dotnet-sdk-win-x64"
+    displayName: Download latest msbuild from branch
 
-    Write-Host "Extracting $(System.ArtifactsDirectory)/installer/$sdk.zip"
-    Expand-Archive "$(System.ArtifactsDirectory)/installer/$sdk.zip" -DestinationPath "$(Pipeline.Workspace)/exp-dotnet/$sdk"
-    
-    $dotnetDirectory = Get-ChildItem -Directory -Path "$(Pipeline.Workspace)/exp-dotnet/$sdk/sdk"
-    $dotnetVersion = $dotnetDirectory.Name
-    Write-Host "Detected dotnet version: $dotnetVersion"
-    
-    Write-Host "Updating MSBuild dlls."
-    $(Build.SourcesDirectory)/scripts/Deploy-MSBuild.ps1 `
-      -destination "$(Pipeline.Workspace)/exp-dotnet/$sdk/sdk/$dotnetVersion" `
-      -bootstrapDirectory "$(System.ArtifactsDirectory)/msbuild/artifacts/bin/MSBuild.Bootstrap" `
-      -configuration Release `
-      -makeBackup $false
-    
-    Write-Host "Compressing dotnet sdk files"
-    Get-ChildItem -Path "$(Pipeline.Workspace)/exp-dotnet/$sdk" | Compress-Archive -DestinationPath "$(Pipeline.Workspace)/artifacts/$sdk.zip"
+  - powershell: |
+      Write-Host "Updating MSBuild dlls."
+      $(Build.SourcesDirectory)/DotNet-msbuild-Trusted/scripts/Deploy-MSBuild.ps1 `
+        -destination "$(Pipeline.Workspace)/VSMSBuild/$(VSVersion)/MSBuild/Current/Bin" `
+        -binDirectory "$(System.ArtifactsDirectory)/msbuild/artifacts/bin" `
+        -configuration Release `
+        -makeBackup $false
 
-  displayName: Dogfood msbuild dlls to dotnet sdk win-x64
+      ls "$(Pipeline.Workspace)/VSMSBuild/$(VSVersion)"
+      Write-Host "Compressing msbuild files"
+      Get-ChildItem -Path "$(Pipeline.Workspace)/VSMSBuild/$(VSVersion)" | Compress-Archive -DestinationPath "$(Pipeline.Workspace)/artifacts/MSBuild.zip"
+    displayName: Dogfood msbuild dlls 
 
-- powershell: |
-    $sdk = "dotnet-sdk-linux-x64"
-    
-    mkdir "$(Pipeline.Workspace)/exp-dotnet/$sdk"
-
-    Write-Host "Extracting $(System.ArtifactsDirectory)/installer/$sdk.tar.gz"
-    tar -xzvf "$(System.ArtifactsDirectory)/installer/$sdk.tar.gz" -C "$(Pipeline.Workspace)/exp-dotnet/$sdk"
-
-    $dotnetDirectory = Get-ChildItem -Directory -Path $(Pipeline.Workspace)/exp-dotnet/$sdk/sdk
-    $dotnetVersion = $dotnetDirectory.Name
-    Write-Host "Detected dotnet version: $dotnetVersion"
-    
-    Write-Host "Updating MSBuild dlls."
-    $(Build.SourcesDirectory)/scripts/Deploy-MSBuild.ps1 `
-      -destination "$(Pipeline.Workspace)/exp-dotnet/$sdk/sdk/$dotnetVersion" `
-      -bootstrapDirectory "$(System.ArtifactsDirectory)/msbuild/artifacts/bin/MSBuild.Bootstrap" `
-      -configuration Release `
-      -makeBackup $false
-    
-    Write-Host "Compressing dotnet sdk files"
-    tar -czvf "$(Pipeline.Workspace)/artifacts/$sdk.tar.gz" -C "$(Pipeline.Workspace)/exp-dotnet/$sdk" .
-  displayName: Dogfood msbuild dlls to dotnet sdk linux-x64
-
-- task: PublishPipelineArtifact@1
-  inputs:
-    targetPath: '$(Pipeline.Workspace)/artifacts'
-    artifactName: ExperimentalDotnet
-    parallel: true
-  condition: always()
-  displayName: Publish crank assests artifacts
+  - task: PublishPipelineArtifact@1
+    inputs:
+      targetPath: '$(Pipeline.Workspace)/artifacts'
+      artifactName: ExperimentalMSBuild
+      parallel: true
+    condition: always()
+    displayName: Publish crank assests artifacts
