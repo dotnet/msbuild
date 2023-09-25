@@ -3,6 +3,7 @@
 
 using FluentAssertions;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 using Xunit;
