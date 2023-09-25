@@ -1033,10 +1033,10 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             @"%DRIVE%:")]
         public void LogWindowsWarningUponBuildingProjectWithDriveEnumeration(string content, string include, string exclude = null, string property = null, string propertyValue = null)
         {
-            var mappedDrive = GetDummyMappedDrive();
-            include = UpdatePathToMappedDrive(include, mappedDrive.MappedDriveLetter);
-            exclude = UpdatePathToMappedDrive(exclude, mappedDrive.MappedDriveLetter);
-            propertyValue = UpdatePathToMappedDrive(propertyValue, mappedDrive.MappedDriveLetter);
+            var mappedDriveTestEnv = new DummyMappedDriveTestEnv();
+            include = mappedDriveTestEnv.UpdatePathToMappedDrive(include);
+            exclude = mappedDriveTestEnv.UpdatePathToMappedDrive(exclude);
+            propertyValue = mappedDriveTestEnv.UpdatePathToMappedDrive(propertyValue);
             content = (string.IsNullOrEmpty(property) && string.IsNullOrEmpty(propertyValue)) ?
                 string.Format(content, include, exclude) :
                 string.Format(content, property, propertyValue, include);
@@ -1208,28 +1208,6 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 Assert.Equal(expected[key], item.GetMetadataValue(key));
             }
-        }
-
-        private DummyMappedDrive GetDummyMappedDrive()
-        {
-            if (NativeMethods.IsWindows)
-            {
-                // let's create the mapped drive only once it's needed by any test, then let's reuse;
-                _mappedDrive ??= new DummyMappedDrive();
-            }
-
-            return _mappedDrive;
-        }
-
-        private static string UpdatePathToMappedDrive(string path, char driveLetter)
-        {
-            const string drivePlaceholder = "%DRIVE%";
-            // if this seems to be rooted path - replace with the dummy mount
-            if (!string.IsNullOrEmpty(path) && path.StartsWith(drivePlaceholder))
-            {
-                path = driveLetter + path.Substring(drivePlaceholder.Length);
-            }
-            return path;
         }
     }
 }

@@ -9,6 +9,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
+using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
@@ -146,7 +147,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Using the CreateItem task to expand wildcards, and then try accessing the RecursiveDir 
+        /// Using the CreateItem task to expand wildcards, and then try accessing the RecursiveDir
         /// metadata to force batching.
         /// </summary>
         [Fact]
@@ -313,20 +314,20 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Logs warning when encountering wildcard drive enumeration during task item creation on Windows platform.
         /// </summary>
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
         [WindowsOnlyTheory]
-        [InlineData(@"z:\**")]
-        [InlineData(@"z:\**\*.log")]
-        [InlineData(@"z:\\\\**\*.log")]
+        [InlineData(@"%DRIVE%:\**")]
+        [InlineData(@"%DRIVE%:\**\*.log")]
+        [InlineData(@"%DRIVE%:\\\\**\*.log")]
         public void LogWindowsWarningUponCreateItemExecution(string itemSpec)
         {
+            var mappedDriveTestEnv = new DummyMappedDriveTestEnv();
+            itemSpec = mappedDriveTestEnv.UpdatePathToMappedDrive(itemSpec);
             VerifyDriveEnumerationWarningLoggedUponCreateItemExecution(itemSpec);
         }
 
         /// <summary>
         /// Logs warning when encountering wildcard drive enumeration during task item creation on Unix platform.
         /// </summary>
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
         [UnixOnlyTheory]
         [InlineData(@"\**")]
         [InlineData(@"\**\*.log")]
@@ -391,21 +392,22 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Logs warning when encountering wildcard drive enumeration during CreateItem task execution on Windows platform.
         /// </summary>
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
         [WindowsOnlyTheory]
         [InlineData(
             CreateItemWithInclude,
-            @"z:\**")]
+            @"%DRIVE%:\**")]
 
         [InlineData(
             CreateItemWithInclude,
-            @"z:\**\*.txt")]
+            @"%DRIVE%:\**\*.txt")]
 
         [InlineData(
             CreateItemWithInclude,
-            @"z:$(empty)\**\*.cs")]
+            @"%DRIVE%:$(empty)\**\*.cs")]
         public void LogWindowsWarningUponItemCreationWithDriveEnumeration(string content, string include)
         {
+            var mappedDriveTestEnv = new DummyMappedDriveTestEnv();
+            include = mappedDriveTestEnv.UpdatePathToMappedDrive(include);
             content = string.Format(content, include);
             Helpers.CleanContentsAndBuildTargetWithDriveEnumeratingWildcard(
                 content,
@@ -418,7 +420,6 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Logs warning when encountering wildcard drive enumeration during CreateItem task execution on Unix platform.
         /// </summary>
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
         [UnixOnlyTheory]
         [InlineData(
             CreateItemWithInclude,

@@ -7,7 +7,7 @@
     <AssemblyName>Microsoft.Build.Engine.UnitTests</AssemblyName>
 
     <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_ENGINE_UNITTESTS</DefineConstants>
-    
+
     <!-- Define a constant so we can skip tests that require MSBuildTaskHost -->
     <DefineConstants Condition="'$(MSBuildRuntimeType)' == 'Core' or '$(MonoBuild)' == 'true'">$(DefineConstants);NO_MSBUILDTASKHOST</DefineConstants>
 
@@ -85,6 +85,9 @@
     <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\UnitTests.Shared\DriveMapping.cs" />
+    <Compile Include="..\UnitTests.Shared\DummyMappedDrive.cs" />
+    <Compile Include="..\UnitTests.Shared\DummyMappedDriveTestEnv.cs" />
     <Compile Include="..\Shared\UnitTests\StreamHelpers.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -144,14 +147,14 @@
     <!-- In TypeLoader, the following logic is used for loading assemblies on .NET Core:
             - if the simple name of the assembly exists in the same folder as msbuild.exe, then that assembly gets loaded, indifferent of the user specified path
             - otherwise, the assembly from the user specified path is loaded, if it exists.
-            
+
           So the custom tasks we are testing can't be in test output folder, because on .NET Core that would affect the loading behavior.  So this
-          target puts them in subfolders of the test output folder instead.    
+          target puts them in subfolders of the test output folder instead.
     -->
 
     <Error Condition="'@(PortableTaskResolvedProjectReferencePath)' == ''" Text="Couldn't find PortableTaskResolvedProjectReferencePath item for PortableTask" />
     <Error Condition="'@(TaskWithDependencyResolvedProjectReferencePath)' == ''" Text="Couldn't find TaskWithDependencyResolvedProjectReferencePath item for TaskWithDependency" />
-    
+
     <PropertyGroup>
       <PortableTaskOutputPath>@(PortableTaskResolvedProjectReferencePath->'%(RootDir)%(Directory)')</PortableTaskOutputPath>
       <TaskWithDependencyOutputPath>@(TaskWithDependencyResolvedProjectReferencePath->'%(RootDir)%(Directory)')</TaskWithDependencyOutputPath>
@@ -163,7 +166,7 @@
       <TaskWithDependencyContentContent Include="$(TaskWithDependencyOutputPath)*.*" />
       <Content Include="@(TaskWithDependencyContentContent)" Link="TaskWithDependency\%(TaskWithDependencyContentContent.Filename)%(TaskWithDependencyContentContent.Extension)" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
-    
+
   </Target>
 
   <ItemDefinitionGroup>
@@ -171,7 +174,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemDefinitionGroup>
-  
+
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
