@@ -2,11 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable enable
+using System;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.UnitTests.Shared
 {
-    public class DummyMappedDriveTestEnv
+    public class DummyMappedDriveTestEnv : IDisposable
     {
         public DummyMappedDrive? _mappedDrive;
 
@@ -28,6 +29,14 @@ namespace Microsoft.Build.UnitTests.Shared
                 path = _mappedDrive.MappedDriveLetter + path.Substring(drivePlaceholder.Length);
             }
             return path;
+        }
+
+        public void Dispose()
+        {
+            if (_mappedDrive != null)
+            {
+                _mappedDrive.Dispose();
+            }
         }
     }
 }
