@@ -83,9 +83,6 @@
     <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
       <Link>IConstrainedEqualityComparer.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\NGen.cs">
-      <Link>SharedUtilities\NGen.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\Pair.cs">
       <Link>SharedUtilities\Pair.cs</Link>
     </Compile>

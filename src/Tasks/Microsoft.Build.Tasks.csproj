@@ -77,9 +77,6 @@
       <Link>FileDelegates.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\NGen.cs">
-      <Link>NGen.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\IConstrainedEqualityComparer.cs" />
     <Compile Include="..\Shared\PropertyParser.cs">
       <Link>PropertyParser.cs</Link>
