@@ -302,7 +302,7 @@ namespace FrameworkReferenceTest
 
             testProject.AdditionalProperties["EnableTargetingPackDownload"] = "False";
 
-            //  Set targeting pack folder to nonexistant folder so the project won't use installed targeting packs
+            //  Set targeting pack folder to nonexistent folder so the project won't use installed targeting packs
             testProject.AdditionalProperties["NetCoreTargetingPackRoot"] = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
