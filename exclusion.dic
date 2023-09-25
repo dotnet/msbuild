@@ -1,6 +1,7 @@
 awaiter
 crossgen
 cshtml
+deserializer
 nuget
 nupkg
 nuspec
@@ -9,3 +10,4 @@ sdks
 url
 urls
 xamarin
+yaml
