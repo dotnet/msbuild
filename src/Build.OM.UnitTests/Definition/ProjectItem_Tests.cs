@@ -804,8 +804,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [InlineData(@"%DRIVE%:\**\*.cs")]
         public void ProjectGetterResultsInWindowsDriveEnumerationWarning(string unevaluatedInclude)
         {
-            var mappedDrive = GetDummyMappedDrive();
-            unevaluatedInclude = UpdatePathToMappedDrive(unevaluatedInclude, mappedDrive.MappedDriveLetter);
+            var mappedDriveUtils = new DummyMappedDriveUtils(_mappedDrive);
+            var mappedDrive = mappedDriveUtils.GetDummyMappedDrive();
+            unevaluatedInclude = mappedDriveUtils.UpdatePathToMappedDrive(unevaluatedInclude, mappedDrive.MappedDriveLetter);
             ProjectGetterResultsInDriveEnumerationWarning(unevaluatedInclude);
         }
 
@@ -898,33 +899,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             @"%DRIVE%:\$(Microsoft_WindowsAzure_EngSys)**")]
         public void LogWindowsWarningUponProjectInstanceCreationFromDriveEnumeratingContent(string content, string placeHolder, string excludePlaceHolder = null)
         {
-            var mappedDrive = GetDummyMappedDrive();
-            placeHolder = UpdatePathToMappedDrive(placeHolder, mappedDrive.MappedDriveLetter);
-            excludePlaceHolder = UpdatePathToMappedDrive(excludePlaceHolder, mappedDrive.MappedDriveLetter);
+            var mappedDriveUtils = new DummyMappedDriveUtils(_mappedDrive);
+            _mappedDrive = mappedDriveUtils.GetDummyMappedDrive();
+            placeHolder = mappedDriveUtils.UpdatePathToMappedDrive(placeHolder, _mappedDrive.MappedDriveLetter);
+            excludePlaceHolder = mappedDriveUtils.UpdatePathToMappedDrive(excludePlaceHolder, _mappedDrive.MappedDriveLetter);
             content = string.Format(content, placeHolder, excludePlaceHolder);
             CleanContentsAndCreateProjectInstanceFromFileWithDriveEnumeratingWildcard(content, false);
-        }
-
-        private DummyMappedDrive GetDummyMappedDrive()
-        {
-            if (NativeMethods.IsWindows)
-            {
-                // let's create the mapped drive only once it's needed by any test, then let's reuse;
-                _mappedDrive ??= new DummyMappedDrive();
-            }
-
-            return _mappedDrive;
-        }
-
-        private static string UpdatePathToMappedDrive(string path, char driveLetter)
-        {
-            const string drivePlaceholder = "%DRIVE%";
-            // if this seems to be rooted path - replace with the dummy mount
-            if (!string.IsNullOrEmpty(path) && path.StartsWith(drivePlaceholder))
-            {
-                path = driveLetter + path.Substring(drivePlaceholder.Length);
-            }
-            return path;
         }
 
         [UnixOnlyTheory]
@@ -968,7 +948,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             try
             {
-                // Reset state 
+                // Reset state
                 Helpers.ResetStateForDriveEnumeratingWildcardTests(env, throwException ? "1" : "0");
 
                 if (throwException)
