@@ -2782,8 +2782,8 @@
     <comment>{StrBegin="MSB3893: "} LOCALIZATION: {0} and {1} are paths.</comment>
   </data>
   <data name="Copy.IncompatibleParameters">
-    <value>MSB3894: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</value>
-    <comment>{StrBegin="MSB3894: "}</comment>
+    <value>MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</value>
+    <comment>{StrBegin="MSB3896: "}</comment>
   </data>
 
   <!--

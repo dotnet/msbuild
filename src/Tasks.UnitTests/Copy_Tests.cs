@@ -387,7 +387,7 @@ namespace Microsoft.Build.UnitTests
                     DestinationFiles = new ITaskItem[] { new TaskItem("destination0.txt"), new TaskItem("destination1.txt") },
                 };
                 task.Execute().ShouldBeFalse();
-                engine.AssertLogContains("MSB3894"); // Copy.IncompatibleParameters
+                engine.AssertLogContains("MSB3896"); // Copy.IncompatibleParameters
                 task.CopiedFiles.ShouldBeNull();
                 task.DestinationFiles.ShouldNotBeNull();
                 task.WroteAtLeastOneFile.ShouldBeFalse();
