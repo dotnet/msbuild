@@ -105,11 +105,11 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="new">  -reportFileAccesses[:True|False]
-                     Causes MSBuild to report file accesses to any configured
-                     project cache plugins.
+        <target state="translated">  -reportFileAccesses[:True|False]
+                     導致 MSBuild 報告任何已設定之專案快取外掛程式的
+                     檔案存取。
 
-                     This flag is experimental and may not work as intended.
+                     此旗標為實驗性質，可能無法如預期般運作。
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -138,7 +138,7 @@
       </trans-unit>
       <trans-unit id="InvalidReportFileAccessesValue">
         <source>MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1063: 報告檔案存取值無效。{0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1063: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
