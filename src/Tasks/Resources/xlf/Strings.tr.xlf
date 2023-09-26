@@ -193,7 +193,7 @@
       </trans-unit>
       <trans-unit id="Copy.IOException">
         <source>MSB3894: "Got {0} copying {1} to {2} and HR is {3}"</source>
-        <target state="new">MSB3894: "Got {0} copying {1} to {2} and HR is {3}"</target>
+        <target state="translated">MSB3894: "{0} için {1} yolu {2} yoluna kopyalandı ve HR: {3}"</target>
         <note>{StrBegin="MSB3894: "} LOCALIZATION: {0} is exception.ToString(), {1} and {2} are paths, {3} is a number")</note>
       </trans-unit>
       <trans-unit id="Copy.LinkFailed">
