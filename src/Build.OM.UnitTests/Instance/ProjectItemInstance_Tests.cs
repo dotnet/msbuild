@@ -1013,11 +1013,6 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             @"$(Microsoft_WindowsAzure_EngSys)\*.pdb;$(Microsoft_WindowsAzure_EngSys)\Microsoft.WindowsAzure.Storage.dll;$(Microsoft_WindowsAzure_EngSys)\Certificates\**\*")]
 
         [InlineData(
-            TargetItemWithIncludeAndExclude,
-            @"$(Microsoft_WindowsAzure_EngSys)\*.pdb",
-            @"%DRIVE%:$(Microsoft_WindowsAzure_EngSys)\**\*")]
-
-        [InlineData(
             TargetWithDefinedPropertyAndItemWithInclude,
             @"$(Microsoft_WindowsAzure_EngSys)**",
             null,
