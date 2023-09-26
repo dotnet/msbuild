@@ -27,11 +27,6 @@
     <PackageReference Include="Microsoft.Win32.Registry" />
   </ItemGroup>
 
-  <PropertyGroup>
-    <ApiCompatPreserveUnnecessarySuppressions>true</ApiCompatPreserveUnnecessarySuppressions>
-    <ApiCompatPermitUnnecessarySuppressions>true</ApiCompatPermitUnnecessarySuppressions>
-  </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="..\Shared\Constants.cs">
       <Link>Shared\Constants.cs</Link>

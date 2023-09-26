@@ -18,11 +18,6 @@
     <EnablePackageValidation>true</EnablePackageValidation>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <ApiCompatPreserveUnnecessarySuppressions>true</ApiCompatPreserveUnnecessarySuppressions>
-    <ApiCompatPermitUnnecessarySuppressions>true</ApiCompatPermitUnnecessarySuppressions>
-  </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
