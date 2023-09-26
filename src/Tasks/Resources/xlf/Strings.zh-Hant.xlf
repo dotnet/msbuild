@@ -196,6 +196,11 @@
         <target state="new">MSB3894: "Got {0} copying {1} to {2} and HR is {3}"</target>
         <note>{StrBegin="MSB3894: "} LOCALIZATION: {0} is exception.ToString(), {1} and {2} are paths, {3} is a number")</note>
       </trans-unit>
+      <trans-unit id="Copy.IncompatibleParameters">
+        <source>MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</source>
+        <target state="new">MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</target>
+        <note>{StrBegin="MSB3896: "}</note>
+      </trans-unit>
       <trans-unit id="Copy.LinkFailed">
         <source>MSB3893: Could not use a link to copy "{0}" to "{1}".</source>
         <target state="translated">MSB3893: 無法使用連結將 "{0}" 複製到 "{1}"。</target>
