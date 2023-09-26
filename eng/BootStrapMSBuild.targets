@@ -229,6 +229,9 @@
     <Copy SourceFiles="@(NuGetSdkResolverManifest)"
           DestinationFolder="$(BootstrapDestination)SdkResolvers\Microsoft.Build.NuGetSdkResolver" />
 
+    <Copy SourceFiles="$(RuntimeIdentifierGraphPath)"
+          DestinationFolder="$(BootstrapDestination)" />
+
     <Copy SourceFiles="@(InstalledSdks)"
           DestinationFiles="@(InstalledSdks -> '$(BootstrapDestination)Sdks\%(RecursiveDir)%(Filename)%(Extension)')" />
 
