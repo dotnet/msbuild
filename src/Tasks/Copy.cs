@@ -212,11 +212,11 @@ namespace Microsoft.Build.Tasks
         /// If MSBUILDALWAYSRETRY is set, also log useful diagnostic information -- as
         /// a warning, so it's easily visible.
         /// </summary>
-        private void LogDiagnostic(string message, params object[] messageArgs)
+        private void LogAlwaysRetryDiagnosticFromResources(string messageResourceName, params object[] messageArgs)
         {
             if (s_alwaysRetryCopy)
             {
-                Log.LogWarning(message, messageArgs);
+                Log.LogWarningWithCodeFromResources(messageResourceName, messageArgs);
             }
         }
 
@@ -917,7 +917,7 @@ namespace Microsoft.Build.Tasks
                         case IOException: // Not clear why we can get one and not the other
                             int code = Marshal.GetHRForException(e);
 
-                            LogDiagnostic("Got {0} copying {1} to {2} and HR is {3}", e.ToString(), sourceFileState.Name, destinationFileState.Name, code);
+                            LogAlwaysRetryDiagnosticFromResources("Copy.IOException", e.ToString(), sourceFileState.Name, destinationFileState.Name, code);
                             if (code == NativeMethods.ERROR_ACCESS_DENIED)
                             {
                                 // ERROR_ACCESS_DENIED can either mean there's an ACL preventing us, or the file has the readonly bit set.
@@ -933,7 +933,7 @@ namespace Microsoft.Build.Tasks
                                 }
                                 else
                                 {
-                                    LogDiagnostic("Retrying on ERROR_ACCESS_DENIED because MSBUILDALWAYSRETRY = 1");
+                                    LogAlwaysRetryDiagnosticFromResources("Copy.RetryingOnAccessDenied");
                                 }
                             }
                             else if (code == NativeMethods.ERROR_INVALID_FILENAME)
