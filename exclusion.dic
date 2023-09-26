@@ -2,6 +2,7 @@ awaiter
 crossgen
 cshtml
 deserializer
+msbuild
 nuget
 nupkg
 nuspec
