@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="DeprecatedEventSerialization">
         <source>Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
-        <target state="translated">사용자 지정 이벤트 유형 '{0}'의 직렬화 중 보안되지 않은 BinaryFormatter 사용. 이 항목은 곧 지원 중단될 예정입니다. 대신 Extended*EventArgs를 사용하세요. 추가 정보: https://aka.ms/msbuild/eventargs</target>
+        <target state="new">Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedEventToBeSerializable">
@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="LoggingBeforeTaskInitialization">
         <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
-        <target state="translated">MSB6005: 작업을 초기화하기 전에 로깅하려고 했습니다. 메시지: {0}</target>
+        <target state="new">MSB6005: Task attempted to log before it was initialized. Message was: {0}</target>
         <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
       </trans-unit>
       <trans-unit id="ModifyingTaskHostEnvironmentHeader">
