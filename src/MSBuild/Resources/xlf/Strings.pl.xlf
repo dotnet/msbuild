@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="BuildFailedWithPropertiesItemsOrTargetResultsRequested">
         <source>Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</source>
-        <target state="translated">Kompilacja nie powiodła się. Nie można uzyskać wyników właściwości, elementów i celu. Zobacz szczegóły w sekcji stderr powyżej.</target>
+        <target state="new">Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -116,16 +116,6 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
-      <trans-unit id="InvalidReportFileAccessesValue">
-        <source>MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</target>
-        <note>
-      {StrBegin="MSBUILD : error MSB1063: "}
-      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
-    </note>
-      </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1064: wartość niskiego priorytetu jest nieprawidłowa. {0}</target>
@@ -138,11 +128,21 @@
       </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
-        <target state="translated">MSBUILD : error MSB1065: Wartość rejestratora terminali jest nieprawidłowa. Powinna to być wartość „auto”, „true” lub „false”. {0}</target>
+        <target state="new">MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidReportFileAccessesValue">
+        <source>MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</source>
+        <target state="new">MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1063: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -568,17 +568,14 @@
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;rejestrator&gt;  Umożliwia użycie podanego rejestratora do rejestrowania
-                         zdarzeń pochodzących z programu MSBuild. Aby określić
-                     wiele rejestratorów, określ każdy z nich osobno.
+        <target state="translated">  -logger:&lt;rejestrator&gt;  Umożliwia użycie podanego rejestratora do rejestrowania zdarzeń pochodzących
+                     z programu MSBuild. Aby określić wiele rejestratorów, określ każdy z nich osobno.
                      Składnia elementu &lt;rejestrator&gt;:
-                        [&lt;klasa rejestratora&gt;,]&lt;zestaw rejestratora&gt;
-                        [;&lt;parametry rejestratora&gt;]
+                      [&lt;klasa rejestratora&gt;,]&lt;zestaw rejestratora&gt; [;&lt;parametry rejestratora&gt;]
                      Składnia elementu &lt;klasa rejestratora&gt;:
-                        [&lt;częściowa lub pełna przestrzeń nazw&gt;.]
-                        &lt;nazwa klasy rejestratora&gt;
+                       [&lt;częściowa lub pełna przestrzeń nazw&gt;.] &lt;nazwa klasy rejestratora&gt;
                      Składnia elementu &lt;zestaw rejestratora&gt;:
-                        {&lt;nazwa zestawu&gt;[,&lt;strong name&gt;] | &lt;plik zestawu&gt;}
+                       {&lt;nazwa zestawu&gt;[,&lt;strong name&gt;] | &lt;plik zestawu&gt;}
                      Wartości &lt;parametry rejestratora&gt; są opcjonalne i są
                      przekazywane do rejestratora dokładnie tak, jak zostały
                      wpisane. (Krótka wersja: -l)
@@ -973,13 +970,11 @@
                      create a log file for each node.
     </source>
         <target state="translated">  -distributedFileLogger
-                     Rejestruje dane wyjściowe kompilacji w wielu plikach
-                     dziennika, po jednym pliku na węzeł programu MSBuild.
-                     Początkową lokalizacją tych plików jest bieżący katalog.
-                     Domyślnie pliki mają nazwę
+                     Rejestruje dane wyjściowe kompilacji w wielu plikach dziennika,po jednym pliku
+                     na węzeł programu MSBuild. Początkową lokalizacją tych plików
+                     jest bieżący katalog. Domyślnie pliki mają nazwę
                      „MSBuild&lt;identyfikator węzła&gt;.log”. Lokalizację plików
                      i inne parametry rejestratora plików można określić
-
                      przez dodanie przełącznika „-fileLoggerParameters”.
 
                      Jeśli nazwa pliku zostanie ustawiona za pomocą przełącznika
@@ -1327,7 +1322,7 @@
       </trans-unit>
       <trans-unit id="MissingGetItemError">
         <source>MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</source>
-        <target state="translated">MSBUILD : error MSB1014: Musi podać nazwę elementu dla przełącznika getItem.</target>
+        <target state="new">MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1014: "}UE: This happens if the user does something like "msbuild.exe -getItem". The user must pass in an actual item name
       following the switch, as in "msbuild.exe -getItem:blah".
@@ -1336,7 +1331,7 @@
       </trans-unit>
       <trans-unit id="MissingGetPropertyError">
         <source>MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</source>
-        <target state="translated">MSBUILD : error MSB1010: Musi podać nazwę właściwości dla przełącznika getProperty.</target>
+        <target state="new">MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1010: "}UE: This happens if the user does something like "msbuild.exe -getProperty". The user must pass in an actual property name
       following the switch, as in "msbuild.exe -getProperty:blah".
@@ -1345,7 +1340,7 @@
       </trans-unit>
       <trans-unit id="MissingGetTargetResultError">
         <source>MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</source>
-        <target state="translated">MSBUILD : error MSB1017: Musi podać nazwę celu dla przełącznika getTargetResult.</target>
+        <target state="new">MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1017: "}UE: This happens if the user does something like "msbuild.exe -getTargetResult". The user must pass in an actual target name
       following the switch, as in "msbuild.exe -getTargetResult:blah".
@@ -1407,7 +1402,7 @@
       </trans-unit>
       <trans-unit id="MissingTerminalLoggerParameterError">
         <source>MSBUILD : error MSB1066: Specify one or more parameters for the terminal logger if using the -terminalLoggerParameters switch</source>
-        <target state="translated">MSBUILD : error MSB1066: W przypadku korzystania z przełącznika -terminalLoggerParameters określ co najmniej jeden parametr dla rejestratora terminalu</target>
+        <target state="new">MSBUILD : error MSB1066: Specify one or more parameters for the terminal logger if using the -terminalLoggerParameters switch</target>
         <note>
       {StrBegin="MSBUILD : error MSB1066: "}
       UE: This happens if the user does something like "msbuild.exe -termionalLoggerParameters:". The user must pass in one or more parameters
@@ -1453,7 +1448,7 @@
       </trans-unit>
       <trans-unit id="NameInvalid">
         <source>MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</source>
-        <target state="translated">MSBUILD : error MSB5016: nazwa „{0}” zawiera nieprawidłowy znak „{1}”.</target>
+        <target state="new">MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</target>
         <note>
       {StrBegin="MSBUILD : error MSB5016: "}
     </note>
@@ -1632,7 +1627,7 @@
       </trans-unit>
       <trans-unit id="SolutionBuildInvalidForCommandLineEvaluation">
         <source>MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</source>
-        <target state="translated">MSBUILD : error MSB1063: Nie można uzyskać dostępu do właściwości lub elementów podczas tworzenia plików rozwiązań lub plików filtrów rozwiązań. Ta funkcja jest dostępna tylko podczas tworzenia pojedynczych projektów.</target>
+        <target state="new">MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1063: "}UE: This happens if the user passes in a solution file when trying to access individual properties or items. The user must pass in a project file.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
@@ -1654,17 +1649,17 @@
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
-        <target state="translated">Rejestrator terminali nie został użyty, ponieważ kompilacja jest uruchamiana w kontekście procesu (np. „dotnet test”), który żąda bezpośredniego dostępu do strumienia StdOut.</target>
+        <target state="new">Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedNotSupported">
         <source>Terminal Logger was not used because the output is not supported.</source>
-        <target state="translated">Rejestrator terminali nie został użyty, ponieważ dane wyjściowe nie są obsługiwane.</target>
+        <target state="new">Terminal Logger was not used because the output is not supported.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedRedirected">
         <source>Terminal Logger was not used because the output is being redirected to a file.</source>
-        <target state="translated">Rejestrator terminali nie został użyty, ponieważ dane wyjściowe są przekierowywane do pliku.</target>
+        <target state="new">Terminal Logger was not used because the output is being redirected to a file.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">

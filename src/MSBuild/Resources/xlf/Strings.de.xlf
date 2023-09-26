@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="BuildFailedWithPropertiesItemsOrTargetResultsRequested">
         <source>Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</source>
-        <target state="translated">Fehler beim Buildvorgang. Eigenschaften, Elemente und Zielergebnisse können nicht abgerufen werden. Details finden Sie oben in stderr.</target>
+        <target state="new">Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -128,7 +128,7 @@
       </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
-        <target state="translated">MSBUILD : error MSB1065: Der Terminalprotokollierungswert ist ungültig. Es sollte "auto", "true" oder "false" sein. {0}</target>
+        <target state="new">MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1316,7 +1316,7 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
       </trans-unit>
       <trans-unit id="MissingGetItemError">
         <source>MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</source>
-        <target state="translated">MSBUILD : error MSB1014: Es muss ein Elementname für den getItem-Switch angegeben werden.</target>
+        <target state="new">MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1014: "}UE: This happens if the user does something like "msbuild.exe -getItem". The user must pass in an actual item name
       following the switch, as in "msbuild.exe -getItem:blah".
@@ -1325,7 +1325,7 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
       </trans-unit>
       <trans-unit id="MissingGetPropertyError">
         <source>MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</source>
-        <target state="translated">MSBUILD : error MSB1010: Für den getProperty-Switch muss ein Eigenschaftenname angegeben werden.</target>
+        <target state="new">MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1010: "}UE: This happens if the user does something like "msbuild.exe -getProperty". The user must pass in an actual property name
       following the switch, as in "msbuild.exe -getProperty:blah".
@@ -1334,7 +1334,7 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
       </trans-unit>
       <trans-unit id="MissingGetTargetResultError">
         <source>MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</source>
-        <target state="translated">MSBUILD : error MSB1017: Für den GetTargetResult-Switch muss ein Zielname angegeben werden.</target>
+        <target state="new">MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1017: "}UE: This happens if the user does something like "msbuild.exe -getTargetResult". The user must pass in an actual target name
       following the switch, as in "msbuild.exe -getTargetResult:blah".
@@ -1396,7 +1396,7 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
       </trans-unit>
       <trans-unit id="MissingTerminalLoggerParameterError">
         <source>MSBUILD : error MSB1066: Specify one or more parameters for the terminal logger if using the -terminalLoggerParameters switch</source>
-        <target state="translated">MSBUILD : error MSB1066: Geben Sie mindestens einen Parameter für die Terminalprotokollierung an, wenn Sie den Schalter "-terminalLoggerParameters" verwenden.</target>
+        <target state="new">MSBUILD : error MSB1066: Specify one or more parameters for the terminal logger if using the -terminalLoggerParameters switch</target>
         <note>
       {StrBegin="MSBUILD : error MSB1066: "}
       UE: This happens if the user does something like "msbuild.exe -termionalLoggerParameters:". The user must pass in one or more parameters
@@ -1442,7 +1442,7 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
       </trans-unit>
       <trans-unit id="NameInvalid">
         <source>MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</source>
-        <target state="translated">MSBUILD : error MSB5016: Der Name "{0}" enthält ein ungültiges Zeichen "{1}".</target>
+        <target state="new">MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</target>
         <note>
       {StrBegin="MSBUILD : error MSB5016: "}
     </note>
@@ -1621,7 +1621,7 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
       </trans-unit>
       <trans-unit id="SolutionBuildInvalidForCommandLineEvaluation">
         <source>MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</source>
-        <target state="translated">MSBUILD : error MSB1063: Beim Erstellen von Projektmappendateien oder Projektmappenfilterdateien kann nicht auf Eigenschaften oder Elemente zugegriffen werden. Dieses Feature ist nur beim Erstellen einzelner Projekte verfügbar.</target>
+        <target state="new">MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1063: "}UE: This happens if the user passes in a solution file when trying to access individual properties or items. The user must pass in a project file.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
@@ -1643,17 +1643,17 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
-        <target state="translated">Die Terminalprotokollierung wurde nicht verwendet, da der Build im Kontext eines Prozesses (z. B. "dotnet test") ausgeführt wird, der direkten Zugriff auf den stdout-Stream anfordert.</target>
+        <target state="new">Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedNotSupported">
         <source>Terminal Logger was not used because the output is not supported.</source>
-        <target state="translated">Die Terminalprotokollierung wurde nicht verwendet, da die Ausgabe nicht unterstützt wird.</target>
+        <target state="new">Terminal Logger was not used because the output is not supported.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedRedirected">
         <source>Terminal Logger was not used because the output is being redirected to a file.</source>
-        <target state="translated">Die Terminalprotokollierung wurde nicht verwendet, da die Ausgabe an eine Datei umgeleitet wird.</target>
+        <target state="new">Terminal Logger was not used because the output is being redirected to a file.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">

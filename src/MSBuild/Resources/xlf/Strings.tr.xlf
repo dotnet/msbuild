@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="BuildFailedWithPropertiesItemsOrTargetResultsRequested">
         <source>Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</source>
-        <target state="translated">Derleme başarısız oldu. Özellikler, Öğeler ve Hedef sonuçları alınamıyor. Yukarıda stderr'de ayrıntılara bakın.</target>
+        <target state="new">Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -116,16 +116,6 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
-      <trans-unit id="InvalidReportFileAccessesValue">
-        <source>MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</target>
-        <note>
-      {StrBegin="MSBUILD : error MSB1063: "}
-      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
-    </note>
-      </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1064: Düşük öncelikli değer geçerli değil. {0}</target>
@@ -138,11 +128,21 @@
       </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
-        <target state="translated">MSBUILD : error MSB1065: Terminal günlükçüsü değeri geçerli değil. Değer şunlardan biri olmalıdır: 'otomatik', 'doğru' veya 'yanlış'. {0}</target>
+        <target state="new">MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidReportFileAccessesValue">
+        <source>MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</source>
+        <target state="new">MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1063: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -879,10 +879,9 @@
                        -ignoreProjectExtensions:.sln
     </source>
         <target state="translated">  -ignoreProjectExtensions:&lt;uzantılar&gt;
-                     Hangi proje dosyasının oluşturulacağı belirlenirken 
-                     yoksayılacak uzantıların listesi. Birden çok uzantıyı 
-                     birbirinden ayırmak için noktalı virgül veya 
-                     virgül kullanın.
+                     Hangi proje dosyasının oluşturulacağı belirlenirken
+                     yoksayılacak uzantıların listesi. Birden çok uzantıyı
+                     birbirinden ayırmak için noktalı virgül veya virgül kullanın.
                      (Kısa biçim: -ignore)
                      Örnek:
                        -ignoreProjectExtensions:.sln
@@ -972,7 +971,6 @@
                      Dosyaların konumu ve fileLogger'ın diğer parametreleri 
                      "/fileLoggerParameters" anahtarının eklenmesi yoluyla
                      belirtilebilir.
-
                      Günlük dosyası adı fileLoggerParameters anahtarı
                      aracılığıyla ayarlanırsa dağıtılmış günlükçü fileName 
                      değerini şablon olarak kullanıp her düğümün günlük dosyasını
@@ -1019,32 +1017,31 @@
     </source>
         <target state="translated">  -fileLoggerParameters[n]:&lt;parametreler&gt;
                      Dosya günlükçüleri için ek parametreler sağlar.
-                     Bu anahtarın olması karşılık gelen -fileLogger[n] 
+                     Bu anahtarın olması karşılık gelen -fileLogger[n]
                      anahtarının olduğu anlamına gelir.
                      "n" varsa, 1-9 arasında bir rakam olabilir.
-                     Dağıtılmış dosya günlükçüleri varsa -fileLoggerParameters 
-                     bunlar tarafından da kullanılır; -distributedFileLogger 
-                     açıklamasına bakın.
+                     Dağıtılmış dosya günlükçüleri varsa -fileLoggerParameters
+                     bunlar tarafından da kullanılır; -distributedFileLogger açıklamasına bakın.
                      (Kısa biçim: -flp[n])
-                     Konsol günlükçüsü için listelenenlerle aynı parametreler 
+                     Konsol günlükçüsü için listelenenlerle aynı parametreler
                      kullanılabilir. Kullanılabilecek bazı ek parametreler:
-                        LogFile--Oluşturma günlüğünün yazılacağı günlük 
+                        LogFile--Oluşturma günlüğünün yazılacağı günlük
                             dosyasının yolu.
-                        Append--Derleme günlüğünün gün dosyasının sonuna mı 
-                            ekleneceğini yoksa üzerine mi yazılacağını 
-                            belirler. Anahtar ayarlandığında oluşturma günlüğü 
-                            dosyanın sonuna eklenir. Anahtar ayarlanmadığında 
-                            varolan günlük dosyasının üzerine yazılır. 
+                        Append--Derleme günlüğünün gün dosyasının sonuna mı
+                            ekleneceğini yoksa üzerine mi yazılacağını
+                            belirler. Anahtar ayarlandığında oluşturma günlüğü
+                            dosyanın sonuna eklenir. Anahtar ayarlanmadığında
+                            varolan günlük dosyasının üzerine yazılır.
                             Varsayılan: günlük dosyasının sonuna eklenmez.
-                        Encoding--Dosyanın kodlamasını belirtir; örneğin, 
+                        Encoding--Dosyanın kodlamasını belirtir; örneğin,
                             UTF-8, Unicode veya ASCII
                      Varsayılan ayrıntı düzeyi ayarı Detailed'dır.
                      Örnekler:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
-                       -flp1:warningsonly;logfile=msbuild.wrn 
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+                       -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1068,8 +1065,7 @@
                        -nr:true
     </source>
         <target state="translated">  -nodeReuse:&lt;parametreler&gt;
-                     MSBuild düğümlerinin yeniden kullanımını etkinleştirir
-                     veya devre dışı bırakır.
+                     MSBuild düğümlerinin yeniden kullanımını etkinleştirir veya devre dışı bırakır.
                      Parametreler:
                      True --Derleme tamamlandıktan sonra düğümler kalır ve
                             izleyen derlemelerde yeniden kullanılır (varsayılan)
@@ -1320,7 +1316,7 @@
       </trans-unit>
       <trans-unit id="MissingGetItemError">
         <source>MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</source>
-        <target state="translated">MSBUILD : error MSB1014: getItem anahtarı için bir öğe adı sağlanması gerekiyor.</target>
+        <target state="new">MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1014: "}UE: This happens if the user does something like "msbuild.exe -getItem". The user must pass in an actual item name
       following the switch, as in "msbuild.exe -getItem:blah".
@@ -1329,7 +1325,7 @@
       </trans-unit>
       <trans-unit id="MissingGetPropertyError">
         <source>MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</source>
-        <target state="translated">MSBUILD : error MSB1010: getProperty anahtarı için bir özellik adı belirtilmelidir.</target>
+        <target state="new">MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1010: "}UE: This happens if the user does something like "msbuild.exe -getProperty". The user must pass in an actual property name
       following the switch, as in "msbuild.exe -getProperty:blah".
@@ -1338,7 +1334,7 @@
       </trans-unit>
       <trans-unit id="MissingGetTargetResultError">
         <source>MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</source>
-        <target state="translated">MSBUILD : error MSB1017: getTargetResult anahtarı için bir hedef adı sağlanması gerekiyor.</target>
+        <target state="new">MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1017: "}UE: This happens if the user does something like "msbuild.exe -getTargetResult". The user must pass in an actual target name
       following the switch, as in "msbuild.exe -getTargetResult:blah".
@@ -1400,7 +1396,7 @@
       </trans-unit>
       <trans-unit id="MissingTerminalLoggerParameterError">
         <source>MSBUILD : error MSB1066: Specify one or more parameters for the terminal logger if using the -terminalLoggerParameters switch</source>
-        <target state="translated">MSBUILD : error MSB1066: -terminalLoggerParameters anahtarı kullanılıyorsa terminal günlükçüsü için bir veya birden çok parametre belirtin</target>
+        <target state="new">MSBUILD : error MSB1066: Specify one or more parameters for the terminal logger if using the -terminalLoggerParameters switch</target>
         <note>
       {StrBegin="MSBUILD : error MSB1066: "}
       UE: This happens if the user does something like "msbuild.exe -termionalLoggerParameters:". The user must pass in one or more parameters
@@ -1446,7 +1442,7 @@
       </trans-unit>
       <trans-unit id="NameInvalid">
         <source>MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</source>
-        <target state="translated">MSBUILD : error MSB5016: "{0}" adı "{1}" geçersiz karakterini içeriyor.</target>
+        <target state="new">MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</target>
         <note>
       {StrBegin="MSBUILD : error MSB5016: "}
     </note>
@@ -1625,7 +1621,7 @@
       </trans-unit>
       <trans-unit id="SolutionBuildInvalidForCommandLineEvaluation">
         <source>MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</source>
-        <target state="translated">MSBUILD : error MSB1063: Çözüm dosyaları veya çözüm filtresi dosyaları oluşturulurken özelliklere veya öğelere erişilemiyor. Bu özellik yalnızca tek tek projeler oluşturulurken kullanılabilir.</target>
+        <target state="new">MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1063: "}UE: This happens if the user passes in a solution file when trying to access individual properties or items. The user must pass in a project file.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
@@ -1647,17 +1643,17 @@
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
-        <target state="translated">Derleme StdOut akışına doğrudan erişim isteyen bir işlem (ör. 'dotnet test') bağlamında çalıştığı için Terminal Günlükçüsü kullanılmadı.</target>
+        <target state="new">Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedNotSupported">
         <source>Terminal Logger was not used because the output is not supported.</source>
-        <target state="translated">Çıkış desteklenmediğinden Terminal Günlükçüsü kullanılmadı.</target>
+        <target state="new">Terminal Logger was not used because the output is not supported.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedRedirected">
         <source>Terminal Logger was not used because the output is being redirected to a file.</source>
-        <target state="translated">Çıkış bir dosyaya yeniden yönlendirildiği için Terminal Günlükçüsü kullanılmadı.</target>
+        <target state="new">Terminal Logger was not used because the output is being redirected to a file.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">

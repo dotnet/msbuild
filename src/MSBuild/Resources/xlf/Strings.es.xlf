@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="BuildFailedWithPropertiesItemsOrTargetResultsRequested">
         <source>Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</source>
-        <target state="translated">Error de compilación. No se pueden obtener los resultados de propiedades, elementos y destinos. Vea los detalles en stderr anterior.</target>
+        <target state="new">Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -128,7 +128,7 @@
       </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
-        <target state="translated">MSBUILD : error MSB1065: El valor del registrador de terminales no es válido. Debe ser uno de "auto", "true", o "false".{0}</target>
+        <target state="new">MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1323,7 +1323,7 @@
       </trans-unit>
       <trans-unit id="MissingGetItemError">
         <source>MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</source>
-        <target state="translated">MSBUILD : error MSB1014: debe proporcionar un nombre de elemento para el modificador getItem.</target>
+        <target state="new">MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1014: "}UE: This happens if the user does something like "msbuild.exe -getItem". The user must pass in an actual item name
       following the switch, as in "msbuild.exe -getItem:blah".
@@ -1332,7 +1332,7 @@
       </trans-unit>
       <trans-unit id="MissingGetPropertyError">
         <source>MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</source>
-        <target state="translated">MSBUILD : error MSB1010: debe proporcionar un nombre de propiedad para el modificador getProperty.</target>
+        <target state="new">MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1010: "}UE: This happens if the user does something like "msbuild.exe -getProperty". The user must pass in an actual property name
       following the switch, as in "msbuild.exe -getProperty:blah".
@@ -1341,7 +1341,7 @@
       </trans-unit>
       <trans-unit id="MissingGetTargetResultError">
         <source>MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</source>
-        <target state="translated">MSBUILD : error MSB1017: debe proporcionar un nombre de destino para el modificador getTargetResult.</target>
+        <target state="new">MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1017: "}UE: This happens if the user does something like "msbuild.exe -getTargetResult". The user must pass in an actual target name
       following the switch, as in "msbuild.exe -getTargetResult:blah".
@@ -1403,7 +1403,7 @@
       </trans-unit>
       <trans-unit id="MissingTerminalLoggerParameterError">
         <source>MSBUILD : error MSB1066: Specify one or more parameters for the terminal logger if using the -terminalLoggerParameters switch</source>
-        <target state="translated">MSBUILD : error MSB1066: Especifique uno o más parámetros para el registrador de terminales si utiliza la opción -terminalLoggerParameters</target>
+        <target state="new">MSBUILD : error MSB1066: Specify one or more parameters for the terminal logger if using the -terminalLoggerParameters switch</target>
         <note>
       {StrBegin="MSBUILD : error MSB1066: "}
       UE: This happens if the user does something like "msbuild.exe -termionalLoggerParameters:". The user must pass in one or more parameters
@@ -1449,7 +1449,7 @@
       </trans-unit>
       <trans-unit id="NameInvalid">
         <source>MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</source>
-        <target state="translated">MSBUILD : error MSB5016: El nombre "{0}" contiene un carácter no válido "{1}".</target>
+        <target state="new">MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</target>
         <note>
       {StrBegin="MSBUILD : error MSB5016: "}
     </note>
@@ -1628,7 +1628,7 @@
       </trans-unit>
       <trans-unit id="SolutionBuildInvalidForCommandLineEvaluation">
         <source>MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</source>
-        <target state="translated">MSBUILD : error MSB1063: no se puede tener acceso a propiedades o elementos al compilar archivos de solución o archivos de filtro de soluciones. Esta característica solo está disponible al compilar proyectos individuales.</target>
+        <target state="new">MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1063: "}UE: This happens if the user passes in a solution file when trying to access individual properties or items. The user must pass in a project file.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
@@ -1650,17 +1650,17 @@
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
-        <target state="translated">No se usó el terminal de Logger porque la compilación se ejecuta en el contexto de un proceso (por ejemplo, "dotnet test") que solicita acceso directo a la secuencia stdout.</target>
+        <target state="new">Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedNotSupported">
         <source>Terminal Logger was not used because the output is not supported.</source>
-        <target state="translated">No se usó el terminal de Logger porque no se admite la salida.</target>
+        <target state="new">Terminal Logger was not used because the output is not supported.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedRedirected">
         <source>Terminal Logger was not used because the output is being redirected to a file.</source>
-        <target state="translated">No se usó el terminal de Logger porque la salida se está redirigiendo a un archivo.</target>
+        <target state="new">Terminal Logger was not used because the output is being redirected to a file.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
