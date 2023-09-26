@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Definition;
@@ -9,6 +10,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
+using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
@@ -19,7 +21,7 @@ using Xunit.NetCore.Extensions;
 
 namespace Microsoft.Build.UnitTests
 {
-    public sealed class CreateItem_Tests
+    public sealed class CreateItem_Tests : IDisposable
     {
         internal const string CreateItemWithInclude = @"
             <Project>
@@ -32,6 +34,12 @@ namespace Microsoft.Build.UnitTests
             ";
 
         private readonly ITestOutputHelper _testOutput;
+        private DummyMappedDrive _mappedDrive = null;
+
+        public void Dispose()
+        {
+            _mappedDrive?.Dispose();
+        }
 
         public CreateItem_Tests(ITestOutputHelper output)
         {
@@ -146,7 +154,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Using the CreateItem task to expand wildcards, and then try accessing the RecursiveDir 
+        /// Using the CreateItem task to expand wildcards, and then try accessing the RecursiveDir
         /// metadata to force batching.
         /// </summary>
         [Fact]
@@ -313,20 +321,20 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Logs warning when encountering wildcard drive enumeration during task item creation on Windows platform.
         /// </summary>
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
         [WindowsOnlyTheory]
-        [InlineData(@"z:\**")]
-        [InlineData(@"z:\**\*.log")]
-        [InlineData(@"z:\\\\**\*.log")]
+        [InlineData(@"%DRIVE%:\**")]
+        [InlineData(@"%DRIVE%:\**\*.log")]
+        [InlineData(@"%DRIVE%:\\\\**\*.log")]
         public void LogWindowsWarningUponCreateItemExecution(string itemSpec)
         {
+            _mappedDrive = DummyMappedDriveUtils.GetDummyMappedDrive(_mappedDrive);
+            itemSpec = DummyMappedDriveUtils.UpdatePathToMappedDrive(itemSpec, _mappedDrive.MappedDriveLetter);
             VerifyDriveEnumerationWarningLoggedUponCreateItemExecution(itemSpec);
         }
 
         /// <summary>
         /// Logs warning when encountering wildcard drive enumeration during task item creation on Unix platform.
         /// </summary>
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
         [UnixOnlyTheory]
         [InlineData(@"\**")]
         [InlineData(@"\**\*.log")]
@@ -391,21 +399,22 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Logs warning when encountering wildcard drive enumeration during CreateItem task execution on Windows platform.
         /// </summary>
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
         [WindowsOnlyTheory]
         [InlineData(
             CreateItemWithInclude,
-            @"z:\**")]
+            @"%DRIVE%:\**")]
 
         [InlineData(
             CreateItemWithInclude,
-            @"z:\**\*.txt")]
+            @"%DRIVE%:\**\*.txt")]
 
         [InlineData(
             CreateItemWithInclude,
-            @"z:$(empty)\**\*.cs")]
+            @"%DRIVE%:$(empty)\**\*.cs")]
         public void LogWindowsWarningUponItemCreationWithDriveEnumeration(string content, string include)
         {
+            _mappedDrive = DummyMappedDriveUtils.GetDummyMappedDrive(_mappedDrive);
+            include = DummyMappedDriveUtils.UpdatePathToMappedDrive(include, _mappedDrive.MappedDriveLetter);
             content = string.Format(content, include);
             Helpers.CleanContentsAndBuildTargetWithDriveEnumeratingWildcard(
                 content,
@@ -418,7 +427,6 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Logs warning when encountering wildcard drive enumeration during CreateItem task execution on Unix platform.
         /// </summary>
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
         [UnixOnlyTheory]
         [InlineData(
             CreateItemWithInclude,

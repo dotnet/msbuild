@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -22,6 +23,7 @@ namespace Microsoft.Build.UnitTests
     public class FileMatcherTest : IDisposable
     {
         private readonly TestEnvironment _env;
+        private DummyMappedDrive _mappedDrive = null;
 
         public FileMatcherTest(ITestOutputHelper output)
         {
@@ -31,6 +33,7 @@ namespace Microsoft.Build.UnitTests
         public void Dispose()
         {
             _env.Dispose();
+            _mappedDrive?.Dispose();
         }
 
         [Theory]
@@ -1377,18 +1380,20 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
         [WindowsOnlyTheory]
-        [InlineData(@"z:\**")]
-        [InlineData(@"z:\\**")]
-        [InlineData(@"z:\\\\\\\\**")]
-        [InlineData(@"z:\**\*.cs")]
+        [InlineData(@"%DRIVE%:\**")]
+        [InlineData(@"%DRIVE%:\\**")]
+        [InlineData(@"%DRIVE%:\\\\\\\\**")]
+        [InlineData(@"%DRIVE%:\**\*.cs")]
         public void DriveEnumeratingWildcardIsLoggedOnWindows(string driveEnumeratingWildcard)
         {
             using (var env = TestEnvironment.Create())
             {
                 try
                 {
+                    _mappedDrive = DummyMappedDriveUtils.GetDummyMappedDrive(_mappedDrive);
+                    driveEnumeratingWildcard = DummyMappedDriveUtils.UpdatePathToMappedDrive(driveEnumeratingWildcard, _mappedDrive.MappedDriveLetter);
+
                     // Set env var to log on drive enumerating wildcard detection
                     Helpers.ResetStateForDriveEnumeratingWildcardTests(env, "0");
 

@@ -804,9 +804,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [InlineData(@"%DRIVE%:\**\*.cs")]
         public void ProjectGetterResultsInWindowsDriveEnumerationWarning(string unevaluatedInclude)
         {
-            var mappedDriveUtils = new DummyMappedDriveUtils(_mappedDrive);
-            var mappedDrive = mappedDriveUtils.GetDummyMappedDrive();
-            unevaluatedInclude = mappedDriveUtils.UpdatePathToMappedDrive(unevaluatedInclude, mappedDrive.MappedDriveLetter);
+            _mappedDrive = DummyMappedDriveUtils.GetDummyMappedDrive(_mappedDrive);
+            unevaluatedInclude = DummyMappedDriveUtils.UpdatePathToMappedDrive(unevaluatedInclude, _mappedDrive.MappedDriveLetter);
             ProjectGetterResultsInDriveEnumerationWarning(unevaluatedInclude);
         }
 
@@ -899,10 +898,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             @"%DRIVE%:\$(Microsoft_WindowsAzure_EngSys)**")]
         public void LogWindowsWarningUponProjectInstanceCreationFromDriveEnumeratingContent(string content, string placeHolder, string excludePlaceHolder = null)
         {
-            var mappedDriveUtils = new DummyMappedDriveUtils(_mappedDrive);
-            _mappedDrive = mappedDriveUtils.GetDummyMappedDrive();
-            placeHolder = mappedDriveUtils.UpdatePathToMappedDrive(placeHolder, _mappedDrive.MappedDriveLetter);
-            excludePlaceHolder = mappedDriveUtils.UpdatePathToMappedDrive(excludePlaceHolder, _mappedDrive.MappedDriveLetter);
+            _mappedDrive = DummyMappedDriveUtils.GetDummyMappedDrive(_mappedDrive);
+            placeHolder = DummyMappedDriveUtils.UpdatePathToMappedDrive(placeHolder, _mappedDrive.MappedDriveLetter);
+            excludePlaceHolder = DummyMappedDriveUtils.UpdatePathToMappedDrive(excludePlaceHolder, _mappedDrive.MappedDriveLetter);
             content = string.Format(content, placeHolder, excludePlaceHolder);
             CleanContentsAndCreateProjectInstanceFromFileWithDriveEnumeratingWildcard(content, false);
         }
@@ -3762,10 +3760,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
     public class ProjectItemWithOptimizations_Tests : ProjectItem_Tests
     {
-        public ProjectItemWithOptimizations_Tests()
-        {
-            // Make sure we always use the dictionary-based Remove logic.
-            _env.SetEnvironmentVariable("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", "0");
-        }
+       public ProjectItemWithOptimizations_Tests()
+       {
+           // Make sure we always use the dictionary-based Remove logic.
+           _env.SetEnvironmentVariable("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", "0");
+       }
     }
 }

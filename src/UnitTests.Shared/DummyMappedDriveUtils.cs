@@ -8,25 +8,18 @@ using Microsoft.Build.UnitTests.Shared;
 
 namespace Microsoft.Build.UnitTests.Shared;
 
-public class DummyMappedDriveUtils
+public static class DummyMappedDriveUtils
 {
-    private DummyMappedDrive _mappedDrive;
-
-    public DummyMappedDriveUtils(DummyMappedDrive mappedDrive)
-    {
-        _mappedDrive = mappedDrive;
-    }
-
-    public DummyMappedDrive GetDummyMappedDrive()
+    public static DummyMappedDrive GetDummyMappedDrive(DummyMappedDrive mappedDrive)
     {
         if (NativeMethods.IsWindows)
         {
-            _mappedDrive ??= new DummyMappedDrive();
+            mappedDrive ??= new DummyMappedDrive();
         }
 
-        return _mappedDrive;
+        return mappedDrive;
     }
-    public string UpdatePathToMappedDrive(string path, char driveLetter)
+    public static string UpdatePathToMappedDrive(string path, char driveLetter)
     {
         const string drivePlaceholder = "%DRIVE%";
         // if this seems to be rooted path - replace with the dummy mount
