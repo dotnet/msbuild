@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Logging.TerminalLogger;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging.SimpleErrorLogger
@@ -44,30 +45,36 @@ namespace Microsoft.Build.Logging.SimpleErrorLogger
         {
             eventSource.ErrorRaised += HandleErrorEvent;
             eventSource.WarningRaised += HandleWarningEvent;
+
+            // This needs to happen so binary loggers can get evaluation properties and items
+            if (eventSource is IEventSource4 eventSource4)
+            {
+                eventSource4.IncludeEvaluationPropertiesAndItems();
+            }
         }
 
         private void HandleErrorEvent(object sender, BuildErrorEventArgs e)
         {
             HasLoggedErrors = true;
-            LogErrorEvent(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true), "\x1b[31;1m");
+            LogWithColor(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true),
+                TerminalColor.Red);
         }
 
         private void HandleWarningEvent(object sender, BuildWarningEventArgs e)
         {
-            LogErrorEvent(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true), "\x1b[33;1m");
+            LogWithColor(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true),
+                TerminalColor.Yellow);
         }
 
-        private void LogErrorEvent(string s, string color)
+        private void LogWithColor(string message, TerminalColor color)
         {
             if (acceptAnsiColorCodes)
             {
-                Console.Error.Write(color);
-                Console.Error.Write(s);
-                Console.Error.WriteLine("\x1b[m");
+                Console.Error.Write(AnsiCodes.Colorize(message, color));
             }
             else
             {
-                Console.Error.Write(s);
+                Console.Error.Write(message);
             }
         }
 
