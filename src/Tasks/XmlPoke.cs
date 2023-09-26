@@ -49,7 +49,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Executes the XMLPoke task.
         /// </summary>
-        /// <returns>true if transformation succeeds.</returns>
+        /// <returns>true if task execution succeeds.</returns>
         public override bool Execute()
         {
             if (Value == null)
