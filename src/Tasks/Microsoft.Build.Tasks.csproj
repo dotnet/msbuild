@@ -19,11 +19,6 @@
     <EnablePackageValidation>true</EnablePackageValidation>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <ApiCompatPreserveUnnecessarySuppressions>true</ApiCompatPreserveUnnecessarySuppressions>
-    <ApiCompatPermitUnnecessarySuppressions>true</ApiCompatPermitUnnecessarySuppressions>
-  </PropertyGroup>
-
   <ItemGroup>
     <EmbeddedResource Include="system.design\system.design.txt">
       <Type>Resx</Type>
