@@ -4,21 +4,21 @@
 using Microsoft.DotNet.ApiCompatibility.Logging;
 using Microsoft.DotNet.ApiSymbolExtensions.Logging;
 
-namespace Microsoft.DotNet.ApiCompat.Task
+namespace Microsoft.DotNet.ApiCompat.Tool
 {
     /// <summary>
-    /// Class that can log Suppressions in an MSBuild task, by implementing MSBuildLog and ISuppressableLog.
+    /// Class that can log Suppressions to the Console, by implementing ConsoleLog and ISuppressibleLog.
     /// </summary>
-    internal sealed class SuppressableMSBuildLog : MSBuildLog, ISuppressableLog
+    internal sealed class SuppressibleConsoleLog : ConsoleLog, ISuppressibleLog
     {
         private readonly ISuppressionEngine _suppressionEngine;
 
         /// <inheritdoc />
         public bool HasLoggedErrorSuppressions { get; private set; }
 
-        public SuppressableMSBuildLog(NET.Build.Tasks.Logger log,
-            ISuppressionEngine suppressionEngine)
-            : base(log)
+        public SuppressibleConsoleLog(ISuppressionEngine suppressionEngine,
+            MessageImportance messageImportance)
+            : base(messageImportance)
         {
             _suppressionEngine = suppressionEngine;
         }

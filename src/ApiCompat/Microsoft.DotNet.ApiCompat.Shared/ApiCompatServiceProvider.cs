@@ -14,17 +14,17 @@ namespace Microsoft.DotNet.ApiCompat
     internal sealed class ApiCompatServiceProvider
     {
         private readonly Lazy<ISuppressionEngine> _suppressionEngine;
-        private readonly Lazy<ISuppressableLog> _compatibilityLogger;
+        private readonly Lazy<ISuppressibleLog> _compatibilityLogger;
         private readonly Lazy<IApiCompatRunner> _apiCompatRunner;
 
-        internal ApiCompatServiceProvider(Func<ISuppressionEngine, ISuppressableLog> logFactory,
+        internal ApiCompatServiceProvider(Func<ISuppressionEngine, ISuppressibleLog> logFactory,
             Func<ISuppressionEngine> suppressionEngineFactory,
-            Func<ISuppressableLog, IRuleFactory> ruleFactory,
+            Func<ISuppressibleLog, IRuleFactory> ruleFactory,
             bool respectInternals,
             string[]? excludeAttributesFiles)
         {
             _suppressionEngine = new Lazy<ISuppressionEngine>(suppressionEngineFactory);
-            _compatibilityLogger = new Lazy<ISuppressableLog>(() => logFactory(SuppressionEngine));
+            _compatibilityLogger = new Lazy<ISuppressibleLog>(() => logFactory(SuppressionEngine));
             _apiCompatRunner = new Lazy<IApiCompatRunner>(() =>
             {
                 CompositeSymbolFilter compositeSymbolFilter = new CompositeSymbolFilter()
@@ -42,15 +42,15 @@ namespace Microsoft.DotNet.ApiCompat
                         new TypedConstantEqualityComparer(symbolEqualityComparer)),
                     respectInternals);
 
-                return new ApiCompatRunner(SuppressableLog,
+                return new ApiCompatRunner(SuppressibleLog,
                     SuppressionEngine,
-                    new ApiComparerFactory(ruleFactory(SuppressableLog), apiComparerSettings),
+                    new ApiComparerFactory(ruleFactory(SuppressibleLog), apiComparerSettings),
                     new AssemblySymbolLoaderFactory(respectInternals));
             });
         }
 
         public ISuppressionEngine SuppressionEngine => _suppressionEngine.Value;
-        public ISuppressableLog SuppressableLog => _compatibilityLogger.Value;
+        public ISuppressibleLog SuppressibleLog => _compatibilityLogger.Value;
         public IApiCompatRunner ApiCompatRunner => _apiCompatRunner.Value;
     }
 }

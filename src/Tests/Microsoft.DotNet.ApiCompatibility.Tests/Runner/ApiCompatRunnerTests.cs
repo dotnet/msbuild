@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner.Tests
                 .Setup(m => m.Create(It.IsAny<bool>()))
                 .Returns(assemblySymbolLoaderMock.Object);
 
-            return new(Mock.Of<ISuppressableLog>(),
+            return new(Mock.Of<ISuppressibleLog>(),
                 suppressionEngineMock.Object,
                 apiComparerFactoryMock.Object,
                 assemblyLoaderFactoryMock.Object);
