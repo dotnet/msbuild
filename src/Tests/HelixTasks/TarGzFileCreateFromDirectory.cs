@@ -134,7 +134,7 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
 
         private string GetExcludes()
         {
-            var excludes = String.Empty;
+            var excludes = string.Empty;
 
             if (ExcludePatterns != null)
             {

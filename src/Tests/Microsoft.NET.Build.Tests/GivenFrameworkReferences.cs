@@ -302,7 +302,7 @@ namespace FrameworkReferenceTest
 
             testProject.AdditionalProperties["EnableTargetingPackDownload"] = "False";
 
-            //  Set targeting pack folder to nonexistant folder so the project won't use installed targeting packs
+            //  Set targeting pack folder to nonexistent folder so the project won't use installed targeting packs
             testProject.AdditionalProperties["NetCoreTargetingPackRoot"] = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -842,8 +842,10 @@ namespace FrameworkReferenceTest
             };
 
             var getValuesCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks,
-                "ResolvedFrameworkReference", GetValuesCommand.ValueType.Item);
-            getValuesCommand.DependsOnTargets = "ResolveFrameworkReferences";
+                "ResolvedFrameworkReference", GetValuesCommand.ValueType.Item)
+            {
+                DependsOnTargets = "ResolveFrameworkReferences"
+            };
             getValuesCommand.MetadataNames.AddRange(expectedMetadata);
 
             getValuesCommand.Execute().Should().Pass();

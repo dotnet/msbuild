@@ -19,9 +19,10 @@ namespace Microsoft.DotNet.Cli
 
         private static CliCommand ConstructCommand()
         {
-            DocumentedCommand command = new("vstest", DocsLink);
-
-            command.TreatUnmatchedTokensAsErrors = false;
+            DocumentedCommand command = new("vstest", DocsLink)
+            {
+                TreatUnmatchedTokensAsErrors = false
+            };
 
             command.Options.Add(CommonOptions.TestPlatformOption);
             command.Options.Add(CommonOptions.TestFrameworkOption);

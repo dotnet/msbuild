@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
             {
                 userFacingMessages = new[]
                 {
-                    String.Format(
+                    string.Format(
                         CommonLocalizableStrings.FailedToUninstallToolPackage,
                         packageId,
                         ex.Message),

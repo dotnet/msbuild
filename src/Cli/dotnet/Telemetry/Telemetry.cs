@@ -136,8 +136,10 @@ namespace Microsoft.DotNet.Cli.Telemetry
         {
             try
             {
-                var persistenceChannel = new PersistenceChannel.PersistenceChannel(sendersCount: _senderCount);
-                persistenceChannel.SendingInterval = TimeSpan.FromMilliseconds(1);
+                var persistenceChannel = new PersistenceChannel.PersistenceChannel(sendersCount: _senderCount)
+                {
+                    SendingInterval = TimeSpan.FromMilliseconds(1)
+                };
 
                 var config = TelemetryConfiguration.CreateDefault();
                 config.TelemetryChannel = persistenceChannel;

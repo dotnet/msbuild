@@ -14,7 +14,7 @@ namespace Microsoft.Build.Tasks
         public AllowEmptyTelemetry()
         {
             EventData = Array.Empty<ITaskItem>();
-            EventName = String.Empty;
+            EventName = string.Empty;
         }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace Microsoft.Build.Tasks
                     {
                         value = HashWithNormalizedCasing(value);
                     }
-                    if (String.IsNullOrEmpty(value))
+                    if (string.IsNullOrEmpty(value))
                     {
                         properties[key] = "null";
                     }

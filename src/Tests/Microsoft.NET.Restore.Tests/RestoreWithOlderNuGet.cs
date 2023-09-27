@@ -21,8 +21,10 @@ namespace Microsoft.NET.Restore.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var restoreCommand = new NuGetExeRestoreCommand(Log, testAsset.Path, testProject.Name);
-            restoreCommand.NuGetExeVersion = "5.7.0";
+            var restoreCommand = new NuGetExeRestoreCommand(Log, testAsset.Path, testProject.Name)
+            {
+                NuGetExeVersion = "5.7.0"
+            };
             restoreCommand
                 //  Workaround for CI machines where MSBuild workload resolver isn't enabled by default
                 .WithEnvironmentVariable("MSBuildEnableWorkloadResolver", "false")

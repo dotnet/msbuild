@@ -6,20 +6,20 @@ namespace Microsoft.NET.Sdk.Razor.Tool
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     internal struct STARTUPINFO
     {
-        internal Int32 cb;
+        internal int cb;
         internal string lpReserved;
         internal string lpDesktop;
         internal string lpTitle;
-        internal Int32 dwX;
-        internal Int32 dwY;
-        internal Int32 dwXSize;
-        internal Int32 dwYSize;
-        internal Int32 dwXCountChars;
-        internal Int32 dwYCountChars;
-        internal Int32 dwFillAttribute;
-        internal Int32 dwFlags;
-        internal Int16 wShowWindow;
-        internal Int16 cbReserved2;
+        internal int dwX;
+        internal int dwY;
+        internal int dwXSize;
+        internal int dwYSize;
+        internal int dwXCountChars;
+        internal int dwYCountChars;
+        internal int dwFillAttribute;
+        internal int dwFlags;
+        internal short wShowWindow;
+        internal short cbReserved2;
         internal IntPtr lpReserved2;
         internal IntPtr hStdInput;
         internal IntPtr hStdOutput;
@@ -47,7 +47,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
 
         internal const uint NORMAL_PRIORITY_CLASS = 0x0020;
         internal const uint CREATE_NO_WINDOW = 0x08000000;
-        internal const Int32 STARTF_USESTDHANDLES = 0x00000100;
+        internal const int STARTF_USESTDHANDLES = 0x00000100;
         internal const int ERROR_SUCCESS = 0;
 
         #endregion

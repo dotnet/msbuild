@@ -15,8 +15,10 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = SetUpProject();
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var runCommand = new DotnetCommand(Log, "run");
-            runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
+            var runCommand = new DotnetCommand(Log, "run")
+            {
+                WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name)
+            };
             runCommand.Execute()
                 .Should()
                 .Pass()
@@ -38,8 +40,10 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var runCommand = new DotnetCommand(Log, "run");
-            runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
+            var runCommand = new DotnetCommand(Log, "run")
+            {
+                WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name)
+            };
             runCommand.Execute()
                 .Should()
                 .Pass()
@@ -60,8 +64,10 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var runCommand = new DotnetCommand(Log, "run");
-            runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
+            var runCommand = new DotnetCommand(Log, "run")
+            {
+                WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name)
+            };
             runCommand.Execute()
                 .Should()
                 .Pass()
@@ -77,8 +83,10 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var runCommand = new DotnetCommand(Log, "run");
-            runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
+            var runCommand = new DotnetCommand(Log, "run")
+            {
+                WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name)
+            };
             runCommand.Execute()
                 .Should()
                 .Pass()
@@ -95,8 +103,10 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
-            var runCommand = new DotnetCommand(Log, "run");
-            runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
+            var runCommand = new DotnetCommand(Log, "run")
+            {
+                WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name)
+            };
             runCommand.Execute()
                 .Should()
                 .Pass()
@@ -112,8 +122,10 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var runCommand = new DotnetCommand(Log, "run");
-            runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
+            var runCommand = new DotnetCommand(Log, "run")
+            {
+                WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name)
+            };
             runCommand.Execute()
                 .Should()
                 .Pass()
@@ -149,8 +161,10 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var runCommand = new DotnetCommand(Log, "run");
-            runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
+            var runCommand = new DotnetCommand(Log, "run")
+            {
+                WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name)
+            };
             runCommand.Execute()
                 .Should()
                 .Pass()
@@ -166,8 +180,10 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var runCommand = new DotnetCommand(Log, "run");
-            runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
+            var runCommand = new DotnetCommand(Log, "run")
+            {
+                WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name)
+            };
             runCommand.Execute()
                 .Should()
                 .Pass()
@@ -193,8 +209,10 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var runCommand = new DotnetCommand(Log, "run");
-            runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
+            var runCommand = new DotnetCommand(Log, "run")
+            {
+                WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name)
+            };
             runCommand.Execute()
                 .Should()
                 .Pass()
@@ -240,8 +258,10 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var runCommand = new DotnetCommand(Log, "run");
-            runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
+            var runCommand = new DotnetCommand(Log, "run")
+            {
+                WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name)
+            };
             runCommand.Execute()
                 .Should()
                 .Pass()

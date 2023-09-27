@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                         if (caseInsensitiveProfileMatches.Count() > 1)
                         {
                             throw new GracefulException(LocalizableStrings.DuplicateCaseInsensitiveLaunchProfileNames,
-                                String.Join(",\n", caseInsensitiveProfileMatches.Select(p => $"\t{p.Name}").ToArray()));
+                                string.Join(",\n", caseInsensitiveProfileMatches.Select(p => $"\t{p.Name}").ToArray()));
                         }
                         else if (!caseInsensitiveProfileMatches.Any())
                         {

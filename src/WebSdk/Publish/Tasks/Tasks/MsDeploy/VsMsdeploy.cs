@@ -450,7 +450,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
 
         // Utility function to log all public instance property to CustomerBuildEventArgs 
-        private static void AddAllPropertiesToCustomBuildWithPropertyEventArgs(CustomBuildWithPropertiesEventArgs cbpEventArg, System.Object obj)
+        private static void AddAllPropertiesToCustomBuildWithPropertyEventArgs(CustomBuildWithPropertiesEventArgs cbpEventArg, object obj)
         {
 #if NET472
             if (obj != null)

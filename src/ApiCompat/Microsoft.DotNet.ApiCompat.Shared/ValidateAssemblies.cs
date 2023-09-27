@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.ApiCompat
 {
     internal static class ValidateAssemblies
     {
-        public static void Run(Func<ISuppressionEngine, ISuppressableLog> logFactory,
+        public static void Run(Func<ISuppressionEngine, ISuppressibleLog> logFactory,
             bool generateSuppressionFile,
             bool preserveUnnecessarySuppressions,
             bool permitUnnecessarySuppressions,
@@ -86,19 +86,19 @@ namespace Microsoft.DotNet.ApiCompat
             // Execute the enqueued work item(s).
             apiCompatRunner.ExecuteWorkItems();
 
-            SuppressionFileHelper.LogApiCompatSuccessOrFailure(generateSuppressionFile, serviceProvider.SuppressableLog);
+            SuppressionFileHelper.LogApiCompatSuccessOrFailure(generateSuppressionFile, serviceProvider.SuppressibleLog);
 
             if (generateSuppressionFile)
             {
                 SuppressionFileHelper.GenerateSuppressionFile(serviceProvider.SuppressionEngine,
-                    serviceProvider.SuppressableLog,
+                    serviceProvider.SuppressibleLog,
                     preserveUnnecessarySuppressions,
                     suppressionFiles,
                     suppressionOutputFile);
             }
             else if (!permitUnnecessarySuppressions)
             {
-                SuppressionFileHelper.ValidateUnnecessarySuppressions(serviceProvider.SuppressionEngine, serviceProvider.SuppressableLog);
+                SuppressionFileHelper.ValidateUnnecessarySuppressions(serviceProvider.SuppressionEngine, serviceProvider.SuppressibleLog);
             }
         }
 

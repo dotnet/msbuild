@@ -186,8 +186,10 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                     manifestId => (manifestId.ToString(), Path.Combine(testDir, "dotnet", "sdk-manifests", currentFeatureBand, manifestId.ToString(), "WorkloadManifest.json"), currentFeatureBand)))
                 .ToArray();
 
-            var workloadManifestProvider = new MockManifestProvider(manifestInfo);
-            workloadManifestProvider.SdkFeatureBand = new SdkFeatureBand(currentFeatureBand);
+            var workloadManifestProvider = new MockManifestProvider(manifestInfo)
+            {
+                SdkFeatureBand = new SdkFeatureBand(currentFeatureBand)
+            };
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, dotnetRoot);
             var installationRepo = new MockInstallationRecordRepository();
@@ -271,7 +273,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             // check that update did not fail
             _reporter.Lines.Should().NotContain(l => l.ToLowerInvariant().Contains("fail"));
-            _reporter.Lines.Should().NotContain(String.Format(Workloads.Workload.Install.LocalizableStrings.AdManifestPackageDoesNotExist, testManifestName));
+            _reporter.Lines.Should().NotContain(string.Format(Workloads.Workload.Install.LocalizableStrings.AdManifestPackageDoesNotExist, testManifestName));
 
         }
 
@@ -339,7 +341,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             //  Assert
             _reporter.Lines.Should().NotContain(l => l.ToLowerInvariant().Contains("fail"));
-            _reporter.Lines.Should().Contain(String.Format(Workloads.Workload.Install.LocalizableStrings.AdManifestPackageDoesNotExist, testManifestName));
+            _reporter.Lines.Should().Contain(string.Format(Workloads.Workload.Install.LocalizableStrings.AdManifestPackageDoesNotExist, testManifestName));
         }
 
         [Theory]
@@ -405,7 +407,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             Directory.GetFiles(adManifestDir).Should().BeEmpty();
 
             _reporter.Lines.Should().NotContain(l => l.ToLowerInvariant().Contains("fail"));
-            _reporter.Lines.Should().Contain(String.Format(Workloads.Workload.Install.LocalizableStrings.AdManifestPackageDoesNotExist, testManifestName));
+            _reporter.Lines.Should().Contain(string.Format(Workloads.Workload.Install.LocalizableStrings.AdManifestPackageDoesNotExist, testManifestName));
         }
 
         [Fact]

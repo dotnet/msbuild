@@ -205,7 +205,7 @@ namespace Microsoft.DotNet.Tools.Common
                 return projectKey;
             }
 
-            var keyWithoutWhitespace = String.Concat(solutionKey.Where(c => !Char.IsWhiteSpace(c)));
+            var keyWithoutWhitespace = string.Concat(solutionKey.Where(c => !char.IsWhiteSpace(c)));
             if (projectKeys.TryGetValue(keyWithoutWhitespace, out projectKey))
             {
                 return projectKey;

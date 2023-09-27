@@ -189,7 +189,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             string sourcedir = Path.GetDirectoryName(sourcepath);
             string destinationSubDirPath = preserveStoreLayout ? sourcedir.Substring(packageRoot.Length) : destinationSubDirectory;
 
-            if (!String.IsNullOrEmpty(destinationSubDirPath) && !destinationSubDirPath.EndsWith(Path.DirectorySeparatorChar))
+            if (!string.IsNullOrEmpty(destinationSubDirPath) && !destinationSubDirPath.EndsWith(Path.DirectorySeparatorChar))
             {
                 destinationSubDirPath += Path.DirectorySeparatorChar;
             }

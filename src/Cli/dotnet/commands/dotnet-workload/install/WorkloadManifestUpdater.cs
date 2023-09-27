@@ -318,7 +318,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                 await _workloadManifestInstaller.ExtractManifestAsync(packagePath, adManifestPath);
 
-                // add file that contains the advertisted manifest feature band so GetAdvertisingManifestVersionAndWorkloads will use correct feature band, regardless of if rollback occurred or not
+                // add file that contains the advertised manifest feature band so GetAdvertisingManifestVersionAndWorkloads will use correct feature band, regardless of if rollback occurred or not
                 File.WriteAllText(Path.Combine(adManifestPath, "AdvertisedManifestFeatureBand.txt"), currentFeatureBand);
 
                 if (_displayManifestUpdates)
@@ -470,7 +470,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         private static string GetAdvertisingWorkloadsFilePath(string userProfileDir, SdkFeatureBand featureBand) => Path.Combine(userProfileDir, $".workloadAdvertisingUpdates{featureBand}");
 
-        private async Task<String> GetOnlinePackagePath(SdkFeatureBand sdkFeatureBand, ManifestId manifestId, bool includePreviews)
+        private async Task<string> GetOnlinePackagePath(SdkFeatureBand sdkFeatureBand, ManifestId manifestId, bool includePreviews)
         {
             string packagePath = await _nugetPackageDownloader.DownloadPackageAsync(
                 _workloadManifestInstaller.GetManifestPackageId(manifestId, sdkFeatureBand),

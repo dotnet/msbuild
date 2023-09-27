@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.ApiCompat
 
         // Write the suppression file to disk and throw if a path isn't provided.
         public static void GenerateSuppressionFile(ISuppressionEngine suppressionEngine,
-            ISuppressableLog log,
+            ISuppressibleLog log,
             bool preserveUnnecessarySuppressions,
             string[]? suppressionFiles,
             string? suppressionOutputFile)
@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.ApiCompat
         }
 
         // Log whether or not we found breaking changes. If we are writing to a suppression file, no need to log anything.
-        public static void LogApiCompatSuccessOrFailure(bool generateSuppressionFile, ISuppressableLog log)
+        public static void LogApiCompatSuccessOrFailure(bool generateSuppressionFile, ISuppressibleLog log)
         {
             if (log.HasLoggedErrorSuppressions)
             {
@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.ApiCompat
         }
 
         // Validate whether unnecessary suppressions exist and log those.
-        public static void ValidateUnnecessarySuppressions(ISuppressionEngine suppressionEngine, ISuppressableLog log)
+        public static void ValidateUnnecessarySuppressions(ISuppressionEngine suppressionEngine, ISuppressibleLog log)
         {
             IReadOnlyCollection<Suppression> unnecessarySuppressions = suppressionEngine.GetUnnecessarySuppressions();
             if (unnecessarySuppressions.Count == 0)

@@ -37,8 +37,10 @@ namespace Microsoft.NET.TestFramework
 
         public static TestCommandLine Parse(string[] args)
         {
-            TestCommandLine ret = new TestCommandLine();
-            ret.RemainingArgs = new List<string>();
+            TestCommandLine ret = new TestCommandLine
+            {
+                RemainingArgs = new List<string>()
+            };
             Stack<string> argStack = new Stack<string>(args.Reverse());
 
             while (argStack.Any())
@@ -210,9 +212,10 @@ namespace Microsoft.NET.TestFramework
 
             public static TestList Parse(XElement element)
             {
-                TestList group = new TestList();
-
-                group.Name = element.Attribute("Name")?.Value;
+                TestList group = new TestList
+                {
+                    Name = element.Attribute("Name")?.Value
+                };
 
                 foreach (var item in element.Elements())
                 {

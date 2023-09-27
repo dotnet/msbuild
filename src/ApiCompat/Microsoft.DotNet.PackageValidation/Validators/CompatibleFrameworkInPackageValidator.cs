@@ -15,10 +15,10 @@ namespace Microsoft.DotNet.PackageValidation.Validators
     /// </summary>
     public class CompatibleFrameworkInPackageValidator : IPackageValidator
     {
-        private readonly ISuppressableLog _log;
+        private readonly ISuppressibleLog _log;
         private readonly IApiCompatRunner _apiCompatRunner;
 
-        public CompatibleFrameworkInPackageValidator(ISuppressableLog log,
+        public CompatibleFrameworkInPackageValidator(ISuppressibleLog log,
             IApiCompatRunner apiCompatRunner)
         {
             _log = log;

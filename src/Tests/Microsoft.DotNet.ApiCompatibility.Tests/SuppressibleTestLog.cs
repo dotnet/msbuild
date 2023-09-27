@@ -6,7 +6,7 @@ using Microsoft.DotNet.ApiSymbolExtensions.Logging;
 
 namespace Microsoft.DotNet.ApiCompatibility.Tests
 {
-    internal class SuppressableTestLog : ISuppressableLog
+    internal class SuppressibleTestLog : ISuppressibleLog
     {
         public List<string> errors = new();
         public List<string> warnings = new();

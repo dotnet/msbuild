@@ -103,9 +103,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 AllowScriptsOption = new CliOption<AllowRunScripts>("--allow-scripts")
                 {
                     Description = SymbolStrings.TemplateCommand_Option_AllowScripts,
-                    Arity = new ArgumentArity(1, 1)
+                    Arity = new ArgumentArity(1, 1),
+                    DefaultValueFactory = (_) => AllowRunScripts.Prompt
                 };
-                AllowScriptsOption.DefaultValueFactory = (_) => AllowRunScripts.Prompt;
                 Options.Add(AllowScriptsOption);
             }
 
