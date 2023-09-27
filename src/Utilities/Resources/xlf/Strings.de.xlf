@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="ToolTask.InvalidTerminationTimeout">
         <source>Specified termination timeout ({0}) is invalid - expecting value greater or equal to -1.</source>
-        <target state="new">Specified termination timeout ({0}) is invalid - expecting value greater or equal to -1.</target>
+        <target state="translated">Das angegebene Beendigungstimeout ({0}) ist ungültig. Es wird ein Wert größer oder gleich -1 erwartet.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolTask.NotUpToDate">
