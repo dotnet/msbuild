@@ -18,7 +18,7 @@
          This is important for the MSBuild.VSSetup project, which "references" both the x86 and x64
          versions of this project -->
     <RuntimeIdentifiers Condition="'$(DotNetBuildFromSource)' != 'true'">win7-x86;win7-x64</RuntimeIdentifiers>
-
+    
     <EnableDefaultItems>false</EnableDefaultItems>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyName>MSBuild</AssemblyName>
@@ -255,9 +255,9 @@
        that reference this one. -->
   <Target Name="AddRuntimeDependenciesToContent" Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp'" BeforeTargets="GetCopyToOutputDirectoryItems">
     <ItemGroup>
-      <ContentWithTargetPath Include="$(ProjectDepsFilePath)" CopyToOutputDirectory="PreserveNewest" TargetPath="$(ProjectDepsFileName)" />
+      <ContentWithTargetPath Include="$(ProjectDepsFilePath)" Condition="Exists('$(ProjectDepsFilePath)')" CopyToOutputDirectory="PreserveNewest" TargetPath="$(ProjectDepsFileName)" />
 
-      <ContentWithTargetPath Include="$(ProjectRuntimeConfigFilePath)" CopyToOutputDirectory="PreserveNewest" TargetPath="$(ProjectRuntimeConfigFileName)" />
+      <ContentWithTargetPath Include="$(ProjectRuntimeConfigFilePath)" Condition="Exists('$(ProjectRuntimeConfigFilePath)')" CopyToOutputDirectory="PreserveNewest" TargetPath="$(ProjectRuntimeConfigFileName)" />
       <ContentWithTargetPath Include="$(ProjectRuntimeConfigDevFilePath)" CopyToOutputDirectory="PreserveNewest" TargetPath="$([System.IO.Path]::GetFileName('$(ProjectRuntimeConfigDevFilePath)'))" />
     </ItemGroup>
   </Target>
