@@ -377,7 +377,7 @@
       </trans-unit>
       <trans-unit id="ReportFileAccessesX64Only">
         <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
-        <target state="new">Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</target>
+        <target state="translated">Raportowanie dostępu do plików jest obecnie obsługiwane tylko przy użyciu wersji x64 programu MSBuild.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
