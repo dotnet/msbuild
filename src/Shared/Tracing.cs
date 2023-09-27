@@ -141,7 +141,6 @@ namespace Microsoft.Build.Internal
         /// Dump all the named counters, if any
         /// </summary>
         [Conditional("DEBUG")]
-        [SuppressMessage("Microsoft.MSInternal", "CA908:AvoidTypesThatRequireJitCompilationInPrecompiledAssemblies", Justification = "Debug only")]
         internal static void Dump()
         {
             if (s_counts.Count > 0)

@@ -230,7 +230,7 @@ namespace Microsoft.Build.Evaluation
                         _expander.Metadata = metadataTable;
 
                         // Also keep a list of everything so we can get the predecessor objects correct.
-                        List<Pair<ProjectMetadataElement, string>> metadataList = new(metadata.Length);
+                        List<KeyValuePair<ProjectMetadataElement, string>> metadataList = new(metadata.Length);
 
                         foreach (var metadataElement in metadata)
                         {
@@ -252,7 +252,7 @@ namespace Microsoft.Build.Evaluation
                             evaluatedValue = FileUtilities.MaybeAdjustFilePath(evaluatedValue, metadataElement.ContainingProject.DirectoryPath);
 
                             metadataTable.SetValue(metadataElement, evaluatedValue);
-                            metadataList.Add(new Pair<ProjectMetadataElement, string>(metadataElement, evaluatedValue));
+                            metadataList.Add(new KeyValuePair<ProjectMetadataElement, string>(metadataElement, evaluatedValue));
                         }
 
                         // Apply those metadata to each item
