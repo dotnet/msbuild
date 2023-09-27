@@ -103,8 +103,10 @@ namespace Microsoft.NET.Build.Tests
                             new XElement(ns + "RuntimeIdentifiers", secondFrameworkRids)));
                 });
 
-            var command = new GetValuesCommand(Log, testAsset.TestRoot, "", valueName: "RuntimeIdentifiers");
-            command.DependsOnTargets = "GetAllRuntimeIdentifiers";
+            var command = new GetValuesCommand(Log, testAsset.TestRoot, "", valueName: "RuntimeIdentifiers")
+            {
+                DependsOnTargets = "GetAllRuntimeIdentifiers"
+            };
             command.ExecuteWithoutRestore().Should().Pass();
             command.GetValues().Should().BeEquivalentTo(expectedCombination.Split(';'));
         }

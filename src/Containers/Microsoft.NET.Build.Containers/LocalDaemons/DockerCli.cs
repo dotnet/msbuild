@@ -78,10 +78,12 @@ internal sealed class DockerCli : ILocalRegistry
         string commandPath = await FindFullCommandPath(cancellationToken);
 
         // call `docker load` and get it ready to receive input
-        ProcessStartInfo loadInfo = new(commandPath, $"load");
-        loadInfo.RedirectStandardInput = true;
-        loadInfo.RedirectStandardOutput = true;
-        loadInfo.RedirectStandardError = true;
+        ProcessStartInfo loadInfo = new(commandPath, $"load")
+        {
+            RedirectStandardInput = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
 
         using Process? loadProcess = Process.Start(loadInfo);
 

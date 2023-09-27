@@ -61,12 +61,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
 
         internal KuduConnectionInfo GetConnectionInfo()
         {
-            KuduConnectionInfo connectionInfo = new KuduConnectionInfo();
-            connectionInfo.DestinationUrl = PublishUrl;
-
-            connectionInfo.UserName = UserName;
-            connectionInfo.Password = Password;
-            connectionInfo.SiteName = PublishSiteName;
+            KuduConnectionInfo connectionInfo = new KuduConnectionInfo
+            {
+                DestinationUrl = PublishUrl,
+                UserName = UserName,
+                Password = Password,
+                SiteName = PublishSiteName
+            };
 
             return connectionInfo;
         }

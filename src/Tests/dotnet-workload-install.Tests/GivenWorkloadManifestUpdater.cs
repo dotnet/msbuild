@@ -186,8 +186,10 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                     manifestId => (manifestId.ToString(), Path.Combine(testDir, "dotnet", "sdk-manifests", currentFeatureBand, manifestId.ToString(), "WorkloadManifest.json"), currentFeatureBand)))
                 .ToArray();
 
-            var workloadManifestProvider = new MockManifestProvider(manifestInfo);
-            workloadManifestProvider.SdkFeatureBand = new SdkFeatureBand(currentFeatureBand);
+            var workloadManifestProvider = new MockManifestProvider(manifestInfo)
+            {
+                SdkFeatureBand = new SdkFeatureBand(currentFeatureBand)
+            };
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, dotnetRoot);
             var installationRepo = new MockInstallationRecordRepository();

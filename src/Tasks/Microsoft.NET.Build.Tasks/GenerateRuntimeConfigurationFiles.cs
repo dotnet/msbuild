@@ -152,8 +152,10 @@ namespace Microsoft.NET.Build.Tasks
             bool isFrameworkDependent,
             IList<LockFileItem> packageFolders)
         {
-            RuntimeConfig config = new RuntimeConfig();
-            config.RuntimeOptions = new RuntimeOptions();
+            RuntimeConfig config = new RuntimeConfig
+            {
+                RuntimeOptions = new RuntimeOptions()
+            };
 
             AddFrameworks(
                 config.RuntimeOptions,
@@ -192,9 +194,11 @@ namespace Microsoft.NET.Build.Tasks
                     //  If there are no RuntimeFrameworks (which would be set in the ProcessFrameworkReferences task based
                     //  on FrameworkReference items), then use package resolved from MicrosoftNETPlatformLibrary for
                     //  the runtimeconfig
-                    RuntimeConfigFramework framework = new RuntimeConfigFramework();
-                    framework.Name = lockFilePlatformLibrary.Name;
-                    framework.Version = lockFilePlatformLibrary.Version.ToNormalizedString();
+                    RuntimeConfigFramework framework = new RuntimeConfigFramework
+                    {
+                        Name = lockFilePlatformLibrary.Name,
+                        Version = lockFilePlatformLibrary.Version.ToNormalizedString()
+                    };
 
                     frameworks.Add(framework);
                 }
@@ -224,9 +228,11 @@ namespace Microsoft.NET.Build.Tasks
                         continue;
                     }
 
-                    RuntimeConfigFramework framework = new RuntimeConfigFramework();
-                    framework.Name = platformLibrary.Name;
-                    framework.Version = platformLibrary.Version;
+                    RuntimeConfigFramework framework = new RuntimeConfigFramework
+                    {
+                        Name = platformLibrary.Name,
+                        Version = platformLibrary.Version
+                    };
 
                     frameworks.Add(framework);
                 }
@@ -325,8 +331,10 @@ namespace Microsoft.NET.Build.Tasks
 
         private void WriteDevRuntimeConfig(IList<LockFileItem> packageFolders)
         {
-            RuntimeConfig devConfig = new RuntimeConfig();
-            devConfig.RuntimeOptions = new RuntimeOptions();
+            RuntimeConfig devConfig = new RuntimeConfig
+            {
+                RuntimeOptions = new RuntimeOptions()
+            };
 
             AddAdditionalProbingPaths(devConfig.RuntimeOptions, packageFolders);
 
@@ -373,10 +381,12 @@ namespace Microsoft.NET.Build.Tasks
 
         private static void WriteToJsonFile(string fileName, object value)
         {
-            JsonSerializer serializer = new JsonSerializer();
-            serializer.ContractResolver = new CamelCasePropertyNamesContractResolver();
-            serializer.Formatting = Formatting.Indented;
-            serializer.DefaultValueHandling = DefaultValueHandling.Ignore;
+            JsonSerializer serializer = new JsonSerializer
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                Formatting = Formatting.Indented,
+                DefaultValueHandling = DefaultValueHandling.Ignore
+            };
 
             using (JsonTextWriter writer = new JsonTextWriter(new StreamWriter(File.Create(fileName))))
             {

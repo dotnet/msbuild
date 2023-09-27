@@ -39,10 +39,9 @@ namespace Microsoft.DotNet.Cli.Utils
 
             var process = new Process
             {
-                StartInfo = startInfo
+                StartInfo = startInfo,
+                EnableRaisingEvents = true
             };
-
-            process.EnableRaisingEvents = true;
 
             using (var reaper = new ProcessReaper(process))
             {

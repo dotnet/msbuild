@@ -67,8 +67,10 @@ namespace Microsoft.NET.Build.Tests
                 projectFolder,
                 targetFramework,
                 "Reference",
-                GetValuesCommand.ValueType.Item);
-            getReferenceCommand.DependsOnTargets = "Build";
+                GetValuesCommand.ValueType.Item)
+            {
+                DependsOnTargets = "Build"
+            };
             var result = getReferenceCommand.Execute("/v:detailed").Should().Pass();
             if (expectConflicts)
             {
@@ -86,8 +88,10 @@ namespace Microsoft.NET.Build.Tests
                 projectFolder,
                 targetFramework,
                 "ReferenceCopyLocalPaths",
-                GetValuesCommand.ValueType.Item);
-            getReferenceCopyLocalPathsCommand.DependsOnTargets = "Build";
+                GetValuesCommand.ValueType.Item)
+            {
+                DependsOnTargets = "Build"
+            };
             getReferenceCopyLocalPathsCommand.Execute().Should().Pass();
 
             referenceCopyLocalPaths = getReferenceCopyLocalPathsCommand.GetValues();

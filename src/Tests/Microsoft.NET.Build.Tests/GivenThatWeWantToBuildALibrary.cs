@@ -283,10 +283,11 @@ namespace Microsoft.NET.Build.Tests
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
             var getValuesCommand = new GetValuesCommand(Log, libraryProjectDirectory,
-                "netstandard1.5", "DefineConstants");
-
-            getValuesCommand.ShouldCompile = true;
-            getValuesCommand.Configuration = configuration;
+                "netstandard1.5", "DefineConstants")
+            {
+                ShouldCompile = true,
+                Configuration = configuration
+            };
 
             getValuesCommand
                 .Execute("/p:Configuration=" + configuration)

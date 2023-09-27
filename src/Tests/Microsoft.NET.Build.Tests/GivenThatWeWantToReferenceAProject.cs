@@ -182,8 +182,10 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(parentAsset);
             buildCommand.Execute().Should().Pass();
 
-            var getValuesCommand = new GetValuesCommand(Log, Path.Combine(parentAsset.Path, parentProject.Name), tfm, "ResultOutput");
-            getValuesCommand.DependsOnTargets = "Build";
+            var getValuesCommand = new GetValuesCommand(Log, Path.Combine(parentAsset.Path, parentProject.Name), tfm, "ResultOutput")
+            {
+                DependsOnTargets = "Build"
+            };
             getValuesCommand.Execute().Should().Pass();
 
             var valuesResult = getValuesCommand.GetValuesWithMetadata().Select(pair => Path.GetFullPath(pair.value));

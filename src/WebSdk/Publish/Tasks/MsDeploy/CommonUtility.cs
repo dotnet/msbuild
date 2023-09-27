@@ -462,8 +462,10 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         public static void SaveDocument(Xml.XmlDocument document, string outputFileName, System.Text.Encoding encode)
         {
 #if NET472
-            Xml.XmlTextWriter textWriter = new Xml.XmlTextWriter(outputFileName, encode);
-            textWriter.Formatting = System.Xml.Formatting.Indented;
+            Xml.XmlTextWriter textWriter = new Xml.XmlTextWriter(outputFileName, encode)
+            {
+                Formatting = System.Xml.Formatting.Indented
+            };
             document.Save(textWriter);
             textWriter.Close();
 #else

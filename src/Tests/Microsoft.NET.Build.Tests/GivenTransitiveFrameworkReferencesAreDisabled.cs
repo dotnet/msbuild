@@ -150,14 +150,13 @@ namespace Microsoft.NET.Build.Tests
 
             referencedProject.FrameworkReferences.Add("Microsoft.AspNetCore.App");
 
-            var testProject = new TestProject()
+            var testProject = new TestProject
             {
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
-                SelfContained = "true"
+                SelfContained = "true",
+                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
             };
-
-            testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid();
             testProject.AdditionalProperties["DisableTransitiveFrameworkReferenceDownloads"] = "True";
             testProject.AdditionalProperties["RestorePackagesPath"] = nugetPackagesFolder;
 

@@ -83,9 +83,10 @@ namespace Microsoft.DotNet.Cli.Utils
                     Assert.Equal(3, buffer[2]);
 
                     readerThreadSuccessful = true;
-                });
-
-                readerThread.IsBackground = true;
+                })
+                {
+                    IsBackground = true
+                };
                 readerThread.Start();
 
                 // ensure the thread is executing
