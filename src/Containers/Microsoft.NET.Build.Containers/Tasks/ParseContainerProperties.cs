@@ -82,13 +82,13 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
     public override bool Execute()
     {
         string[] validTags;
-        if (!String.IsNullOrEmpty(ContainerImageTag) && ContainerImageTags.Length >= 1)
+        if (!string.IsNullOrEmpty(ContainerImageTag) && ContainerImageTags.Length >= 1)
         {
             Log.LogErrorWithCodeFromResources(nameof(Strings.AmbiguousTags), nameof(ContainerImageTag), nameof(ContainerImageTags));
             return !Log.HasLoggedErrors;
         }
 
-        if (!String.IsNullOrEmpty(ContainerImageTag))
+        if (!string.IsNullOrEmpty(ContainerImageTag))
         {
             if (ContainerHelpers.IsValidImageTag(ContainerImageTag))
             {
@@ -105,7 +105,7 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
             validTags = valids;
             if (invalids.Any())
             {
-                Log.LogErrorWithCodeFromResources(nameof(Strings.InvalidTags), nameof(ContainerImageTags), String.Join(",", invalids));
+                Log.LogErrorWithCodeFromResources(nameof(Strings.InvalidTags), nameof(ContainerImageTags), string.Join(",", invalids));
                 return !Log.HasLoggedErrors;
             }
         }
@@ -114,7 +114,7 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
             validTags = Array.Empty<string>();
         }
 
-        if (!String.IsNullOrEmpty(ContainerRegistry) && !ContainerHelpers.IsValidRegistry(ContainerRegistry))
+        if (!string.IsNullOrEmpty(ContainerRegistry) && !ContainerHelpers.IsValidRegistry(ContainerRegistry))
         {
             Log.LogErrorWithCodeFromResources(nameof(Strings.CouldntRecognizeRegistry), ContainerRegistry);
             return !Log.HasLoggedErrors;
@@ -173,7 +173,7 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
             Log.LogMessage(MessageImportance.Low, "Image: {0}", ParsedContainerImage);
             Log.LogMessage(MessageImportance.Low, "Tag: {0}", ParsedContainerTag);
             Log.LogMessage(MessageImportance.Low, "Image Name: {0}", NewContainerRepository);
-            Log.LogMessage(MessageImportance.Low, "Image Tags: {0}", String.Join(", ", NewContainerTags));
+            Log.LogMessage(MessageImportance.Low, "Image Tags: {0}", string.Join(", ", NewContainerTags));
         }
 
         return !Log.HasLoggedErrors;

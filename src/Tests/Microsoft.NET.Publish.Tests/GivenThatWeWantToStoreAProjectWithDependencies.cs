@@ -159,8 +159,10 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset("TargetManifests", "multifile")
                 .WithSource();
 
-            var storeCommand = new ComposeStoreCommand(Log, simpleDependenciesAsset.TestRoot, "NewtonsoftFilterProfile.xml");
-            storeCommand.WorkingDirectory = simpleDependenciesAsset.Path;
+            var storeCommand = new ComposeStoreCommand(Log, simpleDependenciesAsset.TestRoot, "NewtonsoftFilterProfile.xml")
+            {
+                WorkingDirectory = simpleDependenciesAsset.Path
+            };
 
             var OutputFolder = Path.Combine(simpleDependenciesAsset.TestRoot, "o");
             var WorkingDir = Path.Combine(simpleDependenciesAsset.TestRoot, "w");

@@ -50,7 +50,7 @@ public static class ContainerHelpers
     {
         var portNo = 0;
         error = null;
-        if (String.IsNullOrEmpty(portNumber))
+        if (string.IsNullOrEmpty(portNumber))
         {
             error = ParsePortError.MissingPortNumber;
         }

@@ -842,8 +842,10 @@ namespace FrameworkReferenceTest
             };
 
             var getValuesCommand = new GetValuesCommand(Log, projectFolder, testProject.TargetFrameworks,
-                "ResolvedFrameworkReference", GetValuesCommand.ValueType.Item);
-            getValuesCommand.DependsOnTargets = "ResolveFrameworkReferences";
+                "ResolvedFrameworkReference", GetValuesCommand.ValueType.Item)
+            {
+                DependsOnTargets = "ResolveFrameworkReferences"
+            };
             getValuesCommand.MetadataNames.AddRange(expectedMetadata);
 
             getValuesCommand.Execute().Should().Pass();

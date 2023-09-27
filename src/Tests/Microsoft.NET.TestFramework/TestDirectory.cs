@@ -31,8 +31,10 @@ namespace Microsoft.NET.TestFramework
                 try
                 {
                     //  Clear read-only flags on anything in the directory
-                    var dirInfo = new DirectoryInfo(path);
-                    dirInfo.Attributes = FileAttributes.Normal;
+                    var dirInfo = new DirectoryInfo(path)
+                    {
+                        Attributes = FileAttributes.Normal
+                    };
                     foreach (var info in dirInfo.GetFileSystemInfos("*", SearchOption.AllDirectories))
                     {
                         info.Attributes = FileAttributes.Normal;

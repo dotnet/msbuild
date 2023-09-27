@@ -44,7 +44,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             {
                 var itemKey = getItemKey(conflictItem);
 
-                if (String.IsNullOrEmpty(itemKey))
+                if (string.IsNullOrEmpty(itemKey))
                 {
                     continue;
                 }

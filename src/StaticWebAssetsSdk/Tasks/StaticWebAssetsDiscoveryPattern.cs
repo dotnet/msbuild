@@ -65,13 +65,14 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 
         internal static StaticWebAssetsDiscoveryPattern FromTaskItem(ITaskItem pattern)
         {
-            var result = new StaticWebAssetsDiscoveryPattern();
-
-            result.Name = pattern.ItemSpec;
-            result.Source = pattern.GetMetadata(nameof(Source));
-            result.BasePath = pattern.GetMetadata(nameof(BasePath));
-            result.ContentRoot = pattern.GetMetadata(nameof(ContentRoot));
-            result.Pattern = pattern.GetMetadata(nameof(Pattern));
+            var result = new StaticWebAssetsDiscoveryPattern
+            {
+                Name = pattern.ItemSpec,
+                Source = pattern.GetMetadata(nameof(Source)),
+                BasePath = pattern.GetMetadata(nameof(BasePath)),
+                ContentRoot = pattern.GetMetadata(nameof(ContentRoot)),
+                Pattern = pattern.GetMetadata(nameof(Pattern))
+            };
 
             return result;
         }

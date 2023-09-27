@@ -61,8 +61,10 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            var getValuesCommand = new GetValuesCommand(testAsset, "SuggestedWorkload", GetValuesCommand.ValueType.Item);
-            getValuesCommand.DependsOnTargets = "GetSuggestedWorkloads";
+            var getValuesCommand = new GetValuesCommand(testAsset, "SuggestedWorkload", GetValuesCommand.ValueType.Item)
+            {
+                DependsOnTargets = "GetSuggestedWorkloads"
+            };
             getValuesCommand.MetadataNames.Add("VisualStudioComponentId");
             getValuesCommand.MetadataNames.Add("VisualStudioComponentIds");
             getValuesCommand.ShouldRestore = false;
@@ -242,9 +244,11 @@ namespace Microsoft.NET.Build.Tests
                 .CreateTestProject(mainProject);
 
             var getValuesCommand =
-                new GetValuesCommand(testAsset, "_ResolvedSuggestedWorkload", GetValuesCommand.ValueType.Item);
-            getValuesCommand.DependsOnTargets = "_GetRequiredWorkloads";
-            getValuesCommand.ShouldRestore = false;
+                new GetValuesCommand(testAsset, "_ResolvedSuggestedWorkload", GetValuesCommand.ValueType.Item)
+                {
+                    DependsOnTargets = "_GetRequiredWorkloads",
+                    ShouldRestore = false
+                };
 
             getValuesCommand.Execute("/p:SkipResolvePackageAssets=true")
                 .Should()
@@ -290,9 +294,11 @@ namespace Microsoft.NET.Build.Tests
                 .CreateTestProject(mainProject, identifier: mainTfm + "_" + referencingTfm);
 
             var getValuesCommand =
-                new GetValuesCommand(testAsset, "_ResolvedSuggestedWorkload", GetValuesCommand.ValueType.Item);
-            getValuesCommand.DependsOnTargets = "_GetRequiredWorkloads";
-            getValuesCommand.ShouldRestore = false;
+                new GetValuesCommand(testAsset, "_ResolvedSuggestedWorkload", GetValuesCommand.ValueType.Item)
+                {
+                    DependsOnTargets = "_GetRequiredWorkloads",
+                    ShouldRestore = false
+                };
 
             getValuesCommand.Execute("/p:SkipResolvePackageAssets=true")
                 .Should()

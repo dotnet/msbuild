@@ -112,7 +112,7 @@ namespace Microsoft.DotNet.DotNetSdkResolver
                             continue;
                         }
 
-                        if (minimumSdkMajorVersion != 0 && Int32.TryParse(netcoreSdkVersion.Split('.')[0], out int sdkMajorVersion) && sdkMajorVersion < minimumSdkMajorVersion)
+                        if (minimumSdkMajorVersion != 0 && int.TryParse(netcoreSdkVersion.Split('.')[0], out int sdkMajorVersion) && sdkMajorVersion < minimumSdkMajorVersion)
                         {
                             continue;
                         }

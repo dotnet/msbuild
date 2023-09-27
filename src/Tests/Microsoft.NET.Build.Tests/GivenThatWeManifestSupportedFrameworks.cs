@@ -107,9 +107,10 @@ namespace Microsoft.NET.Build.Tests
                 testDirectory,
                 tfm,
                 itemName,
-                GetValuesCommand.ValueType.Item);
-
-            command.DependsOnTargets = "";
+                GetValuesCommand.ValueType.Item)
+            {
+                DependsOnTargets = ""
+            };
             command.Execute().Should().Pass();
 
             return command.GetValues();

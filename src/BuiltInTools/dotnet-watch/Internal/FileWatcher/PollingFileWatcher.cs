@@ -31,9 +31,11 @@ namespace Microsoft.DotNet.Watcher.Internal
             _watchedDirectory = new DirectoryInfo(watchedDirectory);
             BasePath = _watchedDirectory.FullName;
 
-            _pollingThread = new Thread(new ThreadStart(PollingLoop));
-            _pollingThread.IsBackground = true;
-            _pollingThread.Name = nameof(PollingFileWatcher);
+            _pollingThread = new Thread(new ThreadStart(PollingLoop))
+            {
+                IsBackground = true,
+                Name = nameof(PollingFileWatcher)
+            };
 
             CreateKnownFilesSnapshot();
 

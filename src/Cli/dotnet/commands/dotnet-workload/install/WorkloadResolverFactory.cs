@@ -35,9 +35,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public static CreationResult Create(CreationParameters parameters)
         {
-            var result = new CreationResult();
-
-            result.InstalledSdkVersion = new ReleaseVersion(parameters.VersionForTesting ?? Product.Version);
+            var result = new CreationResult
+            {
+                InstalledSdkVersion = new ReleaseVersion(parameters.VersionForTesting ?? Product.Version)
+            };
 
             bool manifestsNeedValidation;
             if (string.IsNullOrEmpty(parameters.SdkVersionFromOption))

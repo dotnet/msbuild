@@ -10,7 +10,7 @@ namespace Microsoft.NET.TestFramework
     {
         public string TestAssetsRoot { get; private set; }
 
-        private List<String> TestDestinationDirectories { get; } = new List<string>();
+        private List<string> TestDestinationDirectories { get; } = new List<string>();
 
         protected ITestOutputHelper Log { get; }
 

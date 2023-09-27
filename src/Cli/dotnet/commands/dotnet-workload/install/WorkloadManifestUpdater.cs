@@ -470,7 +470,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         private static string GetAdvertisingWorkloadsFilePath(string userProfileDir, SdkFeatureBand featureBand) => Path.Combine(userProfileDir, $".workloadAdvertisingUpdates{featureBand}");
 
-        private async Task<String> GetOnlinePackagePath(SdkFeatureBand sdkFeatureBand, ManifestId manifestId, bool includePreviews)
+        private async Task<string> GetOnlinePackagePath(SdkFeatureBand sdkFeatureBand, ManifestId manifestId, bool includePreviews)
         {
             string packagePath = await _nugetPackageDownloader.DownloadPackageAsync(
                 _workloadManifestInstaller.GetManifestPackageId(manifestId, sdkFeatureBand),

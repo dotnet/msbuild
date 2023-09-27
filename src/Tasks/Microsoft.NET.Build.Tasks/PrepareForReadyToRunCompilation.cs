@@ -212,8 +212,10 @@ namespace Microsoft.NET.Build.Tasks
 
                 // This TaskItem corresponds to the output R2R image. It is equivalent to the input TaskItem, only the ItemSpec for it points to the new path
                 // for the newly created R2R image
-                TaskItem r2rFileToPublish = new(file);
-                r2rFileToPublish.ItemSpec = outputR2RImage;
+                TaskItem r2rFileToPublish = new(file)
+                {
+                    ItemSpec = outputR2RImage
+                };
                 r2rFileToPublish.RemoveMetadata(MetadataKeys.OriginalItemSpec);
                 r2rFilesPublishList.Add(r2rFileToPublish);
 
@@ -227,8 +229,10 @@ namespace Microsoft.NET.Build.Tasks
                     {
                         // This TaskItem is the R2R->R2RPDB entry, for a R2R image that was just created, and for which we need to create native PDBs. This will be used as
                         // an input to the ReadyToRunCompiler task
-                        TaskItem pdbCompilationEntry = new(file);
-                        pdbCompilationEntry.ItemSpec = outputR2RImage;
+                        TaskItem pdbCompilationEntry = new(file)
+                        {
+                            ItemSpec = outputR2RImage
+                        };
                         pdbCompilationEntry.SetMetadata(MetadataKeys.OutputPDBImage, outputPDBImage);
                         pdbCompilationEntry.SetMetadata(MetadataKeys.CreatePDBCommand, crossgen1CreatePDBCommand);
                         symbolsCompilationList.Add(pdbCompilationEntry);
@@ -236,8 +240,10 @@ namespace Microsoft.NET.Build.Tasks
 
                     // This TaskItem corresponds to the output PDB image. It is equivalent to the input TaskItem, only the ItemSpec for it points to the new path
                     // for the newly created PDB image.
-                    TaskItem r2rSymbolsFileToPublish = new(file);
-                    r2rSymbolsFileToPublish.ItemSpec = outputPDBImage;
+                    TaskItem r2rSymbolsFileToPublish = new(file)
+                    {
+                        ItemSpec = outputPDBImage
+                    };
                     r2rSymbolsFileToPublish.SetMetadata(MetadataKeys.RelativePath, outputPDBImageRelativePath);
                     r2rSymbolsFileToPublish.RemoveMetadata(MetadataKeys.OriginalItemSpec);
                     if (!IncludeSymbolsInSingleFile)
@@ -257,8 +263,10 @@ namespace Microsoft.NET.Build.Tasks
                 compositeR2RImageRelativePath = Path.ChangeExtension(compositeR2RImageRelativePath, "r2r" + Path.GetExtension(compositeR2RImageRelativePath));
                 var compositeR2RImage = Path.Combine(OutputPath, compositeR2RImageRelativePath);
 
-                TaskItem r2rCompilationEntry = new(MainAssembly);
-                r2rCompilationEntry.ItemSpec = r2rCompositeInputList[0].ItemSpec;
+                TaskItem r2rCompilationEntry = new(MainAssembly)
+                {
+                    ItemSpec = r2rCompositeInputList[0].ItemSpec
+                };
                 r2rCompilationEntry.SetMetadata(MetadataKeys.OutputR2RImage, compositeR2RImage);
                 r2rCompilationEntry.SetMetadata(MetadataKeys.CreateCompositeImage, "true");
                 r2rCompilationEntry.RemoveMetadata(MetadataKeys.OriginalItemSpec);
@@ -288,8 +296,10 @@ namespace Microsoft.NET.Build.Tasks
                         r2rCompilationEntry.SetMetadata(MetadataKeys.OutputPDBImage, compositePDBImage);
 
                         // Publish composite PDB file
-                        TaskItem r2rSymbolsFileToPublish = new(MainAssembly);
-                        r2rSymbolsFileToPublish.ItemSpec = compositePDBImage;
+                        TaskItem r2rSymbolsFileToPublish = new(MainAssembly)
+                        {
+                            ItemSpec = compositePDBImage
+                        };
                         r2rSymbolsFileToPublish.SetMetadata(MetadataKeys.RelativePath, compositePDBRelativePath);
                         r2rSymbolsFileToPublish.RemoveMetadata(MetadataKeys.OriginalItemSpec);
                         if (!IncludeSymbolsInSingleFile)
@@ -304,8 +314,10 @@ namespace Microsoft.NET.Build.Tasks
                 imageCompilationList.Add(r2rCompilationEntry);
 
                 // Publish it
-                TaskItem compositeR2RFileToPublish = new(MainAssembly);
-                compositeR2RFileToPublish.ItemSpec = compositeR2RImage;
+                TaskItem compositeR2RFileToPublish = new(MainAssembly)
+                {
+                    ItemSpec = compositeR2RImage
+                };
                 compositeR2RFileToPublish.RemoveMetadata(MetadataKeys.OriginalItemSpec);
                 compositeR2RFileToPublish.SetMetadata(MetadataKeys.RelativePath, compositeR2RImageRelativePath);
                 r2rFilesPublishList.Add(compositeR2RFileToPublish);

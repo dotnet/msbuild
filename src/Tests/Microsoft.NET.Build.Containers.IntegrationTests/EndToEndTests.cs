@@ -27,7 +27,7 @@ public class EndToEndTests : IDisposable
         var (normalizedName, warning, error) = ContainerHelpers.NormalizeRepository(callerMemberName);
         if (error is (var format, var args))
         {
-            throw new ArgumentException(String.Format(Strings.ResourceManager.GetString(format)!, args));
+            throw new ArgumentException(string.Format(Strings.ResourceManager.GetString(format)!, args));
         }
 
         return normalizedName!; // non-null if error is null

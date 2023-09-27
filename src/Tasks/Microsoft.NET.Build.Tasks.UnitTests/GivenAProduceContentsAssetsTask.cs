@@ -24,8 +24,10 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             };
 
             // mock preprocessor
-            var assetPreprocessor = new MockContentAssetPreprocessor((s) => false);
-            assetPreprocessor.MockReadContent = inputText;
+            var assetPreprocessor = new MockContentAssetPreprocessor((s) => false)
+            {
+                MockReadContent = inputText
+            };
 
             // input items
             var contentPreprocessorValues = GetPreprocessorValueItems(preprocessorValues);
@@ -73,8 +75,10 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             };
 
             // mock preprocessor
-            var assetPreprocessor = new MockContentAssetPreprocessor((s) => false);
-            assetPreprocessor.MockReadContent = inputText;
+            var assetPreprocessor = new MockContentAssetPreprocessor((s) => false)
+            {
+                MockReadContent = inputText
+            };
 
             // input items
             var contentPreprocessorValues = GetPreprocessorValueItems(preprocessorValues);
@@ -127,8 +131,10 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             };
 
             // mock preprocessor
-            var assetPreprocessor = new MockContentAssetPreprocessor((s) => false);
-            assetPreprocessor.MockReadContent = inputText;
+            var assetPreprocessor = new MockContentAssetPreprocessor((s) => false)
+            {
+                MockReadContent = inputText
+            };
 
             // input items
             var contentPreprocessorValues = GetPreprocessorValueItems(preprocessorValues);
@@ -204,8 +210,10 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             };
 
             // mock preprocessor
-            var assetPreprocessor = new MockContentAssetPreprocessor((s) => false);
-            assetPreprocessor.MockReadContent = inputText;
+            var assetPreprocessor = new MockContentAssetPreprocessor((s) => false)
+            {
+                MockReadContent = inputText
+            };
 
             // input items
             var contentPreprocessorValues = GetPreprocessorValueItems(preprocessorValues);
@@ -280,8 +288,10 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             };
 
             // mock preprocessor
-            var assetPreprocessor = new MockContentAssetPreprocessor((s) => false);
-            assetPreprocessor.MockReadContent = inputText;
+            var assetPreprocessor = new MockContentAssetPreprocessor((s) => false)
+            {
+                MockReadContent = inputText
+            };
 
             // input items
             var contentPreprocessorValues = GetPreprocessorValueItems(preprocessorValues);

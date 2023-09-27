@@ -241,7 +241,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                                        .Execute("--logger", "trx", "--results-directory", trxLoggerDirectory);
 
             // Verify
-            String[] trxFiles = Directory.GetFiles(trxLoggerDirectory, "*.trx");
+            string[] trxFiles = Directory.GetFiles(trxLoggerDirectory, "*.trx");
             Assert.Single(trxFiles);
             result.StdOut.Should().Contain(trxFiles[0]);
 

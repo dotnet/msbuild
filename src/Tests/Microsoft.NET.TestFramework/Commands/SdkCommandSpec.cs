@@ -36,10 +36,12 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public ProcessStartInfo ToProcessStartInfo(bool doNotEscapeArguments = false)
         {
-            var ret = new ProcessStartInfo();
-            ret.FileName = FileName;
-            ret.Arguments = doNotEscapeArguments ? string.Join(" ", Arguments) : EscapeArgs();
-            ret.UseShellExecute = false;
+            var ret = new ProcessStartInfo
+            {
+                FileName = FileName,
+                Arguments = doNotEscapeArguments ? string.Join(" ", Arguments) : EscapeArgs(),
+                UseShellExecute = false
+            };
             foreach (var kvp in Environment)
             {
                 ret.Environment[kvp.Key] = kvp.Value;

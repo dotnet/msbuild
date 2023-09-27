@@ -50,7 +50,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             var aliases = item.GetMetadata(MetadataNames.Aliases);
 
-            if (!String.IsNullOrEmpty(aliases))
+            if (!string.IsNullOrEmpty(aliases))
             {
                 // skip compile-time conflict detection for aliased assemblies.
                 // An alias is the way to avoid a conflict
@@ -68,7 +68,7 @@ namespace Microsoft.NET.Build.Tasks
             // RAR to handle or not as it sees fit.
             var sourcePath = GetSourcePath(item);
 
-            if (String.IsNullOrEmpty(sourcePath))
+            if (string.IsNullOrEmpty(sourcePath))
             {
                 return null;
             }
@@ -112,7 +112,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             var sourcePath = item.GetMetadata(MetadataNames.HintPath)?.Trim();
 
-            if (String.IsNullOrWhiteSpace(sourcePath))
+            if (string.IsNullOrWhiteSpace(sourcePath))
             {
                 // assume item-spec points to the file.
                 // this won't work if it comes from a targeting pack or SDK, but
@@ -133,7 +133,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 var value = item.GetMetadata(metadata)?.Trim();
 
-                if (!String.IsNullOrWhiteSpace(value))
+                if (!string.IsNullOrWhiteSpace(value))
                 {
                     // normalize path
                     return value.Replace('\\', '/');

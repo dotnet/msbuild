@@ -88,9 +88,10 @@ namespace Microsoft.NET.TestFramework
             {
                 FullFrameworkMSBuildPath = null;
                 var logger = new StringTestLogger();
-                var command = new DotnetCommand(logger, "--version");
-
-                command.WorkingDirectory = TestContext.Current.TestExecutionDirectory;
+                var command = new DotnetCommand(logger, "--version")
+                {
+                    WorkingDirectory = TestContext.Current.TestExecutionDirectory
+                };
 
                 var result = command.Execute();
 
@@ -110,9 +111,10 @@ namespace Microsoft.NET.TestFramework
         private void InitMSBuildVersion()
         {
             var logger = new StringTestLogger();
-            var command = new MSBuildVersionCommand(logger);
-
-            command.WorkingDirectory = TestContext.Current.TestExecutionDirectory;
+            var command = new MSBuildVersionCommand(logger)
+            {
+                WorkingDirectory = TestContext.Current.TestExecutionDirectory
+            };
 
             var result = command.Execute();
 

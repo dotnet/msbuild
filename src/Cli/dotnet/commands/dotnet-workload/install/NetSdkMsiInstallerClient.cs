@@ -283,7 +283,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     {
                         Log?.LogMessage($"ProductCode mismatch! Cached package: {msi.ProductCode}, pack record: {record.ProductCode}.");
                         string logFile = GetMsiLogName(record, InstallAction.Uninstall);
-                        uint error = ExecuteWithProgress(String.Format(LocalizableStrings.MsiProgressUninstall, id), () => UninstallMsi(record.ProductCode, logFile));
+                        uint error = ExecuteWithProgress(string.Format(LocalizableStrings.MsiProgressUninstall, id), () => UninstallMsi(record.ProductCode, logFile));
                         ExitOnError(error, $"Failed to uninstall {msi.MsiPath}.");
                     }
                     else
@@ -586,7 +586,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     string packageDataPath = Path.Combine(extractionPath, "data");
                     if (!Cache.TryGetMsiPathFromPackageData(packageDataPath, out string msiPath, out _))
                     {
-                        throw new FileNotFoundException(String.Format(LocalizableStrings.ManifestMsiNotFoundInNuGetPackage, extractionPath));
+                        throw new FileNotFoundException(string.Format(LocalizableStrings.ManifestMsiNotFoundInNuGetPackage, extractionPath));
                     }
                     string msiExtractionPath = Path.Combine(extractionPath, "msi");
 
@@ -604,7 +604,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         if (result != Error.SUCCESS)
                         {
                             Log?.LogMessage($"ExtractManifestAsync: Admin install failed: {result}");
-                            throw new GracefulException(String.Format(LocalizableStrings.FailedToExtractMsi, msiPath));
+                            throw new GracefulException(string.Format(LocalizableStrings.FailedToExtractMsi, msiPath));
                         }
                     }
 
@@ -619,7 +619,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                     if (manifestFolder == null)
                     {
-                        throw new GracefulException(String.Format(LocalizableStrings.ExpectedSingleManifest, nupkgPath));
+                        throw new GracefulException(string.Format(LocalizableStrings.ExpectedSingleManifest, nupkgPath));
                     }
 
                     FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(manifestFolder, targetPath));
@@ -930,17 +930,17 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 case InstallAction.MinorUpdate:
                 case InstallAction.Install:
                 case InstallAction.MajorUpgrade:
-                    error = ExecuteWithProgress(String.Format(LocalizableStrings.MsiProgressInstall, name), () => InstallMsi(msi.MsiPath, logFile));
+                    error = ExecuteWithProgress(string.Format(LocalizableStrings.MsiProgressInstall, name), () => InstallMsi(msi.MsiPath, logFile));
                     ExitOnError(error, $"Failed to install {msi.Payload}.");
                     break;
 
                 case InstallAction.Repair:
-                    error = ExecuteWithProgress(String.Format(LocalizableStrings.MsiProgressRepair, name), () => RepairMsi(msi.ProductCode, logFile));
+                    error = ExecuteWithProgress(string.Format(LocalizableStrings.MsiProgressRepair, name), () => RepairMsi(msi.ProductCode, logFile));
                     ExitOnError(error, $"Failed to repair {msi.Payload}.");
                     break;
 
                 case InstallAction.Uninstall:
-                    error = ExecuteWithProgress(String.Format(LocalizableStrings.MsiProgressUninstall, name), () => UninstallMsi(msi.ProductCode, logFile));
+                    error = ExecuteWithProgress(string.Format(LocalizableStrings.MsiProgressUninstall, name), () => UninstallMsi(msi.ProductCode, logFile));
                     ExitOnError(error, $"Failed to remove {msi.Payload}.");
                     break;
 

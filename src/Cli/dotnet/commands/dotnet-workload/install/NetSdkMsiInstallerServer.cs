@@ -133,7 +133,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             if ((ParentProcess == null) || (ParentProcess.StartTime > CurrentProcess.StartTime) ||
                 !string.Equals(ParentProcess.MainModule.FileName, Environment.ProcessPath, StringComparison.OrdinalIgnoreCase))
             {
-                throw new SecurityException(String.Format(LocalizableStrings.NoTrustWithParentPID, ParentProcess?.Id));
+                throw new SecurityException(string.Format(LocalizableStrings.NoTrustWithParentPID, ParentProcess?.Id));
             }
 
             // Configure pipe DACLs

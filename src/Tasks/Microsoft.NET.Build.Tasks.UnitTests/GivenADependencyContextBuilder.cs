@@ -85,8 +85,10 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
                 using (JsonTextWriter writer = new(File.CreateText($"result-{baselineFileName}.deps.json")))
                 {
-                    JsonSerializer serializer = new();
-                    serializer.Formatting = Formatting.Indented;
+                    JsonSerializer serializer = new()
+                    {
+                        Formatting = Formatting.Indented
+                    };
                     serializer.Serialize(writer, result);
                 }
 

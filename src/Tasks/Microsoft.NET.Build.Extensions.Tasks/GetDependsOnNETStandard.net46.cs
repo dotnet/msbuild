@@ -48,8 +48,8 @@ namespace Microsoft.NET.Build.Tasks
                 var assemblyImport = (IMetaDataAssemblyImport)metadataDispenser.OpenScope(filePathAbsolute, 0, s_importerGuid);
 
                 var asmRefEnum = IntPtr.Zero;
-                var asmRefTokens = new UInt32[16];
-                UInt32 fetched;
+                var asmRefTokens = new uint[16];
+                uint fetched;
 
                 var assemblyMD = new ASSEMBLYMETADATA()
                 {
@@ -77,7 +77,7 @@ namespace Microsoft.NET.Build.Tasks
                         {
                             // Determine the length of the string to contain the name first.
                             IntPtr hashDataPtr, pubKeyPtr;
-                            UInt32 hashDataLength, pubKeyBytes, asmNameLength, flags;
+                            uint hashDataLength, pubKeyBytes, asmNameLength, flags;
                             assemblyImport.GetAssemblyRefProps(
                                 asmRefTokens[i],
                                 out pubKeyPtr,
@@ -163,13 +163,13 @@ namespace Microsoft.NET.Build.Tasks
         internal interface IMetaDataDispenser
         {
             [return: MarshalAs(UnmanagedType.Interface)]
-            object DefineScope([In] ref Guid rclsid, [In] UInt32 dwCreateFlags, [In] ref Guid riid);
+            object DefineScope([In] ref Guid rclsid, [In] uint dwCreateFlags, [In] ref Guid riid);
 
             [return: MarshalAs(UnmanagedType.Interface)]
-            object OpenScope([In][MarshalAs(UnmanagedType.LPWStr)]  string szScope, [In] UInt32 dwOpenFlags, [In] ref Guid riid);
+            object OpenScope([In][MarshalAs(UnmanagedType.LPWStr)]  string szScope, [In] uint dwOpenFlags, [In] ref Guid riid);
 
             [return: MarshalAs(UnmanagedType.Interface)]
-            object OpenScopeOnMemory([In] IntPtr pData, [In] UInt32 cbData, [In] UInt32 dwOpenFlags, [In] ref Guid riid);
+            object OpenScopeOnMemory([In] IntPtr pData, [In] uint cbData, [In] uint dwOpenFlags, [In] ref Guid riid);
         }
         
         [ComImport]
@@ -177,16 +177,16 @@ namespace Microsoft.NET.Build.Tasks
         [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
         internal interface IMetaDataAssemblyImport
         {
-            void GetAssemblyProps(UInt32 mdAsm, out IntPtr pPublicKeyPtr, out UInt32 ucbPublicKeyPtr, out UInt32 uHashAlg, StringBuilder strName, UInt32 cchNameIn, out UInt32 cchNameRequired, IntPtr amdInfo, out UInt32 dwFlags);
-            void GetAssemblyRefProps(UInt32 mdAsmRef, out IntPtr ppbPublicKeyOrToken, out UInt32 pcbPublicKeyOrToken, StringBuilder strName, UInt32 cchNameIn, out UInt32 pchNameOut, ref ASSEMBLYMETADATA amdInfo, out IntPtr ppbHashValue, out UInt32 pcbHashValue, out UInt32 pdwAssemblyRefFlags);
-            void GetFileProps([In] UInt32 mdFile, StringBuilder strName, UInt32 cchName, out UInt32 cchNameRequired, out IntPtr bHashData, out UInt32 cchHashBytes, out UInt32 dwFileFlags);
+            void GetAssemblyProps(uint mdAsm, out IntPtr pPublicKeyPtr, out uint ucbPublicKeyPtr, out uint uHashAlg, StringBuilder strName, uint cchNameIn, out uint cchNameRequired, IntPtr amdInfo, out uint dwFlags);
+            void GetAssemblyRefProps(uint mdAsmRef, out IntPtr ppbPublicKeyOrToken, out uint pcbPublicKeyOrToken, StringBuilder strName, uint cchNameIn, out uint pchNameOut, ref ASSEMBLYMETADATA amdInfo, out IntPtr ppbHashValue, out uint pcbHashValue, out uint pdwAssemblyRefFlags);
+            void GetFileProps([In] uint mdFile, StringBuilder strName, uint cchName, out uint cchNameRequired, out IntPtr bHashData, out uint cchHashBytes, out uint dwFileFlags);
             void GetExportedTypeProps();
             void GetManifestResourceProps();
-            void EnumAssemblyRefs([In, Out] ref IntPtr phEnum, [MarshalAs(UnmanagedType.LPArray), Out] UInt32[] asmRefs, System.UInt32 asmRefCount, out System.UInt32 iFetched);
-            void EnumFiles([In, Out] ref IntPtr phEnum, [MarshalAs(UnmanagedType.LPArray), Out] UInt32[] fileRefs, System.UInt32 fileRefCount, out System.UInt32 iFetched);
+            void EnumAssemblyRefs([In, Out] ref IntPtr phEnum, [MarshalAs(UnmanagedType.LPArray), Out] uint[] asmRefs, uint asmRefCount, out uint iFetched);
+            void EnumFiles([In, Out] ref IntPtr phEnum, [MarshalAs(UnmanagedType.LPArray), Out] uint[] fileRefs, uint fileRefCount, out uint iFetched);
             void EnumExportedTypes();
             void EnumManifestResources();
-            void GetAssemblyFromScope(out UInt32 mdAsm);
+            void GetAssemblyFromScope(out uint mdAsm);
             void FindExportedTypeByName();
             void FindManifestResourceByName();
             // PreserveSig because this method is an exception that 
@@ -216,16 +216,16 @@ namespace Microsoft.NET.Build.Tasks
         [StructLayout(LayoutKind.Sequential)]
         internal struct ASSEMBLYMETADATA
         {
-            public UInt16 usMajorVersion;
-            public UInt16 usMinorVersion;
-            public UInt16 usBuildNumber;
-            public UInt16 usRevisionNumber;
+            public ushort usMajorVersion;
+            public ushort usMinorVersion;
+            public ushort usBuildNumber;
+            public ushort usRevisionNumber;
             public IntPtr rpLocale;
-            public UInt32 cchLocale;
+            public uint cchLocale;
             public IntPtr rpProcessors;
-            public UInt32 cProcessors;
+            public uint cProcessors;
             public IntPtr rOses;
-            public UInt32 cOses;
+            public uint cOses;
         }
 
         #endregion

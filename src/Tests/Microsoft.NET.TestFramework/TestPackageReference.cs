@@ -25,7 +25,7 @@ namespace Microsoft.NET.TestFramework
         public bool UpdatePackageReference { get; private set; }
         public bool NuGetPackageExists()
         {
-            return File.Exists(Path.Combine(NupkgPath, String.Concat(ID + "." + Version + ".nupkg")));
+            return File.Exists(Path.Combine(NupkgPath, string.Concat(ID + "." + Version + ".nupkg")));
         }
     }
 }

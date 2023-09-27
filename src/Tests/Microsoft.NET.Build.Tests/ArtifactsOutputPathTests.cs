@@ -308,10 +308,9 @@ namespace Microsoft.NET.Build.Tests
         {
             var testProject = new TestProject("App")
             {
-                IsExe = true
+                IsExe = true,
+                UseArtifactsOutput = true
             };
-
-            testProject.UseArtifactsOutput = true;
 
             var testAsset = _testAssetsManager.CreateTestProjects(new[] { testProject }, callingMethod: callingMethod);
 

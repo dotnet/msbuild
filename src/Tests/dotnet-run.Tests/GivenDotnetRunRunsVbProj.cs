@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .WithWorkingDirectory(testInstance.Path)
                 .Execute("--launch-profile", "first");
 
-            string expectedError = String.Format(LocalizableStrings.DuplicateCaseInsensitiveLaunchProfileNames, "\tfirst," + (OperatingSystem.IsWindows() ? "\r" : "") + "\n\tFIRST");
+            string expectedError = string.Format(LocalizableStrings.DuplicateCaseInsensitiveLaunchProfileNames, "\tfirst," + (OperatingSystem.IsWindows() ? "\r" : "") + "\n\tFIRST");
             runResult
                 .Should()
                 .Fail()
@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .Should()
                 .Pass()
                 .And
-                .HaveStdErrContaining(String.Format(LocalizableStrings.LaunchProfileDoesNotExist, invalidLaunchProfileName));
+                .HaveStdErrContaining(string.Format(LocalizableStrings.LaunchProfileDoesNotExist, invalidLaunchProfileName));
         }
 
         [Theory]

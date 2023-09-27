@@ -33,7 +33,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
             {
                 lock (_syncObject)
                 {
-                    string authInfo = String.Format("{0}:{1}", _connectionInfo.UserName, _connectionInfo.Password);
+                    string authInfo = string.Format("{0}:{1}", _connectionInfo.UserName, _connectionInfo.Password);
                     return Convert.ToBase64String(Encoding.UTF8.GetBytes(authInfo));
                 }
             }

@@ -239,9 +239,10 @@ namespace Microsoft.NET.Build.Tests
                 var getValuesCommand = new GetValuesCommand(testAsset,
                     valueName: "Analyzer",
                     GetValuesCommand.ValueType.Item,
-                    targetFramework);
-
-                getValuesCommand.DependsOnTargets = "ResolveLockFileAnalyzers";
+                    targetFramework)
+                {
+                    DependsOnTargets = "ResolveLockFileAnalyzers"
+                };
 
                 getValuesCommand.Execute("-p:TargetFramework=" + targetFramework).Should().Pass();
 

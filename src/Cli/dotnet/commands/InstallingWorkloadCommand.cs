@@ -82,12 +82,14 @@ namespace Microsoft.DotNet.Workloads.Workload
             _workloadManifestUpdaterFromConstructor = workloadManifestUpdater;
         }
 
-        protected async Task<List<WorkloadDownload>> GetDownloads(IEnumerable<WorkloadId> workloadIds, bool skipManifestUpdate, bool includePreview, string downloadFolder = null)
+        protected async Task<List<WorkloadDownload>> GetDownloads(IEnumerable<WorkloadId> workloadIds, bool skipManifestUpdate, bool includePreview, string downloadFolder = null,
+            IReporter reporter = null, INuGetPackageDownloader packageDownloader = null)
         {
+            reporter ??= Reporter;
+            packageDownloader ??= PackageDownloader;
+
             List<WorkloadDownload> ret = new();
-
             DirectoryPath? tempPath = null;
-
             try
             {
                 if (!skipManifestUpdate)
@@ -109,7 +111,7 @@ namespace Microsoft.DotNet.Workloads.Workload
 
                     if (!manifestDownloads.Any())
                     {
-                        Reporter.WriteLine(Strings.SkippingManifestUpdate);
+                        reporter.WriteLine(Strings.SkippingManifestUpdate);
                     }
 
                     foreach (var download in manifestDownloads)
@@ -117,8 +119,8 @@ namespace Microsoft.DotNet.Workloads.Workload
                         //  Add package to the list of downloads
                         ret.Add(download);
 
-                        //  Download package                        
-                        var downloadedPackagePath = await PackageDownloader.DownloadPackageAsync(new PackageId(download.NuGetPackageId), new NuGetVersion(download.NuGetPackageVersion),
+                        //  Download package
+                        var downloadedPackagePath = await packageDownloader.DownloadPackageAsync(new PackageId(download.NuGetPackageId), new NuGetVersion(download.NuGetPackageVersion),
                             _packageSourceLocation, downloadFolder: folderForManifestDownloads);
 
                         //  Extract manifest from package
@@ -140,9 +142,9 @@ namespace Microsoft.DotNet.Workloads.Workload
                     DirectoryPath downloadFolderDirectoryPath = new(downloadFolder);
                     foreach (var packDownload in packDownloads)
                     {
-                        Reporter.WriteLine(string.Format(Install.LocalizableStrings.DownloadingPackToCacheMessage, packDownload.NuGetPackageId, packDownload.NuGetPackageVersion, downloadFolder));
+                        reporter.WriteLine(string.Format(Install.LocalizableStrings.DownloadingPackToCacheMessage, packDownload.NuGetPackageId, packDownload.NuGetPackageVersion, downloadFolder));
 
-                        await PackageDownloader.DownloadPackageAsync(new PackageId(packDownload.NuGetPackageId), new NuGetVersion(packDownload.NuGetPackageVersion),
+                        await packageDownloader.DownloadPackageAsync(new PackageId(packDownload.NuGetPackageId), new NuGetVersion(packDownload.NuGetPackageVersion),
                             _packageSourceLocation, downloadFolder: downloadFolderDirectoryPath);
                     }
                 }

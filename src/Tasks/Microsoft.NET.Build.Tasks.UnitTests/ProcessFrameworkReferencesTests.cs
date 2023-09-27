@@ -43,28 +43,28 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         [Fact]
         public void It_resolves_FrameworkReferences()
         {
-            var task = new ProcessFrameworkReferences();
-
-            task.EnableTargetingPackDownload = true;
-            task.TargetFrameworkIdentifier = ".NETCoreApp";
-            task.TargetFrameworkVersion = ToolsetInfo.CurrentTargetFrameworkVersion;
-            task.FrameworkReferences = new[]
+            var task = new ProcessFrameworkReferences
             {
-                new MockTaskItem("Microsoft.AspNetCore.App", new Dictionary<string, string>())
-            };
-
-            task.KnownFrameworkReferences = new[]
-            {
-                new MockTaskItem("Microsoft.AspNetCore.App",
-                    new Dictionary<string, string>()
-                    {
-                        {"TargetFramework", ToolsetInfo.CurrentTargetFramework},
-                        {"RuntimeFrameworkName", "Microsoft.AspNetCore.App"},
-                        {"DefaultRuntimeFrameworkVersion", "1.9.5"},
-                        {"LatestRuntimeFrameworkVersion", "1.9.6"},
-                        {"TargetingPackName", "Microsoft.AspNetCore.App"},
-                        {"TargetingPackVersion", "1.9.0"}
-                    })
+                EnableTargetingPackDownload = true,
+                TargetFrameworkIdentifier = ".NETCoreApp",
+                TargetFrameworkVersion = ToolsetInfo.CurrentTargetFrameworkVersion,
+                FrameworkReferences = new[]
+                {
+                    new MockTaskItem("Microsoft.AspNetCore.App", new Dictionary<string, string>())
+                },
+                KnownFrameworkReferences = new[]
+                {
+                    new MockTaskItem("Microsoft.AspNetCore.App",
+                        new Dictionary<string, string>()
+                        {
+                            {"TargetFramework", ToolsetInfo.CurrentTargetFramework},
+                            {"RuntimeFrameworkName", "Microsoft.AspNetCore.App"},
+                            {"DefaultRuntimeFrameworkVersion", "1.9.5"},
+                            {"LatestRuntimeFrameworkVersion", "1.9.6"},
+                            {"TargetingPackName", "Microsoft.AspNetCore.App"},
+                            {"TargetingPackVersion", "1.9.0"}
+                        })
+                }
             };
 
             task.Execute().Should().BeTrue();
@@ -79,30 +79,30 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         [Fact]
         public void Given_targetPlatform_and_targetPlatform_version_It_resolves_FrameworkReferences_()
         {
-            var task = new ProcessFrameworkReferences();
-
-            task.EnableTargetingPackDownload = true;
-            task.TargetFrameworkIdentifier = ".NETCoreApp";
-            task.TargetFrameworkVersion = ToolsetInfo.CurrentTargetFrameworkVersion;
-            task.TargetPlatformIdentifier = "Windows";
-            task.TargetPlatformVersion = "10.0.18362";
-            task.FrameworkReferences = new[]
+            var task = new ProcessFrameworkReferences
             {
-                new MockTaskItem("Microsoft.AspNetCore.App", new Dictionary<string, string>())
-            };
-
-            task.KnownFrameworkReferences = new[]
-            {
-                new MockTaskItem("Microsoft.AspNetCore.App",
-                    new Dictionary<string, string>()
-                    {
-                        {"TargetFramework", ToolsetInfo.CurrentTargetFramework},
-                        {"RuntimeFrameworkName", "Microsoft.AspNetCore.App"},
-                        {"DefaultRuntimeFrameworkVersion", "1.9.5"},
-                        {"LatestRuntimeFrameworkVersion", "1.9.6"},
-                        {"TargetingPackName", "Microsoft.AspNetCore.App"},
-                        {"TargetingPackVersion", "1.9.0"}
-                    })
+                EnableTargetingPackDownload = true,
+                TargetFrameworkIdentifier = ".NETCoreApp",
+                TargetFrameworkVersion = ToolsetInfo.CurrentTargetFrameworkVersion,
+                TargetPlatformIdentifier = "Windows",
+                TargetPlatformVersion = "10.0.18362",
+                FrameworkReferences = new[]
+                {
+                    new MockTaskItem("Microsoft.AspNetCore.App", new Dictionary<string, string>())
+                },
+                KnownFrameworkReferences = new[]
+                {
+                    new MockTaskItem("Microsoft.AspNetCore.App",
+                        new Dictionary<string, string>()
+                        {
+                            {"TargetFramework", ToolsetInfo.CurrentTargetFramework},
+                            {"RuntimeFrameworkName", "Microsoft.AspNetCore.App"},
+                            {"DefaultRuntimeFrameworkVersion", "1.9.5"},
+                            {"LatestRuntimeFrameworkVersion", "1.9.6"},
+                            {"TargetingPackName", "Microsoft.AspNetCore.App"},
+                            {"TargetingPackVersion", "1.9.0"}
+                        })
+                }
             };
 
             task.Execute().Should().BeTrue();
@@ -117,27 +117,27 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         [Fact]
         public void It_does_not_resolve_FrameworkReferences_if_targetframework_doesnt_match()
         {
-            var task = new ProcessFrameworkReferences();
-
-            task.TargetFrameworkIdentifier = ".NETCoreApp";
-            task.TargetFrameworkVersion = "2.0";
-            task.FrameworkReferences = new[]
+            var task = new ProcessFrameworkReferences
             {
-                new MockTaskItem("Microsoft.AspNetCore.App", new Dictionary<string, string>())
-            };
-
-            task.KnownFrameworkReferences = new[]
-            {
-                new MockTaskItem("Microsoft.AspNetCore.App",
-                    new Dictionary<string, string>()
-                    {
-                        {"TargetFramework", "netcoreapp3.0"},
-                        {"RuntimeFrameworkName", "Microsoft.AspNetCore.App"},
-                        {"DefaultRuntimeFrameworkVersion", "1.9.5"},
-                        {"LatestRuntimeFrameworkVersion", "1.9.6"},
-                        {"TargetingPackName", "Microsoft.AspNetCore.App"},
-                        {"TargetingPackVersion", "1.9.0"}
-                    })
+                TargetFrameworkIdentifier = ".NETCoreApp",
+                TargetFrameworkVersion = "2.0",
+                FrameworkReferences = new[]
+                {
+                    new MockTaskItem("Microsoft.AspNetCore.App", new Dictionary<string, string>())
+                },
+                KnownFrameworkReferences = new[]
+                {
+                    new MockTaskItem("Microsoft.AspNetCore.App",
+                        new Dictionary<string, string>()
+                        {
+                            {"TargetFramework", "netcoreapp3.0"},
+                            {"RuntimeFrameworkName", "Microsoft.AspNetCore.App"},
+                            {"DefaultRuntimeFrameworkVersion", "1.9.5"},
+                            {"LatestRuntimeFrameworkVersion", "1.9.6"},
+                            {"TargetingPackName", "Microsoft.AspNetCore.App"},
+                            {"TargetingPackVersion", "1.9.0"}
+                        })
+                }
             };
 
             task.Execute().Should().BeTrue();

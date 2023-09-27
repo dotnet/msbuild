@@ -21,10 +21,11 @@ namespace Microsoft.DotNet.Cli
 
         private static CliCommand ConstructCommand()
         {
-            var command = new DocumentedCommand("nuget", DocsLink);
-
-            // some subcommands are not defined here and just forwarded to NuGet app
-            command.TreatUnmatchedTokensAsErrors = false;
+            var command = new DocumentedCommand("nuget", DocsLink)
+            {
+                // some subcommands are not defined here and just forwarded to NuGet app
+                TreatUnmatchedTokensAsErrors = false
+            };
 
             command.Options.Add(new CliOption<bool>("--version"));
             command.Options.Add(new CliOption<string>("--verbosity", "-v"));
@@ -167,8 +168,10 @@ namespace Microsoft.DotNet.Cli
             };
 
             CliCommand CertificateCommand() {
-                CliOption<string> algorithm = new("--algorithm");
-                algorithm.DefaultValueFactory = (_argResult) => "SHA256";
+                CliOption<string> algorithm = new("--algorithm")
+                {
+                    DefaultValueFactory = (_argResult) => "SHA256"
+                };
                 algorithm.AcceptOnlyFromAmong("SHA256", "SHA384", "SHA512");
 
                 return new CliCommand("certificate") {

@@ -99,9 +99,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
                     Log.LogMessage(MessageImportance.High, string.Format("Executing command: {0} {1}", psi.FileName, psi.Arguments));
                 }
 
-                proc = new Process();
-                proc.StartInfo = psi;
-                proc.EnableRaisingEvents = true;
+                proc = new Process
+                {
+                    StartInfo = psi,
+                    EnableRaisingEvents = true
+                };
                 proc.OutputDataReceived += Proc_OutputDataReceived;
                 proc.ErrorDataReceived += Proc_ErrorDataReceived;
                 proc.Exited += Proc_Exited;

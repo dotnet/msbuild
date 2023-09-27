@@ -184,10 +184,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader.Tests
 
         WorkloadPackGroupJson ConvertGroupToJson(WorkloadPackGroup group)
         {
-            var groupJson = new WorkloadPackGroupJson();
-
-            groupJson.GroupPackageId = group.Workload.Id + ".Packs";
-            groupJson.GroupPackageVersion = group.WorkloadManifestVersion;
+            var groupJson = new WorkloadPackGroupJson
+            {
+                GroupPackageId = group.Workload.Id + ".Packs",
+                GroupPackageVersion = group.WorkloadManifestVersion
+            };
 
             foreach (var pack in group.Packs)
             {
