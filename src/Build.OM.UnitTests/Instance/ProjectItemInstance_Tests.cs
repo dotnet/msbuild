@@ -1045,6 +1045,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Log warning for drive enumerating wildcards that exist in projects on Unix platform.
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
         [UnixOnlyTheory]
         [InlineData(
             TargetWithDefinedPropertyAndItemWithInclude,
