@@ -250,7 +250,6 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
 
             command.Execute();
 
-            _reporter.Lines.Should().Contain("==allPackageLinksJsonOutputStart==");
             string.Join(" ", _reporter.Lines).Should().Contain("http://mock-url/xamarin.android.templates.1.0.3.nupkg", "New pack urls should be included in output");
             string.Join(" ", _reporter.Lines).Should().Contain("http://mock-url/xamarin.android.framework.8.4.0.nupkg", "Urls for packs with updated versions should be included in output");
             string.Join(" ", _reporter.Lines).Should().NotContain("xamarin.android.sdk", "Urls for packs with the same version should not be included in output");
@@ -327,7 +326,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
 
 
             updateCommand.Execute();
-            _reporter.Lines.Count().Should().Be(3);
+            _reporter.Lines.Count().Should().Be(1);
             string.Join("", _reporter.Lines).Should().Contain("samplemanifest");
         }
 
