@@ -727,7 +727,7 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        // No valid sources found
+                        // No valid sources found--failures should have been logged in GetResourcesToProcess
                         return false;
                     }
                 }
