@@ -1406,10 +1406,6 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        /// <summary>
-        /// Copying a file on top of itself should be a success (no-op) whether
-        /// or not skipUnchangedFiles is true or false.
-        /// </summary>
         [Theory]
         [MemberData(nameof(GetHardLinksSymLinks))]
         public void CopyFileItselfNonExistentFile(bool isUseHardLinks, bool isUseSymbolicLinks)
