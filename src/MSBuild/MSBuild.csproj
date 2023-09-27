@@ -260,7 +260,7 @@
       <ContentWithTargetPath Include="$(ProjectDepsFilePath)" Condition="Exists('$(ProjectDepsFilePath)')" CopyToOutputDirectory="PreserveNewest" TargetPath="$(ProjectDepsFileName)" />
 
       <ContentWithTargetPath Include="$(ProjectRuntimeConfigFilePath)" Condition="Exists('$(ProjectRuntimeConfigFilePath)')" CopyToOutputDirectory="PreserveNewest" TargetPath="$(ProjectRuntimeConfigFileName)" />
-      <ContentWithTargetPath Include="$(ProjectRuntimeConfigDevFilePath)" CopyToOutputDirectory="PreserveNewest" TargetPath="$([System.IO.Path]::GetFileName('$(ProjectRuntimeConfigDevFilePath)'))" />
+      <ContentWithTargetPath Include="$(ProjectRuntimeConfigDevFilePath)" Condition="Exists('$(ProjectRuntimeConfigDevFilePath)')" CopyToOutputDirectory="PreserveNewest" TargetPath="$([System.IO.Path]::GetFileName('$(ProjectRuntimeConfigDevFilePath)'))" />
     </ItemGroup>
   </Target>
 
