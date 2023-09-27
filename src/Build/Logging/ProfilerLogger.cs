@@ -219,7 +219,7 @@ namespace Microsoft.Build.Logging
 
             // Let's build an index of profiled locations by id, to speed up subsequent queries
             var idTable = aggregatedLocations.ToDictionary(pair => pair.Key.Id,
-                pair => new Pair<EvaluationLocation, ProfiledLocation>(pair.Key, pair.Value));
+                pair => new KeyValuePair<EvaluationLocation, ProfiledLocation>(pair.Key, pair.Value));
 
             // We want to keep all evaluation pass entries plus the big enough regular entries
             foreach (var prunedPair in aggregatedLocations.Where(pair =>
@@ -237,7 +237,7 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Finds the first ancestor of parentId (which could be itself) that is either an evaluation pass location or a big enough profiled data.
         /// </summary>
-        private static long? FindBigEnoughParentId(IDictionary<long, Pair<EvaluationLocation, ProfiledLocation>> idTable,
+        private static long? FindBigEnoughParentId(IDictionary<long, KeyValuePair<EvaluationLocation, ProfiledLocation>> idTable,
             long? parentId)
         {
             // The parent id is null, which means the item was pointing to an evaluation pass item. So we keep it as is.
