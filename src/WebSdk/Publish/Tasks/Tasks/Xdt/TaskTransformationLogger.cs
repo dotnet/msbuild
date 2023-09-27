@@ -37,7 +37,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Xdt
             {
                 if (indentString == null)
                 {
-                    indentString = String.Empty;
+                    indentString = string.Empty;
                     for (int i = 0; i < indentLevel; i++)
                     {
                         indentString += indentStringPiece;
@@ -86,7 +86,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Xdt
                     break;
             }
 
-            loggingHelper.LogMessage(importance, String.Concat(IndentString, message), messageArgs);
+            loggingHelper.LogMessage(importance, string.Concat(IndentString, message), messageArgs);
         }
 
         void IXmlTransformationLogger.LogWarning(string message, params object[] messageArgs)
@@ -161,7 +161,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Xdt
                 {
                     sb.AppendFormat("{0} : {1}", exIterator.GetType().Name, exIterator.Message);
                     sb.AppendLine();
-                    if (!String.IsNullOrEmpty(exIterator.StackTrace))
+                    if (!string.IsNullOrEmpty(exIterator.StackTrace))
                     {
                         sb.Append(exIterator.StackTrace);
                     }

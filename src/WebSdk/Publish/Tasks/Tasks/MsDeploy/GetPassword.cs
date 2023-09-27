@@ -33,7 +33,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             return GetClearTextPassword(encryptedData);
         }
 
-        public static string GetClearTextPassword(Byte[] encryptedData)
+        public static string GetClearTextPassword(byte[] encryptedData)
         {
             if (encryptedData == null)
             {
@@ -44,7 +44,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             try
             {
 #pragma warning disable CA1416 // This functionality is only expected to work in Windows.
-                Byte[] uncrypted = System.Security.Cryptography.ProtectedData.Unprotect(encryptedData, null, System.Security.Cryptography.DataProtectionScope.CurrentUser);
+                byte[] uncrypted = System.Security.Cryptography.ProtectedData.Unprotect(encryptedData, null, System.Security.Cryptography.DataProtectionScope.CurrentUser);
 #pragma warning restore CA1416 // This functionality is only expected to work in Windows.
                 plainPWD = Encoding.Unicode.GetString(uncrypted);
             }

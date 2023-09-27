@@ -94,7 +94,7 @@ namespace Microsoft.NET.Publish.Tests
                 targetFramework: TargetFramework,
                 runtimeIdentifier: runtimeIdentifier).FullName;
             byte[] fileContent = File.ReadAllBytes(Path.Combine(outputDirectory, TestProjectName + ".exe"));
-            UInt32 peHeaderOffset = BitConverter.ToUInt32(fileContent, PEHeaderPointerOffset);
+            uint peHeaderOffset = BitConverter.ToUInt32(fileContent, PEHeaderPointerOffset);
             BitConverter
                 .ToUInt16(fileContent, (int)(peHeaderOffset + SubsystemOffset))
                 .Should()

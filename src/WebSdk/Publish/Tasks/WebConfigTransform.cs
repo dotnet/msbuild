@@ -117,7 +117,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
                 // if the app path is already there in the web.config, don't do anything.
                 if (string.Equals(appPath, (string)argumentsAttribute, StringComparison.OrdinalIgnoreCase))
                 {
-                    appPath = String.Empty;
+                    appPath = string.Empty;
                 }
                 attributes.Insert(processPathIndex + 1,
                     new XAttribute("arguments", (appPath + " " + (string)argumentsAttribute).Trim()));

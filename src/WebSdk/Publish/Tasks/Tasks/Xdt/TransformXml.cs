@@ -19,7 +19,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Xdt
         private bool stackTrace = false;
 
         [Required]
-        public String Source
+        public string Source
         {
             get
             {
@@ -42,7 +42,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Xdt
 
 
         [Required]
-        public String Transform
+        public string Transform
         {
             get
             {
@@ -72,7 +72,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Xdt
 
 
         [Required]
-        public String Destination
+        public string Destination
         {
             get
             {
