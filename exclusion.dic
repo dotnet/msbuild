@@ -8,6 +8,8 @@ nupkg
 nuspec
 sdk
 sdks
+tfm
+tfms
 url
 urls
 xamarin

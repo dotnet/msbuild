@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
     public class ApiCompatRunner : IApiCompatRunner
     {
         private readonly HashSet<ApiCompatRunnerWorkItem> _workItems = new();
-        private readonly ISuppressableLog _log;
+        private readonly ISuppressibleLog _log;
         private readonly ISuppressionEngine _suppressionEngine;
         private readonly IApiComparerFactory _apiComparerFactory;
         private readonly IAssemblySymbolLoaderFactory _assemblySymbolLoaderFactory;
@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
         /// <inheritdoc />
         public IReadOnlyCollection<ApiCompatRunnerWorkItem> WorkItems => _workItems;
 
-        public ApiCompatRunner(ISuppressableLog log,
+        public ApiCompatRunner(ISuppressibleLog log,
             ISuppressionEngine suppressionEngine,
             IApiComparerFactory apiComparerFactory,
             IAssemblySymbolLoaderFactory assemblySymbolLoaderFactory)

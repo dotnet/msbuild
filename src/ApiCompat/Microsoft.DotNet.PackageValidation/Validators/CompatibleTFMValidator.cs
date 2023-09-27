@@ -15,10 +15,10 @@ namespace Microsoft.DotNet.PackageValidation.Validators
     public class CompatibleTfmValidator : IPackageValidator
     {
         private static readonly Dictionary<NuGetFramework, HashSet<NuGetFramework>> s_packageTfmMapping = InitializeTfmMappings();
-        private readonly ISuppressableLog _log;
+        private readonly ISuppressibleLog _log;
         private readonly IApiCompatRunner _apiCompatRunner;
 
-        public CompatibleTfmValidator(ISuppressableLog log,
+        public CompatibleTfmValidator(ISuppressibleLog log,
             IApiCompatRunner apiCompatRunner)
         {
             _log = log;

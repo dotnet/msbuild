@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.ApiCompat.Task
     /// <summary>
     /// Class that can log Suppressions in an MSBuild task, by implementing MSBuildLog and ISuppressibleLog.
     /// </summary>
-    internal sealed class SuppressibleMSBuildLog : MSBuildLog, ISuppressableLog
+    internal sealed class SuppressibleMSBuildLog : MSBuildLog, ISuppressibleLog
     {
         private readonly ISuppressionEngine _suppressionEngine;
 

@@ -10,11 +10,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     /// </summary>
     public class RuleFactory : IRuleFactory
     {
-        private readonly ISuppressableLog _log;
+        private readonly ISuppressibleLog _log;
         private readonly bool _enableRuleAttributesMustMatch;
         private readonly bool _enableRuleCannotChangeParameterName;
 
-        public RuleFactory(ISuppressableLog log,
+        public RuleFactory(ISuppressibleLog log,
             bool enableRuleAttributesMustMatch = false,
             bool enableRuleCannotChangeParameterName = false)
         {

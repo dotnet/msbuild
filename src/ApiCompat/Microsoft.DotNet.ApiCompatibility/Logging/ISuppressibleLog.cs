@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
     /// <summary>
     /// Interface to define a logging abstraction for APICompat suppressions shared between Console and MSBuild tasks.
     /// </summary>
-    public interface ISuppressableLog : ILog
+    public interface ISuppressibleLog : ILog
     {
         /// <summary>
         /// Reports whether the logger emitted an error suppression.

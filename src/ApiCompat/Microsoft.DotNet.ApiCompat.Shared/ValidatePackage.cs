@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.ApiCompat
 {
     internal static class ValidatePackage
     {
-        public static void Run(Func<ISuppressionEngine, ISuppressableLog> logFactory,
+        public static void Run(Func<ISuppressionEngine, ISuppressibleLog> logFactory,
             bool generateSuppressionFile,
             bool preserveUnnecessarySuppressions,
             bool permitUnnecessarySuppressions,
@@ -51,13 +51,13 @@ namespace Microsoft.DotNet.ApiCompat
             Package package = Package.Create(packagePath, packageAssemblyReferences);
 
             // Invoke all validators and pass the specific validation options in. Don't execute work items, just enqueue them.
-            CompatibleTfmValidator tfmValidator = new(serviceProvider.SuppressableLog, serviceProvider.ApiCompatRunner);
+            CompatibleTfmValidator tfmValidator = new(serviceProvider.SuppressibleLog, serviceProvider.ApiCompatRunner);
             tfmValidator.Validate(new PackageValidatorOption(package,
                 enableStrictModeForCompatibleTfms,
                 enqueueApiCompatWorkItems: runApiCompat,
                 executeApiCompatWorkItems: false));
 
-            CompatibleFrameworkInPackageValidator compatibleFrameworkInPackageValidator = new(serviceProvider.SuppressableLog, serviceProvider.ApiCompatRunner);
+            CompatibleFrameworkInPackageValidator compatibleFrameworkInPackageValidator = new(serviceProvider.SuppressibleLog, serviceProvider.ApiCompatRunner);
             compatibleFrameworkInPackageValidator.Validate(new PackageValidatorOption(package,
                 enableStrictModeForCompatibleFrameworksInPackage,
                 enqueueApiCompatWorkItems: runApiCompat,
@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.ApiCompat
 
             if (!string.IsNullOrEmpty(baselinePackagePath))
             {
-                BaselinePackageValidator baselineValidator = new(serviceProvider.SuppressableLog, serviceProvider.ApiCompatRunner);
+                BaselinePackageValidator baselineValidator = new(serviceProvider.SuppressibleLog, serviceProvider.ApiCompatRunner);
                 baselineValidator.Validate(new PackageValidatorOption(package,
                     enableStrictMode: enableStrictModeForBaselineValidation,
                     enqueueApiCompatWorkItems: runApiCompat,
@@ -78,20 +78,20 @@ namespace Microsoft.DotNet.ApiCompat
                 // Execute the work items that were enqueued.
                 serviceProvider.ApiCompatRunner.ExecuteWorkItems();
 
-                SuppressionFileHelper.LogApiCompatSuccessOrFailure(generateSuppressionFile, serviceProvider.SuppressableLog);
+                SuppressionFileHelper.LogApiCompatSuccessOrFailure(generateSuppressionFile, serviceProvider.SuppressibleLog);
             }
 
             if (generateSuppressionFile)
             {
                 SuppressionFileHelper.GenerateSuppressionFile(serviceProvider.SuppressionEngine,
-                    serviceProvider.SuppressableLog,
+                    serviceProvider.SuppressibleLog,
                     preserveUnnecessarySuppressions,
                     suppressionFiles,
                     suppressionOutputFile);
             }
             else if (!permitUnnecessarySuppressions)
             {
-                SuppressionFileHelper.ValidateUnnecessarySuppressions(serviceProvider.SuppressionEngine, serviceProvider.SuppressableLog);
+                SuppressionFileHelper.ValidateUnnecessarySuppressions(serviceProvider.SuppressionEngine, serviceProvider.SuppressibleLog);
             }
         }
     }
