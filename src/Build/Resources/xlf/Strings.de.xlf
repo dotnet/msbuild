@@ -57,7 +57,7 @@
       </trans-unit>
       <trans-unit id="CannotCopyFromElementOfThatType">
         <source>MSB4277: Cannot copy from object of that type.</source>
-        <target state="new">MSB4277: Cannot copy from object of that type.</target>
+        <target state="translated">MSB4277: Aus einem Objekt dieses Typs kann nicht kopiert werden.</target>
         <note>{StrBegin="MSB4277: "}</note>
       </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
@@ -141,7 +141,7 @@
       </trans-unit>
       <trans-unit id="General.TwoVectorsMustHaveSameLength">
         <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
-        <target state="new">MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</target>
+        <target state="translated">MSB3094: "{2}" verweist auf {0} Element(e), und "{3}" verweist auf {1} Element(e). Die Anzahl von Elementen muss identisch sein.</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
@@ -266,7 +266,7 @@
       </trans-unit>
       <trans-unit id="ProjectCacheHandleBuildResultFailed">
         <source>MSB4269: The project cache failed while handling a build result for the following project: {0}.</source>
-        <target state="new">MSB4269: The project cache failed while handling a build result for the following project: {0}.</target>
+        <target state="translated">MSB4269: Fehler beim Verarbeiten eines Buildergebnisses für das folgende Projekt im Projektcache: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheHitWithDefaultTargets">
@@ -377,7 +377,7 @@
       </trans-unit>
       <trans-unit id="ReportFileAccessesX64Only">
         <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
-        <target state="new">Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</target>
+        <target state="translated">Das Melden von Dateizugriffen wird derzeit nur mit der x64-Variante von MSBuild unterstützt.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">

@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="BuildFailedWithPropertiesItemsOrTargetResultsRequested">
         <source>Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</source>
-        <target state="new">Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</target>
+        <target state="translated">Derleme başarısız oldu. Özellikler, Öğeler ve Hedef sonuçları alınamıyor. Yukarıda stderr'de ayrıntılara bakın.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -128,7 +128,7 @@
       </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
-        <target state="new">MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</target>
+        <target state="translated">MSBUILD : error MSB1065: Terminal günlükçüsü değeri geçerli değil. Değer şunlardan biri olmalıdır: 'otomatik', 'doğru' veya 'yanlış'. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -138,7 +138,7 @@
       </trans-unit>
       <trans-unit id="InvalidReportFileAccessesValue">
         <source>MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1063: Dosya erişimleri değerinin geçerli olmadığını bildirir. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1063: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -566,13 +566,13 @@
         <target state="translated">  -logger:&lt;günlükçü&gt;   MSBuild'deki olayları günlüğe almak için bu günlükçüyü kullanın. Birden fazla
                      günlükçü belirtmek için her günlükçüyü ayrı ayrı belirtin.
                      &lt;günlükçü&gt; söz dizimi şöyledir:
-                       [&lt;sınıf&gt;,]&lt;derleme&gt;[,&lt;seçenekler&gt;][;&lt;parametreler&gt;]
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
                      &lt;günlükçü sınıfı &gt; söz dizimi şöyledir:
                        [&lt;kısmi veya tam ad alanı &gt;.]&lt;günlükçü sınıfı adı&gt;
                      &lt;günlükçü derlemesi&gt; söz dizimi şöyledir:
-                       {&lt;derleme adı&gt;[,&lt;strong name&gt;] | &lt;derleme dosyası&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Günlükçü seçenekleri, MSBuild'in günlükçüyü oluşturma biçimini belirtir.
-                     &lt;günlükçü parametreleri &gt; isteğe bağlıdır ve tam olarak 
+                     &lt;günlükçü parametreleri &gt; isteğe bağlıdır ve tam olarak
                      yazdığınız şekliyle günlükçüye geçirilir. (Kısa biçim: -l)
                      Örnekler:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
@@ -848,11 +848,11 @@
                      günlükçü belirtmek için her günlükçüyü ayrı ayrı belirtin.
                      (Kısa biçim -dl)
                      &lt;günlükçü&gt; söz dizimi şöyledir:
-                       [&lt;sınıf&gt;,]&lt;derleme&gt;[,&lt;seçenekler&gt;][;&lt;parametreler&gt;]
+                       [&lt;sınıf&gt;,]&lt;assembly&gt;[,&lt;seçenekler&gt;][;&lt;parametreler&gt;]
                      &lt;günlükçü sınıfı&gt; söz dizimi şöyledir:
                        [&lt;kısmi veya tam ad alanı&gt;.]&lt;günlükçü sınıfı adı&gt;
                      &lt;günlükçü derlemesi&gt; söz dizimi şöyledir:
-                       {&lt;derleme adı&gt;[,&lt;strong name&gt;] | &lt;derleme dosyası&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Günlükçü seçenekleri, MSBuild'in günlükçüyü oluşturma biçimini belirtir.
                      &lt;günlükçü parametreleri&gt; isteğe bağlıdır ve tam olarak
                      yazdığınız şekliyle günlükçüye geçirilir. (Kısa biçim: -l)
@@ -1316,7 +1316,7 @@
       </trans-unit>
       <trans-unit id="MissingGetItemError">
         <source>MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</source>
-        <target state="new">MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</target>
+        <target state="translated">MSBUILD : error MSB1014: getItem anahtarı için bir öğe adı sağlanması gerekiyor.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1014: "}UE: This happens if the user does something like "msbuild.exe -getItem". The user must pass in an actual item name
       following the switch, as in "msbuild.exe -getItem:blah".
@@ -1325,7 +1325,7 @@
       </trans-unit>
       <trans-unit id="MissingGetPropertyError">
         <source>MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</source>
-        <target state="new">MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</target>
+        <target state="translated">MSBUILD : error MSB1010: getProperty anahtarı için bir özellik adı belirtilmelidir.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1010: "}UE: This happens if the user does something like "msbuild.exe -getProperty". The user must pass in an actual property name
       following the switch, as in "msbuild.exe -getProperty:blah".
@@ -1334,7 +1334,7 @@
       </trans-unit>
       <trans-unit id="MissingGetTargetResultError">
         <source>MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</source>
-        <target state="new">MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</target>
+        <target state="translated">MSBUILD : error MSB1017: getTargetResult anahtarı için bir hedef adı sağlanması gerekiyor.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1017: "}UE: This happens if the user does something like "msbuild.exe -getTargetResult". The user must pass in an actual target name
       following the switch, as in "msbuild.exe -getTargetResult:blah".
@@ -1442,7 +1442,7 @@
       </trans-unit>
       <trans-unit id="NameInvalid">
         <source>MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</source>
-        <target state="new">MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</target>
+        <target state="translated">MSBUILD : error MSB5016: "{0}" adı "{1}" geçersiz karakterini içeriyor.</target>
         <note>
       {StrBegin="MSBUILD : error MSB5016: "}
     </note>
@@ -1621,7 +1621,7 @@
       </trans-unit>
       <trans-unit id="SolutionBuildInvalidForCommandLineEvaluation">
         <source>MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</source>
-        <target state="new">MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</target>
+        <target state="translated">MSBUILD : error MSB1063: Çözüm dosyaları veya çözüm filtresi dosyaları oluşturulurken özelliklere veya öğelere erişilemiyor. Bu özellik yalnızca tek tek projeler oluşturulurken kullanılabilir.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1063: "}UE: This happens if the user passes in a solution file when trying to access individual properties or items. The user must pass in a project file.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
@@ -1643,17 +1643,17 @@
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
-        <target state="new">Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</target>
+        <target state="translated">Derleme StdOut akışına doğrudan erişim isteyen bir işlem (ör. 'dotnet test') bağlamında çalıştığı için Terminal Günlükçüsü kullanılmadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedNotSupported">
         <source>Terminal Logger was not used because the output is not supported.</source>
-        <target state="new">Terminal Logger was not used because the output is not supported.</target>
+        <target state="translated">Çıkış desteklenmediğinden Terminal Günlükçüsü kullanılmadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedRedirected">
         <source>Terminal Logger was not used because the output is being redirected to a file.</source>
-        <target state="new">Terminal Logger was not used because the output is being redirected to a file.</target>
+        <target state="translated">Çıkış bir dosyaya yeniden yönlendirildiği için Terminal Günlükçüsü kullanılmadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
