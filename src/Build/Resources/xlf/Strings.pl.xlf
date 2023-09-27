@@ -264,6 +264,11 @@
         <target state="translated">MSB4273: pamięć podręczna projektu zgłosiła nieobsługiwany wyjątek z metody {0}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheHandleBuildResultFailed">
+        <source>MSB4269: The project cache failed while handling a build result for the following project: {0}.</source>
+        <target state="translated">MSB4269: pamięć podręczna projektu nie powiodła się podczas obsługi wyniku kompilacji dla następującego projektu: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectCacheHitWithDefaultTargets">
         <source>Project cache hit for "{0}" (default targets).</source>
         <target state="translated">Trafienie pamięci podręcznej projektu dla „{0}” (domyślne elementy docelowe).</target>
@@ -368,6 +373,11 @@
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
         <source>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</source>
         <target state="translated">MSB4274: wyłączenie węzła InProc prowadzi do obniżenia wydajności, gdy używane są wtyczki pamięci podręcznej projektu, które emitują żądania kompilowania serwera proxy.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReportFileAccessesX64Only">
+        <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
+        <target state="translated">Raportowanie dostępu do plików jest obecnie obsługiwane tylko przy użyciu wersji x64 programu MSBuild.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">

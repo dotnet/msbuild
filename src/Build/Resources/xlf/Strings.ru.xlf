@@ -264,6 +264,11 @@
         <target state="translated">MSB4273: в кэше проектов возникло необработанное исключение из метода {0}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheHandleBuildResultFailed">
+        <source>MSB4269: The project cache failed while handling a build result for the following project: {0}.</source>
+        <target state="translated">MSB4269: сбой кэша проекта при обработке результата сборки для следующего проекта: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectCacheHitWithDefaultTargets">
         <source>Project cache hit for "{0}" (default targets).</source>
         <target state="translated">Попадание в кэше проекта для "{0}" (целевые объекты по умолчанию).</target>
@@ -368,6 +373,11 @@
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
         <source>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</source>
         <target state="translated">MSB4274: Отключение внутрипроцессного узла приводит к замедлению при использовании плагинов кэша проекта, которые создают запросы на сборку прокси-сервера.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReportFileAccessesX64Only">
+        <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
+        <target state="translated">Доступ к файлам отчетов сейчас поддерживается только при использовании 64-разрядного варианта приложения MSBuild.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">

@@ -284,6 +284,20 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Retrieves the request executing on a node.
+        /// </summary>
+        public BuildRequest GetExecutingRequestByNode(int nodeId)
+        {
+            if (!_schedulingData.IsNodeWorking(nodeId))
+            {
+                return null;
+            }
+
+            SchedulableRequest request = _schedulingData.GetExecutingRequestByNode(nodeId);
+            return request.BuildRequest;
+        }
+
+        /// <summary>
         /// Reports that the specified request has become blocked and cannot proceed.
         /// </summary>
         public IEnumerable<ScheduleResponse> ReportRequestBlocked(int nodeId, BuildRequestBlocker blocker)
