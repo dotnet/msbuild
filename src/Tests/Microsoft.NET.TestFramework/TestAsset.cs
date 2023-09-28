@@ -49,7 +49,7 @@ namespace Microsoft.NET.TestFramework
         {
             _projectFiles = new List<string>();
 
-            var files = Directory.GetFiles(base.Path, "*.*", SearchOption.AllDirectories);
+            var files = Directory.GetFiles(Path, "*.*", SearchOption.AllDirectories);
 
             foreach (string file in files)
             {

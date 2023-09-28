@@ -129,7 +129,7 @@ namespace Microsoft.NET.Build.Tasks
             public override System.Threading.Tasks.Task LogAsync(ILogMessage message)
             {
                 Log(message);
-                return System.Threading.Tasks.Task.CompletedTask;
+                return Task.CompletedTask;
             }
         }
     }

@@ -46,7 +46,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tasks.MsDeploy
         private void ReadParametersElement(Xml.XmlElement element)
         {
             Debug.Assert(element != null);
-            if (string.Compare(element.Name, "parameters", System.StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Compare(element.Name, "parameters", StringComparison.OrdinalIgnoreCase) == 0)
             {
                 foreach (Xml.XmlNode childNode in element.ChildNodes)
                 {
@@ -66,7 +66,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tasks.MsDeploy
         private void ReadParameterElement(Xml.XmlElement element)
         {
             Debug.Assert(element != null);
-            if (string.Compare(element.Name, "parameter", System.StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Compare(element.Name, "parameter", StringComparison.OrdinalIgnoreCase) == 0)
             {
                 Xml.XmlAttribute nameAttribute = element.Attributes.GetNamedItem("name") as Xml.XmlAttribute;
                 if (nameAttribute != null)
@@ -76,7 +76,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tasks.MsDeploy
                     {
                         string attributeName = attribute.Name.ToLower(System.Globalization.CultureInfo.InvariantCulture);
                         if (string.CompareOrdinal(attributeName, "xmlns") == 0
-                            || attribute.Name.StartsWith("xmlns:", System.StringComparison.Ordinal)
+                            || attribute.Name.StartsWith("xmlns:", StringComparison.Ordinal)
                             || string.CompareOrdinal(attributeName, "name") == 0
                             )
                         {
@@ -122,7 +122,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tasks.MsDeploy
         {
             Debug.Assert(element != null && parentItem != null);
             Utilities.TaskItem taskItem = null;
-            if (string.Compare(element.Name, "parameterEntry", System.StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Compare(element.Name, "parameterEntry", StringComparison.OrdinalIgnoreCase) == 0)
             {
                 taskItem = new Microsoft.Build.Utilities.TaskItem(parentItem);
                 taskItem.RemoveMetadata("OriginalItemSpec");
@@ -135,7 +135,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tasks.MsDeploy
                     }
                 }
             }
-            else if (string.Compare(element.Name, "parameterValidation", System.StringComparison.OrdinalIgnoreCase) == 0)
+            else if (string.Compare(element.Name, "parameterValidation", StringComparison.OrdinalIgnoreCase) == 0)
             {
                 taskItem = new Microsoft.Build.Utilities.TaskItem(parentItem);
                 taskItem.RemoveMetadata("OriginalItemSpec");

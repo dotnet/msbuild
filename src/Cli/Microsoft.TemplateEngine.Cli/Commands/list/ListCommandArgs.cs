@@ -9,7 +9,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         internal ListCommandArgs(BaseListCommand command, ParseResult parseResult) : base(command, parseResult)
         {
-            string? nameCriteria = parseResult.GetValue(ListCommand.NameArgument);
+            string? nameCriteria = parseResult.GetValue(BaseListCommand.NameArgument);
             if (!string.IsNullOrWhiteSpace(nameCriteria))
             {
                 ListNameCriteria = nameCriteria;
@@ -28,7 +28,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 Language = GetFilterValue(FilterOptionDefinition.LanguageFilter);
             }
-            IgnoreConstraints = parseResult.GetValue(ListCommand.IgnoreConstraintsOption);
+            IgnoreConstraints = parseResult.GetValue(BaseListCommand.IgnoreConstraintsOption);
         }
 
         public bool DisplayAllColumns { get; }

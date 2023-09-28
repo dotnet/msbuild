@@ -10,28 +10,28 @@ namespace Microsoft.DotNet.Cli
     {
         public static LoggerVerbosity ToLoggerVerbosity(this VerbosityOptions verbosityOptions)
         {
-            LoggerVerbosity verbosity = Build.Framework.LoggerVerbosity.Normal;
+            LoggerVerbosity verbosity = LoggerVerbosity.Normal;
             switch (verbosityOptions)
             {
                 case VerbosityOptions.d:
                 case VerbosityOptions.detailed:
-                    verbosity = Build.Framework.LoggerVerbosity.Detailed;
+                    verbosity = LoggerVerbosity.Detailed;
                     break;
                 case VerbosityOptions.diag:
                 case VerbosityOptions.diagnostic:
-                    verbosity = Build.Framework.LoggerVerbosity.Diagnostic;
+                    verbosity = LoggerVerbosity.Diagnostic;
                     break;
                 case VerbosityOptions.m:
                 case VerbosityOptions.minimal:
-                    verbosity = Build.Framework.LoggerVerbosity.Minimal;
+                    verbosity = LoggerVerbosity.Minimal;
                     break;
                 case VerbosityOptions.n:
                 case VerbosityOptions.normal:
-                    verbosity = Build.Framework.LoggerVerbosity.Normal;
+                    verbosity = LoggerVerbosity.Normal;
                     break;
                 case VerbosityOptions.q:
                 case VerbosityOptions.quiet:
-                    verbosity = Build.Framework.LoggerVerbosity.Quiet;
+                    verbosity = LoggerVerbosity.Quiet;
                     break;
             }
             return verbosity;

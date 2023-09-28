@@ -146,9 +146,9 @@ namespace Microsoft.DotNet.Cli
             }.SetForwardingFunction(ResolveArchOptionToRuntimeIdentifier);
 
         internal static string ArchOptionValue(ParseResult parseResult) =>
-            string.IsNullOrEmpty(parseResult.GetValue(CommonOptions.ArchitectureOption)) ?
-                parseResult.GetValue(CommonOptions.LongFormArchitectureOption) :
-                parseResult.GetValue(CommonOptions.ArchitectureOption);
+            string.IsNullOrEmpty(parseResult.GetValue(ArchitectureOption)) ?
+                parseResult.GetValue(LongFormArchitectureOption) :
+                parseResult.GetValue(ArchitectureOption);
 
         public static CliOption<string> OperatingSystemOption =
             new ForwardedOption<string>("--os")
@@ -230,7 +230,7 @@ namespace Microsoft.DotNet.Cli
         public static string GetCurrentRuntimeId()
         {
             // Get the dotnet directory, while ignoring custom msbuild resolvers
-            string dotnetRootPath = Microsoft.DotNet.NativeWrapper.EnvironmentProvider.GetDotnetExeDirectory(key =>
+            string dotnetRootPath = NativeWrapper.EnvironmentProvider.GetDotnetExeDirectory(key =>
                 key.Equals("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", StringComparison.InvariantCultureIgnoreCase)
                     ? null
                     : Environment.GetEnvironmentVariable(key));

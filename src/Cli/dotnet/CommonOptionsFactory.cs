@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Cli
         /// </summary>
         public static CliOption<bool> CreateDiagnosticsOption(bool recursive) => new("--diagnostics", "-d")
         {
-            Description = Microsoft.DotNet.Tools.Help.LocalizableStrings.SDKDiagnosticsCommandDefinition,
+            Description = Tools.Help.LocalizableStrings.SDKDiagnosticsCommandDefinition,
             Recursive = recursive
         };
     }

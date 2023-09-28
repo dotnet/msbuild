@@ -195,12 +195,12 @@ namespace Microsoft.NET.TestFramework
 
                 if (IsSdkProject)
                 {
-                    string output = System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", platform, configuration, targetFramework, runtimeIdentifier);
+                    string output = Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", platform, configuration, targetFramework, runtimeIdentifier);
                     return output;
                 }
                 else
                 {
-                    string output = System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", platform, configuration);
+                    string output = Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", platform, configuration);
                     return output;
                 }
             }
@@ -240,7 +240,7 @@ namespace Microsoft.NET.TestFramework
                 runtimeIdentifier ??= RuntimeIdentifier ?? string.Empty;
                 platform ??= string.Empty;
 
-                string output = System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", platform, configuration, targetFramework, runtimeIdentifier, "publish");
+                string output = Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", platform, configuration, targetFramework, runtimeIdentifier, "publish");
                 return output;
             }
         }
@@ -278,7 +278,7 @@ namespace Microsoft.NET.TestFramework
             configuration = configuration ?? string.Empty;
             runtimeIdentifier = runtimeIdentifier ?? RuntimeIdentifier ?? string.Empty;
 
-            string output = System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "obj", configuration, targetFramework, runtimeIdentifier);
+            string output = Path.Combine(Path.GetDirectoryName(ProjectPath), "obj", configuration, targetFramework, runtimeIdentifier);
             return output;
         }
 
@@ -286,11 +286,11 @@ namespace Microsoft.NET.TestFramework
         {
             if (UseArtifactsOutput)
             {
-                return System.IO.Path.Combine(ArtifactsPath, "package", configuration.ToLowerInvariant());
+                return Path.Combine(ArtifactsPath, "package", configuration.ToLowerInvariant());
             }
             else
             {
-                return System.IO.Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", configuration);
+                return Path.Combine(Path.GetDirectoryName(ProjectPath), "bin", configuration);
             }
         }
     }

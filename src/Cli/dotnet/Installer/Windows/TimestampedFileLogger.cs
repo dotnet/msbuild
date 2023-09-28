@@ -132,7 +132,7 @@ namespace Microsoft.DotNet.Installer.Windows
                 {
                     // We'll block waiting for messages to arrive before sending them to the queue. We don't call LogMessage
                     // directly since the external logger should have stamped the message with the process ID.
-                    string msg = UTF8Encoding.UTF8.GetString(dispatcher.ReadMessage());
+                    string msg = Encoding.UTF8.GetString(dispatcher.ReadMessage());
 
                     if (!string.IsNullOrWhiteSpace(msg))
                     {

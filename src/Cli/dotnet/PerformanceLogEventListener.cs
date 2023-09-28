@@ -130,7 +130,7 @@ namespace Microsoft.DotNet.Cli.Utils
                     s_builder.Clear();
                 }
 
-                s_builder.Append($"[{DateTime.UtcNow.ToString("o")}] Event={eventData.EventSource.Name}/{eventData.EventName} ProcessID={Environment.ProcessId} ThreadID={System.Threading.Thread.CurrentThread.ManagedThreadId}\t ");
+                s_builder.Append($"[{DateTime.UtcNow.ToString("o")}] Event={eventData.EventSource.Name}/{eventData.EventName} ProcessID={Environment.ProcessId} ThreadID={Thread.CurrentThread.ManagedThreadId}\t ");
                 for (int i = 0; i < eventData.PayloadNames.Count; i++)
                 {
                     s_builder.Append($"{eventData.PayloadNames[i]}=\"{eventData.Payload[i]}\" ");

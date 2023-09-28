@@ -443,7 +443,7 @@ Author: Me
             HelpContext helpContext = new(new HelpBuilder(maxWidth: 50), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand1, templateCommand2 }, helpContext);
-            return Verifier.Verify(sw.ToString());
+            return Verify(sw.ToString());
         }
 
         [Fact]

@@ -292,7 +292,7 @@ namespace Microsoft.DotNet.Cli
 
             Reporter.Verbose.WriteLine(
                 string.Format(
-                    Utils.LocalizableStrings.DotnetCliHomeUsed,
+                    LocalizableStrings.DotnetCliHomeUsed,
                     home,
                     CliFolderPathCalculator.DotnetHomeVariableName));
         }

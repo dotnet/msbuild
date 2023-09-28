@@ -31,7 +31,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         internal string GenerateAssetManifest(Stream stream)
         {
             var assets = new AssetsManifestFileEntry[Assets.Length];
-            System.Threading.Tasks.Parallel.For(0, assets.Length, i =>
+            Parallel.For(0, assets.Length, i =>
             {
                 var item = Assets[i];
                 var hash = item.GetMetadata("FileHash");

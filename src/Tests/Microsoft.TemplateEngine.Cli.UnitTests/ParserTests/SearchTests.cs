@@ -250,7 +250,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             };
 
             ParseResult parseResult = rootCommand.Parse("dotnet new search template");
-            Assert.Equal("dotnet new search my-template", Example.For<NewCommand>(parseResult).WithSubcommand<SearchCommand>().WithArgument(SearchCommand.NameArgument, "my-template"));
+            Assert.Equal("dotnet new search my-template", Example.For<NewCommand>(parseResult).WithSubcommand<SearchCommand>().WithArgument(BaseSearchCommand.NameArgument, "my-template"));
         }
 
         [Fact]
@@ -264,7 +264,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             };
 
             ParseResult parseResult = rootCommand.Parse("dotnet new search template");
-            Assert.Equal("dotnet new search [<template-name>]", Example.For<NewCommand>(parseResult).WithSubcommand<SearchCommand>().WithArgument(SearchCommand.NameArgument));
+            Assert.Equal("dotnet new search [<template-name>]", Example.For<NewCommand>(parseResult).WithSubcommand<SearchCommand>().WithArgument(BaseSearchCommand.NameArgument));
         }
 
         [Fact]
@@ -278,7 +278,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             };
 
             ParseResult parseResult = rootCommand.Parse("dotnet new search template");
-            Assert.Equal("dotnet new search [<template-name>] --author Microsoft", Example.For<NewCommand>(parseResult).WithSubcommand<SearchCommand>().WithArgument(SearchCommand.NameArgument).WithOption(SharedOptionsFactory.CreateAuthorOption(), "Microsoft"));
+            Assert.Equal("dotnet new search [<template-name>] --author Microsoft", Example.For<NewCommand>(parseResult).WithSubcommand<SearchCommand>().WithArgument(BaseSearchCommand.NameArgument).WithOption(SharedOptionsFactory.CreateAuthorOption(), "Microsoft"));
         }
     }
 }

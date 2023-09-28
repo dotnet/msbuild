@@ -96,7 +96,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 baseOptions.EncryptPassword = vSMSDeployObject.EncryptPassword;
 
             if (!string.IsNullOrEmpty(vSMSDeployObject.WebServerManifest))
-                baseOptions.WebServerConfiguration.WebServerManifest = System.IO.Path.GetFileName(vSMSDeployObject.WebServerManifest);
+                baseOptions.WebServerConfiguration.WebServerManifest = Path.GetFileName(vSMSDeployObject.WebServerManifest);
             if (!string.IsNullOrEmpty(vSMSDeployObject.WebServerDirectory))
                 baseOptions.WebServerConfiguration.WebServerDirectory = vSMSDeployObject.WebServerDirectory;
 
@@ -156,7 +156,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         internal static bool LinkContainedInTheCollection(string link, Generic.List<string> linkCollection)
         {
             foreach (string l in linkCollection)
-                if (string.Compare(l, link, System.StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(l, link, StringComparison.OrdinalIgnoreCase) == 0)
                     return true;
             return false;
         }
@@ -189,7 +189,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 foreach (string linkExtObj in linkExtensions)
                 {
 
-                    RegularExpressions.Regex match = new RegularExpressions.Regex(linkExtObj, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                    RegularExpressions.Regex match = new RegularExpressions.Regex(linkExtObj, RegularExpressions.RegexOptions.IgnoreCase);
                     Generic.List<object> matchedList = new Generic.List<object>();
 
                     foreach (/*Deployment.DeploymentLinkExtension*/dynamic linkExtension in baseOptions.LinkExtensions)
@@ -230,18 +230,18 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             m_root = string.IsNullOrEmpty(root) ? string.Empty : root;
 
             // our code path should only take a well known provider
-            Diagnostics.Debug.Assert(MsDeploy.Utility.IsDeploymentWellKnownProvider(provider));
+            Diagnostics.Debug.Assert(Utility.IsDeploymentWellKnownProvider(provider));
             m_provider = provider;
 
             // maybe we should show the "secure data to display"
             // for now just supress it.
 #if NET472
-            if (0 == string.Compare(m_provider, MSWebDeploymentAssembly.DynamicAssembly.GetEnumValue(MSDeploy.TypeName.DeploymentWellKnownProvider, MSDeploy.Provider.DBFullSql).ToString(), System.StringComparison.InvariantCultureIgnoreCase)
-                || 0 == string.Compare(m_provider, MSDeploy.Provider.DbDacFx , System.StringComparison.InvariantCultureIgnoreCase))
+            if (0 == string.Compare(m_provider, MSWebDeploymentAssembly.DynamicAssembly.GetEnumValue(MSDeploy.TypeName.DeploymentWellKnownProvider, MSDeploy.Provider.DBFullSql).ToString(), StringComparison.InvariantCultureIgnoreCase)
+                || 0 == string.Compare(m_provider, MSDeploy.Provider.DbDacFx , StringComparison.InvariantCultureIgnoreCase))
                 m_fNoDisplayRoot = true;
 #else
             if (0 == string.Compare(m_provider, MSWebDeploymentAssembly.DynamicAssembly.GetEnumValue(MSDeploy.TypeName.DeploymentWellKnownProvider, MSDeploy.Provider.DBFullSql).ToString())
-                || 0 == string.Compare(m_provider, MSDeploy.Provider.DbDacFx, System.StringComparison.OrdinalIgnoreCase))
+                || 0 == string.Compare(m_provider, MSDeploy.Provider.DbDacFx, StringComparison.OrdinalIgnoreCase))
                 m_fNoDisplayRoot = true;
 #endif
         }
@@ -256,22 +256,22 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 m_root = string.Empty;
 
             // our code path should only take a well known provider
-            Diagnostics.Debug.Assert(MsDeploy.Utility.IsDeploymentWellKnownProvider(m_provider));
+            Diagnostics.Debug.Assert(Utility.IsDeploymentWellKnownProvider(m_provider));
 
             // maybe we should show the "secure data to display"
             // for now just supress it.
-            if (0 == string.Compare(m_provider, MSWebDeploymentAssembly.DynamicAssembly.GetEnumValue(MSDeploy.TypeName.DeploymentWellKnownProvider, MSDeploy.Provider.DBFullSql).ToString(), System.StringComparison.OrdinalIgnoreCase))
+            if (0 == string.Compare(m_provider, MSWebDeploymentAssembly.DynamicAssembly.GetEnumValue(MSDeploy.TypeName.DeploymentWellKnownProvider, MSDeploy.Provider.DBFullSql).ToString(), StringComparison.OrdinalIgnoreCase))
                 m_fNoDisplayRoot = true;
 
             m_NameValueDictionary.Clear();
             foreach (string name in taskItem.MetadataNames)
             {
-                if (!MsDeploy.Utility.IsInternalMsdeployWellKnownItemMetadata(name))
+                if (!Utility.IsInternalMsdeployWellKnownItemMetadata(name))
                 {
                     string value = taskItem.GetMetadata(name);
                     if (!string.IsNullOrEmpty(value))
                     {
-                        if (MsDeploy.Utility.IsMsDeployWellKnownLocationInfo(name))
+                        if (Utility.IsMsDeployWellKnownLocationInfo(name))
                         {
                             m_NameValueDictionary.Add(name, value);
                         }
@@ -285,7 +285,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 else
                 {
                     MsDeploy.Utility.IISExpressMetadata expressMetadata;
-                    if (System.Enum.TryParse<MsDeploy.Utility.IISExpressMetadata>(name, out expressMetadata))
+                    if (Enum.TryParse<MsDeploy.Utility.IISExpressMetadata>(name, out expressMetadata))
                     {
                         string value = taskItem.GetMetadata(name);
                         if (!string.IsNullOrEmpty(value))
@@ -340,7 +340,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         Generic.IList<MsDeploy.ParameterInfoWithEntry> m_iListParameterWithEntry = new Generic.List<MsDeploy.ParameterInfoWithEntry>();
         Generic.IList<string> m_iListSetParametersFiles = new Generic.List<string>();
 
-        private System.Collections.Generic.Dictionary<string, string> m_NameValueDictionary = new System.Collections.Generic.Dictionary<string, string>(10, System.StringComparer.OrdinalIgnoreCase);
+        private System.Collections.Generic.Dictionary<string, string> m_NameValueDictionary = new System.Collections.Generic.Dictionary<string, string>(10, StringComparer.OrdinalIgnoreCase);
 
         protected /*Deployment.DeploymentBaseOptions*/ dynamic m_deploymentBaseOptions = null;
 
@@ -458,13 +458,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         }
         public bool IncludeAcls
         {
-            get { return System.Convert.ToBoolean(GetDictionaryValue("includeAcls"), System.Globalization.CultureInfo.InvariantCulture); }
+            get { return Convert.ToBoolean(GetDictionaryValue("includeAcls"), System.Globalization.CultureInfo.InvariantCulture); }
             set { SetDictionaryValue("includeAcls", value.ToString()); }
         }
 
         public bool PrefetchPayload
         {
-            get { return System.Convert.ToBoolean(GetDictionaryValue("prefetchPayload"), System.Globalization.CultureInfo.InvariantCulture); }
+            get { return Convert.ToBoolean(GetDictionaryValue("prefetchPayload"), System.Globalization.CultureInfo.InvariantCulture); }
             set { SetDictionaryValue("prefetchPayload", value.ToString()); }
         }
 
@@ -574,22 +574,22 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             /*Deployment.DeploymentProviderOptions*/
             dynamic srcProviderConfig = MSWebDeploymentAssembly.DynamicAssembly.CreateObject("Microsoft.Web.Deployment.DeploymentProviderOptions", new object[]{Provider.ToString()});
             srcProviderConfig.Path = Root;
-            MsDeploy.Utility.AddProviderOptions(srcProviderConfig, ProviderOptions, _host);
+            Utility.AddProviderOptions(srcProviderConfig, ProviderOptions, _host);
 
             using (/*Deployment.DeploymentObject*/ dynamic srcObj =  MSWebDeploymentAssembly.DynamicAssembly.CallStaticMethod("Microsoft.Web.Deployment.DeploymentManager", "CreateObject", new object[]{srcProviderConfig, BaseOptions}))
             {
 
                 //$BUGBUG lmchen, there is only set to source provider?
                 // set up the parameter
-                MsDeploy.Utility.AddSetParametersFilesToObject(srcObj, SetParametersFiles, _host);
-                MsDeploy.Utility.AddSimpleSetParametersToObject(srcObj, Parameters, _host);
-                MsDeploy.Utility.AddSetParametersToObject(srcObj, EntryParameters, _host);
+                Utility.AddSetParametersFilesToObject(srcObj, SetParametersFiles, _host);
+                Utility.AddSimpleSetParametersToObject(srcObj, Parameters, _host);
+                Utility.AddSetParametersToObject(srcObj, EntryParameters, _host);
                 
                 /*Deployment.DeploymentProviderOptions*/ dynamic destProviderConfig = MSWebDeploymentAssembly.DynamicAssembly.CreateObject("Microsoft.Web.Deployment.DeploymentProviderOptions", new object[]{destObject.Provider.ToString()});
                 destProviderConfig.Path = destObject.Root;
 
                 // Setup Destination Provider otpion
-                MsDeploy.Utility.AddProviderOptions(destProviderConfig, destObject.ProviderOptions, _host);
+                Utility.AddProviderOptions(destProviderConfig, destObject.ProviderOptions, _host);
 
                 srcObj.SyncTo(destProviderConfig, destObject.BaseOptions, syncOptions);
             }

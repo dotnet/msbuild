@@ -395,7 +395,7 @@ namespace Microsoft.NET.Build.Tests
             bool contains = false;
             foreach (var attribute in parameterlessAttributes)
             {
-                if (attribute.Equals("RequiresPreviewFeaturesAttribute", System.StringComparison.Ordinal))
+                if (attribute.Equals("RequiresPreviewFeaturesAttribute", StringComparison.Ordinal))
                 {
                     contains = true;
                     break;
@@ -454,7 +454,7 @@ namespace Microsoft.NET.Build.Tests
             bool contains = false;
             foreach (var attribute in parameterlessAttributes)
             {
-                if (attribute.Equals("RequiresPreviewFeaturesAttribute", System.StringComparison.Ordinal))
+                if (attribute.Equals("RequiresPreviewFeaturesAttribute", StringComparison.Ordinal))
                 {
                     contains = true;
                     break;
@@ -508,7 +508,7 @@ namespace Microsoft.NET.Build.Tests
             bool contains = false;
             foreach (var attribute in parameterlessAttributes)
             {
-                if (attribute.Equals("DisableRuntimeMarshallingAttribute", System.StringComparison.Ordinal))
+                if (attribute.Equals("DisableRuntimeMarshallingAttribute", StringComparison.Ordinal))
                 {
                     contains = true;
                     break;

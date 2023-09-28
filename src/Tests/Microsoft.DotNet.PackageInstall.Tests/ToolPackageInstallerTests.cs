@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             Action a = () => installer.InstallPackage(new PackageLocation(), packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion), targetFramework: _testTargetframework);
 
-            a.Should().Throw<ToolPackageException>().WithMessage(Tools.Tool.Install.LocalizableStrings.ToolInstallationRestoreFailed);
+            a.Should().Throw<ToolPackageException>().WithMessage(LocalizableStrings.ToolInstallationRestoreFailed);
 
             reporter.Lines.Count.Should().Be(1);
             reporter.Lines[0].Should().Contain(TestPackageId.ToString());
@@ -460,7 +460,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                 }
             };
 
-            a.Should().Throw<ToolPackageException>().WithMessage(Tools.Tool.Install.LocalizableStrings.ToolInstallationRestoreFailed);
+            a.Should().Throw<ToolPackageException>().WithMessage(LocalizableStrings.ToolInstallationRestoreFailed);
 
             AssertInstallRollBack(fileSystem, store);
         }

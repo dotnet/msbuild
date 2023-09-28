@@ -465,7 +465,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 foreach (string possibleMatch in possibleTemplateMatches)
                 {
                     Example example = useInstantiateCommand
-                        ? Example.For<InstantiateCommand>(instantiateArgs.ParseResult).WithArgument(InstantiateCommand.ShortNameArgument, possibleMatch)
+                        ? Example.For<InstantiateCommand>(instantiateArgs.ParseResult).WithArgument(ShortNameArgument, possibleMatch)
                         : Example.For<NewCommand>(instantiateArgs.ParseResult).WithArgument(NewCommand.ShortNameArgument, possibleMatch);
                     if (helpOption)
                     {
@@ -511,7 +511,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                   Example
                       .For<NewCommand>(instantiateArgs.ParseResult)
                       .WithSubcommand<ListCommand>()
-                      .WithArgument(ListCommand.NameArgument, instantiateArgs.ShortName));
+                      .WithArgument(BaseListCommand.NameArgument, instantiateArgs.ShortName));
             }
             else
             {
@@ -532,7 +532,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     Example
                         .For<NewCommand>(instantiateArgs.ParseResult)
                         .WithSubcommand<SearchCommand>()
-                        .WithArgument(SearchCommand.NameArgument, instantiateArgs.ShortName));
+                        .WithArgument(BaseSearchCommand.NameArgument, instantiateArgs.ShortName));
             }
         }
     }

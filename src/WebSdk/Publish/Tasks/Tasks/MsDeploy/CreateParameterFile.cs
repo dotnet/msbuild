@@ -106,7 +106,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             if (parameters != null)
             {
                 System.Collections.Generic.Dictionary<string, Xml.XmlElement> dictionaryLookup
-                    = new System.Collections.Generic.Dictionary<string, Xml.XmlElement>(parameters.GetLength(0), System.StringComparer.OrdinalIgnoreCase);
+                    = new System.Collections.Generic.Dictionary<string, Xml.XmlElement>(parameters.GetLength(0), StringComparer.OrdinalIgnoreCase);
 
                 // we are on purpose to keep the order without optimistic change the Value/Default base on the non-null optimistic
                 System.Collections.Generic.IList<Framework.ITaskItem> items
@@ -138,11 +138,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
                         string[] parameterIdentities = s_parameterEntryIdentities;
 
-                        if (string.Compare(elementValue, "parameterEntry", System.StringComparison.OrdinalIgnoreCase) == 0)
+                        if (string.Compare(elementValue, "parameterEntry", StringComparison.OrdinalIgnoreCase) == 0)
                         {
                             parameterIdentities = s_parameterEntryIdentities;
                         }
-                        else if (string.Compare(elementValue, "parameterValidation", System.StringComparison.OrdinalIgnoreCase) == 0)
+                        else if (string.Compare(elementValue, "parameterValidation", StringComparison.OrdinalIgnoreCase) == 0)
                         {
                             parameterIdentities = s_parameterValidationIdentities;
                         }
@@ -178,7 +178,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                                 Xml.XmlElement childElement = childNode as Xml.XmlElement;
                                 if (childElement != null)
                                 {
-                                    if (string.Compare(childElement.Name, identityValues[0], System.StringComparison.OrdinalIgnoreCase) == 0)
+                                    if (string.Compare(childElement.Name, identityValues[0], StringComparison.OrdinalIgnoreCase) == 0)
                                     {
                                         fIdentical = true;
                                         for (int i = 1; i < parameterIdentitiesCount; i++)
@@ -224,7 +224,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
 
             // Save the UTF8 and Indented 
-            Utility.SaveDocument(document, outputFileName, System.Text.Encoding.UTF8);
+            Utility.SaveDocument(document, outputFileName, Encoding.UTF8);
         }
 
         /// <summary>
@@ -263,7 +263,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
 
             // Save the UTF8 and Indented 
-            Utility.SaveDocument(document, outputFileName, System.Text.Encoding.UTF8);
+            Utility.SaveDocument(document, outputFileName, Encoding.UTF8);
         }
 
         /// <summary>

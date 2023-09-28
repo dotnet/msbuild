@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Tests
 
         private static string FindDotnetDirInPath()
         {
-            string dotnetExecutable = $"dotnet{Microsoft.DotNet.Cli.Utils.FileNameSuffixes.CurrentPlatform.Exe}";
+            string dotnetExecutable = $"dotnet{Cli.Utils.FileNameSuffixes.CurrentPlatform.Exe}";
             foreach (string path in (Environment.GetEnvironmentVariable("PATH") ?? "").Split(Path.PathSeparator))
             {
                 string dotnetPath = Path.Combine(path, dotnetExecutable);

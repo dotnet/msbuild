@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .Should().Fail()
                 .And.HaveStdErrContaining(
                     string.Format(
-                        Microsoft.DotNet.Tools.Run.LocalizableStrings.RunCommandSpecifiecFileIsNotAValidProject,
+                        Tools.Run.LocalizableStrings.RunCommandSpecifiecFileIsNotAValidProject,
                         slnFullPath));
         }
     }

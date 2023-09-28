@@ -133,10 +133,10 @@ namespace Microsoft.DotNet.Cli
             LogLevel logLevel)
         {
             var builtIns = new List<(Type InterfaceType, IIdentifiedComponent Instance)>();
-            builtIns.AddRange(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Components.AllComponents);
-            builtIns.AddRange(Microsoft.TemplateEngine.Edge.Components.AllComponents);
-            builtIns.AddRange(Microsoft.TemplateEngine.Cli.Components.AllComponents);
-            builtIns.AddRange(Microsoft.TemplateSearch.Common.Components.AllComponents);
+            builtIns.AddRange(TemplateEngine.Orchestrator.RunnableProjects.Components.AllComponents);
+            builtIns.AddRange(TemplateEngine.Edge.Components.AllComponents);
+            builtIns.AddRange(Components.AllComponents);
+            builtIns.AddRange(TemplateSearch.Common.Components.AllComponents);
 
             //post actions
             builtIns.AddRange(new (Type, IIdentifiedComponent)[]
