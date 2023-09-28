@@ -10,4 +10,8 @@
   <!--<Exclusion Type="FileName">ABC.TXT|XYZ.CS</Exclusion>-->
 
   <Exclusion Type="FolderPathFull">.DOTNET</Exclusion>
+  <!-- This file contains entity names including the non-geopolitical captical and spades. Leave them unchanged and skip the file -->
+  <Exclusion Type="FileName">OLDVSPROJECTFILEREADER.CS</Exclusion>
+  <!-- A French word is scannded as English derogatory word. https://devdiv.visualstudio.com/DevDiv/_workitems/edit/1889125  -->
+  <Exclusion Type="FileName">STRINGS.FR.XLF</Exclusion>
 </PoliCheckExclusions>

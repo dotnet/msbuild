@@ -1207,7 +1207,7 @@ namespace Microsoft.Build.Tasks
 
                                         assemblyIdentityAttributes.Add(new XAttribute("name", idealRemappingPartialAssemblyName.Name));
 
-                                        // We use "neutral" for "Invariant Language (Invariant Country)" in assembly names.
+                                        // We use "neutral" for "Invariant Language (Invariant Country/Region)" in assembly names.
                                         var cultureString = idealRemappingPartialAssemblyName.CultureName;
                                         assemblyIdentityAttributes.Add(new XAttribute("culture", String.IsNullOrEmpty(idealRemappingPartialAssemblyName.CultureName) ? "neutral" : idealRemappingPartialAssemblyName.CultureName));
 
