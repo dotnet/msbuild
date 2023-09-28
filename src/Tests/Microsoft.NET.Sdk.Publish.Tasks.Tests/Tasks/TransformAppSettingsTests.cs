@@ -14,7 +14,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.Tasks
         private static readonly ITaskItem CarConnectionTaskItem = new TaskItem("CarConnection", new Dictionary<string, string>() { { "Value", @"Server=(localdb)\mssqllocaldb; Database=CarDB;Trusted_Connection=True;MultipleActiveResultSets=true" } });
         private static readonly ITaskItem PersonConnectionTaskItem = new TaskItem("PersonConnection", new Dictionary<string, string>() { { "Value", @"Server=(localdb)\mssqllocaldb; Database=PersonDb;Trusted_Connection=True;MultipleActiveResultSets=true" } });
 
-        private static readonly List<object[]> testData = new List<object[]>
+        private static readonly List<object[]> testData = new()
         {
             new object[] {new ITaskItem[] { DefaultConnectionTaskItem } },
             new object[] {new ITaskItem[] { DefaultConnectionTaskItem, CarConnectionTaskItem, PersonConnectionTaskItem } }
@@ -39,7 +39,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.Tasks
 
             ITaskItem[] destinationConnectionStrings = connectionStringData;
 
-            TransformAppSettings task = new TransformAppSettings()
+            TransformAppSettings task = new()
             {
                 ProjectDirectory = projectFolder,
                 PublishDirectory = publishDir,
@@ -81,7 +81,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.Tasks
             string publishDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             ITaskItem[] destinationConnectionStrings = connectionStringData;
 
-            TransformAppSettings task = new TransformAppSettings()
+            TransformAppSettings task = new()
             {
                 ProjectDirectory = projectFolder,
                 PublishDirectory = publishDir,
@@ -109,7 +109,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.Tasks
 
             ITaskItem[] destinationConnectionStrings = connectionStringData;
 
-            TransformAppSettings task = new TransformAppSettings()
+            TransformAppSettings task = new()
             {
                 ProjectDirectory = projectFolder,
                 PublishDirectory = publishDir,
@@ -157,7 +157,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.Tasks
 
             ITaskItem[] destinationConnectionStrings = connectionStringData;
 
-            TransformAppSettings task = new TransformAppSettings()
+            TransformAppSettings task = new()
             {
                 ProjectDirectory = projectFolder,
                 PublishDirectory = publishDir,

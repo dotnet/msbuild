@@ -51,7 +51,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     internal class PackIdJsonConverter : JsonConverter<WorkloadPackId>
     {
         public override WorkloadPackId Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
-            new WorkloadPackId(reader.GetString() ?? string.Empty);
+            new(reader.GetString() ?? string.Empty);
 
         public override void Write(Utf8JsonWriter writer, WorkloadPackId value, JsonSerializerOptions options) => writer.WriteStringValue(value.ToString());
     }

@@ -12,7 +12,7 @@ namespace Microsoft.NET.Pack.Tests
         [WindowsOnlyFact]
         public void ImplicitReferencesAreNotIncludedAsFrameworkReferences()
         {
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "PackImplicitReferences",
                 TargetFrameworks = "net462",
@@ -34,7 +34,7 @@ namespace Microsoft.NET.Pack.Tests
         [WindowsOnlyFact]
         public void ExplicitReferencesAreIncludedAsFrameworkReferences()
         {
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "PackImplicitReferences",
                 TargetFrameworks = "net462",

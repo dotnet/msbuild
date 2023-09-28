@@ -60,7 +60,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.Tasks
                 _webConfigTransformRemoveAll.Save(transformFile);
 
                 // Act
-                TransformXml transformTask = new TransformXml()
+                TransformXml transformTask = new()
                 {
                     Source = sourceFile,
                     Destination = outputFile,
@@ -105,7 +105,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.Tasks
                 _webConfigTransformAdd.Save(transformFile);
 
                 // Act
-                TransformXml transformTask = new TransformXml()
+                TransformXml transformTask = new()
                 {
                     Source = sourceFile,
                     Destination = outputFile,

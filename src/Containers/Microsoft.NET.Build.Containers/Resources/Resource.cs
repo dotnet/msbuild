@@ -21,7 +21,7 @@ namespace Microsoft.NET.Build.Containers.Resources
     /// </remarks>
     internal static class Resource
     {
-        internal static readonly ResourceManager Manager = new ResourceManager(typeof(Strings).FullName!, typeof(Resource).GetTypeInfo().Assembly);
+        internal static readonly ResourceManager Manager = new(typeof(Strings).FullName!, typeof(Resource).GetTypeInfo().Assembly);
 
         /// <summary>
         /// Looks up a resource value for a particular name. Looks in the CurrentUICulture, and if not found, all parent CultureInfos.

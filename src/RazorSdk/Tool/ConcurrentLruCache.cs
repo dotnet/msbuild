@@ -17,7 +17,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
         private readonly Dictionary<TKey, CacheValue> _cache;
         private readonly LinkedList<TKey> _nodeList;
         // This is a naive course-grained lock, it can probably be optimized
-        private readonly object _lockObject = new object();
+        private readonly object _lockObject = new();
 
         public ConcurrentLruCache(int capacity)
             : this(capacity, EqualityComparer<TKey>.Default)

@@ -46,8 +46,8 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 // redirecting the standard out and error so we can forward
                 // the output to the caller
-                using (BlockingMemoryStream outStream = new BlockingMemoryStream())
-                using (BlockingMemoryStream errorStream = new BlockingMemoryStream())
+                using (BlockingMemoryStream outStream = new())
+                using (BlockingMemoryStream errorStream = new())
                 {
                     _environment.SetConsoleOut(new StreamWriter(outStream) { AutoFlush = true });
                     _environment.SetConsoleError(new StreamWriter(errorStream) { AutoFlush = true });
@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.Cli.Utils
                     Task.WaitAll(taskOut, taskErr);
 
                     // fake out a ProcessStartInfo using the Muxer command name, since this is a built-in command
-                    ProcessStartInfo startInfo = new ProcessStartInfo(new Muxer().MuxerPath, $"{CommandName} {CommandArgs}");
+                    ProcessStartInfo startInfo = new(new Muxer().MuxerPath, $"{CommandName} {CommandArgs}");
                     return new CommandResult(startInfo, exitCode, null, null);
                 }
             }

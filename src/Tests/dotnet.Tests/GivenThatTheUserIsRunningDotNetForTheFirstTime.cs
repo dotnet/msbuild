@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Tests
         public DirectoryInfo DotDotnetFolder;
         public string TestDirectory;
 
-        public Dictionary<string, string> ExtraEnvironmentVariables = new Dictionary<string, string>();
+        public Dictionary<string, string> ExtraEnvironmentVariables = new();
 
         public void Init(ITestOutputHelper log, TestAssetsManager testAssets)
         {

@@ -12,7 +12,7 @@ namespace Microsoft.TemplateEngine.Cli
     /// </summary>
     internal class CombinedChoiceTemplateParameter : ChoiceTemplateParameter
     {
-        private Dictionary<string, ParameterChoice> _combinedParameters = new Dictionary<string, ParameterChoice>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, ParameterChoice> _combinedParameters = new(StringComparer.OrdinalIgnoreCase);
 
         internal CombinedChoiceTemplateParameter(ChoiceTemplateParameter parameter) : base(parameter)
         {

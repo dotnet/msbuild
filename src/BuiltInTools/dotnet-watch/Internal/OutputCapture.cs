@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.Watcher.Internal
 {
     internal sealed class OutputCapture
     {
-        private readonly List<string> _lines = new List<string>();
+        private readonly List<string> _lines = new();
         public IEnumerable<string> Lines => _lines;
         public void AddLine(string line) => _lines.Add(line);
     }

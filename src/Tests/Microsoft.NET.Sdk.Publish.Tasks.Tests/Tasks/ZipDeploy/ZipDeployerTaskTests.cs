@@ -33,8 +33,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy.Tests
         [Fact]
         public async Task ExecuteZipDeploy_InvalidZipFilePath()
         {
-            Mock<IHttpClient> client = new Mock<IHttpClient>();
-            ZipDeploy zipDeployer = new ZipDeploy();
+            Mock<IHttpClient> client = new();
+            ZipDeploy zipDeployer = new();
 
             bool result = await zipDeployer.ZipDeployAsync(string.Empty, "username", "password", "publishUrl", null, "Foo", client.Object, false);
 
@@ -110,10 +110,10 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy.Tests
 
         private async Task RunZipDeployAsyncTest(string publishUrl, string siteName, string userAgentVersion, HttpStatusCode responseStatusCode, Action<Mock<IHttpClient>, bool> verifyStep)
         {
-            Mock<IHttpClient> client = new Mock<IHttpClient>();
+            Mock<IHttpClient> client = new();
 
             //constructing HttpRequestMessage to get HttpRequestHeaders as HttpRequestHeaders contains no public constructors
-            HttpRequestMessage requestMessage = new HttpRequestMessage();
+            HttpRequestMessage requestMessage = new();
             client.Setup(x => x.DefaultRequestHeaders).Returns(requestMessage.Headers);
             client.Setup(c => c.PostAsync(It.IsAny<Uri>(), It.IsAny<StreamContent>())).Returns((Uri uri, StreamContent streamContent) =>
             {
@@ -131,7 +131,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy.Tests
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
             };
 
-            ZipDeploy zipDeployer = new ZipDeploy();
+            ZipDeploy zipDeployer = new();
 
             bool result = await zipDeployer.ZipDeployAsync(TestZippedPublishContentsPath, "username", "password", publishUrl, siteName, userAgentVersion, client.Object, false);
 

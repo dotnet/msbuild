@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 //  The same workload pack may be aliased from two different names, for example
                 //  Microsoft.NETCore.App.Runtime.Mono.android-arm is aliased from Microsoft.NETCore.App.Runtime.Mono.net6.android-arm and
                 //  from Microsoft.NETCore.App.Runtime.Mono.net6.android-arm64
-                HashSet<(WorkloadPackId id, string version)> expectedWorkloadPacks = new HashSet<(WorkloadPackId id, string version)>();
+                HashSet<(WorkloadPackId id, string version)> expectedWorkloadPacks = new();
                 foreach (var expectedPack in installedPackInfos)
                 {
                     if (!expectedPack.Id.ToString().Equals(expectedPack.ResolvedPackageId, StringComparison.OrdinalIgnoreCase))
@@ -142,14 +142,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                 IEnumerable<WorkloadPackRecord> installedWorkloadPacks = GetWorkloadPackRecords();
 
-                List<WorkloadPackRecord> packsToRemove = new List<WorkloadPackRecord>();
+                List<WorkloadPackRecord> packsToRemove = new();
 
                 // We first need to clean up the dependents and then do a pass at removing them. Querying the installed packs
                 // is effectively a table scan of the registry to make sure we have accurate information and there's a
                 // potential perf hit for both memory and speed when enumerating large sets of registry entries.
                 foreach (WorkloadPackRecord packRecord in installedWorkloadPacks)
                 {
-                    DependencyProvider depProvider = new DependencyProvider(packRecord.ProviderKeyName);
+                    DependencyProvider depProvider = new(packRecord.ProviderKeyName);
 
                     UpdateDependentReferenceCounts(packRecord, depProvider, installedFeatureBands, expectedWorkloadPacks, cleanAllPacks);
 
@@ -219,7 +219,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                 try
                 {
-                    SdkFeatureBand dependentFeatureBand = new SdkFeatureBand(dependentParts[1]);
+                    SdkFeatureBand dependentFeatureBand = new(dependentParts[1]);
 
                     if (!installedFeatureBands.Contains(dependentFeatureBand))
                     {
@@ -373,7 +373,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 Log?.LogMessage($"Rolling back manifest update.");
 
                 // The provider keys for manifest packages are stable across feature bands so we retain dependents during upgrades.
-                DependencyProvider depProvider = new DependencyProvider(msi.Manifest.ProviderKeyName);
+                DependencyProvider depProvider = new(msi.Manifest.ProviderKeyName);
 
                 // Try and remove the SDK dependency, but ignore any remaining dependencies since
                 // we want to force the removal of the old version. The remaining dependencies and the provider
@@ -504,7 +504,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                 // Check the provider key first in case we were installed and we only need to remove
                 // a dependent.
-                DependencyProvider depProvider = new DependencyProvider(msi.Manifest.ProviderKeyName);
+                DependencyProvider depProvider = new(msi.Manifest.ProviderKeyName);
 
                 // Try and remove the dependent against this SDK. If any remain we'll simply exit.
                 UpdateDependent(InstallRequestType.RemoveDependent, msi.Manifest.ProviderKeyName, _dependent);

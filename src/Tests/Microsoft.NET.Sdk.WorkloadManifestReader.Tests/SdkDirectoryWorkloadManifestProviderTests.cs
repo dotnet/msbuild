@@ -1374,7 +1374,7 @@ Microsoft.Net.Workload.Emscripten.net7"
 
         private class EnvironmentMock
         {
-            Dictionary<string, string> _mockedEnvironmentVariables = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> _mockedEnvironmentVariables = new(StringComparer.OrdinalIgnoreCase);
 
             public void Add(string variable, string value)
             {

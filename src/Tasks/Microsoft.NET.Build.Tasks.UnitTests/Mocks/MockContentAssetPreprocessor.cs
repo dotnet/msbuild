@@ -7,7 +7,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 {
     public class MockContentAssetPreprocessor : IContentAssetPreprocessor
     {
-        private Dictionary<string, string> _preprocessorValues = new Dictionary<string, string>();
+        private Dictionary<string, string> _preprocessorValues = new();
         private string _preprocessedOutputDirectory = null;
         private readonly Func<string, bool> _exists;
 
@@ -36,7 +36,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             {
                 // Mock reading, processing and writing content
                 var inputBytes = Encoding.ASCII.GetBytes(MockReadContent);
-                using (MemoryStream input = new MemoryStream(inputBytes))
+                using (MemoryStream input = new(inputBytes))
                 {
                     string result = Preprocessor.Process(input, (token) =>
                     {

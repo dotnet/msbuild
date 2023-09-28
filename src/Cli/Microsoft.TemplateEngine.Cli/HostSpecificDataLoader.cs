@@ -17,7 +17,7 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly IEngineEnvironmentSettings _engineEnvironment;
 
         private readonly ConcurrentDictionary<ITemplateInfo, HostSpecificTemplateData> _cache =
-            new ConcurrentDictionary<ITemplateInfo, HostSpecificTemplateData>();
+            new();
 
         public HostSpecificDataLoader(IEngineEnvironmentSettings engineEnvironment)
         {

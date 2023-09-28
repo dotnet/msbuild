@@ -40,7 +40,7 @@ namespace ManifestReaderTests
 
     internal class InMemoryFakeManifestProvider : IWorkloadManifestProvider, IEnumerable<(string id, string content)>
     {
-        readonly List<(string id, byte[] content)> _manifests = new List<(string, byte[])>();
+        readonly List<(string id, byte[] content)> _manifests = new();
 
         public void Add(string id, string content) => _manifests.Add((id, Encoding.UTF8.GetBytes(content)));
 

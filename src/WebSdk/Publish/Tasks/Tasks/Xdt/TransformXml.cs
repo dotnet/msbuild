@@ -145,7 +145,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Xdt
                 string localPath = Source;
                 if (!string.IsNullOrEmpty(ex.SourceUri))
                 {
-                    Uri sourceUri = new Uri(ex.SourceUri);
+                    Uri sourceUri = new(ex.SourceUri);
                     localPath = sourceUri.LocalPath;
                 }
 
@@ -202,7 +202,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Xdt
         {
             try
             {
-                XmlTransformableDocument document = new XmlTransformableDocument
+                XmlTransformableDocument document = new()
                 {
                     PreserveWhitespace = true
                 };

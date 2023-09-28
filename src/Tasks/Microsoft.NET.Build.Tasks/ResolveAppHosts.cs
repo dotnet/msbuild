@@ -277,7 +277,7 @@ namespace Microsoft.NET.Build.Tasks
                 string hostRelativePathInPackage = Path.Combine("runtimes", bestAppHostRuntimeIdentifier, "native",
                     hostNameWithoutExtension + (isExecutable ? ExecutableExtension.ForRuntimeIdentifier(bestAppHostRuntimeIdentifier) : ".dll"));
 
-                TaskItem appHostItem = new TaskItem(itemName);
+                TaskItem appHostItem = new(itemName);
                 string appHostPackPath = null;
                 if (!string.IsNullOrEmpty(TargetingPackRoot))
                 {

@@ -14,7 +14,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netstandard2.1")]
         public void It_builds_a_netstandard2_library_successfully(string targetFramework)
         {
-            TestProject project = new TestProject()
+            TestProject project = new()
             {
                 Name = "NetStandard2Library",
                 TargetFrameworks = targetFramework,
@@ -34,7 +34,7 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_resolves_assembly_conflicts()
         {
-            TestProject project = new TestProject()
+            TestProject project = new()
             {
                 Name = "NetStandard2Library",
                 TargetFrameworks = "netstandard2.0",

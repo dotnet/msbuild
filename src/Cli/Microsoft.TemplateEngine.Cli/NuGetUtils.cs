@@ -25,7 +25,7 @@ namespace Microsoft.TemplateEngine.Cli
             try
             {
                 using Stream inputStream = engineEnvironmentSettings.Host.FileSystem.OpenRead(packageLocation);
-                using PackageArchiveReader reader = new PackageArchiveReader(inputStream);
+                using PackageArchiveReader reader = new(inputStream);
 
                 NuspecReader nuspec = reader.NuspecReader;
 

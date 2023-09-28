@@ -165,7 +165,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
         private string ConstructServiceUrlForDeployThruAgentService(string serviceUrl)
         {
-            System.Text.StringBuilder url = new System.Text.StringBuilder("http://");
+            System.Text.StringBuilder url = new("http://");
             int iSpot = 0;
             // It needs to start with http:// 
             // It needs to then have the computer name

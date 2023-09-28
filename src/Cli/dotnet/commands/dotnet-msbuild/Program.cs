@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(MSBuildCommandParser.GetCommand()));
 
-            MSBuildCommand command = new MSBuildCommand(
+            MSBuildCommand command = new(
                 msbuildArgs,
                 msbuildPath);
             return command;

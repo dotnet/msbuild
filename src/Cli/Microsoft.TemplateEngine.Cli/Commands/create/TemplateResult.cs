@@ -13,7 +13,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         private readonly TemplateCommand _templateCommand;
         private readonly ParseResult _parseResult;
-        private List<TemplateOptionResult> _parametersInfo = new List<TemplateOptionResult>();
+        private List<TemplateOptionResult> _parametersInfo = new();
 
         private TemplateResult(TemplateCommand templateCommand, ParseResult parseResult)
         {
@@ -39,7 +39,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal static TemplateResult FromParseResult(TemplateCommand templateCommand, ParseResult parseResult)
         {
-            TemplateResult result = new TemplateResult(templateCommand, parseResult)
+            TemplateResult result = new(templateCommand, parseResult)
             {
                 IsLanguageMatch = templateCommand.LanguageOption == null || !parseResult.HasErrorFor(templateCommand.LanguageOption, out _),
                 IsTypeMatch = templateCommand.TypeOption == null || !parseResult.HasErrorFor(templateCommand.TypeOption, out _),

@@ -46,7 +46,7 @@ public class EndToEndTests : IDisposable
 
         // Build the image
 
-        Registry registry = new Registry(DockerRegistryManager.LocalRegistry, logger);
+        Registry registry = new(DockerRegistryManager.LocalRegistry, logger);
 
         ImageBuilder imageBuilder = await registry.GetImageManifestAsync(
             DockerRegistryManager.RuntimeBaseImage,
@@ -93,7 +93,7 @@ public class EndToEndTests : IDisposable
 
         // Build the image
 
-        Registry registry = new Registry(DockerRegistryManager.LocalRegistry, logger);
+        Registry registry = new(DockerRegistryManager.LocalRegistry, logger);
 
         ImageBuilder imageBuilder = await registry.GetImageManifestAsync(
             DockerRegistryManager.RuntimeBaseImage,
@@ -134,7 +134,7 @@ public class EndToEndTests : IDisposable
 
         // Build the image
 
-        Registry registry = new Registry(DockerRegistryManager.LocalRegistry, logger);
+        Registry registry = new(DockerRegistryManager.LocalRegistry, logger);
 
         ImageBuilder imageBuilder = await registry.GetImageManifestAsync(
             DockerRegistryManager.RuntimeBaseImage,
@@ -180,7 +180,7 @@ public class EndToEndTests : IDisposable
     {
         string workingDirectory = Path.Combine(TestSettings.TestArtifactsDirectory, testName);
 
-        DirectoryInfo d = new DirectoryInfo(Path.Combine(workingDirectory, "MinimalTestApp"));
+        DirectoryInfo d = new(Path.Combine(workingDirectory, "MinimalTestApp"));
         if (d.Exists)
         {
             d.Delete(recursive: true);
@@ -214,8 +214,8 @@ public class EndToEndTests : IDisposable
     [InlineData(true)]
     public async Task EndToEnd_NoAPI_Web(bool addPackageReference)
     {
-        DirectoryInfo newProjectDir = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, $"CreateNewImageTest_{addPackageReference}"));
-        DirectoryInfo privateNuGetAssets = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, "ContainerNuGet"));
+        DirectoryInfo newProjectDir = new(Path.Combine(TestSettings.TestArtifactsDirectory, $"CreateNewImageTest_{addPackageReference}"));
+        DirectoryInfo privateNuGetAssets = new(Path.Combine(TestSettings.TestArtifactsDirectory, "ContainerNuGet"));
 
         if (newProjectDir.Exists)
         {
@@ -356,8 +356,8 @@ public class EndToEndTests : IDisposable
     [DockerAvailableFact]
     public void EndToEnd_NoAPI_Console()
     {
-        DirectoryInfo newProjectDir = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, "CreateNewImageTest"));
-        DirectoryInfo privateNuGetAssets = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, "ContainerNuGet"));
+        DirectoryInfo newProjectDir = new(Path.Combine(TestSettings.TestArtifactsDirectory, "CreateNewImageTest"));
+        DirectoryInfo privateNuGetAssets = new(Path.Combine(TestSettings.TestArtifactsDirectory, "ContainerNuGet"));
 
         if (newProjectDir.Exists)
         {

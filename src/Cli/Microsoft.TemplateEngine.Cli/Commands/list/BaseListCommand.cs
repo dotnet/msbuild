@@ -61,7 +61,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             ParseResult parseResult,
             CancellationToken cancellationToken)
         {
-            TemplateListCoordinator templateListCoordinator = new TemplateListCoordinator(
+            TemplateListCoordinator templateListCoordinator = new(
                 environmentSettings,
                 templatePackageManager,
                 new HostSpecificDataLoader(environmentSettings));

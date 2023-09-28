@@ -214,7 +214,7 @@ internal sealed class DockerCli : ILocalRegistry
 
 
         // Feed each layer tarball into the stream
-        JsonArray layerTarballPaths = new JsonArray();
+        JsonArray layerTarballPaths = new();
 
         foreach (var d in image.LayerDescriptors)
         {
@@ -241,7 +241,7 @@ internal sealed class DockerCli : ILocalRegistry
         // add config
         string configTarballPath = $"{image.ImageSha}.json";
         cancellationToken.ThrowIfCancellationRequested();
-        using (MemoryStream configStream = new MemoryStream(Encoding.UTF8.GetBytes(image.Config)))
+        using (MemoryStream configStream = new(Encoding.UTF8.GetBytes(image.Config)))
         {
             PaxTarEntry configEntry = new(TarEntryType.RegularFile, configTarballPath)
             {
@@ -266,7 +266,7 @@ internal sealed class DockerCli : ILocalRegistry
         });
 
         cancellationToken.ThrowIfCancellationRequested();
-        using (MemoryStream manifestStream = new MemoryStream(Encoding.UTF8.GetBytes(manifestNode.ToJsonString())))
+        using (MemoryStream manifestStream = new(Encoding.UTF8.GetBytes(manifestNode.ToJsonString())))
         {
             PaxTarEntry manifestEntry = new(TarEntryType.RegularFile, "manifest.json")
             {

@@ -13,7 +13,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
     {
         private readonly string _baseDirectory;
 
-        private readonly object _lock = new object();
+        private readonly object _lock = new();
         private readonly Dictionary<string, (Assembly assembly, AssemblyIdentity identity)> _loadedByPath;
         private readonly Dictionary<AssemblyIdentity, Assembly> _loadedByIdentity;
         private readonly Dictionary<string, AssemblyIdentity> _identityCache;

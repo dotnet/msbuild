@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Tests.Commands
         {
         }
 
-        private readonly BufferedReporter _reporter = new BufferedReporter();
+        private readonly BufferedReporter _reporter = new();
 
         [Fact]
         public void GivenNoOptionsItEnumeratesAllServers()

@@ -12,7 +12,7 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_runs_successfully()
         {
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "TestRunTargetProject",
                 IsExe = true,

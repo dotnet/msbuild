@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     internal static class Utilities
     {
-        private static readonly NamedMonitor Locker = new NamedMonitor();
+        private static readonly NamedMonitor Locker = new();
 
         /// <summary>
         /// Gets a folder that dotnet-new.IntegrationTests tests can use for temp files.
@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         // Provides a thread safe Dictionary for creating critical section
         internal class NamedMonitor
         {
-            private readonly ConcurrentDictionary<string, object> _dictionary = new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            private readonly ConcurrentDictionary<string, object> _dictionary = new(StringComparer.OrdinalIgnoreCase);
 
             public object this[string name] => _dictionary.GetOrAdd(name, _ => new object());
         }

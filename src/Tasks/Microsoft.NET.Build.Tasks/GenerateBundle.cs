@@ -49,7 +49,7 @@ namespace Microsoft.NET.Build.Tasks
             options |= IncludeSymbols ? BundleOptions.BundleSymbolFiles : BundleOptions.None;
             options |= EnableCompressionInSingleFile ? BundleOptions.EnableCompression : BundleOptions.None;
 
-            Version version = new Version(TargetFrameworkVersion);
+            Version version = new(TargetFrameworkVersion);
             var bundler = new Bundler(
                 AppHostName,
                 OutputDir,

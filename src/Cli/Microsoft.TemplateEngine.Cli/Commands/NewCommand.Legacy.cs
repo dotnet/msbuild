@@ -86,7 +86,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             OptionResult? optionResult = parentResult.Children.OfType<OptionResult>().FirstOrDefault(result => result.Option == option);
             if (optionResult != null)
             {
-                List<string> wrongTokens = new List<string>();
+                List<string> wrongTokens = new();
                 if (optionResult.IdentifierToken is { } && !string.IsNullOrWhiteSpace(optionResult.IdentifierToken.Value))
                 {
                     wrongTokens.Add($"'{optionResult.IdentifierToken.Value}'");
@@ -110,7 +110,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 return;
             }
 
-            List<string> wrongTokens = new List<string>();
+            List<string> wrongTokens = new();
             foreach (CliArgument argument in arguments)
             {
                 var newCommandArgument = parentResult.Children.OfType<ArgumentResult>().FirstOrDefault(result => result.Argument == argument);

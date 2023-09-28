@@ -91,7 +91,7 @@ namespace Microsoft.NET.Build.Tasks
             Dictionary<string, LockFileTargetLibrary> libraryLookup =
                 runtimeLibraries.ToDictionary(e => e.Name, StringComparer.OrdinalIgnoreCase);
 
-            HashSet<string> allExclusionList = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            HashSet<string> allExclusionList = new(StringComparer.OrdinalIgnoreCase);
 
             if (IsFrameworkDependent && PlatformLibrary != null)
             {

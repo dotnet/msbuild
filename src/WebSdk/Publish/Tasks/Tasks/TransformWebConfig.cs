@@ -134,7 +134,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
 
             // Telemetry
             transformedConfig = WebConfigTelemetry.AddTelemetry(transformedConfig, ProjectGuid, IgnoreProjectGuid, SolutionPath, ProjectFullPath);
-            using (FileStream f = new FileStream(publishWebConfigPath, FileMode.Create))
+            using (FileStream f = new(publishWebConfigPath, FileMode.Create))
             {
                 transformedConfig.Save(f);
             }

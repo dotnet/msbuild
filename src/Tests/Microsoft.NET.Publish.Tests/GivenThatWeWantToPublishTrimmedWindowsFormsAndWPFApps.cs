@@ -15,7 +15,7 @@ namespace Microsoft.NET.Publish.Tests
         public void It_builds_windows_Forms_app_with_error()
         {
             var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "WinformsBuildErrorFailTest",
                 TargetFrameworks = targetFramework,
@@ -37,7 +37,7 @@ namespace Microsoft.NET.Publish.Tests
         public void It_builds_windows_Forms_app_with_error_suppressed()
         {
             var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "WinformsBuildErrorSuppressPassTest",
                 TargetFrameworks = targetFramework,
@@ -61,7 +61,7 @@ namespace Microsoft.NET.Publish.Tests
         public void It_publishes_windows_Forms_app_with_error()
         {
             var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "WinformsErrorPresentFailTest",
                 TargetFrameworks = targetFramework,
@@ -85,7 +85,7 @@ namespace Microsoft.NET.Publish.Tests
         public void It_publishes_windows_Forms_app_with_error_suppressed()
         {
             var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "WinformsErrorSuppressedPassTest",
                 TargetFrameworks = targetFramework,
@@ -112,7 +112,7 @@ namespace Microsoft.NET.Publish.Tests
         public void It_builds_wpf_app_with_error()
         {
             var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "WpfErrorPresentFailTest",
                 TargetFrameworks = targetFramework,
@@ -134,7 +134,7 @@ namespace Microsoft.NET.Publish.Tests
         public void It_builds_wpf_app_with_error_suppressed()
         {
             var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "WpfErrorSuppressedPassTest",
                 TargetFrameworks = targetFramework,
@@ -158,7 +158,7 @@ namespace Microsoft.NET.Publish.Tests
         public void It_publishes_wpf_app_with_error()
         {
             var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "WpfErrorPresentPassTest",
                 TargetFrameworks = targetFramework,
@@ -182,7 +182,7 @@ namespace Microsoft.NET.Publish.Tests
         public void It_publishes_wpf_app_with_error_Suppressed()
         {
             var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "WpfPassTest",
                 TargetFrameworks = targetFramework,

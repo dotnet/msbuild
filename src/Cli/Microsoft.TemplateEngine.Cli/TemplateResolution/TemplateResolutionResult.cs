@@ -260,7 +260,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 
         internal static IReadOnlyDictionary<string, string?> GetAllMatchedParametersList(IEnumerable<ITemplateMatchInfo> templateMatchInfos)
         {
-            Dictionary<string, string?> parameterList = new Dictionary<string, string?>();
+            Dictionary<string, string?> parameterList = new();
             if (!templateMatchInfos.Any())
             {
                 return parameterList;

@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel
         /// <summary>
         ///     A list of senders that sends transmissions.
         /// </summary>
-        private readonly List<Sender> _senders = new List<Sender>();
+        private readonly List<Sender> _senders = new();
 
         /// <summary>
         ///     The storage that is used to persist all the transmissions.
@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel
                 return;
             }
 
-            List<Task> stoppedTasks = new List<Task>();
+            List<Task> stoppedTasks = new();
             foreach (Sender sender in _senders)
             {
                 stoppedTasks.Add(sender.StopAsync());

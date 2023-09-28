@@ -72,7 +72,7 @@ namespace Microsoft.NET.ToolPack.Tests
                     XNamespace ns = project.Root.Name.Namespace;
                     XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
                     propertyGroup.Elements("TargetFramework").First().SetValue("targetframeworkAlias");
-                    XElement conditionPropertyGroup = new XElement("PropertyGroup");
+                    XElement conditionPropertyGroup = new("PropertyGroup");
                     project.Root.Add(conditionPropertyGroup);
                     conditionPropertyGroup.SetAttributeValue("Condition", "'$(TargetFramework)' == 'targetframeworkAlias'");
                     conditionPropertyGroup.SetElementValue("TargetFrameworkIdentifier", ".NETCoreApp");

@@ -10,7 +10,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class DetailsCommand : BaseCommand<DetailsCommandArgs>
     {
-        private static NugetApiManager _nugetApiManager = new NugetApiManager();
+        private static NugetApiManager _nugetApiManager = new();
 
         internal DetailsCommand(
             Func<ParseResult, ITemplateEngineHost> hostBuilder)
@@ -59,6 +59,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return status;
         }
 
-        protected override DetailsCommandArgs ParseContext(ParseResult parseResult) => new DetailsCommandArgs(this, parseResult);
+        protected override DetailsCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);
     }
 }

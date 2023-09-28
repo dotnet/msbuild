@@ -209,7 +209,7 @@ namespace Microsoft.NET.TestFramework
 
         private SdkCommandSpec CreateCommand(params string[] args)
         {
-            SdkCommandSpec ret = new SdkCommandSpec();
+            SdkCommandSpec ret = new();
 
             //  Run tests on full framework MSBuild if environment variable is set pointing to it
             if (ShouldUseFullFrameworkMSBuild)
@@ -414,7 +414,7 @@ namespace Microsoft.NET.TestFramework
             return !File.Exists(extensionsImportAfterPath);
         }
 
-        private static readonly Lazy<string> _NewtonsoftJsonPackageVersion = new Lazy<string>(() =>
+        private static readonly Lazy<string> _NewtonsoftJsonPackageVersion = new(() =>
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
             return assembly.GetCustomAttributes(true).OfType<AssemblyMetadataAttribute>().FirstOrDefault(a => a.Key == "NewtonsoftJsonPackageVersion").Value;

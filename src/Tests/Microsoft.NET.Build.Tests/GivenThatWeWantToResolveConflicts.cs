@@ -100,7 +100,7 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void CompileConflictsAreNotRemovedFromRuntimeDepsAssets()
         {
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "NetStandard2Library",
                 TargetFrameworks = "netstandard2.0",
@@ -135,7 +135,7 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void AProjectCanReferenceADllInAPackageDirectly()
         {
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "ReferencePackageDllDirectly",
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
@@ -166,7 +166,7 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void DuplicateFrameworkAssembly()
         {
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "DuplicateFrameworkAssembly",
                 TargetFrameworks = "net472",

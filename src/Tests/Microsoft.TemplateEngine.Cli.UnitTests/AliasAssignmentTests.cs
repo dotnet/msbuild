@@ -19,7 +19,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         {
             get
             {
-                HashSet<string> initiallyTakenAliases = new HashSet<string>()
+                HashSet<string> initiallyTakenAliases = new()
                 {
                     "-h", "--help",
                     "-l", "--list",
@@ -135,7 +135,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [Fact]
         public void ShortNameGenerationShouldNotProduceDuplicates()
         {
-            List<CliTemplateParameter> paramList = new List<CliTemplateParameter>();
+            List<CliTemplateParameter> paramList = new();
             for (int i = 0; i < 10; i++)
             {
                 paramList.Add(new CliTemplateParameter("par" + i));
@@ -150,7 +150,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [Fact]
         public void ShortNameSkippedAfter4Reps()
         {
-            List<CliTemplateParameter> paramList = new List<CliTemplateParameter>();
+            List<CliTemplateParameter> paramList = new();
             for (int i = 0; i < 8; i++)
             {
                 paramList.Add(new CliTemplateParameter("par" + i));

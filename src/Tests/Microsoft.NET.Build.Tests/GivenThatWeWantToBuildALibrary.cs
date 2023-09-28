@@ -580,7 +580,7 @@ class Program
         [InlineData("netcoreapp3.1", "", true)]
         public void It_defines_target_platform_defaults_correctly(string targetFramework, string propertyName, bool defaultsDefined)
         {
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "TargetPlatformDefaults",
                 TargetFrameworks = targetFramework
@@ -614,7 +614,7 @@ class Program
         [InlineData("netcoreapp3.1")]
         public void It_defines_windows_version_default_correctly(string targetFramework)
         {
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "WindowsVersionDefault",
                 ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",

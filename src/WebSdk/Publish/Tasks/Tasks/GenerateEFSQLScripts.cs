@@ -71,17 +71,17 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             }
         }
 
-        private object _sync = new object();
+        private object _sync = new();
         private Process _runningProcess;
         private int _processExitCode;
-        private StringBuilder _standardOut = new StringBuilder();
-        private StringBuilder _standardError = new StringBuilder();
+        private StringBuilder _standardOut = new();
+        private StringBuilder _standardError = new();
         private const string AspNetCoreEnvironment = "ASPNETCORE_ENVIRONMENT";
         private bool GenerateSQLScript(string sqlFileFullPath, string dbContextName, bool isLoggingEnabled = true)
         {
             string previousAspNetCoreEnvironment = Environment.GetEnvironmentVariable(AspNetCoreEnvironment);
             Environment.SetEnvironmentVariable(AspNetCoreEnvironment, "Development");
-            ProcessStartInfo psi = new ProcessStartInfo("dotnet", $@"ef migrations script --no-build --idempotent --configuration {Configuration} --output ""{sqlFileFullPath}"" --context {dbContextName} {EFMigrationsAdditionalArgs}")
+            ProcessStartInfo psi = new("dotnet", $@"ef migrations script --no-build --idempotent --configuration {Configuration} --output ""{sqlFileFullPath}"" --context {dbContextName} {EFMigrationsAdditionalArgs}")
             {
                 WorkingDirectory = ProjectDirectory,
                 CreateNoWindow = true,

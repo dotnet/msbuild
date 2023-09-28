@@ -301,7 +301,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var runtimeIdentifier = useRid ? EnvironmentInfo.GetCompatibleRid(targetFramework) : null;
 
-            TestProject project = new TestProject()
+            TestProject project = new()
             {
                 Name = testName,
                 TargetFrameworks = targetFramework,
@@ -367,7 +367,7 @@ public static class Program
         [InlineData(ToolsetInfo.CurrentTargetFramework, false)]
         public void It_stops_generating_runtimeconfig_dev_json_after_net6(string targetFramework, bool shouldGenerateRuntimeConfigDevJson)
         {
-            TestProject proj = new TestProject()
+            TestProject proj = new()
             {
                 Name = "NetCoreApp",
                 ProjectSdk = "Microsoft.NET.Sdk",
@@ -396,7 +396,7 @@ public static class Program
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_stops_generating_runtimeconfig_dev_json_after_net6_allow_property_override(string targetFramework)
         {
-            TestProject proj = new TestProject()
+            TestProject proj = new()
             {
                 Name = "NetCoreApp",
                 ProjectSdk = "Microsoft.NET.Sdk",
@@ -427,7 +427,7 @@ public static class Program
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_trims_conflicts_from_the_deps_file(string targetFramework)
         {
-            TestProject project = new TestProject()
+            TestProject project = new()
             {
                 Name = "NetCore2App",
                 TargetFrameworks = targetFramework,
@@ -493,7 +493,7 @@ public static class Program
             var targetFramework = ToolsetInfo.CurrentTargetFramework;
             var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
-            TestProject project = new TestProject()
+            TestProject project = new()
             {
                 Name = "NetCore2App",
                 TargetFrameworks = targetFramework,

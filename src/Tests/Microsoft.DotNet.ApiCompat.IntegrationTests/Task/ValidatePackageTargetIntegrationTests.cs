@@ -158,7 +158,7 @@ namespace Microsoft.DotNet.ApiCompat.Task.IntegrationTests
             TestProject testProject = CreateTestProject(@"namespace PackageValidationTests { public class First : ItermediateBaseClass { } }", $"netstandard2.0;{ToolsetInfo.CurrentTargetFramework}", new[] { testDependency });
 
             TestAsset asset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
-            PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
+            PackCommand packCommand = new(Log, Path.Combine(asset.TestRoot, testProject.Name));
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
             Package package = Package.Create(packCommand.GetNuGetPackage());
@@ -200,7 +200,7 @@ namespace Microsoft.DotNet.ApiCompat.Task.IntegrationTests
             TestProject testProject = CreateTestProject(@"namespace PackageValidationTests { public class First : SomeBaseClass { } }", $"netstandard2.0;{ToolsetInfo.CurrentTargetFramework}", new[] { testDependency });
 
             TestAsset asset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
-            PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
+            PackCommand packCommand = new(Log, Path.Combine(asset.TestRoot, testProject.Name));
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
 
@@ -245,7 +245,7 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
             TestProject testProject = CreateTestProject(testSourceCode, $"netstandard2.0;{ToolsetInfo.CurrentTargetFramework}", new[] { dependency });
 
             TestAsset asset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
-            PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
+            PackCommand packCommand = new(Log, Path.Combine(asset.TestRoot, testProject.Name));
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
 
@@ -291,7 +291,7 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
             TestProject testProject = CreateTestProject(testSourceCode, $"netstandard2.0;{ToolsetInfo.CurrentTargetFramework}", new[] { dependency });
 
             TestAsset asset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
-            PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
+            PackCommand packCommand = new(Log, Path.Combine(asset.TestRoot, testProject.Name));
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
 
@@ -317,7 +317,7 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
         {
             TestProject testProject = CreateTestProject("public class MyType { }", $"netstandard2.0;{ToolsetInfo.CurrentTargetFramework}");
             TestAsset asset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
-            PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
+            PackCommand packCommand = new(Log, Path.Combine(asset.TestRoot, testProject.Name));
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
 

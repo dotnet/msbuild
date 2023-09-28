@@ -29,7 +29,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             var engine = new MockBuildEngine5();
 
-            AllowEmptyTelemetry telemetryTask = new AllowEmptyTelemetry
+            AllowEmptyTelemetry telemetryTask = new()
             {
                 BuildEngine = engine,
                 EventName = "My event name",
@@ -50,7 +50,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             var engine = new MockBuildEngine5();
 
-            AllowEmptyTelemetry telemetryTask = new AllowEmptyTelemetry
+            AllowEmptyTelemetry telemetryTask = new()
             {
                 BuildEngine = engine,
                 EventName = "My event name",
@@ -73,7 +73,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             var engine = new MockBuildEngine5();
 
-            AllowEmptyTelemetry telemetryTask = new AllowEmptyTelemetry
+            AllowEmptyTelemetry telemetryTask = new()
             {
                 BuildEngine = engine,
                 EventName = "My event name"
@@ -91,7 +91,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             var engine = new MockBuildEngine5();
 
-            AllowEmptyTelemetry telemetryTask = new AllowEmptyTelemetry
+            AllowEmptyTelemetry telemetryTask = new()
             {
                 BuildEngine = engine,
                 EventName = "My event name",
@@ -112,8 +112,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         /// </summary>
         private class MockBuildEngine5 : MockBuildEngine, IBuildEngine5
         {
-            private readonly object _lockObj = new object();
-            private readonly StringBuilder _log = new StringBuilder();
+            private readonly object _lockObj = new();
+            private readonly StringBuilder _log = new();
 
             internal string Log
             {

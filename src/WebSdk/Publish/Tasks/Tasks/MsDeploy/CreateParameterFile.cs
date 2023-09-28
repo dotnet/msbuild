@@ -99,14 +99,14 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                                                          bool foptimisticParameterDefaultValue,
                                                          string optimisticParameterMetadata)
         {
-            Xml.XmlDocument document = new System.Xml.XmlDocument();
+            Xml.XmlDocument document = new();
             Xml.XmlElement parametersElement = document.CreateElement("parameters");
             document.AppendChild(parametersElement);
 
             if (parameters != null)
             {
                 System.Collections.Generic.Dictionary<string, Xml.XmlElement> dictionaryLookup
-                    = new System.Collections.Generic.Dictionary<string, Xml.XmlElement>(parameters.GetLength(0), StringComparer.OrdinalIgnoreCase);
+                    = new(parameters.GetLength(0), StringComparer.OrdinalIgnoreCase);
 
                 // we are on purpose to keep the order without optimistic change the Value/Default base on the non-null optimistic
                 System.Collections.Generic.IList<Framework.ITaskItem> items
@@ -235,7 +235,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// <param name="outputFileName"></param>
         private static void WriteSetParametersToFile(Utilities.TaskLoggingHelper loggingHelper, Framework.ITaskItem[] parameters, string outputFileName, bool foptimisticParameterDefaultValue)
         {
-            Xml.XmlDocument document = new System.Xml.XmlDocument();
+            Xml.XmlDocument document = new();
             Xml.XmlElement parametersElement = document.CreateElement("parameters");
             document.AppendChild(parametersElement);
             if (parameters != null)
@@ -245,7 +245,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
                 // only the first value win
                 System.Collections.Generic.Dictionary<string, Xml.XmlElement> dictionaryLookup
-                    = new System.Collections.Generic.Dictionary<string, Xml.XmlElement>(parameters.GetLength(0));
+                    = new(parameters.GetLength(0));
 
                 foreach (Framework.ITaskItem item in items)
                 {
@@ -313,7 +313,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 #if NET472
                 catch (System.Xml.XmlException ex)
                 {
-                    System.Uri sourceUri = new System.Uri(ex.SourceUri);
+                    System.Uri sourceUri = new(ex.SourceUri);
                     succeeded = false;
                 }
 #endif

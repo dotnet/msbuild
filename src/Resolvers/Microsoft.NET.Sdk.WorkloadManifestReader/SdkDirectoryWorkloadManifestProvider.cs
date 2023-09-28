@@ -15,7 +15,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         private readonly string _sdkRootPath;
         private readonly SdkFeatureBand _sdkVersionBand;
         private readonly string[] _manifestRoots;
-        private static HashSet<string> _outdatedManifestIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "microsoft.net.workload.android", "microsoft.net.workload.blazorwebassembly", "microsoft.net.workload.ios",
+        private static HashSet<string> _outdatedManifestIds = new(StringComparer.OrdinalIgnoreCase) { "microsoft.net.workload.android", "microsoft.net.workload.blazorwebassembly", "microsoft.net.workload.ios",
             "microsoft.net.workload.maccatalyst", "microsoft.net.workload.macos", "microsoft.net.workload.tvos", "microsoft.net.workload.mono.toolchain" };
         private readonly Dictionary<string, int>? _knownManifestIdsAndOrder;
 
@@ -165,7 +165,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             else
             {
                 //  If the same folder name is in multiple of the workload manifest directories, take the first one
-                Dictionary<string, string> directoriesWithManifests = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, string> directoriesWithManifests = new(StringComparer.OrdinalIgnoreCase);
                 foreach (var manifestRoot in _manifestRoots.Reverse())
                 {
                     var manifestVersionBandDirectory = Path.Combine(manifestRoot, _sdkVersionBand.ToString());
@@ -338,7 +338,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// </summary>
         private Dictionary<string, WorkloadSet> GetAvailableWorkloadSets()
         {
-            Dictionary<string, WorkloadSet> availableWorkloadSets = new Dictionary<string, WorkloadSet>();
+            Dictionary<string, WorkloadSet> availableWorkloadSets = new();
 
             foreach (var manifestRoot in _manifestRoots.Reverse())
             {

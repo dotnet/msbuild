@@ -8,7 +8,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class Example
     {
-        private List<string> _commandParts = new List<string>();
+        private List<string> _commandParts = new();
         private CliCommand _currentCommand;
 
         private Example(CliCommand currentCommand, params string[] commandParts)
@@ -36,7 +36,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             if (commandResult?.Command is T typedCommand)
             {
-                List<string> parentCommands = new List<string>();
+                List<string> parentCommands = new();
                 while (commandResult?.Command != null)
                 {
                     parentCommands.Add(commandResult.Command.Name);
@@ -48,7 +48,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             // if the command is not found in parents of command result, try to search it in the whole command tree
             CliCommand siblingCommand = SearchForSiblingCommand<T>(parseResult.CommandResult.Command);
-            List<string> parentCommands2 = new List<string>();
+            List<string> parentCommands2 = new();
             CliCommand? nextCommand = siblingCommand;
             while (nextCommand != null)
             {

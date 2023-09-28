@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class AddProjectToProjectReferenceParser
     {
-        public static readonly CliArgument<IEnumerable<string>> ProjectPathArgument = new CliArgument<IEnumerable<string>>(LocalizableStrings.ProjectPathArgumentName)
+        public static readonly CliArgument<IEnumerable<string>> ProjectPathArgument = new(LocalizableStrings.ProjectPathArgumentName)
         {
             Description = LocalizableStrings.ProjectPathArgumentDescription,
             Arity = ArgumentArity.OneOrMore

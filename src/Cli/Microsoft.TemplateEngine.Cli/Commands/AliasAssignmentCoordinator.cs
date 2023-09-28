@@ -23,8 +23,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             foreach (var parameter in parameters)
             {
-                HashSet<string> aliases = new HashSet<string>(StringComparer.Ordinal);
-                List<string> errors = new List<string>();
+                HashSet<string> aliases = new(StringComparer.Ordinal);
+                List<string> errors = new();
                 if (parameter.Name.Contains(':'))
                 {
                     // Colon is reserved, template param names cannot have any.

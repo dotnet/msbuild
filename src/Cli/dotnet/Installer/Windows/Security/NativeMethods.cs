@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.Installer.Windows.Security
         /// <summary>
         /// The GUID action ID for using the AuthentiCode policy provider (see softpub.h).
         /// </summary>
-        public static readonly Guid WINTRUST_ACTION_GENERIC_VERIFY_V2 = new Guid("{00AAC56B-CD44-11d0-8CC2-00C04FC295EE}");
+        public static readonly Guid WINTRUST_ACTION_GENERIC_VERIFY_V2 = new("{00AAC56B-CD44-11d0-8CC2-00C04FC295EE}");
 
         [DllImport("Crypt32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]

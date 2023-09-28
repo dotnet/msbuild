@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class RemovePackageParser
     {
-        public static readonly CliArgument<IEnumerable<string>> CmdPackageArgument = new CliArgument<IEnumerable<string>>(Tools.Add.PackageReference.LocalizableStrings.CmdPackage)
+        public static readonly CliArgument<IEnumerable<string>> CmdPackageArgument = new(Tools.Add.PackageReference.LocalizableStrings.CmdPackage)
         {
             Description = LocalizableStrings.AppHelpText,
             Arity = ArgumentArity.OneOrMore,

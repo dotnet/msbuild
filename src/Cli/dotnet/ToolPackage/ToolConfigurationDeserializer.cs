@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.ToolPackage
 
         private static List<string> GenerateWarningAccordingToVersionAttribute(DotNetCliTool dotNetCliTool)
         {
-            List<string> warnings = new List<string>();
+            List<string> warnings = new();
             if (string.IsNullOrWhiteSpace(dotNetCliTool.Version))
             {
                 warnings.Add(CommonLocalizableStrings.FormatVersionIsMissing);

@@ -98,7 +98,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             var toolManifestFileEditor = new ToolManifestEditor(_fileSystem, new FakeDangerousFileDetector());
 
-            PackageId packageId = new PackageId("dotnetsay");
+            PackageId packageId = new("dotnetsay");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("3.0.0");
             Action a = () => toolManifestFileEditor.Add(new FilePath(manifestFile),
                 packageId,
@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             var toolManifestFileEditor = new ToolManifestEditor(_fileSystem, new FakeDangerousFileDetector());
 
-            PackageId packageId = new PackageId("dotnetsay");
+            PackageId packageId = new("dotnetsay");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("2.1.4");
             Action a = () => toolManifestFileEditor.Add(new FilePath(manifestFile),
                 packageId,
@@ -146,7 +146,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             var toolManifestFileEditor = new ToolManifestEditor(_fileSystem, new FakeDangerousFileDetector());
 
-            PackageId packageId = new PackageId("dotnetsay");
+            PackageId packageId = new("dotnetsay");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("3.0.0");
             Action a = () => toolManifestFileEditor.Add(new FilePath(manifestFile),
                 packageId,

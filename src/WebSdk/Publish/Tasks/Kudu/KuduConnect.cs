@@ -8,7 +8,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
     public abstract class KuduConnect
     {
         private KuduConnectionInfo _connectionInfo;
-        private object _syncObject = new object();
+        private object _syncObject = new();
         internal KuduConnect(KuduConnectionInfo connectionInfo, TaskLoggingHelper logger)
         {
             _connectionInfo = connectionInfo;

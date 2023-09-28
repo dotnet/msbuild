@@ -112,7 +112,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     "printTelemetryMessage");
 
             List<FirstRunExperienceAction> firstRunExperienceActions
-                = new List<FirstRunExperienceAction>() {
+                = new() {
                     aspnetCertInstalledTime,
                     printFirstTimeWelcomeMessage,
                     printTelemetryMessage };

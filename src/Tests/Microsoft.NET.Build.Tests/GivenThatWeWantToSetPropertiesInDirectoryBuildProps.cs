@@ -12,7 +12,7 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void The_default_configuration_can_be_set_to_release()
         {
-            TestProject project = new TestProject()
+            TestProject project = new()
             {
                 Name = "DirectoryBuildPropsTest",
                 TargetFrameworks = "netstandard1.4",

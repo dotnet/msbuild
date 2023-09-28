@@ -17,7 +17,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
             AddAuthenticationHeader(username, password, client);
             client.DefaultRequestHeaders.Add("User-Agent", userAgent);
 
-            StreamContent content = new StreamContent(messageBody ?? new MemoryStream())
+            StreamContent content = new(messageBody ?? new MemoryStream())
             {
                 Headers =
                 {

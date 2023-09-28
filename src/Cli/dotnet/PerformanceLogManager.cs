@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             if (_fileSystem.Directory.Exists(_perfLogRoot))
             {
-                List<DirectoryInfo> logDirectories = new List<DirectoryInfo>();
+                List<DirectoryInfo> logDirectories = new();
                 foreach (string directoryPath in _fileSystem.Directory.EnumerateDirectories(_perfLogRoot))
                 {
                     logDirectories.Add(new DirectoryInfo(directoryPath));

@@ -20,7 +20,7 @@ namespace Microsoft.NET.Build.Tests
         [CoreMSBuildOnlyFact]
         public void It_creates_a_deps_file_for_the_tool_and_the_tool_runs()
         {
-            TestProject toolProject = new TestProject()
+            TestProject toolProject = new()
             {
                 Name = "TestTool",
                 TargetFrameworks = "netcoreapp2.2", // netcoreapp2.2 is the highest possible project tools tfm
@@ -39,7 +39,7 @@ namespace Microsoft.NET.Build.Tests
         [CoreMSBuildOnlyFact]
         public void It_handles_conflicts_when_creating_a_tool_deps_file()
         {
-            TestProject toolProject = new TestProject()
+            TestProject toolProject = new()
             {
                 Name = "DependencyContextTool",
                 TargetFrameworks = "netcoreapp2.2", // netcoreapp2.2 is the highest possible project tools tfm
@@ -99,7 +99,7 @@ class Program
 
             string nupkgPath = Path.Combine(packCommand.ProjectRootPath, "bin", "Debug");
 
-            TestProject toolReferencer = new TestProject()
+            TestProject toolReferencer = new()
             {
                 Name = "ToolReferencer",
                 TargetFrameworks = "netcoreapp2.0"
@@ -118,7 +118,7 @@ class Program
                         new XAttribute("Version", "1.0.0")));
                 });
 
-            List<string> sources = new List<string>() { NuGetConfigWriter.DotnetCoreBlobFeed };
+            List<string> sources = new() { NuGetConfigWriter.DotnetCoreBlobFeed };
             sources.Add(nupkgPath);
 
             NuGetConfigWriter.Write(toolReferencerInstance.TestRoot, sources);

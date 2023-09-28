@@ -115,7 +115,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 throw new NotSupportedException($"Method is not invokable when {nameof(TemplateOption)} is null");
             }
 
-            StringBuilder error = new StringBuilder();
+            StringBuilder error = new();
             error.AppendFormat(LocalizableStrings.InvalidParameterDetail, InputFormat, SpecifiedValue);
             ErrorMessage = AppendAllowedValues(error, GetValidValuesForChoiceParameter(templates, TemplateOption.TemplateParameter)).ToString();
         }
@@ -128,7 +128,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             IEnumerable<TemplateResult> templates,
             CliTemplateParameter parameter)
         {
-            Dictionary<string, ParameterChoice> validChoices = new Dictionary<string, ParameterChoice>();
+            Dictionary<string, ParameterChoice> validChoices = new();
             foreach (CliTemplateInfo template in templates.Select(template => template.TemplateInfo))
             {
                 if (template.CliParameters.TryGetValue(parameter.Name, out CliTemplateParameter? param))

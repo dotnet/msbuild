@@ -25,8 +25,8 @@ namespace Microsoft.NET.Build.Tasks
 
             if (duplicateItems.Any())
             {
-                List<ITaskItem> itemsToRemove = new List<ITaskItem>();
-                List<ITaskItem> itemsToAdd = new List<ITaskItem>();
+                List<ITaskItem> itemsToRemove = new();
+                List<ITaskItem> itemsToAdd = new();
                 foreach (var duplicateItemGroup in duplicateItems)
                 {
                     foreach (var item in duplicateItemGroup)

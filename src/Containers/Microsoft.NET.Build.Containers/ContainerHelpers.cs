@@ -24,7 +24,7 @@ public static class ContainerHelpers
     /// <summary>
     /// Matches an environment variable name - must start with a letter or underscore, and can only contain letters, numbers, and underscores.
     /// </summary>
-    private static Regex envVarRegex = new Regex(@"^[a-zA-Z_]{1,}[a-zA-Z0-9_]*$");
+    private static Regex envVarRegex = new(@"^[a-zA-Z_]{1,}[a-zA-Z0-9_]*$");
 
     /// <summary>
     /// The enum contains possible error reasons during port parsing using <see cref="TryParsePort(string, out Port?, out ParsePortError?)"/> or <see cref="TryParsePort(string?, string?, out Port?, out ParsePortError?)"/>.

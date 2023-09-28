@@ -43,7 +43,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
         #region Constants
 
         internal static readonly IntPtr NullPtr = IntPtr.Zero;
-        internal static readonly IntPtr InvalidIntPtr = new IntPtr((int)-1);
+        internal static readonly IntPtr InvalidIntPtr = new((int)-1);
 
         internal const uint NORMAL_PRIORITY_CLASS = 0x0020;
         internal const uint CREATE_NO_WINDOW = 0x08000000;

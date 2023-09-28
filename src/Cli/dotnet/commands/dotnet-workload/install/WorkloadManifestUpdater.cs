@@ -143,7 +143,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             try
             {
                 var backgroundUpdatesDisabled = bool.TryParse(Environment.GetEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_UPDATE_NOTIFY_DISABLE), out var disableEnvVar) && disableEnvVar;
-                SdkFeatureBand featureBand = new SdkFeatureBand(Product.Version);
+                SdkFeatureBand featureBand = new(Product.Version);
                 var adUpdatesFile = GetAdvertisingWorkloadsFilePath(CliFolderPathCalculator.DotnetUserProfileFolderPath, featureBand);
                 if (!backgroundUpdatesDisabled && File.Exists(adUpdatesFile))
                 {
@@ -364,7 +364,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 return null;
             }
 
-            using (FileStream fsSource = new FileStream(manifestPath, FileMode.Open, FileAccess.Read))
+            using (FileStream fsSource = new(manifestPath, FileMode.Open, FileAccess.Read))
             {
                 var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId.ToString(), fsSource, manifestPath);
                 // we need to know the feature band of the advertised manifest (read it from the AdvertisedManifestFeatureBand.txt file)

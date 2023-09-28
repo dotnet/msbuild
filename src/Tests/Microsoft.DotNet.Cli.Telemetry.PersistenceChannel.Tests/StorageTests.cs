@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
         public void EnqueuedContentIsEqualToPeekedContent()
         {
             // Setup
-            StorageService storage = new StorageService();
+            StorageService storage = new();
             storage.Init(GetTemporaryPath());
             Transmission transmissionToEnqueue = CreateTransmission(new TraceTelemetry("mock_item"));
 
@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
         public void DeletedItemIsNotReturnedInCallsToPeek()
         {
             // Setup - create a storage with one item
-            StorageService storage = new StorageService();
+            StorageService storage = new();
             storage.Init(GetTemporaryPath());
             Transmission transmissionToEnqueue = CreateTransmissionAndEnqueueIt(storage);
 
@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
         public void PeekedItemIsOnlyReturnedOnce()
         {
             // Setup - create a storage with one item
-            StorageService storage = new StorageService();
+            StorageService storage = new();
             storage.Init(GetTemporaryPath());
 
             Transmission transmissionToEnqueue = CreateTransmissionAndEnqueueIt(storage);
@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
         public void PeekedItemIsReturnedAgainAfterTheItemInTheFirstCallToPeekIsDisposed()
         {
             // Setup - create a storage with one item
-            StorageService storage = new StorageService();
+            StorageService storage = new();
             storage.Init(GetTemporaryPath());
 
             Transmission transmissionToEnqueue = CreateTransmission(new TraceTelemetry("mock_item"));
@@ -115,7 +115,7 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
         public void WhenStorageHasTwoItemsThenTwoCallsToPeekReturns2DifferentItems()
         {
             // Setup - create a storage with 2 items
-            StorageService storage = new StorageService();
+            StorageService storage = new();
             storage.Init(GetTemporaryPath());
 
             Transmission firstTransmission = CreateTransmissionAndEnqueueIt(storage);
@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
         public void WhenMaxFilesIsOneThenSecondTransmissionIsDropped()
         {
             // Setup
-            StorageService storage = new StorageService();
+            StorageService storage = new();
             storage.Init(GetTemporaryPath());
 
             storage.MaxFiles = 1;
@@ -158,7 +158,7 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
         public void WhenMaxSizeIsReachedThenEnqueuedTransmissionsAreDropped()
         {
             // Setup - create a storage with 2 items
-            StorageService storage = new StorageService();
+            StorageService storage = new();
             storage.Init(GetTemporaryPath());
 
             storage.CapacityInBytes = 200; // Each file enqueued in CreateTransmissionAndEnqueueIt is ~300 bytes.
@@ -175,7 +175,7 @@ namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests
         private static Transmission CreateTransmission(IChannelTelemetry telemetry)
         {
             byte[] data = JsonSerializer.Serialize(new[] { telemetry });
-            Transmission transmission = new Transmission(
+            Transmission transmission = new(
                 new Uri(@"http://some.url"),
                 data,
                 "application/x-json-stream",

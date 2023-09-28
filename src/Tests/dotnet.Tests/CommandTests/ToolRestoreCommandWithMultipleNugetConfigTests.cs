@@ -24,12 +24,12 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         private readonly BufferedReporter _reporter;
         private readonly ILocalToolsResolverCache _localToolsResolverCache;
 
-        private readonly PackageId _packageIdA = new PackageId("local.tool.console.a");
+        private readonly PackageId _packageIdA = new("local.tool.console.a");
         private readonly NuGetVersion _packageVersionA;
-        private readonly ToolCommandName _toolCommandNameA = new ToolCommandName("a");
-        private readonly PackageId _packageIdB = new PackageId("local.tool.console.B");
+        private readonly ToolCommandName _toolCommandNameA = new("a");
+        private readonly PackageId _packageIdB = new("local.tool.console.B");
         private readonly NuGetVersion _packageVersionB;
-        private readonly ToolCommandName _toolCommandNameB = new ToolCommandName("b");
+        private readonly ToolCommandName _toolCommandNameB = new("b");
 
         private string _nugetConfigUnderTestRoot;
         private string _nugetConfigUnderSubDir;
@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             string pathToPlacePackages = Path.Combine(temporaryDirectory, "pathToPlacePackage");
             ToolPackageStoreMock toolPackageStoreMock =
-                new ToolPackageStoreMock(new DirectoryPath(pathToPlacePackages), _fileSystem);
+                new(new DirectoryPath(pathToPlacePackages), _fileSystem);
 
             SetupFileLayoutAndFeed(temporaryDirectory, toolPackageStoreMock);
 
@@ -123,7 +123,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                         new DirectoryPath(Path.GetDirectoryName(_nugetConfigUnderSubDir)))
                 });
 
-            ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_parseResult,
+            ToolRestoreCommand toolRestoreCommand = new(_parseResult,
                 _toolPackageInstallerMock,
                 manifestFinder,
                 _localToolsResolverCache,

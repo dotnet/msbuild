@@ -589,7 +589,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                         : new VSSettings(VSSettingsFile?.FullName, DisallowPrereleaseByDefault));
 
             public DirectoryInfo GetProgramFilesDirectory(ProgramFiles programFiles)
-                => new DirectoryInfo(Path.Combine(TestDirectory.FullName, $"ProgramFiles{programFiles}"));
+                => new(Path.Combine(TestDirectory.FullName, $"ProgramFiles{programFiles}"));
 
             public DirectoryInfo CreateSdkDirectory(
                 ProgramFiles programFiles,
@@ -729,7 +729,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
 
             public DirectoryInfo ProjectFileDirectory
             {
-                get => new DirectoryInfo(Path.GetDirectoryName(ProjectFilePath));
+                get => new(Path.GetDirectoryName(ProjectFilePath));
                 set => ProjectFilePath = Path.Combine(value.FullName, "test.csproj");
             }
 

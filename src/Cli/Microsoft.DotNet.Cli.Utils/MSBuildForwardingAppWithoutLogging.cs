@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Cli.Utils
         public bool ExecuteMSBuildOutOfProc => _forwardingApp != null;
 
         private readonly Dictionary<string, string> _msbuildRequiredEnvironmentVariables =
-            new Dictionary<string, string>
+            new()
             {
                 { "MSBuildExtensionsPath", MSBuildExtensionsPathTestHook ?? AppContext.BaseDirectory },
                 { "MSBuildSDKsPath", GetMSBuildSDKsPath() },
@@ -133,7 +133,7 @@ namespace Microsoft.DotNet.Cli.Utils
         public int ExecuteInProc(string[] arguments)
         {
             // Save current environment variables before overwriting them.
-            Dictionary<string, string> savedEnvironmentVariables = new Dictionary<string, string>();
+            Dictionary<string, string> savedEnvironmentVariables = new();
             try
             {
                 foreach (KeyValuePair<string, string> kvp in _msbuildRequiredEnvironmentVariables)

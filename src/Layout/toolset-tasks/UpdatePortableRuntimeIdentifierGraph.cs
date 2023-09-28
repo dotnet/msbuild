@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Cli.Build
             JToken json;
 
             using (var file = File.OpenText(InputFile))
-            using (JsonTextReader reader = new JsonTextReader(file))
+            using (JsonTextReader reader = new(file))
             {
                 json = JToken.ReadFrom(reader);
             }

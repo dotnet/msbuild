@@ -19,9 +19,9 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         {
             string packageId = "Newtonsoft.Json";
             string packageVersion = ToolsetInfo.GetNewtonsoftJsonPackageVersion();
-            NuGetTestLogger logger = new NuGetTestLogger(Log);
+            NuGetTestLogger logger = new(Log);
             NuGetPackageDownloader installer =
-                new NuGetPackageDownloader(new DirectoryPath(Directory.GetCurrentDirectory()), null,
+                new(new DirectoryPath(Directory.GetCurrentDirectory()), null,
                     new MockFirstPartyNuGetPackageSigningVerifier(), logger, restoreActionConfig: new RestoreActionConfig(NoCache: true));
             string packagePath =
                 await installer.DownloadPackageAsync(new PackageId(packageId), new NuGetVersion(packageVersion));
@@ -38,9 +38,9 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         [UnixOnlyFact]
         public void ItCanGetAllFilesNeedToSetExecutablePermission()
         {
-            NuGetTestLogger logger = new NuGetTestLogger(Log);
+            NuGetTestLogger logger = new(Log);
             NuGetPackageDownloader installer =
-                new NuGetPackageDownloader(
+                new(
                     new DirectoryPath(Directory.GetCurrentDirectory()),
                     null,
                     new MockFirstPartyNuGetPackageSigningVerifier(), logger, restoreActionConfig: new RestoreActionConfig(NoCache: true));
@@ -62,9 +62,9 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         [UnixOnlyFact]
         public void GivenPackageNotInAllowListItCannotGetAllFilesNeedToSetExecutablePermission()
         {
-            NuGetTestLogger logger = new NuGetTestLogger(Log);
+            NuGetTestLogger logger = new(Log);
             NuGetPackageDownloader installer =
-                new NuGetPackageDownloader(new DirectoryPath(Directory.GetCurrentDirectory()), null,
+                new(new DirectoryPath(Directory.GetCurrentDirectory()), null,
                     new MockFirstPartyNuGetPackageSigningVerifier(), logger, restoreActionConfig: new RestoreActionConfig(NoCache: true));
             var allFiles = new List<string>()
             {

@@ -226,7 +226,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("net48")]
         public void WhenNotTargetingNet5TargetPlatformMinVersionPropertyCanBeSet(string targetFramework)
         {
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "Project",
                 IsExe = true,
@@ -289,7 +289,7 @@ namespace Microsoft.NET.Build.Tests
 
         private static TestProject SetUpProject(string targetFramework = ToolsetInfo.CurrentTargetFramework)
         {
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "Project",
                 IsExe = true,

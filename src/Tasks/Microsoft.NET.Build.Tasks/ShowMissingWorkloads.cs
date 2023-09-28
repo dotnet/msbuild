@@ -15,10 +15,10 @@ namespace Microsoft.NET.Build.Tasks
         private static readonly string MauiCrossPlatTopLevelVSWorkloads = "Microsoft.VisualStudio.Workload.NetCrossPlat";
         private static readonly string MauiComponentGroupVSWorkload = "Microsoft.VisualStudio.ComponentGroup.Maui.All";
         private static readonly string WasmTopLevelVSWorkload = "Microsoft.VisualStudio.Workload.NetWeb";
-        private static readonly HashSet<string> MauiWorkloadIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        private static readonly HashSet<string> MauiWorkloadIds = new(StringComparer.OrdinalIgnoreCase)
             { "android", "android-aot", "ios", "maccatalyst", "macos", "maui", "maui-android",
             "maui-desktop", "maui-ios", "maui-maccatalyst", "maui-mobile", "maui-windows", "tvos" };
-        private static readonly HashSet<string> WasmWorkloadIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        private static readonly HashSet<string> WasmWorkloadIds = new(StringComparer.OrdinalIgnoreCase)
             { "wasm-tools", "wasm-tools-net6" };
 
         public ITaskItem[] MissingWorkloadPacks { get; set; }

@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Configurer
             ToolPackageFolderPathCalculator.GetToolPackageFolderPath(ToolsShimPath);
 
         public static BashPathUnderHomeDirectory ToolsShimPathInUnix =>
-            new BashPathUnderHomeDirectory(
+            new(
                 DotnetHomePath,
                 Path.Combine(DotnetProfileDirectoryName, ToolsShimFolderName));
 

@@ -28,9 +28,9 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         private readonly string _pathToPlacePackages;
         private readonly ILocalToolsResolverCache _localToolsResolverCache;
         private readonly string _manifestFilePath;
-        private readonly PackageId _packageIdA = new PackageId("local.tool.console.a");
+        private readonly PackageId _packageIdA = new("local.tool.console.a");
         private readonly NuGetVersion _packageVersionA;
-        private readonly ToolCommandName _toolCommandNameA = new ToolCommandName("a");
+        private readonly ToolCommandName _toolCommandNameA = new("a");
         private readonly ToolManifestFinder _toolManifestFinder;
         private readonly ToolManifestEditor _toolManifestEditor;
 
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             _temporaryDirectory = _fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath;
             _pathToPlacePackages = Path.Combine(_temporaryDirectory, "pathToPlacePackage");
             ToolPackageStoreMock toolPackageStoreMock =
-                new ToolPackageStoreMock(new DirectoryPath(_pathToPlacePackages), _fileSystem);
+                new(new DirectoryPath(_pathToPlacePackages), _fileSystem);
             _toolPackageStore = toolPackageStoreMock;
             _toolPackageInstallerMock = new ToolPackageInstallerMock(
                 _fileSystem,
@@ -377,7 +377,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
         private IToolPackageInstaller GetToolToolPackageInstallerWithPreviewInFeed()
         {
-            List<MockFeed> feeds = new List<MockFeed>
+            List<MockFeed> feeds = new()
             {
                 new MockFeed
                 {

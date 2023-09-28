@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 {
     internal class AwaitableProcess : IDisposable
     {
-        private readonly object _testOutputLock = new object();
+        private readonly object _testOutputLock = new();
 
         private Process _process;
         private readonly DotnetCommand _spec;

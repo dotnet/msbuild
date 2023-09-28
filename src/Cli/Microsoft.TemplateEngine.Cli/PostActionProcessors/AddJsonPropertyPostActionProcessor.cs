@@ -17,13 +17,13 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
         private const string NewJsonPropertyNameArgument = "newJsonPropertyName";
         private const string NewJsonPropertyValueArgument = "newJsonPropertyValue";
 
-        private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions
+        private static readonly JsonSerializerOptions SerializerOptions = new()
         {
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             WriteIndented = true
         };
 
-        private static readonly JsonDocumentOptions DeserializerOptions = new JsonDocumentOptions
+        private static readonly JsonDocumentOptions DeserializerOptions = new()
         {
             AllowTrailingCommas = true,
             CommentHandling = JsonCommentHandling.Skip

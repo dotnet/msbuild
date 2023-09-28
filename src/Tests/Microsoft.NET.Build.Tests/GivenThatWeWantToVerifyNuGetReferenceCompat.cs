@@ -49,7 +49,7 @@ namespace Microsoft.NET.Build.Tests
             foreach (string dependencyTarget in rawDependencyTargets.Split(',', ';', ' ').ToList())
             {
                 TestProject dependencyProject = GetTestProject(ConstantStringValues.DependencyDirectoryNamePrefix + dependencyTarget.Replace('.', '_'), dependencyTarget, true);
-                TestPackageReference dependencyPackageReference = new TestPackageReference(
+                TestPackageReference dependencyPackageReference = new(
                     dependencyProject.Name,
                     "1.0.0",
                     ConstantStringValues.ConstructNuGetPackageReferencePath(dependencyProject, identifier: referencerTarget + testDescription + rawDependencyTargets));
@@ -90,7 +90,7 @@ namespace Microsoft.NET.Build.Tests
             var referencerTestAsset = _testAssetsManager.CreateTestProject(referencerProject, ConstantStringValues.TestDirectoriesNamePrefix, referencerDirectoryNamePostfix);
             var referencerRestoreCommand = referencerTestAsset.GetRestoreCommand(Log, relativePath: referencerProject.Name);
 
-            List<string> referencerRestoreSources = new List<string>();
+            List<string> referencerRestoreSources = new();
 
             //  Modify the restore command to refer to the created NuGet packages
             foreach (TestPackageReference packageReference in referencerProject.PackageReferences)
@@ -268,7 +268,7 @@ namespace Microsoft.NET.Build.Tests
 
         TestProject GetTestProject(string name, string target, bool isSdkProject)
         {
-            TestProject ret = new TestProject()
+            TestProject ret = new()
             {
                 Name = name,
                 IsSdkProject = isSdkProject

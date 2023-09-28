@@ -8,7 +8,7 @@ namespace Microsoft.NET.Build.Tasks
 {
     internal class NugetContentAssetPreprocessor : IContentAssetPreprocessor
     {
-        private Dictionary<string, string> _preprocessorValues = new Dictionary<string, string>();
+        private Dictionary<string, string> _preprocessorValues = new();
         private string _preprocessedOutputDirectory = null;
 
         public void ConfigurePreprocessor(string outputDirectoryBase, Dictionary<string, string> preprocessorValues)

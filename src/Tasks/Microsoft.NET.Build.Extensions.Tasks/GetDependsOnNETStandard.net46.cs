@@ -12,7 +12,7 @@ namespace Microsoft.NET.Build.Tasks
 {
     public partial class GetDependsOnNETStandard
     {
-        private static readonly Guid s_importerGuid = new Guid("7DAC8207-D3AE-4c75-9B67-92801A497D44");
+        private static readonly Guid s_importerGuid = new("7DAC8207-D3AE-4c75-9B67-92801A497D44");
 
         // This method cross-compiles for desktop to avoid using System.Reflection.Metadata (SRM).
         // We do this because we don't want the following:
@@ -91,7 +91,7 @@ namespace Microsoft.NET.Build.Tasks
                                 out flags);
 
                             // Allocate assembly name buffer.
-                            StringBuilder assemblyNameBuffer = new StringBuilder((int)asmNameLength + 1);
+                            StringBuilder assemblyNameBuffer = new((int)asmNameLength + 1);
 
                             // Retrieve the assembly reference properties.
                             assemblyImport.GetAssemblyRefProps(

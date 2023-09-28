@@ -16,7 +16,7 @@ namespace Microsoft.NET.Build.Tests
         public void It_errors_when_missing_windows_target_platform(string propertyName)
         {
             var targetFramework = ToolsetInfo.CurrentTargetFramework;
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "MissingTargetPlatform",
                 TargetFrameworks = targetFramework
@@ -40,7 +40,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("UseWPF")]
         public void It_errors_when_missing_transitive_windows_target_platform(string propertyName)
         {
-            TestProject testProjectA = new TestProject()
+            TestProject testProjectA = new()
             {
                 Name = "A",
                 ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
@@ -48,14 +48,14 @@ namespace Microsoft.NET.Build.Tests
             };
             testProjectA.AdditionalProperties[propertyName] = "true";
 
-            TestProject testProjectB = new TestProject()
+            TestProject testProjectB = new()
             {
                 Name = "B",
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
             testProjectB.ReferencedProjects.Add(testProjectA);
 
-            TestProject testProjectC = new TestProject()
+            TestProject testProjectC = new()
             {
                 Name = "C",
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework
@@ -76,7 +76,7 @@ namespace Microsoft.NET.Build.Tests
         public void It_warns_when_specifying_windows_desktop_sdk()
         {
             var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "windowsDesktopSdk",
                 ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
@@ -97,7 +97,7 @@ namespace Microsoft.NET.Build.Tests
         public void It_does_not_warn_when_multitargeting()
         {
             var targetFramework = $"{ToolsetInfo.CurrentTargetFramework};net472;netcoreapp3.1";
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "windowsDesktopSdk",
                 ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
@@ -119,7 +119,7 @@ namespace Microsoft.NET.Build.Tests
         public void It_imports_when_targeting_dotnet_3()
         {
             var targetFramework = "netcoreapp3.1";
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "windowsDesktopSdk",
                 TargetFrameworks = targetFramework

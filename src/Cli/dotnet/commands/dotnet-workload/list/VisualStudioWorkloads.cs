@@ -89,7 +89,7 @@ namespace Microsoft.DotNet.Workloads.Workload
                             break;
                         }
 
-                        SdkFeatureBand visualStudioSdkFeatureBand = new SdkFeatureBand(visualStudioSdkVersion);
+                        SdkFeatureBand visualStudioSdkFeatureBand = new(visualStudioSdkVersion);
 
                         // The feature band of the SDK in VS must match that of the SDK on which we're running.
                         if (sdkFeatureBand != null && !visualStudioSdkFeatureBand.Equals(sdkFeatureBand))

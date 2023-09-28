@@ -11,13 +11,13 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
     {
         private readonly string _downloadPath;
         private readonly bool _manifestDownload;
-        private NuGetVersion _lastPackageVersion = new NuGetVersion("1.0.0");
+        private NuGetVersion _lastPackageVersion = new("1.0.0");
 
         public List<(PackageId id, NuGetVersion version, DirectoryPath? downloadFolder, PackageSourceLocation packageSourceLocation)> DownloadCallParams = new();
 
-        public List<string> DownloadCallResult = new List<string>();
+        public List<string> DownloadCallResult = new();
 
-        public List<(string, DirectoryPath)> ExtractCallParams = new List<(string, DirectoryPath)>();
+        public List<(string, DirectoryPath)> ExtractCallParams = new();
 
         public HashSet<string> PackageIdsToNotFind { get; set; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 

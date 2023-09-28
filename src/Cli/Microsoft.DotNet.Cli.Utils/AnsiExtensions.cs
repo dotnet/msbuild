@@ -5,7 +5,7 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public static class AnsiExtensions
     {
-        private static readonly Lazy<bool> _xtermEnabled = new Lazy<bool>(
+        private static readonly Lazy<bool> _xtermEnabled = new(
             () =>
             {
                 var environment = Environment.GetEnvironmentVariable("TERM");

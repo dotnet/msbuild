@@ -29,7 +29,7 @@ namespace Microsoft.NET.Build.Tasks
         }
         public IEnumerable<ResolvedFile> Resolve(ProjectContext projectContext, bool resolveRuntimeTargets = true)
         {
-            List<ResolvedFile> results = new List<ResolvedFile>();
+            List<ResolvedFile> results = new();
 
             foreach (LockFileTargetLibrary targetLibrary in projectContext.GetRuntimeLibraries(_excludedPackageIds))
             {

@@ -46,7 +46,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                 await templatePackageManager.GetManagedTemplatePackagesAsync(force: false, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(environmentSettings);
-            CliSearchFiltersFactory searchFiltersFactory = new CliSearchFiltersFactory(templatePackages);
+            CliSearchFiltersFactory searchFiltersFactory = new(templatePackages);
 
             IReadOnlyList<SearchResult>? searchResults = await searchCoordinator.SearchAsync(
                 searchFiltersFactory.GetPackFilter(commandArgs),
@@ -228,7 +228,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             string? defaultLanguage,
             IEnvironment environment)
         {
-            List<SearchResultTableRow> templateGroupsForDisplay = new List<SearchResultTableRow>();
+            List<SearchResultTableRow> templateGroupsForDisplay = new();
 
             foreach (var packSearchResult in results)
             {
@@ -295,7 +295,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             //IEnumerable<string> appliedTemplateParameters = templateParameters?
             //       .Select(param => string.IsNullOrWhiteSpace(param.Value) ? param.Key : $"{param.Key}='{param.Value}'") ?? Array.Empty<string>();
 
-            StringBuilder inputParameters = new StringBuilder();
+            StringBuilder inputParameters = new();
             string? mainCriteria = commandArgs.SearchNameCriteria;
             if (!string.IsNullOrWhiteSpace(mainCriteria))
             {

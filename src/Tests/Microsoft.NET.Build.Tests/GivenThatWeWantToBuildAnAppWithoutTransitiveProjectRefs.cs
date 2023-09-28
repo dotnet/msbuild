@@ -108,7 +108,7 @@ namespace Microsoft.NET.Build.Tests
                     break;
                 }
 
-                DotnetCommand runCommand = new DotnetCommand(
+                DotnetCommand runCommand = new(
                     Log,
                     "run",
                     "--framework",

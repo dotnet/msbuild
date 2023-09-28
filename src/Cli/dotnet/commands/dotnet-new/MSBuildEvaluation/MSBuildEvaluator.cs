@@ -164,7 +164,7 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
                 }
 
                 //For multi-target project, we need to do additional evaluation for each target framework.
-                Dictionary<string, Project?> evaluatedTfmBasedProjects = new Dictionary<string, Project?>();
+                Dictionary<string, Project?> evaluatedTfmBasedProjects = new();
                 innerBuildWatch.Start();
                 foreach (string tfm in targetFrameworks)
                 {

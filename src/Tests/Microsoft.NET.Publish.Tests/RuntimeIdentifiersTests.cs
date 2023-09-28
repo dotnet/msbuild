@@ -202,7 +202,7 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["RuntimeIdentifier"] = runtimeIdentifier;
             testProject.RecordProperties("RuntimeIdentifier");
 
-            List<string> args = new List<string>
+            List<string> args = new()
             {
                 runtimeIdentifierIsGlobal ? $"/p:RuntimeIdentifier={runtimeIdentifier}" : "",
                 publishRuntimeIdentifierIsGlobal ? $"/p:PublishRuntimeIdentifier={publishRuntimeIdentifier}" : ""

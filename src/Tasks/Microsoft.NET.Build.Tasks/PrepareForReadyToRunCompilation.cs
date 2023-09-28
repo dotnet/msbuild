@@ -53,12 +53,12 @@ namespace Microsoft.NET.Build.Tasks
         private bool _crossgen2IsVersion5;
         private int _perfmapFormatVersion;
 
-        private List<ITaskItem> _compileList = new List<ITaskItem>();
-        private List<ITaskItem> _symbolsCompileList = new List<ITaskItem>();
-        private List<ITaskItem> _r2rFiles = new List<ITaskItem>();
-        private List<ITaskItem> _r2rReferences = new List<ITaskItem>();
-        private List<ITaskItem> _r2rCompositeReferences = new List<ITaskItem>();
-        private List<ITaskItem> _r2rCompositeInput = new List<ITaskItem>();
+        private List<ITaskItem> _compileList = new();
+        private List<ITaskItem> _symbolsCompileList = new();
+        private List<ITaskItem> _r2rFiles = new();
+        private List<ITaskItem> _r2rReferences = new();
+        private List<ITaskItem> _r2rCompositeReferences = new();
+        private List<ITaskItem> _r2rCompositeInput = new();
 
         private bool IsTargetWindows
         {
@@ -176,9 +176,9 @@ namespace Microsoft.NET.Build.Tasks
                         }
                         else
                         {
-                            using (FileStream fs = new FileStream(file.ItemSpec, FileMode.Open, FileAccess.Read))
+                            using (FileStream fs = new(file.ItemSpec, FileMode.Open, FileAccess.Read))
                             {
-                                PEReader pereader = new PEReader(fs);
+                                PEReader pereader = new(fs);
                                 MetadataReader mdReader = pereader.GetMetadataReader();
                                 Guid mvid = mdReader.GetGuid(mdReader.GetModuleDefinition().Mvid);
                                 perfmapExtension = ".ni.{" + mvid + "}.map";
@@ -195,7 +195,7 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     // This TaskItem is the IL->R2R entry, for an input assembly that needs to be compiled into a R2R image. This will be used as
                     // an input to the ReadyToRunCompiler task
-                    TaskItem r2rCompilationEntry = new TaskItem(file);
+                    TaskItem r2rCompilationEntry = new(file);
                     r2rCompilationEntry.SetMetadata(MetadataKeys.OutputR2RImage, outputR2RImage);
                     if (outputPDBImage != null && ReadyToRunUseCrossgen2 && !_crossgen2IsVersion5)
                     {
@@ -212,7 +212,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 // This TaskItem corresponds to the output R2R image. It is equivalent to the input TaskItem, only the ItemSpec for it points to the new path
                 // for the newly created R2R image
-                TaskItem r2rFileToPublish = new TaskItem(file)
+                TaskItem r2rFileToPublish = new(file)
                 {
                     ItemSpec = outputR2RImage
                 };
@@ -229,7 +229,7 @@ namespace Microsoft.NET.Build.Tasks
                     {
                         // This TaskItem is the R2R->R2RPDB entry, for a R2R image that was just created, and for which we need to create native PDBs. This will be used as
                         // an input to the ReadyToRunCompiler task
-                        TaskItem pdbCompilationEntry = new TaskItem(file)
+                        TaskItem pdbCompilationEntry = new(file)
                         {
                             ItemSpec = outputR2RImage
                         };
@@ -240,7 +240,7 @@ namespace Microsoft.NET.Build.Tasks
 
                     // This TaskItem corresponds to the output PDB image. It is equivalent to the input TaskItem, only the ItemSpec for it points to the new path
                     // for the newly created PDB image.
-                    TaskItem r2rSymbolsFileToPublish = new TaskItem(file)
+                    TaskItem r2rSymbolsFileToPublish = new(file)
                     {
                         ItemSpec = outputPDBImage
                     };
@@ -263,7 +263,7 @@ namespace Microsoft.NET.Build.Tasks
                 compositeR2RImageRelativePath = Path.ChangeExtension(compositeR2RImageRelativePath, "r2r" + Path.GetExtension(compositeR2RImageRelativePath));
                 var compositeR2RImage = Path.Combine(OutputPath, compositeR2RImageRelativePath);
 
-                TaskItem r2rCompilationEntry = new TaskItem(MainAssembly)
+                TaskItem r2rCompilationEntry = new(MainAssembly)
                 {
                     ItemSpec = r2rCompositeInputList[0].ItemSpec
                 };
@@ -296,7 +296,7 @@ namespace Microsoft.NET.Build.Tasks
                         r2rCompilationEntry.SetMetadata(MetadataKeys.OutputPDBImage, compositePDBImage);
 
                         // Publish composite PDB file
-                        TaskItem r2rSymbolsFileToPublish = new TaskItem(MainAssembly)
+                        TaskItem r2rSymbolsFileToPublish = new(MainAssembly)
                         {
                             ItemSpec = compositePDBImage
                         };
@@ -314,7 +314,7 @@ namespace Microsoft.NET.Build.Tasks
                 imageCompilationList.Add(r2rCompilationEntry);
 
                 // Publish it
-                TaskItem compositeR2RFileToPublish = new TaskItem(MainAssembly)
+                TaskItem compositeR2RFileToPublish = new(MainAssembly)
                 {
                     ItemSpec = compositeR2RImage
                 };
@@ -338,7 +338,7 @@ namespace Microsoft.NET.Build.Tasks
 
             private readonly EligibilityEnum _flags;
 
-            public static Eligibility None => new Eligibility(EligibilityEnum.None);
+            public static Eligibility None => new(EligibilityEnum.None);
 
             public bool NoEligibility => _flags == EligibilityEnum.None;
             public bool IsReference => (_flags & EligibilityEnum.Reference) == EligibilityEnum.Reference;
@@ -397,7 +397,7 @@ namespace Microsoft.NET.Build.Tasks
                 return Eligibility.None;
             }
 
-            using (FileStream fs = new FileStream(file.ItemSpec, FileMode.Open, FileAccess.Read))
+            using (FileStream fs = new(file.ItemSpec, FileMode.Open, FileAccess.Read))
             {
                 try
                 {

@@ -30,7 +30,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             ParseResult parseResult,
             CancellationToken cancellationToken)
         {
-            TemplatePackageCoordinator templatePackageCoordinator = new TemplatePackageCoordinator(environmentSettings, templatePackageManager);
+            TemplatePackageCoordinator templatePackageCoordinator = new(environmentSettings, templatePackageManager);
 
             return templatePackageCoordinator.EnterUninstallFlowAsync(args, cancellationToken);
         }

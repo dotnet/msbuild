@@ -606,7 +606,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             if (commandLineBuilder != null
                 && replaceRuleItems != null)// Dev10 bug 496639 foreach will throw the exception if the replaceRuleItem is null
             {
-                System.Collections.Generic.List<string> arguments = new System.Collections.Generic.List<string>(6);
+                System.Collections.Generic.List<string> arguments = new(6);
 
                 foreach (Framework.ITaskItem item in replaceRuleItems)
                 {
@@ -622,7 +622,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             if (commandLineBuilder != null
                 && skipRuleItems != null)// Dev10 bug 496639 foreach will throw the exception if the replaceRuleItem is null
             {
-                System.Collections.Generic.List<string> arguments = new System.Collections.Generic.List<string>(6);
+                System.Collections.Generic.List<string> arguments = new(6);
 
                 foreach (Framework.ITaskItem item in skipRuleItems)
                 {
@@ -643,7 +643,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             {
                 // special for the name
                 arguments.Clear();
-                System.Collections.Generic.List<string> idenities = new System.Collections.Generic.List<string>(6);
+                System.Collections.Generic.List<string> idenities = new(6);
 
                 string name = item.ItemSpec;
                 if (!string.IsNullOrEmpty(name))
@@ -689,8 +689,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             System.Collections.Generic.IList<Framework.ITaskItem> items = Utility.SortParametersTaskItems(originalItems, foptimisticParameterDefaultValue, DeclareParameterMetadata.DefaultValue.ToString());
             if (commandLineBuilder != null && items != null)
             {
-                System.Collections.Generic.List<string> arguments = new System.Collections.Generic.List<string>(6);
-                System.Collections.Generic.Dictionary<string, string> lookupDictionary = new System.Collections.Generic.Dictionary<string, string>(items.Count);
+                System.Collections.Generic.List<string> arguments = new(6);
+                System.Collections.Generic.Dictionary<string, string> lookupDictionary = new(items.Count);
 
                 foreach (Framework.ITaskItem item in items)
                 {
@@ -740,7 +740,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             System.Collections.Generic.IList<Framework.ITaskItem> items = Utility.SortParametersTaskItems(originalItems, foptimisticParameterDefaultValue, SimpleSyncParameterMetadata.Value.ToString());
             if (commandLineBuilder != null && items != null)
             {
-                System.Collections.Generic.List<string> arguments = new System.Collections.Generic.List<string>(6);
+                System.Collections.Generic.List<string> arguments = new(6);
                 foreach (Framework.ITaskItem item in items)
                 {
                     arguments.Clear();
@@ -770,15 +770,15 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             System.Collections.Generic.IList<Framework.ITaskItem> items = Utility.SortParametersTaskItems(originalItems, foptimisticParameterDefaultValue, ExistingSyncParameterMetadata.Value.ToString());
             if (commandLineBuilder != null && items != null)
             {
-                System.Collections.Generic.List<string> arguments = new System.Collections.Generic.List<string>(6);
-                System.Collections.Generic.Dictionary<string, string> lookupDictionary = new System.Collections.Generic.Dictionary<string, string>(items.Count);
-                System.Collections.Generic.Dictionary<string, string> nameValueDictionary = new System.Collections.Generic.Dictionary<string, string>(items.Count, StringComparer.OrdinalIgnoreCase);
+                System.Collections.Generic.List<string> arguments = new(6);
+                System.Collections.Generic.Dictionary<string, string> lookupDictionary = new(items.Count);
+                System.Collections.Generic.Dictionary<string, string> nameValueDictionary = new(items.Count, StringComparer.OrdinalIgnoreCase);
 
                 foreach (Framework.ITaskItem item in items)
                 {
                     arguments.Clear();
 
-                    System.Collections.Generic.List<string> idenities = new System.Collections.Generic.List<string>(6);
+                    System.Collections.Generic.List<string> idenities = new(6);
 
                     string name = item.ItemSpec;
                     if (!string.IsNullOrEmpty(name))
@@ -845,7 +845,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         {
             //commandLineBuilder.AppendSwitchUnquotedIfNotNull("-source:", m_source);
             //commandLineBuilder.AppendSwitchUnquotedIfNotNull("-dest:", m_dest);
-            System.Collections.Generic.List<string> arguments = new System.Collections.Generic.List<string>(6);
+            System.Collections.Generic.List<string> arguments = new(6);
 
             if (items != null && items.GetLength(0) == 1)
             {
@@ -989,7 +989,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// </summary>
         protected override string GenerateCommandLineCommands()
         {
-            Utilities.CommandLineBuilder commandLine = new Utilities.CommandLineBuilder();
+            Utilities.CommandLineBuilder commandLine = new();
             IncorporateSettingsFromHostObject(ref m_skipRuleItemsITaskItem, Destination, HostObject as System.Collections.Generic.IEnumerable<Framework.ITaskItem>);
             AddDestinationProviderSettingToObject(commandLine, "-source:", Source, m_strValueQuote, null, this);
             AddDestinationProviderSettingToObject(commandLine, "-dest:", Destination, m_strValueQuote, AdditionalDestinationProviderOptions, this);

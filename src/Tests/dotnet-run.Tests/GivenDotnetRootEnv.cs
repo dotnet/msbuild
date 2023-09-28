@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 {
     public class GivenDotnetRootEnv : SdkTest
     {
-        private static Version Version6_0 = new Version(6, 0);
+        private static Version Version6_0 = new(6, 0);
 
         public GivenDotnetRootEnv(ITestOutputHelper log) : base(log)
         {

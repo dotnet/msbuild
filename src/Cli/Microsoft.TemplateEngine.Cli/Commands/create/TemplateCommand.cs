@@ -22,7 +22,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         private readonly BaseCommand _instantiateCommand;
         private readonly TemplateGroup _templateGroup;
         private readonly CliTemplateInfo _template;
-        private Dictionary<string, TemplateOption> _templateSpecificOptions = new Dictionary<string, TemplateOption>();
+        private Dictionary<string, TemplateOption> _templateSpecificOptions = new();
 
         /// <summary>
         /// Create command for instantiation of specific template.
@@ -145,13 +145,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal async Task<NewCommandStatus> InvokeAsync(ParseResult parseResult, CancellationToken cancellationToken)
         {
-            TemplateCommandArgs args = new TemplateCommandArgs(this, _instantiateCommand, parseResult);
-            TemplateInvoker invoker = new TemplateInvoker(_environmentSettings, () => Console.ReadLine() ?? string.Empty);
-            TemplatePackageCoordinator packageCoordinator = new TemplatePackageCoordinator(_environmentSettings, _templatePackageManager);
-            TemplateConstraintManager constraintManager = new TemplateConstraintManager(_environmentSettings);
-            TemplatePackageDisplay templatePackageDisplay = new TemplatePackageDisplay(Reporter.Output, Reporter.Error);
+            TemplateCommandArgs args = new(this, _instantiateCommand, parseResult);
+            TemplateInvoker invoker = new(_environmentSettings, () => Console.ReadLine() ?? string.Empty);
+            TemplatePackageCoordinator packageCoordinator = new(_environmentSettings, _templatePackageManager);
+            TemplateConstraintManager constraintManager = new(_environmentSettings);
+            TemplatePackageDisplay templatePackageDisplay = new(Reporter.Output, Reporter.Error);
 
-            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            CancellationTokenSource cancellationTokenSource = new();
             cancellationTokenSource.CancelAfter(ConstraintEvaluationTimeout);
 
             Task<IReadOnlyList<TemplateConstraintResult>> constraintsEvaluation = ValidateConstraintsAsync(constraintManager, args.Template, args.IsForceFlagSpecified ? cancellationTokenSource.Token : cancellationToken);
@@ -252,7 +252,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         private HashSet<string> GetReservedAliases()
         {
-            HashSet<string> reservedAliases = new HashSet<string>();
+            HashSet<string> reservedAliases = new();
             AddReservedNamesAndAliases(reservedAliases, this);
             //add options of parent? - this covers debug: options
             AddReservedNamesAndAliases(reservedAliases, _instantiateCommand);
@@ -310,7 +310,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             foreach ((CliTemplateParameter parameter, IReadOnlySet<string> aliases, IReadOnlyList<string> _) in parametersWithAliasAssignments)
             {
-                TemplateOption option = new TemplateOption(parameter, aliases);
+                TemplateOption option = new(parameter, aliases);
                 Options.Add(option.Option);
                 _templateSpecificOptions[parameter.Name] = option;
             }

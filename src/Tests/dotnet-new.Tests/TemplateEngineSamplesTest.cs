@@ -65,14 +65,14 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                ScrubbersDefinition.Empty
                .AddScrubber(sb => sb.Replace(DateTime.Now.ToString("MM/dd/yyyy"), "**/**/****")));
 
-            VerificationEngine engine = new VerificationEngine(_log);
+            VerificationEngine engine = new(_log);
             await engine.Execute(options)
                 .ConfigureAwait(false);
         }
 
         private string GetScenarioName(string[]? args)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             if (args != null)
             {

@@ -26,7 +26,7 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            List<string> buildWarnings = new List<string>();
+            List<string> buildWarnings = new();
 
             var packageReferencesToUpdate = new List<ITaskItem>();
 

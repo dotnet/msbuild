@@ -8,7 +8,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 {
     public class MockTaskItem : ITaskItem
     {
-        private Dictionary<string, string> _metadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, string> _metadata = new(StringComparer.OrdinalIgnoreCase);
 
         public MockTaskItem()
         {

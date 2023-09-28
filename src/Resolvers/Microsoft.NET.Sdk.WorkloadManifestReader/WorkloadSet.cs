@@ -17,7 +17,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     public class WorkloadSet
     {
-        public Dictionary<ManifestId, (ManifestVersion Version, SdkFeatureBand FeatureBand)> ManifestVersions = new Dictionary<ManifestId, (ManifestVersion version, SdkFeatureBand featureBand)>();
+        public Dictionary<ManifestId, (ManifestVersion Version, SdkFeatureBand FeatureBand)> ManifestVersions = new();
 
         //  TODO: Generate version from hash of manifest versions if not otherwise set
         public string? Version { get; set; }

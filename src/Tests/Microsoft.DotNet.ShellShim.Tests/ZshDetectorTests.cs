@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         [InlineData("/other-place/zsh")]
         public void GivenFollowingEnvironmentVariableValueItCanDetectZsh(string environmentVariableValue)
         {
-            Mock<IEnvironmentProvider> provider = new Mock<IEnvironmentProvider>(MockBehavior.Strict);
+            Mock<IEnvironmentProvider> provider = new(MockBehavior.Strict);
 
             provider
                 .Setup(p => p.GetEnvironmentVariable("SHELL"))
@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         [InlineData(null)]
         public void GivenFollowingEnvironmentVariableValueItCanDetectItIsNotZsh(string environmentVariableValue)
         {
-            Mock<IEnvironmentProvider> provider = new Mock<IEnvironmentProvider>(MockBehavior.Strict);
+            Mock<IEnvironmentProvider> provider = new(MockBehavior.Strict);
 
             provider
                 .Setup(p => p.GetEnvironmentVariable("SHELL"))

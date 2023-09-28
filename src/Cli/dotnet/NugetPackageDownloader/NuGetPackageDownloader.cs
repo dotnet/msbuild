@@ -173,13 +173,13 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         public async Task<IEnumerable<string>> ExtractPackageAsync(string packagePath, DirectoryPath targetFolder)
         {
             await using FileStream packageStream = File.OpenRead(packagePath);
-            PackageFolderReader packageReader = new PackageFolderReader(targetFolder.Value);
-            PackageExtractionContext packageExtractionContext = new PackageExtractionContext(
+            PackageFolderReader packageReader = new(targetFolder.Value);
+            PackageExtractionContext packageExtractionContext = new(
                 PackageSaveMode.Defaultv3,
                 XmlDocFileSaveMode.None,
                 null,
                 _verboseLogger);
-            NuGetPackagePathResolver packagePathResolver = new NuGetPackagePathResolver(targetFolder.Value);
+            NuGetPackagePathResolver packagePathResolver = new(targetFolder.Value);
             CancellationToken cancellationToken = CancellationToken.None;
 
             var allFilesInPackage = await PackageExtractor.ExtractPackageAsync(
@@ -303,7 +303,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                     packageSourceLocation?.RootConfigDirectory?.Value ?? currentDirectory);
             }
 
-            PackageSourceProvider packageSourceProvider = new PackageSourceProvider(settings);
+            PackageSourceProvider packageSourceProvider = new(settings);
             defaultSources = packageSourceProvider.LoadPackageSources().Where(source => source.IsEnabled);
 
 
@@ -316,7 +316,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                         continue;
                     }
 
-                    PackageSource packageSource = new PackageSource(source);
+                    PackageSource packageSource = new(source);
                     if (packageSource.TrySourceAsUri == null)
                     {
                         _verboseLogger.LogWarning(string.Format(
@@ -339,7 +339,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                 return defaultSources;
             }
 
-            List<PackageSource> customSources = new List<PackageSource>();
+            List<PackageSource> customSources = new();
             foreach (string source in packageSourceLocation?.SourceFeedOverrides)
             {
                 if (string.IsNullOrWhiteSpace(source))
@@ -347,7 +347,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                     continue;
                 }
 
-                PackageSource packageSource = new PackageSource(source);
+                PackageSource packageSource = new(source);
                 if (packageSource.TrySourceAsUri == null)
                 {
                     _verboseLogger.LogWarning(string.Format(

@@ -163,7 +163,7 @@ namespace Microsoft.DotNet.ToolPackage
                 CacheRow cacheRow)
         {
             RestoredCommandIdentifier restoredCommandIdentifier =
-                new RestoredCommandIdentifier(
+                new(
                     packageId,
                     NuGetVersion.Parse(cacheRow.Version),
                     NuGetFramework.Parse(cacheRow.TargetFramework),
@@ -171,7 +171,7 @@ namespace Microsoft.DotNet.ToolPackage
                     new ToolCommandName(cacheRow.Name));
 
             RestoredCommand restoredCommand =
-                new RestoredCommand(
+                new(
                     new ToolCommandName(cacheRow.Name),
                     cacheRow.Runner,
                     new FilePath(cacheRow.PathToExecutable));

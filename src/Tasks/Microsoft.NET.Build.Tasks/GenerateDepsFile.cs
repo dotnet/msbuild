@@ -98,7 +98,7 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string RuntimeGraphPath { get; set; }
 
-        List<ITaskItem> _filesWritten = new List<ITaskItem>();
+        List<ITaskItem> _filesWritten = new();
 
         [Output]
         public ITaskItem[] FilesWritten

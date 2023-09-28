@@ -28,45 +28,45 @@ namespace Microsoft.DotNet.Installer.Windows
         /// <summary>
         /// SID that matches built-in administrators.
         /// </summary>
-        private static readonly SecurityIdentifier s_AdministratorsSid = new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null);
+        private static readonly SecurityIdentifier s_AdministratorsSid = new(WellKnownSidType.BuiltinAdministratorsSid, null);
 
         /// <summary>
         /// SID that matches everyone.
         /// </summary>
-        private static readonly SecurityIdentifier s_EveryoneSid = new SecurityIdentifier(WellKnownSidType.WorldSid, null);
+        private static readonly SecurityIdentifier s_EveryoneSid = new(WellKnownSidType.WorldSid, null);
 
         /// <summary>
         /// Local SYSTEM SID.
         /// </summary>
-        private static readonly SecurityIdentifier s_LocalSystemSid = new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null);
+        private static readonly SecurityIdentifier s_LocalSystemSid = new(WellKnownSidType.LocalSystemSid, null);
 
         /// <summary>
         /// SID matching built-in user accounts.
         /// </summary>
-        private static readonly SecurityIdentifier s_UsersSid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
+        private static readonly SecurityIdentifier s_UsersSid = new(WellKnownSidType.BuiltinUsersSid, null);
 
         /// <summary>
         /// ACL rule associated with the Administrators SID.
         /// </summary>
-        private static readonly FileSystemAccessRule s_AdministratorRule = new FileSystemAccessRule(s_AdministratorsSid, FileSystemRights.FullControl,
+        private static readonly FileSystemAccessRule s_AdministratorRule = new(s_AdministratorsSid, FileSystemRights.FullControl,
             s_DefaultInheritance, PropagationFlags.None, AccessControlType.Allow);
 
         /// <summary>
         /// ACL rule associated with the Everyone SID.
         /// </summary>
-        private static readonly FileSystemAccessRule s_EveryoneRule = new FileSystemAccessRule(s_EveryoneSid, FileSystemRights.ReadAndExecute,
+        private static readonly FileSystemAccessRule s_EveryoneRule = new(s_EveryoneSid, FileSystemRights.ReadAndExecute,
             s_DefaultInheritance, PropagationFlags.None, AccessControlType.Allow);
 
         /// <summary>
         /// ACL rule associated with the Local SYSTEM SID.
         /// </summary>
-        private static readonly FileSystemAccessRule s_LocalSystemRule = new FileSystemAccessRule(s_LocalSystemSid, FileSystemRights.FullControl,
+        private static readonly FileSystemAccessRule s_LocalSystemRule = new(s_LocalSystemSid, FileSystemRights.FullControl,
             s_DefaultInheritance, PropagationFlags.None, AccessControlType.Allow);
 
         /// <summary>
         /// ACL rule associated with the built-in users SID.
         /// </summary>
-        private static readonly FileSystemAccessRule s_UsersRule = new FileSystemAccessRule(s_UsersSid, FileSystemRights.ReadAndExecute,
+        private static readonly FileSystemAccessRule s_UsersRule = new(s_UsersSid, FileSystemRights.ReadAndExecute,
             s_DefaultInheritance, PropagationFlags.None, AccessControlType.Allow);
 
         /// <summary>

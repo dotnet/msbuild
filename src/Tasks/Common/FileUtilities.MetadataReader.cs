@@ -56,7 +56,7 @@ namespace Microsoft.NET.Build.Tasks
                     Version result = null;
                     try
                     {
-                        using (PEReader peReader = new PEReader(assemblyStream, PEStreamOptions.LeaveOpen))
+                        using (PEReader peReader = new(assemblyStream, PEStreamOptions.LeaveOpen))
                         {
                             if (peReader.HasMetadata)
                             {

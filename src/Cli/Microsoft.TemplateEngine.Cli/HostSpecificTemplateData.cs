@@ -74,7 +74,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             get
             {
-                HashSet<string> hiddenNames = new HashSet<string>();
+                HashSet<string> hiddenNames = new();
                 foreach (KeyValuePair<string, IReadOnlyDictionary<string, string>> paramInfo in SymbolInfo)
                 {
                     if (paramInfo.Value.TryGetValue(IsHiddenKey, out string? hiddenStringValue)
@@ -93,7 +93,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             get
             {
-                HashSet<string> parametersToAlwaysShow = new HashSet<string>(StringComparer.Ordinal);
+                HashSet<string> parametersToAlwaysShow = new(StringComparer.Ordinal);
                 foreach (KeyValuePair<string, IReadOnlyDictionary<string, string>> paramInfo in SymbolInfo)
                 {
                     if (paramInfo.Value.TryGetValue(AlwaysShowKey, out string? alwaysShowValue)
@@ -112,7 +112,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             get
             {
-                Dictionary<string, string> map = new Dictionary<string, string>();
+                Dictionary<string, string> map = new();
 
                 foreach (KeyValuePair<string, IReadOnlyDictionary<string, string>> paramInfo in SymbolInfo)
                 {
@@ -130,7 +130,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             get
             {
-                Dictionary<string, string> map = new Dictionary<string, string>();
+                Dictionary<string, string> map = new();
 
                 foreach (KeyValuePair<string, IReadOnlyDictionary<string, string>> paramInfo in SymbolInfo)
                 {

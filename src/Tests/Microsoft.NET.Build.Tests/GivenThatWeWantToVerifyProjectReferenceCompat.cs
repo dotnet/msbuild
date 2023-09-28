@@ -82,7 +82,7 @@ namespace Microsoft.NET.Build.Tests
 
         TestProject GetTestProject(string name, string target, bool isSdkProject)
         {
-            TestProject ret = new TestProject()
+            TestProject ret = new()
             {
                 Name = name,
                 IsSdkProject = isSdkProject

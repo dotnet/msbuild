@@ -70,8 +70,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var task = GetExecutedTaskFromPrefix(projectName, out lockFile);
 
             // set of valid targets and packages
-            HashSet<string> validTargets = new HashSet<string>(lockFile.PackageSpec.TargetFrameworks.Select(tf => tf.TargetAlias));
-            HashSet<string> validPackages = new HashSet<string>(lockFile.Libraries.Select(x => $"{x.Name}/{x.Version.ToNormalizedString()}"));
+            HashSet<string> validTargets = new(lockFile.PackageSpec.TargetFrameworks.Select(tf => tf.TargetAlias));
+            HashSet<string> validPackages = new(lockFile.Libraries.Select(x => $"{x.Name}/{x.Version.ToNormalizedString()}"));
 
             Func<ITaskItem[], bool> allValidParentTarget =
                 (items) => items.All(x => validTargets.Contains(x.GetMetadata(MetadataKeys.ParentTarget)));

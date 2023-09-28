@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class Complete
     {
-        private static CompletionItem ToCompletionItem(string s) => new CompletionItem(s);
+        private static CompletionItem ToCompletionItem(string s) => new(s);
 
         public static IEnumerable<CompletionItem> TargetFrameworksFromProjectFile(CompletionContext _)
         {

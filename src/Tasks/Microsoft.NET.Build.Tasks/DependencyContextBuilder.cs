@@ -41,7 +41,7 @@ namespace Microsoft.NET.Build.Tasks
         private Dictionary<ReferenceInfo, string> _referenceLibraryNames;
 
         // This resolver is only used for building file names, so that base path is not required.
-        private readonly VersionFolderPathResolver _versionFolderPathResolver = new VersionFolderPathResolver(rootPath: null);
+        private readonly VersionFolderPathResolver _versionFolderPathResolver = new(rootPath: null);
 
         private const string NetCorePlatformLibrary = "Microsoft.NETCore.App";
 
@@ -257,7 +257,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             CalculateExcludedLibraries();
 
-            List<RuntimeLibrary> runtimeLibraries = new List<RuntimeLibrary>();
+            List<RuntimeLibrary> runtimeLibraries = new();
 
             if (_includeMainProjectInDepsFile)
             {
@@ -301,7 +301,7 @@ namespace Microsoft.NET.Build.Tasks
                 runtimeLibraries.Add(runtimeLibrary);
             }
 
-            List<CompilationLibrary> compilationLibraries = new List<CompilationLibrary>();
+            List<CompilationLibrary> compilationLibraries = new();
             if (IncludeCompilationLibraries)
             {
                 if (_includeMainProjectInDepsFile)
@@ -434,7 +434,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private List<Dependency> GetProjectDependencies()
         {
-            List<Dependency> dependencies = new List<Dependency>();
+            List<Dependency> dependencies = new();
             foreach (var dependencyName in _mainProjectDependencies)
             {
                 if (_dependencyLibraries.TryGetValue(dependencyName, out var dependencyLibrary))
@@ -521,9 +521,9 @@ namespace Microsoft.NET.Build.Tasks
                 return null;
             }
 
-            List<RuntimeAssetGroup> runtimeAssemblyGroups = new List<RuntimeAssetGroup>();
-            List<RuntimeAssetGroup> nativeLibraryGroups = new List<RuntimeAssetGroup>();
-            List<ResourceAssembly> resourceAssemblies = new List<ResourceAssembly>();
+            List<RuntimeAssetGroup> runtimeAssemblyGroups = new();
+            List<RuntimeAssetGroup> nativeLibraryGroups = new();
+            List<ResourceAssembly> resourceAssemblies = new();
 
             if (library.Type == "project" && !(referenceProjectInfo is UnreferencedProjectInfo))
             {
@@ -603,7 +603,7 @@ namespace Microsoft.NET.Build.Tasks
                 out string hashPath,
                 out SingleProjectInfo referenceProjectInfo);
 
-            List<string> assemblies = new List<string>();
+            List<string> assemblies = new();
 
             if (library.Type == "project" && !(referenceProjectInfo is UnreferencedProjectInfo))
             {
@@ -743,14 +743,14 @@ namespace Microsoft.NET.Build.Tasks
         {
             Dictionary<string, DependencyLibrary> libraries = _dependencyLibraries;
 
-            HashSet<string> runtimeExclusionList = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            HashSet<string> runtimeExclusionList = new(StringComparer.OrdinalIgnoreCase);
 
             if (_isFrameworkDependent && !string.IsNullOrEmpty(_platformLibrary))
             {
                 //  Exclude platform library and dependencies.
                 runtimeExclusionList.Add(_platformLibrary);
 
-                Stack<LibraryDependency> dependenciesToWalk = new Stack<LibraryDependency>(_libraryDependencies[_platformLibrary]);
+                Stack<LibraryDependency> dependenciesToWalk = new(_libraryDependencies[_platformLibrary]);
 
                 // If the platform library is not Microsoft.NETCore.App, treat it as an implicit dependency.
                 // This makes it so Microsoft.AspNet.* 2.x platforms also exclude Microsoft.NETCore.App files.

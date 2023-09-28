@@ -41,7 +41,7 @@ public class Program
     }
 }";
 
-            TestProject referencedProjectWithPart = new TestProject()
+            TestProject referencedProjectWithPart = new()
             {
                 Name = "ReferencedProjectWithPart",
                 TargetFrameworks = "net462",
@@ -57,7 +57,7 @@ class Class1
     public string X => typeof(System.ServiceModel.AddressFilterMode).ToString();
 }";
 
-            TestProject referencedProjectWithMvc = new TestProject()
+            TestProject referencedProjectWithMvc = new()
             {
                 Name = "ReferencedProjectWithMVC",
                 ProjectSdk = "Microsoft.NET.Sdk.Web",

@@ -5,7 +5,7 @@ namespace Microsoft.NET.TestFramework
 {
     public class StringTestLogger : ITestOutputHelper
     {
-        StringBuilder _stringBuilder = new StringBuilder();
+        StringBuilder _stringBuilder = new();
 
         public void WriteLine(string message)
         {

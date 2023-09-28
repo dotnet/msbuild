@@ -21,7 +21,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
         private Task _gcTask;
         private Task<Connection> _listenTask;
         private CancellationTokenSource _listenCancellationTokenSource;
-        private List<Task<ConnectionResult>> _connections = new List<Task<ConnectionResult>>();
+        private List<Task<ConnectionResult>> _connections = new();
 
         public DefaultRequestDispatcher(
             ConnectionHost connectionHost,

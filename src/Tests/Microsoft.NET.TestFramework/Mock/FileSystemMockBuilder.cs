@@ -10,7 +10,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
 {
     public class FileSystemMockBuilder
     {
-        private readonly List<Action> _actions = new List<Action>();
+        private readonly List<Action> _actions = new();
         private MockFileSystemModel _mockFileSystemModel;
         public string TemporaryFolder { get; set; }
         public string WorkingDirectory { get; set; }
@@ -147,7 +147,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                     }
                     else
                     {
-                        DirectoryNode directoryNode = new DirectoryNode();
+                        DirectoryNode directoryNode = new();
                         directoryNode = (DirectoryNode)current.Subs.GetOrAdd(p, directoryNode);
                         current = directoryNode;
                     }
@@ -161,7 +161,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                     path = Path.Combine(WorkingDirectory, path);
                 }
 
-                PathModel pathModel = new PathModel(path);
+                PathModel pathModel = new(path);
 
                 return pathModel;
             }
@@ -193,7 +193,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
             {
                 if (TryGetNodeParent(path, out DirectoryNode current) && current != null)
                 {
-                    PathModel pathModel = new PathModel(path);
+                    PathModel pathModel = new(path);
 
                     if (current.Subs.TryGetValue(pathModel.FileOrDirectoryName(), out var node))
                     {
@@ -215,7 +215,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
             {
                 DirectoryNode current = GetParentOfDirectoryNode(path);
 
-                PathModel pathModel = new PathModel(path);
+                PathModel pathModel = new(path);
                 DirectoryNode directoryNode = current.Subs[pathModel.FileOrDirectoryName()] as DirectoryNode;
 
                 Debug.Assert(directoryNode != null, nameof(directoryNode) + " != null");
@@ -345,7 +345,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
 
                 if (_files.TryGetNodeParent(path, out DirectoryNode current))
                 {
-                    PathModel pathModel = new PathModel(path);
+                    PathModel pathModel = new(path);
                     return (current.Subs.TryGetValue(pathModel.FileOrDirectoryName(), out var node)
                             && node is FileNode);
                 }
@@ -362,7 +362,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
 
                 if (_files.TryGetNodeParent(path, out DirectoryNode current) && current != null)
                 {
-                    PathModel pathModel = new PathModel(path);
+                    PathModel pathModel = new(path);
                     if (current.Subs.TryGetValue(pathModel.FileOrDirectoryName(), out var node))
                     {
                         if (node is FileNode fileNode)
@@ -490,7 +490,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
             {
                 if (_files.TryGetNodeParent(path, out DirectoryNode current))
                 {
-                    PathModel pathModel = new PathModel(path);
+                    PathModel pathModel = new(path);
                     current.Subs.TryRemove(pathModel.FileOrDirectoryName(), out _);
                 }
                 else
@@ -519,7 +519,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
 
                 if (_files.TryGetNodeParent(path, out DirectoryNode current))
                 {
-                    PathModel pathModel = new PathModel(path);
+                    PathModel pathModel = new(path);
 
                     return current.Subs.TryGetValue(pathModel.FileOrDirectoryName(), out var node)
                            && node is DirectoryNode;
@@ -530,7 +530,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
 
             public ITemporaryDirectory CreateTemporaryDirectory()
             {
-                TemporaryDirectoryMock temporaryDirectoryMock = new TemporaryDirectoryMock(_files.TemporaryFolder);
+                TemporaryDirectoryMock temporaryDirectoryMock = new(_files.TemporaryFolder);
                 CreateDirectory(temporaryDirectoryMock.DirectoryPath);
                 return temporaryDirectoryMock;
             }
@@ -583,7 +583,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                 if (path == null) throw new ArgumentNullException(nameof(path));
 
                 DirectoryNode parentOfPath = _files.GetParentOfDirectoryNode(path);
-                PathModel pathModel = new PathModel(path);
+                PathModel pathModel = new(path);
                 if (recursive)
                 {
                     parentOfPath.Subs.TryRemove(pathModel.FileOrDirectoryName(), out _);
@@ -614,13 +614,13 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                 DirectoryNode sourceParent
                     = _files.GetParentOfDirectoryNode(source);
 
-                PathModel parentPathModel = new PathModel(source);
+                PathModel parentPathModel = new(source);
 
                 IFileSystemTreeNode sourceNode = sourceParent.Subs[parentPathModel.FileOrDirectoryName()];
 
                 if (_files.TryGetNodeParent(destination, out DirectoryNode current) && current != null)
                 {
-                    PathModel destinationPathModel = new PathModel(destination);
+                    PathModel destinationPathModel = new(destination);
 
                     if (current.Subs.TryGetValue(destinationPathModel.FileOrDirectoryName(), out var node))
                     {

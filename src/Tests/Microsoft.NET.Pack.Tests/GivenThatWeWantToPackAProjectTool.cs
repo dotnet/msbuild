@@ -14,7 +14,7 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_packs_project_tools_targeting_netcoreapp2_2()
         {
-            TestProject toolProject = new TestProject()
+            TestProject toolProject = new()
             {
                 Name = "TestToolNetCore22",
                 TargetFrameworks = "netcoreapp2.2",
@@ -33,7 +33,7 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_fails_to_pack_project_tools_targeting_netcoreapp3_0()
         {
-            TestProject toolProject = new TestProject()
+            TestProject toolProject = new()
             {
                 Name = "TestTool",
                 TargetFrameworks = "netcoreapp3.0",

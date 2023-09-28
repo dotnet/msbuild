@@ -63,7 +63,7 @@ namespace Microsoft.NET.Build.Tests
 
                             XElement propertyGroup = project.Root.Element(ns + "PropertyGroup");
 
-                            XElement includeProjectsNotInAssetsFileInDepsFile = new XElement(ns + "IncludeProjectsNotInAssetsFileInDepsFile");
+                            XElement includeProjectsNotInAssetsFileInDepsFile = new(ns + "IncludeProjectsNotInAssetsFileInDepsFile");
                             includeProjectsNotInAssetsFileInDepsFile.Add("true");
                             propertyGroup.Add(includeProjectsNotInAssetsFileInDepsFile);
                         }

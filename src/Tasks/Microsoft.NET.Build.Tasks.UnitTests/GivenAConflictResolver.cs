@@ -417,7 +417,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
         static ConflictResults GetConflicts(MockConflictItem[] itemsToCommit, MockConflictItem[] itemsNotToCommit, ITaskItem[] packageOverrides)
         {
-            ConflictResults ret = new ConflictResults();
+            ConflictResults ret = new();
 
             void ConflictHandler(MockConflictItem winner, MockConflictItem loser)
             {

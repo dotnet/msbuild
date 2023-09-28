@@ -26,8 +26,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var postActionProcessor = new CaptureMePostAction(expectedResult: true);
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), postActionProcessor);
             var postAction = new MockPostAction(default, default, default, default, default!);
-            MockCreationResult creationResult = new MockCreationResult(new List<IPostAction>() { postAction });
-            MockCreationEffects creationEffects = new MockCreationEffects();
+            MockCreationResult creationResult = new(new List<IPostAction>() { postAction });
+            MockCreationEffects creationEffects = new();
             var templateCreationResult = new TemplateCreationResult(
                 CreationResultStatus.Success,
                 "TestTemplate",
@@ -36,7 +36,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 "TestPath",
                 creationEffects);
 
-            PostActionDispatcher dispatcher = new PostActionDispatcher(
+            PostActionDispatcher dispatcher = new(
                 engineEnvironmentSettings,
                 () => string.Empty);
 
@@ -58,7 +58,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), postActionProcessor);
             var postAction = new MockPostAction(default, default, default, default, default!);
 
-            MockCreationEffects creationEffects = new MockCreationEffects();
+            MockCreationEffects creationEffects = new();
             var templateCreationResult = new TemplateCreationResult(
                 CreationResultStatus.Success,
                 "TestTemplate",
@@ -67,7 +67,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 "TestPath",
                 creationEffects);
 
-            PostActionDispatcher dispatcher = new PostActionDispatcher(
+            PostActionDispatcher dispatcher = new(
                 engineEnvironmentSettings,
                 () => string.Empty);
 
@@ -83,8 +83,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var postActionProcessor = new CaptureMePostAction(expectedResult: false);
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), postActionProcessor);
             var postAction = new MockPostAction(default, default, default, default, default!);
-            MockCreationResult creationResult = new MockCreationResult(new List<IPostAction>() { postAction });
-            MockCreationEffects creationEffects = new MockCreationEffects();
+            MockCreationResult creationResult = new(new List<IPostAction>() { postAction });
+            MockCreationEffects creationEffects = new();
             var templateCreationResult = new TemplateCreationResult(
                 CreationResultStatus.Success,
                 "TestTemplate",
@@ -93,7 +93,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 "TestPath",
                 creationEffects);
 
-            PostActionDispatcher dispatcher = new PostActionDispatcher(
+            PostActionDispatcher dispatcher = new(
                 engineEnvironmentSettings,
                 () => string.Empty);
 
@@ -114,8 +114,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), postActionProcessor);
             var postAction = new MockPostAction(default, default, default, default, default!);
 
-            MockCreationResult creationResult = new MockCreationResult(new List<IPostAction>() { postAction });
-            MockCreationEffects creationEffects = new MockCreationEffects();
+            MockCreationResult creationResult = new(new List<IPostAction>() { postAction });
+            MockCreationEffects creationEffects = new();
             var templateCreationResult = new TemplateCreationResult(
                 CreationResultStatus.Success,
                 "TestTemplate",
@@ -124,7 +124,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 "TestPath",
                 creationEffects);
 
-            PostActionDispatcher dispatcher = new PostActionDispatcher(
+            PostActionDispatcher dispatcher = new(
                 engineEnvironmentSettings,
                 () => string.Empty);
 
@@ -144,8 +144,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 ActionId = Guid.NewGuid(),
             };
 
-            MockCreationResult creationResult = new MockCreationResult(new List<IPostAction>() { postAction });
-            MockCreationEffects creationEffects = new MockCreationEffects();
+            MockCreationResult creationResult = new(new List<IPostAction>() { postAction });
+            MockCreationEffects creationEffects = new();
             var templateCreationResult = new TemplateCreationResult(
                 CreationResultStatus.Success,
                 "TestTemplate",
@@ -154,7 +154,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 "TestPath",
                 creationEffects);
 
-            PostActionDispatcher dispatcher = new PostActionDispatcher(
+            PostActionDispatcher dispatcher = new(
                 engineEnvironmentSettings,
                 () => string.Empty);
 
@@ -170,8 +170,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), new ThrowExceptionPostAction());
             var postAction = new MockPostAction(default, default, default, default, default!);
 
-            MockCreationResult creationResult = new MockCreationResult(new List<IPostAction>() { postAction });
-            MockCreationEffects creationEffects = new MockCreationEffects();
+            MockCreationResult creationResult = new(new List<IPostAction>() { postAction });
+            MockCreationEffects creationEffects = new();
             var templateCreationResult = new TemplateCreationResult(
                 CreationResultStatus.Success,
                 "TestTemplate",
@@ -180,7 +180,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 "TestPath",
                 creationEffects);
 
-            PostActionDispatcher dispatcher = new PostActionDispatcher(
+            PostActionDispatcher dispatcher = new(
                 engineEnvironmentSettings,
                 () => string.Empty);
 
@@ -211,8 +211,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 ContinueOnError = true
             };
 
-            MockCreationResult creationResult = new MockCreationResult(new List<IPostAction>() { postAction1, postAction2 });
-            MockCreationEffects creationEffects = new MockCreationEffects();
+            MockCreationResult creationResult = new(new List<IPostAction>() { postAction1, postAction2 });
+            MockCreationEffects creationEffects = new();
             var templateCreationResult = new TemplateCreationResult(
                 CreationResultStatus.Success,
                 "TestTemplate",
@@ -221,7 +221,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 "TestPath",
                 creationEffects);
 
-            PostActionDispatcher dispatcher = new PostActionDispatcher(
+            PostActionDispatcher dispatcher = new(
                 engineEnvironmentSettings,
                 () => string.Empty);
 
@@ -259,8 +259,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 ContinueOnError = false
             };
 
-            MockCreationResult creationResult = new MockCreationResult(new List<IPostAction>() { postAction1, postAction2 });
-            MockCreationEffects creationEffects = new MockCreationEffects();
+            MockCreationResult creationResult = new(new List<IPostAction>() { postAction1, postAction2 });
+            MockCreationEffects creationEffects = new();
             var templateCreationResult = new TemplateCreationResult(
                 CreationResultStatus.Success,
                 "TestTemplate",
@@ -269,7 +269,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 "TestPath",
                 creationEffects);
 
-            PostActionDispatcher dispatcher = new PostActionDispatcher(
+            PostActionDispatcher dispatcher = new(
                 engineEnvironmentSettings,
                 () => string.Empty);
 
@@ -295,8 +295,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 { { "executable", "do-not-exist" } }
             };
 
-            MockCreationResult creationResult = new MockCreationResult(new List<IPostAction>() { postAction });
-            MockCreationEffects creationEffects = new MockCreationEffects();
+            MockCreationResult creationResult = new(new List<IPostAction>() { postAction });
+            MockCreationEffects creationEffects = new();
             var templateCreationResult = new TemplateCreationResult(
                 CreationResultStatus.Success,
                 "TestTemplate",
@@ -305,7 +305,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Path.GetTempPath(),
                 creationEffects);
 
-            PostActionDispatcher dispatcher = new PostActionDispatcher(
+            PostActionDispatcher dispatcher = new(
                 engineEnvironmentSettings,
                 () => string.Empty);
 
@@ -327,8 +327,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 { { "executable", "do-not-exist" } }
             };
 
-            MockCreationResult creationResult = new MockCreationResult(new List<IPostAction>() { postAction });
-            MockCreationEffects creationEffects = new MockCreationEffects();
+            MockCreationResult creationResult = new(new List<IPostAction>() { postAction });
+            MockCreationEffects creationEffects = new();
             var templateCreationResult = new TemplateCreationResult(
                 CreationResultStatus.Success,
                 "TestTemplate",
@@ -337,7 +337,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Path.GetTempPath(),
                 creationEffects);
 
-            PostActionDispatcher dispatcher = new PostActionDispatcher(
+            PostActionDispatcher dispatcher = new(
                 engineEnvironmentSettings,
                 () => string.Empty);
 
@@ -358,8 +358,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 { { "executable", "do-not-exist" } }
             };
 
-            MockCreationResult creationResult = new MockCreationResult(new List<IPostAction>() { postAction });
-            MockCreationEffects creationEffects = new MockCreationEffects();
+            MockCreationResult creationResult = new(new List<IPostAction>() { postAction });
+            MockCreationEffects creationEffects = new();
             var templateCreationResult = new TemplateCreationResult(
                 CreationResultStatus.Success,
                 "TestTemplate",
@@ -368,7 +368,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Path.GetTempPath(),
                 creationEffects);
 
-            PostActionDispatcher dispatcher = new PostActionDispatcher(
+            PostActionDispatcher dispatcher = new(
                 engineEnvironmentSettings,
                 () => "Y");  // the user allows to run post action
 
@@ -391,8 +391,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 { { "executable", "do-not-exist" } }
             };
 
-            MockCreationResult creationResult = new MockCreationResult(new List<IPostAction>() { postAction });
-            MockCreationEffects creationEffects = new MockCreationEffects();
+            MockCreationResult creationResult = new(new List<IPostAction>() { postAction });
+            MockCreationEffects creationEffects = new();
             var templateCreationResult = new TemplateCreationResult(
                 CreationResultStatus.Success,
                 "TestTemplate",
@@ -401,7 +401,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Path.GetTempPath(),
                 creationEffects);
 
-            PostActionDispatcher dispatcher = new PostActionDispatcher(
+            PostActionDispatcher dispatcher = new(
                 engineEnvironmentSettings,
                 () => "N"); // the user forbids to run post action
 
@@ -422,8 +422,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 { { "executable", "do-not-exist" } }
             };
 
-            MockCreationResult creationResult = new MockCreationResult(new List<IPostAction>() { postAction });
-            MockCreationEffects creationEffects = new MockCreationEffects();
+            MockCreationResult creationResult = new(new List<IPostAction>() { postAction });
+            MockCreationEffects creationEffects = new();
             var templateCreationResult = new TemplateCreationResult(
                 CreationResultStatus.Success,
                 "TestTemplate",
@@ -432,7 +432,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Path.GetTempPath(),
                 creationEffects);
 
-            PostActionDispatcher dispatcher = new PostActionDispatcher(
+            PostActionDispatcher dispatcher = new(
                 engineEnvironmentSettings,
                 () => "N"); // the user forbids to run post action
 
@@ -468,8 +468,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 ContinueOnError = true
             };
 
-            MockCreationResult creationResult = new MockCreationResult(new List<IPostAction>() { postAction1, postAction2 });
-            MockCreationEffects creationEffects = new MockCreationEffects();
+            MockCreationResult creationResult = new(new List<IPostAction>() { postAction1, postAction2 });
+            MockCreationEffects creationEffects = new();
             var templateCreationResult = new TemplateCreationResult(
                 CreationResultStatus.Success,
                 "TestTemplate",
@@ -478,7 +478,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Path.GetTempPath(),
                 creationEffects);
 
-            PostActionDispatcher dispatcher = new PostActionDispatcher(
+            PostActionDispatcher dispatcher = new(
                 engineEnvironmentSettings,
                 () => "N"); // the user forbids to run post action
 
@@ -511,8 +511,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 ContinueOnError = true
             };
 
-            MockCreationResult creationResult = new MockCreationResult(new List<IPostAction>() { postAction1, postAction2 });
-            MockCreationEffects creationEffects = new MockCreationEffects();
+            MockCreationResult creationResult = new(new List<IPostAction>() { postAction1, postAction2 });
+            MockCreationEffects creationEffects = new();
             var templateCreationResult = new TemplateCreationResult(
                 CreationResultStatus.Success,
                 "TestTemplate",
@@ -521,7 +521,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Path.GetTempPath(),
                 creationEffects);
 
-            PostActionDispatcher dispatcher = new PostActionDispatcher(
+            PostActionDispatcher dispatcher = new(
                 engineEnvironmentSettings,
                 () => "N"); // the user forbids to run post action
 

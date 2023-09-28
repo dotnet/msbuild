@@ -61,7 +61,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             get
             {
-                HashSet<string> shortNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                HashSet<string> shortNames = new(StringComparer.OrdinalIgnoreCase);
                 foreach (ITemplateInfo template in Templates.OrderByDescending(t => t.Precedence))
                 {
                     shortNames.UnionWith(template.ShortNameList);
@@ -77,7 +77,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             get
             {
-                HashSet<string?> language = new HashSet<string?>(StringComparer.OrdinalIgnoreCase);
+                HashSet<string?> language = new(StringComparer.OrdinalIgnoreCase);
                 foreach (ITemplateInfo template in Templates)
                 {
                     language.Add(template.GetLanguage());
@@ -93,7 +93,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             get
             {
-                HashSet<string?> type = new HashSet<string?>(StringComparer.OrdinalIgnoreCase);
+                HashSet<string?> type = new(StringComparer.OrdinalIgnoreCase);
                 foreach (ITemplateInfo template in Templates)
                 {
                     type.Add(template.GetTemplateType());
@@ -109,7 +109,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             get
             {
-                HashSet<string> baselines = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                HashSet<string> baselines = new(StringComparer.OrdinalIgnoreCase);
                 foreach (ITemplateInfo template in Templates)
                 {
                     foreach (var baseline in template.BaselineInfo)
@@ -155,7 +155,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             get
             {
-                HashSet<string> authors = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                HashSet<string> authors = new(StringComparer.OrdinalIgnoreCase);
                 foreach (ITemplateInfo template in Templates)
                 {
                     if (!string.IsNullOrWhiteSpace(template.Author))

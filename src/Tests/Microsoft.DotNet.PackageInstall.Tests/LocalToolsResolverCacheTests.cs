@@ -22,14 +22,14 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         {
             IFileSystem fileSystem = new FileSystemMockBuilder().UseCurrentSystemTemporaryDirectory().Build();
             DirectoryPath tempDirectory =
-                new DirectoryPath(fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath);
+                new(fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath);
             DirectoryPath cacheDirectory = tempDirectory.WithSubDirectories("cacheDirectory");
             DirectoryPath nuGetGlobalPackagesFolder = tempDirectory.WithSubDirectories("nugetGlobalPackageLocation");
             fileSystem.Directory.CreateDirectory(cacheDirectory.Value);
             const int version = 1;
 
             LocalToolsResolverCache localToolsResolverCache =
-                new LocalToolsResolverCache(fileSystem, cacheDirectory, version);
+                new(fileSystem, cacheDirectory, version);
             return (nuGetGlobalPackagesFolder, localToolsResolverCache);
         }
 
@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
 
             NuGetFramework targetFramework = NuGetFramework.Parse(ToolsetInfo.CurrentTargetFramework);
             string runtimeIdentifier = Constants.AnyRid;
-            PackageId packageId = new PackageId("my.toolBundle");
+            PackageId packageId = new("my.toolBundle");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
             IReadOnlyList<RestoredCommand> restoredCommands = new[]
             {
@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
 
             NuGetFramework targetFramework = NuGetFramework.Parse(ToolsetInfo.CurrentTargetFramework);
             string runtimeIdentifier = Constants.AnyRid;
-            PackageId packageId = new PackageId("my.toolBundle");
+            PackageId packageId = new("my.toolBundle");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
             IReadOnlyList<RestoredCommand> restoredCommands = new[]
             {
@@ -114,7 +114,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
 
             NuGetFramework targetFramework = NuGetFramework.Parse(ToolsetInfo.CurrentTargetFramework);
             string runtimeIdentifier = Constants.AnyRid;
-            PackageId packageId = new PackageId("my.toolBundle");
+            PackageId packageId = new("my.toolBundle");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
             IReadOnlyList<RestoredCommand> restoredCommands = new[]
             {
@@ -154,7 +154,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
 
             NuGetFramework targetFramework = NuGetFramework.Parse(ToolsetInfo.CurrentTargetFramework);
             string runtimeIdentifier = Constants.AnyRid;
-            PackageId packageId = new PackageId("my.toolBundle");
+            PackageId packageId = new("my.toolBundle");
 
             NuGetVersion previewNuGetVersion = NuGetVersion.Parse("0.0.2");
             IReadOnlyList<RestoredCommand> restoredCommandsV0 = new[]
@@ -225,7 +225,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
 
             NuGetFramework targetFramework = NuGetFramework.Parse(ToolsetInfo.CurrentTargetFramework);
             string runtimeIdentifier = Constants.AnyRid;
-            PackageId packageId = new PackageId("my.toolBundle");
+            PackageId packageId = new("my.toolBundle");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
             IReadOnlyList<RestoredCommand> restoredCommands = new[]
             {
@@ -296,18 +296,18 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             IFileSystem fileSystem = new FileSystemMockBuilder().UseCurrentSystemTemporaryDirectory().Build();
 
             DirectoryPath tempDirectory =
-                new DirectoryPath(fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath);
+                new(fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath);
             DirectoryPath cacheDirectory = tempDirectory.WithSubDirectories("cacheDirectory");
             DirectoryPath nuGetGlobalPackagesFolder = tempDirectory.WithSubDirectories("nugetGlobalPackageLocation");
             fileSystem.Directory.CreateDirectory(cacheDirectory.Value);
             const int version = 1;
 
             LocalToolsResolverCache localToolsResolverCache =
-                new LocalToolsResolverCache(fileSystem, cacheDirectory, version);
+                new(fileSystem, cacheDirectory, version);
 
             NuGetFramework targetFramework = NuGetFramework.Parse(ToolsetInfo.CurrentTargetFramework);
             string runtimeIdentifier = Constants.AnyRid;
-            PackageId packageId = new PackageId("my.toolBundle");
+            PackageId packageId = new("my.toolBundle");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
             IReadOnlyList<RestoredCommand> restoredCommands = new[]
             {
@@ -353,18 +353,18 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                     : new FileSystemWrapper();
 
             DirectoryPath tempDirectory =
-                new DirectoryPath(fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath);
+                new(fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath);
             DirectoryPath cacheDirectory = tempDirectory.WithSubDirectories("cacheDirectory");
             DirectoryPath nuGetGlobalPackagesFolder = tempDirectory.WithSubDirectories("nugetGlobalPackageLocation");
             fileSystem.Directory.CreateDirectory(cacheDirectory.Value);
             const int version = 1;
 
             LocalToolsResolverCache localToolsResolverCache =
-                new LocalToolsResolverCache(fileSystem, cacheDirectory, version);
+                new(fileSystem, cacheDirectory, version);
 
             NuGetFramework targetFramework = NuGetFramework.Parse(ToolsetInfo.CurrentTargetFramework);
             string runtimeIdentifier = Constants.AnyRid;
-            PackageId packageId = new PackageId("my.toolBundle");
+            PackageId packageId = new("my.toolBundle");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
             IReadOnlyList<RestoredCommand> restoredCommands = new[]
             {

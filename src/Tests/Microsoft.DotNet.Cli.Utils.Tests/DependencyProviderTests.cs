@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         [InlineData(true, "NET.CORE.SDK,v6.0", @"SOFTWARE\Classes\Installer\Dependencies\NET.CORE.SDK,v6.0\Dependents", "HKEY_LOCAL_MACHINE")]
         public void ProviderProperties(bool allUsers, string providerKeyName, string expectedDependentsKeyPath, string expectedBaseKeyName)
         {
-            DependencyProvider dep = new DependencyProvider(providerKeyName, allUsers);
+            DependencyProvider dep = new(providerKeyName, allUsers);
 
             Assert.Equal(expectedDependentsKeyPath, dep.DependentsKeyPath);
             Assert.Equal(expectedBaseKeyName, dep.BaseKey.Name);
@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             // We cannot create per-machine entries unless the tests run elevated. The results are the
             // the same, it's only the base key that's different
-            DependencyProvider dep = new DependencyProvider(".NET_SDK_TEST_PROVIDER_KEY", allUsers: false);
+            DependencyProvider dep = new(".NET_SDK_TEST_PROVIDER_KEY", allUsers: false);
 
             try
             {
@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         [WindowsOnlyFact]
         public void ItCanFindVisualStudioDependents()
         {
-            DependencyProvider dep = new DependencyProvider(".NET_SDK_TEST_PROVIDER_KEY", allUsers: false);
+            DependencyProvider dep = new(".NET_SDK_TEST_PROVIDER_KEY", allUsers: false);
 
             try
             {
@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         [WindowsOnlyFact]
         public void ItWillNotRemoveTheProviderIfOtherDependentsExist()
         {
-            DependencyProvider dep = new DependencyProvider(".NET_SDK_TEST_PROVIDER_KEY", allUsers: false);
+            DependencyProvider dep = new(".NET_SDK_TEST_PROVIDER_KEY", allUsers: false);
 
             try
             {
@@ -91,7 +91,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         public void ItReturnsNullIfProductCodeDoesNotExist()
         {
             string providerKeyName = "Microsoft.NET.Test.Pack";
-            DependencyProvider dep = new DependencyProvider(providerKeyName, allUsers: false);
+            DependencyProvider dep = new(providerKeyName, allUsers: false);
             using RegistryKey providerKey = Registry.CurrentUser.CreateSubKey(Path.Combine(DependencyProvider.DependenciesKeyRelativePath, providerKeyName), writable: true);
 
             try
@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         public void ItCanRetrieveTheProductCodeFromTheProviderKey()
         {
             string providerKeyName = "Microsoft.NET.Test.Pack";
-            DependencyProvider dep = new DependencyProvider(providerKeyName, allUsers: false);
+            DependencyProvider dep = new(providerKeyName, allUsers: false);
             using RegistryKey providerKey = Registry.CurrentUser.CreateSubKey(Path.Combine(DependencyProvider.DependenciesKeyRelativePath, providerKeyName), writable: true);
             string productCode = Guid.NewGuid().ToString("B");
             providerKey?.SetValue(null, productCode);

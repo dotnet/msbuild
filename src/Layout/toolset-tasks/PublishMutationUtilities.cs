@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             JToken deps;
             using (var file = File.OpenText(depsFile))
-            using (JsonTextReader reader = new JsonTextReader(file))
+            using (JsonTextReader reader = new(file))
             {
                 deps = JToken.ReadFrom(reader);
             }

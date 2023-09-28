@@ -13,7 +13,7 @@ namespace Microsoft.NET.TestFramework.Utilities
         }
 
         // This call could take about 00.050s. So cache it can help
-        private static readonly Lazy<string> NugetGlobalPackagesFolder = new Lazy<string>(() =>
+        private static readonly Lazy<string> NugetGlobalPackagesFolder = new(() =>
         {
             ISettings nugetSetting = Settings.LoadDefaultSettings(
                 root: Directory.GetCurrentDirectory(),

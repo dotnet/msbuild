@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
             };
 
         static WorkloadResolver.WorkloadInfo CreateWorkloadInfo(string id, string description = null)
-            => new WorkloadResolver.WorkloadInfo(new WorkloadId(id), description);
+            => new(new WorkloadId(id), description);
 
         public GivenDotnetWorkloadSearch(ITestOutputHelper log) : base(log)
         {

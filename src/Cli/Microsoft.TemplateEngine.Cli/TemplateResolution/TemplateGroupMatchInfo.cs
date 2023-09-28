@@ -194,7 +194,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             IEnumerable<Func<ITemplateInfo, MatchInfo?>> templateInfoFilters,
             Func<ITemplateInfo, IEnumerable<MatchInfo>>? templateParametersFilter = null)
         {
-            List<MatchInfo> groupMatchDispositions = new List<MatchInfo>();
+            List<MatchInfo> groupMatchDispositions = new();
             foreach (Func<TemplateGroup, MatchInfo?>? filter in groupFilters)
             {
                 MatchInfo? info = filter(group);
@@ -263,7 +263,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             {
                 throw new NotSupportedException("Template parameter matches were not evaluated.");
             }
-            Dictionary<string, ParameterChoice> validChoices = new Dictionary<string, ParameterChoice>();
+            Dictionary<string, ParameterChoice> validChoices = new();
             foreach (ITemplateMatchInfo template in _templateMatchInfos)
             {
                 ITemplateParameter? choiceParameter = template.Info.GetChoiceParameter(parameter);

@@ -55,7 +55,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         }
 
         public object UnregisterTaskObject(object key, RegisteredTaskObjectLifetime lifetime) => null;
-        public BuildEngineResult BuildProjectFilesInParallel(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<string>[] removeGlobalProperties, string[] toolsVersion, bool returnTargetOutputs) => new BuildEngineResult();
+        public BuildEngineResult BuildProjectFilesInParallel(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<string>[] removeGlobalProperties, string[] toolsVersion, bool returnTargetOutputs) => new();
         public void Yield()
         {
         }

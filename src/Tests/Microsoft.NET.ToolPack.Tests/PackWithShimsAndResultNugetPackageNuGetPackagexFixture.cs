@@ -23,7 +23,7 @@ namespace Microsoft.NET.ToolPack.Tests
             TestAssetsManager = testAssetsManager;
         }
         public Dictionary<(bool multiTarget, string targetFramework), string> assetMap
-            = new Dictionary<(bool multiTarget, string targetFramework), string>();
+            = new();
 
         public string GetTestToolPackagePath(bool multiTarget, string targetFramework)
         {

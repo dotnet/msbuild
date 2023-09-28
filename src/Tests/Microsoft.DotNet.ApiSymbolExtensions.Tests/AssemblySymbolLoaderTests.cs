@@ -44,7 +44,7 @@ namespace MyNamespace
         // it is fine to reuse the same asset.
         private class TestAssetCache
         {
-            public static TestAssetCache Instance = new TestAssetCache();
+            public static TestAssetCache Instance = new();
 
             private ConcurrentDictionary<string, TestAssetInfo> Dictionary = new();
 

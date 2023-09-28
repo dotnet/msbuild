@@ -68,9 +68,9 @@ namespace Microsoft.DotNet.Build.Tasks
                     for (int i = 0; i < ExcludePatterns.Length; ++i)
                         regexes[i] = new Regex(ExcludePatterns[i].ItemSpec, RegexOptions.IgnoreCase);
 
-                    using (FileStream writer = new FileStream(DestinationArchive, FileMode.CreateNew))
+                    using (FileStream writer = new(DestinationArchive, FileMode.CreateNew))
                     {
-                        using (ZipArchive zipFile = new ZipArchive(writer, ZipArchiveMode.Create))
+                        using (ZipArchive zipFile = new(writer, ZipArchiveMode.Create))
                         {
                             var files = Directory.GetFiles(SourceDirectory, "*", SearchOption.AllDirectories);
 

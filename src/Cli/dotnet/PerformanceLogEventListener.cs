@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Cli.Utils
         private StreamWriter _writer;
 
         [ThreadStatic]
-        private static StringBuilder s_builder = new StringBuilder();
+        private static StringBuilder s_builder = new();
 
         internal static PerformanceLogEventListener Create(IFileSystem fileSystem, string logDirectory)
         {

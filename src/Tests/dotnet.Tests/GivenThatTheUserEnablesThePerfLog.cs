@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Tests
 
             result.ExitCode.Should().Be(0);
 
-            DirectoryInfo logDir = new DirectoryInfo(dir.Path);
+            DirectoryInfo logDir = new(dir.Path);
             FileInfo[] logFiles = logDir.GetFiles();
             Assert.NotEmpty(logFiles);
             Assert.All(logFiles, f => Assert.StartsWith("perf-", f.Name));
@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void WhenPerfLogEnabledDotNetBuildWritesAPerfLog()
         {
-            using (PerfLogTestEventListener listener = new PerfLogTestEventListener())
+            using (PerfLogTestEventListener listener = new())
             {
                 int exitCode = Cli.Program.Main(new string[] { "--help" });
                 Assert.Equal(0, exitCode);

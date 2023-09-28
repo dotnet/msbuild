@@ -165,7 +165,7 @@ namespace Microsoft.DotNet.Watcher.Internal
         {
             private readonly IReporter _reporter;
             private readonly Process _process;
-            private readonly TaskCompletionSource _tcs = new TaskCompletionSource();
+            private readonly TaskCompletionSource _tcs = new();
             private volatile bool _disposed;
 
             public ProcessState(Process process, IReporter reporter)

@@ -914,7 +914,7 @@ namespace Microsoft.NET.Build.Tasks
 
             private void WriteAnalyzers()
             {
-                AnalyzerResolver resolver = new AnalyzerResolver(this);
+                AnalyzerResolver resolver = new(this);
 
                 foreach (var library in _lockFile.Libraries)
                 {
@@ -1838,12 +1838,12 @@ namespace Microsoft.NET.Build.Tasks
                         //  Exclude transitive dependencies of excluded packages unless they are also dependencies
                         //  of non-excluded packages
 
-                        HashSet<string> includedDependencies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                        HashSet<string> excludeFromPublishPackageIds = new HashSet<string>(
+                        HashSet<string> includedDependencies = new(StringComparer.OrdinalIgnoreCase);
+                        HashSet<string> excludeFromPublishPackageIds = new(
                             excludeFromPublishPackageReferences.Select(pr => pr.ItemSpec),
                             StringComparer.OrdinalIgnoreCase);
 
-                        Stack<string> dependenciesToWalk = new Stack<string>(
+                        Stack<string> dependenciesToWalk = new(
                             topLevelDependencies.Except(excludeFromPublishPackageIds, StringComparer.OrdinalIgnoreCase));
 
                         while (dependenciesToWalk.Any())
@@ -1897,7 +1897,7 @@ namespace Microsoft.NET.Build.Tasks
 
             private static Dictionary<string, string> GetProjectReferencePaths(LockFile lockFile)
             {
-                Dictionary<string, string> paths = new Dictionary<string, string>();
+                Dictionary<string, string> paths = new();
 
                 foreach (var library in lockFile.Libraries)
                 {

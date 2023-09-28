@@ -38,7 +38,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// </summary>
         internal static string GetDisplayName(this ITemplateInfo template, bool showIdentity = false)
         {
-            StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder stringBuilder = new();
             string? templateLanguage = template.GetLanguage();
             string shortNames = string.Join(",", template.ShortNameList);
             stringBuilder.Append(template.Name);
@@ -62,7 +62,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// </summary>
         internal static string ToDisplayString(this TemplateConstraintResult constraintResult)
         {
-            StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder stringBuilder = new();
 
             string? constraintDisplayName = constraintResult.Constraint?.DisplayName;
             if (string.IsNullOrWhiteSpace(constraintDisplayName))

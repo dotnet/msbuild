@@ -47,7 +47,7 @@ namespace Microsoft.NET.Build.Tests
 
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework: testProject.TargetFrameworks);
 
-            List<string> expectedFiles = new List<string>()
+            List<string> expectedFiles = new()
             {
                 "it/System.Spatial.resources.dll",
                 "fr/System.Spatial.resources.dll",
@@ -111,7 +111,7 @@ namespace Microsoft.NET.Build.Tests
 
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework: testProject.TargetFrameworks);
 
-            List<string> expectedFiles = new List<string>()
+            List<string> expectedFiles = new()
             {
                 "de/System.Spatial.resources.dll",
                 "es/System.Spatial.resources.dll",

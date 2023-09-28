@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
             var workloads = wp.GetInstalledWorkloadsAsync(default).Result;
 
             // Assert
-            List<WorkloadInfo> expected = new List<WorkloadInfo>()
+            List<WorkloadInfo> expected = new()
             {
                 new WorkloadInfo("A", "Description: A"), new WorkloadInfo("B", "Description: B")
             };

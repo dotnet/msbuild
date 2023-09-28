@@ -46,7 +46,7 @@ namespace Dotnet_new3
 
             static HelpOption CreateCustomHelp()
             {
-                HelpOption helpOption = new HelpOption();
+                HelpOption helpOption = new();
                 HelpAction helpAction = (HelpAction)helpOption.Action!;
                 helpAction.Builder.CustomizeLayout(CustomHelpLayout);
                 return helpOption;

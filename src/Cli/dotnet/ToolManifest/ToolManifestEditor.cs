@@ -221,7 +221,7 @@ namespace Microsoft.DotNet.ToolManifest
             FilePath path,
             DirectoryPath correspondingDirectory)
         {
-            List<ToolManifestPackage> result = new List<ToolManifestPackage>();
+            List<ToolManifestPackage> result = new();
             var errors = new List<string>();
 
             ValidateVersion(deserializedManifest, errors);

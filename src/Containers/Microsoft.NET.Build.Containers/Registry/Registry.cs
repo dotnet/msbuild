@@ -185,7 +185,7 @@ internal sealed class Registry
 
     private static string? GetBestMatchingRid(RuntimeGraph runtimeGraph, string runtimeIdentifier, IEnumerable<string> availableRuntimeIdentifiers)
     {
-        HashSet<string> availableRids = new HashSet<string>(availableRuntimeIdentifiers, StringComparer.Ordinal);
+        HashSet<string> availableRids = new(availableRuntimeIdentifiers, StringComparer.Ordinal);
         foreach (var candidateRuntimeIdentifier in runtimeGraph.ExpandRuntime(runtimeIdentifier))
         {
             if (availableRids.Contains(candidateRuntimeIdentifier))
@@ -414,7 +414,7 @@ internal sealed class Registry
         }
 
         cancellationToken.ThrowIfCancellationRequested();
-        using (MemoryStream stringStream = new MemoryStream(Encoding.UTF8.GetBytes(builtImage.Config)))
+        using (MemoryStream stringStream = new(Encoding.UTF8.GetBytes(builtImage.Config)))
         {
             var configDigest = builtImage.ImageDigest;
             _logger.LogInformation(Strings.Registry_ConfigUploadStarted, configDigest);

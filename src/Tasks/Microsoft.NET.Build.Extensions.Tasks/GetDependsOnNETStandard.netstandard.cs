@@ -14,7 +14,7 @@ namespace Microsoft.NET.Build.Tasks
         internal static bool GetFileDependsOnNETStandard(string filePath)
         {
             using (var assemblyStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Delete | FileShare.Read))
-            using (PEReader peReader = new PEReader(assemblyStream, PEStreamOptions.LeaveOpen))
+            using (PEReader peReader = new(assemblyStream, PEStreamOptions.LeaveOpen))
             {
                 if (peReader.HasMetadata)
                 {

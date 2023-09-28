@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 compositeFilter, stringWriter, null, false, MetadataReferences);
 
             using Stream assemblyStream = SymbolFactory.EmitAssemblyStreamFromSyntax(original, enableNullable: true, allowUnsafe: allowUnsafe, assemblyName: assemblyName);
-            AssemblySymbolLoader assemblySymbolLoader = new AssemblySymbolLoader(resolveAssemblyReferences: true, includeInternalSymbols: includeInternalSymbols);
+            AssemblySymbolLoader assemblySymbolLoader = new(resolveAssemblyReferences: true, includeInternalSymbols: includeInternalSymbols);
             assemblySymbolLoader.AddReferenceSearchPaths(typeof(object).Assembly!.Location!);
             assemblySymbolLoader.AddReferenceSearchPaths(typeof(DynamicAttribute).Assembly!.Location!);
             IAssemblySymbol assemblySymbol = assemblySymbolLoader.LoadAssembly(assemblyName, assemblyStream);

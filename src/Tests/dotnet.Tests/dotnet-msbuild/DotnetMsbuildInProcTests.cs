@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             Telemetry.Telemetry.DisableForTests(); // reset static session id modified by telemetry constructor
             telemetry = new Telemetry.Telemetry(new MockFirstTimeUseNoticeSentinel(sentinelExists));
 
-            MSBuildForwardingApp msBuildForwardingApp = new MSBuildForwardingApp(Enumerable.Empty<string>());
+            MSBuildForwardingApp msBuildForwardingApp = new(Enumerable.Empty<string>());
 
             var forwardingAppWithoutLogging = msBuildForwardingApp
                 .GetType()

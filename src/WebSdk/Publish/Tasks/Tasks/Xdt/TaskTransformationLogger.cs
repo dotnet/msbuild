@@ -155,7 +155,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Xdt
                 // loggingHelper.LogErrorFromException does not have an overload
                 // that accepts line numbers. So instead, we have to construct
                 // the error message from the exception and use LogError.
-                StringBuilder sb = new StringBuilder();
+                StringBuilder sb = new();
                 Exception exIterator = ex;
                 while (exIterator != null)
                 {

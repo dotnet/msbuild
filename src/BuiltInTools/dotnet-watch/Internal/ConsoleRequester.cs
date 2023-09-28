@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.Tools.Internal
     /// </summary>
     internal sealed class ConsoleRequester : IRequester
     {
-        private readonly object _writeLock = new object();
+        private readonly object _writeLock = new();
 
         public ConsoleRequester(IConsole console, bool quiet, bool suppressEmojis)
         {

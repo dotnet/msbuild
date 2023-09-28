@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
         }
 
         public static readonly List<object[]> AddPkg_PackageVersionsLatestPrereleaseSucessData
-            = new List<object[]>
+            = new()
             {
                     new object[] { new string[] { "0.0.5", "0.9.0", "1.0.0-preview.3" }, "1.0.0-preview.3" },
                     new object[] { new string[] { "0.0.5", "0.9.0", "1.0.0-preview.3", "1.1.1-preview.7" }, "1.1.1-preview.7" },
@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
         public void WhenPrereleaseOptionIsPassed(string[] inputVersions, string expectedVersion)
         {
             var targetFramework = ToolsetInfo.CurrentTargetFramework;
-            TestProject testProject = new TestProject()
+            TestProject testProject = new()
             {
                 Name = "Project",
                 IsExe = false,

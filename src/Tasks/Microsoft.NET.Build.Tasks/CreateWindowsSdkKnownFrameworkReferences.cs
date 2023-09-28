@@ -32,7 +32,7 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            List<ITaskItem> knownFrameworkReferences = new List<ITaskItem>();
+            List<ITaskItem> knownFrameworkReferences = new();
 
             if (!string.IsNullOrEmpty(WindowsSdkPackageVersion))
             {
@@ -59,7 +59,7 @@ namespace Microsoft.NET.Build.Tasks
                     if (!string.IsNullOrEmpty(windowsSdkPackageVersion))
                     {
                         var minimumNETVersion = supportedWindowsVersion.GetMetadata("MinimumNETVersion");
-                        Version normalizedMinimumVersion = new Version(0, 0, 0);
+                        Version normalizedMinimumVersion = new(0, 0, 0);
                         if (!string.IsNullOrEmpty(minimumNETVersion))
                         {
                             normalizedMinimumVersion = ProcessFrameworkReferences.NormalizeVersion(new Version(minimumNETVersion));
