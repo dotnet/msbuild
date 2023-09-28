@@ -91,7 +91,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
 
             if (publishStatus)
             {
-                Log.LogMessage(Microsoft.Build.Framework.MessageImportance.High, Resources.KUDUDEPLOY_PublishSucceeded);
+                Log.LogMessage(Framework.MessageImportance.High, Resources.KUDUDEPLOY_PublishSucceeded);
             }
             else
             {
@@ -163,8 +163,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
         internal string CreateZipFile(string sourcePath)
         {
             // Zip the files from PublishOutput path.
-            string zipFileFullPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), string.Format("Publish{0}.zip", new Random().Next(int.MaxValue)));
-            Log.LogMessage(Microsoft.Build.Framework.MessageImportance.High, string.Format(Resources.KUDUDEPLOY_CopyingToTempLocation, zipFileFullPath));
+            string zipFileFullPath = Path.Combine(Path.GetTempPath(), string.Format("Publish{0}.zip", new Random().Next(int.MaxValue)));
+            Log.LogMessage(Framework.MessageImportance.High, string.Format(Resources.KUDUDEPLOY_CopyingToTempLocation, zipFileFullPath));
 
             try
             {
@@ -177,7 +177,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
                 return null;
             }
 
-            Log.LogMessage(Microsoft.Build.Framework.MessageImportance.High, Resources.KUDUDEPLOY_CopyingToTempLocationCompleted);
+            Log.LogMessage(Framework.MessageImportance.High, Resources.KUDUDEPLOY_CopyingToTempLocationCompleted);
 
             return zipFileFullPath;
         }

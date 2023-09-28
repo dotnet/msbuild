@@ -242,8 +242,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                             string[] strVersions = registryKey.GetSubKeyNames();
                             if (strVersions != null)
                             {
-                                int [] versions = registryKey.GetSubKeyNames().Select(p => System.Convert.ToInt32(p)).ToArray();
-                                System.Array.Sort(versions);
+                                int [] versions = registryKey.GetSubKeyNames().Select(p => Convert.ToInt32(p)).ToArray();
+                                Array.Sort(versions);
 
                                 for (int i = versions.Length -1; i >= 0; i--)
                                 {
@@ -269,22 +269,22 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 if (string.IsNullOrEmpty(m_exePath))
                 {
                     string programFiles = Environment.ExpandEnvironmentVariables("%ProgramFiles(x86)%");
-                    string msdeployExePath = IO.Path.Combine("IIS", "Microsoft Web Deploy V3");
-                    m_exePath = IO.Path.Combine(programFiles, msdeployExePath);
-                    if (!IO.File.Exists(IO.Path.Combine(m_exePath, ToolName)))
+                    string msdeployExePath = Path.Combine("IIS", "Microsoft Web Deploy V3");
+                    m_exePath = Path.Combine(programFiles, msdeployExePath);
+                    if (!File.Exists(Path.Combine(m_exePath, ToolName)))
                     {
                         /// On 32-bit Operating Systems, this will return C:\Program Files
                         /// On 64-bit Operating Systems - regardless of process bitness, this will return C:\Program Files
                         if (!Environment.Is64BitOperatingSystem || Environment.Is64BitProcess)
                         {
                             programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-                            m_exePath = IO.Path.Combine(programFiles, msdeployExePath);
+                            m_exePath = Path.Combine(programFiles, msdeployExePath);
                         }
                         else
                         {
                             // 32 bit process on a 64 bit OS can't use SpecialFolder.ProgramFiles to get the 64-bit program files folder
                             programFiles = Environment.ExpandEnvironmentVariables("%ProgramW6432%");
-                            m_exePath = IO.Path.Combine(programFiles, msdeployExePath);
+                            m_exePath = Path.Combine(programFiles, msdeployExePath);
                         }
                     }
                 }
@@ -477,7 +477,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             {
                 if (!string.IsNullOrEmpty(value))
                 {
-                    _userAgent = MsDeploy.Utility.GetFullUserAgentString(value);
+                    _userAgent = Utility.GetFullUserAgentString(value);
                 }
             }
         }
@@ -538,7 +538,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         {
             get
             {
-                return Microsoft.Build.Framework.MessageImportance.High;
+                return Framework.MessageImportance.High;
             }
         }
 
@@ -593,7 +593,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                     type = taskItem.ItemSpec;
                     path = taskItem.GetMetadata("Path");
                 }
-                MsDeploy.Utility.MsDeployExeEndOfExecuteMessage(bSuccess, type, path, Log);
+                Utility.MsDeployExeEndOfExecuteMessage(bSuccess, type, path, Log);
             }
             return bSuccess;
         }
@@ -611,7 +611,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 foreach (Framework.ITaskItem item in replaceRuleItems)
                 {
                     arguments.Clear();
-                    MsDeploy.Utility.BuildArgumentsBaseOnEnumTypeName(item, arguments, typeof(MsDeploy.ReplaceRuleMetadata), valueQuoteChar);
+                    Utility.BuildArgumentsBaseOnEnumTypeName(item, arguments, typeof(MsDeploy.ReplaceRuleMetadata), valueQuoteChar);
                     commandLineBuilder.AppendSwitchUnquotedIfNotNull("-replace:", arguments.Count == 0 ? null : string.Join(",", arguments.ToArray()));
                 }
             }
@@ -627,7 +627,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 foreach (Framework.ITaskItem item in skipRuleItems)
                 {
                     arguments.Clear();
-                    MsDeploy.Utility.BuildArgumentsBaseOnEnumTypeName(item, arguments, typeof(MsDeploy.SkipRuleMetadata), valueQuoteChar);
+                    Utility.BuildArgumentsBaseOnEnumTypeName(item, arguments, typeof(MsDeploy.SkipRuleMetadata), valueQuoteChar);
                     commandLineBuilder.AppendSwitchUnquotedIfNotNull("-skip:", arguments.Count == 0 ? null : string.Join(",", arguments.ToArray()));
                 }
             }
@@ -648,13 +648,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 string name = item.ItemSpec;
                 if (!string.IsNullOrEmpty(name))
                 {
-                    string element = item.GetMetadata(MsDeploy.ExistingParameterValiationMetadata.Element.ToString());
+                    string element = item.GetMetadata(ExistingParameterValiationMetadata.Element.ToString());
                     if (string.IsNullOrEmpty(element))
                         element = "parameterEntry";
-                    if (string.Compare(element, "parameterEntry", System.StringComparison.OrdinalIgnoreCase) == 0)
+                    if (string.Compare(element, "parameterEntry", StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         idenities.Add(name);
-                        foreach (string dPIdentity in System.Enum.GetNames(typeof(MsDeploy.ExistingDeclareParameterMetadata)))
+                        foreach (string dPIdentity in Enum.GetNames(typeof(MsDeploy.ExistingDeclareParameterMetadata)))
                         {
                             idenities.Add(item.GetMetadata(dPIdentity));
                         }
@@ -662,15 +662,15 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                         string identity = string.Join(",", idenities.ToArray());
                         if (!lookupDictionary.ContainsKey(identity))
                         {
-                            string nameValue = MsDeploy.Utility.PutValueInQuote(name, valueQuote);
+                            string nameValue = Utility.PutValueInQuote(name, valueQuote);
                             arguments.Add(string.Concat("name=", nameValue));
                             System.Type enumType = lookupDictionary.ContainsValue(name) ? typeof(MsDeploy.ExistingDeclareParameterMetadata) : typeof(MsDeploy.DeclareParameterMetadata);
                             // the rest, build on the Enum Name
-                            MsDeploy.Utility.BuildArgumentsBaseOnEnumTypeName(item, arguments, enumType, valueQuote);
+                            Utility.BuildArgumentsBaseOnEnumTypeName(item, arguments, enumType, valueQuote);
                             lookupDictionary.Add(identity, name);
                         }
                     }
-                    else if (string.Compare(element, "parameterValidation", System.StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (string.Compare(element, "parameterValidation", StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         System.Diagnostics.Debug.Assert(false, "msdeploy.exe doesn't support parameterValidation entry in the command line for declareParameter yet.");
                     }
@@ -686,7 +686,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// <param name="items"></param>
         static public void AddDeclareParametersOptions(Utilities.CommandLineBuilder commandLineBuilder, Framework.ITaskItem[] originalItems, string valueQuote, bool foptimisticParameterDefaultValue)
         {
-            System.Collections.Generic.IList<Framework.ITaskItem> items = MsDeploy.Utility.SortParametersTaskItems(originalItems, foptimisticParameterDefaultValue, MsDeploy.DeclareParameterMetadata.DefaultValue.ToString());
+            System.Collections.Generic.IList<Framework.ITaskItem> items = Utility.SortParametersTaskItems(originalItems, foptimisticParameterDefaultValue, DeclareParameterMetadata.DefaultValue.ToString());
             if (commandLineBuilder != null && items != null)
             {
                 System.Collections.Generic.List<string> arguments = new(6);
@@ -737,7 +737,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// <param name="items"></param>
         static public void AddSimpleSetParametersToObject(Utilities.CommandLineBuilder commandLineBuilder, Framework.ITaskItem[] originalItems, string valueQuoteChar, bool foptimisticParameterDefaultValue)
         {
-            System.Collections.Generic.IList<Framework.ITaskItem> items = MsDeploy.Utility.SortParametersTaskItems(originalItems, foptimisticParameterDefaultValue, MsDeploy.SimpleSyncParameterMetadata.Value.ToString());
+            System.Collections.Generic.IList<Framework.ITaskItem> items = Utility.SortParametersTaskItems(originalItems, foptimisticParameterDefaultValue, SimpleSyncParameterMetadata.Value.ToString());
             if (commandLineBuilder != null && items != null)
             {
                 System.Collections.Generic.List<string> arguments = new(6);
@@ -749,12 +749,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                     string name = item.ItemSpec;
                     if (!string.IsNullOrEmpty(name))
                     {
-                        string valueData = MsDeploy.Utility.PutValueInQuote(name, valueQuoteChar);
+                        string valueData = Utility.PutValueInQuote(name, valueQuoteChar);
                         arguments.Add(string.Concat("name=", valueData));
                     }
                     // the rest, build on the enum name
 
-                    MsDeploy.Utility.BuildArgumentsBaseOnEnumTypeName(item, arguments, typeof(MsDeploy.SimpleSyncParameterMetadata), valueQuoteChar);
+                    Utility.BuildArgumentsBaseOnEnumTypeName(item, arguments, typeof(MsDeploy.SimpleSyncParameterMetadata), valueQuoteChar);
                     commandLineBuilder.AppendSwitchUnquotedIfNotNull("-setParam:", arguments.Count == 0 ? null : string.Join(",", arguments.ToArray()));
                 }
             }
@@ -767,12 +767,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// <param name="items"></param>
         static public void AddSetParametersToObject(Utilities.CommandLineBuilder commandLineBuilder, Framework.ITaskItem[] originalItems, string valueQuote, bool foptimisticParameterDefaultValue)
         {
-            System.Collections.Generic.IList<Framework.ITaskItem> items = MsDeploy.Utility.SortParametersTaskItems(originalItems, foptimisticParameterDefaultValue, MsDeploy.ExistingSyncParameterMetadata.Value.ToString());
+            System.Collections.Generic.IList<Framework.ITaskItem> items = Utility.SortParametersTaskItems(originalItems, foptimisticParameterDefaultValue, ExistingSyncParameterMetadata.Value.ToString());
             if (commandLineBuilder != null && items != null)
             {
                 System.Collections.Generic.List<string> arguments = new(6);
                 System.Collections.Generic.Dictionary<string, string> lookupDictionary = new(items.Count);
-                System.Collections.Generic.Dictionary<string, string> nameValueDictionary = new(items.Count, System.StringComparer.OrdinalIgnoreCase);
+                System.Collections.Generic.Dictionary<string, string> nameValueDictionary = new(items.Count, StringComparer.OrdinalIgnoreCase);
 
                 foreach (Framework.ITaskItem item in items)
                 {
@@ -783,15 +783,15 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                     string name = item.ItemSpec;
                     if (!string.IsNullOrEmpty(name))
                     {
-                        string element = item.GetMetadata(MsDeploy.ExistingParameterValiationMetadata.Element.ToString());
+                        string element = item.GetMetadata(ExistingParameterValiationMetadata.Element.ToString());
                         if (string.IsNullOrEmpty(element))
                             element = "parameterEntry";
 
-                        if (string.Compare(element, "parameterEntry", System.StringComparison.OrdinalIgnoreCase) == 0)
+                        if (string.Compare(element, "parameterEntry", StringComparison.OrdinalIgnoreCase) == 0)
                         {
 
                             idenities.Add(name);
-                            foreach (string dPIdentity in System.Enum.GetNames(typeof(MsDeploy.ExistingDeclareParameterMetadata)))
+                            foreach (string dPIdentity in Enum.GetNames(typeof(MsDeploy.ExistingDeclareParameterMetadata)))
                             {
                                 idenities.Add(item.GetMetadata(dPIdentity));
                             }
@@ -808,27 +808,27 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                                 }
                                 else
                                 {
-                                    data = item.GetMetadata(MsDeploy.ExistingSyncParameterMetadata.Value.ToString());
+                                    data = item.GetMetadata(ExistingSyncParameterMetadata.Value.ToString());
                                     nameValueDictionary.Add(name, data);
                                 }
 
                                 // the rest, build on the Enum Name
-                                MsDeploy.Utility.BuildArgumentsBaseOnEnumTypeName(item, arguments, typeof(MsDeploy.ExistingDeclareParameterMetadata), valueQuote);
+                                Utility.BuildArgumentsBaseOnEnumTypeName(item, arguments, typeof(MsDeploy.ExistingDeclareParameterMetadata), valueQuote);
                                 if (arguments.Count > 0 && !string.IsNullOrEmpty(data))
                                 {
 #if NET472
-                                    arguments.Add(string.Concat(MsDeploy.ExistingSyncParameterMetadata.Value.ToString().ToLower(System.Globalization.CultureInfo.InvariantCulture),
-                                                            "=", MsDeploy.Utility.PutValueInQuote(data, valueQuote)));
+                                    arguments.Add(string.Concat(ExistingSyncParameterMetadata.Value.ToString().ToLower(CultureInfo.InvariantCulture),
+                                                            "=", Utility.PutValueInQuote(data, valueQuote)));
 #else
-                                    arguments.Add(string.Concat(MsDeploy.ExistingSyncParameterMetadata.Value.ToString().ToLower(),
-                                                            "=", MsDeploy.Utility.PutValueInQuote(data, valueQuote)));
+                                    arguments.Add(string.Concat(ExistingSyncParameterMetadata.Value.ToString().ToLower(),
+                                                            "=", Utility.PutValueInQuote(data, valueQuote)));
 #endif
                                 }
                                 lookupDictionary.Add(identity, name);
 
                             }
                         }
-                        else if (string.Compare(element, "parameterValidation", System.StringComparison.OrdinalIgnoreCase) == 0)
+                        else if (string.Compare(element, "parameterValidation", StringComparison.OrdinalIgnoreCase) == 0)
                         {
                             System.Diagnostics.Debug.Assert(false, "msdeploy.exe doesn't support parameterValidation entry in the command line for declareParameter yet.");
                         }
@@ -852,7 +852,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 Framework.ITaskItem taskItem = items[0];
                 string provider = taskItem.ItemSpec;
                 string path = taskItem.GetMetadata("Path");
-                string valueData = MsDeploy.Utility.PutValueInQuote(path, valueQuoteChar);
+                string valueData = Utility.PutValueInQuote(path, valueQuoteChar);
                 string setData = (string.IsNullOrEmpty(path)) ? provider : string.Concat(provider, "=", valueData);
                 arguments.Add(setData);
 
@@ -868,12 +868,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
                 foreach (string name in taskItem.MetadataNames)
                 {
-                    if (!MsDeploy.Utility.IsInternalMsdeployWellKnownItemMetadata(name))
+                    if (!Utility.IsInternalMsdeployWellKnownItemMetadata(name))
                     {
                         string value = taskItem.GetMetadata(name);
                         if (!string.IsNullOrEmpty(value))
                         {
-                            valueData = MsDeploy.Utility.PutValueInQuote(value, valueQuoteChar);
+                            valueData = Utility.PutValueInQuote(value, valueQuoteChar);
                             setData = string.Concat(name, "=", valueData);
                             arguments.Add(setData);
                         }
@@ -881,7 +881,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                     else
                     {
                         MsDeploy.Utility.IISExpressMetadata expressMetadata;
-                        if (System.Enum.TryParse<MsDeploy.Utility.IISExpressMetadata>(name, out expressMetadata))
+                        if (Enum.TryParse<MsDeploy.Utility.IISExpressMetadata>(name, out expressMetadata))
                         {
                             string value = taskItem.GetMetadata(name);
                             if (!string.IsNullOrEmpty(value))
@@ -1039,7 +1039,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             commandLine.AppendSwitchIfNotNull("-appHostConfigDir:", WebServerAppHostConfigDirectory);
             commandLine.AppendSwitchIfNotNull("-webServerDir:", WebServerDirectory);
             // bug in msdeploy.exe currently only take the file name
-            commandLine.AppendSwitchIfNotNull("-webServerManifest:", System.IO.Path.GetFileName(WebServerManifest));
+            commandLine.AppendSwitchIfNotNull("-webServerManifest:", Path.GetFileName(WebServerManifest));
 
             m_lastCommandLine = commandLine.ToString();
 
@@ -1062,9 +1062,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// <returns>path to aspnet_merge.exe, null if not found</returns>
         protected override string GenerateFullPathToTool()
         {
-            string result = IO.Path.Combine(ExePath, ToolName);
+            string result = Path.Combine(ExePath, ToolName);
 
-            if (string.Compare(ExePath, "%MSDeployPath%", System.StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Compare(ExePath, "%MSDeployPath%", StringComparison.OrdinalIgnoreCase) == 0)
             {
                 // if it comes in as %msdeploypath% don't use Path.Combine because it will add a \ which is 
                 // not necessary since reg key for MSDeployPath already contains it
@@ -1082,13 +1082,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         {
             if (Source != null && Source.GetLength(0) > 1)
             {
-                Log.LogError(string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.MSDEPLOY_InvalidSourceCount, Source.GetLength(0)), null);
+                Log.LogError(string.Format(CultureInfo.CurrentCulture, Resources.MSDEPLOY_InvalidSourceCount, Source.GetLength(0)), null);
                 return false;
             }
 
             if (Destination != null && Destination.GetLength(0) > 1)
             {
-                Log.LogError(string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.MSDEPLOY_InvalidDestinationCount, Destination.GetLength(0)), null);
+                Log.LogError(string.Format(CultureInfo.CurrentCulture, Resources.MSDEPLOY_InvalidDestinationCount, Destination.GetLength(0)), null);
                 return false;
             }
             else
@@ -1123,13 +1123,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                 {
                     foreach (string verb in validVerbs)
                     {
-                        if (string.Compare(Verb, verb, System.StringComparison.OrdinalIgnoreCase) == 0)
+                        if (string.Compare(Verb, verb, StringComparison.OrdinalIgnoreCase) == 0)
                         {
                             return true;
                         }
                     }
                 }
-                Log.LogError(string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.MSDEPLOY_InvalidVerbForTheInput, Verb, Source[0].ItemSpec, (fNullDestination) ? null : Destination[0].ItemSpec), null);
+                Log.LogError(string.Format(CultureInfo.CurrentCulture, Resources.MSDEPLOY_InvalidVerbForTheInput, Verb, Source[0].ItemSpec, (fNullDestination) ? null : Destination[0].ItemSpec), null);
                 return false;
             }
         }

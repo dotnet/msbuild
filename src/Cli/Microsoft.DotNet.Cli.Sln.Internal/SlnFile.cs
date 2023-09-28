@@ -808,13 +808,13 @@ namespace Microsoft.DotNet.Cli.Sln.Internal
 
         public void SetValue(string name, object value, object defaultValue = null)
         {
-            var isDefault = object.Equals(value, defaultValue);
+            var isDefault = Equals(value, defaultValue);
             if (isDefault)
             {
                 // if the value is default, only remove the property if it was not already the default
                 // to avoid unnecessary project file churn
                 if (ContainsKey(name) && (defaultValue == null ||
-                    !object.Equals(defaultValue, GetValue(name, defaultValue.GetType(), null))))
+                    !Equals(defaultValue, GetValue(name, defaultValue.GetType(), null))))
                 {
                     Remove(name);
                 }

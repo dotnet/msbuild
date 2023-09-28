@@ -145,7 +145,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 try
                 {
                     // Execute MSBuild in the current process by calling its Main method.
-                    return Microsoft.Build.CommandLine.MSBuildApp.Main(arguments);
+                    return Build.CommandLine.MSBuildApp.Main(arguments);
                 }
                 catch (Exception exception)
                 {

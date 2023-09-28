@@ -43,7 +43,7 @@ namespace Microsoft.NET.Build.Tasks
                 string globalJsonPath = SdkDirectoryWorkloadManifestProvider.GetGlobalJsonPath(Environment.CurrentDirectory);
 
                 var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(NetCoreRoot, NETCoreSdkVersion, userProfileDir, globalJsonPath);
-                var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, NetCoreRoot, NETCoreSdkVersion, userProfileDir);
+                var workloadResolver = Create(workloadManifestProvider, NetCoreRoot, NETCoreSdkVersion, userProfileDir);
 
                 var suggestedWorkloads = workloadResolver.GetWorkloadSuggestionForMissingPacks(
                     MissingWorkloadPacks.Select(item => new WorkloadPackId(item.ItemSpec)).ToList(),

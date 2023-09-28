@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Cli.Build
             using (var file = File.OpenText(depsFile))
             using (JsonTextReader reader = new(file))
             {
-                deps = JObject.ReadFrom(reader);
+                deps = JToken.ReadFrom(reader);
             }
 
             foreach (JProperty target in deps["targets"])

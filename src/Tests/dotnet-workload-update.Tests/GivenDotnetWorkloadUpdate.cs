@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             var testDirectory = _testAssetsManager.CreateTestDirectory(identifier: userLocal ? "userlocal" : "default").Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
             var userProfileDir = Path.Combine(testDirectory, "user-profile");
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot, userLocal, userProfileDir);
+            var workloadResolver = CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot, userLocal, userProfileDir);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var manifestUpdater = new MockWorkloadManifestUpdater();
             var sdkFeatureVersion = "6.0.100";
@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             }
 
             // Mock updating the manifest
-            workloadResolver = WorkloadResolver.CreateForTests(
+            workloadResolver = CreateForTests(
                 new MockManifestProvider(new[] { Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleUpdatedManifest"), "Sample.json") }),
                 dotnetRoot, userLocal, userProfileDir);
 
@@ -121,7 +121,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
             var userProfileDir = Path.Combine(testDirectory, "user-profile");
             var manifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "BasicSample.json");
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { manifestPath }), dotnetRoot, userLocal, userProfileDir);
+            var workloadResolver = CreateForTests(new MockManifestProvider(new[] { manifestPath }), dotnetRoot, userLocal, userProfileDir);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var manifestUpdater = new MockWorkloadManifestUpdater();
             var sdkFeatureVersion = "6.0.100";
@@ -447,7 +447,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             var copiedManifestFile = Path.Combine(copiedManifestFolder, "WorkloadManifest.json");
             File.Copy(_manifestPath, copiedManifestFile);
 
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { copiedManifestFile }), dotnetRoot);
+            var workloadResolver = CreateForTests(new MockManifestProvider(new[] { copiedManifestFile }), dotnetRoot);
             installer.WorkloadResolver = workloadResolver;
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var manifestUpdater = new MockWorkloadManifestUpdater(manifestUpdates, _manifestPath);

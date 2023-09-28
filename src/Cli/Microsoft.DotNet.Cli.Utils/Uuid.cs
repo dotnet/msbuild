@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             using (SHA1 hasher = SHA1.Create())
             {
-                var nameBytes = System.Text.Encoding.UTF8.GetBytes(name ?? string.Empty);
+                var nameBytes = Encoding.UTF8.GetBytes(name ?? string.Empty);
                 var namespaceBytes = namespaceId.ToByteArray();
 
                 SwapGuidByteOrder(namespaceBytes);

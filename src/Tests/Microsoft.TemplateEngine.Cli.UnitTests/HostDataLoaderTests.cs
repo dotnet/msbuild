@@ -60,7 +60,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             IFile? dataFile = mountPoint!.FileInfo("/Resources/dotnetcli.host.json");
             Assert.NotNull(dataFile);
             using Stream s = dataFile.OpenRead();
-            using TextReader tr = new StreamReader(s, System.Text.Encoding.UTF8, true);
+            using TextReader tr = new StreamReader(s, Encoding.UTF8, true);
 
             string json = tr.ReadToEnd();
             ITemplateInfo template = A.Fake<ITemplateInfo>(builder => builder.Implements<ITemplateInfoHostJsonCache>().Implements<ITemplateInfo>());

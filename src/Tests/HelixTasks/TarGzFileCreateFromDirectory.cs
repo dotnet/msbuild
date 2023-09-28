@@ -149,7 +149,7 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
 
         protected override void LogToolCommand(string message)
         {
-            base.LogToolCommand($"{base.GetWorkingDirectory()}> {message}");
+            base.LogToolCommand($"{GetWorkingDirectory()}> {message}");
         }
     }
 }

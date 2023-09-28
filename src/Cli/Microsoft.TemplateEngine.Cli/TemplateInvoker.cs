@@ -250,10 +250,10 @@ namespace Microsoft.TemplateEngine.Cli
                     if (templatePackage != null)
                     {
                         Reporter.Output.WriteLine(LocalizableStrings.TemplateCreator_Hint_Uninstall);
-                        Reporter.Output.WriteCommand(Example.For<UninstallCommand>(templateArgs.ParseResult).WithArgument(UninstallCommand.NameArgument, templatePackage.DisplayName));
+                        Reporter.Output.WriteCommand(Example.For<UninstallCommand>(templateArgs.ParseResult).WithArgument(BaseUninstallCommand.NameArgument, templatePackage.DisplayName));
                         Reporter.Output.WriteLine();
                         Reporter.Output.WriteLine(LocalizableStrings.TemplateCreator_Hint_Install);
-                        Reporter.Output.WriteCommand(Example.For<InstallCommand>(templateArgs.ParseResult).WithArgument(InstallCommand.NameArgument, templatePackage.DisplayName));
+                        Reporter.Output.WriteCommand(Example.For<InstallCommand>(templateArgs.ParseResult).WithArgument(BaseInstallCommand.NameArgument, templatePackage.DisplayName));
                         Reporter.Output.WriteLine();
                     }
                     return NewCommandStatus.NotFound;

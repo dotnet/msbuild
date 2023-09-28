@@ -10,9 +10,9 @@ namespace Microsoft.DotNet.PackageValidation.Validators.Tests
 {
     public class BaselinePackageValidatorTests
     {
-        private (SuppressableTestLog, BaselinePackageValidator) CreateLoggerAndValidator()
+        private (SuppressibleTestLog, BaselinePackageValidator) CreateLoggerAndValidator()
         {
-            SuppressableTestLog log = new();
+            SuppressibleTestLog log = new();
             BaselinePackageValidator validator = new(log,
                 Mock.Of<IApiCompatRunner>());
 
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.PackageValidation.Validators.Tests
                 @"ref/netcoreapp3.1/TestPackage.dll"
             };
             Package package = new(string.Empty, "TestPackage", "2.0.0", currentFilePaths, null, null);
-            (SuppressableTestLog log, BaselinePackageValidator validator) = CreateLoggerAndValidator();
+            (SuppressibleTestLog log, BaselinePackageValidator validator) = CreateLoggerAndValidator();
 
             validator.Validate(new PackageValidatorOption(package,
                 enableStrictMode: false,

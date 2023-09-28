@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli.Build
             using (var file = File.OpenText(InputFile))
             using (JsonTextReader reader = new(file))
             {
-                json = JObject.ReadFrom(reader);
+                json = JToken.ReadFrom(reader);
             }
 
             JObject runtimes = (JObject)json["runtimes"];

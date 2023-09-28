@@ -171,7 +171,7 @@ namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
 
         private void AssertWorkloadInstallationRecordIsRemoved(string workloadInstallationRecordDirectory)
         {
-            Assert.Equal(Directory.GetFiles(workloadInstallationRecordDirectory), System.Array.Empty<string>());
+            Assert.Equal(Directory.GetFiles(workloadInstallationRecordDirectory), Array.Empty<string>());
         }
 
         private void AssertValidPackCountsMatchExpected(string installRoot, int expectedPackCount, int expectedPackRecordCount)

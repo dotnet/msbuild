@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.Build.Tasks
         /// <returns></returns>
         private static bool IsSDKServicing(string sdkVersion)
         {
-            var parsedSdkVersion = NuGet.Versioning.NuGetVersion.Parse(sdkVersion);
+            var parsedSdkVersion = NuGetVersion.Parse(sdkVersion);
 
             return parsedSdkVersion.Patch % 100 != 0;
         }

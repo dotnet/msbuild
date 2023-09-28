@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Microsoft.DotNet.ApiCompatibility.Tests\SuppressableTestLog.cs" />
+    <Compile Include="..\Microsoft.DotNet.ApiCompatibility.Tests\SuppressibleTestLog.cs" />
   </ItemGroup>
 
   <ItemGroup>

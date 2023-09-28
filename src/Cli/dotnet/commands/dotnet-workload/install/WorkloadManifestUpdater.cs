@@ -88,7 +88,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             try
             {
-                var manifestUpdater = WorkloadManifestUpdater.GetInstance(userProfileDir);
+                var manifestUpdater = GetInstance(userProfileDir);
                 await manifestUpdater.BackgroundUpdateAdvertisingManifestsWhenRequiredAsync();
             }
             catch (Exception)
@@ -318,7 +318,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                 await _workloadManifestInstaller.ExtractManifestAsync(packagePath, adManifestPath);
 
-                // add file that contains the advertisted manifest feature band so GetAdvertisingManifestVersionAndWorkloads will use correct feature band, regardless of if rollback occurred or not
+                // add file that contains the advertised manifest feature band so GetAdvertisingManifestVersionAndWorkloads will use correct feature band, regardless of if rollback occurred or not
                 File.WriteAllText(Path.Combine(adManifestPath, "AdvertisedManifestFeatureBand.txt"), currentFeatureBand);
 
                 if (_displayManifestUpdates)

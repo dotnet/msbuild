@@ -46,7 +46,7 @@ namespace Microsoft.NET.Publish.Tests
                 msbuildArgs.Add($"/p:UseAppHost={useAppHost}");
             }
 
-            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX) &&
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) &&
                 targetFramework == "netcoreapp2.1")
             {
                 //  .NET Core 2.1.0 packages don't support latest versions of OS X, so roll forward to the

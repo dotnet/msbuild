@@ -77,7 +77,7 @@ namespace Microsoft.TemplateEngine.Cli
                        Example
                            .For<NewCommand>(args.ParseResult)
                            .WithSubcommand<SearchCommand>()
-                           .WithArgument(SearchCommand.NameArgument));
+                           .WithArgument(BaseSearchCommand.NameArgument));
                     Reporter.Output.WriteLine();
                     return NewCommandStatus.Success;
                 }
@@ -109,7 +109,7 @@ namespace Microsoft.TemplateEngine.Cli
                         string.Format(
                             LocalizableStrings.TemplateListCoordinator_Error_FailedConstraints,
                             resolutionResult.ContraintsMismatchGroupCount,
-                            ListCommand.IgnoreConstraintsOption.Name)
+                            BaseListCommand.IgnoreConstraintsOption.Name)
                         .Bold().Red());
                 }
 
@@ -122,7 +122,7 @@ namespace Microsoft.TemplateEngine.Cli
                              Example
                                  .For<NewCommand>(args.ParseResult)
                                  .WithSubcommand<SearchCommand>()
-                                 .WithArgument(SearchCommand.NameArgument));
+                                 .WithArgument(BaseSearchCommand.NameArgument));
                 }
                 else
                 {
@@ -130,7 +130,7 @@ namespace Microsoft.TemplateEngine.Cli
                              Example
                                  .For<NewCommand>(args.ParseResult)
                                  .WithSubcommand<SearchCommand>()
-                                 .WithArgument(SearchCommand.NameArgument, args.ListNameCriteria));
+                                 .WithArgument(BaseSearchCommand.NameArgument, args.ListNameCriteria));
                 }
                 Reporter.Error.WriteLine();
                 return NewCommandStatus.NotFound;
@@ -187,7 +187,7 @@ namespace Microsoft.TemplateEngine.Cli
                      Example
                          .For<NewCommand>(args.ParseResult)
                          .WithSubcommand<SearchCommand>()
-                         .WithArgument(SearchCommand.NameArgument, "web"));
+                         .WithArgument(BaseSearchCommand.NameArgument, "web"));
 
             Reporter.Output.WriteLine();
 

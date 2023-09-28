@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Tools.Clean
         public static CleanCommand FromArgs(string[] args, string msbuildPath = null)
         {
 
-            var parser = Cli.Parser.Instance;
+            var parser = Parser.Instance;
             var result = parser.ParseFrom("dotnet clean", args);
             return FromParseResult(result, msbuildPath);
         }

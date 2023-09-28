@@ -84,7 +84,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         public bool TryGetEnumValue(string enumTypeName, string enumStrValue, out object retValue)
         {
             bool fGetValue = false;
-            retValue = System.Enum.ToObject(GetType(enumTypeName), 0);
+            retValue = Enum.ToObject(GetType(enumTypeName), 0);
             try
             {
                 retValue = GetEnumValueIgnoreCase(enumTypeName, enumStrValue);
@@ -108,7 +108,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             System.Type[] argumentTypes = null;
             if (arguments == null || arguments.GetLength(0) == 0)
             {
-                argumentTypes = System.Type.EmptyTypes;
+                argumentTypes = Type.EmptyTypes;
             }
             else
             {
@@ -155,7 +155,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             var lambda = Expression.Lambda(body, parameters);
             // Diagnostics.Debug.Assert(false, lambda.ToString());
 #if NET472
-            return System.Delegate.CreateDelegate(handlerType, lambda.Compile(), "Invoke", false);
+            return Delegate.CreateDelegate(handlerType, lambda.Compile(), "Invoke", false);
 #else
             return null;
 #endif
@@ -164,7 +164,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         static public System.Delegate AddEventDeferHandler(dynamic obj, string eventName, System.Delegate deferEventHandler)
         {
             EventInfo eventinfo = obj.GetType().GetEvent(eventName);
-            System.Delegate eventHandler = DynamicAssembly.CreateEventHandlerDelegate(eventinfo, deferEventHandler);
+            System.Delegate eventHandler = CreateEventHandlerDelegate(eventinfo, deferEventHandler);
             eventinfo.AddEventHandler(obj, eventHandler);
             return eventHandler;
         }

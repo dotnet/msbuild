@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             var printFirstTimeWelcomeMessage
                 = new FirstRunExperienceAction(
                     () => _reporterMock.Lines.Contains(string.Format(
-                    Configurer.LocalizableStrings.FirstTimeMessageWelcome,
+                    LocalizableStrings.FirstTimeMessageWelcome,
                     DotnetFirstTimeUseConfigurer.ParseDotNetVersion(Product.Version),
                     Product.Version))
                             && _reporterMock.Lines.Contains(LocalizableStrings.FirstTimeMessageMoreInformation),
@@ -165,9 +165,9 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 
             public void EvaluateAfterSecondRun()
             {
-                if (ActionCalledTime != ActionCalledTime.FirstRun && _tellTheActionIsRun())
+                if (ActionCalledTime != FirstRun && _tellTheActionIsRun())
                 {
-                    ActionCalledTime = ActionCalledTime.SecondRun;
+                    ActionCalledTime = SecondRun;
                 }
             }
 
@@ -183,9 +183,9 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 
         private static ActionCalledTime GetCalledTime(bool predicate, ActionCalledTime actionCalledTime)
         {
-            if (actionCalledTime != ActionCalledTime.FirstRun && predicate)
+            if (actionCalledTime != FirstRun && predicate)
             {
-                actionCalledTime = ActionCalledTime.SecondRun;
+                actionCalledTime = SecondRun;
             }
 
             return actionCalledTime;

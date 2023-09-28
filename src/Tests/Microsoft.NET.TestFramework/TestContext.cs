@@ -200,11 +200,11 @@ namespace Microsoft.NET.TestFramework
 
             //  Important to set this before below code which ends up calling through TestContext.Current, which would
             //  result in infinite recursion / stack overflow if TestContext.Current wasn't set
-            TestContext.Current = testContext;
+            Current = testContext;
 
             //  Set up test hooks for in-process tests
             Environment.SetEnvironmentVariable(
-                DotNet.Cli.Utils.Constants.MSBUILD_EXE_PATH,
+                Constants.MSBUILD_EXE_PATH,
                 Path.Combine(testContext.ToolsetUnderTest.SdkFolderUnderTest, "MSBuild.dll"));
 
             Environment.SetEnvironmentVariable(
@@ -212,7 +212,7 @@ namespace Microsoft.NET.TestFramework
                 Path.Combine(testContext.ToolsetUnderTest.SdksPath));
 
 #if NETCOREAPP
-            DotNet.Cli.Utils.MSBuildForwardingAppWithoutLogging.MSBuildExtensionsPathTestHook =
+            MSBuildForwardingAppWithoutLogging.MSBuildExtensionsPathTestHook =
                 testContext.ToolsetUnderTest.SdkFolderUnderTest;
 #endif
         }
@@ -278,7 +278,7 @@ namespace Microsoft.NET.TestFramework
         {
             if (!string.IsNullOrEmpty(sdkVersion))
             {
-                string globalJsonPath = System.IO.Path.Combine(path, "global.json");
+                string globalJsonPath = Path.Combine(path, "global.json");
                 File.WriteAllText(globalJsonPath, @"{
   ""sdk"": {
     ""version"": """ + sdkVersion + @"""

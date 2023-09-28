@@ -343,7 +343,7 @@ namespace Microsoft.NET.Publish.Tests
         [MemberData(nameof(Net7Plus), MemberType = typeof(PublishTestUtils))]
         public void NativeAot_hw_runs_with_cross_target_PublishAot_is_enabled(string targetFramework)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && (RuntimeInformation.OSArchitecture == System.Runtime.InteropServices.Architecture.X64))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && (RuntimeInformation.OSArchitecture == Architecture.X64))
             {
                 var projectName = "HellowWorldNativeAotApp";
                 var rid = "win-arm64";
@@ -373,7 +373,7 @@ namespace Microsoft.NET.Publish.Tests
         [MemberData(nameof(Net7Plus), MemberType = typeof(PublishTestUtils))]
         public void NativeAot_hw_runs_with_cross_PackageReference_PublishAot_is_enabled(string targetFramework)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && (RuntimeInformation.OSArchitecture == System.Runtime.InteropServices.Architecture.X64))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && (RuntimeInformation.OSArchitecture == Architecture.X64))
             {
                 var projectName = "HellowWorldNativeAotApp";
                 var rid = "win-arm64";
@@ -409,7 +409,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void NativeAot_hw_runs_with_cross_PackageReference_PublishAot_is_empty(string targetFramework)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && (RuntimeInformation.OSArchitecture == System.Runtime.InteropServices.Architecture.X64))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && (RuntimeInformation.OSArchitecture == Architecture.X64))
             {
                 var projectName = "HellowWorldNativeAotApp";
                 var rid = "win-arm64";
@@ -482,7 +482,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void NativeAot_hw_fails_with_unsupported_target_rid(string targetFramework)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && RuntimeInformation.OSArchitecture == System.Runtime.InteropServices.Architecture.X64)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && RuntimeInformation.OSArchitecture == Architecture.X64)
             {
                 var projectName = "HelloWorldUnsupportedTargetRid";
                 var rid = "linux-x64";
@@ -506,7 +506,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void NativeAot_hw_fails_with_unsupported_host_rid(string targetFramework)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && RuntimeInformation.OSArchitecture == System.Runtime.InteropServices.Architecture.X64)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && RuntimeInformation.OSArchitecture == Architecture.X64)
             {
                 var projectName = "HelloWorldUnsupportedHostRid";
                 var supportedTargetRid = "linux-arm64";

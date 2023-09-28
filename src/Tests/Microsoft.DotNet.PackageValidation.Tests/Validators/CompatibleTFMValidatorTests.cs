@@ -10,9 +10,9 @@ namespace Microsoft.DotNet.PackageValidation.Validators.Tests
 {
     public class CompatibleTFMValidatorTests
     {
-        private (SuppressableTestLog, CompatibleTfmValidator) CreateLoggerAndValidator()
+        private (SuppressibleTestLog, CompatibleTfmValidator) CreateLoggerAndValidator()
         {
-            SuppressableTestLog log = new();
+            SuppressibleTestLog log = new();
             CompatibleTfmValidator validator = new(log,
                 Mock.Of<IApiCompatRunner>());
 
@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.PackageValidation.Validators.Tests
         [Fact]
         public void MissingRidLessAssetForFramework()
         {
-            (SuppressableTestLog log, CompatibleTfmValidator validator) = CreateLoggerAndValidator();
+            (SuppressibleTestLog log, CompatibleTfmValidator validator) = CreateLoggerAndValidator();
             string[] filePaths = new[]
             {
                 @"ref/netcoreapp3.1/TestPackage.dll",
@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.PackageValidation.Validators.Tests
         [Fact]
         public void MissingAssetForFramework()
         {
-            (SuppressableTestLog log, CompatibleTfmValidator validator) = CreateLoggerAndValidator();
+            (SuppressibleTestLog log, CompatibleTfmValidator validator) = CreateLoggerAndValidator();
             string[] filePaths = new[]
             {
                 @"ref/netstandard2.0/TestPackage.dll",
@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.PackageValidation.Validators.Tests
         [Fact]
         public void MissingRidSpecificAssetForFramework()
         {
-            (SuppressableTestLog log, CompatibleTfmValidator validator) = CreateLoggerAndValidator();
+            (SuppressibleTestLog log, CompatibleTfmValidator validator) = CreateLoggerAndValidator();
             string[] filePaths = new[]
             {
                 @"ref/netcoreapp2.0/TestPackage.dll",
@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.PackageValidation.Validators.Tests
         [Fact]
         public void OnlyRuntimeAssembly()
         {
-            (SuppressableTestLog log, CompatibleTfmValidator validator) = CreateLoggerAndValidator();
+            (SuppressibleTestLog log, CompatibleTfmValidator validator) = CreateLoggerAndValidator();
             string[] filePaths = new[]
             {
                 @"runtimes/win/lib/netstandard2.0/TestPackage.dll"
@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.PackageValidation.Validators.Tests
         [Fact]
         public void LibAndRuntimeAssembly()
         {
-            (SuppressableTestLog log, CompatibleTfmValidator validator) = CreateLoggerAndValidator();
+            (SuppressibleTestLog log, CompatibleTfmValidator validator) = CreateLoggerAndValidator();
             string[] filePaths = new[]
             {
                 @"lib/netcoreapp3.1/TestPackage.dll",
@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.PackageValidation.Validators.Tests
         [Fact]
         public void NoCompileTimeAssetForSpecificFramework()
         {
-            (SuppressableTestLog log, CompatibleTfmValidator validator) = CreateLoggerAndValidator();
+            (SuppressibleTestLog log, CompatibleTfmValidator validator) = CreateLoggerAndValidator();
             string[] filePaths = new[]
             {
                 $@"ref/{ToolsetInfo.CurrentTargetFramework}/TestPackage.dll",
@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.PackageValidation.Validators.Tests
         [Fact]
         public void NoRuntimeAssetForSpecificFramework()
         {
-            (SuppressableTestLog log, CompatibleTfmValidator validator) = CreateLoggerAndValidator();
+            (SuppressibleTestLog log, CompatibleTfmValidator validator) = CreateLoggerAndValidator();
             string[] filePaths = new[]
             {
                 $@"ref/{ToolsetInfo.CurrentTargetFramework}/TestPackage.dll",
@@ -143,7 +143,7 @@ namespace Microsoft.DotNet.PackageValidation.Validators.Tests
         [Fact]
         public void NoRuntimeSpecificAssetForSpecificFramework()
         {
-            (SuppressableTestLog log, CompatibleTfmValidator validator) = CreateLoggerAndValidator();
+            (SuppressibleTestLog log, CompatibleTfmValidator validator) = CreateLoggerAndValidator();
             string[] filePaths = new[]
             {
                 @"lib/netstandard2.0/TestPackage.dll",
@@ -161,7 +161,7 @@ namespace Microsoft.DotNet.PackageValidation.Validators.Tests
         [Fact]
         public void CompatibleLibAsset()
         {
-            (SuppressableTestLog log, CompatibleTfmValidator validator) = CreateLoggerAndValidator();
+            (SuppressibleTestLog log, CompatibleTfmValidator validator) = CreateLoggerAndValidator();
             string[] filePaths = new[]
             {
                 @"ref/netcoreapp2.0/TestPackage.dll",
@@ -178,7 +178,7 @@ namespace Microsoft.DotNet.PackageValidation.Validators.Tests
         [Fact]
         public void CompatibleRidSpecificAsset()
         {
-            (SuppressableTestLog log, CompatibleTfmValidator validator) = CreateLoggerAndValidator();
+            (SuppressibleTestLog log, CompatibleTfmValidator validator) = CreateLoggerAndValidator();
             string[] filePaths = new[]
             {
                 @"lib/netcoreapp2.0/TestPackage.dll",
@@ -195,7 +195,7 @@ namespace Microsoft.DotNet.PackageValidation.Validators.Tests
         [Fact]
         public void CompatibleFrameworksWithDifferentAssets()
         {
-            (SuppressableTestLog log, CompatibleTfmValidator validator) = CreateLoggerAndValidator();
+            (SuppressibleTestLog log, CompatibleTfmValidator validator) = CreateLoggerAndValidator();
             string[] filePaths = new[]
             {
                 @"ref/netstandard2.0/TestPackage.dll",

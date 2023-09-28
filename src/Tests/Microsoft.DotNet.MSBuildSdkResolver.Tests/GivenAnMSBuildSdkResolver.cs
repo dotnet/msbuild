@@ -708,7 +708,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                         return;
                     }
 
-                    System.Threading.Thread.Sleep(sleep);
+                    Thread.Sleep(sleep);
                 }
 
                 throw new InvalidOperationException("LastWriteTime is not changing.");

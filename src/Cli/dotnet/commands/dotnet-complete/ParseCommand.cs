@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli
             result.HandleDebugSwitch();
 
             var tokens = result.Tokens.Skip(1).Select(t => t.Value).ToArray();
-            var reparsed = Microsoft.DotNet.Cli.Parser.Instance.Parse(tokens);
+            var reparsed = Parser.Instance.Parse(tokens);
             Console.WriteLine(reparsed.ToString());
 
 

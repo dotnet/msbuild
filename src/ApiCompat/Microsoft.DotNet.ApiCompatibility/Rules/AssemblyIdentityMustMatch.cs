@@ -18,10 +18,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     /// </summary>
     public class AssemblyIdentityMustMatch : IRule
     {
-        private readonly ISuppressableLog _log;
+        private readonly ISuppressibleLog _log;
         private readonly IRuleSettings _settings;
 
-        public AssemblyIdentityMustMatch(ISuppressableLog log,
+        public AssemblyIdentityMustMatch(ISuppressibleLog log,
             IRuleSettings settings,
             IRuleRegistrationContext context)
         {

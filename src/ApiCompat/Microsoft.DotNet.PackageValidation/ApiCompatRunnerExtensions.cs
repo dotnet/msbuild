@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.PackageValidation
     internal static class ApiCompatRunnerExtensions
     {
         public static void QueueApiCompatFromContentItem(this IApiCompatRunner apiCompatRunner,
-            ISuppressableLog log,
+            ISuppressibleLog log,
             IReadOnlyList<ContentItem> leftContentItems,
             IReadOnlyList<ContentItem> rightContentItems,
             ApiCompatRunnerOptions options,
@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.PackageValidation
             apiCompatRunner.EnqueueWorkItem(new ApiCompatRunnerWorkItem(left, options, right));
         }
 
-        private static MetadataInformation GetMetadataInformation(ISuppressableLog log,
+        private static MetadataInformation GetMetadataInformation(ISuppressibleLog log,
             Package package,
             ContentItem item,
             string? displayString = null,

@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Cli
             // since commands can have arguments, we must take those as well in order to get accurate help
             var tokenList = parseResult.Tokens.TakeWhile(token => token.Type == CliTokenType.Argument || token.Type == CliTokenType.Command || token.Type == CliTokenType.Directive).Select(t => t.Value).ToList();
             tokenList.Add("-h");
-            Parser.Instance.Parse(tokenList).Invoke();
+            Instance.Parse(tokenList).Invoke();
         }
 
         public static void ShowHelpOrErrorIfAppropriate(this ParseResult parseResult)
@@ -89,19 +89,19 @@ namespace Microsoft.DotNet.Cli
         public static bool IsDotnetBuiltInCommand(this ParseResult parseResult)
         {
             return string.IsNullOrEmpty(parseResult.RootSubCommandResult()) ||
-                Parser.GetBuiltInCommand(parseResult.RootSubCommandResult()) != null;
+                GetBuiltInCommand(parseResult.RootSubCommandResult()) != null;
         }
 
         public static bool IsTopLevelDotnetCommand(this ParseResult parseResult)
         {
-            return parseResult.CommandResult.Command.Equals(Parser.RootCommand) && string.IsNullOrEmpty(parseResult.RootSubCommandResult());
+            return parseResult.CommandResult.Command.Equals(RootCommand) && string.IsNullOrEmpty(parseResult.RootSubCommandResult());
         }
 
         public static bool CanBeInvoked(this ParseResult parseResult)
         {
-            return Parser.GetBuiltInCommand(parseResult.RootSubCommandResult()) != null ||
+            return GetBuiltInCommand(parseResult.RootSubCommandResult()) != null ||
                 parseResult.Tokens.Any(token => token.Type == CliTokenType.Directive) ||
-                (parseResult.IsTopLevelDotnetCommand() && string.IsNullOrEmpty(parseResult.GetValue(Parser.DotnetSubCommand)));
+                (parseResult.IsTopLevelDotnetCommand() && string.IsNullOrEmpty(parseResult.GetValue(DotnetSubCommand)));
         }
 
         public static int HandleMissingCommand(this ParseResult parseResult)
@@ -139,7 +139,7 @@ namespace Microsoft.DotNet.Cli
         {
             if (symbolResult.Token() == default)
             {
-                return parseResult.GetResult(Parser.DotnetSubCommand)?.GetValueOrDefault<string>();
+                return parseResult.GetResult(DotnetSubCommand)?.GetValueOrDefault<string>();
             }
             else if (symbolResult.Token().Type.Equals(CliTokenType.Command))
             {

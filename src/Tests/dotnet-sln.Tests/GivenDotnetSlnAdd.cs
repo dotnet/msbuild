@@ -1218,7 +1218,7 @@ EndGlobal
                 .Execute($"sln", "App.sln", "add", "--solution-folder", "blah", "--in-root", projectToAdd);
             cmd.Should().Fail();
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
-            cmd.StdErr.Should().Be(Microsoft.DotNet.Tools.Sln.LocalizableStrings.SolutionFolderAndInRootMutuallyExclusive);
+            cmd.StdErr.Should().Be(Tools.Sln.LocalizableStrings.SolutionFolderAndInRootMutuallyExclusive);
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
 
             File.ReadAllText(solutionPath)

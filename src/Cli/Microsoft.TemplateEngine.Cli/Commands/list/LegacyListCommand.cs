@@ -40,7 +40,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         private void ValidateParentCommandArguments(CommandResult commandResult)
         {
             var nameArgumentResult = commandResult.Children.FirstOrDefault(
-                symbol => symbol is ArgumentResult argumentResult && argumentResult.Argument == ListCommand.NameArgument);
+                symbol => symbol is ArgumentResult argumentResult && argumentResult.Argument == NameArgument);
             if (nameArgumentResult == null)
             {
                 return;

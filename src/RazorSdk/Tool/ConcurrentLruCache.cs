@@ -139,7 +139,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
 
         private void MoveNodeToTop(LinkedListNode<TKey> node)
         {
-            if (!object.ReferenceEquals(_nodeList.First, node))
+            if (!ReferenceEquals(_nodeList.First, node))
             {
                 _nodeList.Remove(node);
                 _nodeList.AddFirst(node);

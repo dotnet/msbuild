@@ -38,7 +38,7 @@ namespace Dotnet_new3
             var builtIns = new List<(Type, IIdentifiedComponent)>();
             builtIns.AddRange(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Components.AllComponents);
             builtIns.AddRange(Microsoft.TemplateEngine.Edge.Components.AllComponents);
-            builtIns.AddRange(Microsoft.TemplateEngine.Cli.Components.AllComponents);
+            builtIns.AddRange(Components.AllComponents);
             builtIns.AddRange(Microsoft.TemplateSearch.Common.Components.AllComponents);
             if (!disableSdkTemplates)
             {
