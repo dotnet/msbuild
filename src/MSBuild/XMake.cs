@@ -4269,7 +4269,7 @@ namespace Microsoft.Build.CommandLine
             }
             catch (Exception e) when (loggerDescription.IsOptional)
             {
-                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OptionalLoggerCreationMessage", e.Message));
+                Console.WriteLine(loggerDescription.Name ": " + ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OptionalLoggerCreationMessage", e.Message));
                 return false;
             }
 
