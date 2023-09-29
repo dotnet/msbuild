@@ -192,8 +192,8 @@
         <note>LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
       <trans-unit id="Copy.IOException">
-        <source>MSB3894: "Got {0} copying {1} to {2} and HR is {3}"</source>
-        <target state="translated">MSB3894: « Nous avons obtenu {0} copie de {1} vers {2} et HR est {3} »</target>
+        <source>MSB3894: Got {0} copying "{1}" to "{2}" and HR is {3}</source>
+        <target state="new">MSB3894: Got {0} copying "{1}" to "{2}" and HR is {3}</target>
         <note>{StrBegin="MSB3894: "} LOCALIZATION: {0} is exception.ToString(), {1} and {2} are paths, {3} is a number")</note>
       </trans-unit>
       <trans-unit id="Copy.LinkFailed">
@@ -227,9 +227,9 @@
         <note>LOCALIZATION: {0} and {1} are paths. {2} is an optional localized message.</note>
       </trans-unit>
       <trans-unit id="Copy.RetryingOnAccessDenied">
-        <source>"MSB3895: Retrying on ERROR_ACCESS_DENIED because environment variable MSBUILDALWAYSRETRY = 1"</source>
-        <target state="new">"MSB3895: Retrying on ERROR_ACCESS_DENIED because environment variable MSBUILDALWAYSRETRY = 1"</target>
-        <note>{StrBegin="MSB3895: "} LOCALIZATION: Do NOT translate MSBUILDALWAYSRETRY")</note>
+        <source>MSB3895: Retrying on ERROR_ACCESS_DENIED because environment variable MSBUILDALWAYSRETRY=1</source>
+        <target state="new">MSB3895: Retrying on ERROR_ACCESS_DENIED because environment variable MSBUILDALWAYSRETRY=1</target>
+        <note>{StrBegin="MSB3895: "} LOCALIZATION: Do NOT translate MSBUILDALWAYSRETRY)</note>
       </trans-unit>
       <trans-unit id="Copy.SourceIsDirectory">
         <source>MSB3025: The source file "{0}" is actually a directory.  The "Copy" task does not support copying directories.</source>
