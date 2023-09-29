@@ -104,7 +104,7 @@ namespace Microsoft.Build.Logging
                 }
                 else
                 {
-                    return _loggerAssembly.AssemblyFile;
+                    return _loggerAssembly.AssemblyFile ?? _loggerAssembly.AssemblyName;
                 }
             }
         }
