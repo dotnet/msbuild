@@ -274,6 +274,8 @@ dotnet_diagnostic.IDE0043.severity = warning
 dotnet_diagnostic.IDE0062.severity = warning
 # ConvertTypeOfToNameOf
 dotnet_diagnostic.IDE0082.severity = warning
+# Remove unnecessary lambda expression
+dotnet_diagnostic.IDE0200.severity = none
 # Remove redundant nullable directive
 dotnet_diagnostic.IDE0240.severity = warning
 
