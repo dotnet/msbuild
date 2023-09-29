@@ -2336,13 +2336,13 @@ $@"<Project>
         }
 
         [Theory]
-        [InlineData("-logger:,\"nonExistentlogger.dll\",IsOptional;Foo")]
-        [InlineData("-logger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo")]
-        [InlineData("-logger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC")]
-        [InlineData("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional;Foo")]
-        [InlineData("-distributedlogger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo")]
-        [InlineData("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC")]
-        public void MissingOptionalLoggersAreIgnored(string logger)
+        [InlineData("-logger:,\"nonExistentlogger.dll\",IsOptional;Foo", "nonExistentLogger.dll")]
+        [InlineData("-logger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo", "ClassA")]
+        [InlineData("-logger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC", "nonExistentLogger.dll")]
+        [InlineData("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional;Foo", "nonExistentLogger.dll")]
+        [InlineData("-distributedlogger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo", "ClassA")]
+        [InlineData("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC", "nonExistentLogger.dll")]
+        public void MissingOptionalLoggersAreIgnored(string logger, string expectedLoggerName)
         {
             string projectString =
                 "<Project>" +
@@ -2356,7 +2356,7 @@ $@"<Project>
             var output = RunnerUtilities.ExecMSBuild(parametersLoggerOptional, out bool successfulExit, _output);
             successfulExit.ShouldBe(true);
             output.ShouldContain("Hello", output);
-            output.ShouldContain("The specified logger could not be created and will not be used.", output);
+            output.ShouldContain($"The specified logger \"{expectedLoggerName}\" could not be created and will not be used.", output);
         }
 
         [Theory]
