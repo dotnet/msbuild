@@ -814,7 +814,7 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             // Packs with RID-agnostic build packages that contain MSBuild targets.
-            if (toolPackType is not ToolPackType.Crossgen2)
+            if (toolPackType is not ToolPackType.Crossgen2 && EnableRuntimePackDownload)
             {
                 var buildPackageName = knownPack.ItemSpec;
                 var buildPackage = new TaskItem(buildPackageName);
@@ -827,7 +827,8 @@ namespace Microsoft.NET.Build.Tasks
             // The version comparison doesn't consider prerelease labels, so 8.0.0-foo will be considered equal to 8.0.0 and
             // will not get the extra analyzer package reference.
             if (toolPackType is ToolPackType.ILLink &&
-                new VersionComparer(VersionComparison.Version).Compare(NuGetVersion.Parse(packVersion), new NuGetVersion(8, 0, 0)) < 0)
+                new VersionComparer(VersionComparison.Version).Compare(NuGetVersion.Parse(packVersion), new NuGetVersion(8, 0, 0)) < 0 &&
+                EnableRuntimePackDownload)
             {
                 var analyzerPackage = new TaskItem("Microsoft.NET.ILLink.Analyzers");
                 analyzerPackage.SetMetadata(MetadataKeys.Version, packVersion);
