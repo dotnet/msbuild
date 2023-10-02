@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Logging.TerminalLogger;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging.SimpleErrorLogger
@@ -19,8 +20,11 @@ namespace Microsoft.Build.Logging.SimpleErrorLogger
     /// </summary>
     public sealed class SimpleErrorLogger : INodeLogger
     {
+        private readonly bool acceptAnsiColorCodes;
+        private readonly uint? originalConsoleMode;
         public SimpleErrorLogger()
         {
+            (acceptAnsiColorCodes, _, originalConsoleMode) = NativeMethods.QueryIsScreenAndTryEnableAnsiColorCodes(NativeMethods.StreamHandleType.StdErr);
         }
 
         public bool HasLoggedErrors { get; private set; } = false;
@@ -41,21 +45,37 @@ namespace Microsoft.Build.Logging.SimpleErrorLogger
         {
             eventSource.ErrorRaised += HandleErrorEvent;
             eventSource.WarningRaised += HandleWarningEvent;
+
+            // This needs to happen so binary loggers can get evaluation properties and items
+            if (eventSource is IEventSource4 eventSource4)
+            {
+                eventSource4.IncludeEvaluationPropertiesAndItems();
+            }
         }
 
         private void HandleErrorEvent(object sender, BuildErrorEventArgs e)
         {
             HasLoggedErrors = true;
-            Console.Error.Write("\x1b[31;1m");
-            Console.Error.Write(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true));
-            Console.Error.WriteLine("\x1b[m");
+            LogWithColor(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true),
+                TerminalColor.Red);
         }
 
         private void HandleWarningEvent(object sender, BuildWarningEventArgs e)
         {
-            Console.Error.Write("\x1b[33;1m");
-            Console.Error.Write(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true));
-            Console.Error.WriteLine("\x1b[m");
+            LogWithColor(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true),
+                TerminalColor.Yellow);
+        }
+
+        private void LogWithColor(string message, TerminalColor color)
+        {
+            if (acceptAnsiColorCodes)
+            {
+                Console.Error.Write(AnsiCodes.Colorize(message, color));
+            }
+            else
+            {
+                Console.Error.Write(message);
+            }
         }
 
         public void Initialize(IEventSource eventSource)
@@ -65,6 +85,7 @@ namespace Microsoft.Build.Logging.SimpleErrorLogger
 
         public void Shutdown()
         {
+            NativeMethods.RestoreConsoleMode(originalConsoleMode, NativeMethods.StreamHandleType.StdErr);
         }
     }
 }

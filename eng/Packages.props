@@ -25,7 +25,6 @@
     <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextVersion)" />
     <PackageVersion Include="System.Resources.Extensions" Version="$(SystemResourcesExtensionsPackageVersion)" />
     <PackageVersion Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafeVersion)" />
-    <PackageVersion Include="System.Security.Permissions" Version="$(SystemSecurityPermissionsVersion)" />
     <PackageVersion Include="System.Security.Principal.Windows" Version="$(SystemSecurityPrincipalWindowsVersion)" />
     <PackageVersion Include="System.Text.Encoding.CodePages" Version="$(SystemTextEncodingCodePagesVersion)" />
     <PackageVersion Include="System.Text.Json" Version="$(SystemTextJsonVersion)" />

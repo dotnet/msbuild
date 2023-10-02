@@ -264,6 +264,11 @@
         <target state="translated">MSB4273: 專案快取從 {0} 方法擲回未處理的例外狀況。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheHandleBuildResultFailed">
+        <source>MSB4269: The project cache failed while handling a build result for the following project: {0}.</source>
+        <target state="translated">MSB4269: 處理下列專案的組建結果時，專案快取失敗: {0}。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectCacheHitWithDefaultTargets">
         <source>Project cache hit for "{0}" (default targets).</source>
         <target state="translated">"{0}" 的專案快取命中 (預設目標)。</target>
@@ -368,6 +373,11 @@
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
         <source>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</source>
         <target state="translated">MSB4274: 停用 inproc 節點會在使用可發出 proxy 組建要求的專案快取外掛程式時，導致效能降低。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReportFileAccessesX64Only">
+        <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
+        <target state="translated">目前只支援使用 MSBuild 的 x64 變體來報告檔案存取。</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">

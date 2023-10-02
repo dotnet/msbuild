@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="BuildFailedWithPropertiesItemsOrTargetResultsRequested">
         <source>Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</source>
-        <target state="new">Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</target>
+        <target state="translated">빌드하지 못했습니다. 속성, 항목 및 대상 결과를 가져올 수 없습니다. 위의 stderr에서 세부 정보를 참조하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -98,6 +98,24 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_42_ReportFileAccessesSwitch">
+        <source>  -reportFileAccesses[:True|False]
+                     Causes MSBuild to report file accesses to any configured
+                     project cache plugins.
+
+                     This flag is experimental and may not work as intended.
+    </source>
+        <target state="translated">  -reportFileAccesses[:True|False]
+                     MSBuild에서 모든 구성된 프로젝트 캐시 플러그 인에 대한
+                     파일 액세스를 보고하도록 합니다.
+
+                     이 플래그는 실험적이며 예상대로 작동하지 않을 수 있습니다.
+    </target>
+        <note>
+      LOCALIZATION: "-reportFileAccesses" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1064: 낮은 우선 순위 값이 유효하지 않습니다. {0}</target>
@@ -115,6 +133,16 @@
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidReportFileAccessesValue">
+        <source>MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</source>
+        <target state="translated">MSBUILD : error MSB1063: 보고서 파일 액세스 값이 잘못되었습니다. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1063: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -1288,7 +1316,7 @@
       </trans-unit>
       <trans-unit id="MissingGetItemError">
         <source>MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</source>
-        <target state="new">MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</target>
+        <target state="translated">MSBUILD : error MSB1014: getItem 스위치의 항목 이름을 제공해야 합니다.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1014: "}UE: This happens if the user does something like "msbuild.exe -getItem". The user must pass in an actual item name
       following the switch, as in "msbuild.exe -getItem:blah".
@@ -1297,7 +1325,7 @@
       </trans-unit>
       <trans-unit id="MissingGetPropertyError">
         <source>MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</source>
-        <target state="new">MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</target>
+        <target state="translated">MSBUILD : error MSB1010: getProperty 스위치의 속성 이름을 제공해야 합니다.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1010: "}UE: This happens if the user does something like "msbuild.exe -getProperty". The user must pass in an actual property name
       following the switch, as in "msbuild.exe -getProperty:blah".
@@ -1306,7 +1334,7 @@
       </trans-unit>
       <trans-unit id="MissingGetTargetResultError">
         <source>MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</source>
-        <target state="new">MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</target>
+        <target state="translated">MSBUILD : error MSB1017: getTargetResult 스위치의 대상 이름을 제공해야 합니다.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1017: "}UE: This happens if the user does something like "msbuild.exe -getTargetResult". The user must pass in an actual target name
       following the switch, as in "msbuild.exe -getTargetResult:blah".
@@ -1593,7 +1621,7 @@
       </trans-unit>
       <trans-unit id="SolutionBuildInvalidForCommandLineEvaluation">
         <source>MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</source>
-        <target state="new">MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</target>
+        <target state="translated">MSBUILD : error MSB1063: 솔루션 파일 또는 솔루션 필터 파일을 빌드할 때 속성 또는 항목에 액세스할 수 없습니다. 이 기능은 개별 프로젝트를 빌드할 때만 사용할 수 있습니다.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1063: "}UE: This happens if the user passes in a solution file when trying to access individual properties or items. The user must pass in a project file.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.

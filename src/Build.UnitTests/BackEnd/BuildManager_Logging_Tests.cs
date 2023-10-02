@@ -155,9 +155,15 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// </summary>
         public void Dispose()
         {
-            _buildManager.Dispose();
-            _projectCollection.Dispose();
-            _env.Dispose();
+            try
+            {
+                _buildManager.Dispose();
+                _projectCollection.Dispose();
+            }
+            finally
+            {
+                _env.Dispose();
+            }
         }
     }
 }

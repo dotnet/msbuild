@@ -263,10 +263,11 @@ namespace Microsoft.Build.UnitTests
                 e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
         }
 
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void RoundtripExtendedErrorEventArgs_SerializedAsError(bool useArguments)
+        public void RoundtripExtendedErrorEventArgs_SerializedAsError(bool withOptionalData)
         {
             var args = new ExtendedBuildErrorEventArgs(
                 "extendedDataType",
@@ -281,10 +282,14 @@ namespace Microsoft.Build.UnitTests
                 "Help",
                 "SenderName",
                 DateTime.Parse("9/1/2021 12:02:07 PM"),
-                useArguments ? new object[] { "argument0" } : null);
+                withOptionalData ? new object[] { "argument0" } : null)
+            {
+                ExtendedData = withOptionalData ? "{'long-json':'mostly-strings'}" : null,
+                ExtendedMetadata = withOptionalData ? new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } } : null,
+                BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+            };
 
-            // For now we don't serialize extended data into binary log
-            Roundtrip<BuildErrorEventArgs>(args,
+            Roundtrip(args,
                 e => e.Code,
                 e => e.ColumnNumber.ToString(),
                 e => e.EndColumnNumber.ToString(),
@@ -294,6 +299,9 @@ namespace Microsoft.Build.UnitTests
                 e => e.Message,
                 e => e.ProjectFile,
                 e => e.Subcategory,
+                e => e.ExtendedType,
+                e => TranslationHelpers.ToString(e.ExtendedMetadata),
+                e => e.ExtendedData,
                 e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
         }
 
@@ -332,7 +340,7 @@ namespace Microsoft.Build.UnitTests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void RoundtripExtendedWarningEventArgs_SerializedAsWarning(bool useArguments)
+        public void RoundtripExtendedWarningEventArgs_SerializedAsWarning(bool withOptionalData)
         {
             var args = new ExtendedBuildWarningEventArgs(
                 "extendedDataType",
@@ -347,10 +355,14 @@ namespace Microsoft.Build.UnitTests
                 "Help",
                 "SenderName",
                 DateTime.Parse("9/1/2021 12:02:07 PM"),
-                useArguments ? new object[] { "argument0" } : null);
+                withOptionalData ? new object[] { "argument0" } : null)
+                {
+                    ExtendedData = withOptionalData ? "{'long-json':'mostly-strings'}" : null,
+                    ExtendedMetadata = withOptionalData ? new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } } : null,
+                    BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+                };
 
-            // For now we don't serialize extended data into binary log
-            Roundtrip<BuildWarningEventArgs>(args,
+            Roundtrip(args,
                 e => e.Code,
                 e => e.ColumnNumber.ToString(),
                 e => e.EndColumnNumber.ToString(),
@@ -360,6 +372,9 @@ namespace Microsoft.Build.UnitTests
                 e => e.Message,
                 e => e.ProjectFile,
                 e => e.Subcategory,
+                e => e.ExtendedType,
+                e => TranslationHelpers.ToString(e.ExtendedMetadata),
+                e => e.ExtendedData,
                 e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
         }
 
@@ -400,7 +415,7 @@ namespace Microsoft.Build.UnitTests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void RoundtripExtendedBuildMessageEventArgs_SerializedAsMessage(bool useArguments)
+        public void RoundtripExtendedBuildMessageEventArgs_SerializedAsMessage(bool withOptionalData)
         {
             var args = new ExtendedBuildMessageEventArgs(
                 "extendedDataType",
@@ -416,9 +431,14 @@ namespace Microsoft.Build.UnitTests
                 "SenderName",
                 MessageImportance.High,
                 DateTime.Parse("12/12/2015 06:11:56 PM"),
-                useArguments ? new object[] { "argument0" } : null);
+                withOptionalData ? new object[] { "argument0" } : null)
+            {
+                ExtendedData = withOptionalData ? "{'long-json':'mostly-strings'}" : null,
+                ExtendedMetadata = withOptionalData ? new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } } : null,
+                BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+            };
 
-            Roundtrip<BuildMessageEventArgs>(args,
+            Roundtrip(args,
                 e => e.Code,
                 e => e.ColumnNumber.ToString(),
                 e => e.EndColumnNumber.ToString(),
@@ -429,6 +449,9 @@ namespace Microsoft.Build.UnitTests
                 e => e.Importance.ToString(),
                 e => e.ProjectFile,
                 e => e.Subcategory,
+                e => e.ExtendedType,
+                e => TranslationHelpers.ToString(e.ExtendedMetadata),
+                e => e.ExtendedData,
                 e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
         }
 
@@ -493,19 +516,21 @@ namespace Microsoft.Build.UnitTests
 
             using var buildEventArgsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
             var deserialized = buildEventArgsReader.Read();
-            BuildMessageEventArgs desArgs = (BuildMessageEventArgs)deserialized;
+            ExtendedBuildMessageEventArgs desArgs = (ExtendedBuildMessageEventArgs)deserialized;
 
-            desArgs.ShouldBeOfType(typeof(BuildMessageEventArgs));
-
+            desArgs.ShouldBeOfType(typeof(ExtendedBuildMessageEventArgs));
             desArgs.Message.ShouldBe(args.Message);
             desArgs.HelpKeyword.ShouldBe(args.HelpKeyword);
             desArgs.SenderName.ShouldBe(args.SenderName);
             desArgs.Importance.ShouldBe(MessageImportance.Normal);
             desArgs.Timestamp.ShouldBe(args.Timestamp);
+            desArgs.ExtendedType.ShouldBe(args.ExtendedType);
 
             if (withOptionalData)
             {
                 desArgs.BuildEventContext.ShouldBe(args.BuildEventContext);
+                desArgs.ExtendedData.ShouldBe(args.ExtendedData);
+                TranslationHelpers.ToString(desArgs.ExtendedMetadata).ShouldBe(TranslationHelpers.ToString(args.ExtendedMetadata));
             }
             else
             {

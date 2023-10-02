@@ -64,7 +64,9 @@ namespace Microsoft.Build.Logging
         // version 17:
         //   - Making ProjectStartedEventArgs, ProjectEvaluationFinishedEventArgs, AssemblyLoadBuildEventArgs equal
         //     between de/serialization roundtrips.
-        internal const int FileFormatVersion = 17;
+        // version 18:
+        //   - Added extended data for types implementing IExtendedBuildEventArgs
+        internal const int FileFormatVersion = 18;
 
         private Stream stream;
         private BinaryWriter binaryWriter;
