@@ -582,12 +582,6 @@ namespace Microsoft.Build.BackEnd
 
             public void TranslateException(ref Exception value)
             {
-                if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
-                {
-                    TranslateDotNet<Exception>(ref value);
-                    return;
-                }
-
                 if (!TranslateNullable(value))
                 {
                     return;
@@ -1291,12 +1285,6 @@ namespace Microsoft.Build.BackEnd
 
             public void TranslateException(ref Exception value)
             {
-                if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
-                {
-                    TranslateDotNet<Exception>(ref value);
-                    return;
-                }
-
                 if (!TranslateNullable(value))
                 {
                     return;

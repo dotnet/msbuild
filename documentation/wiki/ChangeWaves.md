@@ -26,8 +26,9 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 ### 17.8
 - [[RAR] Don't do I/O on SDK-provided references](https://github.com/dotnet/msbuild/pull/8688)
 - [Delete destination file before copy](https://github.com/dotnet/msbuild/pull/8685)
-- [New serialization approach for transferring build exceptions between processes](https://github.com/dotnet/msbuild/pull/8779)
 - [Moving from SHA1 to SHA256 for Hash task](https://github.com/dotnet/msbuild/pull/8812)
+- [Deprecating custom derived BuildEventArgs](https://github.com/dotnet/msbuild/pull/8917) - feature can be opted out only if [BinaryFormatter](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.serialization.formatters.binary.binaryformatter) is allowed at runtime by editing `MSBuild.runtimeconfig.json`
+
 
 ### 17.6
 - [Parse invalid property under target](https://github.com/dotnet/msbuild/pull/8190)

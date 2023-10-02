@@ -105,11 +105,12 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="new">  -reportFileAccesses[:True|False]
-                     Causes MSBuild to report file accesses to any configured
-                     project cache plugins.
+        <target state="translated">  -reportFileAccesses[:True|Falsch]
+                     Führt dazu, dass MSBuild Dateizugriffe an alle konfigurierten
+ meldet
+                     Projektcache-Plug-Ins.
 
-                     This flag is experimental and may not work as intended.
+                     Dieses Kennzeichen ist experimentell und funktioniert möglicherweise nicht wie vorgesehen.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -138,7 +139,7 @@
       </trans-unit>
       <trans-unit id="InvalidReportFileAccessesValue">
         <source>MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1063: Der Wert für den Zugriff auf die Berichtsdatei ist ungültig. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1063: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.

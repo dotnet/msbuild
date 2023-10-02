@@ -32,5 +32,6 @@ namespace Microsoft.Build.Logging
         public int ColumnNumber { get; set; }
         public int EndLineNumber { get; set; }
         public int EndColumnNumber { get; set; }
+        public ExtendedDataFields Extended { get; set; }
     }
 }
