@@ -87,12 +87,6 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public event Action<StringReadEventArgs>? StringReadDone;
 
-        /// <summary>
-        /// An event that allows the caller to be notified when a string is encountered in the binary log.
-        /// BinaryReader passed in ctor is at the beginning of the string at this point.
-        /// </summary>
-        public event Action? StringEncountered;
-
         public int FileFormatVersion => fileFormatVersion;
 
         /// <summary>
@@ -512,7 +506,7 @@ namespace Microsoft.Build.Logging
 
             if (fileFormatVersion >= 12)
             {
-                if (fileFormatVersion < 17)
+                if (fileFormatVersion < 18)
                 {
                     // Throw away, but need to advance past it
                     ReadBoolean();
@@ -568,7 +562,7 @@ namespace Microsoft.Build.Logging
 
             if (fileFormatVersion > 6)
             {
-                if (fileFormatVersion < 17)
+                if (fileFormatVersion < 18)
                 {
                     // Throw away, but need to advance past it
                     ReadBoolean();
@@ -1399,7 +1393,6 @@ namespace Microsoft.Build.Logging
 
         private string ReadString()
         {
-            this.StringEncountered?.Invoke();
             string text = binaryReader.ReadString();
             if (this.StringReadDone != null)
             {
