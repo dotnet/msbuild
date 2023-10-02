@@ -266,7 +266,7 @@
       </trans-unit>
       <trans-unit id="ProjectCacheHandleBuildResultFailed">
         <source>MSB4269: The project cache failed while handling a build result for the following project: {0}.</source>
-        <target state="new">MSB4269: The project cache failed while handling a build result for the following project: {0}.</target>
+        <target state="translated">MSB4269: le cache du projet a échoué lors de la gestion d’un résultat de build pour le projet suivant : {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheHitWithDefaultTargets">
@@ -377,7 +377,7 @@
       </trans-unit>
       <trans-unit id="ReportFileAccessesX64Only">
         <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
-        <target state="new">Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</target>
+        <target state="translated">Les accès aux fichiers de création de rapports sont uniquement pris en charge à l’aide de la saveur x64 de MSBuild.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">

@@ -1,20 +1,25 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if NETFRAMEWORK
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks.Deployment.Bootstrapper;
+#endif
+
+using Microsoft.Build.Framework;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks
 {
+#if NETFRAMEWORK
+
     /// <summary>
     /// Generates a bootstrapper for ClickOnce deployment projects.
     /// </summary>
-    public sealed class GenerateBootstrapper : TaskExtension
+    public sealed class GenerateBootstrapper : TaskExtension, IGenerateBootstrapperTaskContract
     {
         public string ApplicationName { get; set; }
 
@@ -173,5 +178,82 @@ namespace Microsoft.Build.Tasks
                 return Deployment.Bootstrapper.ComponentsLocation.HomeSite;
             }
         }
+    }
+
+#else
+
+    public sealed class GenerateBootstrapper : TaskRequiresFramework, IGenerateBootstrapperTaskContract
+    {
+        public GenerateBootstrapper()
+            : base(nameof(GenerateBootstrapper))
+        {
+        }
+
+        #region Properties
+
+        public string ApplicationName { get; set; }
+
+        public string ApplicationFile { get; set; }
+
+        public bool ApplicationRequiresElevation { get; set; }
+
+        public string ApplicationUrl { get; set; }
+
+        public ITaskItem[] BootstrapperItems { get; set; }
+
+        public string ComponentsLocation { get; set; }
+
+        public string ComponentsUrl { get; set; }
+
+        public bool CopyComponents { get; set; }
+
+        public string Culture { get; set; }
+
+        public string FallbackCulture { get; set; }
+
+        public string OutputPath { get; set; }
+
+        public string Path { get; set; }
+
+        public string SupportUrl { get; set; }
+
+        public string VisualStudioVersion { get; set; }
+
+        public bool Validate { get; set; }
+
+        [Output]
+        public string BootstrapperKeyFile { get; set; }
+
+        [Output]
+        public string[] BootstrapperComponentFiles { get; set; }
+
+        #endregion
+    }
+
+#endif
+
+    internal interface IGenerateBootstrapperTaskContract
+    {
+        #region Properties
+
+        string ApplicationName { get; set; }
+        string ApplicationFile { get; set; }
+        bool ApplicationRequiresElevation { get; set; }
+        string ApplicationUrl { get; set; }
+        ITaskItem[] BootstrapperItems { get; set; }
+        string ComponentsLocation { get; set; }
+        string ComponentsUrl { get; set; }
+        bool CopyComponents { get; set; }
+        string Culture { get; set; }
+        string FallbackCulture { get; set; }
+        string OutputPath { get; set; }
+        string Path { get; set; }
+        string SupportUrl { get; set; }
+        string VisualStudioVersion { get; set; }
+        bool Validate { get; set; }
+        string BootstrapperKeyFile { get; set; }
+        string[] BootstrapperComponentFiles { get; set; }
+
+        #endregion
     }
 }
