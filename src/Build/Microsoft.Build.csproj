@@ -179,9 +179,6 @@
     <Compile Include="Logging\BinaryLogger\Postprocessing\StringReadEventArgs.cs" />
     <Compile Include="Logging\BinaryLogger\Postprocessing\SubStream.cs" />
     <Compile Include="Logging\BinaryLogger\ExtendedDataFields.cs" />
-    <Compile Include="Logging\BinaryLogger\IBuildEventArgsReaderNotifications.cs" />
-    <Compile Include="Logging\BinaryLogger\IBuildEventStringsReader.cs" />
-    <Compile Include="Logging\BinaryLogger\StringReadEventArgs.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />
