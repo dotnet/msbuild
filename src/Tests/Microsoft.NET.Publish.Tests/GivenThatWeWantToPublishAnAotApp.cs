@@ -590,25 +590,40 @@ namespace Microsoft.NET.Publish.Tests
                 .And.NotHaveStdOutContaining("warning IL3002");
         }
 
-        [RequiresMSBuildVersionTheory("17.0.0.32901")]
-        [InlineData("netstandard2.0")]
-        public void IsAotCompatible_warns_for_unsupported_target_framework(string targetFramework)
+        [RequiresMSBuildVersionTheory("17.8.0")]
+        [InlineData("netstandard2.0", true)]
+        [InlineData("netstandard2.0;net5.0", true)] // None of these TFMs are supported for AOT
+        [InlineData("netstandard2.0;net7.0", false)] // Net7.0 is the min TFM supported for AOT and targeting.
+        [InlineData("netstandard2.0;net8.0", true)] // Net8.0 is supported for AOT, but leaves a "gap" for the supported net7.0 TFMs.
+        [InlineData("alias-ns2", true)]
+        [InlineData("alias-n6", false)]
+        [InlineData("alias-n7;alias-n8", false)] // If all TFMs are supported, there's no warning even though the project uses aliases.
+        [InlineData("alias-ns2;alias-n7", true)] // This is correctly multi-targeted, but the logic can't detect this due to the alias so it still warns.
+        public void IsAotCompatible_warns_when_expected_for_not_correctly_multitarget_libraries(string targetFrameworks, bool shouldWarn)
         {
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFrameworks);
+
             var testProject = new TestProject()
             {
                 Name = "ClassLibTest",
-                TargetFrameworks = targetFramework
+                TargetFrameworks = targetFrameworks
             };
             testProject.AdditionalProperties["IsAotCompatible"] = "true";
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFrameworks)
+                .WithProjectChanges(AddTargetFrameworkAliases);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
-            buildCommand
-                .Execute()
-                .Should().Pass()
-                // Note: can't check for Strings.IsAotCompatibleUnsupported because each line of
-                // the message gets prefixed with a file path by MSBuild.
-                .And.HaveStdOutContaining("warning NETSDK1210");
+            var buildCommand = new BuildCommand(testAsset);
+            var resultAssertion = buildCommand.Execute()
+                .Should().Pass();
+            if (shouldWarn) {
+                resultAssertion
+                    // Note: can't check for Strings.IsAotCompatibleUnsupported because each line of
+                    // the message gets prefixed with a file path by MSBuild.
+                    .And.HaveStdOutContaining($"warning NETSDK1210")
+                    .And.HaveStdOutContaining($"<IsAotCompatible Condition=\"$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))\">true</IsAotCompatible>");
+            } else {
+                resultAssertion.And.NotHaveStdOutContaining($"warning");
+            }
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]

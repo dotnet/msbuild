@@ -23,6 +23,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   <ItemGroup>
     <_EolNetCoreTargetFrameworkVersions Include="1.0;1.1;2.0;2.1;2.2;3.0;3.1;5.0" />
   </ItemGroup>
+  <PropertyGroup>
+    <_MinimumNonEolSupportedNetCoreTargetFramework>net6.0</_MinimumNonEolSupportedNetCoreTargetFramework>
+  </PropertyGroup>
 
   <Target Name="_CheckForEolTargetFrameworks" AfterTargets="_CheckForUnsupportedNETCoreVersion"
           Condition="'@(_EolNetCoreTargetFrameworkVersions->AnyHaveMetadataValue('Identity', '$(_TargetFrameworkVersionWithoutV)'))' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(CheckEolTargetFramework)' == 'true'">

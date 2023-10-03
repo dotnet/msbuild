@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.Build.Tasks;
 using NuGet.Frameworks;
+using static Microsoft.NET.Publish.Tests.PublishTestUtils;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -632,25 +633,38 @@ namespace Microsoft.NET.Publish.Tests
                 .And.HaveStdOutContaining("(10,13): warning IL3001");
         }
 
-        [RequiresMSBuildVersionTheory("17.0.0.32901")]
-        [InlineData("netstandard2.0")]
-        public void EnableSingleFileAnalyzer_warns_for_unsupported_target_framework(string targetFramework)
+        [RequiresMSBuildVersionTheory("17.8.0")]
+        [InlineData("netstandard2.0", true)]
+        [InlineData("netstandard2.0;net5.0", true)] // None of these TFMs are supported for single-file
+        [InlineData("netstandard2.0;net6.0", false)] // Net6.0 is the min TFM supported for single-file and targeting.
+        [InlineData("netstandard2.0;net8.0", true)] // Net8.0 is supported for single-file, but leaves a "gap" for the supported net6./net7.0 TFMs.
+        [InlineData("alias-ns2", true)]
+        [InlineData("alias-n6", false)]
+        [InlineData("alias-n6;alias-n8", false)] // If all TFMs are supported, there's no warning even though the project uses aliases.
+        [InlineData("alias-ns2;alias-n6", true)] // This is correctly multi-targeted, but the logic can't detect this due to the alias so it still warns.
+        public void EnableSingleFile_warns_when_expected_for_not_correctly_multitargeted_libraries(string targetFrameworks, bool shouldWarn)
         {
             var testProject = new TestProject()
             {
                 Name = "ClassLibTest",
-                TargetFrameworks = targetFramework
+                TargetFrameworks = targetFrameworks
             };
             testProject.AdditionalProperties["EnableSingleFileAnalyzer"] = "true";
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFrameworks)
+                .WithProjectChanges(AddTargetFrameworkAliases);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
-            buildCommand
-                .Execute()
-                .Should().Pass()
+            var buildCommand = new BuildCommand(testAsset);
+            var resultAssertion = buildCommand.Execute("/bl:my.binlog")
+                .Should().Pass();
+            if (shouldWarn) {
                 // Note: can't check for Strings.EnableSingleFileAnalyzerUnsupported because each line of
                 // the message gets prefixed with a file path by MSBuild.
-                .And.HaveStdOutContaining($"warning NETSDK1211");
+                resultAssertion
+                    .And.HaveStdOutContaining($"warning NETSDK1211")
+                    .And.HaveStdOutContaining($"<EnableSingleFileAnalyzer Condition=\"$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))\">true</EnableSingleFileAnalyzer>");
+            } else {
+                resultAssertion.And.NotHaveStdOutContaining($"warning");
+            }
         }
 
         private TestProject CreateTestProjectWithAnalyzerWarnings(string targetFramework, string projectName, bool isExecutable)

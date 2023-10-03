@@ -42,5 +42,26 @@ namespace Microsoft.NET.Publish.Tests
 #else
 #error If building for a newer TFM, please update the values above to include both the old and new TFMs.
 #endif
+
+        public static void AddTargetFrameworkAliases(XDocument project)
+        {
+            var ns = project.Root.Name.Namespace;
+            project.Root.Add(new XElement(ns + "PropertyGroup",
+                new XAttribute("Condition", "'$(TargetFramework)' == 'alias-ns2'"),
+                new XElement(ns + "TargetFrameworkIdentifier", ".NETStandard"),
+                new XElement(ns + "TargetFrameworkVersion", "v2.0")));
+            project.Root.Add(new XElement(ns + "PropertyGroup",
+                new XAttribute("Condition", "'$(TargetFramework)' == 'alias-n6'"),
+                new XElement(ns + "TargetFrameworkIdentifier", ".NETCoreApp"),
+                new XElement(ns + "TargetFrameworkVersion", "v6.0")));
+            project.Root.Add(new XElement(ns + "PropertyGroup",
+                new XAttribute("Condition", "'$(TargetFramework)' == 'alias-n7'"),
+                new XElement(ns + "TargetFrameworkIdentifier", ".NETCoreApp"),
+                new XElement(ns + "TargetFrameworkVersion", "v7.0")));
+            project.Root.Add(new XElement(ns + "PropertyGroup",
+                new XAttribute("Condition", "'$(TargetFramework)' == 'alias-n8'"),
+                new XElement(ns + "TargetFrameworkIdentifier", ".NETCoreApp"),
+                new XElement(ns + "TargetFrameworkVersion", "v8.0")));
+        }
     }
 }

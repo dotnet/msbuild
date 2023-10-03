@@ -45,15 +45,27 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool IsAotCompatible { get; set; }
 
+        public bool SilenceIsAotCompatibleUnsupportedWarning { get; set; }
+
+        public string MinNonEolTargetFrameworkForAot { get; set; }
+
         public bool EnableAotAnalyzer { get; set; }
 
         public bool PublishTrimmed { get; set; }
 
         public bool IsTrimmable { get; set; }
 
+        public bool SilenceIsTrimmableUnsupportedWarning { get; set; }
+
+        public string MinNonEolTargetFrameworkForTrimming { get; set; }
+
         public bool EnableTrimAnalyzer { get; set; }
 
         public bool EnableSingleFileAnalyzer { get; set; }
+
+        public bool SilenceEnableSingleFileAnalyzerUnsupportedWarning { get; set; }
+
+        public string MinNonEolTargetFrameworkForSingleFile { get; set; }
 
         public bool AotUseKnownRuntimePackForTarget { get; set; }
 
@@ -442,7 +454,8 @@ namespace Microsoft.NET.Build.Tasks
                     }
                     else if (IsAotCompatible || EnableAotAnalyzer)
                     {
-                        Log.LogWarning(Strings.IsAotCompatibleUnsupported);
+                        if (!SilenceIsAotCompatibleUnsupportedWarning)
+                            Log.LogWarning(Strings.IsAotCompatibleUnsupported, MinNonEolTargetFrameworkForAot);
                     }
                     else if (PublishTrimmed)
                     {
@@ -450,13 +463,15 @@ namespace Microsoft.NET.Build.Tasks
                     }
                     else if (IsTrimmable || EnableTrimAnalyzer)
                     {
-                        Log.LogWarning(Strings.IsTrimmableUnsupported);
+                        if (!SilenceIsTrimmableUnsupportedWarning)
+                            Log.LogWarning(Strings.IsTrimmableUnsupported, MinNonEolTargetFrameworkForTrimming);
                     }
                     else if (EnableSingleFileAnalyzer)
                     {
                         // There's no IsSingleFileCompatible setting. EnableSingleFileAnalyzer is the
                         // recommended way to ensure single-file compatibility for libraries.
-                        Log.LogWarning(Strings.EnableSingleFileAnalyzerUnsupported);
+                        if (!SilenceEnableSingleFileAnalyzerUnsupportedWarning)
+                            Log.LogWarning(Strings.EnableSingleFileAnalyzerUnsupported, MinNonEolTargetFrameworkForSingleFile);
                     }
                     else
                     {
