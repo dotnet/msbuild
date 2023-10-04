@@ -62,10 +62,10 @@ namespace Microsoft.Build.Logging
         // version 16:
         //   - AssemblyLoadBuildEventArgs
         // version 17:
+        //   - Added extended data for types implementing IExtendedBuildEventArgs
+        // version 18:
         //   - Making ProjectStartedEventArgs, ProjectEvaluationFinishedEventArgs, AssemblyLoadBuildEventArgs equal
         //     between de/serialization roundtrips.
-        // version 18:
-        //   - Added extended data for types implementing IExtendedBuildEventArgs
         internal const int FileFormatVersion = 18;
 
         private Stream stream;
