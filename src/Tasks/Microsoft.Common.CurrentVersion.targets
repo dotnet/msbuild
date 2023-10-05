@@ -1485,6 +1485,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       GenerateBindingRedirects;
       GenerateBindingRedirectsUpdateAppConfig;
       ResolveComReferences;
+      GetComAssembliesMetadata;
       AfterResolveReferences
     </ResolveReferencesDependsOn>
   </PropertyGroup>
@@ -3039,6 +3040,37 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <FileWrites Include="@(_ResolveComReferenceCache)"/>
       <ReferenceComWrappersToCopyLocal Include="@(ComReferenceWrappers)" Condition="'%(ComReferenceWrappers.CopyLocal)'!='false'"/>
     </ItemGroup>
+
+  </Target>
+
+    <!--
+    ============================================================
+                                        GetComAssembliesMetadata
+
+    Resolve Assembly attributes for COM assemblies
+
+        [IN]
+        @(ReferencePath) - Paths to COM referenced wrappers.
+
+        [OUT]
+        @(AssembliesMetadata) - COM assemblies attributes.
+    ============================================================
+    -->
+
+  <Target
+      Name="GetComAssembliesMetadata"
+      Condition="'@(ReferencePath)'!=''"
+      Returns="@(AssembliesMetadata)"
+      DependsOnTargets="ResolveComReferences"
+        >
+
+    <GetComAssembliesMetadata
+          AssembyPaths="@(ReferencePath)"
+          ContinueOnError="$(ContinueOnError)">
+
+      <Output TaskParameter="AssembliesMetadata" ItemName="_AssembliesMetadata"/>
+
+    </GetComAssembliesMetadata>
 
   </Target>
 

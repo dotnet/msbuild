@@ -17,7 +17,7 @@ using Xunit.Sdk;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
-    public class GetAssembliesMetadata_Tests
+    public class GetComAssembliesMetadata_Tests
     {
         private static string TestAssembliesPaths { get; } = Path.Combine(AppContext.BaseDirectory, "TestResources", "Assemblies");
 
@@ -25,7 +25,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         public void CheckPresenceOfCustomCOMAssemblyAttributes()
         {
             string assemblyPath = Path.Combine(TestAssembliesPaths, "Custom_COM.dll");
-            GetAssembliesMetadata t = new() { AssembyPaths = new[] { assemblyPath } };
+            GetComAssembliesMetadata t = new() { AssembyPaths = new[] { assemblyPath } };
 
             bool isSuccess = t.Execute();
 
@@ -55,7 +55,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             string programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
             string programFilesRefAssemblyLocation = Path.Combine(programFilesX86, "Reference Assemblies\\Microsoft\\Framework");
             string assemblyPath = Path.Combine(programFilesRefAssemblyLocation, ".NETFramework", "v4.7.2", "mscorlib.dll");
-            GetAssembliesMetadata t = new() { AssembyPaths = new[] { assemblyPath } };
+            GetComAssembliesMetadata t = new() { AssembyPaths = new[] { assemblyPath } };
 
             bool isSuccess = t.Execute();
 

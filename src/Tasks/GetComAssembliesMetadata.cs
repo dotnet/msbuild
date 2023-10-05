@@ -25,9 +25,9 @@ using Microsoft.Build.Utilities;
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// Resolves metadata for the specified set of assemblies.
+    /// Resolves metadata for the specified set of COM assemblies.
     /// </summary>
-    public class GetAssembliesMetadata : TaskExtension
+    public class GetComAssembliesMetadata : TaskExtension
     {
         /// <summary>
         /// Assembly paths.
@@ -46,7 +46,7 @@ namespace Microsoft.Build.Tasks
         {
             if (!NativeMethodsShared.IsWindows)
             {
-                Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(GetAssembliesMetadata));
+                Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(GetComAssembliesMetadata));
                 return false;
             }
 
@@ -83,26 +83,26 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// This is a list of resolved assembly metadata.
+        /// Gets a list of resolved assembly metadata.
         /// </summary>
         [Output]
         public ITaskItem[] AssembliesMetadata => _assembliesMetadata;
 
         /// <summary>
-        /// Set metadata on the assembly path.
+        /// Sets metadata on the assembly path.
         /// </summary>
-        private ITaskItem SetItemMetadata(AssemblyAttributes attributes)
+        private TaskItem SetItemMetadata(AssemblyAttributes attributes)
         {
-            // Set up the main item.
-            TaskItem referenceItem = new TaskItem();
-            referenceItem.ItemSpec = attributes.AssemblyFullPath;
+            TaskItem referenceItem = new()
+            {
+                ItemSpec = attributes.AssemblyFullPath,
+            };
 
             IMetadataContainer referenceItemAsMetadataContainer = referenceItem;
             referenceItemAsMetadataContainer.ImportMetadata(EnumerateCommonMetadata());
 
             return referenceItem;
 
-            // Enumerate common metadata with an iterator to allow using a more efficient bulk-set operation.
             IEnumerable<KeyValuePair<string, string>> EnumerateCommonMetadata()
             {
                 yield return new KeyValuePair<string, string>(nameof(attributes.AssemblyName), attributes.AssemblyName);

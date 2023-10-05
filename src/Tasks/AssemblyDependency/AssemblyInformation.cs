@@ -270,6 +270,10 @@ namespace Microsoft.Build.Tasks
         }
 
 #if !FEATURE_ASSEMBLYLOADCONTEXT
+        /// <summary>
+        /// Collects the metadata and attributes for specilied assembly.
+        /// The requested properties are used by legacy project system.
+        /// </summary>
         internal AssemblyAttributes GetAssemblyMetadata()
         {
             IntPtr asmMetaPtr = IntPtr.Zero;
@@ -277,20 +281,18 @@ namespace Microsoft.Build.Tasks
             {
                 IMetaDataImport2 import2 = (IMetaDataImport2)_assemblyImport;
                 _assemblyImport.GetAssemblyFromScope(out uint assemblyScope);
-                AssemblyAttributes assemblyAttributes = new()
-                {
-                    AssemblyFullPath = _sourceFile,
-                };
 
                 // get the assembly, if there is no assembly, it is a module reference
                 if (assemblyScope == 0)
                 {
                     return null;
                 }
-                else
+
+                AssemblyAttributes assemblyAttributes = new()
                 {
-                    assemblyAttributes.IsAssembly = true;
-                }
+                    AssemblyFullPath = _sourceFile,
+                    IsAssembly = true,
+                };
 
                 // will be populated with the assembly name
                 char[] defaultCharArray = new char[GENMAN_STRING_BUF_SIZE];
@@ -326,6 +328,7 @@ namespace Microsoft.Build.Tasks
                 if (import2 != null)
                 {
                     assemblyAttributes.Description = GetStringCustomAttribute(import2, assemblyScope, "System.Reflection.AssemblyDescriptionAttribute");
+                    assemblyAttributes.TargetFrameworkMoniker = GetStringCustomAttribute(import2, assemblyScope, "System.Runtime.Versioning.TargetFrameworkAttribute");
                     assemblyAttributes.Guid = GetStringCustomAttribute(import2, assemblyScope, "System.Runtime.InteropServices.GuidAttribute");
                     if (!string.IsNullOrEmpty(assemblyAttributes.Guid))
                     {
@@ -340,11 +343,10 @@ namespace Microsoft.Build.Tasks
                             assemblyAttributes.IsImportedFromTypeLib = !string.IsNullOrEmpty(primaryInteropAssemblyString);
                         }
                     }
-
-                    assemblyAttributes.TargetFrameworkMoniker = GetStringCustomAttribute(import2, assemblyScope, "System.Runtime.Versioning.TargetFrameworkAttribute");
                 }
 
                 assemblyAttributes.RuntimeVersion = GetRuntimeVersion(_sourceFile);
+
                 import2.GetPEKind(out uint peKind, out _);
                 assemblyAttributes.PeKind = peKind;
 
