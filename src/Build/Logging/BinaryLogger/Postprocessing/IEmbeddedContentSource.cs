@@ -5,13 +5,7 @@ using System;
 
 namespace Microsoft.Build.Logging
 {
-
-    internal interface ILogVersionInfo
-    {
-        event Action<int> FileFormatVersionRead;
-    }
-
-    internal interface IEmbeddedContentSource : ILogVersionInfo
+    internal interface IEmbeddedContentSource
     {
         
         /// <summary>

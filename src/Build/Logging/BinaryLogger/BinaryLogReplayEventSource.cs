@@ -11,201 +11,70 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging
 {
+    internal interface IRawLogEventsSource
+    {
+        /// <summary>
+        /// Event raised when non-textual log record is read.
+        /// This means all event args and key-value pairs.
+        /// Strings and Embedded files are not included.
+        /// </summary>
+        event Action<BinaryLogRecordKind, Stream>? LogDataSliceReceived;
+
+        /// <summary>
+        /// Enables initialization (e.g. subscription to events) - that is deferred until Replay is triggered.
+        /// At this point all other possible subscribers should be already subscribed -
+        ///  so it can be determined if raw events or structured events should be replayed.
+        /// </summary>
+        /// <param name="onFileFormatVersionRead"></param>
+        /// <param name="onRawReadingPossible"></param>
+        /// <param name="onStructuredReadingOnly"></param>
+        void DeferredInitialize(
+            Action<int> onFileFormatVersionRead,
+            Action onRawReadingPossible,
+            Action onStructuredReadingOnly);
+    }
+
+    /// <summary>
+    /// Interface for replaying a binary log file (*.binlog)
+    /// </summary>
+    internal interface IBinaryLogReplaySource :
+        IEventSource, IRawLogEventsSource, IBuildEventStringsReader, IEmbeddedContentSource
+    { }
+
     /// <summary>
     /// Provides a method to read a binary log file (*.binlog) and replay all stored BuildEventArgs
     /// by implementing IEventSource and raising corresponding events.
     /// </summary>
     /// <remarks>The class is public so that we can call it from MSBuild.exe when replaying a log file.</remarks>
-    public sealed class BinaryLogReplayEventSource : BinaryLogReplayEventSourceBase, IEventSource, IEmbeddedContentSource
-    {
-        public BinaryLogReplayEventSource()
-            : base(true) { }
-
-        public bool AllowForwardCompatibility
-        {
-            get => AllowForwardCompatibilityInternal;
-            set => AllowForwardCompatibilityInternal = value;
-        }
-
-        public event Action<string>? OnError
-        {
-            add => OnErrorInternal += value;
-            remove => OnErrorInternal -= value;
-        }
-
-        public event Action<BuildEventArgs>? BuildEventReceived
-        {
-            add => BuildEventReceivedInternal += value;
-            remove => BuildEventReceivedInternal -= value;
-        }
-
-        /// <summary>
-        /// This event is raised for all BuildEventArgs objects after a more type-specific event
-        /// </summary>
-        public event AnyEventHandler? AnyEventRaised;
-
-        /// <summary>
-        /// Raised for BuildStatusEventArgs instances
-        /// </summary>
-        public event BuildStatusEventHandler? StatusEventRaised;
-
-        /// <summary>
-        /// Raised for CustomBuildEventArgs instances
-        /// </summary>
-        public event CustomBuildEventHandler? CustomEventRaised;
-
-        /// <summary>
-        /// Raised for BuildStartedEventArgs instances
-        /// </summary>
-        public event BuildStartedEventHandler? BuildStarted;
-
-        /// <summary>
-        /// Raised for BuildFinishedEventArgs instances
-        /// </summary>
-        public event BuildFinishedEventHandler? BuildFinished;
-
-        /// <summary>
-        /// Raised for ProjectStartedEventArgs instances
-        /// </summary>
-        public event ProjectStartedEventHandler? ProjectStarted;
-
-        /// <summary>
-        /// Raised for ProjectFinishedEventArgs instances
-        /// </summary>
-        public event ProjectFinishedEventHandler? ProjectFinished;
-
-        /// <summary>
-        /// Raised for TargetStartedEventArgs instances
-        /// </summary>
-        public event TargetStartedEventHandler? TargetStarted;
-
-        /// <summary>
-        /// Raised for TargetFinishedEventArgs instances
-        /// </summary>
-        public event TargetFinishedEventHandler? TargetFinished;
-
-        /// <summary>
-        /// Raised for TaskStartedEventArgs instances
-        /// </summary>
-        public event TaskStartedEventHandler? TaskStarted;
-
-        /// <summary>
-        /// Raised for TaskFinishedEventArgs instances
-        /// </summary>
-        public event TaskFinishedEventHandler? TaskFinished;
-
-        /// <summary>
-        /// Raised for BuildErrorEventArgs instances
-        /// </summary>
-        public event BuildErrorEventHandler? ErrorRaised;
-
-        /// <summary>
-        /// Raised for BuildWarningEventArgs instances
-        /// </summary>
-        public event BuildWarningEventHandler? WarningRaised;
-
-        /// <summary>
-        /// Raised for BuildMessageEventArgs instances
-        /// </summary>
-        public event BuildMessageEventHandler? MessageRaised;
-
-        /// <summary>
-        /// Raise one of the events that is appropriate for the type of the BuildEventArgs
-        /// </summary>
-        public void Dispatch(BuildEventArgs buildEvent)
-        {
-            if (buildEvent is BuildMessageEventArgs buildMessageEventArgs)
-            {
-                MessageRaised?.Invoke(null, buildMessageEventArgs);
-            }
-            else if (buildEvent is TaskStartedEventArgs taskStartedEventArgs)
-            {
-                TaskStarted?.Invoke(null, taskStartedEventArgs);
-            }
-            else if (buildEvent is TaskFinishedEventArgs taskFinishedEventArgs)
-            {
-                TaskFinished?.Invoke(null, taskFinishedEventArgs);
-            }
-            else if (buildEvent is TargetStartedEventArgs targetStartedEventArgs)
-            {
-                TargetStarted?.Invoke(null, targetStartedEventArgs);
-            }
-            else if (buildEvent is TargetFinishedEventArgs targetFinishedEventArgs)
-            {
-                TargetFinished?.Invoke(null, targetFinishedEventArgs);
-            }
-            else if (buildEvent is ProjectStartedEventArgs projectStartedEventArgs)
-            {
-                ProjectStarted?.Invoke(null, projectStartedEventArgs);
-            }
-            else if (buildEvent is ProjectFinishedEventArgs projectFinishedEventArgs)
-            {
-                ProjectFinished?.Invoke(null, projectFinishedEventArgs);
-            }
-            else if (buildEvent is BuildStartedEventArgs buildStartedEventArgs)
-            {
-                BuildStarted?.Invoke(null, buildStartedEventArgs);
-            }
-            else if (buildEvent is BuildFinishedEventArgs buildFinishedEventArgs)
-            {
-                BuildFinished?.Invoke(null, buildFinishedEventArgs);
-            }
-            else if (buildEvent is CustomBuildEventArgs customBuildEventArgs)
-            {
-                CustomEventRaised?.Invoke(null, customBuildEventArgs);
-            }
-            else if (buildEvent is BuildStatusEventArgs buildStatusEventArgs)
-            {
-                StatusEventRaised?.Invoke(null, buildStatusEventArgs);
-            }
-            else if (buildEvent is BuildWarningEventArgs buildWarningEventArgs)
-            {
-                WarningRaised?.Invoke(null, buildWarningEventArgs);
-            }
-            else if (buildEvent is BuildErrorEventArgs buildErrorEventArgs)
-            {
-                ErrorRaised?.Invoke(null, buildErrorEventArgs);
-            }
-
-            AnyEventRaised?.Invoke(null, buildEvent);
-        }
-    }
-
-    public interface IRawLogEventsSource
-    {
-        public event Action<ArraySegment<byte>>? BuildEventReceived;
-    }
-
-    public sealed class BinaryLogReplayRawEventSource : BinaryLogReplayEventSourceBase, IRawLogEventsSource
-    {
-        public BinaryLogReplayRawEventSource()
-            : base(false) { }
-
-        public event Action<ArraySegment<byte>>? BuildEventReceived
-        {
-            add => RawBuildEventReceivedInternal += value;
-            remove => RawBuildEventReceivedInternal -= value;
-        }
-    }
-
-    public class BinaryLogReplayEventSourceBase : IEmbeddedContentSource
+    public sealed class BinaryLogReplayEventSource : EventArgsDispatcher,
+        IBinaryLogReplaySource
     {
         /// Touches the <see cref="ItemGroupLoggingHelper"/> static constructor
         /// to ensure it initializes <see cref="TaskParameterEventArgs.MessageGetter"/>
         /// and <see cref="TaskParameterEventArgs.DictionaryFactory"/>
-        static BinaryLogReplayEventSourceBase()
+        static BinaryLogReplayEventSource()
         {
             _ = ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix;
         }
 
-        internal BinaryLogReplayEventSourceBase(bool isStructured)
-            => _isStructuredReader = isStructured;
+        /// <summary>
+        /// Unknown build events or unknown parts of known build events will be ignored if this is set to true.
+        /// </summary>
+        public bool AllowForwardCompatibility { private get; init; } = true;
 
-        private bool _isStructuredReader;
-        protected bool AllowForwardCompatibilityInternal { get; set; } = true;
-        protected event Action<string>? OnErrorInternal;
-        protected event Action<BuildEventArgs>? BuildEventReceivedInternal;
-        protected event Action<ArraySegment<byte>>? RawBuildEventReceivedInternal;
+        /// <summary>
+        /// Receives recoverable errors during reading.
+        /// </summary>
+        public event Action<string>? OnRecoverableReadError;
+
+        /// <summary>
+        /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
+        /// </summary>
+        /// <param name="sourceFilePath">The full file path of the binary log file</param>
+        public void Replay(string sourceFilePath)
+        {
+            Replay(sourceFilePath, CancellationToken.None);
+        }
 
         /// <summary>
         /// Creates a <see cref="BinaryReader"/> for the provided binary log file.
@@ -241,9 +110,14 @@ namespace Microsoft.Build.Logging
         /// </summary>
         /// <param name="binaryReader"></param>
         /// <param name="closeInput">Indicates whether the passed BinaryReader should be closed on disposing.</param>
-        /// <param name="allowForwardCompatibility">Indicates whether reading of future versions of logs should be allowed.</param>
+        /// <param name="allowForwardCompatibility">Unknown build events or unknown parts of known build events will be ignored if this is set to true.</param>
+        /// <param name="onRecoverableReadError">Optional handler of recoverable errors during reading.</param>
         /// <returns>BuildEventArgsReader over the given binlog file binary reader.</returns>
-        public static BuildEventArgsReader OpenBuildEventsReader(BinaryReader binaryReader, bool closeInput, bool allowForwardCompatibility = true)
+        public static BuildEventArgsReader OpenBuildEventsReader(
+            BinaryReader binaryReader,
+            bool closeInput,
+            bool allowForwardCompatibility = true,
+            Action<string>? onRecoverableReadError = null)
         {
             int fileFormatVersion = binaryReader.ReadInt32();
 
@@ -255,7 +129,10 @@ namespace Microsoft.Build.Logging
                 throw new NotSupportedException(text);
             }
 
-            return new BuildEventArgsReader(binaryReader, fileFormatVersion) { CloseInput = closeInput };
+            return new BuildEventArgsReader(binaryReader, fileFormatVersion)
+            {
+                CloseInput = closeInput,
+            };
         }
 
         /// <summary>
@@ -272,19 +149,10 @@ namespace Microsoft.Build.Logging
         /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
         /// </summary>
         /// <param name="sourceFilePath">The full file path of the binary log file</param>
-        public void Replay(string sourceFilePath)
-        {
-            Replay(sourceFilePath, CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
-        /// </summary>
-        /// <param name="sourceFilePath">The full file path of the binary log file</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
         public void Replay(string sourceFilePath, CancellationToken cancellationToken)
         {
-            using var eventsReader = BinaryLogReplayEventSource.OpenBuildEventsReader(sourceFilePath);
+            using var eventsReader = OpenBuildEventsReader(sourceFilePath);
             Replay(eventsReader, cancellationToken);
         }
 
@@ -292,57 +160,95 @@ namespace Microsoft.Build.Logging
         /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
         /// </summary>
         /// <param name="binaryReader">The binary log content binary reader - caller is responsible for disposing.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
+        public void Replay(BinaryReader binaryReader, CancellationToken cancellationToken)
+            => Replay(binaryReader, false, cancellationToken);
+
+        /// <summary>
+        /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
+        /// </summary>
+        /// <param name="binaryReader">The binary log content binary reader - caller is responsible for disposing, unless <paramref name="closeInput"/> is set to true.</param>
         /// <param name="closeInput">Indicates whether the passed BinaryReader should be closed on disposing.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
         public void Replay(BinaryReader binaryReader, bool closeInput, CancellationToken cancellationToken)
         {
-            using var reader = BinaryLogReplayEventSource.OpenBuildEventsReader(binaryReader, closeInput, AllowForwardCompatibilityInternal);
+            using var reader = OpenBuildEventsReader(binaryReader, closeInput, AllowForwardCompatibility);
             Replay(reader, cancellationToken);
         }
 
+        /// <summary>
+        /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
+        /// </summary>
+        /// <param name="reader">The build events reader - caller is responsible for disposing.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
         public void Replay(BuildEventArgsReader reader, CancellationToken cancellationToken)
         {
-            _fileFormatVersionRead?.Invoke(reader.FileFormatVersion);
-            reader.EmbeddedContentRead += _embeddedContentRead;
+            bool supportsForwardCompatibility = reader.FileFormatVersion >= 18;
 
-            if (_isStructuredReader)
+            // Allow any possible deferred subscriptions to be registered
+            if (HasStructuredEventsSubscribers || !supportsForwardCompatibility)
             {
-                ReplayStructured(reader, cancellationToken);
+                _onStructuredReadingOnly?.Invoke();
             }
             else
             {
-                ReplayRaw(reader, cancellationToken);
+                _onRawReadingPossible?.Invoke();
             }
-        }
 
-        private void ReplayStructured(BuildEventArgsReader reader, CancellationToken cancellationToken)
-        {
-            while (
-                !cancellationToken.IsCancellationRequested &&
-                reader.Read(AllowForwardCompatibilityInternal, AllowForwardCompatibilityInternal, OnErrorInternal ?? (_ => { }))
-                    is { } instance)
-            {
-                BuildEventReceivedInternal?.Invoke(instance);
-            }
-        }
-
-        private void ReplayRaw(BuildEventArgsReader reader, CancellationToken cancellationToken)
-        {
             _fileFormatVersionRead?.Invoke(reader.FileFormatVersion);
             reader.EmbeddedContentRead += _embeddedContentRead;
+            reader.StringReadDone += _stringReadDone;
 
-            while (!cancellationToken.IsCancellationRequested && reader.ReadRaw() is { Count: > 0 } instance)
+            if (HasStructuredEventsSubscribers || !supportsForwardCompatibility)
             {
-                RawBuildEventReceivedInternal?.Invoke(instance);
+                if (this._logDataSliceReceived != null)
+                {
+                    throw new NotSupportedException(
+                        "Structured events and raw events cannot be replayed at the same time.");
+                }
+
+                // Forward compatibile reading makes sense only for structured events reading.
+                reader.SkipUnknownEvents = supportsForwardCompatibility && AllowForwardCompatibility;
+                reader.SkipUnknownEventParts = supportsForwardCompatibility && AllowForwardCompatibility;
+                reader.OnRecoverableReadError += OnRecoverableReadError;
+
+                while (!cancellationToken.IsCancellationRequested && reader.Read() is { } instance)
+                {
+                    Dispatch(instance);
+                }
+            }
+            else
+            {
+                if (this._logDataSliceReceived == null &&
+                    this._embeddedContentRead == null &&
+                    this._stringReadDone == null)
+                {
+                    throw new NotSupportedException(
+                        "No subscribers for any events.");
+                }
+
+                while (!cancellationToken.IsCancellationRequested && reader.ReadRaw() is { } instance &&
+                       instance.RecordKind != BinaryLogRecordKind.EndOfFile)
+                {
+                    _logDataSliceReceived?.Invoke(instance.RecordKind, instance.Stream);
+                }
             }
         }
 
-        private Action<int>? _fileFormatVersionRead;
-        event Action<int> ILogVersionInfo.FileFormatVersionRead
+        /// <inheritdoc cref="IRawLogEventsSource.DeferredInitialize"/>
+        void IRawLogEventsSource.DeferredInitialize(
+            Action<int> onFileFormatVersionRead,
+            Action onRawReadingPossible,
+            Action onStructuredReadingOnly)
         {
-            add => _fileFormatVersionRead += value;
-            remove => _fileFormatVersionRead -= value;
+            this._fileFormatVersionRead += onFileFormatVersionRead;
+            this._onRawReadingPossible += onRawReadingPossible;
+            this._onStructuredReadingOnly += onStructuredReadingOnly;
         }
+
+        private Action? _onRawReadingPossible;
+        private Action? _onStructuredReadingOnly;
+        private Action<int>? _fileFormatVersionRead;
         private Action<EmbeddedContentEventArgs>? _embeddedContentRead;
         /// <inheritdoc cref="IEmbeddedContentSource.EmbeddedContentRead"/>
         event Action<EmbeddedContentEventArgs>? IEmbeddedContentSource.EmbeddedContentRead
@@ -351,6 +257,22 @@ namespace Microsoft.Build.Logging
             //  https://stackoverflow.com/a/2268472/2308106
             add => _embeddedContentRead += value;
             remove => _embeddedContentRead -= value;
+        }
+
+        private Action<StringReadEventArgs>? _stringReadDone;
+        /// <inheritdoc cref="IBuildEventStringsReader.StringReadDone"/>
+        event Action<StringReadEventArgs>? IBuildEventStringsReader.StringReadDone
+        {
+            add => _stringReadDone += value;
+            remove => _stringReadDone -= value;
+        }
+
+        private Action<BinaryLogRecordKind, Stream>? _logDataSliceReceived;
+        /// <inheritdoc cref="IBuildEventStringsReader.StringReadDone"/>
+        event Action<BinaryLogRecordKind, Stream>? IRawLogEventsSource.LogDataSliceReceived
+        {
+            add => _logDataSliceReceived += value;
+            remove => _logDataSliceReceived -= value;
         }
     }
 }

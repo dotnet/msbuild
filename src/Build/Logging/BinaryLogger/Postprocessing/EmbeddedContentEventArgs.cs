@@ -8,13 +8,6 @@ namespace Microsoft.Build.Logging
 {
     internal sealed class EmbeddedContentEventArgs : EventArgs
     {
-        public EmbeddedContentEventArgs(EmbeddedContentKind contentKind, Stream contentStream, int length)
-        {
-            ContentKind = contentKind;
-            ContentStream = contentStream;
-            Length = length;
-        }
-
         public EmbeddedContentEventArgs(EmbeddedContentKind contentKind, Stream contentStream)
         {
             ContentKind = contentKind;
@@ -23,6 +16,5 @@ namespace Microsoft.Build.Logging
 
         public EmbeddedContentKind ContentKind { get; }
         public Stream ContentStream { get; }
-        public int? Length { get; }
     }
 }

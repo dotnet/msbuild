@@ -78,6 +78,24 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public bool CloseInput { private get; set; } = false;
 
+        /// <summary>
+        /// Indicates whether unknown BuildEvents should be silently skipped. Read returns null otherwise.
+        /// Parameter is supported only if the file format supports forward compatible reading (version is 18 or higher).
+        /// </summary>
+        public bool SkipUnknownEvents { private get; set; } = false;
+
+        /// <summary>
+        /// Indicates whether unread parts of BuildEvents (probably added in newer format of particular BuildEvent)should be silently skipped. Exception thrown otherwise.
+        /// Parameter is supported only if the file format supports forward compatible reading (version is 18 or higher).
+        /// </summary>
+        public bool SkipUnknownEventParts { private get; set; } = false;
+
+        /// <summary>
+        /// Receives recoverable errors during reading.
+        /// Applicable mainly when <see cref="SkipUnknownEvents"/> or <see cref="SkipUnknownEventParts"/> is set to true."/>
+        /// </summary>
+        public event Action<string>? OnRecoverableReadError;
+
         public void Dispose()
         {
             stringStorage.Dispose();
@@ -106,85 +124,41 @@ namespace Microsoft.Build.Logging
         /// <inheritdoc cref="IBuildFileReader.ArchiveFileEncountered"/>
         public event Action<ArchiveFileEventArgs>? ArchiveFileEncountered;
 
-        private byte[]? _pooledBuffer;
-        private BinaryWriter? _pooledBinaryWriter;
+        private SubStream? _lastSubStream;
 
         /// <summary>
         /// Reads the next serialized log record from the <see cref="BinaryReader"/>.
         /// </summary>
         /// <returns>ArraySegment containing serialized BuildEventArgs record</returns>
-        public ArraySegment<byte> ReadRaw()
+        internal (BinaryLogRecordKind RecordKind, Stream Stream) ReadRaw()
         {
-            // TODO: For even better performance experiment with returning a stream
-            //   it would need to be concatenated Stream of a MemoryStream with kind and size
-            //   and SubStream over the binaryReader.BaseStream of the given size.
-            //   We'd need to validate that reader reads exactly the given size, or skip rest on their behalf.
+            // This method is internal and condition is checked once before calling in loop,
+            //  so avoiding it here on each call.
+            // But keeping it for documentation purposes - in case someone will try to call it and debug issues.
+            ////if (fileFormatVersion < 18)
+            ////{
+            ////    throw new InvalidOperationException(
+            ////                           $"Raw data reading is not supported for file format version {fileFormatVersion} (needs >=18).");
+            ////}
 
-            BinaryLogRecordKind recordKind = ReadTillNextEvent();
+            if (!(_lastSubStream?.IsAtEnd ?? true))
+            {
+                throw new InvalidDataException($"Raw data slice for record {recordNumber} was not fully read.");
+            }
+
+            BinaryLogRecordKind recordKind = ReadTillNextEvent(IsTextualDataRecord);
 
             if (recordKind == BinaryLogRecordKind.EndOfFile)
             {
-                ReturnPooledBuffer();
-                return new ArraySegment<byte>();
+                return new(recordKind, Stream.Null);
             }
 
             int serializedEventLength = ReadInt32();
+            Stream stream = binaryReader.BaseStream.Slice(serializedEventLength);
 
-            // The BinaryLogRecordKind and size needs to be added back to the buffer.
-            // We do not know the exact size needed to write those two upfront though,
-            //  so we need to call memoryStream.Position to find out.
-            (BinaryWriter binaryWriter, MemoryStream memoryStream, byte[] buffer) =
-                RentPooledBinaryWriter(serializedEventLength + 2 * sizeof(int));
-            binaryWriter.Write7BitEncodedInt((int)recordKind);
-            binaryWriter.Write7BitEncodedInt(serializedEventLength);
+            _lastSubStream = stream as SubStream;
 
-            binaryReader.BaseStream.ReadAtLeast(buffer, (int)memoryStream.Position, serializedEventLength, throwOnEndOfStream: true);
-            // Size of the raw message and the preceding type and size info
-            return new ArraySegment<byte>(buffer, 0, serializedEventLength + (int)memoryStream.Position);
-        }
-
-        private byte[] RentPooledBuffer(int minimumBytes)
-        {
-            if (_pooledBuffer == null || _pooledBuffer.Length < minimumBytes)
-            {
-                ReturnPooledBuffer();
-                _pooledBuffer = ArrayPool<byte>.Shared.Rent(minimumBytes);
-            }
-
-            return _pooledBuffer;
-        }
-
-        private (BinaryWriter binaryWriter, MemoryStream memoryStream, byte[] buffer) RentPooledBinaryWriter(int minimumBytes)
-        {
-            if (_pooledBuffer == null || _pooledBuffer.Length < minimumBytes)
-            {
-                ReturnPooledBuffer();
-                _pooledBuffer = ArrayPool<byte>.Shared.Rent(minimumBytes);
-                _pooledBinaryWriter = null;
-            }
-
-            MemoryStream ms;
-            if (_pooledBinaryWriter == null)
-            {
-                ms = new(_pooledBuffer);
-                _pooledBinaryWriter = new BinaryWriter(ms);
-            }
-            else
-            {
-                ms = (_pooledBinaryWriter.BaseStream as MemoryStream)!;
-            }
-
-            return (_pooledBinaryWriter, ms, _pooledBuffer);
-        }
-
-        private void ReturnPooledBuffer()
-        {
-            if (_pooledBuffer != null)
-            {
-                ArrayPool<byte>.Shared.Return(_pooledBuffer);
-                _pooledBuffer = null;
-                _pooledBinaryWriter = null;
-            }
+            return new(recordKind, stream);
         }
 
         /// <summary>
@@ -196,35 +170,30 @@ namespace Microsoft.Build.Logging
         /// </returns>
         public BuildEventArgs? Read()
         {
-            return Read(skipUnknownEvents: false, skipUnknownEventParts: false, _ => { });
-        }
+            // todo - flip this into a properties - not to check on each call and to avoid params passing
+            if ((SkipUnknownEvents || SkipUnknownEventParts) && fileFormatVersion < 18)
+            {
+                throw new InvalidOperationException(
+                    $"Forward compatible reading is not supported for file format version {fileFormatVersion} (needs >=18).");
+            }
 
-        /// <summary>
-        /// Reads the next log record from the <see cref="BinaryReader"/>.
-        /// </summary>
-        /// <param name="skipUnknownEvents">Indicates whether unknown BuildEvents should be silently skipped. Read returns null otherwise.</param>
-        /// <param name="skipUnknownEventParts">Indicates whether unread parts of BuildEvents (probably added in newer format of particular BuildEvent)should be silently skipped. Exception thrown otherwise.</param>
-        /// <param name="onError">Receives recoverable errors during reading.</param>
-        /// <returns>
-        /// The next <see cref="BuildEventArgs"/>.
-        /// If there are no more records, returns <see langword="null"/>.
-        /// </returns>
-        /// <exception cref="InvalidDataException">Thrown based on <paramref name="skipUnknownEventParts"/> and <paramref name="skipUnknownEvents"/> arguments.</exception>
-        public BuildEventArgs? Read(bool skipUnknownEvents, bool skipUnknownEventParts, Action<string> onError)
-        {
             BuildEventArgs? result = null;
             while (result == null)
             {
-                BinaryLogRecordKind recordKind = ReadTillNextEvent();
+                BinaryLogRecordKind recordKind = ReadTillNextEvent(IsAuxiliaryRecord);
 
                 if (recordKind == BinaryLogRecordKind.EndOfFile)
                 {
                     return null;
                 }
 
-                int serializedEventLength = ReadInt32(); // record length
-
-                long preEventPosition = _canSeek ? binaryReader.BaseStream.Position : 0;
+                int serializedEventLength = 0;
+                long preEventPosition = 0;
+                if (fileFormatVersion >= 18)
+                {
+                    serializedEventLength = ReadInt32(); // record length
+                    preEventPosition = _canSeek ? binaryReader.BaseStream.Position : 0;
+                }
 
                 switch (recordKind)
                 {
@@ -301,9 +270,9 @@ namespace Microsoft.Build.Logging
                         result = ReadAssemblyLoadEventArgs();
                         break;
                     default:
-                        onError(
-                            $"BuildEvent record number {recordNumber} (serialized size: {serializedEventLength}) is of unsupported type: {recordKind}.{(skipUnknownEvents ? " Skipping it." : string.Empty)}");
-                        if (skipUnknownEvents)
+                        OnRecoverableReadError?.Invoke(
+                            $"BuildEvent record number {recordNumber} (serialized size: {serializedEventLength}) is of unsupported type: {recordKind}.{(SkipUnknownEvents ? " Skipping it." : string.Empty)}");
+                        if (SkipUnknownEvents)
                         {
                             SkipBytes(serializedEventLength);
                         }
@@ -314,21 +283,24 @@ namespace Microsoft.Build.Logging
                         break;
                 }
 
-                long postEventPosition = _canSeek ? binaryReader.BaseStream.Position : serializedEventLength;
-                int bytesRead = (int)(postEventPosition - preEventPosition);
-                if (bytesRead != serializedEventLength)
+                if (fileFormatVersion >= 18)
                 {
-                    string error =
-                        $"BuildEvent record number {recordNumber} was expected to read exactly {serializedEventLength} bytes from the stream, but read {bytesRead} instead.";
+                    long postEventPosition = _canSeek ? binaryReader.BaseStream.Position : serializedEventLength;
+                    int bytesRead = (int)(postEventPosition - preEventPosition);
+                    if (bytesRead != serializedEventLength)
+                    {
+                        string error =
+                            $"BuildEvent record number {recordNumber} was expected to read exactly {serializedEventLength} bytes from the stream, but read {bytesRead} instead.";
 
-                    if (skipUnknownEventParts && bytesRead < serializedEventLength)
-                    {
-                        onError(error);
-                        SkipBytes(serializedEventLength - bytesRead);
-                    }
-                    else
-                    {
-                        throw new InvalidDataException(error);
+                        if (SkipUnknownEventParts && bytesRead < serializedEventLength)
+                        {
+                            OnRecoverableReadError?.Invoke(error);
+                            SkipBytes(serializedEventLength - bytesRead);
+                        }
+                        else
+                        {
+                            throw new InvalidDataException(error);
+                        }
                     }
                 }
 
@@ -346,19 +318,19 @@ namespace Microsoft.Build.Logging
             }
             else
             {
-                byte[] buffer = RentPooledBuffer(count);
+                byte[] buffer = ArrayPool<byte>.Shared.Rent(count);
+                using var _ = new CleanupScope(() => ArrayPool<byte>.Shared.Return(buffer));
                 binaryReader.BaseStream.ReadAtLeast(buffer, 0, count, throwOnEndOfStream: true);
-                ReturnPooledBuffer();
             }
         }
 
-        private BinaryLogRecordKind ReadTillNextEvent()
+        private BinaryLogRecordKind ReadTillNextEvent(Func<BinaryLogRecordKind, bool> isPreprocessRecord)
         {
             BinaryLogRecordKind recordKind = (BinaryLogRecordKind)ReadInt32();
 
             // Skip over data storage records since they don't result in a BuildEventArgs.
             // just ingest their data and continue.
-            while (IsAuxiliaryRecord(recordKind))
+            while (isPreprocessRecord(recordKind))
             {
                 // these are ordered by commonality
                 if (recordKind == BinaryLogRecordKind.String)
@@ -387,6 +359,12 @@ namespace Microsoft.Build.Logging
             return recordKind == BinaryLogRecordKind.String
                 || recordKind == BinaryLogRecordKind.NameValueList
                 || recordKind == BinaryLogRecordKind.ProjectImportArchive;
+        }
+
+        private static bool IsTextualDataRecord(BinaryLogRecordKind recordKind)
+        {
+            return recordKind == BinaryLogRecordKind.String
+                   || recordKind == BinaryLogRecordKind.ProjectImportArchive;
         }
 
         private void ReadEmbeddedContent(BinaryLogRecordKind recordKind)
@@ -444,6 +422,7 @@ namespace Microsoft.Build.Logging
                     }
                 }
 
+                // Once embedded files are replayed one by one - we can send the resulting stream to subscriber
                 if (EmbeddedContentRead != null)
                 {
                     projectImportsCollector!.ProcessResult(
@@ -466,6 +445,11 @@ namespace Microsoft.Build.Logging
 
         private void ReadNameValueList()
         {
+            if (fileFormatVersion >= 18)
+            {
+                _ = ReadInt32(); // buffer size, not used in structured reading
+            }
+
             int count = ReadInt32();
 
             var list = new (int, int)[count];
@@ -507,7 +491,7 @@ namespace Microsoft.Build.Logging
 
             // this should never happen for valid binlogs
             throw new InvalidDataException(
-                $"NameValueList record number {recordNumber} is invalid: index {id} is not within {stringRecords.Count}.");
+                $"NameValueList record number {recordNumber} is invalid: index {id} is not within {nameValueListRecords.Count}.");
         }
 
         private readonly StringReadEventArgs stringReadEventArgs = new StringReadEventArgs(string.Empty);

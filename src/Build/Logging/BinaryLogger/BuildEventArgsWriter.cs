@@ -37,6 +37,13 @@ namespace Microsoft.Build.Logging
         private readonly MemoryStream currentRecordStream;
 
         /// <summary>
+        /// For NameValueList we need to prefix the storage size
+        ///  (distinct from values count due to variable int encoding)
+        /// So using same technique as with 'currentRecordStream'.
+        /// </summary>
+        private readonly MemoryStream nameValueListStream = new MemoryStream(256);
+
+        /// <summary>
         /// The binary writer around the originalStream.
         /// </summary>
         private readonly BinaryWriter originalBinaryWriter;
@@ -135,12 +142,16 @@ namespace Microsoft.Build.Logging
         {
             BinaryLogRecordKind eventKind = WriteCore(e);
 
-            Write(eventKind);
-            Write((int)currentRecordStream.Length);
+            FlushRecordToFinalStream(eventKind, currentRecordStream);
+        }
 
-            // flush the current record and clear the MemoryStream to prepare for next use
-            currentRecordStream.WriteTo(originalStream);
-            currentRecordStream.SetLength(0);
+        private void FlushRecordToFinalStream(BinaryLogRecordKind recordKind, MemoryStream recordStream)
+        {
+            using var redirectionScope = RedirectWritesToOriginalWriter();
+            Write(recordKind);
+            Write((int)recordStream.Length);
+            recordStream.WriteTo(originalStream);
+            recordStream.SetLength(0);
         }
 
         /*
@@ -232,7 +243,7 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        public void WriteBlob(BinaryLogRecordKind kind, Stream stream, int? length = null)
+        public void WriteBlob(BinaryLogRecordKind kind, Stream stream)
         {
             if (stream.CanSeek && stream.Length > int.MaxValue)
             {
@@ -244,8 +255,8 @@ namespace Microsoft.Build.Logging
             using var redirection = RedirectWritesToOriginalWriter();
 
             Write(kind);
-            Write(length ?? (int)stream.Length);
-            Write(stream, length);
+            Write((int)stream.Length);
+            Write(stream);
         }
 
         /// <summary>
@@ -255,23 +266,13 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private IDisposable RedirectWritesToOriginalWriter()
         {
-            binaryWriter = originalBinaryWriter;
-            return new RedirectionScope(this);
+            return RedirectWritesToDifferentWriter(originalBinaryWriter, currentRecordWriter);
         }
 
-        private struct RedirectionScope : IDisposable
+        private IDisposable RedirectWritesToDifferentWriter(BinaryWriter inScopeWriter, BinaryWriter afterScopeWriter)
         {
-            private readonly BuildEventArgsWriter _writer;
-
-            public RedirectionScope(BuildEventArgsWriter buildEventArgsWriter)
-            {
-                _writer = buildEventArgsWriter;
-            }
-
-            public void Dispose()
-            {
-                _writer.binaryWriter = _writer.currentRecordWriter;
-            }
+            binaryWriter = inScopeWriter;
+            return new CleanupScope(() => binaryWriter = afterScopeWriter);
         }
 
         private BinaryLogRecordKind Write(BuildStartedEventArgs e)
@@ -1063,19 +1064,26 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private void WriteNameValueListRecord()
         {
-            // Switch the binaryWriter used by the Write* methods to the direct underlying stream writer.
             // We want this record to precede the record we're currently writing to currentRecordWriter
-            // which is backed by a MemoryStream buffer
-            using var redirectionScope = RedirectWritesToOriginalWriter();
+            // We as well want to know the storage size (differs from nameValueIndexListBuffer.Count as
+            //  we use variable integer encoding).
+            // So we redirect the writes to a MemoryStream and then flush the record to the final stream.
+            // All that is redirected away from the 'currentRecordStream' - that will be flushed last
 
-            Write(BinaryLogRecordKind.NameValueList);
-            Write(nameValueIndexListBuffer.Count);
-            for (int i = 0; i < nameValueListBuffer.Count; i++)
+            var nameValueListBw = new BinaryWriter(nameValueListStream);
+
+            using (var _ = RedirectWritesToDifferentWriter(nameValueListBw, binaryWriter))
             {
-                var kvp = nameValueIndexListBuffer[i];
-                Write(kvp.Key);
-                Write(kvp.Value);
+                Write(nameValueIndexListBuffer.Count);
+                for (int i = 0; i < nameValueListBuffer.Count; i++)
+                {
+                    var kvp = nameValueIndexListBuffer[i];
+                    Write(kvp.Key);
+                    Write(kvp.Value);
+                }
             }
+
+            FlushRecordToFinalStream(BinaryLogRecordKind.NameValueList, nameValueListStream);
         }
 
         /// <summary>
@@ -1124,35 +1132,10 @@ namespace Microsoft.Build.Logging
             binaryWriter.Write(bytes);
         }
 
-        private void Write(Stream stream, int? length)
+        private void Write(Stream stream)
         {
             Stream destinationStream = binaryWriter.BaseStream;
-            if (length == null)
-            {
-                stream.CopyTo(destinationStream);
-                return;
-            }
-
-            // borrowed from runtime from Stream.cs
-            const int defaultCopyBufferSize = 81920;
-            int bufferSize = Math.Min(defaultCopyBufferSize, length.Value);
-
-            byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
-            try
-            {
-                int bytesRead;
-                while (
-                    length > 0 &&
-                    (bytesRead = stream.Read(buffer, 0, Math.Min(buffer.Length, length.Value))) != 0)
-                {
-                    destinationStream.Write(buffer, 0, bytesRead);
-                    length -= bytesRead;
-                }
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(buffer);
-            }
+            stream.CopyTo(destinationStream);
         }
 
         private void Write(byte b)
@@ -1209,7 +1192,7 @@ namespace Microsoft.Build.Logging
             return (recordId, hash);
         }
 
-        private void WriteStringRecord(string text)
+        internal void WriteStringRecord(string text)
         {
             using var redirectionScope = RedirectWritesToOriginalWriter();
 

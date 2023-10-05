@@ -138,9 +138,7 @@ namespace Microsoft.Build.Logging
             Traits.Instance.EscapeHatches.LogProjectImports = true;
             bool logPropertiesAndItemsAfterEvaluation = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation ?? true;
 
-            bool replayInitialInfo;
-            ILogVersionInfo versionInfo = null;
-            ProcessParameters(out replayInitialInfo);
+            ProcessParameters(out bool omitInitialInfo);
 
             try
             {
@@ -176,20 +174,6 @@ namespace Microsoft.Build.Logging
                 {
                     eventSource4.IncludeEvaluationPropertiesAndItems();
                 }
-
-                if (eventSource is IEmbeddedContentSource embeddedFilesSource)
-                {
-                    if (CollectProjectImports == ProjectImportsCollectionMode.Replay)
-                    {
-                        embeddedFilesSource.EmbeddedContentRead += args =>
-                            eventArgsWriter.WriteBlob(args.ContentKind.ToBinaryLogRecordKind(), args.ContentStream, args.Length);
-                    }
-
-                    if (replayInitialInfo)
-                    {
-                        versionInfo = embeddedFilesSource;
-                    }
-                }
             }
             catch (Exception e)
             {
@@ -215,19 +199,46 @@ namespace Microsoft.Build.Logging
                 eventArgsWriter.EmbedFile += EventArgsWriter_EmbedFile;
             }
 
-            if (versionInfo == null)
+            if (eventSource is IBinaryLogReplaySource replayEventsSource)
             {
-                binaryWriter.Write(FileFormatVersion);
-                LogInitialInfo();
+                if (CollectProjectImports == ProjectImportsCollectionMode.Replay)
+                {
+                    replayEventsSource.EmbeddedContentRead += args =>
+                        eventArgsWriter.WriteBlob(args.ContentKind.ToBinaryLogRecordKind(), args.ContentStream);
+                }
+
+                // If raw events are provided - let's try to use the advantage.
+                // But other subscribers can later on subscribe to structured events -
+                //  for this reason we do only subscribe delayed.
+                replayEventsSource.DeferredInitialize(
+                    version => binaryWriter.Write(version),
+                    // For raw events we cannot write the initial info - as we cannot write
+                    //  at the same time as raw events are being written - this would break the deduplicated strings store.
+                    () =>
+                    {
+                        replayEventsSource.LogDataSliceReceived += RawEvents_LogDataSliceReceived;
+                        // Replay separated strings here as well (and do not deduplicate! It would skew string indexes)
+                        replayEventsSource.StringReadDone += strArg => eventArgsWriter.WriteStringRecord(strArg.StringToBeUsed);
+                    },
+                    SubscribeToStructuredEvents);
             }
             else
             {
-                versionInfo.FileFormatVersionRead += version => binaryWriter.Write(version);
+                binaryWriter.Write(FileFormatVersion);
+                SubscribeToStructuredEvents();
             }
 
-            eventSource.AnyEventRaised += EventSource_AnyEventRaised;
-
             KnownTelemetry.LoggingConfigurationTelemetry.BinaryLogger = true;
+
+            void SubscribeToStructuredEvents()
+            {
+                if (!omitInitialInfo)
+                {
+                    LogInitialInfo();
+                }
+
+                eventSource.AnyEventRaised += EventSource_AnyEventRaised;
+            }
         }
 
         private void EventArgsWriter_EmbedFile(string filePath)
@@ -290,6 +301,11 @@ namespace Microsoft.Build.Logging
             }
         }
 
+        private void RawEvents_LogDataSliceReceived(BinaryLogRecordKind recordKind, Stream stream)
+        {
+            eventArgsWriter.WriteBlob(recordKind, stream);
+        }
+
         private void EventSource_AnyEventRaised(object sender, BuildEventArgs e)
         {
             Write(e);
@@ -337,14 +353,14 @@ namespace Microsoft.Build.Logging
         /// </summary>
         /// <exception cref="LoggerException">
         /// </exception>
-        private void ProcessParameters(out bool replayInitialInfo)
+        private void ProcessParameters(out bool omitInitialInfo)
         {
             if (Parameters == null)
             {
                 throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", ""));
             }
 
-            replayInitialInfo = false;
+            omitInitialInfo = false;
             var parameters = Parameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
             foreach (var parameter in parameters)
             {
@@ -364,9 +380,9 @@ namespace Microsoft.Build.Logging
                 {
                     CollectProjectImports = ProjectImportsCollectionMode.Replay;
                 }
-                else if (string.Equals(parameter, "ReplayInitialInfo", StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(parameter, "OmitInitialInfo", StringComparison.OrdinalIgnoreCase))
                 {
-                    replayInitialInfo = true;
+                    omitInitialInfo = true;
                 }
                 else if (parameter.EndsWith(".binlog", StringComparison.OrdinalIgnoreCase))
                 {

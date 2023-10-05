@@ -31,6 +31,8 @@ namespace Microsoft.Build.Logging
             }
         }
 
+        public bool IsAtEnd => _position >= _length;
+
         public override bool CanRead => true;
 
         public override bool CanSeek => false;
