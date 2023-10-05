@@ -148,25 +148,39 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
-        [InlineData("netcoreapp2.0")]
-        [InlineData("netcoreapp2.1")]
-        [InlineData("netstandard2.1")]
-        public void PublishTrimmed_fails_for_unsupported_target_framework(string targetFramework)
+        [InlineData("netcoreapp2.0", true)]
+        [InlineData("netcoreapp2.1", true)]
+        [InlineData("netstandard2.1", true)]
+        [InlineData("netcoreapp3.0", false)]
+        [InlineData("netcoreapp3.1", false)]
+        [InlineData("net5.0", false)]
+        [InlineData("net6.0", false)]
+        public void PublishTrimmed_fails_for_unsupported_target_framework(string targetFramework, bool shouldFail)
         {
             var projectName = "HelloWorld";
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
+            testProject.AdditionalProperties["PublishTrimmed"] = "true";
+            testProject.AdditionalProperties["NoWarn"] = "NETSDK1138"; // Silence warning about targeting EOL TFMs
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
             var publishCommand = new PublishCommand(testAsset);
-            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true")
-                .Should().Fail()
-                .And.HaveStdOutContaining($"error {Strings.PublishTrimmedRequiresVersion30}");
+            var result = publishCommand.Execute($"/p:RuntimeIdentifier={rid}");
+            if (shouldFail) {
+                result.Should().Fail()
+                    .And.HaveStdOutContaining($"error {Strings.PublishTrimmedRequiresVersion30}");
+            } else {
+                result.Should().Pass()
+                    .And.NotHaveStdOutContaining("warning");
+            }
         }
 
         [RequiresMSBuildVersionTheory("17.8.0")]
         [InlineData("netstandard2.0", true)]
         [InlineData("netstandard2.1", true)]
+        [InlineData("netcoreapp3.1", true)]
+        [InlineData("net5.0", true)]
+        [InlineData("net6.0", false)]
         [InlineData("netstandard2.0;net5.0", true)] // None of these TFMs are supported for trimming
         [InlineData("netstandard2.0;net6.0", false)] // Net6.0 is the min TFM supported for trimming and targeting.
         [InlineData("netstandard2.0;net8.0", true)] // Net8.0 is supported for trimming, but leaves a "gap" for the supported net6.0/net7.0 TFMs.
@@ -181,6 +195,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProject = CreateTestProjectForILLinkTesting(targetFrameworks, projectName);
             testProject.AdditionalProperties["IsTrimmable"] = "true";
+            testProject.AdditionalProperties["NoWarn"] = "NETSDK1138"; // Silence warning about targeting EOL TFMs
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFrameworks)
                 .WithProjectChanges(AddTargetFrameworkAliases);
 

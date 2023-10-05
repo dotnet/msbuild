@@ -12,6 +12,10 @@
   </PropertyGroup>
 
   <Target Name="_AddKnownILLinkPack" BeforeTargets="ProcessFrameworkReferences">
+    <PropertyGroup>
+      <!-- Work around a version check that prevents referencing illink pack from a netstandard project. -->
+      <_FirstTargetFrameworkVersionToSupportTrimAnalyzer>2.0</_FirstTargetFrameworkVersionToSupportTrimAnalyzer>
+    </PropertyGroup>
     <ItemGroup>
       <KnownILLinkPack Include="@(KnownILLinkPack)"
                        Condition="'%(TargetFramework)' == '$(CurrentTargetFramework)'"

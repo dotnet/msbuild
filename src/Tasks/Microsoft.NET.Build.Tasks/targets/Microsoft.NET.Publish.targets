@@ -22,6 +22,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- PublishAot depends on PublishTrimmed. This must be set early enough for the KnownILLinkPack to be restored. -->
     <PublishTrimmed Condition="'$(PublishTrimmed)' == '' And '$(PublishAot)' == 'true'">true</PublishTrimmed>
     <IsTrimmable Condition="'$(IsTrimmable)' == '' and '$(IsAotCompatible)' == 'true'">true</IsTrimmable>
+
+    <_FirstTargetFrameworkToSupportTrimming>net6.0</_FirstTargetFrameworkToSupportTrimming>
+    <_FirstTargetFrameworkToSupportAot>net7.0</_FirstTargetFrameworkToSupportAot>
+    <_FirstTargetFrameworkToSupportSingleFile>net6.0</_FirstTargetFrameworkToSupportSingleFile>
+
+    <_FirstTargetFrameworkVersionToSupportTrimAnalyzer>$([MSBuild]::GetTargetFrameworkVersion('$(_FirstTargetFrameworkToSupportTrimming)'))</_FirstTargetFrameworkVersionToSupportTrimAnalyzer>
+    <_FirstTargetFrameworkVersionToSupportAotAnalyzer>$([MSBuild]::GetTargetFrameworkVersion('$(_FirstTargetFrameworkToSupportAot)'))</_FirstTargetFrameworkVersionToSupportAotAnalyzer>
+    <_FirstTargetFrameworkVersionToSupportSingleFileAnalyzer>$([MSBuild]::GetTargetFrameworkVersion('$(_FirstTargetFrameworkToSupportSingleFile)'))</_FirstTargetFrameworkVersionToSupportSingleFileAnalyzer>
   </PropertyGroup>
 
   <ItemDefinitionGroup>
@@ -43,7 +51,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_RequiresILLinkPack Condition="'$(_RequiresILLinkPack)' == ''">false</_RequiresILLinkPack>
     </PropertyGroup>
 
-
     <!-- ProcessFrameworkReferences warns when the project settings introduce a dependency on a
          tool pack that's not available for the target framework. For trimming, AOT, and single-file, the recommendation
          is to multitarget the project to include a more recent TargetFramework. For correctly multitargeted
@@ -60,9 +67,6 @@ Copyright (c) .NET Foundation. All rights reserved.
          and silences the warning if it is. -->
 
     <PropertyGroup>
-      <_FirstTargetFrameworkToSupportTrimming>net6.0</_FirstTargetFrameworkToSupportTrimming>
-      <_FirstTargetFrameworkToSupportAot>net7.0</_FirstTargetFrameworkToSupportAot>
-      <_FirstTargetFrameworkToSupportSingleFile>net6.0</_FirstTargetFrameworkToSupportSingleFile>
       <!-- The min non-EOL TFM has already caught up with the first TFM to support trimming/singlefile. No need to compare against it. -->
       <_MinNonEolTargetFrameworkForTrimming>$(_MinimumNonEolSupportedNetCoreTargetFramework)</_MinNonEolTargetFrameworkForTrimming>
       <_MinNonEolTargetFrameworkForSingleFile>$(_MinimumNonEolSupportedNetCoreTargetFramework)</_MinNonEolTargetFrameworkForSingleFile>

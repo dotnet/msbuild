@@ -74,14 +74,26 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Intermediate step to enable ILLink.Analyzers so ILLink, Blazor, Xamarin, AOT, etc. can enable the same flags -->
     <EnableSingleFileAnalyzer Condition="'$(EnableSingleFileAnalyzer)' == '' And
-                                         ('$(PublishSingleFile)' == 'true' Or '$(PublishAot)' == 'true' Or '$(IsAotCompatible)' == 'true')">true</EnableSingleFileAnalyzer>
+                                         (
+                                             ('$(PublishSingleFile)' == 'true' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '$(_FirstTargetFrameworkVersionToSupportSingleFileAnalyzer)'))) Or
+                                             ('$(PublishAot)' == 'true' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '$(_FirstTargetFrameworkVersionToSupportAotAnalyzer)'))) Or
+                                             '$(IsAotCompatible)' == 'true'
+                                         )">true</EnableSingleFileAnalyzer>
 
     <!-- Enable the trim analyzer when any trimming settings are enabled. Warnings may suppressed based on other settings. -->
     <EnableTrimAnalyzer Condition="'$(EnableTrimAnalyzer)' == '' And
-                                   ('$(PublishTrimmed)' == 'true' Or '$(IsTrimmable)' == 'true' Or '$(PublishAot)' == 'true')">true</EnableTrimAnalyzer>
+                                   (
+                                       ('$(PublishTrimmed)' == 'true' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '$(_FirstTargetFrameworkVersionToSupportTrimAnalyzer)'))) Or
+                                       ('$(PublishAot)' == 'true' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '$(_FirstTargetFrameworkVersionToSupportAotAnalyzer)'))) Or
+                                       '$(IsTrimmable)' == 'true'
+                                   )">true</EnableTrimAnalyzer>
 
     <!-- Enable the AOT analyzer when AOT is enabled. Warnings may suppressed based on other settings. -->
-    <EnableAotAnalyzer Condition="'$(EnableAotAnalyzer)' == '' And ('$(PublishAot)' == 'true' or '$(IsAotCompatible)' == 'true')">true</EnableAotAnalyzer>
+    <EnableAotAnalyzer Condition="'$(EnableAotAnalyzer)' == '' And
+                                  (
+                                      ('$(PublishAot)' == 'true' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '$(_FirstTargetFrameworkVersionToSupportAotAnalyzer)'))) Or
+                                      '$(IsAotCompatible)' == 'true'
+                                  )">true</EnableAotAnalyzer>
 
     <!-- EnforceCodeStyleInBuild Allows code style analyzers to be disabled in bulk via msbuild if the user wants to -->
     <EnforceCodeStyleInBuild Condition="'$(EnforceCodeStyleInBuild)' == ''">false</EnforceCodeStyleInBuild>

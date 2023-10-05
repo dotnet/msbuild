@@ -633,8 +633,45 @@ namespace Microsoft.NET.Publish.Tests
                 .And.HaveStdOutContaining("(10,13): warning IL3001");
         }
 
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData("netcoreapp2.1", true)]
+        [InlineData("netcoreapp3.0", false)]
+        [InlineData("netcoreapp3.1", false)]
+        [InlineData("net5.0", false)]
+        [InlineData("net6.0", false)]
+        [InlineData("net7.0", false)]
+        public void PublishSingleFile_fails_for_unsupported_target_framework(string targetFramework, bool shouldFail)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "HelloWorld",
+                IsExe = true,
+                TargetFrameworks = targetFramework
+            };
+            testProject.AdditionalProperties["PublishSingleFile"] = "true";
+            testProject.AdditionalProperties["SelfContained"] = "true";
+            testProject.AdditionalProperties["NoWarn"] = "NETSDK1138";  // Silence warning about targeting EOL TFMs
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
+
+            var publishCommand = new PublishCommand(testAsset);
+            var result = publishCommand.Execute(RuntimeIdentifier);
+            if (shouldFail)
+            {
+                result.Should().Fail()
+                    .And.HaveStdOutContaining(Strings.PublishSingleFileRequiresVersion30);
+            }
+            else
+            {
+                result.Should().Pass()
+                    .And.NotHaveStdOutContaining("warning");
+            }
+        }
+
         [RequiresMSBuildVersionTheory("17.8.0")]
         [InlineData("netstandard2.0", true)]
+        [InlineData("net5.0", true)]
+        [InlineData("net6.0", false)]
         [InlineData("netstandard2.0;net5.0", true)] // None of these TFMs are supported for single-file
         [InlineData("netstandard2.0;net6.0", false)] // Net6.0 is the min TFM supported for single-file and targeting.
         [InlineData("netstandard2.0;net8.0", true)] // Net8.0 is supported for single-file, but leaves a "gap" for the supported net6./net7.0 TFMs.

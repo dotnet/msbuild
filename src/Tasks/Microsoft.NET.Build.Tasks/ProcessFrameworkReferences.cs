@@ -51,9 +51,13 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool EnableAotAnalyzer { get; set; }
 
+        public string FirstTargetFrameworkVersionToSupportAotAnalyzer { get; set; }
+
         public bool PublishTrimmed { get; set; }
 
         public bool IsTrimmable { get; set; }
+
+        public string FirstTargetFrameworkVersionToSupportTrimAnalyzer { get; set; }
 
         public bool SilenceIsTrimmableUnsupportedWarning { get; set; }
 
@@ -62,6 +66,8 @@ namespace Microsoft.NET.Build.Tasks
         public bool EnableTrimAnalyzer { get; set; }
 
         public bool EnableSingleFileAnalyzer { get; set; }
+
+        public string FirstTargetFrameworkVersionToSupportSingleFileAnalyzer { get; set; }
 
         public bool SilenceEnableSingleFileAnalyzerUnsupportedWarning { get; set; }
 
@@ -826,6 +832,22 @@ namespace Microsoft.NET.Build.Tasks
             if (runtimePackToDownload != null)
             {
                 packagesToDownload.Add(runtimePackToDownload);
+            }
+
+            if (toolPackType is ToolPackType.ILLink)
+            {
+                // The ILLink tool pack is available for some TargetFrameworks where we nonetheless consider
+                // IsTrimmable/IsAotCompatible/EnableSingleFile to be unsupported, because the framework
+                // was not annotated with the attributes.
+                var firstTargetFrameworkVersionToSupportAotAnalyzer = NormalizeVersion(new Version(FirstTargetFrameworkVersionToSupportAotAnalyzer));
+                if ((IsAotCompatible || EnableAotAnalyzer) && normalizedTargetFrameworkVersion < firstTargetFrameworkVersionToSupportAotAnalyzer)
+                    return ToolPackSupport.UnsupportedForTargetFramework;
+                var firstTargetFrameworkVersionToSupportSingleFileAnalyzer = NormalizeVersion(new Version(FirstTargetFrameworkVersionToSupportSingleFileAnalyzer));
+                if (EnableSingleFileAnalyzer && normalizedTargetFrameworkVersion < firstTargetFrameworkVersionToSupportSingleFileAnalyzer)
+                    return ToolPackSupport.UnsupportedForTargetFramework;
+                var firstTargetFrameworkVersionToSupportTrimAnalyzer = NormalizeVersion(new Version(FirstTargetFrameworkVersionToSupportTrimAnalyzer));
+                if ((IsTrimmable || EnableTrimAnalyzer) && normalizedTargetFrameworkVersion < firstTargetFrameworkVersionToSupportTrimAnalyzer)
+                    return ToolPackSupport.UnsupportedForTargetFramework;
             }
 
             // Packs with RID-agnostic build packages that contain MSBuild targets.
