@@ -63,6 +63,7 @@
       <Link>CanonicalError.cs</Link>
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="AssemblyDependency\AssemblyAttributes.cs" />
     <Compile Include="AssemblyDependency\AssemblyMetadata.cs" />
     <Compile Include="CombineTargetFrameworkInfoProperties.cs" />
     <Compile Include="CombineXmlElements.cs" />
@@ -327,6 +328,7 @@
     </Compile>
     <Compile Include="ResourceHandling\*.cs" />
     <Compile Include="GetCompatiblePlatform.cs" />
+    <Compile Include="GetAssembliesMetadata.cs" />
     <Compile Include="SetRidAgnosticValueForProjects.cs" />
     <Compile Include="BuildCacheDisposeWrapper.cs" />
     <Compile Include="DownloadFile.cs" />

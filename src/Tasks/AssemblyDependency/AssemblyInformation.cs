@@ -10,12 +10,14 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 #endif
-using System.Runtime.Versioning;
 using System.Reflection;
+using System.Runtime.Versioning;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
-
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using static Microsoft.Build.Shared.FileSystem.WindowsNative;
 #if FEATURE_ASSEMBLYLOADCONTEXT || MONO
 using System.Reflection.PortableExecutable;
 using System.Reflection.Metadata;
@@ -267,6 +269,111 @@ namespace Microsoft.Build.Tasks
             return false;
         }
 
+#if !FEATURE_ASSEMBLYLOADCONTEXT
+        internal AssemblyAttributes GetAssemblyMetadata()
+        {
+            IntPtr asmMetaPtr = IntPtr.Zero;
+            try
+            {
+                IMetaDataImport2 import2 = (IMetaDataImport2)_assemblyImport;
+                _assemblyImport.GetAssemblyFromScope(out uint assemblyScope);
+                AssemblyAttributes assemblyAttributes = new()
+                {
+                    AssemblyFullPath = _sourceFile,
+                };
+
+                // get the assembly, if there is no assembly, it is a module reference
+                if (assemblyScope == 0)
+                {
+                    return null;
+                }
+                else
+                {
+                    assemblyAttributes.IsAssembly = true;
+                }
+
+                // will be populated with the assembly name
+                char[] defaultCharArray = new char[GENMAN_STRING_BUF_SIZE];
+                asmMetaPtr = AllocAsmMeta();
+                _assemblyImport.GetAssemblyProps(
+                    assemblyScope,
+                    out IntPtr publicKeyPtr,
+                    out uint publicKeyLength,
+                    out uint hashAlgorithmId,
+                    defaultCharArray,
+
+                    // the default buffer size is taken from csproj call
+                    GENMAN_STRING_BUF_SIZE,
+                    out uint nameLength,
+                    asmMetaPtr,
+                    out uint flags);
+
+                assemblyAttributes.AssemblyName = new string(defaultCharArray, 0, (int)nameLength - 1);
+                assemblyAttributes.DefaultAlias = new string(defaultCharArray, 0, (int)nameLength - 1);
+
+                ASSEMBLYMETADATA asmMeta = (ASSEMBLYMETADATA)Marshal.PtrToStructure(asmMetaPtr, typeof(ASSEMBLYMETADATA));
+                assemblyAttributes.MajorVersion = asmMeta.usMajorVersion;
+                assemblyAttributes.MinorVersion = asmMeta.usMinorVersion;
+                assemblyAttributes.RevisionNumber = asmMeta.usRevisionNumber;
+                assemblyAttributes.BuildNumber = asmMeta.usBuildNumber;
+                assemblyAttributes.Culture = Marshal.PtrToStringUni(asmMeta.rpLocale);
+
+                byte[] publicKey = new byte[publicKeyLength];
+                Marshal.Copy(publicKeyPtr, publicKey, 0, (int)publicKeyLength);
+                assemblyAttributes.PublicKey = BitConverter.ToString(publicKey).Replace("-", string.Empty);
+                assemblyAttributes.PublicKeyLength = publicKeyLength;
+
+                if (import2 != null)
+                {
+                    assemblyAttributes.Description = GetStringCustomAttribute(import2, assemblyScope, "System.Reflection.AssemblyDescriptionAttribute");
+                    assemblyAttributes.Guid = GetStringCustomAttribute(import2, assemblyScope, "System.Runtime.InteropServices.GuidAttribute");
+                    if (!string.IsNullOrEmpty(assemblyAttributes.Guid))
+                    {
+                        string importedFromTypeLibString = GetStringCustomAttribute(import2, assemblyScope, "System.Runtime.InteropServices.ImportedFromTypeLibAttribute");
+                        if (!string.IsNullOrEmpty(importedFromTypeLibString))
+                        {
+                            assemblyAttributes.IsImportedFromTypeLib = true;
+                        }
+                        else
+                        {
+                            string primaryInteropAssemblyString = GetStringCustomAttribute(import2, assemblyScope, "System.Runtime.InteropServices.PrimaryInteropAssemblyAttribute");
+                            assemblyAttributes.IsImportedFromTypeLib = !string.IsNullOrEmpty(primaryInteropAssemblyString);
+                        }
+                    }
+
+                    assemblyAttributes.TargetFrameworkMoniker = GetStringCustomAttribute(import2, assemblyScope, "System.Runtime.Versioning.TargetFrameworkAttribute");
+                }
+
+                assemblyAttributes.RuntimeVersion = GetRuntimeVersion(_sourceFile);
+                import2.GetPEKind(out uint peKind, out _);
+                assemblyAttributes.PeKind = peKind;
+
+                return assemblyAttributes;
+            }
+            finally
+            {
+                FreeAsmMeta(asmMetaPtr);
+            }
+        }
+
+        private string GetStringCustomAttribute(IMetaDataImport2 import2, uint assemblyScope, string propertyName)
+        {
+            int hr = import2.GetCustomAttributeByName(assemblyScope, propertyName, out IntPtr data, out uint valueLen);
+
+            // get the AssemblyTitle
+            if (hr == NativeMethodsShared.S_OK)
+            {
+                // if an AssemblyTitle exists, parse the contents of the blob
+                if (NativeMethods.TryReadMetadataString(_sourceFile, data, valueLen, out string propertyValue))
+                {
+                    return propertyValue;
+                }
+            }
+
+            return string.Empty;
+        }
+#endif
+
         /// <summary>
         /// Get the framework name from the assembly.
         /// </summary>
@@ -315,21 +422,12 @@ namespace Microsoft.Build.Tasks
             try
             {
                 var import2 = (IMetaDataImport2)_assemblyImport;
-
                 _assemblyImport.GetAssemblyFromScope(out uint assemblyScope);
-                int hr = import2.GetCustomAttributeByName(assemblyScope, s_targetFrameworkAttribute, out IntPtr data, out uint valueLen);
 
-                // get the AssemblyTitle
-                if (hr == NativeMethodsShared.S_OK)
+                string frameworkNameAttribute = GetStringCustomAttribute(import2, assemblyScope, s_targetFrameworkAttribute);
+                if (!string.IsNullOrEmpty(frameworkNameAttribute))
                 {
-                    // if an AssemblyTitle exists, parse the contents of the blob
-                    if (NativeMethods.TryReadMetadataString(_sourceFile, data, valueLen, out string frameworkNameAttribute))
-                    {
-                        if (!String.IsNullOrEmpty(frameworkNameAttribute))
-                        {
-                            frameworkAttribute = new FrameworkName(frameworkNameAttribute);
-                        }
-                    }
+                    frameworkAttribute = new FrameworkName(frameworkNameAttribute);
                 }
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))

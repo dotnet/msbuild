@@ -145,6 +145,9 @@
 
   <ItemGroup>
     <None Update="ResourceHandling\*.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="TestResources\Assemblies\Custom_COM.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestResources\lorem.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
