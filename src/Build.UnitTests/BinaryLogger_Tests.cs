@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using Microsoft.Build.BackEnd.Logging;
@@ -233,7 +234,26 @@ namespace Microsoft.Build.UnitTests
             AssertBinlogsHaveEqualContent(_logFile, replayedLogFile);
             // If this assertation complicates development - it can possibly be removed
             // The structured equality above should be enough.
-            AssertFilesAreBinaryEqual(_logFile, replayedLogFile);
+            AssertFilesAreBinaryEqualAfterUnpack(_logFile, replayedLogFile);
+        }
+
+        private static void AssertFilesAreBinaryEqualAfterUnpack(string firstPath, string secondPath)
+        {
+            using var br1 = BinaryLogReplayEventSource.OpenReader(firstPath);
+            using var br2 = BinaryLogReplayEventSource.OpenReader(secondPath);
+            const int bufferSize = 4096;
+
+            int readCount = 0;
+            while (br1.ReadBytes(bufferSize) is { Length: > 0 } bytes1)
+            {
+                var bytes2 = br2.ReadBytes(bufferSize);
+
+                bytes1.SequenceEqual(bytes2).ShouldBeTrue(() =>
+                    $"Buffers starting at position {readCount} differ. First:{Environment.NewLine}{string.Join(",", bytes1)}{Environment.NewLine}Second:{Environment.NewLine}{string.Join(",", bytes2)}");
+                readCount += bufferSize;
+            }
+
+            br2.ReadBytes(bufferSize).Length.ShouldBe(0, "Second buffer contains byt after first end");
         }
 
         private static void AssertFilesAreBinaryEqual(string firstPath, string secondPath)
@@ -254,7 +274,7 @@ namespace Microsoft.Build.UnitTests
 
             using FileStream fs1 = first.OpenRead();
             using FileStream fs2 = second.OpenRead();
-            for (int i = 0; i < Math.Min(first.Length,second.Length); i++)
+            for (int i = 0; i < Math.Min(first.Length, second.Length); i++)
             {
                 byte b1 = (byte)fs1.ReadByte();
                 byte b2 = (byte)fs2.ReadByte();
