@@ -272,7 +272,7 @@ namespace Microsoft.Build.Logging
                     default:
                         OnRecoverableReadError?.Invoke(
                             $"BuildEvent record number {recordNumber} (serialized size: {serializedEventLength}) is of unsupported type: {recordKind}.{(SkipUnknownEvents ? " Skipping it." : string.Empty)}");
-                        if (SkipUnknownEvents)
+                        if (SkipUnknownEvents && serializedEventLength > 0)
                         {
                             SkipBytes(serializedEventLength);
                         }

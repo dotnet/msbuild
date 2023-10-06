@@ -199,6 +199,8 @@ namespace Microsoft.Build.Logging
                 eventArgsWriter.EmbedFile += EventArgsWriter_EmbedFile;
             }
 
+            binaryWriter.Write(FileFormatVersion);
+
             if (eventSource is IBinaryLogReplaySource replayEventsSource)
             {
                 if (CollectProjectImports == ProjectImportsCollectionMode.Replay)
@@ -211,7 +213,6 @@ namespace Microsoft.Build.Logging
                 // But other subscribers can later on subscribe to structured events -
                 //  for this reason we do only subscribe delayed.
                 replayEventsSource.DeferredInitialize(
-                    version => binaryWriter.Write(version),
                     // For raw events we cannot write the initial info - as we cannot write
                     //  at the same time as raw events are being written - this would break the deduplicated strings store.
                     () =>
@@ -224,7 +225,6 @@ namespace Microsoft.Build.Logging
             }
             else
             {
-                binaryWriter.Write(FileFormatVersion);
                 SubscribeToStructuredEvents();
             }
 

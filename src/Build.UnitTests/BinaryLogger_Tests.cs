@@ -222,16 +222,12 @@ namespace Microsoft.Build.UnitTests
                 logReader.BuildFinished += (_, _) => { };
             }
 
-            _logFile = @"C:\tmp\trash\console\packed.binlog";
-
             BinaryLogger outputBinlog = new BinaryLogger()
             {
                 Parameters = $"LogFile={replayedLogFile};ProjectImports=Replay;OmitInitialInfo"
             };
             outputBinlog.Initialize(logReader);
             logReader.Replay(_logFile);
-            // TODO: remove here
-            // logReader.Replay(originalBuildEventsReader, CancellationToken.None);
             outputBinlog.Shutdown();
 
             AssertBinlogsHaveEqualContent(_logFile, replayedLogFile);

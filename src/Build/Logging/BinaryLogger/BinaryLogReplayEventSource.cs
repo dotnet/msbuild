@@ -25,11 +25,9 @@ namespace Microsoft.Build.Logging
         /// At this point all other possible subscribers should be already subscribed -
         ///  so it can be determined if raw events or structured events should be replayed.
         /// </summary>
-        /// <param name="onFileFormatVersionRead"></param>
         /// <param name="onRawReadingPossible"></param>
         /// <param name="onStructuredReadingOnly"></param>
         void DeferredInitialize(
-            Action<int> onFileFormatVersionRead,
             Action onRawReadingPossible,
             Action onStructuredReadingOnly);
     }
@@ -195,7 +193,6 @@ namespace Microsoft.Build.Logging
                 _onRawReadingPossible?.Invoke();
             }
 
-            _fileFormatVersionRead?.Invoke(reader.FileFormatVersion);
             reader.EmbeddedContentRead += _embeddedContentRead;
             reader.StringReadDone += _stringReadDone;
 
@@ -237,18 +234,15 @@ namespace Microsoft.Build.Logging
 
         /// <inheritdoc cref="IRawLogEventsSource.DeferredInitialize"/>
         void IRawLogEventsSource.DeferredInitialize(
-            Action<int> onFileFormatVersionRead,
             Action onRawReadingPossible,
             Action onStructuredReadingOnly)
         {
-            this._fileFormatVersionRead += onFileFormatVersionRead;
             this._onRawReadingPossible += onRawReadingPossible;
             this._onStructuredReadingOnly += onStructuredReadingOnly;
         }
 
         private Action? _onRawReadingPossible;
         private Action? _onStructuredReadingOnly;
-        private Action<int>? _fileFormatVersionRead;
         private Action<EmbeddedContentEventArgs>? _embeddedContentRead;
         /// <inheritdoc cref="IEmbeddedContentSource.EmbeddedContentRead"/>
         event Action<EmbeddedContentEventArgs>? IEmbeddedContentSource.EmbeddedContentRead
