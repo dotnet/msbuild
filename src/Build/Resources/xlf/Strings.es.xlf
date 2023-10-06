@@ -264,6 +264,11 @@
         <target state="translated">MSB4273: la caché del proyecto inició una excepción no controlada desde el método {0}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheHandleBuildResultFailed">
+        <source>MSB4269: The project cache failed while handling a build result for the following project: {0}.</source>
+        <target state="translated">MSB4269: error en la caché del proyecto al controlar un resultado de compilación para el siguiente proyecto: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectCacheHitWithDefaultTargets">
         <source>Project cache hit for "{0}" (default targets).</source>
         <target state="translated">Acierto de caché de proyecto para "{0}" (destinos predeterminados).</target>
@@ -368,6 +373,11 @@
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
         <source>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</source>
         <target state="translated">MSB4274: Al deshabilitar el nodo InProc, se degrada el rendimiento cuando use los complementos de caché de proyectos que emiten solicitudes de compilación de proxy.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReportFileAccessesX64Only">
+        <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
+        <target state="translated">Los accesos a archivos de informes solo se admiten actualmente con el tipo x64 de MSBuild.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">

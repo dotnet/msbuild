@@ -92,7 +92,7 @@ namespace Microsoft.Build.Evaluation
         /// Key is the directory of the file importing the usingTask, which is needed
         /// to handle any relative paths in the usingTask.
         /// </summary>
-        private readonly List<Pair<string, ProjectUsingTaskElement>> _usingTaskElements;
+        private readonly List<KeyValuePair<string, ProjectUsingTaskElement>> _usingTaskElements;
 
         /// <summary>
         /// List of ProjectTargetElement's traversing into imports.
@@ -249,7 +249,7 @@ namespace Microsoft.Build.Evaluation
             _data = data;
             _itemGroupElements = new List<ProjectItemGroupElement>();
             _itemDefinitionGroupElements = new List<ProjectItemDefinitionGroupElement>();
-            _usingTaskElements = new List<Pair<string, ProjectUsingTaskElement>>();
+            _usingTaskElements = new List<KeyValuePair<string, ProjectUsingTaskElement>>();
             _targetElements = new List<ProjectTargetElement>();
             _importsSeen = new Dictionary<string, ProjectImportElement>(StringComparer.OrdinalIgnoreCase);
             _initialTargetsList = new List<string>();
@@ -913,7 +913,7 @@ namespace Microsoft.Build.Evaluation
                             EvaluateImportGroupElement(currentProjectOrImport.DirectoryPath, importGroup);
                             break;
                         case ProjectUsingTaskElement usingTask:
-                            _usingTaskElements.Add(new Pair<string, ProjectUsingTaskElement>(currentProjectOrImport.DirectoryPath, usingTask));
+                            _usingTaskElements.Add(new KeyValuePair<string, ProjectUsingTaskElement>(currentProjectOrImport.DirectoryPath, usingTask));
                             break;
                         case ProjectChooseElement choose:
                             EvaluateChooseElement(choose);
