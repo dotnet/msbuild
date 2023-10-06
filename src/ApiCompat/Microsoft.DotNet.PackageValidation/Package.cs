@@ -220,5 +220,37 @@ namespace Microsoft.DotNet.PackageValidation
                 new ReadOnlyCollection<ContentItem>(items) :
                 null;
         }
+
+        /// <summary>
+        /// Finds the best assembly references for a specific framework.
+        /// </summary>
+        /// <param name="framework">The framework where the package needs to be installed.</param>
+        /// <returns>The assembly references for the specified framework.</returns>
+        public IEnumerable<string>? FindBestAssemblyReferencesForFramework(NuGetFramework framework)
+        {
+            if (AssemblyReferences is null)
+                return null;
+
+            // Fast path: return for direct matches
+            if (AssemblyReferences.TryGetValue(framework, out IEnumerable<string>? references))
+            {
+                return references;
+            }
+
+            // Search for the nearest newer assembly references framework.
+            Queue<NuGetFramework> tfmQueue = new(AssemblyReferences.Keys);
+            while (tfmQueue.Count > 0)
+            {
+                NuGetFramework assemblyReferencesFramework = tfmQueue.Dequeue();
+
+                NuGetFramework? bestAssemblyReferencesFramework = NuGetFrameworkUtility.GetNearest(tfmQueue.Concat(new NuGetFramework[] { framework }), assemblyReferencesFramework, (key) => key);
+                if (bestAssemblyReferencesFramework == framework)
+                {
+                    return AssemblyReferences[assemblyReferencesFramework];
+                }
+            }
+
+            return null;
+        }
     }
 }

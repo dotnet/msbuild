@@ -78,17 +78,22 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
                 // - DiagnosticId, Target, IsBaselineSuppression
                 Suppression globalTargetSuppression = new(error.DiagnosticId, error.Target, isBaselineSuppression: error.IsBaselineSuppression);
 
+                // - Left, Right, IsBaselineSuppression
+                Suppression globalLeftRightSuppression = new(string.Empty, left: error.Left, right: error.Right, isBaselineSuppression: error.IsBaselineSuppression);
+
                 // - DiagnosticId, Left, Right, IsBaselineSuppression
-                Suppression globalLeftRightSuppression = new(error.DiagnosticId, left: error.Left, right: error.Right, isBaselineSuppression: error.IsBaselineSuppression);
+                Suppression globalDiagnosticIdLeftRightSuppression = new(error.DiagnosticId, left: error.Left, right: error.Right, isBaselineSuppression: error.IsBaselineSuppression);
 
                 if (_suppressions.Contains(globalTargetSuppression) ||
-                    _suppressions.Contains(globalLeftRightSuppression))
+                    _suppressions.Contains(globalLeftRightSuppression) ||
+                    _suppressions.Contains(globalDiagnosticIdLeftRightSuppression))
                 {
                     return true;
                 }
 
                 if (_baselineSuppressions.TryGetValue(globalTargetSuppression, out Suppression? globalSuppression) ||
-                    _baselineSuppressions.TryGetValue(globalLeftRightSuppression, out globalSuppression))
+                    _baselineSuppressions.TryGetValue(globalLeftRightSuppression, out globalSuppression) ||
+                    _baselineSuppressions.TryGetValue(globalDiagnosticIdLeftRightSuppression, out globalSuppression))
                 {
                     AddSuppression(globalSuppression);
                     return true;

@@ -57,8 +57,16 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
         /// the property won't be serialized to keep the baseline file minimal. The method's name is important as
         /// XmlSerializer will look for methods called ShouldSerializeX to determine if properties should be serialized.
         /// </summary>
-        /// <returns>Returns true if IsBaselineSuppression should be serialized</returns>
+        /// <returns>Returns true when IsBaselineSuppression should be serialized.</returns>
         public bool ShouldSerializeIsBaselineSuppression() => IsBaselineSuppression;
+
+        /// <summary>
+        /// Only serialize the DiagnosticId property when it is not empty. This can happen when a global suppression
+        /// without a diagnostic id was manually added to the suppression file. The method's name is important as
+        /// XmlSerializer will look for methods called ShouldSerializeX to determine if properties should be serialized.
+        /// </summary>
+        /// <returns>Returns true when DiagnosticId should be serialized.</returns>
+        public bool ShouldSerializeDiagnosticId() => DiagnosticId != string.Empty;
 
         /// <inheritdoc/>
         public override bool Equals(object? obj) => Equals(obj as Suppression);

@@ -33,12 +33,17 @@ namespace Microsoft.DotNet.PackageValidation
                 return;
             }
 
-            MetadataInformation[] right = new MetadataInformation[rightContentItems.Count];
-            for (int rightIndex = 0; rightIndex < rightContentItems.Count; rightIndex++)
+            // If a right hand side package is provided in addition to the left side, package validation runs in baseline comparison mode.
+            // The assumption stands that the right hand side is "current" and has more information than the left, i.e. assembly references.
+            // If the left package doesn't provide assembly references, fallback to the references from the right side if the TFMs are compatible.
+            IEnumerable<string>? fallbackAssemblyReferences = null;
+            if (rightPackage is not null && leftPackage.AssemblyReferences is null)
             {
-                right[rightIndex] = GetMetadataInformation(log,
-                    rightPackage ?? leftPackage,
-                    rightContentItems[rightIndex]);
+                // Retrieve the left TFM and try to find the best assembly references from the right hand side package.
+                if (leftContentItems[0].Properties.TryGetValue("tfm", out object? tfmObj) && tfmObj is NuGetFramework leftTargetFramework)
+                {
+                    fallbackAssemblyReferences = rightPackage.FindBestAssemblyReferencesForFramework(leftTargetFramework);
+                }
             }
 
             MetadataInformation[] left = new MetadataInformation[leftContentItems.Count];
@@ -48,8 +53,15 @@ namespace Microsoft.DotNet.PackageValidation
                     leftPackage,
                     leftContentItems[leftIndex],
                     displayString: options.IsBaselineComparison ? Resources.Baseline + " " + leftContentItems[leftIndex].Path : null,
-                    // Use the assembly references from the right package if the left package doesn't provide them.
-                    assemblyReferences: leftPackage.AssemblyReferences is null && rightPackage is not null ? right[0].References : null);
+                    assemblyReferences: fallbackAssemblyReferences);
+            }
+
+            MetadataInformation[] right = new MetadataInformation[rightContentItems.Count];
+            for (int rightIndex = 0; rightIndex < rightContentItems.Count; rightIndex++)
+            {
+                right[rightIndex] = GetMetadataInformation(log,
+                    rightPackage ?? leftPackage,
+                    rightContentItems[rightIndex]);
             }
 
             apiCompatRunner.EnqueueWorkItem(new ApiCompatRunnerWorkItem(left, options, right));
@@ -63,19 +75,21 @@ namespace Microsoft.DotNet.PackageValidation
         {
             displayString ??= item.Path;
 
-            if (package.AssemblyReferences is not null && package.AssemblyReferences.Count > 0 && item.Properties.TryGetValue("tfm", out object? tfmObj))
+            // Don't pass assembly references to the work item if the TFM can't be retrieved.
+            if (item.Properties.TryGetValue("tfm", out object? tfmObj) && tfmObj is NuGetFramework nuGetFramework)
             {
-                // Retrieve the content item's target framework
-                NuGetFramework nuGetFramework = (NuGetFramework)tfmObj;
-
-                // See if the package's assembly reference entries have the same target framework.
-                if (!package.AssemblyReferences.TryGetValue(nuGetFramework, out assemblyReferences))
+                // If assembly references are provided for the package, use those.
+                if (package.AssemblyReferences is not null && package.AssemblyReferences.Count > 0)
                 {
-                    log.LogWarning(new Suppression(DiagnosticIds.SearchDirectoriesNotFoundForTfm) { Target = displayString },
-                        DiagnosticIds.SearchDirectoriesNotFoundForTfm,
-                        string.Format(Resources.MissingSearchDirectory,
-                            nuGetFramework.GetShortFolderName(),
-                            displayString));
+                    // See if the package's assembly reference entries have the same target framework.
+                    if (!package.AssemblyReferences.TryGetValue(nuGetFramework, out assemblyReferences))
+                    {
+                        log.LogWarning(new Suppression(DiagnosticIds.SearchDirectoriesNotFoundForTfm) { Target = displayString },
+                            DiagnosticIds.SearchDirectoriesNotFoundForTfm,
+                            string.Format(Resources.MissingSearchDirectory,
+                                nuGetFramework.GetShortFolderName(),
+                                displayString));
+                    }
                 }
             }
 
