@@ -31,11 +31,12 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// The number of built-in metadata for items.
         /// </summary>
         public const int BuiltInMetadataCount = 15;
-        private DummyMappedDrive _mappedDrive = null;
+        private Lazy<DummyMappedDrive> _mappedDrive = DummyMappedDriveUtils.GetLazyDummyMappedDrive();
+
 
         public void Dispose()
         {
-            _mappedDrive?.Dispose();
+            _mappedDrive.Value?.Dispose();
         }
 
         internal const string TargetItemWithInclude = @"
@@ -1027,10 +1028,9 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             @"%DRIVE%:")]
         public void LogWindowsWarningUponBuildingProjectWithDriveEnumeration(string content, string include, string exclude = null, string property = null, string propertyValue = null)
         {
-             _mappedDrive = DummyMappedDriveUtils.GetDummyMappedDrive(_mappedDrive);
-            include = DummyMappedDriveUtils.UpdatePathToMappedDrive(include, _mappedDrive.MappedDriveLetter);
-            exclude = DummyMappedDriveUtils.UpdatePathToMappedDrive(exclude, _mappedDrive.MappedDriveLetter);
-            propertyValue = DummyMappedDriveUtils.UpdatePathToMappedDrive(propertyValue, _mappedDrive.MappedDriveLetter);
+            include = DummyMappedDriveUtils.UpdatePathToMappedDrive(include, _mappedDrive.Value.MappedDriveLetter);
+            exclude = DummyMappedDriveUtils.UpdatePathToMappedDrive(exclude, _mappedDrive.Value.MappedDriveLetter);
+            propertyValue = DummyMappedDriveUtils.UpdatePathToMappedDrive(propertyValue, _mappedDrive.Value.MappedDriveLetter);
             content = (string.IsNullOrEmpty(property) && string.IsNullOrEmpty(propertyValue)) ?
                 string.Format(content, include, exclude) :
                 string.Format(content, property, propertyValue, include);

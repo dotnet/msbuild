@@ -57,7 +57,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ";
 
         protected readonly TestEnvironment _env;
-        private DummyMappedDrive _mappedDrive = null;
+        private Lazy<DummyMappedDrive> _mappedDrive = DummyMappedDriveUtils.GetLazyDummyMappedDrive();
 
         public ProjectItem_Tests()
         {
@@ -67,7 +67,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void Dispose()
         {
             _env.Dispose();
-            _mappedDrive?.Dispose();
+            _mappedDrive.Value?.Dispose();
         }
 
         /// <summary>
@@ -804,8 +804,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [InlineData(@"%DRIVE%:\**\*.cs")]
         public void ProjectGetterResultsInWindowsDriveEnumerationWarning(string unevaluatedInclude)
         {
-            _mappedDrive = DummyMappedDriveUtils.GetDummyMappedDrive(_mappedDrive);
-            unevaluatedInclude = DummyMappedDriveUtils.UpdatePathToMappedDrive(unevaluatedInclude, _mappedDrive.MappedDriveLetter);
+            unevaluatedInclude = DummyMappedDriveUtils.UpdatePathToMappedDrive(unevaluatedInclude, _mappedDrive.Value.MappedDriveLetter);
             ProjectGetterResultsInDriveEnumerationWarning(unevaluatedInclude);
         }
 
@@ -898,9 +897,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             @"%DRIVE%:\$(Microsoft_WindowsAzure_EngSys)**")]
         public void LogWindowsWarningUponProjectInstanceCreationFromDriveEnumeratingContent(string content, string placeHolder, string excludePlaceHolder = null)
         {
-            _mappedDrive = DummyMappedDriveUtils.GetDummyMappedDrive(_mappedDrive);
-            placeHolder = DummyMappedDriveUtils.UpdatePathToMappedDrive(placeHolder, _mappedDrive.MappedDriveLetter);
-            excludePlaceHolder = DummyMappedDriveUtils.UpdatePathToMappedDrive(excludePlaceHolder, _mappedDrive.MappedDriveLetter);
+            placeHolder = DummyMappedDriveUtils.UpdatePathToMappedDrive(placeHolder, _mappedDrive.Value.MappedDriveLetter);
+            excludePlaceHolder = DummyMappedDriveUtils.UpdatePathToMappedDrive(excludePlaceHolder, _mappedDrive.Value.MappedDriveLetter);
             content = string.Format(content, placeHolder, excludePlaceHolder);
             CleanContentsAndCreateProjectInstanceFromFileWithDriveEnumeratingWildcard(content, false);
         }

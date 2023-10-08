@@ -8,17 +8,8 @@ using Microsoft.Build.UnitTests.Shared;
 
 namespace Microsoft.Build.UnitTests.Shared;
 
-public static class DummyMappedDriveUtils
+internal static class DummyMappedDriveUtils
 {
-    public static DummyMappedDrive GetDummyMappedDrive(DummyMappedDrive mappedDrive)
-    {
-        if (NativeMethods.IsWindows)
-        {
-            mappedDrive ??= new DummyMappedDrive();
-        }
-
-        return mappedDrive;
-    }
     public static string UpdatePathToMappedDrive(string path, char driveLetter)
     {
         const string drivePlaceholder = "%DRIVE%";
@@ -29,4 +20,9 @@ public static class DummyMappedDriveUtils
         }
         return path;
     }
+
+    public static Lazy<DummyMappedDrive?> GetLazyDummyMappedDrive() => new Lazy<DummyMappedDrive?>(() =>
+        {
+            return NativeMethods.IsWindows ? new DummyMappedDrive() : default;
+        });
 }

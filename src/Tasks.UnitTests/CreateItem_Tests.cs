@@ -34,11 +34,11 @@ namespace Microsoft.Build.UnitTests
             ";
 
         private readonly ITestOutputHelper _testOutput;
-        private DummyMappedDrive _mappedDrive = null;
+        private Lazy<DummyMappedDrive> _mappedDrive = DummyMappedDriveUtils.GetLazyDummyMappedDrive();
 
         public void Dispose()
         {
-            _mappedDrive?.Dispose();
+            _mappedDrive.Value?.Dispose();
         }
 
         public CreateItem_Tests(ITestOutputHelper output)
@@ -327,8 +327,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData(@"%DRIVE%:\\\\**\*.log")]
         public void LogWindowsWarningUponCreateItemExecution(string itemSpec)
         {
-            _mappedDrive = DummyMappedDriveUtils.GetDummyMappedDrive(_mappedDrive);
-            itemSpec = DummyMappedDriveUtils.UpdatePathToMappedDrive(itemSpec, _mappedDrive.MappedDriveLetter);
+            itemSpec = DummyMappedDriveUtils.UpdatePathToMappedDrive(itemSpec, _mappedDrive.Value.MappedDriveLetter);
             VerifyDriveEnumerationWarningLoggedUponCreateItemExecution(itemSpec);
         }
 
@@ -414,8 +413,7 @@ namespace Microsoft.Build.UnitTests
             @"%DRIVE%:$(empty)\**\*.cs")]
         public void LogWindowsWarningUponItemCreationWithDriveEnumeration(string content, string include)
         {
-            _mappedDrive = DummyMappedDriveUtils.GetDummyMappedDrive(_mappedDrive);
-            include = DummyMappedDriveUtils.UpdatePathToMappedDrive(include, _mappedDrive.MappedDriveLetter);
+            include = DummyMappedDriveUtils.UpdatePathToMappedDrive(include, _mappedDrive.Value.MappedDriveLetter);
             content = string.Format(content, include);
             Helpers.CleanContentsAndBuildTargetWithDriveEnumeratingWildcard(
                 content,

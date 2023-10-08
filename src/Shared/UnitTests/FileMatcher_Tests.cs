@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests
     public class FileMatcherTest : IDisposable
     {
         private readonly TestEnvironment _env;
-        private DummyMappedDrive _mappedDrive = null;
+        private Lazy<DummyMappedDrive> _mappedDrive = DummyMappedDriveUtils.GetLazyDummyMappedDrive();
 
         public FileMatcherTest(ITestOutputHelper output)
         {
@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests
         public void Dispose()
         {
             _env.Dispose();
-            _mappedDrive?.Dispose();
+            _mappedDrive.Value?.Dispose();
         }
 
         [Theory]
@@ -1391,8 +1391,7 @@ namespace Microsoft.Build.UnitTests
             {
                 try
                 {
-                    _mappedDrive = DummyMappedDriveUtils.GetDummyMappedDrive(_mappedDrive);
-                    driveEnumeratingWildcard = DummyMappedDriveUtils.UpdatePathToMappedDrive(driveEnumeratingWildcard, _mappedDrive.MappedDriveLetter);
+                    driveEnumeratingWildcard = DummyMappedDriveUtils.UpdatePathToMappedDrive(driveEnumeratingWildcard, _mappedDrive.Value.MappedDriveLetter);
 
                     // Set env var to log on drive enumerating wildcard detection
                     Helpers.ResetStateForDriveEnumeratingWildcardTests(env, "0");
