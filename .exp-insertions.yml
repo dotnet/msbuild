@@ -152,22 +152,31 @@ jobs:
       Write-Host "MSBuild Drop Path directory: $MSBuildDropPath"
     displayName: Get Retail MSBuild Drop Path
 
+  - task: NuGetToolInstaller@0
+    inputs:
+      versionSpec: '4.9.2'
+
+  - task: NuGetCommand@2
+    displayName: Restore internal tools
+    inputs:
+      command: restore
+      feedsToUse: config
+      restoreSolution: '$(Build.SourcesDirectory)\DotNet-msbuild-Trusted\eng\common\internal\Tools.csproj'
+      nugetConfigPath: 'NuGet.config'
+      restoreDirectory: '$(Build.SourcesDirectory)\DotNet-msbuild-Trusted\.packages'
+
   - powershell: |
       mkdir "$(Pipeline.Workspace)/artifacts"
       
-      $ToolsFolder = "$(Pipeline.Workspace)/tools"
-      mkdir "$ToolsFolder"
-      $DropZipFile = "$ToolsFolder/drop.zip"
-      $DropExePath = "$ToolsFolder/drop/lib/net45/drop.exe"
-      
-      Write-Host "Downloading drop.exe"
-      $webClient = New-Object 'System.Net.WebClient'
-      $webClient.Downloadfile("$(_DropExeUri)", $DropZipFile)
-      Expand-Archive -LiteralPath $DropZipFile -DestinationPath "$ToolsFolder/drop" -Force
-      Write-Host "Download of drop.exe finished"
-      
+      $dropAppDirectory = Get-ChildItem -Directory -Path "$(Build.SourcesDirectory)/DotNet-msbuild-Trusted/.packages/drop.app"
+      $dropAppVersion = $dropAppDirectory.Name
+      Write-Host "Detected dotnet version: $dropAppVersion"
+
+      $dropExePath = "$dropAppDirectory/$dropAppVersion/lib/net45/drop.exe"
+      Write-Host "Detected drop.exe version: $dropExePath"
+
       Write-Host "Downloading VS msbuild"
-      & "$DropExePath" get --patAuthEnvVar 'cloudbuild-token' -u "$(MSBuildDropPath)\$(VSVersion)" -d "$(System.ArtifactsDirectory)/VSMSBuildDrop"
+      & "$dropExePath" get --patAuthEnvVar 'cloudbuild-token' -u "$(MSBuildDropPath)\$(VSVersion)" -d "$(System.ArtifactsDirectory)/VSMSBuildDrop"
       Write-Host "Download of VS msbuild finished"
 
       Write-Host "Copying VS msbuild to $(Pipeline.Workspace)/VSMSBuild"
