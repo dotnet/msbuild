@@ -1,8 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#if FEATURE_APPDOMAIN
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -50,6 +48,8 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
+#if FEATURE_APPDOMAIN
+
             var assembliesMetadata = new List<ITaskItem>();
             foreach (string assemblyPath in AssembyPaths)
             {
@@ -63,7 +63,7 @@ namespace Microsoft.Build.Tasks
             }
 
             _assembliesMetadata = assembliesMetadata.ToArray();
-
+#endif
             return true;
         }
 
@@ -125,4 +125,3 @@ namespace Microsoft.Build.Tasks
         }
     }
 }
-#endif
