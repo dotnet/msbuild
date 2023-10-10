@@ -14,12 +14,12 @@
 
   <!-- SDK's task infrastructure -->
   <ItemGroup>
-    <Compile Include="..\..\Tasks\Common\TaskBase.cs" LinkBase="Common" />
-    <Compile Include="..\..\Tasks\Common\Logger.cs" LinkBase="Common" />
-    <Compile Include="..\..\Tasks\Common\LogAdapter.cs" LinkBase="Common" />
-    <Compile Include="..\..\Tasks\Common\BuildErrorException.cs" LinkBase="Common" />
-    <Compile Include="..\..\Tasks\Common\Message.cs" LinkBase="Common" />
-    <Compile Include="..\..\Tasks\Common\MessageLevel.cs" LinkBase="Common" />
+    <Compile Include="$(RepoRoot)src\Tasks\Common\TaskBase.cs" LinkBase="Common" />
+    <Compile Include="$(RepoRoot)src\Tasks\Common\Logger.cs" LinkBase="Common" />
+    <Compile Include="$(RepoRoot)src\Tasks\Common\LogAdapter.cs" LinkBase="Common" />
+    <Compile Include="$(RepoRoot)src\Tasks\Common\BuildErrorException.cs" LinkBase="Common" />
+    <Compile Include="$(RepoRoot)src\Tasks\Common\Message.cs" LinkBase="Common" />
+    <Compile Include="$(RepoRoot)src\Tasks\Common\MessageLevel.cs" LinkBase="Common" />
   </ItemGroup>
 
   <!-- Include MSBuild logger -->
@@ -42,8 +42,8 @@
 
   <ItemGroup>
     <None Include="**\*.props;**\*.targets" Pack="true" PackagePath="%(RecursiveDir)%(Filename)%(Extension)" />
-    <None Include="..\..\Tasks\Microsoft.NET.Build.Tasks\targets\Microsoft.NET.ApiCompat.Common.targets" Pack="true" Link="build/Microsoft.NET.ApiCompat.Common.targets" PackagePath="build/%(Filename)%(Extension)" />
-    <None Include="..\..\Tasks\Microsoft.NET.Build.Tasks\targets\Microsoft.NET.ApiCompat.ValidatePackage.targets" Pack="true" Link="build/Microsoft.NET.ApiCompat.ValidatePackage.targets" PackagePath="build/%(Filename)%(Extension)" />
+    <None Include="$(RepoRoot)src\Tasks\Microsoft.NET.Build.Tasks\targets\Microsoft.NET.ApiCompat.Common.targets" Pack="true" Link="build/Microsoft.NET.ApiCompat.Common.targets" PackagePath="build/%(Filename)%(Extension)" />
+    <None Include="$(RepoRoot)src\Tasks\Microsoft.NET.Build.Tasks\targets\Microsoft.NET.ApiCompat.ValidatePackage.targets" Pack="true" Link="build/Microsoft.NET.ApiCompat.ValidatePackage.targets" PackagePath="build/%(Filename)%(Extension)" />
   </ItemGroup>
 
   <Target Name="_AddBuildOutputToPackageCore" DependsOnTargets="Publish" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">

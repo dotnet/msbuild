@@ -2,8 +2,7 @@
 <Project>
   <PropertyGroup>
     <DotNetApiCompatTaskAssembly Condition="'$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)..\tools\net472\Microsoft.DotNet.ApiCompat.Task.dll</DotNetApiCompatTaskAssembly>
-    <DotNetApiCompatTaskAssembly Condition="'$(MSBuildRuntimeType)' == 'Core' and Exists('$(MSBuildThisFileDirectory)..\tools\net8.0\Microsoft.DotNet.ApiCompat.Task.dll')">$(MSBuildThisFileDirectory)..\tools\net8.0\Microsoft.DotNet.ApiCompat.Task.dll</DotNetApiCompatTaskAssembly>
-    <DotNetApiCompatTaskAssembly Condition="'$(MSBuildRuntimeType)' == 'Core' and '$(DotNetApiCompatTaskAssembly)' == ''">$(MSBuildThisFileDirectory)..\tools\net6.0\Microsoft.DotNet.ApiCompat.Task.dll</DotNetApiCompatTaskAssembly>
+    <DotNetApiCompatTaskAssembly Condition="'$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)..\tools\net8.0\Microsoft.DotNet.ApiCompat.Task.dll</DotNetApiCompatTaskAssembly>
     <UseApiCompatPackage>true</UseApiCompatPackage>
     <!-- TODO: Remove when the consumers of this package upgraded to a newer SDK with this change. -->
     <UseCompatibilityPackage>true</UseCompatibilityPackage>

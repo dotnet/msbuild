@@ -75,18 +75,17 @@
 /src/BuiltInTools/*   @tmat @arkalyanms @dotnet/roslyn-ide
 /src/BuiltInTools/BrowserRefresh   @dotnet/aspnet-blazor-eng
 
-# Compatibility tools (APICompat & GenAPI) owned by runtime team
-/src/Microsoft.DotNet.ApiSymbolExtensions/ @dotnet/area-infrastructure-libraries @andriipatsula
-
-# Area-ApiCompat
-/src/ApiCompat/ @dotnet/area-infrastructure-libraries
+# Compatibility tools owned by runtime team
+/src/Compatibility/ @dotnet/area-infrastructure-libraries
 /src/Tests/Microsoft.DotNet.ApiCompatibility*/ @dotnet/area-infrastructure-libraries
 /src/Tests/Microsoft.DotNet.ApiCompat*/ @dotnet/area-infrastructure-libraries
 /src/Tests/Microsoft.DotNet.PackageValidation*/ @dotnet/area-infrastructure-libraries
 
 # Area-GenAPI
-/src/GenAPI/ @dotnet/area-infrastructure-libraries @andriipatsula
+/src/Compatibility/GenAPI/ @dotnet/area-infrastructure-libraries @andriipatsula
+/src/Compatibility/Microsoft.DotNet.ApiSymbolExtensions/ @dotnet/area-infrastructure-libraries @andriipatsula
 /src/Tests/Microsoft.DotNet.GenAPI/ @dotnet/area-infrastructure-libraries @andriipatsula
+/src/Tests/Microsoft.DotNet.ApiSymbolExtensions.Tests/
 
 # Area: dotnet containers
 /src/Cli/Containers @dotnet/sdk-container-builds-maintainers

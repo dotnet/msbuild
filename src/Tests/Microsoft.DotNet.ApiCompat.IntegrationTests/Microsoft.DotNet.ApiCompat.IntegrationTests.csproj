@@ -11,19 +11,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="..\..\ApiCompat\Microsoft.DotNet.PackageValidation\Resources.resx" GenerateSource="true" />
+    <EmbeddedResource Include="$(RepoRoot)src\Compatibility\ApiCompat\Microsoft.DotNet.PackageValidation\Resources.resx" GenerateSource="true" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ApiCompat\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" />
-    <ProjectReference Include="..\..\ApiCompat\Microsoft.DotNet.ApiCompat.Task\Microsoft.DotNet.ApiCompat.Task.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="$(RepoRoot)src\Compatibility\ApiCompat\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\Compatibility\ApiCompat\Microsoft.DotNet.ApiCompat.Task\Microsoft.DotNet.ApiCompat.Task.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
   </ItemGroup>
 
   <Target Name="CopyApiCompatFilesForTests" AfterTargets="Publish">
     <ItemGroup>
-      <ApiCompatFile Include="..\..\ApiCompat\Microsoft.DotNet.ApiCompat.Task\**" />
+      <ApiCompatFile Include="$(RepoRoot)src\Compatibility\ApiCompat\Microsoft.DotNet.ApiCompat.Task\**" />
       <ApiCompatFile Include="..\..\Tasks\Microsoft.NET.Build.Tasks\targets\Microsoft.NET.ApiCompat.targets" />
     </ItemGroup>
     <Copy SourceFiles="@(ApiCompatFile)" DestinationFiles="@(ApiCompatFile->'$(PublishDir)ApiCompat\Microsoft.DotNet.ApiCompat.Task\%(RecursiveDir)%(Filename)%(Extension)')" />

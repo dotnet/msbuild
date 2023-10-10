@@ -1,16 +1,16 @@
 {
   "solution": {
-    "path": "..\\..\\sdk.sln",
+    "path": "..\\..\\..\\sdk.sln",
     "projects": [
-      "src\\ApiCompat\\Microsoft.DotNet.ApiCompat.Shared\\Microsoft.DotNet.ApiCompat.Shared.shproj",
-      "src\\ApiCompat\\Microsoft.DotNet.ApiCompat.Task\\Microsoft.DotNet.ApiCompat.Task.csproj",
-      "src\\ApiCompat\\Microsoft.DotNet.ApiCompat.Tool\\Microsoft.DotNet.ApiCompat.Tool.csproj",
-      "src\\ApiCompat\\Microsoft.DotNet.ApiCompatibility\\Microsoft.DotNet.ApiCompatibility.csproj",
-      "src\\ApiCompat\\Microsoft.DotNet.PackageValidation\\Microsoft.DotNet.PackageValidation.csproj",
       "src\\Cli\\Microsoft.DotNet.Cli.Utils\\Microsoft.DotNet.Cli.Utils.csproj",
       "src\\Cli\\Microsoft.DotNet.InternalAbstractions\\Microsoft.DotNet.InternalAbstractions.csproj",
+      "src\\Compatibility\\ApiCompat\\Microsoft.DotNet.ApiCompat.Shared\\Microsoft.DotNet.ApiCompat.Shared.shproj",
+      "src\\Compatibility\\ApiCompat\\Microsoft.DotNet.ApiCompat.Task\\Microsoft.DotNet.ApiCompat.Task.csproj",
+      "src\\Compatibility\\ApiCompat\\Microsoft.DotNet.ApiCompat.Tool\\Microsoft.DotNet.ApiCompat.Tool.csproj",
+      "src\\Compatibility\\ApiCompat\\Microsoft.DotNet.ApiCompatibility\\Microsoft.DotNet.ApiCompatibility.csproj",
+      "src\\Compatibility\\ApiCompat\\Microsoft.DotNet.PackageValidation\\Microsoft.DotNet.PackageValidation.csproj",
+      "src\\Compatibility\\Microsoft.DotNet.ApiSymbolExtensions\\Microsoft.DotNet.ApiSymbolExtensions.csproj",
       "src\\Layout\\toolset-tasks\\toolset-tasks.csproj",
-      "src\\Microsoft.DotNet.ApiSymbolExtensions\\Microsoft.DotNet.ApiSymbolExtensions.csproj",
       "src\\Tests\\Microsoft.DotNet.ApiCompat.IntegrationTests\\Microsoft.DotNet.ApiCompat.IntegrationTests.csproj",
       "src\\Tests\\Microsoft.DotNet.ApiCompat.Tests\\Microsoft.DotNet.ApiCompat.Tests.csproj",
       "src\\Tests\\Microsoft.DotNet.ApiCompatibility.Tests\\Microsoft.DotNet.ApiCompatibility.Tests.csproj",

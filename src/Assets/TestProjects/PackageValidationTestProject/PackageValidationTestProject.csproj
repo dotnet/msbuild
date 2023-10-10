@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
     <DefineConstants Condition="'$(ForceValidationProblem)' == 'true'">$(DefineConstants);ForceValidationProblem</DefineConstants>
     <DefineConstants Condition="'$(ForceStrictModeBaselineValidationProblem)' == 'true'">$(DefineConstants);ForceStrictModeBaselineValidationProblem</DefineConstants>
     <DefineConstants Condition="'$(AddBreakingChange)' == 'true'">$(DefineConstants);AddBreakingChange</DefineConstants>
@@ -10,18 +10,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildProjectDirectory)\..\..\..\..\src\ApiCompat\Microsoft.DotNet.ApiCompat.Task\Microsoft.DotNet.ApiCompat.Task.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\Compatibility\ApiCompat\Microsoft.DotNet.ApiCompat.Task\Microsoft.DotNet.ApiCompat.Task.csproj" />
     <PackageReference Include="NuGet.Frameworks" Version="6.0.0-preview.1.66" />
     <PackageReference Include="NuGet.Packaging" Version="6.0.0-preview.1.66" />
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.0.0-1.21277.15" />
   </ItemGroup>
 
-  <Import Project="$(MSBuildProjectDirectory)\..\..\..\..\src\Tasks\Microsoft.NET.Build.Tasks\targets\Microsoft.NET.ApiCompat.targets" />
+  <Import Project="$(RepoRoot)src\Tasks\Microsoft.NET.Build.Tasks\targets\Microsoft.NET.ApiCompat.targets" />
 
   <PropertyGroup>
     <DotNetPackageValidationTaskAssembly Condition="'$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)\bin\$(Configuration)\net472\Microsoft.DotNet.ApiCompat.Task.dll</DotNetPackageValidationTaskAssembly>
-    <DotNetPackageValidationTaskAssembly Condition="'$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)\bin\$(Configuration)\net6.0\Microsoft.DotNet.ApiCompat.Task.dll</DotNetPackageValidationTaskAssembly>
+    <DotNetPackageValidationTaskAssembly Condition="'$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)\bin\$(Configuration)\net8.0\Microsoft.DotNet.ApiCompat.Task.dll</DotNetPackageValidationTaskAssembly>
   </PropertyGroup>
 
 </Project>

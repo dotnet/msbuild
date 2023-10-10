@@ -1,0 +1,24 @@
+{
+  "solution": {
+    "path": "..\\..\\sdk.sln",
+    "projects": [
+      "src\\Cli\\Microsoft.DotNet.Cli.Utils\\Microsoft.DotNet.Cli.Utils.csproj",
+      "src\\Cli\\Microsoft.DotNet.InternalAbstractions\\Microsoft.DotNet.InternalAbstractions.csproj",
+      "src\\Compatibility\\ApiCompat\\Microsoft.DotNet.ApiCompat.Shared\\Microsoft.DotNet.ApiCompat.Shared.shproj",
+      "src\\Compatibility\\ApiCompat\\Microsoft.DotNet.ApiCompat.Task\\Microsoft.DotNet.ApiCompat.Task.csproj",
+      "src\\Compatibility\\ApiCompat\\Microsoft.DotNet.ApiCompat.Tool\\Microsoft.DotNet.ApiCompat.Tool.csproj",
+      "src\\Compatibility\\ApiCompat\\Microsoft.DotNet.ApiCompatibility\\Microsoft.DotNet.ApiCompatibility.csproj",
+      "src\\Compatibility\\ApiCompat\\Microsoft.DotNet.PackageValidation\\Microsoft.DotNet.PackageValidation.csproj",
+      "src\\Compatibility\\GenAPI\\Microsoft.DotNet.GenAPI.Task\\Microsoft.DotNet.GenAPI.Task.csproj",
+      "src\\Compatibility\\GenAPI\\Microsoft.DotNet.GenAPI.Tool\\Microsoft.DotNet.GenAPI.Tool.csproj",
+      "src\\Compatibility\\GenAPI\\Microsoft.DotNet.GenAPI\\Microsoft.DotNet.GenAPI.csproj",
+      "src\\Compatibility\\Microsoft.DotNet.ApiSymbolExtensions\\Microsoft.DotNet.ApiSymbolExtensions.csproj",
+      "src\\Tests\\Microsoft.DotNet.ApiCompat.IntegrationTests\\Microsoft.DotNet.ApiCompat.IntegrationTests.csproj",
+      "src\\Tests\\Microsoft.DotNet.ApiCompat.Tests\\Microsoft.DotNet.ApiCompat.Tests.csproj",
+      "src\\Tests\\Microsoft.DotNet.ApiCompatibility.Tests\\Microsoft.DotNet.ApiCompatibility.Tests.csproj",
+      "src\\Tests\\Microsoft.DotNet.ApiSymbolExtensions.Tests\\Microsoft.DotNet.ApiSymbolExtensions.Tests.csproj",
+      "src\\Tests\\Microsoft.DotNet.GenAPI.Tests\\Microsoft.DotNet.GenAPI.Tests.csproj",
+      "src\\Tests\\Microsoft.NET.TestFramework\\Microsoft.NET.TestFramework.csproj"
+    ]
+  }
+}

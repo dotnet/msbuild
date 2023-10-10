@@ -1,5 +1,0 @@
-<Project>
-
-  <Import Project="..\Compatibility\Directory.Build.props" />
-
-</Project>

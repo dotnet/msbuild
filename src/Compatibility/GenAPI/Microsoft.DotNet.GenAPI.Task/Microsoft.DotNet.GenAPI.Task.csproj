@@ -13,12 +13,12 @@
 
   <!-- SDK's task infrastructure -->
   <ItemGroup>
-    <Compile Include="..\..\Tasks\Common\TaskBase.cs" LinkBase="Common" />
-    <Compile Include="..\..\Tasks\Common\Logger.cs" LinkBase="Common" />
-    <Compile Include="..\..\Tasks\Common\LogAdapter.cs" LinkBase="Common" />
-    <Compile Include="..\..\Tasks\Common\BuildErrorException.cs" LinkBase="Common" />
-    <Compile Include="..\..\Tasks\Common\Message.cs" LinkBase="Common" />
-    <Compile Include="..\..\Tasks\Common\MessageLevel.cs" LinkBase="Common" />
+    <Compile Include="$(RepoRoot)src\Tasks\Common\TaskBase.cs" LinkBase="Common" />
+    <Compile Include="$(RepoRoot)src\Tasks\Common\Logger.cs" LinkBase="Common" />
+    <Compile Include="$(RepoRoot)src\Tasks\Common\LogAdapter.cs" LinkBase="Common" />
+    <Compile Include="$(RepoRoot)src\Tasks\Common\BuildErrorException.cs" LinkBase="Common" />
+    <Compile Include="$(RepoRoot)src\Tasks\Common\Message.cs" LinkBase="Common" />
+    <Compile Include="$(RepoRoot)src\Tasks\Common\MessageLevel.cs" LinkBase="Common" />
   </ItemGroup>
 
   <!-- Include MSBuild logger -->
