@@ -409,7 +409,6 @@ dotnet_diagnostic.IDE0290.severity = suggestion
 dotnet_diagnostic.IDE0300.severity = suggestion
 dotnet_diagnostic.IDE0301.severity = suggestion
 
-
 # https://github.com/xunit/xunit/issues/2780
 [*.cs]
 dotnet_diagnostic.xUnit1031.severity = none
