@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 
 #nullable disable
@@ -388,12 +389,8 @@ namespace Microsoft.Build.Framework
 
                 if (value == null)
                 {
-                    // If variable is not set explicitly, for .NETCORE warning appears.
-#if RUNTIME_TYPE_NETCORE
+                    // If variable is not set explicitly, warning appears.
                     return true;
-#else
-                    return false;
-#endif
                 }
 
                 return value == "1";
@@ -407,13 +404,20 @@ namespace Microsoft.Build.Framework
             {
                 if (!_isBinaryFormatterSerializationAllowed.HasValue)
                 {
+                    if (AppContext.TryGetSwitch("System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization",
+                            out bool enabled))
+                    {
 #if RUNTIME_TYPE_NETCORE
-                    AppContext.TryGetSwitch("System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization",
-                        out bool enabled);
-                    _isBinaryFormatterSerializationAllowed = enabled;
+                        // Unexpected, but not worth to throw, but since maybe in future it will be removed from .NET Core, let's assert here.
+                        Debug.Assert(!enabled, "Switch System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization is expected to be defined for current runtime.");
+                        // At this point it means it is actually possible to use BinFmt serialization, but we shan't used it anyway.
+                        enabled = false;
 #else
-                    _isBinaryFormatterSerializationAllowed = true;
+                        // We expect, if the switch is not configured, that it use default/old behavior of .NET Framework = enabled.
+                        enabled = true;
 #endif
+                    }
+                    _isBinaryFormatterSerializationAllowed = enabled;
                 }
 
                 return _isBinaryFormatterSerializationAllowed.Value;
