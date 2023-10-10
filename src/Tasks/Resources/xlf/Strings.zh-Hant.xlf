@@ -1945,6 +1945,11 @@
         <target state="translated">發現無效的 PE 標頭。將不使用實作檔。</target>
         <note>This message can be used as the {1} in MSB3272</note>
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.UnifiedReferenceDependsOn">
+        <source>References which depend on or have been unified to "{0}" [{1}].</source>
+        <target state="new">References which depend on or have been unified to "{0}" [{1}].</target>
+        <note> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
+      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnknownProcessorArchitecture">
         <source>MSB3273: Unknown processor architecture. The implementation file "{0}" for "{1}" had an ImageFileMachine value of "0x{2}". If you wish to use this implementation file make sure the "ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch" property in your project is set to "Warning" or "None".</source>
         <target state="translated">MSB3273: 未知的處理器架構。"{1}" 的實作檔 "{0}" 中 ImageFileMachine 值為 "0x{2}"。如果要使用這個實作檔，請確定專案中的 "ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch" 屬性設為 "Warning" 或 "None"。</target>

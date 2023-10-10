@@ -1692,6 +1692,10 @@
     <value>References which depend on "{0}" [{1}].</value>
     <comment> This will look like references which depend on "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</comment>
   </data>
+  <data name="ResolveAssemblyReference.UnifiedReferenceDependsOn">
+    <value>References which depend on or have been unified to "{0}" [{1}].</value>
+    <comment> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</comment>
+  </data>
   <data name="ResolveAssemblyReference.UnResolvedPrimaryItemSpec">
     <value>Unresolved primary reference with an item include of "{0}".</value>
     <comment> This messages is for a reference which could not be resolved, however we have its item spec and will display that. {0} will be somethign like  System or A, Version=xxx</comment>

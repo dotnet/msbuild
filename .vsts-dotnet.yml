@@ -217,6 +217,7 @@ stages:
       inputs:
         DropName: $(VisualStudio.DropName)
         DropFolder: 'artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+        DropRetentionDays: '30' # extended by insertion + VS release
         AccessToken: '$(System.AccessToken)'
         DropServiceUri: 'https://devdiv.artifacts.visualstudio.com'
         VSDropServiceUri: 'https://vsdrop.corp.microsoft.com/file/v1'
