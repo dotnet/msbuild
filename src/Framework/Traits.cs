@@ -404,8 +404,13 @@ namespace Microsoft.Build.Framework
             {
                 if (!_isBinaryFormatterSerializationAllowed.HasValue)
                 {
+#if !NET35
+
                     if (AppContext.TryGetSwitch("System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization",
                             out bool enabled))
+#else
+                    bool enabled;
+#endif
                     {
 #if RUNTIME_TYPE_NETCORE
                         // Unexpected, but not worth to throw, but since maybe in future it will be removed from .NET Core, let's assert here.
@@ -421,9 +426,8 @@ namespace Microsoft.Build.Framework
                 }
 
                 return _isBinaryFormatterSerializationAllowed.Value;
+                }
             }
-        }
-
 
         private static bool? ParseNullableBoolFromEnvironmentVariable(string environmentVariable)
         {
