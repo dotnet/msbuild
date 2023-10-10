@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Cli.Utils
         /// </summary>
         /// <param name="process">The process component.</param>
         /// <returns>The process ID of the parent process, or -1 if the parent process could not be found.</returns>
-        public unsafe static int GetParentProcessId(this Process process)
+        public static unsafe int GetParentProcessId(this Process process)
         {
             SafeProcessHandle handle = process.SafeHandle;
             NativeMethods.Windows.PROCESS_BASIC_INFORMATION info;

@@ -11,7 +11,7 @@ namespace Microsoft.NET.Publish.Tests
         {
         }
 
-        private readonly static List<string> FrameworkAssemblies = new()
+        private static readonly List<string> FrameworkAssemblies = new()
         {
             "api-ms-win-core-console-l1-1-0.dll",
             "System.Runtime.dll",

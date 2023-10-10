@@ -161,7 +161,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 #endif
         }
 
-        static public System.Delegate AddEventDeferHandler(dynamic obj, string eventName, System.Delegate deferEventHandler)
+        public static System.Delegate AddEventDeferHandler(dynamic obj, string eventName, System.Delegate deferEventHandler)
         {
             EventInfo eventinfo = obj.GetType().GetEvent(eventName);
             System.Delegate eventHandler = CreateEventHandlerDelegate(eventinfo, deferEventHandler);
@@ -169,13 +169,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             return eventHandler;
         }
 
-        static public void AddEventHandler(dynamic obj, string eventName, System.Delegate eventHandler)
+        public static void AddEventHandler(dynamic obj, string eventName, System.Delegate eventHandler)
         {
             EventInfo eventinfo = obj.GetType().GetEvent(eventName);
             eventinfo.AddEventHandler(obj, eventHandler);
         }
 
-        static public void RemoveEventHandler(dynamic obj, string eventName, System.Delegate eventHandler)
+        public static void RemoveEventHandler(dynamic obj, string eventName, System.Delegate eventHandler)
         {
             EventInfo eventinfo = obj.GetType().GetEvent(eventName);
             eventinfo.RemoveEventHandler(obj, eventHandler);
