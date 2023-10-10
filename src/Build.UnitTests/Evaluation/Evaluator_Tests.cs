@@ -1869,11 +1869,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 if (!allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates.TryGetValue(property.Name, out propertyFromAllEvaluated))
                 {
-                    Assert.True(false, String.Format("project.Properties contained property {0}, but AllEvaluatedProperties did not.", property.Name));
+                    Assert.Fail(String.Format("project.Properties contained property {0}, but AllEvaluatedProperties did not.", property.Name));
                 }
                 else if (!property.Equals(propertyFromAllEvaluated))
                 {
-                    Assert.True(false, String.Format("The properties in project.Properties and AllEvaluatedProperties for property {0} were different.", property.Name));
+                    Assert.Fail(String.Format("The properties in project.Properties and AllEvaluatedProperties for property {0} were different.", property.Name));
                 }
             }
 
@@ -2031,11 +2031,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                     if (!allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates.TryGetValue(property.Name, out propertyFromAllEvaluated))
                     {
-                        Assert.True(false, String.Format("project.Properties contained property {0}, but AllEvaluatedProperties did not.", property.Name));
+                        Assert.Fail(String.Format("project.Properties contained property {0}, but AllEvaluatedProperties did not.", property.Name));
                     }
                     else if (!property.Equals(propertyFromAllEvaluated))
                     {
-                        Assert.True(false, String.Format("The properties in project.Properties and AllEvaluatedProperties for property {0} were different.", property.Name));
+                        Assert.Fail(String.Format("The properties in project.Properties and AllEvaluatedProperties for property {0} were different.", property.Name));
                     }
                 }
 
@@ -4363,7 +4363,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     null,
                     new BuildEventContext(1, 2, 3, 4),
                     FileSystems.Default);
-                Assert.True(false, "Expect exception due to the value of property \"TargetOSFamily\" is not a number.");
+                Assert.Fail("Expect exception due to the value of property \"TargetOSFamily\" is not a number.");
             }
             catch (InvalidProjectFileException e)
             {

@@ -720,7 +720,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 // an attempt to load it by the pretend filename should fail,
                 // so it makes a good test to see that the UnloadProject method worked.
                 ProjectCollection.GlobalProjectCollection.LoadProject(xml.FullPath);
-                Assert.True(false, "An InvalidProjectFileException was expected.");
+                Assert.Fail("An InvalidProjectFileException was expected.");
             }
             catch (InvalidProjectFileException)
             {

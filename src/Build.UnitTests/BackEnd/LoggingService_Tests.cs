@@ -1123,13 +1123,13 @@ namespace Microsoft.Build.UnitTests.Logging
             try
             {
                 _initializedService.ShutdownComponent();
-                Assert.True(false, "No Exceptions Generated");
+                Assert.Fail("No Exceptions Generated");
             }
             catch (Exception e)
             {
                 if (e.GetType() != expectedExceptionType)
                 {
-                    Assert.True(false, "Expected a " + expectedExceptionType + " but got a " + e.GetType() + " Stack:" + e.ToString());
+                    Assert.Fail("Expected a " + expectedExceptionType + " but got a " + e.GetType() + " Stack:" + e.ToString());
                 }
             }
         }

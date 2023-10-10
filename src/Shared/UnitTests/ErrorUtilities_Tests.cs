@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests
                 return;
             }
 
-            Assert.True(false, "Should have thrown an exception");
+            Assert.Fail("Should have thrown an exception");
         }
 
         [Fact]

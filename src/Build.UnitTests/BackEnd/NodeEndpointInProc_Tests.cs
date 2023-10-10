@@ -330,7 +330,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             endpoints.ManagerEndpoint.SendData(managerPacket);
             if (!_host.DataReceivedEvent.WaitOne(1000))
             {
-                Assert.True(false, "Data not received before timeout expired.");
+                Assert.Fail("Data not received before timeout expired.");
             }
             Assert.Equal(_host.DataReceivedContext.packet, managerPacket);
             Assert.NotEqual(_host.DataReceivedContext.thread.ManagedThreadId, Thread.CurrentThread.ManagedThreadId);
@@ -340,7 +340,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             endpoints.NodeEndpoint.SendData(nodePacket);
             if (!_host.DataReceivedEvent.WaitOne(1000))
             {
-                Assert.True(false, "Data not received before timeout expired.");
+                Assert.Fail("Data not received before timeout expired.");
             }
             Assert.Equal(_host.DataReceivedContext.packet, nodePacket);
             Assert.NotEqual(_host.DataReceivedContext.thread.ManagedThreadId, Thread.CurrentThread.ManagedThreadId);
