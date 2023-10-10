@@ -15,7 +15,7 @@ using Utilities = Microsoft.Build.Utilities;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
 {
-    sealed public class KuduDeploy : Utilities.Task
+    public sealed class KuduDeploy : Utilities.Task
     {
         public static readonly int TimeoutMilliseconds = 180000;
         [Framework.Required]

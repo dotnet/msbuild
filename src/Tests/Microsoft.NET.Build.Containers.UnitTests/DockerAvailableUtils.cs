@@ -41,7 +41,7 @@ public class DockerAvailableFactAttribute : FactAttribute
 
 // tiny optimization - since there are many instances of this attribute we should only get
 // the daemon status once
-file static class DockerCliStatus
+static file class DockerCliStatus
 {
     public static readonly bool IsAvailable;
     public static readonly string? Command;

@@ -153,7 +153,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
 
             public override string Identifier { get; }
 
-            public async override Task WaitForDisconnectAsync(CancellationToken cancellationToken)
+            public override async Task WaitForDisconnectAsync(CancellationToken cancellationToken)
             {
                 if (!(Stream is PipeStream pipeStream))
                 {

@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             WriteUpdatableWorkloadsFile();
         }
 
-        public async static Task BackgroundUpdateAdvertisingManifestsAsync(string userProfileDir)
+        public static async Task BackgroundUpdateAdvertisingManifestsAsync(string userProfileDir)
         {
             try
             {

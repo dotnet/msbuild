@@ -38,7 +38,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal virtual CliOption<string[]> AddSourceOption { get; } = SharedOptionsFactory.CreateAddSourceOption();
 
-        protected async override Task<NewCommandStatus> ExecuteAsync(
+        protected override async Task<NewCommandStatus> ExecuteAsync(
             DetailsCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,

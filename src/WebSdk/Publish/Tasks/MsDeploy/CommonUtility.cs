@@ -617,7 +617,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// <param name="item"></param>
         /// <param name="arguments"></param>
         /// <param name="enumType"></param>
-        static internal void BuildArgumentsBaseOnEnumTypeName(Framework.ITaskItem item, System.Collections.Generic.List<string> arguments, System.Type enumType, string valueQuote)
+        internal static void BuildArgumentsBaseOnEnumTypeName(Framework.ITaskItem item, System.Collections.Generic.List<string> arguments, System.Type enumType, string valueQuote)
         {
             string[] enumNames = Enum.GetNames(enumType);
             foreach (string enumName in enumNames)
@@ -635,7 +635,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
         }
 
-        static internal string AlternativeQuote(string valueQuote)
+        internal static string AlternativeQuote(string valueQuote)
         {
             if (string.IsNullOrEmpty(valueQuote) || valueQuote == "\"")
             {
@@ -647,8 +647,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
         }
 
-        static public char[] s_specialCharactersForCmd = @"&()[]{}^=;!'+,`~".ToArray();
-        static internal string PutValueInQuote(string value, string quote)
+        public static char[] s_specialCharactersForCmd = @"&()[]{}^=;!'+,`~".ToArray();
+        internal static string PutValueInQuote(string value, string quote)
         {
             if (string.IsNullOrEmpty(quote))
             {
@@ -827,7 +827,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
         }
 
-        static public string ConvertAbsPhysicalPathToAbsUriPath(string physicalPath)
+        public static string ConvertAbsPhysicalPathToAbsUriPath(string physicalPath)
         {
             string absUriPath = string.Empty;
             try
@@ -841,7 +841,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         }
 
         // utility function to add the replace rule for the option
-        static public void AddReplaceRulesToOptions(/*Deployment.DeploymentRuleCollection*/ dynamic syncConfigRules, Framework.ITaskItem[] replaceRuleItems)
+        public static void AddReplaceRulesToOptions(/*Deployment.DeploymentRuleCollection*/ dynamic syncConfigRules, Framework.ITaskItem[] replaceRuleItems)
         {
             if (syncConfigRules != null && replaceRuleItems != null)// Dev10 bug 496639 foreach will throw the exception if the replaceRuleItem is null
             {
@@ -879,7 +879,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// <param name="stringList"></param>
         /// <param name="enabled"></param>
         /// <param name="log"></param>
-        static internal void AdjsutSkipDirectives(/*Deployment.DeploymentBaseOptions*/ dynamic baseOptions, Generic.List<string> stringList, bool enabled, Utilities.TaskLoggingHelper log)
+        internal static void AdjsutSkipDirectives(/*Deployment.DeploymentBaseOptions*/ dynamic baseOptions, Generic.List<string> stringList, bool enabled, Utilities.TaskLoggingHelper log)
         {
             if (stringList != null && baseOptions != null)
             {
@@ -903,7 +903,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         }
 
         // utility function to add the skip rule for the option
-        static public void AddSkipDirectiveToBaseOptions(/*Deployment.DeploymentBaseOptions*/ dynamic baseOptions,
+        public static void AddSkipDirectiveToBaseOptions(/*Deployment.DeploymentBaseOptions*/ dynamic baseOptions,
             Framework.ITaskItem[] skipRuleItems,
             Generic.List<string> enableSkipDirectiveList,
             Generic.List<string> disableSkipDirectiveList,
@@ -938,7 +938,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// </summary>
         /// <param name="vSMSDeploySyncOption"></param>
         /// <param name="item"></param>
-        static public void AddDeclarParameterToOptions(/*VSMSDeploySyncOption*/ dynamic vSMSDeploySyncOption, Framework.ITaskItem item)
+        public static void AddDeclarParameterToOptions(/*VSMSDeploySyncOption*/ dynamic vSMSDeploySyncOption, Framework.ITaskItem item)
         {
             if (item != null && vSMSDeploySyncOption != null)
             {
@@ -1026,7 +1026,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// <param name="thisObj"></param>
         /// <param name="propertyName"></param>
         /// <param name="value"></param>
-        static public void SetDynamicProperty(dynamic thisObj, string propertyName, object value)
+        public static void SetDynamicProperty(dynamic thisObj, string propertyName, object value)
         {
             thisObj.GetType().GetProperty(propertyName).SetValue(thisObj, value, null);
         }
@@ -1037,7 +1037,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// </summary>
         /// <param name="vSMSDeploySyncOption"></param>
         /// <param name="items"></param>
-        static public void AddDeclareParametersToOptions(/*VSMSDeploySyncOption*/ dynamic vSMSDeploySyncOption, Framework.ITaskItem[] originalItems, bool fOptimisticPickNextDefaultValue)
+        public static void AddDeclareParametersToOptions(/*VSMSDeploySyncOption*/ dynamic vSMSDeploySyncOption, Framework.ITaskItem[] originalItems, bool fOptimisticPickNextDefaultValue)
         {
             System.Collections.Generic.IList<Framework.ITaskItem> items = SortParametersTaskItems(originalItems, fOptimisticPickNextDefaultValue, DeclareParameterMetadata.DefaultValue.ToString());
             if (vSMSDeploySyncOption != null && items != null)
@@ -1056,7 +1056,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         ///// </summary>
         ///// <param name="vSMSDeploySyncOption"></param>
         ///// <param name="items"></param>
-        static public void AddImportDeclareParametersFileOptions(/*VSMSDeploySyncOption*/ dynamic vSMSDeploySyncOption, Framework.ITaskItem[] items)
+        public static void AddImportDeclareParametersFileOptions(/*VSMSDeploySyncOption*/ dynamic vSMSDeploySyncOption, Framework.ITaskItem[] items)
         {
             if (vSMSDeploySyncOption != null && items != null)
             {
@@ -1068,7 +1068,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
         }
 
-        static public void AddSetParametersFilesToObject(/*Deployment.DeploymentObject*/ dynamic deploymentObject, Generic.IList<string> filenames, IVSMSDeployHost host)
+        public static void AddSetParametersFilesToObject(/*Deployment.DeploymentObject*/ dynamic deploymentObject, Generic.IList<string> filenames, IVSMSDeployHost host)
         {
             if (deploymentObject != null && filenames != null)
             {
@@ -1097,7 +1097,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// </summary>
         /// <param name="vSMSDeploySyncOption"></param>
         /// <param name="items"></param>
-        static public void AddSimpleSetParametersVsMsDeployObject(MsDeploy.VSMSDeployObject srcVsMsDeployobject, Framework.ITaskItem[] originalItems, bool fOptimisticPickNextDefaultValue)
+        public static void AddSimpleSetParametersVsMsDeployObject(MsDeploy.VSMSDeployObject srcVsMsDeployobject, Framework.ITaskItem[] originalItems, bool fOptimisticPickNextDefaultValue)
         {
             System.Collections.Generic.IList<Framework.ITaskItem> items = SortParametersTaskItems(originalItems, fOptimisticPickNextDefaultValue, SimpleSyncParameterMetadata.Value.ToString());
             if (srcVsMsDeployobject != null && items != null)
@@ -1116,7 +1116,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
         }
 
-        static public void AddProviderOptions(/*Deployment.DeploymentProviderOptions*/ dynamic deploymentProviderOptions, Generic.IList<ProviderOption> providerOptions, IVSMSDeployHost host)
+        public static void AddProviderOptions(/*Deployment.DeploymentProviderOptions*/ dynamic deploymentProviderOptions, Generic.IList<ProviderOption> providerOptions, IVSMSDeployHost host)
         {
             if (deploymentProviderOptions != null && providerOptions != null)
             {
@@ -1148,7 +1148,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// </summary>
         /// <param name="vSMSDeploySyncOption"></param>
         /// <param name="items"></param>
-        static public void AddSimpleSetParametersToObject(/*Deployment.DeploymentObject*/ dynamic deploymentObject, Generic.IList<ParameterInfo> parameters, IVSMSDeployHost host)
+        public static void AddSimpleSetParametersToObject(/*Deployment.DeploymentObject*/ dynamic deploymentObject, Generic.IList<ParameterInfo> parameters, IVSMSDeployHost host)
         {
             if (deploymentObject != null && parameters != null)
             {
@@ -1200,7 +1200,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// </summary>
         /// <param name="vSMSDeploySyncOption"></param>
         /// <param name="items"></param>
-        static public void AddSetParametersToObject(/*Deployment.DeploymentObject*/ dynamic deploymentObject, Generic.IList<ParameterInfoWithEntry> parameters, IVSMSDeployHost host)
+        public static void AddSetParametersToObject(/*Deployment.DeploymentObject*/ dynamic deploymentObject, Generic.IList<ParameterInfoWithEntry> parameters, IVSMSDeployHost host)
         {
             if (deploymentObject != null && parameters != null)
             {
@@ -1320,7 +1320,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// </summary>
         /// <param name="vSMSDeploySyncOption"></param>
         /// <param name="items"></param>
-        static public void AddSetParametersVsMsDeployObject(MsDeploy.VSMSDeployObject srcVsMsDeployobject, Framework.ITaskItem[] originalItems, bool fOptimisticPickNextDefaultValue)
+        public static void AddSetParametersVsMsDeployObject(MsDeploy.VSMSDeployObject srcVsMsDeployobject, Framework.ITaskItem[] originalItems, bool fOptimisticPickNextDefaultValue)
         {
             System.Collections.Generic.IList<Framework.ITaskItem> items = SortParametersTaskItems(originalItems, fOptimisticPickNextDefaultValue, SyncParameterMetadata.DefaultValue.ToString());
             if (srcVsMsDeployobject != null && items != null)
@@ -1352,7 +1352,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
         }
 
-        static public void AddSetParametersFilesVsMsDeployObject(VSMSDeployObject srcVsMsDeployobject, Framework.ITaskItem[] items)
+        public static void AddSetParametersFilesVsMsDeployObject(VSMSDeployObject srcVsMsDeployobject, Framework.ITaskItem[] items)
         {
             if (srcVsMsDeployobject != null && items != null)
             {
@@ -1367,7 +1367,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
 
 
-        static public string DumpITeaskItem(Framework.ITaskItem iTaskItem)
+        public static string DumpITeaskItem(Framework.ITaskItem iTaskItem)
         {
             Text.StringBuilder sb = CleanStringBuilder;
             string itemspec = iTaskItem.ItemSpec;
@@ -1537,7 +1537,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         static string strMsdeployFwlink3 = @"http://go.microsoft.com/fwlink/?LinkId=178036";
         static string strMsdeployFwlink4 = @"http://go.microsoft.com/fwlink/?LinkId=178587";
         static string strMsdeployFwlink5 = @"http://go.microsoft.com/fwlink/?LinkId=178589";
-        static internal string strMsdeployInstallationFwdLink = @"http://go.microsoft.com/?linkid=9278654";
+        internal static string strMsdeployInstallationFwdLink = @"http://go.microsoft.com/?linkid=9278654";
 
         static string[] strMsdeployFwlinks = { strMsdeployFwlink1, strMsdeployFwlink2, strMsdeployFwlink3, strMsdeployFwlink4, strMsdeployFwlink5 };
 
@@ -1778,7 +1778,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             #endregion
         }
 
-        static public string StripOffTrailingSlashes(string str)
+        public static string StripOffTrailingSlashes(string str)
         {
             if (!string.IsNullOrEmpty(str))
             {
@@ -1789,7 +1789,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             return str;
         }
 
-        static public string EnsureTrailingSlashes(string rootPath, char slash)
+        public static string EnsureTrailingSlashes(string rootPath, char slash)
         {
             string directorySeparator = new(slash, 1);
             string rootPathWithSlash = string.Concat(rootPath, rootPath.EndsWith(directorySeparator, StringComparison.Ordinal) ? string.Empty : directorySeparator);
@@ -1797,7 +1797,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         }
 
 
-        static public string GetFilePathResolution(string source, string sourceRootPath)
+        public static string GetFilePathResolution(string source, string sourceRootPath)
         {
             if (Path.IsPathRooted(source) || string.IsNullOrEmpty(sourceRootPath))
                 return source;
@@ -1812,7 +1812,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// </summary>
         /// <param name="iPAddress"></param>
         /// <returns></returns>
-        static internal string GetIPAddressString(System.Net.IPAddress iPAddress)
+        internal static string GetIPAddressString(System.Net.IPAddress iPAddress)
         {
             if (iPAddress != null)
             {
@@ -1836,7 +1836,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// <param name="IISBindingIPString"></param>
         /// <param name="iPAddresses"></param>
         /// <returns></returns>
-        static internal bool MatchOneOfIPAddress(string IISBindingIPString, System.Net.IPAddress[] iPAddresses)
+        internal static bool MatchOneOfIPAddress(string IISBindingIPString, System.Net.IPAddress[] iPAddresses)
         {
             if (!string.IsNullOrEmpty(IISBindingIPString))
             {
@@ -1852,7 +1852,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             return false;
         }
 
-        static internal void SetupMSWebDeployDynamicAssemblies(string strVersionsToTry, Utilities.Task task)
+        internal static void SetupMSWebDeployDynamicAssemblies(string strVersionsToTry, Utilities.Task task)
         {
             // Mark the assembly version.
             // System.Version version1_1 = new System.Version("7.1");
@@ -1907,7 +1907,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         }
 
 
-        static public string EscapeTextForMSBuildVariable(string text)
+        public static string EscapeTextForMSBuildVariable(string text)
         {
             if (!string.IsNullOrEmpty(text) && text.IndexOfAny(@"$%".ToArray()) >= 0)
             {

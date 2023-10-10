@@ -9,7 +9,7 @@ namespace Microsoft.NET.Build.Containers.IntegrationTests;
 
 public sealed class ProjectInitializer
 {
-    private readonly static string _combinedTargetsLocation;
+    private static readonly string _combinedTargetsLocation;
 
     static ProjectInitializer()
     {

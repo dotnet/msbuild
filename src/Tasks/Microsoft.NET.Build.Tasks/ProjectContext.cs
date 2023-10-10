@@ -182,7 +182,7 @@ namespace Microsoft.NET.Build.Tasks
             return GetTopLevelDependencies(LockFile, LockFileTarget);
         }
 
-        static public IEnumerable<string> GetTopLevelDependencies(LockFile lockFile, LockFileTarget lockFileTarget)
+        public static IEnumerable<string> GetTopLevelDependencies(LockFile lockFile, LockFileTarget lockFileTarget)
         {
             Dictionary<string, LockFileTargetLibrary> libraryLookup =
                 lockFileTarget.Libraries.ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);

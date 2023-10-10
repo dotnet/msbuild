@@ -28,7 +28,7 @@
 
 namespace Microsoft.DotNet.Cli.Sln.Internal.FileManipulation
 {
-    static internal class FileUtil
+    internal static class FileUtil
     {
         internal static TextFormatInfo GetTextFormatInfo(string file)
         {

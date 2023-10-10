@@ -29,7 +29,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
             return true;
         }
 
-        protected async override Task<int> ExecuteCoreAsync()
+        protected override async Task<int> ExecuteCoreAsync()
         {
             if (!IsServerRunning())
             {

@@ -22,9 +22,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         {
         }
 
-        static public string AssemblyName { get { return "Microsoft.Web.Deployment"; } }
-        static public MSWebDeploymentAssembly DynamicAssembly { get; set; }
-        static public void SetVersion(System.Version version)
+        public static string AssemblyName { get { return "Microsoft.Web.Deployment"; } }
+        public static MSWebDeploymentAssembly DynamicAssembly { get; set; }
+        public static void SetVersion(System.Version version)
         {
             if (DynamicAssembly == null || DynamicAssembly.Version != version)
             {
@@ -39,7 +39,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// <param name="name"></param>
         /// <param name="foundObject"></param>
         /// <returns></returns>
-        static public bool DeploymentTryGetValueForEach(dynamic deploymentCollection, string name, out dynamic foundObject)
+        public static bool DeploymentTryGetValueForEach(dynamic deploymentCollection, string name, out dynamic foundObject)
         {
             foundObject = null;
             if (deploymentCollection != null)
@@ -57,7 +57,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         }
 
 
-        static public bool DeploymentTryGetValueContains(dynamic deploymentCollection, string name, out dynamic foundObject)
+        public static bool DeploymentTryGetValueContains(dynamic deploymentCollection, string name, out dynamic foundObject)
         {
             foundObject = null;
             if (deploymentCollection != null)
@@ -82,10 +82,10 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         {
         }
 
-        static public string AssemblyName { get { return "Microsoft.Web.Delegation"; } }
+        public static string AssemblyName { get { return "Microsoft.Web.Delegation"; } }
 
-        static public MSWebDelegationAssembly DynamicAssembly { get; set; }
-        static public void SetVersion(System.Version version)
+        public static MSWebDelegationAssembly DynamicAssembly { get; set; }
+        public static void SetVersion(System.Version version)
         {
             if (DynamicAssembly == null || DynamicAssembly.Version != version)
             {
@@ -282,17 +282,17 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// <summary>
         /// Encapsulate the things be done before invoke MSDeploy
         /// </summary>
-        abstract protected void BeforeSync();
+        protected abstract void BeforeSync();
 
         /// <summary>
         /// Encapsulate the approach to invoke the MSDeploy (same thread or in a seperate thread; ui or without ui)
         /// </summary>
-        abstract protected void StartSync();
+        protected abstract void StartSync();
 
         /// <summary>
         /// Encapsulate the approach to wait for the MSDeploy done
         /// </summary>
-        abstract protected void WaitForDone();
+        protected abstract void WaitForDone();
 
         /// <summary>
         /// Encapsulate how to report the Trace information
@@ -300,12 +300,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// <param name="e"></param>
         // abstract protected void LogTrace(Deployment.DeploymentTraceEventArgs e);
 
-        abstract protected void LogTrace(dynamic e, System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.MessageImportance> customTypeLoging);
+        protected abstract void LogTrace(dynamic e, System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.MessageImportance> customTypeLoging);
 
         /// <summary>
         /// Encapsulate the things to be done after the deploy is done
         /// </summary>
-        abstract protected void AfterSync();
+        protected abstract void AfterSync();
 
         /// <summary>
         /// constructor

@@ -601,7 +601,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
 
         // utility function to add the replace rule for the option
-        static public void AddReplaceRulesToOptions(Utilities.CommandLineBuilder commandLineBuilder, Framework.ITaskItem[] replaceRuleItems, string valueQuoteChar)
+        public static void AddReplaceRulesToOptions(Utilities.CommandLineBuilder commandLineBuilder, Framework.ITaskItem[] replaceRuleItems, string valueQuoteChar)
         {
             if (commandLineBuilder != null
                 && replaceRuleItems != null)// Dev10 bug 496639 foreach will throw the exception if the replaceRuleItem is null
@@ -617,7 +617,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
         }
 
-        static public void AddSkipDirectiveToBaseOptions(Utilities.CommandLineBuilder commandLineBuilder, Framework.ITaskItem[] skipRuleItems, string valueQuoteChar)
+        public static void AddSkipDirectiveToBaseOptions(Utilities.CommandLineBuilder commandLineBuilder, Framework.ITaskItem[] skipRuleItems, string valueQuoteChar)
         {
             if (commandLineBuilder != null
                 && skipRuleItems != null)// Dev10 bug 496639 foreach will throw the exception if the replaceRuleItem is null
@@ -634,7 +634,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         }
 
 
-        static public void AddDeclareParameterToCommandArgument(System.Collections.Generic.List<string> arguments,
+        public static void AddDeclareParameterToCommandArgument(System.Collections.Generic.List<string> arguments,
                                                                 Framework.ITaskItem item,
                                                                 string valueQuote,
                                                                 System.Collections.Generic.Dictionary<string, string> lookupDictionary)
@@ -684,7 +684,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// </summary>
         /// <param name="commandLineBuilder"></param>
         /// <param name="items"></param>
-        static public void AddDeclareParametersOptions(Utilities.CommandLineBuilder commandLineBuilder, Framework.ITaskItem[] originalItems, string valueQuote, bool foptimisticParameterDefaultValue)
+        public static void AddDeclareParametersOptions(Utilities.CommandLineBuilder commandLineBuilder, Framework.ITaskItem[] originalItems, string valueQuote, bool foptimisticParameterDefaultValue)
         {
             System.Collections.Generic.IList<Framework.ITaskItem> items = Utility.SortParametersTaskItems(originalItems, foptimisticParameterDefaultValue, DeclareParameterMetadata.DefaultValue.ToString());
             if (commandLineBuilder != null && items != null)
@@ -701,17 +701,17 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         }
 
 
-        static public void AddImportDeclareParametersFilesOptions(Utilities.CommandLineBuilder commandLineBuilder, Framework.ITaskItem[] items)
+        public static void AddImportDeclareParametersFilesOptions(Utilities.CommandLineBuilder commandLineBuilder, Framework.ITaskItem[] items)
         {
             AddImportParametersFilesOptions(commandLineBuilder, "-declareParamFile:", items);
         }
 
-        static public void AddImportSetParametersFilesOptions(Utilities.CommandLineBuilder commandLineBuilder, Framework.ITaskItem[] items)
+        public static void AddImportSetParametersFilesOptions(Utilities.CommandLineBuilder commandLineBuilder, Framework.ITaskItem[] items)
         {
             AddImportParametersFilesOptions(commandLineBuilder, "-setParamFile:", items);
         }
 
-        static internal void AddImportParametersFilesOptions(Utilities.CommandLineBuilder commandLineBuilder, string parameterFlag, Framework.ITaskItem[] items)
+        internal static void AddImportParametersFilesOptions(Utilities.CommandLineBuilder commandLineBuilder, string parameterFlag, Framework.ITaskItem[] items)
         {
             if (commandLineBuilder != null
                 && !string.IsNullOrEmpty(parameterFlag)
@@ -735,7 +735,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// </summary>
         /// <param name="commandLineBuilder"></param>
         /// <param name="items"></param>
-        static public void AddSimpleSetParametersToObject(Utilities.CommandLineBuilder commandLineBuilder, Framework.ITaskItem[] originalItems, string valueQuoteChar, bool foptimisticParameterDefaultValue)
+        public static void AddSimpleSetParametersToObject(Utilities.CommandLineBuilder commandLineBuilder, Framework.ITaskItem[] originalItems, string valueQuoteChar, bool foptimisticParameterDefaultValue)
         {
             System.Collections.Generic.IList<Framework.ITaskItem> items = Utility.SortParametersTaskItems(originalItems, foptimisticParameterDefaultValue, SimpleSyncParameterMetadata.Value.ToString());
             if (commandLineBuilder != null && items != null)
@@ -765,7 +765,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         /// </summary>
         /// <param name="commandLineBuilder"></param>
         /// <param name="items"></param>
-        static public void AddSetParametersToObject(Utilities.CommandLineBuilder commandLineBuilder, Framework.ITaskItem[] originalItems, string valueQuote, bool foptimisticParameterDefaultValue)
+        public static void AddSetParametersToObject(Utilities.CommandLineBuilder commandLineBuilder, Framework.ITaskItem[] originalItems, string valueQuote, bool foptimisticParameterDefaultValue)
         {
             System.Collections.Generic.IList<Framework.ITaskItem> items = Utility.SortParametersTaskItems(originalItems, foptimisticParameterDefaultValue, ExistingSyncParameterMetadata.Value.ToString());
             if (commandLineBuilder != null && items != null)
@@ -840,7 +840,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
 
 
-        static public void AddDestinationProviderSettingToObject(Utilities.CommandLineBuilder commandLineBuilder, string dest, Framework.ITaskItem[] items, string valueQuoteChar,
+        public static void AddDestinationProviderSettingToObject(Utilities.CommandLineBuilder commandLineBuilder, string dest, Framework.ITaskItem[] items, string valueQuoteChar,
                                                                 Framework.ITaskItem[] additionalProviderItems, MSDeploy msdeploy)
         {
             //commandLineBuilder.AppendSwitchUnquotedIfNotNull("-source:", m_source);
