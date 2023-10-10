@@ -68,6 +68,8 @@ namespace Microsoft.Build.Logging
         //     between de/serialization roundtrips.
         //   - Adding serialized events lengths - to support forward compatible reading
         internal const int FileFormatVersion = 18;
+        // The minimum version of the binary log reader that can read log of above version.
+        internal const int MinimumReaderVersion = 18;
 
         private Stream stream;
         private BinaryWriter binaryWriter;
@@ -195,6 +197,7 @@ namespace Microsoft.Build.Logging
             }
 
             binaryWriter.Write(FileFormatVersion);
+            binaryWriter.Write(MinimumReaderVersion);
 
             if (replayEventsSource != null)
             {

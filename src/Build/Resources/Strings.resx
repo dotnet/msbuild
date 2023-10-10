@@ -1346,7 +1346,7 @@
     <comment>{StrBegin="MSB4068: "}</comment>
   </data>
   <data name="UnsupportedLogFileFormat" xml:space="preserve">
-    <value>MSB4235: The log file format version is {0}, whereas this version of MSBuild only supports versions up to {1}.</value>
+    <value>MSB4235: The log file format version is {0} and minimum required read version is {1}, whereas this version of MSBuild only supports versions up to {2}.</value>
     <comment>{StrBegin="MSB4235: "}</comment>
   </data>
   <data name="UnsupportedTaskParameterTypeError" xml:space="preserve">

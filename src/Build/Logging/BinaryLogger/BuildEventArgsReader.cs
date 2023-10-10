@@ -94,7 +94,7 @@ namespace Microsoft.Build.Logging
         /// Receives recoverable errors during reading.
         /// Applicable mainly when <see cref="SkipUnknownEvents"/> or <see cref="SkipUnknownEventParts"/> is set to true."/>
         /// </summary>
-        public event Action<string>? OnRecoverableReadError;
+        public event Action<ReaderErrorType, string>? OnRecoverableReadError;
 
         public void Dispose()
         {
@@ -270,7 +270,7 @@ namespace Microsoft.Build.Logging
 
                         if (SkipUnknownEvents && serializedEventLength > 0)
                         {
-                            OnRecoverableReadError?.Invoke(error);
+                            OnRecoverableReadError?.Invoke(ReaderErrorType.UnkownEventType, error);
                             SkipBytes(serializedEventLength);
                         }
                         else
@@ -291,7 +291,7 @@ namespace Microsoft.Build.Logging
 
                         if (SkipUnknownEventParts && bytesRead < serializedEventLength)
                         {
-                            OnRecoverableReadError?.Invoke(error);
+                            OnRecoverableReadError?.Invoke(ReaderErrorType.UnknownEventData, error);
                             SkipBytes(serializedEventLength - bytesRead);
                         }
                         else

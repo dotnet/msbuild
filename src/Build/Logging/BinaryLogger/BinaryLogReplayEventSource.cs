@@ -36,7 +36,11 @@ namespace Microsoft.Build.Logging
     /// Interface for replaying a binary log file (*.binlog)
     /// </summary>
     internal interface IBinaryLogReplaySource :
-        IEventSource, IRawLogEventsSource, IBuildEventStringsReader, IEmbeddedContentSource
+        IEventSource,
+        IRawLogEventsSource,
+        IBuildEventStringsReader,
+        IEmbeddedContentSource,
+        IBinlogReaderErrors
     { }
 
     /// <summary>
@@ -60,10 +64,8 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public bool AllowForwardCompatibility { private get; init; } = true;
 
-        /// <summary>
-        /// Receives recoverable errors during reading.
-        /// </summary>
-        public event Action<string>? OnRecoverableReadError;
+        /// <inheritdoc cref="IBinlogReaderErrors.OnRecoverableReadError"/>
+        public event Action<ReaderErrorType, string>? OnRecoverableReadError;
 
         /// <summary>
         /// WARNING: This event is under low support and low maintenance - please use events directly exposed by <see cref="BinaryLogReplayEventSource"/> instead. 
@@ -125,12 +127,14 @@ namespace Microsoft.Build.Logging
             Action<string>? onRecoverableReadError = null)
         {
             int fileFormatVersion = binaryReader.ReadInt32();
+            int minimumReaderVersion = binaryReader.ReadInt32();
 
             // the log file is written using a newer version of file format
             // that we don't know how to read
-            if (!allowForwardCompatibility && fileFormatVersion > BinaryLogger.FileFormatVersion)
+            if (fileFormatVersion > BinaryLogger.FileFormatVersion &&
+                (!allowForwardCompatibility || minimumReaderVersion > BinaryLogger.FileFormatVersion))
             {
-                var text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnsupportedLogFileFormat", fileFormatVersion, BinaryLogger.FileFormatVersion);
+                var text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnsupportedLogFileFormat", fileFormatVersion, minimumReaderVersion, BinaryLogger.FileFormatVersion);
                 throw new NotSupportedException(text);
             }
 
