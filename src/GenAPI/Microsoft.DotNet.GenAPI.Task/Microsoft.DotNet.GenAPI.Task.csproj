@@ -2,13 +2,9 @@
 
   <PropertyGroup>
     <TargetFrameworks>net8.0;net472</TargetFrameworks>
-    <TargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">net8.0;net472</TargetFrameworks>
-    <StrongNameKeyId>Open</StrongNameKeyId>
-    <Nullable>enable</Nullable>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-
     <IsPackable>true</IsPackable>
     <IncludeBuildOutput>false</IncludeBuildOutput>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <!-- This package doesn't contain any lib or ref assemblies because it's a tooling package.-->
     <NoWarn>$(NoWarn);NU5128</NoWarn>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddBuildOutputToPackageCore;_AddBuildOutputToPackageDesktop</TargetsForTfmSpecificContentInPackage>
@@ -31,46 +27,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- ExcludeAssets="Runtime" is being set to avoid adding package references and dependencies of package and project references into the package. -->
     <PackageReference Include="Microsoft.Build.Framework" ExcludeAssets="Runtime" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" ExcludeAssets="Runtime" />
-    <ProjectReference Include="..\Microsoft.DotNet.GenAPI\Microsoft.DotNet.GenAPI.csproj" ExcludeAssets="Runtime" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
-    <!-- We carry NuGet as part of the package in case the package is used with an older SDKs or with full framework MSBuild. -->
-    <PackageReference Include="NuGet.Frameworks" />
-    <PackageReference Include="NuGet.Packaging" />
-    <PackageReference Include="NuGet.Protocol" />
+    <ProjectReference Include="..\Microsoft.DotNet.GenAPI\Microsoft.DotNet.GenAPI.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="**\*.props;**\*.targets" Pack="true" PackagePath="%(RecursiveDir)%(Filename)%(Extension)" />
-    <None Include="$(RepoRoot)LICENSE.txt" PackagePath="LICENSE.txt" Pack="true" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!--
-      Update all PackageReference and ProjectReference Items to have
-      PrivateAssets="All" and default Publish to true.
-      This removes the dependency nodes from the generated nuspec and
-      forces the publish output to contain the dlls.
-     -->
-    <PackageReference Update="@(PackageReference)">
-      <PrivateAssets>All</PrivateAssets>
-      <Publish Condition="'%(PackageReference.Publish)' == ''">true</Publish>
-      <ExcludeAssets Condition="'%(PackageReference.Publish)' == 'false'">runtime</ExcludeAssets>
-    </PackageReference>
-    <ProjectReference Update="@(ProjectReference)">
-      <PrivateAssets>All</PrivateAssets>
-      <Publish Condition="'%(ProjectReference.Publish)' == ''">true</Publish>
-    </ProjectReference>
-
-    <!--
-      Update all Reference items to have Pack="false"
-      This removes the frameworkDependency nodes from the generated nuspec
-    -->
-    <Reference Update="@(Reference)">
-      <Pack>false</Pack>
-    </Reference>
   </ItemGroup>
 
   <Target Name="_AddBuildOutputToPackageCore" DependsOnTargets="Publish" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">

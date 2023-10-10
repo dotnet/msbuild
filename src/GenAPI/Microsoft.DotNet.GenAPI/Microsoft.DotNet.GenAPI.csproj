@@ -2,10 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>net8.0;net472</TargetFrameworks>
-    <TargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">net8.0;net472</TargetFrameworks>
-    <Nullable>enable</Nullable>
-    <StrongNameKeyId>Open</StrongNameKeyId>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">

@@ -2,12 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <TargetFramework Condition="'$(DotNetBuildFromSource)' == 'true'">net8.0</TargetFramework>
     <OutputType>Exe</OutputType>
-    <Nullable>enable</Nullable>
-    <StrongNameKeyId>Open</StrongNameKeyId>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-
     <IsPackable>true</IsPackable>
     <IsShippingPackage>true</IsShippingPackage>
     <PackAsTool>true</PackAsTool>
@@ -25,10 +20,6 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <ProjectReference Include="..\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.ApiCompatibility\Microsoft.DotNet.ApiCompatibility.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="$(RepoRoot)LICENSE.txt" PackagePath="LICENSE.txt" Pack="true" />
   </ItemGroup>
 
   <!-- Move code analysis assemblies into a sub directory so that they can be conditionally resolved. -->

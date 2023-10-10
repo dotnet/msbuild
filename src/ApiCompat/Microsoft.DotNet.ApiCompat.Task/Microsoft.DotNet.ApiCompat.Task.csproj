@@ -2,11 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>net8.0;net472</TargetFrameworks>
-    <TargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">net8.0;net472</TargetFrameworks>
-    <Nullable>enable</Nullable>
-    <StrongNameKeyId>Open</StrongNameKeyId>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-
     <IsPackable>true</IsPackable>
     <IsShippingPackage>true</IsShippingPackage>
     <IncludeBuildOutput>false</IncludeBuildOutput>
@@ -49,7 +44,6 @@
     <None Include="**\*.props;**\*.targets" Pack="true" PackagePath="%(RecursiveDir)%(Filename)%(Extension)" />
     <None Include="..\..\Tasks\Microsoft.NET.Build.Tasks\targets\Microsoft.NET.ApiCompat.Common.targets" Pack="true" Link="build/Microsoft.NET.ApiCompat.Common.targets" PackagePath="build/%(Filename)%(Extension)" />
     <None Include="..\..\Tasks\Microsoft.NET.Build.Tasks\targets\Microsoft.NET.ApiCompat.ValidatePackage.targets" Pack="true" Link="build/Microsoft.NET.ApiCompat.ValidatePackage.targets" PackagePath="build/%(Filename)%(Extension)" />
-    <None Include="$(RepoRoot)LICENSE.txt" PackagePath="LICENSE.txt" Pack="true" />
   </ItemGroup>
 
   <Target Name="_AddBuildOutputToPackageCore" DependsOnTargets="Publish" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">

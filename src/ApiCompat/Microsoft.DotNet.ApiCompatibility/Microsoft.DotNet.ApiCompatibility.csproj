@@ -2,10 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>net8.0;net472</TargetFrameworks>
-    <TargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">net8.0;net472</TargetFrameworks>
-    <StrongNameKeyId>Open</StrongNameKeyId>
-    <Nullable>enable</Nullable>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- We need to compare ISymbols in a special way (by name) and roslyn symbol comparers take more heuristics into consideration.-->
     <NoWarn>$(NoWarn);RS1024</NoWarn>
   </PropertyGroup>

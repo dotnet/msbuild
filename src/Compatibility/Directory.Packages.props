@@ -1,0 +1,11 @@
+<Project>
+
+  <Import Project="..\..\Directory.Packages.props" />
+
+  <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true' and '$(SkipMicrosoftCodeAnalysisCSharpPinning)' != 'true'">
+    <!-- We pin the code analysis version when not in source build as we need to support running on older
+         SDKs when the OOB package is used. -->
+    <PackageVersion Update="Microsoft.CodeAnalysis.CSharp" Version="4.4.0" />
+  </ItemGroup>
+
+</Project>

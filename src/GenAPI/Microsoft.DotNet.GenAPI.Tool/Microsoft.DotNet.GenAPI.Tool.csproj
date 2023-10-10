@@ -2,12 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <TargetFramework Condition="'$(DotNetBuildFromSource)' == 'true'">net8.0</TargetFramework>
     <OutputType>Exe</OutputType>
-    <Nullable>enable</Nullable>
-    <StrongNameKeyId>Open</StrongNameKeyId>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>genapi</ToolCommandName>
@@ -17,10 +12,6 @@
   <ItemGroup>
     <PackageReference Include="System.CommandLine" />
     <ProjectReference Include="..\Microsoft.DotNet.GenAPI\Microsoft.DotNet.GenAPI.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="$(RepoRoot)LICENSE.txt" PackagePath="LICENSE.txt" Pack="true" />
   </ItemGroup>
 
 </Project>
