@@ -105,20 +105,15 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        /// <summary>
-        /// An event that allows the subscriber to be notified when a string is read from the binary log.
-        /// Subscriber may adjust the string by setting <see cref="StringReadEventArgs.StringToBeUsed"/> property.
-        /// The passed event arg can be reused and should not be stored.
-        /// </summary>
+        /// <inheritdoc cref="IBuildEventStringsReader.StringReadDone"/>
         public event Action<StringReadEventArgs>? StringReadDone;
+
+        /// <inheritdoc cref="IBuildEventStringsReader.StringEncountered"/>
+        public event Action? StringEncountered;
 
         public int FileFormatVersion => fileFormatVersion;
 
-        /// <summary>
-        /// Raised when the log reader encounters a project import archive (embedded content) in the stream.
-        /// The subscriber must read the exactly given length of binary data from the stream - otherwise exception is raised.
-        /// If no subscriber is attached, the data is skipped.
-        /// </summary>
+        /// <inheritdoc cref="IEmbeddedContentSource.EmbeddedContentRead"/>
         internal event Action<EmbeddedContentEventArgs>? EmbeddedContentRead;
 
         /// <inheritdoc cref="IBuildFileReader.ArchiveFileEncountered"/>
@@ -146,7 +141,7 @@ namespace Microsoft.Build.Logging
                 throw new InvalidDataException($"Raw data slice for record {recordNumber} was not fully read.");
             }
 
-            BinaryLogRecordKind recordKind = ReadTillNextEvent(IsTextualDataRecord);
+            BinaryLogRecordKind recordKind = PreprocessRecordsTillNextEvent(IsTextualDataRecord);
 
             if (recordKind == BinaryLogRecordKind.EndOfFile)
             {
@@ -180,7 +175,7 @@ namespace Microsoft.Build.Logging
             BuildEventArgs? result = null;
             while (result == null)
             {
-                BinaryLogRecordKind recordKind = ReadTillNextEvent(IsAuxiliaryRecord);
+                BinaryLogRecordKind recordKind = PreprocessRecordsTillNextEvent(IsAuxiliaryRecord);
 
                 if (recordKind == BinaryLogRecordKind.EndOfFile)
                 {
@@ -270,15 +265,17 @@ namespace Microsoft.Build.Logging
                         result = ReadAssemblyLoadEventArgs();
                         break;
                     default:
-                        OnRecoverableReadError?.Invoke(
-                            $"BuildEvent record number {recordNumber} (serialized size: {serializedEventLength}) is of unsupported type: {recordKind}.{(SkipUnknownEvents ? " Skipping it." : string.Empty)}");
+                        string error =
+                            $"BuildEvent record number {recordNumber} (serialized size: {serializedEventLength}) is of unsupported type: {recordKind}.{(SkipUnknownEvents ? " Skipping it." : string.Empty)}";
+
                         if (SkipUnknownEvents && serializedEventLength > 0)
                         {
+                            OnRecoverableReadError?.Invoke(error);
                             SkipBytes(serializedEventLength);
                         }
                         else
                         {
-                            return null;
+                            throw new InvalidDataException(error);
                         }
                         break;
                 }
@@ -318,13 +315,11 @@ namespace Microsoft.Build.Logging
             }
             else
             {
-                byte[] buffer = ArrayPool<byte>.Shared.Rent(count);
-                using var _ = new CleanupScope(() => ArrayPool<byte>.Shared.Return(buffer));
-                binaryReader.BaseStream.ReadAtLeast(buffer, 0, count, throwOnEndOfStream: true);
+                binaryReader.BaseStream.SkipBytes(count, true);
             }
         }
 
-        private BinaryLogRecordKind ReadTillNextEvent(Func<BinaryLogRecordKind, bool> isPreprocessRecord)
+        private BinaryLogRecordKind PreprocessRecordsTillNextEvent(Func<BinaryLogRecordKind, bool> isPreprocessRecord)
         {
             BinaryLogRecordKind recordKind = (BinaryLogRecordKind)ReadInt32();
 
@@ -415,7 +410,6 @@ namespace Microsoft.Build.Logging
                             projectImportsCollector.AddFileFromMemory(
                                 resultFile.FullPath,
                                 resultFile.GetContent(),
-                                encoding: resultFile.Encoding,
                                 makePathAbsolute: false,
                                 entryCreationStamp: entry.LastWriteTime);
                         }
@@ -1535,6 +1529,7 @@ namespace Microsoft.Build.Logging
 
         private string ReadString()
         {
+            this.StringEncountered?.Invoke();
             string text = binaryReader.ReadString();
             if (this.StringReadDone != null)
             {

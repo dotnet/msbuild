@@ -5,7 +5,7 @@ using System;
 
 namespace Microsoft.Build.Logging;
 
-internal class CleanupScope : IDisposable
+internal readonly struct CleanupScope : IDisposable
 {
     private readonly Action _disposeAction;
 

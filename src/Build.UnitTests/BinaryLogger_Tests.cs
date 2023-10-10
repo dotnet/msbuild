@@ -129,24 +129,16 @@ namespace Microsoft.Build.UnitTests
                     fileToReplay = _logFile;
                     break;
                 case BinlogRoundtripTestReplayMode.Structured:
-                    {
-                        var logReader = new BinaryLogReplayEventSource();
-                        fileToReplay = _env.ExpectFile(".binlog").Path;
-                        // need dummy handler to force structured replay
-                        logReader.BuildFinished += (_, _) => { };
-                        BinaryLogger outputBinlog = new BinaryLogger()
-                        {
-                            Parameters = fileToReplay
-                        };
-                        outputBinlog.Initialize(logReader);
-                        logReader.Replay(_logFile);
-                        outputBinlog.Shutdown();
-                    }
-                    break;
                 case BinlogRoundtripTestReplayMode.RawEvents:
                     {
                         var logReader = new BinaryLogReplayEventSource();
                         fileToReplay = _env.ExpectFile(".binlog").Path;
+                        if (replayMode == BinlogRoundtripTestReplayMode.Structured)
+                        {
+                            // need dummy handler to force structured replay
+                            logReader.BuildFinished += (_, _) => { };
+                        }
+
                         BinaryLogger outputBinlog = new BinaryLogger()
                         {
                             Parameters = fileToReplay
@@ -193,6 +185,21 @@ namespace Microsoft.Build.UnitTests
             parallelActual.ShouldContainWithoutWhitespace(parallelExpected);
         }
 
+        /// <summary>
+        /// This test validate then binlog file content is identical upon replaying.
+        /// The identity can be defined via 3 ways:
+        ///   * byte-for-byte equality
+        ///   * byte-for-byte equality of unzipped content
+        ///   * structured equality of events
+        ///
+        /// They are ordered by their strength (the byte-for-byte equality implies the other two, etc.),
+        ///  but we mainly care about the structured equality. If the more strong equalities are broken -
+        ///  the assertions can be simply removed.
+        /// However the structured equality is important - it guarantees that binlog reading and writing functionality
+        ///  is not dropping or altering any information.
+        /// </summary>
+        /// <param name="projectText"></param>
+        /// <param name="replayMode"></param>
         [Theory]
         [InlineData(s_testProject, BinlogRoundtripTestReplayMode.Structured)]
         [InlineData(s_testProject, BinlogRoundtripTestReplayMode.RawEvents)]
@@ -200,10 +207,6 @@ namespace Microsoft.Build.UnitTests
         [InlineData(s_testProject2, BinlogRoundtripTestReplayMode.RawEvents)]
         public void TestBinaryLoggerRoundtripEquality(string projectText, BinlogRoundtripTestReplayMode replayMode)
         {
-            // Make sure the env var will get transcribed to traits.
-            BuildEnvironmentState.s_runningTests = true;
-            _env.SetEnvironmentVariable("MSBUILDDETERMNISTICBINLOG", "1");
-
             var binaryLogger = new BinaryLogger();
 
             binaryLogger.Parameters = _logFile;
@@ -225,7 +228,7 @@ namespace Microsoft.Build.UnitTests
 
             BinaryLogger outputBinlog = new BinaryLogger()
             {
-                Parameters = $"LogFile={replayedLogFile};ProjectImports=Replay;OmitInitialInfo"
+                Parameters = $"LogFile={replayedLogFile};OmitInitialInfo"
             };
             outputBinlog.Initialize(logReader);
             logReader.Replay(_logFile);

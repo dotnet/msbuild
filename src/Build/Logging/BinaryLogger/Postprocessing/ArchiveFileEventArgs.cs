@@ -43,7 +43,7 @@ public sealed class ArchiveFileEventArgs : EventArgs
 
     public void SetResult(string resultPath, string resultContent)
     {
-        _archiveFile = new ArchiveFile(resultPath, resultContent, _archiveFile.Encoding);
+        _archiveFile = new ArchiveFile(resultPath, resultContent);
         _disposeAction += _archiveFile.Dispose;
         _resultSet = true;
     }

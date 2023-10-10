@@ -16,5 +16,13 @@ namespace Microsoft.Build.Logging
         /// The passed event arg can be reused and should not be stored.
         /// </summary>
         public event Action<StringReadEventArgs>? StringReadDone;
+
+        /// <summary>
+        /// WARNING: This event is under low support and low maintenance - please use <see cref="StringReadDone"/> instead. 
+        /// 
+        /// An event that allows the caller to be notified when a string is encountered in the binary log.
+        /// BinaryReader passed in ctor is at the beginning of the string at this point.
+        /// </summary>
+        public event Action? StringEncountered;
     }
 }

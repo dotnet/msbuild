@@ -18,7 +18,7 @@ namespace Microsoft.Build.Logging
         /// This means all event args and key-value pairs.
         /// Strings and Embedded files are not included.
         /// </summary>
-        event Action<BinaryLogRecordKind, Stream>? LogDataSliceReceived;
+        event Action<BinaryLogRecordKind, Stream>? RawLogRecordReceived;
 
         /// <summary>
         /// Enables initialization (e.g. subscription to events) - that is deferred until Replay is triggered.
@@ -64,6 +64,13 @@ namespace Microsoft.Build.Logging
         /// Receives recoverable errors during reading.
         /// </summary>
         public event Action<string>? OnRecoverableReadError;
+
+        /// <summary>
+        /// WARNING: This event is under low support and low maintenance - please use events directly exposed by <see cref="BinaryLogReplayEventSource"/> instead. 
+        /// 
+        /// Raised once <see cref="BuildEventArgsReader"/> is created during replaying
+        /// </summary>
+        public event Action<IBuildEventArgsReaderNotifications>? NotificationsSourceCreated;
 
         /// <summary>
         /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
@@ -171,6 +178,7 @@ namespace Microsoft.Build.Logging
         public void Replay(BinaryReader binaryReader, bool closeInput, CancellationToken cancellationToken)
         {
             using var reader = OpenBuildEventsReader(binaryReader, closeInput, AllowForwardCompatibility);
+            NotificationsSourceCreated?.Invoke(reader);
             Replay(reader, cancellationToken);
         }
 
@@ -195,10 +203,11 @@ namespace Microsoft.Build.Logging
 
             reader.EmbeddedContentRead += _embeddedContentRead;
             reader.StringReadDone += _stringReadDone;
+            reader.StringEncountered += _stringEncountered;
 
             if (HasStructuredEventsSubscribers || !supportsForwardCompatibility)
             {
-                if (this._logDataSliceReceived != null)
+                if (this._rawLogRecordReceived != null)
                 {
                     throw new NotSupportedException(
                         "Structured events and raw events cannot be replayed at the same time.");
@@ -216,9 +225,10 @@ namespace Microsoft.Build.Logging
             }
             else
             {
-                if (this._logDataSliceReceived == null &&
+                if (this._rawLogRecordReceived == null &&
                     this._embeddedContentRead == null &&
-                    this._stringReadDone == null)
+                    this._stringReadDone == null &&
+                    this._stringEncountered == null)
                 {
                     throw new NotSupportedException(
                         "No subscribers for any events.");
@@ -227,7 +237,7 @@ namespace Microsoft.Build.Logging
                 while (!cancellationToken.IsCancellationRequested && reader.ReadRaw() is { } instance &&
                        instance.RecordKind != BinaryLogRecordKind.EndOfFile)
                 {
-                    _logDataSliceReceived?.Invoke(instance.RecordKind, instance.Stream);
+                    _rawLogRecordReceived?.Invoke(instance.RecordKind, instance.Stream);
                 }
             }
         }
@@ -261,12 +271,20 @@ namespace Microsoft.Build.Logging
             remove => _stringReadDone -= value;
         }
 
-        private Action<BinaryLogRecordKind, Stream>? _logDataSliceReceived;
-        /// <inheritdoc cref="IBuildEventStringsReader.StringReadDone"/>
-        event Action<BinaryLogRecordKind, Stream>? IRawLogEventsSource.LogDataSliceReceived
+        private Action? _stringEncountered;
+        /// <inheritdoc cref="IBuildEventStringsReader.StringEncountered"/>
+        event Action? IBuildEventStringsReader.StringEncountered
         {
-            add => _logDataSliceReceived += value;
-            remove => _logDataSliceReceived -= value;
+            add => _stringEncountered += value;
+            remove => _stringEncountered -= value;
+        }
+
+        private Action<BinaryLogRecordKind, Stream>? _rawLogRecordReceived;
+        /// <inheritdoc cref="IBuildEventStringsReader.StringReadDone"/>
+        event Action<BinaryLogRecordKind, Stream>? IRawLogEventsSource.RawLogRecordReceived
+        {
+            add => _rawLogRecordReceived += value;
+            remove => _rawLogRecordReceived -= value;
         }
     }
 }

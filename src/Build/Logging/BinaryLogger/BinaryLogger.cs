@@ -97,11 +97,6 @@ namespace Microsoft.Build.Logging
             /// Create an external .ProjectImports.zip archive for the project files.
             /// </summary>
             ZipFile,
-
-            /// <summary>
-            /// Don't collect any files from build events, but instead replay them from the given event source (if that one supports it).
-            /// </summary>
-            Replay,
         }
 
         /// <summary>
@@ -140,6 +135,7 @@ namespace Microsoft.Build.Logging
             bool logPropertiesAndItemsAfterEvaluation = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation ?? true;
 
             ProcessParameters(out bool omitInitialInfo);
+            var replayEventsSource = eventSource as IBinaryLogReplaySource;
 
             try
             {
@@ -161,7 +157,7 @@ namespace Microsoft.Build.Logging
 
                 stream = new FileStream(FilePath, FileMode.Create);
 
-                if (CollectProjectImports != ProjectImportsCollectionMode.None && CollectProjectImports != ProjectImportsCollectionMode.Replay)
+                if (CollectProjectImports != ProjectImportsCollectionMode.None && replayEventsSource == null)
                 {
                     projectImportsCollector = new ProjectImportsCollector(FilePath, CollectProjectImports == ProjectImportsCollectionMode.ZipFile);
                 }
@@ -189,9 +185,7 @@ namespace Microsoft.Build.Logging
             // wrapping the GZipStream in a buffered stream significantly improves performance
             // and the max throughput is reached with a 32K buffer. See details here:
             // https://github.com/dotnet/runtime/issues/39233#issuecomment-745598847
-            stream = Traits.Instance.DeterministicBinlogStreamBuffering ?
-                new GreedyBufferedStream(stream, bufferSize: 32768) :
-                new BufferedStream(stream, bufferSize: 32768);
+            stream = new BufferedStream(stream, bufferSize: 32768);
             binaryWriter = new BinaryWriter(stream);
             eventArgsWriter = new BuildEventArgsWriter(binaryWriter);
 
@@ -202,12 +196,16 @@ namespace Microsoft.Build.Logging
 
             binaryWriter.Write(FileFormatVersion);
 
-            if (eventSource is IBinaryLogReplaySource replayEventsSource)
+            if (replayEventsSource != null)
             {
-                if (CollectProjectImports == ProjectImportsCollectionMode.Replay)
+                if (CollectProjectImports == ProjectImportsCollectionMode.Embed)
                 {
                     replayEventsSource.EmbeddedContentRead += args =>
                         eventArgsWriter.WriteBlob(args.ContentKind.ToBinaryLogRecordKind(), args.ContentStream);
+                }
+                else if (CollectProjectImports != ProjectImportsCollectionMode.None)
+                {
+                    throw new LoggerException($"ProjectImports={CollectProjectImports} not supported in reply mode - only Embed or None are supported.");
                 }
 
                 // If raw events are provided - let's try to use the advantage.
@@ -218,7 +216,7 @@ namespace Microsoft.Build.Logging
                     //  at the same time as raw events are being written - this would break the deduplicated strings store.
                     () =>
                     {
-                        replayEventsSource.LogDataSliceReceived += RawEvents_LogDataSliceReceived;
+                        replayEventsSource.RawLogRecordReceived += RawEvents_LogDataSliceReceived;
                         // Replay separated strings here as well (and do not deduplicate! It would skew string indexes)
                         replayEventsSource.StringReadDone += strArg => eventArgsWriter.WriteStringRecord(strArg.StringToBeUsed);
                     },
@@ -376,10 +374,6 @@ namespace Microsoft.Build.Logging
                 else if (string.Equals(parameter, "ProjectImports=ZipFile", StringComparison.OrdinalIgnoreCase))
                 {
                     CollectProjectImports = ProjectImportsCollectionMode.ZipFile;
-                }
-                else if (string.Equals(parameter, "ProjectImports=Replay", StringComparison.OrdinalIgnoreCase))
-                {
-                    CollectProjectImports = ProjectImportsCollectionMode.Replay;
                 }
                 else if (string.Equals(parameter, "OmitInitialInfo", StringComparison.OrdinalIgnoreCase))
                 {

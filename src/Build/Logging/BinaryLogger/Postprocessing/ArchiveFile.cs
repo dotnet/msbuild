@@ -10,24 +10,18 @@ namespace Microsoft.Build.Logging
 {
     public sealed class ArchiveFile
     {
-        // We need to specify encoding without preamble - as then StreamReader will
-        //  automatically adjust the encoding to match the preamble (if present).
-        // It will as well change to other encoding if detected.
-        private static readonly Encoding s_utf8WithoutPreamble = new UTF8Encoding(false);
-
         public ArchiveFile(string fullPath, Stream contentStream)
         {
             FullPath = fullPath;
-            _contentReader = new StreamReader(contentStream, s_utf8WithoutPreamble);
+            _contentReader = new StreamReader(contentStream);
         }
 
-        public ArchiveFile(string fullPath, string content, Encoding? contentEncoding = null)
+        public ArchiveFile(string fullPath, string content)
         {
             FullPath = fullPath;
             _content = content;
             _stringAcquired = true;
             _contentReader = StreamReader.Null;
-            _stringEncoding = contentEncoding ?? Encoding.UTF8;
         }
 
         internal static ArchiveFile From(ZipArchiveEntry entry)
@@ -36,9 +30,6 @@ namespace Microsoft.Build.Logging
         }
 
         public string FullPath { get; }
-
-        public Encoding Encoding => _stringEncoding ?? _contentReader.CurrentEncoding;
-
         public bool CanUseReader => !_stringAcquired;
         public bool CanUseString => !_streamAcquired;
 
@@ -69,7 +60,7 @@ namespace Microsoft.Build.Logging
         {
             if (_streamAcquired)
             {
-                throw new InvalidOperationException("Content already acquired as StreamReader via GetContnetReader.");
+                throw new InvalidOperationException("Content already acquired as StreamReader via GetContentReader.");
             }
 
             if (!_stringAcquired)
@@ -85,7 +76,6 @@ namespace Microsoft.Build.Logging
         private bool _stringAcquired;
         private readonly StreamReader _contentReader;
         private string? _content;
-        private readonly Encoding? _stringEncoding;
 
         // Intentionally not exposing this publicly (e.g. as IDisposable implementation)
         // as we don't want to user to be bothered with ownership and disposing concerns.

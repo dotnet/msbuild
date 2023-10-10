@@ -83,12 +83,11 @@ namespace Microsoft.Build.Logging
         public void AddFileFromMemory(
             string? filePath,
             string data,
-            Encoding? encoding = null,
             DateTimeOffset? entryCreationStamp = null,
             bool makePathAbsolute = true)
         {
             AddFileHelper(filePath, path =>
-                AddFileFromMemoryCore(path, data, encoding ?? Encoding.UTF8, makePathAbsolute, entryCreationStamp));
+                AddFileFromMemoryCore(path, data, makePathAbsolute, entryCreationStamp));
         }
 
         public void AddFileFromMemory(
@@ -106,8 +105,6 @@ namespace Microsoft.Build.Logging
         {
             if (filePath != null && _fileStream != null)
             {
-                Action addFileAction = WrapWithExceptionSwallowing(() => addFileWorker(filePath));
-
                 lock (_fileStream)
                 {
                     if (_runOnBackground)
@@ -115,29 +112,25 @@ namespace Microsoft.Build.Logging
                         // enqueue the task to add a file and return quickly
                         // to avoid holding up the current thread
                         _currentTask = _currentTask.ContinueWith(
-                            t => { addFileAction(); },
+                            t => { TryAddFile(); },
                             TaskScheduler.Default);
                     }
                     else
                     {
-                        addFileAction();
+                        TryAddFile();
                     }
                 }
             }
-        }
 
-        private Action WrapWithExceptionSwallowing(Action action)
-        {
-            return () =>
+            void TryAddFile()
             {
                 try
                 {
-                    action();
+                    addFileWorker(filePath);
                 }
                 catch
-                {
-                }
-            };
+                { }
+            }
         }
 
         /// <remarks>
@@ -160,7 +153,7 @@ namespace Microsoft.Build.Logging
         /// This method doesn't need locking/synchronization because it's only called
         /// from a task that is chained linearly
         /// </remarks>
-        private void AddFileFromMemoryCore(string filePath, string data, Encoding encoding, bool makePathAbsolute, DateTimeOffset? entryCreationStamp)
+        private void AddFileFromMemoryCore(string filePath, string data, bool makePathAbsolute, DateTimeOffset? entryCreationStamp)
         {
             // quick check to avoid repeated disk access for Exists etc.
             if (!ShouldAddFile(ref filePath, false, makePathAbsolute))
@@ -168,7 +161,8 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            AddFileData(filePath, data, encoding, entryCreationStamp);
+            using var content = new MemoryStream(Encoding.UTF8.GetBytes(data));
+            AddFileData(filePath, content, entryCreationStamp);
         }
 
         private void AddFileFromMemoryCore(string filePath, Stream data, bool makePathAbsolute, DateTimeOffset? entryCreationStamp)
@@ -186,19 +180,6 @@ namespace Microsoft.Build.Logging
         {
             using Stream entryStream = OpenArchiveEntry(filePath, entryCreationStamp);
             data.CopyTo(entryStream);
-        }
-
-        private void AddFileData(string filePath, string data, Encoding encoding, DateTimeOffset? entryCreationStamp)
-        {
-            using Stream entryStream = OpenArchiveEntry(filePath, entryCreationStamp);
-            using MemoryStream memoryStream = new MemoryStream();
-            // We need writer as encoding.GetBytes() isn't obliged to output preamble
-            // We cannot write directly to entryStream (preamble is written separately) as it's compressed differnetly, then writing the whole stream at once
-            using StreamWriter writer = new StreamWriter(memoryStream, encoding);
-            writer.Write(data);
-            writer.Flush();
-            memoryStream.Position = 0;
-            memoryStream.CopyTo(entryStream);
         }
 
         private bool ShouldAddFile(ref string filePath, bool checkFileExistence, bool makeAbsolute)
