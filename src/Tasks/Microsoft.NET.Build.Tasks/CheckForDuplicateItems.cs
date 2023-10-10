@@ -35,7 +35,7 @@ namespace Microsoft.NET.Build.Tasks
 
             if (DefaultItemsEnabled && DefaultItemsOfThisTypeEnabled)
             {
-                var itemGroups = Items.GroupBy(i => i.ItemSpec);
+                var itemGroups = Items.GroupBy(i => i.ItemSpec, StringComparer.OrdinalIgnoreCase);
 
                 var duplicateItems = itemGroups.Where(g => g.Count() > 1).ToList();
                 if (duplicateItems.Any())
