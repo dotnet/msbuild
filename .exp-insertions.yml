@@ -29,8 +29,6 @@ parameters:
 variables:
   - name: _MsBuildCiPipelineId
     value: 9434
-  - name: _DropExeUri
-    value: "https://artifacts.dev.azure.com/CloudBuild/_apis/drop/client/exe"
   - name: _MSBuildConfigFilePath
     value: "config/batmon/Q-Prod-Co3/Coordinator/ToolsReleaseConfig-GeneralPublic.json"
   - name: VSVersion
@@ -151,10 +149,9 @@ jobs:
       Write-Host "##vso[task.setvariable variable=MSBuildDropPath]$MSBuildDropPath"
       Write-Host "MSBuild Drop Path directory: $MSBuildDropPath"
     displayName: Get Retail MSBuild Drop Path
-
-  - task: NuGetToolInstaller@0
-    inputs:
-      versionSpec: '4.9.2'
+  
+  - task: NuGetToolInstaller@1
+    displayName: 'Install NuGet.exe'
 
   - task: NuGetCommand@2
     displayName: Restore internal tools
@@ -162,18 +159,18 @@ jobs:
       command: restore
       feedsToUse: config
       restoreSolution: '$(Build.SourcesDirectory)\DotNet-msbuild-Trusted\eng\common\internal\Tools.csproj'
-      nugetConfigPath: 'NuGet.config'
+      nugetConfigPath: '$(Build.SourcesDirectory)\DotNet-msbuild-Trusted\NuGet.config'
       restoreDirectory: '$(Build.SourcesDirectory)\DotNet-msbuild-Trusted\.packages'
-
+  
   - powershell: |
       mkdir "$(Pipeline.Workspace)/artifacts"
       
       $dropAppDirectory = Get-ChildItem -Directory -Path "$(Build.SourcesDirectory)/DotNet-msbuild-Trusted/.packages/drop.app"
       $dropAppVersion = $dropAppDirectory.Name
-      Write-Host "Detected dotnet version: $dropAppVersion"
+      Write-Host "Detected drop.exe version: $dropAppVersion"
 
-      $dropExePath = "$dropAppDirectory/$dropAppVersion/lib/net45/drop.exe"
-      Write-Host "Detected drop.exe version: $dropExePath"
+      $dropExePath = "$(Build.SourcesDirectory)/DotNet-msbuild-Trusted/.packages/drop.app/$dropAppVersion/lib/net45/drop.exe"
+      Write-Host "Detected drop.exe path: $dropExePath"
 
       Write-Host "Downloading VS msbuild"
       & "$dropExePath" get --patAuthEnvVar 'cloudbuild-token' -u "$(MSBuildDropPath)\$(VSVersion)" -d "$(System.ArtifactsDirectory)/VSMSBuildDrop"
