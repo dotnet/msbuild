@@ -20,7 +20,7 @@ namespace Microsoft.Build.Logging
         private readonly Stream _stream;
         private long _position;
 
-        public static Stream CreateSeekableStream(Stream stream)
+        public static Stream EnsureSeekableStream(Stream stream)
         {
             if (stream.CanSeek)
             {
@@ -35,11 +35,36 @@ namespace Microsoft.Build.Logging
             return new TransparentReadStream(stream);
         }
 
+        public static TransparentReadStream EnsureTransparentReadStream(Stream stream)
+        {
+            if (stream is TransparentReadStream transparentReadStream)
+            {
+                return transparentReadStream;
+            }
+
+            if (!stream.CanRead)
+            {
+                throw new InvalidOperationException("Stream must be readable.");
+            }
+
+            return new TransparentReadStream(stream);
+        }
+
         private TransparentReadStream(Stream stream)
         {
             _stream = stream;
         }
 
+        public int? BytesCountAllowedToRead
+        {
+            set { _maxAllowedPosition = value.HasValue ? _position + value.Value : long.MaxValue; }
+        }
+
+        // if we haven't constrained the allowed read size - do not report it being unfinished either.
+        public int BytesCountAllowedToReadRemaining =>
+            _maxAllowedPosition == long.MaxValue ? 0 : (int)(_maxAllowedPosition - _position);
+
+        private long _maxAllowedPosition = long.MaxValue;
         public override bool CanRead => _stream.CanRead;
         public override bool CanSeek => true;
         public override bool CanWrite => false;
@@ -57,6 +82,12 @@ namespace Microsoft.Build.Logging
 
         public override int Read(byte[] buffer, int offset, int count)
         {
+            if (_position + count > _maxAllowedPosition)
+            {
+                throw new StreamChunkOverReadException(
+                    $"Attempt to read {count} bytes, when only {_maxAllowedPosition - _position} are allowed to be read.");
+            }
+
             int cnt = _stream.Read(buffer, offset, count);
             _position += cnt;
             return cnt;

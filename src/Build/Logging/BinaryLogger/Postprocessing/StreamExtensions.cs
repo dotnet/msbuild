@@ -66,7 +66,7 @@ namespace Microsoft.Build.Logging
 
         public static Stream ToReadableSeekableStream(this Stream stream)
         {
-            return TransparentReadStream.CreateSeekableStream(stream);
+            return TransparentReadStream.EnsureSeekableStream(stream);
         }
 
         /// <summary>
