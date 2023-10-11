@@ -50,65 +50,34 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\UnitTests\BuildEventArgsExtension.cs">
-      <!-- Extension methods -->
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\EscapingUtilities_Tests.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\FileUtilities_Tests.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\FileMatcher_Tests.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\MockEngine.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\MockLogger.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="..\Shared\UnitTests\BuildEventArgsExtension.cs" />
+    <Compile Include="..\Shared\UnitTests\EscapingUtilities_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\FileUtilities_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\FileMatcher_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\MockEngine.cs" />
+    <Compile Include="..\Shared\UnitTests\MockLogger.cs" />
+    <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
     <Compile Include="..\UnitTests.Shared\EnvironmentProvider.cs" />
-    <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" />
     <Compile Include="..\UnitTests.Shared\DriveMapping.cs" />
     <Compile Include="..\UnitTests.Shared\DummyMappedDrive.cs" />
     <Compile Include="..\UnitTests.Shared\DummyMappedDriveUtils.cs" />
-    <Compile Include="..\Shared\UnitTests\StreamHelpers.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="..\Shared\UnitTests\StreamHelpers.cs" />
     <Compile Include="..\Shared\UnitTests\EngineTestEnvironment.cs">
       <Link>EngineTestEnvironment.cs</Link>
     </Compile>
     <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
       <Link>TestEnvironment.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\UnitTests\TypeLoader_Tests.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\TypeLoader_Dependencies_Tests.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="..\Shared\UnitTests\TypeLoader_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\TypeLoader_Dependencies_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\XmakeAttributes_Tests.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
       <Link>XmakeAttributes_Tests.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\UnitTests\XmlUtilities_Tests.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="..\Shared\UnitTests\XmlUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\AssemblyNameEx_Tests.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
       <Link>AssemblyNameEx_Tests.cs</Link>
     </Compile>
     <Compile Include="..\Shared\UnitTests\TaskParameter_Tests.cs">
