@@ -35,19 +35,19 @@ namespace Microsoft.Build.Logging
             return totalRead;
         }
 
-        public static int SkipBytes(this Stream stream, int bytesCount, bool throwOnEndOfStream)
+        public static long SkipBytes(this Stream stream, long bytesCount, bool throwOnEndOfStream)
         {
             byte[] buffer = ArrayPool<byte>.Shared.Rent(4096);
             using var _ = new CleanupScope(() => ArrayPool<byte>.Shared.Return(buffer));
             return SkipBytes(stream, bytesCount, throwOnEndOfStream, buffer);
         }
 
-        public static int SkipBytes(this Stream stream, int bytesCount, bool throwOnEndOfStream, byte[] buffer)
+        public static long SkipBytes(this Stream stream, long bytesCount, bool throwOnEndOfStream, byte[] buffer)
         {
-            int totalRead = 0;
+            long totalRead = 0;
             while (totalRead < bytesCount)
             {
-                int read = stream.Read(buffer, 0,  Math.Min(bytesCount - totalRead, buffer.Length));
+                int read = stream.Read(buffer, 0,  (int)Math.Min(bytesCount - totalRead, buffer.Length));
                 if (read == 0)
                 {
                     if (throwOnEndOfStream)

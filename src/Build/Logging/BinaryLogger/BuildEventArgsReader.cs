@@ -52,11 +52,6 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private readonly StringStorage stringStorage = new StringStorage();
 
-        /// <summary>
-        /// Is the enderlying stream seekable?
-        /// </summary>
-        private readonly bool _canSeek;
-
         // reflection is needed to set these three fields because public constructors don't provide
         // a way to set these from the outside
         private static FieldInfo? buildEventArgsFieldThreadId =
@@ -71,9 +66,11 @@ namespace Microsoft.Build.Logging
         /// <param name="fileFormatVersion">The file format version of the log file being read.</param>
         public BuildEventArgsReader(BinaryReader binaryReader, int fileFormatVersion)
         {
-            this.binaryReader = binaryReader;
-            this._canSeek = binaryReader.BaseStream.CanSeek;
             this._readStream = TransparentReadStream.EnsureTransparentReadStream(binaryReader.BaseStream);
+            // make sure the reader we're going to use wraps the transparent stream wrapper
+            this.binaryReader = binaryReader.BaseStream == _readStream
+                ? binaryReader
+                : new BinaryReader(_readStream);
             this.fileFormatVersion = fileFormatVersion;
         }
 
@@ -327,14 +324,7 @@ namespace Microsoft.Build.Logging
 
         private void SkipBytes(int count)
         {
-            if (_canSeek)
-            {
-                binaryReader.BaseStream.Seek(count, SeekOrigin.Current);
-            }
-            else
-            {
-                binaryReader.BaseStream.SkipBytes(count, true);
-            }
+            binaryReader.BaseStream.Seek(count, SeekOrigin.Current);
         }
 
         private BinaryLogRecordKind PreprocessRecordsTillNextEvent(Func<BinaryLogRecordKind, bool> isPreprocessRecord)

@@ -72,7 +72,7 @@ namespace Microsoft.Build.Logging
         public override long Position
         {
             get => _position;
-            set => SkipBytes(value - _position);
+            set => this.SkipBytes((int)(value - _position), true);
         }
 
         public override void Flush()
@@ -100,7 +100,7 @@ namespace Microsoft.Build.Logging
                 throw new InvalidOperationException("Only seeking from SeekOrigin.Current is supported.");
             }
 
-            SkipBytes(offset);
+            this.SkipBytes((int)offset, true);
 
             return _position;
         }
@@ -113,29 +113,6 @@ namespace Microsoft.Build.Logging
         public override void Write(byte[] buffer, int offset, int count)
         {
             throw new InvalidOperationException("Writing is not supported.");
-        }
-
-        private void SkipBytes(long count)
-        {
-            if(count < 0)
-            {
-                throw new InvalidOperationException("Seeking backwards is not supported.");
-            }
-
-            if(count == 0)
-            {
-                return;
-            }
-
-            byte[] buffer = ArrayPool<byte>.Shared.Rent((int)count);
-            try
-            {
-                _position += _stream.ReadAtLeast(buffer, 0, (int)count, throwOnEndOfStream: true);
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(buffer);
-            }
         }
 
         public override void Close() => _stream.Close();
