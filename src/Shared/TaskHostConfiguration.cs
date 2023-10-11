@@ -45,6 +45,11 @@ namespace Microsoft.Build.BackEnd
 
 #if FEATURE_APPDOMAIN
         /// <summary>
+        /// The app domain configuration bytes sent via RPC.
+        /// </summary>
+        private byte[] _appDomainConfigBytes;
+
+        /// <summary>
         /// The AppDomainSetup that we may want to use on AppDomainIsolated tasks. 
         /// </summary>
         private AppDomainSetup _appDomainSetup;
@@ -182,6 +187,7 @@ namespace Microsoft.Build.BackEnd
             _culture = culture;
             _uiCulture = uiCulture;
 #if FEATURE_APPDOMAIN
+            _appDomainConfigBytes = appDomainSetup?.GetConfigurationBytes();
             _appDomainSetup = appDomainSetup;
 #endif
             _lineNumberOfTask = lineNumberOfTask;
@@ -417,7 +423,7 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateCulture(ref _culture);
             translator.TranslateCulture(ref _uiCulture);
 #if FEATURE_APPDOMAIN
-            translator.TranslateDotNet(ref _appDomainSetup);
+            translator.Translate(ref _appDomainConfigBytes);
 #endif
             translator.Translate(ref _lineNumberOfTask);
             translator.Translate(ref _columnNumberOfTask);
@@ -458,6 +464,13 @@ namespace Microsoft.Build.BackEnd
         {
             TaskHostConfiguration configuration = new TaskHostConfiguration();
             configuration.Translate(translator);
+#if FEATURE_APPDOMAIN
+            if (configuration._appDomainConfigBytes != null)
+            {
+                configuration._appDomainSetup = new AppDomainSetup();
+                configuration._appDomainSetup.SetConfigurationBytes(configuration._appDomainConfigBytes);
+            }
+#endif
             return configuration;
         }
     }

@@ -29,6 +29,11 @@ namespace Microsoft.Build.BackEnd
 
 #if FEATURE_APPDOMAIN
         /// <summary>
+        /// The app domain configuration bytes sent via RPC.
+        /// </summary>
+        private byte[] _appDomainConfigBytes;
+
+        /// <summary>
         /// The app domain information needed for setting up AppDomain-isolated tasks.
         /// </summary>
         private AppDomainSetup _appDomainSetup;
@@ -66,6 +71,7 @@ namespace Microsoft.Build.BackEnd
             _buildParameters = buildParameters;
             _forwardingLoggers = forwardingLoggers;
 #if FEATURE_APPDOMAIN
+            _appDomainConfigBytes = appDomainSetup?.GetConfigurationBytes();
             _appDomainSetup = appDomainSetup;
 #endif
             _loggingNodeConfiguration = loggingNodeConfiguration;
@@ -161,7 +167,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _buildParameters, BuildParameters.FactoryForDeserialization);
             translator.TranslateArray(ref _forwardingLoggers, LoggerDescription.FactoryForTranslation);
 #if FEATURE_APPDOMAIN
-            translator.TranslateDotNet(ref _appDomainSetup);
+            translator.Translate(ref _appDomainConfigBytes);
 #endif
             translator.Translate(ref _loggingNodeConfiguration);
         }
@@ -173,6 +179,13 @@ namespace Microsoft.Build.BackEnd
         {
             NodeConfiguration configuration = new NodeConfiguration();
             configuration.Translate(translator);
+#if FEATURE_APPDOMAIN
+            if (configuration._appDomainConfigBytes != null)
+            {
+                configuration._appDomainSetup = new AppDomainSetup();
+                configuration._appDomainSetup.SetConfigurationBytes(configuration._appDomainConfigBytes);
+            }
+#endif
             return configuration;
         }
         #endregion
