@@ -63,6 +63,7 @@
     <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" />
     <Compile Include="..\UnitTests.Shared\DriveMapping.cs" />
     <Compile Include="..\UnitTests.Shared\DummyMappedDrive.cs" />
+    <Compile Include="..\UnitTests.Shared\DummyMappedDriveUtils.cs"/>
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>

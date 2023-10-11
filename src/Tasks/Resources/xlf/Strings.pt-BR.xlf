@@ -1940,6 +1940,11 @@
         <target state="translated">Cabeçalho PE inválido encontrado. O arquivo de implementação não será usado.</target>
         <note>This message can be used as the {1} in MSB3272</note>
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.UnifiedReferenceDependsOn">
+        <source>References which depend on or have been unified to "{0}" [{1}].</source>
+        <target state="new">References which depend on or have been unified to "{0}" [{1}].</target>
+        <note> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
+      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnknownProcessorArchitecture">
         <source>MSB3273: Unknown processor architecture. The implementation file "{0}" for "{1}" had an ImageFileMachine value of "0x{2}". If you wish to use this implementation file make sure the "ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch" property in your project is set to "Warning" or "None".</source>
         <target state="translated">MSB3273: Arquitetura de processador desconhecida. O arquivo de implementação "{0}" para "{1}" tinha um valor de ImageFileMachine igual a "0x{2}". Se desejar usar esse arquivo de implementação, certifique-se de que a propriedade "ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch" em seu projeto esteja definida como "Aviso" ou "Nenhum".</target>
