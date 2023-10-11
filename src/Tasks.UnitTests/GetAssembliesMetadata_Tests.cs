@@ -1,8 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-
-#if FEATURE_APPDOMAIN
+#if NETFRAMEWORK
 
 using System;
 using System.Collections.Generic;
@@ -17,7 +16,7 @@ using Xunit.Sdk;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
-    public class GetComAssembliesMetadata_Tests
+    public class GetAssembliesMetadata_Tests
     {
         private static string TestAssembliesPaths { get; } = Path.Combine(AppContext.BaseDirectory, "TestResources", "Assemblies");
 
@@ -25,7 +24,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         public void CheckPresenceOfCustomCOMAssemblyAttributes()
         {
             string assemblyPath = Path.Combine(TestAssembliesPaths, "Custom_COM.dll");
-            GetComAssembliesMetadata t = new() { AssembyPaths = new[] { assemblyPath } };
+            GetAssembliesMetadata t = new() { AssemblyPaths = new[] { assemblyPath } };
 
             bool isSuccess = t.Execute();
 
@@ -52,10 +51,8 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void CheckPresenceOfCOMAssemblyAttributes()
         {
-            string programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
-            string programFilesRefAssemblyLocation = Path.Combine(programFilesX86, "Reference Assemblies\\Microsoft\\Framework");
-            string assemblyPath = Path.Combine(programFilesRefAssemblyLocation, ".NETFramework", "v4.7.2", "mscorlib.dll");
-            GetComAssembliesMetadata t = new() { AssembyPaths = new[] { assemblyPath } };
+            string assemblyPath = Path.Combine("C:/", "Windows", "Microsoft.NET", "Framework", "v4.0.30319", "mscorlib.dll");
+            GetAssembliesMetadata t = new() { AssemblyPaths = new[] { assemblyPath } };
 
             bool isSuccess = t.Execute();
 

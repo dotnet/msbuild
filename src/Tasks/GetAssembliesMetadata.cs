@@ -24,10 +24,10 @@ using Microsoft.Build.Utilities;
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// Resolves metadata for the specified set of COM assemblies.
+    /// Resolves metadata for the specified set of assemblies.
     /// </summary>
     [SupportedOSPlatform("windows")]
-    public class GetComAssembliesMetadata : TaskExtension
+    public class GetAssembliesMetadata : TaskExtension
     {
         /// <summary>
         /// Assembly paths.
@@ -44,28 +44,20 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public override bool Execute()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(GetComAssembliesMetadata));
-                return false;
-            }
-
-#if FEATURE_APPDOMAIN
-
             var assembliesMetadata = new List<ITaskItem>();
-            foreach (string assemblyPath in AssembyPaths)
+            foreach (string assemblyPath in AssemblyPaths)
             {
                 AssemblyInformation assemblyInformation = new(assemblyPath);
                 AssemblyAttributes attributes = assemblyInformation.GetAssemblyMetadata();
 
                 if (attributes != null)
                 {
-                    assembliesMetadata.Add(SetItemMetadata(attributes));
+                    assembliesMetadata.Add(CreateItemWithMetadata(attributes));
                 }
             }
 
             _assembliesMetadata = assembliesMetadata.ToArray();
-#endif
+
             return true;
         }
 
@@ -73,13 +65,13 @@ namespace Microsoft.Build.Tasks
         /// List of assembly paths.
         /// </summary>
         [Required]
-        public string[] AssembyPaths
+        public string[] AssemblyPaths
         {
             get => _assemblyPaths;
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(AssembyPaths));
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(AssemblyPaths));
                 _assemblyPaths = value;
             }
         }
@@ -93,7 +85,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Sets metadata on the assembly path.
         /// </summary>
-        private TaskItem SetItemMetadata(AssemblyAttributes attributes)
+        private TaskItem CreateItemWithMetadata(AssemblyAttributes attributes)
         {
             TaskItem referenceItem = new()
             {
@@ -119,7 +111,6 @@ namespace Microsoft.Build.Tasks
                 yield return new KeyValuePair<string, string>(nameof(attributes.MinorVersion), attributes.MinorVersion.ToString());
                 yield return new KeyValuePair<string, string>(nameof(attributes.PeKind), attributes.PeKind.ToString());
                 yield return new KeyValuePair<string, string>(nameof(attributes.PublicKey), attributes.PublicKey);
-                yield return new KeyValuePair<string, string>(nameof(attributes.PublicKeyLength), attributes.PublicKeyLength.ToString());
                 yield return new KeyValuePair<string, string>(nameof(attributes.IsAssembly), attributes.IsAssembly.ToString());
                 yield return new KeyValuePair<string, string>(nameof(attributes.TargetFrameworkMoniker), attributes.TargetFrameworkMoniker);
                 yield return new KeyValuePair<string, string>(nameof(attributes.IsImportedFromTypeLib), attributes.IsImportedFromTypeLib.ToString());

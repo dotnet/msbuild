@@ -11,7 +11,7 @@
 
   <UsingTask TaskName="Microsoft.Build.Tasks.ResolveComReference"       AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildToolsVersion)' == '3.5'" />
 
-  <UsingTask TaskName="Microsoft.Build.Tasks.GetComAssembliesMetadata"  AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildToolsVersion)' == '3.5'" />
+  <UsingTask TaskName="Microsoft.Build.Tasks.GetAssembliesMetadata"     AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildToolsVersion)' == '3.5'" />
 
   <UsingTask TaskName="Microsoft.Build.Tasks.GenerateResource"          AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildToolsVersion)' == '3.5' and ('$(DisableOutOfProcTaskHost)' != '' or !$([MSBuild]::DoesTaskHostExist(`CLR2`,`CurrentArchitecture`)))" />
   <UsingTask TaskName="Microsoft.Build.Tasks.GenerateResource"          AssemblyName="Microsoft.Build.Tasks.v3.5, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildToolsVersion)' == '3.5' and '$(DisableOutOfProcTaskHost)' == '' and $([MSBuild]::DoesTaskHostExist(`CLR2`,`CurrentArchitecture`))" Runtime="CLR2" />
@@ -24,7 +24,7 @@
 
   <UsingTask TaskName="ResolveComReference"                             AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildToolsVersion)' == '2.0'" />
 
-  <UsingTask TaskName="Microsoft.Build.Tasks.GetComAssembliesMetadata"  AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildToolsVersion)' == '2.0'" />
+  <UsingTask TaskName="Microsoft.Build.Tasks.GetAssembliesMetadata"     AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildToolsVersion)' == '2.0'" />
 
   <UsingTask TaskName="GenerateResource"                                AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildToolsVersion)' == '2.0' and ('$(DisableOutOfProcTaskHost)' != '' or !$([MSBuild]::DoesTaskHostExist(`CLR2`,`CurrentArchitecture`)))" />
   <UsingTask TaskName="GenerateResource"                                AssemblyName="Microsoft.Build.Tasks.v3.5, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildToolsVersion)' == '2.0' and '$(DisableOutOfProcTaskHost)' == '' and $([MSBuild]::DoesTaskHostExist(`CLR2`,`CurrentArchitecture`))" Runtime="CLR2" />

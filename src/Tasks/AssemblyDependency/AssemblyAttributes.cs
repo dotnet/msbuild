@@ -12,7 +12,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
     /// <summary>
     /// Collection of assembly attributes.
     /// </summary>
-    internal class AssemblyAttributes
+    internal sealed class AssemblyAttributes
     {
         public string AssemblyFullPath { get; set; } = string.Empty;
 
@@ -36,8 +36,6 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
 
         // it is a byte[] converted to string
         public string PublicKey { get; set; } = string.Empty;
-
-        public uint PublicKeyLength { get; set; }
 
         public bool IsAssembly { get; set; }
 
