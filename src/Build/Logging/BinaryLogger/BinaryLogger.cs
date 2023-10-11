@@ -206,9 +206,10 @@ namespace Microsoft.Build.Logging
                     replayEventsSource.EmbeddedContentRead += args =>
                         eventArgsWriter.WriteBlob(args.ContentKind.ToBinaryLogRecordKind(), args.ContentStream);
                 }
-                else if (CollectProjectImports != ProjectImportsCollectionMode.None)
+                else if (CollectProjectImports == ProjectImportsCollectionMode.ZipFile)
                 {
-                    throw new LoggerException($"ProjectImports={CollectProjectImports} not supported in reply mode - only Embed or None are supported.");
+                    replayEventsSource.EmbeddedContentRead += args =>
+                        ProjectImportsCollector.FlushBlobToFile(FilePath, args.ContentStream);
                 }
 
                 // If raw events are provided - let's try to use the advantage.

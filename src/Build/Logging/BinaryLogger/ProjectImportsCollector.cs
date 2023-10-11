@@ -24,6 +24,7 @@ namespace Microsoft.Build.Logging
         private ZipArchive? _zipArchive;
         private readonly string _archiveFilePath;
         private readonly bool _runOnBackground;
+        private const string DefaultSourcesArchiveExtension = ".ProjectImports.zip";
 
         /// <summary>
         /// Avoid visiting each file more than once.
@@ -33,16 +34,30 @@ namespace Microsoft.Build.Logging
         // this will form a chain of file write tasks, running sequentially on a background thread
         private Task _currentTask = Task.CompletedTask;
 
+        internal static void FlushBlobToFile(
+            string logFilePath,
+            Stream contentStream)
+        {
+            string archiveFilePath = GetArchiveFilePath(logFilePath, DefaultSourcesArchiveExtension);
+
+            using var fileStream = new FileStream(archiveFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Delete);
+            contentStream.CopyTo(fileStream);
+        }
+
+        // Archive file will be stored alongside the binlog
+        private static string GetArchiveFilePath(string logFilePath, string sourcesArchiveExtension)
+            => Path.ChangeExtension(logFilePath, sourcesArchiveExtension);
+        
+
         public ProjectImportsCollector(
             string logFilePath,
             bool createFile,
-            string sourcesArchiveExtension = ".ProjectImports.zip",
+            string sourcesArchiveExtension = DefaultSourcesArchiveExtension,
             bool runOnBackground = true)
         {
             if (createFile)
             {
-                // Archive file will be stored alongside the binlog
-                _archiveFilePath = Path.ChangeExtension(logFilePath, sourcesArchiveExtension);
+                _archiveFilePath = GetArchiveFilePath(logFilePath, sourcesArchiveExtension);
             }
             else
             {
