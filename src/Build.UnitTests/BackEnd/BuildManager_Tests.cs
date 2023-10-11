@@ -4046,7 +4046,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/9245")]
+        [Fact]
         public void IdenticalSubmissionsShouldCompleteAndNotHangTheBuildOnMissingTargetExceptions()
         {
             var projectContents =
@@ -4114,8 +4114,8 @@ $@"<Project InitialTargets=`Sleep`>
                     submission1.ExecuteAsync(null, null);
                     submission2.ExecuteAsync(null, null);
 
-                    submission1.WaitHandle.WaitOne(TimeSpan.FromSeconds(10));
-                    submission2.WaitHandle.WaitOne(TimeSpan.FromSeconds(10));
+                    submission1.WaitHandle.WaitOne(TimeSpan.FromSeconds(20));
+                    submission2.WaitHandle.WaitOne(TimeSpan.FromSeconds(20));
 
                     submission1.IsCompleted.ShouldBeTrue();
                     submission2.IsCompleted.ShouldBeTrue();
