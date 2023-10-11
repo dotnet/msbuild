@@ -118,7 +118,8 @@ namespace Microsoft.Build.Logging
             if (fileFormatVersion < 18)
             {
                 throw new InvalidOperationException(
-                    $"Forward compatible reading is not supported for file format version {fileFormatVersion} (needs >=18).");
+                    ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_FwdCompatUnsupported",
+                        fileFormatVersion));
             }
         }
 
@@ -170,7 +171,7 @@ namespace Microsoft.Build.Logging
 
             if (!(_lastSubStream?.IsAtEnd ?? true))
             {
-                throw new InvalidDataException($"Raw data slice for record {recordNumber} was not fully read.");
+                throw new InvalidDataException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_RawDataUnread", recordNumber));
             }
 
             BinaryLogRecordKind recordKind = PreprocessRecordsTillNextEvent(IsTextualDataRecord);
@@ -225,7 +226,10 @@ namespace Microsoft.Build.Logging
                 {
                     hasError = true;
                     string error =
-                        $"BuildEvent record number {recordNumber} (serialized size: {serializedEventLength}) attempted to perform disallowed reads (error: {e.Message}).{(_skipUnknownEventParts ? " Skipping it." : string.Empty)}";
+                        ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_ReaderMismatchedRead",
+                            recordNumber, serializedEventLength, e.Message) + (_skipUnknownEventParts
+                            ? " " + ResourceUtilities.GetResourceString("Binlog_ReaderSkippingRecord")
+                            : string.Empty);
 
                     HandleError(error, _skipUnknownEventParts, ReaderErrorType.UnknownFormatOfEventData, e);
                 }
@@ -233,7 +237,10 @@ namespace Microsoft.Build.Logging
                 if (result == null && !hasError)
                 {
                     string error =
-                        $"BuildEvent record number {recordNumber} (serialized size: {serializedEventLength}) is of unsupported type: {recordKind}.{(_skipUnknownEvents ? " Skipping it." : string.Empty)}";
+                        ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_ReaderUnknownType",
+                            recordNumber, serializedEventLength, recordKind) + (_skipUnknownEvents
+                            ? " " + ResourceUtilities.GetResourceString("Binlog_ReaderSkippingRecord")
+                            : string.Empty);
 
                     HandleError(error, _skipUnknownEvents, ReaderErrorType.UnkownEventType);
                 }
@@ -241,7 +248,8 @@ namespace Microsoft.Build.Logging
                 if (_readStream.BytesCountAllowedToReadRemaining > 0)
                 {
                     string error =
-                        $"BuildEvent record number {recordNumber} was expected to read exactly {serializedEventLength} bytes from the stream, but read {serializedEventLength - _readStream.BytesCountAllowedToReadRemaining} instead.";
+                        ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_ReaderUnderRead",
+                            recordNumber, serializedEventLength, serializedEventLength - _readStream.BytesCountAllowedToReadRemaining);
 
                     HandleError(error, _skipUnknownEventParts, ReaderErrorType.UnknownEventData);
                 }

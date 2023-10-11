@@ -257,7 +257,7 @@ namespace Microsoft.Build.Logging
 
                 if (fileStream.Length > int.MaxValue)
                 {
-                    onError("Imported files archive exceeded 2GB limit and it's not embedded.");
+                    onError(ResourceUtilities.GetResourceString("Binlog_ImportFileSizeError"));
                 }
                 else
                 {

@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging
 {
@@ -43,7 +44,7 @@ namespace Microsoft.Build.Logging
         {
             if (_stringAcquired)
             {
-                throw new InvalidOperationException("Content already acquired as string via GetContent or initialized as string only.");
+                throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_ArchiveFile_AcquiredAsString"));
             }
 
             _streamAcquired = true;
@@ -60,7 +61,7 @@ namespace Microsoft.Build.Logging
         {
             if (_streamAcquired)
             {
-                throw new InvalidOperationException("Content already acquired as StreamReader via GetContentReader.");
+                throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_ArchiveFile_AcquiredAsStream"));
             }
 
             if (!_stringAcquired)

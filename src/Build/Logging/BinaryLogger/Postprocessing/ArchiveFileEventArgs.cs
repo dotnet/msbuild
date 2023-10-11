@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging;
 
@@ -27,7 +28,7 @@ public sealed class ArchiveFileEventArgs : EventArgs
         if (!_resultSet)
         {
             throw new InvalidOperationException(
-                "ArchiveFile was obtained, but the final edited version was not set.");
+                ResourceUtilities.GetResourceString("Binlog_ArchiveFile_NotSetAfterAcquire"));
         }
 
         _resultSet = false;

@@ -26,6 +26,103 @@
         <note>{StrBegin="MSB4003: "}UE: Tasks are not allowed to use incorrect case for reserved attributes on the task nodes e.g. "continueonerror"
     instead of the "ContinueOnError".</note>
       </trans-unit>
+      <trans-unit id="Binlog_ArchiveFile_AcquiredAsStream">
+        <source>Content already acquired as StreamReader via GetContentReader.</source>
+        <target state="new">Content already acquired as StreamReader via GetContentReader.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_ArchiveFile_AcquiredAsString">
+        <source>Content already acquired as string via GetContent or initialized as string only.</source>
+        <target state="new">Content already acquired as string via GetContent or initialized as string only.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_ArchiveFile_NotSetAfterAcquire">
+        <source>ArchiveFile was obtained, but the final edited version was not set.</source>
+        <target state="new">ArchiveFile was obtained, but the final edited version was not set.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_FwdCompatUnsupported">
+        <source>Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</source>
+        <target state="new">Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</target>
+        <note>
+      LOCALIZATION: {0} is an integer number denoting version.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_ImportFileSizeError">
+        <source>Imported files archive exceeded 2GB limit and it's not embedded.</source>
+        <target state="new">Imported files archive exceeded 2GB limit and it's not embedded.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_RawDataUnread">
+        <source>Raw data sub-stream for record {0} was not fully read.</source>
+        <target state="new">Raw data sub-stream for record {0} was not fully read.</target>
+        <note>
+      LOCALIZATION: {0} is an integer number denoting order.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_ReaderMismatchedRead">
+        <source>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (error: {2}).</source>
+        <target state="new">BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (error: {2}).</target>
+        <note>
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an exception message string.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_ReaderSkippingRecord">
+        <source>Skipping the record.</source>
+        <target state="new">Skipping the record.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_ReaderUnderRead">
+        <source>BuildEvent record number {0} was expected to read exactly {1} bytes from the stream, but read {2} instead.</source>
+        <target state="new">BuildEvent record number {0} was expected to read exactly {1} bytes from the stream, but read {2} instead.</target>
+        <note>
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an integer value indicating number of bytes.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_ReaderUnknownType">
+        <source>BuildEvent record number {0} (serialized size: {1}) is of unsupported type: {2}.</source>
+        <target state="new">BuildEvent record number {0} (serialized size: {1}) is of unsupported type: {2}.</target>
+        <note>
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is a string or integer value indicating type.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_Source_MissingSubscribeError">
+        <source>No subscribers for any events.</source>
+        <target state="new">No subscribers for any events.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_Source_MultiSubscribeError">
+        <source>Structured events and raw events cannot be replayed at the same time.</source>
+        <target state="new">Structured events and raw events cannot be replayed at the same time.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_ExpandUnsupported">
+        <source>Expanding stream is not supported.</source>
+        <target state="new">Expanding stream is not supported.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_MustBeReadable">
+        <source>Stream must be readable.</source>
+        <target state="new">Stream must be readable.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_OverRead">
+        <source>"Attempt to read {0} bytes, when only {1} are allowed to be read.</source>
+        <target state="new">"Attempt to read {0} bytes, when only {1} are allowed to be read.</target>
+        <note>
+      LOCALIZATION: {0} and {1} are integer numbers denoting number of bytes.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_SeekNonOrigin">
+        <source>Only seeking from SeekOrigin.Current is supported.</source>
+        <target state="new">Only seeking from SeekOrigin.Current is supported.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_WriteUnsupported">
+        <source>Writing is not supported.</source>
+        <target state="new">Writing is not supported.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildInProgress">
         <source>The operation cannot be completed because a build is already in progress.</source>
         <target state="translated">A operação não pode ser concluída porque uma compilação está em andamento.</target>

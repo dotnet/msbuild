@@ -214,7 +214,7 @@ namespace Microsoft.Build.Logging
                 if (this._rawLogRecordReceived != null)
                 {
                     throw new NotSupportedException(
-                        "Structured events and raw events cannot be replayed at the same time.");
+                        ResourceUtilities.GetResourceString("Binlog_Source_MultiSubscribeError"));
                 }
 
                 // Forward compatibile reading makes sense only for structured events reading.
@@ -235,7 +235,7 @@ namespace Microsoft.Build.Logging
                     this._stringEncountered == null)
                 {
                     throw new NotSupportedException(
-                        "No subscribers for any events.");
+                        ResourceUtilities.GetResourceString("Binlog_Source_MissingSubscribeError"));
                 }
 
                 while (!cancellationToken.IsCancellationRequested && reader.ReadRaw() is { } instance &&

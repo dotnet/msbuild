@@ -2004,6 +2004,75 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="ReportFileAccessesX64Only" xml:space="preserve">
     <value>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</value>
   </data>
+  <data name="Binlog_Source_MultiSubscribeError" xml:space="preserve">
+    <value>Structured events and raw events cannot be replayed at the same time.</value>
+  </data>
+  <data name="Binlog_Source_MissingSubscribeError" xml:space="preserve">
+    <value>No subscribers for any events.</value>
+  </data>
+  <data name="Binlog_ImportFileSizeError" xml:space="preserve">
+    <value>Imported files archive exceeded 2GB limit and it's not embedded.</value>
+  </data>
+  <data name="Binlog_FwdCompatUnsupported" xml:space="preserve">
+    <value>Forward compatible reading is not supported for file format version {0} (needs >= 18).</value>
+    <comment>
+      LOCALIZATION: {0} is an integer number denoting version.
+    </comment>
+  </data>
+  <data name="Binlog_RawDataUnread" xml:space="preserve">
+    <value>Raw data sub-stream for record {0} was not fully read.</value>
+    <comment>
+      LOCALIZATION: {0} is an integer number denoting order.
+    </comment>
+  </data>
+  <data name="Binlog_ReaderSkippingRecord" xml:space="preserve">
+    <value>Skipping the record.</value>
+  </data>
+  <data name="Binlog_ReaderMismatchedRead" xml:space="preserve">
+    <value>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (error: {2}).</value>
+    <comment>
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an exception message string.
+    </comment>
+  </data>
+  <data name="Binlog_ReaderUnknownType" xml:space="preserve">
+    <value>BuildEvent record number {0} (serialized size: {1}) is of unsupported type: {2}.</value>
+    <comment>
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is a string or integer value indicating type.
+    </comment>
+  </data>
+  <data name="Binlog_ReaderUnderRead" xml:space="preserve">
+    <value>BuildEvent record number {0} was expected to read exactly {1} bytes from the stream, but read {2} instead.</value>
+    <comment>
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an integer value indicating number of bytes.
+    </comment>
+  </data>
+  <data name="Binlog_ArchiveFile_AcquiredAsStream" xml:space="preserve">
+    <value>Content already acquired as StreamReader via GetContentReader.</value>
+  </data>
+  <data name="Binlog_ArchiveFile_AcquiredAsString" xml:space="preserve">
+    <value>Content already acquired as string via GetContent or initialized as string only.</value>
+  </data>
+  <data name="Binlog_ArchiveFile_NotSetAfterAcquire" xml:space="preserve">
+    <value>ArchiveFile was obtained, but the final edited version was not set.</value>
+  </data>
+  <data name="Binlog_StreamUtils_MustBeReadable" xml:space="preserve">
+    <value>Stream must be readable.</value>
+  </data>
+  <data name="Binlog_StreamUtils_OverRead" xml:space="preserve">
+    <value>"Attempt to read {0} bytes, when only {1} are allowed to be read.</value>
+    <comment>
+      LOCALIZATION: {0} and {1} are integer numbers denoting number of bytes.
+    </comment>
+  </data>
+  <data name="Binlog_StreamUtils_SeekNonOrigin" xml:space="preserve">
+    <value>Only seeking from SeekOrigin.Current is supported.</value>
+  </data>
+  <data name="Binlog_StreamUtils_ExpandUnsupported" xml:space="preserve">
+    <value>Expanding stream is not supported.</value>
+  </data>
+  <data name="Binlog_StreamUtils_WriteUnsupported" xml:space="preserve">
+    <value>Writing is not supported.</value>
+  </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999
 

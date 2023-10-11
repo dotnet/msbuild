@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging
 {
@@ -27,7 +28,7 @@ namespace Microsoft.Build.Logging
 
             if (!stream.CanRead)
             {
-                throw new InvalidOperationException("Stream must be readable.");
+                throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_StreamUtils_MustBeReadable"));
             }
         }
 

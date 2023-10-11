@@ -9,6 +9,7 @@ using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging
 {
@@ -29,7 +30,7 @@ namespace Microsoft.Build.Logging
 
             if(!stream.CanRead)
             {
-                throw new InvalidOperationException("Stream must be readable.");
+                throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_StreamUtils_MustBeReadable"));
             }
 
             return new TransparentReadStream(stream);
@@ -44,7 +45,7 @@ namespace Microsoft.Build.Logging
 
             if (!stream.CanRead)
             {
-                throw new InvalidOperationException("Stream must be readable.");
+                throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_StreamUtils_MustBeReadable"));
             }
 
             return new TransparentReadStream(stream);
@@ -85,7 +86,8 @@ namespace Microsoft.Build.Logging
             if (_position + count > _maxAllowedPosition)
             {
                 throw new StreamChunkOverReadException(
-                    $"Attempt to read {count} bytes, when only {_maxAllowedPosition - _position} are allowed to be read.");
+                    ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_StreamUtils_OverRead", count,
+                        _maxAllowedPosition - _position));
             }
 
             int cnt = _stream.Read(buffer, offset, count);
@@ -97,7 +99,7 @@ namespace Microsoft.Build.Logging
         {
             if(origin != SeekOrigin.Current)
             {
-                throw new InvalidOperationException("Only seeking from SeekOrigin.Current is supported.");
+                throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_StreamUtils_SeekNonOrigin"));
             }
 
             this.SkipBytes((int)offset, true);
@@ -107,12 +109,12 @@ namespace Microsoft.Build.Logging
 
         public override void SetLength(long value)
         {
-            throw new InvalidOperationException("Expanding stream is not supported.");
+            throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_StreamUtils_ExpandUnsupported"));
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            throw new InvalidOperationException("Writing is not supported.");
+            throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_StreamUtils_WriteUnsupported"));
         }
 
         public override void Close() => _stream.Close();
