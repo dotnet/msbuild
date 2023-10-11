@@ -586,7 +586,7 @@ namespace Microsoft.Build.Execution
             {
                 if (packet is LogMessagePacketBase logMessage
                     && logMessage.EventType == LoggingEventType.CustomEvent 
-                    && (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8) || !Traits.Instance.EscapeHatches.IsBinaryFormatterSerializationAllowed)
+                    && (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10) || !Traits.Instance.EscapeHatches.IsBinaryFormatterSerializationAllowed)
                     && Traits.Instance.EscapeHatches.EnableWarningOnCustomBuildEvent)
                 {
                     BuildEventArgs buildEvent = logMessage.NodeBuildEvent.Value.Value;
