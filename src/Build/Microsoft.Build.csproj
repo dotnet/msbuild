@@ -78,17 +78,13 @@
     </Compile>
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\CanonicalError.cs</Link>
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
       <Link>IConstrainedEqualityComparer.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\Pair.cs">
-      <Link>SharedUtilities\Pair.cs</Link>
     </Compile>
     <Compile Include="..\Shared\PropertyParser.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\PropertyParser.cs</Link>
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\StringExtensions.cs">
       <Link>SharedUtilities\StringExtensions.cs</Link>
@@ -117,25 +113,20 @@
     <Compile Include="..\Shared\ProcessExtensions.cs" />
     <Compile Include="..\Shared\PlatformNegotiation.cs">
       <Link>PlatformNegotiation.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\SolutionConfiguration.cs" />
     <Compile Include="..\Shared\TaskLoggingHelper.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelper.cs</Link>
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelperExtension.cs</Link>
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
     <Compile Include="..\Shared\TranslatorHelpers.cs" />
     <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\InterningBinaryReader.cs" />
-    <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs" />
     <Compile Include="..\Shared\ThreadPoolExtensions.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />
@@ -164,6 +155,7 @@
     <Compile Include="BackEnd\Components\SdkResolution\TranslationHelpers.cs" />
     <Compile Include="FileSystem\*.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
+    <Compile Include="Logging\BinaryLogger\ExtendedDataFields.cs" />
     <Compile Include="Logging\BinaryLogger\IBuildEventArgsReaderNotifications.cs" />
     <Compile Include="Logging\BinaryLogger\IBuildEventStringsReader.cs" />
     <Compile Include="Logging\BinaryLogger\StringReadEventArgs.cs" />
@@ -218,14 +210,10 @@
     <Compile Include="BackEnd\Components\Logging\ProjectLoggingContext.cs" />
     <Compile Include="BackEnd\Components\Logging\TargetLoggingContext.cs" />
     <Compile Include="BackEnd\Components\Logging\TaskLoggingContext.cs" />
-    <Compile Include="BackEnd\Components\RequestBuilder\IntrinsicTasks\CallTarget.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="BackEnd\Components\RequestBuilder\IntrinsicTasks\CallTarget.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\IntrinsicTasks\IntrinsicTaskFactory.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\IntrinsicTasks\ItemGroupLoggingHelper.cs" />
-    <Compile Include="BackEnd\Components\RequestBuilder\IntrinsicTasks\MSBuild.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="BackEnd\Components\RequestBuilder\IntrinsicTasks\MSBuild.cs" />
     <Compile Include="BackEnd\Components\Scheduler\SchedulableRequest.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\FullTracking.cs" />
     <Compile Include="BackEnd\Components\Scheduler\SchedulingData.cs" />
@@ -253,18 +241,10 @@
     <Compile Include="Collections\ConcurrentQueueExtensions.cs" />
     <Compile Include="Collections\ConcurrentStackExtensions.cs" />
     <Compile Include="Collections\LookasideStringInterner.cs" />
-    <Compile Include="Collections\RetrievableEntryHashSet\HashSet.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Collections\RetrievableEntryHashSet\BitHelper.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Collections\RetrievableEntryHashSet\HashSetDebugView.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Collections\RetrievableEntryHashSet\HashHelpers.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="Collections\RetrievableEntryHashSet\HashSet.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\BitHelper.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\HashSetDebugView.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\HashHelpers.cs" />
     <Compile Include="Construction\ImplicitImportLocation.cs" />
     <Compile Include="Construction\ProjectSdkElement.cs" />
     <Compile Include="Definition\ProjectOptions.cs" />
@@ -321,9 +301,7 @@
     <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProc.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProcBase.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProcTaskHost.cs" />
-    <Compile Include="BackEnd\Components\RequestBuilder\BatchingEngine.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="BackEnd\Components\RequestBuilder\BatchingEngine.cs" />
     <Compile Include="BackEnd\BuildManager\BuildRequestData.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\IntrinsicTask.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\IntrinsicTasks\ItemGroupIntrinsicTask.cs" />
@@ -339,18 +317,12 @@
     <Compile Include="BackEnd\Components\RequestBuilder\IRequestBuilderCallback.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\ITargetBuilder.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\ITaskBuilder.cs" />
-    <Compile Include="BackEnd\Components\RequestBuilder\ItemBucket.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="BackEnd\Components\RequestBuilder\Lookup.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="BackEnd\Components\RequestBuilder\ItemBucket.cs" />
+    <Compile Include="BackEnd\Components\RequestBuilder\Lookup.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\RequestBuilder.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\TargetBuilder.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\TargetEntry.cs" />
-    <Compile Include="BackEnd\Components\RequestBuilder\TargetUpToDateChecker.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="BackEnd\Components\RequestBuilder\TargetUpToDateChecker.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\TaskBuilder.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\TaskHost.cs" />
     <Compile Include="BackEnd\Shared\BuildRequest.cs" />
@@ -390,9 +362,7 @@
     </Compile>
     <Compile Include="Collections\CopyOnWritePropertyDictionary.cs" />
     <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
-    <Compile Include="Collections\HashTableUtility.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="Collections\HashTableUtility.cs" />
     <Compile Include="Collections\ItemDictionary.cs" />
     <Compile Include="Collections\IImmutable.cs" />
     <Compile Include="Collections\MultiDictionary.cs" />
@@ -430,12 +400,8 @@
     <Compile Include="Construction\ProjectUsingTaskBodyElement.cs" />
     <Compile Include="Construction\Solution\SolutionConfigurationInSolution.cs" />
     <Compile Include="Construction\Solution\ProjectConfigurationInSolution.cs" />
-    <Compile Include="Construction\Solution\ProjectInSolution.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Construction\Solution\SolutionFile.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="Construction\Solution\ProjectInSolution.cs" />
+    <Compile Include="Construction\Solution\SolutionFile.cs" />
     <!-- #### DEFINITION MODEL ### -->
     <Compile Include="Definition\BuiltInMetadata.cs" />
     <Compile Include="Definition\ProjectCollection.cs" />
@@ -448,9 +414,7 @@
     <Compile Include="Definition\SubToolset.cs" />
     <Compile Include="Definition\Toolset.cs" />
     <Compile Include="Definition\ToolsetConfigurationReader.cs" />
-    <Compile Include="..\Shared\ToolsetElement.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="..\Shared\ToolsetElement.cs" />
     <Compile Include="Definition\ToolsetPropertyDefinition.cs" />
     <Compile Include="Definition\ToolsetReader.cs" />
     <Compile Include="Definition\ToolsetRegistryReader.cs" />
@@ -461,85 +425,33 @@
     <Compile Include="ElementLocation\XmlDocumentWithLocation.cs" />
     <Compile Include="ElementLocation\XmlElementWithLocation.cs" />
     <Compile Include="ElementLocation\XmlNameTableThreadSafe.cs" />
-    <Compile Include="Errors\InternalLoggerException.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Errors\InvalidProjectFileException.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Errors\InvalidToolsetDefinitionException.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Errors\RegistryException.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="Errors\InternalLoggerException.cs" />
+    <Compile Include="Errors\InvalidProjectFileException.cs" />
+    <Compile Include="Errors\InvalidToolsetDefinitionException.cs" />
+    <Compile Include="Errors\RegistryException.cs" />
     <!-- #### EVALUATION ### -->
-    <Compile Include="Evaluation\ConditionEvaluator.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Evaluation\Conditionals\AndExpressionNode.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Evaluation\Conditionals\CharacterUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Evaluation\Conditionals\EqualExpressionNode.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Evaluation\Conditionals\FunctionCallExpressionNode.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Evaluation\Conditionals\GenericExpressionNode.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Evaluation\Conditionals\GreaterThanExpressionNode.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Evaluation\Conditionals\GreaterThanOrEqualExpressionNode.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Evaluation\Conditionals\LessThanExpressionNode.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Evaluation\Conditionals\LessThanOrEqualExpressionNode.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Evaluation\Conditionals\MultipleComparisonExpressionNode.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Evaluation\Conditionals\NotEqualExpressionNode.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Evaluation\Conditionals\NotExpressionNode.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Evaluation\Conditionals\NumericComparisonExpressionNode.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Evaluation\Conditionals\NumericExpressionNode.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Evaluation\Conditionals\OperandExpressionNode.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Evaluation\Conditionals\OperatorExpressionNode.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Evaluation\Conditionals\OrExpressionNode.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Evaluation\Conditionals\Parser.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Evaluation\Conditionals\Scanner.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Evaluation\Conditionals\StringExpressionNode.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Evaluation\Conditionals\Token.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="Evaluation\ConditionEvaluator.cs" />
+    <Compile Include="Evaluation\Conditionals\AndExpressionNode.cs" />
+    <Compile Include="Evaluation\Conditionals\CharacterUtilities.cs" />
+    <Compile Include="Evaluation\Conditionals\EqualExpressionNode.cs" />
+    <Compile Include="Evaluation\Conditionals\FunctionCallExpressionNode.cs" />
+    <Compile Include="Evaluation\Conditionals\GenericExpressionNode.cs" />
+    <Compile Include="Evaluation\Conditionals\GreaterThanExpressionNode.cs" />
+    <Compile Include="Evaluation\Conditionals\GreaterThanOrEqualExpressionNode.cs" />
+    <Compile Include="Evaluation\Conditionals\LessThanExpressionNode.cs" />
+    <Compile Include="Evaluation\Conditionals\LessThanOrEqualExpressionNode.cs" />
+    <Compile Include="Evaluation\Conditionals\MultipleComparisonExpressionNode.cs" />
+    <Compile Include="Evaluation\Conditionals\NotEqualExpressionNode.cs" />
+    <Compile Include="Evaluation\Conditionals\NotExpressionNode.cs" />
+    <Compile Include="Evaluation\Conditionals\NumericComparisonExpressionNode.cs" />
+    <Compile Include="Evaluation\Conditionals\NumericExpressionNode.cs" />
+    <Compile Include="Evaluation\Conditionals\OperandExpressionNode.cs" />
+    <Compile Include="Evaluation\Conditionals\OperatorExpressionNode.cs" />
+    <Compile Include="Evaluation\Conditionals\OrExpressionNode.cs" />
+    <Compile Include="Evaluation\Conditionals\Parser.cs" />
+    <Compile Include="Evaluation\Conditionals\Scanner.cs" />
+    <Compile Include="Evaluation\Conditionals\StringExpressionNode.cs" />
+    <Compile Include="Evaluation\Conditionals\Token.cs" />
     <Compile Include="Evaluation\EvaluatorMetadataTable.cs" />
     <Compile Include="Evaluation\IEvaluatorData.cs" />
     <Compile Include="Evaluation\IItem.cs" />
@@ -599,9 +511,7 @@
     <Compile Include="Instance\TaskRegistry.cs" />
     <!-- ######################## -->
     <Compile Include="Evaluation\LazyItemEvaluator.LazyItemOperation.cs" />
-    <Compile Include="Logging\BaseConsoleLogger.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="Logging\BaseConsoleLogger.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogger.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogRecordKind.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogReplayEventSource.cs" />
@@ -611,39 +521,19 @@
     <Compile Include="Logging\BinaryLogger\BuildEventArgsReader.cs" />
     <Compile Include="Logging\BinaryLogger\BuildEventArgsWriter.cs" />
     <Compile Include="Logging\BinaryLogger\ProjectImportsCollector.cs" />
-    <Compile Include="Logging\ConsoleLogger.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Logging\DistributedLoggers\DistributedFileLogger.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Logging\DistributedLoggers\ConfigurableForwardingLogger.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Logging\NullCentralLogger.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Logging\LoggerDescription.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="Logging\ConsoleLogger.cs" />
+    <Compile Include="Logging\DistributedLoggers\DistributedFileLogger.cs" />
+    <Compile Include="Logging\DistributedLoggers\ConfigurableForwardingLogger.cs" />
+    <Compile Include="Logging\NullCentralLogger.cs" />
+    <Compile Include="Logging\LoggerDescription.cs" />
     <Compile Include="Logging\OptimizedStringIndenter.cs" />
-    <Compile Include="Logging\ParallelLogger\ParallelLoggerHelpers.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Logging\ParallelLogger\ParallelConsoleLogger.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="Logging\ParallelLogger\ParallelLoggerHelpers.cs" />
+    <Compile Include="Logging\ParallelLogger\ParallelConsoleLogger.cs" />
     <Compile Include="Logging\SimpleErrorLogger.cs" />
     <Compile Include="Logging\ParallelLogger\ConsoleOutputAligner.cs" />
-    <Compile Include="Logging\FileLogger.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Logging\LogFormatter.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Logging\SerialConsoleLogger.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="Logging\FileLogger.cs" />
+    <Compile Include="Logging\LogFormatter.cs" />
+    <Compile Include="Logging\SerialConsoleLogger.cs" />
     <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectMetadataLink.cs" />
     <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectPropertyLink.cs" />
     <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectElementContainerLink.cs" />
@@ -657,120 +547,87 @@
     <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectTargetElementLink.cs" />
     <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectTaskElementLink.cs" />
     <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectUsingTaskBodyElementLink.cs" />
-    <Compile Include="Resources\AssemblyResources.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Resources\Constants.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="Resources\AssemblyResources.cs" />
+    <Compile Include="Resources\Constants.cs" />
     <Compile Include="Resources\MSBuildAssemblyFileVersion.cs" />
     <!-- ######################## -->
     <!-- ######################## -->
     <!-- ######################## -->
-    <Compile Include="Utilities\EngineFileUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="Utilities\EngineFileUtilities.cs" />
     <Compile Include="Utilities\FileSpecMatchTester.cs" />
-    <Compile Include="Utilities\RegistryKeyWrapper.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Utilities\Utilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="Utilities\RegistryKeyWrapper.cs" />
+    <Compile Include="Utilities\Utilities.cs" />
     <Compile Include="Utilities\SimpleVersion.cs" />
     <Compile Include="Xml\ProjectXmlUtilities.XmlElementChildIterator.cs" />
-    <Compile Include="Xml\ProjectXmlUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="Xml\ProjectXmlUtilities.cs" />
     <Compile Include="Xml\XmlReaderExtension.cs" />
     <Compile Include="..\Shared\AssemblyLoadInfo.cs">
       <Link>SharedUtilities\AssemblyLoadInfo.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs">
       <Link>SharedUtilities\ReadOnlyEmptyDictionary.cs</Link>
     </Compile>
     <Compile Include="..\Shared\AssemblyNameExtension.cs">
       <Link>SharedUtilities\AssemblyNameExtension.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\BuildEventFileInfo.cs">
       <Link>SharedUtilities\BuildEventFileInfo.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\ConversionUtilities.cs">
       <Link>SharedUtilities\ConversionUtilities.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\FileDelegates.cs">
       <Link>SharedUtilities\FileDelegates.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\ErrorUtilities.cs">
       <Link>Errors\ErrorUtilities.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\EscapingUtilities.cs">
       <Link>SharedUtilities\EscapingUtilities.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\VersionUtilities.cs">
       <Link>SharedUtilities\VersionUtilities.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\EventArgsFormatting.cs">
       <Link>SharedUtilities\EventArgsFormatting.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\ExceptionHandling.cs">
       <Link>SharedUtilities\ExceptionHandling.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FileMatcher.cs">
       <Link>SharedUtilities\FileMatcher.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\FileUtilities.cs">
       <Link>SharedUtilities\FileUtilities.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\TempFileUtilities.cs" />
-    <Compile Include="..\Shared\Modifiers.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="..\Shared\Modifiers.cs" />
     <Compile Include="..\Shared\FileUtilitiesRegex.cs">
       <Link>SharedUtilities\FileUtilitiesRegex.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\FrameworkLocationHelper.cs">
       <Link>SharedUtilities\FrameworkLocationHelper.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\IElementLocation.cs">
       <Link>SharedUtilities\IElementLocation.cs</Link>
     </Compile>
     <Compile Include="..\Shared\LoadedType.cs">
       <Link>SharedUtilities\LoadedType.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
       <Link>InprocTrackingNativeMethods.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\ProjectErrorUtilities.cs">
       <Link>Errors\ProjectErrorUtilities.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\ProjectFileErrorUtilities.cs">
       <Link>Errors\ProjectFileErrorUtilities.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\ProjectWriter.cs">
       <Link>SharedUtilities\ProjectWriter.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\ResourceUtilities.cs">
       <Link>SharedUtilities\ResourceUtilities.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\Tracing.cs" />
     <Compile Include="..\Shared\CoreCLRAssemblyLoader.cs" Condition="'$(TargetFrameworkIdentifier)'!='.NETFramework'" />
@@ -785,15 +642,12 @@
     </Compile>
     <Compile Include="..\Shared\XMakeAttributes.cs">
       <Link>Resources\XMakeAttributes.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\XMakeElements.cs">
       <Link>Resources\XMakeElements.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\XmlUtilities.cs">
       <Link>SharedUtilities\XmlUtilities.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Evaluation\LazyItemEvaluator.EvaluatorData.cs" />
 

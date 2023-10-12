@@ -1,0 +1,17 @@
+<PoliCheckExclusions>
+  <!-- All strings must be UPPER CASE -->
+  <!--Each of these exclusions is a folder name -if \[name]\exists in the file path, it will be skipped -->
+  <!--<Exclusion Type="FolderPathFull">ABC|XYZ</Exclusion>-->
+  <!--Each of these exclusions is a folder name -if any folder or file starts with "\[name]", it will be skipped -->
+  <!--<Exclusion Type="FolderPathStart">ABC|XYZ</Exclusion>-->
+  <!--Each of these file types will be completely skipped for the entire scan -->
+  <!--<Exclusion Type="FileType">.ABC|.XYZ</Exclusion>-->
+  <!--The specified file names will be skipped during the scan regardless which folder they are in -->
+  <!--<Exclusion Type="FileName">ABC.TXT|XYZ.CS</Exclusion>-->
+
+  <Exclusion Type="FolderPathFull">.DOTNET</Exclusion>
+  <!-- This file contains entity names that were written out by the XML writer in the VS.NET 2002/2003 project system. Leave them unchanged and skip the file -->
+  <Exclusion Type="FileName">OLDVSPROJECTFILEREADER.CS</Exclusion>
+  <!-- Since only support the locale en-us in our repo, skip the translated files currently. https://devdiv.visualstudio.com/DevDiv/_workitems/edit/1889125  -->
+  <Exclusion Type="FileType">.XLF</Exclusion>
+</PoliCheckExclusions>

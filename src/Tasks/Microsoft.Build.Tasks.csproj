@@ -61,37 +61,30 @@
     </Compile>
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>CanonicalError.cs</Link>
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="AssemblyDependency\AssemblyMetadata.cs" />
     <Compile Include="CombineTargetFrameworkInfoProperties.cs" />
     <Compile Include="CombineXmlElements.cs" />
-    <Compile Include="ConvertToAbsolutePath.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="ConvertToAbsolutePath.cs" />
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs" />
     <Compile Include="..\Shared\ExtensionFoldersRegistryKey.cs">
       <Link>ExtensionFoldersRegistryKey.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FileDelegates.cs">
       <Link>FileDelegates.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\IConstrainedEqualityComparer.cs" />
     <Compile Include="..\Shared\PropertyParser.cs">
       <Link>PropertyParser.cs</Link>
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs">
       <Link>ReadOnlyEmptyCollection.cs</Link>
     </Compile>
     <Compile Include="..\Shared\RegistryDelegates.cs">
       <Link>RegistryDelegates.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\RegistryHelper.cs">
       <Link>RegistryHelper.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\StrongNameHelpers.cs">
       <Link>StrongNameHelpers.cs</Link>
@@ -101,34 +94,26 @@
     </Compile>
     <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
       <Link>TaskLoggingHelperExtension.cs</Link>
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\TempFileUtilities.cs" />
     <Compile Include="..\Shared\MetadataConversionUtilities.cs">
       <Link>MetadataConversionUtilities.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\LanguageParser\StreamMappedString.cs">
       <Link>StreamMappedString.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\ExceptionHandling.cs">
       <Link>ExceptionHandling.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FileUtilities.cs">
       <Link>FileUtilities.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\EscapingUtilities.cs">
       <Link>EscapingUtilities.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\FileMatcher.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="..\Shared\FileMatcher.cs" />
     <Compile Include="..\Shared\Modifiers.cs">
       <Link>Modifiers.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
     <Compile Include="..\Shared\ReadOnlyCollection.cs" />
@@ -136,370 +121,149 @@
     <Compile Include="..\Shared\Tracing.cs" />
     <Compile Include="..\Shared\VersionUtilities.cs">
       <Link>VersionUtilities.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\VisualStudioConstants.cs">
       <Link>VisualStudioConstants.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\AssemblyNameExtension.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\ErrorUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\ConversionUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\FileUtilitiesRegex.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\ResourceUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\LanguageParser\token.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\LanguageParser\tokenChar.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\LanguageParser\tokenCharReader.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\LanguageParser\tokenEnumerator.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\LanguageParser\CSharptokenCharReader.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\LanguageParser\CSharptokenEnumerator.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\LanguageParser\CSharptokenizer.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\LanguageParser\VisualBasictokenCharReader.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\LanguageParser\VisualBasictokenEnumerator.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\LanguageParser\VisualBasictokenizer.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="..\Shared\AssemblyNameExtension.cs" />
+    <Compile Include="..\Shared\ErrorUtilities.cs" />
+    <Compile Include="..\Shared\ConversionUtilities.cs" />
+    <Compile Include="..\Shared\FileUtilitiesRegex.cs" />
+    <Compile Include="..\Shared\ResourceUtilities.cs" />
+    <Compile Include="..\Shared\LanguageParser\token.cs" />
+    <Compile Include="..\Shared\LanguageParser\tokenChar.cs" />
+    <Compile Include="..\Shared\LanguageParser\tokenCharReader.cs" />
+    <Compile Include="..\Shared\LanguageParser\tokenEnumerator.cs" />
+    <Compile Include="..\Shared\LanguageParser\CSharptokenCharReader.cs" />
+    <Compile Include="..\Shared\LanguageParser\CSharptokenEnumerator.cs" />
+    <Compile Include="..\Shared\LanguageParser\CSharptokenizer.cs" />
+    <Compile Include="..\Shared\LanguageParser\VisualBasictokenCharReader.cs" />
+    <Compile Include="..\Shared\LanguageParser\VisualBasictokenEnumerator.cs" />
+    <Compile Include="..\Shared\LanguageParser\VisualBasictokenizer.cs" />
     <Compile Include="..\Shared\PlatformNegotiation.cs">
       <Link>PlatformNegotiation.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\XMakeAttributes.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\XMakeElements.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AppConfig\*.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\AssemblyFoldersExResolver.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="..\Shared\XMakeAttributes.cs" />
+    <Compile Include="..\Shared\XMakeElements.cs" />
+    <Compile Include="AppConfig\*.cs" />
+    <Compile Include="AssemblyDependency\AssemblyFoldersExResolver.cs" />
     <Compile Include="AssemblyDependency\AssemblyFoldersFromConfig\AssemblyFoldersFromConfigCache.cs" />
     <Compile Include="AssemblyDependency\AssemblyFoldersFromConfig\AssemblyFoldersFromConfigResolver.cs" />
-    <Compile Include="AssemblyDependency\AssemblyFoldersResolver.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\AssemblyInformation.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\AssemblyNameReference.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\AssemblyNameReferenceAscendingVersionComparer.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\AssemblyResolution.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\AssemblyResolutionConstants.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\BadImageReferenceException.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\CandidateAssemblyFilesResolver.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\ConflictLossReason.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\CopyLocalState.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\DependencyResolutionException.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\DirectoryResolver.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\DisposableBase.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\FrameworkPathResolver.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="AssemblyDependency\AssemblyFoldersResolver.cs" />
+    <Compile Include="AssemblyDependency\AssemblyInformation.cs" />
+    <Compile Include="AssemblyDependency\AssemblyNameReference.cs" />
+    <Compile Include="AssemblyDependency\AssemblyNameReferenceAscendingVersionComparer.cs" />
+    <Compile Include="AssemblyDependency\AssemblyResolution.cs" />
+    <Compile Include="AssemblyDependency\AssemblyResolutionConstants.cs" />
+    <Compile Include="AssemblyDependency\BadImageReferenceException.cs" />
+    <Compile Include="AssemblyDependency\CandidateAssemblyFilesResolver.cs" />
+    <Compile Include="AssemblyDependency\ConflictLossReason.cs" />
+    <Compile Include="AssemblyDependency\CopyLocalState.cs" />
+    <Compile Include="AssemblyDependency\DependencyResolutionException.cs" />
+    <Compile Include="AssemblyDependency\DirectoryResolver.cs" />
+    <Compile Include="AssemblyDependency\DisposableBase.cs" />
+    <Compile Include="AssemblyDependency\FrameworkPathResolver.cs" />
     <Compile Include="AssemblyDependency\GenerateBindingRedirects.cs" />
-    <Compile Include="AssemblyDependency\HintPathResolver.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\InstalledAssemblies.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\InvalidReferenceAssemblyNameException.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\NoMatchReason.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\RawFilenameResolver.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\Reference.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\ReferenceResolutionException.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\ReferenceTable.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\ResolutionSearchLocation.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\Resolver.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\ResolveAssemblyReference.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\TaskItemSpecFilenameComparer.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\UnificationReason.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\UnificationVersion.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\UnifiedAssemblyName.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="AssemblyDependency\HintPathResolver.cs" />
+    <Compile Include="AssemblyDependency\InstalledAssemblies.cs" />
+    <Compile Include="AssemblyDependency\InvalidReferenceAssemblyNameException.cs" />
+    <Compile Include="AssemblyDependency\NoMatchReason.cs" />
+    <Compile Include="AssemblyDependency\RawFilenameResolver.cs" />
+    <Compile Include="AssemblyDependency\Reference.cs" />
+    <Compile Include="AssemblyDependency\ReferenceResolutionException.cs" />
+    <Compile Include="AssemblyDependency\ReferenceTable.cs" />
+    <Compile Include="AssemblyDependency\ResolutionSearchLocation.cs" />
+    <Compile Include="AssemblyDependency\Resolver.cs" />
+    <Compile Include="AssemblyDependency\ResolveAssemblyReference.cs" />
+    <Compile Include="AssemblyDependency\TaskItemSpecFilenameComparer.cs" />
+    <Compile Include="AssemblyDependency\UnificationReason.cs" />
+    <Compile Include="AssemblyDependency\UnificationVersion.cs" />
+    <Compile Include="AssemblyDependency\UnifiedAssemblyName.cs" />
     <Compile Include="AssemblyDependency\WarnOrErrorOnTargetArchitectureMismatchBehavior.cs" />
-    <Compile Include="AssemblyFolder.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyInfo.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="AssemblyFolder.cs" />
+    <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblyRemapping.cs" />
-    <Compile Include="AssemblyResources.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="AssemblyResources.cs" />
     <Compile Include="AssignLinkMetadata.cs" />
-    <Compile Include="AssignProjectConfiguration.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssignTargetPath.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="BootstrapperUtil\*.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="CallTarget.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="CombinePath.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="CommandLineBuilderExtension.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="AssignProjectConfiguration.cs" />
+    <Compile Include="AssignTargetPath.cs" />
+    <Compile Include="BootstrapperUtil\*.cs" />
+    <Compile Include="CallTarget.cs" />
+    <Compile Include="CombinePath.cs" />
+    <Compile Include="CommandLineBuilderExtension.cs" />
     <Compile Include="ResourceHandling\*.cs" />
     <Compile Include="GetCompatiblePlatform.cs" />
     <Compile Include="SetRidAgnosticValueForProjects.cs" />
-    <Compile Include="ResolveComReference.cs" />
     <Compile Include="BuildCacheDisposeWrapper.cs" />
     <Compile Include="DownloadFile.cs" />
     <Compile Include="FileIO\GetFileHash.cs" />
     <Compile Include="FileIO\HashEncoding.cs" />
     <Compile Include="FileIO\VerifyFileHash.cs" />
     <Compile Include="FileState.cs" />
-    <Compile Include="Copy.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="CreateCSharpManifestResourceName.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="CreateVisualBasicManifestResourceName.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="CreateItem.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="CreateManifestResourceName.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="CreateProperty.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="CSharpParserUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Delegate.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Delete.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Error.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Exec.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="FindAppConfigFile.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="Copy.cs" />
+    <Compile Include="CreateCSharpManifestResourceName.cs" />
+    <Compile Include="CreateVisualBasicManifestResourceName.cs" />
+    <Compile Include="CreateItem.cs" />
+    <Compile Include="CreateManifestResourceName.cs" />
+    <Compile Include="CreateProperty.cs" />
+    <Compile Include="CSharpParserUtilities.cs" />
+    <Compile Include="Delegate.cs" />
+    <Compile Include="Delete.cs" />
+    <Compile Include="Error.cs" />
+    <Compile Include="Exec.cs" />
+    <Compile Include="FindAppConfigFile.cs" />
     <Compile Include="FindInvalidProjectReferences.cs" />
-    <Compile Include="GetFrameworkPath.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="GetFrameworkPath.cs" />
     <Compile Include="GetReferenceAssemblyPaths.cs" />
     <Compile Include="Hash.cs" />
     <Compile Include="InstalledSDKResolver.cs" />
     <Compile Include="Interop.cs" />
     <Compile Include="ErrorFromResources.cs" />
-    <Compile Include="ExtractedClassName.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="FileIO\ReadLinesFromFile.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="FileIO\WriteLinesToFile.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="FindInList.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="FormatUrl.cs" Condition="'$(MonoBuild)' != 'true'">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="FormatVersion.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="GenerateApplicationManifest.cs" Condition="'$(MonoBuild)' != 'true'">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="GenerateDeploymentManifest.cs" Condition="'$(MonoBuild)' != 'true'">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="GenerateLauncher.cs" Condition="'$(MonoBuild)' != 'true'">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="GenerateManifestBase.cs" Condition="'$(MonoBuild)' != 'true'">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="GenerateResource.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="GetAssemblyIdentity.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="ExtractedClassName.cs" />
+    <Compile Include="FileIO\ReadLinesFromFile.cs" />
+    <Compile Include="FileIO\WriteLinesToFile.cs" />
+    <Compile Include="FindInList.cs" />
+    <Compile Include="FormatUrl.cs" Condition="'$(MonoBuild)' != 'true'" />
+    <Compile Include="FormatVersion.cs" />
+    <Compile Include="GenerateApplicationManifest.cs" Condition="'$(MonoBuild)' != 'true'" />
+    <Compile Include="GenerateDeploymentManifest.cs" Condition="'$(MonoBuild)' != 'true'" />
+    <Compile Include="GenerateLauncher.cs" Condition="'$(MonoBuild)' != 'true'" />
+    <Compile Include="GenerateManifestBase.cs" Condition="'$(MonoBuild)' != 'true'" />
+    <Compile Include="GenerateResource.cs" />
+    <Compile Include="GetAssemblyIdentity.cs" />
     <Compile Include="GetInstalledSDKLocations.cs" />
     <Compile Include="GetSDKReferenceFiles.cs" />
-    <Compile Include="IAnalyzerHostObject.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ICscHostObject.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ICscHostObject2.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ICscHostObject3.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ICscHostObject4.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="IVbcHostObject.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="IVbcHostObject2.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="IVbcHostObject3.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="IVbcHostObject4.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="IVbcHostObject5.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="IVbcHostObjectFreeThreaded.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="InvalidParameterValueException.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="LC.cs" Condition="'$(MonoBuild)' != 'true'">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ListOperators\FindUnderPath.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ListOperators\RemoveDuplicates.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="IAnalyzerHostObject.cs" />
+    <Compile Include="ICscHostObject.cs" />
+    <Compile Include="ICscHostObject2.cs" />
+    <Compile Include="ICscHostObject3.cs" />
+    <Compile Include="ICscHostObject4.cs" />
+    <Compile Include="IVbcHostObject.cs" />
+    <Compile Include="IVbcHostObject2.cs" />
+    <Compile Include="IVbcHostObject3.cs" />
+    <Compile Include="IVbcHostObject4.cs" />
+    <Compile Include="IVbcHostObject5.cs" />
+    <Compile Include="IVbcHostObjectFreeThreaded.cs" />
+    <Compile Include="InvalidParameterValueException.cs" />
+    <Compile Include="LC.cs" Condition="'$(MonoBuild)' != 'true'" />
+    <Compile Include="ListOperators\FindUnderPath.cs" />
+    <Compile Include="ListOperators\RemoveDuplicates.cs" />
     <Compile Include="LockCheck.cs" />
-    <Compile Include="MakeDir.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ManifestUtil\*.cs" Exclude="ManifestUtil\CngLightup.cs" Condition="'$(MonoBuild)' != 'true'">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Message.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="MakeDir.cs" />
+    <Compile Include="ManifestUtil\*.cs" Exclude="ManifestUtil\CngLightup.cs" Condition="'$(MonoBuild)' != 'true'" />
+    <Compile Include="Message.cs" />
     <Compile Include="Move.cs" />
-    <Compile Include="MSBuild.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="NativeMethods.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ParserState.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="RedistList.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="RemoveDir.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="MSBuild.cs" />
+    <Compile Include="NativeMethods.cs" />
+    <Compile Include="ParserState.cs" />
+    <Compile Include="RedistList.cs" />
+    <Compile Include="RemoveDir.cs" />
     <Compile Include="ResGenDependencies.cs" />
     <Compile Include="ResolveCodeAnalysisRuleSet.cs" />
-    <Compile Include="ResolveKeySource.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ResolveManifestFiles.cs" Condition="'$(MonoBuild)' != 'true'">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ResolveNonMSBuildProjectOutput.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ResolveProjectBase.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="ResolveKeySource.cs" />
+    <Compile Include="ResolveManifestFiles.cs" Condition="'$(MonoBuild)' != 'true'" />
+    <Compile Include="ResolveNonMSBuildProjectOutput.cs" />
+    <Compile Include="ResolveProjectBase.cs" />
     <Compile Include="ResolveSDKReference.cs" />
     <Compile Include="RequiresFramework35SP1Assembly.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactory.cs" />
@@ -507,32 +271,18 @@
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryCompilers.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryTaskInfo.cs" />
     <Compile Include="SdkToolsPathUtility.cs" />
-    <Compile Include="SGen.cs" Condition="'$(MonoBuild)' != 'true'">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="SignFile.cs" Condition="'$(MonoBuild)' != 'true'">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="SGen.cs" Condition="'$(MonoBuild)' != 'true'" />
+    <Compile Include="SignFile.cs" Condition="'$(MonoBuild)' != 'true'" />
     <Compile Include="System.Design.cs" />
     <Compile Include="system.design\stronglytypedresourcebuilder.cs" />
-    <Compile Include="TaskExtension.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="TaskExtension.cs" />
     <Compile Include="TaskTranslatorHelpers.cs" />
     <Compile Include="Telemetry.cs" />
-    <Compile Include="ToolTaskExtension.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Touch.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="ToolTaskExtension.cs" />
+    <Compile Include="Touch.cs" />
     <Compile Include="Unzip.cs" />
-    <Compile Include="VisualBasicParserUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Warning.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="VisualBasicParserUtilities.cs" />
+    <Compile Include="Warning.cs" />
     <Compile Include="XslTransformation.cs" />
     <Compile Include="AssignCulture.cs" />
     <Compile Include="Culture.cs" />
@@ -547,115 +297,56 @@
     <Compile Include="DependencyFile.cs" />
     <Compile Include="ZipDirectory.cs" />
   </ItemGroup>
-  <ItemGroup Condition="$(TargetFrameworkIdentifier) == '.NETFramework'">
-    <Compile Include="Al.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AppDomainIsolatedTaskExtension.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AspNetCompiler.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\GacResolver.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyDependency\GlobalAssemblyCache.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyRegistrationCache.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AxImp.cs" />
-    <Compile Include="AxReference.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AxTlbBaseReference.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AxTlbBaseTask.cs" />
-    <Compile Include="ComDependencyWalker.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ComReference.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ComReferenceInfo.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ComReferenceItemAttributes.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ComReferenceResolutionException.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ComReferenceTypes.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ComReferenceWrapperInfo.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="GenerateBootstrapper.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="GenerateTrustInfo.cs" Condition="'$(MonoBuild)' != 'true'">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="GetFrameworkSDKPath.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="IComReferenceResolver.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ManifestUtil\CngLightup.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="RCWForCurrentContext.cs" />
-    <Compile Include="PiaReference.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="RegisterAssembly.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ResGen.cs" />
-    <Compile Include="ResolveComReferenceCache.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ResolveNativeReference.cs" Condition="'$(MonoBuild)' != 'true'">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="StrongNameException.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="StrongNameUtils.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="TlbImp.cs" />
-    <Compile Include="TlbReference.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="UnregisterAssembly.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="UpdateManifest.cs" Condition="'$(MonoBuild)' != 'true'">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+  <ItemGroup>
+    <Compile Include="TaskRequiresFramework.cs" />
+    <!-- Tasks with NET/NETSTANDARD stubs -->
+    <Compile Include="Al.cs" />
+    <Compile Include="AspNetCompiler.cs" />
+    <Compile Include="GenerateBootstrapper.cs" />
+    <Compile Include="GenerateTrustInfo.cs" Condition="'$(MonoBuild)' != 'true'" />
+    <Compile Include="GetFrameworkSDKPath.cs" />
+    <Compile Include="RegisterAssembly.cs" />
+    <Compile Include="ResolveComReference.cs" />
+    <Compile Include="ResolveNativeReference.cs" Condition="'$(MonoBuild)' != 'true'" />
+    <Compile Include="UnregisterAssembly.cs" />
+    <Compile Include="UpdateManifest.cs" Condition="'$(MonoBuild)' != 'true'" />
     <Compile Include="WinMDExp.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="$(TargetFrameworkIdentifier) == '.NETFramework'">
+    <Compile Include="AppDomainIsolatedTaskExtension.cs" />
+    <Compile Include="AssemblyDependency\GacResolver.cs" />
+    <Compile Include="AssemblyDependency\GlobalAssemblyCache.cs" />
+    <Compile Include="AssemblyRegistrationCache.cs" />
+    <Compile Include="AxImp.cs" />
+    <Compile Include="AxReference.cs" />
+    <Compile Include="AxTlbBaseReference.cs" />
+    <Compile Include="AxTlbBaseTask.cs" />
+    <Compile Include="ComDependencyWalker.cs" />
+    <Compile Include="ComReference.cs" />
+    <Compile Include="ComReferenceInfo.cs" />
+    <Compile Include="ComReferenceItemAttributes.cs" />
+    <Compile Include="ComReferenceResolutionException.cs" />
+    <Compile Include="ComReferenceTypes.cs" />
+    <Compile Include="ComReferenceWrapperInfo.cs" />
+    <Compile Include="IComReferenceResolver.cs" />
+    <Compile Include="ManifestUtil\CngLightup.cs" />
+    <Compile Include="RCWForCurrentContext.cs" />
+    <Compile Include="PiaReference.cs" />
+    <Compile Include="ResGen.cs" />
+    <Compile Include="ResolveComReferenceCache.cs" />
+    <Compile Include="StrongNameException.cs" />
+    <Compile Include="StrongNameUtils.cs" />
+    <Compile Include="TlbImp.cs" />
+    <Compile Include="TlbReference.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Compile Include="XamlTaskFactory\CommandLineGenerator.cs" />
     <Compile Include="XamlTaskFactory\CommandLineToolSwitch.cs" />
-    <Compile Include="XamlTaskFactory\RelationsParser.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="XamlTaskFactory\RelationsParser.cs" />
     <Compile Include="XamlTaskFactory\Property.cs" />
-    <Compile Include="XamlTaskFactory\TaskGenerator.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="XamlTaskFactory\TaskGenerator.cs" />
     <Compile Include="XamlTaskFactory\TaskParser.cs" />
-    <Compile Include="XamlTaskFactory\XamlDataDrivenToolTask.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="XamlTaskFactory\XamlDataDrivenToolTask.cs" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetFrameworkIdentifier) == '.NETFramework'">
     <!-- Shim targets only work when the destination targets are installed. -->
@@ -817,7 +508,6 @@
       <GenerateResource>true</GenerateResource>
       <FullClassName>Microsoft.Build.Tasks.SR</FullClassName>
       <LogicalName>System.Design.resources</LogicalName>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </TextStringResource>
     <!-- Files to copy -->
     <DataFile Include="Microsoft.Common.targets">
@@ -971,11 +661,9 @@
   </ItemGroup>
 
   <!-- Mimics AddRefAssemblies from MSBuild.csproj -->
-  <Target Name="AddRefAssemblies"
-          DependsOnTargets="ResolveAssemblyReferences"
-          BeforeTargets="AssignTargetPaths">
+  <Target Name="AddRefAssemblies" DependsOnTargets="ResolveAssemblyReferences" BeforeTargets="AssignTargetPaths">
     <ItemGroup>
-      <Content Include="@(NetstandardRefAssemblies)" CopyToOutputDirectory="PreserveNewest" Link="ref\%(Filename)%(Extension)"/>
+      <Content Include="@(NetstandardRefAssemblies)" CopyToOutputDirectory="PreserveNewest" Link="ref\%(Filename)%(Extension)" />
     </ItemGroup>
   </Target>
 
