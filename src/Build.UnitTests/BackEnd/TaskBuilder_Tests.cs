@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -144,10 +145,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildManager manager = new BuildManager();
                 ProjectCollection collection = new ProjectCollection();
 
+                string sleepCommand = Helpers.GetSleepCommand(TimeSpan.FromSeconds(10));
                 string contents = @"
                     <Project ToolsVersion ='Current'>
                      <Target Name='test'>
-                        <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
+                        <Exec Command='" + sleepCommand + @"'/>
                      </Target>
                     </Project>";
 
@@ -168,8 +170,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestData data = new BuildRequestData(project.CreateProjectInstance(), new string[] { "test" }, collection.HostServices);
                 manager.BeginBuild(_parameters);
                 BuildSubmission asyncResult = manager.PendBuildRequest(data);
+                string unescapedSleepCommand = sleepCommand.Replace("&quot;", "\"").Replace("&gt;", ">");
+                Func<bool> isSleepCommandExecuted = () => logger.AllBuildEvents.Any(a => unescapedSleepCommand.Equals(a.Message));
+                Task waitCommandExecuted = new Task(() =>
+                {
+                    while (!isSleepCommandExecuted())
+                    {
+                        Task.Delay(TimeSpan.FromMilliseconds(10)).Wait();
+                    }
+                });
                 asyncResult.ExecuteAsync(null, null);
-                Thread.Sleep(500);
+                waitCommandExecuted.Start();
+                waitCommandExecuted.Wait(TimeSpan.FromSeconds(5)).ShouldBeTrue("Waiting for executing the command timed out.");
                 manager.CancelAllSubmissions();
                 asyncResult.WaitHandle.WaitOne();
                 BuildResult result = asyncResult.BuildResult;
