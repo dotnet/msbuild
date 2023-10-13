@@ -193,7 +193,7 @@
       </trans-unit>
       <trans-unit id="Copy.IOException">
         <source>MSB3894: Got {0} copying "{1}" to "{2}" and HR is {3}</source>
-        <target state="new">MSB3894: Got {0} copying "{1}" to "{2}" and HR is {3}</target>
+        <target state="translated">MSB3894: "{1}" を "{2}" にコピー中に {0}が発生しました。HR は {3} です</target>
         <note>{StrBegin="MSB3894: "} LOCALIZATION: {0} is exception.ToString(), {1} and {2} are paths, {3} is a number")</note>
       </trans-unit>
       <trans-unit id="Copy.LinkFailed">
@@ -228,7 +228,7 @@
       </trans-unit>
       <trans-unit id="Copy.RetryingOnAccessDenied">
         <source>MSB3895: Retrying on ERROR_ACCESS_DENIED because environment variable MSBUILDALWAYSRETRY=1</source>
-        <target state="new">MSB3895: Retrying on ERROR_ACCESS_DENIED because environment variable MSBUILDALWAYSRETRY=1</target>
+        <target state="translated">MSB3895: 環境変数 MSBUILDALWAYSRETRY = 1 のため、ERROR_ACCESS_DENIED で再試行しています</target>
         <note>{StrBegin="MSB3895: "} LOCALIZATION: Do NOT translate MSBUILDALWAYSRETRY)</note>
       </trans-unit>
       <trans-unit id="Copy.SourceIsDirectory">
