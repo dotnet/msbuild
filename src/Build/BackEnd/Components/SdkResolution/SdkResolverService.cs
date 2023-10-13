@@ -46,12 +46,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <remarks>
         /// Need it for supporting the ChangeWave less than <see cref="ChangeWaves.Wave17_4"/>. Remove when move out Wave17_4.
         /// </remarks>
-        private IList<SdkResolver> _resolversList;
+        private IReadOnlyList<SdkResolver> _resolversList;
 
         /// <summary>
         /// Stores the loaded SDK resolvers, mapped to the manifest from which they came.
         /// </summary>
-        private Dictionary<SdkResolverManifest, IList<SdkResolver>> _manifestToResolvers;
+        private Dictionary<SdkResolverManifest, IReadOnlyList<SdkResolver>> _manifestToResolvers;
 
         /// <summary>
         /// Stores the list of manifests of specific SDK resolvers which could be loaded.
@@ -238,7 +238,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             List<SdkResolver> resolvers = new List<SdkResolver>();
             foreach (var resolverManifest in resolversManifests)
             {
-                if (!_manifestToResolvers.TryGetValue(resolverManifest, out IList<SdkResolver> newResolvers))
+                if (!_manifestToResolvers.TryGetValue(resolverManifest, out IReadOnlyList<SdkResolver> newResolvers))
                 {
                     lock (_lockObject)
                     {
@@ -286,7 +286,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         }
 
         private bool TryResolveSdkUsingSpecifiedResolvers(
-            IList<SdkResolver> resolvers,
+            IReadOnlyList<SdkResolver> resolvers,
             int submissionId,
             SdkReference sdk,
             LoggingContext loggingContext,
@@ -379,7 +379,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// </summary>
         /// <param name="resolverLoader">An <see cref="SdkResolverLoader"/> to use for loading SDK resolvers.</param>
         /// <param name="resolvers">Explicit set of SdkResolvers to use for all SDK resolution.</param>
-        internal void InitializeForTests(SdkResolverLoader resolverLoader = null, IList<SdkResolver> resolvers = null)
+        internal void InitializeForTests(SdkResolverLoader resolverLoader = null, IReadOnlyList<SdkResolver> resolvers = null)
         {
             if (resolverLoader != null)
             {
@@ -397,7 +397,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 {
                     _specificResolversManifestsRegistry = new List<SdkResolverManifest>();
                     _generalResolversManifestsRegistry = new List<SdkResolverManifest>();
-                    _manifestToResolvers = new Dictionary<SdkResolverManifest, IList<SdkResolver>>();
+                    _manifestToResolvers = new Dictionary<SdkResolverManifest, IReadOnlyList<SdkResolver>>();
 
                     SdkResolverManifest sdkResolverManifest = new SdkResolverManifest(DisplayName: "TestResolversManifest", Path: null, ResolvableSdkRegex: null);
                     _generalResolversManifestsRegistry.Add(sdkResolverManifest);
@@ -471,15 +471,15 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 MSBuildEventSource.Log.SdkResolverServiceFindResolversManifestsStart();
                 var allResolversManifests = _sdkResolverLoader.GetResolversManifests(loggingContext, location);
 
-                _manifestToResolvers = new Dictionary<SdkResolverManifest, IList<SdkResolver>>();
+                _manifestToResolvers = new Dictionary<SdkResolverManifest, IReadOnlyList<SdkResolver>>();
 
                 // Load and add the manifest for the default resolvers, located directly in this dll.
-                IList<SdkResolver> defaultResolvers = _sdkResolverLoader.GetDefaultResolvers(loggingContext, location);
+                IReadOnlyList<SdkResolver> defaultResolvers = _sdkResolverLoader.GetDefaultResolvers(loggingContext, location);
+                SdkResolverManifest sdkDefaultResolversManifest = null;
                 if (defaultResolvers.Count > 0)
                 {
                     MSBuildEventSource.Log.SdkResolverServiceLoadResolversStart();
-                    SdkResolverManifest sdkDefaultResolversManifest = new SdkResolverManifest(DisplayName: "DefaultResolversManifest", Path: null, ResolvableSdkRegex: null);
-                    allResolversManifests.Add(sdkDefaultResolversManifest);
+                    sdkDefaultResolversManifest = new SdkResolverManifest(DisplayName: "DefaultResolversManifest", Path: null, ResolvableSdkRegex: null);
                     _manifestToResolvers[sdkDefaultResolversManifest] = defaultResolvers;
                     MSBuildEventSource.Log.SdkResolverServiceLoadResolversStop(sdkDefaultResolversManifest.DisplayName, defaultResolvers.Count);
                 }
@@ -499,6 +499,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     {
                         _specificResolversManifestsRegistry.Add(manifest);
                     }
+                }
+                if (sdkDefaultResolversManifest != null)
+                {
+                    _generalResolversManifestsRegistry.Add(sdkDefaultResolversManifest);
                 }
             }
         }

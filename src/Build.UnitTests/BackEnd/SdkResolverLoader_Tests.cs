@@ -350,7 +350,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                             resolvers.Add(new MockSdkResolverWithAssemblyPath(resolverPath));
                         }
                     };
-                    IList<SdkResolverBase> resolvers = loader.LoadAllResolvers(_loggingContext, new MockElementLocation("file"));
+                    IReadOnlyList<SdkResolverBase> resolvers = loader.LoadAllResolvers(_loggingContext, new MockElementLocation("file"));
 
                     resolvers.Count.ShouldBe(0);
                 }
@@ -390,7 +390,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     Environment.SetEnvironmentVariable("MSBUILDADDITIONALSDKRESOLVERSFOLDER", additionalRoot);
 
                     SdkResolverLoader loader = new SdkResolverLoader();
-                    IList<string> resolvers = loader.FindPotentialSdkResolvers(testRoot, new MockElementLocation("file"));
+                    IReadOnlyList<string> resolvers = loader.FindPotentialSdkResolvers(testRoot, new MockElementLocation("file"));
 
                     resolvers.ShouldBeSameIgnoringOrder(new[] { resolver1Path, resolver2Path, resolver3Path });
                 }
@@ -459,7 +459,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             public Func<string, LoggingContext, ElementLocation, Assembly> LoadResolverAssemblyFunc { get; set; }
 
-            public Func<string, ElementLocation, IList<string>> FindPotentialSdkResolversFunc { get; set; }
+            public Func<string, ElementLocation, IReadOnlyList<string>> FindPotentialSdkResolversFunc { get; set; }
 
             public Func<Assembly, IEnumerable<Type>> GetResolverTypesFunc { get; set; }
 
@@ -485,7 +485,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 return base.GetResolverTypes(assembly);
             }
 
-            internal override IList<string> FindPotentialSdkResolvers(string rootFolder, ElementLocation location)
+            internal override IReadOnlyList<string> FindPotentialSdkResolvers(string rootFolder, ElementLocation location)
             {
                 if (FindPotentialSdkResolversFunc != null)
                 {
