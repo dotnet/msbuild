@@ -105,11 +105,11 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="new">  -reportFileAccesses[:True|False]
-                     Causes MSBuild to report file accesses to any configured
-                     project cache plugins.
+        <target state="translated">  -reportFileAccesses[:True|Falso]
+                     Hace que MSBuild informe de los accesos a los archivos a cualquier
+                     complemento de caché de proyectos.
 
-                     This flag is experimental and may not work as intended.
+                     Esta marca es experimental y puede que no funcione según lo previsto.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.

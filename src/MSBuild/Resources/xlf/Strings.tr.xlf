@@ -105,11 +105,11 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="new">  -reportFileAccesses[:True|False]
-                     Causes MSBuild to report file accesses to any configured
-                     project cache plugins.
+        <target state="translated">  -reportFileAccesses[:True|False]
+                     MSBuild’in yapılandırılmış proje önbelleği eklentilerine dosya
+                     erişimlerini bildirmesine neden olur.
 
-                     This flag is experimental and may not work as intended.
+                     Bu bayrak deneme amaçlıdır ve istendiği gibi çalışmayabilir.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -1396,7 +1396,7 @@
       </trans-unit>
       <trans-unit id="MissingTerminalLoggerParameterError">
         <source>MSBUILD : error MSB1066: Specify one or more parameters for the terminal logger if using the -terminalLoggerParameters switch</source>
-        <target state="new">MSBUILD : error MSB1066: Specify one or more parameters for the terminal logger if using the -terminalLoggerParameters switch</target>
+        <target state="translated">MSBUILD : error MSB1066: terminalLoggerParameters anahtarı kullanılıyorsa terminal günlükçüsü için bir veya birden çok parametre belirtin</target>
         <note>
       {StrBegin="MSBUILD : error MSB1066: "}
       UE: This happens if the user does something like "msbuild.exe -termionalLoggerParameters:". The user must pass in one or more parameters
