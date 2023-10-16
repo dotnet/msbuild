@@ -171,7 +171,7 @@ namespace Microsoft.Build.Tasks
             var cultureString = suggestedRedirect.CultureName;
             if (String.IsNullOrEmpty(cultureString))
             {
-                // We use "neutral" for "Invariant Language (Invariant Country)" in assembly names.
+                // We use "neutral" for "Invariant Language (Invariant Country/Region)" in assembly names.
                 cultureString = "neutral";
             }
 

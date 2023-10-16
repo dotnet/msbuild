@@ -7,7 +7,7 @@
     <AssemblyName>Microsoft.Build.Engine.UnitTests</AssemblyName>
 
     <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_ENGINE_UNITTESTS</DefineConstants>
-    
+
     <!-- Define a constant so we can skip tests that require MSBuildTaskHost -->
     <DefineConstants Condition="'$(MSBuildRuntimeType)' == 'Core' or '$(MonoBuild)' == 'true'">$(DefineConstants);NO_MSBUILDTASKHOST</DefineConstants>
 
@@ -21,16 +21,14 @@
     <PackageReference Include="Shouldly" />
     <PackageReference Include="System.Net.Http" />
     <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" />
-    <PackageReference Include="NuGet.Frameworks" >
+    <PackageReference Include="NuGet.Frameworks">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
 
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
-    <ProjectReference Include="..\MSBuildTaskHost\MSBuildTaskHost.csproj"
-                      Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MonoBuild)' != 'true'"
-                      Aliases="MSBuildTaskHost" />
+    <ProjectReference Include="..\MSBuildTaskHost\MSBuildTaskHost.csproj" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MonoBuild)' != 'true'" Aliases="MSBuildTaskHost" />
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
@@ -48,67 +46,38 @@
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">TargetFramework=$(LatestDotNetCoreForMSBuild)</SetTargetFramework>
     </ProjectReference>
 
-    <Reference Include="System.IO.Compression"
-               Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' " />
+    <Reference Include="System.IO.Compression" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' " />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\UnitTests\BuildEventArgsExtension.cs">
-      <!-- Extension methods -->
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\EscapingUtilities_Tests.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\FileUtilities_Tests.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\FileMatcher_Tests.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\MockEngine.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\MockLogger.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="..\Shared\UnitTests\BuildEventArgsExtension.cs" />
+    <Compile Include="..\Shared\UnitTests\EscapingUtilities_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\FileUtilities_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\FileMatcher_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\MockEngine.cs" />
+    <Compile Include="..\Shared\UnitTests\MockLogger.cs" />
+    <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
     <Compile Include="..\UnitTests.Shared\EnvironmentProvider.cs" />
-    <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\StreamHelpers.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" />
+    <Compile Include="..\UnitTests.Shared\DriveMapping.cs" />
+    <Compile Include="..\UnitTests.Shared\DummyMappedDrive.cs" />
+    <Compile Include="..\UnitTests.Shared\DummyMappedDriveUtils.cs" />
+    <Compile Include="..\Shared\UnitTests\StreamHelpers.cs" />
     <Compile Include="..\Shared\UnitTests\EngineTestEnvironment.cs">
       <Link>EngineTestEnvironment.cs</Link>
     </Compile>
     <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
       <Link>TestEnvironment.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\UnitTests\TypeLoader_Tests.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\TypeLoader_Dependencies_Tests.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="..\Shared\UnitTests\TypeLoader_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\TypeLoader_Dependencies_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\XmakeAttributes_Tests.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
       <Link>XmakeAttributes_Tests.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\UnitTests\XmlUtilities_Tests.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="..\Shared\UnitTests\XmlUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\AssemblyNameEx_Tests.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
       <Link>AssemblyNameEx_Tests.cs</Link>
     </Compile>
     <Compile Include="..\Shared\UnitTests\TaskParameter_Tests.cs">
@@ -144,14 +113,14 @@
     <!-- In TypeLoader, the following logic is used for loading assemblies on .NET Core:
             - if the simple name of the assembly exists in the same folder as msbuild.exe, then that assembly gets loaded, indifferent of the user specified path
             - otherwise, the assembly from the user specified path is loaded, if it exists.
-            
+
           So the custom tasks we are testing can't be in test output folder, because on .NET Core that would affect the loading behavior.  So this
-          target puts them in subfolders of the test output folder instead.    
+          target puts them in subfolders of the test output folder instead.
     -->
 
     <Error Condition="'@(PortableTaskResolvedProjectReferencePath)' == ''" Text="Couldn't find PortableTaskResolvedProjectReferencePath item for PortableTask" />
     <Error Condition="'@(TaskWithDependencyResolvedProjectReferencePath)' == ''" Text="Couldn't find TaskWithDependencyResolvedProjectReferencePath item for TaskWithDependency" />
-    
+
     <PropertyGroup>
       <PortableTaskOutputPath>@(PortableTaskResolvedProjectReferencePath->'%(RootDir)%(Directory)')</PortableTaskOutputPath>
       <TaskWithDependencyOutputPath>@(TaskWithDependencyResolvedProjectReferencePath->'%(RootDir)%(Directory)')</TaskWithDependencyOutputPath>
@@ -163,7 +132,7 @@
       <TaskWithDependencyContentContent Include="$(TaskWithDependencyOutputPath)*.*" />
       <Content Include="@(TaskWithDependencyContentContent)" Link="TaskWithDependency\%(TaskWithDependencyContentContent.Filename)%(TaskWithDependencyContentContent.Extension)" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
-    
+
   </Target>
 
   <ItemDefinitionGroup>
@@ -171,7 +140,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemDefinitionGroup>
-  
+
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
