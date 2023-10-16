@@ -7,7 +7,7 @@ parameters:
   # Dotnet installer channel from which to take the latest dotnet bits.
   - name: DotnetInstallerChannel
     displayName: Dotnet installer channel
-    type: string  
+    type: string
     default: 'none'
   # VS version for which to take the latest Retail MSBuild bits.
   - name: VSVersionName
@@ -15,12 +15,12 @@ parameters:
     type: string
     default: 'none'
   # Branch from the MSBuild Build CI pipeline. Default: main
-  # Top run for the branch would be used to create an experimental insertion. 
+  # Top run for the branch would be used to create an experimental insertion.
   - name: MSBuildBranch
     displayName: MSBuild Branch
     type: string
     default: 'refs/heads/main'
-  # BuildID from the MSBuild Build CI pipeline. Overrides the choice of MSBuildBranch parameter 
+  # BuildID from the MSBuild Build CI pipeline. Overrides the choice of MSBuildBranch parameter
   - name: MSBuildBuildID
     displayName: MSBuild CI Run Override
     type: string
@@ -38,12 +38,12 @@ pool:
   vmImage: windows-latest
 
 resources:
-  repositories: 
+  repositories:
     - repository: CloudBuildConfig
       type: git
       name: CloudBuild/CloudBuildConfig
       endpoint: CloudBuild_Test
-      ref: refs/heads/main 
+      ref: refs/heads/main
 
 jobs:
 - job: CreateExpDotnet
@@ -70,14 +70,15 @@ jobs:
     inputs:
       buildType: specific
       project: DevDiv
-      pipeline: $(_MsBuildCiPipelineId) 
-      ${{ if eq(parameters.MSBuildBuildID, 'default') }}: 
+      pipeline: $(_MsBuildCiPipelineId)
+      ${{ if eq(parameters.MSBuildBuildID, 'default') }}:
         buildVersionToDownload: latestFromBranch
         branchName: '${{parameters.MSBuildBranch}}'
       ${{ else }}:
         buildVersionToDownload: specific
-        buildId: ${{parameters.MSBuildBuildID}} 
+        buildId: ${{parameters.MSBuildBuildID}}
       artifactName: bin
+      itemPattern: 'MSBuild.Bootstrap/**'
       downloadPath: '$(System.ArtifactsDirectory)/msbuild/artifacts/bin'
     displayName: Download msbuild artifacts
 
@@ -86,18 +87,18 @@ jobs:
 
       Write-Host "Extracting $(System.ArtifactsDirectory)/installer/$sdk.zip"
       Expand-Archive "$(System.ArtifactsDirectory)/installer/$sdk.zip" -DestinationPath "$(Pipeline.Workspace)/exp-dotnet/$sdk"
-    
+
       $dotnetDirectory = Get-ChildItem -Directory -Path "$(Pipeline.Workspace)/exp-dotnet/$sdk/sdk"
       $dotnetVersion = $dotnetDirectory.Name
       Write-Host "Detected dotnet version: $dotnetVersion"
-    
+
       Write-Host "Updating MSBuild dlls."
       $(Build.SourcesDirectory)/scripts/Deploy-MSBuild.ps1 `
         -destination "$(Pipeline.Workspace)/exp-dotnet/$sdk/sdk/$dotnetVersion" `
         -binDirectory "$(System.ArtifactsDirectory)/msbuild/artifacts/bin" `
         -configuration Release `
         -makeBackup $false
-    
+
       Write-Host "Compressing dotnet sdk files"
       Get-ChildItem -Path "$(Pipeline.Workspace)/exp-dotnet/$sdk" | Compress-Archive -DestinationPath "$(Pipeline.Workspace)/artifacts/$sdk.zip"
 
@@ -105,7 +106,7 @@ jobs:
 
   - powershell: |
       $sdk = "dotnet-sdk-linux-x64"
-    
+
       mkdir "$(Pipeline.Workspace)/exp-dotnet/$sdk"
 
       Write-Host "Extracting $(System.ArtifactsDirectory)/installer/$sdk.tar.gz"
@@ -114,14 +115,14 @@ jobs:
       $dotnetDirectory = Get-ChildItem -Directory -Path $(Pipeline.Workspace)/exp-dotnet/$sdk/sdk
       $dotnetVersion = $dotnetDirectory.Name
       Write-Host "Detected dotnet version: $dotnetVersion"
-    
+
       Write-Host "Updating MSBuild dlls."
       $(Build.SourcesDirectory)/scripts/Deploy-MSBuild.ps1 `
         -destination "$(Pipeline.Workspace)/exp-dotnet/$sdk/sdk/$dotnetVersion" `
         -binDirectory "$(System.ArtifactsDirectory)/msbuild/artifacts/bin" `
         -configuration Release `
         -makeBackup $false
-    
+
       Write-Host "Compressing dotnet sdk files"
       tar -czvf "$(Pipeline.Workspace)/artifacts/$sdk.tar.gz" -C "$(Pipeline.Workspace)/exp-dotnet/$sdk" .
     displayName: Dogfood msbuild dlls to dotnet sdk linux-x64
@@ -141,15 +142,18 @@ jobs:
   steps:
   - checkout: self
 
-  - checkout: CloudBuildConfig
-
   - powershell: |
-      $json = (Get-Content "$(Build.SourcesDirectory)/CloudBuildConfig/$(_MSBuildConfigFilePath)" -Raw) | ConvertFrom-Json 
-      $MSBuildDropPath = $json.Tools.MSBuild.Locations
+      $url = "https://dev.azure.com/cloudbuild/CloudBuild/_apis/git/repositories/CloudBuildConfig/items?versionDescriptor.version=main&path=$(_MSBuildConfigFilePath)&api-version=5.0"
+      $token = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes("PAT:$env:ACCESSTOKEN"))
+      $headers = @{ Authorization = "Basic $token" };
+      $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
+      $MSBuildDropPath = $response.Tools.MSBuild.Locations
       Write-Host "##vso[task.setvariable variable=MSBuildDropPath]$MSBuildDropPath"
       Write-Host "MSBuild Drop Path directory: $MSBuildDropPath"
     displayName: Get Retail MSBuild Drop Path
-  
+    env:
+      ACCESSTOKEN: $(cloudbuild-token)
+
   - task: NuGetToolInstaller@1
     displayName: 'Install NuGet.exe'
 
@@ -161,10 +165,10 @@ jobs:
       restoreSolution: '$(Build.SourcesDirectory)\DotNet-msbuild-Trusted\eng\common\internal\Tools.csproj'
       nugetConfigPath: '$(Build.SourcesDirectory)\DotNet-msbuild-Trusted\NuGet.config'
       restoreDirectory: '$(Build.SourcesDirectory)\DotNet-msbuild-Trusted\.packages'
-  
+
   - powershell: |
       mkdir "$(Pipeline.Workspace)/artifacts"
-      
+
       $dropAppDirectory = Get-ChildItem -Directory -Path "$(Build.SourcesDirectory)/DotNet-msbuild-Trusted/.packages/drop.app"
       $dropAppVersion = $dropAppDirectory.Name
       Write-Host "Detected drop.exe version: $dropAppVersion"
@@ -182,19 +186,26 @@ jobs:
     displayName: Download msbuild vs drop
     env:
       cloudbuild-token: $(cloudbuild-token)
-      
+
   - task: DownloadBuildArtifacts@1
     inputs:
       buildType: specific
       project: DevDiv
-      pipeline: $(_MsBuildCiPipelineId) 
-      ${{ if eq(parameters.MSBuildBuildID, 'default') }}: 
+      pipeline: $(_MsBuildCiPipelineId)
+      ${{ if eq(parameters.MSBuildBuildID, 'default') }}:
         buildVersionToDownload: latestFromBranch
         branchName: '${{parameters.MSBuildBranch}}'
       ${{ else }}:
         buildVersionToDownload: specific
-        buildId: ${{parameters.MSBuildBuildID}} 
+        buildId: ${{parameters.MSBuildBuildID}}
       artifactName: bin
+      itemPattern: |
+        MSBuild.Bootstrap/*/net472/**
+        Microsoft.Build.Conversion/*/net472/Microsoft.Build.Conversion.Core.dll
+        Microsoft.Build.Engine/*/net472/Microsoft.Build.Engine.dll
+        MSBuildTaskHost/**/MSBuildTaskHost.exe
+        MSBuildTaskHost/**/MSBuildTaskHost.pdb
+        MSBuild/*/*/net472/MSBuild.exe*
       downloadPath: '$(System.ArtifactsDirectory)/msbuild/artifacts/bin'
     displayName: Download msbuild artifacts
 
@@ -209,7 +220,7 @@ jobs:
       ls "$(Pipeline.Workspace)/VSMSBuild/$(VSVersion)"
       Write-Host "Compressing msbuild files"
       Get-ChildItem -Path "$(Pipeline.Workspace)/VSMSBuild/$(VSVersion)" | Compress-Archive -DestinationPath "$(Pipeline.Workspace)/artifacts/MSBuild.zip"
-    displayName: Dogfood msbuild dlls 
+    displayName: Dogfood msbuild dlls
 
   - task: PublishPipelineArtifact@1
     inputs:
