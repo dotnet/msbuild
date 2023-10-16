@@ -3047,13 +3047,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                         _GetAssembliesMetadata
 
     Resolve Assembly attributes for assemblies
-    It is needed by Visual Studio legacy project system
+    The ResolveComReferences dependency is needed for defining COM-referenced wrappers only,
+    but this target handles all the assembly references from ResolveAssemblyReferences
+    The target is needed by the Visual Studio legacy project system
 
         [IN]
-        @(ReferencePath) - Paths to COM referenced wrappers.
+        @(ReferencePath) - Paths to COM-referenced wrappers and other types of assembly references.
 
         [OUT]
-        @(AssembliesMetadata) - COM assemblies attributes.
+        @(AssembliesMetadata) - Resolved assemblies attributes.
     ============================================================
     -->
 
