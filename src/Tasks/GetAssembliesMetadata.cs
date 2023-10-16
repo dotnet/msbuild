@@ -83,7 +83,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] AssembliesMetadata => _assembliesMetadata;
 
         /// <summary>
-        /// Sets metadata on the assembly path.
+        /// Creates a TaskItem and populates it with the given assembly attributes.
         /// </summary>
         private TaskItem CreateItemWithMetadata(AssemblyAttributes attributes)
         {
@@ -110,7 +110,7 @@ namespace Microsoft.Build.Tasks
                 yield return new KeyValuePair<string, string>(nameof(attributes.MajorVersion), attributes.MajorVersion.ToString());
                 yield return new KeyValuePair<string, string>(nameof(attributes.MinorVersion), attributes.MinorVersion.ToString());
                 yield return new KeyValuePair<string, string>(nameof(attributes.PeKind), attributes.PeKind.ToString());
-                yield return new KeyValuePair<string, string>(nameof(attributes.PublicKey), attributes.PublicKey);
+                yield return new KeyValuePair<string, string>(nameof(attributes.PublicHexKey), attributes.PublicHexKey);
                 yield return new KeyValuePair<string, string>(nameof(attributes.IsAssembly), attributes.IsAssembly.ToString());
                 yield return new KeyValuePair<string, string>(nameof(attributes.TargetFrameworkMoniker), attributes.TargetFrameworkMoniker);
                 yield return new KeyValuePair<string, string>(nameof(attributes.IsImportedFromTypeLib), attributes.IsImportedFromTypeLib.ToString());

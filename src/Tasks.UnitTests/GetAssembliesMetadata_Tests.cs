@@ -50,7 +50,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void CheckPresenceOfCOMAssemblyAttributes()
         {
-            string assemblyPath = Path.Combine("C:/", "Windows", "Microsoft.NET", "Framework", "v4.0.30319", "mscorlib.dll");
+            string assemblyPath = Path.Combine("%SystemRoot%", "Microsoft.NET", "Framework", "v4.0.30319", "mscorlib.dll");
             GetAssembliesMetadata t = new() { AssemblyPaths = new[] { assemblyPath } };
 
             bool isSuccess = t.Execute();

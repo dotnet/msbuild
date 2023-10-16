@@ -323,7 +323,7 @@ namespace Microsoft.Build.Tasks
 
                 byte[] publicKey = new byte[publicKeyLength];
                 Marshal.Copy(publicKeyPtr, publicKey, 0, (int)publicKeyLength);
-                assemblyAttributes.PublicKey = BitConverter.ToString(publicKey).Replace("-", string.Empty);
+                assemblyAttributes.PublicHexKey = BitConverter.ToString(publicKey).Replace("-", string.Empty);
 
                 if (import2 != null)
                 {
@@ -958,6 +958,7 @@ namespace Microsoft.Build.Tasks
             {
                 // Free unmanaged memory.
                 Marshal.FreeCoTaskMem(asmMeta.rpLocale);
+                asmMeta.rpLocale = IntPtr.Zero;
                 Marshal.DestroyStructure(asmMetaPtr, typeof(ASSEMBLYMETADATA));
                 Marshal.FreeCoTaskMem(asmMetaPtr);
             }

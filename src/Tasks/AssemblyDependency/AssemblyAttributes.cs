@@ -35,7 +35,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
         public ushort RevisionNumber { get; set; }
 
         // it is a byte[] converted to string
-        public string PublicKey { get; set; } = string.Empty;
+        public string PublicHexKey { get; set; } = string.Empty;
 
         public bool IsAssembly { get; set; }
 

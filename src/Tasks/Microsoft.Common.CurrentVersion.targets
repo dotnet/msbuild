@@ -3044,9 +3044,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!--
     ============================================================
-                                        GetAssembliesMetadata
+                                        _GetAssembliesMetadata
 
-    Resolve Assembly attributes for COM assemblies
+    Resolve Assembly attributes for assemblies
+    It is needed by Visual Studio legacy project system
 
         [IN]
         @(ReferencePath) - Paths to COM referenced wrappers.
@@ -3057,14 +3058,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
 
   <Target
-      Name="GetAssembliesMetadata"
+      Name="_GetAssembliesMetadata"
       Condition="'@(ReferencePath)'!=''"
-      Returns="@(AssembliesMetadata)"
+      Returns="@(_AssembliesMetadata)"
       DependsOnTargets="ResolveComReferences"
         >
 
     <GetAssembliesMetadata
-          AssembyPaths="@(ReferencePath)"
+          AssemblyPaths="@(ReferencePath)"
           ContinueOnError="$(ContinueOnError)">
 
       <Output TaskParameter="AssembliesMetadata" ItemName="_AssembliesMetadata"/>
