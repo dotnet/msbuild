@@ -66,7 +66,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// Stores an <see cref="SdkResolverLoader"/> which can load registered SDK resolvers.
         /// </summary>
-        private SdkResolverLoader _sdkResolverLoader = new SdkResolverLoader();
+        /// <remarks>
+        /// Unless the 17.10 changewave is disabled, we use a singleton instance because the set of SDK resolvers
+        /// is not expected to change during the lifetime of the process.
+        /// </remarks>
+        private SdkResolverLoader _sdkResolverLoader = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10)
+            ? CachingSdkResolverLoader.Instance
+            : new SdkResolverLoader();
 
         public SdkResolverService()
         {

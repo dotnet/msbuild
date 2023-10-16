@@ -18,6 +18,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         private readonly object _lock = new();
 
+        public static CachingSdkResolverLoader Instance = new CachingSdkResolverLoader();
+
         public CachingSdkResolverLoader()
         {
             _defaultResolvers = base.GetDefaultResolvers();
