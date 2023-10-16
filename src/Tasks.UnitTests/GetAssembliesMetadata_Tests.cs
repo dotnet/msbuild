@@ -37,20 +37,21 @@ namespace Microsoft.Build.Tasks.UnitTests
             t.AssembliesMetadata[0].GetMetadata("RuntimeVersion").ShouldBe("v4.0.30319");
             t.AssembliesMetadata[0].GetMetadata("MajorVersion").ShouldBe("1");
             t.AssembliesMetadata[0].GetMetadata("MinorVersion").ShouldBe("2");
-            t.AssembliesMetadata[0].GetMetadata("PeKind").ShouldBe("3");
+            t.AssembliesMetadata[0].GetMetadata("PeKind").ShouldBe("1");
             t.AssembliesMetadata[0].GetMetadata("Guid").ShouldBe("a48efb66-2596-4c6a-87ab-c8a765e54429");
             t.AssembliesMetadata[0].GetMetadata("BuildNumber").ShouldBe("3");
             t.AssembliesMetadata[0].GetMetadata("Description").ShouldBe("description for com");
             t.AssembliesMetadata[0].GetMetadata("Culture").ShouldBeEmpty();
             t.AssembliesMetadata[0].GetMetadata("TargetFrameworkMoniker").ShouldBe(".NETFramework,Version=v4.7.2");
             t.AssembliesMetadata[0].GetMetadata("DefaultAlias").ShouldBe("Custom_COM");
-            t.AssembliesMetadata[0].GetMetadata("PublicKey").ShouldBeEmpty();
+            t.AssembliesMetadata[0].GetMetadata("PublicHexKey").ShouldBeEmpty();
         }
 
         [Fact]
         public void CheckPresenceOfCOMAssemblyAttributes()
         {
-            string assemblyPath = Path.Combine("%SystemRoot%", "Microsoft.NET", "Framework", "v4.0.30319", "mscorlib.dll");
+            string pathToWinFolder = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+            string assemblyPath = Path.Combine(pathToWinFolder, "Microsoft.NET", "Framework", "v4.0.30319", "mscorlib.dll");
             GetAssembliesMetadata t = new() { AssemblyPaths = new[] { assemblyPath } };
 
             bool isSuccess = t.Execute();
@@ -64,14 +65,14 @@ namespace Microsoft.Build.Tasks.UnitTests
             t.AssembliesMetadata[0].GetMetadata("RuntimeVersion").ShouldBe("v4.0.30319");
             t.AssembliesMetadata[0].GetMetadata("MajorVersion").ShouldBe("4");
             t.AssembliesMetadata[0].GetMetadata("MinorVersion").ShouldBe("0");
-            t.AssembliesMetadata[0].GetMetadata("PeKind").ShouldBe("1");
+            t.AssembliesMetadata[0].GetMetadata("PeKind").ShouldBe("3");
             t.AssembliesMetadata[0].GetMetadata("Guid").ShouldBe("BED7F4EA-1A96-11d2-8F08-00A0C9A6186D");
             t.AssembliesMetadata[0].GetMetadata("BuildNumber").ShouldBe("0");
             t.AssembliesMetadata[0].GetMetadata("Description").ShouldBe("mscorlib.dll");
             t.AssembliesMetadata[0].GetMetadata("Culture").ShouldBeEmpty();
             t.AssembliesMetadata[0].GetMetadata("TargetFrameworkMoniker").ShouldBeEmpty();
             t.AssembliesMetadata[0].GetMetadata("DefaultAlias").ShouldBe("mscorlib");
-            t.AssembliesMetadata[0].GetMetadata("PublicKey").ShouldBe("00000000000000000400000000000000");
+            t.AssembliesMetadata[0].GetMetadata("PublicHexKey").ShouldBe("00000000000000000400000000000000");
         }
     }
 }
