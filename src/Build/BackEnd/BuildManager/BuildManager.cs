@@ -1783,15 +1783,30 @@ namespace Microsoft.Build.Execution
 
         private static void AddProxyBuildRequestToSubmission(
             BuildSubmission submission,
-            int configurationId,
+            BuildRequestConfiguration configuration,
             ProxyTargets proxyTargets,
             int projectContextId)
         {
+            IReadOnlyDictionary<string, string> realTargetsToProxyTargets = proxyTargets.RealTargetToProxyTargetMap;
+
+            ICollection<string> requestedTargets = submission.BuildRequestData.TargetNames.Count > 0
+                ? submission.BuildRequestData.TargetNames
+                : configuration.Project.DefaultTargets;
+            List<string> targets = new(requestedTargets.Count);
+            foreach (string requestedTarget in requestedTargets)
+            {
+                string effectiveTarget = realTargetsToProxyTargets.TryGetValue(requestedTarget, out string proxyTarget)
+                    ? proxyTarget
+                    : requestedTarget;
+                targets.Add(effectiveTarget);
+            }
+
             submission.BuildRequest = new BuildRequest(
                 submission.SubmissionId,
                 BackEnd.BuildRequest.InvalidNodeRequestId,
-                configurationId,
+                configuration.ConfigurationId,
                 proxyTargets,
+                targets,
                 submission.BuildRequestData.HostServices,
                 submission.BuildRequestData.Flags,
                 submission.BuildRequestData.RequestedProjectState,
@@ -2294,7 +2309,7 @@ namespace Microsoft.Build.Execution
                         {
                             // Setup submission.BuildRequest with proxy targets. The proxy request is built on the inproc node (to avoid
                             // ProjectInstance serialization). The proxy target results are used as results for the real targets.
-                            AddProxyBuildRequestToSubmission(submission, configuration.ConfigurationId, cacheResult.ProxyTargets, projectContextId);
+                            AddProxyBuildRequestToSubmission(submission, configuration, cacheResult.ProxyTargets, projectContextId);
                             IssueBuildRequestForBuildSubmission(submission, configuration, allowMainThreadBuild: false);
                         }
                         else if (cacheResult.ResultType == CacheResultType.CacheHit && cacheResult.BuildResult != null)
