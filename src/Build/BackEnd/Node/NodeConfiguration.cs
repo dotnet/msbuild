@@ -30,11 +30,6 @@ namespace Microsoft.Build.BackEnd
 
 #if FEATURE_APPDOMAIN
         /// <summary>
-        /// The app domain configuration bytes sent via RPC.
-        /// </summary>
-        private byte[] _appDomainConfigBytes;
-
-        /// <summary>
         /// The app domain information needed for setting up AppDomain-isolated tasks.
         /// </summary>
         private AppDomainSetup _appDomainSetup;
@@ -169,6 +164,8 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10) || !Traits.Instance.EscapeHatches.IsBinaryFormatterSerializationAllowed)
             {
+                byte[] _appDomainConfigBytes = null;
+
                 // Set the configuration bytes just before serialization in case the SetConfigurationBytes was invoked during lifetime of this instance.
                 if (translator.Mode == TranslationDirection.WriteToStream)
                 {
