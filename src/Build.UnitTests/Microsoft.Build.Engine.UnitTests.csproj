@@ -21,16 +21,14 @@
     <PackageReference Include="Shouldly" />
     <PackageReference Include="System.Net.Http" />
     <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" />
-    <PackageReference Include="NuGet.Frameworks" >
+    <PackageReference Include="NuGet.Frameworks">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
 
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
-    <ProjectReference Include="..\MSBuildTaskHost\MSBuildTaskHost.csproj"
-                      Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MonoBuild)' != 'true'"
-                      Aliases="MSBuildTaskHost" />
+    <ProjectReference Include="..\MSBuildTaskHost\MSBuildTaskHost.csproj" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MonoBuild)' != 'true'" Aliases="MSBuildTaskHost" />
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
@@ -48,8 +46,7 @@
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">TargetFramework=$(LatestDotNetCoreForMSBuild)</SetTargetFramework>
     </ProjectReference>
 
-    <Reference Include="System.IO.Compression"
-               Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' " />
+    <Reference Include="System.IO.Compression" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' " />
   </ItemGroup>
 
   <ItemGroup>

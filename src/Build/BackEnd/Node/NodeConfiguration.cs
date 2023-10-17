@@ -71,7 +71,6 @@ namespace Microsoft.Build.BackEnd
             _buildParameters = buildParameters;
             _forwardingLoggers = forwardingLoggers;
 #if FEATURE_APPDOMAIN
-            _appDomainConfigBytes = appDomainSetup?.GetConfigurationBytes();
             _appDomainSetup = appDomainSetup;
 #endif
             _loggingNodeConfiguration = loggingNodeConfiguration;
@@ -167,7 +166,19 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _buildParameters, BuildParameters.FactoryForDeserialization);
             translator.TranslateArray(ref _forwardingLoggers, LoggerDescription.FactoryForTranslation);
 #if FEATURE_APPDOMAIN
+            // Set the configuration bytes just before serialization in case the SetConfigurationBytes was invoked during lifetime of this instance.
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                _appDomainConfigBytes = _appDomainSetup?.GetConfigurationBytes();
+            }
+
             translator.Translate(ref _appDomainConfigBytes);
+
+            if (translator.Mode == TranslationDirection.ReadFromStream)
+            {
+                _appDomainSetup = new AppDomainSetup();
+                _appDomainSetup.SetConfigurationBytes(_appDomainConfigBytes);
+            }
 #endif
             translator.Translate(ref _loggingNodeConfiguration);
         }
@@ -179,13 +190,7 @@ namespace Microsoft.Build.BackEnd
         {
             NodeConfiguration configuration = new NodeConfiguration();
             configuration.Translate(translator);
-#if FEATURE_APPDOMAIN
-            if (configuration._appDomainConfigBytes != null)
-            {
-                configuration._appDomainSetup = new AppDomainSetup();
-                configuration._appDomainSetup.SetConfigurationBytes(configuration._appDomainConfigBytes);
-            }
-#endif
+
             return configuration;
         }
         #endregion
