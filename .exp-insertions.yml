@@ -29,21 +29,13 @@ parameters:
 variables:
   - name: _MsBuildCiPipelineId
     value: 9434
-  - name: _MSBuildConfigFilePath
-    value: "config/batmon/Q-Prod-Co3/Coordinator/ToolsReleaseConfig-GeneralPublic.json"
+  - name: _MSBuildConfigFilePathRequestURL
+    value: 'https://dev.azure.com/cloudbuild/CloudBuild/_apis/git/repositories/CloudBuildConfig/items?versionDescriptor.version=main&path=config/batmon/Q-Prod-Co3/Coordinator/ToolsReleaseConfig-GeneralPublic.json&api-version=5.0'
   - name: VSVersion
     value: ${{parameters.VSVersionName}}
 
 pool:
   vmImage: windows-latest
-
-resources:
-  repositories:
-    - repository: CloudBuildConfig
-      type: git
-      name: CloudBuild/CloudBuildConfig
-      endpoint: CloudBuild_Test
-      ref: refs/heads/main
 
 jobs:
 - job: CreateExpDotnet
@@ -140,13 +132,10 @@ jobs:
   displayName: "Create Experimental MSBuild"
   condition: ne('${{ parameters.VSVersionName }}', 'none')
   steps:
-  - checkout: self
-
   - powershell: |
-      $url = "https://dev.azure.com/cloudbuild/CloudBuild/_apis/git/repositories/CloudBuildConfig/items?versionDescriptor.version=main&path=$(_MSBuildConfigFilePath)&api-version=5.0"
       $token = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes("PAT:$env:ACCESSTOKEN"))
       $headers = @{ Authorization = "Basic $token" };
-      $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
+      $response = Invoke-RestMethod -Uri "$(_MSBuildConfigFilePathRequestURL)" -Headers $headers -Method Get
       $MSBuildDropPath = $response.Tools.MSBuild.Locations
       Write-Host "##vso[task.setvariable variable=MSBuildDropPath]$MSBuildDropPath"
       Write-Host "MSBuild Drop Path directory: $MSBuildDropPath"
@@ -162,18 +151,18 @@ jobs:
     inputs:
       command: restore
       feedsToUse: config
-      restoreSolution: '$(Build.SourcesDirectory)\DotNet-msbuild-Trusted\eng\common\internal\Tools.csproj'
-      nugetConfigPath: '$(Build.SourcesDirectory)\DotNet-msbuild-Trusted\NuGet.config'
-      restoreDirectory: '$(Build.SourcesDirectory)\DotNet-msbuild-Trusted\.packages'
+      restoreSolution: '$(Build.SourcesDirectory)\eng\common\internal\Tools.csproj'
+      nugetConfigPath: '$(Build.SourcesDirectory)\NuGet.config'
+      restoreDirectory: '$(Build.SourcesDirectory)\.packages'
 
   - powershell: |
       mkdir "$(Pipeline.Workspace)/artifacts"
 
-      $dropAppDirectory = Get-ChildItem -Directory -Path "$(Build.SourcesDirectory)/DotNet-msbuild-Trusted/.packages/drop.app"
+      $dropAppDirectory = Get-ChildItem -Directory -Path "$(Build.SourcesDirectory)/.packages/drop.app"
       $dropAppVersion = $dropAppDirectory.Name
       Write-Host "Detected drop.exe version: $dropAppVersion"
 
-      $dropExePath = "$(Build.SourcesDirectory)/DotNet-msbuild-Trusted/.packages/drop.app/$dropAppVersion/lib/net45/drop.exe"
+      $dropExePath = "$(Build.SourcesDirectory)/.packages/drop.app/$dropAppVersion/lib/net45/drop.exe"
       Write-Host "Detected drop.exe path: $dropExePath"
 
       Write-Host "Downloading VS msbuild"
@@ -211,7 +200,7 @@ jobs:
 
   - powershell: |
       Write-Host "Updating MSBuild dlls."
-      $(Build.SourcesDirectory)/DotNet-msbuild-Trusted/scripts/Deploy-MSBuild.ps1 `
+      $(Build.SourcesDirectory)/scripts/Deploy-MSBuild.ps1 `
         -destination "$(Pipeline.Workspace)/VSMSBuild/$(VSVersion)/MSBuild/Current/Bin" `
         -binDirectory "$(System.ArtifactsDirectory)/msbuild/artifacts/bin" `
         -configuration Release `
