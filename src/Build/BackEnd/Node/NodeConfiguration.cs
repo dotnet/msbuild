@@ -7,6 +7,7 @@ using System;
 using System.Diagnostics;
 
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 #nullable disable
 
@@ -166,18 +167,25 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _buildParameters, BuildParameters.FactoryForDeserialization);
             translator.TranslateArray(ref _forwardingLoggers, LoggerDescription.FactoryForTranslation);
 #if FEATURE_APPDOMAIN
-            // Set the configuration bytes just before serialization in case the SetConfigurationBytes was invoked during lifetime of this instance.
-            if (translator.Mode == TranslationDirection.WriteToStream)
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10) || !Traits.Instance.EscapeHatches.IsBinaryFormatterSerializationAllowed)
             {
-                _appDomainConfigBytes = _appDomainSetup?.GetConfigurationBytes();
+                // Set the configuration bytes just before serialization in case the SetConfigurationBytes was invoked during lifetime of this instance.
+                if (translator.Mode == TranslationDirection.WriteToStream)
+                {
+                    _appDomainConfigBytes = _appDomainSetup?.GetConfigurationBytes();
+                }
+
+                translator.Translate(ref _appDomainConfigBytes);
+
+                if (translator.Mode == TranslationDirection.ReadFromStream)
+                {
+                    _appDomainSetup = new AppDomainSetup();
+                    _appDomainSetup.SetConfigurationBytes(_appDomainConfigBytes);
+                }
             }
-
-            translator.Translate(ref _appDomainConfigBytes);
-
-            if (translator.Mode == TranslationDirection.ReadFromStream)
+            else
             {
-                _appDomainSetup = new AppDomainSetup();
-                _appDomainSetup.SetConfigurationBytes(_appDomainConfigBytes);
+                translator.TranslateDotNet(ref _appDomainSetup);
             }
 #endif
             translator.Translate(ref _loggingNodeConfiguration);
