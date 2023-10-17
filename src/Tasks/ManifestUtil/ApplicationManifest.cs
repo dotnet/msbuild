@@ -640,7 +640,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             int t1 = Environment.TickCount;
             bool isPartialTrust = !TrustInfo.IsFullTrust;
-            var targetPathList = new Dictionary<string, NGen<bool>>();
+            var targetPathList = new Dictionary<string, bool>();
 
             foreach (AssemblyReference assembly in AssemblyReferences)
             {

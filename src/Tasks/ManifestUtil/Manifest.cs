@@ -611,7 +611,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 return;
             }
 
-            var identityList = new Dictionary<string, NGen<bool>>();
+            var identityList = new Dictionary<string, bool>();
             foreach (AssemblyReference assembly in AssemblyReferences)
             {
                 if (assembly.AssemblyIdentity != null)

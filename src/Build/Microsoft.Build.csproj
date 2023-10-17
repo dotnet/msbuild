@@ -82,9 +82,6 @@
     <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
       <Link>IConstrainedEqualityComparer.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\NGen.cs">
-      <Link>SharedUtilities\NGen.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\PropertyParser.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\PropertyParser.cs</Link>
     </Compile>
