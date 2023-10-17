@@ -48,7 +48,7 @@ namespace Microsoft.Build.Tasks
         /// When we check to see if an assembly is in this redist list we want to cache it so that if we ask again we do not
         /// have to re-scan bits of the redist list and do the assemblynameExtension comparisons.
         /// </summary>
-        private readonly ConcurrentDictionary<AssemblyNameExtension, NGen<bool>> _assemblyNameInRedist = new ConcurrentDictionary<AssemblyNameExtension, NGen<bool>>(AssemblyNameComparer.GenericComparer);
+        private readonly ConcurrentDictionary<AssemblyNameExtension, bool> _assemblyNameInRedist = new ConcurrentDictionary<AssemblyNameExtension, bool>(AssemblyNameComparer.GenericComparer);
 
         /// <summary>
         /// AssemblyName to unified assemblyName. We make this kind of call a lot and also will ask for the same name multiple times.
@@ -431,7 +431,7 @@ namespace Microsoft.Build.Tasks
         {
             ErrorUtilities.VerifyThrowArgumentNull(assemblyName, nameof(assemblyName));
 
-            if (!_assemblyNameInRedist.TryGetValue(assemblyName, out NGen<bool> isAssemblyNameInRedist))
+            if (!_assemblyNameInRedist.TryGetValue(assemblyName, out bool isAssemblyNameInRedist))
             {
                 string simpleName = GetSimpleName(assemblyName.Name);
                 if (_simpleNameMap.TryGetValue(simpleName, out int index))
