@@ -266,7 +266,7 @@
       </trans-unit>
       <trans-unit id="ProjectCacheHandleBuildResultFailed">
         <source>MSB4269: The project cache failed while handling a build result for the following project: {0}.</source>
-        <target state="new">MSB4269: The project cache failed while handling a build result for the following project: {0}.</target>
+        <target state="translated">MSB4269: 处理以下项目的生成结果时，项目缓存失败: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheHitWithDefaultTargets">
@@ -377,7 +377,7 @@
       </trans-unit>
       <trans-unit id="ReportFileAccessesX64Only">
         <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
-        <target state="new">Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</target>
+        <target state="translated">当前仅支持使用 x64 风格的 MSBuild 来报告文件访问情况。</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
@@ -2406,7 +2406,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="InvalidSdkFormat">
         <source>MSB4229: The value "{0}" is not valid for an Sdk specification. The attribute should be a semicolon-delimited list of Sdk-name/minimum-version pairs, separated by a forward slash.</source>
-        <target state="translated">MSB4229: 值“{0}”对 Sdk 规范无效。此属性应该是以分号分隔的Sdk-name/minimum-version 对（用正斜杠分隔）的列表。</target>
+        <target state="translated">MSB4229: 值“{0}”对 Sdk 规范无效。此属性应该是以分号分隔的Sdk-name/minimum-version 对 (用正斜杠分隔) 的列表。</target>
         <note>{StrBegin="MSB4229: "}</note>
       </trans-unit>
       <trans-unit id="TaskInstantiationFailureNotSupported">
