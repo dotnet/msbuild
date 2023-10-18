@@ -93,6 +93,9 @@ namespace Microsoft.Build.Graph
 
             RootNodes = GetGraphRoots(EntryPointNodes);
             ProjectNodes = allParsedProjects.Values.Select(p => p.GraphNode).ToList();
+
+            // Clean and release some temporary used large memory objects.
+            _platformNegotiationInstancesCache.Clear();
         }
 
         private static IReadOnlyCollection<ProjectGraphNode> GetGraphRoots(IReadOnlyCollection<ProjectGraphNode> entryPointNodes)
