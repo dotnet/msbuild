@@ -82,17 +82,17 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [InlineData("1", true)]
         // [InlineData("0", true)] <-- explicitly opting out on core will lead to node crash (as documented)
         [InlineData(null, true)]
-        public void Build_WithCustomBuildArgs_NetCore(string envVariableValue, bool isWarningExpected)
-            => TestCustomEventWarning<BuildErrorEventArgs>(envVariableValue, isWarningExpected);
+        public void Build_WithCustomBuildArgs_NetCore(string envVariableValue, bool isErrorExpected)
+            => TestCustomEvent<BuildErrorEventArgs>(envVariableValue, isErrorExpected);
 
         [WindowsFullFrameworkOnlyTheory]
         [InlineData("1", true)]
         [InlineData("0", false)]
-        [InlineData(null, false)]
-        public void Build_WithCustomBuildArgs_Framework(string envVariableValue, bool isWarningExpected) =>
-            TestCustomEventWarning<BuildWarningEventArgs>(envVariableValue, isWarningExpected);
+        [InlineData(null, true)]
+        public void Build_WithCustomBuildArgs_Framework(string envVariableValue, bool isErrorExpected) =>
+            TestCustomEvent<BuildErrorEventArgs>(envVariableValue, isErrorExpected);
 
-        private void TestCustomEventWarning<T>(string envVariableValue, bool isWarningExpected) where T : LazyFormattedBuildEventArgs
+        private void TestCustomEvent<T>(string envVariableValue, bool isWarningExpected) where T : LazyFormattedBuildEventArgs
         {
             var testFiles = _env.CreateTestProjectWithFiles(string.Empty, new[] { "main", "child1" }, string.Empty);
 
