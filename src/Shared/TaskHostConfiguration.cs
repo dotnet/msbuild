@@ -424,15 +424,15 @@ namespace Microsoft.Build.BackEnd
                 // Set the configuration bytes just before serialization in case the SetConfigurationBytes was invoked during lifetime of this instance.
                 if (translator.Mode == TranslationDirection.WriteToStream)
                 {
-                    _appDomainConfigBytes = _appDomainSetup?.GetConfigurationBytes();
+                    appDomainConfigBytes = _appDomainSetup?.GetConfigurationBytes();
                 }
 
-                translator.Translate(ref _appDomainConfigBytes);
+                translator.Translate(ref appDomainConfigBytes);
 
                 if (translator.Mode == TranslationDirection.ReadFromStream)
                 {
                     _appDomainSetup = new AppDomainSetup();
-                    _appDomainSetup.SetConfigurationBytes(_appDomainConfigBytes);
+                    _appDomainSetup.SetConfigurationBytes(appDomainConfigBytes);
                 }
             }
             else
