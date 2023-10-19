@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -154,6 +153,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </Project>";
 
                 MockLogger logger = new MockLogger(_testOutput);
+                ManualResetEvent waitCommandExecuted = new ManualResetEvent(false);
+                string unescapedSleepCommand = sleepCommand.Replace("&quot;", "\"").Replace("&gt;", ">");
+                logger.AdditionalHandlers.Add((sender, args) =>
+                {
+                    if (unescapedSleepCommand.Equals(args.Message))
+                    {
+                        waitCommandExecuted.Set();
+                    }
+                });
 
                 var project = new Project(XmlReader.Create(new StringReader(contents)), null, MSBuildConstants.CurrentToolsVersion, collection)
                 {
@@ -170,18 +178,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestData data = new BuildRequestData(project.CreateProjectInstance(), new string[] { "test" }, collection.HostServices);
                 manager.BeginBuild(_parameters);
                 BuildSubmission asyncResult = manager.PendBuildRequest(data);
-                string unescapedSleepCommand = sleepCommand.Replace("&quot;", "\"").Replace("&gt;", ">");
-                Func<bool> isSleepCommandExecuted = () => logger.AllBuildEvents.Any(a => unescapedSleepCommand.Equals(a.Message));
-                Task waitCommandExecuted = new Task(() =>
-                {
-                    while (!isSleepCommandExecuted())
-                    {
-                        Task.Delay(TimeSpan.FromMilliseconds(10)).Wait();
-                    }
-                });
                 asyncResult.ExecuteAsync(null, null);
-                waitCommandExecuted.Start();
-                waitCommandExecuted.Wait(TimeSpan.FromSeconds(5)).ShouldBeTrue("Waiting for executing the command timed out.");
+                waitCommandExecuted.WaitOne();
                 manager.CancelAllSubmissions();
                 asyncResult.WaitHandle.WaitOne();
                 BuildResult result = asyncResult.BuildResult;
