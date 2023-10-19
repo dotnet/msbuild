@@ -167,6 +167,12 @@
     <Compile Include="BackEnd\Components\SdkResolution\TranslationHelpers.cs" />
     <Compile Include="FileSystem\*.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
+    <Compile Include="FileAccess\DesiredAccess.cs" />
+    <Compile Include="FileAccess\FileAccessData.cs" />
+    <Compile Include="FileAccess\FlagsAndAttributes.cs" />
+    <Compile Include="FileAccess\ProcessData.cs" />
+    <Compile Include="FileAccess\ReportedFileOperation.cs" />
+    <Compile Include="FileAccess\RequestedAccess.cs" />
     <Compile Include="Logging\BinaryLogger\IBuildEventArgsReaderNotifications.cs" />
     <Compile Include="Logging\BinaryLogger\IBuildEventStringsReader.cs" />
     <Compile Include="Logging\BinaryLogger\StringReadEventArgs.cs" />
