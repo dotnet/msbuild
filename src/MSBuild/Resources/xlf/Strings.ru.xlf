@@ -105,25 +105,15 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="new">  -reportFileAccesses[:True|False]
-                     Causes MSBuild to report file accesses to any configured
-                     project cache plugins.
+        <target state="translated">  -reportFileAccesses[:True|False]
+                     Включение отчетов MSBuild о доступе к файлам для всех настроенных
+                     подключаемых модулей кэша проекта.
 
-                     This flag is experimental and may not work as intended.
+                     Этот флаг является экспериментальным и может работать неправильно.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
-    </note>
-      </trans-unit>
-      <trans-unit id="InvalidReportFileAccessesValue">
-        <source>MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</target>
-        <note>
-      {StrBegin="MSBUILD : error MSB1063: "}
-      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
@@ -138,11 +128,21 @@
       </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
-        <target state="new">MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</target>
+        <target state="translated">MSBUILD : error MSB1065: Недопустимое значение средства ведения журнала терминала. Это должно быть одно из следующих значений: "auto", "ИСТИНА" или "ЛОЖЬ". {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidReportFileAccessesValue">
+        <source>MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</source>
+        <target state="translated">MSBUILD : error MSB1063: переданное значение отчета о доступе к файлам является недопустимым. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1063: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
