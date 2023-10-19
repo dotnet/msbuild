@@ -1942,7 +1942,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnifiedReferenceDependsOn">
         <source>References which depend on or have been unified to "{0}" [{1}].</source>
-        <target state="new">References which depend on or have been unified to "{0}" [{1}].</target>
+        <target state="translated">Verweise, die von „{0}“ [{1}] abhängen oder damit vereint wurden.</target>
         <note> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnknownProcessorArchitecture">
