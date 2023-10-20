@@ -18,7 +18,7 @@ This change also simplifies and unifies user experiences. MSBuild works the same
 
 # High-level design
 
-Conceptually, there are two parts of caching: "cache get" and "cache add". "Cache get" is MSBuild asking the plugin if it wants to handle a build request, ie by fetching from some cache. "Cache add" is, upon cache miss, MSBuild providing enough information to the plugin during the build of the build request for the plugin add the results to its cache and safely be able to retrieve it for some future build.
+Conceptually, there are two parts of caching: "cache get" and "cache add". "Cache get" is MSBuild asking the plugin if it wants to handle a build request, ie by fetching from some cache. "Cache add" is, upon cache miss, MSBuild providing enough information to the plugin during the build of the build request for the plugin to add the results to its cache and safely be able to retrieve it for some future build.
 
 The "cache get" functionality was introduced in 16.9, while "cache add" was added in 17.8.
 
@@ -32,20 +32,21 @@ The "cache get" functionality was introduced in 16.9, while "cache add" was adde
   <ProjectCachePlugin Include="$(SomePath)\MyAmazingCachePlugin.dll" />
 </ItemGroup>
 ```
-- Progrmatic usage of `BuildManager` can also set `BuildParameters.ProjectCacheDescriptor` to apply a plugin to all requests.
+- Programmatic usage of `BuildManager` can also set `BuildParameters.ProjectCacheDescriptor` to apply a plugin to all requests.
 
 ## Plugin lifetime
 
 - Plugin instances reside only in the `BuildManager` node. Having it otherwise (plugin instances residing in all nodes) means forcing the plugins to either deal with distributed state or implement a long lived service. We consider this high complexity cost to not be worth it. We also want to avoid serializing the `ProjectInstance` between nodes, which is expensive.
 - `BuildManager.BeginBuild` calls `ProjectCacheBase.BeginBuildAsync` on all discovered plugins. This allows plugins to start any required initialization work. It does not wait for the plugins to fully initialize, ie it is a "fire-and-forget" call at this point. The first query on the plugin will wait for plugin initialization.
-- `BuildManager.EndBuild` calls `ProjectCacheBase.EndBuildAsync` on all discovered plugins. This allows plugins to perform any required cleanup work. This is a blocking call which will be awaited before th build can complete.
-- Only the user provided top level build requests are checked against the cache. The build requests issued recursively from the top level requests are not checked against the cache, since it is assumed that users issue build requests in reverse toposort order. Therefore when a project builds its references, those references should have already been built and present in MSBuild's internal cache, provided either by the project cache plugin or real builds. In other words, projects which are not well-described in the graph (eg using `<MSBuild>` tasks directly) will not benefit from the cache.
-- The plugin instance will get called in reverse topo sort order (from dependencies up towards dependents). This happens based on the requirement of using `/graph`. Building in reverse topo sort order is common between Visual Studio solution builds and higher build engines.
-- Plugins can function with and without a static graph. When a static graph is not provided, hints about the graph entry points are provided (details in Defining the "graph" when static graph is not available).
+  - `BeginBuildAsync` may be called with or without a `ProjectGraph`, depending on MSBuild has one to provide. When it is not provided, hints about the graph entry points are provided with which the plugin may decide to construct the `ProjectGraph` itself, if desired.
+- `BuildManager.EndBuild` calls `ProjectCacheBase.EndBuildAsync` on all discovered plugins. This allows plugins to perform any required cleanup work. This is a blocking call which will be awaited before the build can complete.
+- The plugin instance will get called in reverse topological sort order (from dependencies up towards dependents). This happens when performing a graph build (`/graph`), Visual Studio solution builds, and commonly in higher build engines.
+- Only the top-level build requests are checked against the cache. Build requests issued recursively from the top-level requests, for example a project building its dependencies, are not checked against the cache. However, because the build requests are assumed to be issued in reverse topological sort order, those requests should have already been built and present in MSBuild's internal result cache, provided either by the project cache plugin or real builds. A consequence of this is that, projects which are not well-described in the graph (eg using `<MSBuild>` tasks directly) will not benefit from the cache.
 
 ## Cache get scenario
 
 - For each [`BuildRequestData`](/src/Build/BackEnd/BuildManager/BuildRequestData.cs#L83) ([`ProjectInstance`](/src/Build/Instance/ProjectInstance.cs#L71), Global Properties, Targets) submitted to the [`BuildManager`](/src/Build/BackEnd/BuildManager/BuildManager.cs#L38), MSBuild asks the plugin whether to build the request or not.
+  
   - If the `BuildRequestData` is based on a project path instead of a `ProjectInstance`, the project is evaluated by the `BuildManager`.
 - If the plugin decides to build, then MSBuild proceeds building the project as usual.
 - If the plugin decides to skip the build, it needs to return back to MSBuild the target results that the build request would have produced. It can either provide the results directly, or instruct MSBuild to run a set of less expensive targets on the projects with the same effect as the expensive targets ("proxy targets").
@@ -64,30 +65,19 @@ The "cache get" functionality was introduced in 16.9, while "cache add" was adde
 ## Cache add scenario
 
 - Upon a cache miss, MSBuild will generally handle a request as normal, ie by building it.
-- To facilitate the plugin being able to hande future builds, MSBuild can report file accesses as well as the build result for the BuildRequestData.
-- MSBuild disables the in-proc node and uses [Detours](https://github.com/microsoft/Detours) to observe file accesses of the worker nodes. It forwards this information to the plugin for it to use as desired.
-  - This functionality has some implementation restrictions so will require additional opt-in. Specifically, the `/ReportFileAccesses` command-line flag or by setting `BuildParameters.ReportFileAccesses` for programatic use of `BuildManager`. If this is not set, no file accesses will be reported to the plugin, however the plugin will still be notified of the build result.
-- Due to the experimental nature of the feature, `/ReportFileAccesses` is only available with MSBuild.exe (ie. the Visual Studio install; not `dotnet`) and only from the command-line. The Visual Studio IDE does not set `BuildParameters.ReportFileAccesses`.
+- MSBuild uses [Detours](https://github.com/microsoft/Detours) to observe file accesses of the worker nodes. To facilitate the plugin being able to handle future builds, it forwards this information as well as the build result to the plugin for it to use as desired, for example to add to a cache.
+  - This functionality has some implementation restrictions so will require additional opt-in. Specifically, the `/ReportFileAccesses` command-line flag or by setting `BuildParameters.ReportFileAccesses` for programmatic use of `BuildManager`. If this is not set, no file accesses will be reported to the plugin, however the plugin will still be notified of the build result.
+  - The in-proc node is disabled since MSBuild is unable to use Detours on the currently running process. It also would not want to capture the file accesses of the plugins themselves.
+  - Detours adds some overhead to file accesses. Based on initial experimentation, it's around 10-15%. There's the overhead of the plugin adding to the cache. Caching becomes valuable if it can save more than the overhead on average.
+- Due to the experimental nature of the feature, `/ReportFileAccesses` is only available with MSBuild.exe (ie. the Visual Studio install; not `dotnet`), only for the x64 flavor (not x86 or arm64), and only from the command-line. The Visual Studio IDE does not set `BuildParameters.ReportFileAccesses`.
 - As described above, it is recommended to serialize the `BuildResult` from `HandleProjectFinishedAsync` for later replay.
 
 # APIs and calling patterns
 
 ## Plugin API
-[ProjectCachePluginBase](/src/Build/BackEnd/Components/ProjectCache/ProjectCachePluginBase.cs) is an abstract class which plugin implementors will subclass. It contains the following methods:
+[ProjectCachePluginBase](/src/Build/BackEnd/Components/ProjectCache/ProjectCachePluginBase.cs) is an abstract class which plugin implementors will subclass.
 
-```cs
-public abstract Task BeginBuildAsync(CacheContext context, PluginLoggerBase logger, CancellationToken cancellationToken);
-
-public abstract Task EndBuildAsync(PluginLoggerBase logger, CancellationToken cancellationToken);
-
-public abstract Task<CacheResult> GetCacheResultAsync(BuildRequestData buildRequest, PluginLoggerBase logger, CancellationToken cancellationToken);
-
-public virtual void HandleFileAccess(FileAccessContext fileAccessContext, FileAccessData fileAccessData);
-
-public virtual void HandleProcess(FileAccessContext fileAccessContext, ProcessData processData);
-
-public virtual Task HandleProjectFinishedAsync(FileAccessContext fileAccessContext, BuildResult buildResult, PluginLoggerBase logger, CancellationToken cancellationToken);
-```
+See the [Plugin implementation guidance and simple example design](#plugin-implementation-guidance-and-simple-example-design) section for guidance for plugin implementations.
 
 ## Configuring plugins
 
@@ -111,7 +101,7 @@ Note: As it is likely that plugins will be distributed through NuGet packages an
 
 - Requires `/graph` to light up cache get scenarios.
 - Requires `/reportfileaccesses` to light up cache add scenarios.
-- The static graph has all the project instances in the same process, makes it easy to find and keep plugin instances in one process.
+- The static graph has all the project instances in the same process, making it easy to find and keep plugin instances in one process.
 - MSBuild constructs the static graph and build bottom up, so by the time a project is considered, all of its references and their build results are already present in the Scheduler.
 
 ## Enabling from Visual Studio, a temporary workaround
@@ -125,15 +115,15 @@ Note: As it is likely that plugins will be distributed through NuGet packages an
 
 # Detours (cache add scenario)
 
-In order for MSBuild to observe the file accesses as part of the build, it uses Detours on the worker nodes. In this way the Scheduler node will events for all file accesses done by the worker nodes. As the Scheduler knows what build request a worker node is working on at any given moment, it is able to properly associate the file access with a build request and dispatch these augmented events to plugins via the plugins' `HandleFileAccess` and `HandleProcess` implementations.
+In order for MSBuild to observe the file accesses as part of the build, it uses Detours on the worker nodes. In this way the Scheduler node will emit events for all file accesses done by the worker nodes. As the Scheduler knows what build request a worker node is working on at any given moment, it is able to properly associate the file access with a build request and dispatch these augmented events to plugins via the plugins' `HandleFileAccess` and `HandleProcess` implementations.
 
 Note that the Scheduler node cannot use Detours on itself, so the in-proc node is disabled when repoting file accesses. Additionally task yielding is disabled since it would leave to improperly associated file accesses.
 
 ## Pipe synchronization
 
-Because the Detours implementation being used communicates over a pipe, and node communication is also over a pipe, and pipes are async, there is some coordination required for ensuring that file accesses are associated with the proper build request. For example, if a "project finished" signal comes through the node communication pipe, but the detours pipe still has a queue of file accesses which have not been processed yet, those file accesses might be processed after the worker node has moved onto some other project.
+Because the Detours implementation being used communicates over a pipe, and nodes communicate over a pipe as well, and pipes are async, there is some coordination required to ensure that file accesses are associated with the proper build request. For example, if a "project finished" signal comes through the node communication pipe, but the detours pipe still has a queue of file accesses which have not been processed yet, those file accesses might be processed after the worker node has moved onto some other project.
 
-To address this problem, when a worker node finishes a project it will emit a dummy file access with a specific format known to MSBuild. When the scheduler not recieves as "project finished" event over the node communication pipe, it will wait to determine that the project is actually finished until it also recieves the dummy file access. This ensures that the all file accesses associated with the project have fully flushed from the pipe before the scheduler deterines the project is finished and schedules new work to the worker node (which would trigger new file accesses).
+To address this problem, when a worker node finishes a project it will emit a dummy file access with a specific format known to MSBuild. When the scheduler node receives as "project finished" event over the node communication pipe, it will wait to determine that the project is actually finished until it also receives the dummy file access. This ensures that the all file accesses associated with the project have fully flushed from the pipe before the scheduler determines the project is finished and schedules new work to the worker node (which would trigger new file accesses).
 
 # Plugin implementation guidance and simple example design
 
@@ -148,7 +138,7 @@ A "fingerprint" describes each unique input which went into the building a build
 In this example, we will only consider the following as inputs, and thus part of the fingerprint:
 - The global properties of the build request (eg `Configuration=Debug`, `Platform=AnyCPU`)
 - The content hash of the project file
-- The content hash of files defined in specific items we know contribute to the build, like `<Compile>` and `<Content>`. 
+- The content hash of files defined in specific items we know contribute to the build, like `<Compile>` and `<Content>`
 - The fingerprint of referenced projects
 
 Again, this is for illustrative purposes and a real implementation will want to use additional state for fingerprinting depending on the environment in which it runs and the correctness requirements.
@@ -171,7 +161,7 @@ For a given project, `GetCacheResultAsync` will be invoked, but will end up retu
 
 MSBuild will then build the project normally but under a detoured worker node. Because of this, the plugin will recieve `HandleFileAccess` and `HandleProcess` events. In this example implementation we will ignore `HandleProcess`. For `HandleFileAccess`, the plugin will simply store all `FileAccessData`s for a `FileAccessContext` to build up a list of all file accesses during the build. The plugin may decide to avoid storing the entire `FileAccessData` and instead just peel off the data it finds relevant (eg. paths, whether it was a read or write, etc).
 
-Once MSBuild is done building the project, it will call the plugin's `HandleProjectFinishedAsync`. Now the plugin knows the project is done and can process the results and add them a cache. In general it's only useful to cache successful results, so the plugin should filter out non-success results. The `FileAccessContext` provided can then be used to retrieve the list of `FileAccessData` the plugin recieved. These `FileAccessData` can be processed to understand which files were read and writted as part of the build.
+Once MSBuild is done building the project, it will call the plugin's `HandleProjectFinishedAsync`. Now the plugin knows the project is done and can process the results and add them to a cache. In general it's only useful to cache successful results, so the plugin should filter out non-success results. The `FileAccessContext` provided can then be used to retrieve the list of `FileAccessData` the plugin recieved. These `FileAccessData` can be processed to understand which files were read and written as part of the build.
 
 In our example, we can use the read files to construct a fingerprint for the build request. We can then add the files written during the build ("outputs") to some cache implementation.
 
@@ -189,7 +179,7 @@ This can then be used for future builds.
 
  For a given project, `GetCacheResultAsync` will be invoked. The plugin can fingerprint the request and use that fingerprint to look up in its cache. If the cache entry exists, it can declare a cache hit.
 
-In the example above, if all inputs are the same as in the first build, we should end up with a fingerprint `F`. We look up in the metadata part of the cache (file `metadata/F`) and find that it exists. This means we have a cache hit. We can fetch that metadata `M` from the cache and find that is describes the output with path `O` and hash `H`. The plugin would then copy `content/H` to `O` and return the deserialized `BuildResult R` contained in `M` to MSBuild.
+In the example above, if all inputs are the same as in the first build, we should end up with a fingerprint `F`. We look up in the metadata part of the cache (file `metadata/F`) and find that it exists. This means we have a cache hit. We can fetch that metadata `M` from the cache and find that it describes the output with path `O` and hash `H`. The plugin would then copy `content/H` to `O` and return the deserialized `BuildResult R` contained in `M` to MSBuild.
 
 If the inputs were not the same as in the first build, for example if a `Compile` item (a .cs file) changed, the fingerprint would be something else besides `F` and so would not have corresponding cache entries for it, indicating a cache miss. This will then go through the "cache add" scenario described above to populate the cache with the new fingerprint.
 
