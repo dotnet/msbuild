@@ -212,7 +212,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 if (!_builderThread.Join(5000))
                 {
-                    Assert.Fail("Builder thread did not terminate on cancel.");
+                    Assert.True(false, "Builder thread did not terminate on cancel.");
 #if FEATURE_THREAD_ABORT
                     _builderThread.Abort();
 #endif
@@ -529,11 +529,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             int index = WaitHandle.WaitAny(events, 5000);
             if (WaitHandle.WaitTimeout == index)
             {
-                Assert.Fail("Did not receive " + eventName + " callback before the timeout expired.");
+                Assert.True(false, "Did not receive " + eventName + " callback before the timeout expired.");
             }
             else if (index == 0)
             {
-                Assert.Fail("Received engine exception " + _engineException_Exception);
+                Assert.True(false, "Received engine exception " + _engineException_Exception);
             }
         }
 

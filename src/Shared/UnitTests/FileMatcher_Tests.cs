@@ -651,7 +651,7 @@ namespace Microsoft.Build.UnitTests
             else
             {
                 Console.WriteLine("GetFileSystemEntries('{0}', '{1}')", path, pattern);
-                Assert.Fail("Unexpected input into GetFileSystemEntries");
+                Assert.True(false, "Unexpected input into GetFileSystemEntries");
             }
             return new string[] { "<undefined>" };
         }
@@ -2118,7 +2118,7 @@ namespace Microsoft.Build.UnitTests
                             }
                             else
                             {
-                                Assert.Fail(String.Format("Unhandled case in GetMatchingFiles: {0}", pattern));
+                                Assert.True(false, String.Format("Unhandled case in GetMatchingFiles: {0}", pattern));
                             }
                         }
                     }
@@ -2175,7 +2175,7 @@ namespace Microsoft.Build.UnitTests
                                 }
                                 else
                                 {
-                                    Assert.Fail(String.Format("Unhandled case in GetMatchingDirectories: {0}", pattern));
+                                    Assert.True(false, String.Format("Unhandled case in GetMatchingDirectories: {0}", pattern));
                                 }
                             }
                         }
@@ -2498,7 +2498,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine("Expect Fixed '{0}' got '{1}'", expectedFixedDirectoryPart, fixedDirectoryPart);
                 Console.WriteLine("Expect Wildcard '{0}' got '{1}'", expectedWildcardDirectoryPart, wildcardDirectoryPart);
                 Console.WriteLine("Expect Filename '{0}' got '{1}'", expectedFilenamePart, filenamePart);
-                Assert.Fail("FileMatcher Regression: Failure while validating SplitFileSpec.");
+                Assert.True(false, "FileMatcher Regression: Failure while validating SplitFileSpec.");
             }
         }
 
@@ -2526,7 +2526,7 @@ namespace Microsoft.Build.UnitTests
         {
             if (!IsFileMatchAssertIfIllegal(filespec, fileToMatch, shouldBeRecursive))
             {
-                Assert.Fail("FileMatcher Regression: Failure while validating that files match.");
+                Assert.True(false, "FileMatcher Regression: Failure while validating that files match.");
             }
 
             // Now, simulate a filesystem with only fileToMatch. Make sure the file exists that way.
@@ -2551,7 +2551,7 @@ namespace Microsoft.Build.UnitTests
         {
             if (IsFileMatchAssertIfIllegal(filespec, fileToMatch, shouldBeRecursive))
             {
-                Assert.Fail("FileMatcher Regression: Failure while validating that files don't match.");
+                Assert.True(false, "FileMatcher Regression: Failure while validating that files don't match.");
             }
 
             // Now, simulate a filesystem with only fileToMatch. Make sure the file doesn't exist that way.
@@ -2579,7 +2579,7 @@ namespace Microsoft.Build.UnitTests
 
             if (isLegalFileSpec)
             {
-                Assert.Fail("FileMatcher Regression: Expected an illegal filespec, but got a legal one.");
+                Assert.True(false, "FileMatcher Regression: Expected an illegal filespec, but got a legal one.");
             }
 
             // Now, FileMatcher is supposed to take any legal file name and just return it immediately.
@@ -2604,7 +2604,7 @@ namespace Microsoft.Build.UnitTests
             if (!match.isLegalFileSpec)
             {
                 Console.WriteLine("Checking FileSpec: '{0}' against '{1}'", filespec, fileToMatch);
-                Assert.Fail("FileMatcher Regression: Invalid filespec.");
+                Assert.True(false, "FileMatcher Regression: Invalid filespec.");
             }
             if (shouldBeRecursive != match.isFileSpecRecursive)
             {

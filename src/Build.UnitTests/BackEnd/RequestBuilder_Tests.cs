@@ -327,7 +327,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             if (!evt.WaitOne(5000))
             {
-                Assert.Fail("Did not receive " + eventName + " callback before the timeout expired.");
+                Assert.True(false, "Did not receive " + eventName + " callback before the timeout expired.");
             }
         }
 

@@ -96,13 +96,13 @@ namespace Microsoft.Build.UnitTests
 
             msg += "Not found!\r\n";
             Console.WriteLine(msg);
-            Assert.Fail(msg); // Could not find the parameter.
+            Assert.True(false, msg); // Could not find the parameter.
 
             return 0;
         }
 
         /// <summary>
-        /// Validates that the given ToolTaskExtension's command line does not contain
+        /// Validates that the given ToolTaskExtension's command line does not contain 
         /// any parameter starting with the given string.
         /// </summary>
         /// <param name="t">task to get the command line from</param>
@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Validates that the given ToolTaskExtension's command line does not contain
+        /// Validates that the given ToolTaskExtension's command line does not contain 
         /// any parameter starting with the given string.
         /// </summary>
         /// <param name="t">task to get the command line from</param>
@@ -125,7 +125,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Validates that the given ToolTaskExtension's command line does not contain
+        /// Validates that the given ToolTaskExtension's command line does not contain 
         /// any parameter starting with the given string.
         /// </summary>
         /// <param name="t">task to get the command line from</param>
@@ -137,7 +137,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Validates that the given ToolTaskExtension's command line does not contain
+        /// Validates that the given ToolTaskExtension's command line does not contain 
         /// any parameter starting with the given string.
         /// </summary>
         /// <param name="t">task to get the command line from</param>
@@ -185,7 +185,7 @@ namespace Microsoft.Build.UnitTests
                     {
                         msg += String.Format(" Found something!\r\n");
                         Console.WriteLine(msg);
-                        Assert.Fail(msg); // Found the startsWith but shouldn't have.
+                        Assert.True(false, msg); // Found the startsWith but shouldn't have.
                         return;
                     }
                 }
@@ -221,7 +221,7 @@ namespace Microsoft.Build.UnitTests
             {
                 msg += "Not found!\r\n";
                 Console.WriteLine(msg);
-                Assert.Fail(msg);
+                Assert.True(false, msg);
             }
         }
 
@@ -253,7 +253,7 @@ namespace Microsoft.Build.UnitTests
             {
                 msg += "Found!\r\n";
                 Console.WriteLine(msg);
-                Assert.Fail(msg);
+                Assert.True(false, msg);
             }
         }
 
@@ -284,7 +284,7 @@ namespace Microsoft.Build.UnitTests
             {
                 msg += "Does not match!\r\n";
                 Console.WriteLine(msg);
-                Assert.Fail(msg);
+                Assert.True(false, msg);
             }
         }
 

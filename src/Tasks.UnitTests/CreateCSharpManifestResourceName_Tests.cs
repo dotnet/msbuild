@@ -756,7 +756,7 @@ namespace ClassLibrary2
 namespace ClassLibrary3
 #endif
 {
-    class MyForm
+    class MyForm 
     {
     }
 }"),
@@ -780,7 +780,7 @@ namespace ClassLibrary3
             {
                 return StreamHelpers.StringToStream("namespace MyStuff.Namespace { class Class {} }");
             }
-            Assert.Fail(String.Format("Encountered a new path {0}, needs unittesting support", path));
+            Assert.True(false, String.Format("Encountered a new path {0}, needs unittesting support", path));
             return null;
         }
 

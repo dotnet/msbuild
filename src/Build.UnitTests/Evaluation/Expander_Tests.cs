@@ -4209,7 +4209,7 @@ $(
                 {
                     string message = "FAILURE: " + validTests[i][0] + " expanded to '" + result + "' instead of '" + validTests[i][1] + "'";
                     Console.WriteLine(message);
-                    Assert.Fail(message);
+                    Assert.True(false, message);
                 }
                 else
                 {

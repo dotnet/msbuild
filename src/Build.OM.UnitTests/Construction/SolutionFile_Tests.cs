@@ -52,7 +52,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
 
                 ParseSolutionHelper(solutionFileContents);
-                Assert.Fail("Should not get here");
+                Assert.True(false, "Should not get here");
             });
         }
         /// <summary>
@@ -273,7 +273,7 @@ namespace Microsoft.Build.UnitTests.Construction
             }
             catch (Exception ex)
             {
-                Assert.Fail("Failed to parse solution containing description information. Error: " + ex.Message);
+                Assert.True(false, "Failed to parse solution containing description information. Error: " + ex.Message);
             }
         }
 

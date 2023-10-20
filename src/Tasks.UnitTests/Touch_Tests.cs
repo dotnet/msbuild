@@ -65,7 +65,7 @@ namespace Microsoft.Build.UnitTests
             {
                 return true;
             }
-            Assert.Fail("Unexpected file exists: " + path);
+            Assert.True(false, "Unexpected file exists: " + path);
 
             return true;
         }
@@ -87,7 +87,7 @@ namespace Microsoft.Build.UnitTests
             }
 
 
-            Assert.Fail("Unexpected file create: " + path);
+            Assert.True(false, "Unexpected file create: " + path);
             return null;
         }
 
@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests
                 return System.IO.FileAttributes.ReadOnly;
             }
 
-            Assert.Fail("Unexpected file attributes: " + path);
+            Assert.True(false, "Unexpected file attributes: " + path);
             return a;
         }
 
@@ -128,7 +128,7 @@ namespace Microsoft.Build.UnitTests
             {
                 return;
             }
-            Assert.Fail("Unexpected set file attributes: " + path);
+            Assert.True(false, "Unexpected set file attributes: " + path);
         }
 
         /// <summary>
@@ -153,7 +153,7 @@ namespace Microsoft.Build.UnitTests
                 throw new IOException();
             }
 
-            Assert.Fail("Unexpected set last access time: " + path);
+            Assert.True(false, "Unexpected set last access time: " + path);
         }
 
         /// <summary>
@@ -178,7 +178,7 @@ namespace Microsoft.Build.UnitTests
             }
 
 
-            Assert.Fail("Unexpected set last write time: " + path);
+            Assert.True(false, "Unexpected set last write time: " + path);
         }
 
         [Fact]

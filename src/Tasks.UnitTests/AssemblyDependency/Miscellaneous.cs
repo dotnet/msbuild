@@ -553,17 +553,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 {
                     // The version of System.Xml.dll in C:\MyProject is an older version.
                     // This version is not a match. When want the current version which should have been in a different directory.
-                    Assert.Fail("Wrong version of System.Xml.dll matched--version was wrong");
+                    Assert.True(false, "Wrong version of System.Xml.dll matched--version was wrong");
                 }
                 else if (String.Equals(item.ItemSpec, Path.Combine(s_myProjectPath, "System.Data.dll"), StringComparison.OrdinalIgnoreCase))
                 {
                     // The version of System.Data.dll in C:\MyProject has an incorrect PKT
                     // This version is not a match.
-                    Assert.Fail("Wrong version of System.Data.dll matched--public key token was wrong");
+                    Assert.True(false, "Wrong version of System.Data.dll matched--public key token was wrong");
                 }
                 else
                 {
-                    Assert.Fail(String.Format("A new resolved file called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
+                    Assert.True(false, String.Format("A new resolved file called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
                 }
             }
 
@@ -593,14 +593,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
                 else
                 {
-                    Assert.Fail(String.Format("A new dependency called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
+                    Assert.True(false, String.Format("A new dependency called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
                 }
             }
 
             // Process the related files.
             foreach (ITaskItem item in t.RelatedFiles)
             {
-                Assert.Fail(String.Format("A new dependency called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
+                Assert.True(false, String.Format("A new dependency called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
             }
 
             // Process the satellites.
@@ -622,7 +622,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
                 else
                 {
-                    Assert.Fail(String.Format("A new dependency called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
+                    Assert.True(false, String.Format("A new dependency called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
                 }
             }
 
@@ -786,7 +786,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                     if (j == assembliesCount)
                     {
-                        Assert.Fail(String.Format("{0}: A new resolved file called '{1}' was found. If this is intentional, then add unittests above.", fxVersion, item.ItemSpec));
+                        Assert.True(false, String.Format("{0}: A new resolved file called '{1}' was found. If this is intentional, then add unittests above.", fxVersion, item.ItemSpec));
                     }
                 }
 

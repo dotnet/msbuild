@@ -176,9 +176,9 @@ namespace Microsoft.Build.UnitTests
 
         /*
          * Property:    Parameters
-         *
+         * 
          * The mock logger does not take parameters.
-         *
+         * 
          */
         public string Parameters { get; set; }
 
@@ -223,9 +223,9 @@ namespace Microsoft.Build.UnitTests
 
         /*
          * Method:  Shutdown
-         *
+         * 
          * The mock logger does not need to release any resources.
-         *
+         * 
          */
         public void Shutdown()
         {
@@ -497,7 +497,9 @@ namespace Microsoft.Build.UnitTests
                         PrintFullLog();
                     }
 
-                    Assert.Fail($"Log was expected to contain '{contains[index]}', but did not. Full log:\n=======\n{FullLog}\n=======");
+                    Assert.True(
+                        false,
+                        $"Log was expected to contain '{contains[index]}', but did not. Full log:\n=======\n{FullLog}\n=======");
                 }
             }
         }
@@ -521,7 +523,7 @@ namespace Microsoft.Build.UnitTests
                         PrintFullLog();
                     }
 
-                    Assert.Fail($"Log was not expected to contain '{contains}', but did.");
+                    Assert.True(false, $"Log was not expected to contain '{contains}', but did.");
                 }
             }
         }

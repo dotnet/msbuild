@@ -442,7 +442,7 @@ namespace Microsoft.Build.UnitTests
             // Log an error for any leftover items in the expectedItems collection.
             foreach (ITaskItem expectedItem in expectedItems)
             {
-                Assert.Fail(string.Format("Item '{0}' was expected but not returned.", expectedItem.ItemSpec));
+                Assert.True(false, string.Format("Item '{0}' was expected but not returned.", expectedItem.ItemSpec));
             }
 
             if (outOfOrder)
@@ -450,7 +450,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine("ERROR:  Items were returned in the incorrect order...");
                 Console.WriteLine("Expected:  " + expectedItemSpecs);
                 Console.WriteLine("Actual:    " + actualItemSpecs);
-                Assert.Fail("Items were returned in the incorrect order.  See 'Standard Out' tab for more details.");
+                Assert.True(false, "Items were returned in the incorrect order.  See 'Standard Out' tab for more details.");
             }
         }
 
@@ -1144,7 +1144,7 @@ namespace Microsoft.Build.UnitTests
             }
             else
             {
-                Assert.Fail("unrecognized current platform");
+                Assert.True(false, "unrecognized current platform");
             }
 
             return currentPlatformString;
@@ -1873,7 +1873,7 @@ namespace Microsoft.Build.UnitTests
 
             if (ex1 == null && ex2 == null)
             {
-                Assert.Fail("Neither threw");
+                Assert.True(false, "Neither threw");
             }
 
             Assert.NotNull(ex1); // "First method did not throw, second: {0}", ex2 == null ? "" : ex2.GetType() + ex2.Message);
@@ -1931,7 +1931,7 @@ namespace Microsoft.Build.UnitTests
                 string output = "\r\n#################################Expected#################################\n" + string.Join("\r\n", expectedLines);
                 output += "\r\n#################################Actual#################################\n" + string.Join("\r\n", actualLines);
 
-                Assert.Fail(output);
+                Assert.True(false, output);
             }
 
             if (actualLines.Length > expectedLines.Length)
@@ -1939,14 +1939,14 @@ namespace Microsoft.Build.UnitTests
                 LogLine("\n#################################Expected#################################\n" + string.Join("\n", expectedLines));
                 LogLine("#################################Actual#################################\n" + string.Join("\n", actualLines));
 
-                Assert.Fail("Expected content was shorter, actual had this extra line: '" + actualLines[expectedLines.Length] + "'");
+                Assert.True(false, "Expected content was shorter, actual had this extra line: '" + actualLines[expectedLines.Length] + "'");
             }
             else if (actualLines.Length < expectedLines.Length)
             {
                 LogLine("\n#################################Expected#################################\n" + string.Join("\n", expectedLines));
                 LogLine("#################################Actual#################################\n" + string.Join("\n", actualLines));
 
-                Assert.Fail("Actual content was shorter, expected had this extra line: '" + expectedLines[actualLines.Length] + "'");
+                Assert.True(false, "Actual content was shorter, expected had this extra line: '" + expectedLines[actualLines.Length] + "'");
             }
         }
 
