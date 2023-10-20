@@ -179,11 +179,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 manager.BeginBuild(_parameters);
                 BuildSubmission asyncResult = manager.PendBuildRequest(data);
                 asyncResult.ExecuteAsync(null, null);
-                waitCommandExecuted.WaitOne();
+                int timeoutMilliseconds = 2000;
+                bool isCommandExecuted = waitCommandExecuted.WaitOne(timeoutMilliseconds);
                 manager.CancelAllSubmissions();
-                asyncResult.WaitHandle.WaitOne();
+                bool isSubmissionComplated = asyncResult.WaitHandle.WaitOne(timeoutMilliseconds);
                 BuildResult result = asyncResult.BuildResult;
                 manager.EndBuild();
+                isCommandExecuted.ShouldBeTrue($"Waiting for that the sleep command is executed failed in the timeout period {timeoutMilliseconds} ms.");
+                isSubmissionComplated.ShouldBeTrue($"Waiting for that the build submission is completed failed in the timeout period {timeoutMilliseconds} ms.");
 
                 // No errors from cancelling a build.
                 logger.ErrorCount.ShouldBe(0);
