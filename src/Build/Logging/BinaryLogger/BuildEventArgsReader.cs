@@ -30,6 +30,7 @@ namespace Microsoft.Build.Logging
         private long recordNumber = 0;
         private bool _skipUnknownEvents;
         private bool _skipUnknownEventParts;
+        private const int ForwardCompatibilityMinimalVersion = 18;
 
         /// <summary>
         /// A list of string records we've encountered so far. If it's a small string, it will be the string directly.
@@ -115,7 +116,7 @@ namespace Microsoft.Build.Logging
 
         private void EnsureForwardCompatibleReadingSupported()
         {
-            if (fileFormatVersion < 18)
+            if (fileFormatVersion < ForwardCompatibilityMinimalVersion)
             {
                 throw new InvalidOperationException(
                     ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_FwdCompatUnsupported",
@@ -169,7 +170,7 @@ namespace Microsoft.Build.Logging
             ////                           $"Raw data reading is not supported for file format version {fileFormatVersion} (needs >=18).");
             ////}
 
-            if (!(_lastSubStream?.IsAtEnd ?? true))
+            if (_lastSubStream?.IsAtEnd == false)
             {
                 throw new InvalidDataException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_RawDataUnread", recordNumber));
             }
@@ -209,7 +210,7 @@ namespace Microsoft.Build.Logging
                 }
 
                 int serializedEventLength = 0;
-                if (fileFormatVersion >= 18)
+                if (fileFormatVersion >= ForwardCompatibilityMinimalVersion)
                 {
                     serializedEventLength = ReadInt32(); // record length
                     _readStream.BytesCountAllowedToRead = serializedEventLength;
@@ -274,61 +275,34 @@ namespace Microsoft.Build.Logging
         }
 
         private BuildEventArgs? ReadBuildEventArgs(BinaryLogRecordKind recordKind)
-        {
-            switch (recordKind)
+            => recordKind switch
             {
-                case BinaryLogRecordKind.BuildStarted:
-                    return ReadBuildStartedEventArgs();
-                case BinaryLogRecordKind.BuildFinished:
-                    return ReadBuildFinishedEventArgs();
-                case BinaryLogRecordKind.ProjectStarted:
-                    return ReadProjectStartedEventArgs();
-                case BinaryLogRecordKind.ProjectFinished:
-                    return ReadProjectFinishedEventArgs();
-                case BinaryLogRecordKind.TargetStarted:
-                    return ReadTargetStartedEventArgs();
-                case BinaryLogRecordKind.TargetFinished:
-                    return ReadTargetFinishedEventArgs();
-                case BinaryLogRecordKind.TaskStarted:
-                    return ReadTaskStartedEventArgs();
-                case BinaryLogRecordKind.TaskFinished:
-                    return ReadTaskFinishedEventArgs();
-                case BinaryLogRecordKind.Error:
-                    return ReadBuildErrorEventArgs();
-                case BinaryLogRecordKind.Warning:
-                    return ReadBuildWarningEventArgs();
-                case BinaryLogRecordKind.Message:
-                    return ReadBuildMessageEventArgs();
-                case BinaryLogRecordKind.CriticalBuildMessage:
-                    return ReadCriticalBuildMessageEventArgs();
-                case BinaryLogRecordKind.TaskCommandLine:
-                    return ReadTaskCommandLineEventArgs();
-                case BinaryLogRecordKind.TaskParameter:
-                    return ReadTaskParameterEventArgs();
-                case BinaryLogRecordKind.ProjectEvaluationStarted:
-                    return ReadProjectEvaluationStartedEventArgs();
-                case BinaryLogRecordKind.ProjectEvaluationFinished:
-                    return ReadProjectEvaluationFinishedEventArgs();
-                case BinaryLogRecordKind.ProjectImported:
-                    return ReadProjectImportedEventArgs();
-                case BinaryLogRecordKind.TargetSkipped:
-                    return ReadTargetSkippedEventArgs();
-                case BinaryLogRecordKind.EnvironmentVariableRead:
-                    return ReadEnvironmentVariableReadEventArgs();
-                case BinaryLogRecordKind.ResponseFileUsed:
-                    return ReadResponseFileUsedEventArgs();
-                case BinaryLogRecordKind.PropertyReassignment:
-                    return ReadPropertyReassignmentEventArgs();
-                case BinaryLogRecordKind.UninitializedPropertyRead:
-                    return ReadUninitializedPropertyReadEventArgs();
-                case BinaryLogRecordKind.PropertyInitialValueSet:
-                    return ReadPropertyInitialValueSetEventArgs();
-                case BinaryLogRecordKind.AssemblyLoad:
-                    return ReadAssemblyLoadEventArgs();
-                default:
-                    return null;
-            }
-        }
+                BinaryLogRecordKind.BuildStarted => ReadBuildStartedEventArgs(),
+                BinaryLogRecordKind.BuildFinished => ReadBuildFinishedEventArgs(),
+                BinaryLogRecordKind.ProjectStarted => ReadProjectStartedEventArgs(),
+                BinaryLogRecordKind.ProjectFinished => ReadProjectFinishedEventArgs(),
+                BinaryLogRecordKind.TargetStarted => ReadTargetStartedEventArgs(),
+                BinaryLogRecordKind.TargetFinished => ReadTargetFinishedEventArgs(),
+                BinaryLogRecordKind.TaskStarted => ReadTaskStartedEventArgs(),
+                BinaryLogRecordKind.TaskFinished => ReadTaskFinishedEventArgs(),
+                BinaryLogRecordKind.Error => ReadBuildErrorEventArgs(),
+                BinaryLogRecordKind.Warning => ReadBuildWarningEventArgs(),
+                BinaryLogRecordKind.Message => ReadBuildMessageEventArgs(),
+                BinaryLogRecordKind.CriticalBuildMessage => ReadCriticalBuildMessageEventArgs(),
+                BinaryLogRecordKind.TaskCommandLine => ReadTaskCommandLineEventArgs(),
+                BinaryLogRecordKind.TaskParameter => ReadTaskParameterEventArgs(),
+                BinaryLogRecordKind.ProjectEvaluationStarted => ReadProjectEvaluationStartedEventArgs(),
+                BinaryLogRecordKind.ProjectEvaluationFinished => ReadProjectEvaluationFinishedEventArgs(),
+                BinaryLogRecordKind.ProjectImported => ReadProjectImportedEventArgs(),
+                BinaryLogRecordKind.TargetSkipped => ReadTargetSkippedEventArgs(),
+                BinaryLogRecordKind.EnvironmentVariableRead => ReadEnvironmentVariableReadEventArgs(),
+                BinaryLogRecordKind.ResponseFileUsed => ReadResponseFileUsedEventArgs(),
+                BinaryLogRecordKind.PropertyReassignment => ReadPropertyReassignmentEventArgs(),
+                BinaryLogRecordKind.UninitializedPropertyRead => ReadUninitializedPropertyReadEventArgs(),
+                BinaryLogRecordKind.PropertyInitialValueSet => ReadPropertyInitialValueSetEventArgs(),
+                BinaryLogRecordKind.AssemblyLoad => ReadAssemblyLoadEventArgs(),
+                _ => null
+            };
 
         private void SkipBytes(int count)
         {
@@ -458,7 +432,7 @@ namespace Microsoft.Build.Logging
 
         private void ReadNameValueList()
         {
-            if (fileFormatVersion >= 18)
+            if (fileFormatVersion >= ForwardCompatibilityMinimalVersion)
             {
                 _readStream.BytesCountAllowedToRead = ReadInt32();
             }
@@ -661,7 +635,7 @@ namespace Microsoft.Build.Logging
 
             if (fileFormatVersion >= 12)
             {
-                if (fileFormatVersion < 18)
+                if (fileFormatVersion < ForwardCompatibilityMinimalVersion)
                 {
                     // Throw away, but need to advance past it
                     ReadBoolean();
@@ -717,7 +691,7 @@ namespace Microsoft.Build.Logging
 
             if (fileFormatVersion > 6)
             {
-                if (fileFormatVersion < 18)
+                if (fileFormatVersion < ForwardCompatibilityMinimalVersion)
                 {
                     // Throw away, but need to advance past it
                     ReadBoolean();

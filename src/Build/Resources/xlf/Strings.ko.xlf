@@ -118,6 +118,13 @@
         <target state="new">Only seeking from SeekOrigin.Current is supported.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_UnsupportedSkipOffset">
+        <source>"Attempt to skip {0} bytes, only non-negative offset up to int.MaxValue is allowed.</source>
+        <target state="new">"Attempt to skip {0} bytes, only non-negative offset up to int.MaxValue is allowed.</target>
+        <note>
+      LOCALIZATION: {0} is integer number denoting number of bytes. 'int.MaxValue' should not be translated.
+    </note>
+      </trans-unit>
       <trans-unit id="Binlog_StreamUtils_WriteUnsupported">
         <source>Writing is not supported.</source>
         <target state="new">Writing is not supported.</target>

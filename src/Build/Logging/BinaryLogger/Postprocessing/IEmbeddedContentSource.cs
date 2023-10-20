@@ -7,7 +7,6 @@ namespace Microsoft.Build.Logging
 {
     internal interface IEmbeddedContentSource
     {
-        
         /// <summary>
         /// Raised when the log reader encounters a project import archive (embedded content) in the stream.
         /// The subscriber must read the exactly given length of binary data from the stream - otherwise exception is raised.

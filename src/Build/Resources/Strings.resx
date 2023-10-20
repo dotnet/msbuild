@@ -2073,6 +2073,12 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="Binlog_StreamUtils_WriteUnsupported" xml:space="preserve">
     <value>Writing is not supported.</value>
   </data>
+  <data name="Binlog_StreamUtils_UnsupportedSkipOffset" xml:space="preserve">
+    <value>"Attempt to skip {0} bytes, only non-negative offset up to int.MaxValue is allowed.</value>
+    <comment>
+      LOCALIZATION: {0} is integer number denoting number of bytes. 'int.MaxValue' should not be translated.
+    </comment>
+  </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999
 

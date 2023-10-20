@@ -2,11 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging
@@ -14,7 +10,7 @@ namespace Microsoft.Build.Logging
     /// <summary>
     /// Bounded read-only, forward-only view over an underlying stream.
     /// </summary>
-    internal class SubStream : Stream
+    internal sealed class SubStream : Stream
     {
         // Do not Dispose/Close on Dispose/Close !!
         private readonly Stream _stream;
@@ -28,7 +24,7 @@ namespace Microsoft.Build.Logging
 
             if (!stream.CanRead)
             {
-                throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_StreamUtils_MustBeReadable"));
+                throw new NotSupportedException(ResourceUtilities.GetResourceString("Binlog_StreamUtils_MustBeReadable"));
             }
         }
 

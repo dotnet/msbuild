@@ -9,8 +9,16 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging
 {
+    /// <summary>
+    /// An object model for binlog embedded files.
+    /// </summary>
     public sealed class ArchiveFile
     {
+        private bool _streamAcquired;
+        private bool _stringAcquired;
+        private readonly StreamReader _contentReader;
+        private string? _content;
+
         public ArchiveFile(string fullPath, Stream contentStream)
         {
             FullPath = fullPath;
@@ -72,11 +80,6 @@ namespace Microsoft.Build.Logging
 
             return _content!;
         }
-
-        private bool _streamAcquired;
-        private bool _stringAcquired;
-        private readonly StreamReader _contentReader;
-        private string? _content;
 
         // Intentionally not exposing this publicly (e.g. as IDisposable implementation)
         // as we don't want to user to be bothered with ownership and disposing concerns.

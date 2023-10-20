@@ -7,9 +7,12 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging;
 
+/// <summary>
+/// Event arguments for <see cref="IBuildFileReader.ArchiveFileEncountered"/> event.
+/// </summary>
 public sealed class ArchiveFileEventArgs : EventArgs
 {
-    private ArchiveFile  _archiveFile;
+    private ArchiveFile _archiveFile;
     private bool _resultSet;
     private Action _disposeAction;
 

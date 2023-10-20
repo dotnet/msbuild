@@ -47,7 +47,6 @@ namespace Microsoft.Build.Logging
         // Archive file will be stored alongside the binlog
         private static string GetArchiveFilePath(string logFilePath, string sourcesArchiveExtension)
             => Path.ChangeExtension(logFilePath, sourcesArchiveExtension);
-        
 
         public ProjectImportsCollector(
             string logFilePath,
@@ -212,7 +211,7 @@ namespace Microsoft.Build.Logging
             }
 
             // Only make the path absolute if it's request. In the replay scenario, the file entries
-            //  are read from zip archive - where ':' is stripped and path can then seem relative.
+            // are read from zip archive - where ':' is stripped and path can then seem relative.
             if (makeAbsolute)
             {
                 filePath = Path.GetFullPath(filePath);

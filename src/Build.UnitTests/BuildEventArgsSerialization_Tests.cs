@@ -909,19 +909,19 @@ namespace Microsoft.Build.UnitTests
 
             buildEventArgsWriter.Write(error);
 
-            //Some future data that are not known in current version
+            // Some future data that are not known in current version
             binaryWriter.Write(new byte[] { 1, 2, 3, 4 });
 
 
             int positionAfterFirstEvent = (int)memoryStream.Position;
             memoryStream.Position = 0;
-            //event type
+            // event type
             Microsoft.Build.Shared.BinaryReaderExtensions.Read7BitEncodedInt(binaryReader);
             int eventSizePos = (int)memoryStream.Position;
             int eventSize = Microsoft.Build.Shared.BinaryReaderExtensions.Read7BitEncodedInt(binaryReader);
             int positionAfterFirstEventSize = (int)memoryStream.Position;
             memoryStream.Position = eventSizePos;
-            //the extra 4 bytes
+            // the extra 4 bytes
             Microsoft.Build.Shared.BinaryWriterExtensions.Write7BitEncodedInt(binaryWriter, eventSize + 4);
             memoryStream.Position.ShouldBe(positionAfterFirstEventSize, "The event size need to be overwritten in place - without overwriting any bytes after the size info");
             memoryStream.Position = positionAfterFirstEvent;
@@ -975,7 +975,7 @@ namespace Microsoft.Build.UnitTests
 
             int positionAfterFirstEvent = (int)memoryStream.Position;
             memoryStream.Position = 0;
-            //event type
+            // event type
             Microsoft.Build.Shared.BinaryReaderExtensions.Read7BitEncodedInt(binaryReader);
             int eventSizePos = (int)memoryStream.Position;
             memoryStream.Position = 0;
@@ -1001,7 +1001,7 @@ namespace Microsoft.Build.UnitTests
             List<(ReaderErrorType errorType, BinaryLogRecordKind recordKind, string error)> readerErrors = new();
             buildEventArgsReader.OnRecoverableReadError += (t, et, e) => readerErrors.Add((t, et, e));
 
-            var deserializedEvent = /*(BuildErrorEventArgs)*/buildEventArgsReader.Read();
+            var deserializedEvent = buildEventArgsReader.Read();
 
             readerErrors.Count.ShouldBe(1);
             readerErrors[0].errorType.ShouldBe(ReaderErrorType.UnkownEventType);
@@ -1016,7 +1016,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ForwardCompatibleRead_HandleMismatchedFormatOfEvent()
         {
-            //BuildErrorEventArgs error = new("Subcategory", "Code", "File", 1, 2, 3, 4, "Message", "HelpKeyword", "SenderName");
+            // BuildErrorEventArgs error = new("Subcategory", "Code", "File", 1, 2, 3, 4, "Message", "HelpKeyword", "SenderName");
             BuildErrorEventArgs error = new(null, null, null, 1, 2, 3, 4, null, null, null);
             BuildFinishedEventArgs finished = new("Message", "HelpKeyword", true);
 
@@ -1029,10 +1029,10 @@ namespace Microsoft.Build.UnitTests
 
             int positionAfterFirstEvent = (int)memoryStream.Position;
             memoryStream.Position = 0;
-            //event type
+            // event type
             Microsoft.Build.Shared.BinaryReaderExtensions.Read7BitEncodedInt(binaryReader);
             int eventSize = Microsoft.Build.Shared.BinaryReaderExtensions.Read7BitEncodedInt(binaryReader);
-            //overwrite the entire event with garbage
+            // overwrite the entire event with garbage
             binaryWriter.Write(Enumerable.Repeat(byte.MaxValue, eventSize).ToArray());
 
             memoryStream.Position.ShouldBe(positionAfterFirstEvent, "The event need to be overwritten in place - without overwriting any bytes after the size info");
@@ -1052,7 +1052,7 @@ namespace Microsoft.Build.UnitTests
             List<(ReaderErrorType errorType, BinaryLogRecordKind recordKind, string error)> readerErrors = new();
             buildEventArgsReader.OnRecoverableReadError += (t, et, e) => readerErrors.Add((t, et, e));
 
-            var deserializedEvent = /*(BuildErrorEventArgs)*/buildEventArgsReader.Read();
+            var deserializedEvent = buildEventArgsReader.Read();
 
             readerErrors.Count.ShouldBe(1);
             readerErrors[0].errorType.ShouldBe(ReaderErrorType.UnknownFormatOfEventData);

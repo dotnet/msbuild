@@ -2,13 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Buffers;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging
@@ -16,10 +10,11 @@ namespace Microsoft.Build.Logging
     /// <summary>
     /// A wrapper stream that allows position tracking and forward seeking.
     /// </summary>
-    internal class TransparentReadStream : Stream
+    internal sealed class TransparentReadStream : Stream
     {
         private readonly Stream _stream;
         private long _position;
+        private long _maxAllowedPosition = long.MaxValue;
 
         public static Stream EnsureSeekableStream(Stream stream)
         {
@@ -28,7 +23,7 @@ namespace Microsoft.Build.Logging
                 return stream;
             }
 
-            if(!stream.CanRead)
+            if (!stream.CanRead)
             {
                 throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_StreamUtils_MustBeReadable"));
             }
@@ -65,7 +60,6 @@ namespace Microsoft.Build.Logging
         public int BytesCountAllowedToReadRemaining =>
             _maxAllowedPosition == long.MaxValue ? 0 : (int)(_maxAllowedPosition - _position);
 
-        private long _maxAllowedPosition = long.MaxValue;
         public override bool CanRead => _stream.CanRead;
         public override bool CanSeek => true;
         public override bool CanWrite => false;
@@ -73,7 +67,7 @@ namespace Microsoft.Build.Logging
         public override long Position
         {
             get => _position;
-            set => this.SkipBytes((int)(value - _position), true);
+            set => this.SkipBytes(value - _position, true);
         }
 
         public override void Flush()
@@ -97,24 +91,24 @@ namespace Microsoft.Build.Logging
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            if(origin != SeekOrigin.Current)
+            if (origin != SeekOrigin.Current)
             {
-                throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_StreamUtils_SeekNonOrigin"));
+                throw new NotSupportedException(ResourceUtilities.GetResourceString("Binlog_StreamUtils_SeekNonOrigin"));
             }
 
-            this.SkipBytes((int)offset, true);
+            this.SkipBytes(offset, true);
 
             return _position;
         }
 
         public override void SetLength(long value)
         {
-            throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_StreamUtils_ExpandUnsupported"));
+            throw new NotSupportedException(ResourceUtilities.GetResourceString("Binlog_StreamUtils_ExpandUnsupported"));
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_StreamUtils_WriteUnsupported"));
+            throw new NotSupportedException(ResourceUtilities.GetResourceString("Binlog_StreamUtils_WriteUnsupported"));
         }
 
         public override void Close() => _stream.Close();

@@ -5,38 +5,30 @@ using System;
 using System.Buffers;
 using System.Diagnostics;
 using System.IO;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging
 {
     internal static class StreamExtensions
     {
-        public static int ReadAtLeast(this Stream stream, byte[] buffer, int offset, int minimumBytes, bool throwOnEndOfStream)
+        private static bool CheckIsSkipNeeded(long bytesCount)
         {
-            Debug.Assert(offset + minimumBytes <= buffer.Length);
-
-            int totalRead = 0;
-            while (totalRead < minimumBytes)
+            if(bytesCount is < 0 or > int.MaxValue)
             {
-                int read = stream.Read(buffer, offset, minimumBytes - totalRead);
-                if (read == 0)
-                {
-                    if (throwOnEndOfStream)
-                    {
-                        throw new InvalidDataException("Unexpected end of stream.");
-                    }
-
-                    return totalRead;
-                }
-
-                totalRead += read;
-                offset += read;
+                throw new ArgumentOutOfRangeException(nameof(bytesCount), ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_StreamUtils_UnsupportedSkipOffset",
+                    bytesCount));
             }
 
-            return totalRead;
+            return bytesCount > 0;
         }
 
         public static long SkipBytes(this Stream stream, long bytesCount, bool throwOnEndOfStream)
         {
+            if (!CheckIsSkipNeeded(bytesCount))
+            {
+                return 0;
+            }
+
             byte[] buffer = ArrayPool<byte>.Shared.Rent(4096);
             using var _ = new CleanupScope(() => ArrayPool<byte>.Shared.Return(buffer));
             return SkipBytes(stream, bytesCount, throwOnEndOfStream, buffer);
@@ -44,10 +36,15 @@ namespace Microsoft.Build.Logging
 
         public static long SkipBytes(this Stream stream, long bytesCount, bool throwOnEndOfStream, byte[] buffer)
         {
+            if (!CheckIsSkipNeeded(bytesCount))
+            {
+                return 0;
+            }
+
             long totalRead = 0;
             while (totalRead < bytesCount)
             {
-                int read = stream.Read(buffer, 0,  (int)Math.Min(bytesCount - totalRead, buffer.Length));
+                int read = stream.Read(buffer, 0, (int)Math.Min(bytesCount - totalRead, buffer.Length));
                 if (read == 0)
                 {
                     if (throwOnEndOfStream)

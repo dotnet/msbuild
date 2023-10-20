@@ -276,7 +276,6 @@ namespace Microsoft.Build.Logging
 
             Traits.Instance.EscapeHatches.LogProjectImports = _initialLogImports;
 
-
             if (projectImportsCollector != null)
             {
                 projectImportsCollector.Close();

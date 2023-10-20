@@ -217,7 +217,7 @@ namespace Microsoft.Build.Logging
                         ResourceUtilities.GetResourceString("Binlog_Source_MultiSubscribeError"));
                 }
 
-                // Forward compatibile reading makes sense only for structured events reading.
+                // Forward compatible reading makes sense only for structured events reading.
                 reader.SkipUnknownEvents = supportsForwardCompatibility && AllowForwardCompatibility;
                 reader.SkipUnknownEventParts = supportsForwardCompatibility && AllowForwardCompatibility;
                 reader.OnRecoverableReadError += OnRecoverableReadError;
