@@ -27,6 +27,23 @@ namespace Microsoft.Build.Experimental.ProjectCache
         /// </summary>
         public IReadOnlyDictionary<string, string> ProxyTargetToRealTargetMap => _proxyTargetToRealTargetMap;
 
+        internal IReadOnlyDictionary<string, string> RealTargetToProxyTargetMap
+        {
+            get
+            {
+                // The ProxyTargetToRealTargetMap is "backwards" from how most users would want to use it and doesn't provide as much flexibility as it could if reversed.
+                // Unfortunately this is part of a public API so cannot easily change at this point.
+                Dictionary<string, string> realTargetsToProxyTargets = new(ProxyTargetToRealTargetMap.Count, StringComparer.OrdinalIgnoreCase);
+                foreach (KeyValuePair<string, string> kvp in ProxyTargetToRealTargetMap)
+                {
+                    // In the case of multiple proxy targets pointing to the same real target, the last one wins. Another awkwardness of ProxyTargetToRealTargetMap being "backwards".
+                    realTargetsToProxyTargets[kvp.Value] = kvp.Key;
+                }
+
+                return realTargetsToProxyTargets;
+            }
+        }
+
         private ProxyTargets()
         {
         }

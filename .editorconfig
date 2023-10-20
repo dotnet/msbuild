@@ -408,7 +408,8 @@ dotnet_diagnostic.IDE0290.severity = suggestion
 # Collection initialization can be simplified
 dotnet_diagnostic.IDE0300.severity = suggestion
 dotnet_diagnostic.IDE0301.severity = suggestion
+dotnet_diagnostic.IDE0305.severity = suggestion
 
-# https://github.com/xunit/xunit/issues/2780
-[*.cs]
+# Do not use blocking task operations in test method https://github.com/xunit/xunit/issues/2780
 dotnet_diagnostic.xUnit1031.severity = none
+

@@ -57,7 +57,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ";
 
         protected readonly TestEnvironment _env;
-        private DummyMappedDrive _mappedDrive = null;
+        private Lazy<DummyMappedDrive> _mappedDrive = DummyMappedDriveUtils.GetLazyDummyMappedDrive();
 
         public ProjectItem_Tests()
         {
@@ -67,7 +67,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void Dispose()
         {
             _env.Dispose();
-            _mappedDrive?.Dispose();
+            _mappedDrive.Value?.Dispose();
         }
 
         /// <summary>
@@ -804,8 +804,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [InlineData(@"%DRIVE%:\**\*.cs")]
         public void ProjectGetterResultsInWindowsDriveEnumerationWarning(string unevaluatedInclude)
         {
-            var mappedDrive = GetDummyMappedDrive();
-            unevaluatedInclude = UpdatePathToMappedDrive(unevaluatedInclude, mappedDrive.MappedDriveLetter);
+            unevaluatedInclude = DummyMappedDriveUtils.UpdatePathToMappedDrive(unevaluatedInclude, _mappedDrive.Value.MappedDriveLetter);
             ProjectGetterResultsInDriveEnumerationWarning(unevaluatedInclude);
         }
 
@@ -898,33 +897,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             @"%DRIVE%:\$(Microsoft_WindowsAzure_EngSys)**")]
         public void LogWindowsWarningUponProjectInstanceCreationFromDriveEnumeratingContent(string content, string placeHolder, string excludePlaceHolder = null)
         {
-            var mappedDrive = GetDummyMappedDrive();
-            placeHolder = UpdatePathToMappedDrive(placeHolder, mappedDrive.MappedDriveLetter);
-            excludePlaceHolder = UpdatePathToMappedDrive(excludePlaceHolder, mappedDrive.MappedDriveLetter);
+            placeHolder = DummyMappedDriveUtils.UpdatePathToMappedDrive(placeHolder, _mappedDrive.Value.MappedDriveLetter);
+            excludePlaceHolder = DummyMappedDriveUtils.UpdatePathToMappedDrive(excludePlaceHolder, _mappedDrive.Value.MappedDriveLetter);
             content = string.Format(content, placeHolder, excludePlaceHolder);
             CleanContentsAndCreateProjectInstanceFromFileWithDriveEnumeratingWildcard(content, false);
-        }
-
-        private DummyMappedDrive GetDummyMappedDrive()
-        {
-            if (NativeMethods.IsWindows)
-            {
-                // let's create the mapped drive only once it's needed by any test, then let's reuse;
-                _mappedDrive ??= new DummyMappedDrive();
-            }
-
-            return _mappedDrive;
-        }
-
-        private static string UpdatePathToMappedDrive(string path, char driveLetter)
-        {
-            const string drivePlaceholder = "%DRIVE%";
-            // if this seems to be rooted path - replace with the dummy mount
-            if (!string.IsNullOrEmpty(path) && path.StartsWith(drivePlaceholder))
-            {
-                path = driveLetter + path.Substring(drivePlaceholder.Length);
-            }
-            return path;
         }
 
         [UnixOnlyTheory]
@@ -968,7 +944,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             try
             {
-                // Reset state 
+                // Reset state
                 Helpers.ResetStateForDriveEnumeratingWildcardTests(env, throwException ? "1" : "0");
 
                 if (throwException)
@@ -3782,10 +3758,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
     public class ProjectItemWithOptimizations_Tests : ProjectItem_Tests
     {
-        public ProjectItemWithOptimizations_Tests()
-        {
-            // Make sure we always use the dictionary-based Remove logic.
-            _env.SetEnvironmentVariable("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", "0");
-        }
+       public ProjectItemWithOptimizations_Tests()
+       {
+           // Make sure we always use the dictionary-based Remove logic.
+           _env.SetEnvironmentVariable("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", "0");
+       }
     }
 }

@@ -23,6 +23,9 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 
 ## Current Rotation of Change Waves
 
+### 17.10
+- [AppDomain configuration is serialized without using BinFmt](https://github.com/dotnet/msbuild/pull/9320) - feature can be opted out only if [BinaryFormatter](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.serialization.formatters.binary.binaryformatter) is allowed at runtime by editing `MSBuild.runtimeconfig.json`
+
 ### 17.8
 - [[RAR] Don't do I/O on SDK-provided references](https://github.com/dotnet/msbuild/pull/8688)
 - [Delete destination file before copy](https://github.com/dotnet/msbuild/pull/8685)
