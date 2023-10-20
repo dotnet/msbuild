@@ -127,7 +127,7 @@ namespace Microsoft.Build.Logging
         /// Receives recoverable errors during reading.
         /// Applicable mainly when <see cref="SkipUnknownEvents"/> or <see cref="SkipUnknownEventParts"/> is set to true."/>
         /// </summary>
-        public event Action<ReaderErrorType, string>? OnRecoverableReadError;
+        public event Action<ReaderErrorType, BinaryLogRecordKind, string>? OnRecoverableReadError;
 
         public void Dispose()
         {
@@ -227,11 +227,11 @@ namespace Microsoft.Build.Logging
                     hasError = true;
                     string error =
                         ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_ReaderMismatchedRead",
-                            recordNumber, serializedEventLength, e.Message) + (_skipUnknownEventParts
+                            recordNumber, serializedEventLength, e.Message) + (_skipUnknownEvents
                             ? " " + ResourceUtilities.GetResourceString("Binlog_ReaderSkippingRecord")
                             : string.Empty);
 
-                    HandleError(error, _skipUnknownEventParts, ReaderErrorType.UnknownFormatOfEventData, e);
+                    HandleError(error, _skipUnknownEvents, ReaderErrorType.UnknownFormatOfEventData, recordKind, e);
                 }
 
                 if (result == null && !hasError)
@@ -242,7 +242,7 @@ namespace Microsoft.Build.Logging
                             ? " " + ResourceUtilities.GetResourceString("Binlog_ReaderSkippingRecord")
                             : string.Empty);
 
-                    HandleError(error, _skipUnknownEvents, ReaderErrorType.UnkownEventType);
+                    HandleError(error, _skipUnknownEvents, ReaderErrorType.UnkownEventType, recordKind);
                 }
 
                 if (_readStream.BytesCountAllowedToReadRemaining > 0)
@@ -251,7 +251,7 @@ namespace Microsoft.Build.Logging
                         ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_ReaderUnderRead",
                             recordNumber, serializedEventLength, serializedEventLength - _readStream.BytesCountAllowedToReadRemaining);
 
-                    HandleError(error, _skipUnknownEventParts, ReaderErrorType.UnknownEventData);
+                    HandleError(error, _skipUnknownEventParts, ReaderErrorType.UnknownEventData, recordKind);
                 }
 
                 recordNumber += 1;
@@ -259,11 +259,11 @@ namespace Microsoft.Build.Logging
 
             return result;
 
-            void HandleError(string msg, bool noThrow, ReaderErrorType readerErrorType, Exception? innerException = null)
+            void HandleError(string msg, bool noThrow, ReaderErrorType readerErrorType, BinaryLogRecordKind recordKind, Exception? innerException = null)
             {
                 if (noThrow)
                 {
-                    OnRecoverableReadError?.Invoke(readerErrorType, msg);
+                    OnRecoverableReadError?.Invoke(readerErrorType, recordKind, msg);
                     SkipBytes(_readStream.BytesCountAllowedToReadRemaining);
                 }
                 else

@@ -65,7 +65,7 @@ namespace Microsoft.Build.Logging
         public bool AllowForwardCompatibility { private get; init; } = true;
 
         /// <inheritdoc cref="IBinlogReaderErrors.OnRecoverableReadError"/>
-        public event Action<ReaderErrorType, string>? OnRecoverableReadError;
+        public event Action<ReaderErrorType, BinaryLogRecordKind, string>? OnRecoverableReadError;
 
         /// <summary>
         /// WARNING: This event is under low support and low maintenance - please use events directly exposed by <see cref="BinaryLogReplayEventSource"/> instead. 

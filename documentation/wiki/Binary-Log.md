@@ -84,7 +84,7 @@ It is a `GZipStream`-compressed binary stream of serialized `BuildEventArgs` obj
 
 ## Incrementing the file format
 
-Every .binlog file has the first three bytes that indicate the file version. The current file format version is 9 (`00 00 09`).
+Every .binlog file has the first four bytes that indicate the file version. The current file format is indicated in [`BinaryLogger.cs`](/src/Build/Logging/BinaryLogger/BinaryLogger.cs).
 
 When incrementing the file format, keep this in mind:
  * Increment the version and add a summary of the changes: https://github.com/dotnet/msbuild/blob/main/src/Build/Logging/BinaryLogger/BinaryLogger.cs#L22
@@ -94,4 +94,59 @@ When incrementing the file format, keep this in mind:
 
 The format is backwards compatible, i.e. MSBuild will be able to play back .binlog files created with an older version of MSBuild. The Viewer will also be able to open files of any older version. Since the viewer updates automatically and I can push out updates easily, we can consider the Viewer is always able to read all .binlogs.
 
-However MSBuild of version 15.3 won't be able to read .binlogs created with MSBuild version 15.6. This means the format is unfortunately not forwards-compatible. It is not self-describing, i.e. it doesn't carry its schema around for performance and compactness reasons. This is not a problem with a Viewer because Viewer is always up-to-date (there isn't an "old version" of the Viewer unless people go to great lengths to prevent it from auto-updating).
+## Forward compatibility reading
+
+From version 18, the binlog contains as well the minimum version of reader that can interpret it (stored in bytes 4 to 8). A support for best effor forward compatibility is added by this version. Best effort only because binlog format is not self-describing, i.e. it doesn't carry its schema around for performance and compactness reasons.
+
+This is not of a high importance for users of the Viewer because Viewer is always up-to-date (there isn't an "old version" of the Viewer unless people go to great lengths to prevent it from auto-updating).
+
+## Reading API
+
+We recommend usage of `BinaryLogReplayEventSource`. It provides simplified helpers for creating and configuring `BuildEventArgsReader` and subscribing to the events.
+
+```csharp
+var logReader = new BinaryLogReplayEventSource()
+{
+    AllowForwardCompatibility = true
+};
+
+// Handling of the structured events contained within the log
+logReader.AnyEventRaised += (_, e) =>
+{
+    if (e is BuildErrorEventArgs error)
+    {
+        //...
+    }
+
+    // ...
+};
+
+// Those can be raised only during forward compatibility reading mode.
+logReader.OnRecoverableReadError += (errorType, recordKind, message) =>
+{
+    // ...
+
+    // e.g. we can decide to ignore the error and continue reading or break reading
+    //  based on the type of the error or/and type of the record
+};
+
+// Starts the synchronous log reading loop.
+logReader.Replay(path_to_binlog_file);
+
+```
+
+### Handling the recoverable reading errors
+
+In compatibility mode (default for `BinaryLogReplayEventSource`. Only supported for binlogs of version 18 and higher) reader is capable of skipping unknown event types and unknown parts of known events (`BuildEventArgsReader` can configure the behavior via 2 separate properties - `SkipUnknownEvents` and `SkipUnknownEventParts`).
+
+The unknown events and event parts are regarded as recverable errors - since reader is capable to continue reading following records in binlog. However the specific user logic should have the last call in deciding whether errors are realy recoverable (e.g. is presence of unrecognized or unparsable event fine? Might be fine when searching only for specific events - e.g. errors, but not acceptable when trying to provide definitive overview of the built).
+
+To allow the calling code to decide - based on the type of error, type of events getting the error, or the number of errors - the `OnRecoverableReadError` event is exposed (from both `BinaryLogReplayEventSource` and `BuildEventArgsReader`).
+
+```csharp
+/// <summary>
+/// Receives recoverable errors during reading.
+/// Communicates type of the error, kind of the record that encountered the error and the message detailing the error.
+/// </summary>
+event Action<ReaderErrorType, BinaryLogRecordKind, string>? OnRecoverableReadError;
+```
