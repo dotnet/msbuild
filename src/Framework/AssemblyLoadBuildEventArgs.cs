@@ -78,7 +78,11 @@ namespace Microsoft.Build.Framework
                 if (RawMessage == null)
                 {
                     string? loadingInitiator = LoadingInitiator == null ? null : $" ({LoadingInitiator})";
+#if FEATURE_ASSEMBLYLOADCONTEXT
+                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TaskAssemblyLoadedWithAssemblyLoadContext", LoadingContext.ToString(), loadingInitiator, AssemblyName, AssemblyPath, MVID.ToString(), AppDomainDescriptor ?? DefaultAppDomainDescriptor);
+#else
                     RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TaskAssemblyLoaded", LoadingContext.ToString(), loadingInitiator, AssemblyName, AssemblyPath, MVID.ToString(), AppDomainDescriptor ?? DefaultAppDomainDescriptor);
+#endif
                 }
 
                 return RawMessage;
