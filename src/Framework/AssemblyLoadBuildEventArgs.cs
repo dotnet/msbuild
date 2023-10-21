@@ -39,7 +39,8 @@ namespace Microsoft.Build.Framework
         public string? AssemblyName { get; private set; }
         public string? AssemblyPath { get; private set; }
         public Guid MVID { get; private set; }
-        // Null string indicates that load occurred on Default AppDomain (for both Core and Framework).
+        // Null string indicates that load occurred on Default AppDomain (for Framework).
+        // For Core, string won't be null.
         public string? AppDomainDescriptor { get; private set; }
 
         internal override void WriteToStream(BinaryWriter writer)
