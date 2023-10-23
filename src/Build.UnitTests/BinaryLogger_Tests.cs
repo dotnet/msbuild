@@ -216,7 +216,10 @@ namespace Microsoft.Build.UnitTests
             using (ProjectCollection collection = new())
             {
                 Project project = ObjectModelHelpers.CreateInMemoryProject(collection, projectText);
+                // make sure the project file makes it to the binlog (it has file existence check)
+                File.WriteAllText(project.FullPath, projectText);
                 project.Build(new ILogger[] { binaryLogger }).ShouldBeTrue();
+                File.Delete(project.FullPath);
             }
 
             var logReader = new BinaryLogReplayEventSource();
