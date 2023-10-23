@@ -891,7 +891,15 @@ namespace Microsoft.Build.UnitTests
                 var binaryReader = new BinaryReader(memoryStream);
                 using var buildEventArgsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
 
-                Assert.Throws<EndOfStreamException>(() => buildEventArgsReader.Read());
+                try
+                {
+                    buildEventArgsReader.Read();
+                }
+                catch (Exception e)
+                {
+                    // if the EndOfStreamException is received during EventArgs parsing - the parsing code will translate it to InvalidDataException
+                    Assert.True(e is InvalidDataException or EndOfStreamException, "Abruptly ended stream should lead to InvalidDataException or EndOfStreamException");
+                }
             }
         }
 
