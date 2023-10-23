@@ -115,7 +115,7 @@ namespace Microsoft.Build.Evaluation
         /// Dictionary of project full paths and a boolean that indicates whether at least one
         /// of their targets has the "Returns" attribute set.
         /// </summary>
-        private readonly Dictionary<ProjectRootElement, NGen<bool>> _projectSupportsReturnsAttribute;
+        private readonly Dictionary<ProjectRootElement, bool> _projectSupportsReturnsAttribute;
 
         /// <summary>
         /// The Project Xml to be evaluated.
@@ -253,7 +253,7 @@ namespace Microsoft.Build.Evaluation
             _targetElements = new List<ProjectTargetElement>();
             _importsSeen = new Dictionary<string, ProjectImportElement>(StringComparer.OrdinalIgnoreCase);
             _initialTargetsList = new List<string>();
-            _projectSupportsReturnsAttribute = new Dictionary<ProjectRootElement, NGen<bool>>();
+            _projectSupportsReturnsAttribute = new Dictionary<ProjectRootElement, bool>();
             _projectRootElement = projectRootElement;
             _loadSettings = loadSettings;
             _maxNodeCount = maxNodeCount;
@@ -901,7 +901,7 @@ namespace Microsoft.Build.Evaluation
                             break;
                         case ProjectTargetElement target:
                             // Defaults to false
-                            _projectSupportsReturnsAttribute.TryGetValue(currentProjectOrImport, out NGen<bool> projectSupportsReturnsAttribute);
+                            _projectSupportsReturnsAttribute.TryGetValue(currentProjectOrImport, out bool projectSupportsReturnsAttribute);
 
                             _projectSupportsReturnsAttribute[currentProjectOrImport] = projectSupportsReturnsAttribute || (target.Returns != null);
                             _targetElements.Add(target);

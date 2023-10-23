@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="9.0.0-alpha.1.23475.1">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="8.0.0-alpha.1.23516.4">
       <Uri>https://github.com/dotnet/source-build-reference-packages</Uri>
-      <Sha>0650b50b2a5263c735d12b5c36c5deb34e7e6b60</Sha>
+      <Sha>b4fa7f2e1e65ef49881be2ab2df27624280a8c55</Sha>
       <SourceBuild RepoName="source-build-reference-packages" ManagedOnly="true" />
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
@@ -72,9 +72,9 @@
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>0dd5a1ea536201af94725353e4bc711d7560b246</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.8.0-3.23501.1">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.8.0-3.23510.8">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>0d735148bbb4cb511be547fbc1db63a2c81a821d</Sha>
+      <Sha>d49b29ecbf9bd72fe6023ad1b8aad9a8db7e7c3a</Sha>
       <SourceBuild RepoName="roslyn" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="8.0.0-beta.23463.1">

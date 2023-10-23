@@ -118,7 +118,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Set of active nodes in the system.
         /// </summary>
-        private readonly HashSet<NGen<int>> _activeNodes;
+        private readonly HashSet<int> _activeNodes;
 
         /// <summary>
         /// Event signalled when all nodes have shutdown.
@@ -128,7 +128,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Mapping of nodes to the configurations they know about.
         /// </summary>
-        private readonly Dictionary<NGen<int>, HashSet<NGen<int>>> _nodeIdToKnownConfigurations;
+        private readonly Dictionary<int, HashSet<int>> _nodeIdToKnownConfigurations;
 
         /// <summary>
         /// Flag indicating if we are currently shutting down.  When set, we stop processing packets other than NodeShutdown.
@@ -301,9 +301,9 @@ namespace Microsoft.Build.Execution
             _buildSubmissions = new Dictionary<int, BuildSubmission>();
             _graphBuildSubmissions = new Dictionary<int, GraphBuildSubmission>();
             _noActiveSubmissionsEvent = new AutoResetEvent(true);
-            _activeNodes = new HashSet<NGen<int>>();
+            _activeNodes = new HashSet<int>();
             _noNodesActiveEvent = new AutoResetEvent(true);
-            _nodeIdToKnownConfigurations = new Dictionary<NGen<int>, HashSet<NGen<int>>>();
+            _nodeIdToKnownConfigurations = new Dictionary<int, HashSet<int>>();
             _unnamedProjectInstanceToNames = new Dictionary<ProjectInstance, string>();
             _nextUnnamedProjectId = 1;
             _componentFactories = new BuildComponentFactoryCollection(this);
@@ -1783,15 +1783,30 @@ namespace Microsoft.Build.Execution
 
         private static void AddProxyBuildRequestToSubmission(
             BuildSubmission submission,
-            int configurationId,
+            BuildRequestConfiguration configuration,
             ProxyTargets proxyTargets,
             int projectContextId)
         {
+            IReadOnlyDictionary<string, string> realTargetsToProxyTargets = proxyTargets.RealTargetToProxyTargetMap;
+
+            ICollection<string> requestedTargets = submission.BuildRequestData.TargetNames.Count > 0
+                ? submission.BuildRequestData.TargetNames
+                : configuration.Project.DefaultTargets;
+            List<string> targets = new(requestedTargets.Count);
+            foreach (string requestedTarget in requestedTargets)
+            {
+                string effectiveTarget = realTargetsToProxyTargets.TryGetValue(requestedTarget, out string proxyTarget)
+                    ? proxyTarget
+                    : requestedTarget;
+                targets.Add(effectiveTarget);
+            }
+
             submission.BuildRequest = new BuildRequest(
                 submission.SubmissionId,
                 BackEnd.BuildRequest.InvalidNodeRequestId,
-                configurationId,
+                configuration.ConfigurationId,
                 proxyTargets,
+                targets,
                 submission.BuildRequestData.HostServices,
                 submission.BuildRequestData.Flags,
                 submission.BuildRequestData.RequestedProjectState,
@@ -2294,7 +2309,7 @@ namespace Microsoft.Build.Execution
                         {
                             // Setup submission.BuildRequest with proxy targets. The proxy request is built on the inproc node (to avoid
                             // ProjectInstance serialization). The proxy target results are used as results for the real targets.
-                            AddProxyBuildRequestToSubmission(submission, configuration.ConfigurationId, cacheResult.ProxyTargets, projectContextId);
+                            AddProxyBuildRequestToSubmission(submission, configuration, cacheResult.ProxyTargets, projectContextId);
                             IssueBuildRequestForBuildSubmission(submission, configuration, allowMainThreadBuild: false);
                         }
                         else if (cacheResult.ResultType == CacheResultType.CacheHit && cacheResult.BuildResult != null)
@@ -2394,9 +2409,9 @@ namespace Microsoft.Build.Execution
 
             var response = new BuildRequestConfigurationResponse(unresolvedConfiguration.ConfigurationId, resolvedConfiguration.ConfigurationId, resolvedConfiguration.ResultsNodeId);
 
-            if (!_nodeIdToKnownConfigurations.TryGetValue(node, out HashSet<NGen<int>> configurationsOnNode))
+            if (!_nodeIdToKnownConfigurations.TryGetValue(node, out HashSet<int> configurationsOnNode))
             {
-                configurationsOnNode = new HashSet<NGen<int>>();
+                configurationsOnNode = new HashSet<int>();
                 _nodeIdToKnownConfigurations[node] = configurationsOnNode;
             }
 
@@ -2664,7 +2679,7 @@ namespace Microsoft.Build.Execution
                             // of which nodes have had configurations specifically assigned to them for building.  However, a node may
                             // have created a configuration based on a build request it needs to wait on.  In this
                             // case we need not send the configuration since it will already have been mapped earlier.
-                            if (!_nodeIdToKnownConfigurations.TryGetValue(response.NodeId, out HashSet<NGen<int>> configurationsOnNode) ||
+                            if (!_nodeIdToKnownConfigurations.TryGetValue(response.NodeId, out HashSet<int> configurationsOnNode) ||
                                !configurationsOnNode.Contains(response.BuildRequest.ConfigurationId))
                             {
                                 IConfigCache configCache = _componentFactories.GetComponent(BuildComponentType.ConfigCache) as IConfigCache;

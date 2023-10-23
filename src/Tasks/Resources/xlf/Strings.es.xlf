@@ -193,7 +193,7 @@
       </trans-unit>
       <trans-unit id="Copy.IOException">
         <source>MSB3894: Got {0} copying "{1}" to "{2}" and HR is {3}</source>
-        <target state="new">MSB3894: Got {0} copying "{1}" to "{2}" and HR is {3}</target>
+        <target state="translated">MSB3894: Se obtuvo {0} al copiar "{1}" en "{2}" y HR es {3}</target>
         <note>{StrBegin="MSB3894: "} LOCALIZATION: {0} is exception.ToString(), {1} and {2} are paths, {3} is a number")</note>
       </trans-unit>
       <trans-unit id="Copy.IncompatibleParameters">
@@ -233,7 +233,7 @@
       </trans-unit>
       <trans-unit id="Copy.RetryingOnAccessDenied">
         <source>MSB3895: Retrying on ERROR_ACCESS_DENIED because environment variable MSBUILDALWAYSRETRY=1</source>
-        <target state="new">MSB3895: Retrying on ERROR_ACCESS_DENIED because environment variable MSBUILDALWAYSRETRY=1</target>
+        <target state="translated">MSB3895: Reintentando el ERROR_ACCESS_DENIED porque la variable de entorno MSBUILDALWAYSRETRY=1</target>
         <note>{StrBegin="MSB3895: "} LOCALIZATION: Do NOT translate MSBUILDALWAYSRETRY)</note>
       </trans-unit>
       <trans-unit id="Copy.SourceIsDirectory">
@@ -1947,7 +1947,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnifiedReferenceDependsOn">
         <source>References which depend on or have been unified to "{0}" [{1}].</source>
-        <target state="new">References which depend on or have been unified to "{0}" [{1}].</target>
+        <target state="translated">Referencias que dependen o se han unificado para "{0}" [{1}].</target>
         <note> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnknownProcessorArchitecture">
