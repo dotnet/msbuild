@@ -221,14 +221,19 @@ namespace Microsoft.Build.Logging
                 {
                     result = ReadBuildEventArgs(recordKind);
                 }
-                catch (Exception e) when (e is InvalidDataException dataException ||
-                                          e is FormatException formatException ||
-                                          e is StreamChunkOverReadException overReadException)
+                catch (Exception e) when (
+                    // We throw this on mismatches in metadata (name-value list, strings index).
+                    e is InvalidDataException ||
+                    // Thrown when BinaryReader is unable to deserialize binary data into expected type.
+                    e is FormatException ||
+                    // Following 2 are thrown when we attempt to read more bytes than what is in the next event chunk.
+                    e is StreamChunkOverReadException ||
+                    e is EndOfStreamException)
                 {
                     hasError = true;
                     string error =
                         ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_ReaderMismatchedRead",
-                            recordNumber, serializedEventLength, e.Message) + (_skipUnknownEvents
+                            recordNumber, serializedEventLength, e.GetType(), e.Message) + (_skipUnknownEvents
                             ? " " + ResourceUtilities.GetResourceString("Binlog_ReaderSkippingRecord")
                             : string.Empty);
 

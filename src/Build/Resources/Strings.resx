@@ -2029,9 +2029,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Skipping the record.</value>
   </data>
   <data name="Binlog_ReaderMismatchedRead" xml:space="preserve">
-    <value>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (error: {2}).</value>
+    <value>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}:{3}).</value>
     <comment>
-      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an exception message string.
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an exception type and {3} the exception message string.
     </comment>
   </data>
   <data name="Binlog_ReaderUnknownType" xml:space="preserve">
@@ -2059,7 +2059,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Stream must be readable.</value>
   </data>
   <data name="Binlog_StreamUtils_OverRead" xml:space="preserve">
-    <value>"Attempt to read {0} bytes, when only {1} are allowed to be read.</value>
+    <value>Attempt to read {0} bytes, when only {1} are allowed to be read.</value>
     <comment>
       LOCALIZATION: {0} and {1} are integer numbers denoting number of bytes.
     </comment>
@@ -2074,7 +2074,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Writing is not supported.</value>
   </data>
   <data name="Binlog_StreamUtils_UnsupportedSkipOffset" xml:space="preserve">
-    <value>"Attempt to skip {0} bytes, only non-negative offset up to int.MaxValue is allowed.</value>
+    <value>Attempt to skip {0} bytes, only non-negative offset up to int.MaxValue is allowed.</value>
     <comment>
       LOCALIZATION: {0} is integer number denoting number of bytes. 'int.MaxValue' should not be translated.
     </comment>

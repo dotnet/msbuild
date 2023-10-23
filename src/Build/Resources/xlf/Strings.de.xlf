@@ -61,10 +61,10 @@
     </note>
       </trans-unit>
       <trans-unit id="Binlog_ReaderMismatchedRead">
-        <source>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (error: {2}).</source>
-        <target state="new">BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (error: {2}).</target>
+        <source>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}:{3}).</source>
+        <target state="new">BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}:{3}).</target>
         <note>
-      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an exception message string.
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an exception type and {3} the exception message string.
     </note>
       </trans-unit>
       <trans-unit id="Binlog_ReaderSkippingRecord">
@@ -107,8 +107,8 @@
         <note />
       </trans-unit>
       <trans-unit id="Binlog_StreamUtils_OverRead">
-        <source>"Attempt to read {0} bytes, when only {1} are allowed to be read.</source>
-        <target state="new">"Attempt to read {0} bytes, when only {1} are allowed to be read.</target>
+        <source>Attempt to read {0} bytes, when only {1} are allowed to be read.</source>
+        <target state="new">Attempt to read {0} bytes, when only {1} are allowed to be read.</target>
         <note>
       LOCALIZATION: {0} and {1} are integer numbers denoting number of bytes.
     </note>
@@ -119,8 +119,8 @@
         <note />
       </trans-unit>
       <trans-unit id="Binlog_StreamUtils_UnsupportedSkipOffset">
-        <source>"Attempt to skip {0} bytes, only non-negative offset up to int.MaxValue is allowed.</source>
-        <target state="new">"Attempt to skip {0} bytes, only non-negative offset up to int.MaxValue is allowed.</target>
+        <source>Attempt to skip {0} bytes, only non-negative offset up to int.MaxValue is allowed.</source>
+        <target state="new">Attempt to skip {0} bytes, only non-negative offset up to int.MaxValue is allowed.</target>
         <note>
       LOCALIZATION: {0} is integer number denoting number of bytes. 'int.MaxValue' should not be translated.
     </note>

@@ -271,8 +271,15 @@ namespace Microsoft.Build.UnitTests
             reader1.ArchiveFileEncountered += arg
                 => AddArchiveFile(embedFiles1, arg);
 
-            reader2.ArchiveFileEncountered += arg
-                => AddArchiveFile(embedFiles2, arg);
+            // This would be standard subscribe:
+            // reader2.ArchiveFileEncountered += arg
+            //    => AddArchiveFile(embedFiles2, arg);
+
+            // We however use the AddArchiveFileFromStringHandler - to exercise it
+            // and to assert it's equality with ArchiveFileEncountered handler
+            string currentFileName = null;
+            reader2.ArchiveFileEncountered +=
+                ((Action<StringReadEventArgs>)AddArchiveFileFromStringHandler).ToArchiveFileHandler();
 
             int i = 0;
             while (reader1.Read() is { } ev1)
@@ -295,6 +302,18 @@ namespace Microsoft.Build.UnitTests
                 string content = embedFile.GetContent();
                 files.Add(embedFile.FullPath, content);
                 arg.SetResult(embedFile.FullPath, content);
+            }
+
+            void AddArchiveFileFromStringHandler(StringReadEventArgs args)
+            {
+                if (currentFileName == null)
+                {
+                    currentFileName = args.OriginalString;
+                    return;
+                }
+
+                embedFiles2.Add(currentFileName, args.OriginalString);
+                currentFileName = null;
             }
         }
 
