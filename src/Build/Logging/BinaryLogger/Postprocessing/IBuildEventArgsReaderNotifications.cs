@@ -10,7 +10,5 @@ namespace Microsoft.Build.Logging
         IBuildEventStringsReader,
         IBuildFileReader,
         IBinlogReaderErrors
-    {
-        /* For future use */
-    }
+    { }
 }
