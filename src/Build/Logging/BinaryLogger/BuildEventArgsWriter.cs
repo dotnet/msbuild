@@ -140,6 +140,8 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public void Write(BuildEventArgs e)
         {
+            // reset the temp stream (in case last usage forgot to do so).
+            this.currentRecordStream.SetLength(0);
             BinaryLogRecordKind eventKind = WriteCore(e);
 
             FlushRecordToFinalStream(eventKind, currentRecordStream);
@@ -1070,6 +1072,7 @@ namespace Microsoft.Build.Logging
             // So we redirect the writes to a MemoryStream and then flush the record to the final stream.
             // All that is redirected away from the 'currentRecordStream' - that will be flushed last
 
+            nameValueListStream.SetLength(0);
             var nameValueListBw = new BinaryWriter(nameValueListStream);
 
             using (var _ = RedirectWritesToDifferentWriter(nameValueListBw, binaryWriter))

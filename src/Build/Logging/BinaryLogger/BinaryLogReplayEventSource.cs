@@ -65,7 +65,7 @@ namespace Microsoft.Build.Logging
         public bool AllowForwardCompatibility { private get; init; } = true;
 
         /// <inheritdoc cref="IBinlogReaderErrors.OnRecoverableReadError"/>
-        public event Action<ReaderErrorType, BinaryLogRecordKind, string>? OnRecoverableReadError;
+        public event Action<ReaderErrorType, BinaryLogRecordKind, Func<string>>? OnRecoverableReadError;
 
         /// <summary>
         /// WARNING: This event is under low support and low maintenance - please use events directly exposed by <see cref="BinaryLogReplayEventSource"/> instead. 
@@ -118,13 +118,11 @@ namespace Microsoft.Build.Logging
         /// <param name="binaryReader"></param>
         /// <param name="closeInput">Indicates whether the passed BinaryReader should be closed on disposing.</param>
         /// <param name="allowForwardCompatibility">Unknown build events or unknown parts of known build events will be ignored if this is set to true.</param>
-        /// <param name="onRecoverableReadError">Optional handler of recoverable errors during reading.</param>
         /// <returns>BuildEventArgsReader over the given binlog file binary reader.</returns>
         public static BuildEventArgsReader OpenBuildEventsReader(
             BinaryReader binaryReader,
             bool closeInput,
-            bool allowForwardCompatibility = true,
-            Action<string>? onRecoverableReadError = null)
+            bool allowForwardCompatibility = true)
         {
             int fileFormatVersion = binaryReader.ReadInt32();
             int minimumReaderVersion = binaryReader.ReadInt32();

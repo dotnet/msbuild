@@ -947,7 +947,7 @@ namespace Microsoft.Build.UnitTests
             };
 
             List<(ReaderErrorType errorType, BinaryLogRecordKind recordKind, string error)> readerErrors = new();
-            buildEventArgsReader.OnRecoverableReadError += (t, et, e) => readerErrors.Add((t, et, e));
+            buildEventArgsReader.OnRecoverableReadError += (t, et, e) => readerErrors.Add((t, et, e()));
 
             var deserializedError = (BuildErrorEventArgs)buildEventArgsReader.Read();
 
@@ -1007,7 +1007,7 @@ namespace Microsoft.Build.UnitTests
             };
 
             List<(ReaderErrorType errorType, BinaryLogRecordKind recordKind, string error)> readerErrors = new();
-            buildEventArgsReader.OnRecoverableReadError += (t, et, e) => readerErrors.Add((t, et, e));
+            buildEventArgsReader.OnRecoverableReadError += (t, et, e) => readerErrors.Add((t, et, e()));
 
             var deserializedEvent = buildEventArgsReader.Read();
 
@@ -1058,7 +1058,7 @@ namespace Microsoft.Build.UnitTests
             };
 
             List<(ReaderErrorType errorType, BinaryLogRecordKind recordKind, string error)> readerErrors = new();
-            buildEventArgsReader.OnRecoverableReadError += (t, et, e) => readerErrors.Add((t, et, e));
+            buildEventArgsReader.OnRecoverableReadError += (t, et, e) => readerErrors.Add((t, et, e()));
 
             var deserializedEvent = buildEventArgsReader.Read();
 
@@ -1114,7 +1114,7 @@ namespace Microsoft.Build.UnitTests
             };
 
             List<(ReaderErrorType errorType, BinaryLogRecordKind recordKind, string error)> readerErrors = new();
-            buildEventArgsReader.OnRecoverableReadError += (t, et, e) => readerErrors.Add((t, et, e));
+            buildEventArgsReader.OnRecoverableReadError += (t, et, e) => readerErrors.Add((t, et, e()));
 
             var deserializedEvent = buildEventArgsReader.Read();
 

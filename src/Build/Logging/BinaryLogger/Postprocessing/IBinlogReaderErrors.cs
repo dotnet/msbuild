@@ -43,7 +43,8 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Receives recoverable errors during reading.
         /// Communicates type of the error, kind of the record that encountered the error and the message detailing the error.
+        /// The error message is returned as a function to avoid unnecessary string allocations in case the error is not logged.
         /// </summary>
-        event Action<ReaderErrorType, BinaryLogRecordKind, string>? OnRecoverableReadError;
+        event Action<ReaderErrorType, BinaryLogRecordKind, Func<string>>? OnRecoverableReadError;
     }
 }
