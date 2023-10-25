@@ -2,7 +2,6 @@ trigger:
 - main
 - exp/*
 - vs*
-- perf/*
 
 jobs:
 - job: BootstrapMSBuildOnFullFrameworkWindows
