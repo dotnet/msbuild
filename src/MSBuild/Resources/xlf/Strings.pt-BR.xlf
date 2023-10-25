@@ -106,9 +106,8 @@
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
-                     Faz com que o MSBuild relate acessos a arquivos a qualquer
- configurado
-                     plug-ins de cache do projeto.
+                     Faz com que o MSBuild relate acessos a arquivos para qualquer plug-in
+                     de cache de projeto configurado.
 
                      Este sinalizador é experimental e pode não funcionar conforme o esperado.
     </target>
@@ -752,10 +751,10 @@ arquivo de resposta.
                      MSBuild will use up to the number of processors on the
                      computer. (Short form: -m[:n])
       </source>
-        <target state="translated">  -maxCpuCount[:n] Especifica o número máximo de processos simultâneos a serem
+        <target state="translated">  -maxCpuCount[:n] Especifica o número máximo de processos simultâneos a serem 
                      compilados. Se a opção não for usada, o valor padrão
                      usado será 1. Se a opção for usada sem um valor, o
-                     MSBuild usará o número de processadores do
+                     MSBuild usará o número de processadores do 
                      computador. (Forma abreviada: -m[:n])
       </target>
         <note>
@@ -773,7 +772,7 @@ arquivo de resposta.
         <target state="translated">Exemplos:
 
         MSBuild MyApp.sln -t:Rebuild -p:Configuration=Release
-        MSBuild MyApp.csproj -t:Clean
+        MSBuild MyApp.csproj -t:Clean 
                              -p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </target>
         <note>
@@ -934,12 +933,12 @@ arquivo de resposta.
                      10 file loggers to be attached. (Short form: -fl[n])
     </source>
         <target state="translated">  -fileLogger[n] Registra a saída do build em um arquivo. Por padrão,
-                     o arquivo está no diretório atual e tem o nome
+                     o arquivo está no diretório atual e tem o nome 
                      "msbuild[n].log". Os eventos de todos os nós são combinados em
                      um único log. A localização do arquivo e outros
-                     parâmetros do fileLogger pode ser especificada por meio
+                     parâmetros do fileLogger pode ser especificada por meio 
                      do acréscimo da opção "-fileLoggerParameters[n]".
-                     "n", se presente, pode ser um dígito de 1 a 9, permitindo que até
+                     "n", se presente, pode ser um dígito de 1 a 9, permitindo que até 
                      10 agentes de arquivo sejam anexados. (Forma abreviada: -fl[n])
     </target>
         <note>
@@ -1092,14 +1091,14 @@ arquivo de resposta.
                      Example:
                        -pp:out.txt
     </source>
-        <target state="translated">  -preprocess[:arquivo]
+        <target state="translated">  -preprocess[:arquivo] 
                      Cria um arquivo de projeto único e agregado
                      embutindo todos os arquivos que poderiam ser importados durante um
                      build, com seus limites marcados. Isso pode ser
                      útil para descobrir quais arquivos são importados,
                      de qual localização e como contribuirão para
                      o build. Por padrão, a saída é gravada na
-                     janela do console. Se o caminho de um arquivo de saída
+                     janela do console. Se o caminho de um arquivo de saída 
                      for fornecido, ele será usado.
                      (Forma abreviada: -pp)
                      Exemplo:
@@ -1822,7 +1821,7 @@ arquivo de resposta.
                        -warnAsError:MSB4130
 
                      Quando um aviso for tratado como um erro, o destino continuará
-                     a ser executado como se ele fosse um aviso, mas o
+                     a ser executado como se ele fosse um aviso, mas o 
                      build geral falhará.
     </target>
         <note>
