@@ -105,12 +105,11 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="translated">  -reportFileAccesses[:True|Falsch]
-                     Führt dazu, dass MSBuild Dateizugriffe an alle konfigurierten
- meldet
-                     Projektcache-Plug-Ins.
+        <target state="translated">  -reportFileAccesses[:True|False]
+                     Führt dazu, dass MSBuild Dateizugriffe auf ein beliebiges konfiguriertes
+                     Projektcache-Plug-In meldet.
 
-                     Dieses Kennzeichen ist experimentell und funktioniert möglicherweise nicht wie vorgesehen.
+                     Dieses Flag ist experimentell und funktioniert möglicherweise nicht wie vorgesehen.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -235,7 +234,7 @@
                      value that comes from a response file.
     </source>
         <target state="translated">  -interactive[:True|False]
-                     Weist darauf hin, dass für Aktionen im Build eine 
+                     Weist darauf hin, dass für Aktionen im Build eine
                      Interaktion mit dem Benutzer zugelassen ist. Verwenden Sie dieses Argument
                      in einem automatisierten Szenario, in dem keine Interaktivität
                      erwartet wird.
@@ -404,7 +403,7 @@ Dies ist ein restriktiverer Modus von MSBuild, da er erfordert,
     </source>
         <target state="translated">  -warnNotAsError[:code[;code2]]
                      Liste der Warnungscodes, die nicht als Fehler behandelt werden.
-                     Semikolon oder Komma zum Trennen 
+                     Semikolon oder Komma zum Trennen
                      mehrerer Warnungscodes verwenden. Hat keine Auswirkungen, wenn der Switch -warnaserror
                      nicht festgelegt ist.
 
@@ -472,8 +471,8 @@ Dies ist ein restriktiverer Modus von MSBuild, da er erfordert,
                      Antwortdateien anzugeben, geben Sie jede Antwortdatei
                      gesondert an.
 
-                     Alle Antwortdateien mit dem Name "msbuild.rsp" werden automatisch 
-                     in den folgenden Speicherorten verwendet: 
+                     Alle Antwortdateien mit dem Name "msbuild.rsp" werden automatisch
+                     in den folgenden Speicherorten verwendet:
                      (1) Verzeichnis von "msbuild.exe"
                      (2) Verzeichnis des ersten erstellten Projekts oder Projektmappe
 </target>
@@ -564,16 +563,16 @@ Dies ist ein restriktiverer Modus von MSBuild, da er erfordert,
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;Protokollierung&gt;   Mithilfe dieser Protokollierung werden Ereignisse von MSBuild protokolliert. Um mehrere Protokollierungen anzugeben, 
+        <target state="translated">  -logger:&lt;Protokollierung&gt;   Mithilfe dieser Protokollierung werden Ereignisse von MSBuild protokolliert. Um mehrere Protokollierungen anzugeben,
                      wird jede Protokollierung gesondert angegeben.
                      Die Syntax für die &lt;Protokollierung&gt; lautet:
-                       [&lt;Klasse&gt;,]&lt;Assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
+                       [&lt;Klasse&gt;,]&lt;assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
                      Die Syntax für die &lt;Protokollierungsklasse&gt; lautet:
                         [&lt;Teilweiser oder vollständiger Namespace&gt;.]&lt;Name der Protokollierungsklasse&gt;
                      Die Syntax für die &lt;Protokollierungsassembly&gt; lautet:
-                       {&lt;Assemblyname&gt;[,&lt;strong name&gt;] | &lt;Assemblydatei&gt;}
+                        {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Die Protokollierungsoptionen geben an, wie MSBuild die Protokollierung erstellt.
-                     Die &lt;Protokollierungsparameter&gt; sind optional und werden genau 
+                     Die &lt;Protokollierungsparameter&gt; sind optional und werden genau
                      so an die Protokollierung übergeben, wie sie eingegeben wurden. (Kurzform: -l)
                      Beispiele:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
@@ -668,7 +667,7 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
                         WarningsOnly: Zeigt nur Warnungen an.
                         NoItemAndPropertyList: Zeigt keine Liste der Elemente
                             und Eigenschaften am Anfang jeder Projekterstellung an.
-                        ShowCommandLine: Zeigt TaskCommandLineEvent-Meldungen an. 
+                        ShowCommandLine: Zeigt TaskCommandLineEvent-Meldungen an.
                         ShowTimestamp: Zeigt den Timestamp als Präfix einer
                             Meldung an.
                         ShowEventId: Zeigt die eventId für gestartete
@@ -844,18 +843,18 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
         <target state="translated">  -distributedlogger:&lt;Zentrale Protokollierung&gt;*&lt;Weiterleitende Protokollierung&gt;
-                     Mithilfe dieser Protokollierung werden Ereignisse von MSBuild protokolliert, wobei an jeden Knoten eine andere 
-                     Protokollierungsinstanz angefügt wird. Um mehrere Protokollierungen anzugeben, wird jede Protokollierung 
+                     Mithilfe dieser Protokollierung werden Ereignisse von MSBuild protokolliert, wobei an jeden Knoten eine andere
+                     Protokollierungsinstanz angefügt wird. Um mehrere Protokollierungen anzugeben, wird jede Protokollierung
                      gesondert angegeben.
                      (Kurzform -dl)
                      Die Syntax für die &lt;Protokollierung&gt; lautet:
-                       [&lt;Klasse&gt;,]&lt;Assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
+                       [&lt;Klasse&gt;,]&lt;assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
                      Die Syntax für die &lt;Protokollierungsklasse&gt; lautet:
                         [&lt;Teilweiser oder vollständiger Namespace&gt;.]&lt;Name der Protokollierungsklasse&gt;
                      Die Syntax für die &lt;Protokollierungsassembly&gt; lautet:
-                       {&lt;Assemblyname&gt;[,&lt;strong name&gt;] | &lt;Assemblydatei&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Die Protokollierungsoptionen geben an, wie MSBuild die Protokollierung erstellt.
-                     Die &lt;Protokollierungsparameter&gt; sind optional und werden genau 
+                     Die &lt;Protokollierungsparameter&gt; sind optional und werden genau
                      so an die Protokollierung übergeben, wie sie eingegeben wurden. (Kurzform: -l)
                      Beispiele:
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
@@ -880,8 +879,8 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
                        -ignoreProjectExtensions:.sln
     </source>
         <target state="translated">  -ignoreprojectextensions:&lt;Erweiterungen&gt;
-                     Liste der zu ignorierenden Erweiterungen, wenn die zu erstellende 
-                     Projektdatei ermittelt wird. Verwenden Sie ein Semikolon oder ein Komma, 
+                     Liste der zu ignorierenden Erweiterungen, wenn die zu erstellende
+                     Projektdatei ermittelt wird. Verwenden Sie ein Semikolon oder ein Komma,
                      um mehrere Erweiterungen voneinander zu trennen.
                      (Kurzform: -ignore)
                      Beispiel:
@@ -907,8 +906,8 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
    </source>
         <target state="translated">  -toolsversion:&lt;Version&gt;
                      Die Version des MSBuild-Toolsets (Aufgaben, Ziele usw.),
-                     die während des Erstellens zu verwenden ist. Diese Version überschreibt die 
-                     von einzelnen Projekten angegebenen Versionen. (Kurzform: 
+                     die während des Erstellens zu verwenden ist. Diese Version überschreibt die
+                     von einzelnen Projekten angegebenen Versionen. (Kurzform:
                      -tv)
                      Beispiel:
                        -toolsversion:3.5
@@ -967,14 +966,14 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
         <target state="translated">  -distributedFileLogger
                      Protokolliert die Erstellungsausgabe in mehrere Dateien, eine Protokolldatei
                      pro MSBuild-Knoten. Der anfängliche Speicherort für diese Dateien ist
-                     das aktuelle Verzeichnis. Standardmäßig werden die Dateien 
+                     das aktuelle Verzeichnis. Standardmäßig werden die Dateien
                      "MSBuild&lt;Knoten-ID&gt;.log" benannt. Der Speicherort der Datei und
-                     andere Parameter für fileLogger können durch das Hinzufügen 
+                     andere Parameter für fileLogger können durch das Hinzufügen
                      des Schalters "-fileLoggerParameters" angegeben werden.
 
                      Wenn mithilfe des fileLoggerParameters-Parameters ein Protokolldateiname festgelegt wurde,
-                     verwendet die verteilte Protokollierung den Dateinamen als 
-                     Vorlage und fügt die Knoten-ID an diesen Dateinamen an, 
+                     verwendet die verteilte Protokollierung den Dateinamen als
+                     Vorlage und fügt die Knoten-ID an diesen Dateinamen an,
                      um für jeden Knoten eine Protokolldatei zu erstellen.
     </target>
         <note>
@@ -1018,31 +1017,31 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
     </source>
         <target state="translated">  -fileLoggerParameters[n]:&lt;Parameter&gt;
                      Gibt zusätzliche Parameter für Dateiprotokollierungen an.
-                     Dieser Schalter bedeutet, dass der entsprechende 
+                     Dieser Schalter bedeutet, dass der entsprechende
                      Schalter "-fileLogger[n]" ebenfalls vorhanden ist.
                      "n" (optional) kann eine Zahl von 1–9 sein.
-                     "-fileLoggerParameters" wird auch von verteilten 
+                     "-fileLoggerParameters" wird auch von verteilten
                      Dateiprotokollierungen verwendet (siehe Beschreibung zu "-distributedFileLogger").
                      (Kurzform: -flp[n])
                      Es sind dieselben Parameter wie für die Konsolenprotokollierung
                      verfügbar. Einige zusätzliche Parameter:
-                        LogFile: Pfad der Protokolldatei, in die das 
+                        LogFile: Pfad der Protokolldatei, in die das
                             Buildprotokoll geschrieben wird.
-                        Append: Gibt an, ob das Buildprotokoll erweitert oder 
+                        Append: Gibt an, ob das Buildprotokoll erweitert oder
                             oder überschrieben wird. Mit diesem Schalter
                             wird das Buildprotokoll an die Protokolldatei angefügt;
-                            Ohne diesen Schalter wird der Inhalt 
-                            der vorhandenen Protokolldatei überschrieben. 
+                            Ohne diesen Schalter wird der Inhalt
+                            der vorhandenen Protokolldatei überschrieben.
                             Standardmäßig wird die Protokolldatei nicht erweitert.
-                        Encoding: Gibt die Codierung der Datei an, 
+                        Encoding: Gibt die Codierung der Datei an,
                             z. B. UTF-8, Unicode oder ASCII.
                      Die Standardeinstellung für "verbosity" ist "Detailed".
                      Beispiele:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
-                       -flp1:warningsonly;logfile=msbuild.wrn 
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+                       -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1068,7 +1067,7 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
         <target state="translated">  -nodeReuse:&lt;Parameter&gt;
                      Aktiviert oder deaktiviert die Wiederverwendung von MSBuild-Knoten.
                      Die Parameter lauten:
-                     True: Knoten bleiben nach dem Abschluss der Erstellung 
+                     True: Knoten bleiben nach dem Abschluss der Erstellung
                      erhalten und werden bei folgenden Erstellungen wiederverwendet (Standardeinstellung).
                      False: Knoten bleiben nach dem Abschluss der Erstellung nicht erhalten.
                      (Kurzform: -nr)

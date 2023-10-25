@@ -9,7 +9,7 @@ using System.Runtime.Versioning;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Framework.FileAccess;
+using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.FileAccesses

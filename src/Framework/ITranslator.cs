@@ -6,9 +6,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using Microsoft.Build.Framework;
-#if !CLR2COMPATIBILITY
-using Microsoft.Build.Framework.FileAccess;
-#endif
 
 #nullable disable
 
@@ -242,25 +239,7 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         /// <param name="value">The context to be translated.</param>
         void Translate(ref BuildEventContext value);
-
-        /// <summary>
-        /// Translates <paramref name="fileAccessData"/>.
-        /// </summary>
-        /// <param name="fileAccessData">The <see cref="FileAccessData"/> to translate.</param>
-        void Translate(ref FileAccessData fileAccessData);
-
-        /// <summary>
-        /// Translates <paramref name="fileAccessDataList"/>.
-        /// </summary>
-        /// <param name="fileAccessDataList">The file accesses to translate.</param>
-        void Translate(ref List<FileAccessData> fileAccessDataList);
-
-        /// <summary>
-        /// Translates <paramref name="processData"/>.
-        /// </summary>
-        /// <param name="processData">The <see cref="ProcessData"/> to translate.</param>
-        void Translate(ref ProcessData processData);
-#endif 
+#endif
 
         /// <summary>
         /// Translates an enumeration.
