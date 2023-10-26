@@ -11,7 +11,7 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Framework.FileAccess;
+using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 

@@ -5,7 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Framework.FileAccess;
+using Microsoft.Build.Experimental.FileAccess;
 
 namespace Microsoft.Build.Experimental.ProjectCache
 {

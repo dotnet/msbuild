@@ -451,6 +451,11 @@
         <target state="translated">Załadowano zestaw podczas {0}{1}: {2} (lokalizacja: {3}, MVID: {4}, domena aplikacji: {5})</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskAssemblyLoadedWithAssemblyLoadContext">
+        <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</source>
+        <target state="new">Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">Zadanie „{0}” zwolniło rdzenie ({1}) i teraz jego łączna liczba rdzeni to {2}.</target>
@@ -477,7 +482,7 @@
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Jest to nieobsługiwany wyjątek w aplikacji MSBuild -- ZAGŁOSUJ NA ISTNIEJĄCY PROBLEM LUB ZAGŁOSUJ NA NOWY NA https://aka.ms/msbuild/unhandled.
+        <target state="translated">Jest to nieobsługiwany wyjątek na platformie MSBuild -- ZAGŁOSUJ NA ISTNIEJĄCY PROBLEM LUB ZAREJESTRUJ NOWY W WITRYNIE https://aka.ms/msbuild/unhandled.
     {0}</target>
         <note />
       </trans-unit>

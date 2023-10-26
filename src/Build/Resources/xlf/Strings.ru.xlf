@@ -451,6 +451,11 @@
         <target state="translated">Сборка загружена во время {0}{1}: {2} (расположение: {3}, MVID: {4}, домен приложения: {5})</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskAssemblyLoadedWithAssemblyLoadContext">
+        <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</source>
+        <target state="new">Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">Задача "{0}" освободила указанное число ядер ({1}). Теперь общее число ядер, которыми располагает задача, равно {2}.</target>
@@ -477,7 +482,7 @@
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Это необработанное исключение в MSBuild. Проголосуйте за существующую проблему или сообщите о новой по адресу https://aka.ms/msbuild/unhandled
+        <target state="translated">Это необработанное исключение в MSBuild. ПРОГОЛОСУЙТЕ ЗА СУЩЕСТВУЮЩУЮ ПРОБЛЕМУ ИЛИ СООБЩИТЕ О НОВУЙ НА https://aka.ms/msbuild/unhandled
     {0}</target>
         <note />
       </trans-unit>
