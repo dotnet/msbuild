@@ -67,6 +67,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExtendedBuildMessageEventArgs extMessage = new("extMsg", "SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender", MessageImportance.Normal);
             ExtendedCustomBuildEventArgs extCustom = new("extCustom", "message", "help", "sender");
             CriticalBuildMessageEventArgs criticalMessage = new("Subcategory", "Code", "File", 1, 2, 3, 4, "{0}", "HelpKeyword", "Sender", DateTime.Now, "arg1");
+            ExtendedCriticalBuildMessageEventArgs extCriticalMessage = new("extCritMsg", "Subcategory", "Code", "File", 1, 2, 3, 4, "{0}", "HelpKeyword", "Sender", DateTime.Now, "arg1");
             PropertyInitialValueSetEventArgs propInit = new("prop", "val", "propsource", "message", "help", "sender", MessageImportance.Normal);
             MetaprojectGeneratedEventArgs metaProjectGenerated = new("metaName", "path", "message");
             PropertyReassignmentEventArgs propReassign = new("prop", "prevValue", "newValue", "loc", "message", "help", "sender", MessageImportance.Normal);
@@ -98,6 +99,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyLoggingPacket(extMessage, LoggingEventType.ExtendedBuildMessageEvent);
             VerifyLoggingPacket(extCustom, LoggingEventType.ExtendedCustomEvent);
             VerifyLoggingPacket(criticalMessage, LoggingEventType.CriticalBuildMessage);
+            VerifyLoggingPacket(extCriticalMessage, LoggingEventType.ExtendedCriticalBuildMessageEvent);
             VerifyLoggingPacket(propInit, LoggingEventType.PropertyInitialValueSet);
             VerifyLoggingPacket(metaProjectGenerated, LoggingEventType.MetaprojectGenerated);
             VerifyLoggingPacket(propReassign, LoggingEventType.PropertyReassignment);
@@ -294,6 +296,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },
                     new ExtendedCustomBuildEventArgs("extCustom", "message", "help", "sender", DateTime.UtcNow, "arg1")
+                    {
+                        ExtendedData = "{'long-json':'mostly-strings'}",
+                        ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
+                        BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
+                    },
+                    new ExtendedCriticalBuildMessageEventArgs("extCritMsg", "Subcategory", "Code", "File", 1, 2, 3, 4, "{0}", "HelpKeyword", "Sender", DateTime.Now, "arg1")
                     {
                         ExtendedData = "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },

@@ -199,7 +199,12 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Event is <see cref="UninitializedPropertyReadEventArgs"/>
         /// </summary>
-        UninitializedPropertyRead = 32
+        UninitializedPropertyRead = 32,
+
+        /// <summary>
+        /// Event is <see cref="ExtendedCriticalBuildMessageEventArgs"/>
+        /// </summary>
+        ExtendedCriticalBuildMessageEvent = 33,
     }
     #endregion
 
@@ -597,6 +602,7 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.ExtendedBuildErrorEvent => new ExtendedBuildErrorEventArgs(),
                 LoggingEventType.ExtendedBuildWarningEvent => new ExtendedBuildWarningEventArgs(),
                 LoggingEventType.ExtendedBuildMessageEvent => new ExtendedBuildMessageEventArgs(),
+                LoggingEventType.ExtendedCriticalBuildMessageEvent => new ExtendedCriticalBuildMessageEventArgs(),
                 LoggingEventType.ExternalProjectStartedEvent => new ExternalProjectStartedEventArgs(null, null, null, null, null),
                 LoggingEventType.ExternalProjectFinishedEvent => new ExternalProjectFinishedEventArgs(null, null, null, null, false),
                 LoggingEventType.CriticalBuildMessage => new CriticalBuildMessageEventArgs(null, null, null, -1, -1, -1, -1, null, null, null),
@@ -694,6 +700,10 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(CriticalBuildMessageEventArgs))
             {
                 return LoggingEventType.CriticalBuildMessage;
+            }
+            else if (eventType == typeof(ExtendedCriticalBuildMessageEventArgs))
+            {
+                return LoggingEventType.ExtendedCriticalBuildMessageEvent;
             }
             else if (eventType == typeof(MetaprojectGeneratedEventArgs))
             {

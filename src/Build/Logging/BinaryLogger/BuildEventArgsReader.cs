@@ -798,21 +798,49 @@ namespace Microsoft.Build.Logging
         {
             var fields = ReadBuildEventArgsFields(readImportance: true);
 
-            var e = new CriticalBuildMessageEventArgs(
-                fields.Subcategory,
-                fields.Code,
-                fields.File,
-                fields.LineNumber,
-                fields.ColumnNumber,
-                fields.EndLineNumber,
-                fields.EndColumnNumber,
-                fields.Message,
-                fields.HelpKeyword,
-                fields.SenderName,
-                fields.Timestamp,
-                fields.Arguments);
+            BuildEventArgs e;
+            if (fields.Extended == null)
+            {
+                e = new CriticalBuildMessageEventArgs(
+                    fields.Subcategory,
+                    fields.Code,
+                    fields.File,
+                    fields.LineNumber,
+                    fields.ColumnNumber,
+                    fields.EndLineNumber,
+                    fields.EndColumnNumber,
+                    fields.Message,
+                    fields.HelpKeyword,
+                    fields.SenderName,
+                    fields.Timestamp,
+                    fields.Arguments)
+                {
+                    ProjectFile = fields.ProjectFile,
+                };
+            }
+            else
+            {
+                e = new ExtendedCriticalBuildMessageEventArgs(
+                    fields.Extended?.ExtendedType ?? string.Empty,
+                    fields.Subcategory,
+                    fields.Code,
+                    fields.File,
+                    fields.LineNumber,
+                    fields.ColumnNumber,
+                    fields.EndLineNumber,
+                    fields.EndColumnNumber,
+                    fields.Message,
+                    fields.HelpKeyword,
+                    fields.SenderName,
+                    fields.Timestamp,
+                    fields.Arguments)
+                {
+                    ProjectFile = fields.ProjectFile,
+                    ExtendedMetadata = fields.Extended?.ExtendedMetadata,
+                    ExtendedData = fields.Extended?.ExtendedData,
+                };
+            }
             e.BuildEventContext = fields.BuildEventContext;
-            e.ProjectFile = fields.ProjectFile;
             return e;
         }
 
