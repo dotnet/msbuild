@@ -13,7 +13,7 @@ namespace Microsoft.Build.Framework
     /// <remarks>
     /// In .NET 8 and later and Visual Studio 17.8 and later, this type is deprecated; instead use <see cref="ExtendedCustomBuildEventArgs"/>.
     /// For more information, see <see href="https://learn.microsoft.com/dotnet/core/compatibility/sdk/8.0/custombuildeventargs"/>
-    /// For recommended replacement, see <see https://learn.microsoft.com/en-us/dotnet/core/compatibility/sdk/8.0/custombuildeventargs#recommended-action/> 
+    /// For recommended replacement, see <see href="https://learn.microsoft.com/dotnet/core/compatibility/sdk/8.0/custombuildeventargs#recommended-action" />.
     /// </remarks>
     [Serializable]
     public abstract class CustomBuildEventArgs : LazyFormattedBuildEventArgs
