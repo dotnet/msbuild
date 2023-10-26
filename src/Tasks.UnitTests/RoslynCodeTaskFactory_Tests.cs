@@ -1068,6 +1068,48 @@ namespace InlineTask
             }
         }
 
+#if !FEATURE_RUN_EXE_IN_TESTS
+        [Fact]
+        public void RoslynCodeTaskFactory_UsingAPI()
+        {
+            string text = $@"
+<Project>
+
+  <UsingTask
+    TaskName=""Custom1""
+    TaskFactory=""RoslynCodeTaskFactory""
+    AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"" >
+    <ParameterGroup>
+      <SayHi ParameterType=""System.String"" Required=""true"" />
+    </ParameterGroup>
+    <Task>
+      <Code Type=""Fragment"" Language=""cs"">
+        <![CDATA[
+        string sayHi = ""Hello "" + SayHi;
+        Log.LogMessage(sayHi);
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+    <Target Name=""Build"">
+        <Custom1 SayHi=""World"" />
+    </Target>
+
+</Project>";
+
+            using var env = TestEnvironment.Create();
+            RunnerUtilities.ApplyDotnetHostPathEnvironmentVariable(env);
+            var dotnetPath = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
+
+            var project = env.CreateTestProjectWithFiles("p1.proj", text);
+            var logger = project.BuildProjectExpectSuccess();
+            var logLines = logger.AllBuildEvents.Select(a => a.Message);
+            var log = string.Join("\n", logLines);
+            logLines.Where(l => l.Contains(dotnetPath)).Count().ShouldBe(1, log);
+        }
+#endif
+
         private void TryLoadTaskBodyAndExpectFailure(string taskBody, string expectedErrorMessage)
         {
             if (expectedErrorMessage == null)
