@@ -76,11 +76,11 @@ namespace Microsoft.Build.Framework
             int projectId,
             string message,
             string helpKeyword,
-            string projectFile,
-            string targetNames,
-            IEnumerable properties,
-            IEnumerable items,
-            BuildEventContext parentBuildEventContext)
+            string? projectFile,
+            string? targetNames,
+            IEnumerable? properties,
+            IEnumerable? items,
+            BuildEventContext? parentBuildEventContext)
             : this(projectId, message, helpKeyword, projectFile, targetNames, properties, items, parentBuildEventContext, DateTime.UtcNow)
         {
         }
@@ -103,13 +103,13 @@ namespace Microsoft.Build.Framework
             int projectId,
             string message,
             string helpKeyword,
-            string projectFile,
-            string targetNames,
-            IEnumerable properties,
-            IEnumerable items,
-            BuildEventContext parentBuildEventContext,
-            IDictionary<string, string> globalProperties,
-            string toolsVersion)
+            string? projectFile,
+            string? targetNames,
+            IEnumerable? properties,
+            IEnumerable? items,
+            BuildEventContext? parentBuildEventContext,
+            IDictionary<string, string>? globalProperties,
+            string? toolsVersion)
             : this(projectId, message, helpKeyword, projectFile, targetNames, properties, items, parentBuildEventContext)
         {
             this.GlobalProperties = globalProperties;
@@ -130,10 +130,10 @@ namespace Microsoft.Build.Framework
         public ProjectStartedEventArgs(
             string message,
             string helpKeyword,
-            string projectFile,
-            string targetNames,
-            IEnumerable properties,
-            IEnumerable items,
+            string? projectFile,
+            string? targetNames,
+            IEnumerable? properties,
+            IEnumerable? items,
             DateTime eventTimestamp)
             : base(message, helpKeyword, "MSBuild", eventTimestamp)
         {
@@ -160,11 +160,11 @@ namespace Microsoft.Build.Framework
             int projectId,
             string message,
             string helpKeyword,
-            string projectFile,
-            string targetNames,
-            IEnumerable properties,
-            IEnumerable items,
-            BuildEventContext parentBuildEventContext,
+            string? projectFile,
+            string? targetNames,
+            IEnumerable? properties,
+            IEnumerable? items,
+            BuildEventContext? parentBuildEventContext,
             DateTime eventTimestamp)
             : this(message, helpKeyword, projectFile, targetNames, properties, items, eventTimestamp)
         {

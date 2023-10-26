@@ -6,17 +6,20 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
 using Microsoft.Build.Logging.TerminalLogger;
-
+using Microsoft.Build.UnitTests.Shared;
+using Shouldly;
 using VerifyTests;
 using VerifyXunit;
 using Xunit;
-
 using static VerifyXunit.Verifier;
 
 namespace Microsoft.Build.UnitTests
@@ -236,10 +239,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public Task PrintBuildSummary_FailedWithErrors()
         {
-           InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
-           {
-               ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error!"));
-           });
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
+            {
+                ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error!"));
+            });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
@@ -284,6 +287,69 @@ namespace Microsoft.Build.UnitTests
             _terminallogger.DisplayNodes();
 
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public void TestTerminalLoggerTogetherWithOtherLoggers()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            { 
+                string contents = @"
+<Project>
+    <ItemGroup>
+        <Compile Include=""MyItem1.cs"" />
+        <Compile Include=""MyItem2.cs"" />
+    </ItemGroup>
+    <PropertyGroup>
+        <MyProp1>MyProperty1</MyProp1>
+    </PropertyGroup>
+    <Target Name = ""Build"">
+        <Message Text = ""Build target is executing."" Importance = ""High"" />
+    </Target>
+</Project>";
+                TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
+                TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
+
+                BinaryLogger loggerWithTL = new();
+                string logFileWithTL = env.ExpectFile(".binlog").Path;
+                loggerWithTL.Parameters = logFileWithTL;
+
+                BinaryLogger loggerWithoutTL = new();
+                string logFileWithoutTL = env.ExpectFile(".binlog").Path;
+                loggerWithoutTL.Parameters = logFileWithoutTL;
+
+                // Execute MSBuild with binary, file and terminal loggers
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /m /bl:{logFileWithTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithTL.log")};verbosity=diagnostic -tl:on", out bool success);
+                success.ShouldBeTrue();
+
+                // Execute MSBuild with binary and file loggers
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /m /bl:{logFileWithoutTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithoutTL.log")};verbosity=diagnostic", out success);
+                success.ShouldBeTrue();
+
+                // Read the binary log and replay into mockLogger
+                var mockLogFromPlaybackWithTL = new MockLogger();
+                var binaryLogReaderWithTL = new BinaryLogReplayEventSource();
+                mockLogFromPlaybackWithTL.Initialize(binaryLogReaderWithTL);
+
+                var mockLogFromPlaybackWithoutTL = new MockLogger();
+                var binaryLogReaderWithoutTL = new BinaryLogReplayEventSource();
+                mockLogFromPlaybackWithoutTL.Initialize(binaryLogReaderWithoutTL);
+
+                binaryLogReaderWithTL.Replay(logFileWithTL);
+                binaryLogReaderWithoutTL.Replay(logFileWithoutTL);
+
+                // Check that amount of events, warnings, errors is equal in both cases. Presence of other loggers should not change behavior
+                mockLogFromPlaybackWithoutTL.Errors.Count.ShouldBe(mockLogFromPlaybackWithTL.Errors.Count);
+                mockLogFromPlaybackWithoutTL.Warnings.Count.ShouldBe(mockLogFromPlaybackWithTL.Warnings.Count);
+                mockLogFromPlaybackWithoutTL.AllBuildEvents.Count.ShouldBe(mockLogFromPlaybackWithTL.AllBuildEvents.Count);
+
+                // Check presence of some items and properties and that they have at least 1 item and property
+                mockLogFromPlaybackWithoutTL.EvaluationFinishedEvents.ShouldContain(x => (x.Items != null) && x.Items.GetEnumerator().MoveNext());
+                mockLogFromPlaybackWithTL.EvaluationFinishedEvents.ShouldContain(x => (x.Items != null) && x.Items.GetEnumerator().MoveNext());
+
+                mockLogFromPlaybackWithoutTL.EvaluationFinishedEvents.ShouldContain(x => (x.Properties != null) && x.Properties.GetEnumerator().MoveNext());
+                mockLogFromPlaybackWithTL.EvaluationFinishedEvents.ShouldContain(x => (x.Properties != null) && x.Properties.GetEnumerator().MoveNext());
+            }
         }
     }
 }

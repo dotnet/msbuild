@@ -93,9 +93,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         public void Dispose()
         {
-            _buildManager.Dispose();
-            _projectCollection.Dispose();
-            _env.Dispose();
+            try
+            {
+                _buildManager.Dispose();
+                _projectCollection.Dispose();
+            }
+            finally
+            {
+                _env.Dispose();
+            }
         }
 
         /// <summary>
@@ -4108,8 +4114,8 @@ $@"<Project InitialTargets=`Sleep`>
                     submission1.ExecuteAsync(null, null);
                     submission2.ExecuteAsync(null, null);
 
-                    submission1.WaitHandle.WaitOne(TimeSpan.FromSeconds(10));
-                    submission2.WaitHandle.WaitOne(TimeSpan.FromSeconds(10));
+                    submission1.WaitHandle.WaitOne(TimeSpan.FromSeconds(20));
+                    submission2.WaitHandle.WaitOne(TimeSpan.FromSeconds(20));
 
                     submission1.IsCompleted.ShouldBeTrue();
                     submission2.IsCompleted.ShouldBeTrue();

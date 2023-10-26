@@ -34,6 +34,11 @@ namespace Microsoft.Build.BackEnd
         int GetConfigurationIdFromPlan(string configurationPath);
 
         /// <summary>
+        /// Retrieves the request executing on a node.
+        /// </summary>
+        BuildRequest GetExecutingRequestByNode(int nodeId);
+
+        /// <summary>
         /// Reports to the scheduler that a request is blocked.
         /// </summary>
         /// <param name="nodeId">The node making the report.</param>

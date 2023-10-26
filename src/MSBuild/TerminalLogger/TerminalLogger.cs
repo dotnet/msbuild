@@ -9,7 +9,6 @@ using System.Text;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Runtime.InteropServices;
 #if NETFRAMEWORK
 using Microsoft.IO;
 #else
@@ -216,6 +215,11 @@ internal sealed class TerminalLogger : INodeLogger
         eventSource.MessageRaised += MessageRaised;
         eventSource.WarningRaised += WarningRaised;
         eventSource.ErrorRaised += ErrorRaised;
+
+        if (eventSource is IEventSource4 eventSource4)
+        {
+            eventSource4.IncludeEvaluationPropertiesAndItems();
+        }
     }
 
     /// <inheritdoc/>

@@ -12,6 +12,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.NetCore.Extensions;
@@ -24,12 +25,19 @@ namespace Microsoft.Build.UnitTests.OM.Instance
     /// <summary>
     /// Tests for ProjectItemInstance public members
     /// </summary>
-    public class ProjectItemInstance_Tests
+    public class ProjectItemInstance_Tests : IDisposable
     {
         /// <summary>
         /// The number of built-in metadata for items.
         /// </summary>
         public const int BuiltInMetadataCount = 15;
+        private Lazy<DummyMappedDrive> _mappedDrive = DummyMappedDriveUtils.GetLazyDummyMappedDrive();
+
+
+        public void Dispose()
+        {
+            _mappedDrive.Value?.Dispose();
+        }
 
         internal const string TargetItemWithInclude = @"
             <Project>
@@ -999,33 +1007,30 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Log warning for drive enumerating wildcards that exist in projects on Windows platform.
         /// </summary>
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
         [WindowsOnlyTheory]
         [InlineData(
             TargetItemWithIncludeAndExclude,
-            @"z:$(Microsoft_WindowsAzure_EngSys)\**\*",
+            @"%DRIVE%:$(Microsoft_WindowsAzure_EngSys)\**\*",
             @"$(Microsoft_WindowsAzure_EngSys)\*.pdb;$(Microsoft_WindowsAzure_EngSys)\Microsoft.WindowsAzure.Storage.dll;$(Microsoft_WindowsAzure_EngSys)\Certificates\**\*")]
-
-        [InlineData(
-            TargetItemWithIncludeAndExclude,
-            @"$(Microsoft_WindowsAzure_EngSys)\*.pdb",
-            @"z:$(Microsoft_WindowsAzure_EngSys)\**\*")]
 
         [InlineData(
             TargetWithDefinedPropertyAndItemWithInclude,
             @"$(Microsoft_WindowsAzure_EngSys)**",
             null,
             "Microsoft_WindowsAzure_EngSys",
-            @"z:\")]
+            @"%DRIVE%:\")]
 
         [InlineData(
             TargetWithDefinedPropertyAndItemWithInclude,
             @"$(Microsoft_WindowsAzure_EngSys)\**\*",
             null,
             "Microsoft_WindowsAzure_EngSys",
-            @"z:")]
+            @"%DRIVE%:")]
         public void LogWindowsWarningUponBuildingProjectWithDriveEnumeration(string content, string include, string exclude = null, string property = null, string propertyValue = null)
         {
+            include = DummyMappedDriveUtils.UpdatePathToMappedDrive(include, _mappedDrive.Value.MappedDriveLetter);
+            exclude = DummyMappedDriveUtils.UpdatePathToMappedDrive(exclude, _mappedDrive.Value.MappedDriveLetter);
+            propertyValue = DummyMappedDriveUtils.UpdatePathToMappedDrive(propertyValue, _mappedDrive.Value.MappedDriveLetter);
             content = (string.IsNullOrEmpty(property) && string.IsNullOrEmpty(propertyValue)) ?
                 string.Format(content, include, exclude) :
                 string.Format(content, property, propertyValue, include);
@@ -1040,7 +1045,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Log warning for drive enumerating wildcards that exist in projects on Unix platform.
         /// </summary>
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/8373")]
         [UnixOnlyTheory]
         [InlineData(
             TargetWithDefinedPropertyAndItemWithInclude,

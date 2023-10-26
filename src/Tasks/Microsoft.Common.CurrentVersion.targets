@@ -1511,6 +1511,24 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <Target Name="AfterResolveReferences"/>
+  
+  <!--
+    ============================================================
+                                        IgnoreJavaScriptOutputAssembly
+
+    esproj are JavaScript or TypeScript Projects that never produce an assembly.
+    Set ReferenceOutputAssembly to false in any reference to an esproj.
+    ============================================================
+    -->
+  <Target Name="IgnoreJavaScriptOutputAssembly"
+    BeforeTargets="AssignProjectConfiguration"
+    Condition="$([MSBuild]::AreFeaturesEnabled('17.8'))">
+      <ItemGroup>
+        <ProjectReference Condition="'%(ProjectReference.Extension)' == '.esproj' and '%(ProjectReference.ReferenceOutputAssembly)' == ''">
+          <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+        </ProjectReference>
+      </ItemGroup>
+  </Target>
 
   <!--
     ============================================================
@@ -4356,14 +4374,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   </Target>
 
-  <PropertyGroup>
-    <DeploymentComputeClickOnceManifestInfoDependsOn>
-      CleanPublishFolder;
-      _DeploymentGenerateTrustInfo
-      $(DeploymentComputeClickOnceManifestInfoDependsOn)
-    </DeploymentComputeClickOnceManifestInfoDependsOn>
-  </PropertyGroup>
-
   <!--
     ============================================================
                                         _DeploymentComputeClickOnceManifestInfo
@@ -4422,7 +4432,29 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_ClickOnceRuntimeCopyLocalItems Include="@(NativeCopyLocalItems)"
                                       Condition="'%(NativeCopyLocalItems.CopyLocal)' == 'true'" />
       <_ClickOnceRuntimeCopyLocalItems Remove="@(_DeploymentReferencePaths)" />
-      <_ClickOnceFiles Include="@(ContentWithTargetPath);@(_DeploymentManifestIconFile);@(AppConfigWithTargetPath);@(NetCoreRuntimeJsonFilesForClickOnce);@(_ClickOnceRuntimeCopyLocalItems)"/>
+
+      <!--
+        For .NET>=5, we need to check if we need to publish any content items from transitive project references. For such items to be published, they
+        either have the .exe/.dll extension or their publish status has been overriden in VS so they will show up in the PublishFiles collection.
+        The PublishProtocol property is available only in .NET>=5 so we will used that to exclude .NET FX 4.X case.
+      -->
+      <_ClickOnceTransitiveContentItemsTemp Include="@(_TransitiveItemsToCopyToOutputDirectory->'%(TargetPath)')" Condition="'$(PublishProtocol)' == 'ClickOnce'" >
+        <SavedIdentity>%(Identity)</SavedIdentity>
+      </_ClickOnceTransitiveContentItemsTemp>
+      <_ClickOnceTransitiveContentItems Include="@(_ClickOnceTransitiveContentItemsTemp->'%(SavedIdentity)')" Condition="'%(Identity)'=='@(PublishFile)' Or '%(Extension)'=='.exe' Or '%(Extension)'=='.dll'" />
+
+      <!--
+        For .NET>=5, we need to check if we need to publish any copylocal items from None group. For such items to be published, they either 
+        have .exe/.dll extension or their publish status has been overriden in VS so they will show up in the PublishFiles collection. 
+        The PublishProtocol property is available only in .NET>=5 so we will used that to exclude .NET FX 4.X case.
+      -->
+      <!-- Include items from None group for publishing -->
+      <_ClickOnceNoneItemsTemp Include="@(_NoneWithTargetPath->'%(TargetPath)')" Condition="'$(PublishProtocol)'=='Clickonce' And ('%(_NoneWithTargetPath.CopyToOutputDirectory)'=='Always' or '%(_NoneWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest')">
+        <SavedIdentity>%(Identity)</SavedIdentity>
+      </_ClickOnceNoneItemsTemp>
+      <_ClickOnceNoneItems Include="@(_ClickOnceNoneItemsTemp->'%(SavedIdentity)')" Condition="'%(Identity)'=='@(PublishFile)' Or '%(Extension)'=='.exe' Or '%(Extension)'=='.dll'" />
+
+      <_ClickOnceFiles Include="@(ContentWithTargetPath);@(_DeploymentManifestIconFile);@(AppConfigWithTargetPath);@(NetCoreRuntimeJsonFilesForClickOnce);@(_ClickOnceRuntimeCopyLocalItems);@(_ClickOnceNoneItems);@(_ClickOnceTransitiveContentItems)"/>
     </ItemGroup>
 
     <!-- For single file publish, we need to include the SF bundle EXE, application icon file and files excluded from the bundle EXE in the clickonce manifest -->
@@ -4978,7 +5010,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
     Name="_GetCopyToOutputDirectoryItemsFromTransitiveProjectReferences"
     DependsOnTargets="_PopulateCommonStateForGetCopyToOutputDirectoryItems;_AddOutputPathToGlobalPropertiesToRemove"
-    Returns="@(_TransitiveItemsToCopyToOutputDirectory)">
+    Returns="@(_CopyToOutputDirectoryTransitiveItems)">
 
     <!-- Get items from child projects first. -->
     <MSBuild
@@ -4997,8 +5029,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Target outputs must be full paths because they will be consumed by a different project. -->
     <ItemGroup>
-      <_TransitiveItemsToCopyToOutputDirectory   KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_AllChildProjectItemsWithTargetPath->'%(FullPath)')" Condition="'%(_AllChildProjectItemsWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
-      <_TransitiveItemsToCopyToOutputDirectory   KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_AllChildProjectItemsWithTargetPath->'%(FullPath)')" Condition="'%(_AllChildProjectItemsWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
+      <_CopyToOutputDirectoryTransitiveItems   KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_AllChildProjectItemsWithTargetPath->'%(FullPath)')" Condition="'%(_AllChildProjectItemsWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
+      <_CopyToOutputDirectoryTransitiveItems   KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_AllChildProjectItemsWithTargetPath->'%(FullPath)')" Condition="'%(_AllChildProjectItemsWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
     </ItemGroup>
 
     <!-- Remove items which we will never again use - they just sit around taking up memory otherwise -->
@@ -5008,13 +5040,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Copy paste _GetCopyToOutputDirectoryItemsFromThisProject but keep the items that came from other projects via ProjectReference's OutputItemType metadata -->
     <ItemGroup>
-      <_TransitiveItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(ContentWithTargetPath->'%(FullPath)')" Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='Always' AND '%(ContentWithTargetPath.MSBuildSourceProjectFile)'!=''"/>
-      <_TransitiveItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(ContentWithTargetPath->'%(FullPath)')" Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest' AND '%(ContentWithTargetPath.MSBuildSourceProjectFile)'!=''"/>
+      <_CopyToOutputDirectoryTransitiveItems       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(ContentWithTargetPath->'%(FullPath)')" Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='Always' AND '%(ContentWithTargetPath.MSBuildSourceProjectFile)'!=''"/>
+      <_CopyToOutputDirectoryTransitiveItems       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(ContentWithTargetPath->'%(FullPath)')" Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest' AND '%(ContentWithTargetPath.MSBuildSourceProjectFile)'!=''"/>
     </ItemGroup>
 
     <ItemGroup>
-      <_TransitiveItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(EmbeddedResource->'%(FullPath)')" Condition="'%(EmbeddedResource.CopyToOutputDirectory)'=='Always' AND '%(EmbeddedResource.MSBuildSourceProjectFile)'!=''"/>
-      <_TransitiveItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(EmbeddedResource->'%(FullPath)')" Condition="'%(EmbeddedResource.CopyToOutputDirectory)'=='PreserveNewest' AND '%(EmbeddedResource.MSBuildSourceProjectFile)'!=''"/>
+      <_CopyToOutputDirectoryTransitiveItems       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(EmbeddedResource->'%(FullPath)')" Condition="'%(EmbeddedResource.CopyToOutputDirectory)'=='Always' AND '%(EmbeddedResource.MSBuildSourceProjectFile)'!=''"/>
+      <_CopyToOutputDirectoryTransitiveItems       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(EmbeddedResource->'%(FullPath)')" Condition="'%(EmbeddedResource.CopyToOutputDirectory)'=='PreserveNewest' AND '%(EmbeddedResource.MSBuildSourceProjectFile)'!=''"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -5026,13 +5058,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </AssignTargetPath>
 
     <ItemGroup>
-      <_TransitiveItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_CompileItemsToCopyWithTargetPath)" Condition="'%(_CompileItemsToCopyWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
-      <_TransitiveItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_CompileItemsToCopyWithTargetPath)" Condition="'%(_CompileItemsToCopyWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
+      <_CopyToOutputDirectoryTransitiveItems       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_CompileItemsToCopyWithTargetPath)" Condition="'%(_CompileItemsToCopyWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
+      <_CopyToOutputDirectoryTransitiveItems       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_CompileItemsToCopyWithTargetPath)" Condition="'%(_CompileItemsToCopyWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
     </ItemGroup>
 
     <ItemGroup>
-      <_TransitiveItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_NoneWithTargetPath->'%(FullPath)')" Condition="'%(_NoneWithTargetPath.CopyToOutputDirectory)'=='Always' AND '%(_NoneWithTargetPath.MSBuildSourceProjectFile)'!=''"/>
-      <_TransitiveItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_NoneWithTargetPath->'%(FullPath)')" Condition="'%(_NoneWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest' AND '%(_NoneWithTargetPath.MSBuildSourceProjectFile)'!=''"/>
+      <_CopyToOutputDirectoryTransitiveItems       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_NoneWithTargetPath->'%(FullPath)')" Condition="'%(_NoneWithTargetPath.CopyToOutputDirectory)'=='Always' AND '%(_NoneWithTargetPath.MSBuildSourceProjectFile)'!=''"/>
+      <_CopyToOutputDirectoryTransitiveItems       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_NoneWithTargetPath->'%(FullPath)')" Condition="'%(_NoneWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest' AND '%(_NoneWithTargetPath.MSBuildSourceProjectFile)'!=''"/>
     </ItemGroup>
 
   </Target>
@@ -5108,7 +5140,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <!-- Empty intermediate items to release memory -->
       <_TransitiveItemsToCopyToOutputDirectoryAlways               Remove="@(_TransitiveItemsToCopyToOutputDirectoryAlways)"/>
       <_TransitiveItemsToCopyToOutputDirectoryPreserveNewest       Remove="@(_TransitiveItemsToCopyToOutputDirectoryPreserveNewest)"/>
-      <_TransitiveItemsToCopyToOutputDirectory                     Remove="@(_TransitiveItemsToCopyToOutputDirectory)"/>
 
       <_ThisProjectItemsToCopyToOutputDirectoryAlways              Remove="@(_ThisProjectItemsToCopyToOutputDirectoryAlways)"/>
       <_ThisProjectItemsToCopyToOutputDirectoryPreserveNewest      Remove="@(_ThisProjectItemsToCopyToOutputDirectoryPreserveNewest)"/>
@@ -5786,6 +5817,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ***********************************************************************************************
     ***********************************************************************************************
     -->
+
+  <PropertyGroup>
+    <DeploymentComputeClickOnceManifestInfoDependsOn>
+      CleanPublishFolder;
+      $(_RecursiveTargetForContentCopying);
+      _DeploymentGenerateTrustInfo
+      $(DeploymentComputeClickOnceManifestInfoDependsOn)
+    </DeploymentComputeClickOnceManifestInfoDependsOn>
+  </PropertyGroup>
 
   <!--
     ============================================================

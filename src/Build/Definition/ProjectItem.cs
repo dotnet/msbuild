@@ -1020,11 +1020,11 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Applies the supplied metadata to the destination item.
             /// </summary>
-            public void SetMetadata(IEnumerable<Pair<ProjectMetadataElement, string>> metadata, IEnumerable<ProjectItem> destinationItems)
+            public void SetMetadata(IEnumerable<KeyValuePair<ProjectMetadataElement, string>> metadata, IEnumerable<ProjectItem> destinationItems)
             {
                 foreach (IItem<ProjectMetadata> item in destinationItems)
                 {
-                    foreach (Pair<ProjectMetadataElement, string> metadatum in metadata)
+                    foreach (KeyValuePair<ProjectMetadataElement, string> metadatum in metadata)
                     {
                         item.SetMetadata(metadatum.Key, metadatum.Value);
                     }

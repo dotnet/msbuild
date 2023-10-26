@@ -264,6 +264,11 @@
         <target state="translated">MSB4273: Mezipaměť projektu vyvolala neošetřenou výjimku z metody {0}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheHandleBuildResultFailed">
+        <source>MSB4269: The project cache failed while handling a build result for the following project: {0}.</source>
+        <target state="translated">MSB4269: Mezipaměť projektu selhala při zpracování výsledku sestavení pro následující projekt: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectCacheHitWithDefaultTargets">
         <source>Project cache hit for "{0}" (default targets).</source>
         <target state="translated">Přístup do mezipaměti projektu pro „{0}“ (výchozí cíle).</target>
@@ -370,6 +375,11 @@
         <target state="translated">MSB4274: Zakázání uzlu inproc způsobí snížení výkonu při používání modulů plug-in mezipaměti projektu, které vysílají žádosti o sestavení proxy serveru.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ReportFileAccessesX64Only">
+        <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
+        <target state="translated">Přístupy k souborům sestav se v současné době podporují jenom pomocí varianty x64 nástroje MSBuild.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
         <source>MSB4242: SDK Resolver Failure: "{0}"</source>
         <target state="translated">MSB4242: Selhání překladače sady SDK: {0}</target>
@@ -439,6 +449,11 @@
       <trans-unit id="TaskAssemblyLoaded">
         <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</source>
         <target state="translated">Sestavení načtené během {0}{1}: {2} (umístění: {3}, MVID: {4}, AppDomain: {5})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TaskAssemblyLoadedWithAssemblyLoadContext">
+        <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</source>
+        <target state="new">Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
@@ -1475,7 +1490,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectSkipped">
         <source>Skipping because the "$(AspNetConfiguration)" configuration is not supported for this web project.  You can use the AspNetConfiguration property to override the configuration used for building web projects, by adding /p:AspNetConfiguration=&lt;value&gt; to the command line. Currently web projects only support Debug and Release configurations.</source>
-        <target state="translated">Vynecháno, protože konfigurace $(AspNetConfiguration) není pro tento webový projekt podporována. Pomocí vlastnosti AspNetConfiguration můžete přepsat konfiguraci používanou k sestavování webových projektů, a to přidáním příkazu /p:AspNetConfiguration=&lt;hodnota&gt; do příkazového řádku. Webové projekty nyní podporují pouze konfigurace Debug a Release.</target>
+        <target state="translated">Vynecháno, protože konfigurace "$(AspNetConfiguration)" není pro tento webový projekt podporována. Pomocí vlastnosti AspNetConfiguration můžete přepsat konfiguraci používanou k sestavování webových projektů, a to přidáním příkazu /p:AspNetConfiguration=&lt;hodnota&gt; do příkazového řádku. Webové projekty nyní podporují pouze konfigurace Debug a Release.</target>
         <note>
     UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do NOT localize "AspNetConfiguration", "Debug", "Release".

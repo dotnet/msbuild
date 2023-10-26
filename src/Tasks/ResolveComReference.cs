@@ -139,8 +139,13 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Main class for the COM reference resolution task for .NET Core
     /// </summary>
-    public sealed partial class ResolveComReference : Microsoft.Build.Tasks.TaskExtension, IResolveComReferenceTaskContract
+    public sealed partial class ResolveComReference : TaskRequiresFramework, IResolveComReferenceTaskContract
     {
+        public ResolveComReference()
+            : base(nameof(ResolveComReference))
+        {
+        }
+
 #pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Properties
 
@@ -181,20 +186,6 @@ namespace Microsoft.Build.Tasks
         public string StateFile { get; set; }
 
         public string TargetFrameworkVersion { get; set; } = String.Empty;
-
-        #endregion
-
-        #region ITask members
-
-        /// <summary>
-        /// Task entry point.
-        /// </summary>
-        /// <returns></returns>
-        public override bool Execute()
-        {
-            Log.LogErrorWithCodeFromResources("TaskRequiresFrameworkFailure", nameof(ResolveComReference));
-            return false;
-        }
 
         #endregion
 #pragma warning restore format 

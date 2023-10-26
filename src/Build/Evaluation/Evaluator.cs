@@ -92,7 +92,7 @@ namespace Microsoft.Build.Evaluation
         /// Key is the directory of the file importing the usingTask, which is needed
         /// to handle any relative paths in the usingTask.
         /// </summary>
-        private readonly List<Pair<string, ProjectUsingTaskElement>> _usingTaskElements;
+        private readonly List<KeyValuePair<string, ProjectUsingTaskElement>> _usingTaskElements;
 
         /// <summary>
         /// List of ProjectTargetElement's traversing into imports.
@@ -115,7 +115,7 @@ namespace Microsoft.Build.Evaluation
         /// Dictionary of project full paths and a boolean that indicates whether at least one
         /// of their targets has the "Returns" attribute set.
         /// </summary>
-        private readonly Dictionary<ProjectRootElement, NGen<bool>> _projectSupportsReturnsAttribute;
+        private readonly Dictionary<ProjectRootElement, bool> _projectSupportsReturnsAttribute;
 
         /// <summary>
         /// The Project Xml to be evaluated.
@@ -249,11 +249,11 @@ namespace Microsoft.Build.Evaluation
             _data = data;
             _itemGroupElements = new List<ProjectItemGroupElement>();
             _itemDefinitionGroupElements = new List<ProjectItemDefinitionGroupElement>();
-            _usingTaskElements = new List<Pair<string, ProjectUsingTaskElement>>();
+            _usingTaskElements = new List<KeyValuePair<string, ProjectUsingTaskElement>>();
             _targetElements = new List<ProjectTargetElement>();
             _importsSeen = new Dictionary<string, ProjectImportElement>(StringComparer.OrdinalIgnoreCase);
             _initialTargetsList = new List<string>();
-            _projectSupportsReturnsAttribute = new Dictionary<ProjectRootElement, NGen<bool>>();
+            _projectSupportsReturnsAttribute = new Dictionary<ProjectRootElement, bool>();
             _projectRootElement = projectRootElement;
             _loadSettings = loadSettings;
             _maxNodeCount = maxNodeCount;
@@ -901,7 +901,7 @@ namespace Microsoft.Build.Evaluation
                             break;
                         case ProjectTargetElement target:
                             // Defaults to false
-                            _projectSupportsReturnsAttribute.TryGetValue(currentProjectOrImport, out NGen<bool> projectSupportsReturnsAttribute);
+                            _projectSupportsReturnsAttribute.TryGetValue(currentProjectOrImport, out bool projectSupportsReturnsAttribute);
 
                             _projectSupportsReturnsAttribute[currentProjectOrImport] = projectSupportsReturnsAttribute || (target.Returns != null);
                             _targetElements.Add(target);
@@ -913,7 +913,7 @@ namespace Microsoft.Build.Evaluation
                             EvaluateImportGroupElement(currentProjectOrImport.DirectoryPath, importGroup);
                             break;
                         case ProjectUsingTaskElement usingTask:
-                            _usingTaskElements.Add(new Pair<string, ProjectUsingTaskElement>(currentProjectOrImport.DirectoryPath, usingTask));
+                            _usingTaskElements.Add(new KeyValuePair<string, ProjectUsingTaskElement>(currentProjectOrImport.DirectoryPath, usingTask));
                             break;
                         case ProjectChooseElement choose:
                             EvaluateChooseElement(choose);
@@ -2536,7 +2536,16 @@ namespace Microsoft.Build.Evaluation
                         importElement.Project.Replace(searchPathMatch.MsBuildPropertyFormat, extensionsPathPropValue),
                         ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
 
-                relativeProjectPath = FileUtilities.MakeRelative(extensionsPathPropValue, importExpandedWithDefaultPath);
+                try
+                {
+                    relativeProjectPath = FileUtilities.MakeRelative(extensionsPathPropValue, importExpandedWithDefaultPath);
+                }
+                catch (ArgumentException ex)
+                {
+                    // https://github.com/dotnet/msbuild/issues/8762 .Catch the exceptions when extensionsPathPropValue is null or importExpandedWithDefaultPath is empty. In NET Framework, Path.* function also throws exceptions if the path contains invalid characters.
+                    ProjectErrorUtilities.ThrowInvalidProject(importElement.Location, "InvalidAttributeValueWithException", importExpandedWithDefaultPath, XMakeAttributes.project, XMakeElements.import, ex.Message);
+                    return;
+                }
             }
             else
             {

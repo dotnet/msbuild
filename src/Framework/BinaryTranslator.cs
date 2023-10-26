@@ -172,6 +172,9 @@ namespace Microsoft.Build.BackEnd
                 value = _reader.ReadInt32();
             }
 
+            /// <inheritdoc/>
+            public void Translate(ref uint unsignedInteger) => unsignedInteger = _reader.ReadUInt32();
+
             /// <summary>
             /// Translates an <see langword="int"/> array.
             /// </summary>
@@ -420,7 +423,6 @@ namespace Microsoft.Build.BackEnd
                     _reader.ReadInt32(),
                     _reader.ReadInt32());
             }
-
 #endif
 
             /// <summary>
@@ -501,12 +503,6 @@ namespace Microsoft.Build.BackEnd
 
             public void TranslateException(ref Exception value)
             {
-                if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
-                {
-                    TranslateDotNet<Exception>(ref value);
-                    return;
-                }
-
                 if (!TranslateNullable(value))
                 {
                     return;
@@ -884,6 +880,9 @@ namespace Microsoft.Build.BackEnd
                 _writer.Write(value);
             }
 
+            /// <inheritdoc/>
+            public void Translate(ref uint unsignedInteger) => _writer.Write(unsignedInteger);
+
             /// <summary>
             /// Translates an <see langword="int"/> array.
             /// </summary>
@@ -1108,7 +1107,6 @@ namespace Microsoft.Build.BackEnd
                 _writer.Write(value.TargetId);
                 _writer.Write(value.TaskId);
             }
-
 #endif 
 
             /// <summary>
@@ -1155,12 +1153,6 @@ namespace Microsoft.Build.BackEnd
 
             public void TranslateException(ref Exception value)
             {
-                if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
-                {
-                    TranslateDotNet<Exception>(ref value);
-                    return;
-                }
-
                 if (!TranslateNullable(value))
                 {
                     return;

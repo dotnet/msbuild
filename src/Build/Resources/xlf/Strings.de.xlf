@@ -264,6 +264,11 @@
         <target state="translated">MSB4273: Der Projektcache hat über die Methode {0} eine unbehandelte Ausnahme ausgelöst.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheHandleBuildResultFailed">
+        <source>MSB4269: The project cache failed while handling a build result for the following project: {0}.</source>
+        <target state="translated">MSB4269: Fehler beim Verarbeiten eines Buildergebnisses für das folgende Projekt im Projektcache: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectCacheHitWithDefaultTargets">
         <source>Project cache hit for "{0}" (default targets).</source>
         <target state="translated">Projektcachetreffer für „{0}“ (Standardziele).</target>
@@ -370,6 +375,11 @@
         <target state="translated">MSB4274: Das Deaktivieren des In-Process-Knotens führt zu Leistungseinbußen bei der Verwendung von Projektcache-Plug-Ins, die Proxybuildanforderungen ausgeben.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ReportFileAccessesX64Only">
+        <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
+        <target state="translated">Das Melden von Dateizugriffen wird derzeit nur mit der x64-Variante von MSBuild unterstützt.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
         <source>MSB4242: SDK Resolver Failure: "{0}"</source>
         <target state="translated">MSB4242: Fehler bei SDK-Resolver: "{0}"</target>
@@ -441,6 +451,11 @@
         <target state="translated">Assembly während {0}{1} geladen: {2} (Speicherort: {3}, MVID: {4}, AppDomain: {5})</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskAssemblyLoadedWithAssemblyLoadContext">
+        <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</source>
+        <target state="new">Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">Die Aufgabe "{0}" hat {1} Kerne freigegeben und belegt jetzt insgesamt {2} Kerne.</target>
@@ -467,7 +482,7 @@
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Dies ist eine nicht behandelte Ausnahme in MSBuild. RUFEN SIE EIN VORHANDENES PROBLEM AUF, ODER ERSTELLEN SIE EIN NEUES UNTER https://aka.ms/msbuild/unhandled
+        <target state="translated">Dies ist ein Ausnahmefehler in MSBuild. STIMMEN SIE EINEM VORHANDENEN ISSUE ZU, ODER ERSTELLEN SIE EIN NEUES ISSUE UNTER https://aka.ms/msbuild/unhandled
     {0}</target>
         <note />
       </trans-unit>

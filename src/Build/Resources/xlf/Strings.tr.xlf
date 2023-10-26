@@ -264,6 +264,11 @@
         <target state="translated">MSB4273: Proje önbelleği {0} yönteminden yakalanamayan özel durum oluşturdu.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheHandleBuildResultFailed">
+        <source>MSB4269: The project cache failed while handling a build result for the following project: {0}.</source>
+        <target state="translated">MSB4269: Proje önbelleği şu proje için bir derleme sonucu işlenirken başarısız oldu: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectCacheHitWithDefaultTargets">
         <source>Project cache hit for "{0}" (default targets).</source>
         <target state="translated">"{0}" (varsayılan hedefler) için proje önbelleği isabeti.</target>
@@ -370,6 +375,11 @@
         <target state="translated">MSB4274: InProc düğümünün devre dışı bırakılması, ara sunucu oluşturma istekleri gönderen proje önbelleği eklentileri kullanılırken performans düşüşüne yol açar.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ReportFileAccessesX64Only">
+        <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
+        <target state="translated">Raporlama dosyası erişimleri şu anda yalnızca MSBuild x64 varyantı kullanıldığında destekleniyor.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
         <source>MSB4242: SDK Resolver Failure: "{0}"</source>
         <target state="translated">MSB4242: SDK Çözümleyici Hatası: "{0}"</target>
@@ -441,6 +451,11 @@
         <target state="translated">Derleme {0}{1} sırasında yüklendi: {2} (konum: {3}, MVID: {4}, AppDomain: {5})</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskAssemblyLoadedWithAssemblyLoadContext">
+        <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</source>
+        <target state="new">Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">"{0}" görevi {1} çekirdeği serbest bıraktı. Şu anda toplam {2} çekirdek tutuyor.</target>
@@ -467,7 +482,7 @@
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Bu, MSBuild'de işlenmeyen bir istisnadır -- LÜTFEN MEVCUT BİR SORUNU OYLAYIN VEYA https://aka.ms/msbuild/unhandled ADRESİNDE YENİ BİR SORUN DOSYALAYIN
+        <target state="translated">Bu, MSBuild'de işlenmeyen bir istisnadır -- LÜTFEN MEVCUT BİR SORUNU OYLAYIN VEYA https://aka.ms/msbuild/unhandled ADRESİNDE YENİ BİR SORUN OLUŞTURUN
     {0}</target>
         <note />
       </trans-unit>

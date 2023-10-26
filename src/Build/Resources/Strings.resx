@@ -1906,6 +1906,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="ProjectCacheShutdownFailed" xml:space="preserve">
     <value>MSB4268: The project cache failed to shut down properly.</value>
   </data>
+  <data name="ProjectCacheHandleBuildResultFailed" xml:space="preserve">
+    <value>MSB4269: The project cache failed while handling a build result for the following project: {0}.</value>
+  </data>
   <data name="NoProjectCachePluginFoundInAssembly" xml:space="preserve">
     <value>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</value>
   </data>
@@ -1984,6 +1987,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="TaskAssemblyLoaded" xml:space="preserve">
     <value>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</value>
   </data>
+  <data name="TaskAssemblyLoadedWithAssemblyLoadContext" xml:space="preserve">
+    <value>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</value>
+  </data>
   <data name="NodeReused" xml:space="preserve">
     <value>Reusing node {0} (PID: {1}).</value>
   </data>
@@ -1994,6 +2000,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="CannotCopyFromElementOfThatType" xml:space="preserve">
     <value>MSB4277: Cannot copy from object of that type.</value>
     <comment>{StrBegin="MSB4277: "}</comment>
+  </data>
+  <data name="ReportFileAccessesX64Only" xml:space="preserve">
+    <value>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</value>
   </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999

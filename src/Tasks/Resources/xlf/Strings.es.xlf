@@ -118,7 +118,7 @@
       </trans-unit>
       <trans-unit id="AxTlbBaseTask.StrongNameUtils.NoPublicKeySpecified">
         <source>MSB3654: Delay signing requires that at least a public key be specified.  Please either supply a public key using the KeyFile or KeyContainer properties, or disable delay signing.</source>
-        <target state="translated">MSB3654: La firma retardada requiere que se especifique al menos una clave pública.  Proporcione una clave pública mediante las propiedades KeyFile o KeyContainer, o deshabilite la firma retardada.</target>
+        <target state="translated">MSB3654: La firma retrasada requiere que se especifique al menos una clave pública.  Proporcione una clave pública mediante las propiedades KeyFile o KeyContainer, o deshabilite la firma retrasada.</target>
         <note>{StrBegin="MSB3654: "}</note>
       </trans-unit>
       <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
@@ -191,6 +191,11 @@
         <target state="translated">Creando un vínculo físico para copiar "{0}" en "{1}".</target>
         <note>LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
+      <trans-unit id="Copy.IOException">
+        <source>MSB3894: Got {0} copying "{1}" to "{2}" and HR is {3}</source>
+        <target state="translated">MSB3894: Se obtuvo {0} al copiar "{1}" en "{2}" y HR es {3}</target>
+        <note>{StrBegin="MSB3894: "} LOCALIZATION: {0} is exception.ToString(), {1} and {2} are paths, {3} is a number")</note>
+      </trans-unit>
       <trans-unit id="Copy.LinkFailed">
         <source>MSB3893: Could not use a link to copy "{0}" to "{1}".</source>
         <target state="translated">MSB3893: No se puede usar un vínculo para copiar "{0}" en "{1}".</target>
@@ -220,6 +225,11 @@
         <source>Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</source>
         <target state="translated">No se puede usar un vínculo físico para copiar "{0}" en "{1}". Se va a copiar el archivo en un vínculo simbólico su lugar. {2}</target>
         <note>LOCALIZATION: {0} and {1} are paths. {2} is an optional localized message.</note>
+      </trans-unit>
+      <trans-unit id="Copy.RetryingOnAccessDenied">
+        <source>MSB3895: Retrying on ERROR_ACCESS_DENIED because environment variable MSBUILDALWAYSRETRY=1</source>
+        <target state="translated">MSB3895: Reintentando el ERROR_ACCESS_DENIED porque la variable de entorno MSBUILDALWAYSRETRY=1</target>
+        <note>{StrBegin="MSB3895: "} LOCALIZATION: Do NOT translate MSBUILDALWAYSRETRY)</note>
       </trans-unit>
       <trans-unit id="Copy.SourceIsDirectory">
         <source>MSB3025: The source file "{0}" is actually a directory.  The "Copy" task does not support copying directories.</source>
@@ -1930,6 +1940,11 @@
         <target state="translated">Se encontró un encabezado PE no válido. No se usará el archivo de implementación.</target>
         <note>This message can be used as the {1} in MSB3272</note>
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.UnifiedReferenceDependsOn">
+        <source>References which depend on or have been unified to "{0}" [{1}].</source>
+        <target state="translated">Referencias que dependen o se han unificado para "{0}" [{1}].</target>
+        <note> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
+      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnknownProcessorArchitecture">
         <source>MSB3273: Unknown processor architecture. The implementation file "{0}" for "{1}" had an ImageFileMachine value of "0x{2}". If you wish to use this implementation file make sure the "ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch" property in your project is set to "Warning" or "None".</source>
         <target state="translated">MSB3273: Arquitectura de procesador desconocida. El archivo de implementación "{0}" para "{1}" tenía un valor ImageFileMachine de "0x{2}". Si desea usar este archivo de implementación, asegúrese de que la propiedad "ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch" del proyecto esté establecida en "Warning" o "None".</target>
@@ -2287,7 +2302,7 @@
       </trans-unit>
       <trans-unit id="ResolveComReference.LoadingDelaySignedAssemblyWithStrongNameVerificationEnabled">
         <source>MSB3295: Failed to load an assembly. Please make sure you have disabled strong name verification for your public key if you want to generate delay signed wrappers. {0}</source>
-        <target state="translated">MSB3295: No se pudo cargar un ensamblado. Asegúrese de que deshabilitó la comprobación de nombres seguros para su clave pública si desea generar contenedores de firma retardada. {0}</target>
+        <target state="translated">MSB3295: No se pudo cargar un ensamblado. Asegúrese de que deshabilitó la comprobación de nombres seguros para su clave pública si desea generar contenedores de firma con retraso. {0}</target>
         <note>{StrBegin="MSB3295: "}</note>
       </trans-unit>
       <trans-unit id="ResolveComReference.MissingOrUnknownComReferenceAttribute">
@@ -2496,7 +2511,7 @@
       </trans-unit>
       <trans-unit id="StrongNameUtils.NoPublicKeySpecified">
         <source>MSB3353: Public key necessary for delay signing was not specified.</source>
-        <target state="translated">MSB3353: No se especificó la clave pública necesaria para la firma retardada.</target>
+        <target state="translated">MSB3353: No se especificó la clave pública necesaria para la firma con retraso.</target>
         <note>{StrBegin="MSB3353: "}</note>
       </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">

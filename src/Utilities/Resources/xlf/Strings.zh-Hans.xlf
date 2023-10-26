@@ -57,6 +57,11 @@
         <target state="translated">MSB6003: 指定的任务可执行文件“{0}”未能运行。{1}</target>
         <note>{StrBegin="MSB6003: "}</note>
       </trans-unit>
+      <trans-unit id="ToolTask.InvalidTerminationTimeout">
+        <source>Specified termination timeout ({0}) is invalid - expecting value greater or equal to -1.</source>
+        <target state="translated">指定的终止超时({0})无效 - 值应大于或等于 -1。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ToolTask.NotUpToDate">
         <source>Unable to skip task because it is not up-to-date.</source>
         <target state="translated">无法跳过任务，因为它不是最新的。</target>

@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 
 
@@ -375,6 +376,57 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(expectedGlobalProperties, deserializedConfig.GlobalProperties);
         }
+
+#if FEATURE_APPDOMAIN
+        /// <summary>
+        /// Test serialization / deserialization of the AppDomainSetup instance. 
+        /// </summary>
+        [Theory]
+        [InlineData(new byte[] { 1, 2, 3 })]
+        [InlineData(null)]
+        public void TestTranslationWithAppDomainSetup(byte[] configBytes)
+        {
+            AppDomainSetup setup = new AppDomainSetup();
+
+            TaskHostConfiguration config = new TaskHostConfiguration(
+                nodeId: 1,
+                startupDirectory: Directory.GetCurrentDirectory(),
+                buildProcessEnvironment: null,
+                culture: Thread.CurrentThread.CurrentCulture,
+                uiCulture: Thread.CurrentThread.CurrentUICulture,
+                appDomainSetup: setup,
+                lineNumberOfTask: 1,
+                columnNumberOfTask: 1,
+                projectFileOfTask: @"c:\my project\myproj.proj",
+                continueOnError: _continueOnErrorDefault,
+                taskName: "TaskName",
+                taskLocation: @"c:\MyTasks\MyTask.dll",
+                isTaskInputLoggingEnabled: false,
+                taskParameters: new Dictionary<string, object>(),
+                globalParameters: new Dictionary<string, string>(),
+                warningsAsErrors: null,
+                warningsNotAsErrors: null,
+                warningsAsMessages: null);
+
+            setup.SetConfigurationBytes(configBytes);
+
+            ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
+            INodePacket packet = TaskHostConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            TaskHostConfiguration deserializedConfig = packet as TaskHostConfiguration;
+
+            deserializedConfig.AppDomainSetup.ShouldNotBeNull();
+
+            if (configBytes is null)
+            {
+                deserializedConfig.AppDomainSetup.GetConfigurationBytes().ShouldBeNull();
+            }
+            else
+            {
+                deserializedConfig.AppDomainSetup.GetConfigurationBytes().SequenceEqual(configBytes).ShouldBeTrue();
+            }
+        }
+#endif
 
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary is empty. 

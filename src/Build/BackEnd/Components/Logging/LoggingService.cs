@@ -218,17 +218,17 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// A list of warnings to treat as errors for an associated <see cref="BuildEventContext"/>.  If an empty set, all warnings are treated as errors.
         /// </summary>
-        private IDictionary<int, ISet<string>> _warningsAsErrorsByProject;
+        private IDictionary<WarningsConfigKey, ISet<string>> _warningsAsErrorsByProject;
 
         /// <summary>
         /// A list of warnings to not to be promoted to errors for an associated <see cref="BuildEventContext"/>.
         /// </summary>
-        private IDictionary<int, ISet<string>> _warningsNotAsErrorsByProject;
+        private IDictionary<WarningsConfigKey, ISet<string>> _warningsNotAsErrorsByProject;
 
         /// <summary>
         /// A list of warnings to treat as messages for an associated <see cref="BuildEventContext"/>.
         /// </summary>
-        private IDictionary<int, ISet<string>> _warningsAsMessagesByProject;
+        private IDictionary<WarningsConfigKey, ISet<string>> _warningsAsMessagesByProject;
 
         /// <summary>
         /// The minimum message importance that must be logged because there is a possibility that a logger consumes it.
@@ -623,9 +623,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="warningsByProject">A dictionary of all warnings to be treated special by for which projects.</param>
         /// <param name="warnings">Warning codes we already know should be promoted, demoted, or not promoted as relevant.</param>
         /// <returns></returns>
-        private ICollection<string> GetWarningsForProject(BuildEventContext context, IDictionary<int, ISet<string>> warningsByProject, ISet<string> warnings)
+        private ICollection<string> GetWarningsForProject(BuildEventContext context, IDictionary<WarningsConfigKey, ISet<string>> warningsByProject, ISet<string> warnings)
         {
-            int key = GetWarningsAsErrorOrMessageKey(context);
+            WarningsConfigKey key = GetWarningsConfigKey(context);
 
             if (warningsByProject != null && warningsByProject.TryGetValue(key, out ISet<string> newWarnings))
             {
@@ -678,13 +678,13 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="warningsByProject">Dictionary with what warnings are currently known (by project) that we will add to.</param>
         /// <param name="buildEventContext">Context for the project to be added</param>
         /// <param name="codes">Codes to add</param>
-        private void AddWarningsAsMessagesOrErrors(ref IDictionary<int, ISet<string>> warningsByProject, BuildEventContext buildEventContext, ISet<string> codes)
+        private void AddWarningsAsMessagesOrErrors(ref IDictionary<WarningsConfigKey, ISet<string>> warningsByProject, BuildEventContext buildEventContext, ISet<string> codes)
         {
             lock (_lockObject)
             {
-                int key = GetWarningsAsErrorOrMessageKey(buildEventContext);
+                WarningsConfigKey key = GetWarningsConfigKey(buildEventContext);
 
-                warningsByProject ??= new ConcurrentDictionary<int, ISet<string>>();
+                warningsByProject ??= new ConcurrentDictionary<WarningsConfigKey, ISet<string>>();
 
                 if (!warningsByProject.ContainsKey(key))
                 {
@@ -1294,18 +1294,17 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         #region Private Methods
-        private static int GetWarningsAsErrorOrMessageKey(BuildEventContext buildEventContext)
+        private static WarningsConfigKey GetWarningsConfigKey(BuildEventContext buildEventContext)
         {
-            var hash = 17;
-            hash = (hash * 31) + buildEventContext.ProjectInstanceId;
-            hash = (hash * 31) + buildEventContext.ProjectContextId;
-            return hash;
+            return new WarningsConfigKey(buildEventContext.ProjectInstanceId, buildEventContext.ProjectContextId);
         }
 
-        private static int GetWarningsAsErrorOrMessageKey(BuildEventArgs buildEventArgs)
+        private static WarningsConfigKey GetWarningsConfigKey(BuildEventArgs buildEventArgs)
         {
-            return GetWarningsAsErrorOrMessageKey(buildEventArgs.BuildEventContext);
+            return GetWarningsConfigKey(buildEventArgs.BuildEventContext);
         }
+
+        private readonly record struct WarningsConfigKey(int InstanceId, int ContextId);
 
         /// <summary>
         /// Create a logging thread to process the logging queue.
@@ -1587,7 +1586,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (buildEventArgs is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
             {
-                int key = GetWarningsAsErrorOrMessageKey(projectFinishedEvent);
+                WarningsConfigKey key = GetWarningsConfigKey(projectFinishedEvent);
                 _warningsAsErrorsByProject?.Remove(key);
                 _warningsNotAsErrorsByProject?.Remove(key);
                 _warningsAsMessagesByProject?.Remove(key);
@@ -1859,7 +1858,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // This only applies if the user specified <MSBuildWarningsAsMessages /> and there is a valid ProjectInstanceId
             if (_warningsAsMessagesByProject != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
             {
-                if (_warningsAsMessagesByProject.TryGetValue(GetWarningsAsErrorOrMessageKey(warningEvent), out ISet<string> codesByProject))
+                if (_warningsAsMessagesByProject.TryGetValue(GetWarningsConfigKey(warningEvent), out ISet<string> codesByProject))
                 {
                     return codesByProject?.Contains(warningEvent.Code) == true;
                 }
@@ -1870,7 +1869,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         private bool WarningAsErrorNotOverriden(BuildWarningEventArgs warningEvent)
         {
-            int key = GetWarningsAsErrorOrMessageKey(warningEvent);
+            WarningsConfigKey key = GetWarningsConfigKey(warningEvent);
 
             return WarningsNotAsErrors?.Contains(warningEvent.Code) != true && !(_warningsNotAsErrorsByProject?.TryGetValue(key, out ISet<string> notToError) == true && notToError.Contains(warningEvent.Code));
         }
@@ -1897,7 +1896,7 @@ namespace Microsoft.Build.BackEnd.Logging
             if (_warningsAsErrorsByProject != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
             {
                 // Attempt to get the list of warnings to treat as errors for the current project
-                int key = GetWarningsAsErrorOrMessageKey(warningEvent);
+                WarningsConfigKey key = GetWarningsConfigKey(warningEvent);
                 if (_warningsAsErrorsByProject.TryGetValue(key, out ISet<string> codesByProject))
                 {
                     // We create an empty set if all warnings should be treated as errors so that should be checked first.

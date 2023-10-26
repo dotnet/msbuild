@@ -67,8 +67,14 @@ namespace Microsoft.Build.Engine.UnitTests
         /// <nodoc/>
         public void Dispose()
         {
-            _buildManager.Dispose();
-            _env.Dispose();
+            try
+            {
+                _buildManager.Dispose();
+            }
+            finally
+            {
+                _env.Dispose();
+            }
         }
 
         /// <summary>

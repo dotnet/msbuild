@@ -264,6 +264,11 @@
         <target state="translated">MSB4273: pamięć podręczna projektu zgłosiła nieobsługiwany wyjątek z metody {0}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheHandleBuildResultFailed">
+        <source>MSB4269: The project cache failed while handling a build result for the following project: {0}.</source>
+        <target state="translated">MSB4269: pamięć podręczna projektu nie powiodła się podczas obsługi wyniku kompilacji dla następującego projektu: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectCacheHitWithDefaultTargets">
         <source>Project cache hit for "{0}" (default targets).</source>
         <target state="translated">Trafienie pamięci podręcznej projektu dla „{0}” (domyślne elementy docelowe).</target>
@@ -370,6 +375,11 @@
         <target state="translated">MSB4274: wyłączenie węzła InProc prowadzi do obniżenia wydajności, gdy używane są wtyczki pamięci podręcznej projektu, które emitują żądania kompilowania serwera proxy.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ReportFileAccessesX64Only">
+        <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
+        <target state="translated">Raportowanie dostępu do plików jest obecnie obsługiwane tylko przy użyciu wersji x64 programu MSBuild.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
         <source>MSB4242: SDK Resolver Failure: "{0}"</source>
         <target state="translated">MSB4242: niepowodzenia programu do rozpoznawania zestawu SDK: „{0}”</target>
@@ -441,6 +451,11 @@
         <target state="translated">Załadowano zestaw podczas {0}{1}: {2} (lokalizacja: {3}, MVID: {4}, domena aplikacji: {5})</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskAssemblyLoadedWithAssemblyLoadContext">
+        <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</source>
+        <target state="new">Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">Zadanie „{0}” zwolniło rdzenie ({1}) i teraz jego łączna liczba rdzeni to {2}.</target>
@@ -467,7 +482,7 @@
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Jest to nieobsługiwany wyjątek w aplikacji MSBuild -- ZAGŁOSUJ NA ISTNIEJĄCY PROBLEM LUB ZAGŁOSUJ NA NOWY NA https://aka.ms/msbuild/unhandled.
+        <target state="translated">Jest to nieobsługiwany wyjątek na platformie MSBuild -- ZAGŁOSUJ NA ISTNIEJĄCY PROBLEM LUB ZAREJESTRUJ NOWY W WITRYNIE https://aka.ms/msbuild/unhandled.
     {0}</target>
         <note />
       </trans-unit>

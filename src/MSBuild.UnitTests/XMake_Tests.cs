@@ -566,6 +566,7 @@ namespace Microsoft.Build.UnitTests
                 MSBuildApp.ProcessVerbositySwitch("loquacious");
             });
         }
+
         [Fact]
         public void ValidMaxCPUCountSwitch()
         {
@@ -615,6 +616,85 @@ namespace Microsoft.Build.UnitTests
                 // Too big
                 MSBuildApp.ProcessMaxCPUCountSwitch(new[] { "1025" });
             });
+        }
+
+        [Theory]
+        [InlineData("-getProperty:Foo;Bar", true, "EvalValue", false, false, false, true, false)]
+        [InlineData("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false, true, false)]
+        [InlineData("-getItem:MyItem", false, "", true, false, false, true, false)]
+        [InlineData("-getItem:MyItem -t:Build", false, "", true, true, false, true, false)]
+        [InlineData("-getItem:WrongItem -t:Build", false, "", false, false, false, true, false)]
+        [InlineData("-getProperty:Foo;Bar -getItem:MyItem -t:Build", true, "TargetValue", true, true, false, true, false)]
+        [InlineData("-getProperty:Foo;Bar -getItem:MyItem", true, "EvalValue", true, false, false, true, false)]
+        [InlineData("-getProperty:Foo;Bar -getTargetResult:MyTarget", true, "TargetValue", false, false, true, true, false)]
+        [InlineData("-getProperty:Foo;Bar", true, "EvalValue", false, false, false, false, false)]
+        [InlineData("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false, false, false)]
+        [InlineData("-getItem:MyItem", false, "", true, false, false, false, false)]
+        [InlineData("-getItem:MyItem -t:Build", false, "", true, true, false, false, false)]
+        [InlineData("-getItem:WrongItem -t:Build", false, "", false, false, false, false, false)]
+        [InlineData("-getProperty:Foo;Bar -getItem:MyItem -t:Build", true, "TargetValue", true, true, false, false, false)]
+        [InlineData("-getProperty:Foo;Bar -getItem:MyItem", true, "EvalValue", true, false, false, false, false)]
+        [InlineData("-getProperty:Foo;Bar -getTargetResult:MyTarget", true, "TargetValue", false, false, true, false, false)]
+        [InlineData("-getTargetResult:Restore", false, "", false, false, false, false, true)]
+        public void ExecuteAppWithGetPropertyItemAndTargetResult(
+            string extraSwitch,
+            bool fooPresent,
+            string fooResult,
+            bool itemIncludesAlwaysThere,
+            bool itemIncludesTargetItem,
+            bool targetResultPresent,
+            bool isGraphBuild,
+            bool restoreOnly)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile project = env.CreateFile("testProject.csproj", @"
+<Project>
+
+  <PropertyGroup>
+    <Foo>EvalValue</Foo>
+    <Baz>InnocuousValue</Baz>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <MyItem Include=""itemAlwaysThere"" Metadatum=""metadatumValue"" />
+  </ItemGroup>
+
+  <Target Name=""MyTarget"" BeforeTargets=""Build"">
+    <PropertyGroup>
+      <Foo>TargetValue</Foo>
+    </PropertyGroup>
+    <ItemGroup>
+      <MyItem Include=""targetItem"" Metadato=""OtherMetadatum"" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name=""Build"">
+
+  </Target>
+
+  <Target Name=""Restore"">
+
+  </Target>
+
+</Project>
+");
+            string graph = isGraphBuild ? "--graph" : "";
+            string results = RunnerUtilities.ExecMSBuild($" {project.Path} {extraSwitch} {graph}", out bool success);
+            success.ShouldBeTrue(results);
+            if (fooPresent)
+            {
+                results.ShouldContain($"\"Foo\": \"{fooResult}\"");
+                results.ShouldContain("\"Bar\": \"\"");
+            }
+
+            results.ShouldNotContain("InnocuousValue");
+
+            results.Contains("itemAlwaysThere").ShouldBe(itemIncludesAlwaysThere);
+            results.Contains("targetItem").ShouldBe(itemIncludesTargetItem);
+
+            results.Contains("MyTarget").ShouldBe(targetResultPresent);
+            results.Contains("\"Result\": \"Success\"").ShouldBe(targetResultPresent || restoreOnly);
+            results.ShouldNotContain(ResourceUtilities.GetResourceString("BuildFailedWithPropertiesItemsOrTargetResultsRequested"));
         }
 
         /// <summary>

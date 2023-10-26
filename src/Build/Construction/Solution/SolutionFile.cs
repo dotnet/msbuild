@@ -1635,5 +1635,5 @@ namespace Microsoft.Build.Construction
         }
 
         #endregion
-    } // class SolutionParser
+    } // class SolutionFile
 } // namespace Microsoft.Build.Construction

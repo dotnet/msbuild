@@ -1,9 +1,61 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- https://learn.microsoft.com/en-us/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <!-- For updating target framework from net 7.0 to net 8.0 in MSBuild 17.8 suppress baseline package validation error PKV006 on net 7.0 -->
+  <!-- Suppressions for api differences between main and vs17.8 when merging vs17.8 into main -->
   <Suppression>
-    <DiagnosticId>PKV006</DiagnosticId>
-    <Target>net7.0</Target>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase.HandleFileAccess(Microsoft.Build.Experimental.ProjectCache.FileAccessContext,Microsoft.Build.Framework.FileAccess.FileAccessData)</Target>
+    <Left>lib/net472/Microsoft.Build.dll</Left>
+    <Right>lib/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase.HandleProcess(Microsoft.Build.Experimental.ProjectCache.FileAccessContext,Microsoft.Build.Framework.FileAccess.ProcessData)</Target>
+    <Left>lib/net472/Microsoft.Build.dll</Left>
+    <Right>lib/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase.HandleFileAccess(Microsoft.Build.Experimental.ProjectCache.FileAccessContext,Microsoft.Build.Framework.FileAccess.FileAccessData)</Target>
+    <Left>lib/net8.0/Microsoft.Build.dll</Left>
+    <Right>lib/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase.HandleProcess(Microsoft.Build.Experimental.ProjectCache.FileAccessContext,Microsoft.Build.Framework.FileAccess.ProcessData)</Target>
+    <Left>lib/net8.0/Microsoft.Build.dll</Left>
+    <Right>lib/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase.HandleFileAccess(Microsoft.Build.Experimental.ProjectCache.FileAccessContext,Microsoft.Build.Framework.FileAccess.FileAccessData)</Target>
+    <Left>ref/net472/Microsoft.Build.dll</Left>
+    <Right>ref/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase.HandleProcess(Microsoft.Build.Experimental.ProjectCache.FileAccessContext,Microsoft.Build.Framework.FileAccess.ProcessData)</Target>
+    <Left>ref/net472/Microsoft.Build.dll</Left>
+    <Right>ref/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase.HandleFileAccess(Microsoft.Build.Experimental.ProjectCache.FileAccessContext,Microsoft.Build.Framework.FileAccess.FileAccessData)</Target>
+    <Left>ref/net8.0/Microsoft.Build.dll</Left>
+    <Right>ref/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase.HandleProcess(Microsoft.Build.Experimental.ProjectCache.FileAccessContext,Microsoft.Build.Framework.FileAccess.ProcessData)</Target>
+    <Left>ref/net8.0/Microsoft.Build.dll</Left>
+    <Right>ref/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
 </Suppressions>

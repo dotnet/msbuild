@@ -19,13 +19,16 @@
     <PackageVersion Include="LargeAddressAware" Version="1.0.5" />
     <PackageVersion Update="LargeAddressAware" Condition="'$(LargeAddressAwareVersion)' != ''" Version="$(LargeAddressAwareVersion)" />
 
+    <PackageVersion Include="Microsoft.BuildXL.Processes" Version="0.1.0-20230929.2" />
+    <PackageVersion Update="Microsoft.BuildXL.Processes" Condition="'$(BuildXLProcessesVersion)' != ''" Version="$(BuildXLProcessesVersion)" />
+
     <PackageVersion Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="3.2.2146" PrivateAssets="All" />
     <PackageVersion Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Condition="'$(MicrosoftVisualStudioSetupConfigurationInteropVersion)' != ''" Version="$(MicrosoftVisualStudioSetupConfigurationInteropVersion)" PrivateAssets="All" />
 
     <PackageVersion Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageVersion Update="Microsoft.Win32.Registry" Condition="'$(MicrosoftWin32RegistryVersion)' != ''" Version="$(MicrosoftWin32RegistryVersion)" />
 
-    <PackageVersion Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Update="Newtonsoft.Json" Condition="'$(NewtonsoftJsonVersion)' != ''" Version="$(NewtonsoftJsonVersion)" />
 
     <PackageVersion Include="PdbGit" Version="3.0.41" />

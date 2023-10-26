@@ -189,6 +189,11 @@ namespace Microsoft.Build.Framework
         public readonly bool AlwaysDoImmutableFilesUpToDateCheck = Environment.GetEnvironmentVariable("MSBUILDDONOTCACHEMODIFICATIONTIME") == "1";
 
         /// <summary>
+        /// When copying over an existing file, copy directly into the existing file rather than deleting and recreating.
+        /// </summary>
+        public readonly bool CopyWithoutDelete = Environment.GetEnvironmentVariable("MSBUILDCOPYWITHOUTDELETE") == "1";
+
+        /// <summary>
         /// Emit events for project imports.
         /// </summary>
         private bool? _logProjectImports;
@@ -394,6 +399,27 @@ namespace Microsoft.Build.Framework
                 return value == "1";
             }
         }
+
+        private bool? _isBinaryFormatterSerializationAllowed;
+        public bool IsBinaryFormatterSerializationAllowed
+        {
+            get
+            {
+                if (!_isBinaryFormatterSerializationAllowed.HasValue)
+                {
+#if RUNTIME_TYPE_NETCORE
+                    AppContext.TryGetSwitch("System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization",
+                        out bool enabled);
+                    _isBinaryFormatterSerializationAllowed = enabled;
+#else
+                    _isBinaryFormatterSerializationAllowed = true;
+#endif
+                }
+
+                return _isBinaryFormatterSerializationAllowed.Value;
+            }
+        }
+
 
         private static bool? ParseNullableBoolFromEnvironmentVariable(string environmentVariable)
         {

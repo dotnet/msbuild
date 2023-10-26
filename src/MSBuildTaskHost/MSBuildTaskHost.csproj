@@ -14,6 +14,7 @@
          This is important for the MSBuild.VSSetup project, which "references" both the x86 and x64
          versions of this project -->
     <RuntimeIdentifiers Condition="'$(DotNetBuildFromSource)' != 'true'">win7-x86;win7-x64</RuntimeIdentifiers>
+    <UseRidGraph>true</UseRidGraph>
 
     <EnableDefaultItems>false</EnableDefaultItems>
     <DefineConstants>$(DefineConstants);CLR2COMPATIBILITY;TASKHOST;NO_FRAMEWORK_IVT</DefineConstants>

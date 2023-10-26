@@ -27,7 +27,8 @@ namespace Microsoft.Build.Framework
         internal static readonly Version Wave17_4 = new Version(17, 4);
         internal static readonly Version Wave17_6 = new Version(17, 6);
         internal static readonly Version Wave17_8 = new Version(17, 8);
-        internal static readonly Version[] AllWaves = { Wave17_4, Wave17_6, Wave17_8 };
+        internal static readonly Version Wave17_10 = new Version(17, 10);
+        internal static readonly Version[] AllWaves = { Wave17_4, Wave17_6, Wave17_8, Wave17_10 };
 
         /// <summary>
         /// Special value indicating that all features behind all Change Waves should be enabled.
