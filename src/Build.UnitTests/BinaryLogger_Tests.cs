@@ -188,8 +188,13 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        public void AssemblyLoadsDuringTaskRunLogged()
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "Tests if the AppDomain used to load the task is included in the log text for the event, which is true only on Framework.")]
+        public void AssemblyLoadsDuringTaskRunLoggedWithAppDomain() => AssemblyLoadsDuringTaskRun("AppDomain: [Default]");
+
+        [DotNetOnlyFact(additionalMessage: "Tests if the AssemblyLoadContext used to load the task is included in the log text for the event, which is true only on Core.")]
+        public void AssemblyLoadsDuringTaskRunLoggedWithAssemblyLoadContext() => AssemblyLoadsDuringTaskRun("AssemblyLoadContext: Default");
+
+        private void AssemblyLoadsDuringTaskRun(string additionalEventText)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
@@ -201,7 +206,7 @@ namespace Microsoft.Build.UnitTests
                         TaskFactory="RoslynCodeTaskFactory"
                         AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
                         <ParameterGroup />
-                        <Task> 
+                        <Task>
                           <Using Namespace="System"/>
                           <Using Namespace="System.IO"/>
                           <Using Namespace="System.Reflection"/>
@@ -235,17 +240,20 @@ namespace Microsoft.Build.UnitTests
                     "Assembly loaded during TaskRun (InlineCode.HelloWorld): System.Diagnostics.Debug";
                 string text = File.ReadAllText(Path.Combine(logFolder.Path, "logFile.log"));
                 text.ShouldContain(assemblyLoadedEventText);
+                text.ShouldContain(additionalEventText);
                 // events should not be in logger with verbosity normal
                 string text2 = File.ReadAllText(Path.Combine(logFolder.Path, "logFile2.log"));
                 text2.ShouldNotContain(assemblyLoadedEventText);
-
+                text2.ShouldNotContain(additionalEventText);
                 RunnerUtilities.ExecMSBuild($"{logger.Parameters} -flp1:logfile={Path.Combine(logFolder.Path, "logFile3.log")};verbosity=diagnostic -flp2:logfile={Path.Combine(logFolder.Path, "logFile4.log")};verbosity=normal", out success);
                 success.ShouldBeTrue();
                 text = File.ReadAllText(Path.Combine(logFolder.Path, "logFile3.log"));
                 text.ShouldContain(assemblyLoadedEventText);
+                text.ShouldContain(additionalEventText);
                 // events should not be in logger with verbosity normal
                 text2 = File.ReadAllText(Path.Combine(logFolder.Path, "logFile4.log"));
                 text2.ShouldNotContain(assemblyLoadedEventText);
+                text2.ShouldNotContain(additionalEventText);
             }
         }
 
