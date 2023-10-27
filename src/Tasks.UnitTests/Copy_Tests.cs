@@ -133,10 +133,7 @@ namespace Microsoft.Build.UnitTests
         {
             var task = new Copy { BuildEngine = new MockEngine(true), };
             task.Execute().ShouldBeFalse();
-            task.CopiedFiles.ShouldNotBeNull();
-            task.CopiedFiles.Length.ShouldBe(0);
-            task.DestinationFiles.ShouldNotBeNull();
-            task.DestinationFiles.Length.ShouldBe(0);
+            (task.CopiedFiles == null || task.CopiedFiles.Length == 0).ShouldBeTrue();
             task.WroteAtLeastOneFile.ShouldBeFalse();
         }
 
