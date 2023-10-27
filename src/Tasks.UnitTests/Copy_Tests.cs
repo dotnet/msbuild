@@ -36,6 +36,13 @@ namespace Microsoft.Build.UnitTests
                 new object[] { false },
             };
 
+        public static IEnumerable<object[]> GetNullAndEmptyArrays() =>
+            new List<object[]>
+            {
+                new object[] { null },
+                new object[] { Array.Empty<ITaskItem>() },
+            };
+
         /// <summary>
         /// Gets data for testing with combinations of isUseHardLinks and isUseSymbolicLinks.
         /// Index 0 is the value for isUseHardLinks.
@@ -125,7 +132,7 @@ namespace Microsoft.Build.UnitTests
         public void CopyWithNoInput()
         {
             var task = new Copy { BuildEngine = new MockEngine(true), };
-            task.Execute().ShouldBeTrue();
+            task.Execute().ShouldBeFalse();
             task.CopiedFiles.ShouldNotBeNull();
             task.CopiedFiles.Length.ShouldBe(0);
             task.DestinationFiles.ShouldNotBeNull();
@@ -239,7 +246,8 @@ namespace Microsoft.Build.UnitTests
                     BuildEngine = engine,
                     DestinationFolder = new TaskItem(destinationFolder.Path),
                 };
-                task.Execute().ShouldBeTrue();
+                task.Execute().ShouldBeFalse();
+                engine.AssertLogContains("MSB3897"); // Copy.NeedsSource
                 task.CopiedFiles.ShouldNotBeNull();
                 task.CopiedFiles.Length.ShouldBe(0);
                 task.DestinationFiles.ShouldNotBeNull();
@@ -279,8 +287,9 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        public void CopyWithEmptySourceFiles()
+        [Theory]
+        [MemberData(nameof(GetNullAndEmptyArrays))]
+        public void CopyWithEmptySourceFiles(ITaskItem[] sourceFiles)
         {
             using (var env = TestEnvironment.Create())
             {
@@ -290,10 +299,11 @@ namespace Microsoft.Build.UnitTests
                 var task = new Copy
                 {
                     BuildEngine = engine,
-                    SourceFiles = Array.Empty<ITaskItem>(),
+                    SourceFiles = sourceFiles,
                     DestinationFolder = new TaskItem(destinationFolder.Path),
                 };
-                task.Execute().ShouldBeTrue();
+                task.Execute().ShouldBeFalse();
+                engine.AssertLogContains("MSB3897"); // Copy.NeedsSource
                 task.CopiedFiles.ShouldNotBeNull();
                 task.CopiedFiles.Length.ShouldBe(0);
                 task.DestinationFiles.ShouldNotBeNull();
@@ -302,8 +312,9 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        public void CopyWithEmptySourceFolders()
+        [Theory]
+        [MemberData(nameof(GetNullAndEmptyArrays))]
+        public void CopyWithEmptySourceFolders(ITaskItem[] sourceFolders)
         {
             using (var env = TestEnvironment.Create())
             {
@@ -313,10 +324,11 @@ namespace Microsoft.Build.UnitTests
                 var task = new Copy
                 {
                     BuildEngine = engine,
-                    SourceFolders = Array.Empty<ITaskItem>(),
+                    SourceFolders = sourceFolders,
                     DestinationFolder = new TaskItem(destinationFolder.Path),
                 };
-                task.Execute().ShouldBeTrue();
+                task.Execute().ShouldBeFalse();
+                engine.AssertLogContains("MSB3897"); // Copy.NeedsSource
                 task.CopiedFiles.ShouldNotBeNull();
                 task.CopiedFiles.Length.ShouldBe(0);
                 task.DestinationFiles.ShouldNotBeNull();
@@ -325,8 +337,9 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        public void CopyWithNoDestination()
+        [Theory]
+        [MemberData(nameof(GetNullAndEmptyArrays))]
+        public void CopyWithNoDestination(ITaskItem[] destinationFiles)
         {
             using (var env = TestEnvironment.Create())
             {
@@ -337,11 +350,12 @@ namespace Microsoft.Build.UnitTests
                 {
                     BuildEngine = engine,
                     SourceFiles = new ITaskItem[] { new TaskItem(sourceFile.Path) },
+                    DestinationFiles = destinationFiles,
                 };
                 task.Execute().ShouldBeFalse();
                 engine.AssertLogContains("MSB3023"); // Copy.NeedsDestination
                 task.CopiedFiles.ShouldBeNull();
-                task.DestinationFiles.ShouldBeNull();
+                (task.DestinationFiles == null || task.DestinationFiles.Length == 0).ShouldBeTrue();
                 task.WroteAtLeastOneFile.ShouldBeFalse();
             }
         }

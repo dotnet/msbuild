@@ -206,6 +206,11 @@
         <target state="translated">MSB3893: 링크를 사용하여 "{0}"을(를) "{1}"에 복사할 수 없습니다.</target>
         <note>{StrBegin="MSB3893: "} LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
+      <trans-unit id="Copy.NeedsSource">
+        <source>MSB3897: No source specified for Copy. Please supply either "{0}" or "{1}".</source>
+        <target state="new">MSB3897: No source specified for Copy. Please supply either "{0}" or "{1}".</target>
+        <note>{StrBegin="MSB3897: "}</note>
+      </trans-unit>
       <trans-unit id="Copy.NonWindowsLinkErrorMessage">
         <source>The {0} library call failed with the following error code: {1}.</source>
         <target state="translated">오류 코드 {1}(으)로 인해 {0} 라이브러리 호출이 실패했습니다.</target>

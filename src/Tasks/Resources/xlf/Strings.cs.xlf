@@ -206,6 +206,11 @@
         <target state="translated">MSB3893: Nedá se použít odkaz pro kopírování {0} do {1}.</target>
         <note>{StrBegin="MSB3893: "} LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
+      <trans-unit id="Copy.NeedsSource">
+        <source>MSB3897: No source specified for Copy. Please supply either "{0}" or "{1}".</source>
+        <target state="new">MSB3897: No source specified for Copy. Please supply either "{0}" or "{1}".</target>
+        <note>{StrBegin="MSB3897: "}</note>
+      </trans-unit>
       <trans-unit id="Copy.NonWindowsLinkErrorMessage">
         <source>The {0} library call failed with the following error code: {1}.</source>
         <target state="translated">Volání knihovny {0} se nezdařilo s následujícím kódem chyby: {1}.</target>

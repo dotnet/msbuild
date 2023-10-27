@@ -402,15 +402,6 @@ namespace Microsoft.Build.Tasks
             CopyFileWithState copyFile,
             int parallelism)
         {
-            // If there are no source files then just return success.
-            if ((SourceFiles == null || SourceFiles.Length == 0) &&
-                (SourceFolders == null || SourceFolders.Length == 0))
-            {
-                DestinationFiles = Array.Empty<ITaskItem>();
-                CopiedFiles = Array.Empty<ITaskItem>();
-                return true;
-            }
-
             if (!(ValidateInputs() && InitializeDestinationFiles()))
             {
                 return false;
@@ -663,8 +654,18 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
+            // There must be a source (either files or directory).
+            if ((SourceFiles == null || SourceFiles.Length == 0) &&
+                (SourceFolders == null || SourceFolders.Length == 0))
+            {
+                DestinationFiles = Array.Empty<ITaskItem>();
+                CopiedFiles = Array.Empty<ITaskItem>();
+                Log.LogErrorWithCodeFromResources("Copy.NeedsSource", "SourceFiles", "SourceFolders");
+                return false;
+            }
+
             // There must be a destination (either files or directory).
-            if (DestinationFiles == null && DestinationFolder == null)
+            if ((DestinationFiles == null || DestinationFiles.Length == 0) && DestinationFolder == null)
             {
                 Log.LogErrorWithCodeFromResources("Copy.NeedsDestination", "DestinationFiles", "DestinationFolder");
                 return false;

@@ -206,6 +206,11 @@
         <target state="translated">MSB3893: No se puede usar un vínculo para copiar "{0}" en "{1}".</target>
         <note>{StrBegin="MSB3893: "} LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
+      <trans-unit id="Copy.NeedsSource">
+        <source>MSB3897: No source specified for Copy. Please supply either "{0}" or "{1}".</source>
+        <target state="new">MSB3897: No source specified for Copy. Please supply either "{0}" or "{1}".</target>
+        <note>{StrBegin="MSB3897: "}</note>
+      </trans-unit>
       <trans-unit id="Copy.NonWindowsLinkErrorMessage">
         <source>The {0} library call failed with the following error code: {1}.</source>
         <target state="translated">Error en la llamada a la biblioteca {0} con el siguiente código de error: {1}.</target>
