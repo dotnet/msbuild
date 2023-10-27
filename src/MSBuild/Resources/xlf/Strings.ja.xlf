@@ -107,7 +107,7 @@
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
                      MSBuild が、構成されているプロジェクト キャッシュ プラグインへの
-                     ファイル アクセスを報告するようにします。
+                     ファイル アクセスを報告します。
 
                      このフラグは実験的なものであり、意図したとおりに動作しない可能性があります。
     </target>
@@ -128,7 +128,7 @@
       </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
-        <target state="translated">MSBUILD : error MSB1065: ターミナル ロガーの値が無効です。'auto'、'true'、または 'false' のいずれかである必要があります。{0}</target>
+        <target state="translated">MSBUILD : error MSB1065: ターミナル ロガーの値が無効です。'auto'、'true'、または 'false' のいずれかである必要があります。 {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -341,7 +341,7 @@
     </source>
         <target state="translated">  -targets[:file]
                      使用可能なターゲットの一覧を、実際のビルド処理を
-                     実行せずに出力します。既定では、出力はコンソール
+                     実行せずに出力します。既定では、出力はコンソール 
                      ウィンドウに書き込まれます。出力ファイルへのパスを
                      指定した場合は、代わりにそのファイルが使用されます。
                      (短い形式:-ts)
@@ -601,7 +601,7 @@
         <target state="translated">  -verbosity:&lt;level&gt; この量の情報をイベント ログに表示します。
                      利用可能な詳細レベル: q[uiet], m[inimal]、
                      n[ormal], d[etailed]、および diag[nostic]。(短縮形: -v)
-                     例:
+                     例: 
                        -verbosity:quiet
 
                      注意: ファイル ロガーの詳細度は
@@ -657,7 +657,7 @@
 </source>
         <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
                      コンソール ロガーへのパラメーターです。(短縮形: -clp)
-                     利用可能なパラメーター:
+                     利用可能なパラメーター: 
                         PerformanceSummary--タスク、ターゲット、プロジェクトにかかった時間を
                             表示します。
                         Summary--最後にエラーと警告の概要を表示します。
@@ -1974,7 +1974,7 @@
                      (Short form: -r)
     </source>
         <target state="translated">  -restore[:True|False]
-                     他のターゲットをビルドする前に Restore
+                     他のターゲットをビルドする前に Restore 
                      という名前のターゲットを実行し、これらのターゲットのビルドが
                      最新の復元ビルド ロジックを使用するようにします。
                      これは、パッケージ ツリーでパッケージをビルド
