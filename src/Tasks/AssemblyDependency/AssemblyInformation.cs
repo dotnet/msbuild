@@ -329,8 +329,8 @@ namespace Microsoft.Build.Tasks
                 {
                     assemblyAttributes.Description = GetStringCustomAttribute(import2, assemblyScope, "System.Reflection.AssemblyDescriptionAttribute");
                     assemblyAttributes.TargetFrameworkMoniker = GetStringCustomAttribute(import2, assemblyScope, "System.Runtime.Versioning.TargetFrameworkAttribute");
-                    assemblyAttributes.Guid = GetStringCustomAttribute(import2, assemblyScope, "System.Runtime.InteropServices.GuidAttribute");
-                    if (!string.IsNullOrEmpty(assemblyAttributes.Guid))
+                    var guid = GetStringCustomAttribute(import2, assemblyScope, "System.Runtime.InteropServices.GuidAttribute");
+                    if (!string.IsNullOrEmpty(guid))
                     {
                         string importedFromTypeLibString = GetStringCustomAttribute(import2, assemblyScope, "System.Runtime.InteropServices.ImportedFromTypeLibAttribute");
                         if (!string.IsNullOrEmpty(importedFromTypeLibString))

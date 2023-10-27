@@ -19,6 +19,8 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
 
+#nullable enable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -104,7 +106,6 @@ namespace Microsoft.Build.Tasks
                 yield return new KeyValuePair<string, string>(nameof(attributes.Culture), attributes.Culture);
                 yield return new KeyValuePair<string, string>(nameof(attributes.DefaultAlias), attributes.DefaultAlias);
                 yield return new KeyValuePair<string, string>(nameof(attributes.Description), attributes.Description);
-                yield return new KeyValuePair<string, string>(nameof(attributes.Guid), attributes.Guid);
                 yield return new KeyValuePair<string, string>(nameof(attributes.MajorVersion), attributes.MajorVersion.ToString());
                 yield return new KeyValuePair<string, string>(nameof(attributes.MinorVersion), attributes.MinorVersion.ToString());
                 yield return new KeyValuePair<string, string>(nameof(attributes.PeKind), attributes.PeKind.ToString());

@@ -20,6 +20,7 @@
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
+    <ProjectReference Include="..\Utilities.UnitTests\Microsoft.Build.Utilities.UnitTests.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
     <ProjectReference Include="..\Samples\PortableTask\PortableTask.csproj" ReferenceOutputAssembly="false" Private="false" />
@@ -74,6 +75,18 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="..\Shared\UnitTests\xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestResources\Projects\Custom_COM\Custom_COM\Class1.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestResources\Projects\Custom_COM\Custom_COM.sln">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestResources\Projects\Custom_COM\Custom_COM\Custom_COM.csproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestResources\Projects\Custom_COM\Custom_COM\Properties\AssemblyInfo.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -148,7 +161,7 @@
 
   <ItemGroup>
     <None Update="ResourceHandling\*.txt" CopyToOutputDirectory="PreserveNewest" />
-    <None Update="TestResources\Assemblies\Custom_COM.dll">
+    <None Update="TestResources\Projects\Custom_COM\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestResources\lorem.bin">

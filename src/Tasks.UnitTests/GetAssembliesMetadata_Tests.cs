@@ -13,21 +13,33 @@ using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 using Xunit.Sdk;
+using Microsoft.Build.UnitTests.Shared;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
     public class GetAssembliesMetadata_Tests
     {
-        private static string TestAssembliesPaths { get; } = Path.Combine(AppContext.BaseDirectory, "TestResources", "Assemblies");
+        private static string TestAssembliesPaths { get; } = Path.Combine(AppContext.BaseDirectory, "TestResources", "Projects");
+
+        private readonly ITestOutputHelper _testOutput;
+
+        public GetAssembliesMetadata_Tests(ITestOutputHelper testOutput)
+        {
+            _testOutput = testOutput;
+        }
 
         [Fact]
         public void CheckPresenceOfCustomCOMAssemblyAttributes()
         {
-            string assemblyPath = Path.Combine(TestAssembliesPaths, "Custom_COM.dll");
+            string testSolutionPath = Path.Combine(TestAssembliesPaths, "Custom_COM");
+            RunnerUtilities.ExecMSBuild(testSolutionPath, out bool success, _testOutput);
+            string assemblyPath = Path.Combine(testSolutionPath, "Custom_COM", "bin", "Debug", "Custom_COM.dll");
             GetAssembliesMetadata t = new() { AssemblyPaths = new[] { assemblyPath } };
 
             bool isSuccess = t.Execute();
 
+            success.ShouldBeTrue();
             isSuccess.ShouldBeTrue();
             t.AssembliesMetadata[0].ItemSpec.ShouldBe(assemblyPath);
             t.AssembliesMetadata[0].GetMetadata("AssemblyName").ShouldBe("Custom_COM");
@@ -38,7 +50,6 @@ namespace Microsoft.Build.Tasks.UnitTests
             t.AssembliesMetadata[0].GetMetadata("MajorVersion").ShouldBe("1");
             t.AssembliesMetadata[0].GetMetadata("MinorVersion").ShouldBe("2");
             t.AssembliesMetadata[0].GetMetadata("PeKind").ShouldBe("1");
-            t.AssembliesMetadata[0].GetMetadata("Guid").ShouldBe("a48efb66-2596-4c6a-87ab-c8a765e54429");
             t.AssembliesMetadata[0].GetMetadata("BuildNumber").ShouldBe("3");
             t.AssembliesMetadata[0].GetMetadata("Description").ShouldBe("description for com");
             t.AssembliesMetadata[0].GetMetadata("Culture").ShouldBeEmpty();
@@ -66,7 +77,6 @@ namespace Microsoft.Build.Tasks.UnitTests
             t.AssembliesMetadata[0].GetMetadata("MajorVersion").ShouldBe("4");
             t.AssembliesMetadata[0].GetMetadata("MinorVersion").ShouldBe("0");
             t.AssembliesMetadata[0].GetMetadata("PeKind").ShouldBe("3");
-            t.AssembliesMetadata[0].GetMetadata("Guid").ShouldBe("BED7F4EA-1A96-11d2-8F08-00A0C9A6186D");
             t.AssembliesMetadata[0].GetMetadata("BuildNumber").ShouldBe("0");
             t.AssembliesMetadata[0].GetMetadata("Description").ShouldBe("mscorlib.dll");
             t.AssembliesMetadata[0].GetMetadata("Culture").ShouldBeEmpty();

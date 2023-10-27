@@ -44,7 +44,5 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
         public bool IsImportedFromTypeLib { get; set; }
 
         public string TargetFrameworkMoniker { get; set; } = string.Empty;
-
-        public string Guid { get; set; } = string.Empty;
     }
 }
