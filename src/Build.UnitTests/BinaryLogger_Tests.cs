@@ -283,7 +283,7 @@ namespace Microsoft.Build.UnitTests
             // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
             // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"),
-                () => $"Embedded files: {string.Join(",", zipArchive.Entries)}");
+                $"Embedded files: {string.Join(",", zipArchive.Entries)}");
         }
 
         [RequiresSymbolicLinksFact]
@@ -343,13 +343,13 @@ namespace Microsoft.Build.UnitTests
             // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
             // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"),
-                () => $"Embedded files: {string.Join(",", zipArchive.Entries)}");
+                customMessage: $"Embedded files: {string.Join(",", zipArchive.Entries)}");
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(symlinkName),
-                () => $"Embedded files: {string.Join(",", zipArchive.Entries)}");
+                customMessage: $"Embedded files: {string.Join(",", zipArchive.Entries)}");
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(symlinkLvl2Name),
-                () => $"Embedded files: {string.Join(",", zipArchive.Entries)}");
+                customMessage: $"Embedded files: {string.Join(",", zipArchive.Entries)}");
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(emptyFileName),
-                () => $"Embedded files: {string.Join(",", zipArchive.Entries)}");
+                customMessage: $"Embedded files: {string.Join(",", zipArchive.Entries)}");
         }
 
         [Fact]

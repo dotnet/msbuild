@@ -101,7 +101,7 @@ namespace Microsoft.Build.UnitTests
             bool foundDoNotModify = false;
             foreach (string line in File.ReadLines(outputFile.Path))
             {
-                line.ShouldNotContain("<!---->", "This is what it will look like if we're loading read/only");
+                line.ShouldNotContain("<!---->", customMessage: "This is what it will look like if we're loading read/only");
 
                 if (line.Contains("DO NOT MODIFY")) // this is in a comment in our targets
                 {
@@ -170,7 +170,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ObjectModelHelpers.CreateInMemoryProject(@"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`> 
+                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                     <ProjectExtensions/>
                     <Import Project=`$(MSBuildBinPath)\\Microsoft.CSharp.Targets` />
                     <ProjectExtensions/>
