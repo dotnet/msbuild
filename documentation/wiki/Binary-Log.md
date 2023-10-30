@@ -96,7 +96,7 @@ The format is backwards compatible, i.e. MSBuild will be able to play back .binl
 
 ## Forward compatibility reading
 
-From version 18, the binlog contains as well the minimum version of reader that can interpret it (stored in bytes 4 to 8). A support for best effor forward compatibility is added by this version. Best effort only because binlog format is not self-describing, i.e. it doesn't carry its schema around for performance and compactness reasons.
+From version 18, the binlog contains as well the minimum version of reader that can interpret it (stored in bytes 4 to 8). Support for best effort forward compatibility is added by this version. It is “best effort” only because the binlog format is not self-describing, i.e. it doesn't carry its schema around for performance and compactness reasons.
 
 This is not of a high importance for users of the Viewer because Viewer is always up-to-date (there isn't an "old version" of the Viewer unless people go to great lengths to prevent it from auto-updating).
 
@@ -139,7 +139,7 @@ logReader.Replay(path_to_binlog_file);
 
 In compatibility mode (default for `BinaryLogReplayEventSource`. Only supported for binlogs of version 18 and higher) reader is capable of skipping unknown event types and unknown parts of known events (`BuildEventArgsReader` can configure the behavior via 2 separate properties - `SkipUnknownEvents` and `SkipUnknownEventParts`).
 
-The unknown events and event parts are regarded as recverable errors - since reader is capable to continue reading following records in binlog. However the specific user logic should have the last call in deciding whether errors are realy recoverable (e.g. is presence of unrecognized or unparsable event fine? Might be fine when searching only for specific events - e.g. errors, but not acceptable when trying to provide definitive overview of the built).
+The unknown events and event parts are regarded as recoverable errors, since the reader is able to continue reading subsequent records in the binlog. However the specific user logic should have the last call in deciding whether errors are really recoverable (e.g. is presence of unrecognized or unparseable event ok? It might be fine when searching only for specific events - e.g. errors but not acceptable when trying to provide definitive overview of the built).
 
 To allow the calling code to decide - based on the type of error, type of events getting the error, or the number of errors - the `OnRecoverableReadError` event is exposed (from both `BinaryLogReplayEventSource` and `BuildEventArgsReader`).
 
@@ -148,5 +148,5 @@ To allow the calling code to decide - based on the type of error, type of events
 /// Receives recoverable errors during reading.
 /// Communicates type of the error, kind of the record that encountered the error and the message detailing the error.
 /// </summary>
-event Action<ReaderErrorType, BinaryLogRecordKind, string>? OnRecoverableReadError;
+event Action<ReaderErrorType, BinaryLogRecordKind, Func<string>>? OnRecoverableReadError;
 ```

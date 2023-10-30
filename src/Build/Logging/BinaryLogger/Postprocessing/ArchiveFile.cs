@@ -44,7 +44,7 @@ namespace Microsoft.Build.Logging
 
         /// <summary>
         /// Fetches the file content as a stream reader (forward only).
-        /// This prevents the content to be read as string.
+        /// This prevents the content from being read as string.
         /// </summary>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
