@@ -11,13 +11,17 @@ public static class ArchiveFileEventArgsExtensions
     {
         return args =>
         {
-            var archiveFile = args.ObtainArchiveFile();
+            var archiveFile = args.ArchiveData.ToArchString();
             var pathArgs = new StringReadEventArgs(archiveFile.FullPath);
             stringHandler(pathArgs);
-            var contentArgs = new StringReadEventArgs(archiveFile.GetContent());
+            var contentArgs = new StringReadEventArgs(archiveFile.Content);
             stringHandler(contentArgs);
 
-            args.SetResult(pathArgs.StringToBeUsed, contentArgs.StringToBeUsed);
+            if(pathArgs.StringToBeUsed != pathArgs.OriginalString ||
+               contentArgs.StringToBeUsed != contentArgs.OriginalString)
+            {
+                args.ArchiveData = new ArchiveFile(pathArgs.StringToBeUsed, contentArgs.StringToBeUsed);
+            }
         };
     }
 }

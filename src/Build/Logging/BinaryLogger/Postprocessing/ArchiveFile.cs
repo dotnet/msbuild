@@ -11,78 +11,81 @@ namespace Microsoft.Build.Logging
 {
     /// <summary>
     /// An object model for binlog embedded files.
+    /// Used in <see cref="IBuildFileReader.ArchiveFileEncountered"/> event.
     /// </summary>
-    public sealed class ArchiveFile
+    public abstract class ArchiveData : IDisposable
     {
-        private bool _streamAcquired;
-        private bool _stringAcquired;
-        private readonly StreamReader _contentReader;
-        private string? _content;
+        private protected ArchiveData(string fullPath) => FullPath = fullPath;
 
-        public ArchiveFile(string fullPath, Stream contentStream)
-        {
-            FullPath = fullPath;
-            _contentReader = new StreamReader(contentStream);
-        }
-
-        public ArchiveFile(string fullPath, string content)
-        {
-            FullPath = fullPath;
-            _content = content;
-            _stringAcquired = true;
-            _contentReader = StreamReader.Null;
-        }
-
-        internal static ArchiveFile From(ZipArchiveEntry entry)
-        {
-            return new ArchiveFile(entry.FullName, entry.Open());
-        }
-
+        /// <summary>
+        /// Full path of the original file before it was put in the embedded archive.
+        /// </summary>
         public string FullPath { get; }
-        public bool CanUseReader => !_stringAcquired;
-        public bool CanUseString => !_streamAcquired;
 
         /// <summary>
-        /// Fetches the file content as a stream reader (forward only).
-        /// This prevents the content from being read as string.
+        /// Materializes the whole content of the embedded file in memory as a string.
         /// </summary>
         /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
-        public StreamReader GetContentReader()
-        {
-            if (_stringAcquired)
-            {
-                throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_ArchiveFile_AcquiredAsString"));
-            }
+        public abstract ArchiveFile ToArchString();
 
-            _streamAcquired = true;
-            return _contentReader;
-        }
+        public virtual void Dispose()
+        { }
+    }
+
+    /// <summary>
+    /// Fully materialized (in-memory) embedded file.
+    /// Easier to work with (the content is expressed in a single string), but more memory greedy.
+    /// </summary>
+    public class ArchiveFile : ArchiveData
+    {
+        public ArchiveFile(string fullPath, string content)
+            : base(fullPath)
+            => Content = content;
 
         /// <summary>
-        /// Fetches the file content as a string.
-        /// This prevents the content to be fetched via StreamReader.
+        /// The content of the original file.
         /// </summary>
+        public string Content { get; }
+
+        /// <inheritdoc cref="ArchiveData.ToArchString" />
+        public override ArchiveFile ToArchString()
+            => this;
+    }
+
+    /// <summary>
+    /// Lazy (streaming) embedded file.
+    /// Might be favorable for large files, as it doesn't materialize the whole content in memory.
+    /// </summary>
+    public class ArchiveStream : ArchiveData
+    {
+        public ArchiveStream(string fullPath, StreamReader contentReader)
+            : base(fullPath)
+            => ContentReader = contentReader;
+
+        /// <summary>
+        /// Stream over the content of the archived file.
+        /// </summary>
+        public StreamReader ContentReader { get; }
+
+        /// <summary>
+        /// Creates an externally exposable embedded file representation from a <see cref="ZipArchiveEntry"/> (which is an implementation detail currently).
+        /// </summary>
+        /// <param name="entry"></param>
         /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
-        public string GetContent()
+        internal static ArchiveStream From(ZipArchiveEntry entry)
         {
-            if (_streamAcquired)
-            {
-                throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_ArchiveFile_AcquiredAsStream"));
-            }
-
-            if (!_stringAcquired)
-            {
-                _stringAcquired = true;
-                _content = _contentReader.ReadToEnd();
-            }
-
-            return _content!;
+            return new ArchiveStream(entry.FullName, new StreamReader(entry.Open()));
         }
 
-        // Intentionally not exposing this publicly (e.g. as IDisposable implementation)
-        // as we don't want to user to be bothered with ownership and disposing concerns.
-        internal void Dispose() => _contentReader.Dispose();
+        /// <inheritdoc cref="ArchiveData.ToArchString" />
+        public override ArchiveFile ToArchString()
+        {
+            var content = ContentReader.ReadToEnd();
+            ContentReader.Dispose();
+            return new ArchiveFile(content, FullPath);
+        }
+
+        public override void Dispose()
+            => ContentReader.Dispose();
     }
 }

@@ -387,7 +387,7 @@ namespace Microsoft.Build.Logging
 
                 foreach (var entry in zipArchive.Entries/*.OrderBy(e => e.LastWriteTime)*/)
                 {
-                    var file = ArchiveFile.From(entry);
+                    var file = ArchiveStream.From(entry);
                     ArchiveFileEventArgs archiveFileEventArgs = new(file);
                     // ArchiveFileEventArgs is not IDisposable as we do not want to clutter exposed API
                     using var cleanupScope = new CleanupScope(archiveFileEventArgs.Dispose);
@@ -395,13 +395,13 @@ namespace Microsoft.Build.Logging
 
                     if (projectImportsCollector != null)
                     {
-                        var resultFile = archiveFileEventArgs.ObtainArchiveFile();
+                        var resultFile = archiveFileEventArgs.ArchiveData;
 
-                        if (resultFile.CanUseReader)
+                        if (resultFile is ArchiveStream archiveStream)
                         {
                             projectImportsCollector.AddFileFromMemory(
-                                resultFile.FullPath,
-                                resultFile.GetContentReader().BaseStream,
+                                archiveStream.FullPath,
+                                archiveStream.ContentReader.BaseStream,
                                 makePathAbsolute: false,
                                 entryCreationStamp: entry.LastWriteTime);
                         }
@@ -409,7 +409,7 @@ namespace Microsoft.Build.Logging
                         {
                             projectImportsCollector.AddFileFromMemory(
                                 resultFile.FullPath,
-                                resultFile.GetContent(),
+                                resultFile.ToArchString().Content,
                                 makePathAbsolute: false,
                                 entryCreationStamp: entry.LastWriteTime);
                         }
