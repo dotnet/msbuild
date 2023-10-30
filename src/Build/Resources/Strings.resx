@@ -2029,7 +2029,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Skipping the record.</value>
   </data>
   <data name="Binlog_ReaderMismatchedRead" xml:space="preserve">
-    <value>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}:{3}).</value>
+    <value>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</value>
     <comment>
       LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an exception type and {3} the exception message string.
     </comment>
@@ -2057,12 +2057,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="Binlog_StreamUtils_MustBeReadable" xml:space="preserve">
     <value>Stream must be readable.</value>
-  </data>
-  <data name="Binlog_StreamUtils_OverRead" xml:space="preserve">
-    <value>Attempt to read {0} bytes, when only {1} are allowed to be read.</value>
-    <comment>
-      LOCALIZATION: {0} and {1} are integer numbers denoting number of bytes.
-    </comment>
   </data>
   <data name="Binlog_StreamUtils_SeekNonOrigin" xml:space="preserve">
     <value>Only seeking from SeekOrigin.Current is supported.</value>

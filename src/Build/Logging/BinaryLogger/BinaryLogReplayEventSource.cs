@@ -40,6 +40,7 @@ namespace Microsoft.Build.Logging
         IRawLogEventsSource,
         IBuildEventStringsReader,
         IEmbeddedContentSource,
+        IBuildFileReader,
         IBinlogReaderErrors
     { }
 
@@ -62,10 +63,10 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Unknown build events or unknown parts of known build events will be ignored if this is set to true.
         /// </summary>
-        public bool AllowForwardCompatibility { private get; init; } = true;
+        public bool AllowForwardCompatibility { private get; init; }
 
         /// <inheritdoc cref="IBinlogReaderErrors.OnRecoverableReadError"/>
-        public event Action<ReaderErrorType, BinaryLogRecordKind, Func<string>>? OnRecoverableReadError;
+        public event Action<ReaderErrorType, BinaryLogRecordKind, FormatErrorMessage>? OnRecoverableReadError;
 
         /// <summary>
         /// WARNING: This event is under low support and low maintenance - please use events directly exposed by <see cref="BinaryLogReplayEventSource"/> instead. 
@@ -204,6 +205,7 @@ namespace Microsoft.Build.Logging
             }
 
             reader.EmbeddedContentRead += _embeddedContentRead;
+            reader.ArchiveFileEncountered += _archiveFileEncountered;
             reader.StringReadDone += _stringReadDone;
             reader.StringEncountered += _stringEncountered;
 
@@ -230,6 +232,7 @@ namespace Microsoft.Build.Logging
                 if (this._rawLogRecordReceived == null &&
                     this._embeddedContentRead == null &&
                     this._stringReadDone == null &&
+                    this._archiveFileEncountered == null &&
                     this._stringEncountered == null)
                 {
                     throw new NotSupportedException(
@@ -271,6 +274,14 @@ namespace Microsoft.Build.Logging
         {
             add => _stringReadDone += value;
             remove => _stringReadDone -= value;
+        }
+
+        private Action<ArchiveFileEventArgs>? _archiveFileEncountered;
+        /// <inheritdoc cref="IBuildFileReader.ArchiveFileEncountered"/>
+        event Action<ArchiveFileEventArgs>? IBuildFileReader.ArchiveFileEncountered
+        {
+            add => _archiveFileEncountered += value;
+            remove => _archiveFileEncountered -= value;
         }
 
         private Action? _stringEncountered;

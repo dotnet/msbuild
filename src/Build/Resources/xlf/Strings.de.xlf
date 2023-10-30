@@ -61,8 +61,8 @@
     </note>
       </trans-unit>
       <trans-unit id="Binlog_ReaderMismatchedRead">
-        <source>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}:{3}).</source>
-        <target state="new">BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}:{3}).</target>
+        <source>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</source>
+        <target state="new">BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</target>
         <note>
       LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an exception type and {3} the exception message string.
     </note>
@@ -105,13 +105,6 @@
         <source>Stream must be readable.</source>
         <target state="new">Stream must be readable.</target>
         <note />
-      </trans-unit>
-      <trans-unit id="Binlog_StreamUtils_OverRead">
-        <source>Attempt to read {0} bytes, when only {1} are allowed to be read.</source>
-        <target state="new">Attempt to read {0} bytes, when only {1} are allowed to be read.</target>
-        <note>
-      LOCALIZATION: {0} and {1} are integer numbers denoting number of bytes.
-    </note>
       </trans-unit>
       <trans-unit id="Binlog_StreamUtils_SeekNonOrigin">
         <source>Only seeking from SeekOrigin.Current is supported.</source>
@@ -2584,8 +2577,8 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
         <note>{StrBegin="MSB4238: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedLogFileFormat">
-        <source>MSB4235: The log file format version is {0} and minimum required read version is {1}, whereas this version of MSBuild only supports versions up to {2}.</source>
-        <target state="new">MSB4235: The log file format version is {0} and minimum required read version is {1}, whereas this version of MSBuild only supports versions up to {2}.</target>
+        <source>MSB4235: The log file format version is {0} with minimum required read version {1}, whereas this version of MSBuild only supports versions up to {2}.</source>
+        <target state="new">MSB4235: The log file format version is {0} with minimum required read version {1}, whereas this version of MSBuild only supports versions up to {2}.</target>
         <note>{StrBegin="MSB4235: "}</note>
       </trans-unit>
       <trans-unit id="ProjectEvaluationPerformanceSummary">

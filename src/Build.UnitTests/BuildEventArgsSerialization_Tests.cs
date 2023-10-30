@@ -891,15 +891,7 @@ namespace Microsoft.Build.UnitTests
                 var binaryReader = new BinaryReader(memoryStream);
                 using var buildEventArgsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
 
-                try
-                {
-                    buildEventArgsReader.Read();
-                }
-                catch (Exception e)
-                {
-                    // if the EndOfStreamException is received during EventArgs parsing - the parsing code will translate it to InvalidDataException
-                    Assert.True(e is InvalidDataException or EndOfStreamException, "Abruptly ended stream should lead to InvalidDataException or EndOfStreamException");
-                }
+                Assert.Throws<EndOfStreamException>(() => buildEventArgsReader.Read());
             }
         }
 
@@ -1121,9 +1113,7 @@ namespace Microsoft.Build.UnitTests
             readerErrors.Count.ShouldBe(1);
             readerErrors[0].errorType.ShouldBe(ReaderErrorType.UnknownFormatOfEventData);
             readerErrors[0].recordKind.ShouldBe(BinaryLogRecordKind.Error);
-            // Expect StreamChunkOverReadException or EndOfStreamException - based on the implementation
-            //  of indicating attempt to overread in the TransparentReadStream.
-            readerErrors[0].error.ShouldContain("StreamChunkOverReadException");
+            readerErrors[0].error.ShouldContain("EndOfStreamException");
 
             deserializedEvent.Should().BeEquivalentTo(finished);
 

@@ -69,7 +69,7 @@ namespace Microsoft.Build.Logging
                 // Archive file will be temporarily stored in MSBuild cache folder and deleted when no longer needed
                 _archiveFilePath = Path.Combine(
                     cacheDirectory,
-                    Path.ChangeExtension(
+                    GetArchiveFilePath(
                         Path.GetFileName(logFilePath),
                         sourcesArchiveExtension));
             }

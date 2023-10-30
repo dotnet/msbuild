@@ -128,7 +128,7 @@ namespace Microsoft.Build.Logging
         /// Receives recoverable errors during reading. See <see cref="IBinlogReaderErrors.OnRecoverableReadError"/> for documentation on arguments.
         /// Applicable mainly when <see cref="SkipUnknownEvents"/> or <see cref="SkipUnknownEventParts"/> is set to true."/>
         /// </summary>
-        public event Action<ReaderErrorType, BinaryLogRecordKind, Func<string>>? OnRecoverableReadError;
+        public event Action<ReaderErrorType, BinaryLogRecordKind, FormatErrorMessage>? OnRecoverableReadError;
 
         public void Dispose()
         {
@@ -228,9 +228,8 @@ namespace Microsoft.Build.Logging
                     e is InvalidDataException ||
                     // Thrown when BinaryReader is unable to deserialize binary data into expected type.
                     e is FormatException ||
-                    // Following 2 are thrown when we attempt to read more bytes than what is in the next event chunk.
-                    e is StreamChunkOverReadException ||
-                    e is EndOfStreamException)
+                    // Thrown when we attempt to read more bytes than what is in the next event chunk.
+                    (e is EndOfStreamException && _readStream.BytesCountAllowedToReadRemaining <= 0))
                 {
                     hasError = true;
 
@@ -268,7 +267,7 @@ namespace Microsoft.Build.Logging
 
             return result;
 
-            void HandleError(Func<string> msgFactory, bool noThrow, ReaderErrorType readerErrorType, BinaryLogRecordKind recordKind, Exception? innerException = null)
+            void HandleError(FormatErrorMessage msgFactory, bool noThrow, ReaderErrorType readerErrorType, BinaryLogRecordKind recordKind, Exception? innerException = null)
             {
                 if (noThrow)
                 {
@@ -421,7 +420,7 @@ namespace Microsoft.Build.Logging
                 if (EmbeddedContentRead != null)
                 {
                     projectImportsCollector!.ProcessResult(
-                        streamToEmbed => EmbeddedContentRead(new EmbeddedContentEventArgs(EmbeddedContentKind.ProjectImportArchive, streamToEmbed)),
+                        streamToEmbed => EmbeddedContentRead(new EmbeddedContentEventArgs(recordKind, streamToEmbed)),
                         error => throw new InvalidDataException(error));
                     projectImportsCollector.DeleteArchive();
                 }
@@ -429,7 +428,7 @@ namespace Microsoft.Build.Logging
             else if (EmbeddedContentRead != null)
             {
                 EmbeddedContentRead(new EmbeddedContentEventArgs(
-                    recordKind.ToEmbeddedContentKind(),
+                    recordKind,
                     _binaryReader.BaseStream.Slice(length)));
             }
             else

@@ -204,7 +204,7 @@ namespace Microsoft.Build.Logging
                 if (CollectProjectImports == ProjectImportsCollectionMode.Embed)
                 {
                     replayEventsSource.EmbeddedContentRead += args =>
-                        eventArgsWriter.WriteBlob(args.ContentKind.ToBinaryLogRecordKind(), args.ContentStream);
+                        eventArgsWriter.WriteBlob(args.ContentKind, args.ContentStream);
                 }
                 else if (CollectProjectImports == ProjectImportsCollectionMode.ZipFile)
                 {

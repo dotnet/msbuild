@@ -121,15 +121,6 @@ logReader.AnyEventRaised += (_, e) =>
     // ...
 };
 
-// Those can be raised only during forward compatibility reading mode.
-logReader.OnRecoverableReadError += (errorType, recordKind, message) =>
-{
-    // ...
-
-    // e.g. we can decide to ignore the error and continue reading or break reading
-    //  based on the type of the error or/and type of the record
-};
-
 // Starts the synchronous log reading loop.
 logReader.Replay(path_to_binlog_file);
 
@@ -145,8 +136,39 @@ To allow the calling code to decide - based on the type of error, type of events
 
 ```csharp
 /// <summary>
+/// Materializes the error message.
+/// Until it's called the error message is not materialized and no string allocations are made.
+/// </summary>
+/// <returns>The error message.</returns>
+public delegate string FormatErrorMessage();
+
+/// <summary>
 /// Receives recoverable errors during reading.
 /// Communicates type of the error, kind of the record that encountered the error and the message detailing the error.
+/// The error message is returned as a function to avoid unnecessary string allocations in case the error is not logged.
 /// </summary>
-event Action<ReaderErrorType, BinaryLogRecordKind, Func<string>>? OnRecoverableReadError;
+event Action<ReaderErrorType, BinaryLogRecordKind, FormatErrorMessage>? OnRecoverableReadError;
 ```
+
+Our sample usage of the [Reading API](#reading-api) can be enhanced with recoverable errors handling e.g. as such:
+
+```csharp
+
+// Those can be raised only during forward compatibility reading mode.
+logReader.OnRecoverableReadError += (errorType, recordKind, messageFactory) =>
+{
+    // ...
+
+    // e.g. we can decide to ignore the error and continue reading or break reading
+    //  based on the type of the error or/and type of the record or/and the frequency of the error
+
+    // Would we decide to completely ignore some errors - we can aid better performance by not materializing the actual error message.
+    // Otherwise the error message can be materialized via the provided delegate:
+    Console.WriteLine($"Recoverable reader error: {messageFactory()}");
+};
+
+```
+
+When authoring changes to the specific BuildEventArg types - it is always strongly recommended to **prefer append-only changes**. 
+
+This prevents the possibility of collision where some fields are removed in one version and then different fields with same binary size are added in future version. Such a sequence of format changes might not be caught by the decoder and might lead to unnoticed corrupt interpretation of data. For this reason the author of specific OM changes should always check whether there is a possibility of unrecognizable format collision (same binary size, different representation) within binlog versions of a same [minimum reader version support](#forward-compatibility-reading). If this is possible, the [minimum reader version support](#forward-compatibility-reading) should be incremented.

@@ -8,13 +8,13 @@ namespace Microsoft.Build.Logging
 {
     internal sealed class EmbeddedContentEventArgs : EventArgs
     {
-        public EmbeddedContentEventArgs(EmbeddedContentKind contentKind, Stream contentStream)
+        public EmbeddedContentEventArgs(BinaryLogRecordKind contentKind, Stream contentStream)
         {
             ContentKind = contentKind;
             ContentStream = contentStream;
         }
 
-        public EmbeddedContentKind ContentKind { get; }
+        public BinaryLogRecordKind ContentKind { get; }
         public Stream ContentStream { get; }
     }
 }

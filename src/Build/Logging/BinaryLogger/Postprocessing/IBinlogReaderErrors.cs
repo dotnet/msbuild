@@ -11,14 +11,6 @@ namespace Microsoft.Build.Logging
     public enum ReaderErrorType
     {
         /// <summary>
-        /// The file format of the binlog is not supported by the current reader.
-        /// Despite the logs should be supported by older readers - there might be certain format updates that prevent
-        ///  such forward compatibility. The binlog file contains the info about the minimum required reader version
-        ///  to detect this case.
-        /// </summary>
-        UnsupportedFileFormat,
-
-        /// <summary>
         /// The encountered event is completely unknown to the reader. It cannot interpret neither a part of it.
         /// </summary>
         UnkownEventType,
@@ -38,6 +30,13 @@ namespace Microsoft.Build.Logging
         UnknownFormatOfEventData,
     }
 
+    /// <summary>
+    /// Materializes the error message.
+    /// Until it's called the error message is not materialized and no string allocations are made.
+    /// </summary>
+    /// <returns>The error message.</returns>
+    public delegate string FormatErrorMessage();
+
     public interface IBinlogReaderErrors
     {
         /// <summary>
@@ -45,6 +44,6 @@ namespace Microsoft.Build.Logging
         /// Communicates type of the error, kind of the record that encountered the error and the message detailing the error.
         /// The error message is returned as a function to avoid unnecessary string allocations in case the error is not logged.
         /// </summary>
-        event Action<ReaderErrorType, BinaryLogRecordKind, Func<string>>? OnRecoverableReadError;
+        event Action<ReaderErrorType, BinaryLogRecordKind, FormatErrorMessage>? OnRecoverableReadError;
     }
 }

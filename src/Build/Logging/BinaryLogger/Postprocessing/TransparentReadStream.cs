@@ -79,9 +79,7 @@ namespace Microsoft.Build.Logging
         {
             if (_position + count > _maxAllowedPosition)
             {
-                throw new StreamChunkOverReadException(
-                    ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_StreamUtils_OverRead", count,
-                        _maxAllowedPosition - _position));
+                count = (int)(_maxAllowedPosition - _position);
             }
 
             int cnt = _stream.Read(buffer, offset, count);
