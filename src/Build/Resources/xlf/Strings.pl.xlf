@@ -453,7 +453,7 @@
       </trans-unit>
       <trans-unit id="TaskAssemblyLoadedWithAssemblyLoadContext">
         <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</source>
-        <target state="new">Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</target>
+        <target state="translated">Załadowano zestaw podczas {0}{1}: {2} (lokalizacja: {3}, MVID: {4}, kontekst ładowania zestawu: {5})</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
