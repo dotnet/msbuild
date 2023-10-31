@@ -291,7 +291,8 @@ namespace Microsoft.Build.Tasks.UnitTests
             redirectResults2.TargetAppConfigContent.ShouldContain("<assemblyIdentity name=\"System\" publicKeyToken=\"b77a5c561934e089\" culture=\"neutral\" />");
             redirectResults2.TargetAppConfigContent.ShouldContain("newVersion=\"40.0.0.0\"");
 
-            File.GetLastWriteTime(outputAppConfigFile).ShouldBeGreaterThan(oldTimestamp);
+            File.GetCreationTime(outputAppConfigFile).ShouldBe(oldTimestamp, TimeSpan.FromSeconds(5));
+            File.GetLastWriteTime(outputAppConfigFile).ShouldBe(oldTimestamp, TimeSpan.FromSeconds(5));
         }
 
         private BindingRedirectsExecutionResult GenerateBindingRedirects(string appConfigFile, string targetAppConfigFile,

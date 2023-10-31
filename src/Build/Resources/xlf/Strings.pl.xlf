@@ -451,6 +451,11 @@
         <target state="translated">Załadowano zestaw podczas {0}{1}: {2} (lokalizacja: {3}, MVID: {4}, domena aplikacji: {5})</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskAssemblyLoadedWithAssemblyLoadContext">
+        <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</source>
+        <target state="translated">Załadowano zestaw podczas {0}{1}: {2} (lokalizacja: {3}, MVID: {4}, kontekst ładowania zestawu: {5})</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">Zadanie „{0}” zwolniło rdzenie ({1}) i teraz jego łączna liczba rdzeni to {2}.</target>

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -138,13 +138,6 @@ namespace Microsoft.Build.Tasks
                 {
                     doc.Save(stream);
                 }
-            }
-            else if (outputExists)
-            {
-                // if the file exists and the content is up to date, then touch the output file.
-                var now = DateTime.Now;
-                File.SetLastAccessTime(OutputAppConfigFile.ItemSpec, now);
-                File.SetLastWriteTime(OutputAppConfigFile.ItemSpec, now);
             }
 
             return !Log.HasLoggedErrors;

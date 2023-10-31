@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Framework.FileAccess;
+using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Xunit;

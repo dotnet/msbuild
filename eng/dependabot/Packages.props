@@ -19,7 +19,7 @@
     <PackageVersion Include="LargeAddressAware" Version="1.0.5" />
     <PackageVersion Update="LargeAddressAware" Condition="'$(LargeAddressAwareVersion)' != ''" Version="$(LargeAddressAwareVersion)" />
 
-    <PackageVersion Include="Microsoft.BuildXL.Processes" Version="0.1.0-20230727.4.2" />
+    <PackageVersion Include="Microsoft.BuildXL.Processes" Version="0.1.0-20230929.2" />
     <PackageVersion Update="Microsoft.BuildXL.Processes" Condition="'$(BuildXLProcessesVersion)' != ''" Version="$(BuildXLProcessesVersion)" />
 
     <PackageVersion Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="3.2.2146" PrivateAssets="All" />
@@ -34,7 +34,7 @@
     <PackageVersion Include="PdbGit" Version="3.0.41" />
     <PackageVersion Update="PdbGit" Condition="'$(PdbGitVersion)' != ''" Version="$(PdbGitVersion)" />
 
-    <PackageVersion Include="Shouldly" Version="3.0.0" />
+    <PackageVersion Include="Shouldly" Version="4.2.1" />
     <PackageVersion Update="Shouldly" Condition="'$(ShouldlyVersion)' != ''" Version="$(ShouldlyVersion)" />
 
     <PackageVersion Include="System.CodeDom" Version="7.0.0" />

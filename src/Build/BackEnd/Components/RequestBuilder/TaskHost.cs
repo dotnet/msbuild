@@ -19,7 +19,7 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Framework.FileAccess;
+using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.Shared;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -939,17 +939,20 @@ namespace Microsoft.Build.BackEnd
             /// <inheritdoc/>
             public override bool IsTaskInputLoggingEnabled => _taskHost._host.BuildParameters.LogTaskInputs;
 
-            /// <inheritdoc/>
-            public override void ReportFileAccess(FileAccessData fileAccessData)
-            {
 #if FEATURE_REPORTFILEACCESSES
+            /// <summary>
+            /// Reports a file access from a task.
+            /// </summary>
+            /// <param name="fileAccessData">The file access to report.</param>
+            public void ReportFileAccess(FileAccessData fileAccessData)
+            {
                 IBuildComponentHost buildComponentHost = _taskHost._host;
                 if (buildComponentHost.BuildParameters.ReportFileAccesses)
                 {
                     ((IFileAccessManager)buildComponentHost.GetComponent(BuildComponentType.FileAccessManager)).ReportFileAccess(fileAccessData, buildComponentHost.BuildParameters.NodeId);
                 }
-#endif
             }
+#endif
         }
 
         public EngineServices EngineServices { get; }
