@@ -190,7 +190,7 @@ namespace Microsoft.Build.Evaluation
         /// covariance problems. (A dictionary of Key, Value cannot be upcast
         /// to a Dictionary of Key, IValue).
         /// </summary>
-        ItemDictionary<I> Items
+        IItemDictionary<I> Items
         {
             get;
         }
