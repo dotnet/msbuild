@@ -1558,10 +1558,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 string generatedSource = File.ReadAllText(t.StronglyTypedFileName);
 
-                generatedSource.ShouldNotContain("object Image1", "Strongly-typed resource accessor is returning type `object` instead of `System.Drawing.Bitmap`");
+                generatedSource.ShouldNotContain("object Image1", customMessage: "Strongly-typed resource accessor is returning type `object` instead of `System.Drawing.Bitmap`");
                 generatedSource.ShouldContain("Bitmap Image1");
 
-                generatedSource.ShouldNotContain("object MyString", "Strongly-typed resource accessor is returning type `object` instead of `string`");
+                generatedSource.ShouldNotContain("object MyString", customMessage: "Strongly-typed resource accessor is returning type `object` instead of `string`");
                 generatedSource.ShouldContain("static string MyString");
                 generatedSource.ShouldMatch("//.*Looks up a localized string similar to MyValue", "Couldn't find a comment in the usual format for a string resource.");
             }
