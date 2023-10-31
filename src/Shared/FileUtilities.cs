@@ -1191,8 +1191,12 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string AttemptToShortenPath(string path)
         {
-            // Attempt to make it shorter -- perhaps there are some \..\ elements
-            return GetFullPathNoThrow(path);
+            if (IsPathTooLong(path) || IsPathTooLongIfRooted(path))
+            {
+                // Attempt to make it shorter -- perhaps there are some \..\ elements
+                path = GetFullPathNoThrow(path);
+            }
+            return FixFilePath(path);
         }
 
         private static bool IsPathTooLong(string path)
