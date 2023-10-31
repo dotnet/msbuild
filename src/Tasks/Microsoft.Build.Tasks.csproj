@@ -62,6 +62,7 @@
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>CanonicalError.cs</Link>
     </Compile>
+    <Compile Include="AssemblyDependency\AssemblyAttributes.cs" />
     <Compile Include="AssemblyDependency\AssemblyMetadata.cs" />
     <Compile Include="CombineTargetFrameworkInfoProperties.cs" />
     <Compile Include="CombineXmlElements.cs" />
@@ -328,6 +329,7 @@
     <Compile Include="ComReferenceResolutionException.cs" />
     <Compile Include="ComReferenceTypes.cs" />
     <Compile Include="ComReferenceWrapperInfo.cs" />
+    <Compile Include="GetAssembliesMetadata.cs" />
     <Compile Include="IComReferenceResolver.cs" />
     <Compile Include="ManifestUtil\CngLightup.cs" />
     <Compile Include="RCWForCurrentContext.cs" />
