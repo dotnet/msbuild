@@ -226,6 +226,7 @@
     <Compile Include="BackEnd\Components\Scheduler\SchedulerCircularDependencyException.cs" />
     <Compile Include="BackEnd\Components\Scheduler\ScheduleTimeRecord.cs" />
     <Compile Include="BackEnd\Components\Scheduler\SchedulingPlan.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\CachingSdkResolverLoader.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\DefaultSdkResolver.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\ISdkResolverService.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\OutOfProcNodeSdkResolverService.cs" />

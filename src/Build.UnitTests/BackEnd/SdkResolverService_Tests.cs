@@ -638,13 +638,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 _resolversWithPatterns = new List<(string ResolvableSdkPattern, SdkResolver Resolver)>();
             }
 
-            internal override IList<SdkResolver> LoadAllResolvers(LoggingContext loggingContext, ElementLocation location)
+            internal override IReadOnlyList<SdkResolver> LoadAllResolvers(ElementLocation location)
             {
                 return _resolvers.OrderBy(i => i.Priority).ToList();
             }
 
-            internal override IList<SdkResolverManifest> GetResolversManifests(LoggingContext loggingContext,
-            ElementLocation location)
+            internal override IReadOnlyList<SdkResolverManifest> GetResolversManifests(ElementLocation location)
             {
                 var manifests = new List<SdkResolverManifest>();
                 foreach (SdkResolver resolver in _resolvers)
@@ -663,7 +662,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 return manifests;
             }
 
-            protected internal override IList<SdkResolver> LoadResolversFromManifest(SdkResolverManifest manifest, LoggingContext loggingContext, ElementLocation location)
+            protected internal override IReadOnlyList<SdkResolver> LoadResolversFromManifest(SdkResolverManifest manifest, ElementLocation location)
             {
                 var resolvers = new List<SdkResolver>();
                 foreach (var resolver in _resolvers)
@@ -683,7 +682,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 return resolvers.OrderBy(t => t.Priority).ToList();
             }
 
-            internal override IList<SdkResolver> GetDefaultResolvers(LoggingContext loggingContext, ElementLocation location)
+            internal override IReadOnlyList<SdkResolver> GetDefaultResolvers()
             {
                 return new List<SdkResolver>();
             }
