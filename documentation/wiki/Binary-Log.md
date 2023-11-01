@@ -40,7 +40,7 @@ If the binary log contains the projects/imports files the MSBuild Structured Log
 
 # Logging all environment variables
 
-By default, MSBuild logs only the environment variables that are used to influence MSBuild, which is a subset of what is set in the environment. This behavior can be changed to log the full environment by setting the environment variable `MSBUILDLOGALLENVIRONMENTVARIABLES=1`.
+By default, MSBuild logs only the environment variables that are used to influence MSBuild, which is a subset of what is set in the environment. This reduces, but does not eliminate, the likelihood of leaking sensitive information through logs. This behavior can be changed to log the full environment by setting the environment variable `MSBUILDLOGALLENVIRONMENTVARIABLES=1`.
 
 # Replaying a binary log
 
