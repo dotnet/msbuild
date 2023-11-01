@@ -47,12 +47,15 @@ namespace Microsoft.Build.Tasks
             var assembliesMetadata = new List<ITaskItem>();
             foreach (string assemblyPath in AssemblyPaths)
             {
-                AssemblyInformation assemblyInformation = new(assemblyPath);
-                AssemblyAttributes attributes = assemblyInformation.GetAssemblyMetadata();
-
-                if (attributes != null)
+                if (Directory.Exists(assemblyPath))
                 {
-                    assembliesMetadata.Add(CreateItemWithMetadata(attributes));
+                    AssemblyInformation assemblyInformation = new(assemblyPath);
+                    AssemblyAttributes attributes = assemblyInformation.GetAssemblyMetadata();
+
+                    if (attributes != null)
+                    {
+                        assembliesMetadata.Add(CreateItemWithMetadata(attributes));
+                    }
                 }
             }
 
