@@ -47,7 +47,7 @@ namespace Microsoft.Build.Tasks
             var assembliesMetadata = new List<ITaskItem>();
             foreach (string assemblyPath in AssemblyPaths)
             {
-                if (Directory.Exists(assemblyPath))
+                if (File.Exists(assemblyPath))
                 {
                     AssemblyInformation assemblyInformation = new(assemblyPath);
                     AssemblyAttributes attributes = assemblyInformation.GetAssemblyMetadata();
