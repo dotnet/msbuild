@@ -29,3 +29,17 @@
 "culture"="neutral"
 "oldVersion"="0.0.0.0-1.0.0.0"
 "newVersion"="1.0.0.0"
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\codeBase\{838C80EF-8658-480D-A7DD-F7530A21142C}]
+"name"="Microsoft.DotNet.MSBuildSdkResolver"
+"version"="8.0.100.0"
+"codeBase"="$BaseInstallDir$\MSBuild\Current\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\Microsoft.DotNet.MSBuildSdkResolver.dll"
+"publicKeyToken"="adb9793829ddae60"
+"culture"="neutral"
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\codeBase\{9CE1CEDE-35FC-4FC1-97F2-3D2A582CE805}]
+"name"="Microsoft.Deployment.DotNet.Releases"
+"version"="2.0.0.0"
+"codeBase"="$BaseInstallDir$\MSBuild\Current\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\Microsoft.Deployment.DotNet.Releases.dll"
+"publicKeyToken"="31bf3856ad364e35"
+"culture"="neutral"
