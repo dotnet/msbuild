@@ -255,7 +255,7 @@ namespace Microsoft.Build.UnitTests
             {
                 var bytes2 = br2.ReadBytes(bufferSize);
 
-                bytes1.SequenceEqual(bytes2).ShouldBeTrue(() =>
+                bytes1.SequenceEqual(bytes2).ShouldBeTrue(
                     $"Buffers starting at position {readCount} differ. First:{Environment.NewLine}{string.Join(",", bytes1)}{Environment.NewLine}Second:{Environment.NewLine}{string.Join(",", bytes2)}");
                 readCount += bufferSize;
             }
