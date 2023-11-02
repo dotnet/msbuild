@@ -196,7 +196,8 @@ internal sealed class TerminalLogger : INodeLogger
     /// <inheritdoc/>
     public void Initialize(IEventSource eventSource, int nodeCount)
     {
-        _nodes = new NodeStatus[nodeCount];
+        // When MSBUILDNOINPROCNODE enabled, NodeId reported by build equals 2. We need to reserve an extra spot for this case. 
+        _nodes = new NodeStatus[nodeCount + 1];
 
         Initialize(eventSource);
     }
@@ -500,10 +501,7 @@ internal sealed class TerminalLogger : INodeLogger
         lock (_lock)
         {
             int nodeIndex = NodeIndexForContext(buildEventContext);
-            if (_nodes != null && _nodes.Length - 1 >= nodeIndex)
-            {
-                _nodes[nodeIndex] = nodeStatus;
-            }
+            _nodes[nodeIndex] = nodeStatus;
         }
     }
 
