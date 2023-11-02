@@ -8,6 +8,7 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
 using Microsoft.Build.Evaluation;
@@ -56,9 +57,11 @@ namespace Microsoft.Build.Graph
 
         private readonly Lazy<IReadOnlyCollection<ProjectGraphNode>> _projectNodesTopologicallySorted;
 
-        private GraphBuilder.GraphEdges Edges { get; }
+        private readonly bool _isSolution;
 
-        internal GraphBuilder.GraphEdges TestOnly_Edges => Edges;
+        private readonly GraphBuilder.GraphEdges _edges;
+
+        internal GraphBuilder.GraphEdges TestOnly_Edges => _edges;
 
         public GraphConstructionMetrics ConstructionMetrics { get; private set; }
 
@@ -432,7 +435,8 @@ namespace Microsoft.Build.Graph
             EntryPointNodes = graphBuilder.EntryPointNodes;
             GraphRoots = graphBuilder.RootNodes;
             ProjectNodes = graphBuilder.ProjectNodes;
-            Edges = graphBuilder.Edges;
+            _edges = graphBuilder.Edges;
+            _isSolution = graphBuilder.IsSolution;
 
             _projectNodesTopologicallySorted = new Lazy<IReadOnlyCollection<ProjectGraphNode>>(() => TopologicalSort(GraphRoots, ProjectNodes));
 
@@ -472,7 +476,7 @@ namespace Microsoft.Build.Graph
                 return new GraphConstructionMetrics(
                     measurementInfo.Timer.Elapsed,
                     ProjectNodes.Count,
-                    Edges.Count);
+                    _edges.Count);
             }
         }
 
@@ -598,6 +602,26 @@ namespace Microsoft.Build.Graph
         {
             ThrowOnEmptyTargetNames(entryProjectTargets);
 
+            List<string> entryTargets = entryProjectTargets == null ? null : new(entryProjectTargets);
+
+            // Solutions have quirky behavior when provided a target with ';' in it, eg "Clean;Build". This can happen if via the command-line the user provides something
+            // like /t:"Clean;Build". When building a project, the target named "Clean;Build" is executed (which usually doesn't exist, but could). However, for solutions
+            // the generated metaproject ends up calling the MSBuild task with the provided targets, which ends up splitting the value as if it were [ "Clean", "Build" ].
+            // Mimic this flattening behavior for consistency.
+            if (_isSolution && entryProjectTargets != null && entryProjectTargets.Count != 0)
+            {
+                List<string> newEntryTargets = new(entryTargets.Count);
+                foreach (string entryTarget in entryTargets)
+                {
+                    foreach (string s in ExpressionShredder.SplitSemiColonSeparatedList(entryTarget))
+                    {
+                        newEntryTargets.Add(s);
+                    }
+                }
+
+                entryTargets = newEntryTargets;
+            }
+
             // Seed the dictionary with empty lists for every node. In this particular case though an empty list means "build nothing" rather than "default targets".
             var targetLists = ProjectNodes.ToDictionary(node => node, node => ImmutableList<string>.Empty);
 
@@ -606,10 +630,10 @@ namespace Microsoft.Build.Graph
 
             foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
             {
-                var entryTargets = entryProjectTargets == null || entryProjectTargets.Count == 0
+                ImmutableList<string> nodeEntryTargets = entryTargets == null || entryTargets.Count == 0
                     ? ImmutableList.CreateRange(entryPointNode.ProjectInstance.DefaultTargets)
-                    : ImmutableList.CreateRange(entryProjectTargets);
-                var entryEdge = new ProjectGraphBuildRequest(entryPointNode, entryTargets);
+                    : ImmutableList.CreateRange(entryTargets);
+                var entryEdge = new ProjectGraphBuildRequest(entryPointNode, nodeEntryTargets);
                 encounteredEdges.Add(entryEdge);
                 edgesToVisit.Enqueue(entryEdge);
             }
@@ -645,7 +669,7 @@ namespace Microsoft.Build.Graph
                     var expandedTargets = ExpandDefaultTargets(
                         applicableTargets,
                         referenceNode.ProjectInstance.DefaultTargets,
-                        Edges[(node, referenceNode)]);
+                        _edges[(node, referenceNode)]);
 
                     var projectReferenceEdge = new ProjectGraphBuildRequest(
                         referenceNode,

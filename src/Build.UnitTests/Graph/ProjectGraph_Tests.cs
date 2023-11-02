@@ -760,7 +760,6 @@ namespace Microsoft.Build.Graph.UnitTests
                     EndGlobal
                     """;
                 TransientTestFile slnFile = env.CreateFile(@"Solution.sln", SolutionFileContents);
-                SolutionFile solutionFile = SolutionFile.Parse(slnFile.Path);
 
                 ProjectRootElement project1Xml = ProjectRootElement.Create();
 
@@ -826,6 +825,74 @@ namespace Microsoft.Build.Graph.UnitTests
                 project5Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
                 project5Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("Win32");
                 project5Node.ProjectReferences.Count.ShouldBe(0);
+            }
+        }
+
+        [Fact]
+        public void GetTargetListsWithSemicolonInTarget()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProjectFile(env, 1);
+
+                var projectGraph = new ProjectGraph(entryProject.Path);
+                projectGraph.ProjectNodes.Count.ShouldBe(1);
+                projectGraph.ProjectNodes.First().ProjectInstance.FullPath.ShouldBe(entryProject.Path);
+
+                // Example: msbuild /graph /t:"Clean;Build". For projects, this does not expand
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(new[] { "Clean;Build" });
+                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
+                targetLists[GetFirstNodeWithProjectNumber(projectGraph, 1)].ShouldBe(new[] { "Clean;Build" });
+            }
+        }
+
+        [Fact]
+        public void GetTargetListsWithSemicolonInTargetSolution()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile project = CreateProjectFile(env, 1);
+
+                string solutionFileContents = $$"""
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio Version 17
+                    VisualStudioVersion = 17.0.31903.59
+                    MinimumVisualStudioVersion = 17.0.31903.59
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project1", "{{project.Path}}", "{8761499A-7280-43C4-A32F-7F41C47CA6DF}"
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug|x64 = Debug|x64
+                            Debug|x86 = Debug|x86
+                            Release|x64 = Release|x64
+                            Release|x86 = Release|x86
+                        EndGlobalSection
+                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.ActiveCfg = Debug|x64
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.Build.0 = Debug|x64
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x86.ActiveCfg = Debug|x86
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x86.Build.0 = Debug|x86
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Release|x64.ActiveCfg = Release|x64
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Release|x64.Build.0 = Release|x64
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Release|x86.ActiveCfg = Release|x86
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Release|x86.Build.0 = Release|x86
+                        EndGlobalSection
+                        GlobalSection(SolutionProperties) = preSolution
+                            HideSolutionNode = FALSE
+                        EndGlobalSection
+                    EndGlobal
+                    """;
+                TransientTestFile slnFile = env.CreateFile(@"Solution.sln", solutionFileContents);
+                SolutionFile solutionFile = SolutionFile.Parse(slnFile.Path);
+
+                var projectGraph = new ProjectGraph(slnFile.Path);
+                projectGraph.ProjectNodes.Count.ShouldBe(1);
+                projectGraph.ProjectNodes.First().ProjectInstance.FullPath.ShouldBe(project.Path);
+
+                // Example: msbuild /graph /t:"Clean;Build". For solutions, this does expand!
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(new[] { "Clean;Build" });
+                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
+                targetLists[GetFirstNodeWithProjectNumber(projectGraph, 1)].ShouldBe(new[] { "Clean", "Build" });
             }
         }
 

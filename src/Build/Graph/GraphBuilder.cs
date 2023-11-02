@@ -21,7 +21,7 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Graph
 {
-    internal class GraphBuilder
+    internal sealed class GraphBuilder
     {
         internal const string SolutionItemReference = "_SolutionReference";
 
@@ -37,6 +37,8 @@ namespace Microsoft.Build.Graph
         public IReadOnlyCollection<ProjectGraphNode> EntryPointNodes { get; private set; }
 
         public GraphEdges Edges { get; private set; }
+
+        public bool IsSolution { get; private set; }
 
         private readonly List<ConfigurationMetadata> _entryPointConfigurationMetadata;
 
@@ -257,8 +259,7 @@ namespace Microsoft.Build.Graph
                         string.Join(";", entryPoints.Select(e => e.ProjectFile))));
             }
 
-            ErrorUtilities.VerifyThrowArgument(entryPoints.Count == 1, "StaticGraphAcceptsSingleSolutionEntryPoint");
-
+            IsSolution = true;
             ProjectGraphEntryPoint solutionEntryPoint = entryPoints.Single();
             ImmutableDictionary<string, string>.Builder solutionGlobalPropertiesBuilder = ImmutableDictionary.CreateBuilder(
                 keyComparer: StringComparer.OrdinalIgnoreCase,
