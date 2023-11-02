@@ -601,16 +601,14 @@ namespace Microsoft.Build.Graph
         {
             ThrowOnEmptyTargetNames(entryProjectTargets);
 
-            List<string> entryTargets = entryProjectTargets == null ? null : new(entryProjectTargets);
-
             // Solutions have quirky behavior when provided a target with ';' in it, eg "Clean;Build". This can happen if via the command-line the user provides something
             // like /t:"Clean;Build". When building a project, the target named "Clean;Build" is executed (which usually doesn't exist, but could). However, for solutions
             // the generated metaproject ends up calling the MSBuild task with the provided targets, which ends up splitting the value as if it were [ "Clean", "Build" ].
             // Mimic this flattening behavior for consistency.
             if (_isSolution && entryProjectTargets != null && entryProjectTargets.Count != 0)
             {
-                List<string> newEntryTargets = new(entryTargets.Count);
-                foreach (string entryTarget in entryTargets)
+                List<string> newEntryTargets = new(entryProjectTargets.Count);
+                foreach (string entryTarget in entryProjectTargets)
                 {
                     foreach (string s in ExpressionShredder.SplitSemiColonSeparatedList(entryTarget))
                     {
@@ -618,7 +616,7 @@ namespace Microsoft.Build.Graph
                     }
                 }
 
-                entryTargets = newEntryTargets;
+                entryProjectTargets = newEntryTargets;
             }
 
             // Seed the dictionary with empty lists for every node. In this particular case though an empty list means "build nothing" rather than "default targets".
@@ -629,9 +627,9 @@ namespace Microsoft.Build.Graph
 
             foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
             {
-                ImmutableList<string> nodeEntryTargets = entryTargets == null || entryTargets.Count == 0
+                ImmutableList<string> nodeEntryTargets = entryProjectTargets == null || entryProjectTargets.Count == 0
                     ? ImmutableList.CreateRange(entryPointNode.ProjectInstance.DefaultTargets)
-                    : ImmutableList.CreateRange(entryTargets);
+                    : ImmutableList.CreateRange(entryProjectTargets);
                 var entryEdge = new ProjectGraphBuildRequest(entryPointNode, nodeEntryTargets);
                 encounteredEdges.Add(entryEdge);
                 edgesToVisit.Enqueue(entryEdge);
