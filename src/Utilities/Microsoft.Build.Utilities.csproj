@@ -34,7 +34,7 @@
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
     <PackageReference Include="System.Text.Encoding.CodePages" />
   </ItemGroup>
-  
+
   <ItemGroup Label="Shared Code">
     <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersEx.cs">
       <Link>Shared\AssemblyFolders\AssemblyFoldersEx.cs</Link>
@@ -138,6 +138,7 @@
     <Compile Include="..\Shared\ToolsetElement.cs">
       <Link>Shared\ToolsetElement.cs</Link>
     </Compile>
+    <Compile Include="..\Tasks\LockCheck.cs" />
   </ItemGroup>
 
   <ItemGroup>

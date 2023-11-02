@@ -15,6 +15,7 @@ using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Tasks;
 
 #nullable disable
 
@@ -811,9 +812,15 @@ namespace Microsoft.Build.Utilities
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
+                string processes = string.Empty;
+                if (NativeMethodsShared.IsWindows)
+                {
+                    processes = LockCheck.GetProcessesLockingFile(fileName);
+                }
+
                 // Warn only -- occasionally temp files fail to delete because of virus checkers; we
                 // don't want the build to fail in such cases
-                LogShared.LogWarningWithCodeFromResources("Shared.FailedDeletingTempFile", fileName, e.Message);
+                LogShared.LogWarningWithCodeFromResources("Shared.FailedDeletingTempFile", fileName, e.Message + " Processes: " + processes);
             }
         }
 
