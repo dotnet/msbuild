@@ -113,7 +113,6 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
         ShouldNotBeTerminalLog(output);
     }
 
-
     [Fact]
     public void TerminalLoggerDefaultByEnv()
     {
@@ -230,6 +229,30 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
 
         // Test if there is ANSI clear screen sequence, which shall only occur when the terminal logger was enabled.
         ShouldNotBeTerminalLog(output);
+    }
+
+    [WindowsFullFrameworkOnlyTheory]
+    [InlineData("1")]
+    [InlineData("0")]
+    public void TerminalLoggerOnInvalidProjectBuild(string msbuildinprocnodeState)
+    {
+        var projectFile = _env.CreateFile(_env.CreateFolder(createFolder: true), "myProjBroken.proj", $"""
+            <Project>
+              <Target Name='Build'>
+                <RegisterAssembly Assemblies="nonexistent.dll" />
+              </Target>
+            </Project>
+            """);
+        string cmd = $"{projectFile.Path} -logger:{typeof(MockLogger).FullName},{typeof(MockLogger).Assembly.Location};ReportTelemetry";
+        _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", msbuildinprocnodeState);
+
+        string output = RunnerUtilities.ExecMSBuild(
+            $"{cmd} -tl:true",
+            out bool success);
+
+        success.ShouldBeFalse();
+        ShouldBeTerminalLog(output);
+        output.ShouldContain("Cannot register assembly \"nonexistent.dll\" - file doesn't exist.");
     }
 
     private static void ShouldBeTerminalLog(string output) => output.ShouldContain("\x1b[?25l");

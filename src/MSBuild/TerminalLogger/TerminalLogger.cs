@@ -339,10 +339,7 @@ internal sealed class TerminalLogger : INodeLogger
         // Mark node idle until something uses it again
         if (_restoreContext is null)
         {
-            lock (_lock)
-            {
-                _nodes[NodeIndexForContext(buildEventContext)] = null;
-            }
+            UpdateNodeStatus(buildEventContext, null);
         }
 
         ProjectContext c = new(buildEventContext);
@@ -494,9 +491,18 @@ internal sealed class TerminalLogger : INodeLogger
 
             string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
             NodeStatus nodeStatus = new(projectFile, project.TargetFramework, e.TargetName, project.Stopwatch);
-            lock (_lock)
+            UpdateNodeStatus(buildEventContext, nodeStatus);
+        }
+    }
+
+    private void UpdateNodeStatus(BuildEventContext buildEventContext, NodeStatus? nodeStatus)
+    {
+        lock (_lock)
+        {
+            int nodeIndex = NodeIndexForContext(buildEventContext);
+            if (_nodes != null && _nodes.Length - 1 >= nodeIndex)
             {
-                _nodes[NodeIndexForContext(buildEventContext)] = nodeStatus;
+                _nodes[nodeIndex] = nodeStatus;
             }
         }
     }
@@ -517,10 +523,7 @@ internal sealed class TerminalLogger : INodeLogger
         if (_restoreContext is null && buildEventContext is not null && e.TaskName == "MSBuild")
         {
             // This will yield the node, so preemptively mark it idle
-            lock (_lock)
-            {
-                _nodes[NodeIndexForContext(buildEventContext)] = null;
-            }
+            UpdateNodeStatus(buildEventContext, null);
 
             if (_projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
             {
