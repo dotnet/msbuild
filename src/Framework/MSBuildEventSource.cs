@@ -42,7 +42,18 @@ namespace Microsoft.Build.Eventing
         /// </summary>
         public static MSBuildEventSource Log = new MSBuildEventSource();
 
-        private MSBuildEventSource() { }
+        // Try to catch misauthored events by making them into failures on debug.
+        private const bool throwOnEventWriteErrors =
+#if DEBUG
+            true;
+#else
+            false;
+#endif
+
+        private MSBuildEventSource()
+          : base(throwOnEventWriteErrors)
+        {
+        }
 
         #region Events
 
@@ -242,7 +253,7 @@ namespace Microsoft.Build.Eventing
             WriteEvent(27);
         }
 
-        [Event(28, Keywords = Keywords.All | Keywords.PerformanceLog)]
+        [Event(28, Keywords = Keywords.All | Keywords.PerformanceLog, Version = 1)]
         public void RarOverallStop(int assembliesCount, int assemblyFilesCount, int resolvedFilesCount, int resolvedDependencyFilesCount, int copyLocalFilesCount, bool findDependencies)
         {
             WriteEvent(28, assembliesCount, assemblyFilesCount, resolvedFilesCount, resolvedDependencyFilesCount, copyLocalFilesCount, findDependencies);
