@@ -8,7 +8,7 @@ using System;
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
     /// <summary>
-    /// A factory used when creating a <see cref="OutOfProcNodeSdkResolverService"/> which can pass parameters to its constructor.  Our 
+    /// A factory used when creating a <see cref="OutOfProcNodeSdkResolverService"/> which can pass parameters to its constructor.  Our
     /// dependency inject cannot pass parameters to constructors so this factory is used as a middle man.
     /// </summary>
     internal sealed class OutOfProcNodeSdkResolverServiceFactory

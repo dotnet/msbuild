@@ -169,9 +169,9 @@ namespace Microsoft.Build.Evaluation
                     ////////////////////////////////////////////////////
                     // UNDONE: Implement batching here.
                     //
-                    // We want to allow built-in metadata in metadata values here. 
+                    // We want to allow built-in metadata in metadata values here.
                     // For example, so that an Idl file can specify that its Tlb output should be named %(Filename).tlb.
-                    // 
+                    //
                     // In other words, we want batching. However, we won't need to go to the trouble of using the regular batching code!
                     // That's because that code is all about grouping into buckets of similar items. In this context, we're not
                     // invoking a task, and it's fine to process each item individually, which will always give the correct results.
@@ -183,7 +183,7 @@ namespace Microsoft.Build.Evaluation
                     //    or whether they contain any custom metadata && the Include involved an @(itemlist) expression.
                     // -- if either case is found, we go ahead and evaluate all the metadata separately for each item.
                     // -- otherwise we can do the old thing (evaluating all metadata once then applying to all items)
-                    // 
+                    //
                     // This algorithm gives the correct results except when:
                     // -- batchable expressions exist on the include, exclude, or condition on the item element itself
                     //

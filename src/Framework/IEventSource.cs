@@ -75,7 +75,7 @@ namespace Microsoft.Build.Framework
     /// </summary>
     public delegate void AnyEventHandler(object sender, BuildEventArgs e);
 
-    /// <summary> 
+    /// <summary>
     /// This interface defines the events raised by the build engine.
     /// Loggers use this interface to subscribe to the events they
     /// are interested in receiving.

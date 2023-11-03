@@ -218,7 +218,7 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
             TerminalLoggerUserIntentSource = null,
             ConsoleLogger = true,
             ConsoleLoggerVerbosity = "minimal",
-            ConsoleLoggerType = "parallel", 
+            ConsoleLoggerType = "parallel",
             FileLogger = false,
         };
 

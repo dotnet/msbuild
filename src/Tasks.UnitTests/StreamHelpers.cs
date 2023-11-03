@@ -11,7 +11,7 @@ namespace Microsoft.Build.UnitTests
     {
         /*
          * Method:  StringToStream (overload)
-         * 
+         *
          * Take a string and convert it into a Stream.
          * Use the default encoding which means this machine's ANSI codepage.
          */
@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests
 
         /*
          * Method:  StringToStream (overload)
-         * 
+         *
          * Take a string and convert it into a Stream.
          * Takes an alternate encoding type
          */

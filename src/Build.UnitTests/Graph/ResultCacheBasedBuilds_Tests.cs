@@ -408,7 +408,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// This method runs in two modes.
         /// When <param name="generateCacheFiles"></param> is true, the method will fill in the empty <param name="outputCaches"/> and <param name="expectedNodeBuildOutput"/>, simulating a build from scratch.
         /// When it is false, it uses the filled in <param name="outputCaches"/> and <param name="expectedNodeBuildOutput"/> to simulate a fully cached build.
-        /// 
+        ///
         /// </summary>
         /// <param name="env">The test environment under which to run.</param>
         /// <param name="topoSortedNodes"></param>
@@ -533,7 +533,7 @@ namespace Microsoft.Build.Graph.UnitTests
                                 ? $"Targets='{explicitTargets}'"
                                 : string.Empty)}
                             >
-                            <Output TaskParameter='TargetOutputs' ItemName='i' />  
+                            <Output TaskParameter='TargetOutputs' ItemName='i' />
                         </MSBuild>
                     </Target>");
 

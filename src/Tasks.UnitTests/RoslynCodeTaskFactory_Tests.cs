@@ -231,12 +231,12 @@ Imports System.Linq
 Imports System.Text
 
 Namespace InlineCode
-    
+
     Public Class {TaskName}
         Inherits Microsoft.Build.Utilities.Task
-        
+
         Private _Success As Boolean = true
-        
+
         Public Overridable Property Success() As Boolean
             Get
                 Return _Success
@@ -245,7 +245,7 @@ Namespace InlineCode
                 _Success = value
             End Set
         End Property
-        
+
         Public Overrides Function Execute() As Boolean
 {fragment}
             Return Success
@@ -302,12 +302,12 @@ Imports System.Linq
 Imports System.Text
 
 Namespace InlineCode
-    
+
     Public Class {TaskName}
         Inherits Microsoft.Build.Utilities.Task
-        
+
         Private _Parameter1 As String
-        
+
         Public Overridable Property Parameter1() As String
             Get
                 Return _Parameter1
@@ -316,9 +316,9 @@ Namespace InlineCode
                 _Parameter1 = value
             End Set
         End Property
-        
+
         Private _Parameter2 As String
-        
+
         Public Overridable Property Parameter2() As String
             Get
                 Return _Parameter2
@@ -327,9 +327,9 @@ Namespace InlineCode
                 _Parameter2 = value
             End Set
         End Property
-        
+
         Private _Parameter3 As String
-        
+
         Public Overridable Property Parameter3() As String
             Get
                 Return _Parameter3
@@ -338,9 +338,9 @@ Namespace InlineCode
                 _Parameter3 = value
             End Set
         End Property
-        
+
         Private _Parameter4 As Microsoft.Build.Framework.ITaskItem
-        
+
         Public Overridable Property Parameter4() As Microsoft.Build.Framework.ITaskItem
             Get
                 Return _Parameter4
@@ -349,9 +349,9 @@ Namespace InlineCode
                 _Parameter4 = value
             End Set
         End Property
-        
+
         Private _Parameter5() As Microsoft.Build.Framework.ITaskItem
-        
+
         Public Overridable Property Parameter5() As Microsoft.Build.Framework.ITaskItem()
             Get
                 Return _Parameter5
@@ -360,9 +360,9 @@ Namespace InlineCode
                 _Parameter5 = value
             End Set
         End Property
-        
+
         Private _Success As Boolean = true
-        
+
         Public Overridable Property Success() As Boolean
             Get
                 Return _Success
@@ -371,7 +371,7 @@ Namespace InlineCode
                 _Success = value
             End Set
         End Property
-        
+
         Public Overrides Function Execute() As Boolean
 {fragment}
             Return Success
@@ -423,10 +423,10 @@ Imports System.Linq
 Imports System.Text
 
 Namespace InlineCode
-    
+
     Public Class {TaskName}
         Inherits Microsoft.Build.Utilities.Task
-        
+
 {method}
     End Class
 End Namespace
@@ -529,12 +529,12 @@ namespace InlineCode {{
     using System.IO;
     using System.Linq;
     using System.Text;
-    
-    
+
+
     public class {TaskName} : Microsoft.Build.Utilities.Task {{
-        
+
         private bool _Success = true;
-        
+
         public virtual bool Success {{
             get {{
                 return _Success;
@@ -543,7 +543,7 @@ namespace InlineCode {{
                 _Success = value;
             }}
         }}
-        
+
         public override bool Execute() {{
 {fragment}
             return Success;
@@ -591,12 +591,12 @@ namespace InlineCode {{
     using System.IO;
     using System.Linq;
     using System.Text;
-    
-    
+
+
     public class {TaskName} : Microsoft.Build.Utilities.Task {{
-        
+
         private string _Parameter1;
-        
+
         public virtual string Parameter1 {{
             get {{
                 return _Parameter1;
@@ -605,9 +605,9 @@ namespace InlineCode {{
                 _Parameter1 = value;
             }}
         }}
-        
+
         private string _Parameter2;
-        
+
         public virtual string Parameter2 {{
             get {{
                 return _Parameter2;
@@ -616,9 +616,9 @@ namespace InlineCode {{
                 _Parameter2 = value;
             }}
         }}
-        
+
         private string _Parameter3;
-        
+
         public virtual string Parameter3 {{
             get {{
                 return _Parameter3;
@@ -627,9 +627,9 @@ namespace InlineCode {{
                 _Parameter3 = value;
             }}
         }}
-        
+
         private Microsoft.Build.Framework.ITaskItem _Parameter4;
-        
+
         public virtual Microsoft.Build.Framework.ITaskItem Parameter4 {{
             get {{
                 return _Parameter4;
@@ -638,9 +638,9 @@ namespace InlineCode {{
                 _Parameter4 = value;
             }}
         }}
-        
+
         private Microsoft.Build.Framework.ITaskItem[] _Parameter5;
-        
+
         public virtual Microsoft.Build.Framework.ITaskItem[] Parameter5 {{
             get {{
                 return _Parameter5;
@@ -649,9 +649,9 @@ namespace InlineCode {{
                 _Parameter5 = value;
             }}
         }}
-        
+
         private bool _Success = true;
-        
+
         public virtual bool Success {{
             get {{
                 return _Success;
@@ -660,7 +660,7 @@ namespace InlineCode {{
                 _Success = value;
             }}
         }}
-        
+
         public override bool Execute() {{
 {fragment}
             return Success;
@@ -704,10 +704,10 @@ namespace InlineCode {{
     using System.IO;
     using System.Linq;
     using System.Text;
-    
-    
+
+
     public class MyInlineTask : Microsoft.Build.Utilities.Task {{
-        
+
 {method}
     }}
 }}
@@ -775,12 +775,12 @@ namespace InlineCode {{
     using System.IO;
     using System.Linq;
     using System.Text;
-    
-    
+
+
     public class {TaskName} : Microsoft.Build.Utilities.Task {{
-        
+
         private bool _Success = true;
-        
+
         public virtual bool Success {{
             get {{
                 return _Success;
@@ -789,7 +789,7 @@ namespace InlineCode {{
                 _Success = value;
             }}
         }}
-        
+
         public override bool Execute() {{
 {sourceCodeFileContents}
             return Success;
@@ -835,10 +835,10 @@ namespace InlineCode {{
     using System.IO;
     using System.Linq;
     using System.Text;
-    
-    
+
+
     public class MyInlineTask : Microsoft.Build.Utilities.Task {{
-        
+
 {sourceCodeFileContents}
     }}
 }}

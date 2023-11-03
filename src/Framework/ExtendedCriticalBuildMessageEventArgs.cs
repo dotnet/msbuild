@@ -117,7 +117,7 @@ public sealed class ExtendedCriticalBuildMessageEventArgs : CriticalBuildMessage
         string? senderName,
         DateTime eventTimestamp,
         params object[]? messageArgs)
-        //// Force importance to High. 
+        //// Force importance to High.
         : base(subcategory, code, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, helpKeyword, senderName, eventTimestamp, messageArgs) => ExtendedType = type;
 
     /// <summary>

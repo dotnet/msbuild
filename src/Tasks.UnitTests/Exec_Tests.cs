@@ -896,7 +896,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Test the CanEncode method with and without ANSI characters to determine if they can be encoded 
+        /// Test the CanEncode method with and without ANSI characters to determine if they can be encoded
         /// in the current system encoding.
         /// </summary>
         [WindowsOnlyFact]

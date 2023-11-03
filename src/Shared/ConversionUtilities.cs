@@ -12,12 +12,12 @@ namespace Microsoft.Build.Shared
 {
     /// <summary>
     /// This class contains only static methods, which are useful throughout many
-    /// of the MSBuild classes and don't really belong in any specific class.   
+    /// of the MSBuild classes and don't really belong in any specific class.
     /// </summary>
     internal static class ConversionUtilities
     {
         /// <summary>
-        /// Converts a string to a bool.  We consider "true/false", "on/off", and 
+        /// Converts a string to a bool.  We consider "true/false", "on/off", and
         /// "yes/no" to be valid boolean representations in the XML.
         /// </summary>
         /// <param name="parameterValue">The string to convert.</param>

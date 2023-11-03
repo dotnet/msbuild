@@ -41,7 +41,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         public string Path { get; private set; }
 
         /// <summary>
-        /// Regex which matches all the sdk names that could be resolved by the resolvers associated with given manifest.  
+        /// Regex which matches all the sdk names that could be resolved by the resolvers associated with given manifest.
         /// </summary>
         public Regex ResolvableSdkRegex { get; private set; }
 

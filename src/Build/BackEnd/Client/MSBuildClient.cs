@@ -437,7 +437,7 @@ namespace Microsoft.Build.Experimental
         }
 
         /// <summary>
-        /// Launches MSBuild server. 
+        /// Launches MSBuild server.
         /// </summary>
         /// <returns> Whether MSBuild server was started successfully.</returns>
         private bool TryLaunchServer()
@@ -511,7 +511,7 @@ namespace Microsoft.Build.Experimental
                 envVars[pair.Key] = pair.Value;
             }
 
-            // We remove env variable used to invoke MSBuild server as that might be equal to 1, so we do not get an infinite recursion here. 
+            // We remove env variable used to invoke MSBuild server as that might be equal to 1, so we do not get an infinite recursion here.
             envVars.Remove(Traits.UseMSBuildServerEnvVarName);
 
             Debug.Assert(KnownTelemetry.PartialBuildTelemetry == null || KnownTelemetry.PartialBuildTelemetry.StartAt.HasValue, "BuildTelemetry.StartAt was not initialized!");

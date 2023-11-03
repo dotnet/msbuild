@@ -21,12 +21,12 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     For the ExternalProjectsProvider mock infrastructure we'll try to use very similar model as in the actual implementation in VS.
 
     Typical flow for "linked object" of type "Foo"
-    [ ---  Client Collection                                    ]                           [ Server collection (can be different process) ] 
+    [ ---  Client Collection                                    ]                           [ Server collection (can be different process) ]
     (Foo) localView <=> (FooLink) link <=> FooLinkRemoter (Proxy) <=~connection mechanism~=> FooLinkRemoter(stub) <=> (Real object)
-    
+
     FooLinkRemoter would be whatever ExternalProviders see useful to provide FooLink implementation and is compatable with connection mechanism
     it might be completely different interface since some link types would be either inefficient or impossible to serialize for example and pass cross process.
-    
+
     Here we can cheat a little bit, since we run both Client and Server collection in the same process so we can ignore connection mechanism (typically some
     form of serialization/deserialization) and just give the "client" link implementation the same Remoter object we create on the "server"
 

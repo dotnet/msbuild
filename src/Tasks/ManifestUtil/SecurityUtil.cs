@@ -617,7 +617,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private static bool UseSha256Algorithm(X509Certificate2 cert)
         {
             Oid oid = cert.SignatureAlgorithm;
-            // Issue 6732: Clickonce does not support sha384/sha512 file hash so we default to sha256 
+            // Issue 6732: Clickonce does not support sha384/sha512 file hash so we default to sha256
             // for certs with that signature algorithm.
             return string.Equals(oid.FriendlyName, "sha256RSA", StringComparison.OrdinalIgnoreCase) ||
                    string.Equals(oid.FriendlyName, "sha384RSA", StringComparison.OrdinalIgnoreCase) ||

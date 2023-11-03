@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private bool _continueOnErrorDefault = true;
 
         /// <summary>
-        /// Test that an exception is thrown when the task name is null. 
+        /// Test that an exception is thrown when the task name is null.
         /// </summary>
         [Fact]
         public void ConstructorWithNullName()
@@ -67,7 +67,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             });
         }
         /// <summary>
-        /// Test that an exception is thrown when the task name is empty. 
+        /// Test that an exception is thrown when the task name is empty.
         /// </summary>
         [Fact]
         public void ConstructorWithEmptyName()
@@ -176,7 +176,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
 
         /// <summary>
-        /// Test the valid constructors.  
+        /// Test the valid constructors.
         /// </summary>
         [Fact]
         public void TestValidConstructors()
@@ -326,7 +326,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Test serialization / deserialization when the parameter dictionary is null. 
+        /// Test serialization / deserialization when the parameter dictionary is null.
         /// </summary>
         [Fact]
         public void TestTranslationWithNullDictionary()
@@ -379,7 +379,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
 #if FEATURE_APPDOMAIN
         /// <summary>
-        /// Test serialization / deserialization of the AppDomainSetup instance. 
+        /// Test serialization / deserialization of the AppDomainSetup instance.
         /// </summary>
         [Theory]
         [InlineData(new byte[] { 1, 2, 3 })]
@@ -429,7 +429,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
 
         /// <summary>
-        /// Test serialization / deserialization when the parameter dictionary is empty. 
+        /// Test serialization / deserialization when the parameter dictionary is empty.
         /// </summary>
         [Fact]
         public void TestTranslationWithEmptyDictionary()
@@ -477,7 +477,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Test serialization / deserialization when the parameter dictionary contains just value types. 
+        /// Test serialization / deserialization when the parameter dictionary contains just value types.
         /// </summary>
         [Fact]
         public void TestTranslationWithValueTypesInDictionary()
@@ -527,7 +527,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem. 
+        /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem.
         /// </summary>
         [Fact]
         public void TestTranslationWithITaskItemInDictionary()
@@ -575,7 +575,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem array. 
+        /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem array.
         /// </summary>
         [Fact]
         public void TestTranslationWithITaskItemArrayInDictionary()
@@ -627,7 +627,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem array. 
+        /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem array.
         /// </summary>
         [Fact]
         public void TestTranslationWithWarningsAsErrors()
@@ -723,7 +723,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Helper methods for testing the task host-related packets. 
+        /// Helper methods for testing the task host-related packets.
         /// </summary>
         internal static class TaskHostPacketHelpers
         {

@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests
         public void Initialize()
         {
             // Create some items and place them in a dictionary
-            // Add some include information so that when we check the final 
+            // Add some include information so that when we check the final
             // item spec we can verify that the item was recreated properly
             BuildItem[] buildItems = new BuildItem[1];
             buildItems[0] = new BuildItem("BuildItem1", "Item1");

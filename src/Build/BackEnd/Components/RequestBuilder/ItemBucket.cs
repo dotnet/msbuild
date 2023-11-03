@@ -38,10 +38,10 @@ namespace Microsoft.Build.BackEnd
         private Lookup _lookup;
 
         /// <summary>
-        /// When buckets are being created for batching purposes, this indicates which order the 
+        /// When buckets are being created for batching purposes, this indicates which order the
         /// buckets were created in, so that the target/task being batched gets called with the items
         /// in the same order as they were declared in the project file.  For example, the first
-        /// bucket created gets bucketSequenceNumber=0, the second bucket created gets 
+        /// bucket created gets bucketSequenceNumber=0, the second bucket created gets
         /// bucketSequenceNumber=1, etc.
         /// </summary>
         private int _bucketSequenceNumber;
@@ -153,10 +153,10 @@ namespace Microsoft.Build.BackEnd
 
 
         /// <summary>
-        /// When buckets are being created for batching purposes, this indicates which order the 
+        /// When buckets are being created for batching purposes, this indicates which order the
         /// buckets were created in, so that the target/task being batched gets called with the items
         /// in the same order as they were declared in the project file.  For example, the first
-        /// bucket created gets bucketSequenceNumber=0, the second bucket created gets 
+        /// bucket created gets bucketSequenceNumber=0, the second bucket created gets
         /// bucketSequenceNumber=1, etc.
         /// </summary>
         internal int BucketSequenceNumber

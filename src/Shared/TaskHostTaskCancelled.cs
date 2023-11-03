@@ -6,7 +6,7 @@
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// TaskHostTaskCancelled informs the task host that the task it is 
+    /// TaskHostTaskCancelled informs the task host that the task it is
     /// currently executing has been canceled.
     /// </summary>
     internal class TaskHostTaskCancelled : INodePacket
@@ -32,7 +32,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="translator">The translator to use.</param>
         public void Translate(ITranslator translator)
         {
-            // Do nothing -- this packet doesn't contain any parameters. 
+            // Do nothing -- this packet doesn't contain any parameters.
         }
 
         /// <summary>

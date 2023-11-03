@@ -208,7 +208,7 @@ namespace Microsoft.Build.Tasks
                 {
                     // Its pretty hard to get here, you need an assembly that contains a valid reference
                     // to a dependent assembly that, in turn, throws a FileLoadException during GetAssemblyName.
-                    // Still it happened once, with an older version of the CLR. 
+                    // Still it happened once, with an older version of the CLR.
 
                     // ...falling through and relying on the targetAssemblyName==null behavior below...
                 }
@@ -330,7 +330,7 @@ namespace Microsoft.Build.Tasks
                         throw new InvalidParameterValueException("SearchPaths", directory + (directory.EndsWith("\\", StringComparison.OrdinalIgnoreCase) ? String.Empty : "\\") + baseName, e.Message);
                     }
 
-                    // We have a full path returned 
+                    // We have a full path returned
                     if (ResolveAsFile(fullPath, assemblyName, isPrimaryProjectReference, wantSpecificVersion, false, assembliesConsideredAndRejected))
                     {
                         if (candidateFullPath == null)
@@ -340,10 +340,10 @@ namespace Microsoft.Build.Tasks
 
                         /*
                          * After finding a file we now will check to see if it matches the type of processor architecture we want to return. The rules are as follows
-                         * 
+                         *
                          * If targeting AMD64 / X86 / IA64 / ARM /NONE we will return the first assembly which has a matching processor architecture OR is an assembly with a processor architecture of MSIL or NONE
-                         * 
-                         * If targeting MSIL we will first look through all of the assemblies, if an MSIL assembly is found we will return that. If no MSIL assembly is found we will return 
+                         *
+                         * If targeting MSIL we will first look through all of the assemblies, if an MSIL assembly is found we will return that. If no MSIL assembly is found we will return
                          * the first assembly which matches reguardless of its processor architecture.
                          */
 
