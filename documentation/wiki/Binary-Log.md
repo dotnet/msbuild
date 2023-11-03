@@ -136,18 +136,33 @@ To allow the calling code to decide - based on the type of error, type of events
 
 ```csharp
 /// <summary>
-/// Materializes the error message.
-/// Until it's called the error message is not materialized and no string allocations are made.
+/// An event args for <see cref="IBinaryLogReaderErrors.OnRecoverableReadError"/> event.
 /// </summary>
-/// <returns>The error message.</returns>
-public delegate string FormatErrorMessage();
+public sealed class BinaryLogReaderErrorEventArgs : EventArgs
+{
+    /// <summary>
+    /// Type of the error that occurred during reading.
+    /// </summary>
+    public ReaderErrorType ErrorType { get; }
+
+    /// <summary>
+    /// Kind of the record that encountered the error.
+    /// </summary>
+    public BinaryLogRecordKind RecordKind { get; }
+
+    /// <summary>
+    /// Materializes the error message.
+    /// Until it's called the error message is not materialized and no string allocations are made.
+    /// </summary>
+    /// <returns>The error message.</returns>
+    public string GetFormattedMessage() => _formatErrorMessage();
+}
 
 /// <summary>
 /// Receives recoverable errors during reading.
 /// Communicates type of the error, kind of the record that encountered the error and the message detailing the error.
-/// The error message is returned as a function to avoid unnecessary string allocations in case the error is not logged.
 /// </summary>
-event Action<ReaderErrorType, BinaryLogRecordKind, FormatErrorMessage>? OnRecoverableReadError;
+event Action<BinaryLogReaderErrorEventArgs>? OnRecoverableReadError;
 ```
 
 Our sample usage of the [Reading API](#reading-api) can be enhanced with recoverable errors handling e.g. as such:
@@ -155,7 +170,7 @@ Our sample usage of the [Reading API](#reading-api) can be enhanced with recover
 ```csharp
 
 // Those can be raised only during forward compatibility reading mode.
-logReader.OnRecoverableReadError += (errorType, recordKind, messageFactory) =>
+logReader.OnRecoverableReadError += errorEventArgs =>
 {
     // ...
 
@@ -163,8 +178,8 @@ logReader.OnRecoverableReadError += (errorType, recordKind, messageFactory) =>
     //  based on the type of the error or/and type of the record or/and the frequency of the error
 
     // Would we decide to completely ignore some errors - we can aid better performance by not materializing the actual error message.
-    // Otherwise the error message can be materialized via the provided delegate:
-    Console.WriteLine($"Recoverable reader error: {messageFactory()}");
+    // Otherwise the error message can be materialized via the provided method on the event argument:
+    Console.WriteLine($"Recoverable reader error: {errorEventArgs.GetFormattedMessage()}");
 };
 
 ```

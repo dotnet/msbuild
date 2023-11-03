@@ -30,7 +30,6 @@ namespace Microsoft.Build.Logging
         private long _recordNumber = 0;
         private bool _skipUnknownEvents;
         private bool _skipUnknownEventParts;
-        private const int ForwardCompatibilityMinimalVersion = 18;
 
         /// <summary>
         /// A list of string records we've encountered so far. If it's a small string, it will be the string directly.
@@ -116,7 +115,7 @@ namespace Microsoft.Build.Logging
 
         private void EnsureForwardCompatibleReadingSupported()
         {
-            if (_fileFormatVersion < ForwardCompatibilityMinimalVersion)
+            if (_fileFormatVersion < BinaryLogger.ForwardCompatibilityMinimalVersion)
             {
                 throw new InvalidOperationException(
                     ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_FwdCompatUnsupported",
@@ -125,10 +124,10 @@ namespace Microsoft.Build.Logging
         }
 
         /// <summary>
-        /// Receives recoverable errors during reading. See <see cref="IBinlogReaderErrors.OnRecoverableReadError"/> for documentation on arguments.
+        /// Receives recoverable errors during reading. See <see cref="IBinaryLogReaderErrors.OnRecoverableReadError"/> for documentation on arguments.
         /// Applicable mainly when <see cref="SkipUnknownEvents"/> or <see cref="SkipUnknownEventParts"/> is set to true."/>
         /// </summary>
-        public event Action<ReaderErrorType, BinaryLogRecordKind, FormatErrorMessage>? OnRecoverableReadError;
+        public event Action<BinaryLogReaderErrorEventArgs>? OnRecoverableReadError;
 
         public void Dispose()
         {
@@ -212,7 +211,7 @@ namespace Microsoft.Build.Logging
                 }
 
                 int serializedEventLength = 0;
-                if (_fileFormatVersion >= ForwardCompatibilityMinimalVersion)
+                if (_fileFormatVersion >= BinaryLogger.ForwardCompatibilityMinimalVersion)
                 {
                     serializedEventLength = ReadInt32(); // record length
                     _readStream.BytesCountAllowedToRead = serializedEventLength;
@@ -271,7 +270,7 @@ namespace Microsoft.Build.Logging
             {
                 if (noThrow)
                 {
-                    OnRecoverableReadError?.Invoke(readerErrorType, recordKind, msgFactory);
+                    OnRecoverableReadError?.Invoke(new BinaryLogReaderErrorEventArgs(readerErrorType, recordKind, msgFactory));
                     SkipBytes(_readStream.BytesCountAllowedToReadRemaining);
                 }
                 else
@@ -439,7 +438,7 @@ namespace Microsoft.Build.Logging
 
         private void ReadNameValueList()
         {
-            if (_fileFormatVersion >= ForwardCompatibilityMinimalVersion)
+            if (_fileFormatVersion >= BinaryLogger.ForwardCompatibilityMinimalVersion)
             {
                 _readStream.BytesCountAllowedToRead = ReadInt32();
             }
@@ -642,7 +641,7 @@ namespace Microsoft.Build.Logging
 
             if (_fileFormatVersion >= 12)
             {
-                if (_fileFormatVersion < ForwardCompatibilityMinimalVersion)
+                if (_fileFormatVersion < BinaryLogger.ForwardCompatibilityMinimalVersion)
                 {
                     // Throw away, but need to advance past it
                     ReadBoolean();
@@ -698,7 +697,7 @@ namespace Microsoft.Build.Logging
 
             if (_fileFormatVersion > 6)
             {
-                if (_fileFormatVersion < ForwardCompatibilityMinimalVersion)
+                if (_fileFormatVersion < BinaryLogger.ForwardCompatibilityMinimalVersion)
                 {
                     // Throw away, but need to advance past it
                     ReadBoolean();

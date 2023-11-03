@@ -36,7 +36,7 @@ namespace Microsoft.Build.Logging
     /// Fully materialized (in-memory) embedded file.
     /// Easier to work with (the content is expressed in a single string), but more memory greedy.
     /// </summary>
-    public class ArchiveFile : ArchiveData
+    public sealed class ArchiveFile : ArchiveData
     {
         public ArchiveFile(string fullPath, string content)
             : base(fullPath)
@@ -56,7 +56,7 @@ namespace Microsoft.Build.Logging
     /// Lazy (streaming) embedded file.
     /// Might be favorable for large files, as it doesn't materialize the whole content in memory.
     /// </summary>
-    public class ArchiveStream : ArchiveData
+    public sealed class ArchiveStream : ArchiveData
     {
         public ArchiveStream(string fullPath, StreamReader contentReader)
             : base(fullPath)

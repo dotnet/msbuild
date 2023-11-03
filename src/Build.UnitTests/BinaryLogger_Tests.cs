@@ -187,7 +187,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// This test validate then binlog file content is identical upon replaying.
+        /// This test validate that binlog file content is identical upon replaying.
         /// The identity can be defined via 3 ways:
         ///   * byte-for-byte equality
         ///   * byte-for-byte equality of unzipped content

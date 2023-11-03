@@ -13,7 +13,7 @@ namespace Microsoft.Build.Logging
     {
         private static bool CheckIsSkipNeeded(long bytesCount)
         {
-            if(bytesCount is < 0 or > int.MaxValue)
+            if (bytesCount is < 0 or > int.MaxValue)
             {
                 throw new ArgumentOutOfRangeException(nameof(bytesCount), ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_StreamUtils_UnsupportedSkipOffset",
                     bytesCount));
@@ -22,7 +22,7 @@ namespace Microsoft.Build.Logging
             return bytesCount > 0;
         }
 
-        public static long SkipBytes(this Stream stream, long bytesCount, bool throwOnEndOfStream)
+        public static long SkipBytes(this Stream stream, long bytesCount)
         {
             if (!CheckIsSkipNeeded(bytesCount))
             {
@@ -31,10 +31,10 @@ namespace Microsoft.Build.Logging
 
             byte[] buffer = ArrayPool<byte>.Shared.Rent(4096);
             using var _ = new CleanupScope(() => ArrayPool<byte>.Shared.Return(buffer));
-            return SkipBytes(stream, bytesCount, throwOnEndOfStream, buffer);
+            return SkipBytes(stream, bytesCount, buffer);
         }
 
-        public static long SkipBytes(this Stream stream, long bytesCount, bool throwOnEndOfStream, byte[] buffer)
+        public static long SkipBytes(this Stream stream, long bytesCount, byte[] buffer)
         {
             if (!CheckIsSkipNeeded(bytesCount))
             {
@@ -47,12 +47,7 @@ namespace Microsoft.Build.Logging
                 int read = stream.Read(buffer, 0, (int)Math.Min(bytesCount - totalRead, buffer.Length));
                 if (read == 0)
                 {
-                    if (throwOnEndOfStream)
-                    {
-                        throw new InvalidDataException("Unexpected end of stream.");
-                    }
-
-                    return totalRead;
+                    throw new InvalidDataException("Unexpected end of stream.");
                 }
 
                 totalRead += read;

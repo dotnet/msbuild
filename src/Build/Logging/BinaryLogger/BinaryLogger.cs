@@ -67,8 +67,18 @@ namespace Microsoft.Build.Logging
         //   - Making ProjectStartedEventArgs, ProjectEvaluationFinishedEventArgs, AssemblyLoadBuildEventArgs equal
         //     between de/serialization roundtrips.
         //   - Adding serialized events lengths - to support forward compatible reading
+
+        // This should be never changed.
+        // The minimum version of the binary log reader that can read log of above version.
+        internal const int ForwardCompatibilityMinimalVersion = 18;
+
+        // The current version of the binary log representation.
+        // Changes with each update of the binary log format.
         internal const int FileFormatVersion = 18;
         // The minimum version of the binary log reader that can read log of above version.
+        // This should be changed only when the binary log format is changed in a way that would prevent it from being
+        // read by older readers. (changing of the individual BuildEventArgs or adding new is fine - as reader can
+        // skip them if they are not known to it. Example of change requiring the increment would be the introduction of strings deduplication)
         internal const int MinimumReaderVersion = 18;
 
         private Stream stream;

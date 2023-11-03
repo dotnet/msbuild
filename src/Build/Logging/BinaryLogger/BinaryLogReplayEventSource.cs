@@ -41,7 +41,7 @@ namespace Microsoft.Build.Logging
         IBuildEventStringsReader,
         IEmbeddedContentSource,
         IBuildFileReader,
-        IBinlogReaderErrors
+        IBinaryLogReaderErrors
     { }
 
     /// <summary>
@@ -65,8 +65,8 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public bool AllowForwardCompatibility { private get; init; }
 
-        /// <inheritdoc cref="IBinlogReaderErrors.OnRecoverableReadError"/>
-        public event Action<ReaderErrorType, BinaryLogRecordKind, FormatErrorMessage>? OnRecoverableReadError;
+        /// <inheritdoc cref="IBinaryLogReaderErrors.OnRecoverableReadError"/>
+        public event Action<BinaryLogReaderErrorEventArgs>? OnRecoverableReadError;
 
         /// <summary>
         /// WARNING: This event is under low support and low maintenance - please use events directly exposed by <see cref="BinaryLogReplayEventSource"/> instead. 
@@ -85,6 +85,17 @@ namespace Microsoft.Build.Logging
         }
 
         /// <summary>
+        /// Read the provided binary log file opened as a stream and raise corresponding events for each BuildEventArgs
+        /// </summary>
+        /// <param name="sourceFileStream">Stream over the binlog content.</param>
+        /// <param name="cancellationToken"></param>
+        public void Replay(Stream sourceFileStream, CancellationToken cancellationToken)
+        {
+            using var binaryReader = OpenReader(sourceFileStream);
+            Replay(binaryReader, cancellationToken);
+        }
+
+        /// <summary>
         /// Creates a <see cref="BinaryReader"/> for the provided binary log file.
         /// Performs decompression and buffering in the optimal way.
         /// Caller is responsible for disposing the returned reader.
@@ -97,19 +108,31 @@ namespace Microsoft.Build.Logging
             try
             {
                 stream = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                var gzipStream = new GZipStream(stream, CompressionMode.Decompress, leaveOpen: false);
-
-                // wrapping the GZipStream in a buffered stream significantly improves performance
-                // and the max throughput is reached with a 32K buffer. See details here:
-                // https://github.com/dotnet/runtime/issues/39233#issuecomment-745598847
-                var bufferedStream = new BufferedStream(gzipStream, 32768);
-                return new BinaryReader(bufferedStream.ToReadableSeekableStream());
+                return OpenReader(stream);
             }
             catch (Exception)
             {
                 stream?.Dispose();
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Creates a <see cref="BinaryReader"/> for the provided binary log file.
+        /// Performs decompression and buffering in the optimal way.
+        /// Caller is responsible for disposing the returned reader.
+        /// </summary>
+        /// <param name="sourceFileStream">Stream over the binlog file</param>
+        /// <returns>BinaryReader of the given binlog file.</returns>
+        public static BinaryReader OpenReader(Stream sourceFileStream)
+        {
+            var gzipStream = new GZipStream(sourceFileStream, CompressionMode.Decompress, leaveOpen: false);
+
+            // wrapping the GZipStream in a buffered stream significantly improves performance
+            // and the max throughput is reached with a 32K buffer. See details here:
+            // https://github.com/dotnet/runtime/issues/39233#issuecomment-745598847
+            var bufferedStream = new BufferedStream(gzipStream, 32768);
+            return new BinaryReader(bufferedStream);
         }
 
         /// <summary>
@@ -192,7 +215,7 @@ namespace Microsoft.Build.Logging
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
         public void Replay(BuildEventArgsReader reader, CancellationToken cancellationToken)
         {
-            bool supportsForwardCompatibility = reader.FileFormatVersion >= 18;
+            bool supportsForwardCompatibility = reader.FileFormatVersion >= BinaryLogger.ForwardCompatibilityMinimalVersion;
 
             // Allow any possible deferred subscriptions to be registered
             if (HasStructuredEventsSubscribers || !supportsForwardCompatibility)
@@ -245,6 +268,13 @@ namespace Microsoft.Build.Logging
                     _rawLogRecordReceived?.Invoke(instance.RecordKind, instance.Stream);
                 }
             }
+
+            // Unsubscribe from events for a case if the reader is reused (upon cancellation).
+            reader.EmbeddedContentRead -= _embeddedContentRead;
+            reader.ArchiveFileEncountered -= _archiveFileEncountered;
+            reader.StringReadDone -= _stringReadDone;
+            reader.StringEncountered -= _stringEncountered;
+            reader.OnRecoverableReadError -= OnRecoverableReadError;
         }
 
         /// <inheritdoc cref="IRawLogEventsSource.DeferredInitialize"/>

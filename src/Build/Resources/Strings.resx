@@ -2061,8 +2061,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="Binlog_StreamUtils_SeekNonOrigin" xml:space="preserve">
     <value>Only seeking from SeekOrigin.Current is supported.</value>
   </data>
-  <data name="Binlog_StreamUtils_ExpandUnsupported" xml:space="preserve">
-    <value>Expanding stream is not supported.</value>
+  <data name="Binlog_StreamUtils_SetLengthUnsupported" xml:space="preserve">
+    <value>Changing the stream length is not supported.</value>
   </data>
   <data name="Binlog_StreamUtils_WriteUnsupported" xml:space="preserve">
     <value>Writing is not supported.</value>

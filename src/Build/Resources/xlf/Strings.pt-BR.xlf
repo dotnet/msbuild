@@ -96,11 +96,6 @@
         <target state="new">Structured events and raw events cannot be replayed at the same time.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Binlog_StreamUtils_ExpandUnsupported">
-        <source>Expanding stream is not supported.</source>
-        <target state="new">Expanding stream is not supported.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Binlog_StreamUtils_MustBeReadable">
         <source>Stream must be readable.</source>
         <target state="new">Stream must be readable.</target>
@@ -109,6 +104,11 @@
       <trans-unit id="Binlog_StreamUtils_SeekNonOrigin">
         <source>Only seeking from SeekOrigin.Current is supported.</source>
         <target state="new">Only seeking from SeekOrigin.Current is supported.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_SetLengthUnsupported">
+        <source>Changing the stream length is not supported.</source>
+        <target state="new">Changing the stream length is not supported.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_StreamUtils_UnsupportedSkipOffset">

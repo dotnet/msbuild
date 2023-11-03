@@ -938,14 +938,14 @@ namespace Microsoft.Build.UnitTests
                 SkipUnknownEventParts = true
             };
 
-            List<(ReaderErrorType errorType, BinaryLogRecordKind recordKind, string error)> readerErrors = new();
-            buildEventArgsReader.OnRecoverableReadError += (t, et, e) => readerErrors.Add((t, et, e()));
+            List<BinaryLogReaderErrorEventArgs> readerErrors = new();
+            buildEventArgsReader.OnRecoverableReadError += readerErrors.Add;
 
             var deserializedError = (BuildErrorEventArgs)buildEventArgsReader.Read();
 
             readerErrors.Count.ShouldBe(1);
-            readerErrors[0].errorType.ShouldBe(ReaderErrorType.UnknownEventData);
-            readerErrors[0].recordKind.ShouldBe(BinaryLogRecordKind.Error);
+            readerErrors[0].ErrorType.ShouldBe(ReaderErrorType.UnknownEventData);
+            readerErrors[0].RecordKind.ShouldBe(BinaryLogRecordKind.Error);
 
             deserializedError.Should().BeEquivalentTo(error);
 
@@ -998,14 +998,14 @@ namespace Microsoft.Build.UnitTests
                 SkipUnknownEvents = true
             };
 
-            List<(ReaderErrorType errorType, BinaryLogRecordKind recordKind, string error)> readerErrors = new();
-            buildEventArgsReader.OnRecoverableReadError += (t, et, e) => readerErrors.Add((t, et, e()));
+            List<BinaryLogReaderErrorEventArgs> readerErrors = new();
+            buildEventArgsReader.OnRecoverableReadError += readerErrors.Add;
 
             var deserializedEvent = buildEventArgsReader.Read();
 
             readerErrors.Count.ShouldBe(1);
-            readerErrors[0].errorType.ShouldBe(ReaderErrorType.UnkownEventType);
-            readerErrors[0].recordKind.ShouldBe(unknownType);
+            readerErrors[0].ErrorType.ShouldBe(ReaderErrorType.UnkownEventType);
+            readerErrors[0].RecordKind.ShouldBe(unknownType);
 
             deserializedEvent.Should().BeEquivalentTo(finished);
 
@@ -1049,15 +1049,15 @@ namespace Microsoft.Build.UnitTests
                 SkipUnknownEvents = true
             };
 
-            List<(ReaderErrorType errorType, BinaryLogRecordKind recordKind, string error)> readerErrors = new();
-            buildEventArgsReader.OnRecoverableReadError += (t, et, e) => readerErrors.Add((t, et, e()));
+            List<BinaryLogReaderErrorEventArgs> readerErrors = new();
+            buildEventArgsReader.OnRecoverableReadError += readerErrors.Add;
 
             var deserializedEvent = buildEventArgsReader.Read();
 
             readerErrors.Count.ShouldBe(1);
-            readerErrors[0].errorType.ShouldBe(ReaderErrorType.UnknownFormatOfEventData);
-            readerErrors[0].recordKind.ShouldBe(BinaryLogRecordKind.Error);
-            readerErrors[0].error.ShouldContain("FormatException");
+            readerErrors[0].ErrorType.ShouldBe(ReaderErrorType.UnknownFormatOfEventData);
+            readerErrors[0].RecordKind.ShouldBe(BinaryLogRecordKind.Error);
+            readerErrors[0].GetFormattedMessage().ShouldContain("FormatException");
 
             deserializedEvent.Should().BeEquivalentTo(finished);
 
@@ -1105,15 +1105,15 @@ namespace Microsoft.Build.UnitTests
                 SkipUnknownEvents = true
             };
 
-            List<(ReaderErrorType errorType, BinaryLogRecordKind recordKind, string error)> readerErrors = new();
-            buildEventArgsReader.OnRecoverableReadError += (t, et, e) => readerErrors.Add((t, et, e()));
+            List<BinaryLogReaderErrorEventArgs> readerErrors = new();
+            buildEventArgsReader.OnRecoverableReadError += readerErrors.Add;
 
             var deserializedEvent = buildEventArgsReader.Read();
 
             readerErrors.Count.ShouldBe(1);
-            readerErrors[0].errorType.ShouldBe(ReaderErrorType.UnknownFormatOfEventData);
-            readerErrors[0].recordKind.ShouldBe(BinaryLogRecordKind.Error);
-            readerErrors[0].error.ShouldContain("EndOfStreamException");
+            readerErrors[0].ErrorType.ShouldBe(ReaderErrorType.UnknownFormatOfEventData);
+            readerErrors[0].RecordKind.ShouldBe(BinaryLogRecordKind.Error);
+            readerErrors[0].GetFormattedMessage().ShouldContain("EndOfStreamException");
 
             deserializedEvent.Should().BeEquivalentTo(finished);
 

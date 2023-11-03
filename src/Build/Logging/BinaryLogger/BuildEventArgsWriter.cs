@@ -41,7 +41,7 @@ namespace Microsoft.Build.Logging
         ///  (distinct from values count due to variable int encoding)
         /// So using same technique as with 'currentRecordStream'.
         /// </summary>
-        private readonly MemoryStream nameValueListStream = new MemoryStream(256);
+        private readonly MemoryStream nameValueListStream;
 
         /// <summary>
         /// The binary writer around the originalStream.
@@ -128,6 +128,8 @@ namespace Microsoft.Build.Logging
             // this doesn't exceed 30K for smaller binlogs so seems like a reasonable
             // starting point to avoid reallocations in the common case
             this.currentRecordStream = new MemoryStream(65536);
+
+            this.nameValueListStream = new MemoryStream(256);
 
             this.originalBinaryWriter = binaryWriter;
             this.currentRecordWriter = new BinaryWriter(currentRecordStream);

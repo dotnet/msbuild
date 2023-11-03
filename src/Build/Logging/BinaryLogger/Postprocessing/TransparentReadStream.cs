@@ -67,7 +67,7 @@ namespace Microsoft.Build.Logging
         public override long Position
         {
             get => _position;
-            set => this.SkipBytes(value - _position, true);
+            set => this.SkipBytes(value - _position);
         }
 
         public override void Flush()
@@ -94,14 +94,14 @@ namespace Microsoft.Build.Logging
                 throw new NotSupportedException(ResourceUtilities.GetResourceString("Binlog_StreamUtils_SeekNonOrigin"));
             }
 
-            this.SkipBytes(offset, true);
+            this.SkipBytes(offset);
 
             return _position;
         }
 
         public override void SetLength(long value)
         {
-            throw new NotSupportedException(ResourceUtilities.GetResourceString("Binlog_StreamUtils_ExpandUnsupported"));
+            throw new NotSupportedException(ResourceUtilities.GetResourceString("Binlog_StreamUtils_SetLengthUnsupported"));
         }
 
         public override void Write(byte[] buffer, int offset, int count)

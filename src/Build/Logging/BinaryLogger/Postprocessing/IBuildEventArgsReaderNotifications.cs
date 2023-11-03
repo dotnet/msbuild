@@ -9,6 +9,6 @@ namespace Microsoft.Build.Logging
     public interface IBuildEventArgsReaderNotifications :
         IBuildEventStringsReader,
         IBuildFileReader,
-        IBinlogReaderErrors
+        IBinaryLogReaderErrors
     { }
 }
