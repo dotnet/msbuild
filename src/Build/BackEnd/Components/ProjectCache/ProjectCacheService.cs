@@ -525,7 +525,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
                     ErrorUtilities.VerifyThrow(plugin.Instance != null, "Plugin '{0}' instance is null", plugin.Name);
 
-                    MSBuildEventSource.Log.ProjectCacheGetCacheResultStart(plugin.Name, buildRequest.ProjectFullPath, targetNames);
+                    MSBuildEventSource.Log.ProjectCacheGetCacheResultStart(plugin.Name, buildRequest.ProjectFullPath, targetNames ?? "<default>");
                     cacheResult = await plugin.Instance!.GetCacheResultAsync(buildRequest, pluginLogger, cancellationToken);
 
                     if (pluginLogger.HasLoggedErrors || cacheResult.ResultType == CacheResultType.None)
@@ -548,7 +548,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     if (MSBuildEventSource.Log.IsEnabled())
                     {
                         string cacheResultType = cacheResult?.ResultType.ToString() ?? nameof(CacheResultType.None);
-                        MSBuildEventSource.Log.ProjectCacheGetCacheResultStop(plugin.Name, buildRequest.ProjectFullPath, targetNames, cacheResultType);
+                        MSBuildEventSource.Log.ProjectCacheGetCacheResultStop(plugin.Name, buildRequest.ProjectFullPath, targetNames ?? "<default>", cacheResultType);
                     }
                 }
             }
