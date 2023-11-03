@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -33,7 +34,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test for bug where the MSBuild does not respect "en" CultureInfo
         /// </summary>
-        [WindowsOnlyTheory]
+        [Theory]
         [InlineData("en", "en")]
         [InlineData("jp", "jp")]
         [InlineData("fr", "fr")]
