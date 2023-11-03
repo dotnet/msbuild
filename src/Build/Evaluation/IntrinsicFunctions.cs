@@ -398,11 +398,11 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Hash the string independent of bitness and target framework.
+        /// Hash the string independent of bitness, target framework and default codepage of the environment.
         /// </summary>
         internal static int StableStringHash(string toHash)
         {
-            return CommunicationsUtilities.GetHashCode(toHash);
+            return FowlerNollVo1aHash.ComputeHash(toHash);
         }
 
         /// <summary>

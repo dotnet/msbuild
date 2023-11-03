@@ -388,7 +388,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   
   <PropertyGroup>
     <MSBuildCopyMarkerName Condition ="'$(MSBuildCopyMarkerName)' == ''">$(MSBuildProjectFile)</MSBuildCopyMarkerName>
-    <MSBuildCopyMarkerName Condition ="'$(MSBuildCopyMarkerName.Length)' &gt; '16' and '$(ProjectGuid)' != ''">$(MSBuildCopyMarkerName.Substring(0,8)).$(ProjectGuid.Substring(1,8))</MSBuildCopyMarkerName>
+	<!-- For a long MSBuildProjectFile let's shorten this to 17 chars - using the first 8 chars of the filename and either the ProjectGuid if it exists -->
+    <MSBuildCopyMarkerName Condition ="'$(MSBuildCopyMarkerName.Length)' &gt; '17' and '$(ProjectGuid)' != ''">$(MSBuildProjectFile.Substring(0,8)).$(ProjectGuid.Substring(1,8))</MSBuildCopyMarkerName>
+	<!-- or a filename hash if the guid is not present (in such case the filename was not shortened and is still over 17 chars long). -->
+	<MSBuildCopyMarkerName Condition ="'$(MSBuildCopyMarkerName.Length)' &gt; '17'">$(MSBuildProjectFile.Substring(0,8)).$([MSBuild]::StableStringHash($(MSBuildProjectFile)).ToString("X8"))</MSBuildCopyMarkerName>
   </PropertyGroup>
 
   <ItemGroup>
