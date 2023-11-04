@@ -590,9 +590,7 @@ namespace Microsoft.Build.Tasks
             {
                 commandLine.AppendSwitch("-c");
                 commandLine.AppendTextUnquoted(" \"");
-                // Set the locale to the POSIX 'Computer C' English locale.
-                // This makes the task command output the same text independent of the system locale.
-                commandLine.AppendTextUnquoted("export LANG=C; export LC_ALL=C; . ");
+                commandLine.AppendTextUnquoted(". ");
                 commandLine.AppendFileNameIfNotNull(batchFileForCommandLine);
                 commandLine.AppendTextUnquoted("\"");
             }
