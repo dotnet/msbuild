@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -27,8 +28,8 @@ namespace Microsoft.Build.UnitTests
             string nonAnsiCharacters = "\u521B\u5EFA";
             string pathWithAnsiCharacters = @"c:\windows\system32\cmd.exe";
 
-            Assert.False(EncodingUtilities.CanEncodeString(defaultEncoding.CodePage, nonAnsiCharacters));
-            Assert.True(EncodingUtilities.CanEncodeString(defaultEncoding.CodePage, pathWithAnsiCharacters));
+            EncodingUtilities.CanEncodeString(defaultEncoding.CodePage, nonAnsiCharacters).ShouldBeFalse();
+            EncodingUtilities.CanEncodeString(defaultEncoding.CodePage, pathWithAnsiCharacters).ShouldBeTrue();
         }
 
         /// <summary>
@@ -50,8 +51,7 @@ namespace Microsoft.Build.UnitTests
             // Override the ui language by setting environment variable
             testEnvironment.SetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE, inputLanguage);
 
-            var result = EncodingUtilities.GetExternalOverriddenUILanguageIfSupportableWithEncoding();
-            Assert.Equal(new CultureInfo(expectedLanguage), result);
+            EncodingUtilities.GetExternalOverriddenUILanguageIfSupportableWithEncoding().ShouldBeEquivalentTo(new CultureInfo(expectedLanguage));
         }
     }
 }
