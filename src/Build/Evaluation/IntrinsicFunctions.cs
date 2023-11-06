@@ -402,7 +402,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal static int StableStringHash(string toHash)
         {
-            return FowlerNollVo1aHash.ComputeHash(toHash);
+            return FowlerNollVo1aHash.ComputeHash32(toHash);
         }
 
         /// <summary>
