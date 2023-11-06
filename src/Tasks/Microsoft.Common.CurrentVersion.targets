@@ -5748,17 +5748,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   -->
   <!--
     ============================================================
-    This stub `MSBuildRunTests` target allows for targets implementing Test execution functionality
+    This stub `VSTest` target allows for targets implementing Test execution functionality
     to run after it.
     
     For example:
-    <Target Name="ExecuteTests" AfterTargets="MSBuildRunTests">
+    <Target Name="RunVSTest" AfterTargets="VSTest">
      (implementation)
     </Target>
     ============================================================
   -->
 
-  <Target Name="MSBuildRunTests"></Target>
+  <Target Name="VSTest"></Target>
 
   <!--
     ***********************************************************************************************
