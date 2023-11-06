@@ -900,6 +900,10 @@ namespace Microsoft.Build.CommandLine
 
                 exitType = ExitType.SwitchError;
             }
+            catch (InvalidProjectFileException)
+            {
+                exitType = ExitType.BuildError;
+            }
             // handle configuration exceptions: problems reading toolset information from msbuild.exe.config or the registry
             catch (InvalidToolsetDefinitionException e)
             {
