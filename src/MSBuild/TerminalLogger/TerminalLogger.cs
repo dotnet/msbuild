@@ -199,7 +199,7 @@ internal sealed class TerminalLogger : INodeLogger
     /// <inheritdoc/>
     public void Initialize(IEventSource eventSource, int nodeCount)
     {
-        // When MSBUILDNOINPROCNODE enabled, NodeId reported by build equals 2. We need to reserve an extra spot for this case. 
+        // When MSBUILDNOINPROCNODE enabled, NodeId's reported by build start with 2. We need to reserve an extra spot for this case. 
         _nodes = new NodeStatus[nodeCount + 1];
 
         Initialize(eventSource);
