@@ -272,10 +272,7 @@ namespace Microsoft.Build.Shared
             CultureInfo? externalLanguageSetting = GetExternalOverriddenUILanguage();
             if (externalLanguageSetting != null)
             {
-                if (
-                    !externalLanguageSetting.TwoLetterISOLanguageName.Equals("en", StringComparison.InvariantCultureIgnoreCase) &&
-                    CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding()
-                    )
+                if (CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
                 {
                     // Setting both encodings causes a change in the CHCP, making it so we don't need to P-Invoke CHCP ourselves.
                     Console.OutputEncoding = Encoding.UTF8;
