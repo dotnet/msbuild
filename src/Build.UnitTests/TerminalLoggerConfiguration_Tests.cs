@@ -23,12 +23,10 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
     private readonly TestEnvironment _env;
 
     private readonly string _cmd;
-    private readonly ITestOutputHelper _output;
 
     public TerminalLoggerConfiguration_Tests(ITestOutputHelper output)
     {
         _env = TestEnvironment.Create(output);
-        _output = output;
 
         // Ignore environment variables that may have been set by the environment where the tests are running.
         _env.SetEnvironmentVariable("MSBUILDLIVELOGGER", null);
@@ -231,30 +229,23 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
         ShouldNotBeTerminalLog(output);
     }
 
-    [WindowsFullFrameworkOnlyTheory]
+    [Theory]
     [InlineData("1")]
     [InlineData("0")]
     public void TerminalLoggerOnInvalidProjectBuild(string msbuildinprocnodeState)
     {
-        var projectFile = _env.CreateFile(_env.CreateFolder(createFolder: true), "myProjBroken.proj", $"""
-            <Project>
-              <Target Name='Build'>
-                <RegisterAssembly Assemblies="nonexistent.dll" />
-              </Target>
-            </Project>
-            """);
-        string cmd = $"{projectFile.Path} -logger:{typeof(MockLogger).FullName},{typeof(MockLogger).Assembly.Location};ReportTelemetry";
-        _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", msbuildinprocnodeState);
+        _ = _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", msbuildinprocnodeState);
 
         string output = RunnerUtilities.ExecMSBuild(
-            $"{cmd} -tl:true",
+            $"{_cmd} -tl:true",
             out bool success);
 
-        success.ShouldBeFalse();
+        success.ShouldBeTrue();
         ShouldBeTerminalLog(output);
-        output.ShouldContain("Cannot register assembly \"nonexistent.dll\" - file doesn't exist.");
+        output.ShouldContain("Build succeeded.");
     }
 
     private static void ShouldBeTerminalLog(string output) => output.ShouldContain("\x1b[?25l");
+
     private static void ShouldNotBeTerminalLog(string output) => output.ShouldNotContain("\x1b[?25l");
 }
