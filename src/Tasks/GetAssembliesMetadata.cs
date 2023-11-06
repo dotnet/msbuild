@@ -47,7 +47,8 @@ namespace Microsoft.Build.Tasks
             var assembliesMetadata = new List<ITaskItem>();
             foreach (string assemblyPath in AssemblyPaths)
             {
-                if (Directory.Exists(assemblyPath))
+                // During DTB the referenced project may not has been built yet, so we need to check if the assembly already exists.
+                if (File.Exists(assemblyPath))
                 {
                     AssemblyInformation assemblyInformation = new(assemblyPath);
                     AssemblyAttributes attributes = assemblyInformation.GetAssemblyMetadata();

@@ -3049,7 +3049,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     Resolve Assembly attributes for assemblies
     The ResolveComReferences dependency is needed for defining COM-referenced wrappers only,
     but this target handles all the assembly references from ResolveAssemblyReferences
-    The target is needed by the Visual Studio legacy project system
+    This target is needed by the Visual Studio legacy project system during design time build only
 
         [IN]
         @(ReferencePath) - Paths to COM-referenced wrappers and other types of assembly references.
@@ -3061,7 +3061,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target
       Name="_GetAssembliesMetadata"
-      Condition="'@(ReferencePath)'!=''"
+      Condition="'@(ReferencePath)'!=''and '$(DesignTimeBuild)' == 'true' "
       Returns="@(_AssembliesMetadata)"
       DependsOnTargets="ResolveComReferences"
         >
