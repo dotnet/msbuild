@@ -4,8 +4,8 @@ trigger: none # Prevents this pipeline from triggering on check-ins
 pr: none # don't run this on PR as well
 
 parameters:
-  # Dotnet installer channel from which to take the latest dotnet bits.
-  - name: DotnetInstallerChannel
+  # Dotnet installer channels from which to take the latest dotnet bits. Seperated by comma
+  - name: DotnetInstallerChannels
     displayName: Dotnet installer channel
     type: string
     default: 'none'
@@ -44,16 +44,18 @@ jobs:
   steps:
   - powershell: |
       mkdir '$(System.ArtifactsDirectory)/installer'
-
-      $dotnetChannel = '${{parameters.DotnetInstallerChannel}}'
-      $sdks = "dotnet-sdk-win-x64.zip", "dotnet-sdk-linux-x64.tar.gz"
-
-      foreach ($sdk in $sdks)
+      $dotnetInstallerChannels =  '${{parameters.DotnetInstallerChannels}}'.split(",").trim()
+      foreach( $dotnetChannel in $dotnetInstallerChannels)
       {
-        Write-Host "Downloading dotnet $sdk from channel $dotnetChannel"
-        Invoke-WebRequest `
-          -Uri "https://aka.ms/dotnet/$dotnetChannel/daily/$sdk" `
-          -OutFile "$(System.ArtifactsDirectory)/installer/$sdk"
+        $sdks = "dotnet-sdk-win-x64.zip", "dotnet-sdk-linux-x64.tar.gz"
+
+        foreach ($sdk in $sdks)
+        {
+          Write-Host "Downloading dotnet $sdk from channel $dotnetChannel"
+          Invoke-WebRequest `
+            -Uri "https://aka.ms/dotnet/$dotnetChannel/daily/$sdk" `
+            -OutFile "$(System.ArtifactsDirectory)/installer/$dotnetChannel$sdk"
+        }
       }
       mkdir '$(Pipeline.Workspace)/artifacts'
     displayName: Download latest dotnet sdks
@@ -75,48 +77,59 @@ jobs:
     displayName: Download msbuild artifacts
 
   - powershell: |
-      $sdk = "dotnet-sdk-win-x64"
+      $dotnetInstallerChannels =  '${{parameters.DotnetInstallerChannels}}'.split(",").trim()
+      foreach ($dotnetChannel in $dotnetInstallerChannels)
+      {
+        $sdks = @($dotnetChannel + "dotnet-sdk-win-x64")
+        foreach ($sdk in $sdks)
+        {
+          Write-Host "Extracting $(System.ArtifactsDirectory)/installer/$sdk.zip"
+          Expand-Archive "$(System.ArtifactsDirectory)/installer/$sdk.zip" -DestinationPath "$(Pipeline.Workspace)/exp-dotnet/$sdk"
 
-      Write-Host "Extracting $(System.ArtifactsDirectory)/installer/$sdk.zip"
-      Expand-Archive "$(System.ArtifactsDirectory)/installer/$sdk.zip" -DestinationPath "$(Pipeline.Workspace)/exp-dotnet/$sdk"
+          $dotnetDirectory = Get-ChildItem -Directory -Path "$(Pipeline.Workspace)/exp-dotnet/$sdk/sdk"
+          $dotnetVersion = $dotnetDirectory.Name
+          Write-Host "Detected dotnet version: $dotnetVersion"
 
-      $dotnetDirectory = Get-ChildItem -Directory -Path "$(Pipeline.Workspace)/exp-dotnet/$sdk/sdk"
-      $dotnetVersion = $dotnetDirectory.Name
-      Write-Host "Detected dotnet version: $dotnetVersion"
+          Write-Host "Updating MSBuild dlls."
+          $(Build.SourcesDirectory)/scripts/Deploy-MSBuild.ps1 `
+            -destination "$(Pipeline.Workspace)/exp-dotnet/$sdk/sdk/$dotnetVersion" `
+            -binDirectory "$(System.ArtifactsDirectory)/msbuild/artifacts/bin" `
+            -configuration Release `
+            -makeBackup $false
 
-      Write-Host "Updating MSBuild dlls."
-      $(Build.SourcesDirectory)/scripts/Deploy-MSBuild.ps1 `
-        -destination "$(Pipeline.Workspace)/exp-dotnet/$sdk/sdk/$dotnetVersion" `
-        -binDirectory "$(System.ArtifactsDirectory)/msbuild/artifacts/bin" `
-        -configuration Release `
-        -makeBackup $false
-
-      Write-Host "Compressing dotnet sdk files"
-      Get-ChildItem -Path "$(Pipeline.Workspace)/exp-dotnet/$sdk" | Compress-Archive -DestinationPath "$(Pipeline.Workspace)/artifacts/$sdk.zip"
-
+          Write-Host "Compressing dotnet sdk files"
+          Get-ChildItem -Path "$(Pipeline.Workspace)/exp-dotnet/$sdk" | Compress-Archive -DestinationPath "$(Pipeline.Workspace)/artifacts/$sdk.zip"
+        }
+      }
     displayName: Dogfood msbuild dlls to dotnet sdk win-x64
 
   - powershell: |
-      $sdk = "dotnet-sdk-linux-x64"
+       $dotnetInstallerChannels =  '${{parameters.DotnetInstallerChannels}}'.split(",").trim()
+      foreach ($dotnetChannel in $dotnetInstallerChannels)
+      {
+        $sdks = @($dotnetChannel + "dotnet-sdk-linux-x64")
+        foreach ($sdk in $sdks)
+        {
+          mkdir "$(Pipeline.Workspace)/exp-dotnet/$sdk"
 
-      mkdir "$(Pipeline.Workspace)/exp-dotnet/$sdk"
+          Write-Host "Extracting $(System.ArtifactsDirectory)/installer/$sdk.tar.gz"
+          tar -xzvf "$(System.ArtifactsDirectory)/installer/$sdk.tar.gz" -C "$(Pipeline.Workspace)/exp-dotnet/$sdk"
 
-      Write-Host "Extracting $(System.ArtifactsDirectory)/installer/$sdk.tar.gz"
-      tar -xzvf "$(System.ArtifactsDirectory)/installer/$sdk.tar.gz" -C "$(Pipeline.Workspace)/exp-dotnet/$sdk"
+          $dotnetDirectory = Get-ChildItem -Directory -Path $(Pipeline.Workspace)/exp-dotnet/$sdk/sdk
+          $dotnetVersion = $dotnetDirectory.Name
+          Write-Host "Detected dotnet version: $dotnetVersion"
 
-      $dotnetDirectory = Get-ChildItem -Directory -Path $(Pipeline.Workspace)/exp-dotnet/$sdk/sdk
-      $dotnetVersion = $dotnetDirectory.Name
-      Write-Host "Detected dotnet version: $dotnetVersion"
+          Write-Host "Updating MSBuild dlls."
+          $(Build.SourcesDirectory)/scripts/Deploy-MSBuild.ps1 `
+            -destination "$(Pipeline.Workspace)/exp-dotnet/$sdk/sdk/$dotnetVersion" `
+            -binDirectory "$(System.ArtifactsDirectory)/msbuild/artifacts/bin" `
+            -configuration Release `
+            -makeBackup $false
 
-      Write-Host "Updating MSBuild dlls."
-      $(Build.SourcesDirectory)/scripts/Deploy-MSBuild.ps1 `
-        -destination "$(Pipeline.Workspace)/exp-dotnet/$sdk/sdk/$dotnetVersion" `
-        -binDirectory "$(System.ArtifactsDirectory)/msbuild/artifacts/bin" `
-        -configuration Release `
-        -makeBackup $false
-
-      Write-Host "Compressing dotnet sdk files"
-      tar -czvf "$(Pipeline.Workspace)/artifacts/$sdk.tar.gz" -C "$(Pipeline.Workspace)/exp-dotnet/$sdk" .
+          Write-Host "Compressing dotnet sdk files"
+          tar -czvf "$(Pipeline.Workspace)/artifacts/$sdk.tar.gz" -C "$(Pipeline.Workspace)/exp-dotnet/$sdk" .
+        }
+      }
     displayName: Dogfood msbuild dlls to dotnet sdk linux-x64
 
   - task: PublishPipelineArtifact@1
