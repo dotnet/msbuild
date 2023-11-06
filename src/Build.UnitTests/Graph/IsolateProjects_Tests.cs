@@ -58,7 +58,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     </Target>
 
                     <Target Name='CallTarget'>
-                        <CallTarget Targets='SelfTarget'/>  
+                        <CallTarget Targets='SelfTarget'/>
                     </Target>
 
                     <Target Name='SelfTarget'>

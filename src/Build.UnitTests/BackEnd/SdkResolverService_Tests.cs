@@ -131,7 +131,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
         [Fact]
         // Scenario: MockSdkResolverWithResolvableSdkPattern1 is a specific resolver, it is loaded but did not resolve sdk.
-        // MockSdkResolver1 is a general resolver (i.e. resolver without pattern), it resolves sdk on a fallback. 
+        // MockSdkResolver1 is a general resolver (i.e. resolver without pattern), it resolves sdk on a fallback.
         public void AssertFirstResolverCanResolve()
         {
             SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy());

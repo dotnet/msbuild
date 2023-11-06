@@ -21,7 +21,7 @@ using Microsoft.Build.Shared;
     * require T implements IKeyed, and accept IKeyed directly where necessary
     * all constructors require a comparer -- an IEqualityComparer<IKeyed> -- to avoid mistakes
     * change Contains to give you back the found entry, rather than a boolean
-    * change Add so that it always adds, even if there's an entry already present with the same name. 
+    * change Add so that it always adds, even if there's an entry already present with the same name.
            We want "replacement" semantics, like a dictionary keyed on name.
     * constructor that allows the collection to be read-only
     * implement IDictionary<string, T>
@@ -43,36 +43,36 @@ namespace Microsoft.Build.Collections
     /// Implementation notes:
     /// This uses an array-based implementation similar to <see cref="Dictionary{TKey, TValue}" />, using a buckets array
     /// to map hash values to the Slots array. Items in the Slots array that hash to the same value
-    /// are chained together through the "next" indices. 
-    /// 
+    /// are chained together through the "next" indices.
+    ///
     /// The capacity is always prime; so during resizing, the capacity is chosen as the next prime
-    /// greater than double the last capacity. 
-    /// 
-    /// The underlying data structures are lazily initialized. Because of the observation that, 
+    /// greater than double the last capacity.
+    ///
+    /// The underlying data structures are lazily initialized. Because of the observation that,
     /// in practice, hashtables tend to contain only a few elements, the initial capacity is
     /// set very small (3 elements) unless the ctor with a collection is used.
-    /// 
-    /// The +/- 1 modifications in methods that add, check for containment, etc allow us to 
-    /// distinguish a hash code of 0 from an uninitialized bucket. This saves us from having to 
+    ///
+    /// The +/- 1 modifications in methods that add, check for containment, etc allow us to
+    /// distinguish a hash code of 0 from an uninitialized bucket. This saves us from having to
     /// reset each bucket to -1 when resizing. See Contains, for example.
-    /// 
+    ///
     /// Set methods such as UnionWith, IntersectWith, ExceptWith, and SymmetricExceptWith modify
     /// this set.
-    /// 
+    ///
     /// Some operations can perform faster if we can assume "other" contains unique elements
     /// according to this equality comparer. The only times this is efficient to check is if
     /// other is a hashset. Note that checking that it's a hashset alone doesn't suffice; we
-    /// also have to check that the hashset is using the same equality comparer. If other 
+    /// also have to check that the hashset is using the same equality comparer. If other
     /// has a different equality comparer, it will have unique elements according to its own
-    /// equality comparer, but not necessarily according to ours. Therefore, to go these 
+    /// equality comparer, but not necessarily according to ours. Therefore, to go these
     /// optimized routes we check that other is a hashset using the same equality comparer.
-    /// 
-    /// A HashSet with no elements has the properties of the empty set. (See IsSubset, etc. for 
+    ///
+    /// A HashSet with no elements has the properties of the empty set. (See IsSubset, etc. for
     /// special empty set checks.)
-    /// 
-    /// A couple of methods have a special case if other is this (e.g. SymmetricExceptWith). 
+    ///
+    /// A couple of methods have a special case if other is this (e.g. SymmetricExceptWith).
     /// If we didn't have these checks, we could be iterating over the set and modifying at
-    /// the same time. 
+    /// the same time.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [DebuggerTypeProxy(typeof(Microsoft.Build.Collections.HashSetDebugView<>))]
@@ -90,7 +90,7 @@ namespace Microsoft.Build.Collections
         // store lower 31 bits of hash code
         private const int Lower31BitMask = 0x7FFFFFFF;
 
-        // when constructing a hashset from an existing collection, it may contain duplicates, 
+        // when constructing a hashset from an existing collection, it may contain duplicates,
         // so this is used as the max acceptable excess ratio of capacity to count. Note that
         // this is only used on the ctor and not to automatically shrink if the hashset has, e.g,
         // a lot of adds followed by removes. Users must explicitly shrink by calling TrimExcess.
@@ -147,8 +147,8 @@ namespace Microsoft.Build.Collections
 
         /// <summary>
         /// Implementation Notes:
-        /// Since resizes are relatively expensive (require rehashing), this attempts to minimize 
-        /// the need to resize by setting the initial capacity based on size of collection. 
+        /// Since resizes are relatively expensive (require rehashing), this attempts to minimize
+        /// the need to resize by setting the initial capacity based on size of collection.
         /// </summary>
         public RetrievableEntryHashSet(int suggestedCapacity, IEqualityComparer<string> comparer)
             : this(comparer)
@@ -158,8 +158,8 @@ namespace Microsoft.Build.Collections
 
         /// <summary>
         /// Implementation Notes:
-        /// Since resizes are relatively expensive (require rehashing), this attempts to minimize 
-        /// the need to resize by setting the initial capacity based on size of collection. 
+        /// Since resizes are relatively expensive (require rehashing), this attempts to minimize
+        /// the need to resize by setting the initial capacity based on size of collection.
         /// </summary>
         public RetrievableEntryHashSet(IEnumerable<T> collection, IEqualityComparer<string> comparer)
             : this(comparer)
@@ -192,9 +192,9 @@ namespace Microsoft.Build.Collections
 
         protected RetrievableEntryHashSet(SerializationInfo info, StreamingContext context)
         {
-            // We can't do anything with the keys and values until the entire graph has been 
-            // deserialized and we have a reasonable estimate that GetHashCode is not going to 
-            // fail.  For the time being, we'll just cache this.  The graph is not valid until 
+            // We can't do anything with the keys and values until the entire graph has been
+            // deserialized and we have a reasonable estimate that GetHashCode is not going to
+            // fail.  For the time being, we'll just cache this.  The graph is not valid until
             // OnDeserialization has been called.
             _siInfo = info;
         }
@@ -253,7 +253,7 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
-        /// Remove all items from this set. This clears the elements but not the underlying 
+        /// Remove all items from this set. This clears the elements but not the underlying
         /// buckets and slots array. Follow this call by TrimExcess to release these.
         /// </summary>
         public void Clear()
@@ -268,7 +268,7 @@ namespace Microsoft.Build.Collections
                 Debug.Assert(_buckets != null, "m_buckets was null but m_lastIndex > 0");
 
                 // clear the elements so that the gc can reclaim the references.
-                // clear only up to m_lastIndex for m_slots 
+                // clear only up to m_lastIndex for m_slots
                 Array.Clear(_slots, 0, _lastIndex);
                 Array.Clear(_buckets, 0, _buckets.Length);
                 _lastIndex = 0;
@@ -392,7 +392,7 @@ namespace Microsoft.Build.Collections
 
         /// <summary>
         /// Remove entry that compares equal to T
-        /// </summary>        
+        /// </summary>
         public bool Remove(T item)
         {
             return Remove(item.Key);
@@ -542,9 +542,9 @@ namespace Microsoft.Build.Collections
         {
             if (_siInfo == null)
             {
-                // It might be necessary to call OnDeserialization from a container if the 
-                // container object also implements OnDeserialization. However, remoting will 
-                // call OnDeserialization again. We can return immediately if this function is 
+                // It might be necessary to call OnDeserialization from a container if the
+                // container object also implements OnDeserialization. However, remoting will
+                // call OnDeserialization again. We can return immediately if this function is
                 // called twice. Note we set m_siInfo to null at the end of this method.
                 return;
             }
@@ -586,7 +586,7 @@ namespace Microsoft.Build.Collections
         #region HashSet methods
 
         /// <summary>
-        /// Add item to this HashSet. 
+        /// Add item to this HashSet.
         /// *** MSBUILD NOTE: Always added - overwrite semantics
         /// </summary>
         public void Add(T item)
@@ -613,9 +613,9 @@ namespace Microsoft.Build.Collections
 
         /// <summary>
         /// Take the union of this HashSet with other. Modifies this set.
-        /// 
-        /// Implementation note: GetSuggestedCapacity (to increase capacity in advance avoiding 
-        /// multiple resizes ended up not being useful in practice; quickly gets to the 
+        ///
+        /// Implementation note: GetSuggestedCapacity (to increase capacity in advance avoiding
+        /// multiple resizes ended up not being useful in practice; quickly gets to the
         /// point where it's a wasteful check.
         /// </summary>
         /// <param name="other">enumerable with items to add</param>
@@ -695,13 +695,13 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Sets the capacity of this list to the size of the list (rounded up to nearest prime),
         /// unless count is 0, in which case we release references.
-        /// 
+        ///
         /// This method can be used to minimize a list's memory overhead once it is known that no
-        /// new elements will be added to the list. To completely clear a list and release all 
+        /// new elements will be added to the list. To completely clear a list and release all
         /// memory referenced by the list, execute the following statements:
-        /// 
+        ///
         /// list.Clear();
-        /// list.TrimExcess(); 
+        /// list.TrimExcess();
         /// </summary>
         public void TrimExcess()
         {
@@ -724,7 +724,7 @@ namespace Microsoft.Build.Collections
                 Slot[] newSlots = new Slot[newSize];
                 int[] newBuckets = new int[newSize];
 
-                // move down slots and rehash at the same time. newIndex keeps track of current 
+                // move down slots and rehash at the same time. newIndex keeps track of current
                 // position in newSlots array
                 int newIndex = 0;
                 for (int i = 0; i < _lastIndex; i++)
@@ -771,9 +771,9 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
-        /// Expand to new capacity. New capacity is next prime greater than or equal to suggested 
-        /// size. This is called when the underlying array is filled. This performs no 
-        /// defragmentation, allowing faster execution; note that this is reasonable since 
+        /// Expand to new capacity. New capacity is next prime greater than or equal to suggested
+        /// size. This is called when the underlying array is filled. This performs no
+        /// defragmentation, allowing faster execution; note that this is reasonable since
         /// AddEvenIfPresent attempts to insert new elements in re-opened spots.
         /// </summary>
         private void IncreaseCapacity()

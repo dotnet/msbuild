@@ -88,7 +88,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="projectFileName">Name of the project file with extension to be created.</param>
         /// <param name="projectContents">Contents of the project file to be created.</param>
         /// <param name="files">Files to be created.</param>
-        /// <param name="relativePathFromRootToProject">Path for the specified files to be created in relative to 
+        /// <param name="relativePathFromRootToProject">Path for the specified files to be created in relative to
         /// the root of the project directory.</param>
         public TransientTestProjectWithFiles CreateTestProjectWithFiles(string projectFileName, string projectContents, string[] files = null, string relativePathFromRootToProject = ".")
             => WithTransientTestState(new TransientTestProjectWithFiles(projectFileName, projectContents, files, relativePathFromRootToProject));
@@ -99,7 +99,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <param name="projectContents">Contents of the project file to be created.</param>
         /// <param name="files">Files to be created.</param>
-        /// <param name="relativePathFromRootToProject">Path for the specified files to be created in relative to 
+        /// <param name="relativePathFromRootToProject">Path for the specified files to be created in relative to
         /// the root of the project directory.</param>
         public TransientTestProjectWithFiles CreateTestProjectWithFiles(string projectContents, string[] files = null, string relativePathFromRootToProject = ".")
             => CreateTestProjectWithFiles("build.proj", projectContents, files, relativePathFromRootToProject);

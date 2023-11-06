@@ -395,9 +395,9 @@ namespace Microsoft.Build.Graph
                                     dependencyGuid);
                             }
 
-                            // Add it to the list of dependencies, but only if it should build in this solution configuration 
+                            // Add it to the list of dependencies, but only if it should build in this solution configuration
                             // (If a project is not selected for build in the solution configuration, it won't build even if it's depended on by something that IS selected for build)
-                            // .. and only if it's known to be MSBuild format, as projects can't use the information otherwise 
+                            // .. and only if it's known to be MSBuild format, as projects can't use the information otherwise
                             return dependencyProject?.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat
                                 ? dependencyProject.AbsolutePath
                                 : null;
@@ -491,7 +491,7 @@ namespace Microsoft.Build.Graph
                             }
 
                             // the project being evaluated has a circular dependency involving multiple projects
-                            // add this project to the list of projects involved in cycle 
+                            // add this project to the list of projects involved in cycle
                             var projectsInCycle = new List<string> { referenceNode.ProjectInstance.FullPath };
                             return (false, projectsInCycle);
                         }
@@ -604,7 +604,7 @@ namespace Microsoft.Build.Graph
             ProjectCollection projectCollection)
         {
             return _platformNegotiationInstancesCache.GetOrAdd(
-                new ConfigurationMetadata(projectPath, CreatePropertyDictionary(globalProperties)), 
+                new ConfigurationMetadata(projectPath, CreatePropertyDictionary(globalProperties)),
                 new Lazy<ProjectInstance>(() => _projectInstanceFactory(projectPath, globalProperties, projectCollection))).Value;
         }
 

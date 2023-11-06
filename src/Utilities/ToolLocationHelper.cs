@@ -1025,7 +1025,7 @@ namespace Microsoft.Build.Utilities
 
             try
             {
-                // TODO: Add caching so that we only have to read all this stuff in once. 
+                // TODO: Add caching so that we only have to read all this stuff in once.
                 string sdkRoot = GetPlatformSDKLocation(targetPlatformIdentifier, targetPlatformVersion, diskRoots, registryRoot);
                 string winmdLocation = null;
 
@@ -1839,7 +1839,7 @@ namespace Microsoft.Build.Utilities
                     return FileUtilities.EnsureNoTrailingSlash(legacyMsCorlib20Path);
                 }
 
-                // If for some reason the 2.0 framework is not installed in its default location then maybe someone is using the ".net 4.0" reference assembly 
+                // If for some reason the 2.0 framework is not installed in its default location then maybe someone is using the ".net 4.0" reference assembly
                 // location, if so then we can just use what ever version they passed in because it should be MSIL now and not bit specific.
             }
 
@@ -2236,7 +2236,7 @@ namespace Microsoft.Build.Utilities
                 if (string.IsNullOrEmpty(frameworkName.Profile)) // profiles are always in new locations
                 {
                     // If the identifier is ".NET Framework" and the version is a well know legacy version. Manually generate the list of reference assembly paths
-                    // based on the known chaining order. Pass null in for the two delegates so we call the static methods rather than require the creation and calling 
+                    // based on the known chaining order. Pass null in for the two delegates so we call the static methods rather than require the creation and calling
                     // of two delegates
                     dotNetFrameworkReferenceAssemblies = HandleLegacyDotNetFrameworkReferenceAssemblyPaths(
                         null,
@@ -2292,7 +2292,7 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-            // Still don't have one. 
+            // Still don't have one.
             // Probably it's 3.5 or earlier: make something reasonable.
             // VS uses the same algorithm to find something to display
             StringBuilder displayNameBuilder = new StringBuilder();
@@ -2545,7 +2545,7 @@ namespace Microsoft.Build.Utilities
                     ErrorUtilities.DebugTraceMessage("GatherExtensionSDKs", "Parsed sdk version folder '{0}' under '{1}'", sdkVersionDirectory.Name, sdkVersionDirectory.FullName);
                     if (Version.TryParse(sdkVersionDirectory.Name, out Version _))
                     {
-                        // Create SDK name based on the folder structure. We could open the manifest here and read the display name, but that would 
+                        // Create SDK name based on the folder structure. We could open the manifest here and read the display name, but that would
                         // add complexity and since things are supposed to be in a certain structure I don't think that is needed at this point.
                         string SDKKey = TargetPlatformSDK.GetSdkKey(sdkNameFolders.Name, sdkVersionDirectory.Name);
 
@@ -2644,7 +2644,7 @@ namespace Microsoft.Build.Utilities
                                 targetPlatformSDK.Path = platformSDKDirectory;
                             }
 
-                            // Gather the set of platforms supported by this SDK if it's a valid one. 
+                            // Gather the set of platforms supported by this SDK if it's a valid one.
                             if (!string.IsNullOrEmpty(targetPlatformSDK.Path))
                             {
                                 GatherPlatformsForSdk(targetPlatformSDK);
@@ -2686,7 +2686,7 @@ namespace Microsoft.Build.Utilities
             {
                 ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", "Gathering SDKS from registryRoot '{0}', Hive '{1}', View '{2}'", registryKeyRoot, registryHive, registryView);
 
-                // Attach the target platform to the registry root. This should give us something like 
+                // Attach the target platform to the registry root. This should give us something like
                 // SOFTWARE\MICROSOFT\Microsoft SDKs\Windows
 
                 // Get all of the platform identifiers
@@ -2764,7 +2764,7 @@ namespace Microsoft.Build.Utilities
                                 targetPlatformSDK.Path = platformSDKDirectory;
                             }
 
-                            // Gather the set of platforms supported by this SDK if it's a valid one. 
+                            // Gather the set of platforms supported by this SDK if it's a valid one.
                             if (!string.IsNullOrEmpty(targetPlatformSDK.Path))
                             {
                                 GatherPlatformsForSdk(targetPlatformSDK);
@@ -2877,7 +2877,7 @@ namespace Microsoft.Build.Utilities
             // Under WOW64 the HKEY_CURRENT_USER\SOFTWARE key is shared. This means the values are the same in the 64 bit and 32 bit views. This means we only need to get one view of this key.
             GatherSDKsFromRegistryImpl(platformMonikers, registryRoot, RegistryView.Default, RegistryHive.CurrentUser, getSubkeyNames, getRegistrySubKeyDefaultValue, openBaseKey, fileExists);
 
-            // Since SDKS can contain multiple architecture it makes sense to register both 32 bit and 64 bit in one location, but if for some reason that 
+            // Since SDKS can contain multiple architecture it makes sense to register both 32 bit and 64 bit in one location, but if for some reason that
             // is not possible then we need to look at both hives. Choosing the 32 bit one first because is where we expect to find them usually.
             if (is64bitOS)
             {
@@ -3036,7 +3036,7 @@ namespace Microsoft.Build.Utilities
                     DirectoryInfo[] platformIdentifiers = platformsRootInfo.GetDirectories();
                     ErrorUtilities.DebugTraceMessage("GatherPlatformsForSdk", "Found '{0}' platform identifier directories under '{1}'", platformIdentifiers.Length, platformsRoot);
 
-                    // Iterate through all identifiers 
+                    // Iterate through all identifiers
                     foreach (DirectoryInfo platformIdentifier in platformIdentifiers)
                     {
                         DirectoryInfo[] platformVersions = platformIdentifier.GetDirectories();
@@ -3108,7 +3108,7 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-            // Read in the redist list at the specified path, and return 
+            // Read in the redist list at the specified path, and return
             // the display name and the "include framework" value for chaining.
             // If display name is not available, returns empty string.
             // If include framework is not available, returns null.
@@ -3205,7 +3205,7 @@ namespace Microsoft.Build.Utilities
                 if (!string.IsNullOrEmpty(includeFramework))
                 {
                     // Take the path which should point to something like  c:\ProgramFiles\ReferenceAssemblies\Framework\.NETFramework\v4.1
-                    // We will take the path, to "up" a directory then append the name found in the redist. For example if the redist list had v4.0 
+                    // We will take the path, to "up" a directory then append the name found in the redist. For example if the redist list had v4.0
                     // the path which would be expected would be c:\ProgramFiles\ReferenceAssemblies\Framework\.NETFramework\v4.0
                     pathToReturn = path;
                     pathToReturn = Directory.GetParent(pathToReturn).FullName;
@@ -3407,7 +3407,7 @@ namespace Microsoft.Build.Utilities
                         NativeMethodsShared.ProcessorArchitectures.IA64 => ProcessorArchitecture.IA64,
                         NativeMethodsShared.ProcessorArchitectures.ARM64 => ProcessorArchitecture.ARM64,
                         // Error, OK, we're trying to get the 64-bit path on a 32-bit machine.
-                        // That ... doesn't make sense. 
+                        // That ... doesn't make sense.
                         NativeMethodsShared.ProcessorArchitectures.X86 => null,
                         NativeMethodsShared.ProcessorArchitectures.ARM => null,
                         // unknown architecture? return null
@@ -3741,7 +3741,7 @@ namespace Microsoft.Build.Utilities
                     sharedArchitecture = SharedDotNetFrameworkArchitecture.Bitness64;
                     break;
                 default:
-                    // Should never reach here -- If any new values are added to the DotNetFrameworkArchitecture enum, they should be added here as well.  
+                    // Should never reach here -- If any new values are added to the DotNetFrameworkArchitecture enum, they should be added here as well.
                     ErrorUtilities.ThrowInternalErrorUnreachable();
                     break;
             }
@@ -3885,7 +3885,7 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-            // sort in ascending order of the version numbers, this is important as later when we search for assemblies in other methods 
+            // sort in ascending order of the version numbers, this is important as later when we search for assemblies in other methods
             // we should be looking in ascending order of the framework version folders on disk
             frameworkVersions.Sort(VersionComparer.Instance);
 
@@ -3955,7 +3955,7 @@ namespace Microsoft.Build.Utilities
 
             if (dotNetFx35Path != null)
             {
-                // .NetFx35 is installed  
+                // .NetFx35 is installed
 
                 // check v20
                 string dotNetFx20Path = GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20);

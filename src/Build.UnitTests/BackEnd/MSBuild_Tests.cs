@@ -171,7 +171,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Ensures that it is possible to call the MSBuild task with an empty Projects parameter, and it 
+        /// Ensures that it is possible to call the MSBuild task with an empty Projects parameter, and it
         /// shouldn't error, and it shouldn't try to build itself.
         /// </summary>
         [Fact]
@@ -481,7 +481,7 @@ namespace Microsoft.Build.UnitTests
             // -------------------------------------------------------
             // TeamBuild.proj
             // -------------------------------------------------------
-            // Attempts to build the above ConsoleApplication1.csproj by calling the MSBuild task, 
+            // Attempts to build the above ConsoleApplication1.csproj by calling the MSBuild task,
             // and overriding the OutDir property.  However, the value being passed into OutDir
             // is coming from another property which is produced by CreateProperty and has
             // some special characters in it.
@@ -490,16 +490,16 @@ namespace Microsoft.Build.UnitTests
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <Target Name=`Build`>
-                    
+
                         <CreateProperty Value=`$(MSBuildProjectDirectory)\binaries\`>
                             <Output PropertyName=`MasterOutDir` TaskParameter=`Value`/>
                         </CreateProperty>
-                        
+
                         <MSBuild Projects=`ConsoleApplication1\ConsoleApplication1.csproj`
                                  Properties=`OutDir=$(MasterOutDir)`
                                  Targets=`Rebuild`/>
                     </Target>
-                    
+
                 </Project>
                 ");
 
@@ -521,7 +521,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyProp)'=='0'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyProp)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -590,7 +590,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyProp)'=='0'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyProp)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -665,7 +665,7 @@ namespace Microsoft.Build.UnitTests
                           <UndefineProperties>g;h;</UndefineProperties>
                         </PR>
                       </ItemGroup>
-                      <Target Name='a'> 
+                      <Target Name='a'>
                         <MSBuild Projects='@(PR)' Properties='c=c;d=d;' RemoveProperties='i;c;' Targets='b'/>
                       </Target>
                       <Target Name='b'>
@@ -897,7 +897,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyProp)'=='0'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyProp)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -964,7 +964,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyProp)'=='0'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyProp)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -1019,7 +1019,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyPropG)'=='1'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyPropA)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -1086,7 +1086,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyPropG)'=='0'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyPropA)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -1155,7 +1155,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyPropG)'=='1'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyPropA)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -1232,7 +1232,7 @@ namespace Microsoft.Build.UnitTests
                     <ItemGroup>
                         <ProjectFile Include=`" + projectFile1 + @"` />
                     </ItemGroup>
-                   
+
                     <Target Name=`Build` Outputs=`$(SomeOutputs)`>
                         <MSBuild Projects=`@(ProjectFile)` Targets=`$(Targets)` TargetAndPropertyListSeparators=`%3B;%3C` />
                     </Target>
@@ -1297,14 +1297,14 @@ namespace Microsoft.Build.UnitTests
                     new TaskItem(project1), new TaskItem(project2)
                 };
 
-                // Test the various combinations of BuildInParallel and StopOnFirstFailure when the msbuild task is told there are not multiple nodes 
+                // Test the various combinations of BuildInParallel and StopOnFirstFailure when the msbuild task is told there are not multiple nodes
                 // running in the system
                 for (int i = 0; i < 4; i++)
                 {
                     bool buildInParallel = false;
                     bool stopOnFirstFailure = false;
 
-                    // first set up the project being built. 
+                    // first set up the project being built.
                     switch (i)
                     {
                         case 0:
@@ -1345,7 +1345,7 @@ namespace Microsoft.Build.UnitTests
                     switch (i)
                     {
                         case 0:
-                            // Verify setting BuildInParallel and StopOnFirstFailure to 
+                            // Verify setting BuildInParallel and StopOnFirstFailure to
                             // true will cause the msbuild task to set BuildInParallel to false during the execute
                             // Verify build did not build second project which has the message SecondProject
                             logger.AssertLogDoesntContain("SecondProject");
@@ -1355,7 +1355,7 @@ namespace Microsoft.Build.UnitTests
                             logger.AssertLogContains(AssemblyResources.GetString("MSBuild.NotBuildingInParallel"));
                             break;
                         case 1:
-                            // Verify setting BuildInParallel to true and StopOnFirstFailure to 
+                            // Verify setting BuildInParallel to true and StopOnFirstFailure to
                             // false will cause no change in BuildInParallel
                             // Verify build did  build second project which has the message SecondProject
                             logger.AssertLogContains("SecondProject");
@@ -1374,7 +1374,7 @@ namespace Microsoft.Build.UnitTests
                             break;
 
                         case 3:
-                            // Verify setting BuildInParallel to false and StopOnFirstFailure to 
+                            // Verify setting BuildInParallel to false and StopOnFirstFailure to
                             // false will cause no change in BuildInParallel
                             // Verify build did build second project which has the message SecondProject
                             logger.AssertLogContains("SecondProject");
@@ -1420,14 +1420,14 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                // Test the various combinations of BuildInParallel and StopOnFirstFailure when the msbuild task is told there are multiple nodes 
+                // Test the various combinations of BuildInParallel and StopOnFirstFailure when the msbuild task is told there are multiple nodes
                 // running in the system
                 for (int i = 0; i < 4; i++)
                 {
                     bool buildInParallel = false;
                     bool stopOnFirstFailure = false;
 
-                    // first set up the project being built. 
+                    // first set up the project being built.
                     switch (i)
                     {
                         case 0:
@@ -1477,7 +1477,7 @@ namespace Microsoft.Build.UnitTests
                             logger.AssertLogDoesntContain(AssemblyResources.GetString("MSBuild.NotBuildingInParallel"));
                             break;
                         case 1:
-                            // Verify setting BuildInParallel to true and StopOnFirstFailure to 
+                            // Verify setting BuildInParallel to true and StopOnFirstFailure to
                             // false will cause no change in BuildInParallel
                             // Verify build did build second project which has the message SecondProject
                             logger.AssertLogContains("SecondProject");
@@ -1487,7 +1487,7 @@ namespace Microsoft.Build.UnitTests
                             logger.AssertLogDoesntContain(AssemblyResources.GetString("MSBuild.NotBuildingInParallel"));
                             break;
                         case 2:
-                            // Verify setting BuildInParallel to false and StopOnFirstFailure to 
+                            // Verify setting BuildInParallel to false and StopOnFirstFailure to
                             // true will cause no change in BuildInParallel
                             // Verify build did not build second project which has the message SecondProject
                             logger.AssertLogDoesntContain("SecondProject");
@@ -1498,7 +1498,7 @@ namespace Microsoft.Build.UnitTests
                             break;
 
                         case 3:
-                            // Verify setting BuildInParallel to false and StopOnFirstFailure to 
+                            // Verify setting BuildInParallel to false and StopOnFirstFailure to
                             // false will cause no change in BuildInParallel
                             // Verify build did build second project which has the message SecondProject
                             logger.AssertLogContains("SecondProject");
@@ -1772,12 +1772,12 @@ namespace Microsoft.Build.UnitTests
                             <AdditionalProperties>C=$(CValues)%3BD=$(DValues)</AdditionalProperties>
                         </ProjectFile>
                     </ItemGroup>
-                   
+
                     <Target Name=`Build` Outputs=`$(SomeOutputs)`>
                         <MSBuild Projects=`@(ProjectFile)` Targets=`Build` Properties=`a=$(AValues)%3Bb=$(BValues)` TargetAndPropertyListSeparators=`%3B`>
                             <Output TaskParameter=`TargetOutputs` PropertyName=`SomeOutputs`/>
                         </MSBuild>
-                    </Target>	
+                    </Target>
                 </Project>
                 ");
 
@@ -1837,13 +1837,13 @@ namespace Microsoft.Build.UnitTests
                 ");
 
             string projectFile2 = ObjectModelHelpers.CreateTempFileOnDisk(@"
-                <Project DefaultTargets=`t` xmlns=`msbuildnamespace` ToolsVersion=`msbuilddefaulttoolsversion`>                  
+                <Project DefaultTargets=`t` xmlns=`msbuildnamespace` ToolsVersion=`msbuilddefaulttoolsversion`>
                     <Target Name=`t`>
                         <MSBuild Projects=`" + projectFile1 + @"` Targets=`BUILD`>
                             <Output TaskParameter=`TargetOutputs` ItemName=`out`/>
                         </MSBuild>
                         <Message Text=`[@(out)]`/>
-                    </Target>	
+                    </Target>
                 </Project>
                 ");
 
@@ -1873,13 +1873,13 @@ namespace Microsoft.Build.UnitTests
                 ");
 
             string projectFile2 = ObjectModelHelpers.CreateTempFileOnDisk(@"
-                <Project>                  
+                <Project>
                     <Target Name=`t`>
                         <MSBuild Projects=`" + projectFile1 + @"` Targets=`Build`>
                             <Output TaskParameter=`TargetOutputs` ItemName=`out`/>
                         </MSBuild>
                         <Message Text=`[@(out)]`/>
-                    </Target>	
+                    </Target>
                 </Project>
                 ");
 

@@ -143,8 +143,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
-        /// Make sure we get the default affinity when the affinity map exists, but the specific 
-        /// project we're requesting is not set. 
+        /// Make sure we get the default affinity when the affinity map exists, but the specific
+        /// project we're requesting is not set.
         /// </summary>
         [Fact]
         public void TestDefaultAffinityWhenProjectNotRegistered()

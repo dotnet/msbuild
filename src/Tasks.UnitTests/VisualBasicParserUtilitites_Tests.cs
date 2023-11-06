@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests
                 @"
     Namespace Goofy
         Namespace Mickey
-            <DefaultInstanceProperty(&qtGetInstance&qt)> Public Class Form1      
+            <DefaultInstanceProperty(&qtGetInstance&qt)> Public Class Form1
                 ",
                 "Goofy.Mickey.Form1");
         }
@@ -68,7 +68,7 @@ namespace Microsoft.Build.UnitTests
     Namespace Goofy
         Namespace Mickey
         End Namespace ' Just finished with the namespace, about to make a class
-        <DefaultInstanceProperty(&qtthis propert is a class name&qt)> PuBlic Class Form1      
+        <DefaultInstanceProperty(&qtthis propert is a class name&qt)> PuBlic Class Form1
                 ",
                 "Goofy.Form1");
         }

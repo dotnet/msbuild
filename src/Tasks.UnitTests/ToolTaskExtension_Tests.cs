@@ -27,7 +27,7 @@ namespace Microsoft.Build.UnitTests
 
             t.BuildEngine = engine;
 
-            // No need to actually check the outputted strings. We only care that this doesn't throw, which means that 
+            // No need to actually check the outputted strings. We only care that this doesn't throw, which means that
             // the resource strings were reachable.
 
             // Normal CSC messages first, from private XMakeTasks resources. They should be accessible with t.Log

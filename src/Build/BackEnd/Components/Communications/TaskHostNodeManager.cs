@@ -12,13 +12,13 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// The NodeManager class is responsible for marshalling data to/from the NodeProviders and organizing the 
+    /// The NodeManager class is responsible for marshalling data to/from the NodeProviders and organizing the
     /// creation of new nodes on request.
     /// </summary>
     internal class TaskHostNodeManager : INodeManager
     {
         /// <summary>
-        /// The node provider for task hosts. 
+        /// The node provider for task hosts.
         /// </summary>
         private INodeProvider _outOfProcTaskHostNodeProvider;
 
@@ -28,7 +28,7 @@ namespace Microsoft.Build.BackEnd
         private IBuildComponentHost _componentHost;
 
         /// <summary>
-        /// Tracks whether ShutdownComponent has been called.  
+        /// Tracks whether ShutdownComponent has been called.
         /// </summary>
         private bool _componentShutdown;
 

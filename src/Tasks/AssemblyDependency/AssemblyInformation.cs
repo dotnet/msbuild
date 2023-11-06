@@ -149,7 +149,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Get the scatter files from the assembly metadata. 
+        /// Get the scatter files from the assembly metadata.
         /// </summary>
         public string[] Files
         {
@@ -193,7 +193,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Given an assembly name, crack it open and retrieve the list of dependent 
+        /// Given an assembly name, crack it open and retrieve the list of dependent
         /// assemblies and  the list of scatter files.
         /// </summary>
         /// <param name="path">Path to the assembly.</param>
@@ -544,7 +544,7 @@ namespace Microsoft.Build.Tasks
 
 #if !FEATURE_ASSEMBLYLOADCONTEXT
         /// <summary>
-        /// Release interface pointers on Dispose(). 
+        /// Release interface pointers on Dispose().
         /// </summary>
         protected override void DisposeUnmanagedResources()
         {
@@ -583,7 +583,7 @@ namespace Microsoft.Build.Tasks
 
                 unsafe
                 {
-                    // Allocate an initial buffer 
+                    // Allocate an initial buffer
                     char* runtimeVersion = stackalloc char[bufferLength];
 
                     // Run GetFileVersion, this should succeed using the initial buffer.
@@ -782,7 +782,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Construct assembly name. 
+        /// Construct assembly name.
         /// </summary>
         /// <param name="asmMetaPtr">Assembly metadata structure</param>
         /// <param name="asmNameBuf">Buffer containing the name</param>

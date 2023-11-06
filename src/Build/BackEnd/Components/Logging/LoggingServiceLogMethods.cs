@@ -26,7 +26,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Logs a comment (BuildMessageEventArgs) with a certain MessageImportance level
         /// </summary>
         /// <param name="buildEventContext">Event context information which describes who is logging the event</param>
-        /// <param name="importance">How important is the message, this will determine which verbosities the message will show up on. 
+        /// <param name="importance">How important is the message, this will determine which verbosities the message will show up on.
         /// The higher the importance the lower the verbosity needs to be for the message to be seen</param>
         /// <param name="messageResourceName">String which identifies the message in the string resx</param>
         /// <param name="messageArgs">Arguments for the format string indexed by messageResourceName</param>
@@ -45,7 +45,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Log a comment
         /// </summary>
         /// <param name="buildEventContext">Event context information which describes who is logging the event</param>
-        /// <param name="importance">How important is the message, this will determine which verbosities the message will show up on. 
+        /// <param name="importance">How important is the message, this will determine which verbosities the message will show up on.
         /// The higher the importance the lower the verbosity needs to be for the message to be seen</param>
         /// <param name="message">Message to log</param>
         /// <exception cref="InternalErrorException">BuildEventContext is null</exception>
@@ -59,7 +59,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Log a comment
         /// </summary>
         /// <param name="buildEventContext">Event context information which describes who is logging the event</param>
-        /// <param name="importance">How important is the message, this will determine which verbosities the message will show up on. 
+        /// <param name="importance">How important is the message, this will determine which verbosities the message will show up on.
         /// The higher the importance the lower the verbosity needs to be for the message to be seen</param>
         /// <param name="message">Message to log</param>
         /// <param name="messageArgs">Message formatting arguments</param>
@@ -368,7 +368,7 @@ namespace Microsoft.Build.BackEnd.Logging
         #region Log status
 
         /// <summary>
-        /// Logs that the build has started 
+        /// Logs that the build has started
         /// </summary>
         public void LogBuildStarted()
         {

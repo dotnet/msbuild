@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         }
 
         /// <summary>
-        /// Tests the SdkToolsPath property:  Should log an error if it's null or a bad path.  
+        /// Tests the SdkToolsPath property:  Should log an error if it's null or a bad path.
         /// </summary>
         [Fact]
         public void SdkToolsPath()
@@ -226,7 +226,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         }
 
         /// <summary>
-        /// Tests the ToolPath property:  Should log an error if it's null or a bad path.  
+        /// Tests the ToolPath property:  Should log an error if it's null or a bad path.
         /// </summary>
         [Fact]
         public void ToolPath()
@@ -286,13 +286,13 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
                 t.KeyFile = tempKeyFile;
                 Utilities.ExecuteTaskAndVerifyLogContainsErrorFromResource(t, "AxTlbBaseTask.CannotSpecifyBothKeyFileAndKeyContainer");
 
-                // All the inputs are correct, but the KeyContainer passed in is bad            
+                // All the inputs are correct, but the KeyContainer passed in is bad
                 t.DelaySign = false;
                 t.KeyContainer = tempKeyContainer;
                 t.KeyFile = null;
                 Utilities.ExecuteTaskAndVerifyLogContainsErrorFromResource(t, "AxTlbBaseTask.StrongNameUtils.NoKeyPairInContainer", t.KeyContainer);
 
-                // All the inputs are correct, but the KeyFile passed in is bad            
+                // All the inputs are correct, but the KeyFile passed in is bad
                 t.KeyContainer = null;
                 t.KeyFile = tempKeyFile;
                 Utilities.ExecuteTaskAndVerifyLogContainsErrorFromResource(t, "AxTlbBaseTask.StrongNameUtils.NoKeyPairInFile", t.KeyFile);
@@ -316,7 +316,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Given an instance of an AxImp task, executes that task (assuming all necessary parameters
         /// have been set ahead of time) and verifies that the execution log contains the error
-        /// corresponding to the resource name passed in. 
+        /// corresponding to the resource name passed in.
         /// </summary>
         /// <param name="t">The task to execute and check</param>
         /// <param name="errorResource">The name of the resource string to check the log for</param>
@@ -349,7 +349,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Given an instance of an AxImp task, executes that task (assuming all necessary parameters
         /// have been set ahead of time) and verifies that the execution log does not contain the error
-        /// corresponding to the resource name passed in. 
+        /// corresponding to the resource name passed in.
         /// </summary>
         /// <param name="t">The task to execute and check</param>
         /// <param name="errorResource">The name of the resource string to check the log for</param>

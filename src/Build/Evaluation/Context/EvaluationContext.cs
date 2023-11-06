@@ -110,7 +110,7 @@ namespace Microsoft.Build.Evaluation.Context
 
         internal EvaluationContext ContextForNewProject()
         {
-            // Projects using isolated contexts need to get a new context instance 
+            // Projects using isolated contexts need to get a new context instance
             switch (Policy)
             {
                 case SharingPolicy.Shared:

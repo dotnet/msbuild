@@ -57,7 +57,7 @@ namespace Microsoft.Build.Tasks
                             if (trimmedTextLine.Length > 0)
                             {
                                 // The lines were written to the file in unescaped form, so we need to escape them
-                                // before passing them to the TaskItem. 
+                                // before passing them to the TaskItem.
                                 nonEmptyLines.Add(new TaskItem(EscapingUtilities.Escape(trimmedTextLine)));
                             }
                         }

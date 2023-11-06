@@ -199,7 +199,7 @@ namespace Microsoft.Build.Shared
             #region Initialization code
 
             /// <summary>
-            /// Loads FileTracker.dll into a handle that we can use subsequently to grab the exported methods we're interested in. 
+            /// Loads FileTracker.dll into a handle that we can use subsequently to grab the exported methods we're interested in.
             /// </summary>
             private static void LoadFileTrackerDll()
             {
@@ -227,8 +227,8 @@ namespace Microsoft.Build.Shared
             }
 
             /// <summary>
-            /// Generic code to grab the function pointer for a function exported by FileTracker.dll, given 
-            /// that function's name, and transform that function pointer into a callable delegate. 
+            /// Generic code to grab the function pointer for a function exported by FileTracker.dll, given
+            /// that function's name, and transform that function pointer into a callable delegate.
             /// </summary>
             [SecurityCritical]
             private static DT CreateDelegate<DT>(String entryPointName)
@@ -244,7 +244,7 @@ namespace Microsoft.Build.Shared
             }
 
             /// <summary>
-            /// Actually generate all of the delegates that will be called by our public (or rather, internal) surface area methods.  
+            /// Actually generate all of the delegates that will be called by our public (or rather, internal) surface area methods.
             /// </summary>
             private static void InitDelegates()
             {
@@ -264,7 +264,7 @@ namespace Microsoft.Build.Shared
 
             /// <summary>
             /// Static constructor -- generates the delegates for all of the export methods from
-            /// FileTracker.dll that we care about. 
+            /// FileTracker.dll that we care about.
             /// </summary>
             [SecuritySafeCritical]
             static FileTrackerDllStub()
@@ -275,7 +275,7 @@ namespace Microsoft.Build.Shared
 
             #endregion  // Initialization code
 #pragma warning restore format
-            // Specialized handle to make sure we free FileTracker.dll 
+            // Specialized handle to make sure we free FileTracker.dll
             [SecurityCritical]
             private class SafeLibraryHandle : SafeHandle
             {
@@ -296,8 +296,8 @@ namespace Microsoft.Build.Shared
                 [SecurityCritical]
                 protected override bool ReleaseHandle()
                 {
-                    // FileTracker expects to continue to exist even through ExitProcess -- if we forcibly unload it now, 
-                    // bad things can happen when the CLR attempts to call the (still detoured?) ExitProcess.  
+                    // FileTracker expects to continue to exist even through ExitProcess -- if we forcibly unload it now,
+                    // bad things can happen when the CLR attempts to call the (still detoured?) ExitProcess.
                     return true;
                 }
             }  // private class SafeLibraryHandle

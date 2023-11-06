@@ -13,7 +13,7 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// TaskHostConfiguration contains information needed for the task host to 
+    /// TaskHostConfiguration contains information needed for the task host to
     /// configure itself for to execute a particular task.
     /// </summary>
     internal class TaskHostConfiguration : INodePacket
@@ -45,23 +45,23 @@ namespace Microsoft.Build.BackEnd
 
 #if FEATURE_APPDOMAIN
         /// <summary>
-        /// The AppDomainSetup that we may want to use on AppDomainIsolated tasks. 
+        /// The AppDomainSetup that we may want to use on AppDomainIsolated tasks.
         /// </summary>
         private AppDomainSetup _appDomainSetup;
 #endif
 
         /// <summary>
-        /// Line number where the instance of this task is defined. 
+        /// Line number where the instance of this task is defined.
         /// </summary>
         private int _lineNumberOfTask;
 
         /// <summary>
-        /// Column number where the instance of this task is defined. 
+        /// Column number where the instance of this task is defined.
         /// </summary>
         private int _columnNumberOfTask;
 
         /// <summary>
-        /// Project file where the instance of this task is defined. 
+        /// Project file where the instance of this task is defined.
         /// </summary>
         private string _projectFileOfTask;
 
@@ -71,12 +71,12 @@ namespace Microsoft.Build.BackEnd
         private bool _continueOnError;
 
         /// <summary>
-        /// Name of the task to be executed on the task host. 
+        /// Name of the task to be executed on the task host.
         /// </summary>
         private string _taskName;
 
         /// <summary>
-        /// Location of the assembly containing the task to be executed. 
+        /// Location of the assembly containing the task to be executed.
         /// </summary>
         private string _taskLocation;
 
@@ -86,7 +86,7 @@ namespace Microsoft.Build.BackEnd
         private bool _isTaskInputLoggingEnabled;
 
         /// <summary>
-        /// The set of parameters to apply to the task prior to execution.  
+        /// The set of parameters to apply to the task prior to execution.
         /// </summary>
         private Dictionary<string, TaskParameter> _taskParameters;
 
@@ -209,7 +209,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Constructor for deserialization. 
+        /// Constructor for deserialization.
         /// </summary>
         private TaskHostConfiguration()
         {
@@ -268,7 +268,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// The AppDomain configuration bytes that we may want to use to initialize
-        /// AppDomainIsolated tasks. 
+        /// AppDomainIsolated tasks.
         /// </summary>
         public AppDomainSetup AppDomainSetup
         {
@@ -279,7 +279,7 @@ namespace Microsoft.Build.BackEnd
 #endif
 
         /// <summary>
-        /// Line number where the instance of this task is defined. 
+        /// Line number where the instance of this task is defined.
         /// </summary>
         public int LineNumberOfTask
         {
@@ -289,7 +289,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Column number where the instance of this task is defined. 
+        /// Column number where the instance of this task is defined.
         /// </summary>
         public int ColumnNumberOfTask
         {
@@ -309,7 +309,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Project file where the instance of this task is defined. 
+        /// Project file where the instance of this task is defined.
         /// </summary>
         public string ProjectFileOfTask
         {
@@ -319,7 +319,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Name of the task to execute. 
+        /// Name of the task to execute.
         /// </summary>
         public string TaskName
         {
@@ -329,7 +329,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Path to the assembly to load the task from. 
+        /// Path to the assembly to load the task from.
         /// </summary>
         public string TaskLocation
         {
@@ -349,7 +349,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Parameters to set on the instantiated task prior to execution. 
+        /// Parameters to set on the instantiated task prior to execution.
         /// </summary>
         public Dictionary<string, TaskParameter> TaskParameters
         {
