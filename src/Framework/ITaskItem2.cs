@@ -40,7 +40,7 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// Allows a piece of custom metadata to be set on the item.  Assumes that the value passed
-        /// in is unescaped, and escapes the value as necessary in order to maintain its value. 
+        /// in is unescaped, and escapes the value as necessary in order to maintain its value.
         /// </summary>
         /// <remarks>
         /// Taking the opportunity to fix the property name, although this doesn't
@@ -50,7 +50,7 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// ITaskItem2 implementation which returns a clone of the metadata on this object.
-        /// Values returned are in their original escaped form. 
+        /// Values returned are in their original escaped form.
         /// </summary>
         /// <returns>The cloned metadata, with values' escaping preserved.</returns>
         IDictionary CloneCustomMetadataEscaped();

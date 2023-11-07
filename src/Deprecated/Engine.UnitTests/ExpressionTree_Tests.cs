@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests
     [TestFixture]
     public class ExpressionTreeTest
     {
-        private XmlAttribute dummyAttribute; 
+        private XmlAttribute dummyAttribute;
         private XmlAttribute DummyAttribute
         {
             get
@@ -112,7 +112,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// A whole bunch of conditionals, that should be true, false, or error 
+        /// A whole bunch of conditionals, that should be true, false, or error
         /// (many coincidentally like existing QA tests) to give breadth coverage.
         /// Please add more cases as they arise.
         /// </summary>
@@ -216,7 +216,7 @@ namespace Microsoft.Build.UnitTests
                     "0==0.0",
                     "1\n\t==1",
                     "+4==4",
-                    "44==+44.0 and -44==-44.0",                    
+                    "44==+44.0 and -44==-44.0",
                     "false==no",
                     "true==yes",
                     "true==!false",
@@ -285,7 +285,7 @@ namespace Microsoft.Build.UnitTests
                     "exists('%3b')",
                     "exists('%27')",
                     "exists('@(v);@(nonexistent)')",
-                    @"HASTRAILINGSLASH('foo\')", 
+                    @"HASTRAILINGSLASH('foo\')",
                     @"!HasTrailingSlash('foo')",
                     @"HasTrailingSlash('foo/')",
                     @"HasTrailingSlash($(has_trailing_slash))",

@@ -48,6 +48,7 @@ namespace Microsoft.Build.Graph
 
         private readonly ProjectGraph.ProjectInstanceFactoryFunc _projectInstanceFactory;
         private IReadOnlyDictionary<string, IReadOnlyCollection<string>> _solutionDependencies;
+        private ConcurrentDictionary<ConfigurationMetadata, Lazy<ProjectInstance>> _platformNegotiationInstancesCache = new();
 
         public GraphBuilder(
             IEnumerable<ProjectGraphEntryPoint> entryPoints,
@@ -92,6 +93,9 @@ namespace Microsoft.Build.Graph
 
             RootNodes = GetGraphRoots(EntryPointNodes);
             ProjectNodes = allParsedProjects.Values.Select(p => p.GraphNode).ToList();
+
+            // Clean and release some temporary used large memory objects.
+            _platformNegotiationInstancesCache.Clear();
         }
 
         private static IReadOnlyCollection<ProjectGraphNode> GetGraphRoots(IReadOnlyCollection<ProjectGraphNode> entryPointNodes)
@@ -391,9 +395,9 @@ namespace Microsoft.Build.Graph
                                     dependencyGuid);
                             }
 
-                            // Add it to the list of dependencies, but only if it should build in this solution configuration 
+                            // Add it to the list of dependencies, but only if it should build in this solution configuration
                             // (If a project is not selected for build in the solution configuration, it won't build even if it's depended on by something that IS selected for build)
-                            // .. and only if it's known to be MSBuild format, as projects can't use the information otherwise 
+                            // .. and only if it's known to be MSBuild format, as projects can't use the information otherwise
                             return dependencyProject?.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat
                                 ? dependencyProject.AbsolutePath
                                 : null;
@@ -487,7 +491,7 @@ namespace Microsoft.Build.Graph
                             }
 
                             // the project being evaluated has a circular dependency involving multiple projects
-                            // add this project to the list of projects involved in cycle 
+                            // add this project to the list of projects involved in cycle
                             var projectsInCycle = new List<string> { referenceNode.ProjectInstance.FullPath };
                             return (false, projectsInCycle);
                         }
@@ -576,7 +580,7 @@ namespace Microsoft.Build.Graph
         {
             var referenceInfos = new List<ProjectInterpretation.ReferenceInfo>();
 
-            foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject.ProjectInstance, _projectCollection, _projectInstanceFactory))
+            foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject.ProjectInstance, _projectCollection, GetInstanceForPlatformNegotiationWithCaching))
             {
                 if (FileUtilities.IsSolutionFilename(referenceInfo.ReferenceConfiguration.ProjectFullPath))
                 {
@@ -592,6 +596,16 @@ namespace Microsoft.Build.Graph
             }
 
             return referenceInfos;
+        }
+
+        private ProjectInstance GetInstanceForPlatformNegotiationWithCaching(
+            string projectPath,
+            Dictionary<string, string> globalProperties,
+            ProjectCollection projectCollection)
+        {
+            return _platformNegotiationInstancesCache.GetOrAdd(
+                new ConfigurationMetadata(projectPath, CreatePropertyDictionary(globalProperties)),
+                new Lazy<ProjectInstance>(() => _projectInstanceFactory(projectPath, globalProperties, projectCollection))).Value;
         }
 
         internal static string FormatCircularDependencyError(List<string> projectsInCycle)

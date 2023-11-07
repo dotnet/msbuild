@@ -32,7 +32,7 @@ namespace Microsoft.Build.BuildEngine
 
         // This is the XML element representing the <PropertyGroup> in the XMake
         // project file.  If this BuildPropertyGroup object doesn't represent an
-        // actual <PropertyGroup> element in the XMake project file, it's 
+        // actual <PropertyGroup> element in the XMake project file, it's
         // okay if this remains null throughout the life of this object.
         private XmlElement propertyGroupElement = null;
 
@@ -66,7 +66,7 @@ namespace Microsoft.Build.BuildEngine
         // in the order that they appear in the project file.  In this list,
         // there can be multiple properties of the same name.  This member
         // is only valid (non-null) if this is a persisted <PropertyGroup>.
-        // For virtual property groups (e.g., evaluated property groups, 
+        // For virtual property groups (e.g., evaluated property groups,
         // global property groups, etc.), this will remain null.
         private ArrayList propertyList = null;
 
@@ -343,7 +343,7 @@ namespace Microsoft.Build.BuildEngine
 
             set
             {
-                // If this BuildPropertyGroup object is not actually represented by a 
+                // If this BuildPropertyGroup object is not actually represented by a
                 // <PropertyGroup> element in the project file, then do not allow
                 // the caller to set the condition.
                 MustBePersisted("CannotSetCondition", null);
@@ -363,7 +363,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public void SetImportedPropertyGroupCondition(string condition)
         {
-            // If this BuildPropertyGroup object is not actually represented by a 
+            // If this BuildPropertyGroup object is not actually represented by a
             // <PropertyGroup> element in the project file, then do not allow
             // the caller to set the condition.
             MustBePersisted("CannotSetCondition", null);
@@ -538,12 +538,12 @@ namespace Microsoft.Build.BuildEngine
             get
             {
                 // We don't support this method for PropertyGroups that are persisted.
-                // This is because persisted PropertyGroups can contain multiple 
+                // This is because persisted PropertyGroups can contain multiple
                 // properties with the same name, so you can't index by name.
                 MustBeVirtual("CannotAccessPropertyByName");
 
-                // Do the lookup in the hash table using the hash table's 
-                // indexer method.  Get back the property data object, 
+                // Do the lookup in the hash table using the hash table's
+                // indexer method.  Get back the property data object,
                 // which will be "null" if the property hasn't been set. Note
                 // that we key off property names in a case-insensitive fashion.
                 return (BuildProperty)propertyTableByName[propertyName];
@@ -630,7 +630,7 @@ namespace Microsoft.Build.BuildEngine
 
                 if (deepClone)
                 {
-                    // Loop through every BuildProperty in our collection, and add those same properties 
+                    // Loop through every BuildProperty in our collection, and add those same properties
                     // to the cloned collection.
 
                     // Create a new virtual BuildPropertyGroup.
@@ -697,7 +697,7 @@ namespace Microsoft.Build.BuildEngine
                     this.importedFromAnotherProject
                     );
 
-                // Loop through every BuildProperty in our collection, and add those same properties 
+                // Loop through every BuildProperty in our collection, and add those same properties
                 // to the cloned collection.
                 foreach (BuildProperty property in this)
                 {
@@ -734,8 +734,8 @@ namespace Microsoft.Build.BuildEngine
             BuildPropertyGroup globalProperties
         )
         {
-            // The consumer of the OM has the ability to add new properties to the 
-            // GlobalProperties BuildPropertyGroup, and the OM doesn't expose the 
+            // The consumer of the OM has the ability to add new properties to the
+            // GlobalProperties BuildPropertyGroup, and the OM doesn't expose the
             // property type, because that would be too dangerous.  So all properties
             // created by the OM consumer will be "normal" properties, even those
             // set in the GlobalProperties BuildPropertyGroup.  But in order to make
@@ -782,7 +782,7 @@ namespace Microsoft.Build.BuildEngine
         {
             // We don't support this method for PropertyGroups that are
             // represented by an actual <PropertyGroup> element.  This is because
-            // persisted PropertyGroups can contain multiple properties with the same 
+            // persisted PropertyGroups can contain multiple properties with the same
             // name, so the behavior of SetProperty becomes ambiguous.
             MustBeVirtual("NeedVirtualPropertyGroup");
 
@@ -794,12 +794,12 @@ namespace Microsoft.Build.BuildEngine
 
             if (existingProperty != null)
             {
-                // If the existing property is an XMake reserved property, we may have an 
+                // If the existing property is an XMake reserved property, we may have an
                 // invalid project file, because reserved properties are not allowed to
                 // be set.
-                // Don't fail if the new property is itself a "reserved" property.  We 
-                // want to be able to override reserved properties with new reserved 
-                // properties, otherwise the engine itself would never be allowed to 
+                // Don't fail if the new property is itself a "reserved" property.  We
+                // want to be able to override reserved properties with new reserved
+                // properties, otherwise the engine itself would never be allowed to
                 // change the value of a reserved property.
                 ProjectErrorUtilities.VerifyThrowInvalidProject(
                     (existingProperty.Type != PropertyType.ReservedProperty) ||
@@ -808,7 +808,7 @@ namespace Microsoft.Build.BuildEngine
 
                 // Also make sure it's not a read-only property (such as a property
                 // that was set at the XMake command-line), but don't actually throw
-                // an error in this case.  Only output properties from tasks are allowed 
+                // an error in this case.  Only output properties from tasks are allowed
                 // to override read-only properties
                 if ((existingProperty.Type == PropertyType.GlobalProperty) &&
                     (newProperty.Type != PropertyType.OutputProperty))
@@ -1037,7 +1037,7 @@ namespace Microsoft.Build.BuildEngine
         {
             error.VerifyThrowArgumentNull(property, nameof(property));
 
-            // If this is a persisted <PropertyGroup>, then remove the property element from 
+            // If this is a persisted <PropertyGroup>, then remove the property element from
             // the XML and from the array list.
             if (IsPersisted)
             {
@@ -1085,10 +1085,10 @@ namespace Microsoft.Build.BuildEngine
             {
                 MustBePersisted("NeedPersistedPropertyGroup", XMakeElements.propertyGroup);
 
-                // For persisted <PropertyGroup>'s, there could be multiple properties 
-                // with the given name.  We need to loop through our arraylist of properties, 
-                // finding all the ones with the given property name, and delete them.  But we 
-                // shouldn't be modifying the arraylist while we're still enumerating through 
+                // For persisted <PropertyGroup>'s, there could be multiple properties
+                // with the given name.  We need to loop through our arraylist of properties,
+                // finding all the ones with the given property name, and delete them.  But we
+                // shouldn't be modifying the arraylist while we're still enumerating through
                 // it.  So, first we create a new list of all the properties we want to remove,
                 // and then we later go through and actually remove them.
                 ArrayList propertiesToRemove = new ArrayList();
@@ -1114,7 +1114,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 MustBeVirtual("NeedVirtualPropertyGroup");
 
-                // We only need to remove the BuildProperty object with the given name from 
+                // We only need to remove the BuildProperty object with the given name from
                 // the Hashtable.  There can be only one.
                 this.propertyTableByName.Remove(propertyName);
 
@@ -1191,7 +1191,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal void ClearHelper(bool clearImportedPropertyGroup)
         {
-            // If this group is backed by XML, clear all attributes and 
+            // If this group is backed by XML, clear all attributes and
             // children out unless it's an imported group, in which case we don't want to modify the XML
             if (IsPersisted && !clearImportedPropertyGroup)
             {
@@ -1273,7 +1273,7 @@ namespace Microsoft.Build.BuildEngine
                 else
                 {
                     // This is not a change to the contents of the project file, however
-                    // this change does require a re-evaluation of the project.  For 
+                    // this change does require a re-evaluation of the project.  For
                     // example, if a global property changes....
                     this.ParentProject.MarkProjectAsDirtyForReevaluation();
                 }
@@ -1326,9 +1326,9 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void SetExtensionsPathProperties()
         {
-            // We set the MSBuildExtensionsPath variables here because we don't want to make them official 
-            // reserved properties; we need the ability for people to override our default in their 
-            // environment or as a global property.  
+            // We set the MSBuildExtensionsPath variables here because we don't want to make them official
+            // reserved properties; we need the ability for people to override our default in their
+            // environment or as a global property.
 
             // "MSBuildExtensionsPath32". This points to whatever the value of "Program Files (x86)" environment variable is;
             // but on a 32 bit box this isn't set, and we should use "Program Files" instead.
@@ -1346,9 +1346,9 @@ namespace Microsoft.Build.BuildEngine
             string extensionsPath32 = Path.Combine(programFiles32, ReservedPropertyNames.extensionsPathSuffix);
             SetProperty(new BuildProperty(ReservedPropertyNames.extensionsPath32, extensionsPath32, PropertyType.EnvironmentProperty));
 
-            // MSBuildExtensionsPath:  The way this used to work is that it would point to "Program Files\MSBuild" on both 
+            // MSBuildExtensionsPath:  The way this used to work is that it would point to "Program Files\MSBuild" on both
             // 32-bit and 64-bit machines.  We have a switch to continue using that behavior; however the default is now for
-            // MSBuildExtensionsPath to always point to the same location as MSBuildExtensionsPath32. 
+            // MSBuildExtensionsPath to always point to the same location as MSBuildExtensionsPath32.
 
             bool useLegacyMSBuildExtensionsPathBehavior = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLEGACYEXTENSIONSPATH"));
 
@@ -1398,7 +1398,7 @@ namespace Microsoft.Build.BuildEngine
             if (this.Count == compareToPropertyGroup.Count)
             {
                 // If both bags do have the same number of elements, it should
-                // be sufficient to check if one bag contains all of the 
+                // be sufficient to check if one bag contains all of the
                 // elements in the other.
                 foreach (DictionaryEntry entry in this.propertyTableByName)
                 {
@@ -1449,8 +1449,8 @@ namespace Microsoft.Build.BuildEngine
         {
             error.VerifyThrowInvalidOperation(IsVirtual, errorResourceName, XMakeElements.propertyGroup);
 
-            // If this is a virtual BuildPropertyGroup (not a <PropertyGroup> element), then 
-            // we should not have an ArrayList of BuildProperty objects ... we should only have 
+            // If this is a virtual BuildPropertyGroup (not a <PropertyGroup> element), then
+            // we should not have an ArrayList of BuildProperty objects ... we should only have
             // the hash table.
             error.VerifyThrow(this.propertyList == null,
                 "ArrayList of BuildProperty objects not expected for a virtual BuildPropertyGroup.");

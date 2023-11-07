@@ -424,7 +424,7 @@ namespace Microsoft.Build.BuildEngine
                 else if ((eventType == 1 && executionMode == NodeLoopExecutionMode.WaitingPassiveThread) ||
                          (eventType == 2 && executionMode == NodeLoopExecutionMode.WaitingActiveThread))
                 {
-                    // There maybe multiple results in the list so we need to loop over it 
+                    // There maybe multiple results in the list so we need to loop over it
                     // and store the results
                     int originalResultCount = resultCount;
                     lock (postedBuildResults)
@@ -532,7 +532,7 @@ namespace Microsoft.Build.BuildEngine
                 int i = 0;
                 foreach (DictionaryEntry entry in waitingTasks)
                 {
-                    // Store the node proxy 
+                    // Store the node proxy
                     waitingTasksArray[i] = (int)entry.Key;
                     // Loop through the build requests and add uncomplete requests to the list
                     WaitingTaskData taskData = (WaitingTaskData)entry.Value;
@@ -597,7 +597,7 @@ namespace Microsoft.Build.BuildEngine
         private WaitHandle[] WaitingActiveThreadWaitHandles;
         private WaitHandle[] WaitingPassiveThreadWaitHandles;
 
-        // Data shared between worked threads for one TEM, this data is initialized by the first 
+        // Data shared between worked threads for one TEM, this data is initialized by the first
         // thread
         private ManualResetEvent exitTaskThreads;          // Used to signal all threads to exit
         private ExitTaskCache exitTaskThreadsCache;        // cached value to avoid waiting on the kernel event

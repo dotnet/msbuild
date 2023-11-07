@@ -261,7 +261,7 @@ namespace Microsoft.Build.Shared.Concurrent
         /// <summary>
         /// Provides a multi-producer, multi-consumer thread-safe bounded segment.  When the queue is full,
         /// enqueues fail and return false.  When the queue is empty, dequeues fail and return null.
-        /// These segments are linked together to form the unbounded <see cref="ConcurrentQueue{T}"/>. 
+        /// These segments are linked together to form the unbounded <see cref="ConcurrentQueue{T}"/>.
         /// </summary>
         [DebuggerDisplay("Capacity = {Capacity}")]
         private sealed class Segment

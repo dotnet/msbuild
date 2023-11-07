@@ -48,7 +48,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the Project value. 
+        /// Gets or sets the Project value.
         /// </summary>
         public string Project
         {

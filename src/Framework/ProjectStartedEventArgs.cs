@@ -31,7 +31,7 @@ namespace Microsoft.Build.Framework
         #endregion
 
         /// <summary>
-        /// Default constructor 
+        /// Default constructor
         /// </summary>
         protected ProjectStartedEventArgs()
             : base()
@@ -319,8 +319,8 @@ namespace Microsoft.Build.Framework
                 // the central logger in the multi-proc case.  No one uses this though, so it's probably no big deal.  In
                 // the new OM, this list of items could come directly from the BuildRequestConfiguration, which has access
                 // to the loaded project.  For distributed loggers in the multi-proc case and all loggers in the single-proc
-                // case, this access is to the live list.  For the central logger in the multi-proc case, the main node 
-                // has likely not loaded this project, and therefore the live items would not be available to them, which is 
+                // case, this access is to the live list.  For the central logger in the multi-proc case, the main node
+                // has likely not loaded this project, and therefore the live items would not be available to them, which is
                 // the same as the current functionality.
                 return items;
             }
@@ -357,9 +357,9 @@ namespace Microsoft.Build.Framework
             // TargetNames cannot be null as per the constructor
             writer.Write(targetNames!);
 
-            // If no properties were added to the property list 
+            // If no properties were added to the property list
             // then we have nothing to create when it is deserialized
-            // This can happen if properties is null or if none of the 
+            // This can happen if properties is null or if none of the
             // five properties were found in the property object.
             if (properties == null)
             {

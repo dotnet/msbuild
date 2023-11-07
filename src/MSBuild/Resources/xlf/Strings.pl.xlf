@@ -106,10 +106,10 @@
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
-                     Powoduje, że platforma MSBuild zgłasza dostępy do wszystkich skonfigurowanych
+                     Powoduje, że program MSBuild zgłasza dostępy do wszystkich skonfigurowanych plików
                      wtyczek pamięci podręcznej projektu.
 
-                     Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
+Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -240,7 +240,7 @@
                      interakcyjność nie jest oczekiwana.
                      Podanie parametru -interactive jest równoznaczne
                      z podaniem parametru -interactive:true. Użyj tego
-                     parametru, aby przesłonić wartość pochodzącą z pliku
+                     parametru, aby przesłonić wartość pochodzącą z pliku 
                      odpowiedzi.
     </target>
         <note>
@@ -275,7 +275,7 @@
                      Po ustawieniu na wartość „MessageUponIsolationViolation” (lub jej skróconą
                      formę „Message”), serializowane są tylko wyniki z celów najwyższego poziomu
                      , jeśli przełącznik -outputResultsCache jest
-                     dostarczony. Ma to na celu zmniejszenie szans na to, że cel
+                     dostarczony. Ma to na celu zmniejszenie szans na to, że cel 
                      naruszy izolację w projekcie zależnym przy użyciu
                      nieprawidłowego stanu z powodu jego zależności od buforowanego celu
                      którego efekty uboczne nie byłyby brane pod uwagę.
@@ -309,7 +309,7 @@
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -graphBuild[:True|False]
-                     Powoduje, że program MSBuild tworzy i kompiluje graf
+                     Powoduje, że program MSBuild tworzy i kompiluje graf                 
                      projektu.
 
                      Tworzenie grafu obejmuje identyfikowanie odwołań do
@@ -477,7 +477,7 @@
                      osobno.
 
                      Wszelkie pliki odpowiedzi o nazwie „msbuild.rsp” będą automatycznie
-                     wykorzystywane z następujących lokalizacji:
+                     wykorzystywane z następujących lokalizacji: 
                      (1) katalog programu msbuild.exe
                      (2) katalog pierwszej kompilacji projektu lub rozwiązania
 </target>
@@ -568,14 +568,17 @@
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;rejestrator&gt;  Umożliwia użycie podanego rejestratora do rejestrowania zdarzeń pochodzących
-                     z programu MSBuild. Aby określić wiele rejestratorów, określ każdy z nich osobno.
+        <target state="translated">  -logger:&lt;rejestrator&gt;  Umożliwia użycie podanego rejestratora do rejestrowania
+                         zdarzeń pochodzących z programu MSBuild. Aby określić
+                     wiele rejestratorów, określ każdy z nich osobno.
                      Składnia elementu &lt;rejestrator&gt;:
-                      [&lt;klasa rejestratora&gt;,]&lt;assembly&gt; [;&lt;parametry rejestratora&gt;]
+                        [&lt;klasa rejestratora&gt;,]&lt;zestaw rejestratora&gt;
+                        [;&lt;parametry rejestratora&gt;]
                      Składnia elementu &lt;klasa rejestratora&gt;:
-                       [&lt;częściowa lub pełna przestrzeń nazw&gt;.] &lt;nazwa klasy rejestratora&gt;
+                        [&lt;częściowa lub pełna przestrzeń nazw&gt;.]
+                        &lt;nazwa klasy rejestratora&gt;
                      Składnia elementu &lt;zestaw rejestratora&gt;:
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                        {&lt;nazwa zestawu&gt;[,&lt;strong name&gt;] | &lt;plik zestawu&gt;}
                      Wartości &lt;parametry rejestratora&gt; są opcjonalne i są
                      przekazywane do rejestratora dokładnie tak, jak zostały
                      wpisane. (Krótka wersja: -l)
@@ -796,7 +799,7 @@
                      to False, this sets it to True. (short form: -irc)
    </source>
         <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     Rozdzielona średnikami lista wejściowych plików pamięci podręcznej, z których MSBuild
+                     Rozdzielona średnikami lista wejściowych plików pamięci podręcznej, z których MSBuild 
                      odczyta wyniki kompilacji. Jeśli jest ustawione -isolateProjects
                      na wartość Fałsz, ta opcja ustawia ją na wartość Prawda. (skrócona forma: -irc)
    </target>
@@ -854,11 +857,11 @@
                      wiele rejestratorów, określ każdy z nich osobno.
                      (Krótka wersja: -dl)
                      Składnia elementu &lt;rejestrator&gt;:
-                       [&lt;klasa rejestratora&gt;,]&lt;assembly&gt;[;&lt;parametry rejestratora&gt;]
+                       [&lt;klasa rejestratora&gt;,]&lt;zestaw rejestratora&gt;[;&lt;parametry rejestratora&gt;]
                      Składnia elementu &lt;klasa rejestratora&gt;:
                        [&lt;częściowa lub pełna przestrzeń nazw&gt;.]&lt;nazwa klasy rejestratora&gt;
                      Składnia elementu &lt;zestaw rejestratora&gt;:
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                       {&lt;nazwa zestawu&gt;[,&lt;strong name&gt;] | &lt;plik zestawu&gt;}
                      Wartości &lt;parametry rejestratora&gt; są opcjonalne i są
                      przekazywane do rejestratora dokładnie tak, jak zostały
                      wpisane. (Krótka wersja: -l)
@@ -970,11 +973,13 @@
                      create a log file for each node.
     </source>
         <target state="translated">  -distributedFileLogger
-                     Rejestruje dane wyjściowe kompilacji w wielu plikach dziennika,po jednym pliku
-                     na węzeł programu MSBuild. Początkową lokalizacją tych plików
-                     jest bieżący katalog. Domyślnie pliki mają nazwę
+                     Rejestruje dane wyjściowe kompilacji w wielu plikach
+                     dziennika, po jednym pliku na węzeł programu MSBuild.
+                     Początkową lokalizacją tych plików jest bieżący katalog.
+                     Domyślnie pliki mają nazwę
                      „MSBuild&lt;identyfikator węzła&gt;.log”. Lokalizację plików
                      i inne parametry rejestratora plików można określić
+
                      przez dodanie przełącznika „-fileLoggerParameters”.
 
                      Jeśli nazwa pliku zostanie ustawiona za pomocą przełącznika
@@ -1032,7 +1037,7 @@
                      Dostępne są parametry takie same, jak podane dla rejestratora
                      konsoli. Dostępne są również dodatkowe parametry:
                        LogFile — ścieżka do pliku dziennika, w którym będzie
-                                 zapisywany dziennik kompilacji.
+                                 zapisywany dziennik kompilacji. 
                        Append — określa, czy plik dziennika kompilacji zostanie
                                 dołączony do pliku dziennika, czy go zastąpi.
                                 Ustawienie tego przełącznika powoduje dołączenie dziennika kompilacji
@@ -1046,8 +1051,8 @@
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
-                       -flp1:warningsonly;logfile=msbuild.wrn
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
+                       -flp1:warningsonly;logfile=msbuild.wrn 
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1981,10 +1986,10 @@ dzienników                     tekstowych i wykorzystać w innych narzędziach 
     </source>
         <target state="translated">  -restore[:True|False]
                      Uruchamia element docelowy o nazwie Restore przed skompilowaniem
-                     innych elementów docelowych i zapewnia, że kompilacja tych
-                     elementów docelowych korzysta z najnowszej logiki przywróconej
-                     kompilacji. Jest to przydatne, gdy drzewo projektu wymaga
-                     przywrócenia pakietów przed ich skompilowaniem. Podanie parametru
+                     innych elementów docelowych i zapewnia, że kompilacja tych 
+                     elementów docelowych korzysta z najnowszej logiki przywróconej 
+                     kompilacji. Jest to przydatne, gdy drzewo projektu wymaga 
+                     przywrócenia pakietów przed ich skompilowaniem. Podanie parametru 
                      -restore jest równoznaczne z podaniem parametru -restore:True.
                      Za pomocą tego parametru można przesłonić wartość pochodzącą
                      z pliku odpowiedzi.

@@ -34,7 +34,7 @@
     <PackageVersion Include="PdbGit" Version="3.0.41" />
     <PackageVersion Update="PdbGit" Condition="'$(PdbGitVersion)' != ''" Version="$(PdbGitVersion)" />
 
-    <PackageVersion Include="Shouldly" Version="3.0.0" />
+    <PackageVersion Include="Shouldly" Version="4.2.1" />
     <PackageVersion Update="Shouldly" Condition="'$(ShouldlyVersion)' != ''" Version="$(ShouldlyVersion)" />
 
     <PackageVersion Include="System.CodeDom" Version="7.0.0" />

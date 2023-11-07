@@ -57,7 +57,7 @@ namespace Microsoft.Build.Tasks
         public bool CaseSensitive { get; set; }
 
         /// <summary>
-        /// Whether or not to return the last match, instead of 
+        /// Whether or not to return the last match, instead of
         /// the first one
         /// </summary>
         public bool FindLastMatch { get; set; }

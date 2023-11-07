@@ -13,7 +13,7 @@
     <ProjectReference Include="..\..\Framework\Microsoft.Build.Framework.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Shouldly" Version="3.0.0" />
+    <PackageReference Include="Shouldly" Version="4.2.1" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
 </Project>

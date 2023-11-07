@@ -2651,18 +2651,18 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Version.TryParse(msbuildVersionProperty, out Version msbuildVersionAsVersion).ShouldBeTrue();
 
             msbuildVersionAsVersion.Minor.ShouldBeInRange(0, 20,
-                () => $"minor version {msbuildVersionProperty} looks fishy. If we're really in x.20.0, go ahead and change the constant. This is to guard against being nonsensical like 16.200.19");
+                customMessage: $"minor version {msbuildVersionProperty} looks fishy. If we're really in x.20.0, go ahead and change the constant. This is to guard against being nonsensical like 16.200.19");
 
             // Version parses missing elements into -1, and this property should be Major.Minor.Patch only
             msbuildVersionAsVersion.Revision.ShouldBe(-1);
 
             msbuildFileVersionProperty.ShouldBe(ProjectCollection.Version.ToString());
             ProjectCollection.Version.ToString().ShouldStartWith(msbuildVersionProperty,
-                "ProjectCollection.Version should match the property MSBuildVersion, but can contain another version part");
+                customMessage: "ProjectCollection.Version should match the property MSBuildVersion, but can contain another version part");
 
             msbuildSemanticVersionProperty.ShouldBe(ProjectCollection.DisplayVersion);
             ProjectCollection.DisplayVersion.ShouldStartWith(msbuildVersionProperty,
-                "DisplayVersion is semver2 while MSBuildVersion is Major.Minor.Build but should be a prefix match");
+                customMessage: "DisplayVersion is semver2 while MSBuildVersion is Major.Minor.Build but should be a prefix match");
         }
 
 

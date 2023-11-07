@@ -300,7 +300,7 @@ namespace Microsoft.Build.BuildEngine
 
                 engineProxy?.MarkAsInActive();
 
-                // Now all task batches are done, apply all item adds to the outer 
+                // Now all task batches are done, apply all item adds to the outer
                 // target batch; we do this even if the task wasn't found (in that case,
                 // no items or properties will have been added to the scope)
                 if (buckets != null)
@@ -355,7 +355,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 // Now that we know we will need to execute the task,
                 // Ensure the TaskEngine is initialized with the task class
-                // This does the work of task discovery, if it 
+                // This does the work of task discovery, if it
                 // hasn't already been done.
                 bool taskClassWasFound = FindTask();
 
@@ -738,7 +738,7 @@ namespace Microsoft.Build.BuildEngine
                     {
                         loggingServices.LogTaskWarningFromException(buildEventContext, e,
                             // Don't try and log the line/column number for this error if
-                            // ContinueOnError=true, because it's too expensive to do so, 
+                            // ContinueOnError=true, because it's too expensive to do so,
                             // and this error may be fairly common and expected.
                             new BuildEventFileInfo(projectFileOfTaskNode), TaskName);
 
@@ -1189,8 +1189,8 @@ namespace Microsoft.Build.BuildEngine
                 {
                     TaskOutput taskOutputSpecification = new TaskOutput((XmlElement)childNode);
 
-                    // The "ItemName" attribute of the <Output> tag is usually just a straight 
-                    // string representing the item name.  If it contains any "@" signs, the 
+                    // The "ItemName" attribute of the <Output> tag is usually just a straight
+                    // string representing the item name.  If it contains any "@" signs, the
                     // project author most likely made a mistake, and so we throw a warning here.
                     XmlAttribute itemNameAttribute = taskOutputSpecification.ItemNameAttribute;
                     if (showWarnings && taskOutputSpecification.IsItemVector &&
@@ -1200,8 +1200,8 @@ namespace Microsoft.Build.BuildEngine
                             projectFileOfTaskNode), "AtSignInTaskOutputItemName", itemNameAttribute.Value);
                     }
 
-                    // The "PropertyName" attribute of the <Output> tag is usually just a straight 
-                    // string representing the property name.  If it contains any "$" signs, the 
+                    // The "PropertyName" attribute of the <Output> tag is usually just a straight
+                    // string representing the property name.  If it contains any "$" signs, the
                     // project author most likely made a mistake, and so we throw a warning here.
                     XmlAttribute propertyNameAttribute = taskOutputSpecification.PropertyNameAttribute;
                     if (showWarnings && taskOutputSpecification.IsProperty &&
@@ -1485,8 +1485,8 @@ namespace Microsoft.Build.BuildEngine
                     finalTaskInputs.AddRange(finalTaskItems);
                 }
 
-                // If there were no items, don't change the parameter's value.  EXCEPT if it's marked as a required 
-                // parameter, in which case we made an explicit decision to pass in an empty array.  This is 
+                // If there were no items, don't change the parameter's value.  EXCEPT if it's marked as a required
+                // parameter, in which case we made an explicit decision to pass in an empty array.  This is
                 // to avoid project authors having to add Conditions on all their tasks to avoid calling them
                 // when a particular item list is empty.  This way, we just call the task with an empty list,
                 // the task will loop over an empty list, and return quickly.

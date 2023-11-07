@@ -731,10 +731,10 @@ namespace Microsoft.Build.Tasks
                             break;
                         }
 
-                        // Initialize the destinationFolder item.
-                        // ItemSpec is unescaped, and the TaskItem constructor expects an escaped input, so we need to
-                        // make sure to re-escape it here.
-                        DestinationFiles[i] = new TaskItem(EscapingUtilities.Escape(destinationFile));
+                    // Initialize the destinationFolder item.
+                    // ItemSpec is unescaped, and the TaskItem constructor expects an escaped input, so we need to
+                    // make sure to re-escape it here.
+                    DestinationFiles[i] = new TaskItem(EscapingUtilities.Escape(destinationFile));
 
                         // Copy meta-data from source to destinationFolder.
                         SourceFiles[i].CopyMetadataTo(DestinationFiles[i]);
