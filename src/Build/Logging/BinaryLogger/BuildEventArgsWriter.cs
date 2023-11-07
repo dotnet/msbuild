@@ -14,6 +14,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 
@@ -1274,13 +1275,13 @@ namespace Microsoft.Build.Logging
                 }
                 else
                 {
-                    value = FnvHash64.GetHashCode(text);
+                    value = FowlerNollVo1aHash.ComputeHash64Fast(text);
                 }
             }
 
             public static HashKey Combine(HashKey left, HashKey right)
             {
-                return new HashKey(FnvHash64.Combine(left.value, right.value));
+                return new HashKey(FowlerNollVo1aHash.Combine64(left.value, right.value));
             }
 
             public HashKey Add(HashKey other) => Combine(this, other);
@@ -1308,36 +1309,6 @@ namespace Microsoft.Build.Logging
             public override string ToString()
             {
                 return value.ToString();
-            }
-        }
-
-        internal static class FnvHash64
-        {
-            public const ulong Offset = 14695981039346656037;
-            public const ulong Prime = 1099511628211;
-
-            public static ulong GetHashCode(string text)
-            {
-                ulong hash = Offset;
-
-                unchecked
-                {
-                    for (int i = 0; i < text.Length; i++)
-                    {
-                        char ch = text[i];
-                        hash = (hash ^ ch) * Prime;
-                    }
-                }
-
-                return hash;
-            }
-
-            public static ulong Combine(ulong left, ulong right)
-            {
-                unchecked
-                {
-                    return (left ^ right) * Prime;
-                }
             }
         }
     }
