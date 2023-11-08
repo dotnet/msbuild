@@ -809,11 +809,19 @@ namespace Microsoft.Build.CommandLine
                     }
                     else if ((getProperty.Length > 0 || getItem.Length > 0) && (targets is null || targets.Length == 0))
                     {
-                        using (ProjectCollection collection = new(globalProperties, loggers, ToolsetDefinitionLocations.Default))
+                        try
                         {
-                            Project project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
-                            exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project);
-                            collection.LogBuildFinishedEvent(exitType == ExitType.Success);
+                            using (ProjectCollection collection = new(globalProperties, loggers, ToolsetDefinitionLocations.Default))
+                            {
+                                Project project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
+                                exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project);
+                                collection.LogBuildFinishedEvent(exitType == ExitType.Success);
+                            }
+                        }
+                        catch (InvalidProjectFileException e)
+                        {
+                            Console.Error.WriteLine(e.Message);
+                            return ExitType.BuildError;
                         }
                     }
                     else // regular build
@@ -899,10 +907,6 @@ namespace Microsoft.Build.CommandLine
                 ShowHelpPrompt();
 
                 exitType = ExitType.SwitchError;
-            }
-            catch (InvalidProjectFileException)
-            {
-                exitType = ExitType.BuildError;
             }
             // handle configuration exceptions: problems reading toolset information from msbuild.exe.config or the registry
             catch (InvalidToolsetDefinitionException e)
@@ -1035,28 +1039,20 @@ namespace Microsoft.Build.CommandLine
 
         private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, Project project)
         {
-            try
+            // Special case if the user requests exactly one property: skip json formatting
+            if (getProperty.Length == 1 && getItem.Length == 0)
             {
-                // Special case if the user requests exactly one property: skip json formatting
-                if (getProperty.Length == 1 && getItem.Length == 0)
-                {
-                    Console.WriteLine(project.GetPropertyValue(getProperty[0]));
-                }
-                else
-                {
-                    JsonOutputFormatter jsonOutputFormatter = new();
-                    jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
-                    jsonOutputFormatter.AddItemsInJsonFormat(getItem, project);
-                    Console.WriteLine(jsonOutputFormatter.ToString());
-                }
+                Console.WriteLine(project.GetPropertyValue(getProperty[0]));
+            }
+            else
+            {
+                JsonOutputFormatter jsonOutputFormatter = new();
+                jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
+                jsonOutputFormatter.AddItemsInJsonFormat(getItem, project);
+                Console.WriteLine(jsonOutputFormatter.ToString());
+            }
 
-                return ExitType.Success;
-            }
-            catch (InvalidProjectFileException e)
-            {
-                Console.Error.WriteLine(e.Message);
-                return ExitType.BuildError;
-            }
+            return ExitType.Success;
         }
 
         private static ExitType OutputBuildInformationInJson(BuildResult result, string[] getProperty, string[] getItem, string[] getTargetResult, ILogger[] loggers, ExitType exitType)
