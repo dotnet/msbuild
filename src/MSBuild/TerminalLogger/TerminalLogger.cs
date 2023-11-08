@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-
+using System.Linq;
 using System.Text;
 using System.Threading;
 using Microsoft.Build.Framework;
@@ -25,6 +25,9 @@ namespace Microsoft.Build.Logging.TerminalLogger;
 /// </remarks>
 internal sealed class TerminalLogger : INodeLogger
 {
+    private const string FilePathPattern = " -> ";
+    private readonly string[] _immediateMessageMarkers = new[] { "[CredentialProvider]", "--interactive" };
+
     /// <summary>
     /// A wrapper over the project context ID passed to us in <see cref="IEventSource"/> logger events.
     /// </summary>
@@ -549,7 +552,7 @@ internal sealed class TerminalLogger : INodeLogger
         {
             // Detect project output path by matching high-importance messages against the "$(MSBuildProjectName) -> ..."
             // pattern used by the CopyFilesToOutputDirectory target.
-            int index = message.IndexOf(" -> ", StringComparison.Ordinal);
+            int index = message.IndexOf(FilePathPattern, StringComparison.Ordinal);
             if (index > 0)
             {
                 var projectFileName = Path.GetFileName(e.ProjectFile.AsSpan());
@@ -560,6 +563,12 @@ internal sealed class TerminalLogger : INodeLogger
                     ReadOnlyMemory<char> outputPath = e.Message.AsMemory().Slice(index + 4);
                     project.OutputPath = outputPath;
                 }
+            }
+
+            // Detect markers that require special attention from a customer.
+            if (_immediateMessageMarkers.Any(marker => message.IndexOf(marker, StringComparison.Ordinal) > 0))
+            {
+                RenderImmediateMessage(message, MessageSeverity.Blocking);
             }
         }
     }
@@ -585,6 +594,11 @@ internal sealed class TerminalLogger : INodeLogger
                 endColumnNumber: e.EndColumnNumber,
                 threadId: e.ThreadId,
                 logOutputProperties: null);
+
+            if (_immediateMessageMarkers.Any(marker => message.IndexOf(marker, StringComparison.Ordinal) > 0))
+            {
+                RenderImmediateMessage(message, MessageSeverity.Warning);
+            }
 
             project.AddBuildMessage(MessageSeverity.Warning, message);
         }
@@ -845,6 +859,26 @@ internal sealed class TerminalLogger : INodeLogger
         else
         {
             return AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Succeeded"), TerminalColor.Green);
+        }
+    }
+
+    /// <summary>
+    /// Print a build messages to the output that require special customer's attention.
+    /// </summary>
+    /// <param name="message">Build message needed to be shown immediately.</param>
+    /// <param name="severity">Message severity.</param>
+    private void RenderImmediateMessage(string message, MessageSeverity severity)
+    {
+        string styledMessage = severity switch
+        {
+            MessageSeverity.Warning => AnsiCodes.Colorize(message, TerminalColor.Yellow),
+            MessageSeverity.Blocking => AnsiCodes.Colorize(message, TerminalColor.Blue),
+            _ => string.Empty,
+        };
+
+        if (!string.IsNullOrEmpty(styledMessage))
+        {
+            Terminal.WriteLine(styledMessage);
         }
     }
 
