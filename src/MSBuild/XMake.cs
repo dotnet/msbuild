@@ -818,9 +818,8 @@ namespace Microsoft.Build.CommandLine
                                 collection.LogBuildFinishedEvent(exitType == ExitType.Success);
                             }
                         }
-                        catch (InvalidProjectFileException e)
+                        catch (InvalidProjectFileException)
                         {
-                            Console.Error.WriteLine(e.Message);
                             return ExitType.BuildError;
                         }
                     }
