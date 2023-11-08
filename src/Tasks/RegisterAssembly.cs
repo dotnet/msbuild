@@ -222,7 +222,7 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                // Load the specified assembly. 
+                // Load the specified assembly.
                 Assembly asm = Assembly.UnsafeLoadFrom(assemblyPath);
 
                 var comRegistrar = new RegistrationServices();
@@ -230,8 +230,8 @@ namespace Microsoft.Build.Tasks
                 // Register the assembly
                 if (!comRegistrar.RegisterAssembly(asm, CreateCodeBase ? AssemblyRegistrationFlags.SetCodeBase : AssemblyRegistrationFlags.None))
                 {
-                    // If the assembly doesn't contain any types that could be registered for COM interop, 
-                    // warn the user about it.  
+                    // If the assembly doesn't contain any types that could be registered for COM interop,
+                    // warn the user about it.
                     Log.LogWarningWithCodeFromResources("RegisterAssembly.NoValidTypes", assemblyPath);
                 }
 

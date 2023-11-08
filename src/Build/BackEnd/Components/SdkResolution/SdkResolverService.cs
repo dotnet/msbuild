@@ -201,7 +201,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 warnings.AddRange(firstWarnings);
             }
 
-            // Second pass: fallback to general resolvers. 
+            // Second pass: fallback to general resolvers.
             resolvers = GetResolvers(
                 _generalResolversManifestsRegistry,
                 loggingContext,

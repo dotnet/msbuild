@@ -13,17 +13,17 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Collections
 {
     /// <summary>
-    /// Collection of items that allows a list of all items of a specified type to be 
-    /// retrieved in O(1), and specific items to be added, removed, or checked for in O(1). 
+    /// Collection of items that allows a list of all items of a specified type to be
+    /// retrieved in O(1), and specific items to be added, removed, or checked for in O(1).
     /// All items of a particular type can also be removed in O(1).
     /// Items are ordered with respect to all other items of their type.
     /// </summary>
     /// <remarks>
     /// Really a Dictionary&lt;string, ICollection&lt;T&gt;&gt; where the key (the item type) is obtained from IKeyed.Key
-    /// Is not observable, so if clients wish to observe modifications they must mediate them themselves and 
+    /// Is not observable, so if clients wish to observe modifications they must mediate them themselves and
     /// either not expose this collection or expose it through a readonly wrapper.
     /// At various places in this class locks are taken on the backing collection.  The reason for this is to allow
-    /// this class to be asynchronously enumerated.  This is accomplished by the CopyOnReadEnumerable which will 
+    /// this class to be asynchronously enumerated.  This is accomplished by the CopyOnReadEnumerable which will
     /// lock the backing collection when it does its deep cloning.  This prevents asynchronous access from corrupting
     /// the state of the enumeration until the collection has been fully copied.
     /// </remarks>
@@ -248,7 +248,7 @@ namespace Microsoft.Build.Collections
         /// <remarks>
         /// If a list is emptied, removes the list from the enclosing collection
         /// so it can be garbage collected.
-        /// </remarks>        
+        /// </remarks>
         internal bool Remove(T projectItem)
         {
             lock (_itemLists)

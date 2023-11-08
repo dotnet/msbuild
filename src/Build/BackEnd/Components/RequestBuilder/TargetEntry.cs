@@ -19,7 +19,7 @@ using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingCont
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
-#if MSBUILDENABLEVSPROFILING 
+#if MSBUILDENABLEVSPROFILING
 using Microsoft.VisualStudio.Profiler;
 #endif
 #nullable disable
@@ -507,7 +507,7 @@ namespace Microsoft.Build.BackEnd
                                 // We either have some work to do or at least we need to infer outputs from inputs.
                                 bucketResult = await ProcessBucket(taskBuilder, targetLoggingContext, GetTaskExecutionMode(dependencyResult), lookupForInference, lookupForExecution);
 
-                                // Now aggregate the result with the existing known results.  There are four rules, assuming the target was not 
+                                // Now aggregate the result with the existing known results.  There are four rules, assuming the target was not
                                 // skipped due to being up-to-date:
                                 // 1. If this bucket failed or was cancelled, the aggregate result is failure.
                                 // 2. If this bucket Succeeded and we have not previously failed, the aggregate result is a success.
@@ -525,7 +525,7 @@ namespace Microsoft.Build.BackEnd
                                     }
                                 }
 
-                                // Pop the lookup scopes, causing them to collapse their values back down into the 
+                                // Pop the lookup scopes, causing them to collapse their values back down into the
                                 // bucket's lookup.
                                 // NOTE: this order is important because when we infer outputs, we are trying
                                 // to produce the same results as would be produced from a full build; as such
@@ -557,7 +557,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     finally
                     {
-                        // Don't log the last target finished event until we can process the target outputs as we want to attach them to the 
+                        // Don't log the last target finished event until we can process the target outputs as we want to attach them to the
                         // last target batch.
                         if (targetLoggingContext != null && i < numberOfBuckets - 1)
                         {
@@ -585,13 +585,13 @@ namespace Microsoft.Build.BackEnd
                     string targetReturns = _target.Returns;
                     ElementLocation targetReturnsLocation = _target.ReturnsLocation;
 
-                    // If there are no targets in the project file that use the "Returns" attribute, that means that we 
+                    // If there are no targets in the project file that use the "Returns" attribute, that means that we
                     // revert to the legacy behavior in the case where Returns is not specified (null, rather
-                    // than the empty string, which indicates no returns).  Legacy behavior is for all 
-                    // of the target's Outputs to be returned. 
-                    // On the other hand, if there is at least one target in the file that uses the Returns attribute, 
+                    // than the empty string, which indicates no returns).  Legacy behavior is for all
+                    // of the target's Outputs to be returned.
+                    // On the other hand, if there is at least one target in the file that uses the Returns attribute,
                     // then all targets in the file are run according to the new behaviour (return nothing unless otherwise
-                    // specified by the Returns attribute). 
+                    // specified by the Returns attribute).
                     if (targetReturns == null)
                     {
                         if (!_target.ParentProjectSupportsReturnsAttribute)
@@ -616,7 +616,7 @@ namespace Microsoft.Build.BackEnd
 
                         // NOTE: we need to gather the outputs in batches, because the output specification may reference item metadata
                         // Also, we are using the baseLookup, which has possibly had changes made to it since the project started.  Because of this, the
-                        // set of outputs calculated here may differ from those which would have been calculated at the beginning of the target.  It is 
+                        // set of outputs calculated here may differ from those which would have been calculated at the beginning of the target.  It is
                         // assumed the user intended this.
                         List<ItemBucket> batchingBuckets = BatchingEngine.PrepareBatchingBuckets(GetBatchableParametersForTarget(), _baseLookup, _target.Location);
 
@@ -648,7 +648,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 finally
                 {
-                    // log the last target finished since we now have the target outputs. 
+                    // log the last target finished since we now have the target outputs.
                     targetLoggingContext?.LogTargetBatchFinished(projectFullPath, targetSuccess, targetOutputItems?.Count > 0 ? targetOutputItems : null);
                 }
 

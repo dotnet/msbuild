@@ -127,7 +127,7 @@ namespace Microsoft.Build.BuildEngine
         #region Methods
 
         /// <summary>
-        /// This ICollection method copies the contents of this collection to an 
+        /// This ICollection method copies the contents of this collection to an
         /// array.
         /// </summary>
         /// <owner>RGoel</owner>
@@ -160,7 +160,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Adds a new Target to our collection.  This method does nothing
         /// to manipulate the project's XML content.
-        /// If a target with the same name already exists, it is replaced by 
+        /// If a target with the same name already exists, it is replaced by
         /// the new one.
         /// </summary>
         /// <param name="newTarget">target to add</param>
@@ -196,7 +196,7 @@ namespace Microsoft.Build.BuildEngine
             this.targetTable[targetName] = newTarget;
 
             // The project file has been modified and needs to be saved and re-evaluated.
-            // Also though, adding/removing a target requires us to re-walk all the XML 
+            // Also though, adding/removing a target requires us to re-walk all the XML
             // in order to re-compute out the "first logical target" as well as re-compute
             // the target overriding rules.
             this.parentProject.MarkProjectAsDirtyForReprocessXml();
@@ -229,7 +229,7 @@ namespace Microsoft.Build.BuildEngine
             this.parentProject.ProjectElement.RemoveChild(targetToRemove.TargetElement);
 
             // Remove the target from our hashtable, if it exists.  It might not exist, and that's okay.
-            // The reason it might not exist is because of target overriding, and the fact that 
+            // The reason it might not exist is because of target overriding, and the fact that
             // our hashtable only stores the *last* target of a given name.
             if ((Target)this.targetTable[targetToRemove.Name] == targetToRemove)
             {
@@ -240,7 +240,7 @@ namespace Microsoft.Build.BuildEngine
             targetToRemove.ParentProject = null;
 
             // The project file has been modified and needs to be saved and re-evaluated.
-            // Also though, adding/removing a target requires us to re-walk all the XML 
+            // Also though, adding/removing a target requires us to re-walk all the XML
             // in order to re-compute the "first logical target" as well as re-compute
             // the target overriding rules.
             this.parentProject.MarkProjectAsDirtyForReprocessXml();

@@ -17,7 +17,7 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
-    /// Each packet is split up into a region, the region contains the tests for 
+    /// Each packet is split up into a region, the region contains the tests for
     /// a given packet type.
     /// </summary>
     public class NodePackets_Tests
@@ -326,7 +326,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         .RespectingRuntimeTypes()
                         // Since we use struct DictionaryEntry of class TaskItemData, generated DictionaryEntry.Equals compare TaskItemData by references.
                         // Bellow will instruct equivalency test to not use DictionaryEntry.Equals but its public members for equivalency tests.
-                        .ComparingByMembers<DictionaryEntry>() 
+                        .ComparingByMembers<DictionaryEntry>()
                         .WithTracing(), "Roundtrip deserialization of message type {0} should be equivalent", args.GetType().Name);
                 }
             }
@@ -337,7 +337,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify the LoggingMessagePacket is properly created from a build event. 
+        /// Verify the LoggingMessagePacket is properly created from a build event.
         /// This includes the packet type and the event type depending on which build event arg is passed in.
         /// </summary>
         /// <param name="buildEvent">Build event to put into a packet, and verify after packet creation</param>

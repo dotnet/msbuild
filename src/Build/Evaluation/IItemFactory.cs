@@ -49,18 +49,18 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Creates an item based off the provided item, with cloning semantics.
-        /// New item is associated with the passed in defining project, not that of the original item. 
+        /// New item is associated with the passed in defining project, not that of the original item.
         /// </summary>
         T CreateItem(S source, string definingProject);
 
         /// <summary>
         /// Creates an item with the specified include and the metadata from the specified base item
-        /// New item is associated with the passed in defining project, not that of the original item. 
+        /// New item is associated with the passed in defining project, not that of the original item.
         /// </summary>
         T CreateItem(string include, S baseItem, string definingProject);
 
         /// <summary>
-        /// Creates an item using the specified evaluated include, include before wildcard expansion, 
+        /// Creates an item using the specified evaluated include, include before wildcard expansion,
         /// and defining project.
         /// </summary>
         T CreateItem(string include, string includeBeforeWildcardExpansion, string definingProject);

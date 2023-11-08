@@ -543,10 +543,10 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// Formats the given string using the variable arguments passed in.
-        /// 
+        ///
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
-        /// 
+        ///
         /// Thread safe.
         /// </summary>
         /// <param name="unformatted">The string to format.</param>
@@ -563,7 +563,7 @@ namespace Microsoft.Build.Framework
             if ((args?.Length > 0))
             {
 #if DEBUG
-                // If you accidentally pass some random type in that can't be converted to a string, 
+                // If you accidentally pass some random type in that can't be converted to a string,
                 // FormatResourceString calls ToString() which returns the full name of the type!
                 foreach (object param in args)
                 {

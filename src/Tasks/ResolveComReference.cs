@@ -84,12 +84,12 @@ namespace Microsoft.Build.Tasks
         bool NoClassMembers { get; set; }
 
         /// <summary>
-        /// If true, do not log messages or warnings.  Default is false. 
+        /// If true, do not log messages or warnings.  Default is false.
         /// </summary>
         bool Silent { get; set; }
 
         /// <summary>
-        /// The preferred target processor architecture. Passed to tlbimp.exe /machine flag after translation. 
+        /// The preferred target processor architecture. Passed to tlbimp.exe /machine flag after translation.
         /// Should be a member of Microsoft.Build.Utilities.ProcessorArchitecture.
         /// </summary>
         string TargetProcessorArchitecture { get; set; }
@@ -188,7 +188,7 @@ namespace Microsoft.Build.Tasks
         public string TargetFrameworkVersion { get; set; } = String.Empty;
 
         #endregion
-#pragma warning restore format 
+#pragma warning restore format
     }
 
 #else
@@ -316,7 +316,7 @@ namespace Microsoft.Build.Tasks
 
             if (!ComputePathToAxImp() || !ComputePathToTlbImp())
             {
-                // unable to compute the path to tlbimp.exe, aximp.exe, or both and that is necessary to 
+                // unable to compute the path to tlbimp.exe, aximp.exe, or both and that is necessary to
                 // continue forward, so return now.
                 return false;
             }
@@ -356,7 +356,7 @@ namespace Microsoft.Build.Tasks
 
                 // Process each task item. If one of them fails we still process the rest of them, but
                 // remember that the task should return failure.
-                // DESIGN CHANGE: we no longer fail the task when one or more references fail to resolve. 
+                // DESIGN CHANGE: we no longer fail the task when one or more references fail to resolve.
                 // Unless we experience a catastrophic failure, we'll log warnings for those refs and proceed
                 // (and return success)
                 var moduleList = new List<ITaskItem>();
@@ -396,7 +396,7 @@ namespace Microsoft.Build.Tasks
                             catch (FileLoadException ex)
                             {
                                 // This exception is thrown when we try to load a delay signed assembly without disabling
-                                // strong name verification first. So print a nice information if we're generating 
+                                // strong name verification first. So print a nice information if we're generating
                                 // delay signed wrappers, otherwise rethrow, since it's an unexpected exception.
                                 if (DelaySign)
                                 {
@@ -415,7 +415,7 @@ namespace Microsoft.Build.Tasks
                             catch (ArgumentException ex)
                             {
                                 // This exception is thrown when we try to convert some of the Metadata from the project
-                                // file and the conversion fails.  Most likely, the user needs to correct a type in the 
+                                // file and the conversion fails.  Most likely, the user needs to correct a type in the
                                 // project file.
                                 Log.LogErrorWithCodeFromResources("General.InvalidArgument", ex.Message);
                                 return false;
@@ -435,8 +435,8 @@ namespace Microsoft.Build.Tasks
                 ResolvedModules = moduleList.ToArray();
                 ResolvedFiles = resolvedReferenceList.ToArray();
 
-                // The Logs from AxImp and TlbImp aren't part of our log, but if the task failed, it will return false from 
-                // GenerateWrapper, which should get passed all the way back up here.  
+                // The Logs from AxImp and TlbImp aren't part of our log, but if the task failed, it will return false from
+                // GenerateWrapper, which should get passed all the way back up here.
                 return allReferencesResolvedSuccessfully && !Log.HasLoggedErrors;
             }
             finally
@@ -477,7 +477,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Computes the path to TlbImp.exe for use in logging and for passing to the 
+        /// Computes the path to TlbImp.exe for use in logging and for passing to the
         /// nested TlbImp task.
         /// </summary>
         /// <returns>True if the path is found (or it doesn't matter because we're executing in memory), false otherwise</returns>
@@ -517,7 +517,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Computes the path to AxImp.exe for use in logging and for passing to the 
+        /// Computes the path to AxImp.exe for use in logging and for passing to the
         /// nested AxImp task.
         /// </summary>
         /// <returns>True if the path is found, false otherwise</returns>
@@ -530,12 +530,12 @@ namespace Microsoft.Build.Tasks
             {
                 // In certain cases -- such as trying to build a Dev10 project on a machine that only has Dev11 installed --
                 // it's possible to have ExecuteAsTool set to false (e.g. "use the current CLR") but still have SDKToolsPath
-                // be empty (because it's referencing the 7.0A SDK in the registry, which doesn't exist).  In that case, we 
-                // want to look for VersionLatest.  However, if ExecuteAsTool is true (default value) and SDKToolsPath is 
+                // be empty (because it's referencing the 7.0A SDK in the registry, which doesn't exist).  In that case, we
+                // want to look for VersionLatest.  However, if ExecuteAsTool is true (default value) and SDKToolsPath is
                 // empty, then we can safely assume that we want to get the 3.5 version of the tool.
                 TargetDotNetFrameworkVersion targetAxImpVersion = ExecuteAsTool ? TargetDotNetFrameworkVersion.Version35 : TargetDotNetFrameworkVersion.Latest;
 
-                // We want to use the copy of AxImp corresponding to our targeted architecture if possible.  
+                // We want to use the copy of AxImp corresponding to our targeted architecture if possible.
                 _aximpPath = GetPathToSDKFileWithCurrentlyTargetedArchitecture("AxImp.exe", targetAxImpVersion, VisualStudioVersion.VersionLatest);
 
                 if (_aximpPath == null)
@@ -559,7 +559,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Try to get the path to the tool in the Windows SDK with the given .NET Framework version and 
+        /// Try to get the path to the tool in the Windows SDK with the given .NET Framework version and
         /// of the same architecture as we were currently given for TargetProcessorArchitecture.
         /// </summary>
         private string GetPathToSDKFileWithCurrentlyTargetedArchitecture(string file, TargetDotNetFrameworkVersion targetFrameworkVersion, VisualStudioVersion visualStudioVersion)
@@ -617,7 +617,7 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  VerifyAndInitializeInputs
-         * 
+         *
          * Helper method. Verifies the input task items have correct metadata and initializes optional ones with
          * default values if they're not present.
          */
@@ -687,7 +687,7 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  ConvertAttrReferencesToComReferenceInfo
-         * 
+         *
          * Helper method. Converts TypeLibAttr references to ComReferenceInfo objects.
          * This method cannot fail, since we want to proceed with the task even if some references won't load.
          */
@@ -725,7 +725,7 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  ConvertFileReferencesToComReferenceInfo
-         * 
+         *
          * Helper method. Converts TypeLibFiles references to ComReferenceInfo objects
          * This method cannot fail, since we want to proceed with the task even if some references won't load.
          */
@@ -881,8 +881,8 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  ResolveReference
-         * 
-         * Helper COM resolution method. Creates an appropriate helper class for the given tool and calls 
+         *
+         * Helper COM resolution method. Creates an appropriate helper class for the given tool and calls
          * the Resolve method on it.
          */
         internal bool ResolveReference(ComDependencyWalker dependencyWalker, ComReferenceInfo referenceInfo, string outputDirectory, out ITaskItem referencePathItem)
@@ -936,7 +936,7 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  IsExistingProjectReference
-         * 
+         *
          * If given typelib attributes are already a project reference, return that reference.
          */
         internal bool IsExistingProjectReference(TYPELIBATTR typeLibAttr, string neededRefType, out ComReferenceInfo referenceInfo)
@@ -977,7 +977,7 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  IsExistingDependencyReference
-         * 
+         *
          * If given typelib attributes are already a dependency reference (that is, was already
          * processed) return that reference.
          */
@@ -999,7 +999,7 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  ResolveComClassicReference
-         * 
+         *
          * Resolves a COM classic reference given the type library attributes and the type of wrapper to use.
          * If wrapper type is not specified, this method will first look for an existing reference in the project,
          * fall back to looking for a PIA and finally try to generate a regular tlbimp wrapper.
@@ -1050,7 +1050,7 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  ResolveComClassicReference
-         * 
+         *
          * Resolves a COM classic reference given the type library attributes and the type of wrapper to use.
          * If wrapper type is not specified, this method will first look for an existing reference in the project,
          * fall back to looking for a PIA and finally try to generate a regular tlbimp wrapper.
@@ -1076,7 +1076,7 @@ namespace Microsoft.Build.Tasks
             // find an existing ref in the project (taking the desired wrapperType into account, if any)
             if (IsExistingProjectReference(typeLibAttr, wrapperType, out ComReferenceInfo referenceInfo))
             {
-                // IsExistingProjectReference should not return null... 
+                // IsExistingProjectReference should not return null...
                 Debug.Assert(referenceInfo != null, "IsExistingProjectReference should not return null");
                 topLevelRef = true;
                 wrapperType = referenceInfo.taskItem.GetMetadata(ComReferenceItemMetadataNames.wrapperTool);
@@ -1145,7 +1145,7 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  ResolveNetAssemblyReference
-         * 
+         *
          * Resolves a .NET assembly reference using the list of resolved managed references supplied to the task.
          *
          * This is the method available for references to call back to resolve their dependencies
@@ -1177,9 +1177,9 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  ResolveComAssemblyReference
-         * 
+         *
          * Resolves a COM wrapper assembly reference based on the COM references resolved so far. This method is necessary
-         * for Ax wrappers only, so all necessary references will be resolved by then (since we resolve them in 
+         * for Ax wrappers only, so all necessary references will be resolved by then (since we resolve them in
          * the following order: pia, tlbimp, aximp)
          *
          * This is the method available for references to call back to resolve their dependencies
@@ -1292,7 +1292,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Return the set of item specs for the resolved assembly references. 
+        /// Return the set of item specs for the resolved assembly references.
         /// </summary>
         /// <returns></returns>
         internal IEnumerable<string> GetResolvedAssemblyReferenceItemSpecs()
@@ -1433,7 +1433,7 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  VerifyReferenceMetadataForNameItem
-         * 
+         *
          * Verifies that all required metadata on the COM reference item are there.
          */
         internal static bool VerifyReferenceMetadataForNameItem(ITaskItem reference, out string missingOrInvalidMetadata)
@@ -1507,7 +1507,7 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  InitializeDefaultMetadataForNameItem
-         * 
+         *
          * Initializes optional metadata on given name item to their default values if they're not present
          */
         internal static void InitializeDefaultMetadataForNameItem(ITaskItem reference)
@@ -1527,7 +1527,7 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  InitializeDefaultMetadataForFileItem
-         * 
+         *
          * Initializes optional metadata on given file item to their default values if they're not present
          */
         internal static void InitializeDefaultMetadataForFileItem(ITaskItem reference)
@@ -1541,7 +1541,7 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  CheckForConflictingReferences
-         * 
+         *
          * Checks if we have any conflicting references.
          */
         internal bool CheckForConflictingReferences()
@@ -1629,7 +1629,7 @@ namespace Microsoft.Build.Tasks
 
                 string privateMetadata = taskItem.GetMetadata(ItemMetadataNames.privateMetadata);
 
-                // if Private is not set on the original item, we set CopyLocal to false for GAC items 
+                // if Private is not set on the original item, we set CopyLocal to false for GAC items
                 // and true for non-GAC items
                 if (string.IsNullOrEmpty(privateMetadata))
                 {
@@ -1652,7 +1652,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Scan all the dependencies of the main project references and preresolve them
-        /// so that when we get asked about a previously unknown dependency in the form of a .NET assembly 
+        /// so that when we get asked about a previously unknown dependency in the form of a .NET assembly
         /// we know what to do with it.
         /// </summary>
         private List<string> ScanAndResolveAllDependencies(ComDependencyWalker dependencyWalker, ComReferenceInfo reference)
@@ -1684,13 +1684,13 @@ namespace Microsoft.Build.Tasks
 
             foreach (TYPELIBATTR dependencyTypeLibAttr in dependentAttrs)
             {
-                // We don't need to even try to resolve if the dependency reference is ourselves. 
+                // We don't need to even try to resolve if the dependency reference is ourselves.
                 if (!ComReference.AreTypeLibAttrEqual(dependencyTypeLibAttr, reference.attr))
                 {
                     if (IsExistingProjectReference(dependencyTypeLibAttr, null, out ComReferenceInfo existingReference))
                     {
                         // If we're resolving another project reference, empty out the type cache -- if the dependencies are buried,
-                        // caching the analyzed types can make it so that we don't recognize our dependencies' dependencies. 
+                        // caching the analyzed types can make it so that we don't recognize our dependencies' dependencies.
                         dependencyWalker.ClearAnalyzedTypeCache();
 
                         if (ResolveReference(dependencyWalker, existingReference, WrapperOutputDirectory, out ITaskItem resolvedItem))
@@ -1698,7 +1698,7 @@ namespace Microsoft.Build.Tasks
                             // Add the resolved dependency
                             dependentPaths.Add(resolvedItem.ItemSpec);
 
-                            // and anything it depends on 
+                            // and anything it depends on
                             foreach (string dependentPath in existingReference.dependentWrapperPaths)
                             {
                                 dependentPaths.Add(dependentPath);
@@ -1733,7 +1733,7 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  TaskItemToTypeLibAttr
-         * 
+         *
          * Gets the TLIBATTR structure based on the reference we have.
          * Sets guid, versions major & minor, lcid.
          */
@@ -1761,7 +1761,7 @@ namespace Microsoft.Build.Tasks
         }
 
         #endregion
-#pragma warning restore format 
+#pragma warning restore format
     }
 
 #endif
