@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -26,7 +27,8 @@ namespace Microsoft.Build.Logging.TerminalLogger;
 internal sealed class TerminalLogger : INodeLogger
 {
     private const string FilePathPattern = " -> ";
-    private readonly string[] _immediateMessageMarkers = new[] { "[CredentialProvider]", "--interactive" };
+    private const char PatternSeparator = '|';
+    private readonly string _immediateMessagePattern = $"[CredentialProvider]{PatternSeparator}--interactive";
 
     /// <summary>
     /// A wrapper over the project context ID passed to us in <see cref="IEventSource"/> logger events.
@@ -565,10 +567,9 @@ internal sealed class TerminalLogger : INodeLogger
                 }
             }
 
-            // Detect markers that require special attention from a customer.
-            if (_immediateMessageMarkers.Any(marker => message.IndexOf(marker, StringComparison.Ordinal) > 0))
+            if (ImmeidateMessageRaised(message))
             {
-                RenderImmediateMessage(message, MessageSeverity.Blocking);
+                RenderImmediateMessage(message);
             }
         }
     }
@@ -595,13 +596,25 @@ internal sealed class TerminalLogger : INodeLogger
                 threadId: e.ThreadId,
                 logOutputProperties: null);
 
-            if (_immediateMessageMarkers.Any(marker => message.IndexOf(marker, StringComparison.Ordinal) > 0))
+            if (ImmeidateMessageRaised(message))
             {
-                RenderImmediateMessage(message, MessageSeverity.Warning);
+                RenderImmediateMessage(message);
             }
 
             project.AddBuildMessage(MessageSeverity.Warning, message);
         }
+    }
+
+    /// <summary>
+    /// Detectw markers that require special attention from a customer.
+    /// </summary>
+    /// <param name="message">Raised event</param>
+    /// <returns>true if marker is detected.</returns>
+    private bool ImmeidateMessageRaised(string message)
+    {
+        Regex regex = new Regex($"({_immediateMessagePattern})");
+
+        return regex.IsMatch(message);
     }
 
     /// <summary>
@@ -867,19 +880,12 @@ internal sealed class TerminalLogger : INodeLogger
     /// </summary>
     /// <param name="message">Build message needed to be shown immediately.</param>
     /// <param name="severity">Message severity.</param>
-    private void RenderImmediateMessage(string message, MessageSeverity severity)
+    private void RenderImmediateMessage(string message)
     {
-        string styledMessage = severity switch
-        {
-            MessageSeverity.Warning => AnsiCodes.Colorize(message, TerminalColor.Yellow),
-            MessageSeverity.Blocking => AnsiCodes.Colorize(message, TerminalColor.Blue),
-            _ => string.Empty,
-        };
-
-        if (!string.IsNullOrEmpty(styledMessage))
-        {
-            Terminal.WriteLine(styledMessage);
-        }
+        // Calling erase helps to clear the screen before printing the message
+        // The immediate output will not overlap with node status reporting
+        EraseNodes();
+        Terminal.WriteLine(message);
     }
 
     /// <summary>
