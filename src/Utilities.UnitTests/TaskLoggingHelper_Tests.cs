@@ -89,9 +89,9 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CheckMessageFromStreamParsesErrorsAndMessagesCorrectly()
         {
-            IBuildEngine2 mockEngine = new MockEngine();
+            IBuildEngine2 MockEngine3 = new MockEngine3();
             Task t = new MockTask();
-            t.BuildEngine = mockEngine;
+            t.BuildEngine = MockEngine3;
 
             // This should return true since I am passing a canonical error as the stream
             StringReader sr = new StringReader("error MSB4040: There is no target in the project.");
@@ -109,12 +109,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LogCommandLine()
         {
-            MockEngine mockEngine = new MockEngine();
+            MockEngine3 MockEngine3 = new MockEngine3();
             Task t = new MockTask();
-            t.BuildEngine = mockEngine;
+            t.BuildEngine = MockEngine3;
 
             t.Log.LogCommandLine("MySuperCommand");
-            mockEngine.Log.ShouldContain("MySuperCommand");
+            MockEngine3.Log.ShouldContain("MySuperCommand");
         }
 
         /// <summary>
@@ -124,9 +124,9 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LogMessageWithUnmatchedCurly()
         {
-            MockEngine mockEngine = new MockEngine();
+            MockEngine3 MockEngine3 = new MockEngine3();
             Task t = new MockTask();
-            t.BuildEngine = mockEngine;
+            t.BuildEngine = MockEngine3;
 
             t.Log.LogMessage("echo {");
             t.Log.LogMessageFromText("{1", MessageImportance.High);
@@ -134,19 +134,19 @@ namespace Microsoft.Build.UnitTests
             t.Log.LogWarning("{3");
             t.Log.LogError("{4");
 
-            mockEngine.AssertLogContains("echo {");
-            mockEngine.AssertLogContains("{1");
-            mockEngine.AssertLogContains("{2");
-            mockEngine.AssertLogContains("{3");
-            mockEngine.AssertLogContains("{4");
+            MockEngine3.AssertLogContains("echo {");
+            MockEngine3.AssertLogContains("{1");
+            MockEngine3.AssertLogContains("{2");
+            MockEngine3.AssertLogContains("{3");
+            MockEngine3.AssertLogContains("{4");
         }
 
         [Fact]
         public void LogFromResources()
         {
-            MockEngine mockEngine = new MockEngine();
+            MockEngine3 MockEngine3 = new MockEngine3();
             Task t = new MockTask();
-            t.BuildEngine = mockEngine;
+            t.BuildEngine = MockEngine3;
 
             t.Log.LogErrorFromResources("MySubcategoryResource", null,
                 "helpkeyword", "filename", 1, 2, 3, 4, "MyErrorResource", "foo");
@@ -158,10 +158,10 @@ namespace Microsoft.Build.UnitTests
 
             t.Log.LogWarningFromResources("MyWarningResource", "foo");
 
-            mockEngine.Log.Contains("filename(1,2,3,4): Romulan error : Oops I wiped your harddrive foo").ShouldBeTrue();
-            mockEngine.Log.Contains("filename(1,2,3,4): Romulan warning : Be nice or I wipe your harddrive foo").ShouldBeTrue();
-            mockEngine.Log.Contains("Oops I wiped your harddrive foo").ShouldBeTrue();
-            mockEngine.Log.Contains("Be nice or I wipe your harddrive foo").ShouldBeTrue();
+            MockEngine3.Log.Contains("filename(1,2,3,4): Romulan error : Oops I wiped your harddrive foo").ShouldBeTrue();
+            MockEngine3.Log.Contains("filename(1,2,3,4): Romulan warning : Be nice or I wipe your harddrive foo").ShouldBeTrue();
+            MockEngine3.Log.Contains("Oops I wiped your harddrive foo").ShouldBeTrue();
+            MockEngine3.Log.Contains("Be nice or I wipe your harddrive foo").ShouldBeTrue();
         }
 
         [Fact]
@@ -183,23 +183,23 @@ namespace Microsoft.Build.UnitTests
                 // This closes the reader
                 File.WriteAllText(file, contents);
 
-                MockEngine mockEngine = new MockEngine();
+                MockEngine3 MockEngine3 = new MockEngine3();
                 Task t = new MockTask();
-                t.BuildEngine = mockEngine;
+                t.BuildEngine = MockEngine3;
                 t.Log.LogMessagesFromFile(file, MessageImportance.High);
 
-                mockEngine.Errors.ShouldBe(2);
-                mockEngine.Warnings.ShouldBe(1);
-                mockEngine.Messages.ShouldBe(3);
+                MockEngine3.Errors.ShouldBe(2);
+                MockEngine3.Warnings.ShouldBe(1);
+                MockEngine3.Messages.ShouldBe(3);
 
-                mockEngine = new MockEngine();
+                MockEngine3 = new MockEngine3();
                 t = new MockTask();
-                t.BuildEngine = mockEngine;
+                t.BuildEngine = MockEngine3;
                 t.Log.LogMessagesFromFile(file);
 
-                mockEngine.Errors.ShouldBe(2);
-                mockEngine.Warnings.ShouldBe(1);
-                mockEngine.Messages.ShouldBe(3);
+                MockEngine3.Errors.ShouldBe(2);
+                MockEngine3.Warnings.ShouldBe(1);
+                MockEngine3.Messages.ShouldBe(3);
             }
             finally
             {
@@ -238,7 +238,7 @@ namespace Microsoft.Build.UnitTests
             string message = "exception message";
             string stackTrace = "TaskLoggingHelperTests.TestLogFromException";
 
-            MockEngine engine = new MockEngine();
+            MockEngine3 engine = new MockEngine3();
             MockTask task = new MockTask();
             task.BuildEngine = engine;
 
@@ -297,7 +297,7 @@ namespace Microsoft.Build.UnitTests
                 new InvalidOperationException("The operation was invalid"),
                 new IOException("An I/O error occurred"));
 
-            MockEngine engine = new MockEngine();
+            MockEngine3 engine = new MockEngine3();
             MockTask task = new MockTask
             {
                 BuildEngine = engine
