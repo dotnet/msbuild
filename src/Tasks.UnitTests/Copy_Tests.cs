@@ -21,7 +21,6 @@ using Shouldly;
 
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -132,7 +131,7 @@ namespace Microsoft.Build.UnitTests
         public void CopyWithNoInput()
         {
             var task = new Copy { BuildEngine = new MockEngine(true), };
-            task.Execute().ShouldBeFalse();
+            task.Execute().ShouldBeTrue();
             (task.CopiedFiles == null || task.CopiedFiles.Length == 0).ShouldBeTrue();
             task.WroteAtLeastOneFile.ShouldBeFalse();
         }
@@ -243,8 +242,7 @@ namespace Microsoft.Build.UnitTests
                     BuildEngine = engine,
                     DestinationFolder = new TaskItem(destinationFolder.Path),
                 };
-                task.Execute().ShouldBeFalse();
-                engine.AssertLogContains("MSB3897"); // Copy.NeedsSource
+                task.Execute().ShouldBeTrue();
                 task.CopiedFiles.ShouldNotBeNull();
                 task.CopiedFiles.Length.ShouldBe(0);
                 task.DestinationFiles.ShouldNotBeNull();
@@ -299,8 +297,7 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = sourceFiles,
                     DestinationFolder = new TaskItem(destinationFolder.Path),
                 };
-                task.Execute().ShouldBeFalse();
-                engine.AssertLogContains("MSB3897"); // Copy.NeedsSource
+                task.Execute().ShouldBeTrue();
                 task.CopiedFiles.ShouldNotBeNull();
                 task.CopiedFiles.Length.ShouldBe(0);
                 task.DestinationFiles.ShouldNotBeNull();
@@ -324,8 +321,7 @@ namespace Microsoft.Build.UnitTests
                     SourceFolders = sourceFolders,
                     DestinationFolder = new TaskItem(destinationFolder.Path),
                 };
-                task.Execute().ShouldBeFalse();
-                engine.AssertLogContains("MSB3897"); // Copy.NeedsSource
+                task.Execute().ShouldBeTrue();
                 task.CopiedFiles.ShouldNotBeNull();
                 task.CopiedFiles.Length.ShouldBe(0);
                 task.DestinationFiles.ShouldNotBeNull();

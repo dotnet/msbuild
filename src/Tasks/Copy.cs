@@ -8,6 +8,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks.Dataflow;
+
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -402,6 +403,14 @@ namespace Microsoft.Build.Tasks
             CopyFileWithState copyFile,
             int parallelism)
         {
+            // If there are no source files then just return success.
+            if (IsSourceSetEmpty())
+            {
+                DestinationFiles = Array.Empty<ITaskItem>();
+                CopiedFiles = Array.Empty<ITaskItem>();
+                return true;
+            }
+
             if (!(ValidateInputs() && InitializeDestinationFiles()))
             {
                 return false;
@@ -636,6 +645,11 @@ namespace Microsoft.Build.Tasks
             return success;
         }
 
+        private bool IsSourceSetEmpty()
+        {
+            return (SourceFiles == null || SourceFiles.Length == 0) && (SourceFolders == null || SourceFolders.Length == 0);
+        }
+
         /// <summary>
         /// Verify that the inputs are correct.
         /// </summary>
@@ -651,16 +665,6 @@ namespace Microsoft.Build.Tasks
             if (RetryDelayMilliseconds < 0)
             {
                 Log.LogErrorWithCodeFromResources("Copy.InvalidRetryDelay", RetryDelayMilliseconds);
-                return false;
-            }
-
-            // There must be a source (either files or directory).
-            if ((SourceFiles == null || SourceFiles.Length == 0) &&
-                (SourceFolders == null || SourceFolders.Length == 0))
-            {
-                DestinationFiles = Array.Empty<ITaskItem>();
-                CopiedFiles = Array.Empty<ITaskItem>();
-                Log.LogErrorWithCodeFromResources("Copy.NeedsSource", "SourceFiles", "SourceFolders");
                 return false;
             }
 
@@ -731,10 +735,10 @@ namespace Microsoft.Build.Tasks
                             break;
                         }
 
-                    // Initialize the destinationFolder item.
-                    // ItemSpec is unescaped, and the TaskItem constructor expects an escaped input, so we need to
-                    // make sure to re-escape it here.
-                    DestinationFiles[i] = new TaskItem(EscapingUtilities.Escape(destinationFile));
+                        // Initialize the destinationFolder item.
+                        // ItemSpec is unescaped, and the TaskItem constructor expects an escaped input, so we need to
+                        // make sure to re-escape it here.
+                        DestinationFiles[i] = new TaskItem(EscapingUtilities.Escape(destinationFile));
 
                         // Copy meta-data from source to destinationFolder.
                         SourceFiles[i].CopyMetadataTo(DestinationFiles[i]);
