@@ -669,7 +669,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // There must be a destination (either files or directory).
-            if ((DestinationFiles == null || DestinationFiles.Length == 0) && DestinationFolder == null)
+            if (DestinationFiles == null && DestinationFolder == null)
             {
                 Log.LogErrorWithCodeFromResources("Copy.NeedsDestination", "DestinationFiles", "DestinationFolder");
                 return false;

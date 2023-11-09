@@ -133,6 +133,7 @@ namespace Microsoft.Build.UnitTests
             var task = new Copy { BuildEngine = new MockEngine(true), };
             task.Execute().ShouldBeTrue();
             (task.CopiedFiles == null || task.CopiedFiles.Length == 0).ShouldBeTrue();
+            (task.DestinationFiles == null || task.DestinationFiles.Length == 0).ShouldBeTrue();
             task.WroteAtLeastOneFile.ShouldBeFalse();
         }
 
@@ -346,7 +347,8 @@ namespace Microsoft.Build.UnitTests
                     DestinationFiles = destinationFiles,
                 };
                 task.Execute().ShouldBeFalse();
-                engine.AssertLogContains("MSB3023"); // Copy.NeedsDestination
+                // Copy.NeedsDestination (MSB3023) or General.TwoVectorsMustHaveSameLength (MSB3094)
+                engine.AssertLogContains(destinationFiles == null ? "MSB3023" : "MSB3094");
                 task.CopiedFiles.ShouldBeNull();
                 (task.DestinationFiles == null || task.DestinationFiles.Length == 0).ShouldBeTrue();
                 task.WroteAtLeastOneFile.ShouldBeFalse();
