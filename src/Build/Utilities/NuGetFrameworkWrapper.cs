@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -16,47 +17,69 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
-    /// Wraps the NuGet.Frameworks assembly, which is referenced by reflection.
+    /// Wraps the NuGet.Frameworks assembly, which is referenced by reflection and optionally loaded into a separate AppDomain for performance.
     /// </summary>
-    internal class NuGetFrameworkWrapper
+    internal sealed class NuGetFrameworkWrapper
+#if FEATURE_APPDOMAIN
+        : MarshalByRefObject
+#endif
     {
-        /// <summary>
-        /// NuGet Types
-        /// </summary>
-        private static MethodInfo ParseMethod;
-        private static MethodInfo IsCompatibleMethod;
-        private static object DefaultCompatibilityProvider;
-        private static PropertyInfo FrameworkProperty;
-        private static PropertyInfo VersionProperty;
-        private static PropertyInfo PlatformProperty;
-        private static PropertyInfo PlatformVersionProperty;
-        private static PropertyInfo AllFrameworkVersionsProperty;
+        private const string NuGetFrameworksAssemblyName = "NuGet.Frameworks";
+        private const string NuGetFrameworksFileName = NuGetFrameworksAssemblyName + ".dll";
 
+        /// <summary>
+        /// Methods, properties, and objects used from the NuGet.Frameworks assembly.
+        /// </summary>
+        private MethodInfo ParseMethod;
+        private MethodInfo IsCompatibleMethod;
+        private object DefaultCompatibilityProvider;
+        private PropertyInfo FrameworkProperty;
+        private PropertyInfo VersionProperty;
+        private PropertyInfo PlatformProperty;
+        private PropertyInfo PlatformVersionProperty;
+        private PropertyInfo AllFrameworkVersionsProperty;
+
+        /// <summary>
+        /// Public constructor for cross-domain activation only. Use <see cref="CreateInstance"/> to instantiate.
+        /// </summary>
         public NuGetFrameworkWrapper()
+        { }
+
+        /// <summary>
+        /// Initialized this instance. May run in a separate AppDomain.
+        /// </summary>
+        /// <param name="assemblyDirectory">The directory from which NuGet.Frameworks should be loaded.</param>
+        /// <param name="useAssemblyLoad">True to use Assembly.Load with partial name, false to use Assembly.LoadFile.</param>
+        public void Initialize(string assemblyDirectory, bool useAssemblyLoad)
         {
-            // Resolve the location of the NuGet.Frameworks assembly
-            var assemblyDirectory = BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio ?
-                Path.Combine(BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory, "Common7", "IDE", "CommonExtensions", "Microsoft", "NuGet") :
-                BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
-            try
+            string assemblyFilePath = Path.Combine(assemblyDirectory, NuGetFrameworksFileName);
+
+            Assembly NuGetAssembly;
+            if (useAssemblyLoad)
             {
-                var NuGetAssembly = Assembly.LoadFile(Path.Combine(assemblyDirectory, "NuGet.Frameworks.dll"));
-                var NuGetFramework = NuGetAssembly.GetType("NuGet.Frameworks.NuGetFramework");
-                var NuGetFrameworkCompatibilityProvider = NuGetAssembly.GetType("NuGet.Frameworks.CompatibilityProvider");
-                var NuGetFrameworkDefaultCompatibilityProvider = NuGetAssembly.GetType("NuGet.Frameworks.DefaultCompatibilityProvider");
-                ParseMethod = NuGetFramework.GetMethod("Parse", new Type[] { typeof(string) });
-                IsCompatibleMethod = NuGetFrameworkCompatibilityProvider.GetMethod("IsCompatible");
-                DefaultCompatibilityProvider = NuGetFrameworkDefaultCompatibilityProvider.GetMethod("get_Instance").Invoke(null, Array.Empty<object>());
-                FrameworkProperty = NuGetFramework.GetProperty("Framework");
-                VersionProperty = NuGetFramework.GetProperty("Version");
-                PlatformProperty = NuGetFramework.GetProperty("Platform");
-                PlatformVersionProperty = NuGetFramework.GetProperty("PlatformVersion");
-                AllFrameworkVersionsProperty = NuGetFramework.GetProperty("AllFrameworkVersions");
+                // This will load the assembly into the default load context if possible, and fall back to LoadFrom context.
+                AssemblyName assemblyName = new AssemblyName(NuGetFrameworksAssemblyName)
+                {
+                    CodeBase = assemblyFilePath,
+                };
+                NuGetAssembly = Assembly.Load(assemblyName);
             }
-            catch
+            else
             {
-                throw new InternalErrorException(string.Format(AssemblyResources.GetString("NuGetAssemblyNotFound"), assemblyDirectory));
+                NuGetAssembly = Assembly.LoadFile(assemblyFilePath);
             }
+
+            var NuGetFramework = NuGetAssembly.GetType("NuGet.Frameworks.NuGetFramework");
+            var NuGetFrameworkCompatibilityProvider = NuGetAssembly.GetType("NuGet.Frameworks.CompatibilityProvider");
+            var NuGetFrameworkDefaultCompatibilityProvider = NuGetAssembly.GetType("NuGet.Frameworks.DefaultCompatibilityProvider");
+            ParseMethod = NuGetFramework.GetMethod("Parse", new Type[] { typeof(string) });
+            IsCompatibleMethod = NuGetFrameworkCompatibilityProvider.GetMethod("IsCompatible");
+            DefaultCompatibilityProvider = NuGetFrameworkDefaultCompatibilityProvider.GetMethod("get_Instance").Invoke(null, Array.Empty<object>());
+            FrameworkProperty = NuGetFramework.GetProperty("Framework");
+            VersionProperty = NuGetFramework.GetProperty("Version");
+            PlatformProperty = NuGetFramework.GetProperty("Platform");
+            PlatformVersionProperty = NuGetFramework.GetProperty("PlatformVersion");
+            AllFrameworkVersionsProperty = NuGetFramework.GetProperty("AllFrameworkVersions");
         }
 
         private object Parse(string tfm)
@@ -131,6 +154,107 @@ namespace Microsoft.Build.Evaluation
                     (string originalTfm, object parsedTfm) parsed = (tfm, Parse(tfm));
                     return parsed;
                 });
+            }
+        }
+
+#if FEATURE_APPDOMAIN
+        /// <summary>
+        /// A null-returning InitializeLifetimeService to give the proxy an infinite lease time.
+        /// </summary>
+        public override object InitializeLifetimeService() => null;
+
+        private static AppDomainSetup CreateAppDomainSetup(string assemblyDirectory)
+        {
+            string assemblyPath = Path.Combine(assemblyDirectory, NuGetFrameworksFileName);
+            AssemblyName assemblyName;
+            try
+            {
+                assemblyName = AssemblyName.GetAssemblyName(assemblyPath);
+            }
+            catch
+            {
+                // Return null to fall back to loading into the default AppDomain using LoadFile.
+                return null;
+            }
+
+            byte[] publicKeyToken = assemblyName.GetPublicKeyToken();
+            StringBuilder publicKeyTokenString = new(publicKeyToken.Length * 2);
+            for (int i = 0; i < publicKeyToken.Length; i++)
+            {
+                publicKeyTokenString.Append(publicKeyToken[i].ToString("x2", CultureInfo.InvariantCulture));
+            }
+
+            // Create an app.config for the AppDomain. We expect the AD to host the currently executing assembly Microsoft.Build,
+            // NuGet.Frameworks, and Framework assemblies. It is important to use the same binding redirects that were used when
+            // NGENing MSBuild for the native images to be used.
+            string configuration = $@"<?xml version=""1.0"" encoding=""utf-8""?>
+  <configuration>
+    <runtime>
+      <DisableFXClosureWalk enabled=""true"" />
+      <DeferFXClosureWalk enabled=""true"" />
+      <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
+        {
+            (Environment.Is64BitProcess
+                ? @"<dependentAssembly>
+                      <assemblyIdentity name=""Microsoft.Build"" culture=""neutral"" publicKeyToken=""b03f5f7f11d50a3a"" />
+                      <bindingRedirect oldVersion=""0.0.0.0-99.9.9.9"" newVersion=""15.1.0.0"" />
+                      <codeBase version=""15.1.0.0"" href=""..\Microsoft.Build.dll""/>
+                    </dependentAssembly>"
+
+                : @"<dependentAssembly>
+                      <assemblyIdentity name=""Microsoft.Build"" culture=""neutral"" publicKeyToken=""b03f5f7f11d50a3a"" />
+                      <bindingRedirect oldVersion=""0.0.0.0-99.9.9.9"" newVersion=""15.1.0.0"" />
+                    </dependentAssembly>"
+             )
+        }
+        <dependentAssembly>
+          <assemblyIdentity name=""{NuGetFrameworksAssemblyName}"" publicKeyToken=""{publicKeyTokenString}"" culture=""{assemblyName.CultureName}"" />
+          <codeBase version=""{assemblyName.Version}"" href=""{assemblyPath}"" />
+        </dependentAssembly>
+        <qualifyAssembly partialName=""{NuGetFrameworksAssemblyName}"" fullName=""{assemblyName.FullName}"" />
+      </assemblyBinding>
+    </runtime>
+  </configuration>";
+
+            AppDomainSetup appDomainSetup = AppDomain.CurrentDomain.SetupInformation;
+            appDomainSetup.SetConfigurationBytes(Encoding.UTF8.GetBytes(configuration));
+            return appDomainSetup;
+        }
+#endif
+
+        public static NuGetFrameworkWrapper CreateInstance()
+        {
+            // Resolve the location of the NuGet.Frameworks assembly
+            string assemblyDirectory = BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio ?
+                Path.Combine(BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory, "Common7", "IDE", "CommonExtensions", "Microsoft", "NuGet") :
+                BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
+
+            bool isLoadedInSeparateAppDomain = false;
+            NuGetFrameworkWrapper instance = null;
+            try
+            {
+#if FEATURE_APPDOMAIN
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10) && BuildEnvironmentHelper.Instance.RunningInMSBuildExe)
+                {
+                    // If we are running in MSBuild.exe we can load the assembly into a separate AppDomain. Loading into an AD with
+                    // Assembly.Load enables the runtime to bind to the native image, eliminating some non-trivial JITting cost.
+                    AppDomainSetup appDomainSetup = CreateAppDomainSetup(assemblyDirectory);
+                    if (appDomainSetup != null)
+                    {
+                        AppDomain appDomain = AppDomain.CreateDomain(nameof(NuGetFrameworkWrapper), null, appDomainSetup);
+                        instance = (NuGetFrameworkWrapper)appDomain.CreateInstanceAndUnwrap(Assembly.GetExecutingAssembly().FullName, typeof(NuGetFrameworkWrapper).FullName);
+                        isLoadedInSeparateAppDomain = true;
+                    }
+                }
+#endif
+                instance ??= new NuGetFrameworkWrapper();
+                instance.Initialize(assemblyDirectory, useAssemblyLoad: isLoadedInSeparateAppDomain);
+
+                return instance;
+            }
+            catch
+            {
+                throw new InternalErrorException(string.Format(AssemblyResources.GetString("NuGetAssemblyNotFound"), assemblyDirectory));
             }
         }
     }
