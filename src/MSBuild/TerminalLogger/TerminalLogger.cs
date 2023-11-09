@@ -28,7 +28,7 @@ internal sealed class TerminalLogger : INodeLogger
 {
     private const string FilePathPattern = " -> ";
     private const char PatternSeparator = '|';
-    private readonly string _immediateMessagePattern = $"[CredentialProvider]{PatternSeparator}--interactive";
+    private readonly string _immediateMessagePattern = $@"\[CredentialProvider\]{PatternSeparator}--interactive";
 
     /// <summary>
     /// A wrapper over the project context ID passed to us in <see cref="IEventSource"/> logger events.
@@ -606,13 +606,13 @@ internal sealed class TerminalLogger : INodeLogger
     }
 
     /// <summary>
-    /// Detectw markers that require special attention from a customer.
+    /// Detect markers that require special attention from a customer.
     /// </summary>
-    /// <param name="message">Raised event</param>
+    /// <param name="message">Raised event.</param>
     /// <returns>true if marker is detected.</returns>
     private bool ImmeidateMessageRaised(string message)
     {
-        Regex regex = new Regex($"({_immediateMessagePattern})");
+        Regex regex = new(_immediateMessagePattern);
 
         return regex.IsMatch(message);
     }

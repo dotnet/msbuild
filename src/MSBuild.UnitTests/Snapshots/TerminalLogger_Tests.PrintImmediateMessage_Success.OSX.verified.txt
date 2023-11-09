@@ -1,0 +1,4 @@
+﻿\--interactive
+[?25l[1F
+[?25h
+Build [32;1msucceeded[m in 0.0s
