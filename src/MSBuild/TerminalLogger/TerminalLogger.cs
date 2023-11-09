@@ -28,7 +28,7 @@ internal sealed class TerminalLogger : INodeLogger
 {
     private const string FilePathPattern = " -> ";
     private const char PatternSeparator = '|';
-    private readonly string _immediateMessagePattern = $@"\[CredentialProvider\]{PatternSeparator}--interactive";
+    private readonly Regex _immediateMessageRegex = new Regex($@"\[CredentialProvider\]{PatternSeparator}--interactive");
 
     /// <summary>
     /// A wrapper over the project context ID passed to us in <see cref="IEventSource"/> logger events.
@@ -567,7 +567,7 @@ internal sealed class TerminalLogger : INodeLogger
                 }
             }
 
-            if (ImmeidateMessageRaised(message))
+            if (ImmediateMessageRaised(message))
             {
                 RenderImmediateMessage(message);
             }
@@ -596,7 +596,7 @@ internal sealed class TerminalLogger : INodeLogger
                 threadId: e.ThreadId,
                 logOutputProperties: null);
 
-            if (ImmeidateMessageRaised(message))
+            if (ImmediateMessageRaised(message))
             {
                 RenderImmediateMessage(message);
             }
@@ -610,12 +610,7 @@ internal sealed class TerminalLogger : INodeLogger
     /// </summary>
     /// <param name="message">Raised event.</param>
     /// <returns>true if marker is detected.</returns>
-    private bool ImmeidateMessageRaised(string message)
-    {
-        Regex regex = new(_immediateMessagePattern);
-
-        return regex.IsMatch(message);
-    }
+    private bool ImmediateMessageRaised(string message) => _immediateMessageRegex.IsMatch(message);
 
     /// <summary>
     /// The <see cref="IEventSource.ErrorRaised"/> callback.
