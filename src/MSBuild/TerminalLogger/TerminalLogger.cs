@@ -6,10 +6,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using System.Text.RegularExpressions;
+#if NET7_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
+#endif
 #if NETFRAMEWORK
 using Microsoft.IO;
 #else
@@ -24,11 +27,25 @@ namespace Microsoft.Build.Logging.TerminalLogger;
 /// <remarks>
 /// Uses ANSI/VT100 control codes to erase and overwrite lines as the build is progressing.
 /// </remarks>
-internal sealed class TerminalLogger : INodeLogger
+internal sealed partial class TerminalLogger : INodeLogger
 {
     private const string FilePathPattern = " -> ";
-    private const char PatternSeparator = '|';
-    private readonly Regex _immediateMessageRegex = new Regex($@"\[CredentialProvider\]{PatternSeparator}--interactive");
+
+#if NET7_0_OR_GREATER
+    [StringSyntax(StringSyntaxAttribute.Regex)]
+#endif
+    private const string ImmediateMessagePattern = @"\[CredentialProvider\]|--interactive";
+
+    private const RegexOptions Options = RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture;
+
+#if NET7_0_OR_GREATER
+    [GeneratedRegex(ImmediateMessagePattern, Options)]
+    private static partial Regex ImmediateMessageRegex();
+#else
+    private static Regex ImmediateMessageRegex() => immediateMessageRegex;
+
+    private static readonly Regex immediateMessageRegex = new(ImmediateMessagePattern, RegexOptions.Compiled | Options);
+#endif
 
     /// <summary>
     /// A wrapper over the project context ID passed to us in <see cref="IEventSource"/> logger events.
@@ -610,7 +627,7 @@ internal sealed class TerminalLogger : INodeLogger
     /// </summary>
     /// <param name="message">Raised event.</param>
     /// <returns>true if marker is detected.</returns>
-    private bool ImmediateMessageRaised(string message) => _immediateMessageRegex.IsMatch(message);
+    private bool ImmediateMessageRaised(string message) => ImmediateMessageRegex().IsMatch(message);
 
     /// <summary>
     /// The <see cref="IEventSource.ErrorRaised"/> callback.
