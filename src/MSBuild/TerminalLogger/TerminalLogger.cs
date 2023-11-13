@@ -584,7 +584,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                 }
             }
 
-            if (ImmediateMessageRaised(message))
+            if (IsImmediateMessage(message))
             {
                 RenderImmediateMessage(message);
             }
@@ -613,11 +613,10 @@ internal sealed partial class TerminalLogger : INodeLogger
                 threadId: e.ThreadId,
                 logOutputProperties: null);
 
-            if (ImmediateMessageRaised(message))
+            if (IsImmediateMessage(message))
             {
                 RenderImmediateMessage(message);
             }
-
             project.AddBuildMessage(MessageSeverity.Warning, message);
         }
     }
@@ -627,7 +626,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     /// <param name="message">Raised event.</param>
     /// <returns>true if marker is detected.</returns>
-    private bool ImmediateMessageRaised(string message) => ImmediateMessageRegex().IsMatch(message);
+    private bool IsImmediateMessage(string message) => ImmediateMessageRegex().IsMatch(message);
 
     /// <summary>
     /// The <see cref="IEventSource.ErrorRaised"/> callback.
@@ -891,13 +890,15 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// Print a build messages to the output that require special customer's attention.
     /// </summary>
     /// <param name="message">Build message needed to be shown immediately.</param>
-    /// <param name="severity">Message severity.</param>
     private void RenderImmediateMessage(string message)
     {
-        // Calling erase helps to clear the screen before printing the message
-        // The immediate output will not overlap with node status reporting
-        EraseNodes();
-        Terminal.WriteLine(message);
+        lock (_lock)
+        {
+            // Calling erase helps to clear the screen before printing the message
+            // The immediate output will not overlap with node status reporting
+            EraseNodes();
+            Terminal.WriteLine(message);
+        }
     }
 
     /// <summary>
