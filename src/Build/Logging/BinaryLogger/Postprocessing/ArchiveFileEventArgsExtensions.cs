@@ -43,6 +43,10 @@ public static class ArchiveFileEventArgsExtensions
             {
                 args.ArchiveData = new ArchiveFile(pathArgs.StringToBeUsed, contentArgs.StringToBeUsed);
             }
+            else
+            {
+                args.ArchiveData = archiveFile;
+            }
         };
     }
 }

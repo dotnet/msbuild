@@ -2019,12 +2019,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION: {0} is an integer number denoting version.
     </comment>
   </data>
-  <data name="Binlog_RawDataUnread" xml:space="preserve">
-    <value>Raw data sub-stream for record {0} was not fully read.</value>
-    <comment>
-      LOCALIZATION: {0} is an integer number denoting order.
-    </comment>
-  </data>
   <data name="Binlog_ReaderSkippingRecord" xml:space="preserve">
     <value>Skipping the record.</value>
   </data>

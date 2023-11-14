@@ -53,13 +53,6 @@
         <target state="new">Imported files archive exceeded 2GB limit and it's not embedded.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Binlog_RawDataUnread">
-        <source>Raw data sub-stream for record {0} was not fully read.</source>
-        <target state="new">Raw data sub-stream for record {0} was not fully read.</target>
-        <note>
-      LOCALIZATION: {0} is an integer number denoting order.
-    </note>
-      </trans-unit>
       <trans-unit id="Binlog_ReaderMismatchedRead">
         <source>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</source>
         <target state="new">BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</target>

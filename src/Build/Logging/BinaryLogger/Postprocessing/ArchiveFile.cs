@@ -82,7 +82,7 @@ namespace Microsoft.Build.Logging
         {
             var content = ContentReader.ReadToEnd();
             ContentReader.Dispose();
-            return new ArchiveFile(content, FullPath);
+            return new ArchiveFile(FullPath, content);
         }
 
         public override void Dispose()

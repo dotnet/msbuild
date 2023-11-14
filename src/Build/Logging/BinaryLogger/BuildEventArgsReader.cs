@@ -173,7 +173,7 @@ namespace Microsoft.Build.Logging
 
             if (_lastSubStream?.IsAtEnd == false)
             {
-                throw new InvalidDataException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_RawDataUnread", _recordNumber));
+                _lastSubStream.ReadToEnd();
             }
 
             BinaryLogRecordKind recordKind = PreprocessRecordsTillNextEvent(IsTextualDataRecord);
@@ -187,6 +187,8 @@ namespace Microsoft.Build.Logging
             Stream stream = _binaryReader.BaseStream.Slice(serializedEventLength);
 
             _lastSubStream = stream as SubStream;
+
+            _recordNumber += 1;
 
             return new(recordKind, stream);
         }
