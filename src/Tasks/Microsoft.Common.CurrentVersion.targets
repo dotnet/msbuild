@@ -5742,27 +5742,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <!--
     ***********************************************************************************************
     ***********************************************************************************************
-                                                                Test Section
-    ***********************************************************************************************
-    ***********************************************************************************************
-  -->
-  <!--
-    ============================================================
-    This stub `VSTest` target allows for targets implementing Test execution functionality
-    to run after it.
-    
-    For example:
-    <Target Name="RunVSTest" AfterTargets="VSTest">
-     (implementation)
-    </Target>
-    ============================================================
-  -->
-
-  <Target Name="VSTest"></Target>
-
-  <!--
-    ***********************************************************************************************
-    ***********************************************************************************************
                                                                 PostBuildEvent Section
     ***********************************************************************************************
     ***********************************************************************************************
@@ -6728,7 +6707,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <Import Project="$(MsTestToolsTargets)" Condition="Exists('$(MsTestToolsTargets)')" />
-
+  
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.Test.targets" />
   <!-- App packaging support -->
 
   <!--
@@ -6761,5 +6741,5 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter\*" Condition="'$(ImportByWildcardAfterMicrosoftCommonTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter')"/>
   <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftCommonTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter')"/>
-
+  
 </Project>
