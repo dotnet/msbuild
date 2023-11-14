@@ -9,7 +9,7 @@ namespace Microsoft.Build.Logging;
 public enum ReaderErrorType
 {
     /// <summary>
-    /// The encountered event is completely unknown to the reader. It cannot interpret neither a part of it.
+    /// The encountered event is completely unknown to the reader. It cannot interpret any part of it.
     /// </summary>
     UnkownEventType,
 
@@ -21,9 +21,9 @@ public enum ReaderErrorType
     UnknownEventData,
 
     /// <summary>
-    /// The encountered event is known to the reader, however the reader cannot interpret the data of the event.
-    /// This is probably caused by the fact that the event definition changed in the future revision in other than append-only manner.
-    /// For this reason reader can only skip the event in full.
+    /// The encountered event type is known to the reader, but the reader cannot interpret the data of the event.
+    /// This is probably caused by an event definition changing more than just adding fields.
+    /// The reader can only skip the event in full.
     /// </summary>
     UnknownFormatOfEventData,
 }
