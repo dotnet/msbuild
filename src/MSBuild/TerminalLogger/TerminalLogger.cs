@@ -39,7 +39,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     [GeneratedRegex(ImmediateMessagePattern, Options)]
     private static partial Regex ImmediateMessageRegex();
 #else
-    private readonly string[] _immediateMessageKeywords = { @"\[CredentialProvider\]", "--interactive" };
+    private static readonly string[] _immediateMessageKeywords = { "[CredentialProvider]", "--interactive" };
 #endif
 
     /// <summary>
