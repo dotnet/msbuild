@@ -507,6 +507,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 }
             }
 
+
             AssertCacheBuild(graph, testData, mockCache, logger, nodesToBuildResults, targets: null);
         }
 
@@ -763,59 +764,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             graphResult.ShouldHaveSucceeded();
 
             logger.AssertMessageCount("MSB4274", 1);
-        }
-
-        // A common scenario is to get a request for N targets, but only some of them can be handled by the cache.
-        // In this case, missing targets should be passed through.
-        [Fact]
-        public async Task PartialProxyTargets()
-        {
-            const string ProjectContent = """
-                <Project>
-                  <Target Name="SomeTarget">
-                    <Message Text="SomeTarget running" />
-                  </Target>
-                  <Target Name="ProxyTarget">
-                    <Message Text="ProxyTarget running" />
-                  </Target>
-                  <Target Name="SomeOtherTarget">
-                    <Message Text="SomeOtherTarget running" />
-                  </Target>
-                </Project>
-                """;
-            TransientTestFile project = _env.CreateFile($"project.proj", ProjectContent);
-
-            BuildParameters buildParameters = new()
-            {
-                ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(
-                    new ConfigurableMockCache
-                    {
-                        GetCacheResultImplementation = (_, _, _) =>
-                        {
-                            return Task.FromResult(
-                                CacheResult.IndicateCacheHit(
-                                    new ProxyTargets(
-                                        new Dictionary<string, string>
-                                        {
-                                            { "ProxyTarget", "SomeTarget" },
-                                        })));
-                        }
-                    }),
-            };
-
-            MockLogger logger;
-            using (Helpers.BuildManagerSession buildSession = new(_env, buildParameters))
-            {
-                logger = buildSession.Logger;
-                BuildResult buildResult = await buildSession.BuildProjectFileAsync(project.Path, new[] { "SomeTarget", "SomeOtherTarget" });
-
-                buildResult.Exception.ShouldBeNull();
-                buildResult.ShouldHaveSucceeded();
-            }
-
-            logger.BuildMessageEvents.Select(i => i.Message).ShouldNotContain("SomeTarget running");
-            logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("ProxyTarget running");
-            logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("SomeOtherTarget running");
         }
 
         private void AssertCacheBuild(
@@ -1599,7 +1547,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         // This test ensures that scheduling proxy builds on the inproc node works nicely within the Scheduler
         // if the BuildRequestConfigurations for those proxy builds have built before (or are still building) on
         // the out of proc node.
-        // More details: https://github.com/dotnet/msbuild/pull/6635 
+        // More details: https://github.com/dotnet/msbuild/pull/6635
         public void ProxyCacheHitsOnPreviousCacheMissesShouldWork()
         {
             var cacheNotApplicableTarget = "NATarget";

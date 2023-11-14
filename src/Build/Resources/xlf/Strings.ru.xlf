@@ -451,6 +451,11 @@
         <target state="translated">Сборка загружена во время {0}{1}: {2} (расположение: {3}, MVID: {4}, домен приложения: {5})</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskAssemblyLoadedWithAssemblyLoadContext">
+        <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</source>
+        <target state="new">Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">Задача "{0}" освободила указанное число ядер ({1}). Теперь общее число ядер, которыми располагает задача, равно {2}.</target>

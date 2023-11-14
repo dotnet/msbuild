@@ -267,7 +267,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// Gets or sets the minimum OS version required by the application.
         /// </summary>
         /// <remarks>
-        /// An example value is "5.1.2600.0" for Windows XP.        
+        /// An example value is "5.1.2600.0" for Windows XP.
         /// If you don't specify a value, a default value is used.
         /// The default value is the minimum supported OS of the .NET Framework, which is "4.10.0.0" for Windows 98 Second Edition.
         /// However, if the application contains any native or Reg-Free COM references, then the default is the Windows XP version, which is "5.1.2600.0".

@@ -176,9 +176,9 @@ namespace Microsoft.Build.UnitTests
 
         /*
          * Property:    Parameters
-         * 
+         *
          * The mock logger does not take parameters.
-         * 
+         *
          */
         public string Parameters { get; set; }
 
@@ -223,9 +223,9 @@ namespace Microsoft.Build.UnitTests
 
         /*
          * Method:  Shutdown
-         * 
+         *
          * The mock logger does not need to release any resources.
-         * 
+         *
          */
         public void Shutdown()
         {

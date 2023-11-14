@@ -115,7 +115,7 @@ namespace Microsoft.Build.Evaluation
             initialProperties.ImportProperties(globalProperties);
 
             // The ordering here is important because the configuration file should have greater precedence
-            // than the registry, and we do a check and don't read in the new toolset if there's already one. 
+            // than the registry, and we do a check and don't read in the new toolset if there's already one.
             string defaultToolsVersionFromConfiguration = null;
             string overrideTasksPathFromConfiguration = null;
             string defaultOverrideToolsVersionFromConfiguration = null;
@@ -248,12 +248,12 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            // The 2.0 .NET Framework installer did not write a ToolsVersion key for itself in the registry. 
-            // The 3.5 installer writes one for 2.0, but 3.5 might not be installed.  
-            // The 4.0 and subsequent installers can't keep writing the 2.0 one, because (a) it causes SxS issues and (b) we 
+            // The 2.0 .NET Framework installer did not write a ToolsVersion key for itself in the registry.
+            // The 3.5 installer writes one for 2.0, but 3.5 might not be installed.
+            // The 4.0 and subsequent installers can't keep writing the 2.0 one, because (a) it causes SxS issues and (b) we
             // don't want it unless 2.0 is installed.
             // So if the 2.0 framework is actually installed, we're reading the registry, and either the registry or the config
-            // file have not already created the 2.0 toolset, mock up a fake one.  
+            // file have not already created the 2.0 toolset, mock up a fake one.
             if (((locations & ToolsetDefinitionLocations.Registry) != 0) && !toolsets.ContainsKey("2.0")
                 && FrameworkLocationHelper.PathToDotNetFrameworkV20 != null)
             {
@@ -396,8 +396,8 @@ namespace Microsoft.Build.Evaluation
         protected abstract IEnumerable<string> GetSubToolsetVersions(string toolsVersion);
 
         /// <summary>
-        /// Provides an enumerator over property definitions for a specified sub-toolset version 
-        /// under a specified toolset version. 
+        /// Provides an enumerator over property definitions for a specified sub-toolset version
+        /// under a specified toolset version.
         /// </summary>
         /// <param name="toolsVersion">The tools version.</param>
         /// <param name="subToolsetVersion">The sub-toolset version.</param>
@@ -421,10 +421,10 @@ namespace Microsoft.Build.Evaluation
             foreach (ToolsetPropertyDefinition toolsVersion in ToolsVersions)
             {
                 // If there's already an existing toolset, it's of higher precedence, so
-                // don't even bother to read this toolset in.  
+                // don't even bother to read this toolset in.
                 if (!toolsets.ContainsKey(toolsVersion.Name))
                 {
-                    // We clone here because we don't want to interfere with the evaluation 
+                    // We clone here because we don't want to interfere with the evaluation
                     // of subsequent Toolsets; otherwise, properties found during the evaluation
                     // of this Toolset would be persisted in initialProperties and appear
                     // to later Toolsets as Global or Environment properties from the Engine.
@@ -509,7 +509,7 @@ namespace Microsoft.Build.Evaluation
                 IEnumerable<ToolsetPropertyDefinition> rawSubToolsetProperties = GetSubToolsetPropertyDefinitions(toolsVersion.Name, subToolsetVersion);
                 PropertyDictionary<ProjectPropertyInstance> subToolsetProperties = new PropertyDictionary<ProjectPropertyInstance>();
 
-                // If we have a sub-toolset, any values defined here will override the toolset properties. 
+                // If we have a sub-toolset, any values defined here will override the toolset properties.
                 foreach (ToolsetPropertyDefinition property in rawSubToolsetProperties)
                 {
                     EvaluateAndSetProperty(property, subToolsetProperties, globalProperties, initialProperties, false /* do not ever accumulate sub-toolset properties */, ref subToolsetToolsPath, ref subToolsetBinPath, ref expander);
@@ -646,7 +646,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Processes a particular ToolsetPropertyDefinition into the correct value and location in the initial and/or final property set. 
+        /// Processes a particular ToolsetPropertyDefinition into the correct value and location in the initial and/or final property set.
         /// </summary>
         /// <param name="property">The ToolsetPropertyDefinition being analyzed.</param>
         /// <param name="properties">The final set of properties that we wish this toolset property to be added to. </param>

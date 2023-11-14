@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests
         {
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <PropertyGroup> 
+                <PropertyGroup>
                     <p1>v1</p1>
                     <p2>v2</p2>
                 </PropertyGroup>
@@ -151,7 +151,7 @@ namespace Microsoft.Build.UnitTests
         {
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <PropertyGroup Condition='false'> 
+                <PropertyGroup Condition='false'>
                     <p1>v1</p1>
                     <p2>v2</p2>
                 </PropertyGroup>
@@ -164,7 +164,7 @@ namespace Microsoft.Build.UnitTests
 
             content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <PropertyGroup Condition='true'> 
+                <PropertyGroup Condition='true'>
                     <p1>v1</p1>
                     <p2>v2</p2>
                 </PropertyGroup>
@@ -195,7 +195,7 @@ namespace Microsoft.Build.UnitTests
             // </ItemGroup>
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <PropertyGroup Condition=""'%(i0.m)'=='m2'""> 
+                <PropertyGroup Condition=""'%(i0.m)'=='m2'"">
                     <p1>@(i0)</p1>
                     <p2>%(i0.m)</p2>
                 </PropertyGroup>
@@ -211,7 +211,7 @@ namespace Microsoft.Build.UnitTests
         {
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <ItemGroup> 
+                <ItemGroup>
                     <i1 Include='a1'/>
                     <i2 Include='b1'/>
                 </ItemGroup>
@@ -256,7 +256,7 @@ namespace Microsoft.Build.UnitTests
         {
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <ItemGroup> 
+                <ItemGroup>
                     <i1 Include='  $(p0)  '/>
                     <i2 Include='b1'/>
                 </ItemGroup>
@@ -316,7 +316,7 @@ namespace Microsoft.Build.UnitTests
         {
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <ItemGroup> 
+                <ItemGroup>
                     <i1 Include='a.cpp'/>
                     <i2 Include=""@(i1->'%(filename).obj')""/>
                 </ItemGroup>
@@ -336,7 +336,7 @@ namespace Microsoft.Build.UnitTests
         {
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <ItemGroup> 
+                <ItemGroup>
                     <i1 Include='a.cpp'/>
                     <i2 Include='@(i1)'>
                        <m>@(i1->'%(filename).obj')</m>
@@ -357,7 +357,7 @@ namespace Microsoft.Build.UnitTests
         {
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <ItemGroup> 
+                <ItemGroup>
                     <i1 Include='a1'/>
                     <i2 Include='a1;@(i1);b1;b2' Exclude='@(i1);b1'/>
                 </ItemGroup>
@@ -377,7 +377,7 @@ namespace Microsoft.Build.UnitTests
         {
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <ItemGroup> 
+                <ItemGroup>
                     <i1 Include='a1'>
                         <m>a1</m>
                     </i1>
@@ -401,7 +401,7 @@ namespace Microsoft.Build.UnitTests
         {
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <ItemGroup Condition='false'> 
+                <ItemGroup Condition='false'>
                     <i1 Include='a1'/>
                     <i2 Include='b1'/>
                 </ItemGroup>
@@ -415,7 +415,7 @@ namespace Microsoft.Build.UnitTests
 
             content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <ItemGroup Condition='true'> 
+                <ItemGroup Condition='true'>
                     <i1 Include='a1'/>
                     <i2 Include='b1'/>
                 </ItemGroup>
@@ -447,7 +447,7 @@ namespace Microsoft.Build.UnitTests
             // </ItemGroup>
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <ItemGroup Condition=""'%(i0.m)'!='m1'""> 
+                <ItemGroup Condition=""'%(i0.m)'!='m1'"">
                     <i1 Include='a1'/>
                     <i2 Include='%(i0.m)'/>
                     <i3 Include='%(i0.identity)'/>
@@ -467,7 +467,7 @@ namespace Microsoft.Build.UnitTests
             // </PropertyGroup>
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <PropertyGroup> 
+                <PropertyGroup>
                     <p1>$(p0)</p1>
                 </PropertyGroup>
             </Target>";
@@ -488,7 +488,7 @@ namespace Microsoft.Build.UnitTests
             // </PropertyGroup>
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <ItemGroup> 
+                <ItemGroup>
                     <i1 Include='$(p0)'/>
                     <i2 Include='a2'/>
                 </ItemGroup>
@@ -509,7 +509,7 @@ namespace Microsoft.Build.UnitTests
         {
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <ItemGroup> 
+                <ItemGroup>
                     <i1 Include='a1'>
                         <m>m1</m>
                     </i1>
@@ -540,7 +540,7 @@ namespace Microsoft.Build.UnitTests
         {
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <ItemGroup> 
+                <ItemGroup>
                     <i1 Include='a1'>
                         <m>m1</m>
                     </i1>
@@ -609,7 +609,7 @@ namespace Microsoft.Build.UnitTests
             // </ItemGroup>
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <ItemGroup> 
+                <ItemGroup>
                     <i1 Include='b1'>
                         <m>%(i0.m)</m>
                     </i1>
@@ -641,7 +641,7 @@ namespace Microsoft.Build.UnitTests
         {
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <PropertyGroup> 
+                <PropertyGroup>
                     <p1>v1</p1>
                     <p2>#$(p1)#</p2>
                     <p1>v2</p1>
@@ -677,7 +677,7 @@ namespace Microsoft.Build.UnitTests
             // </ItemGroup>
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <PropertyGroup Condition=""'%(i0.m)' != m1""> 
+                <PropertyGroup Condition=""'%(i0.m)' != m1"">
                     <p1>%(i0.m)</p1>
                 </PropertyGroup>
             </Target>";
@@ -706,7 +706,7 @@ namespace Microsoft.Build.UnitTests
             // </ItemGroup>
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <PropertyGroup> 
+                <PropertyGroup>
                     <p1 Condition=""'%(i0.n)' != n3"">%(i0.n)</p1>
                 </PropertyGroup>
             </Target>";
@@ -750,7 +750,7 @@ namespace Microsoft.Build.UnitTests
                     <PropertyGroup>
                         <p0>v0</p0>
                     </PropertyGroup>
-                    <ItemGroup> 
+                    <ItemGroup>
                         <i1 Include='$(p0)'/>
                     </ItemGroup>
                     <Message Text=`[@(i1)]`/>
@@ -857,7 +857,7 @@ namespace Microsoft.Build.UnitTests
             Project p = ObjectModelHelpers.CreateInMemoryProject(@"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                   <Target Name=`t2` DependsOnTargets=`t`>
-                    <Message Text=`[$(p)]`/>                    
+                    <Message Text=`[$(p)]`/>
                   </Target>
                   <Target Name=`t`>
                     <PropertyGroup>
@@ -897,7 +897,7 @@ namespace Microsoft.Build.UnitTests
             Project p = ObjectModelHelpers.CreateInMemoryProject(@"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                   <Target Name=`t2` DependsOnTargets=`t`>
-                    <Message Text=`[@(i)]`/>                    
+                    <Message Text=`[@(i)]`/>
                   </Target>
                   <Target Name=`t`>
                     <ItemGroup>
@@ -920,13 +920,13 @@ namespace Microsoft.Build.UnitTests
                   <ItemGroup>
                     <i Include=`1.in`><output>1.out</output></i>
                     <i Include=`2.in`><output>2.out</output></i>
-                  </ItemGroup> 
+                  </ItemGroup>
                   <Target Name=`t` Inputs=`%(i.Identity)` Outputs=`%(i.output)`>
                     <Message Text=`start:[@(i)]`/>
                     <ItemGroup>
                       <j Include=`%(i.identity)`/>
                     </ItemGroup>
-                    <Message Text=`end:[@(j)]`/>                    
+                    <Message Text=`end:[@(j)]`/>
                 </Target>
                 </Project>
             ", logger);
@@ -975,16 +975,16 @@ namespace Microsoft.Build.UnitTests
                   <ItemGroup>
                     <i Include=`" + oldFiles[0] + "`><output>" + newFiles[0] + @"</output></i>
                     <i Include=`" + newFiles[1] + "`><output>" + oldFiles[1] + @"</output></i>
-                  </ItemGroup> 
+                  </ItemGroup>
                   <Target Name=`t2` DependsOnTargets=`t`>
-                    <Message Text=`final:[@(j)]`/>                    
+                    <Message Text=`final:[@(j)]`/>
                   </Target>
                   <Target Name=`t` Inputs=`%(i.Identity)` Outputs=`%(i.Output)`>
                     <Message Text=`start:[@(j)]`/>
                     <ItemGroup>
                       <j Include=`%(i.identity)`/>
                     </ItemGroup>
-                    <Message Text=`end:[@(j)]`/>                    
+                    <Message Text=`end:[@(j)]`/>
                 </Target>
                 </Project>
             ", logger);
@@ -1016,16 +1016,16 @@ namespace Microsoft.Build.UnitTests
                   <ItemGroup>
                     <i Include=`" + oldFiles[0] + "`><output>" + newFiles[0] + @"</output></i>
                     <i Include=`" + newFiles[1] + "`><output>" + oldFiles[1] + @"</output></i>
-                  </ItemGroup> 
+                  </ItemGroup>
                   <Target Name=`t2` DependsOnTargets=`t`>
-                    <Message Text=`final:[$(p)]`/>                    
+                    <Message Text=`final:[$(p)]`/>
                   </Target>
                   <Target Name=`t` Inputs=`%(i.Identity)` Outputs=`%(i.Output)`>
                     <Message Text=`start:[$(p)]`/>
                     <PropertyGroup>
                       <p>@(i)</p>
                     </PropertyGroup>
-                    <Message Text=`end:[$(p)]`/>                    
+                    <Message Text=`end:[$(p)]`/>
                 </Target>
                 </Project>
             ", logger);
@@ -1062,20 +1062,20 @@ namespace Microsoft.Build.UnitTests
                   <ItemGroup>
                     <i Include=`" + oldInput + "`><output>" + newOutput + @"</output></i>
                     <i Include=`" + newInput + "`><output>" + oldOutput + @"</output></i>
-                  </ItemGroup> 
+                  </ItemGroup>
                   <Target Name=`t2` DependsOnTargets=`t`>
-                    <Message Text=`final:[@(i)]`/>                    
+                    <Message Text=`final:[@(i)]`/>
                   </Target>
                   <Target Name=`t` Inputs=`%(i.Identity)` Outputs=`%(i.Output)`>
                     <Message Text=`start:[@(i)]`/>
                     <ItemGroup>
                       <j Include=`%(i.identity)`/>
                     </ItemGroup>
-                    <Message Text=`middle:[@(i)][@(j)]`/> 
+                    <Message Text=`middle:[@(i)][@(j)]`/>
                     <CreateItem Include=`@(j)`>
                       <Output TaskParameter=`Include` ItemName=`i`/>
                     </CreateItem>
-                    <Message Text=`end:[@(i)]`/>                    
+                    <Message Text=`end:[@(i)]`/>
                 </Target>
                 </Project>
             ", logger);
@@ -1084,11 +1084,11 @@ namespace Microsoft.Build.UnitTests
                 // We should only see messages for the out of date inputs, but the itemgroup should do its work for both inputs;
                 // The final result should include the out of date inputs (twice) and the up to date inputs (twice).
                 // NOTE: outputs from regular tasks, like CreateItem, are gathered up and included in the project in the order (1) inferred (2) executed.
-                // Intrinsic tasks, because they affect the project directly, don't do this. So the final order we see is 
+                // Intrinsic tasks, because they affect the project directly, don't do this. So the final order we see is
                 // two inputs (old, new) from the ItemGroup; followed by the inferred CreateItem output, then the executed CreateItem output.
                 // I suggest this ordering isn't important: it's a new feature, so nobody will get broken.
-                logger.AssertLogContains(new string[] { "start:[" + newInput + "]", 
-                                                        "middle:[" + newInput + "][" + newInput + "]", 
+                logger.AssertLogContains(new string[] { "start:[" + newInput + "]",
+                                                        "middle:[" + newInput + "][" + newInput + "]",
                                                         "end:["   + newInput + ";" + newInput + "]",
                                                         "final:[" + oldInput + ";" + newInput + ";" + oldInput + ";" + newInput + "]" });
             }
@@ -1105,7 +1105,7 @@ namespace Microsoft.Build.UnitTests
         {
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <ItemGroup> 
+                <ItemGroup>
                     <i1 Include=''/>
                 </ItemGroup>
             </Target>";
@@ -1118,7 +1118,7 @@ namespace Microsoft.Build.UnitTests
         {
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <ItemGroup> 
+                <ItemGroup>
                     <i1 Remove='a1'/>
                 </ItemGroup>
             </Target>";
@@ -1135,7 +1135,7 @@ namespace Microsoft.Build.UnitTests
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                 <ItemGroup>
-                    <i1 Include='a1'/> 
+                    <i1 Include='a1'/>
                     <i1 Remove='a1'/>
                 </ItemGroup>
             </Target>";
@@ -1160,7 +1160,7 @@ namespace Microsoft.Build.UnitTests
                     <!-- just to cause two target batches -->
                     <i Include=`1.in`><output>1.out</output></i>
                     <i Include=`2.in`><output>2.out</output></i>
-                  </ItemGroup> 
+                  </ItemGroup>
                   <Target Name=`t` Inputs=`%(i.Identity)` Outputs=`%(i.output)`>
                     <ItemGroup>
                       <j Include=`a` Condition=`'%(i.Identity)'=='1.in'`/>
@@ -1196,7 +1196,7 @@ namespace Microsoft.Build.UnitTests
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                 <ItemGroup>
                     <i0 Include='a.cpp;b.cpp'/>
-                    <i1 Include='a.obj;b.obj'/> 
+                    <i1 Include='a.obj;b.obj'/>
                     <i1 Remove=""@(i0->'%(filename).obj')""/>
                 </ItemGroup>
             </Target>";
@@ -1213,8 +1213,8 @@ namespace Microsoft.Build.UnitTests
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                 <ItemGroup>
-                    <i1 Include='a1'/> 
-                    <i1 Include='a2'/> 
+                    <i1 Include='a1'/>
+                    <i1 Include='a2'/>
                     <i1 Remove='a1;a2'/>
                 </ItemGroup>
             </Target>";
@@ -1231,8 +1231,8 @@ namespace Microsoft.Build.UnitTests
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                 <ItemGroup>
-                    <i1 Include='a1'/> 
-                    <i1 Include='a2'/> 
+                    <i1 Include='a1'/>
+                    <i1 Include='a2'/>
                     <i1 Remove='@(i1)'/>
                 </ItemGroup>
             </Target>";
@@ -1280,7 +1280,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Bare (batchable) metadata is prohibited on IG/PG conditions -- all other expressions 
+        /// Bare (batchable) metadata is prohibited on IG/PG conditions -- all other expressions
         /// should be allowed
         /// </summary>
         [Test]
@@ -1302,7 +1302,7 @@ namespace Microsoft.Build.UnitTests
             // </PropertyGroup>
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <PropertyGroup Condition=""'$(p0)'=='v0' and '@(i0)'=='a1;a2;a3;a4' and '@(i0->'%(identity).x','|')'=='a1.x|a2.x|a3.x|a4.x'""> 
+                <PropertyGroup Condition=""'$(p0)'=='v0' and '@(i0)'=='a1;a2;a3;a4' and '@(i0->'%(identity).x','|')'=='a1.x|a2.x|a3.x|a4.x'"">
                   <p1>v1</p1>
                 </PropertyGroup>
             </Target>";
@@ -1318,7 +1318,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Bare (batchable) metadata is prohibited on IG/PG conditions -- all other expressions 
+        /// Bare (batchable) metadata is prohibited on IG/PG conditions -- all other expressions
         /// should be allowed
         /// </summary>
         [Test]
@@ -1340,7 +1340,7 @@ namespace Microsoft.Build.UnitTests
             // </PropertyGroup>
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <ItemGroup Condition=""'$(p0)'=='v0' and '@(i0)'=='a1;a2;a3;a4' and '@(i0->'%(identity).x','|')'=='a1.x|a2.x|a3.x|a4.x'"">  
+                <ItemGroup Condition=""'$(p0)'=='v0' and '@(i0)'=='a1;a2;a3;a4' and '@(i0->'%(identity).x','|')'=='a1.x|a2.x|a3.x|a4.x'"">
                   <i1 Include='x'/>
                 </ItemGroup>
             </Target>";
@@ -1359,9 +1359,9 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// This bug was caused by batching over the ItemGroup as well as over each child.
         /// If the condition on a child did not exclude it, an unwitting child could be included multiple times,
-        /// once for each outer batch. The fix was to abandon the idea of outer batching and just 
+        /// once for each outer batch. The fix was to abandon the idea of outer batching and just
         /// prohibit batchable expressions on the ItemGroup conditions. It's just too hard to write such expressions
-        /// in a comprehensible way.    
+        /// in a comprehensible way.
         /// </summary>
         [Test]
         public void RegressPCHBug68578()
@@ -1379,7 +1379,7 @@ namespace Microsoft.Build.UnitTests
             // </ItemGroup>
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <ItemGroup> 
+                <ItemGroup>
                   <!-- squint and pretend i0 is 'CppCompile' and 'm' is 'ObjectFile' -->
                   <Link Include=""A_PCH""/>
                   <Link Include=""@(i0->'%(m).obj')"" Condition=""'%(i0.m)' == 'm1'""/>
@@ -1504,13 +1504,13 @@ namespace Microsoft.Build.UnitTests
                   <ItemGroup>
                     <i0 Include='a1'>
                       <m>m1</m>
-                    </i0> 
+                    </i0>
                   </ItemGroup>
                   <Target Name=`t`>
                     <ItemGroup>
                       <i0 Include='a1'>
                         <m>m2</m>
-                      </i0> 
+                      </i0>
                       <i0 Remove=`a1`/>
                     </ItemGroup>
                     <Message Text=`[%(i0.m)]`/>
@@ -1574,13 +1574,13 @@ namespace Microsoft.Build.UnitTests
                   <ItemGroup>
                     <i0 Include='a1'>
                       <m>m1</m>
-                    </i0> 
+                    </i0>
                   </ItemGroup>
                   <Target Name=`t`>
                     <ItemGroup>
                       <i0 Include='a1'>
                         <m>m2</m>
-                      </i0> 
+                      </i0>
                       <i0 Remove=`a1` Condition=`'%(i0.m)' == 'm1'`/>
                     </ItemGroup>
                     <Message Text=`[%(i0.m)]`/>
@@ -1634,7 +1634,7 @@ namespace Microsoft.Build.UnitTests
                 string content = @"
                 <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <ItemGroup>
-                        <i1 Include='" + files[0] + ";" + files[1] + @";other'/> 
+                        <i1 Include='" + files[0] + ";" + files[1] + @";other'/>
                         <i1 Remove='$(temp)\*.tmp'/>
                     </ItemGroup>
                 </Target>";
@@ -1662,13 +1662,13 @@ namespace Microsoft.Build.UnitTests
                   <ItemGroup>
                     <i Include=`1.in`><output>1.out</output></i>
                     <i Include=`2.in`><output>2.out</output></i>
-                  </ItemGroup> 
+                  </ItemGroup>
                   <Target Name=`t` Inputs=`%(i.Identity)` Outputs=`%(i.output)`>
                     <Message Text=`start:[@(i)]`/>
                     <ItemGroup>
                       <i Remove=`1.in;2.in`/>
                     </ItemGroup>
-                    <Message Text=`end:[@(i)]`/>                    
+                    <Message Text=`end:[@(i)]`/>
                 </Target>
                 </Project>
             ", logger);
@@ -1687,13 +1687,13 @@ namespace Microsoft.Build.UnitTests
                     <i Include=`1.in`><output>1.out</output></i>
                     <i Include=`2.in`><output>2.out</output></i>
                     <j Include=`j1`/>
-                  </ItemGroup> 
+                  </ItemGroup>
                   <Target Name=`t` Inputs=`%(i.Identity)` Outputs=`%(i.output)`>
                     <Message Text=`start:[@(j)]`/>
                     <ItemGroup>
                       <j Remove=`@(j)`/>
                     </ItemGroup>
-                    <Message Text=`end:[@(j)]`/>                    
+                    <Message Text=`end:[@(j)]`/>
                 </Target>
                 </Project>
             ", logger);
@@ -1717,7 +1717,7 @@ namespace Microsoft.Build.UnitTests
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                   <ItemGroup>
                     <i Include=`i1;i2`/>
-                  </ItemGroup> 
+                  </ItemGroup>
                   <Target Name=`t`>
                     <Message Text=`a:[@(i)]`/>
                     <ItemGroup>
@@ -1725,7 +1725,7 @@ namespace Microsoft.Build.UnitTests
                     </ItemGroup>
                     <Message Text=`b:[@(i)]`/>
                     <CallTarget Targets=`t2`/>
-                    <Message Text=`d:[@(i)]`/>                    
+                    <Message Text=`d:[@(i)]`/>
                   </Target>
                   <Target Name=`t2`>
                     <Message Text=`c:[@(i)]`/>
@@ -1783,7 +1783,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Whidbey behavior was that items/properties emitted by a target calling another target, were
-        /// not visible to the calling target. (That was because the project items and properties had been cloned for the target batches.) 
+        /// not visible to the calling target. (That was because the project items and properties had been cloned for the target batches.)
         /// We must match that behavior. (For now)
         /// </summary>
         [Test]
@@ -1829,7 +1829,7 @@ namespace Microsoft.Build.UnitTests
         {
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                <ItemGroup> 
+                <ItemGroup>
                     <i1/>
                 </ItemGroup>
             </Target>";
@@ -1846,7 +1846,7 @@ namespace Microsoft.Build.UnitTests
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                 <ItemGroup>
-                    <i1 Include='a1'> 
+                    <i1 Include='a1'>
                       <m>m1</m>
                     </i1>
                     <i1>
@@ -1868,7 +1868,7 @@ namespace Microsoft.Build.UnitTests
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                 <ItemGroup>
-                    <i1 Include='a1'> 
+                    <i1 Include='a1'>
                       <m>m1</m>
                     </i1>
                     <i1>
@@ -1916,10 +1916,10 @@ namespace Microsoft.Build.UnitTests
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                 <ItemGroup>
-                    <i1 Include='a1'> 
+                    <i1 Include='a1'>
                       <m>m1</m>
                     </i1>
-                    <i1 Include='a2'> 
+                    <i1 Include='a2'>
                       <m>m2</m>
                     </i1>
                     <i1 Condition=""'%(i1.m)'=='m2'"">
@@ -1945,10 +1945,10 @@ namespace Microsoft.Build.UnitTests
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                 <ItemGroup>
-                    <i1 Include='a1'> 
+                    <i1 Include='a1'>
                       <m>m1</m>
                     </i1>
-                    <i1 Include='a2'> 
+                    <i1 Include='a2'>
                       <m>m2</m>
                     </i1>
                     <i1>
@@ -1991,10 +1991,10 @@ namespace Microsoft.Build.UnitTests
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                 <ItemGroup>
-                    <i1 Include='a1'> 
+                    <i1 Include='a1'>
                       <m>m1</m>
                     </i1>
-                    <i1 Include='a2'> 
+                    <i1 Include='a2'>
                       <m>m2</m>
                     </i1>
                     <i1 Condition=""'%(m)'=='m2'"">
@@ -2021,10 +2021,10 @@ namespace Microsoft.Build.UnitTests
             string content = @"
             <Target Name='t' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                 <ItemGroup>
-                    <i1 Include='a1'> 
+                    <i1 Include='a1'>
                       <m>m1</m>
                     </i1>
-                    <i1 Include='a2'> 
+                    <i1 Include='a2'>
                       <m>m2</m>
                     </i1>
                     <i1>
@@ -2072,7 +2072,7 @@ namespace Microsoft.Build.UnitTests
             IntrinsicTask task = CreateIntrinsicTask(content);
 
             Lookup lookup = GenerateLookup();
-            
+
             task.ExecuteTask(lookup);
 
             BuildItemGroup i0Group = lookup.GetItems("i0");
@@ -2149,7 +2149,7 @@ namespace Microsoft.Build.UnitTests
                     <ItemGroup>
                       <i0>
                         <m>m1</m>
-                      </i0> 
+                      </i0>
                     </ItemGroup>
                   </Target>
                   <Target Name=`t2`>
@@ -2190,7 +2190,7 @@ namespace Microsoft.Build.UnitTests
                       </i1>
                       <i1>
                         <n>n1</n>
-                      </i1> 
+                      </i1>
                     </ItemGroup>
                   </Target>
                   <Target Name=`t2`>
@@ -2307,7 +2307,7 @@ namespace Microsoft.Build.UnitTests
                     <!-- just to cause two target batches -->
                     <i Include=`1.in`><output>1.out</output></i>
                     <i Include=`2.in`><output>2.out</output></i>
-                  </ItemGroup> 
+                  </ItemGroup>
                   <Target Name=`t` Inputs=`%(i.Identity)` Outputs=`%(i.output)`>
                     <Message Text=`start:[$(p)]`/>
                     <CreateProperty Value='$(p)--%(i.Identity)'>
@@ -2363,16 +2363,16 @@ namespace Microsoft.Build.UnitTests
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                   <ItemGroup>
                     <i Include=`" + files[0] + "`><output>" + files[1] + @"</output></i>
-                  </ItemGroup> 
+                  </ItemGroup>
                   <Target Name=`t2` DependsOnTargets=`t`>
-                    <Message Text=`final:[$(p)]`/>                    
+                    <Message Text=`final:[$(p)]`/>
                   </Target>
                   <Target Name=`t` Inputs=`%(i.Identity)` Outputs=`%(i.Output)`>
                     <Message Text=`start:[$(p)]`/>
                     <CreateProperty Value='@(i)'>
                       <Output TaskParameter='Value' PropertyName='p'/>
                     </CreateProperty>
-                    <Message Text=`end:[$(p)]`/>                    
+                    <Message Text=`end:[$(p)]`/>
                 </Target>
                 </Project>
             ", logger);
@@ -2405,7 +2405,7 @@ namespace Microsoft.Build.UnitTests
                       </x>
                       <x>
                         <m1>2</m1>
-                      </x>  
+                      </x>
                     </ItemGroup>
                     <Message Text=`[%(x.m1)]`/>
                   </Target>
@@ -2435,7 +2435,7 @@ namespace Microsoft.Build.UnitTests
                     <ItemGroup>
                       <x>
                         <m1>2</m1>
-                      </x>  
+                      </x>
                     </ItemGroup>
                     <Message Text=`[%(x.m1)]`/>
                   </Target>
@@ -2517,7 +2517,7 @@ namespace Microsoft.Build.UnitTests
                       </x>
                       <x Condition=`'%(x.m1)'=='1'`>
                         <m1>2</m1>
-                      </x>  
+                      </x>
                     </ItemGroup>
                     <Message Text=`[%(x.m1)]`/>
                   </Target>
@@ -2545,7 +2545,7 @@ namespace Microsoft.Build.UnitTests
                       </x>
                       <x>
                         <m1 Condition=`'%(x.m1)'=='1'`>2</m1>
-                      </x>  
+                      </x>
                     </ItemGroup>
                     <Message Text=`[%(x.m1)]`/>
                   </Target>
@@ -2744,9 +2744,9 @@ namespace Microsoft.Build.UnitTests
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(content);
 
-            IntrinsicTask task = new IntrinsicTask((XmlElement)doc.FirstChild.FirstChild, 
-                                                   new EngineLoggingServicesInProc(new EventSource(), true, null), 
-                                                   null, 
+            IntrinsicTask task = new IntrinsicTask((XmlElement)doc.FirstChild.FirstChild,
+                                                   new EngineLoggingServicesInProc(new EventSource(), true, null),
+                                                   null,
                                                    Directory.GetCurrentDirectory(),
                                                    new ItemDefinitionLibrary(new Project()));
             return task;

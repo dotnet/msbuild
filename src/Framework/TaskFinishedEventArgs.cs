@@ -38,7 +38,7 @@ namespace Microsoft.Build.Framework
         /// <param name="helpKeyword">help keyword </param>
         /// <param name="projectFile">project file</param>
         /// <param name="taskFile">file in which the task is defined</param>
-        /// <param name="taskName">task name</param> 
+        /// <param name="taskName">task name</param>
         /// <param name="succeeded">true indicates task succeed</param>
         public TaskFinishedEventArgs(
             string message,
@@ -59,7 +59,7 @@ namespace Microsoft.Build.Framework
         /// <param name="helpKeyword">help keyword </param>
         /// <param name="projectFile">project file</param>
         /// <param name="taskFile">file in which the task is defined</param>
-        /// <param name="taskName">task name</param> 
+        /// <param name="taskName">task name</param>
         /// <param name="succeeded">true indicates task succeed</param>
         /// <param name="eventTimestamp">Timestamp when event was created</param>
         public TaskFinishedEventArgs(
@@ -127,12 +127,12 @@ namespace Microsoft.Build.Framework
         public bool Succeeded => succeeded;
 
         /// <summary>
-        /// Project file associated with event.   
+        /// Project file associated with event.
         /// </summary>
         public string ProjectFile => projectFile;
 
         /// <summary>
-        /// MSBuild file where this task was defined.   
+        /// MSBuild file where this task was defined.
         /// </summary>
         public string TaskFile => taskFile;
 

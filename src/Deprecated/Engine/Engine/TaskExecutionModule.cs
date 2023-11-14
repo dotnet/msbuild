@@ -50,7 +50,7 @@ namespace Microsoft.Build.BuildEngine
 
             SetBatchRequestSize();
 
-            // In singleproc mode the task execution module executes tasks on the engine thread. In multi proc mode a new thread is 
+            // In singleproc mode the task execution module executes tasks on the engine thread. In multi proc mode a new thread is
             // created so the TEM can submit tasks to a worker queue which will run the tasks on a new thread.
             if (moduleMode != TaskExecutionModuleMode.SingleProcMode)
             {

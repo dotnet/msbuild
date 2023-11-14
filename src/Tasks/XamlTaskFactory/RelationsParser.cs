@@ -529,7 +529,7 @@ namespace Microsoft.Build.Tasks.Xaml
                 child = child.NextSibling;
             }
 
-            // We've read any enumerated values and any dependencies, so we just 
+            // We've read any enumerated values and any dependencies, so we just
             // have to add the switchRelations
             switchRelationsList.Add(switchRelationsToAdd.SwitchValue, switchRelationsToAdd);
             return true;

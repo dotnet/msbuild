@@ -93,7 +93,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="nodeNumber"></param>
         /// <returns></returns>

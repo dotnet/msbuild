@@ -50,8 +50,8 @@
     <MicrosoftDotNetXUnitExtensionsVersion>8.0.0-beta.23463.1</MicrosoftDotNetXUnitExtensionsVersion>
     <MicrosoftExtensionsDependencyModelVersion>7.0.0</MicrosoftExtensionsDependencyModelVersion>
     <MicrosoftIORedistVersion>6.0.0</MicrosoftIORedistVersion>
-    <MicrosoftNetCompilersToolsetVersion>4.8.0-3.23510.8</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>6.8.0-rc.122</NuGetBuildTasksVersion>
+    <MicrosoftNetCompilersToolsetVersion>4.9.0-2.23562.2</MicrosoftNetCompilersToolsetVersion>
+    <NuGetBuildTasksVersion>6.9.0-preview.1.23</NuGetBuildTasksVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
     <SystemTextJsonVersion>7.0.3</SystemTextJsonVersion>
     <SystemThreadingTasksDataflowVersion>7.0.0</SystemThreadingTasksDataflowVersion>

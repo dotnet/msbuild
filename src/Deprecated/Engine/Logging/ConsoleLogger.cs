@@ -36,8 +36,8 @@ namespace Microsoft.Build.BuildEngine
 
     /// <summary>
     /// This class implements the default logger that outputs event data
-    /// to the console (stdout). 
-    /// It is a facade: it creates, wraps and delegates to a kind of BaseConsoleLogger, 
+    /// to the console (stdout).
+    /// It is a facade: it creates, wraps and delegates to a kind of BaseConsoleLogger,
     /// either SerialConsoleLogger or ParallelConsoleLogger.
     /// </summary>
     /// <remarks>This class is not thread safe.</remarks>
@@ -287,7 +287,7 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// Apply a parameter.
-        /// NOTE: This method was public by accident in Whidbey, so it cannot be made internal now. It has 
+        /// NOTE: This method was public by accident in Whidbey, so it cannot be made internal now. It has
         /// no good reason for being public.
         /// </summary>
         public void ApplyParameter(string parameterName, string parameterValue)

@@ -29,7 +29,7 @@ namespace Microsoft.Build.Tasks
         public bool PreserveExistingMetadata { get; set; } = false;
 
         /// <summary>
-        /// A list of metadata name/value pairs to apply to the output items.  
+        /// A list of metadata name/value pairs to apply to the output items.
         /// A typical input: "metadataname1=metadatavalue1", "metadataname2=metadatavalue2", ...
         /// </summary>
         /// <remarks>
@@ -38,7 +38,7 @@ namespace Microsoft.Build.Tasks
         ///     The fact that this is a `string[]` makes the following illegal:
         ///         `<CreateItem AdditionalMetadata="TargetPath=@(OutputPathItem)" />`
         ///     The engine fails on this because it doesn't like item lists being concatenated with string
-        ///     constants when the data is being passed into an array parameter.  So the workaround is to 
+        ///     constants when the data is being passed into an array parameter.  So the workaround is to
         ///     write this in the project file:
         ///         `<CreateItem AdditionalMetadata="@(OutputPathItem-&gt;'TargetPath=%(Identity)')" />`
         ///     ]]>
@@ -118,7 +118,7 @@ namespace Microsoft.Build.Tasks
                             {
                                 if (FileUtilities.ItemSpecModifiers.IsItemSpecModifier(nameAndValue.Key))
                                 {
-                                    // Explicitly setting built-in metadata, is not allowed. 
+                                    // Explicitly setting built-in metadata, is not allowed.
                                     Log.LogErrorWithCodeFromResources("CreateItem.AdditionalMetadataError", nameAndValue.Key);
                                     break;
                                 }

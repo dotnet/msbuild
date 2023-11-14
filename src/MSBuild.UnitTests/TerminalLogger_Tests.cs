@@ -293,7 +293,7 @@ namespace Microsoft.Build.UnitTests
         public void TestTerminalLoggerTogetherWithOtherLoggers()
         {
             using (TestEnvironment env = TestEnvironment.Create())
-            { 
+            {
                 string contents = @"
 <Project>
     <ItemGroup>

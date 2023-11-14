@@ -110,10 +110,10 @@ namespace Microsoft.Build.BuildEngine
             // The writer thread should be created before the
             // reader thread because some LocalCallDescriptors
             // assume the shared memory for the writer thread
-            // has already been created. The method will both 
-            // instantiate the shared memory for the writer 
+            // has already been created. The method will both
+            // instantiate the shared memory for the writer
             // thread and also start the writer thread itself.
-            // We will verifyThrow in the method if the 
+            // We will verifyThrow in the method if the
             // sharedMemory was not created correctly.
             engineCallback.StartWriterThread(nodeNumber);
 
@@ -124,7 +124,7 @@ namespace Microsoft.Build.BuildEngine
                         // Generate the name for the shared memory region
                         LocalNodeProviderGlobalNames.NodeInputMemoryName(nodeNumber),
                         SharedMemoryType.ReadOnly,
-                        // Reuse an existing shared memory region as it should have already 
+                        // Reuse an existing shared memory region as it should have already
                         // been created by the parent node side
                         true
                   );
@@ -150,7 +150,7 @@ namespace Microsoft.Build.BuildEngine
             Thread writerThread = engineCallback.GetWriterThread();
             // The threads may not exist if the child has timed out before the parent has told the node
             // to start up its communication threads. This can happen if the node is started with /nodemode:x
-            // and no parent is running, or if the parent node has spawned a new process and then crashed 
+            // and no parent is running, or if the parent node has spawned a new process and then crashed
             // before establishing communication with the child node.
             writerThread?.Join();
 
@@ -263,7 +263,7 @@ namespace Microsoft.Build.BuildEngine
                     globalNodeActivate.Reset();
                     // Set the global inuse event so other parent processes know this node is now initialized
                     globalNodeInUse.Set();
-                    // Make a copy of the parents handle to protect ourselves in case the parent dies, 
+                    // Make a copy of the parents handle to protect ourselves in case the parent dies,
                     // this is to prevent a parent from reserving a node another parent is trying to use.
                     globalNodeReserveHandle =
                         new EventWaitHandle(false, EventResetMode.ManualReset, LocalNodeProviderGlobalNames.NodeReserveEventName(nodeNumber));
@@ -359,7 +359,7 @@ namespace Microsoft.Build.BuildEngine
                     {
                         // Read the list of LocalCallDescriptors from sharedMemory,
                         // this will be null if a large object is being read from shared
-                        // memory and will continue to be null until the large object has 
+                        // memory and will continue to be null until the large object has
                         // been completly sent.
                         IList localCallDescriptorList = sharedMemory.Read();
 
@@ -472,7 +472,7 @@ namespace Microsoft.Build.BuildEngine
 
             inUseEvent.Set();
 
-            // Clear the environment so that we dont have extra variables laying around, this 
+            // Clear the environment so that we dont have extra variables laying around, this
             // may be a performance hog but needs to be done
             IDictionary variableDictionary = Environment.GetEnvironmentVariables();
             foreach (string variableName in variableDictionary.Keys)
@@ -518,7 +518,7 @@ namespace Microsoft.Build.BuildEngine
 
             if (!isParentAlive)
             {
-                // No logging's going to reach the parent at this point: 
+                // No logging's going to reach the parent at this point:
                 // indicate on the console what's going on
                 string message = ResourceUtilities.FormatResourceString("ParentProcessUnexpectedlyDied", node.NodeId);
                 Console.WriteLine(message);
@@ -605,8 +605,8 @@ namespace Microsoft.Build.BuildEngine
         // This event is used to cause the child to create the shared memory structures to start communication
         // with the parent
         private static EventWaitHandle globalInitiateActivationEvent;
-        // This event is used to indicate to the parent that shared memory buffers have been created and are ready for 
-        // use 
+        // This event is used to indicate to the parent that shared memory buffers have been created and are ready for
+        // use
         private static EventWaitHandle globalNodeActivate;
         // Private local events
         private static ManualResetEvent communicationThreadExitEvent = new ManualResetEvent(false);

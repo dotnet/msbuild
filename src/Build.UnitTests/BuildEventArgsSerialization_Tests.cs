@@ -422,7 +422,7 @@ namespace Microsoft.Build.UnitTests
                 "Subcategory",
                 "Code",
                 "File",
-                1, 
+                1,
                 2,
                 3,
                 4,
@@ -572,6 +572,48 @@ namespace Microsoft.Build.UnitTests
                 e => e.Message,
                 e => e.ProjectFile,
                 e => e.Subcategory);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void RoundtripExtendedCriticalBuildMessageEventArgs(bool withOptionalData)
+        {
+            var args = new ExtendedCriticalBuildMessageEventArgs(
+                "extCrit",
+                "Subcategory",
+                "Code",
+                "File",
+                1,
+                2,
+                3,
+                4,
+                "Message",
+                "Help",
+                "SenderName",
+                DateTime.Parse("12/12/2015 06:11:56 PM"),
+                withOptionalData ? new object[] { "argument0" } : null)
+            {
+                ExtendedData = withOptionalData ? "{'long-json':'mostly-strings'}" : null,
+                ExtendedMetadata = withOptionalData ? new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } } : null,
+                BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+            };
+
+
+            Roundtrip(args,
+                e => e.Code,
+                e => e.ColumnNumber.ToString(),
+                e => e.EndColumnNumber.ToString(),
+                e => e.EndLineNumber.ToString(),
+                e => e.File,
+                e => e.LineNumber.ToString(),
+                e => e.Message,
+                e => e.ProjectFile,
+                e => e.Subcategory,
+                e => e.ExtendedType,
+                e => TranslationHelpers.ToString(e.ExtendedMetadata),
+                e => e.ExtendedData,
+                e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
         }
 
         [Fact]

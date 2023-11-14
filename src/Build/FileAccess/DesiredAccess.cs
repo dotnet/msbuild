@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.Build.Framework.FileAccess
+namespace Microsoft.Build.Experimental.FileAccess
 {
     /*
      * Implementation note: This is a copy of BuildXL.Processes.DesiredAccess.
