@@ -33,18 +33,13 @@ internal sealed partial class TerminalLogger : INodeLogger
 
 #if NET7_0_OR_GREATER
     [StringSyntax(StringSyntaxAttribute.Regex)]
-#endif
     private const string ImmediateMessagePattern = @"\[CredentialProvider\]|--interactive";
-
     private const RegexOptions Options = RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture;
 
-#if NET7_0_OR_GREATER
     [GeneratedRegex(ImmediateMessagePattern, Options)]
     private static partial Regex ImmediateMessageRegex();
 #else
-    private static Regex ImmediateMessageRegex() => immediateMessageRegex;
-
-    private static readonly Regex immediateMessageRegex = new(ImmediateMessagePattern, RegexOptions.Compiled | Options);
+    private readonly string[] _immediateMessageKeywords = { @"\[CredentialProvider\]", "--interactive" };
 #endif
 
     /// <summary>
@@ -626,7 +621,14 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     /// <param name="message">Raised event.</param>
     /// <returns>true if marker is detected.</returns>
-    private bool IsImmediateMessage(string message) => ImmediateMessageRegex().IsMatch(message);
+    private bool IsImmediateMessage(string message)
+    {
+#if NET7_0_OR_GREATER
+        return ImmediateMessageRegex().IsMatch(message);
+#else
+        return _immediateMessageKeywords.Any(imk => message.IndexOf(imk, StringComparison.OrdinalIgnoreCase) >= 0);
+#endif
+    }
 
     /// <summary>
     /// The <see cref="IEventSource.ErrorRaised"/> callback.
@@ -654,7 +656,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         }
     }
 
-    #endregion
+#endregion
 
     #region Refresher thread implementation
 
