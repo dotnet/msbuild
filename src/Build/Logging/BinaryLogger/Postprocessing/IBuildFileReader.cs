@@ -12,7 +12,7 @@ public interface IBuildFileReader
     /// When subscriber is OK with greedy reading entire content of the file and is interested only in the individual strings (e.g. for sensitive data redaction purposes),
     ///  it can simplify subscribing to this event, by using handler with same signature as handler for <see cref="IBuildEventStringsReader.StringReadDone"/> and wrapping it via
     /// <see cref="ArchiveFileEventArgsExtensions.ToArchiveFileHandler"/> extension.
-    ///
+    /// </summary>
     /// <example>
     /// <code>
     /// private void OnStringReadDone(StringReadEventArgs e)
@@ -27,6 +27,5 @@ public interface IBuildFileReader
     /// }
     /// </code>
     /// </example>
-    /// </summary>
     public event Action<ArchiveFileEventArgs>? ArchiveFileEncountered;
 }

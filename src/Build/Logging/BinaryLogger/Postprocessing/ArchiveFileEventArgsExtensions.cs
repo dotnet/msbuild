@@ -32,7 +32,7 @@ public static class ArchiveFileEventArgsExtensions
     {
         return args =>
         {
-            var archiveFile = args.ArchiveData.ToArchString();
+            var archiveFile = args.ArchiveData.ToArchiveFile();
             var pathArgs = new StringReadEventArgs(archiveFile.FullPath);
             stringHandler(pathArgs);
             var contentArgs = new StringReadEventArgs(archiveFile.Content);

@@ -38,10 +38,8 @@ namespace Microsoft.Build.Logging
     internal interface IBinaryLogReplaySource :
         IEventSource,
         IRawLogEventsSource,
-        IBuildEventStringsReader,
-        IEmbeddedContentSource,
-        IBuildFileReader,
-        IBinaryLogReaderErrors
+        IBuildEventArgsReaderNotifications,
+        IEmbeddedContentSource
     { }
 
     /// <summary>

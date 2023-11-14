@@ -410,7 +410,7 @@ namespace Microsoft.Build.Logging
                         {
                             projectImportsCollector.AddFileFromMemory(
                                 resultFile.FullPath,
-                                resultFile.ToArchString().Content,
+                                resultFile.ToArchiveFile().Content,
                                 makePathAbsolute: false,
                                 entryCreationStamp: entry.LastWriteTime);
                         }

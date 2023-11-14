@@ -26,7 +26,7 @@ namespace Microsoft.Build.Logging
         /// Materializes the whole content of the embedded file in memory as a string.
         /// </summary>
         /// <returns></returns>
-        public abstract ArchiveFile ToArchString();
+        public abstract ArchiveFile ToArchiveFile();
 
         public virtual void Dispose()
         { }
@@ -47,8 +47,8 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public string Content { get; }
 
-        /// <inheritdoc cref="ArchiveData.ToArchString" />
-        public override ArchiveFile ToArchString()
+        /// <inheritdoc cref="ArchiveData.ToArchiveFile" />
+        public override ArchiveFile ToArchiveFile()
             => this;
     }
 
@@ -77,8 +77,8 @@ namespace Microsoft.Build.Logging
             return new ArchiveStream(entry.FullName, new StreamReader(entry.Open()));
         }
 
-        /// <inheritdoc cref="ArchiveData.ToArchString" />
-        public override ArchiveFile ToArchString()
+        /// <inheritdoc cref="ArchiveData.ToArchiveFile" />
+        public override ArchiveFile ToArchiveFile()
         {
             var content = ContentReader.ReadToEnd();
             ContentReader.Dispose();

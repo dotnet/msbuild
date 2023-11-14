@@ -301,7 +301,7 @@ namespace Microsoft.Build.UnitTests
 
             void AddArchiveFile(Dictionary<string, string> files, ArchiveFileEventArgs arg)
             {
-                ArchiveFile embedFile = arg.ArchiveData.ToArchString();
+                ArchiveFile embedFile = arg.ArchiveData.ToArchiveFile();
                 files.Add(embedFile.FullPath, embedFile.Content);
             }
 
