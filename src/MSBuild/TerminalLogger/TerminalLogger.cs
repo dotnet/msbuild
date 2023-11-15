@@ -635,10 +635,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private void ErrorRaised(object sender, BuildErrorEventArgs e)
     {
-        var buildEventContext = e.BuildEventContext;
-        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
-        {
-            string message = EventArgsFormatting.FormatEventMessage(
+        string message = EventArgsFormatting.FormatEventMessage(
                 category: AnsiCodes.Colorize("error", TerminalColor.Red),
                 subcategory: e.Subcategory,
                 message: e.Message,
@@ -652,7 +649,16 @@ internal sealed partial class TerminalLogger : INodeLogger
                 threadId: e.ThreadId,
                 logOutputProperties: null);
 
+        BuildEventContext? buildEventContext = e.BuildEventContext;
+        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+        {
             project.AddBuildMessage(MessageSeverity.Error, message);
+        }
+
+        // It is necessary to display error messages reported by MSBuild, even if it's not tracked in _projects collection.
+        else
+        {
+            RenderImmediateMessage(message);
         }
     }
 
