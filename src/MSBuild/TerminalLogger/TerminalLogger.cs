@@ -635,16 +635,18 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private void ErrorRaised(object sender, BuildErrorEventArgs e)
     {
-        var buildEventContext = e.BuildEventContext;
-        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
-        {
-            string message = EventArgsFormatting.FormatEventMessage(
+        BuildEventContext? buildEventContext = e.BuildEventContext;
+        Project? project = null;
+        bool isTrackedProject = buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out project);
+        string message = EventArgsFormatting.FormatEventMessage(
                 category: AnsiCodes.Colorize("error", TerminalColor.Red),
                 subcategory: e.Subcategory,
                 message: e.Message,
                 code: AnsiCodes.Colorize(e.Code, TerminalColor.Red),
                 file: HighlightFileName(e.File),
-                projectFile: null,
+
+                // for the tracked projects the project file name is included in the final output result.
+                projectFile: isTrackedProject ? null : e.ProjectFile ?? string.Empty,
                 lineNumber: e.LineNumber,
                 endLineNumber: e.EndLineNumber,
                 columnNumber: e.ColumnNumber,
@@ -652,11 +654,19 @@ internal sealed partial class TerminalLogger : INodeLogger
                 threadId: e.ThreadId,
                 logOutputProperties: null);
 
-            project.AddBuildMessage(MessageSeverity.Error, message);
+        if (isTrackedProject)
+        {
+            project!.AddBuildMessage(MessageSeverity.Error, message);
+        }
+
+        // It is necessary to display error messages reported by MSBuild, even if it's not tracked in _projects collection.
+        else
+        {
+            RenderImmediateMessage(message);
         }
     }
 
-#endregion
+    #endregion
 
     #region Refresher thread implementation
 
