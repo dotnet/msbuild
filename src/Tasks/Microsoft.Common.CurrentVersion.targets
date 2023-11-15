@@ -3042,6 +3042,40 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   </Target>
 
+    <!--
+    ============================================================
+                                        _GetAssembliesMetadata
+
+    Resolve Assembly attributes for assemblies
+    The ResolveComReferences dependency is needed for defining COM-referenced wrappers only,
+    but this target handles all the assembly references from ResolveAssemblyReferences
+    This target is needed by the Visual Studio legacy project system during design time build only
+
+        [IN]
+        @(ReferencePath) - Paths to COM-referenced wrappers and other types of assembly references.
+
+        [OUT]
+        @(AssembliesMetadata) - Resolved assemblies attributes.
+    ============================================================
+    -->
+
+  <Target
+      Name="_GetAssembliesMetadata"
+      Condition="'@(ReferencePath)'!=''and '$(DesignTimeBuild)' == 'true' "
+      Returns="@(_AssembliesMetadata)"
+      DependsOnTargets="ResolveComReferences"
+        >
+
+    <GetAssembliesMetadata
+          AssemblyPaths="@(ReferencePath)"
+          ContinueOnError="$(ContinueOnError)">
+
+      <Output TaskParameter="AssembliesMetadata" ItemName="_AssembliesMetadata"/>
+
+    </GetAssembliesMetadata>
+
+  </Target>
+
   <Target
       Name="ResolveComReferencesDesignTime"
       Returns="@(ComReferenceWrappers)"

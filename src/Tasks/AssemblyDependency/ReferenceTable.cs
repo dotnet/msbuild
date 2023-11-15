@@ -3070,11 +3070,11 @@ namespace Microsoft.Build.Tasks
         {
             if (displayPrimaryReferenceMessage)
             {
-                _log.LogWarningWithCodeFromResources("ResolveAssemblyReference.PrimaryReferenceOutsideOfFramework", reference.PrimarySourceItem.ItemSpec /* primary item spec*/, reference.ReferenceVersion /*Version of dependent assemby*/, reference.ExclusionListLoggingProperties.HighestVersionInRedist /*Version found in redist*/);
+                _log.LogWarningWithCodeFromResources("ResolveAssemblyReference.PrimaryReferenceOutsideOfFramework", reference.PrimarySourceItem.ItemSpec /* primary item spec*/, reference.ReferenceVersion /*Version of dependent assembly*/, reference.ExclusionListLoggingProperties.HighestVersionInRedist /*Version found in redist*/);
             }
             else
             {
-                _log.LogWarningWithCodeFromResources("ResolveAssemblyReference.DependencyReferenceOutsideOfFramework", referenceItem.ItemSpec /* primary item spec*/, assemblyName.FullName /*Dependent assemblyName*/, reference.ReferenceVersion /*Version of dependent assemby*/, reference.ExclusionListLoggingProperties.HighestVersionInRedist /*Version found in redist*/);
+                _log.LogWarningWithCodeFromResources("ResolveAssemblyReference.DependencyReferenceOutsideOfFramework", referenceItem.ItemSpec /* primary item spec*/, assemblyName.FullName /*Dependent assemblyName*/, reference.ReferenceVersion /*Version of dependent assembly*/, reference.ExclusionListLoggingProperties.HighestVersionInRedist /*Version found in redist*/);
             }
         }
 
@@ -3085,7 +3085,7 @@ namespace Microsoft.Build.Tasks
         {
             if (displayPrimaryReferenceMessage)
             {
-                _log.LogWarningWithCodeFromResources("ResolveAssemblyReference.PrimaryReferenceOutsideOfFrameworkUsingAttribute", reference.PrimarySourceItem.ItemSpec /* primary item spec*/, reference.FrameworkNameAttribute /*Version of dependent assemby*/, targetedFramework);
+                _log.LogWarningWithCodeFromResources("ResolveAssemblyReference.PrimaryReferenceOutsideOfFrameworkUsingAttribute", reference.PrimarySourceItem.ItemSpec /* primary item spec*/, reference.FrameworkNameAttribute /*Version of dependent assembly*/, targetedFramework);
             }
             else
             {
