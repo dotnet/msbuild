@@ -140,9 +140,9 @@ namespace Microsoft.Build.UnitTests
                 <Project ToolsVersion=`3.5` xmlns=`msbuildnamespace`>
 
                     <Target Name=`Build` Condition=`'@(foo)'!=''` >
-                        <Message Text=`This target should NOT run.`/>  
+                        <Message Text=`This target should NOT run.`/>
                     </Target>
-                  
+
                 </Project>
                 ");
 
@@ -158,7 +158,7 @@ namespace Microsoft.Build.UnitTests
                     <Target Name=`Build`>
                         <Message Text=`Item list foo contains @(foo)`/>
                     </Target>
-                  
+
                 </Project>
                 ");
 
@@ -266,11 +266,11 @@ namespace Microsoft.Build.UnitTests
 
             List<TaskItem> taskItems = expander.ExpandAllIntoTaskItems(
                 "@(Resource->'%(Filename)') ; @(Content) ; @(NonExistent) ; $(NonExistent) ; %(NonExistent) ; " +
-                "$(OutputPath) ; $(TargetPath) ; %(Language)_%(Culture)", 
+                "$(OutputPath) ; $(TargetPath) ; %(Language)_%(Culture)",
                  (new XmlDocument()).CreateAttribute("dummy"));
 
-            // the following items are passed to the TaskItem constructor, and thus their ItemSpecs should be 
-            // in escaped form. 
+            // the following items are passed to the TaskItem constructor, and thus their ItemSpecs should be
+            // in escaped form.
             ObjectModelHelpers.AssertItemsMatch(@"
                 string$(p): ddd=444
                 dialogs%253b: eee=555
@@ -337,7 +337,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Exercises ExpandAllIntoString with a string that does not need expanding. 
+        /// Exercises ExpandAllIntoString with a string that does not need expanding.
         /// In this case the expanded string should be reference identical to the passed in string.
         /// </summary>
         [Test]
@@ -354,14 +354,14 @@ namespace Microsoft.Build.UnitTests
             // Create a *non-literal* string. If we used a literal string, the CLR might (would) intern
             // it, which would mean that Expander would inevitably return a reference to the same string.
             // In real builds, the strings will never be literals, and we want to test the behavior in
-            // that situation. 
+            // that situation.
             xmlattribute.Value = "abc123" + new Random().Next();
             string expandedString = expander.ExpandAllIntoStringLeaveEscaped(xmlattribute.Value, xmlattribute);
 
             // Verify neither string got interned, so that this test is meaningful
             Assertion.Assert(null == string.IsInterned(xmlattribute.Value));
             Assertion.Assert(null == string.IsInterned(expandedString));
-            
+
             // Finally verify Expander indeed didn't create a new string.
             Assertion.Assert(Object.ReferenceEquals(xmlattribute.Value, expandedString));
         }
@@ -774,7 +774,7 @@ namespace Microsoft.Build.UnitTests
                 return dummyAttribute;
             }
         }
-        
+
         private bool EvaluateCondition(string conditionExpression, Expander expander)
         {
             Parser p = new Parser();
@@ -997,7 +997,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Expand property function calls a static method 
+        /// Expand property function calls a static method
         /// </summary>
         [Test]
         public void PropertyFunctionStaticMethodMakeRelative()
@@ -1071,7 +1071,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Expand property function calls a static method 
+        /// Expand property function calls a static method
         /// </summary>
         [Test]
         public void PropertyFunctionStaticMethod1()
@@ -1088,7 +1088,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Expand property function calls a static method 
+        /// Expand property function calls a static method
         /// </summary>
         [Test]
         public void PropertyFunctionStaticMethodQuoted1()
@@ -1147,9 +1147,9 @@ namespace Microsoft.Build.UnitTests
 
             Assertion.AssertEquals(DateTime.Now.ToString("MM.dd.yyyy"), result);
         }
-        
+
         /// <summary>
-        /// Expand property function calls a static method 
+        /// Expand property function calls a static method
         /// </summary>
         [Test]
         public void PropertyFunctionStaticMethodNested()
@@ -1739,9 +1739,9 @@ namespace Microsoft.Build.UnitTests
             {
                 Registry.CurrentUser.DeleteSubKey(@"Software\Microsoft\MSBuild_test");
             }
-        }    
+        }
     }
- 
+
     /// <summary>
     /// Tests relating to SplitSemiColonSeparatedList method
     /// </summary>

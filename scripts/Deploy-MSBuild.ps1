@@ -6,7 +6,7 @@ Param(
   [string] $configuration = "Debug",
   [ValidateSet('Core','Desktop', 'Detect', 'Full')]
   [string] $runtime = "Detect",
-  [string] $bootstrapDirectory = "",
+  [string] $binDirectory = "",
   [bool] $makeBackup = $true
 )
 
@@ -80,11 +80,11 @@ if ($runtime -eq "Desktop") {
 }
 
 # If bootstrap directory is not defined in parameters, use the default location
-if ($bootstrapDirectory -eq "") {
-    $bootstrapDirectory = "artifacts\bin\MSBuild.Bootstrap" 
+if ($binDirectory -eq "") {
+    $binDirectory = "artifacts\bin" 
 }
 
-$bootstrapBinDirectory = "$bootstrapDirectory\$configuration\$targetFramework"
+$bootstrapBinDirectory = "$binDirectory\MSBuild.Bootstrap\$configuration\$targetFramework"
 
 $filesToCopyToBin = @(
     FileToCopy "$bootstrapBinDirectory\Microsoft.Build.dll"
@@ -116,8 +116,8 @@ $filesToCopyToBin = @(
 
 if ($runtime -eq "Desktop") {
     $runtimeSpecificFiles = @(
-        FileToCopy "artifacts\bin\Microsoft.Build.Conversion\$configuration\$targetFramework\Microsoft.Build.Conversion.Core.dll"
-        FileToCopy "artifacts\bin\Microsoft.Build.Engine\$configuration\$targetFramework\Microsoft.Build.Engine.dll"
+        FileToCopy "$binDirectory\Microsoft.Build.Conversion\$configuration\$targetFramework\Microsoft.Build.Conversion.Core.dll"
+        FileToCopy "$binDirectory\Microsoft.Build.Engine\$configuration\$targetFramework\Microsoft.Build.Engine.dll"
 
         FileToCopy "$bootstrapBinDirectory\Microsoft.Bcl.AsyncInterfaces.dll"
         FileToCopy "$bootstrapBinDirectory\Microsoft.Data.Entity.targets"
@@ -152,14 +152,14 @@ if ($runtime -eq "Desktop") {
     $x86files = @(
         FileToCopy "$bootstrapBinDirectory\MSBuild.exe"
         FileToCopy "$bootstrapBinDirectory\MSBuild.exe.config"
-        FileToCopy "artifacts\bin\MSBuildTaskHost\$configuration\net35\MSBuildTaskHost.exe"
-        FileToCopy "artifacts\bin\MSBuildTaskHost\$configuration\net35\MSBuildTaskHost.pdb"
+        FileToCopy "$binDirectory\MSBuildTaskHost\$configuration\net35\MSBuildTaskHost.exe"
+        FileToCopy "$binDirectory\MSBuildTaskHost\$configuration\net35\MSBuildTaskHost.pdb"
     )
     $amd64files = @(
-        FileToCopy "artifacts\bin\MSBuild\x64\$configuration\$targetFramework\MSBuild.exe"
-        FileToCopy "artifacts\bin\MSBuild\x64\$configuration\$targetFramework\MSBuild.exe.config"
-        FileToCopy "artifacts\bin\MSBuildTaskHost\x64\$configuration\net35\MSBuildTaskHost.exe"
-        FileToCopy "artifacts\bin\MSBuildTaskHost\x64\$configuration\net35\MSBuildTaskHost.pdb"
+        FileToCopy "$binDirectory\MSBuild\x64\$configuration\$targetFramework\MSBuild.exe"
+        FileToCopy "$binDirectory\MSBuild\x64\$configuration\$targetFramework\MSBuild.exe.config"
+        FileToCopy "$binDirectory\MSBuildTaskHost\x64\$configuration\net35\MSBuildTaskHost.exe"
+        FileToCopy "$binDirectory\MSBuildTaskHost\x64\$configuration\net35\MSBuildTaskHost.pdb"
     )
 }
 

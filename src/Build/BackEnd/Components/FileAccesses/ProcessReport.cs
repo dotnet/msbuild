@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Framework.FileAccess;
+using Microsoft.Build.Experimental.FileAccess;
 
 namespace Microsoft.Build.FileAccesses
 {

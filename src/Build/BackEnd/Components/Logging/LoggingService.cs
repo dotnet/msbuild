@@ -998,13 +998,13 @@ namespace Microsoft.Build.BackEnd.Logging
 
                     // Get the Id of the eventSourceSink which was created for the first logger.
                     // We keep a reference to this Id so that all other central loggers registered on this logging service (from registerLogger)
-                    // will be attached to that eventSource sink so that they get all of the events forwarded by 
+                    // will be attached to that eventSource sink so that they get all of the events forwarded by
                     // forwarded by the CentralForwardingLogger
                     _centralForwardingLoggerSinkId = centralForwardingLoggerDescription.LoggerId;
                 }
                 else
                 {
-                    // We have already create a forwarding logger and have a single eventSink which 
+                    // We have already create a forwarding logger and have a single eventSink which
                     // a logger can listen to inorder to get all events in the system
                     EventSourceSink eventSource = (EventSourceSink)_eventSinkDictionary[_centralForwardingLoggerSinkId];
 
@@ -1035,7 +1035,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
 
-            // UNDONE: (Logging) This should re-initialize this logging service. 
+            // UNDONE: (Logging) This should re-initialize this logging service.
         }
 
         /// <summary>
@@ -1641,10 +1641,10 @@ namespace Microsoft.Build.BackEnd.Logging
                 // them.
                 _filterEventSource.Consume(eventArg);
 
-                // Now that the forwarding loggers have been given the chance to log the build started and finished events we need to check the 
+                // Now that the forwarding loggers have been given the chance to log the build started and finished events we need to check the
                 // central logger sinks to see if they have received the events or not. If the sink has not received the event we need to send it to the
                 // logger for backwards compatibility with orcas.
-                // In addition we need to make sure we manually forward the events because in orcas the forwarding loggers were not allowed to 
+                // In addition we need to make sure we manually forward the events because in orcas the forwarding loggers were not allowed to
                 // forward build started or build finished events. In the new OM we allow the loggers to forward the events. However since orcas did not forward them
                 // we need to support loggers which cannot forward the events.
                 if (eventArg is BuildStartedEventArgs)

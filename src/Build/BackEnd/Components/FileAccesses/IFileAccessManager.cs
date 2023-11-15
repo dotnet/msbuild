@@ -5,7 +5,7 @@
 using System;
 using System.Threading;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Framework.FileAccess;
+using Microsoft.Build.Experimental.FileAccess;
 
 namespace Microsoft.Build.FileAccesses
 {

@@ -43,7 +43,7 @@ namespace Microsoft.Build.Framework
         /// <remarks>
         ///    <format type="text/markdown"><![CDATA[
         /// ## Remarks
-        ///     
+        ///
         /// File version is informational and not equal to the assembly version.
         /// ]]></format>
         /// </remarks>

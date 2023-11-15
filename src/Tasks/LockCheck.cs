@@ -279,17 +279,17 @@ namespace Microsoft.Build.Tasks
                 //
                 // Obtain the list of affected applications/services.
                 //
-                // NOTE: Restart Manager returns the results into the buffer allocated by the caller. The first call to 
-                // RmGetList() will return the size of the buffer (i.e. nProcInfoNeeded) the caller needs to allocate. 
-                // The caller then needs to allocate the buffer (i.e. rgAffectedApps) and make another RmGetList() 
-                // call to ask Restart Manager to write the results into the buffer. However, since Restart Manager 
-                // refreshes the list every time RmGetList()is called, it is possible that the size returned by the first 
-                // RmGetList()call is not sufficient to hold the results discovered by the second RmGetList() call. Therefore, 
+                // NOTE: Restart Manager returns the results into the buffer allocated by the caller. The first call to
+                // RmGetList() will return the size of the buffer (i.e. nProcInfoNeeded) the caller needs to allocate.
+                // The caller then needs to allocate the buffer (i.e. rgAffectedApps) and make another RmGetList()
+                // call to ask Restart Manager to write the results into the buffer. However, since Restart Manager
+                // refreshes the list every time RmGetList()is called, it is possible that the size returned by the first
+                // RmGetList()call is not sufficient to hold the results discovered by the second RmGetList() call. Therefore,
                 // it is recommended that the caller follows the following practice to handle this race condition:
                 //
-                //    Use a loop to call RmGetList() in case the buffer allocated according to the size returned in previous 
+                //    Use a loop to call RmGetList() in case the buffer allocated according to the size returned in previous
                 //    call is not enough.
-                // 
+                //
                 uint pnProcInfo = 0;
                 RM_PROCESS_INFO[] rgAffectedApps = null;
                 int retry = 0;

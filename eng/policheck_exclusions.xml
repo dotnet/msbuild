@@ -10,4 +10,8 @@
   <!--<Exclusion Type="FileName">ABC.TXT|XYZ.CS</Exclusion>-->
 
   <Exclusion Type="FolderPathFull">.DOTNET</Exclusion>
+  <!-- This file contains entity names that were written out by the XML writer in the VS.NET 2002/2003 project system. Leave them unchanged and skip the file -->
+  <Exclusion Type="FileName">OLDVSPROJECTFILEREADER.CS</Exclusion>
+  <!-- Since only support the locale en-us in our repo, skip the translated files currently. https://devdiv.visualstudio.com/DevDiv/_workitems/edit/1889125  -->
+  <Exclusion Type="FileType">.XLF</Exclusion>
 </PoliCheckExclusions>

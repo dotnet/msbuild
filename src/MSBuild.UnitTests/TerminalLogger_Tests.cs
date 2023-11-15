@@ -179,6 +179,14 @@ namespace Microsoft.Build.UnitTests
             };
         }
 
+        private BuildMessageEventArgs MakeMessageEventArgs(string message)
+        {
+            return new BuildMessageEventArgs(message, "keyword", null, MessageImportance.High)
+            {
+                BuildEventContext = MakeBuildEventContext(),
+            };
+        }
+
         private BuildErrorEventArgs MakeErrorEventArgs(string error)
         {
             return new BuildErrorEventArgs("", "AA0000", "directory/file", 1, 2, 3, 4, error, null, null)
@@ -224,6 +232,47 @@ namespace Microsoft.Build.UnitTests
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
                 WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning!"));
+            });
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintImmediateWarningMessage_Succeeded()
+        {
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("[CredentialProvider]DeviceFlow: https://testfeed/index.json"));
+                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs(
+                    "[CredentialProvider]ATTENTION: User interaction required." +
+                    "**********************************************************************" +
+                    "To sign in, use a web browser to open the page https://devicelogin and enter the code XXXXXX to authenticate." +
+                    "**********************************************************************"));
+            });
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintImmediateMessage_Success()
+        {
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs(
+                    "The plugin credential provider could not acquire credentials." +
+                    "Authentication may require manual action. Consider re-running the command with --interactive for `dotnet`, " +
+                    "/p:NuGetInteractive=\"true\" for MSBuild or removing the -NonInteractive switch for `NuGet`"));
+            });
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintImmediateMessage_Skipped()
+        {
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs("--anycustomarg"));
             });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
@@ -293,7 +342,7 @@ namespace Microsoft.Build.UnitTests
         public void TestTerminalLoggerTogetherWithOtherLoggers()
         {
             using (TestEnvironment env = TestEnvironment.Create())
-            { 
+            {
                 string contents = @"
 <Project>
     <ItemGroup>

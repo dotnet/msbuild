@@ -91,7 +91,7 @@ namespace Microsoft.Build.CommandLine
                 Enum.TryParse(exitResult.MSBuildAppExitTypeString, out MSBuildApp.ExitType MSBuildAppExitType))
             {
                 // The client successfully set up a build task for MSBuild server and received the result.
-                // (Which could be a failure as well). Return the received exit type. 
+                // (Which could be a failure as well). Return the received exit type.
                 return MSBuildAppExitType;
             }
 

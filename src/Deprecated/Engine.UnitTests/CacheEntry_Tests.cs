@@ -49,7 +49,7 @@ namespace Microsoft.Build.UnitTests
             BuildItemCacheEntry tice = new BuildItemCacheEntry();
             Assertion.AssertEquals(null, tice.Name);
             Assertion.AssertEquals(null, tice.BuildItems);
-            
+
             tice.Name = "tice";
             tice.BuildItems = buildItems;
             Assertion.AssertEquals("tice", tice.Name);
@@ -81,7 +81,7 @@ namespace Microsoft.Build.UnitTests
         public void IsEquivalentProperty()
         {
             PropertyCacheEntry e = new PropertyCacheEntry("name", "value");
-            
+
             Assert.IsFalse(e.IsEquivalent(null));
             Assert.IsFalse(e.IsEquivalent(new BuildItemCacheEntry()));
             Assert.IsFalse(e.IsEquivalent(new PropertyCacheEntry()));
@@ -154,7 +154,7 @@ namespace Microsoft.Build.UnitTests
                 BuildItemCacheEntry buildItemEntry = new BuildItemCacheEntry("Badger", buildItems);
                 BuildResultCacheEntry buildResultEntry = new BuildResultCacheEntry("Koi", buildItems, true);
                 PropertyCacheEntry propertyEntry = new PropertyCacheEntry("Seagull", "bread");
-                
+
                 stream.Position = 0;
                 // Serialize
                 buildItemEntry.WriteToStream(writer);

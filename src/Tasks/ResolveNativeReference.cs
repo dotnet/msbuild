@@ -232,7 +232,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 bool isClickOnceApp = manifest is ApplicationManifest applicationManifest && applicationManifest.IsClickOnceManifest;
-                // ClickOnce application manifest should not be added as native reference, but we should open and process it.        
+                // ClickOnce application manifest should not be added as native reference, but we should open and process it.
                 if (!containingReferenceFilesTable.ContainsKey(path) && !isClickOnceApp)
                 {
                     ITaskItem itemNativeReferenceFile = new TaskItem();

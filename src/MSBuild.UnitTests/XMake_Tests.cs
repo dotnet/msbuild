@@ -619,22 +619,23 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData("-getProperty:Foo;Bar", true, "EvalValue", false, false, false, true)]
-        [InlineData("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false, true)]
-        [InlineData("-getItem:MyItem", false, "", true, false, false, true)]
-        [InlineData("-getItem:MyItem -t:Build", false, "", true, true, false, true)]
-        [InlineData("-getItem:WrongItem -t:Build", false, "", false, false, false, true)]
-        [InlineData("-getProperty:Foo;Bar -getItem:MyItem -t:Build", true, "TargetValue", true, true, false, true)]
-        [InlineData("-getProperty:Foo;Bar -getItem:MyItem", true, "EvalValue", true, false, false, true)]
-        [InlineData("-getProperty:Foo;Bar -getTargetResult:MyTarget", true, "TargetValue", false, false, true, true)]
-        [InlineData("-getProperty:Foo;Bar", true, "EvalValue", false, false, false, false)]
-        [InlineData("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false, false)]
-        [InlineData("-getItem:MyItem", false, "", true, false, false, false)]
-        [InlineData("-getItem:MyItem -t:Build", false, "", true, true, false, false)]
-        [InlineData("-getItem:WrongItem -t:Build", false, "", false, false, false, false)]
-        [InlineData("-getProperty:Foo;Bar -getItem:MyItem -t:Build", true, "TargetValue", true, true, false, false)]
-        [InlineData("-getProperty:Foo;Bar -getItem:MyItem", true, "EvalValue", true, false, false, false)]
-        [InlineData("-getProperty:Foo;Bar -getTargetResult:MyTarget", true, "TargetValue", false, false, true, false)]
+        [InlineData("-getProperty:Foo;Bar", true, "EvalValue", false, false, false, true, false)]
+        [InlineData("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false, true, false)]
+        [InlineData("-getItem:MyItem", false, "", true, false, false, true, false)]
+        [InlineData("-getItem:MyItem -t:Build", false, "", true, true, false, true, false)]
+        [InlineData("-getItem:WrongItem -t:Build", false, "", false, false, false, true, false)]
+        [InlineData("-getProperty:Foo;Bar -getItem:MyItem -t:Build", true, "TargetValue", true, true, false, true, false)]
+        [InlineData("-getProperty:Foo;Bar -getItem:MyItem", true, "EvalValue", true, false, false, true, false)]
+        [InlineData("-getProperty:Foo;Bar -getTargetResult:MyTarget", true, "TargetValue", false, false, true, true, false)]
+        [InlineData("-getProperty:Foo;Bar", true, "EvalValue", false, false, false, false, false)]
+        [InlineData("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false, false, false)]
+        [InlineData("-getItem:MyItem", false, "", true, false, false, false, false)]
+        [InlineData("-getItem:MyItem -t:Build", false, "", true, true, false, false, false)]
+        [InlineData("-getItem:WrongItem -t:Build", false, "", false, false, false, false, false)]
+        [InlineData("-getProperty:Foo;Bar -getItem:MyItem -t:Build", true, "TargetValue", true, true, false, false, false)]
+        [InlineData("-getProperty:Foo;Bar -getItem:MyItem", true, "EvalValue", true, false, false, false, false)]
+        [InlineData("-getProperty:Foo;Bar -getTargetResult:MyTarget", true, "TargetValue", false, false, true, false, false)]
+        [InlineData("-getTargetResult:Restore", false, "", false, false, false, false, true)]
         public void ExecuteAppWithGetPropertyItemAndTargetResult(
             string extraSwitch,
             bool fooPresent,
@@ -642,7 +643,8 @@ namespace Microsoft.Build.UnitTests
             bool itemIncludesAlwaysThere,
             bool itemIncludesTargetItem,
             bool targetResultPresent,
-            bool isGraphBuild)
+            bool isGraphBuild,
+            bool restoreOnly)
         {
             using TestEnvironment env = TestEnvironment.Create();
             TransientTestFile project = env.CreateFile("testProject.csproj", @"
@@ -670,11 +672,15 @@ namespace Microsoft.Build.UnitTests
 
   </Target>
 
+  <Target Name=""Restore"">
+
+  </Target>
+
 </Project>
 ");
             string graph = isGraphBuild ? "--graph" : "";
             string results = RunnerUtilities.ExecMSBuild($" {project.Path} {extraSwitch} {graph}", out bool success);
-            success.ShouldBeTrue();
+            success.ShouldBeTrue(results);
             if (fooPresent)
             {
                 results.ShouldContain($"\"Foo\": \"{fooResult}\"");
@@ -687,7 +693,8 @@ namespace Microsoft.Build.UnitTests
             results.Contains("targetItem").ShouldBe(itemIncludesTargetItem);
 
             results.Contains("MyTarget").ShouldBe(targetResultPresent);
-            results.Contains("\"Result\": \"Success\"").ShouldBe(targetResultPresent);
+            results.Contains("\"Result\": \"Success\"").ShouldBe(targetResultPresent || restoreOnly);
+            results.ShouldNotContain(ResourceUtilities.GetResourceString("BuildFailedWithPropertiesItemsOrTargetResultsRequested"));
         }
 
         /// <summary>
@@ -1472,8 +1479,7 @@ namespace Microsoft.Build.UnitTests
 
             string logContents = ExecuteMSBuildExeExpectSuccess(contents, envsToCreate: environmentVars, arguments: aggregateArguments);
 
-            string expected = $@"Task priority is '{expectedPrority}'";
-            logContents.ShouldContain(expected, () => logContents);
+            logContents.ShouldContain($@"Task priority is '{expectedPrority}'", customMessage: logContents);
         }
 
         /// <summary>
@@ -2331,8 +2337,8 @@ $@"<Project>
 
             string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, arguments: "/t:Target1 /t:Target2");
 
-            logContents.ShouldContain("7514CB1641A948D0A3930C5EC2DC1940", () => logContents);
-            logContents.ShouldContain("E2C73B5843F94B63B067D9BEB2C4EC52", () => logContents);
+            logContents.ShouldContain("7514CB1641A948D0A3930C5EC2DC1940", customMessage: logContents);
+            logContents.ShouldContain("E2C73B5843F94B63B067D9BEB2C4EC52", customMessage: logContents);
         }
 
         [Theory]
@@ -2355,8 +2361,8 @@ $@"<Project>
 
             var output = RunnerUtilities.ExecMSBuild(parametersLoggerOptional, out bool successfulExit, _output);
             successfulExit.ShouldBe(true);
-            output.ShouldContain("Hello", output);
-            output.ShouldContain("The specified logger could not be created and will not be used.", output);
+            output.ShouldContain("Hello", customMessage: output);
+            output.ShouldContain("The specified logger could not be created and will not be used.", customMessage: output);
         }
 
         [Theory]
@@ -2621,7 +2627,7 @@ EndGlobal
         {
             (bool result, string output) = ExecuteMSBuildExe(projectContents, filesToCreate, envsToCreate, arguments);
 
-            result.ShouldBeTrue(() => output);
+            result.ShouldBeTrue(output);
 
             return output;
         }
@@ -2630,7 +2636,7 @@ EndGlobal
         {
             (bool result, string output) = ExecuteMSBuildExe(projectContents, filesToCreate, envsToCreate, arguments);
 
-            result.ShouldBeFalse(() => output);
+            result.ShouldBeFalse(output);
 
             return output;
         }

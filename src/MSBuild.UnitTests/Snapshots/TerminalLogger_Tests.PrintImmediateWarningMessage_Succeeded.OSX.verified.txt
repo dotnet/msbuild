@@ -1,0 +1,8 @@
+﻿directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mAA0000[m: [CredentialProvider]DeviceFlow: https://testfeed/index.json
+directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mAA0000[m: [CredentialProvider]ATTENTION: User interaction required.**********************************************************************To sign in, use a web browser to open the page https://devicelogin and enter the code XXXXXX to authenticate.**********************************************************************
+  project [33;1msucceeded with warnings[m (0.0s)
+    directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mAA0000[m: [CredentialProvider]DeviceFlow: https://testfeed/index.json
+    directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mAA0000[m: [CredentialProvider]ATTENTION: User interaction required.**********************************************************************To sign in, use a web browser to open the page https://devicelogin and enter the code XXXXXX to authenticate.**********************************************************************
+[?25l[1F
+[?25h
+Build [33;1msucceeded with warnings[m in 0.0s

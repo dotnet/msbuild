@@ -276,7 +276,7 @@ namespace Microsoft.Build.BuildEngine
         /// <returns></returns>
         internal bool Contains(T item)
         {
-            // The dual queue in general contains an item if the item exists 
+            // The dual queue in general contains an item if the item exists
             // in one or even both of the backing queues
             return backingQueueA.Contains(item) || backingQueueB.Contains(item);
         }
@@ -316,7 +316,7 @@ namespace Microsoft.Build.BuildEngine
         private Queue<T> backingQueueB;
 
         /// <summary>
-        /// Count of the current writer queue - we only own the reader queue in Count so we have to keep 
+        /// Count of the current writer queue - we only own the reader queue in Count so we have to keep
         /// the count for the writer queue separately.
         /// </summary>
         private int writingQueueCount;

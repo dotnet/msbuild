@@ -97,8 +97,8 @@ namespace Microsoft.Build.Tasks
                     continue;
                 }
 
-                // Touch the file.  If the file was touched successfully then add it to our array of 
-                // touched items. 
+                // Touch the file.  If the file was touched successfully then add it to our array of
+                // touched items.
                 if
                 (
                     TouchFile(
@@ -123,7 +123,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // Now, set the property that indicates which items we touched.  Note that we
-            // touch all the items 
+            // touch all the items
             TouchedFiles = touchedItems.ToArray();
             return retVal;
         }
@@ -225,10 +225,12 @@ namespace Microsoft.Build.Tasks
             {
                 Log.LogWarningFromResources("Touch.Touching", file);
             }
+            else
+            {
+                Log.LogMessageFromResources(messageImportance, "Touch.Touching", file);
+            }
 
-            Log.LogMessageFromResources(messageImportance, "Touch.Touching", file);
-
-            // If the file is read only then we must either issue an error, or, if the user so 
+            // If the file is read only then we must either issue an error, or, if the user so
             // specified, make the file temporarily not read only.
             bool needToRestoreAttributes = false;
             FileAttributes faOriginal = fileGetAttributes(file);
@@ -266,7 +268,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (needToRestoreAttributes)
                 {
-                    // Attempt to restore the attributes.  If we fail here, then there is 
+                    // Attempt to restore the attributes.  If we fail here, then there is
                     // not much we can do.
                     try
                     {

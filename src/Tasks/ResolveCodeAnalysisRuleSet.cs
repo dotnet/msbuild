@@ -53,7 +53,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Computes the resolved rule set path.
-        /// 
+        ///
         /// There are four cases: null, file name, relative path, and full path.
         ///
         /// If we were given no value for the ruleset, simply return null.

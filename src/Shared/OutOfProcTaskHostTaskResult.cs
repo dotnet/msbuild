@@ -16,7 +16,7 @@ namespace Microsoft.Build.Shared
     internal class OutOfProcTaskHostTaskResult
     {
         /// <summary>
-        /// Constructor 
+        /// Constructor
         /// </summary>
         internal OutOfProcTaskHostTaskResult(TaskCompleteType result)
             : this(result, null /* no final parameters */, null /* no exception */, null /* no exception message */, null /* and no args to go with it */)
@@ -56,8 +56,8 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal OutOfProcTaskHostTaskResult(TaskCompleteType result, IDictionary<string, Object> finalParams, Exception taskException, string exceptionMessage, string[] exceptionMessageArgs)
         {
-            // If we're returning a crashing result, we should always also be returning the exception that caused the crash, although 
-            // we may not always be returning an accompanying message. 
+            // If we're returning a crashing result, we should always also be returning the exception that caused the crash, although
+            // we may not always be returning an accompanying message.
             if (result == TaskCompleteType.CrashedDuringInitialization ||
                 result == TaskCompleteType.CrashedDuringExecution ||
                 result == TaskCompleteType.CrashedAfterExecution)
@@ -87,7 +87,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// The overall result of the task execution. 
+        /// The overall result of the task execution.
         /// </summary>
         public TaskCompleteType Result
         {
@@ -105,8 +105,8 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// The exception thrown by the task during initialization or execution, 
-        /// if any. 
+        /// The exception thrown by the task during initialization or execution,
+        /// if any.
         /// </summary>
         public Exception TaskException
         {
@@ -115,8 +115,8 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// The name of the resource representing the message to be logged along with the 
-        /// above exception. 
+        /// The name of the resource representing the message to be logged along with the
+        /// above exception.
         /// </summary>
         public string ExceptionMessage
         {

@@ -42,7 +42,7 @@ namespace Microsoft.Build.Framework.XamlTypes
             set;
         }
 
-        #endregion 
+        #endregion
 
         #region ISupportInitialize Methods
 

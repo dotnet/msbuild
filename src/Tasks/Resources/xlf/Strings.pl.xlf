@@ -193,7 +193,7 @@
       </trans-unit>
       <trans-unit id="Copy.IOException">
         <source>MSB3894: Got {0} copying "{1}" to "{2}" and HR is {3}</source>
-        <target state="new">MSB3894: Got {0} copying "{1}" to "{2}" and HR is {3}</target>
+        <target state="translated">MSB3894: „Mam {0} kopiowane z „{1}” do „{2}”, a HR to {3}”</target>
         <note>{StrBegin="MSB3894: "} LOCALIZATION: {0} is exception.ToString(), {1} and {2} are paths, {3} is a number")</note>
       </trans-unit>
       <trans-unit id="Copy.LinkFailed">
@@ -228,7 +228,7 @@
       </trans-unit>
       <trans-unit id="Copy.RetryingOnAccessDenied">
         <source>MSB3895: Retrying on ERROR_ACCESS_DENIED because environment variable MSBUILDALWAYSRETRY=1</source>
-        <target state="new">MSB3895: Retrying on ERROR_ACCESS_DENIED because environment variable MSBUILDALWAYSRETRY=1</target>
+        <target state="translated">MSB3895: ponowienie próby w przypadku ERROR_ACCESS_DENIED, ponieważ zmienną środowiskową jest MSBUILDALWAYSRETRY = 1</target>
         <note>{StrBegin="MSB3895: "} LOCALIZATION: Do NOT translate MSBUILDALWAYSRETRY)</note>
       </trans-unit>
       <trans-unit id="Copy.SourceIsDirectory">
@@ -1939,6 +1939,11 @@
         <source>Invalid PE header found. The implementation file will not used.</source>
         <target state="translated">Znaleziono nieprawidłowy nagłówek PE. Plik implementacji nie zostanie użyty.</target>
         <note>This message can be used as the {1} in MSB3272</note>
+      </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.UnifiedReferenceDependsOn">
+        <source>References which depend on or have been unified to "{0}" [{1}].</source>
+        <target state="translated">Odwołania, które są zależne lub zostały ujednolicone dla „{0}” [{1}].</target>
+        <note> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnknownProcessorArchitecture">
         <source>MSB3273: Unknown processor architecture. The implementation file "{0}" for "{1}" had an ImageFileMachine value of "0x{2}". If you wish to use this implementation file make sure the "ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch" property in your project is set to "Warning" or "None".</source>
