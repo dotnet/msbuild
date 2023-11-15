@@ -6708,7 +6708,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(MsTestToolsTargets)" Condition="Exists('$(MsTestToolsTargets)')" />
   
-  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.Test.targets" />
+  <PropertyGroup>
+    <UseMSBuildTestInfrastructure>false</UseMSBuildTestInfrastructure>
+  </PropertyGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.Test.targets" Condition="$(UseMSBuildTestInfrastructure) == 'true'"/>
   <!-- App packaging support -->
 
   <!--

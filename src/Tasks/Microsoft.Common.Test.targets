@@ -21,8 +21,5 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
   -->
 <Project>
-    <PropertyGroup>
-        <UseMSBuildTestInfrastructure>false</UseMSBuildTestInfrastructure>
-    </PropertyGroup>
-    <Target Name="Test" Condition="$(UseMSBuildTestInfrastructure) == 'true'"></Target>
+    <Target Name="Test"></Target>
 </Project>
