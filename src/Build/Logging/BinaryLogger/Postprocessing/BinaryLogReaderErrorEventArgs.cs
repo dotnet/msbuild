@@ -13,7 +13,7 @@ namespace Microsoft.Build.Logging
     internal delegate string FormatErrorMessage();
 
     /// <summary>
-    /// An event args for <see cref="IBinaryLogReaderErrors.OnRecoverableReadError"/> event.
+    /// An event args for <see cref="IBuildEventArgsReaderNotifications.OnRecoverableReadError"/> event.
     /// </summary>
     public sealed class BinaryLogReaderErrorEventArgs : EventArgs
     {

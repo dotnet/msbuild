@@ -53,6 +53,11 @@
         <target state="new">Imported files archive exceeded 2GB limit and it's not embedded.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_MissingRecoverableErrorSubscribeError">
+        <source>Subscription to OnRecoverableReadError is mandatory during forward compatible reading.</source>
+        <target state="new">Subscription to OnRecoverableReadError is mandatory during forward compatible reading.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Binlog_ReaderMismatchedRead">
         <source>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</source>
         <target state="new">BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</target>

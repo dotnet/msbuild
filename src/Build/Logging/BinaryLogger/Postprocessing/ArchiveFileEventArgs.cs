@@ -6,7 +6,7 @@ using System;
 namespace Microsoft.Build.Logging;
 
 /// <summary>
-/// Event arguments for <see cref="IBuildFileReader.ArchiveFileEncountered"/> event.
+/// Event arguments for <see cref="IBuildEventArgsReaderNotifications.ArchiveFileEncountered"/> event.
 /// </summary>
 public sealed class ArchiveFileEventArgs : EventArgs
 {

@@ -63,7 +63,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public bool AllowForwardCompatibility { private get; init; }
 
-        /// <inheritdoc cref="IBinaryLogReaderErrors.OnRecoverableReadError"/>
+        /// <inheritdoc cref="IBuildEventArgsReaderNotifications.OnRecoverableReadError"/>
         public event Action<BinaryLogReaderErrorEventArgs>? OnRecoverableReadError;
 
         /// <summary>
@@ -297,31 +297,31 @@ namespace Microsoft.Build.Logging
         }
 
         private Action<StringReadEventArgs>? _stringReadDone;
-        /// <inheritdoc cref="IBuildEventStringsReader.StringReadDone"/>
-        event Action<StringReadEventArgs>? IBuildEventStringsReader.StringReadDone
+        /// <inheritdoc cref="IBuildEventArgsReaderNotifications.StringReadDone"/>
+        event Action<StringReadEventArgs>? IBuildEventArgsReaderNotifications.StringReadDone
         {
             add => _stringReadDone += value;
             remove => _stringReadDone -= value;
         }
 
         private Action<ArchiveFileEventArgs>? _archiveFileEncountered;
-        /// <inheritdoc cref="IBuildFileReader.ArchiveFileEncountered"/>
-        event Action<ArchiveFileEventArgs>? IBuildFileReader.ArchiveFileEncountered
+        /// <inheritdoc cref="IBuildEventArgsReaderNotifications.ArchiveFileEncountered"/>
+        event Action<ArchiveFileEventArgs>? IBuildEventArgsReaderNotifications.ArchiveFileEncountered
         {
             add => _archiveFileEncountered += value;
             remove => _archiveFileEncountered -= value;
         }
 
         private Action? _stringEncountered;
-        /// <inheritdoc cref="IBuildEventStringsReader.StringEncountered"/>
-        event Action? IBuildEventStringsReader.StringEncountered
+        /// <inheritdoc cref="IBuildEventArgsReaderNotifications.StringEncountered"/>
+        event Action? IBuildEventArgsReaderNotifications.StringEncountered
         {
             add => _stringEncountered += value;
             remove => _stringEncountered -= value;
         }
 
         private Action<BinaryLogRecordKind, Stream>? _rawLogRecordReceived;
-        /// <inheritdoc cref="IBuildEventStringsReader.StringReadDone"/>
+        /// <inheritdoc cref="IBuildEventArgsReaderNotifications.StringReadDone"/>
         event Action<BinaryLogRecordKind, Stream>? IRawLogEventsSource.RawLogRecordReceived
         {
             add => _rawLogRecordReceived += value;

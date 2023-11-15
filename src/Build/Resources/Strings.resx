@@ -2010,6 +2010,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="Binlog_Source_MissingSubscribeError" xml:space="preserve">
     <value>No subscribers for any events.</value>
   </data>
+  <data name="Binlog_MissingRecoverableErrorSubscribeError" xml:space="preserve">
+    <value>Subscription to OnRecoverableReadError is mandatory during forward compatible reading.</value>
+  </data>
   <data name="Binlog_ImportFileSizeError" xml:space="preserve">
     <value>Imported files archive exceeded 2GB limit and it's not embedded.</value>
   </data>

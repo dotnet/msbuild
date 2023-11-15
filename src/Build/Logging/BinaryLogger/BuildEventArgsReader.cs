@@ -9,6 +9,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
@@ -124,7 +125,7 @@ namespace Microsoft.Build.Logging
         }
 
         /// <summary>
-        /// Receives recoverable errors during reading. See <see cref="IBinaryLogReaderErrors.OnRecoverableReadError"/> for documentation on arguments.
+        /// Receives recoverable errors during reading. See <see cref="IBuildEventArgsReaderNotifications.OnRecoverableReadError"/> for documentation on arguments.
         /// Applicable mainly when <see cref="SkipUnknownEvents"/> or <see cref="SkipUnknownEventParts"/> is set to true."/>
         /// </summary>
         public event Action<BinaryLogReaderErrorEventArgs>? OnRecoverableReadError;
@@ -138,10 +139,10 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        /// <inheritdoc cref="IBuildEventStringsReader.StringReadDone"/>
+        /// <inheritdoc cref="IBuildEventArgsReaderNotifications.StringReadDone"/>
         public event Action<StringReadEventArgs>? StringReadDone;
 
-        /// <inheritdoc cref="IBuildEventStringsReader.StringEncountered"/>
+        /// <inheritdoc cref="IBuildEventArgsReaderNotifications.StringEncountered"/>
         public event Action? StringEncountered;
 
         internal int FileFormatVersion => _fileFormatVersion;
@@ -149,7 +150,7 @@ namespace Microsoft.Build.Logging
         /// <inheritdoc cref="IEmbeddedContentSource.EmbeddedContentRead"/>
         internal event Action<EmbeddedContentEventArgs>? EmbeddedContentRead;
 
-        /// <inheritdoc cref="IBuildFileReader.ArchiveFileEncountered"/>
+        /// <inheritdoc cref="IBuildEventArgsReaderNotifications.ArchiveFileEncountered"/>
         public event Action<ArchiveFileEventArgs>? ArchiveFileEncountered;
 
         private SubStream? _lastSubStream;
@@ -193,6 +194,16 @@ namespace Microsoft.Build.Logging
             return new(recordKind, stream);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void CheckErrorsSubscribed()
+        {
+            if ((_skipUnknownEvents || _skipUnknownEventParts) && OnRecoverableReadError == null)
+            {
+                throw new InvalidOperationException(
+                    ResourceUtilities.GetResourceString("Binlog_MissingRecoverableErrorSubscribeError"));
+            }
+        }
+
         /// <summary>
         /// Reads the next log record from the <see cref="BinaryReader"/>.
         /// </summary>
@@ -202,6 +213,7 @@ namespace Microsoft.Build.Logging
         /// </returns>
         public BuildEventArgs? Read()
         {
+            CheckErrorsSubscribed();
             BuildEventArgs? result = null;
             while (result == null)
             {

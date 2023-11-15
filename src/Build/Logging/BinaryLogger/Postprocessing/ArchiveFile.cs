@@ -11,7 +11,7 @@ namespace Microsoft.Build.Logging
 {
     /// <summary>
     /// An object model for binlog embedded files.
-    /// Used in <see cref="IBuildFileReader.ArchiveFileEncountered"/> event.
+    /// Used in <see cref="IBuildEventArgsReaderNotifications.ArchiveFileEncountered"/> event.
     /// </summary>
     public abstract class ArchiveData : IDisposable
     {

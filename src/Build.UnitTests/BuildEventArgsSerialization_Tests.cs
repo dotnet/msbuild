@@ -993,12 +993,12 @@ namespace Microsoft.Build.UnitTests
             // Now move back to the beginning of the stream and start reading.
             memoryStream.Position = 0;
 
+            List<BinaryLogReaderErrorEventArgs> readerErrors = new();
             using var buildEventArgsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion)
             {
                 SkipUnknownEvents = true
             };
 
-            List<BinaryLogReaderErrorEventArgs> readerErrors = new();
             buildEventArgsReader.OnRecoverableReadError += readerErrors.Add;
 
             var deserializedEvent = buildEventArgsReader.Read();
