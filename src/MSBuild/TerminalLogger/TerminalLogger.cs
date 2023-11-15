@@ -4,11 +4,15 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-
+using System.Linq;
 using System.Text;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using System.Text.RegularExpressions;
+#if NET7_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
+#endif
 #if NETFRAMEWORK
 using Microsoft.IO;
 #else
@@ -23,8 +27,21 @@ namespace Microsoft.Build.Logging.TerminalLogger;
 /// <remarks>
 /// Uses ANSI/VT100 control codes to erase and overwrite lines as the build is progressing.
 /// </remarks>
-internal sealed class TerminalLogger : INodeLogger
+internal sealed partial class TerminalLogger : INodeLogger
 {
+    private const string FilePathPattern = " -> ";
+
+#if NET7_0_OR_GREATER
+    [StringSyntax(StringSyntaxAttribute.Regex)]
+    private const string ImmediateMessagePattern = @"\[CredentialProvider\]|--interactive";
+    private const RegexOptions Options = RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture;
+
+    [GeneratedRegex(ImmediateMessagePattern, Options)]
+    private static partial Regex ImmediateMessageRegex();
+#else
+    private static readonly string[] _immediateMessageKeywords = { "[CredentialProvider]", "--interactive" };
+#endif
+
     /// <summary>
     /// A wrapper over the project context ID passed to us in <see cref="IEventSource"/> logger events.
     /// </summary>
@@ -549,7 +566,7 @@ internal sealed class TerminalLogger : INodeLogger
         {
             // Detect project output path by matching high-importance messages against the "$(MSBuildProjectName) -> ..."
             // pattern used by the CopyFilesToOutputDirectory target.
-            int index = message.IndexOf(" -> ", StringComparison.Ordinal);
+            int index = message.IndexOf(FilePathPattern, StringComparison.Ordinal);
             if (index > 0)
             {
                 var projectFileName = Path.GetFileName(e.ProjectFile.AsSpan());
@@ -560,6 +577,11 @@ internal sealed class TerminalLogger : INodeLogger
                     ReadOnlyMemory<char> outputPath = e.Message.AsMemory().Slice(index + 4);
                     project.OutputPath = outputPath;
                 }
+            }
+
+            if (IsImmediateMessage(message))
+            {
+                RenderImmediateMessage(message);
             }
         }
     }
@@ -586,8 +608,26 @@ internal sealed class TerminalLogger : INodeLogger
                 threadId: e.ThreadId,
                 logOutputProperties: null);
 
+            if (IsImmediateMessage(message))
+            {
+                RenderImmediateMessage(message);
+            }
             project.AddBuildMessage(MessageSeverity.Warning, message);
         }
+    }
+
+    /// <summary>
+    /// Detect markers that require special attention from a customer.
+    /// </summary>
+    /// <param name="message">Raised event.</param>
+    /// <returns>true if marker is detected.</returns>
+    private bool IsImmediateMessage(string message)
+    {
+#if NET7_0_OR_GREATER
+        return ImmediateMessageRegex().IsMatch(message);
+#else
+        return _immediateMessageKeywords.Any(imk => message.IndexOf(imk, StringComparison.OrdinalIgnoreCase) >= 0);
+#endif
     }
 
     /// <summary>
@@ -616,7 +656,7 @@ internal sealed class TerminalLogger : INodeLogger
         }
     }
 
-    #endregion
+#endregion
 
     #region Refresher thread implementation
 
@@ -845,6 +885,21 @@ internal sealed class TerminalLogger : INodeLogger
         else
         {
             return AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Succeeded"), TerminalColor.Green);
+        }
+    }
+
+    /// <summary>
+    /// Print a build messages to the output that require special customer's attention.
+    /// </summary>
+    /// <param name="message">Build message needed to be shown immediately.</param>
+    private void RenderImmediateMessage(string message)
+    {
+        lock (_lock)
+        {
+            // Calling erase helps to clear the screen before printing the message
+            // The immediate output will not overlap with node status reporting
+            EraseNodes();
+            Terminal.WriteLine(message);
         }
     }
 
