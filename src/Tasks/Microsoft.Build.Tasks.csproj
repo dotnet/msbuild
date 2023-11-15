@@ -62,6 +62,7 @@
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>CanonicalError.cs</Link>
     </Compile>
+    <Compile Include="AssemblyDependency\AssemblyAttributes.cs" />
     <Compile Include="AssemblyDependency\AssemblyMetadata.cs" />
     <Compile Include="CombineTargetFrameworkInfoProperties.cs" />
     <Compile Include="CombineXmlElements.cs" />
@@ -321,6 +322,7 @@
     <Compile Include="AxReference.cs" />
     <Compile Include="AxTlbBaseReference.cs" />
     <Compile Include="AxTlbBaseTask.cs" />
+    <Compile Include="GetAssembliesMetadata.cs" />
     <Compile Include="ComDependencyWalker.cs" />
     <Compile Include="ComReference.cs" />
     <Compile Include="ComReferenceInfo.cs" />
