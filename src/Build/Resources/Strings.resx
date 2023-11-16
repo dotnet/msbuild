@@ -158,6 +158,12 @@
   <data name="BuildFinishedFailure" xml:space="preserve">
     <value>Build FAILED.</value>
   </data>
+  <data name="BuildFinishedQuestionFailure" xml:space="preserve">
+    <value>Question build Failed.  The build exited early upon detection of an incremental issue.</value>
+  </data>
+  <data name="BuildFinishedQuestionSuccess" xml:space="preserve">
+    <value>Question build succeeded.  No incremental isssues detected.</value>
+  </data>
   <data name="BuildFinishedSuccess" xml:space="preserve">
     <value>Build succeeded.</value>
   </data>
