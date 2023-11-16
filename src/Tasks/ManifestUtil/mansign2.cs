@@ -300,7 +300,7 @@ namespace System.Deployment.Internal.CodeSigning
         }
     }
 
-    //[SupportedOSPlatform("windows")]
+    [SupportedOSPlatform("windows")]
     internal class SignedCmiManifest2
     {
         private XmlDocument _manifestDom = null;
@@ -1262,7 +1262,7 @@ namespace System.Deployment.Internal.CodeSigning
         }
     }
 
-   // [SupportedOSPlatform("windows")]
+    [SupportedOSPlatform("windows")]
     internal class CmiAuthenticodeSignerInfo
     {
         private int _error = 0;
@@ -1389,7 +1389,7 @@ namespace System.Deployment.Internal.CodeSigning
         }
     }
 
-    //[SupportedOSPlatform("windows")]
+    [SupportedOSPlatform("windows")]
     internal class CmiAuthenticodeTimestamperInfo
     {
         private int _error = 0;
