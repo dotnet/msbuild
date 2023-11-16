@@ -54,7 +54,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             internal static X509Certificate2 MockCertificate(string pathToCertificate)
             {
-                var certificate = new X509Certificate2(pathToCertificate);          
+                var certificate = new X509Certificate2(pathToCertificate);
                 UpdateCertificateState(certificate, s_personalStore.Add);
 
                 return certificate;
