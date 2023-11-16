@@ -27,13 +27,13 @@
     instead of the "ContinueOnError".</note>
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
-        <source>Question build Failed.  The build exited early upon detection of an incremental issue.</source>
-        <target state="new">Question build Failed.  The build exited early upon detection of an incremental issue.</target>
+        <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
+        <target state="new">Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionSuccess">
-        <source>Question build succeeded.  No incremental isssues detected.</source>
-        <target state="new">Question build succeeded.  No incremental isssues detected.</target>
+        <source>Question build succeeded. Pp-to-date checks passed.</source>
+        <target state="new">Question build succeeded. Pp-to-date checks passed.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildInProgress">

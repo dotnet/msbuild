@@ -155,11 +155,6 @@ namespace Microsoft.Build.BackEnd.Logging
         private int _maxCPUCount = 1;
 
         /// <summary>
-        /// A build mode that will error when the build process fails an incremental check.
-        /// </summary>
-        private bool _question = false;
-
-        /// <summary>
         /// Component host for this component which is used to get system parameters and other initialization information.
         /// </summary>
         private IBuildComponentHost _componentHost;
@@ -468,14 +463,9 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Gets or sets a value that will error when the build process fails an incremental check.
+        /// Gets or sets a value that will error when the build process fails an up-to-date check.
         /// </summary>
-        public bool Question
-        {
-            get => _question;
-
-            set => _question = value;
-        }
+        public bool Question { get; set; }
 
         /// <summary>
         /// The list of descriptions which describe how to create forwarding loggers on a node.
@@ -812,7 +802,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 // this information default to 1
                 _maxCPUCount = buildComponentHost.BuildParameters.MaxNodeCount;
 
-                _question = buildComponentHost.BuildParameters.Question;
+                Question = buildComponentHost.BuildParameters.Question;
 
                 // Ask the component host if onlyLogCriticalEvents is true or false. If the host does
                 // not have this information default to false.
