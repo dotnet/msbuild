@@ -110,6 +110,12 @@ namespace Microsoft.Build.Tasks
                 {
                     OutputFile = new TaskItem(Path.Combine(OutputDirectory.ItemSpec, OutputFile.ItemSpec));
                 }
+                else if (OutputFile != null && OutputDirectory == null && !Path.IsPathRooted(OutputFile.ItemSpec))
+                {
+                    // In case specified OutputFile path is a file name but OutputDirectory is not set, expand it to a fully qualified path based on current directory.
+                    // So that it has the directory given to ensuring directory exists.
+                    OutputFile.ItemSpec = Path.GetFullPath(OutputFile.ItemSpec);
+                }
 
                 OutputFile ??= new TaskItem(FileUtilities.GetTemporaryFile(OutputDirectory.ItemSpec, null, extension));
 

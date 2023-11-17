@@ -138,6 +138,31 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// File name is set but no OutputDirectory
+        /// </summary>
+        [Fact]
+        public void FileNameNoDirectory()
+        {
+            WriteCodeFragment task = new WriteCodeFragment();
+            MockEngine engine = new MockEngine(true);
+            task.BuildEngine = engine;
+            task.Language = "c#";
+            task.AssemblyAttributes = new TaskItem[] { new TaskItem("aa") };
+
+            string fileName = "file.tmp";
+            string file = Path.GetFullPath(fileName);
+            task.OutputFile = new TaskItem(fileName);
+            bool result = task.Execute();
+
+            Assert.True(result);
+
+            Assert.Equal(file, task.OutputFile.ItemSpec);
+            Assert.True(File.Exists(file));
+
+            FileUtilities.DeleteNoThrow(file);
+        }
+
+        /// <summary>
         /// Ignore directory if file is rooted
         /// </summary>
         [Fact]
