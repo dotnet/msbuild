@@ -820,7 +820,7 @@ namespace Microsoft.Build.CommandLine
                         }
                         catch (InvalidProjectFileException)
                         {
-                            return ExitType.BuildError;
+                            exitType = ExitType.BuildError;
                         }
                     }
                     else // regular build
