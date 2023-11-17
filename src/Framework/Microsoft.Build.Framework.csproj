@@ -18,7 +18,7 @@
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <!-- Promote CompilerServices.Unsafe from the old version we get from System.Memory on net472. -->
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" />
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
+    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
     <Reference Include="System.Xaml" />
   </ItemGroup>
 
