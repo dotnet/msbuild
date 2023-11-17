@@ -32,8 +32,8 @@
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionSuccess">
-        <source>Question build succeeded. Pp-to-date checks passed.</source>
-        <target state="new">Question build succeeded. Pp-to-date checks passed.</target>
+        <source>Question build succeeded. Up-to-date checks passed.</source>
+        <target state="new">Question build succeeded. Up-to-date checks passed.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildInProgress">
