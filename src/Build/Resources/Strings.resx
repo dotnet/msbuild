@@ -158,6 +158,12 @@
   <data name="BuildFinishedFailure" xml:space="preserve">
     <value>Build FAILED.</value>
   </data>
+  <data name="BuildFinishedQuestionFailure" xml:space="preserve">
+    <value>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</value>
+  </data>
+  <data name="BuildFinishedQuestionSuccess" xml:space="preserve">
+    <value>Question build succeeded. Up-to-date checks passed.</value>
+  </data>
   <data name="BuildFinishedSuccess" xml:space="preserve">
     <value>Build succeeded.</value>
   </data>

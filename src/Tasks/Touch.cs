@@ -202,8 +202,7 @@ namespace Microsoft.Build.Tasks
                 {
                     if (FailIfNotIncremental)
                     {
-                        Log.LogErrorFromResources("Touch.CreatingFile", file, "AlwaysCreate");
-                        return false;
+                        Log.LogWarningFromResources("Touch.CreatingFile", file, "AlwaysCreate");
                     }
                     else
                     {
@@ -222,11 +221,9 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            // Ignore touching the disk when FailIfNotIncremental.
             if (FailIfNotIncremental)
             {
-                Log.LogErrorFromResources("Touch.Touching", file);
-                return false;
+                Log.LogWarningFromResources("Touch.Touching", file);
             }
             else
             {
