@@ -116,7 +116,7 @@ internal sealed class TerminalLogger : INodeLogger
 
     /// <summary>
     /// The project build context corresponding to the <c>Restore</c> initial target, or null if the build is currently
-    /// bot restoring.
+    /// not restoring.
     /// </summary>
     private ProjectContext? _restoreContext;
 
@@ -229,6 +229,8 @@ internal sealed class TerminalLogger : INodeLogger
     /// <inheritdoc/>
     public void Shutdown()
     {
+        _cts.Cancel();
+        _refresher?.Join();
         Terminal.Dispose();
     }
 
@@ -320,12 +322,13 @@ internal sealed class TerminalLogger : INodeLogger
                 targetFramework = null;
             }
             _projects[c] = new(targetFramework);
-        }
 
-        if (e.TargetNames == "Restore")
-        {
-            _restoreContext = c;
-            _nodes[0] = new NodeStatus(e.ProjectFile!, null, "Restore", _projects[c].Stopwatch);
+            if (e.TargetNames == "Restore")
+            {
+                _restoreContext = c;
+                int nodeIndex = NodeIndexForContext(buildEventContext);
+                _nodes[nodeIndex] = new NodeStatus(e.ProjectFile!, null, "Restore", _projects[c].Stopwatch);
+            }
         }
     }
 
