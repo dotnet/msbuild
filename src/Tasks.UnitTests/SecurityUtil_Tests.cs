@@ -27,16 +27,16 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             Uri timestampUrl = new("http://timestamp.comodoca.com/rfc3161");
             string clickOnceManifest = Path.Combine(TestAssembliesPaths, "ClickOnceProfile.pubxml");
-            string targetFrameworkVersion = Constants.TargetFrameworkVersion40;
+            string targetFrameworkVersion = "v4.0";
             string targetFrameworkIdentifier = Constants.DotNetFrameworkIdentifier;
             bool disallowMansignTimestampFallback = false;
 
             // the certificate was generated locally and does not contain any sensitive information
             string pathToCertificate = Path.Combine(TestAssembliesPaths, "mycert.pfx");
-            X509Certificate2 cerfiticate = TestCertHelper.MockCertificate(pathToCertificate);
+            X509Certificate2 certificate = TestCertHelper.MockCertificate(pathToCertificate);
 
             void SignAction() => SecurityUtilities.SignFile(
-                cerfiticate?.Thumbprint,
+                certificate?.Thumbprint,
                 timestampUrl,
                 clickOnceManifest,
                 targetFrameworkVersion,
@@ -45,7 +45,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             Should.NotThrow(SignAction);
 
-            TestCertHelper.RemoveCertificate(cerfiticate);
+            TestCertHelper.RemoveCertificate(certificate);
         }
 
         internal static class TestCertHelper

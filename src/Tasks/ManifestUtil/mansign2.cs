@@ -270,12 +270,7 @@ namespace System.Deployment.Internal.CodeSigning
                                Sha256SignatureMethodUri);
 
 #if RUNTIME_TYPE_NETCORE
-#pragma warning disable SYSLIB0021 // Type or member is obsolete
-            // SHA256 can not be used since it is an abstract class.
-            // CalculateHashValue internally calls CryptoConfig.CreateFromName and it causes instantiation problems.
-            CryptoConfig.AddAlgorithm(typeof(SHA256Managed),
-                               Sha256DigestMethod);
-#pragma warning restore SYSLIB0021 // Type or member is obsolete
+            CryptoConfig.AddOID(Win32.szOID_NIST_sha256, Sha256DigestMethod);
 #else
             CryptoConfig.AddAlgorithm(typeof(SHA256Cng),
                                Sha256DigestMethod);
