@@ -392,9 +392,7 @@ namespace Microsoft.Build.Framework
 #if RUNTIME_TYPE_NETCORE
                     return true;
 #else
-                    return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10) ?
-                        true :
-                        false;
+                    return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10);
 #endif
                 }
 
