@@ -21,14 +21,16 @@ namespace Microsoft.Build.Tasks.UnitTests
     {
         private static string TestAssembliesPaths { get; } = Path.Combine(AppContext.BaseDirectory, "TestResources");
 
-        [WindowsOnlyFact]
+        [WindowsOnlyTheory]
+        [InlineData("v4.0", Constants.DotNetFrameworkIdentifier)]
+        [InlineData("net8.0", Constants.DotNetCoreAppIdentifier)]
         [SupportedOSPlatform("windows")]
-        public void SignFile_Success()
+        public void SignFile_Success(string tfVersion, string tfIdentifier)
         {
             Uri timestampUrl = new("http://timestamp.comodoca.com/rfc3161");
             string clickOnceManifest = Path.Combine(TestAssembliesPaths, "ClickOnceProfile.pubxml");
-            string targetFrameworkVersion = "v4.0";
-            string targetFrameworkIdentifier = Constants.DotNetFrameworkIdentifier;
+            string targetFrameworkVersion = tfVersion;
+            string targetFrameworkIdentifier = tfIdentifier;
             bool disallowMansignTimestampFallback = false;
 
             // the certificate was generated locally and does not contain any sensitive information
