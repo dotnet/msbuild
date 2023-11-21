@@ -28,12 +28,12 @@
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
         <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
-        <target state="new">Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</target>
+        <target state="translated">問題建立失敗。建置提早結束，因為它遇到不是最新的目標或工作。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionSuccess">
         <source>Question build succeeded. Up-to-date checks passed.</source>
-        <target state="new">Question build succeeded. Up-to-date checks passed.</target>
+        <target state="translated">問題建立成功。最新版本檢查已通過。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildInProgress">
