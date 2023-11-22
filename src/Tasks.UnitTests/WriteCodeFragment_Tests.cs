@@ -143,23 +143,22 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void FileNameNoDirectory()
         {
+            using TestEnvironment env = TestEnvironment.Create();
+            var file = env.ExpectFile(Directory.GetCurrentDirectory(), ".tmp");
             WriteCodeFragment task = new WriteCodeFragment();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
             task.Language = "c#";
             task.AssemblyAttributes = new TaskItem[] { new TaskItem("aa") };
 
-            string fileName = "file.tmp";
-            string file = Path.GetFullPath(fileName);
+            string fileName = Path.GetFileName(file.Path);
             task.OutputFile = new TaskItem(fileName);
             bool result = task.Execute();
 
             Assert.True(result);
 
-            Assert.Equal(file, task.OutputFile.ItemSpec);
-            Assert.True(File.Exists(file));
-
-            FileUtilities.DeleteNoThrow(file);
+            Assert.Equal(fileName, task.OutputFile.ItemSpec);
+            Assert.True(File.Exists(file.Path));
         }
 
         /// <summary>

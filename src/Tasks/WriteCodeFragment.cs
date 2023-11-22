@@ -110,16 +110,12 @@ namespace Microsoft.Build.Tasks
                 {
                     OutputFile = new TaskItem(Path.Combine(OutputDirectory.ItemSpec, OutputFile.ItemSpec));
                 }
-                else if (OutputFile != null && OutputDirectory == null && !Path.IsPathRooted(OutputFile.ItemSpec))
-                {
-                    // In case specified OutputFile path is a file name but OutputDirectory is not set, expand it to a fully qualified path based on current directory.
-                    // So that it has the directory given to ensuring directory exists.
-                    OutputFile.ItemSpec = Path.GetFullPath(OutputFile.ItemSpec);
-                }
 
                 OutputFile ??= new TaskItem(FileUtilities.GetTemporaryFile(OutputDirectory.ItemSpec, null, extension));
 
-                FileUtilities.EnsureDirectoryExists(Path.GetDirectoryName(OutputFile.ItemSpec));
+                // To get OutputFile's directory use its full path in case specified OutputFile path is a file name but OutputDirectory is not set
+                var fullPath = FileUtilities.PathIsInvalid(OutputFile.ItemSpec) ? OutputFile.ItemSpec : OutputFile.GetMetadata("FullPath");
+                FileUtilities.EnsureDirectoryExists(Path.GetDirectoryName(fullPath));
 
                 File.WriteAllText(OutputFile.ItemSpec, code); // Overwrites file if it already exists (and can be overwritten)
             }
