@@ -281,8 +281,6 @@ namespace Microsoft.Build.Graph
                         string.Join(";", solution.SolutionParserErrorCodes)));
             }
 
-            IReadOnlyCollection<ProjectInSolution> projectsInSolution = GetBuildableProjects(solution);
-
             // Mimic behavior of SolutionProjectGenerator
             SolutionConfigurationInSolution currentSolutionConfiguration = SelectSolutionConfiguration(solution, solutionEntryPoint.GlobalProperties);
             solutionGlobalPropertiesBuilder["Configuration"] = currentSolutionConfiguration.ConfigurationName;
@@ -307,40 +305,38 @@ namespace Microsoft.Build.Graph
             // Project configurations are reused heavily, so cache the global properties for each
             Dictionary<string, ImmutableDictionary<string, string>> globalPropertiesForProjectConfiguration = new(StringComparer.OrdinalIgnoreCase);
 
+            IReadOnlyList<ProjectInSolution> projectsInSolution = solution.ProjectsInOrder;
             var newEntryPoints = new List<ProjectGraphEntryPoint>(projectsInSolution.Count);
 
             foreach (ProjectInSolution project in projectsInSolution)
             {
-                if (project.ProjectConfigurations.Count == 0)
+                if (!SolutionFile.IsBuildableProject(project))
                 {
                     continue;
                 }
 
                 ProjectConfigurationInSolution projectConfiguration = SelectProjectConfiguration(currentSolutionConfiguration, project.ProjectConfigurations);
 
-                if (projectConfiguration.IncludeInBuild)
+                if (!SolutionProjectGenerator.WouldProjectBuild(solution, currentSolutionConfiguration.FullName, project, projectConfiguration))
                 {
-                    if (!globalPropertiesForProjectConfiguration.TryGetValue(projectConfiguration.FullName, out ImmutableDictionary<string, string> projectGlobalProperties))
-                    {
-                        solutionGlobalPropertiesBuilder["Configuration"] = projectConfiguration.ConfigurationName;
-                        solutionGlobalPropertiesBuilder["Platform"] = projectConfiguration.PlatformName;
-
-                        projectGlobalProperties = solutionGlobalPropertiesBuilder.ToImmutable();
-                        globalPropertiesForProjectConfiguration.Add(projectConfiguration.FullName, projectGlobalProperties);
-                    }
-
-                    newEntryPoints.Add(new ProjectGraphEntryPoint(project.AbsolutePath, projectGlobalProperties));
+                    continue;
                 }
+
+                if (!globalPropertiesForProjectConfiguration.TryGetValue(projectConfiguration.FullName, out ImmutableDictionary<string, string> projectGlobalProperties))
+                {
+                    solutionGlobalPropertiesBuilder["Configuration"] = projectConfiguration.ConfigurationName;
+                    solutionGlobalPropertiesBuilder["Platform"] = projectConfiguration.PlatformName;
+
+                    projectGlobalProperties = solutionGlobalPropertiesBuilder.ToImmutable();
+                    globalPropertiesForProjectConfiguration.Add(projectConfiguration.FullName, projectGlobalProperties);
+                }
+
+                newEntryPoints.Add(new ProjectGraphEntryPoint(project.AbsolutePath, projectGlobalProperties));
             }
 
             newEntryPoints.TrimExcess();
 
             return (newEntryPoints, GetSolutionDependencies(solution));
-
-            IReadOnlyCollection<ProjectInSolution> GetBuildableProjects(SolutionFile solutionFile)
-            {
-                return solutionFile.ProjectsInOrder.Where(p => p.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat && solutionFile.ProjectShouldBuild(p.RelativePath)).ToImmutableArray();
-            }
 
             SolutionConfigurationInSolution SelectSolutionConfiguration(SolutionFile solutionFile, IDictionary<string, string> globalProperties)
             {
