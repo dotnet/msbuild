@@ -928,37 +928,56 @@ namespace Microsoft.Build.BackEnd.Logging
                 BuildEventArgs buildEvent = loggingPacket.NodeBuildEvent.Value.Value;
                 BuildEventContext buildEventContext = buildEvent?.BuildEventContext ?? BuildEventContext.Invalid;
 
+                string typeName = buildEvent?.GetType().FullName ?? string.Empty;
                 string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
                     out string warningCode,
                     out string helpKeyword,
                     "DeprecatedEventSerialization",
-                    buildEvent?.GetType().Name ?? string.Empty);
+                    typeName);
 
-                BuildWarningEventArgs warning = new(
-                    null,
-                    warningCode,
-                    BuildEventFileInfo.Empty.File,
-                    BuildEventFileInfo.Empty.Line,
-                    BuildEventFileInfo.Empty.Column,
-                    BuildEventFileInfo.Empty.EndLine,
-                    BuildEventFileInfo.Empty.EndColumn,
-                    message,
-                    helpKeyword,
-                    "MSBuild");
+                BuildEventArgs customEventUsedEventArgs =
+                    HasTypeException(typeName)
+                        ? new BuildMessageEventArgs(
+                            message,
+                            helpKeyword,
+                            "MSBuild",
+                            MessageImportance.Low)
+                        {
+                            BuildEventContext = buildEventContext,
+                            ProjectFile = GetProjectFile(),
+                        }
+                        : new BuildWarningEventArgs(
+                            null,
+                            warningCode,
+                            BuildEventFileInfo.Empty.File,
+                            BuildEventFileInfo.Empty.Line,
+                            BuildEventFileInfo.Empty.Column,
+                            BuildEventFileInfo.Empty.EndLine,
+                            BuildEventFileInfo.Empty.EndColumn,
+                            message,
+                            helpKeyword,
+                            "MSBuild")
+                        {
+                            BuildEventContext = buildEventContext,
+                            ProjectFile = GetProjectFile(),
+                        };
 
-                warning.BuildEventContext = buildEventContext;
-                if (warning.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
-                {
-                    warning.ProjectFile = buildEvent switch
-                    {
-                        BuildMessageEventArgs buildMessageEvent => buildMessageEvent.ProjectFile,
-                        BuildErrorEventArgs buildErrorEvent => buildErrorEvent.ProjectFile,
-                        BuildWarningEventArgs buildWarningEvent => buildWarningEvent.ProjectFile,
-                        _ => null,
-                    };
-                }
+                ProcessLoggingEvent(customEventUsedEventArgs);
 
-                ProcessLoggingEvent(warning);
+                string GetProjectFile()
+                    =>
+                        buildEventContext.ProjectContextId == BuildEventContext.InvalidProjectContextId
+                            ? null
+                            : buildEvent switch
+                            {
+                                BuildMessageEventArgs buildMessageEvent => buildMessageEvent.ProjectFile,
+                                BuildErrorEventArgs buildErrorEvent => buildErrorEvent.ProjectFile,
+                                BuildWarningEventArgs buildWarningEvent => buildWarningEvent.ProjectFile,
+                                _ => null,
+                            };
+
+                bool HasTypeException(string typeNameArg)
+                    => string.Equals(typeNameArg, "SarifBuildErrorEventArgs", StringComparison.OrdinalIgnoreCase);
             }
         }
 
