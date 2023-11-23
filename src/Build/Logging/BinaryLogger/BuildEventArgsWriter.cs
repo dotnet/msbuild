@@ -1139,8 +1139,7 @@ namespace Microsoft.Build.Logging
 
         private void Write(Stream stream)
         {
-            Stream destinationStream = binaryWriter.BaseStream;
-            stream.CopyTo(destinationStream);
+            stream.CopyTo(binaryWriter.BaseStream);
         }
 
         private void Write(byte b)

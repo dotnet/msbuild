@@ -147,7 +147,10 @@ namespace Microsoft.Build.Logging
             bool allowForwardCompatibility = true)
         {
             int fileFormatVersion = binaryReader.ReadInt32();
-            int minimumReaderVersion = binaryReader.ReadInt32();
+            // Is this the new log format that contains the minimum reader version?
+            int minimumReaderVersion = fileFormatVersion >= BinaryLogger.ForwardCompatibilityMinimalVersion
+                ? binaryReader.ReadInt32()
+                : fileFormatVersion;
 
             // the log file is written using a newer version of file format
             // that we don't know how to read
@@ -321,7 +324,7 @@ namespace Microsoft.Build.Logging
         }
 
         private Action<BinaryLogRecordKind, Stream>? _rawLogRecordReceived;
-        /// <inheritdoc cref="IBuildEventArgsReaderNotifications.StringReadDone"/>
+        /// <inheritdoc cref="IRawLogEventsSource.RawLogRecordReceived"/>
         event Action<BinaryLogRecordKind, Stream>? IRawLogEventsSource.RawLogRecordReceived
         {
             add => _rawLogRecordReceived += value;
