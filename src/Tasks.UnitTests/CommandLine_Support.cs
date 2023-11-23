@@ -102,7 +102,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Validates that the given ToolTaskExtension's command line does not contain 
+        /// Validates that the given ToolTaskExtension's command line does not contain
         /// any parameter starting with the given string.
         /// </summary>
         /// <param name="t">task to get the command line from</param>
@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Validates that the given ToolTaskExtension's command line does not contain 
+        /// Validates that the given ToolTaskExtension's command line does not contain
         /// any parameter starting with the given string.
         /// </summary>
         /// <param name="t">task to get the command line from</param>
@@ -125,7 +125,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Validates that the given ToolTaskExtension's command line does not contain 
+        /// Validates that the given ToolTaskExtension's command line does not contain
         /// any parameter starting with the given string.
         /// </summary>
         /// <param name="t">task to get the command line from</param>
@@ -137,7 +137,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Validates that the given ToolTaskExtension's command line does not contain 
+        /// Validates that the given ToolTaskExtension's command line does not contain
         /// any parameter starting with the given string.
         /// </summary>
         /// <param name="t">task to get the command line from</param>

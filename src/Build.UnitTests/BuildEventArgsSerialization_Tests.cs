@@ -423,7 +423,7 @@ namespace Microsoft.Build.UnitTests
                 "Subcategory",
                 "Code",
                 "File",
-                1, 
+                1,
                 2,
                 3,
                 4,

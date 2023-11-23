@@ -21,7 +21,7 @@ namespace Microsoft.Build.Tasks
         }
 
         // Use C# destructor syntax for finalization code.
-        // This destructor will run only if the Dispose method 
+        // This destructor will run only if the Dispose method
         // does not get called.
         // It gives your base class the opportunity to finalize.
         // Do not provide destructors in types derived from this class.
@@ -40,7 +40,7 @@ namespace Microsoft.Build.Tasks
         {
             // This object will be cleaned up by the Dispose method.
             // Therefore, you should call GC.SupressFinalize to
-            // take this object off the finalization queue 
+            // take this object off the finalization queue
             // and prevent finalization code for this object
             // from executing a second time.
             Dispose(true);
@@ -51,15 +51,15 @@ namespace Microsoft.Build.Tasks
         // If disposing equals true, the method has been called directly
         // or indirectly by a user's code. Managed and unmanaged resources
         // can be disposed.
-        // If disposing equals false, the method has been called by the 
-        // runtime from inside the finalizer and you should not reference 
+        // If disposing equals false, the method has been called by the
+        // runtime from inside the finalizer and you should not reference
         // other objects. Only unmanaged resources can be disposed.
         private void Dispose(bool disposing)
         {
             // Check to see if Dispose has already been called.
             if (!_disposed)
             {
-                // If disposing equals true, dispose all managed 
+                // If disposing equals true, dispose all managed
                 // and unmanaged resources.
                 if (disposing)
                 {
@@ -67,9 +67,9 @@ namespace Microsoft.Build.Tasks
                     DisposeManagedResources();
                 }
 
-                // Call the appropriate methods to clean up 
+                // Call the appropriate methods to clean up
                 // unmanaged resources here.
-                // If disposing is false, 
+                // If disposing is false,
                 // only the following code is executed.
                 DisposeUnmanagedResources();
             }

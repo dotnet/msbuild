@@ -97,7 +97,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
         /// <summary>
         /// Make sure we get an internal error when we call the initialize factory on the public method.
-        /// This is done because we cannot properly initialize the task factory using the public interface and keep 
+        /// This is done because we cannot properly initialize the task factory using the public interface and keep
         /// backwards compatibility with orcas and whidbey.
         /// </summary>
         [Fact]
@@ -111,7 +111,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
         /// <summary>
         /// Make sure we get an internal error when we call the ITaskFactory2 version of initialize factory.
-        /// This is done because we cannot properly initialize the task factory using the public interface and keep 
+        /// This is done because we cannot properly initialize the task factory using the public interface and keep
         /// backwards compatibility with orcas and whidbey.
         /// </summary>
         [Fact]
@@ -166,8 +166,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             });
         }
         /// <summary>
-        /// Make sure that when an explicitly matching identity is specified (e.g. the identity is non-empty), 
-        /// it still counts as correct.  
+        /// Make sure that when an explicitly matching identity is specified (e.g. the identity is non-empty),
+        /// it still counts as correct.
         /// </summary>
         [Fact]
         public void CreatableByTaskFactoryMatchingIdentity()
@@ -186,7 +186,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify that if the task identity parameters don't match the factory identity, TaskNameCreatableByFactory 
+        /// Verify that if the task identity parameters don't match the factory identity, TaskNameCreatableByFactory
         /// returns false.
         /// </summary>
         [Fact]
@@ -263,7 +263,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify a good task that does not use the task host can be created when passed "don't care" 
+        /// Verify a good task that does not use the task host can be created when passed "don't care"
         /// for the task invocation task host parameters.
         /// </summary>
         [Fact]
@@ -294,8 +294,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify a good task that does not use the task host can be created when passed task host 
-        /// parameters that explicitly match the current process. 
+        /// Verify a good task that does not use the task host can be created when passed task host
+        /// parameters that explicitly match the current process.
         /// </summary>
         [Fact]
         public void VerifyMatchingTaskParametersDontLaunchTaskHost2()
@@ -325,7 +325,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify a good task that does not use the task host can be created when passed "don't care" 
+        /// Verify a good task that does not use the task host can be created when passed "don't care"
         /// for the task invocation task host parameters.
         /// </summary>
         [Fact]
@@ -358,8 +358,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify a good task that does not use the task host can be created when passed task host 
-        /// parameters that explicitly match the current process. 
+        /// Verify a good task that does not use the task host can be created when passed task host
+        /// parameters that explicitly match the current process.
         /// </summary>
         [Fact]
         public void VerifyMatchingUsingTaskParametersDontLaunchTaskHost2()
@@ -391,8 +391,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify a good task that uses the task host can be created when passed task host 
-        /// parameters that explicitly do not match the current process. 
+        /// Verify a good task that uses the task host can be created when passed task host
+        /// parameters that explicitly do not match the current process.
         /// </summary>
         [Fact]
         public void VerifyMatchingParametersDontLaunchTaskHost()
@@ -426,8 +426,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify a good task that uses the task host can be created when passed task host 
-        /// parameters that explicitly do not match the current process. 
+        /// Verify a good task that uses the task host can be created when passed task host
+        /// parameters that explicitly do not match the current process.
         /// </summary>
         [Fact]
         public void VerifyNonmatchingUsingTaskParametersLaunchTaskHost()
@@ -459,8 +459,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify a good task that uses the task host can be created when passed task host 
-        /// parameters that explicitly do not match the current process. 
+        /// Verify a good task that uses the task host can be created when passed task host
+        /// parameters that explicitly do not match the current process.
         /// </summary>
         [Fact]
         public void VerifyNonmatchingTaskParametersLaunchTaskHost()
@@ -490,8 +490,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify a good task that uses the task host can be created when passed task host 
-        /// parameters that explicitly do not match the current process. 
+        /// Verify a good task that uses the task host can be created when passed task host
+        /// parameters that explicitly do not match the current process.
         /// </summary>
         [Fact]
         public void VerifyNonmatchingParametersLaunchTaskHost()
@@ -525,8 +525,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify a good task that uses the task host can be created when the task factory is 
-        /// explicitly instructed to launch the task host. 
+        /// Verify a good task that uses the task host can be created when the task factory is
+        /// explicitly instructed to launch the task host.
         /// </summary>
         [Fact]
         public void VerifyExplicitlyLaunchTaskHost()
@@ -554,8 +554,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify a good task that uses the task host can be created when the task factory is 
-        /// explicitly instructed to launch the task host. 
+        /// Verify a good task that uses the task host can be created when the task factory is
+        /// explicitly instructed to launch the task host.
         /// </summary>
         [Fact]
         public void VerifyExplicitlyLaunchTaskHostEvenIfParametersMatch1()
@@ -587,8 +587,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify a good task that uses the task host can be created when the task factory is 
-        /// explicitly instructed to launch the task host. 
+        /// Verify a good task that uses the task host can be created when the task factory is
+        /// explicitly instructed to launch the task host.
         /// </summary>
         [Fact]
         public void VerifyExplicitlyLaunchTaskHostEvenIfParametersMatch2()
@@ -620,8 +620,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify a good task that uses the task host can be created when the task factory is 
-        /// explicitly instructed to launch the task host. 
+        /// Verify a good task that uses the task host can be created when the task factory is
+        /// explicitly instructed to launch the task host.
         /// </summary>
         [Fact]
         public void VerifySameFactoryCanGenerateDifferentTaskInstances()
@@ -677,7 +677,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Abstract out the creation of the new AssemblyTaskFactory with default task, and 
+        /// Abstract out the creation of the new AssemblyTaskFactory with default task, and
         /// with some basic validation.
         /// </summary>
         private void SetupTaskFactory(IDictionary<string, string> factoryParameters, bool explicitlyLaunchTaskHost)

@@ -855,17 +855,17 @@ namespace Microsoft.Build.Tasks
 
             // Set some default references:
 
-            // Loading with the partial name is fine for framework assemblies -- we'll always get the correct one 
+            // Loading with the partial name is fine for framework assemblies -- we'll always get the correct one
             // through the magic of unification
             foreach (string defaultReference in s_defaultReferencedFrameworkAssemblyNames)
             {
                 AddReferenceAssemblyToReferenceList(finalReferenceList, defaultReference);
             }
 
-            // We also want to add references to two MSBuild assemblies: Microsoft.Build.Framework.dll and 
-            // Microsoft.Build.Utilities.Core.dll.  If we just let the CLR unify the simple name, it will 
-            // pick the highest version on the machine, which means that in hosts with restrictive binding 
-            // redirects, or no binding redirects, we'd end up creating an inline task that could not be 
+            // We also want to add references to two MSBuild assemblies: Microsoft.Build.Framework.dll and
+            // Microsoft.Build.Utilities.Core.dll.  If we just let the CLR unify the simple name, it will
+            // pick the highest version on the machine, which means that in hosts with restrictive binding
+            // redirects, or no binding redirects, we'd end up creating an inline task that could not be
             // run.  Instead, to make sure that we can actually use what we're building, just use the Framework
             // and Utilities currently loaded into this process -- Since we're in Microsoft.Build.Tasks.Core.dll
             // right now, by definition both of them are always already loaded.

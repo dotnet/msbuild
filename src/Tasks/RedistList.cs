@@ -271,7 +271,7 @@ namespace Microsoft.Build.Tasks
             string referenceAssembliesPath = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(version);
 
             // On dogfood build machines, v3.5 is not formally installed, so this returns null.
-            // We don't use redist lists in this case.            
+            // We don't use redist lists in this case.
             string[] redistListPaths = (referenceAssembliesPath == null) ? Array.Empty<string>() : GetRedistListPathsFromDisk(referenceAssembliesPath);
 
             var assemblyTableInfos = new AssemblyTableInfo[redistListPaths.Length];
@@ -558,7 +558,7 @@ namespace Microsoft.Build.Tasks
                     // we do not get a "redist name is null or empty" error when in actual fact it was a file not found error.
                     int errorsBeforeReadCall = allowListErrors.Count;
 
-                    // Read in the subset list file. 
+                    // Read in the subset list file.
                     string redistName = ReadFile(info, allowListAssembliesReadIn, allowListErrors, allowListErrorFileNames, null);
 
                     // Get the client subset name which has been read in.
@@ -846,7 +846,7 @@ namespace Microsoft.Build.Tasks
             attributes.TryGetValue("IsRedistRoot", out string isRedistRoot);
             if (!bool.TryParse(inGAC, out bool inGACFlag))
             {
-                inGACFlag = true;                           // true by default 
+                inGACFlag = true;                           // true by default
             }
 
             // The retargetable flag is Yes or No for some reason
@@ -912,9 +912,9 @@ namespace Microsoft.Build.Tasks
 
                 // We now want to sort based on the version number
                 // The compare method is expected to return the following values:
-                // Less than zero = right instance is less than left. 
-                // Zero  = right instance is equal to left. 
-                // Greater than zero  = right instance is greater than left. 
+                // Less than zero = right instance is less than left.
+                // Zero  = right instance is equal to left.
+                // Greater than zero  = right instance is greater than left.
 
                 // Want the greater version number to be on top in a list so we need to reverse the comparison
                 int returnValue = firstAssemblyName.Version.CompareTo(secondAssemblyName.Version);
@@ -1023,14 +1023,14 @@ namespace Microsoft.Build.Tasks
             {
                 lock (s_subsetListPathCacheLock)
                 {
-                    // We want to cache the paths to the subset files so that we do not have to hit the disk and check for the files 
+                    // We want to cache the paths to the subset files so that we do not have to hit the disk and check for the files
                     // each time RAR is called within the appdomain.
                     if (s_subsetListPathCache == null)
                     {
                         s_subsetListPathCache = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
                     }
 
-                    // TargetFrameworkDirectory is not unique enough because a different invocation could ask for a different 
+                    // TargetFrameworkDirectory is not unique enough because a different invocation could ask for a different
                     // set of subset files from the same TargetFrameworkDirectory
                     string concatenatedSubsetListNames = String.Join(";", _subsetToSearchFor);
 
@@ -1044,7 +1044,7 @@ namespace Microsoft.Build.Tasks
 
                         var subsetFilesForFrameworkDirectory = new List<string>();
 
-                        // Go through each of the subsets and see if it is in the target framework subset directory 
+                        // Go through each of the subsets and see if it is in the target framework subset directory
                         foreach (string subsetName in _subsetToSearchFor)
                         {
                             string subsetFilePath = Path.Combine(subsetDirectory, subsetName + ".xml");
@@ -1054,7 +1054,7 @@ namespace Microsoft.Build.Tasks
                             }
                         }
 
-                        // Note, even if the array is empty we still want to add it to the cache, because some 
+                        // Note, even if the array is empty we still want to add it to the cache, because some
                         // target framework directories may never contain a subset file (for example 2.05727 and 3.0)
                         // for this reason we should not check them everytime if the files are not found.
                         s_subsetListPathCache[key] = subsetFilesForFrameworkDirectory.ToArray();

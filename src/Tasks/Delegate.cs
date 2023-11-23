@@ -80,7 +80,7 @@ namespace Microsoft.Build.Tasks
     internal delegate string GetPathFromFusionName(string strongName);
 
     /// <summary>
-    /// Delegate. Given an assembly name, crack it open and retrieve the list of dependent 
+    /// Delegate. Given an assembly name, crack it open and retrieve the list of dependent
     /// assemblies and  the list of scatter files.
     /// </summary>
     /// <param name="path">Path to the assembly.</param>
@@ -106,7 +106,7 @@ namespace Microsoft.Build.Tasks
     internal delegate string GetAssemblyPathInGac(AssemblyNameExtension assemblyName, System.Reflection.ProcessorArchitecture targetProcessorArchitecture, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVersion, FileExists fileExists, bool fullFusionName, bool specificVersion);
 
     /// <summary>
-    /// Determines if a assembly is an winmd file 
+    /// Determines if a assembly is an winmd file
     /// </summary>
     internal delegate bool IsWinMDFile(string fullpath, GetAssemblyRuntimeVersion getAssemblyRuntimeVersion, FileExists fileExists, out string imageRuntimeVersion, out bool isManagedWinmd);
 

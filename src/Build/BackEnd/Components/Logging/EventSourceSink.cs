@@ -83,8 +83,8 @@ namespace Microsoft.Build.BackEnd.Logging
         public event CustomBuildEventHandler CustomEventRaised;
 
         /// <summary>
-        /// this event is raised to log build status events, such as 
-        /// build/project/target/task started/stopped 
+        /// this event is raised to log build status events, such as
+        /// build/project/target/task started/stopped
         /// </summary>
         public event BuildStatusEventHandler StatusEventRaised;
 
@@ -102,7 +102,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         #region Properties
         /// <summary>
-        /// Provide a friendly name for the sink to make it easier to differentiate during 
+        /// Provide a friendly name for the sink to make it easier to differentiate during
         /// debugging and display
         /// </summary>
         public string Name
@@ -313,7 +313,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="buildEvent">BuildMessageEventArgs</param>
         /// <exception cref="LoggerException">When EventHandler raises an logger exception the LoggerException is rethrown</exception>
         /// <exception cref="InternalLoggerException">Any exceptions which are not LoggerExceptions are wrapped in an InternalLoggerException</exception>
-        /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception> 
+        /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception>
         private void RaiseMessageEvent(object sender, BuildMessageEventArgs buildEvent)
         {
             if (MessageRaised != null)
@@ -875,9 +875,9 @@ namespace Microsoft.Build.BackEnd.Logging
                     // if a fellow logger is throwing in an event handler.
                     this.UnregisterAllEventHandlers();
 
-                    // We ought to dump this farther up the stack, but if for example a task is logging an event within a 
-                    // catch(Exception) block and not rethrowing it, there's the possibility that this exception could 
-                    // just get silently eaten.  So better to have duplicates than to not log the problem at all. :) 
+                    // We ought to dump this farther up the stack, but if for example a task is logging an event within a
+                    // catch(Exception) block and not rethrowing it, there's the possibility that this exception could
+                    // just get silently eaten.  So better to have duplicates than to not log the problem at all. :)
                     ExceptionHandling.DumpExceptionToFile(exception);
 
                     throw;
@@ -888,9 +888,9 @@ namespace Microsoft.Build.BackEnd.Logging
                     // if a fellow logger is throwing in an event handler.
                     this.UnregisterAllEventHandlers();
 
-                    // We ought to dump this farther up the stack, but if for example a task is logging an event within a 
-                    // catch(Exception) block and not rethrowing it, there's the possibility that this exception could 
-                    // just get silently eaten.  So better to have duplicates than to not log the problem at all. :) 
+                    // We ought to dump this farther up the stack, but if for example a task is logging an event within a
+                    // catch(Exception) block and not rethrowing it, there's the possibility that this exception could
+                    // just get silently eaten.  So better to have duplicates than to not log the problem at all. :)
                     ExceptionHandling.DumpExceptionToFile(exception);
 
                     if (ExceptionHandling.IsCriticalException(exception))

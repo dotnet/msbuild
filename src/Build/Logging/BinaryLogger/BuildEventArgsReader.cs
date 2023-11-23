@@ -886,7 +886,7 @@ namespace Microsoft.Build.Logging
                 };
             }
             e.BuildEventContext = fields.BuildEventContext;
-                
+
             return e;
         }
 
@@ -1813,7 +1813,7 @@ namespace Microsoft.Build.Logging
                 }
                 catch
                 {
-                    // The StringStorage class is not crucial for other functionality and if 
+                    // The StringStorage class is not crucial for other functionality and if
                     // there are exceptions when closing the temp file, it's too late to do anything about it.
                     // Since we don't want to disrupt anything and the file is in the TEMP directory, it will
                     // get cleaned up at some point anyway.

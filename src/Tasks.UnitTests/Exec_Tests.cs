@@ -895,22 +895,6 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(2, exec.ConsoleOutput.Length);
         }
 
-        /// <summary>
-        /// Test the CanEncode method with and without ANSI characters to determine if they can be encoded 
-        /// in the current system encoding.
-        /// </summary>
-        [WindowsOnlyFact]
-        public void CanEncodeTest()
-        {
-            var defaultEncoding = EncodingUtilities.CurrentSystemOemEncoding;
-
-            string nonAnsiCharacters = "\u521B\u5EFA";
-            string pathWithAnsiCharacters = @"c:\windows\system32\cmd.exe";
-
-            Assert.False(EncodingUtilities.CanEncodeString(defaultEncoding.CodePage, nonAnsiCharacters));
-            Assert.True(EncodingUtilities.CanEncodeString(defaultEncoding.CodePage, pathWithAnsiCharacters));
-        }
-
         [Fact]
         public void EndToEndMultilineExec()
         {

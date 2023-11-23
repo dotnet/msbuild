@@ -215,7 +215,7 @@ namespace Microsoft.Build.Logging
         #region Data
         // The file logger which will do the actual logging of the node's build output
         private FileLogger _nodeFileLogger;
-        // Reference for the central logger 
+        // Reference for the central logger
         private IEventRedirector _buildEventRedirector;
         // The Id of the node the forwardingLogger is attached to
         private int _nodeId;

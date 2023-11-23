@@ -902,7 +902,7 @@ namespace Microsoft.Build.Evaluation
 
             try
             {
-                
+
                 List<ProjectPropertyInstance> reservedProperties = new List<ProjectPropertyInstance>();
 
                 reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.binPath, EscapingUtilities.Escape(ToolsPath), mayBeReserved: true));

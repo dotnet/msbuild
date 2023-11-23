@@ -488,8 +488,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PublishDir Condition="'$(PublishDir)'==''">$(OutputPath)app.publish\</PublishDir>
   </PropertyGroup>
 
-  <!-- 
-    ClickOncePublishDir property is the output location used by all ClickOnce publish targets. This should be same as PublishDir except 
+  <!--
+    ClickOncePublishDir property is the output location used by all ClickOnce publish targets. This should be same as PublishDir except
     for a trailing slash. PublishDir when specified as a global property on the command line cannot be changed to add a trailing slash.
   -->
   <PropertyGroup>
@@ -1511,7 +1511,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <Target Name="AfterResolveReferences"/>
-  
+
   <!--
     ============================================================
                                         IgnoreJavaScriptOutputAssembly
@@ -1823,7 +1823,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         SkipNonexistentTargets="true">
       <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetFrameworkPossibilities" />
     </MSBuild>
-    
+
     <!--
        SetPlatform negotiation requires the 'GetTargetFrameworks' MSBuild call to NOT pass global properties. This is to verify
        whether or not the referenced project would build as the same platform as the current project by default. The above
@@ -1897,7 +1897,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <SetRidAgnosticValueForProjects Projects="@(AnnotatedProjects)">
       <Output ItemName="UpdatedAnnotatedProjects" TaskParameter="UpdatedProjects" />
     </SetRidAgnosticValueForProjects>
-    
+
     <ItemGroup>
       <AnnotatedProjects Remove="@(AnnotatedProjects)" />
       <AnnotatedProjects Include="@(UpdatedAnnotatedProjects)" />
@@ -1998,7 +1998,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
              SelfContained and RuntimeIdentifier should not flow across project references.  The IsRidAgnostic metadata value is consumed in the
              _GetProjectReferenceTargetFrameworkProperties target, where those properties are added to a project's UndefineProperties if
              IsRidAgnostic is set.
-        
+
              Generally we set the IsRidAgnostic metadata based on the IsRidAgnostic property set by the .NET SDK.  If that's not set, then the
              fallback logic here will be that the project is RID agnostic if it doesn't have RuntimeIdentifier or RuntimeIdentifiers properties set. -->
         <IsRidAgnostic>$(IsRidAgnostic)</IsRidAgnostic>
@@ -2525,7 +2525,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_NewGenerateBindingRedirectsIntermediateAppConfig Condition="Exists('$(_GenerateBindingRedirectsIntermediateAppConfig)')">true</_NewGenerateBindingRedirectsIntermediateAppConfig>
       <AppConfig Condition="$(_NewGenerateBindingRedirectsIntermediateAppConfig) == 'true'">$(_GenerateBindingRedirectsIntermediateAppConfig)</AppConfig>
     </PropertyGroup>
-    
+
     <ItemGroup Condition="$(_NewGenerateBindingRedirectsIntermediateAppConfig) == 'true'">
       <AppConfigWithTargetPath Remove="@(AppConfigWithTargetPath)" />
       <AppConfigWithTargetPath Include="$(AppConfig)">
@@ -3039,6 +3039,40 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <FileWrites Include="@(_ResolveComReferenceCache)"/>
       <ReferenceComWrappersToCopyLocal Include="@(ComReferenceWrappers)" Condition="'%(ComReferenceWrappers.CopyLocal)'!='false'"/>
     </ItemGroup>
+
+  </Target>
+
+    <!--
+    ============================================================
+                                        _GetAssembliesMetadata
+
+    Resolve Assembly attributes for assemblies
+    The ResolveComReferences dependency is needed for defining COM-referenced wrappers only,
+    but this target handles all the assembly references from ResolveAssemblyReferences
+    This target is needed by the Visual Studio legacy project system during design time build only
+
+        [IN]
+        @(ReferencePath) - Paths to COM-referenced wrappers and other types of assembly references.
+
+        [OUT]
+        @(AssembliesMetadata) - Resolved assemblies attributes.
+    ============================================================
+    -->
+
+  <Target
+      Name="_GetAssembliesMetadata"
+      Condition="'@(ReferencePath)'!=''and '$(DesignTimeBuild)' == 'true' "
+      Returns="@(_AssembliesMetadata)"
+      DependsOnTargets="ResolveComReferences"
+        >
+
+    <GetAssembliesMetadata
+          AssemblyPaths="@(ReferencePath)"
+          ContinueOnError="$(ContinueOnError)">
+
+      <Output TaskParameter="AssembliesMetadata" ItemName="_AssembliesMetadata"/>
+
+    </GetAssembliesMetadata>
 
   </Target>
 
@@ -4444,8 +4478,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_ClickOnceTransitiveContentItems Include="@(_ClickOnceTransitiveContentItemsTemp->'%(SavedIdentity)')" Condition="'%(Identity)'=='@(PublishFile)' Or '%(Extension)'=='.exe' Or '%(Extension)'=='.dll'" />
 
       <!--
-        For .NET>=5, we need to check if we need to publish any copylocal items from None group. For such items to be published, they either 
-        have .exe/.dll extension or their publish status has been overriden in VS so they will show up in the PublishFiles collection. 
+        For .NET>=5, we need to check if we need to publish any copylocal items from None group. For such items to be published, they either
+        have .exe/.dll extension or their publish status has been overriden in VS so they will show up in the PublishFiles collection.
         The PublishProtocol property is available only in .NET>=5 so we will used that to exclude .NET FX 4.X case.
       -->
       <!-- Include items from None group for publishing -->

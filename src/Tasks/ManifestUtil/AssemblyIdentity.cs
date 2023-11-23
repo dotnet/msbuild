@@ -276,7 +276,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     }
                     catch (ArgumentException e) when (e.HResult == unchecked((int)0x80070057))
                     {
-                        // 0x80070057 - "Value does not fall within the expected range." is returned from 
+                        // 0x80070057 - "Value does not fall within the expected range." is returned from
                         // GetAssemblyIdentityFromFile for WinMD components
                     }
                 }

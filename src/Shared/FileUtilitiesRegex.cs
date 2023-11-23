@@ -10,7 +10,7 @@ namespace Microsoft.Build.Shared
     /// <summary>
     /// This class contains utility methods for file IO.
     /// Separate from FileUtilities because some assemblies may only need the patterns.
-    /// PERF\COVERAGE NOTE: Try to keep classes in 'shared' as granular as possible. All the methods in 
+    /// PERF\COVERAGE NOTE: Try to keep classes in 'shared' as granular as possible. All the methods in
     /// each class get pulled into the resulting assembly.
     /// </summary>
     internal static class FileUtilitiesRegex
