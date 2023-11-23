@@ -15,6 +15,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+using Microsoft.NET.StringTools;
 
 #nullable disable
 
@@ -1260,9 +1261,9 @@ namespace Microsoft.Build.Logging
 
         internal readonly struct HashKey : IEquatable<HashKey>
         {
-            private readonly ulong value;
+            private readonly long value;
 
-            private HashKey(ulong i)
+            private HashKey(long i)
             {
                 value = i;
             }

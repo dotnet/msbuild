@@ -14,6 +14,7 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+using Microsoft.NET.StringTools;
 using Microsoft.Win32;
 
 // Needed for DoesTaskHostExistForParameters
