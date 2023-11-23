@@ -136,14 +136,17 @@ namespace Microsoft.Build.Logging
                 }
             }
 
-            void TryAddFile()
+            bool TryAddFile()
             {
                 try
                 {
                     addFileWorker(filePath);
+                    return true;
                 }
                 catch
                 { }
+
+                return false;
             }
         }
 
