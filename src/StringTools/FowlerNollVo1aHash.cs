@@ -124,7 +124,6 @@ namespace Microsoft.NET.StringTools
         /// <param name="left"></param>
         /// <param name="right"></param>
         /// <returns></returns>
-        [CLSCompliant(false)]
         public static long Combine64(long left, long right)
         {
             unchecked
