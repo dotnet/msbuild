@@ -1,6 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Runtime.InteropServices;
+using System;
+
 namespace Microsoft.Build.Utilities
 {
     internal static class FowlerNollVo1aHash
@@ -27,19 +30,10 @@ namespace Microsoft.Build.Utilities
         {
             uint hash = fnvOffsetBasisA32Bit;
 
-            unchecked
+            ReadOnlySpan<byte> span = MemoryMarshal.Cast<char, byte>(text.AsSpan());
+            foreach (byte b in span)
             {
-                for (int i = 0; i < text.Length; i++)
-                {
-                    char ch = text[i];
-                    byte b = (byte)ch;
-                    hash ^= b;
-                    hash *= fnvPrimeA32Bit;
-
-                    b = (byte)(ch >> 8);
-                    hash ^= b;
-                    hash *= fnvPrimeA32Bit;
-                }
+                hash = unchecked((hash ^ b) * fnvPrimeA32Bit);
             }
 
             return unchecked((int)hash);
@@ -78,19 +72,10 @@ namespace Microsoft.Build.Utilities
         {
             ulong hash = fnvOffsetBasisA64Bit;
 
-            unchecked
+            ReadOnlySpan<byte> span = MemoryMarshal.Cast<char, byte>(text.AsSpan());
+            foreach (byte b in span)
             {
-                for (int i = 0; i < text.Length; i++)
-                {
-                    char ch = text[i];
-                    byte b = (byte)ch;
-                    hash ^= b;
-                    hash *= fnvPrimeA64Bit;
-
-                    b = (byte)(ch >> 8);
-                    hash ^= b;
-                    hash *= fnvPrimeA64Bit;
-                }
+                hash = unchecked((hash ^ b) * fnvPrimeA64Bit);
             }
 
             return hash;
