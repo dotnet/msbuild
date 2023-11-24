@@ -664,7 +664,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private bool IsMultipleAllowedSwithParameterDueToUnquote(bool unquoteParameter, ParameterizedSwitch parameterizedSwitch)
         {
-            if (!unquoteParameter || !Traits.Instance.EscapeHatches.UnquoteSwitchParameterForTragetParametrizedSwitch)
+            if (!unquoteParameter || !Traits.Instance.EscapeHatches.UnquoteTragetSwitchParameters)
             {
                 return false;
             }
