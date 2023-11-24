@@ -115,6 +115,11 @@ internal sealed class TerminalLogger : INodeLogger
     private bool _restoreFailed;
 
     /// <summary>
+    /// True if restore happened and finished.
+    /// </summary>
+    private bool _restoreFinished = false;
+
+    /// <summary>
     /// The project build context corresponding to the <c>Restore</c> initial target, or null if the build is currently
     /// not restoring.
     /// </summary>
@@ -323,7 +328,8 @@ internal sealed class TerminalLogger : INodeLogger
             }
             _projects[c] = new(targetFramework);
 
-            if (e.TargetNames == "Restore")
+            // First ever restore in the build is starting.
+            if (e.TargetNames == "Restore" && !_restoreFinished)
             {
                 _restoreContext = c;
                 int nodeIndex = NodeIndexForContext(buildEventContext);
@@ -398,6 +404,7 @@ internal sealed class TerminalLogger : INodeLogger
                         }
 
                         _restoreContext = null;
+                        _restoreFinished = true;
                     }
                     // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
                     else if (project.OutputPath is not null || project.BuildMessages is not null)
