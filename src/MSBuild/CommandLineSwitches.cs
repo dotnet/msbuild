@@ -305,12 +305,12 @@ namespace Microsoft.Build.CommandLine
                     {
                         parameterlessSwitch = switchInfo.parameterlessSwitch;
                         duplicateSwitchErrorMessage = switchInfo.duplicateSwitchErrorMessage;
-                        break;
+                        return true;
                     }
                 }
             }
 
-            return parameterlessSwitch != ParameterlessSwitch.Invalid;
+            return false;
         }
 
         /// <summary>
@@ -362,12 +362,12 @@ namespace Microsoft.Build.CommandLine
                         missingParametersErrorMessage = switchInfo.missingParametersErrorMessage;
                         unquoteParameters = switchInfo.unquoteParameters;
                         emptyParametersAllowed = switchInfo.emptyParametersAllowed;
-                        break;
+                        return true;
                     }
                 }
             }
 
-            return parameterizedSwitch != ParameterizedSwitch.Invalid;
+            return false;
         }
 
         /// <summary>
