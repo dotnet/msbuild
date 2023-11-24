@@ -488,6 +488,11 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
+                    if (IsMultipleAllowedSwithParameterDueToUnquote(unquoteParameters, parameterizedSwitch))
+                    {
+                        switchParameters = QuotingUtilities.Unquote(switchParameters);
+                    }
+
                     // store all the switch parameters
                     int emptyParameters;
                     _parameterizedSwitches[(int)parameterizedSwitch].parameters.AddRange(QuotingUtilities.SplitUnquoted(switchParameters, int.MaxValue, false /* discard empty parameters */, unquoteParameters, out emptyParameters, s_parameterSeparators));
@@ -649,6 +654,26 @@ namespace Microsoft.Build.CommandLine
             groupedFileLoggerParameters[9] = GetSpecificFileLoggerParameters(ParameterlessSwitch.FileLogger9, ParameterizedSwitch.FileLoggerParameters9);
 
             return groupedFileLoggerParameters;
+        }
+
+        /// <summary>
+        /// Checks if the provided parametrized switch needs to be unquoted.
+        /// The method will return 'true' in case:
+        ///     The changewave 17.10 is not set and
+        ///     The parametrized switch is 'Target'
+        /// </summary>
+        private bool IsMultipleAllowedSwithParameterDueToUnquote(bool unquoteParameter, ParameterizedSwitch parameterizedSwitch)
+        {
+            if (!unquoteParameter || !Traits.Instance.EscapeHatches.UnquoteSwitchParameterForTragetParametrizedSwitch)
+            {
+                return false;
+            }
+            if (parameterizedSwitch == ParameterizedSwitch.Target)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>

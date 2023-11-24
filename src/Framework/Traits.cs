@@ -400,6 +400,14 @@ namespace Microsoft.Build.Framework
             }
         }
 
+        public bool UnquoteSwitchParameterForTragetParametrizedSwitch
+        {
+            get
+            {
+                return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10);
+            }
+        }
+
         private bool? _isBinaryFormatterSerializationAllowed;
         public bool IsBinaryFormatterSerializationAllowed
         {
