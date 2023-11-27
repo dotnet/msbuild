@@ -1538,9 +1538,9 @@ namespace Microsoft.Build.CommandLine
 
                             if (enableRestore || restoreOnly)
                             {
-                                result = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties, saveProjectResult: saveProjectResult);
+                                BuildResult restoreResult = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties, saveProjectResult: saveProjectResult);
 
-                                if (result.OverallResult != BuildResultCode.Success)
+                                if (restoreResult.OverallResult != BuildResultCode.Success)
                                 {
                                     return false;
                                 }
