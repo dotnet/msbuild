@@ -636,10 +636,9 @@ internal sealed class TerminalLogger : INodeLogger
     /// </summary>
     private void ThreadProc()
     {
-        while (!_cts.IsCancellationRequested)
+        // 1_000 / 30 is a poor approx of 30Hz
+        while (!_cts.Token.WaitHandle.WaitOne(1_000 / 30))
         {
-            _cts.Token.WaitHandle.WaitOne(1_000 / 30);  // basically equivalent for a sleep with quick cancellation, 1_000 / 30 is a poor approx of 30Hz
-
             lock (_lock)
             {
                 DisplayNodes();
