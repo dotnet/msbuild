@@ -668,6 +668,10 @@ namespace Microsoft.Build.CommandLine
             {
                 return false;
             }
+
+            // issue: https://github.com/dotnet/msbuild/issues/9442
+            // In order to align the parsing behaviour of Target property when MSBuild invoked from PowerShell or CMD,
+            // the target property value will be unquoted before processing further
             if (parameterizedSwitch == ParameterizedSwitch.Target)
             {
                 return true;
