@@ -132,8 +132,13 @@ internal sealed partial class TerminalLogger : INodeLogger
     private bool _restoreFailed;
 
     /// <summary>
+    /// True if restore happened and finished.
+    /// </summary>
+    private bool _restoreFinished = false;
+
+    /// <summary>
     /// The project build context corresponding to the <c>Restore</c> initial target, or null if the build is currently
-    /// bot restoring.
+    /// not restoring.
     /// </summary>
     private ProjectContext? _restoreContext;
 
@@ -246,7 +251,10 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <inheritdoc/>
     public void Shutdown()
     {
+        _cts.Cancel();
+        _refresher?.Join();
         Terminal.Dispose();
+        _cts.Dispose();
     }
 
     #endregion
@@ -337,12 +345,14 @@ internal sealed partial class TerminalLogger : INodeLogger
                 targetFramework = null;
             }
             _projects[c] = new(targetFramework);
-        }
 
-        if (e.TargetNames == "Restore")
-        {
-            _restoreContext = c;
-            _nodes[0] = new NodeStatus(e.ProjectFile!, null, "Restore", _projects[c].Stopwatch);
+            // First ever restore in the build is starting.
+            if (e.TargetNames == "Restore" && !_restoreFinished)
+            {
+                _restoreContext = c;
+                int nodeIndex = NodeIndexForContext(buildEventContext);
+                _nodes[nodeIndex] = new NodeStatus(e.ProjectFile!, null, "Restore", _projects[c].Stopwatch);
+            }
         }
     }
 
@@ -412,6 +422,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                         }
 
                         _restoreContext = null;
+                        _restoreFinished = true;
                     }
                     // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
                     else if (project.OutputPath is not null || project.BuildMessages is not null)
@@ -665,10 +676,9 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private void ThreadProc()
     {
-        while (!_cts.IsCancellationRequested)
+        // 1_000 / 30 is a poor approx of 30Hz
+        while (!_cts.Token.WaitHandle.WaitOne(1_000 / 30))
         {
-            Thread.Sleep(1_000 / 30); // poor approx of 30Hz
-
             lock (_lock)
             {
                 DisplayNodes();
