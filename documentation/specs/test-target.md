@@ -1,5 +1,6 @@
 ## MSBuild Test Target and Task 
 See: [MSBuild Test Target](https://github.com/dotnet/msbuild/pull/9193)
+
 ### Motivation
 The primary motivation of the MSBuild Test Target is to offer a convienent and standardardized way for executing tests within the msbuild environment. This is inspired by the simplicity of the `dotnet test` command. The proposed command for initiating test within MSBuild would be `msbuild /t:Test`
 
@@ -48,14 +49,14 @@ For instance, an implementation for running VSTest would look like:
 See: [MSBuild Test Task](https://github.com/microsoft/MSBuildSdks/pull/473)
 
 #### Nuget package for default implementaion
-* The default implementation will be provided through a nuget package
-* This package will contain an MSBuild Task deigned to execute `vstest.console.exe`
+* The default implementation will be provided through a nuget package.
+* This package will contain an MSBuild Task deigned to execute `vstest.console.exe`.
 
 #### MSBuild Task Functionality
 * The core of this implemenation is an MSBuild task that interfaces with `vstest.console.exe`.
 * This task will accept arguments as properties and pass them directly into the command line test runner.
 
 #### Using The Default Implementation
-* Users would install the provided Nuget Package to incorporate it into their projects
-* Add the package to their GlobalPackageReferences or specific projects
-* Once integrated, executing `msbuild /t:Test` would trigger the MSBuild Task, ultimately executing `vstest.console.exe`
+* Users would install the provided Nuget Package to incorporate it into their projects.
+* Add the package to their GlobalPackageReferences or specific projects.
+* Once integrated, executing `msbuild /t:Test` would trigger the MSBuild Task, ultimately executing `vstest.console.exe`.
