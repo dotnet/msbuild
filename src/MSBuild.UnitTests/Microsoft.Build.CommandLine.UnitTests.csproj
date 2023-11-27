@@ -75,4 +75,22 @@
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Snapshots\TerminalLogger_Tests.PrintRestore_Failed.Linux.verified.txt">
+      <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
+      <DependentUpon>%(ParentFile).cs</DependentUpon>
+    </None>
+    <None Update="Snapshots\TerminalLogger_Tests.PrintRestore_SuccessWithWarnings.OSX.verified.txt">
+      <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
+      <DependentUpon>%(ParentFile).cs</DependentUpon>
+    </None>
+    <None Update="Snapshots\TerminalLogger_Tests.PrintRestore_Failed.OSX.verified.txt">
+      <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
+      <DependentUpon>%(ParentFile).cs</DependentUpon>
+    </None>
+    <None Update="Snapshots\TerminalLogger_Tests.PrintRestore_SuccessWithWarnings.Linux.verified.txt">
+      <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
+    </None>
+  </ItemGroup>
+
 </Project>

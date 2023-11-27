@@ -279,6 +279,30 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public Task PrintRestore_Failed()
+        {
+            bool succeeded = false;
+            ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Restore Failed"));
+
+            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(_projectFile, succeeded));
+            BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintRestore_SuccessWithWarnings()
+        {
+            bool succeeded = true;
+            WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Restore with Warning"));
+
+            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(_projectFile, succeeded));
+            BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
         public Task PrintBuildSummary_Failed()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, () => { });
