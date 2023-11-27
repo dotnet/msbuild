@@ -237,6 +237,7 @@ internal sealed class TerminalLogger : INodeLogger
         _cts.Cancel();
         _refresher?.Join();
         Terminal.Dispose();
+        _cts.Dispose();
     }
 
     #endregion
@@ -637,7 +638,7 @@ internal sealed class TerminalLogger : INodeLogger
     {
         while (!_cts.IsCancellationRequested)
         {
-            Thread.Sleep(1_000 / 30); // poor approx of 30Hz
+            _cts.Token.WaitHandle.WaitOne(1_000 / 30);  // basically equivalent for a sleep with quick cancellation, 1_000 / 30 is a poor approx of 30Hz
 
             lock (_lock)
             {
