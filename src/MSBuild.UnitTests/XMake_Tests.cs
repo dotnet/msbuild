@@ -627,6 +627,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData("-getProperty:Foo;Bar -getItem:MyItem -t:Build", true, "TargetValue", true, true, false, true, false)]
         [InlineData("-getProperty:Foo;Bar -getItem:MyItem", true, "EvalValue", true, false, false, true, false)]
         [InlineData("-getProperty:Foo;Bar -getTargetResult:MyTarget", true, "TargetValue", false, false, true, true, false)]
+        [InlineData("-getProperty:Foo;Bar -getTargetResult:MyTarget -t:restore", true, "TargetValue", false, false, true, true, false)]
         [InlineData("-getProperty:Foo;Bar", true, "EvalValue", false, false, false, false, false)]
         [InlineData("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false, false, false)]
         [InlineData("-getItem:MyItem", false, "", true, false, false, false, false)]
