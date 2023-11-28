@@ -1515,7 +1515,6 @@ namespace Microsoft.Build.CommandLine
                             // approach.
                             GraphBuildRequestData graphBuildRequest = null;
                             BuildRequestData buildRequest = null;
-                            BuildResult restoreResult = null;
                             if (!restoreOnly)
                             {
                                 // By default, the project state is thrown out after a build. The ProvideProjectStateAfterBuild flag adds the project state after build
@@ -1539,9 +1538,9 @@ namespace Microsoft.Build.CommandLine
 
                             if (enableRestore || restoreOnly)
                             {
-                                restoreResult = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties, saveProjectResult: saveProjectResult);
+                                result = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties, saveProjectResult: saveProjectResult);
 
-                                if (restoreResult.OverallResult != BuildResultCode.Success)
+                                if (result.OverallResult != BuildResultCode.Success)
                                 {
                                     return false;
                                 }
@@ -1569,22 +1568,18 @@ namespace Microsoft.Build.CommandLine
                                                                                                                                         entryValue.Equals(propertyKvp.Value)))
                                             .Value;
                                     }
-                                    else
-                                    {
-                                        success = graphResult.OverallResult == BuildResultCode.Success;
-                                    }
                                 }
                                 else
                                 {
                                     result = ExecuteBuild(buildManager, buildRequest);
                                 }
                             }
-                            else
-                            {
-                                success = restoreResult.OverallResult == BuildResultCode.Success;
-                            }
 
-                            if (result != null && result.Exception == null)
+                            if (graphResult != null && !saveProjectResult)
+                            {
+                                success = graphResult.OverallResult == BuildResultCode.Success;
+                            }
+                            else if (result != null && result.Exception == null)
                             {
                                 success = result.OverallResult == BuildResultCode.Success;
                             }
