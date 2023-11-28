@@ -1515,6 +1515,7 @@ namespace Microsoft.Build.CommandLine
                             // approach.
                             GraphBuildRequestData graphBuildRequest = null;
                             BuildRequestData buildRequest = null;
+                            BuildResult restoreResult = null;
                             if (!restoreOnly)
                             {
                                 // By default, the project state is thrown out after a build. The ProvideProjectStateAfterBuild flag adds the project state after build
@@ -1538,7 +1539,7 @@ namespace Microsoft.Build.CommandLine
 
                             if (enableRestore || restoreOnly)
                             {
-                                BuildResult restoreResult = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties, saveProjectResult: saveProjectResult);
+                                restoreResult = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties, saveProjectResult: saveProjectResult);
 
                                 if (restoreResult.OverallResult != BuildResultCode.Success)
                                 {
@@ -1577,6 +1578,10 @@ namespace Microsoft.Build.CommandLine
                                 {
                                     result = ExecuteBuild(buildManager, buildRequest);
                                 }
+                            }
+                            else
+                            {
+                                success = restoreResult.OverallResult == BuildResultCode.Success;
                             }
 
                             if (result != null && result.Exception == null)
