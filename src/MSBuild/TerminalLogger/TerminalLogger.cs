@@ -592,8 +592,6 @@ internal sealed partial class TerminalLogger : INodeLogger
     private void WarningRaised(object sender, BuildWarningEventArgs e)
     {
         BuildEventContext? buildEventContext = e.BuildEventContext;
-        Project? project = null;
-        bool isTrackedProject = buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out project);
         string message = EventArgsFormatting.FormatEventMessage(
                 category: AnsiCodes.Colorize("warning", TerminalColor.Yellow),
                 subcategory: e.Subcategory,
@@ -608,14 +606,14 @@ internal sealed partial class TerminalLogger : INodeLogger
                 threadId: e.ThreadId,
                 logOutputProperties: null);
 
-        if (isTrackedProject)
+        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
             if (IsImmediateMessage(message))
             {
                 RenderImmediateMessage(message);
             }
 
-            project!.AddBuildMessage(MessageSeverity.Warning, message);
+            project.AddBuildMessage(MessageSeverity.Warning, message);
         }
         else
         {
@@ -643,8 +641,6 @@ internal sealed partial class TerminalLogger : INodeLogger
     private void ErrorRaised(object sender, BuildErrorEventArgs e)
     {
         BuildEventContext? buildEventContext = e.BuildEventContext;
-        Project? project = null;
-        bool isTrackedProject = buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out project);
         string message = EventArgsFormatting.FormatEventMessage(
                 category: AnsiCodes.Colorize("error", TerminalColor.Red),
                 subcategory: e.Subcategory,
@@ -659,9 +655,9 @@ internal sealed partial class TerminalLogger : INodeLogger
                 threadId: e.ThreadId,
                 logOutputProperties: null);
 
-        if (isTrackedProject)
+        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
-            project!.AddBuildMessage(MessageSeverity.Error, message);
+            project.AddBuildMessage(MessageSeverity.Error, message);
         }
         else
         {
