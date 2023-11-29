@@ -1453,13 +1453,20 @@ namespace Microsoft.Build.Execution
             }
 
             ErrorUtilities.VerifyThrow(FileUtilities.IsSolutionFilename(config.ProjectFullPath), "{0} is not a solution", config.ProjectFullPath);
+
+            var buildEventContext = request.BuildEventContext;
+            if (buildEventContext == BuildEventContext.Invalid)
+            {
+                buildEventContext = new BuildEventContext(request.SubmissionId, 0, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+            }
+
             var instances = ProjectInstance.LoadSolutionForBuild(
                 config.ProjectFullPath,
                 config.GlobalProperties,
                 config.ExplicitToolsVersionSpecified ? config.ToolsVersion : null,
                 _buildParameters,
                 ((IBuildComponentHost)this).LoggingService,
-                request.BuildEventContext,
+                buildEventContext,
                 false /* loaded by solution parser*/,
                 config.RequestedTargets,
                 SdkResolverService,
