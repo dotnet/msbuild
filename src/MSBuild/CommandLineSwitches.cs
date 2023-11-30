@@ -488,7 +488,7 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
-                    if (IsMultipleAllowedSwithParameterDueToUnquote(unquoteParameters, parameterizedSwitch))
+                    if (IsMultipleAllowedSwitchParameterDueToUnquote(unquoteParameters, parameterizedSwitch))
                     {
                         switchParameters = QuotingUtilities.Unquote(switchParameters);
                     }
@@ -662,9 +662,9 @@ namespace Microsoft.Build.CommandLine
         ///     The changewave 17.10 is not set and
         ///     The parametrized switch is 'Target'
         /// </summary>
-        private bool IsMultipleAllowedSwithParameterDueToUnquote(bool unquoteParameter, ParameterizedSwitch parameterizedSwitch)
+        private bool IsMultipleAllowedSwitchParameterDueToUnquote(bool unquoteParameter, ParameterizedSwitch parameterizedSwitch)
         {
-            if (!unquoteParameter || !Traits.Instance.EscapeHatches.UnquoteTragetSwitchParameters)
+            if (!unquoteParameter || !Traits.Instance.EscapeHatches.UnquoteTargetSwitchParameters)
             {
                 return false;
             }

@@ -400,7 +400,7 @@ namespace Microsoft.Build.Framework
             }
         }
 
-        public bool UnquoteTragetSwitchParameters
+        public bool UnquoteTargetSwitchParameters
         {
             get
             {
