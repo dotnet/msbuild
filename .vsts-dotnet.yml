@@ -311,4 +311,5 @@ stages:
         -TsaRepositoryName "dotnet-msbuild"
         -TsaCodebaseName "dotnet-msbuild"
         -TsaPublish $True
+        -CrScanAdditionalRunConfigParams @("SuppressionsPath < $(Build.SourcesDirectory)\eng\CredScanSuppressions.json")
         -PoliCheckAdditionalRunConfigParams @("UserExclusionPath < $(Build.SourcesDirectory)\eng\policheck_exclusions.xml")'
