@@ -1567,21 +1567,18 @@ namespace Microsoft.Build.CommandLine
                                             nodeResultKvp.Key.ProjectInstance.GlobalProperties.All(propertyKvp => entryPoint.GlobalProperties.TryGetValue(propertyKvp.Key, out string entryValue) &&
                                                                                                                                         entryValue.Equals(propertyKvp.Value)))
                                             .Value;
+                                        success = result.OverallResult == BuildResultCode.Success;
+                                    }
+                                    else
+                                    {
+                                        success = graphResult.OverallResult == BuildResultCode.Success;
                                     }
                                 }
                                 else
                                 {
                                     result = ExecuteBuild(buildManager, buildRequest);
+                                    success = result.OverallResult == BuildResultCode.Success;
                                 }
-                            }
-
-                            if (graphResult != null && !saveProjectResult)
-                            {
-                                success = graphResult.OverallResult == BuildResultCode.Success;
-                            }
-                            else if (result != null && result.Exception == null)
-                            {
-                                success = result.OverallResult == BuildResultCode.Success;
                             }
                         }
                         finally
