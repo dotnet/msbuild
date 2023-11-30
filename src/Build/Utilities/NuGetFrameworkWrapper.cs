@@ -48,20 +48,14 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Initialized this instance. May run in a separate AppDomain.
         /// </summary>
-        /// <param name="assemblyDirectory">The directory from which NuGet.Frameworks should be loaded.</param>
-        /// <param name="useAssemblyLoad">True to use Assembly.Load with partial name, false to use Assembly.LoadFile.</param>
-        public void Initialize(string assemblyDirectory, bool useAssemblyLoad)
+        /// <param name="assemblyName">The NuGet.Frameworks to be loaded or null to load by path.</param>
+        /// <param name="assemblyFilePath">The file path from which NuGet.Frameworks should be loaded of <paramref name="assemblyName"/> is null.</param>
+        public void Initialize(AssemblyName assemblyName, string assemblyFilePath)
         {
-            string assemblyFilePath = Path.Combine(assemblyDirectory, NuGetFrameworksFileName);
-
             Assembly NuGetAssembly;
-            if (useAssemblyLoad)
+            if (assemblyName != null)
             {
                 // This will load the assembly into the default load context if possible, and fall back to LoadFrom context.
-                AssemblyName assemblyName = new AssemblyName(NuGetFrameworksAssemblyName)
-                {
-                    CodeBase = assemblyFilePath,
-                };
                 NuGetAssembly = Assembly.Load(assemblyName);
             }
             else
@@ -163,20 +157,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public override object InitializeLifetimeService() => null;
 
-        private static AppDomainSetup CreateAppDomainSetup(string assemblyDirectory)
+        private static AppDomainSetup CreateAppDomainSetup(AssemblyName assemblyName, string assemblyPath)
         {
-            string assemblyPath = Path.Combine(assemblyDirectory, NuGetFrameworksFileName);
-            AssemblyName assemblyName;
-            try
-            {
-                assemblyName = AssemblyName.GetAssemblyName(assemblyPath);
-            }
-            catch
-            {
-                // Return null to fall back to loading into the default AppDomain using LoadFile.
-                return null;
-            }
-
             byte[] publicKeyToken = assemblyName.GetPublicKeyToken();
             StringBuilder publicKeyTokenString = new(publicKeyToken.Length * 2);
             for (int i = 0; i < publicKeyToken.Length; i++)
@@ -211,7 +193,6 @@ namespace Microsoft.Build.Evaluation
           <assemblyIdentity name=""{NuGetFrameworksAssemblyName}"" publicKeyToken=""{publicKeyTokenString}"" culture=""{assemblyName.CultureName}"" />
           <codeBase version=""{assemblyName.Version}"" href=""{assemblyPath}"" />
         </dependentAssembly>
-        <qualifyAssembly partialName=""{NuGetFrameworksAssemblyName}"" fullName=""{assemblyName.FullName}"" />
       </assemblyBinding>
     </runtime>
   </configuration>";
@@ -229,26 +210,43 @@ namespace Microsoft.Build.Evaluation
                 Path.Combine(BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory, "Common7", "IDE", "CommonExtensions", "Microsoft", "NuGet") :
                 BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
 
-            bool isLoadedInSeparateAppDomain = false;
+            string assemblyPath = Path.Combine(assemblyDirectory, NuGetFrameworksFileName);
+
             NuGetFrameworkWrapper instance = null;
-            try
-            {
+            AssemblyName assemblyName = null;
 #if FEATURE_APPDOMAIN
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10) && BuildEnvironmentHelper.Instance.RunningInMSBuildExe)
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10) &&
+                (BuildEnvironmentHelper.Instance.RunningInMSBuildExe || BuildEnvironmentHelper.Instance.RunningInVisualStudio))
+            {
+                // If we are running in MSBuild.exe or VS, we can load the assembly with Assembly.Load, which enables
+                // the runtime to bind to the native image, eliminating some non-trivial JITting cost. Devenv.exe knows how to
+                // load the assembly by name. In MSBuild.exe, however, we don't know the version of the assembly statically so
+                // we create a separate AppDomain with the right binding redirects.
+                try
                 {
-                    // If we are running in MSBuild.exe we can load the assembly into a separate AppDomain. Loading into an AD with
-                    // Assembly.Load enables the runtime to bind to the native image, eliminating some non-trivial JITting cost.
-                    AppDomainSetup appDomainSetup = CreateAppDomainSetup(assemblyDirectory);
-                    if (appDomainSetup != null)
+                    assemblyName = AssemblyName.GetAssemblyName(assemblyPath);
+                    if (assemblyName != null && BuildEnvironmentHelper.Instance.RunningInMSBuildExe)
                     {
-                        AppDomain appDomain = AppDomain.CreateDomain(nameof(NuGetFrameworkWrapper), null, appDomainSetup);
-                        instance = (NuGetFrameworkWrapper)appDomain.CreateInstanceAndUnwrap(Assembly.GetExecutingAssembly().FullName, typeof(NuGetFrameworkWrapper).FullName);
-                        isLoadedInSeparateAppDomain = true;
+                        AppDomainSetup appDomainSetup = CreateAppDomainSetup(assemblyName, assemblyPath);
+                        if (appDomainSetup != null)
+                        {
+                            AppDomain appDomain = AppDomain.CreateDomain(nameof(NuGetFrameworkWrapper), null, appDomainSetup);
+                            instance = (NuGetFrameworkWrapper)appDomain.CreateInstanceAndUnwrap(Assembly.GetExecutingAssembly().FullName, typeof(NuGetFrameworkWrapper).FullName);
+                        }
                     }
                 }
+                catch
+                {
+                    // If anything goes wrong just fall back to loading into current AD by path.
+                    instance = null;
+                    assemblyName = null;
+                }
+            }
 #endif
+            try
+            {
                 instance ??= new NuGetFrameworkWrapper();
-                instance.Initialize(assemblyDirectory, useAssemblyLoad: isLoadedInSeparateAppDomain);
+                instance.Initialize(assemblyName, assemblyPath);
 
                 return instance;
             }
