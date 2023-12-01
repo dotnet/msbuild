@@ -657,7 +657,7 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Checks if the provided parametrized switch needs to be unquoted.
+        /// Checks if the provided multiple valued parametrized switch needs to be unquoted.
         /// The method will return 'true' in case:
         ///     The changewave 17.10 is not set and
         ///     The parametrized switch is 'Target'

@@ -1066,15 +1066,16 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches switches = new CommandLineSwitches();
             switches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.Target, commandLineArg, switchParameters, true, true, false);
-            Assert.True(switches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Target));
+            switches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Target).ShouldBeTrue();
 
             switches[CommandLineSwitches.ParameterizedSwitch.Target].Length.ShouldBe(2);
             switches[CommandLineSwitches.ParameterizedSwitch.Target][0].ShouldBe("Clean");
             switches[CommandLineSwitches.ParameterizedSwitch.Target][1].ShouldBe("Build");
+            switches.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.Target).ShouldBe(commandLineArg);
         }
 
         /// <summary>
-        /// Verifies that the parsing behaviour of quoted target properties is not change when ChangeWave configured.
+        /// Verifies that the parsing behavior of quoted target properties is not changed when ChangeWave configured.
         /// </summary>
         [Fact]
         public void ParameterizedSwitchTargetQuotedChangeWaveTest()
@@ -1085,7 +1086,7 @@ namespace Microsoft.Build.UnitTests
 
                 CommandLineSwitches switches = new CommandLineSwitches();
                 switches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.Target, "/t:Clean;Build", "\"Clean;Build\"", true, true, false);
-                Assert.True(switches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Target));
+                switches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Target).ShouldBeTrue();
 
                 switches[CommandLineSwitches.ParameterizedSwitch.Target].Length.ShouldBe(1);
                 switches[CommandLineSwitches.ParameterizedSwitch.Target][0].ShouldBe("Clean;Build");
