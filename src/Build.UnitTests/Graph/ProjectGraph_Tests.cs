@@ -678,11 +678,18 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void ConstructGraphWithSolution()
         {
-            // This test exercises two key features of solution-based builds from AssignProjectConfiguration:
-            // 1. Adding synthetic project references
-            // 2. Resolving project configuration based on the sln
-            // 3. Handling unresolved project references with ShouldUnsetParentConfigurationAndPlatform=true
-            // 4. Handling unresolved project references with ShouldUnsetParentConfigurationAndPlatform=false
+            /*
+             * This test exercises various key features of solution-based builds:
+             *      From AssignProjectConfiguration:
+             *          Adding synthetic project references
+             *          Resolving project configuration based on the sln
+             *          Handling unresolved project references with ShouldUnsetParentConfigurationAndPlatform=true
+             *          Handling unresolved project references with ShouldUnsetParentConfigurationAndPlatform=false
+             *      Project types other than "well-known" MSBuild project types:
+             *          Buildable project (wapproj)
+             *          Solution folder
+             * 
+             */
             using (var env = TestEnvironment.Create())
             {
                 const string SolutionFileContents = """
@@ -698,6 +705,13 @@ namespace Microsoft.Build.Graph.UnitTests
                     Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Project2", "Project2.vcxproj", "{D638A8EF-3A48-45F2-913C-88B29FED03CB}"
                     EndProject
                     Project("{13B669BE-BB05-4DDF-9536-439F39A36129}") = "Project3", "Project3.vcxproj", "{52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}"
+                    EndProject
+                    Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "Project6", "Project6.wapproj", "{CA5CAD1A-224A-4171-B13A-F16E576FDD12}"
+                    EndProject
+                    Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0392E290-973E-4086-A58E-F927AAA65B9A}"
+                        ProjectSection(SolutionItems) = preProject
+                            SomeSolutionItemsFile = SomeSolutionItemsFile
+                        EndProjectSection
                     EndProject
                     Global
                         GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -753,6 +767,24 @@ namespace Microsoft.Build.Graph.UnitTests
                             {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Release|x64.Build.0 = Release|x64
                             {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Release|x86.ActiveCfg = Release|Win32
                             {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Release|x86.Build.0 = Release|Win32
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Debug|Win32.ActiveCfg = Debug|x86
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Debug|Win32.Build.0 = Debug|x86
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Debug|Win32.Deploy.0 = Debug|x86
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Debug|x64.ActiveCfg = Debug|x64
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Debug|x64.Build.0 = Debug|x64
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Debug|x64.Deploy.0 = Debug|x64
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Debug|x86.ActiveCfg = Debug|x86
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Debug|x86.Build.0 = Debug|x86
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Debug|x86.Deploy.0 = Debug|x86
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|Win32.ActiveCfg = Release|x86
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|Win32.Build.0 = Release|x86
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|Win32.Deploy.0 = Release|x86
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|x64.ActiveCfg = Release|x64
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|x64.Build.0 = Release|x64
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|x64.Deploy.0 = Release|x64
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|x86.ActiveCfg = Release|x86
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|x86.Build.0 = Release|x86
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|x86.Deploy.0 = Release|x86
                         EndGlobalSection
                         GlobalSection(SolutionProperties) = preSolution
                             HideSolutionNode = FALSE
@@ -781,24 +813,27 @@ namespace Microsoft.Build.Graph.UnitTests
 
                 ProjectRootElement project4Xml = ProjectRootElement.Create();
                 ProjectRootElement project5Xml = ProjectRootElement.Create();
+                ProjectRootElement project6Xml = ProjectRootElement.Create();
 
                 string project1Path = Path.Combine(env.DefaultTestDirectory.Path, "Project1.csproj");
                 string project2Path = Path.Combine(env.DefaultTestDirectory.Path, "Project2.vcxproj");
                 string project3Path = Path.Combine(env.DefaultTestDirectory.Path, "Project3.vcxproj");
                 string project4Path = Path.Combine(env.DefaultTestDirectory.Path, "Project4.vcxproj");
                 string project5Path = Path.Combine(env.DefaultTestDirectory.Path, "Project5.vcxproj");
+                string project6Path = Path.Combine(env.DefaultTestDirectory.Path, "Project6.wapproj");
 
                 project1Xml.Save(project1Path);
                 project2Xml.Save(project2Path);
                 project3Xml.Save(project3Path);
                 project4Xml.Save(project4Path);
                 project5Xml.Save(project5Path);
+                project6Xml.Save(project6Path);
 
                 var projectGraph = new ProjectGraph(slnFile.Path);
-                projectGraph.EntryPointNodes.Count.ShouldBe(3);
-                projectGraph.GraphRoots.Count.ShouldBe(1);
-                projectGraph.GraphRoots.First().ProjectInstance.FullPath.ShouldBe(project1Path);
-                projectGraph.ProjectNodes.Count.ShouldBe(5);
+                projectGraph.EntryPointNodes.Count.ShouldBe(4);
+                projectGraph.GraphRoots.Count.ShouldBe(2);
+                projectGraph.GraphRoots.Select(node => node.ProjectInstance.FullPath).ShouldBe(new[] { project1Path, project6Path }, ignoreOrder: true);
+                projectGraph.ProjectNodes.Count.ShouldBe(6);
 
                 ProjectGraphNode project1Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project1Path);
                 project1Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
@@ -826,6 +861,12 @@ namespace Microsoft.Build.Graph.UnitTests
                 project5Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
                 project5Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("Win32");
                 project5Node.ProjectReferences.Count.ShouldBe(0);
+
+                // Project type other than "well-known" MSBuild project types.
+                ProjectGraphNode project6Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project6Path);
+                project6Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
+                project6Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
+                project6Node.ProjectReferences.Count.ShouldBe(0);
             }
         }
 

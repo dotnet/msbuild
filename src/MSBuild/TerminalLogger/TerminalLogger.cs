@@ -132,8 +132,13 @@ internal sealed partial class TerminalLogger : INodeLogger
     private bool _restoreFailed;
 
     /// <summary>
+    /// True if restore happened and finished.
+    /// </summary>
+    private bool _restoreFinished = false;
+
+    /// <summary>
     /// The project build context corresponding to the <c>Restore</c> initial target, or null if the build is currently
-    /// bot restoring.
+    /// not restoring.
     /// </summary>
     private ProjectContext? _restoreContext;
 
@@ -246,7 +251,10 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <inheritdoc/>
     public void Shutdown()
     {
+        _cts.Cancel();
+        _refresher?.Join();
         Terminal.Dispose();
+        _cts.Dispose();
     }
 
     #endregion
@@ -337,12 +345,14 @@ internal sealed partial class TerminalLogger : INodeLogger
                 targetFramework = null;
             }
             _projects[c] = new(targetFramework);
-        }
 
-        if (e.TargetNames == "Restore")
-        {
-            _restoreContext = c;
-            _nodes[0] = new NodeStatus(e.ProjectFile!, null, "Restore", _projects[c].Stopwatch);
+            // First ever restore in the build is starting.
+            if (e.TargetNames == "Restore" && !_restoreFinished)
+            {
+                _restoreContext = c;
+                int nodeIndex = NodeIndexForContext(buildEventContext);
+                _nodes[nodeIndex] = new NodeStatus(e.ProjectFile!, null, "Restore", _projects[c].Stopwatch);
+            }
         }
     }
 
@@ -412,6 +422,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                         }
 
                         _restoreContext = null;
+                        _restoreFinished = true;
                     }
                     // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
                     else if (project.OutputPath is not null || project.BuildMessages is not null)
@@ -591,16 +602,14 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private void WarningRaised(object sender, BuildWarningEventArgs e)
     {
-        var buildEventContext = e.BuildEventContext;
-        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
-        {
-            string message = EventArgsFormatting.FormatEventMessage(
+        BuildEventContext? buildEventContext = e.BuildEventContext;
+        string message = EventArgsFormatting.FormatEventMessage(
                 category: AnsiCodes.Colorize("warning", TerminalColor.Yellow),
                 subcategory: e.Subcategory,
                 message: e.Message,
                 code: AnsiCodes.Colorize(e.Code, TerminalColor.Yellow),
                 file: HighlightFileName(e.File),
-                projectFile: null,
+                projectFile: e.ProjectFile ?? null,
                 lineNumber: e.LineNumber,
                 endLineNumber: e.EndLineNumber,
                 columnNumber: e.ColumnNumber,
@@ -608,11 +617,20 @@ internal sealed partial class TerminalLogger : INodeLogger
                 threadId: e.ThreadId,
                 logOutputProperties: null);
 
+        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+        {
             if (IsImmediateMessage(message))
             {
                 RenderImmediateMessage(message);
             }
+
             project.AddBuildMessage(MessageSeverity.Warning, message);
+        }
+        else
+        {
+            // It is necessary to display warning messages reported by MSBuild, even if it's not tracked in _projects collection.
+            RenderImmediateMessage(message);
+            _buildHasWarnings = true;
         }
     }
 
@@ -621,30 +639,26 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     /// <param name="message">Raised event.</param>
     /// <returns>true if marker is detected.</returns>
-    private bool IsImmediateMessage(string message)
-    {
+    private bool IsImmediateMessage(string message) =>
 #if NET7_0_OR_GREATER
-        return ImmediateMessageRegex().IsMatch(message);
+        ImmediateMessageRegex().IsMatch(message);
 #else
-        return _immediateMessageKeywords.Any(imk => message.IndexOf(imk, StringComparison.OrdinalIgnoreCase) >= 0);
+        _immediateMessageKeywords.Any(imk => message.IndexOf(imk, StringComparison.OrdinalIgnoreCase) >= 0);
 #endif
-    }
 
     /// <summary>
     /// The <see cref="IEventSource.ErrorRaised"/> callback.
     /// </summary>
     private void ErrorRaised(object sender, BuildErrorEventArgs e)
     {
-        var buildEventContext = e.BuildEventContext;
-        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
-        {
-            string message = EventArgsFormatting.FormatEventMessage(
+        BuildEventContext? buildEventContext = e.BuildEventContext;
+        string message = EventArgsFormatting.FormatEventMessage(
                 category: AnsiCodes.Colorize("error", TerminalColor.Red),
                 subcategory: e.Subcategory,
                 message: e.Message,
                 code: AnsiCodes.Colorize(e.Code, TerminalColor.Red),
                 file: HighlightFileName(e.File),
-                projectFile: null,
+                projectFile: e.ProjectFile ?? null,
                 lineNumber: e.LineNumber,
                 endLineNumber: e.EndLineNumber,
                 columnNumber: e.ColumnNumber,
@@ -652,11 +666,19 @@ internal sealed partial class TerminalLogger : INodeLogger
                 threadId: e.ThreadId,
                 logOutputProperties: null);
 
+        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+        {
             project.AddBuildMessage(MessageSeverity.Error, message);
+        }
+        else
+        {
+            // It is necessary to display error messages reported by MSBuild, even if it's not tracked in _projects collection.
+            RenderImmediateMessage(message);
+            _buildHasErrors = true;
         }
     }
 
-#endregion
+    #endregion
 
     #region Refresher thread implementation
 
@@ -665,10 +687,9 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private void ThreadProc()
     {
-        while (!_cts.IsCancellationRequested)
+        // 1_000 / 30 is a poor approx of 30Hz
+        while (!_cts.Token.WaitHandle.WaitOne(1_000 / 30))
         {
-            Thread.Sleep(1_000 / 30); // poor approx of 30Hz
-
             lock (_lock)
             {
                 DisplayNodes();

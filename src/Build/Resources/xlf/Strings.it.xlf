@@ -28,12 +28,12 @@
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
         <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
-        <target state="new">Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</target>
+        <target state="translated">Compilazione della domanda NON RIUSCITA. La compilazione è terminata in anticipo perché è stata rilevata una destinazione o un'attività non aggiornata.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionSuccess">
         <source>Question build succeeded. Up-to-date checks passed.</source>
-        <target state="new">Question build succeeded. Up-to-date checks passed.</target>
+        <target state="translated">Compilazione della domanda riuscita. Controlli aggiornati superati.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildInProgress">
@@ -463,7 +463,7 @@
       </trans-unit>
       <trans-unit id="TaskAssemblyLoadedWithAssemblyLoadContext">
         <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</source>
-        <target state="new">Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</target>
+        <target state="translated">Assembly caricato durante {0}{1}: {2} (percorso: {3}, MVID: {4}, AssemblyLoadContext: {5})</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
