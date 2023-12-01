@@ -4487,7 +4487,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static void ShowVersion()
         {
-            Console.Write(ProjectCollection.Version.ToString());
+            Console.WriteLine(ProjectCollection.Version.ToString());
         }
     }
 }

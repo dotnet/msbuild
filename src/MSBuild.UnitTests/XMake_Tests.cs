@@ -523,6 +523,45 @@ namespace Microsoft.Build.UnitTests
             .ShouldBe(MSBuildApp.ExitType.Success);
         }
 
+        [Theory]
+        [InlineData("--version")]
+        [InlineData("-version")]
+        [InlineData(@"/version")]
+        [InlineData("-ver")]
+        [InlineData(@"/ver")]
+        public void VersionSwitch(string cmdSwitch)
+        {
+            List<string> cmdLine = new()
+            {
+#if !FEATURE_RUN_EXE_IN_TESTS
+                EnvironmentProvider.GetDotnetExePath(),
+#endif
+                FileUtilities.EnsureDoubleQuotes(RunnerUtilities.PathToCurrentlyRunningMsBuildExe),
+                "-nologo",
+                cmdSwitch
+            };
+
+            using Process process = new()
+            {
+                StartInfo =
+                {
+                    FileName = cmdLine[0],
+                    Arguments = string.Join(" ", cmdLine.Skip(1)),
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                },
+            };
+
+            process.Start();
+            process.WaitForExit();
+            process.ExitCode.ShouldBe(0);
+
+            string output = process.StandardOutput.ReadToEnd();
+            output.EndsWith(Environment.NewLine).ShouldBeTrue();
+
+            process.Close();
+        }
+
         [Fact]
         public void ErrorCommandLine()
         {
