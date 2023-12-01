@@ -254,7 +254,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                             MSBuildEventSource.Log.SdkResolverServiceLoadResolversStart();
                             newResolvers = _sdkResolverLoader.LoadResolversFromManifest(resolverManifest, sdkReferenceLocation);
                             _manifestToResolvers[resolverManifest] = newResolvers;
-                            MSBuildEventSource.Log.SdkResolverServiceLoadResolversStop(resolverManifest.DisplayName, newResolvers.Count);
+                            MSBuildEventSource.Log.SdkResolverServiceLoadResolversStop(resolverManifest.DisplayName ?? string.Empty, newResolvers.Count);
                         }
                     }
                 }
@@ -346,7 +346,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 }
                 finally
                 {
-                    MSBuildEventSource.Log.SdkResolverResolveSdkStop(sdkResolver.Name, sdk.Name, solutionPath, projectPath, result?.Path, result?.Success ?? false);
+                    MSBuildEventSource.Log.SdkResolverResolveSdkStop(sdkResolver.Name, sdk.Name, solutionPath ?? string.Empty, projectPath ?? string.Empty, result?.Path ?? string.Empty, result?.Success ?? false);
                 }
 
                 SetResolverState(submissionId, sdkResolver, context.State);
@@ -487,7 +487,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     MSBuildEventSource.Log.SdkResolverServiceLoadResolversStart();
                     sdkDefaultResolversManifest = new SdkResolverManifest(DisplayName: "DefaultResolversManifest", Path: null, ResolvableSdkRegex: null);
                     _manifestToResolvers[sdkDefaultResolversManifest] = defaultResolvers;
-                    MSBuildEventSource.Log.SdkResolverServiceLoadResolversStop(sdkDefaultResolversManifest.DisplayName, defaultResolvers.Count);
+                    MSBuildEventSource.Log.SdkResolverServiceLoadResolversStop(sdkDefaultResolversManifest.DisplayName ?? string.Empty, defaultResolvers.Count);
                 }
 
                 MSBuildEventSource.Log.SdkResolverServiceFindResolversManifestsStop(allResolversManifests.Count);
