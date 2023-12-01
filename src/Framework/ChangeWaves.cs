@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics;
 using System.Linq;
 
 #nullable disable
@@ -22,7 +23,7 @@ namespace Microsoft.Build.Framework
     /// </summary>
     /// See docs here: https://github.com/dotnet/msbuild/blob/main/documentation/wiki/ChangeWaves.md
     /// For dev docs: https://github.com/dotnet/msbuild/blob/main/documentation/wiki/ChangeWaves-Dev.md
-    internal class ChangeWaves
+    internal static class ChangeWaves
     {
         internal static readonly Version Wave17_4 = new Version(17, 4);
         internal static readonly Version Wave17_6 = new Version(17, 6);
@@ -161,6 +162,8 @@ namespace Microsoft.Build.Framework
         internal static bool AreFeaturesEnabled(Version wave)
         {
             ApplyChangeWave();
+
+            Debug.Assert(AllWaves.Contains(wave), $"Change wave version {wave} is invalid");
 
             return wave < _cachedWave;
         }
