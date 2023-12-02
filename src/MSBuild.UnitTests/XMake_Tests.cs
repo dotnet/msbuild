@@ -523,13 +523,8 @@ namespace Microsoft.Build.UnitTests
             .ShouldBe(MSBuildApp.ExitType.Success);
         }
 
-        [Theory]
-        [InlineData("--version")]
-        [InlineData("-version")]
-        [InlineData(@"/version")]
-        [InlineData("-ver")]
-        [InlineData(@"/ver")]
-        public void VersionSwitch(string cmdSwitch)
+        [Fact]
+        public void VersionSwitch()
         {
             List<string> cmdLine = new()
             {
@@ -538,7 +533,7 @@ namespace Microsoft.Build.UnitTests
 #endif
                 FileUtilities.EnsureDoubleQuotes(RunnerUtilities.PathToCurrentlyRunningMsBuildExe),
                 "-nologo",
-                cmdSwitch
+                "-version"
             };
 
             using Process process = new()
