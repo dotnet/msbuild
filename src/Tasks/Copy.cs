@@ -925,22 +925,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static string GetLockedFileMessage(string file)
         {
-            string message = string.Empty;
-
-            try
-            {
-                if (NativeMethodsShared.IsWindows && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
-                {
-                    var processes = LockCheck.GetProcessesLockingFile(file);
-                    message = !string.IsNullOrEmpty(processes)
-                        ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("Copy.FileLocked", processes)
-                        : String.Empty;
-                }
-            }
-            catch (Exception)
-            {
-                // Never throw if we can't get the processes locking the file.
-            }
+#pragma warning disable CA1416
+            string message = LockCheck.GetLockedFileMessage(file);
+#pragma warning restore CA1416
 
             return message;
         }
