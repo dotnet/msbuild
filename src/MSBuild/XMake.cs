@@ -1544,6 +1544,10 @@ namespace Microsoft.Build.CommandLine
                                 {
                                     return false;
                                 }
+                                else
+                                {
+                                    success = result.OverallResult == BuildResultCode.Success;
+                                }
                             }
 
                             if (!restoreOnly)
@@ -1567,12 +1571,8 @@ namespace Microsoft.Build.CommandLine
                                             nodeResultKvp.Key.ProjectInstance.GlobalProperties.All(propertyKvp => entryPoint.GlobalProperties.TryGetValue(propertyKvp.Key, out string entryValue) &&
                                                                                                                                         entryValue.Equals(propertyKvp.Value)))
                                             .Value;
-                                        success = result.OverallResult == BuildResultCode.Success;
                                     }
-                                    else
-                                    {
-                                        success = graphResult.OverallResult == BuildResultCode.Success;
-                                    }
+                                    success = graphResult.OverallResult == BuildResultCode.Success;
                                 }
                                 else
                                 {
