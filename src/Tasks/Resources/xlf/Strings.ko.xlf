@@ -1055,8 +1055,8 @@
         <note>{StrBegin="MSB3183: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.WriteOutputManifestFailed">
-        <source>MSB3173: Unable to write manifest '{0}'. {1}</source>
-        <target state="translated">MSB3173: '{0}' 매니페스트를 쓸 수 없습니다. {1}</target>
+        <source>MSB3173: Unable to write manifest '{0}'. {1} {2}</source>
+        <target state="new">MSB3173: Unable to write manifest '{0}'. {1} {2}</target>
         <note>{StrBegin="MSB3173: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.InvalidRequestedExecutionLevel">
@@ -2514,6 +2514,11 @@
         <target state="translated">MSB3353: 서명 연기에 필요한 공개 키를 지정하지 않았습니다.</target>
         <note>{StrBegin="MSB3353: "}</note>
       </trans-unit>
+      <trans-unit id="Task.FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="new">The file is locked by: "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
         <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
         <target state="translated">MSB4803: "{0}" 작업은 MSBuild의 .NET Core 버전에서 지원되지 않습니다. MSBuild의 .NET Framework 버전을 사용하세요. 자세한 내용은 https://aka.ms/msbuild/MSB4803을 참조하세요.</target>
@@ -3398,11 +3403,6 @@
         <source>MSB4801: The task factory "{0}" is not supported on the .NET Core version of MSBuild.</source>
         <target state="translated">MSB4801: MSBuild의 .NET Core 버전에서는 "{0}" 작업 팩터리가 지원되지 않습니다.</target>
         <note>{StrBegin="MSB4801: "}</note>
-      </trans-unit>
-      <trans-unit id="Copy.FileLocked">
-        <source>The file is locked by: "{0}"</source>
-        <target state="translated">파일이 "{0}"에 의해 잠겨 있습니다.</target>
-        <note />
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeType">
         <source>MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</source>

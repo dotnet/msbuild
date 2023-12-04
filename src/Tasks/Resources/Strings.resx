@@ -293,7 +293,7 @@
     <value>MSB3030: Could not copy the file "{0}" because it was not found.</value>
     <comment>{StrBegin="MSB3030: "} LOCALIZATION: {0} is a number.</comment>
   </data>
-  <data name="Copy.FileLocked">
+  <data name="Task.FileLocked">
     <value>The file is locked by: "{0}"</value>
   </data>
 
@@ -915,7 +915,7 @@
     <comment>{StrBegin="MSB3183: "}</comment>
   </data>
   <data name="GenerateManifest.WriteOutputManifestFailed">
-    <value>MSB3173: Unable to write manifest '{0}'. {1}</value>
+    <value>MSB3173: Unable to write manifest '{0}'. {1} {2}</value>
     <comment>{StrBegin="MSB3173: "}</comment>
   </data>
   <data name="GenerateManifest.InvalidRequestedExecutionLevel">

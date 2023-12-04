@@ -259,7 +259,7 @@ namespace Microsoft.Build.Tasks
                 {
                     var processes = GetProcessesLockingFile(file);
                     message = !string.IsNullOrEmpty(processes)
-                        ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("Copy.FileLocked", processes)
+                        ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("Task.FileLocked", processes)
                         : String.Empty;
                 }
             }

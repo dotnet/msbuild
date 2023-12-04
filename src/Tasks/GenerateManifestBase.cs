@@ -619,9 +619,11 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception ex)
             {
-#pragma warning disable CA1416
-                string lockedFileMessage = LockCheck.GetLockedFileMessage(OutputManifest.ItemSpec);
-#pragma warning restore CA1416
+                string lockedFileMessage = string.Empty;
+                if (NativeMethodsShared.IsWindows)
+                {
+                    lockedFileMessage = LockCheck.GetLockedFileMessage(OutputManifest.ItemSpec);
+                }
                 Log.LogErrorWithCodeFromResources("GenerateManifest.WriteOutputManifestFailed", OutputManifest.ItemSpec, ex.Message, lockedFileMessage);
 
                 return false;
