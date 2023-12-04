@@ -33,7 +33,6 @@ namespace Microsoft.NET.StringTools
         {
             uint hash = fnvOffsetBasisA32Bit;
 
-#if NET35
             unchecked
             {
                 for (int i = 0; i < text.Length; i++)
@@ -48,20 +47,14 @@ namespace Microsoft.NET.StringTools
                     hash *= fnvPrimeA32Bit;
                 }
             }
-#else
-            ReadOnlySpan<byte> span = MemoryMarshal.Cast<char, byte>(text.AsSpan());
-            foreach (byte b in span)
-            {
-                hash = unchecked((hash ^ b) * fnvPrimeA32Bit);
-            }
-#endif
 
             return unchecked((int)hash);
         }
 
         /// <summary>
-        /// Computes 64 bit Fowler/Noll/Vo-1a hash optimized for ASCII strings.
-        /// The hashing algorithm considers only the first 8 bits of each character.
+        /// Computes 64 bit Fowler/Noll/Vo-1a inspired hash of a string.
+        /// The hashing algorithm process the data by the whole 16bit chars, instead of by bytes.
+        ///  this speeds up the hashing process almost by 2x, while not significantly increasing collisions rate.
         /// Analysis: https://github.com/KirillOsenkov/MSBuildStructuredLog/wiki/String-Hashing#faster-fnv-1a
         /// </summary>
         /// <param name="text">String to be hashed.</param>
@@ -92,7 +85,6 @@ namespace Microsoft.NET.StringTools
         {
             long hash = fnvOffsetBasisA64Bit;
 
-#if NET35
             unchecked
             {
                 for (int i = 0; i < text.Length; i++)
@@ -107,13 +99,6 @@ namespace Microsoft.NET.StringTools
                     hash *= fnvPrimeA64Bit;
                 }
             }
-#else
-            ReadOnlySpan<byte> span = MemoryMarshal.Cast<char, byte>(text.AsSpan());
-            foreach (byte b in span)
-            {
-                hash = unchecked((hash ^ b) * fnvPrimeA64Bit);
-            }
-#endif
 
             return hash;
         }
