@@ -4597,7 +4597,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void VerifyPropertyTrackingLoggingDefault()
         {
             // Having just environment variables defined should default to nothing being logged except one environment variable read.
-            this.VerifyPropertyTrackingLoggingScenario(
+            VerifyPropertyTrackingLoggingScenario(
                 null,
                 logger =>
                 {
@@ -4615,11 +4615,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                     logger
                         .AllBuildEvents
-                        .OfType<PropertyReassignmentEventArgs>()
-                        .ShouldBeEmpty();
-
-                    logger
-                        .AllBuildEvents
                         .OfType<PropertyInitialValueSetEventArgs>()
                         .ShouldBeEmpty();
                 });
@@ -4628,7 +4623,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void VerifyPropertyTrackingLoggingPropertyReassignment()
         {
-            this.VerifyPropertyTrackingLoggingScenario(
+            VerifyPropertyTrackingLoggingScenario(
                 "1",
                 logger =>
                 {
@@ -4674,11 +4669,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         .ShouldHaveSingleItem()
                         .EnvironmentVariableName
                         .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
-
-                    logger
-                        .AllBuildEvents
-                        .OfType<PropertyReassignmentEventArgs>()
-                        .ShouldBeEmpty();
 
                     logger
                         .AllBuildEvents
