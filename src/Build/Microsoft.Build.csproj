@@ -179,6 +179,7 @@
     <Compile Include="Logging\TargetConsoleConfiguration.cs" />
     <Compile Include="Utilities\ImmutableCollectionsExtensions.cs" />
     <Compile Include="Utilities\NuGetFrameworkWrapper.cs" />
+    <Compile Include="Utilities\NuGetFrameworkWrapper.redirects.cs" Condition="'$(FeatureAppDomain)' == 'true'" />
     <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectUsingTaskParameterElementLink.cs" />
     <Compile Include="ObjectModelRemoting\ExternalProjectsProvider.cs" />
     <Compile Include="ObjectModelRemoting\LinkedObjectFactory.cs" />
@@ -670,4 +671,30 @@
       <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
+
+  <!-- Extract binding redirects for Microsoft.Build from MSBuild.exe.config into a source file -->
+  <Target Name="GenerateAppDomainConfig" BeforeTargets="Build" Condition="'$(FeatureAppDomain)' == 'true'">
+    <PropertyGroup>
+      <BindingRedirectNamespace>&lt;Namespace Prefix='ns' Uri='urn:schemas-microsoft-com:asm.v1' /&gt;</BindingRedirectNamespace>
+      <BindingRedirectXPath>/configuration/runtime/ns:assemblyBinding/ns:dependentAssembly[ns:assemblyIdentity/@name='Microsoft.Build']</BindingRedirectXPath>
+    </PropertyGroup>
+
+    <XmlPeek XmlInputPath="..\MSBuild\app.config" Query="$(BindingRedirectXPath)" Namespaces="$(BindingRedirectNamespace)">
+      <Output TaskParameter="Result" ItemName="BindingRedirect32" />
+    </XmlPeek>
+    <XmlPeek XmlInputPath="..\MSBuild\app.amd64.config" Query="$(BindingRedirectXPath)" Namespaces="$(BindingRedirectNamespace)">
+      <Output TaskParameter="Result" ItemName="BindingRedirect64" />
+    </XmlPeek>
+
+    <WriteLinesToFile File="Utilities\NuGetFrameworkWrapper.redirects.cs" Overwrite="true" WriteOnlyWhenDifferent="true" Lines="
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+namespace Microsoft.Build.Evaluation%3B;
+[System.CodeDom.Compiler.GeneratedCode(&quot;GenerateAppDomainConfig&quot;, &quot;1.0&quot;)]
+internal sealed partial class NuGetFrameworkWrapper
+{
+%20%20%20%20private const string _bindingRedirect32 = &quot;&quot;&quot;;@(BindingRedirect32);&quot;&quot;&quot;%3B;
+%20%20%20%20private const string _bindingRedirect64 = &quot;&quot;&quot;;@(BindingRedirect64);&quot;&quot;&quot;%3B;
+}"/>
+  </Target>
 </Project>

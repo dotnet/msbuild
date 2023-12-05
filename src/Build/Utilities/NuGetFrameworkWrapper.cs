@@ -19,7 +19,7 @@ namespace Microsoft.Build.Evaluation
     /// <summary>
     /// Wraps the NuGet.Frameworks assembly, which is referenced by reflection and optionally loaded into a separate AppDomain for performance.
     /// </summary>
-    internal sealed class NuGetFrameworkWrapper
+    internal sealed partial class NuGetFrameworkWrapper
 #if FEATURE_APPDOMAIN
         : MarshalByRefObject
 #endif
@@ -169,33 +169,22 @@ namespace Microsoft.Build.Evaluation
             // Create an app.config for the AppDomain. We expect the AD to host the currently executing assembly Microsoft.Build,
             // NuGet.Frameworks, and Framework assemblies. It is important to use the same binding redirects that were used when
             // NGENing MSBuild for the native images to be used.
-            string configuration = $@"<?xml version=""1.0"" encoding=""utf-8""?>
+            string configuration = $"""
+<?xml version="1.0" encoding="utf-8"?>
   <configuration>
     <runtime>
-      <DisableFXClosureWalk enabled=""true"" />
-      <DeferFXClosureWalk enabled=""true"" />
-      <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
-        {
-            (Environment.Is64BitProcess
-                ? @"<dependentAssembly>
-                      <assemblyIdentity name=""Microsoft.Build"" culture=""neutral"" publicKeyToken=""b03f5f7f11d50a3a"" />
-                      <bindingRedirect oldVersion=""0.0.0.0-99.9.9.9"" newVersion=""15.1.0.0"" />
-                      <codeBase version=""15.1.0.0"" href=""..\Microsoft.Build.dll""/>
-                    </dependentAssembly>"
-
-                : @"<dependentAssembly>
-                      <assemblyIdentity name=""Microsoft.Build"" culture=""neutral"" publicKeyToken=""b03f5f7f11d50a3a"" />
-                      <bindingRedirect oldVersion=""0.0.0.0-99.9.9.9"" newVersion=""15.1.0.0"" />
-                    </dependentAssembly>"
-             )
-        }
+      <DisableFXClosureWalk enabled="true" />
+      <DeferFXClosureWalk enabled="true" />
+      <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+        {(Environment.Is64BitProcess ? _bindingRedirect64 : _bindingRedirect32)}
         <dependentAssembly>
-          <assemblyIdentity name=""{NuGetFrameworksAssemblyName}"" publicKeyToken=""{publicKeyTokenString}"" culture=""{assemblyName.CultureName}"" />
-          <codeBase version=""{assemblyName.Version}"" href=""{assemblyPath}"" />
+          <assemblyIdentity name="{NuGetFrameworksAssemblyName}" publicKeyToken="{publicKeyTokenString}" culture="{assemblyName.CultureName}" />
+          <codeBase version="{assemblyName.Version}" href="{assemblyPath}" />
         </dependentAssembly>
       </assemblyBinding>
     </runtime>
-  </configuration>";
+  </configuration>
+""";
 
             AppDomainSetup appDomainSetup = AppDomain.CurrentDomain.SetupInformation;
             appDomainSetup.SetConfigurationBytes(Encoding.UTF8.GetBytes(configuration));
