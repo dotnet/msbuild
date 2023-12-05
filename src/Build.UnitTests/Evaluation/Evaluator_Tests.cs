@@ -4919,6 +4919,57 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
+        /// <summary>
+        /// Log when a property is being assigned a new value.
+        /// </summary>
+        [Fact]
+        public void VerifyLogPropertyReassignment()
+        {
+            string testtargets = ObjectModelHelpers.CleanupFileContents(@"
+                                <Project xmlns='msbuildnamespace'>
+                                     <PropertyGroup>
+                                         <Prop>OldValue</Prop>
+                                         <Prop>NewValue</Prop>
+                                     </PropertyGroup>
+                                  <Target Name=""Test""/>
+                                </Project>");
+
+            string tempPath = Path.GetTempPath();
+            string targetDirectory = Path.Combine(tempPath, "LogPropertyAssignments");
+            string testTargetPath = Path.Combine(targetDirectory, "test.proj");
+
+            try
+            {
+                Directory.CreateDirectory(targetDirectory);
+                File.WriteAllText(testTargetPath, testtargets);
+
+                MockLogger logger = new()
+                {
+                    Verbosity = LoggerVerbosity.Diagnostic,
+                };
+                ProjectCollection pc = new();
+                pc.RegisterLogger(logger);
+                Project project = pc.LoadProject(testTargetPath);
+
+                bool result = project.Build();
+                result.ShouldBeTrue();
+                logger.BuildMessageEvents
+                      .OfType<PropertyReassignmentEventArgs>()
+                      .ShouldContain(r => r.PropertyName == "Prop"
+                      && r.PreviousValue == "OldValue"
+                      && r.NewValue == "NewValue"
+                      && r.Message.StartsWith("Property reassignment: $(Prop)=\"NewValue\" (previous value: \"OldValue\")"));
+                logger.BuildMessageEvents.ShouldBeOfTypes(new[] { typeof(PropertyReassignmentEventArgs) });
+            }
+            finally
+            {
+                if (Directory.Exists(targetDirectory))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(targetDirectory, true /* recursive delete */);
+                }
+            }
+        }
+
 #if FEATURE_HTTP_LISTENER
         /// <summary>
         /// HTTP server code running on a separate thread that expects a connection request
