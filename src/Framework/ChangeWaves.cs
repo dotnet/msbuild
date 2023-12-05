@@ -36,6 +36,13 @@ namespace Microsoft.Build.Framework
         /// </summary>
         internal static readonly Version EnableAllFeatures = new Version(999, 999);
 
+#if DEBUG
+        /// <summary>
+        /// True if <see cref="ResetStateForTests"/> has been called.
+        /// </summary>
+        private static bool _runningTests = false;
+#endif
+
         /// <summary>
         /// The lowest wave in the current rotation of Change Waves.
         /// </summary>
@@ -163,7 +170,9 @@ namespace Microsoft.Build.Framework
         {
             ApplyChangeWave();
 
-            Debug.Assert(AllWaves.Contains(wave), $"Change wave version {wave} is invalid");
+#if DEBUG
+            Debug.Assert(_runningTests || AllWaves.Contains(wave), $"Change wave version {wave} is invalid");
+#endif
 
             return wave < _cachedWave;
         }
@@ -174,6 +183,9 @@ namespace Microsoft.Build.Framework
         /// </summary>
         internal static void ResetStateForTests()
         {
+#if DEBUG
+            _runningTests = true;
+#endif
             _cachedWave = null;
             _state = ChangeWaveConversionState.NotConvertedYet;
         }
