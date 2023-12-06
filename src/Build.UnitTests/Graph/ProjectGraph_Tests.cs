@@ -688,6 +688,7 @@ namespace Microsoft.Build.Graph.UnitTests
              *      Project types other than "well-known" MSBuild project types:
              *          Buildable project (wapproj)
              *          Solution folder
+             *      Project not included in build (also has solution dependencies as a regression test)
              * 
              */
             using (var env = TestEnvironment.Create())
@@ -708,7 +709,12 @@ namespace Microsoft.Build.Graph.UnitTests
                     EndProject
                     Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "Project6", "Project6.wapproj", "{CA5CAD1A-224A-4171-B13A-F16E576FDD12}"
                     EndProject
-                    Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0392E290-973E-4086-A58E-F927AAA65B9A}"
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project7", "Project7.csproj", "{28C7025E-2AB6-4962-A001-1E5B2271837C}"
+                        ProjectSection(ProjectDependencies) = postProject
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98} = {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}
+                        EndProjectSection
+                    EndProject
+                                        Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0392E290-973E-4086-A58E-F927AAA65B9A}"
                         ProjectSection(SolutionItems) = preProject
                             SomeSolutionItemsFile = SomeSolutionItemsFile
                         EndProjectSection
@@ -777,15 +783,15 @@ namespace Microsoft.Build.Graph.UnitTests
                             {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Debug|x86.Build.0 = Debug|x86
                             {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Debug|x86.Deploy.0 = Debug|x86
                             {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|Win32.ActiveCfg = Release|x86
-                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|Win32.Build.0 = Release|x86
-                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|Win32.Deploy.0 = Release|x86
                             {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|x64.ActiveCfg = Release|x64
-                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|x64.Build.0 = Release|x64
-                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|x64.Deploy.0 = Release|x64
                             {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|x86.ActiveCfg = Release|x86
-                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|x86.Build.0 = Release|x86
-                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|x86.Deploy.0 = Release|x86
-                        EndGlobalSection
+                            {28C7025E-2AB6-4962-A001-1E5B2271837C}.Debug|Win32.ActiveCfg = Debug|x86
+                            {28C7025E-2AB6-4962-A001-1E5B2271837C}.Debug|x64.ActiveCfg = Debug|x64
+                            {28C7025E-2AB6-4962-A001-1E5B2271837C}.Debug|x86.ActiveCfg = Debug|x86
+                            {28C7025E-2AB6-4962-A001-1E5B2271837C}.Release|Win32.ActiveCfg = Release|x86
+                            {28C7025E-2AB6-4962-A001-1E5B2271837C}.Release|x64.ActiveCfg = Release|x64
+                            {28C7025E-2AB6-4962-A001-1E5B2271837C}.Release|x86.ActiveCfg = Release|x86
+                                            EndGlobalSection
                         GlobalSection(SolutionProperties) = preSolution
                             HideSolutionNode = FALSE
                         EndGlobalSection
@@ -814,6 +820,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 ProjectRootElement project4Xml = ProjectRootElement.Create();
                 ProjectRootElement project5Xml = ProjectRootElement.Create();
                 ProjectRootElement project6Xml = ProjectRootElement.Create();
+                ProjectRootElement project7Xml = ProjectRootElement.Create();
 
                 string project1Path = Path.Combine(env.DefaultTestDirectory.Path, "Project1.csproj");
                 string project2Path = Path.Combine(env.DefaultTestDirectory.Path, "Project2.vcxproj");
@@ -821,6 +828,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 string project4Path = Path.Combine(env.DefaultTestDirectory.Path, "Project4.vcxproj");
                 string project5Path = Path.Combine(env.DefaultTestDirectory.Path, "Project5.vcxproj");
                 string project6Path = Path.Combine(env.DefaultTestDirectory.Path, "Project6.wapproj");
+                string project7Path = Path.Combine(env.DefaultTestDirectory.Path, "Project7.csproj");
 
                 project1Xml.Save(project1Path);
                 project2Xml.Save(project2Path);
@@ -828,6 +836,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 project4Xml.Save(project4Path);
                 project5Xml.Save(project5Path);
                 project6Xml.Save(project6Path);
+                project6Xml.Save(project7Path);
 
                 var projectGraph = new ProjectGraph(slnFile.Path);
                 projectGraph.EntryPointNodes.Count.ShouldBe(4);
@@ -867,6 +876,9 @@ namespace Microsoft.Build.Graph.UnitTests
                 project6Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
                 project6Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
                 project6Node.ProjectReferences.Count.ShouldBe(0);
+
+                // Project not included in the build
+                Assert.DoesNotContain(projectGraph.ProjectNodes, node => node.ProjectInstance.FullPath == project7Path);
             }
         }
 
