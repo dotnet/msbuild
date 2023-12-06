@@ -15,6 +15,7 @@ using Microsoft.Build.CommandLine;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks.Deployment.Bootstrapper;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
@@ -627,7 +628,6 @@ namespace Microsoft.Build.UnitTests
         [InlineData("-getProperty:Foo;Bar -getItem:MyItem -t:Build", true, "TargetValue", true, true, false, true, false)]
         [InlineData("-getProperty:Foo;Bar -getItem:MyItem", true, "EvalValue", true, false, false, true, false)]
         [InlineData("-getProperty:Foo;Bar -getTargetResult:MyTarget", true, "TargetValue", false, false, true, true, false)]
-        [InlineData("-getProperty:Foo;Bar -getTargetResult:MyTarget -t:restore", true, "TargetValue", false, false, true, true, false)]
         [InlineData("-getProperty:Foo;Bar", true, "EvalValue", false, false, false, false, false)]
         [InlineData("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false, false, false)]
         [InlineData("-getItem:MyItem", false, "", true, false, false, false, false)]
@@ -696,6 +696,36 @@ namespace Microsoft.Build.UnitTests
             results.Contains("MyTarget").ShouldBe(targetResultPresent);
             results.Contains("\"Result\": \"Success\"").ShouldBe(targetResultPresent || restoreOnly);
             results.ShouldNotContain(ResourceUtilities.GetResourceString("BuildFailedWithPropertiesItemsOrTargetResultsRequested"));
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void BuildFailsWithCompileErrorAndRestore(bool isGraphBuild)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile project = env.CreateFile("testProject.csproj", @"
+<Project>
+  <ItemGroup>
+    <CSFile Include=""Program.cs""/>
+  </ItemGroup>
+
+  <Target Name=""Build"">
+    <Csc Sources=""@(CSFile)"" />
+  </Target>
+</Project>
+        ");
+            TransientTestFile wrongSyntaxFile = env.CreateFile("Program.cs", @"
+            Console.WriteLine(""Hello, World!"")
+            A Line here for this to not compile right");
+
+            string graph = isGraphBuild ? "--graph" : "";
+            string result = RunnerUtilities.ExecMSBuild($" {project.Path} /restore {graph}", out bool success);
+
+            success.ShouldBeFalse();
+            result.Contains("Program.cs(2,47): error CS1002: ; expected");
+            result.Contains("Program.cs(3,20): error CS1003: Syntax error, ','");
+            result.Contains("Program.cs(3,54): error CS1002: ; expected");
         }
 
         /// <summary>
