@@ -717,10 +717,7 @@ internal sealed partial class NuGetFrameworkWrapper
       <Compile Include="$(NuGetFrameworkWrapperRedirects_FilePath)">
         <Link>Utilities\NuGetFrameworkWrapper.redirects.cs</Link>
       </Compile>
+      <FileWrites Include="$(NuGetFrameworkWrapperRedirects_FilePath)" />
     </ItemGroup>
-  </Target>
-
-  <Target Name="ForceGenerateAppDomainConfigOnRebuild" AfterTargets="CoreClean">
-    <Delete Files="$(NuGetFrameworkWrapperRedirects_FilePath)" />
   </Target>
 </Project>
