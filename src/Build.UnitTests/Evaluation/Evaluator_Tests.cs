@@ -4915,11 +4915,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void VerifyLogPropertyReassignment()
         {
-            string testtargets = ObjectModelHelpers.CleanupFileContents(@"
+            string propertyName = "Prop";
+            string propertyOldValue = "OldValue";
+            string propertyNewValue = "NewValue";
+            string testtargets = ObjectModelHelpers.CleanupFileContents(@$"
                                 <Project xmlns='msbuildnamespace'>
                                      <PropertyGroup>
-                                         <Prop>OldValue</Prop>
-                                         <Prop>NewValue</Prop>
+                                         <{propertyName}>{propertyOldValue}</{propertyName}>
+                                         <{propertyName}>{propertyNewValue}</{propertyName}>
                                      </PropertyGroup>
                                   <Target Name=""Test""/>
                                 </Project>");
@@ -4928,10 +4931,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string targetDirectory = Path.Combine(tempPath, "LogPropertyAssignments");
             string testTargetPath = Path.Combine(targetDirectory, "test.proj");
 
-            try
+            using (TestEnvironment env = TestEnvironment.Create())
             {
-                Directory.CreateDirectory(targetDirectory);
-                File.WriteAllText(testTargetPath, testtargets);
+                env.CreateFolder(targetDirectory);
+                env.CreateFile(testTargetPath, testtargets);
 
                 MockLogger logger = new()
                 {
@@ -4945,18 +4948,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 result.ShouldBeTrue();
                 logger.BuildMessageEvents
                       .OfType<PropertyReassignmentEventArgs>()
-                      .ShouldContain(r => r.PropertyName == "Prop"
-                      && r.PreviousValue == "OldValue"
-                      && r.NewValue == "NewValue"
-                      && r.Message.StartsWith("Property reassignment: $(Prop)=\"NewValue\" (previous value: \"OldValue\")"));
+                      .ShouldContain(r => r.PropertyName == propertyName
+                      && r.PreviousValue == propertyOldValue
+                      && r.NewValue == propertyNewValue
+                      && r.Message.StartsWith($"{
+                          ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                              "PropertyReassignment", propertyName, propertyNewValue, propertyOldValue, string.Empty)}"));
                 logger.BuildMessageEvents.ShouldBeOfTypes(new[] { typeof(PropertyReassignmentEventArgs) });
-            }
-            finally
-            {
-                if (Directory.Exists(targetDirectory))
-                {
-                    FileUtilities.DeleteWithoutTrailingBackslash(targetDirectory, true /* recursive delete */);
-                }
             }
         }
 
