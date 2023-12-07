@@ -722,9 +722,9 @@ namespace Microsoft.Build.UnitTests
             string result = RunnerUtilities.ExecMSBuild($" {project.Path} /restore {graph}", out bool success);
 
             success.ShouldBeFalse();
-            result.Contains("Program.cs(2,47): error CS1002: ; expected");
-            result.Contains("Program.cs(3,20): error CS1003: Syntax error, ','");
-            result.Contains("Program.cs(3,54): error CS1002: ; expected");
+            result.ShouldContain("Program.cs(2,47): error CS1002: ; expected");
+            result.ShouldContain("Program.cs(3,20): error CS1003: Syntax error, ','");
+            result.ShouldContain("Program.cs(3,54): error CS1002: ; expected");
         }
 
         /// <summary>
