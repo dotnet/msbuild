@@ -10,13 +10,14 @@ using System.Threading.Tasks;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Instance
 {
     /// <summary>
     /// A specialized collection used when item data originates in an immutable Project.
     /// </summary>
-    internal class ImmutableItemDictionary<TCached, T> : IItemDictionary<T>
+    internal sealed class ImmutableItemDictionary<TCached, T> : IItemDictionary<T>
         where T : class, IKeyed, IItem
     {
         private readonly IDictionary<string, ICollection<TCached>> _itemsByType;
@@ -147,7 +148,7 @@ namespace Microsoft.Build.Instance
             return null;
         }
 
-        private class ListConverter : ICollection<T>
+        private sealed class ListConverter : ICollection<T>
         {
             private readonly string _itemType;
             private readonly ICollection<T> _allItems;
@@ -178,15 +179,7 @@ namespace Microsoft.Build.Instance
 
             public void CopyTo(T[] array, int arrayIndex)
             {
-                if (array == null)
-                {
-                    throw new ArgumentNullException(nameof(array));
-                }
-
-                if (arrayIndex < 0 || arrayIndex >= array.Length)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(arrayIndex));
-                }
+                ErrorUtilities.VerifyCollectionCopyToArguments(array, nameof(array), arrayIndex, nameof(arrayIndex), _list.Count);
 
                 int currentIndex = arrayIndex;
                 foreach (var item in _list)
@@ -196,10 +189,6 @@ namespace Microsoft.Build.Instance
                     {
                         array[currentIndex] = instance;
                         ++currentIndex;
-                        if (currentIndex == array.Length)
-                        {
-                            break;
-                        }
                     }
                 }
             }

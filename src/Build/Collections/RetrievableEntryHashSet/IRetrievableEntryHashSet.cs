@@ -12,8 +12,6 @@ namespace Microsoft.Build.Collections
         ICollection<T>,
         ISerializable,
         IDeserializationCallback,
-        ICollection<KeyValuePair<string, T>>,
-        IEnumerable<KeyValuePair<string, T>>,
         IDictionary<string, T>
         where T : class, IKeyed
     {

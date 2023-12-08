@@ -422,8 +422,7 @@ namespace Microsoft.Build.Execution
             // ProjectItems
             InitializeImmutableProjectItemInstances(linkedProject.Items);
             var itemsByType = linkedProject.Items as IDictionary<string, ICollection<ProjectItem>>;
-            var allItems = linkedProject.Items as ICollection<ProjectItem>;
-            _items = new ImmutableItemDictionary<ProjectItem, ProjectItemInstance>(itemsByType, allItems);
+            _items = new ImmutableItemDictionary<ProjectItem, ProjectItemInstance>(itemsByType, linkedProject.Items);
 
             // ItemsByEvaluatedInclude
             if (fastItemLookupNeeded)

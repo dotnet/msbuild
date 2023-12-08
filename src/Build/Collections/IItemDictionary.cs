@@ -70,6 +70,10 @@ namespace Microsoft.Build.Collections
         /// </summary>
         void Add(T projectItem);
 
+        /// <summary>
+        /// Adds each new item to the collection, at the
+        /// end of the list of other items with the same key.
+        /// </summary>
         void AddRange(IEnumerable<T> projectItems);
 
         /// <summary>

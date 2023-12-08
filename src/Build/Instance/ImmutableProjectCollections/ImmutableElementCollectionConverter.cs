@@ -11,13 +11,14 @@ using System.Runtime.Serialization;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Instance
 {
     /// <summary>
     /// A specialized collection used when element data originates in an immutable Project.
     /// </summary>
-    internal class ImmutableElementCollectionConverter<TCached, T> : IRetrievableEntryHashSet<T>
+    internal sealed class ImmutableElementCollectionConverter<TCached, T> : IRetrievableEntryHashSet<T>
         where T : class, IKeyed
     {
         private readonly IDictionary<string, TCached> _projectElements;
@@ -57,6 +58,11 @@ namespace Microsoft.Build.Instance
 
         public bool Contains(T item) => _projectElements.ContainsKey(item.Key);
 
+        // Note: This implementation of Contains(KeyValuePair<string, T> only checks whether the collection contains
+        // an item with the same key. This doesn't match the general behavior of collection comparison, where the
+        // KeyValuePair's key *and* value are compared. This is done intentionally in order to match the behavior of
+        // RetrievableEntryHashSet, which only checks for the existence of an item with the same key (ignoring
+        // whether the values match).
         public bool Contains(KeyValuePair<string, T> item) => _projectElements.ContainsKey(item.Key);
 
         public bool ContainsKey(string key) => _projectElements.ContainsKey(key);
@@ -100,7 +106,7 @@ namespace Microsoft.Build.Instance
         /// <summary>
         /// Wraps the Project's values.
         /// </summary>
-        private class ValuesCollection : ICollection<T>
+        private sealed class ValuesCollection : ICollection<T>
         {
             private readonly IDictionary<string, TCached> _projectElements;
             private readonly IDictionary<(string, int, int), TCached> _constrainedProjectElements;
@@ -133,37 +139,17 @@ namespace Microsoft.Build.Instance
 
             public void CopyTo(T[] array, int arrayIndex)
             {
-                if (array == null)
-                {
-                    throw new ArgumentNullException(nameof(array));
-                }
-
-                if (arrayIndex < 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(arrayIndex));
-                }
-
-                int count = Math.Min(Count, array.Length - arrayIndex);
-
-                CopyTo(array, arrayIndex, count);
+                CopyTo(array, arrayIndex, _projectElements.Count);
             }
 
             public void CopyTo(T[] array, int arrayIndex, int count)
             {
-                if (array == null)
-                {
-                    throw new ArgumentNullException(nameof(array));
-                }
-
-                if (arrayIndex < 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(arrayIndex));
-                }
-
                 if (count < 0)
                 {
                     throw new ArgumentOutOfRangeException(nameof(count));
                 }
+
+                ErrorUtilities.VerifyCollectionCopyToArguments(array, nameof(array), arrayIndex, nameof(arrayIndex), count);
 
                 int index = arrayIndex;
                 int endIndex = arrayIndex + count;
@@ -180,28 +166,14 @@ namespace Microsoft.Build.Instance
 
             public void CopyTo(KeyValuePair<string, T>[] array, int arrayIndex)
             {
-                if (array == null)
-                {
-                    throw new ArgumentNullException(nameof(array));
-                }
+                ErrorUtilities.VerifyCollectionCopyToArguments(array, nameof(array), arrayIndex, nameof(arrayIndex), _projectElements.Count);
 
-                if (arrayIndex < 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(arrayIndex));
-                }
-
-                int count = Math.Min(_projectElements.Count, array.Length - arrayIndex);
                 int index = arrayIndex;
-                int endIndex = arrayIndex + count;
                 foreach (var item in _projectElements.Values)
                 {
                     var itemInstance = GetElementInstance(item);
                     array[index] = new KeyValuePair<string, T>(itemInstance.Key, itemInstance);
                     ++index;
-                    if (index >= endIndex)
-                    {
-                        break;
-                    }
                 }
             }
 

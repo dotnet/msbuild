@@ -230,14 +230,7 @@ namespace Microsoft.Build.Collections
         {
             lock (_itemLists)
             {
-                if (!_itemLists.TryGetValue(projectItem.Key, out LinkedList<T> list))
-                {
-                    list = new LinkedList<T>();
-                    _itemLists[projectItem.Key] = list;
-                }
-
-                LinkedListNode<T> node = list.AddLast(projectItem);
-                _nodes.Add(projectItem, node);
+                AddProjectItem(projectItem);
             }
         }
 
@@ -247,14 +240,7 @@ namespace Microsoft.Build.Collections
             {
                 foreach (var projectItem in projectItems)
                 {
-                    if (!_itemLists.TryGetValue(projectItem.Key, out LinkedList<T> list))
-                    {
-                        list = new LinkedList<T>();
-                        _itemLists[projectItem.Key] = list;
-                    }
-
-                    LinkedListNode<T> node = list.AddLast(projectItem);
-                    _nodes.Add(projectItem, node);
+                    AddProjectItem(projectItem);
                 }
             }
         }
@@ -392,6 +378,18 @@ namespace Microsoft.Build.Collections
 
                 return false;
             }
+        }
+
+        private void AddProjectItem(T projectItem)
+        {
+            if (!_itemLists.TryGetValue(projectItem.Key, out LinkedList<T> list))
+            {
+                list = new LinkedList<T>();
+                _itemLists[projectItem.Key] = list;
+            }
+
+            LinkedListNode<T> node = list.AddLast(projectItem);
+            _nodes.Add(projectItem, node);
         }
 
         /// <summary>
