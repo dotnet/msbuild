@@ -1544,6 +1544,10 @@ namespace Microsoft.Build.CommandLine
                                 {
                                     return false;
                                 }
+                                else
+                                {
+                                    success = result.OverallResult == BuildResultCode.Success;
+                                }
                             }
 
                             if (!restoreOnly)
@@ -1568,20 +1572,13 @@ namespace Microsoft.Build.CommandLine
                                                                                                                                         entryValue.Equals(propertyKvp.Value)))
                                             .Value;
                                     }
-                                    else
-                                    {
-                                        success = graphResult.OverallResult == BuildResultCode.Success;
-                                    }
+                                    success = graphResult.OverallResult == BuildResultCode.Success;
                                 }
                                 else
                                 {
                                     result = ExecuteBuild(buildManager, buildRequest);
+                                    success = result.OverallResult == BuildResultCode.Success;
                                 }
-                            }
-
-                            if (result != null && result.Exception == null)
-                            {
-                                success = result.OverallResult == BuildResultCode.Success;
                             }
                         }
                         finally

@@ -697,6 +697,36 @@ namespace Microsoft.Build.UnitTests
             results.ShouldNotContain(ResourceUtilities.GetResourceString("BuildFailedWithPropertiesItemsOrTargetResultsRequested"));
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void BuildFailsWithCompileErrorAndRestore(bool isGraphBuild)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile project = env.CreateFile("testProject.csproj", @"
+<Project>
+  <ItemGroup>
+    <CSFile Include=""Program.cs""/>
+  </ItemGroup>
+
+  <Target Name=""Build"">
+    <Csc Sources=""@(CSFile)"" />
+  </Target>
+</Project>
+        ");
+            TransientTestFile wrongSyntaxFile = env.CreateFile("Program.cs", @"
+            Console.WriteLine(""Hello, World!"")
+            A Line here for this to not compile right");
+
+            string graph = isGraphBuild ? "--graph" : "";
+            string result = RunnerUtilities.ExecMSBuild($" {project.Path} /restore {graph}", out bool success);
+
+            success.ShouldBeFalse();
+            result.ShouldContain("Program.cs(2,47): error CS1002: ; expected");
+            result.ShouldContain("Program.cs(3,20): error CS1003: Syntax error, ','");
+            result.ShouldContain("Program.cs(3,54): error CS1002: ; expected");
+        }
+
         /// <summary>
         /// Regression test for bug where the MSBuild.exe command-line app
         /// would sometimes set the UI culture to just "en" which is considered a "neutral" UI
