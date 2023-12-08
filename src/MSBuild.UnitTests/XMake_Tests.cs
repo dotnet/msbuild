@@ -526,6 +526,13 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void VersionSwitch()
         {
+            using TestEnvironment env = UnitTests.TestEnvironment.Create();
+
+            // Ensure Change Wave 17.10 is enabled.
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "");
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
             List<string> cmdLine = new()
             {
 #if !FEATURE_RUN_EXE_IN_TESTS
@@ -552,15 +559,7 @@ namespace Microsoft.Build.UnitTests
             process.ExitCode.ShouldBe(0);
 
             string output = process.StandardOutput.ReadToEnd();
-            // Change Version switch output to finish with a newline https://github.com/dotnet/msbuild/pull/9485
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
-            {
-                output.EndsWith(Environment.NewLine).ShouldBeTrue();
-            }
-            else
-            {
-                output.EndsWith(Environment.NewLine).ShouldBeFalse();
-            }
+            output.EndsWith(Environment.NewLine).ShouldBeTrue();
 
             process.Close();
         }
@@ -571,6 +570,13 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void VersionSwitchDisableChangeWave()
         {
+            using TestEnvironment env = UnitTests.TestEnvironment.Create();
+
+            // Disable Change Wave 17.10
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_10.ToString());
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
             List<string> cmdLine = new()
             {
 #if !FEATURE_RUN_EXE_IN_TESTS
@@ -591,8 +597,6 @@ namespace Microsoft.Build.UnitTests
                     RedirectStandardOutput = true,
                 },
             };
-            // Disable Change Wave 17.10
-            process.StartInfo.Environment.Add("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_10.ToString());
 
             process.Start();
             process.WaitForExit();
