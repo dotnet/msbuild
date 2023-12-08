@@ -4616,7 +4616,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<PropertyReassignmentEventArgs>()
-                        .ShouldHaveSingleItem();
+                        .Count()
+                        .ShouldBe(2);
 
                     logger
                         .AllBuildEvents
@@ -4683,7 +4684,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                        .AllBuildEvents
                        .OfType<PropertyReassignmentEventArgs>()
-                       .ShouldHaveSingleItem();
+                       .Count()
+                       .ShouldBe(2);
                 });
         }
 
