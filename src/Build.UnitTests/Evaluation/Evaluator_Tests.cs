@@ -4615,6 +4615,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                     logger
                         .AllBuildEvents
+                        .OfType<PropertyReassignmentEventArgs>()
+                        .ShouldHaveSingleItem();
+
+                    logger
+                        .AllBuildEvents
                         .OfType<PropertyInitialValueSetEventArgs>()
                         .ShouldBeEmpty();
                 });
@@ -4674,6 +4679,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         .AllBuildEvents
                         .OfType<PropertyInitialValueSetEventArgs>()
                         .ShouldBeEmpty();
+
+                    logger
+                       .AllBuildEvents
+                       .OfType<PropertyReassignmentEventArgs>()
+                       .ShouldHaveSingleItem();
                 });
         }
 
