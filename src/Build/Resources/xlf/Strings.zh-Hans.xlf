@@ -54,8 +54,8 @@
         <note />
       </trans-unit>
       <trans-unit id="Binlog_MissingRecoverableErrorSubscribeError">
-        <source>Subscription to OnRecoverableReadError is mandatory during forward compatible reading.</source>
-        <target state="new">Subscription to OnRecoverableReadError is mandatory during forward compatible reading.</target>
+        <source>Subscription to RecoverableReadError is mandatory during forward compatible reading.</source>
+        <target state="new">Subscription to RecoverableReadError is mandatory during forward compatible reading.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_ReaderMismatchedRead">

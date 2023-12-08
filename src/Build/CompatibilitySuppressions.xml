@@ -1,7 +1,34 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- https://learn.microsoft.com/en-us/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <!-- Suppressions for api differences between main and vs17.8 when merging vs17.8 into main -->
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Microsoft.Build.Logging.IBuildEventStringsReader</Target>
+    <Left>lib/net472/Microsoft.Build.dll</Left>
+    <Right>lib/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Microsoft.Build.Logging.IBuildEventStringsReader</Target>
+    <Left>lib/net8.0/Microsoft.Build.dll</Left>
+    <Right>lib/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Microsoft.Build.Logging.IBuildEventStringsReader</Target>
+    <Left>ref/net472/Microsoft.Build.dll</Left>
+    <Right>ref/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Microsoft.Build.Logging.IBuildEventStringsReader</Target>
+    <Left>ref/net8.0/Microsoft.Build.dll</Left>
+    <Right>ref/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase.HandleFileAccess(Microsoft.Build.Experimental.ProjectCache.FileAccessContext,Microsoft.Build.Framework.FileAccess.FileAccessData)</Target>
@@ -12,6 +39,34 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase.HandleProcess(Microsoft.Build.Experimental.ProjectCache.FileAccessContext,Microsoft.Build.Framework.FileAccess.ProcessData)</Target>
+    <Left>lib/net472/Microsoft.Build.dll</Left>
+    <Right>lib/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Logging.BinaryLogReplayEventSource.add_NotificationsSourceCreated(System.Action{Microsoft.Build.Logging.IBuildEventArgsReaderNotifications})</Target>
+    <Left>lib/net472/Microsoft.Build.dll</Left>
+    <Right>lib/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Logging.BinaryLogReplayEventSource.remove_NotificationsSourceCreated(System.Action{Microsoft.Build.Logging.IBuildEventArgsReaderNotifications})</Target>
+    <Left>lib/net472/Microsoft.Build.dll</Left>
+    <Right>lib/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Logging.BuildEventArgsReader.add_StringEncountered(System.Action)</Target>
+    <Left>lib/net472/Microsoft.Build.dll</Left>
+    <Right>lib/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Logging.BuildEventArgsReader.remove_StringEncountered(System.Action)</Target>
     <Left>lib/net472/Microsoft.Build.dll</Left>
     <Right>lib/net472/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -26,6 +81,34 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase.HandleProcess(Microsoft.Build.Experimental.ProjectCache.FileAccessContext,Microsoft.Build.Framework.FileAccess.ProcessData)</Target>
+    <Left>lib/net8.0/Microsoft.Build.dll</Left>
+    <Right>lib/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Logging.BinaryLogReplayEventSource.add_NotificationsSourceCreated(System.Action{Microsoft.Build.Logging.IBuildEventArgsReaderNotifications})</Target>
+    <Left>lib/net8.0/Microsoft.Build.dll</Left>
+    <Right>lib/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Logging.BinaryLogReplayEventSource.remove_NotificationsSourceCreated(System.Action{Microsoft.Build.Logging.IBuildEventArgsReaderNotifications})</Target>
+    <Left>lib/net8.0/Microsoft.Build.dll</Left>
+    <Right>lib/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Logging.BuildEventArgsReader.add_StringEncountered(System.Action)</Target>
+    <Left>lib/net8.0/Microsoft.Build.dll</Left>
+    <Right>lib/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Logging.BuildEventArgsReader.remove_StringEncountered(System.Action)</Target>
     <Left>lib/net8.0/Microsoft.Build.dll</Left>
     <Right>lib/net8.0/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -40,6 +123,34 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase.HandleProcess(Microsoft.Build.Experimental.ProjectCache.FileAccessContext,Microsoft.Build.Framework.FileAccess.ProcessData)</Target>
+    <Left>ref/net472/Microsoft.Build.dll</Left>
+    <Right>ref/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Logging.BinaryLogReplayEventSource.add_NotificationsSourceCreated(System.Action{Microsoft.Build.Logging.IBuildEventArgsReaderNotifications})</Target>
+    <Left>ref/net472/Microsoft.Build.dll</Left>
+    <Right>ref/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Logging.BinaryLogReplayEventSource.remove_NotificationsSourceCreated(System.Action{Microsoft.Build.Logging.IBuildEventArgsReaderNotifications})</Target>
+    <Left>ref/net472/Microsoft.Build.dll</Left>
+    <Right>ref/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Logging.BuildEventArgsReader.add_StringEncountered(System.Action)</Target>
+    <Left>ref/net472/Microsoft.Build.dll</Left>
+    <Right>ref/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Logging.BuildEventArgsReader.remove_StringEncountered(System.Action)</Target>
     <Left>ref/net472/Microsoft.Build.dll</Left>
     <Right>ref/net472/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -58,31 +169,30 @@
     <Right>ref/net8.0/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
-  <!-- Suppressions for api differences introduced in the new binlog reading events -->
   <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Microsoft.Build.Logging.IBuildEventStringsReader</Target>
-    <Left>lib/net472/Microsoft.Build.dll</Left>
-    <Right>lib/net472/Microsoft.Build.dll</Right>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Logging.BinaryLogReplayEventSource.add_NotificationsSourceCreated(System.Action{Microsoft.Build.Logging.IBuildEventArgsReaderNotifications})</Target>
+    <Left>ref/net8.0/Microsoft.Build.dll</Left>
+    <Right>ref/net8.0/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Microsoft.Build.Logging.IBuildEventStringsReader</Target>
-    <Left>lib/net8.0/Microsoft.Build.dll</Left>
-    <Right>lib/net8.0/Microsoft.Build.dll</Right>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Logging.BinaryLogReplayEventSource.remove_NotificationsSourceCreated(System.Action{Microsoft.Build.Logging.IBuildEventArgsReaderNotifications})</Target>
+    <Left>ref/net8.0/Microsoft.Build.dll</Left>
+    <Right>ref/net8.0/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Microsoft.Build.Logging.IBuildEventStringsReader</Target>
-    <Left>ref/net472/Microsoft.Build.dll</Left>
-    <Right>ref/net472/Microsoft.Build.dll</Right>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Logging.BuildEventArgsReader.add_StringEncountered(System.Action)</Target>
+    <Left>ref/net8.0/Microsoft.Build.dll</Left>
+    <Right>ref/net8.0/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Microsoft.Build.Logging.IBuildEventStringsReader</Target>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Logging.BuildEventArgsReader.remove_StringEncountered(System.Action)</Target>
     <Left>ref/net8.0/Microsoft.Build.dll</Left>
     <Right>ref/net8.0/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -96,14 +206,7 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0006</DiagnosticId>
-    <Target>E:Microsoft.Build.Logging.IBuildEventArgsReaderNotifications.OnRecoverableReadError</Target>
-    <Left>lib/net472/Microsoft.Build.dll</Left>
-    <Right>lib/net472/Microsoft.Build.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0006</DiagnosticId>
-    <Target>E:Microsoft.Build.Logging.IBuildEventArgsReaderNotifications.StringEncountered</Target>
+    <Target>E:Microsoft.Build.Logging.IBuildEventArgsReaderNotifications.RecoverableReadError</Target>
     <Left>lib/net472/Microsoft.Build.dll</Left>
     <Right>lib/net472/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -124,14 +227,7 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0006</DiagnosticId>
-    <Target>E:Microsoft.Build.Logging.IBuildEventArgsReaderNotifications.OnRecoverableReadError</Target>
-    <Left>lib/net8.0/Microsoft.Build.dll</Left>
-    <Right>lib/net8.0/Microsoft.Build.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0006</DiagnosticId>
-    <Target>E:Microsoft.Build.Logging.IBuildEventArgsReaderNotifications.StringEncountered</Target>
+    <Target>E:Microsoft.Build.Logging.IBuildEventArgsReaderNotifications.RecoverableReadError</Target>
     <Left>lib/net8.0/Microsoft.Build.dll</Left>
     <Right>lib/net8.0/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -152,14 +248,7 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0006</DiagnosticId>
-    <Target>E:Microsoft.Build.Logging.IBuildEventArgsReaderNotifications.OnRecoverableReadError</Target>
-    <Left>ref/net8.0/Microsoft.Build.dll</Left>
-    <Right>ref/net8.0/Microsoft.Build.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0006</DiagnosticId>
-    <Target>E:Microsoft.Build.Logging.IBuildEventArgsReaderNotifications.StringEncountered</Target>
+    <Target>E:Microsoft.Build.Logging.IBuildEventArgsReaderNotifications.RecoverableReadError</Target>
     <Left>ref/net8.0/Microsoft.Build.dll</Left>
     <Right>ref/net8.0/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>

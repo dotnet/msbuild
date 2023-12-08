@@ -125,10 +125,10 @@ namespace Microsoft.Build.Logging
         }
 
         /// <summary>
-        /// Receives recoverable errors during reading. See <see cref="IBuildEventArgsReaderNotifications.OnRecoverableReadError"/> for documentation on arguments.
+        /// Receives recoverable errors during reading. See <see cref="IBuildEventArgsReaderNotifications.RecoverableReadError"/> for documentation on arguments.
         /// Applicable mainly when <see cref="SkipUnknownEvents"/> or <see cref="SkipUnknownEventParts"/> is set to true."/>
         /// </summary>
-        public event Action<BinaryLogReaderErrorEventArgs>? OnRecoverableReadError;
+        public event Action<BinaryLogReaderErrorEventArgs>? RecoverableReadError;
 
         public void Dispose()
         {
@@ -141,9 +141,6 @@ namespace Microsoft.Build.Logging
 
         /// <inheritdoc cref="IBuildEventArgsReaderNotifications.StringReadDone"/>
         public event Action<StringReadEventArgs>? StringReadDone;
-
-        /// <inheritdoc cref="IBuildEventArgsReaderNotifications.StringEncountered"/>
-        public event Action? StringEncountered;
 
         internal int FileFormatVersion => _fileFormatVersion;
 
@@ -197,7 +194,7 @@ namespace Microsoft.Build.Logging
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CheckErrorsSubscribed()
         {
-            if ((_skipUnknownEvents || _skipUnknownEventParts) && OnRecoverableReadError == null)
+            if ((_skipUnknownEvents || _skipUnknownEventParts) && RecoverableReadError == null)
             {
                 throw new InvalidOperationException(
                     ResourceUtilities.GetResourceString("Binlog_MissingRecoverableErrorSubscribeError"));
@@ -284,7 +281,7 @@ namespace Microsoft.Build.Logging
             {
                 if (noThrow)
                 {
-                    OnRecoverableReadError?.Invoke(new BinaryLogReaderErrorEventArgs(readerErrorType, recordKind, msgFactory));
+                    RecoverableReadError?.Invoke(new BinaryLogReaderErrorEventArgs(readerErrorType, recordKind, msgFactory));
                     SkipBytes(_readStream.BytesCountAllowedToReadRemaining);
                 }
                 else
@@ -1542,7 +1539,6 @@ namespace Microsoft.Build.Logging
 
         private string ReadString()
         {
-            this.StringEncountered?.Invoke();
             string text = _binaryReader.ReadString();
             if (this.StringReadDone != null)
             {

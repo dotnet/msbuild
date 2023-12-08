@@ -939,7 +939,7 @@ namespace Microsoft.Build.UnitTests
             };
 
             List<BinaryLogReaderErrorEventArgs> readerErrors = new();
-            buildEventArgsReader.OnRecoverableReadError += readerErrors.Add;
+            buildEventArgsReader.RecoverableReadError += readerErrors.Add;
 
             var deserializedError = (BuildErrorEventArgs)buildEventArgsReader.Read();
 
@@ -999,7 +999,7 @@ namespace Microsoft.Build.UnitTests
                 SkipUnknownEvents = true
             };
 
-            buildEventArgsReader.OnRecoverableReadError += readerErrors.Add;
+            buildEventArgsReader.RecoverableReadError += readerErrors.Add;
 
             var deserializedEvent = buildEventArgsReader.Read();
 
@@ -1050,7 +1050,7 @@ namespace Microsoft.Build.UnitTests
             };
 
             List<BinaryLogReaderErrorEventArgs> readerErrors = new();
-            buildEventArgsReader.OnRecoverableReadError += readerErrors.Add;
+            buildEventArgsReader.RecoverableReadError += readerErrors.Add;
 
             var deserializedEvent = buildEventArgsReader.Read();
 
@@ -1106,7 +1106,7 @@ namespace Microsoft.Build.UnitTests
             };
 
             List<BinaryLogReaderErrorEventArgs> readerErrors = new();
-            buildEventArgsReader.OnRecoverableReadError += readerErrors.Add;
+            buildEventArgsReader.RecoverableReadError += readerErrors.Add;
 
             var deserializedEvent = buildEventArgsReader.Read();
 

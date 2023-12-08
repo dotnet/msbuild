@@ -132,11 +132,11 @@ In compatibility mode (default for `BinaryLogReplayEventSource`. Only supported 
 
 The unknown events and event parts are regarded as recoverable errors, since the reader is able to continue reading subsequent records in the binlog. However the specific user logic should have the last call in deciding whether errors are really recoverable (e.g. is presence of unrecognized or unparseable event ok? It might be fine when searching only for specific events - e.g. errors but not acceptable when trying to provide definitive overview of the built).
 
-To allow the calling code to decide - based on the type of error, type of events getting the error, or the number of errors - the `OnRecoverableReadError` event is exposed (from both `BinaryLogReplayEventSource` and `BuildEventArgsReader`).
+To allow the calling code to decide - based on the type of error, type of events getting the error, or the number of errors - the `RecoverableReadError` event is exposed (from both `BinaryLogReplayEventSource` and `BuildEventArgsReader`).
 
 ```csharp
 /// <summary>
-/// An event args for <see cref="IBinaryLogReaderErrors.OnRecoverableReadError"/> event.
+/// An event args for <see cref="IBinaryLogReaderErrors.RecoverableReadError"/> event.
 /// </summary>
 public sealed class BinaryLogReaderErrorEventArgs : EventArgs
 {
@@ -164,7 +164,7 @@ public sealed class BinaryLogReaderErrorEventArgs : EventArgs
 /// In case of <see cref="ReaderErrorType.UnknownEventData"/> this is raised before returning the structured representation of a build event
 /// that has some extra unknown data in the binlog. In case of other error types this event is raised and the offending build event is skipped and not returned.
 /// </summary>
-event Action<BinaryLogReaderErrorEventArgs>? OnRecoverableReadError;
+event Action<BinaryLogReaderErrorEventArgs>? RecoverableReadError;
 ```
 
 Our sample usage of the [Reading API](#reading-api) can be enhanced with recoverable errors handling e.g. as such:
@@ -172,7 +172,7 @@ Our sample usage of the [Reading API](#reading-api) can be enhanced with recover
 ```csharp
 
 // Those can be raised only during forward compatibility reading mode.
-logReader.OnRecoverableReadError += errorEventArgs =>
+logReader.RecoverableReadError += errorEventArgs =>
 {
     // ...
 

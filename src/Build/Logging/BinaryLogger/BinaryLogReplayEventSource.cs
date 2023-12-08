@@ -63,15 +63,8 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public bool AllowForwardCompatibility { private get; init; }
 
-        /// <inheritdoc cref="IBuildEventArgsReaderNotifications.OnRecoverableReadError"/>
-        public event Action<BinaryLogReaderErrorEventArgs>? OnRecoverableReadError;
-
-        /// <summary>
-        /// WARNING: This event is under low support and low maintenance - please use events directly exposed by <see cref="BinaryLogReplayEventSource"/> instead. 
-        /// 
-        /// Raised once <see cref="BuildEventArgsReader"/> is created during replaying
-        /// </summary>
-        public event Action<IBuildEventArgsReaderNotifications>? NotificationsSourceCreated;
+        /// <inheritdoc cref="IBuildEventArgsReaderNotifications.RecoverableReadError"/>
+        public event Action<BinaryLogReaderErrorEventArgs>? RecoverableReadError;
 
         /// <summary>
         /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
@@ -205,7 +198,6 @@ namespace Microsoft.Build.Logging
         public void Replay(BinaryReader binaryReader, bool closeInput, CancellationToken cancellationToken)
         {
             using var reader = OpenBuildEventsReader(binaryReader, closeInput, AllowForwardCompatibility);
-            NotificationsSourceCreated?.Invoke(reader);
             Replay(reader, cancellationToken);
         }
 
@@ -231,7 +223,6 @@ namespace Microsoft.Build.Logging
             reader.EmbeddedContentRead += _embeddedContentRead;
             reader.ArchiveFileEncountered += _archiveFileEncountered;
             reader.StringReadDone += _stringReadDone;
-            reader.StringEncountered += _stringEncountered;
 
             if (HasStructuredEventsSubscribers || !supportsForwardCompatibility)
             {
@@ -244,7 +235,7 @@ namespace Microsoft.Build.Logging
                 // Forward compatible reading makes sense only for structured events reading.
                 reader.SkipUnknownEvents = supportsForwardCompatibility && AllowForwardCompatibility;
                 reader.SkipUnknownEventParts = supportsForwardCompatibility && AllowForwardCompatibility;
-                reader.OnRecoverableReadError += OnRecoverableReadError;
+                reader.RecoverableReadError += RecoverableReadError;
 
                 while (!cancellationToken.IsCancellationRequested && reader.Read() is { } instance)
                 {
@@ -256,8 +247,7 @@ namespace Microsoft.Build.Logging
                 if (this._rawLogRecordReceived == null &&
                     this._embeddedContentRead == null &&
                     this._stringReadDone == null &&
-                    this._archiveFileEncountered == null &&
-                    this._stringEncountered == null)
+                    this._archiveFileEncountered == null)
                 {
                     throw new NotSupportedException(
                         ResourceUtilities.GetResourceString("Binlog_Source_MissingSubscribeError"));
@@ -274,8 +264,7 @@ namespace Microsoft.Build.Logging
             reader.EmbeddedContentRead -= _embeddedContentRead;
             reader.ArchiveFileEncountered -= _archiveFileEncountered;
             reader.StringReadDone -= _stringReadDone;
-            reader.StringEncountered -= _stringEncountered;
-            reader.OnRecoverableReadError -= OnRecoverableReadError;
+            reader.RecoverableReadError -= RecoverableReadError;
         }
 
         /// <inheritdoc cref="IRawLogEventsSource.DeferredInitialize"/>
@@ -313,14 +302,6 @@ namespace Microsoft.Build.Logging
         {
             add => _archiveFileEncountered += value;
             remove => _archiveFileEncountered -= value;
-        }
-
-        private Action? _stringEncountered;
-        /// <inheritdoc cref="IBuildEventArgsReaderNotifications.StringEncountered"/>
-        event Action? IBuildEventArgsReaderNotifications.StringEncountered
-        {
-            add => _stringEncountered += value;
-            remove => _stringEncountered -= value;
         }
 
         private Action<BinaryLogRecordKind, Stream>? _rawLogRecordReceived;

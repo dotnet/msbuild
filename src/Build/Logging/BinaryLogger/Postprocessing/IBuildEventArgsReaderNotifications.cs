@@ -15,20 +15,7 @@ namespace Microsoft.Build.Logging
         /// Subscriber may adjust the string by setting <see cref="StringReadEventArgs.StringToBeUsed"/> property.
         /// The passed event arg can be reused and should not be stored.
         /// </summary>
-        public event Action<StringReadEventArgs>? StringReadDone;
-
-        /// <summary>
-        /// An event that allows the caller to be notified when a string is encountered in the binary log.
-        /// BinaryReader passed in ctor is at the beginning of the string at this point.
-        /// </summary>
-        /// <remarks>
-        ///    <format type="text/markdown"><![CDATA[
-        /// ## Remarks
-        /// > [!CAUTION]
-        /// > Use <see cref="StringReadDone"/> instead of this method.
-        /// ]]></format>
-        /// </remarks>
-        public event Action? StringEncountered;
+        event Action<StringReadEventArgs>? StringReadDone;
 
         /// <summary>
         /// An event that allows the caller to be notified when an embedded file is encountered in the binary log.
@@ -50,7 +37,7 @@ namespace Microsoft.Build.Logging
         /// }
         /// </code>
         /// </example>
-        public event Action<ArchiveFileEventArgs>? ArchiveFileEncountered;
+        event Action<ArchiveFileEventArgs>? ArchiveFileEncountered;
 
         /// <summary>
         /// Receives recoverable errors during reading.
@@ -58,6 +45,6 @@ namespace Microsoft.Build.Logging
         /// In case of <see cref="ReaderErrorType.UnknownEventData"/> this is raised before returning the structured representation of a build event
         /// that has some extra unknown data in the binlog. In case of other error types this event is raised and the offending build event is skipped and not returned.
         /// </summary>
-        event Action<BinaryLogReaderErrorEventArgs>? OnRecoverableReadError;
+        event Action<BinaryLogReaderErrorEventArgs>? RecoverableReadError;
     }
 }
