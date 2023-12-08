@@ -2585,8 +2585,8 @@ Wykorzystanie:          Średnie wykorzystanie {0}: {1:###.0}</target>
         <note>{StrBegin="MSB4238: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedLogFileFormat">
-        <source>MSB4235: The log file format version is {0} with minimum required read version {1}, whereas this version of MSBuild only supports versions up to {2}.</source>
-        <target state="new">MSB4235: The log file format version is {0} with minimum required read version {1}, whereas this version of MSBuild only supports versions up to {2}.</target>
+        <source>MSB4235: The log file format version is {0} with minimum required reader version {1}, whereas this version of MSBuild only supports versions up to {2}.</source>
+        <target state="new">MSB4235: The log file format version is {0} with minimum required reader version {1}, whereas this version of MSBuild only supports versions up to {2}.</target>
         <note>{StrBegin="MSB4235: "}</note>
       </trans-unit>
       <trans-unit id="ProjectEvaluationPerformanceSummary">
