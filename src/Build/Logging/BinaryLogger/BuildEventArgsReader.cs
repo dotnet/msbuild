@@ -143,6 +143,7 @@ namespace Microsoft.Build.Logging
         public event Action<StringReadEventArgs>? StringReadDone;
 
         internal int FileFormatVersion => _fileFormatVersion;
+        internal int MinimumReaderVersion { get; set; } = BinaryLogger.ForwardCompatibilityMinimalVersion;
 
         /// <inheritdoc cref="IEmbeddedContentSource.EmbeddedContentRead"/>
         internal event Action<EmbeddedContentEventArgs>? EmbeddedContentRead;

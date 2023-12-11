@@ -2016,6 +2016,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="Binlog_Source_MissingSubscribeError" xml:space="preserve">
     <value>No subscribers for any events.</value>
   </data>
+  <data name="Binlog_Source_VersionUninitialized" xml:space="preserve">
+    <value>Version info not yet initialized. Replay must be called first.</value>
+  </data>
   <data name="Binlog_MissingRecoverableErrorSubscribeError" xml:space="preserve">
     <value>Subscription to RecoverableReadError is mandatory during forward compatible reading.</value>
   </data>

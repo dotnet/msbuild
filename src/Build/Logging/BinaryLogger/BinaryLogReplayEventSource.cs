@@ -30,6 +30,16 @@ namespace Microsoft.Build.Logging
         void DeferredInitialize(
             Action onRawReadingPossible,
             Action onStructuredReadingOnly);
+
+        /// <summary>
+        /// File format version of the binary log file.
+        /// </summary>
+        int FileFormatVersion { get; }
+
+        /// <summary>
+        /// The minimum reader version for the binary log file.
+        /// </summary>
+        int MinimumReaderVersion { get; }
     }
 
     /// <summary>
@@ -157,6 +167,7 @@ namespace Microsoft.Build.Logging
             return new BuildEventArgsReader(binaryReader, fileFormatVersion)
             {
                 CloseInput = closeInput,
+                MinimumReaderVersion = minimumReaderVersion
             };
         }
 
@@ -208,6 +219,8 @@ namespace Microsoft.Build.Logging
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
         public void Replay(BuildEventArgsReader reader, CancellationToken cancellationToken)
         {
+            _fileFormatVersion = reader.FileFormatVersion;
+            _minimumReaderVersion = reader.MinimumReaderVersion;
             bool supportsForwardCompatibility = reader.FileFormatVersion >= BinaryLogger.ForwardCompatibilityMinimalVersion;
 
             // Allow any possible deferred subscriptions to be registered
@@ -276,6 +289,11 @@ namespace Microsoft.Build.Logging
             this._onStructuredReadingOnly += onStructuredReadingOnly;
         }
 
+        public int FileFormatVersion => _fileFormatVersion ?? throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_Source_VersionUninitialized"));
+        public int MinimumReaderVersion => _minimumReaderVersion ?? throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_Source_VersionUninitialized"));
+
+        private int? _fileFormatVersion;
+        private int? _minimumReaderVersion;
         private Action? _onRawReadingPossible;
         private Action? _onStructuredReadingOnly;
         private Action<EmbeddedContentEventArgs>? _embeddedContentRead;
