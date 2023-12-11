@@ -440,7 +440,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     for (int i = 0; i < items.Count; i++)
                     {
-                        string fullPath = FileUtilities.NormalizePathForComparisonNoThrow(items[i].Item.EvaluatedIncludeEscaped, items[i].Item.ProjectDirectory);
+                        string fullPath = FileUtilities.NormalizePathForComparisonNoThrow(items[i].Item.EvaluatedInclude, items[i].Item.ProjectDirectory);
                         if (itemsWithNoWildcards.TryGetValue(fullPath, out UpdateOperation op))
                         {
                             items[i] = op.UpdateItem(items[i]);
