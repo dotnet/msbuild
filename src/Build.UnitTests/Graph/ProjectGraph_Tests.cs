@@ -836,7 +836,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 project4Xml.Save(project4Path);
                 project5Xml.Save(project5Path);
                 project6Xml.Save(project6Path);
-                project6Xml.Save(project7Path);
+                project7Xml.Save(project7Path);
 
                 var projectGraph = new ProjectGraph(slnFile.Path);
                 projectGraph.EntryPointNodes.Count.ShouldBe(4);
