@@ -7,54 +7,54 @@
       <SourceBuild RepoName="source-build-reference-packages" ManagedOnly="true" />
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.CodeDom" Version="7.0.0">
-      <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
+    <Dependency Name="System.CodeDom" Version="8.0.0">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
+      <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
     </Dependency>
     <!-- Necessary for source-build due to being a transitive dependency of System.Reflection.MetadataLoadContext.
       This allows the package to be retrieved from previously-source-built artifacts and flow in as dependencies
       of the packages produced by msbuild. -->
-    <Dependency Name="System.Collections.Immutable" Version="7.0.0">
-      <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
+    <Dependency Name="System.Collections.Immutable" Version="8.0.0">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
+      <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the package to be retrieved from previously-source-built artifacts
       and flow in as dependencies of the packages produced by msbuild. -->
-    <Dependency Name="System.Configuration.ConfigurationManager" Version="7.0.0">
-      <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
+    <Dependency Name="System.Configuration.ConfigurationManager" Version="8.0.0">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
+      <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the package to be retrieved from previously-source-built artifacts
       and flow in as dependencies of the packages produced by msbuild. -->
-    <Dependency Name="System.Reflection.Metadata" Version="7.0.0">
-      <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
+    <Dependency Name="System.Reflection.Metadata" Version="8.0.0">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
+      <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the package to be retrieved from previously-source-built artifacts
       and flow in as dependencies of the packages produced by msbuild. -->
-    <Dependency Name="System.Reflection.MetadataLoadContext" Version="7.0.0">
-      <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
+    <Dependency Name="System.Reflection.MetadataLoadContext" Version="8.0.0">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
+      <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Resources.Extensions" Version="7.0.0">
-      <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
+    <Dependency Name="System.Resources.Extensions" Version="8.0.0">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
+      <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the package to be retrieved from previously-source-built artifacts
       and flow in as dependencies of the packages produced by msbuild. -->
-    <Dependency Name="System.Security.Cryptography.Pkcs" Version="7.0.2">
-      <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
+    <Dependency Name="System.Security.Cryptography.Pkcs" Version="8.0.0">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
+      <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Security.Cryptography.Xml" Version="7.0.1">
-      <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
+    <Dependency Name="System.Security.Cryptography.Xml" Version="8.0.0">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
+      <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
     </Dependency>
-    <Dependency Name="System.Text.Json" Version="7.0.3">
-      <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>5b20af47d99620150c53eaf5db8636fdf730b126</Sha>
+    <Dependency Name="System.Text.Json" Version="8.0.0">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
+      <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
