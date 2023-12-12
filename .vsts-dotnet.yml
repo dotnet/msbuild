@@ -94,6 +94,8 @@ stages:
       value: 'int.main'
     - name: VisualStudio.DropName
       value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
+    - name: NUGET_PACKAGES
+      value:
 
     steps:
     - task: NuGetToolInstaller@0
