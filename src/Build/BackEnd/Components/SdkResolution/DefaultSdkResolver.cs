@@ -26,7 +26,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     {
         public override string Name => "DefaultSdkResolver";
 
+#if NETCOREAPP
+        public override int Priority => 100;
+#else
         public override int Priority => 10000;
+#endif
 
         public override SdkResultBase Resolve(SdkReference sdk, SdkResolverContextBase context, SdkResultFactoryBase factory)
         {
