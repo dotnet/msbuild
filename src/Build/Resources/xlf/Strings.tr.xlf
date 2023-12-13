@@ -463,7 +463,7 @@
       </trans-unit>
       <trans-unit id="TaskAssemblyLoadedWithAssemblyLoadContext">
         <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</source>
-        <target state="new">Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</target>
+        <target state="translated">Derleme {0}{1} sırasında yüklendi: {2} (konum: {3}, MVID: {4}, AssemblyLoadContext: {5})</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
