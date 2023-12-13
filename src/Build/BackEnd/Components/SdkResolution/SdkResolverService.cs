@@ -118,6 +118,19 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
         public virtual SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio, bool failOnUnresolvedSdk)
         {
+#if NETCOREAPP
+            if (!BuildEnvironmentHelper.Instance.RunningTests)
+            {
+                // Just ask the default resolver first, before loading any of the plug-in assemblies.
+                DefaultSdkResolver defaultResolver = new DefaultSdkResolver();
+                SdkResult defaultResult = (SdkResult)defaultResolver.Resolve(sdk, null, new SdkResultFactory(sdk));
+                if (defaultResult.Success)
+                {
+                    return defaultResult;
+                }
+            }
+#endif
+
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
             {
                 return ResolveSdkUsingResolversWithPatternsFirst(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio, failOnUnresolvedSdk);
