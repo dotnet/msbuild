@@ -642,7 +642,7 @@ namespace Microsoft.Build.Logging
                     fields.Arguments)
                 {
                     ProjectFile = fields.ProjectFile,
-                    ExtendedMetadata = fields.Extended.ExtendedMetadata,
+                    ExtendedMetadata = fields.Extended.ExtendedMetadataAsDictionary,
                     ExtendedData = fields.Extended.ExtendedData,
                 };
             }
@@ -694,7 +694,7 @@ namespace Microsoft.Build.Logging
                     fields.Arguments)
                 {
                     ProjectFile = fields.ProjectFile,
-                    ExtendedMetadata = fields.Extended.ExtendedMetadata,
+                    ExtendedMetadata = fields.Extended.ExtendedMetadataAsDictionary,
                     ExtendedData = fields.Extended.ExtendedData,
                 };
             }
@@ -747,7 +747,7 @@ namespace Microsoft.Build.Logging
                     fields.Arguments)
                 {
                     ProjectFile = fields.ProjectFile,
-                    ExtendedMetadata = fields.Extended?.ExtendedMetadata,
+                    ExtendedMetadata = fields.Extended?.ExtendedMetadataAsDictionary,
                     ExtendedData = fields.Extended?.ExtendedData,
                 };
             }
@@ -836,7 +836,7 @@ namespace Microsoft.Build.Logging
                     fields.Arguments)
                 {
                     ProjectFile = fields.ProjectFile,
-                    ExtendedMetadata = fields.Extended?.ExtendedMetadata,
+                    ExtendedMetadata = fields.Extended?.ExtendedMetadataAsDictionary,
                     ExtendedData = fields.Extended?.ExtendedData,
                 };
             }
