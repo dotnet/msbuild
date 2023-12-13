@@ -77,6 +77,13 @@
         <target state="translated">MSBUILD : error MSB1027: MSBuild.rsp 자동 지시 파일과 자동 지시 파일에서 참조하는 모든 지시 파일에는 -noAutoResponse 스위치를 지정할 수 없습니다.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="DurationDisplay">
+        <source>({0:F1}s)</source>
+        <target state="new">({0:F1}s)</target>
+        <note>
+        {0}: duration in seconds with 1 decimal point
+      </note>
+      </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
         <source>  -question
                      (Experimental) Question whether there is any build work.
@@ -1474,29 +1481,6 @@
         <source>Process = "{0}"</source>
         <target state="translated">프로세스 = "{0}"</target>
         <note />
-      </trans-unit>
-      <trans-unit id="ProjectBuilding_NoTF">
-        <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3}초)</target>
-        <note>
-      Project building.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target
-      {3}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectBuilding_WithTF">
-        <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3} ({4}초)</target>
-        <note>
-      Project building including target framework information.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target framework
-      {3}: target
-      {4}: duration in seconds with 1 decimal point
-    </note>
       </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
