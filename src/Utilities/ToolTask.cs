@@ -229,7 +229,7 @@ namespace Microsoft.Build.Utilities
         /// here since processes we run don't really have much to do with our console window (and also Console.OutputEncoding
         /// doesn't return the OEM code page if the running application that hosts MSBuild is not a console application).
         /// </remarks>
-        protected virtual Encoding StandardOutputEncoding => EncodingUtilities.CurrentSystemOemEncoding;
+        protected virtual Encoding StandardOutputEncoding { get; private set; } = EncodingUtilities.CurrentSystemOemEncoding;
 
         /// <summary>
         /// Overridable property specifying the encoding of the captured task standard error stream
@@ -239,7 +239,7 @@ namespace Microsoft.Build.Utilities
         /// here since processes we run don't really have much to do with our console window (and also Console.OutputEncoding
         /// doesn't return the OEM code page if the running application that hosts MSBuild is not a console application).
         /// </remarks>
-        protected virtual Encoding StandardErrorEncoding => EncodingUtilities.CurrentSystemOemEncoding;
+        protected virtual Encoding StandardErrorEncoding { get; private set; } = EncodingUtilities.CurrentSystemOemEncoding;
 
         /// <summary>
         /// Gets the Path override value.
@@ -1404,6 +1404,9 @@ namespace Microsoft.Build.Utilities
                         }
 
                         File.AppendAllText(_temporaryBatchFile, commandLineCommands, encoding);
+                        // Keep the encoding of standard output & error consistent with the console code page.
+                        StandardOutputEncoding = encoding;
+                        StandardErrorEncoding = encoding;
 
                         string batchFileForCommandLine = _temporaryBatchFile;
 
