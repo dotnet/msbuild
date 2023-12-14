@@ -290,7 +290,19 @@ namespace Microsoft.Build.Tasks
                 destinationFileState.FileExists &&
                 !destinationFileState.IsReadOnly)
             {
-                FileUtilities.DeleteNoThrow(destinationFileState.Name);
+                try
+                {
+                    Log?.LogMessage($"Try to delete with no throw: {destinationFileState.Name}");
+                    FileUtilities.DeleteNoThrow(destinationFileState.Name);
+                }
+                catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
+                {
+                    Log?.LogErrorFromException(ex, showStackTrace: true, showDetail: true, destinationFileState.Name);
+                }
+                catch (Exception ex)
+                {
+                    Log?.LogErrorFromException(ex, showStackTrace: true, showDetail: true, destinationFileState.Name);
+                }
             }
 
             bool symbolicLinkCreated = false;
@@ -951,7 +963,16 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         public override bool Execute()
         {
-            return Execute(CopyFileWithLogging, s_parallelism);
+            try
+            {
+                return Execute(CopyFileWithLogging, s_parallelism);
+            }
+            catch (Exception ex)
+            {
+                Log.LogErrorFromException(ex, showStackTrace: true);
+            }
+
+            return false;
         }
 
         #endregion
