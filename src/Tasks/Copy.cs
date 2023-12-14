@@ -929,7 +929,7 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                if (NativeMethodsShared.IsWindows && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+                if (NativeMethodsShared.IsWindows)
                 {
                     var processes = LockCheck.GetProcessesLockingFile(file);
                     message = !string.IsNullOrEmpty(processes)

@@ -102,22 +102,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 var assembly = Path.Combine(subfolder.FullName, $"{subfolder.Name}.dll");
                 bool assemblyAdded = false;
 
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
-                {
-                    // Prefer manifest over the assembly. Try to read the xml first, and if not found then look for an assembly.
-                    assemblyAdded = TryAddAssemblyManifestFromXml(manifest, subfolder.FullName, manifestsList, location);
-                    if (!assemblyAdded)
-                    {
-                        assemblyAdded = TryAddAssemblyManifestFromDll(assembly, manifestsList);
-                    }
-                }
-                else
+                // Prefer manifest over the assembly. Try to read the xml first, and if not found then look for an assembly.
+                assemblyAdded = TryAddAssemblyManifestFromXml(manifest, subfolder.FullName, manifestsList, location);
+                if (!assemblyAdded)
                 {
                     assemblyAdded = TryAddAssemblyManifestFromDll(assembly, manifestsList);
-                    if (!assemblyAdded)
-                    {
-                        assemblyAdded = TryAddAssemblyManifestFromXml(manifest, subfolder.FullName, manifestsList, location);
-                    }
                 }
 
                 if (!assemblyAdded)
