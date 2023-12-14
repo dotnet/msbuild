@@ -1985,7 +1985,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <IsRidAgnostic>@(_TargetFrameworkInfo->'%(IsRidAgnostic)')</IsRidAgnostic>
         <!-- Extract necessary information for SetPlatform negotiation -->
         <IsVcxOrNativeProj Condition="'$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj'">true</IsVcxOrNativeProj>
-        <Platform Condition="$([MSBuild]::AreFeaturesEnabled('17.4'))">$(Platform)</Platform>
+        <Platform>$(Platform)</Platform>
         <Platforms>$(Platforms)</Platforms>
         <!-- .vcxproj and .nativeproj contain a `ProjectConfiguration` item that have `Platform` metadata within.
              Build the `Platforms` property from that. -->

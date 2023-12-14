@@ -1654,9 +1654,8 @@ namespace Microsoft.Build.Evaluation
             {
 #if RUNTIME_TYPE_NETCORE
                 // .NET Core MSBuild used to always return empty, so match that behavior
-                // on non-Windows (no registry), and with a changewave (in case someone
-                // had a registry property and it breaks when it lights up).
-                if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+                // on non-Windows (no registry).
+                if (!NativeMethodsShared.IsWindows)
                 {
                     return string.Empty;
                 }
