@@ -1348,13 +1348,30 @@ namespace Microsoft.Build.Evaluation
 
             if (newValue != oldValue)
             {
-                _evaluationLoggingContext.LogComment(
-                    MessageImportance.Low,
-                    "PropertyReassignment",
-                    property.Name,
-                    newValue,
-                    oldValue,
-                    location);
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+                {
+                    var args = new PropertyReassignmentEventArgs(
+                        property.Name,
+                        oldValue,
+                        newValue,
+                        location,
+                        message: null)
+                    {
+                        BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                    };
+
+                    _evaluationLoggingContext.LogBuildEvent(args);
+                }
+                else
+                {
+                    _evaluationLoggingContext.LogComment(
+                        MessageImportance.Low,
+                        "PropertyReassignment",
+                        property.Name,
+                        newValue,
+                        oldValue,
+                        location);
+                }
             }
         }
 

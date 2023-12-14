@@ -18,7 +18,7 @@ public sealed class ExtendedBuildErrorEventArgs : BuildErrorEventArgs, IExtended
     public string ExtendedType { get; set; }
 
     /// <inheritdoc />
-    public IDictionary<string, string?>? ExtendedMetadata { get; set; }
+    public Dictionary<string, string?>? ExtendedMetadata { get; set; }
 
     /// <inheritdoc />
     public string? ExtendedData { get; set; }

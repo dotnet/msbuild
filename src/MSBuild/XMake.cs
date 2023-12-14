@@ -1544,6 +1544,10 @@ namespace Microsoft.Build.CommandLine
                                 {
                                     return false;
                                 }
+                                else
+                                {
+                                    success = result.OverallResult == BuildResultCode.Success;
+                                }
                             }
 
                             if (!restoreOnly)
@@ -1568,20 +1572,13 @@ namespace Microsoft.Build.CommandLine
                                                                                                                                         entryValue.Equals(propertyKvp.Value)))
                                             .Value;
                                     }
-                                    else
-                                    {
-                                        success = graphResult.OverallResult == BuildResultCode.Success;
-                                    }
+                                    success = graphResult.OverallResult == BuildResultCode.Success;
                                 }
                                 else
                                 {
                                     result = ExecuteBuild(buildManager, buildRequest);
+                                    success = result.OverallResult == BuildResultCode.Success;
                                 }
-                            }
-
-                            if (result != null && result.Exception == null)
-                            {
-                                success = result.OverallResult == BuildResultCode.Success;
                             }
                         }
                         finally
@@ -4490,7 +4487,15 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static void ShowVersion()
         {
-            Console.Write(ProjectCollection.Version.ToString());
+            // Change Version switch output to finish with a newline https://github.com/dotnet/msbuild/pull/9485
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+            {
+                Console.WriteLine(ProjectCollection.Version.ToString());
+            }
+            else
+            {
+                Console.Write(ProjectCollection.Version.ToString());
+            }
         }
     }
 }
