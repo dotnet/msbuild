@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -292,16 +293,31 @@ namespace Microsoft.Build.Tasks
             {
                 try
                 {
-                    Log?.LogMessage($"Try to delete with no throw: {destinationFileState.Name}");
+                    if (!NativeMethodsShared.IsWindows)
+                    {
+                        Log.LogMessage($"Run lsof before DeleteNoThrow: {destinationFileState.Name}");
+                        RunLsof();
+                    }
+
+                    Log.LogMessage($"Try to delete with no throw: {destinationFileState.Name}");
                     FileUtilities.DeleteNoThrow(destinationFileState.Name);
                 }
                 catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {
-                    Log?.LogErrorFromException(ex, showStackTrace: true, showDetail: true, destinationFileState.Name);
+                    Log.LogErrorFromException(ex, showStackTrace: true, showDetail: true, destinationFileState.Name);
+                    if (!NativeMethodsShared.IsWindows)
+                    {
+                        Log.LogMessage($"Run lsof before DeleteNoThrow with IsIoRelatedException condition: {destinationFileState.Name}");
+                        RunLsof();
+                    }
                 }
                 catch (Exception ex)
                 {
-                    Log?.LogErrorFromException(ex, showStackTrace: true, showDetail: true, destinationFileState.Name);
+#if NETCOREAPP
+                    Log.LogMessage($"Run lsof after failed DeleteNoThrow: {destinationFileState.Name}");
+                    RunLsof();
+#endif
+                    Log.LogErrorFromException(ex, showStackTrace: true, showDetail: true, destinationFileState.Name);
                 }
             }
 
@@ -371,6 +387,42 @@ namespace Microsoft.Build.Tasks
             WroteAtLeastOneFile = true;
 
             return true;
+        }
+
+        private void RunLsof()
+        {
+            try
+            {
+                using (Process process = new Process())
+                {
+                    process.StartInfo.FileName = "lsof";
+
+                    process.StartInfo.RedirectStandardOutput = true;
+                    process.StartInfo.RedirectStandardError = true;
+                    process.StartInfo.UseShellExecute = false;
+                    process.StartInfo.CreateNoWindow = true;
+
+                    process.Start();
+
+                    string output = process.StandardOutput.ReadToEnd();
+                    string error = process.StandardError.ReadToEnd();
+
+                    process.WaitForExit();
+                    if (!string.IsNullOrEmpty(output))
+                    {
+                        Log.LogMessage($"lsof output:\n{output}");
+                    }
+
+                    if (!string.IsNullOrEmpty(error))
+                    {
+                        Log.LogError($"lsof error:\n{error}");
+                    }
+                }
+            }
+            catch
+            {
+                Log.LogError("lsof invocation has failed.");
+            }
         }
 
         private void TryCopyViaLink(string linkComment, MessageImportance messageImportance, FileState sourceFileState, FileState destinationFileState, out bool linkCreated, ref string errorMessage, Func<string, string, string, bool> createLink)
