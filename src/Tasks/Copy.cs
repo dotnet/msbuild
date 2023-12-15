@@ -293,7 +293,7 @@ namespace Microsoft.Build.Tasks
             {
                 try
                 {
-                    if (!NativeMethodsShared.IsWindows)
+                    if (NativeMethodsShared.IsLinux)
                     {
                         Log.LogMessage($"Run lsof before DeleteNoThrow: {destinationFileState.Name}");
                         RunLsof();
@@ -305,7 +305,7 @@ namespace Microsoft.Build.Tasks
                 catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {
                     Log.LogErrorFromException(ex, showStackTrace: true, showDetail: true, destinationFileState.Name);
-                    if (!NativeMethodsShared.IsWindows)
+                    if (NativeMethodsShared.IsLinux)
                     {
                         Log.LogMessage($"Run lsof before DeleteNoThrow with IsIoRelatedException condition: {destinationFileState.Name}");
                         RunLsof();
@@ -313,10 +313,11 @@ namespace Microsoft.Build.Tasks
                 }
                 catch (Exception ex)
                 {
-#if NETCOREAPP
-                    Log.LogMessage($"Run lsof after failed DeleteNoThrow: {destinationFileState.Name}");
-                    RunLsof();
-#endif
+                    if (NativeMethodsShared.IsLinux)
+                    {
+                        Log.LogMessage($"Run lsof after failed DeleteNoThrow: {destinationFileState.Name}");
+                        RunLsof();
+                    }
                     Log.LogErrorFromException(ex, showStackTrace: true, showDetail: true, destinationFileState.Name);
                 }
             }
