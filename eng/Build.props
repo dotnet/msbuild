@@ -3,7 +3,7 @@
 <Project>
 
   <PropertyGroup>
-    <RestoreUseStaticGraphEvaluation Condition="'$(DotNetBuildFromSource)' != 'true'">true</RestoreUseStaticGraphEvaluation>
+    <RestoreUseStaticGraphEvaluation>true</RestoreUseStaticGraphEvaluation>
   </PropertyGroup>
 
   <ItemGroup>
