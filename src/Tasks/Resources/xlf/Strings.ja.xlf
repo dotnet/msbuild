@@ -2180,11 +2180,6 @@
         <target state="translated">再頒布可能パッケージ リスト ファイル "{0}" の FileList 要素に null または空の再頒布可能パッケージ名があります。再頒布可能パッケージ名が null または空でないことを確認してください。</target>
         <note />
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
-        <source>Updating assembly cache file "{0}".</source>
-        <target state="translated">アセンブリ キャッシュ ファイル "{0}" を更新しています。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
         <source>COM Reference '{0}' is the interop assembly for ActiveX control '{1}' but was marked to be linked by the compiler with the /link flag. This COM reference will be treated as a reference and will not be linked.</source>
         <target state="translated">COM 参照 '{0}' は ActiveX コントロール '{1}' の相互運用アセンブリですが、コンパイラによって /link フラグでリンクされるように設定されています。この COM 参照は参照として処理され、リンクされません。</target>

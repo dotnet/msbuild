@@ -2180,11 +2180,6 @@
         <target state="translated">Plik z listą pakietów redystrybucyjnych „{0}” ma nazwę Redist równą null lub pustą w elemencie FileList. Upewnij się, że nazwa Redist nie ma wartości null ani nie jest pusta.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
-        <source>Updating assembly cache file "{0}".</source>
-        <target state="translated">Aktualizowanie pliku pamięci podręcznej zestawu „{0}”.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
         <source>COM Reference '{0}' is the interop assembly for ActiveX control '{1}' but was marked to be linked by the compiler with the /link flag. This COM reference will be treated as a reference and will not be linked.</source>
         <target state="translated">Odwołanie COM „{0}” jest zestawem międzyoperacyjnym dla kontrolki ActiveX „{1}”, ale zostało wybrane do połączenia przez kompilator przy użyciu flagi /link. To odwołanie COM jest traktowane jako odwołanie i nie zostanie połączone.</target>

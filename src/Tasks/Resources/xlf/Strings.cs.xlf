@@ -2180,11 +2180,6 @@
         <target state="translated">Název redistribučního balíčku v elementu FileList v souboru seznamu redistribučního balíčku {0} je null nebo prázdný. Název redistribučního balíčku nesmí být null ani prázdný.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
-        <source>Updating assembly cache file "{0}".</source>
-        <target state="translated">Aktualizuje se soubor mezipaměti sestavení „{0}“.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
         <source>COM Reference '{0}' is the interop assembly for ActiveX control '{1}' but was marked to be linked by the compiler with the /link flag. This COM reference will be treated as a reference and will not be linked.</source>
         <target state="translated">Odkaz modelu COM {0} je definiční sestavení ovládacího prvku ActiveX {1}, ale kompilátor ho označil příznakem /link. S tímto odkazem modelu COM se bude zacházet jako s odkazem a nebude propojen.</target>

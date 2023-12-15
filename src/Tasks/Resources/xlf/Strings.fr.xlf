@@ -2180,11 +2180,6 @@
         <target state="translated">Le fichier de liste de packages redistribuables "{0}" a un nom Redist vide ou ayant une valeur null dans l'élément FileList. Vérifiez que le nom Redist n'est pas vide ou qu'il n'a pas une valeur null.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
-        <source>Updating assembly cache file "{0}".</source>
-        <target state="translated">Mise à jour du fichier de cache d’assembly «{0}».</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
         <source>COM Reference '{0}' is the interop assembly for ActiveX control '{1}' but was marked to be linked by the compiler with the /link flag. This COM reference will be treated as a reference and will not be linked.</source>
         <target state="translated">La référence COM '{0}' est l'assembly d'interopérabilité pour le contrôle ActiveX '{1}', mais elle a été marquée comme étant liée au compilateur avec l'indicateur /link. Cette référence COM sera traitée comme une référence, mais ne sera pas liée.</target>

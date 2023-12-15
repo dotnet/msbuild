@@ -2180,11 +2180,6 @@
         <target state="translated">재배포 가능 패키지 목록 파일 "{0}"의 FileList 요소에 null이거나 비어 있는 재배포 가능 패키지 이름이 있습니다. 재배포 가능 패키지 이름이 null이거나 비어 있지 않도록 하세요.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
-        <source>Updating assembly cache file "{0}".</source>
-        <target state="translated">어셈블리 캐시 파일 "{0}"을(를) 업데이트하는 중입니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
         <source>COM Reference '{0}' is the interop assembly for ActiveX control '{1}' but was marked to be linked by the compiler with the /link flag. This COM reference will be treated as a reference and will not be linked.</source>
         <target state="translated">COM 참조 '{0}'은(는) ActiveX 컨트롤 '{1}'에 대한 interop 어셈블리이지만 /link 플래그로 컴파일러에 의해 링크되도록 표시되어 있습니다. 이 COM 참조는 참조로 간주되지만 링크되지 않습니다.</target>
