@@ -318,6 +318,7 @@ namespace Microsoft.Build.Tasks
                         Log.LogMessage($"Run lsof after failed DeleteNoThrow: {destinationFileState.Name}");
                         RunLsof();
                     }
+
                     Log.LogErrorFromException(ex, showStackTrace: true, showDetail: true, destinationFileState.Name);
                 }
             }
@@ -422,7 +423,7 @@ namespace Microsoft.Build.Tasks
             }
             catch
             {
-                Log.LogError("lsof invocation has failed.");
+                Log.LogWarning("lsof invocation has failed.");
             }
         }
 
