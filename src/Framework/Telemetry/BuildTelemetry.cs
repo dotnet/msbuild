@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace Microsoft.Build.Framework.Telemetry
@@ -83,6 +84,11 @@ namespace Microsoft.Build.Framework.Telemetry
         /// Framework name suitable for display to a user.
         /// </summary>
         public string? FrameworkName { get; set; }
+
+        public override IDictionary<string, string> GetProperties()
+        {
+            return Properties;
+        }
 
         public override void UpdateEventProperties()
         {

@@ -71,7 +71,7 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
         };
 
         expectedTelemetry.UpdateEventProperties();
-        foreach (KeyValuePair<string, string> pair in expectedTelemetry.Properties)
+        foreach (KeyValuePair<string, string> pair in expectedTelemetry.GetProperties())
         {
             output.ShouldContain($"{expectedTelemetry.EventName}:{pair.Key}={pair.Value}");
         }
@@ -102,7 +102,7 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
         };
 
         expectedTelemetry.UpdateEventProperties();
-        foreach (KeyValuePair<string, string> pair in expectedTelemetry.Properties)
+        foreach (KeyValuePair<string, string> pair in expectedTelemetry.GetProperties())
         {
             output.ShouldContain($"{expectedTelemetry.EventName}:{pair.Key}={pair.Value}");
         }
@@ -130,7 +130,7 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
         };
 
         expectedTelemetry.UpdateEventProperties();
-        foreach (KeyValuePair<string, string> pair in expectedTelemetry.Properties)
+        foreach (KeyValuePair<string, string> pair in expectedTelemetry.GetProperties())
         {
             output.ShouldContain($"{expectedTelemetry.EventName}:{pair.Key}={pair.Value}");
         }
@@ -160,7 +160,7 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
         };
 
         expectedTelemetry.UpdateEventProperties();
-        foreach (KeyValuePair<string, string> pair in expectedTelemetry.Properties)
+        foreach (KeyValuePair<string, string> pair in expectedTelemetry.GetProperties())
         {
             output.ShouldContain($"{expectedTelemetry.EventName}:{pair.Key}={pair.Value}");
         }
@@ -189,7 +189,7 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
         };
 
         expectedTelemetry.UpdateEventProperties();
-        foreach (KeyValuePair<string, string> pair in expectedTelemetry.Properties)
+        foreach (KeyValuePair<string, string> pair in expectedTelemetry.GetProperties())
         {
             output.ShouldContain($"{expectedTelemetry.EventName}:{pair.Key}={pair.Value}");
         }
@@ -220,7 +220,7 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
         };
 
         expectedTelemetry.UpdateEventProperties();
-        foreach (KeyValuePair<string, string> pair in expectedTelemetry.Properties)
+        foreach (KeyValuePair<string, string> pair in expectedTelemetry.GetProperties())
         {
             output.ShouldContain($"{expectedTelemetry.EventName}:{pair.Key}={pair.Value}");
         }
