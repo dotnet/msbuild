@@ -1692,6 +1692,10 @@
     <value>References which depend on "{0}" [{1}].</value>
     <comment> This will look like references which depend on "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</comment>
   </data>
+  <data name="ResolveAssemblyReference.UnifiedReferenceDependsOn">
+    <value>References which depend on or have been unified to "{0}" [{1}].</value>
+    <comment> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</comment>
+  </data>
   <data name="ResolveAssemblyReference.UnResolvedPrimaryItemSpec">
     <value>Unresolved primary reference with an item include of "{0}".</value>
     <comment> This messages is for a reference which could not be resolved, however we have its item spec and will display that. {0} will be somethign like  System or A, Version=xxx</comment>
@@ -2782,12 +2786,12 @@
     <comment>{StrBegin="MSB3893: "} LOCALIZATION: {0} and {1} are paths.</comment>
   </data>
   <data name="Copy.IOException">
-    <value>MSB3894: "Got {0} copying {1} to {2} and HR is {3}"</value>
+    <value>MSB3894: Got {0} copying "{1}" to "{2}" and HR is {3}</value>
     <comment>{StrBegin="MSB3894: "} LOCALIZATION: {0} is exception.ToString(), {1} and {2} are paths, {3} is a number")</comment>
   </data>
   <data name="Copy.RetryingOnAccessDenied">
-    <value>"MSB3895: Retrying on ERROR_ACCESS_DENIED because environment variable MSBUILDALWAYSRETRY = 1"</value>
-    <comment>{StrBegin="MSB3895: "} LOCALIZATION: Do NOT translate MSBUILDALWAYSRETRY")</comment>
+    <value>MSB3895: Retrying on ERROR_ACCESS_DENIED because environment variable MSBUILDALWAYSRETRY=1</value>
+    <comment>{StrBegin="MSB3895: "} LOCALIZATION: Do NOT translate MSBUILDALWAYSRETRY)</comment>
   </data>
 
   <!--

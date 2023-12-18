@@ -127,7 +127,7 @@ namespace Microsoft.Build.Utilities
         {
             get
             {
-                // If the task instance does not equal null then use its build engine because 
+                // If the task instance does not equal null then use its build engine because
                 // the task instances build engine can be changed for example during tests. This changing of the engine on the same task object is not expected to happen
                 // during normal operation.
                 if (_taskInstance != null)
@@ -187,10 +187,10 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Loads the specified resource string and optionally formats it using the given arguments. The current thread's culture
         /// is used for formatting.
-        /// 
+        ///
         /// Requires the owner task to have registered its resources either via the Task (or TaskMarshalByRef) base
         /// class constructor, or the Task.TaskResources (or AppDomainIsolatedTask.TaskResources) property.
-        /// 
+        ///
         /// Thread safe.
         /// </summary>
         /// <param name="resourceName">The name of the string resource to load.</param>
@@ -792,14 +792,14 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Logs an error using the specified resource string. 
+        /// Logs an error using the specified resource string.
         /// If the message has an error code prefixed to it, the code is extracted and logged with the message. If a help keyword
         /// prefix has been provided, a help keyword for the host IDE is also logged with the message. The help keyword is
         /// composed by appending the string resource name to the prefix.
-        /// 
+        ///
         /// A task can provide a help keyword prefix either via the Task (or TaskMarshalByRef) base class constructor, or the
         /// Task.HelpKeywordPrefix (or AppDomainIsolatedTask.HelpKeywordPrefix) property.
-        /// 
+        ///
         /// Thread safe.
         /// </summary>
         /// <param name="messageResourceName">The name of the string resource to load.</param>
@@ -811,14 +811,14 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Logs an error using the specified resource string and other error details. 
+        /// Logs an error using the specified resource string and other error details.
         /// If the message has an error code prefixed, the code is extracted and logged with the message. If a
         /// help keyword prefix has been provided, a help keyword for the host IDE is also logged with the message. The help
         /// keyword is composed by appending the error message resource string name to the prefix.
-        /// 
+        ///
         /// A task can provide a help keyword prefix either via the Task (or TaskMarshalByRef) base class constructor, or the
         /// Task.HelpKeywordPrefix (or AppDomainIsolatedTask.HelpKeywordPrefix) property.
-        /// 
+        ///
         /// Thread safe.
         /// </summary>
         /// <param name="subcategoryResourceName">The name of the string resource that describes the error type (can be null).</param>

@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
 
         public void Dispose()
         {
-            // Reset PATH to its original value. 
+            // Reset PATH to its original value.
             if (s_oldPath != null)
             {
                 Environment.SetEnvironmentVariable("PATH", s_oldPath);
@@ -123,8 +123,8 @@ namespace Microsoft.Build.UnitTests.FileTracking
                     Directory.Delete(testDirectory, true);
                 }
 
-                // create an empty directory and copy Tracker.exe -- BUT NOT TrackerUI.dll -- to 
-                // that directory. 
+                // create an empty directory and copy Tracker.exe -- BUT NOT TrackerUI.dll -- to
+                // that directory.
                 Directory.CreateDirectory(testDirectory);
                 File.Copy(s_defaultTrackerPath, testTrackerPath);
 
@@ -132,14 +132,14 @@ namespace Microsoft.Build.UnitTests.FileTracking
 
                 Assert.Equal(9, exit);
                 // It's OK to look for the English message since that's all we're capable of printing when we can't find
-                // our resource dll. 
+                // our resource dll.
                 Assert.Contains("FileTracker : ERROR : Could not load UI satellite dll 'TrackerUI.dll'", log);
             }
             finally
             {
-                // Doesn't delete the directory itself, but deletes its contents.  If you try to delete the directory, 
-                // even after calling this method, it sometimes throws IO exceptions due to not recognizing that the 
-                // contents have been deleted yet. 
+                // Doesn't delete the directory itself, but deletes its contents.  If you try to delete the directory,
+                // even after calling this method, it sometimes throws IO exceptions due to not recognizing that the
+                // contents have been deleted yet.
                 ObjectModelHelpers.DeleteDirectory(testDirectory);
             }
         }
@@ -303,11 +303,11 @@ namespace ConsoleApplication4
         static void Main(string[] args)
         {
             File.GetAttributes(Directory.GetCurrentDirectory());
-            GetFileAttributes(Directory.GetCurrentDirectory()); 
+            GetFileAttributes(Directory.GetCurrentDirectory());
         }
 
         [DllImport(""Kernel32.dll"", SetLastError = true, CharSet = CharSet.Unicode)]
-        private extern static uint GetFileAttributes(string FileName); 
+        private extern static uint GetFileAttributes(string FileName);
     }
 }";
 
@@ -344,7 +344,7 @@ namespace ConsoleApplication4
                 Console.WriteLine("");
                 Assert.Equal(0, exit);
 
-                // With '/a', should *not* track GetFileAttributes on directories, even though we do so on files. 
+                // With '/a', should *not* track GetFileAttributes on directories, even though we do so on files.
                 FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesExW:" + FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
                 FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesW:" + FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
 
@@ -382,7 +382,7 @@ namespace ConsoleApplication4
                 Console.WriteLine("");
                 Assert.Equal(0, exit);
 
-                // With '/a', should *not* track GetFileAttributes on directories, even though we do so on files. 
+                // With '/a', should *not* track GetFileAttributes on directories, even though we do so on files.
                 FileTrackerTestHelper.AssertDidntFindStringInTLog(FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
 
                 File.Delete("directoryattributes.read.1.tlog");
@@ -470,12 +470,12 @@ namespace ConsoleApplication4
                 writeFile = Path.Combine(testDirectory, "test.out");
                 string codeFile = Path.Combine(testDirectory, "code.cs");
                 string codeContent = @"
-using System.IO; 
+using System.IO;
 using System.Runtime.InteropServices;
-class X 
-{ 
-    static void Main() 
-    { 
+class X
+{
+    static void Main()
+    {
         FileStream f = File.Open(@""" + writeFile + @""", FileMode.CreateNew, FileAccess.ReadWrite, FileShare.ReadWrite);
         f.WriteByte(8);
         f.Close();
@@ -501,9 +501,9 @@ class X
             }
             finally
             {
-                // Doesn't delete the directory itself, but deletes its contents.  If you try to delete the directory, 
-                // even after calling this method, it sometimes throws IO exceptions due to not recognizing that the 
-                // contents have been deleted yet. 
+                // Doesn't delete the directory itself, but deletes its contents.  If you try to delete the directory,
+                // even after calling this method, it sometimes throws IO exceptions due to not recognizing that the
+                // contents have been deleted yet.
                 ObjectModelHelpers.DeleteDirectory(testDirectory);
             }
 
@@ -1381,7 +1381,7 @@ class X
             }
             Console.WriteLine("");
             Assert.Equal(0, exit);
-            // This line is the problem.  It seems to have been reliable in MSTest 
+            // This line is the problem.  It seems to have been reliable in MSTest
             // but in xunit when run with other tests (NOT by itself), filetracker
             // puts a PID in the path, so this tries to open the wrong file and throws.
             FileTrackerTestHelper.AssertFoundStringInTLog(Path.GetFullPath("test.in").ToUpperInvariant(), "InProcTrackingStartProcessFindStrIn-findstr.read.1.tlog");
@@ -2239,7 +2239,7 @@ class X
 
                 Directory.CreateDirectory(testDir);
 
-                // File to run findstr against. 
+                // File to run findstr against.
                 string tempFilePath = Path.Combine(testDir, "bar.txt");
                 File.WriteAllText(tempFilePath, "");
 
@@ -2430,7 +2430,7 @@ namespace ConsoleApplication4
 
                 // make sure the disk write gets time for NTFS to recognize its existence.  Estimate time needed to sleep based
                 // roughly on the number of tlogs that we're looking for (presumably roughly proportional to the number of tlogs
-                // being written. 
+                // being written.
                 Thread.Sleep(Math.Max(200, 250 * tlogCount));
 
                 // Item1: The pattern the tlog name should follow

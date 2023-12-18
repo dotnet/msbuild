@@ -1537,26 +1537,11 @@
       {0}: VT100 coded hyperlink to project output directory
     </comment>
   </data>
-  <data name="ProjectBuilding_NoTF" xml:space="preserve">
-    <value>{0}{1} {2} ({3}s)</value>
-    <comment>
-      Project building.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target
-      {3}: duration in seconds with 1 decimal point
-    </comment>
-  </data>
-  <data name="ProjectBuilding_WithTF" xml:space="preserve">
-    <value>{0}{1} {2} {3} ({4}s)</value>
-    <comment>
-      Project building including target framework information.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target framework
-      {3}: target
-      {4}: duration in seconds with 1 decimal point
-    </comment>
+  <data name="DurationDisplay">
+      <value>({0:F1}s)</value>
+      <comment>
+        {0}: duration in seconds with 1 decimal point
+      </comment>
   </data>
   <data name="BuildFailedWithPropertiesItemsOrTargetResultsRequested" xml:space="preserve">
     <value>Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</value>

@@ -1,0 +1,5 @@
+﻿]9;4;3;\The plugin credential provider could not acquire credentials.Authentication may require manual action. Consider re-running the command with --interactive for `dotnet`, /p:NuGetInteractive="true" for MSBuild or removing the -NonInteractive switch for `NuGet`
+[?25l[1F
+[?25h
+Build [32;1msucceeded[m in 0.0s
+]9;4;0;\

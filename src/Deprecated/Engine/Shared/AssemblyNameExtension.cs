@@ -56,7 +56,7 @@ namespace Microsoft.Build.BuildEngine.Shared
 
         /// <summary>
         /// Construct from a string, but immediately construct a real AssemblyName.
-        /// This will cause an exception to be thrown up front if the assembly name 
+        /// This will cause an exception to be thrown up front if the assembly name
         /// isn't well formed.
         /// </summary>
         /// <param name="assemblyName">
@@ -253,7 +253,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <returns></returns>
         internal new int GetHashCode()
         {
-            // Ok, so this isn't a great hashing algorithm. However, basenames with different 
+            // Ok, so this isn't a great hashing algorithm. However, basenames with different
             // versions or PKTs are relatively uncommon and so collisions should be low.
             // Hashing on FullName is wrong because the order of tuple fields is undefined.
             int hash = StringComparer.OrdinalIgnoreCase.GetHashCode(this.Name);
@@ -288,7 +288,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
-        /// An implementation of compare that compares two base 
+        /// An implementation of compare that compares two base
         /// names as quickly as possible.
         /// </summary>
         /// <param name="that"></param>
@@ -480,7 +480,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
-        /// Return a string that has AssemblyName special characters escaped. 
+        /// Return a string that has AssemblyName special characters escaped.
         /// Those characters are Equals(=), Comma(,), Quote("), Apostrophe('), Backslash(\).
         /// </summary>
         /// <remarks>

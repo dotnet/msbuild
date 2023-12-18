@@ -1982,7 +1982,7 @@ namespace Microsoft.Build.Execution
             rootElement.DefaultTargets = String.Join(";", DefaultTargets);
             rootElement.ToolsVersion = ToolsVersion;
 
-            // Add all of the item definitions.            
+            // Add all of the item definitions.
             ProjectItemDefinitionGroupElement itemDefinitionGroupElement = rootElement.AddItemDefinitionGroup();
             foreach (ProjectItemDefinitionInstance itemDefinitionInstance in _itemDefinitions.Values)
             {
@@ -2253,7 +2253,7 @@ namespace Microsoft.Build.Execution
             }
 
             // If a ToolsVersion has been passed in using the /tv:xx switch, we want to generate an
-            // old-style solution wrapper project if it's < 4.0, to work around ordering issues.  
+            // old-style solution wrapper project if it's < 4.0, to work around ordering issues.
             if (toolsVersion != null)
             {
                 if (
@@ -2261,7 +2261,7 @@ namespace Microsoft.Build.Execution
                        String.Equals(toolsVersion, "3.0", StringComparison.OrdinalIgnoreCase) ||
                        String.Equals(toolsVersion, "3.5", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Spawn the Orcas SolutionWrapperProject generator.  
+                    // Spawn the Orcas SolutionWrapperProject generator.
                     loggingService.LogComment(projectBuildEventContext, MessageImportance.Low, "OldWrapperGeneratedExplicitToolsVersion", toolsVersion);
                     projectInstances = GenerateSolutionWrapperUsingOldOM(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, buildParameters, loggingService, projectBuildEventContext, isExplicitlyLoaded, sdkResolverService, submissionId);
                 }
@@ -2272,7 +2272,7 @@ namespace Microsoft.Build.Execution
             }
 
             // If the user didn't pass in a ToolsVersion, still try to make a best-effort guess as to whether
-            // we should be generating a 4.0+ or a 3.5-style wrapper project based on the version of the solution. 
+            // we should be generating a 4.0+ or a 3.5-style wrapper project based on the version of the solution.
             else
             {
                 string solutionFile = projectFile;
@@ -2282,9 +2282,9 @@ namespace Microsoft.Build.Execution
                 }
                 SolutionFile.GetSolutionFileAndVisualStudioMajorVersions(solutionFile, out int solutionVersion, out int visualStudioVersion);
 
-                // If we get to this point, it's because it's a valid version.  Map the solution version 
-                // to the equivalent MSBuild ToolsVersion, and unless it's Dev10 or newer, spawn the old 
-                // engine to generate the solution wrapper.  
+                // If we get to this point, it's because it's a valid version.  Map the solution version
+                // to the equivalent MSBuild ToolsVersion, and unless it's Dev10 or newer, spawn the old
+                // engine to generate the solution wrapper.
                 if (solutionVersion <= 9) /* Whidbey or before */
                 {
                     loggingService.LogComment(projectBuildEventContext, MessageImportance.Low, "OldWrapperGeneratedOldSolutionVersion", "2.0", solutionVersion);
@@ -2600,7 +2600,7 @@ namespace Microsoft.Build.Execution
             int submissionId)
         {
             // Pass the toolsVersion of this project through, which will never be null -- either we passed the /tv:nn
-            // switch straight through, or we fabricated a ToolsVersion based on the solution version.  
+            // switch straight through, or we fabricated a ToolsVersion based on the solution version.
             // It's needed to determine which <UsingTask> tags to put in, whether to put a ToolsVersion parameter
             // on the <MSBuild> task tags, and what MSBuildToolsPath to use when scanning child projects
             // for dependency information.
@@ -2771,7 +2771,7 @@ namespace Microsoft.Build.Execution
                 this.SubToolsetVersion = this.Toolset.GenerateSubToolsetVersionUsingVisualStudioVersion(globalProperties, visualStudioVersionFromSolution);
             }
 
-            // Create a task registry which will fall back on the toolset task registry if necessary.          
+            // Create a task registry which will fall back on the toolset task registry if necessary.
             this.TaskRegistry = new TaskRegistry(this.Toolset, ProjectRootElementCache);
 
             if (globalProperties != null)
@@ -2780,9 +2780,9 @@ namespace Microsoft.Build.Execution
                 {
                     if (String.Equals(globalProperty.Key, Constants.SubToolsetVersionPropertyName, StringComparison.OrdinalIgnoreCase) && explicitSubToolsetVersion != null)
                     {
-                        // if we have a sub-toolset version explicitly provided by the ProjectInstance constructor, AND a sub-toolset version provided as a global property, 
-                        // make sure that the one passed in with the constructor wins.  If there isn't a matching global property, the sub-toolset version will be set at 
-                        // a later point. 
+                        // if we have a sub-toolset version explicitly provided by the ProjectInstance constructor, AND a sub-toolset version provided as a global property,
+                        // make sure that the one passed in with the constructor wins.  If there isn't a matching global property, the sub-toolset version will be set at
+                        // a later point.
                         _globalProperties.Set(ProjectPropertyInstance.Create(globalProperty.Key, explicitSubToolsetVersion, false /* may not be reserved */, _isImmutable));
                     }
                     else
@@ -2996,7 +2996,7 @@ namespace Microsoft.Build.Execution
 
             foreach (ProjectProperty property in properties)
             {
-                // Allow reserved property names, since this is how they are added to the project instance. 
+                // Allow reserved property names, since this is how they are added to the project instance.
                 // The caller has prevented users setting them themselves.
                 ProjectPropertyInstance instance = ProjectPropertyInstance.Create(property.Name, ((IProperty)property).EvaluatedValueEscaped, true /* MAY be reserved name */, isImmutable, property.IsEnvironmentProperty);
                 _properties.Set(instance);

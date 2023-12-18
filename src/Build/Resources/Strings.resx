@@ -158,6 +158,12 @@
   <data name="BuildFinishedFailure" xml:space="preserve">
     <value>Build FAILED.</value>
   </data>
+  <data name="BuildFinishedQuestionFailure" xml:space="preserve">
+    <value>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</value>
+  </data>
+  <data name="BuildFinishedQuestionSuccess" xml:space="preserve">
+    <value>Question build succeeded. Up-to-date checks passed.</value>
+  </data>
   <data name="BuildFinishedSuccess" xml:space="preserve">
     <value>Build succeeded.</value>
   </data>
@@ -1986,6 +1992,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="TaskAssemblyLoaded" xml:space="preserve">
     <value>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</value>
+  </data>
+  <data name="TaskAssemblyLoadedWithAssemblyLoadContext" xml:space="preserve">
+    <value>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</value>
   </data>
   <data name="NodeReused" xml:space="preserve">
     <value>Reusing node {0} (PID: {1}).</value>

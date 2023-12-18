@@ -1,7 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Microsoft.Build.Framework.FileAccess
+namespace Microsoft.Build.Experimental.FileAccess
 {
     /*
      * Implementation note: This is a copy of BuildXL.Processes.ReportedFileOperation.
@@ -186,7 +186,7 @@ namespace Microsoft.Build.Framework.FileAccess
 
         /// <summary>
         /// This is a quasi operation. The sandbox issues this only when FileAccessPolicy.OverrideAllowWriteForExistingFiles is set, representing
-        /// that an allow for write check was performed for a given path for the first time (in the scope of a process, another process in the same process 
+        /// that an allow for write check was performed for a given path for the first time (in the scope of a process, another process in the same process
         /// tree may also report this for the same path).
         /// </summary>
         FirstAllowWriteCheckInProcess,

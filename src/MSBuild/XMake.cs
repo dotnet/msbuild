@@ -1255,7 +1255,7 @@ namespace Microsoft.Build.CommandLine
                 InitializationException.Throw(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectUpgradeNeededToVcxProj", projectFile), null);
             }
 
-            bool success = false;
+            bool success = true;
 
             ProjectCollection projectCollection = null;
             bool onlyLogCriticalEvents = false;
@@ -1371,11 +1371,12 @@ namespace Microsoft.Build.CommandLine
 
                 if (isPreprocess)
                 {
+                    success = false;
+
                     // TODO: Support /preprocess for solution files. https://github.com/dotnet/msbuild/issues/7697
                     if (isSolution)
                     {
                         Console.WriteLine(ResourceUtilities.GetResourceString("UnsupportedSwitchForSolutionFiles"), CommandLineSwitches.ParameterizedSwitch.Preprocess);
-                        success = false;
                     }
                     else
                     {
@@ -1389,13 +1390,14 @@ namespace Microsoft.Build.CommandLine
                     }
                 }
 
-                if (isTargets)
+                if (isTargets && success)
                 {
+                    success = false;
+
                     // TODO: Support /targets for solution files. https://github.com/dotnet/msbuild/issues/7697
                     if (isSolution)
                     {
                         Console.WriteLine(ResourceUtilities.GetResourceString("UnsupportedSwitchForSolutionFiles"), CommandLineSwitches.ParameterizedSwitch.Targets);
-                        success = false;
                     }
                     else
                     {
@@ -1405,6 +1407,7 @@ namespace Microsoft.Build.CommandLine
 
                 if (!isPreprocess && !isTargets)
                 {
+                    success = false;
                     BuildParameters parameters = new BuildParameters(projectCollection);
 
                     // By default we log synchronously to the console for compatibility with previous versions,
@@ -1535,11 +1538,15 @@ namespace Microsoft.Build.CommandLine
 
                             if (enableRestore || restoreOnly)
                             {
-                                result = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties);
+                                result = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties, saveProjectResult: saveProjectResult);
 
                                 if (result.OverallResult != BuildResultCode.Success)
                                 {
                                     return false;
+                                }
+                                else
+                                {
+                                    success = result.OverallResult == BuildResultCode.Success;
                                 }
                             }
 
@@ -1565,20 +1572,13 @@ namespace Microsoft.Build.CommandLine
                                                                                                                                         entryValue.Equals(propertyKvp.Value)))
                                             .Value;
                                     }
-                                    else
-                                    {
-                                        success = graphResult.OverallResult == BuildResultCode.Success;
-                                    }
+                                    success = graphResult.OverallResult == BuildResultCode.Success;
                                 }
                                 else
                                 {
                                     result = ExecuteBuild(buildManager, buildRequest);
+                                    success = result.OverallResult == BuildResultCode.Success;
                                 }
-                            }
-
-                            if (result != null && result.Exception == null)
-                            {
-                                success = result.OverallResult == BuildResultCode.Success;
                             }
                         }
                         finally
@@ -1759,7 +1759,7 @@ namespace Microsoft.Build.CommandLine
             return submission.Execute();
         }
 
-        private static BuildResult ExecuteRestore(string projectFile, string toolsVersion, BuildManager buildManager, Dictionary<string, string> globalProperties)
+        private static BuildResult ExecuteRestore(string projectFile, string toolsVersion, BuildManager buildManager, Dictionary<string, string> globalProperties, bool saveProjectResult = false)
         {
             // Make a copy of the global properties
             Dictionary<string, string> restoreGlobalProperties = new Dictionary<string, string>(globalProperties);
@@ -1776,13 +1776,19 @@ namespace Microsoft.Build.CommandLine
             //     make available an import that doesn't exist yet and the <Import /> might be missing a condition.
             //  - BuildRequestDataFlags.FailOnUnresolvedSdk to still fail in the case when an MSBuild project SDK can't be resolved since this is fatal and should
             //     fail the build.
+            BuildRequestDataFlags flags = BuildRequestDataFlags.ClearCachesAfterBuild | BuildRequestDataFlags.SkipNonexistentTargets | BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports | BuildRequestDataFlags.FailOnUnresolvedSdk;
+            if (saveProjectResult)
+            {
+                flags |= BuildRequestDataFlags.ProvideProjectStateAfterBuild;
+            }
+
             BuildRequestData restoreRequest = new BuildRequestData(
                 projectFile,
                 restoreGlobalProperties,
                 toolsVersion,
                 targetsToBuild: new[] { MSBuildConstants.RestoreTargetName },
                 hostServices: null,
-                flags: BuildRequestDataFlags.ClearCachesAfterBuild | BuildRequestDataFlags.SkipNonexistentTargets | BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports | BuildRequestDataFlags.FailOnUnresolvedSdk);
+                flags: flags);
 
             return ExecuteBuild(buildManager, restoreRequest);
         }
@@ -4481,7 +4487,15 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static void ShowVersion()
         {
-            Console.Write(ProjectCollection.Version.ToString());
+            // Change Version switch output to finish with a newline https://github.com/dotnet/msbuild/pull/9485
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+            {
+                Console.WriteLine(ProjectCollection.Version.ToString());
+            }
+            else
+            {
+                Console.Write(ProjectCollection.Version.ToString());
+            }
         }
     }
 }

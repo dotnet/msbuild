@@ -79,7 +79,7 @@ namespace Microsoft.Build.Tasks
                 publicKey = snp.PublicKey;
 
                 // If we didn't throw up to this point then we have a valid public/private key pair,
-                // so assign the object just created above to the out parameter.  
+                // so assign the object just created above to the out parameter.
                 keyPair = snp;
             }
             catch (ArgumentException)
@@ -280,7 +280,7 @@ namespace Microsoft.Build.Tasks
 
             // cor20DataDirectoryLong is really a IMAGE_DATA_DIRECTORY structure which I had to pack into an ulong
             // (see comments for IMAGE_OPTIONAL_HEADER32/64 in NativeMethods.cs)
-            // this code extracts the virtualAddress (uint) and size (uint) fields from the ulong by doing simple 
+            // this code extracts the virtualAddress (uint) and size (uint) fields from the ulong by doing simple
             // bit masking/shifting ops
             uint virtualAddress = (uint)(cor20DataDirectoryLong & 0x00000000ffffffff);
             // uint size = (uint)(cor20DataDirectoryLong >> 32);

@@ -220,7 +220,7 @@ namespace Microsoft.Build.BackEnd
                 // Restrict access to just this account.  We set the owner specifically here, and on the
                 // pipe client side they will check the owner against this one - they must have identical
                 // SIDs or the client will reject this server.  This is used to avoid attacks where a
-                // hacked server creates a less restricted pipe in an attempt to lure us into using it and 
+                // hacked server creates a less restricted pipe in an attempt to lure us into using it and
                 // then sending build requests to the real pipe client (which is the MSBuild Build Manager.)
                 PipeAccessRule rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite, AccessControlType.Allow);
                 security.AddAccessRule(rule);
@@ -516,7 +516,7 @@ namespace Microsoft.Build.BackEnd
         private void RunReadLoop(Stream localReadPipe, Stream localWritePipe,
             ConcurrentQueue<INodePacket> localPacketQueue, AutoResetEvent localPacketAvailable, AutoResetEvent localTerminatePacketPump)
         {
-            // Ordering of the wait handles is important.  The first signalled wait handle in the array 
+            // Ordering of the wait handles is important.  The first signalled wait handle in the array
             // will be returned by WaitAny if multiple wait handles are signalled.  We prefer to have the
             // terminate event triggered so that we cannot get into a situation where packets are being
             // spammed to the endpoint and it never gets an opportunity to shutdown.

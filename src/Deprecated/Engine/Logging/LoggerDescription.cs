@@ -317,7 +317,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 loggerClassName = reader.ReadString();
             }
-            #endregion 
+            #endregion
             #region LoggerSwitchParameters
             if (reader.ReadByte() == 0)
             {

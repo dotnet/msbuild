@@ -362,7 +362,7 @@ namespace Microsoft.Build.Shared
                 category.Validate();
             }
 
-            // If the DataSource property is not defined on this Rule, check that a DataSource is 
+            // If the DataSource property is not defined on this Rule, check that a DataSource is
             // specified locally on every property.
             if (null == type.DataSource)
             {

@@ -26,13 +26,13 @@ namespace Microsoft.Build.UnitTests
        /*
         * Method:  GetFileSystemEntries
         * Owner:   jomof
-        * 
+        *
         * Simulate Directories.GetFileSystemEntries where file names are short.
-        * 
+        *
         */
         private static string[] GetFileSystemEntries(FileMatcher.FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
         {
-            if 
+            if
             (
                 pattern==@"LONGDI~1"
                 && (@"D:\"==path || @"\\server\share\"==path || path.Length==0)
@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests
             {
                 return new string [] {Path.Combine(path, "LongDirectoryName")};
             }
-            else if 
+            else if
             (
                 pattern==@"LONGSU~1"
                 && (@"D:\LongDirectoryName"==path || @"\\server\share\LongDirectoryName"==path || @"LongDirectoryName"==path)
@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests
             {
                 return new string [] {Path.Combine (path, "LongSubDirectory")};
             }
-            else if 
+            else if
             (
                 pattern==@"LONGFI~1.TXT"
                 && (@"D:\LongDirectoryName\LongSubDirectory"==path || @"\\server\share\LongDirectoryName\LongSubDirectory"==path || @"LongDirectoryName\LongSubDirectory"==path)
@@ -56,14 +56,14 @@ namespace Microsoft.Build.UnitTests
             {
                 return new string[] { Path.Combine (path, "LongFileName.txt") };
             }
-            else if 
+            else if
             (
                 pattern==@"pomegr~1"
                 && @"c:\apple\banana\tomato"==path
             )
             {
                 return new string[] { Path.Combine (path, "pomegranate") };
-            } 
+            }
             else if
             (
                 @"c:\apple\banana\tomato\pomegranate\orange"==path
@@ -71,8 +71,8 @@ namespace Microsoft.Build.UnitTests
             {
                 // No files exist here. This is an empty directory.
                 return new string[0];
-            }            
-            else            
+            }
+            else
             {
                 Console.WriteLine("GetFileSystemEntries('{0}', '{1}')", path, pattern);
                 Assertion.Assert("Unexpected input into GetFileSystemEntries", false);
@@ -102,12 +102,12 @@ namespace Microsoft.Build.UnitTests
                 null
             );
         }
-        
+
         /// <summary>
         /// This pattern should *not* recurse indefinitely since there is no '**' in the pattern:
-        /// 
+        ///
         ///        c:\?emp\foo
-        /// 
+        ///
         /// </summary>
         [Test]
         public void Regress162390()
@@ -118,9 +118,9 @@ namespace Microsoft.Build.UnitTests
                 new string[] { @"c:\temp\foo.txt" },    // Should match
                 new string[] { @"c:\timp\foo.txt" },    // Shouldn't match
                 new string[]                            // Should not even consider.
-                { 
+                {
                     @"c:\temp\sub\foo.txt"
-                } 
+                }
             );
         }
 
@@ -128,9 +128,9 @@ namespace Microsoft.Build.UnitTests
         /*
         * Method:  GetLongFileNameForShortLocalPath
         * Owner:   jomof
-        * 
+        *
         * Convert a short local path to a long path.
-        * 
+        *
         */
         [Test]
         public void GetLongFileNameForShortLocalPath()
@@ -140,16 +140,16 @@ namespace Microsoft.Build.UnitTests
                 @"D:\LONGDI~1\LONGSU~1\LONGFI~1.TXT",
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries)
             );
-            
+
             Assertion.AssertEquals(longPath, @"D:\LongDirectoryName\LongSubDirectory\LongFileName.txt");
-        } 
-               
+        }
+
         /*
         * Method:  GetLongFileNameForLongLocalPath
         * Owner:   jomof
-        * 
+        *
         * Convert a long local path to a long path (nop).
-        * 
+        *
         */
         [Test]
         public void GetLongFileNameForLongLocalPath()
@@ -159,16 +159,16 @@ namespace Microsoft.Build.UnitTests
                 @"D:\LongDirectoryName\LongSubDirectory\LongFileName.txt",
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries)
             );
-            
+
             Assertion.AssertEquals(longPath, @"D:\LongDirectoryName\LongSubDirectory\LongFileName.txt");
-        }    
-        
+        }
+
         /*
         * Method:  GetLongFileNameForShortUncPath
         * Owner:   jomof
-        * 
+        *
         * Convert a short UNC path to a long path.
-        * 
+        *
         */
         [Test]
         public void GetLongFileNameForShortUncPath()
@@ -178,16 +178,16 @@ namespace Microsoft.Build.UnitTests
                 @"\\server\share\LONGDI~1\LONGSU~1\LONGFI~1.TXT",
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries)
             );
-            
+
             Assertion.AssertEquals(longPath, @"\\server\share\LongDirectoryName\LongSubDirectory\LongFileName.txt");
-        } 
-               
+        }
+
         /*
         * Method:  GetLongFileNameForLongUncPath
         * Owner:   jomof
-        * 
+        *
         * Convert a long UNC path to a long path (nop)
-        * 
+        *
         */
         [Test]
         public void GetLongFileNameForLongUncPath()
@@ -197,16 +197,16 @@ namespace Microsoft.Build.UnitTests
                 @"\\server\share\LongDirectoryName\LongSubDirectory\LongFileName.txt",
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries)
             );
-            
+
             Assertion.AssertEquals(longPath, @"\\server\share\LongDirectoryName\LongSubDirectory\LongFileName.txt");
-        }     
-        
+        }
+
         /*
         * Method:  GetLongFileNameForRelativePath
         * Owner:   jomof
-        * 
+        *
         * Convert a short relative path to a long path
-        * 
+        *
         */
         [Test]
         public void GetLongFileNameForRelativePath()
@@ -216,16 +216,16 @@ namespace Microsoft.Build.UnitTests
                 @"LONGDI~1\LONGSU~1\LONGFI~1.TXT",
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries)
             );
-            
+
             Assertion.AssertEquals(longPath, @"LongDirectoryName\LongSubDirectory\LongFileName.txt");
-        }       
-        
+        }
+
         /*
         * Method:  GetLongFileNameForRelativePathPreservesTrailingSlash
         * Owner:   jomof
-        * 
+        *
         * Convert a short relative path with a trailing backslash to a long path
-        * 
+        *
         */
         [Test]
         public void GetLongFileNameForRelativePathPreservesTrailingSlash()
@@ -235,16 +235,16 @@ namespace Microsoft.Build.UnitTests
                 @"LONGDI~1\LONGSU~1\",
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries)
             );
-            
+
             Assertion.AssertEquals(@"LongDirectoryName\LongSubDirectory\", longPath);
-        }           
-        
+        }
+
         /*
         * Method:  GetLongFileNameForRelativePathPreservesExtraSlashes
         * Owner:   jomof
-        * 
+        *
         * Convert a short relative path with doubled embedded backslashes to a long path
-        * 
+        *
         */
         [Test]
         public void GetLongFileNameForRelativePathPreservesExtraSlashes()
@@ -254,16 +254,16 @@ namespace Microsoft.Build.UnitTests
                 @"LONGDI~1\\LONGSU~1\\",
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries)
             );
-            
+
             Assertion.AssertEquals(@"LongDirectoryName\\LongSubDirectory\\", longPath);
-        }  
-            
+        }
+
         /*
         * Method:  GetLongFileNameForMixedLongAndShort
         * Owner:   jomof
-        * 
+        *
         * Only part of the path might be short.
-        * 
+        *
         */
         [Test]
         public void GetLongFileNameForMixedLongAndShort()
@@ -273,17 +273,17 @@ namespace Microsoft.Build.UnitTests
                 @"c:\apple\banana\tomato\pomegr~1\orange\",
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries)
             );
-            
+
             Assertion.AssertEquals (@"c:\apple\banana\tomato\pomegranate\orange\", longPath);
-        } 
-        
+        }
+
         /*
         * Method:  GetLongFileNameWherePartOfThePathDoesntExist
         * Owner:   jomof
-        * 
+        *
         * Part of the path may not exist. In this case, we treat the non-existent parts
         * as if they were already a long file name.
-        * 
+        *
         */
         [Test]
         public void GetLongFileNameWherePartOfThePathDoesntExist()
@@ -293,44 +293,44 @@ namespace Microsoft.Build.UnitTests
                 @"c:\apple\banana\tomato\pomegr~1\orange\chocol~1\vanila~1",
                 new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries)
             );
-            
+
             Assertion.AssertEquals (@"c:\apple\banana\tomato\pomegranate\orange\chocol~1\vanila~1", longPath);
-        }                
-        
+        }
+
         [Test]
         public void BasicMatch()
         {
             ValidateFileMatch("file.txt", "File.txt", false);
             ValidateNoFileMatch("file.txt", "File.bin", false);
         }
-        
+
         [Test]
         public void MatchSingleCharacter()
         {
             ValidateFileMatch("file.?xt", "File.txt", false);
             ValidateNoFileMatch("file.?xt", "File.bin", false);
         }
-        
+
         [Test]
         public void MatchMultipleCharacters()
         {
             ValidateFileMatch("*.txt", "*.txt", false);
             ValidateNoFileMatch("*.txt", "*.bin", false);
         }
-        
+
         [Test]
         public void SimpleRecursive()
         {
             ValidateFileMatch("**", ".\\File.txt", true);
         }
-        
+
         [Test]
         public void DotForCurrentDirectory()
         {
             ValidateFileMatch(".\\file.txt", ".\\File.txt", false);
             ValidateNoFileMatch(".\\file.txt", ".\\File.bin", false);
         }
-                                        
+
         [Test]
         public void DotDotForParentDirectory()
         {
@@ -339,17 +339,17 @@ namespace Microsoft.Build.UnitTests
             ValidateNoFileMatch("..\\..\\*.*", "..\\..\\dir1\\dir2\\File.txt", false);
             ValidateNoFileMatch("..\\..\\*.*", "..\\..\\dir1\\dir2\\File", false);
         }
-        
+
         [Test]
         public void ReduceDoubleSlashesBaseline()
         {
             // Baseline
             ValidateFileMatch("f:\\dir1\\dir2\\file.txt", "f:\\dir1\\dir2\\file.txt", false);
             ValidateFileMatch("**\\*.cs", "dir1\\dir2\\file.cs", true);
-            ValidateFileMatch("**\\*.cs", "file.cs", true);     
-        } 
-           
-            
+            ValidateFileMatch("**\\*.cs", "file.cs", true);
+        }
+
+
         [Test]
         public void ReduceDoubleSlashes()
         {
@@ -371,7 +371,7 @@ namespace Microsoft.Build.UnitTests
             ValidateFileMatch("..\\**/.\\*.cs", "..\\dir1\\dir2//\\file.cs", true, false);
             ValidateFileMatch("..\\**\\./.\\*.cs", "..\\dir1/\\/\\/dir2\\file.cs", true, false);
         }
-        
+
         [Test]
         public void DecomposeDotSlash()
         {
@@ -387,11 +387,11 @@ namespace Microsoft.Build.UnitTests
             ValidateFileMatch(".//dir1\\dir2\\file.txt", ".\\dir1\\dir2\\file.txt", false);
             ValidateFileMatch(".//.//dir1\\dir2\\file.txt", ".\\dir1\\dir2\\file.txt", false);
         }
-        
+
         [Test]
         public void RecursiveDirRecursive()
         {
-           // Check that a wildcardpath of **\x\**\ matches correctly since, \**\ is a 
+           // Check that a wildcardpath of **\x\**\ matches correctly since, \**\ is a
             // separate code path.
             ValidateFileMatch(@"c:\foo\**\x\**\*.*", @"c:\foo\x\file.txt", true);
             ValidateFileMatch(@"c:\foo\**\x\**\*.*", @"c:\foo\y\x\file.txt", true);
@@ -411,23 +411,23 @@ namespace Microsoft.Build.UnitTests
             ValidateFileMatch(@"a\b\**\**\**\e\*", @"a\b\c\d\e\f.txt", true);
             ValidateFileMatch(@"a\b\**\**\**\**\e\*", @"a\b\c\d\e\f.txt", true);
         }
-           
+
         [Test]
         public void ParentWithoutSlash()
         {
             // However, we don't wtool this to match,
             ValidateNoFileMatch(@"C:\foo\**", @"C:\foo", true);
             // becase we don't know whether foo is a file or folder.
-            
+
             // Same for UNC
             ValidateNoFileMatch
                 (
                 "\\\\server\\c$\\Documents and Settings\\User\\**",
                 "\\\\server\\c$\\Documents and Settings\\User",
                 true
-                );            
-        } 
-                                       
+                );
+        }
+
         [Test]
         public void Unc()
         {
@@ -465,9 +465,9 @@ namespace Microsoft.Build.UnitTests
                 "\\\\server\\c$\\Documents and Settings\\User\\Source.cs",
                 true
                 );
-        
+
         }
-        
+
         [Test]
         public void ExplicitToolCompatibility()
         {
@@ -491,45 +491,45 @@ namespace Microsoft.Build.UnitTests
             ValidateFileMatch("org/IIS/**/SourceSafe/*", "org/IIS\\SourceSafe/Entries", true);
             ValidateFileMatch("org/IIS/**/SourceSafe/*", "org/IIS/pluggin/tools/tool/SourceSafe/Entries", true);
             ValidateNoFileMatch("org/IIS/**/SourceSafe/*", "org/IIS/SourceSafe/foo/bar/Entries", true);
-            ValidateNoFileMatch("org/IIS/**/SourceSafe/*", "org/IISSourceSage/Entries", true);        
+            ValidateNoFileMatch("org/IIS/**/SourceSafe/*", "org/IISSourceSage/Entries", true);
         }
-        
+
         [Test]
         public void ExplicitToolIncompatibility()
         {
             // NOTE: Weirdly, ANT syntax is to match a file here.
             // We don't because MSBuild philosophy is that a trailing slash indicates a directory
-            ValidateNoFileMatch("**/test/**", ".\\test", true); 
+            ValidateNoFileMatch("**/test/**", ".\\test", true);
 
             // NOTE: We deviate from ANT format here. ANT would append a ** to any path
             // that ends with '/' or '\'. We think this is the wrong thing because 'folder\'
             // is a valid folder name.
             ValidateNoFileMatch("org/", "org/IISSourceSage/Entries", false);
-            ValidateNoFileMatch("org\\", "org/IISSourceSage/Entries", false);        
+            ValidateNoFileMatch("org\\", "org/IISSourceSage/Entries", false);
         }
-        
+
         [Test]
         public void MultipleStarStar()
         {
-            // Multiple-** matches 
+            // Multiple-** matches
             ValidateFileMatch("c:\\**\\jomof\\**\\*.*", "c:\\Documents and Settings\\JomoF\\NTUSER.DAT", true);
             ValidateNoFileMatch("c:\\**\\jomof1\\**\\*.*", "c:\\Documents and Settings\\JomoF\\NTUSER.DAT", true);
             ValidateFileMatch("c:\\**\\jomof\\**\\*.*", "c://Documents and Settings\\JomoF\\NTUSER.DAT", true);
             ValidateNoFileMatch("c:\\**\\jomof1\\**\\*.*", "c:\\Documents and Settings//JomoF\\NTUSER.DAT", true);
-    
+
         }
-        
+
         [Test]
         public void Regress54411()
         {
             // Regress bug#54411:  Item recursion doesn't work as expected on "c:\foo\**"
-            ValidateFileMatch("c:\\foo\\**", "c:\\foo\\bar\\subfile.txt", true);    
+            ValidateFileMatch("c:\\foo\\**", "c:\\foo\\bar\\subfile.txt", true);
         }
-        
+
         [Test]
         public void IllegalPaths()
         {
-            
+
             // Certain patterns are illegal.
             ValidateIllegal("**.cs");
             ValidateIllegal("***");
@@ -578,7 +578,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.Delete(workingPathSubfolder);
                 Directory.Delete(workingPath);
             }
-            
+
         }
 
         [Test]
@@ -1061,12 +1061,12 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// A general purpose method used to:
-        /// 
+        ///
         /// (1) Simulate a file system.
         /// (2) Check whether all matchingFiles where hit by the filespec pattern.
         /// (3) Check whether all nonmatchingFiles were *not* hit by the filespec pattern.
         /// (4) Check whether all untouchableFiles were not even requested (usually for perf reasons).
-        /// 
+        ///
         /// These can be used in various combinations to test the filematcher framework.
         /// </summary>
         /// <param name="filespec">A FileMatcher filespec, possibly with wildcards.</param>
@@ -1163,17 +1163,17 @@ namespace Microsoft.Build.UnitTests
                 string filenamePart;
                 FileMatcher.SplitFileSpec
                 (
-                    filespec, 
-                    out fixedDirectoryPart, 
-                    out wildcardDirectoryPart, 
+                    filespec,
+                    out fixedDirectoryPart,
+                    out wildcardDirectoryPart,
                     out filenamePart,
                     new FileMatcher.GetFileSystemEntries(GetFileSystemEntriesLoopBack)
                 );
 
-                if 
+                if
                     (
-                    expectedWildcardDirectoryPart!=wildcardDirectoryPart 
-                    || expectedFixedDirectoryPart!=fixedDirectoryPart 
+                    expectedWildcardDirectoryPart!=wildcardDirectoryPart
+                    || expectedFixedDirectoryPart!=fixedDirectoryPart
                     || expectedFilenamePart!=filenamePart
                     )
                 {
@@ -1197,7 +1197,7 @@ namespace Microsoft.Build.UnitTests
             {
                 ValidateFileMatch(filespec, fileToMatch, shouldBeRecursive, /* Simulate filesystem? */ true);
             }
-            
+
             /*************************************************************************************
             * Given a pattern (filespec) and a candidate filename (fileToMatch). Verify that they
             * do indeed match.
@@ -1216,7 +1216,7 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 // Now, simulate a filesystem with only fileToMatch. Make sure the file exists that way.
-                if (fileSystemSimulation) 
+                if (fileSystemSimulation)
                 {
                     MatchDriver
                     (
@@ -1320,7 +1320,7 @@ namespace Microsoft.Build.UnitTests
 
 
 
-#endregion        
+#endregion
     }
 }
 

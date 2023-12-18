@@ -735,7 +735,7 @@ namespace Microsoft.Build.UnitTests
             Path.ShouldNotBe(@"\");
             Path.ShouldNotBe(@"/");
             System.IO.Path.GetFullPath(Path).ShouldNotBe(System.IO.Path.GetFullPath(System.IO.Path.GetTempPath()));
-            System.IO.Path.IsPathRooted(Path).ShouldBeTrue(() => $"{Path} is not rooted");
+            System.IO.Path.IsPathRooted(Path).ShouldBeTrue($"{Path} is not rooted");
 
             FileUtilities.DeleteDirectoryNoThrow(Path, true);
         }

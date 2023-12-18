@@ -2,6 +2,7 @@ trigger:
 - main
 - vs*
 - exp/*
+- perf/*
 
 # If defined here, these values are not overrideable
 # Once they exist, we should define these as "runtime parameters"
@@ -217,6 +218,7 @@ stages:
       inputs:
         DropName: $(VisualStudio.DropName)
         DropFolder: 'artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+        DropRetentionDays: '30' # extended by insertion + VS release
         AccessToken: '$(System.AccessToken)'
         DropServiceUri: 'https://devdiv.artifacts.visualstudio.com'
         VSDropServiceUri: 'https://vsdrop.corp.microsoft.com/file/v1'
@@ -309,4 +311,5 @@ stages:
         -TsaRepositoryName "dotnet-msbuild"
         -TsaCodebaseName "dotnet-msbuild"
         -TsaPublish $True
+        -CrScanAdditionalRunConfigParams @("SuppressionsPath < $(Build.SourcesDirectory)\eng\CredScanSuppressions.json")
         -PoliCheckAdditionalRunConfigParams @("UserExclusionPath < $(Build.SourcesDirectory)\eng\policheck_exclusions.xml")'

@@ -24,33 +24,33 @@ namespace Microsoft.Build.BackEnd
     ///     - quick lookups
     ///     - scoping down of item subsets in nested scopes (useful for batches)
     ///     - isolation of adds, removes, modifies, and property sets inside nested scopes
-    ///     
+    ///
     /// When retrieving the item group for an item type, each table is consulted in turn,
     /// starting with the primary table (the "top" or "innermost" table), until a table is found that has an entry for that type.
     /// When an entry is found, it is returned without looking deeper.
     /// This makes it possible to let callers see only a subset of items without affecting or cloning the original item groups,
     /// by populating a scope with item groups that are empty or contain subsets of items in lower scopes.
-    /// 
+    ///
     /// Instances of this class can be cloned with Clone() to share between batches.
-    /// 
+    ///
     /// When EnterScope() is called, a fresh primary table is inserted, and all adds and removes will be invisible to
     /// any clones made before the scope was entered and anyone who has access to item groups in lower tables.
-    /// 
+    ///
     /// When LeaveScope() is called, the primary tables are merged into the secondary tables, and the primary tables are discarded.
     /// This makes the adds and removes in the primary tables visible to clones made during the previous scope.
-    /// 
+    ///
     /// Scopes can be populated (before Adds, Removes, and Lookups) using PopulateWithItem(). This reduces the set of items of a particular
     /// type that are visible in a scope, because lookups of items of this type will stop at this level and see the subset, rather than the
     /// larger set in a scope below.
-    /// 
+    ///
     /// Items can be added or removed by calling AddNewItem() and RemoveItem(). Only the primary level is modified.
     /// When items are added or removed they enter into a primary table exclusively for adds or removes, instead of the main primary table.
     /// This allows the adds and removes to be applied to the scope below on LeaveScope(). Even when LeaveScope() is called, the adds and removes
     /// stay in their separate add and remove tables: if they were applied to a main table, they could truncate the downward traversal performed by lookups
     /// and hide items in a lower main table. Only on the final call of LeaveScope() can all adds and removes be applied to the outermost table, i.e., the project.
-    /// 
+    ///
     /// Much the same applies to properties.
-    /// 
+    ///
     /// For sensible semantics, only the current primary scope can be modified at any point.
     /// </summary>
     internal class Lookup : IPropertyProvider<ProjectPropertyInstance>, IItemProvider<ProjectItemInstance>
@@ -221,7 +221,7 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     // Set the value of the hash to the new property value
-                    // PERF: we store the EvaluatedValueEscaped here to avoid unnecessary unescaping (the value is stored 
+                    // PERF: we store the EvaluatedValueEscaped here to avoid unnecessary unescaping (the value is stored
                     // escaped in the property)
                     lookupHash[propertyName] = ((IProperty)property).EvaluatedValueEscaped;
                 }
@@ -262,8 +262,8 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(_lookupScopes.Count >= 2, "Too many calls to Leave().");
             ErrorUtilities.VerifyThrow(Object.ReferenceEquals(scopeToLeave, _lookupScopes.First.Value), "Attempting to leave with scope '{0}' but scope '{1}' is on top of the stack.", scopeToLeave.Description, _lookupScopes.First.Value.Description);
 
-            // Our lookup works by stopping the first time it finds an item group of the appropriate type. 
-            // So we can't apply an add directly into the table below because that could create a new group 
+            // Our lookup works by stopping the first time it finds an item group of the appropriate type.
+            // So we can't apply an add directly into the table below because that could create a new group
             // of that type, which would cause the next lookup to stop there and miss any existing items in a table below.
             // Instead we keep adds stored separately until we're leaving the very last scope. Until then
             // we only move adds down into the next add table below, and when we lookup we consider both tables.
@@ -279,7 +279,7 @@ namespace Microsoft.Build.BackEnd
 
             // Let go of our pointer into the clone table; we assume we won't need it after leaving scope and want to save memory.
             // This is an assumption on IntrinsicTask, that it won't ask to remove or modify a clone in a higher scope than it was handed out in.
-            // We mustn't call cloneTable.Clear() because other clones of this lookup may still be using it. When the last lookup clone leaves scope, 
+            // We mustn't call cloneTable.Clear() because other clones of this lookup may still be using it. When the last lookup clone leaves scope,
             // the table will be collected.
             _cloneTable = null;
 
@@ -413,7 +413,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public ProjectPropertyInstance GetProperty(string name, int startIndex, int endIndex)
         {
-            // Walk down the tables and stop when the first 
+            // Walk down the tables and stop when the first
             // property with this name is found
             foreach (Scope scope in _lookupScopes)
             {
@@ -716,8 +716,8 @@ namespace Microsoft.Build.BackEnd
             PrimaryRemoveTable ??= new ItemDictionary<ProjectItemInstance>();
             PrimaryRemoveTable.Add(item);
 
-            // No need to remove this item from the primary add table if it's 
-            // already there -- we always apply removes after adds, so that add 
+            // No need to remove this item from the primary add table if it's
+            // already there -- we always apply removes after adds, so that add
             // will be reversed anyway.
         }
 
@@ -731,7 +731,7 @@ namespace Microsoft.Build.BackEnd
             MustNotBeOuterScope();
 
 #if DEBUG
-            // This item should not already be in any remove table; there is no way a project can 
+            // This item should not already be in any remove table; there is no way a project can
             // modify items that were already removed
             // Obviously, do this only in debug, as it's a slow check for bugs.
             LinkedListNode<Scope> node = _lookupScopes.First;
@@ -912,7 +912,7 @@ namespace Microsoft.Build.BackEnd
                     foreach (var metadataChange in modify.Value.ExplicitModifications)
                     {
                         // If the existing metadata change list has an entry for this metadata, ignore this change.
-                        // We continue to allow changes made when KeepOnlySpecified is set because it is assumed that explicit metadata changes 
+                        // We continue to allow changes made when KeepOnlySpecified is set because it is assumed that explicit metadata changes
                         // always trump implicit ones.
                         if (!existingMetadataChanges.ContainsExplicitModification(metadataChange.Key))
                         {
@@ -960,7 +960,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Verify item is not in any table in any scope
-        /// </summary>        
+        /// </summary>
         private void MustNotBeInAnyTables(ProjectItemInstance item)
         {
             // This item should not already be in any table; there is no way a project can
@@ -1360,8 +1360,8 @@ namespace Microsoft.Build.BackEnd
 
             /// <summary>
             /// The main table, populated with items that
-            /// are initially visible in this scope. Does not 
-            /// include adds or removes unless it's the table in 
+            /// are initially visible in this scope. Does not
+            /// include adds or removes unless it's the table in
             /// the outermost scope.
             /// </summary>
             internal ItemDictionary<ProjectItemInstance> Items
