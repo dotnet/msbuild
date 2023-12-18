@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using System.Reflection.Metadata;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
@@ -102,6 +103,11 @@ namespace Microsoft.Build.Logging
 
         private string FilePath { get; set; }
 
+        /// <summary>
+        /// Boolean flag identifies if the log file was provided from parameters
+        /// </summary>
+        private bool IsUniqueLogFile { get; set; }
+
         /// <summary> Gets or sets the verbosity level.</summary>
         /// <remarks>
         /// The binary logger Verbosity is always maximum (Diagnostic). It tries to capture as much
@@ -110,9 +116,16 @@ namespace Microsoft.Build.Logging
         public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Diagnostic;
 
         /// <summary>
+        /// Gets or sets the parameters
+        /// </summary>
+        public string BLParameters { get; set; }
+
+        /// <summary>
         /// Gets or sets the parameters. The only supported parameter is the output log file path (for example, "msbuild.binlog").
         /// </summary>
         public string Parameters { get; set; }
+
+        public string InitProjectFile { get; set; }
 
         /// <summary>
         /// Initializes the logger by subscribing to events of the specified event source.
@@ -131,6 +144,7 @@ namespace Microsoft.Build.Logging
             bool logPropertiesAndItemsAfterEvaluation = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation ?? true;
 
             ProcessParameters();
+            UpdateFilePathBaseodOnParameters();
 
             try
             {
@@ -321,12 +335,64 @@ namespace Microsoft.Build.Logging
         /// </exception>
         private void ProcessParameters()
         {
+            AttachBLArguments();
+            AttachBLParameters();
+        }
+
+
+        /// <summary>
+        /// Updates the current FilePath value based on instance configuration
+        /// </summary>
+        /// <exception cref="LoggerException"></exception>
+        private void UpdateFilePathBaseodOnParameters()
+        {
+            if (IsUniqueLogFile)
+            {
+                if (FilePath != null)
+                {
+                    throw new LoggerException("Incompatible configuration provided");
+                }
+
+                FilePath = InitProjectFile + "." + DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()  + ".binlog";
+            }
+            else
+            {
+                if (FilePath == null)
+                {
+                    FilePath = "msbuild.binlog";
+                }
+            }
+
+            KnownTelemetry.LoggingConfigurationTelemetry.BinaryLoggerUsedDefaultName = FilePath == "msbuild.binlog";
+
+
+            try
+            {
+                FilePath = Path.GetFullPath(FilePath);
+            }
+            catch (Exception e)
+            {
+                string errorCode;
+                string helpKeyword;
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, "InvalidFileLoggerFile", FilePath, e.Message);
+                throw new LoggerException(message, e, errorCode, helpKeyword);
+            }
+        }
+
+        /// <summary>
+        /// Process the arguments provided to the bl flag
+        /// Available arguments: ProjectImports=None, ProjectImports=Embed, ProjectImports=ZipFile,[LogFile=]filename.binlog
+        /// </summary>
+        /// <exception cref="LoggerException"></exception>
+        private void AttachBLArguments()
+        {
             if (Parameters == null)
             {
                 throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", ""));
             }
 
             var parameters = Parameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
+
             foreach (var parameter in parameters)
             {
                 if (string.Equals(parameter, "ProjectImports=None", StringComparison.OrdinalIgnoreCase))
@@ -356,23 +422,34 @@ namespace Microsoft.Build.Logging
                     throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", parameter));
                 }
             }
+        }
 
-            if (FilePath == null)
+        /// <summary>
+        /// Process the arguments provided to the blp flag
+        /// Available arguments: uniqueFileName
+        /// </summary>
+        /// <exception cref="LoggerException"></exception>
+        private void AttachBLParameters()
+        {
+            if (BLParameters == null)
             {
-                FilePath = "msbuild.binlog";
+                return;
             }
-            KnownTelemetry.LoggingConfigurationTelemetry.BinaryLoggerUsedDefaultName = FilePath == "msbuild.binlog";
 
-            try
+            var parameters = BLParameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var parameter in parameters)
             {
-                FilePath = Path.GetFullPath(FilePath);
-            }
-            catch (Exception e)
-            {
-                string errorCode;
-                string helpKeyword;
-                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, "InvalidFileLoggerFile", FilePath, e.Message);
-                throw new LoggerException(message, e, errorCode, helpKeyword);
+                if (parameter.Length > 0)
+                {
+                    if (parameter.Equals("uniqueFileName", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        IsUniqueLogFile = true;
+                    }
+                }
+                else
+                {
+                    throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", parameter));
+                }
             }
         }
     }

@@ -98,6 +98,7 @@ namespace Microsoft.Build.CommandLine
             WarningsNotAsErrors,
             WarningsAsMessages,
             BinaryLogger,
+            BinaryLoggerParameters,
             Restore,
             ProfileEvaluation,
             RestoreProperty,
@@ -263,6 +264,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "warnnotaserror", "noerr" },           ParameterizedSwitch.WarningsNotAsErrors,        null,                           true,           "MissingWarnNotAsErrorParameterError", true,   false),
             new ParameterizedSwitchInfo(  new string[] { "warnasmessage", "nowarn" },           ParameterizedSwitch.WarningsAsMessages,         null,                           true,           "MissingWarnAsMessageParameterError",  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "binarylogger", "bl" },                ParameterizedSwitch.BinaryLogger,               null,                           false,          null,                                  true,   false),
+            new ParameterizedSwitchInfo(  new string[] { "binaryloggerparameters", "blp" },     ParameterizedSwitch.BinaryLoggerParameters,     null,                           false,          null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "restore", "r" },                      ParameterizedSwitch.Restore,                    null,                           false,          null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "profileevaluation", "prof" },         ParameterizedSwitch.ProfileEvaluation,          null,                           false,          "MissingProfileParameterError",        true,   false),
             new ParameterizedSwitchInfo(  new string[] { "restoreproperty", "rp" },             ParameterizedSwitch.RestoreProperty,            null,                           true,           "MissingPropertyError",                true,   false),
@@ -278,8 +280,8 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "question", "q" },                     ParameterizedSwitch.Question,                   null,                           false,          null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "detailedsummary", "ds" },             ParameterizedSwitch.DetailedSummary,            null,                           false,          null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "getProperty" },                       ParameterizedSwitch.GetProperty,                null,                           true,           "MissingGetPropertyError",             true,   false),
-            new ParameterizedSwitchInfo(  new string[] { "getItem" },                           ParameterizedSwitch.GetItem,                    null,                           true,           "MissingGetItemError",             true,   false),
-            new ParameterizedSwitchInfo(  new string[] { "getTargetResult" },                   ParameterizedSwitch.GetTargetResult,            null,                           true,           "MissingGetTargetResultError",             true,   false),
+            new ParameterizedSwitchInfo(  new string[] { "getItem" },                           ParameterizedSwitch.GetItem,                    null,                           true,           "MissingGetItemError",                 true,   false),
+            new ParameterizedSwitchInfo(  new string[] { "getTargetResult" },                   ParameterizedSwitch.GetTargetResult,            null,                           true,           "MissingGetTargetResultError",         true,   false),
         };
 
         /// <summary>
@@ -301,7 +303,7 @@ namespace Microsoft.Build.CommandLine
             {
                 foreach (string parameterlessSwitchName in switchInfo.switchNames)
                 {
-                    if (String.Equals(switchName, parameterlessSwitchName, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(switchName, parameterlessSwitchName, StringComparison.OrdinalIgnoreCase))
                     {
                         parameterlessSwitch = switchInfo.parameterlessSwitch;
                         duplicateSwitchErrorMessage = switchInfo.duplicateSwitchErrorMessage;
@@ -311,17 +313,6 @@ namespace Microsoft.Build.CommandLine
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// Identifies/detects a switch that takes no parameters.
-        /// </summary>
-        internal static bool IsParameterlessSwitch(
-            string switchName)
-        {
-            ParameterlessSwitch parameterlessSwitch;
-            string duplicateSwitchErrorMessage;
-            return CommandLineSwitches.IsParameterlessSwitch(switchName, out parameterlessSwitch, out duplicateSwitchErrorMessage);
         }
 
         /// <summary>
@@ -354,7 +345,7 @@ namespace Microsoft.Build.CommandLine
             {
                 foreach (string parameterizedSwitchName in switchInfo.switchNames)
                 {
-                    if (String.Equals(switchName, parameterizedSwitchName, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(switchName, parameterizedSwitchName, StringComparison.OrdinalIgnoreCase))
                     {
                         parameterizedSwitch = switchInfo.parameterizedSwitch;
                         duplicateSwitchErrorMessage = switchInfo.duplicateSwitchErrorMessage;
@@ -480,7 +471,7 @@ namespace Microsoft.Build.CommandLine
             // check if the switch has multiple parameters
             if (multipleParametersAllowed)
             {
-                if (String.Empty.Equals(switchParameters) && emptyParametersAllowed)
+                if (string.Empty.Equals(switchParameters) && emptyParametersAllowed)
                 {
                     // Store a null parameter if its allowed
                     _parameterizedSwitches[(int)parameterizedSwitch].parameters.Add(null);
@@ -551,7 +542,7 @@ namespace Microsoft.Build.CommandLine
             commandLineA.Sort(StringComparer.OrdinalIgnoreCase);
             commandLineB.Sort(StringComparer.OrdinalIgnoreCase);
 
-            return (String.Join(" ", commandLineA).Trim() + " " + String.Join(" ", commandLineB).Trim()).Trim();
+            return (string.Join(" ", commandLineA).Trim() + " " + string.Join(" ", commandLineB).Trim()).Trim();
         }
 
         /// <summary>
