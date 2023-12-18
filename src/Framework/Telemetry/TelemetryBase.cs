@@ -13,7 +13,7 @@ internal abstract class TelemetryBase
     public abstract string EventName { get; }
 
     /// <summary>
-    /// Fetches current properties wrapped in Dictionary
+    /// Fetches all derived type members wrapped in Dictionary which will be used to build <see cref="TelemetryEventArgs"/>.
     /// </summary>
     public abstract IDictionary<string, string> GetProperties();
 }
