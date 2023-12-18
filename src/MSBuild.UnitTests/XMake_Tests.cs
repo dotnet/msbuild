@@ -703,6 +703,17 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
+        [Fact]
+        public void GetPropertyWithInvalidProjectThrowsInvalidProjectFileExceptionNotInternalError()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile project = env.CreateFile("testProject.csproj", "Project");
+            string result = RunnerUtilities.ExecMSBuild($" {project.Path} -getProperty:Foo", out bool success);
+            success.ShouldBeFalse();
+            result.ShouldContain("MSB4025");
+            result.ShouldNotContain("MSB1025");
+        }
+
         [Theory]
         [InlineData("-getProperty:Foo;Bar", true, "EvalValue", false, false, false, true, false)]
         [InlineData("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false, true, false)]
