@@ -13,17 +13,7 @@ internal abstract class TelemetryBase
     public abstract string EventName { get; }
 
     /// <summary>
-    /// Gets or sets a list of properties associated with the event.
-    /// </summary>
-    private protected IDictionary<string, string> Properties { get; set; } = new Dictionary<string, string>();
-
-    /// <summary>
-    /// Fetch current properties <see cref="Properties"/>.
+    /// Fetches current properties wrapped in Dictionary
     /// </summary>
     public abstract IDictionary<string, string> GetProperties();
-
-    /// <summary>
-    /// Translate all derived type members into properties which will be used to build <see cref="TelemetryEventArgs"/>.
-    /// </summary>
-    public abstract void UpdateEventProperties();
 }

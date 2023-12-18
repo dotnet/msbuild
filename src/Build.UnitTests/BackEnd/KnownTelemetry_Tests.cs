@@ -49,7 +49,6 @@ public class KnownTelemetry_Tests
         buildTelemetry.Target.ShouldBeNull();
         buildTelemetry.Version.ShouldBeNull();
 
-        buildTelemetry.UpdateEventProperties();
         buildTelemetry.GetProperties().ShouldBeEmpty();
     }
 
@@ -75,7 +74,6 @@ public class KnownTelemetry_Tests
         buildTelemetry.Target = "clean";
         buildTelemetry.Version = new Version(1, 2, 3, 4);
 
-        buildTelemetry.UpdateEventProperties();
         var properties = buildTelemetry.GetProperties();
 
         properties.Count.ShouldBe(11);
@@ -102,22 +100,18 @@ public class KnownTelemetry_Tests
 
         buildTelemetry.StartAt = DateTime.MinValue;
         buildTelemetry.FinishedAt = null;
-        buildTelemetry.UpdateEventProperties();
         buildTelemetry.GetProperties().ShouldBeEmpty();
 
         buildTelemetry.StartAt = null;
         buildTelemetry.FinishedAt = DateTime.MaxValue;
-        buildTelemetry.UpdateEventProperties();
         buildTelemetry.GetProperties().ShouldBeEmpty();
 
         buildTelemetry.InnerStartAt = DateTime.MinValue;
         buildTelemetry.FinishedAt = null;
-        buildTelemetry.UpdateEventProperties();
         buildTelemetry.GetProperties().ShouldBeEmpty();
 
         buildTelemetry.InnerStartAt = null;
         buildTelemetry.FinishedAt = DateTime.MaxValue;
-        buildTelemetry.UpdateEventProperties();
         buildTelemetry.GetProperties().ShouldBeEmpty();
     }
 }

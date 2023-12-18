@@ -40,7 +40,6 @@ public class LoggingConfigurationTelemetry_Tests
         telemetry.BinaryLogger.ShouldBe(false);
         telemetry.BinaryLoggerUsedDefaultName.ShouldBe(false);
 
-        telemetry.UpdateEventProperties();
         telemetry.GetProperties().Where(kv => kv.Value != bool.FalseString).ShouldBeEmpty();
     }
 
@@ -65,7 +64,6 @@ public class LoggingConfigurationTelemetry_Tests
             BinaryLoggerUsedDefaultName = true
         };
 
-        telemetry.UpdateEventProperties();
         var properties = telemetry.GetProperties();
         properties["TerminalLogger"].ShouldBe(bool.TrueString);
         properties["TerminalLoggerUserIntent"].ShouldBe("on");

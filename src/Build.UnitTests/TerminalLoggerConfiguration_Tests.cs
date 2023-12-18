@@ -70,7 +70,6 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
             FileLogger = false,
         };
 
-        expectedTelemetry.UpdateEventProperties();
         foreach (KeyValuePair<string, string> pair in expectedTelemetry.GetProperties())
         {
             output.ShouldContain($"{expectedTelemetry.EventName}:{pair.Key}={pair.Value}");
@@ -101,7 +100,6 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
             FileLogger = false,
         };
 
-        expectedTelemetry.UpdateEventProperties();
         foreach (KeyValuePair<string, string> pair in expectedTelemetry.GetProperties())
         {
             output.ShouldContain($"{expectedTelemetry.EventName}:{pair.Key}={pair.Value}");
@@ -129,7 +127,6 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
             FileLogger = false,
         };
 
-        expectedTelemetry.UpdateEventProperties();
         foreach (KeyValuePair<string, string> pair in expectedTelemetry.GetProperties())
         {
             output.ShouldContain($"{expectedTelemetry.EventName}:{pair.Key}={pair.Value}");
@@ -159,7 +156,6 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
             FileLogger = false,
         };
 
-        expectedTelemetry.UpdateEventProperties();
         foreach (KeyValuePair<string, string> pair in expectedTelemetry.GetProperties())
         {
             output.ShouldContain($"{expectedTelemetry.EventName}:{pair.Key}={pair.Value}");
@@ -188,7 +184,6 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
             FileLogger = false,
         };
 
-        expectedTelemetry.UpdateEventProperties();
         foreach (KeyValuePair<string, string> pair in expectedTelemetry.GetProperties())
         {
             output.ShouldContain($"{expectedTelemetry.EventName}:{pair.Key}={pair.Value}");
@@ -219,7 +214,6 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
             FileLogger = false,
         };
 
-        expectedTelemetry.UpdateEventProperties();
         foreach (KeyValuePair<string, string> pair in expectedTelemetry.GetProperties())
         {
             output.ShouldContain($"{expectedTelemetry.EventName}:{pair.Key}={pair.Value}");

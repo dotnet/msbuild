@@ -87,65 +87,65 @@ namespace Microsoft.Build.Framework.Telemetry
 
         public override IDictionary<string, string> GetProperties()
         {
-            return Properties;
-        }
+            var properties = new Dictionary<string, string>();
 
-        public override void UpdateEventProperties()
-        {
+            // populate property values
             if (DisplayVersion != null)
             {
-                Properties["BuildEngineDisplayVersion"] = DisplayVersion;
+                properties["BuildEngineDisplayVersion"] = DisplayVersion;
             }
 
             if (StartAt.HasValue && FinishedAt.HasValue)
             {
-                Properties["BuildDurationInMilliseconds"] = (FinishedAt.Value - StartAt.Value).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
+                properties["BuildDurationInMilliseconds"] = (FinishedAt.Value - StartAt.Value).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
             }
 
             if (InnerStartAt.HasValue && FinishedAt.HasValue)
             {
-                Properties["InnerBuildDurationInMilliseconds"] = (FinishedAt.Value - InnerStartAt.Value).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
+                properties["InnerBuildDurationInMilliseconds"] = (FinishedAt.Value - InnerStartAt.Value).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
             }
 
             if (FrameworkName != null)
             {
-                Properties["BuildEngineFrameworkName"] = FrameworkName;
+                properties["BuildEngineFrameworkName"] = FrameworkName;
             }
 
             if (Host != null)
             {
-                Properties["BuildEngineHost"] = Host;
+                properties["BuildEngineHost"] = Host;
             }
 
             if (InitialServerState != null)
             {
-                Properties["InitialMSBuildServerState"] = InitialServerState;
+                properties["InitialMSBuildServerState"] = InitialServerState;
             }
 
             if (Project != null)
             {
-                Properties["ProjectPath"] = Project;
+                properties["ProjectPath"] = Project;
             }
 
             if (ServerFallbackReason != null)
             {
-                Properties["ServerFallbackReason"] = ServerFallbackReason;
+                properties["ServerFallbackReason"] = ServerFallbackReason;
             }
 
             if (Success.HasValue)
             {
-                Properties["BuildSuccess"] = Success.HasValue.ToString(CultureInfo.InvariantCulture);
+                properties["BuildSuccess"] = Success.HasValue.ToString(CultureInfo.InvariantCulture);
             }
 
             if (Target != null)
             {
-                Properties["BuildTarget"] = Target;
+                properties["BuildTarget"] = Target;
             }
 
             if (Version != null)
             {
-                Properties["BuildEngineVersion"] = Version.ToString();
+                properties["BuildEngineVersion"] = Version.ToString();
             }
+
+            return properties;
         }
     }
 }

@@ -576,7 +576,6 @@ namespace Microsoft.Build.Execution
                 LogDeferredMessages(loggingService, _deferredBuildMessages);
 
                 // Log known deferred telemetry
-                KnownTelemetry.LoggingConfigurationTelemetry.UpdateEventProperties();
                 loggingService.LogTelemetry(buildEventContext: null, KnownTelemetry.LoggingConfigurationTelemetry.EventName, KnownTelemetry.LoggingConfigurationTelemetry.GetProperties());
 
                 InitializeCaches();
@@ -1090,7 +1089,6 @@ namespace Microsoft.Build.Execution
                             }
                             _buildTelemetry.Host = host;
 
-                            _buildTelemetry.UpdateEventProperties();
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;

@@ -9,8 +9,6 @@ namespace Microsoft.Build.Framework.Telemetry;
 
 internal class LoggingConfigurationTelemetry : TelemetryBase
 {
-    private readonly object _propertiesLock = new object();
-
     public override string EventName => "loggingConfiguration";
 
     /// <summary>
@@ -102,63 +100,57 @@ internal class LoggingConfigurationTelemetry : TelemetryBase
 
     public override IDictionary<string, string> GetProperties()
     {
-        lock (_propertiesLock)
+        var properties = new Dictionary<string, string>();
+
+        // populate property values
+        properties["TerminalLogger"] = TerminalLogger.ToString(CultureInfo.InvariantCulture);
+
+        if (TerminalLoggerUserIntent != null)
         {
-            return new Dictionary<string, string>(Properties);
+            properties["TerminalLoggerUserIntent"] = TerminalLoggerUserIntent;
         }
-    }
 
-    public override void UpdateEventProperties()
-    {
-        lock (_propertiesLock)
+        if (TerminalLoggerUserIntentSource != null)
         {
-            Properties["TerminalLogger"] = TerminalLogger.ToString(CultureInfo.InvariantCulture);
-
-            if (TerminalLoggerUserIntent != null)
-            {
-                Properties["TerminalLoggerUserIntent"] = TerminalLoggerUserIntent;
-            }
-
-            if (TerminalLoggerUserIntentSource != null)
-            {
-                Properties["TerminalLoggerUserIntentSource"] = TerminalLoggerUserIntentSource;
-            }
-
-            if (TerminalLoggerDefault != null)
-            {
-                Properties["TerminalLoggerDefault"] = TerminalLoggerDefault;
-            }
-
-            if (TerminalLoggerDefaultSource != null)
-            {
-                Properties["TerminalLoggerDefaultSource"] = TerminalLoggerDefaultSource;
-            }
-
-            Properties["ConsoleLogger"] = ConsoleLogger.ToString(CultureInfo.InvariantCulture);
-            if (ConsoleLoggerType != null)
-            {
-                Properties["ConsoleLoggerType"] = ConsoleLoggerType;
-            }
-
-            if (ConsoleLoggerVerbosity != null)
-            {
-                Properties["ConsoleLoggerVerbosity"] = ConsoleLoggerVerbosity;
-            }
-
-            Properties["FileLogger"] = FileLogger.ToString(CultureInfo.InvariantCulture);
-            if (FileLoggerType != null)
-            {
-                Properties["FileLoggerType"] = FileLoggerType;
-                Properties["FileLoggersCount"] = FileLoggersCount.ToString(CultureInfo.InvariantCulture);
-            }
-
-            if (FileLoggerVerbosity != null)
-            {
-                Properties["FileLoggerVerbosity"] = FileLoggerVerbosity;
-            }
-
-            Properties["BinaryLogger"] = BinaryLogger.ToString(CultureInfo.InvariantCulture);
-            Properties["BinaryLoggerUsedDefaultName"] = BinaryLoggerUsedDefaultName.ToString(CultureInfo.InvariantCulture);
+            properties["TerminalLoggerUserIntentSource"] = TerminalLoggerUserIntentSource;
         }
+
+        if (TerminalLoggerDefault != null)
+        {
+            properties["TerminalLoggerDefault"] = TerminalLoggerDefault;
+        }
+
+        if (TerminalLoggerDefaultSource != null)
+        {
+            properties["TerminalLoggerDefaultSource"] = TerminalLoggerDefaultSource;
+        }
+
+        properties["ConsoleLogger"] = ConsoleLogger.ToString(CultureInfo.InvariantCulture);
+        if (ConsoleLoggerType != null)
+        {
+            properties["ConsoleLoggerType"] = ConsoleLoggerType;
+        }
+
+        if (ConsoleLoggerVerbosity != null)
+        {
+            properties["ConsoleLoggerVerbosity"] = ConsoleLoggerVerbosity;
+        }
+
+        properties["FileLogger"] = FileLogger.ToString(CultureInfo.InvariantCulture);
+        if (FileLoggerType != null)
+        {
+            properties["FileLoggerType"] = FileLoggerType;
+            properties["FileLoggersCount"] = FileLoggersCount.ToString(CultureInfo.InvariantCulture);
+        }
+
+        if (FileLoggerVerbosity != null)
+        {
+            properties["FileLoggerVerbosity"] = FileLoggerVerbosity;
+        }
+
+        properties["BinaryLogger"] = BinaryLogger.ToString(CultureInfo.InvariantCulture);
+        properties["BinaryLoggerUsedDefaultName"] = BinaryLoggerUsedDefaultName.ToString(CultureInfo.InvariantCulture);
+
+        return properties;
     }
 }
