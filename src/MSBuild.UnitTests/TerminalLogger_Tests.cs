@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.CommandLine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
@@ -41,8 +42,6 @@ namespace Microsoft.Build.UnitTests
 
         private VerifySettings _settings = new();
 
-        private static Regex s_elapsedTime = new($@"\d+{Regex.Escape(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)}\ds", RegexOptions.Compiled);
-
         public TerminalLogger_Tests()
         {
             _mockTerminal = new Terminal(_outputWriter);
@@ -50,17 +49,9 @@ namespace Microsoft.Build.UnitTests
 
             _terminallogger.Initialize(this, _nodeCount);
 
-            UseProjectRelativeDirectory("Snapshots");
+            _terminallogger.CreateStopwatch = () => new MockStopwatch();
 
-            // Scrub timestamps on intermediate execution lines,
-            // which are subject to the vagaries of the test machine
-            // and OS scheduler.
-            _settings.AddScrubber(static lineBuilder =>
-            {
-                string line = lineBuilder.ToString();
-                lineBuilder.Clear();
-                lineBuilder.Append(s_elapsedTime.Replace(line, "0.0s"));
-            });
+            UseProjectRelativeDirectory("Snapshots");
         }
 
         #region IEventSource implementation

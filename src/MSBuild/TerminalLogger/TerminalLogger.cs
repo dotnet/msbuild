@@ -57,6 +57,8 @@ internal sealed partial class TerminalLogger : INodeLogger
 
     internal const TerminalColor TargetFrameworkColor = TerminalColor.Cyan;
 
+    internal Func<StopwatchAbstraction>? CreateStopwatch = null;
+
     /// <summary>
     /// Protects access to state shared between the logger callbacks and the rendering thread.
     /// </summary>
@@ -318,7 +320,7 @@ internal sealed partial class TerminalLogger : INodeLogger
             {
                 targetFramework = null;
             }
-            _projects[c] = new(targetFramework);
+            _projects[c] = new(targetFramework, CreateStopwatch?.Invoke());
 
             // First ever restore in the build is starting.
             if (e.TargetNames == "Restore" && !_restoreFinished)
