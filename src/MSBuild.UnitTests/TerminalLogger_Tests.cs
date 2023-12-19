@@ -200,8 +200,6 @@ namespace Microsoft.Build.UnitTests
 
             additionalCallbacks();
 
-            Thread.Sleep(1_000);
-
             TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(_projectFile, "Task", succeeded));
             TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(_projectFile, "Build", succeeded));
 
@@ -327,6 +325,43 @@ namespace Microsoft.Build.UnitTests
                 await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
             });
         }
+
+        [Fact]
+        public void DisplayNodesOverwritesTime()
+        {
+            List<MockStopwatch> stopwatches = new();
+
+            Func<StopwatchAbstraction>? createStopwatch = _terminallogger.CreateStopwatch;
+
+            try
+            {
+                _terminallogger.CreateStopwatch = () =>
+                {
+                    MockStopwatch stopwatch = new();
+                    stopwatches.Add(stopwatch);
+                    return stopwatch;
+                };
+
+                InvokeLoggerCallbacksForSimpleProject(succeeded: false, async () =>
+                {
+                    foreach (var stopwatch in stopwatches)
+                    {
+                        // Tick time forward by at least 10 seconds,
+                        // as a regression test for https://github.com/dotnet/msbuild/issues/9562
+                        stopwatch.Tick(111.0);
+                    }
+
+                    _terminallogger.DisplayNodes();
+
+                    await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+                });
+            }
+            finally
+            {
+                _terminallogger.CreateStopwatch = createStopwatch;
+            }
+        }
+
 
         [Fact]
         public async Task DisplayNodesOverwritesWithNewTargetFramework()
