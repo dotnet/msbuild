@@ -17,6 +17,7 @@ internal sealed class NodesFrame
     private const int MaxColumn = 120;
 
     private readonly NodeStatus[] _nodes;
+    private readonly int[] _durationLength;
 
     private readonly StringBuilder _renderBuilder = new();
 
@@ -30,6 +31,7 @@ internal sealed class NodesFrame
         Height = height;
 
         _nodes = new NodeStatus[nodes.Length];
+        _durationLength = new int[nodes.Length];
 
         foreach (NodeStatus? status in nodes)
         {
@@ -40,11 +42,15 @@ internal sealed class NodesFrame
         }
     }
 
-    internal ReadOnlySpan<char> RenderNodeStatus(NodeStatus status)
+    internal ReadOnlySpan<char> RenderNodeStatus(int i)
     {
+        NodeStatus status = _nodes[i];
+
         string durationString = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
             "DurationDisplay",
             status.Stopwatch.Elapsed.TotalSeconds);
+
+        _durationLength[i] = durationString.Length;
 
         string project = status.Project;
         string? targetFramework = status.TargetFramework;
@@ -91,14 +97,14 @@ internal sealed class NodesFrame
         int i = 0;
         for (; i < NodesCount; i++)
         {
-            ReadOnlySpan<char> needed = RenderNodeStatus(_nodes[i]);
+            ReadOnlySpan<char> needed = RenderNodeStatus(i);
 
             // Do we have previous node string to compare with?
             if (previousFrame.NodesCount > i)
             {
-                if (previousFrame._nodes[i] == _nodes[i])
+                if (previousFrame._nodes[i] == _nodes[i] &&                 // Same everything except time, AND
+                    previousFrame._durationLength[i] == _durationLength[i]) // same number of digits in time
                 {
-                    // Same everything except time
                     string durationString = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("DurationDisplay", _nodes[i].Stopwatch.Elapsed.TotalSeconds);
                     sb.Append($"{AnsiCodes.SetCursorHorizontal(MaxColumn)}{AnsiCodes.MoveCursorBackward(durationString.Length)}{durationString}");
                 }
