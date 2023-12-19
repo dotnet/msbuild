@@ -24,7 +24,7 @@ internal sealed class Project
     /// <summary>
     /// A stopwatch to time the build of the project.
     /// </summary>
-    public Stopwatch Stopwatch { get; } = Stopwatch.StartNew();
+    public StopwatchAbstraction Stopwatch { get; } = SystemStopwatch.StartNew();
 
     /// <summary>
     /// Full path to the primary output of the project, if known.

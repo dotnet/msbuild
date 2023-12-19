@@ -358,7 +358,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                 {
                     EraseNodes();
 
-                    string duration = project.Stopwatch.Elapsed.TotalSeconds.ToString("F1");
+                    string duration = project.Stopwatch.ElapsedSeconds.ToString("F1");
                     ReadOnlyMemory<char>? outputPath = project.OutputPath;
 
                     string projectFile = e.ProjectFile is not null ?

@@ -48,7 +48,7 @@ internal sealed class NodesFrame
 
         string durationString = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
             "DurationDisplay",
-            status.Stopwatch.Elapsed.TotalSeconds);
+            status.Stopwatch.ElapsedSeconds);
 
         _durationLength[i] = durationString.Length;
 
@@ -105,7 +105,7 @@ internal sealed class NodesFrame
                 if (previousFrame._nodes[i] == _nodes[i] &&                 // Same everything except time, AND
                     previousFrame._durationLength[i] == _durationLength[i]) // same number of digits in time
                 {
-                    string durationString = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("DurationDisplay", _nodes[i].Stopwatch.Elapsed.TotalSeconds);
+                    string durationString = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("DurationDisplay", _nodes[i].Stopwatch.ElapsedSeconds);
                     sb.Append($"{AnsiCodes.SetCursorHorizontal(MaxColumn)}{AnsiCodes.MoveCursorBackward(durationString.Length)}{durationString}");
                 }
                 else
