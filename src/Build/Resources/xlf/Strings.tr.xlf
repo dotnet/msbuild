@@ -222,8 +222,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
-        <source>A required NuGet assembly was not found. Expected Path: {0}</source>
-        <target state="translated">Gereken NuGet derlemesi bulunamadı. Beklenen Yol: {0}</target>
+        <source>A required NuGet assembly '{0}' could not be loaded.</source>
+        <target state="new">A required NuGet assembly '{0}' could not be loaded.</target>
         <note />
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
