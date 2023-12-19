@@ -272,6 +272,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public Task PrintRestore_Failed()
         {
+            BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
+
             bool succeeded = false;
             ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Restore Failed"));
 
@@ -284,6 +286,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public Task PrintRestore_SuccessWithWarnings()
         {
+            BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
+
             bool succeeded = true;
             WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Restore with Warning"));
 
