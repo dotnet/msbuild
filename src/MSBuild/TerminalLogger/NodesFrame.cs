@@ -16,8 +16,7 @@ internal sealed class NodesFrame
 {
     private const int MaxColumn = 120;
 
-    private readonly NodeStatus[] _nodes;
-    private readonly int[] _durationLength;
+    private readonly (NodeStatus nodeStatus, int durationLength)[] _nodes;
 
     private readonly StringBuilder _renderBuilder = new();
 
@@ -30,27 +29,26 @@ internal sealed class NodesFrame
         Width = Math.Min(width, MaxColumn);
         Height = height;
 
-        _nodes = new NodeStatus[nodes.Length];
-        _durationLength = new int[nodes.Length];
+        _nodes = new (NodeStatus, int)[nodes.Length];
 
         foreach (NodeStatus? status in nodes)
         {
             if (status is not null)
             {
-                _nodes[NodesCount++] = status;
+                _nodes[NodesCount++].nodeStatus = status;
             }
         }
     }
 
     internal ReadOnlySpan<char> RenderNodeStatus(int i)
     {
-        NodeStatus status = _nodes[i];
+        NodeStatus status = _nodes[i].nodeStatus;
 
         string durationString = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
             "DurationDisplay",
             status.Stopwatch.ElapsedSeconds);
 
-        _durationLength[i] = durationString.Length;
+        _nodes[i].durationLength = durationString.Length;
 
         string project = status.Project;
         string? targetFramework = status.TargetFramework;
@@ -102,10 +100,10 @@ internal sealed class NodesFrame
             // Do we have previous node string to compare with?
             if (previousFrame.NodesCount > i)
             {
-                if (previousFrame._nodes[i] == _nodes[i] &&                 // Same everything except time, AND
-                    previousFrame._durationLength[i] == _durationLength[i]) // same number of digits in time
+                if (previousFrame._nodes[i] == _nodes[i])
                 {
-                    string durationString = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("DurationDisplay", _nodes[i].Stopwatch.ElapsedSeconds);
+                    // Same everything except time, AND same number of digits in time
+                    string durationString = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("DurationDisplay", _nodes[i].nodeStatus.Stopwatch.ElapsedSeconds);
                     sb.Append($"{AnsiCodes.SetCursorHorizontal(MaxColumn)}{AnsiCodes.MoveCursorBackward(durationString.Length)}{durationString}");
                 }
                 else
