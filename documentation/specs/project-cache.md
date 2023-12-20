@@ -168,7 +168,7 @@ In our example, we can use the read files to construct a fingerprint for the bui
 The plugin would then create some metadata describing the outputs (eg. the paths and hashes) and the serialized `BuildResult`, and associate it with the fingerprint and put that assocation in the cache.
 
 To illustrate this, consider a project with fingerprint `F` which wrote a single file `O` with hash `H` and had `BuildResult R`. The plugin could create a metadata file `M` which describes the outputs of the build (the path and hash of `O`) as well as the serialized `R`. Using the cache implementation described above, the plugin would write the following two files to the cache:
- - `metadata/F -> M`
+ - `metadata/F -> M:"{outputs: [{path: 'path/to/O', hash: H}], result: R}"`
  - `content/H -> O`
 
 This can then be used for future builds.
