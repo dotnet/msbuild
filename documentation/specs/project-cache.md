@@ -151,7 +151,7 @@ At the beginning of the build, the plugin's `BeginBuildAsync` method will be cal
 
 Any storage mechanism can be used as a cache implementation, for example [Azure Blob Storage](https://azure.microsoft.com/products/storage/blobs/), or even just the local filesystem. At least in this example the only real requirement is that it can be used effectively as a key-value store. In many cases it can be useful for content to be keyed by its hash, and for the metadata file to be keyed by the fingerprint. In particular when content is keyed by hash, it is effectively deduplicated across multiple copies of the same file, which is common in builds.
 
-For illustration purposes, consider our cache implementation is based on a simple filesystem which a separate metadata and content directory inside it. Under the metadata dir, each file is a metadata file where the filename matches the fingerprint it's describing. Under the content dir, each file is a content file where the filename matches the hash of the content itself.
+For illustration purposes, consider our cache implementation is based on a simple filesystem with a separate metadata and content directory inside it. Under the metadata dir, each file is a metadata file where the filename matches the fingerprint it's describing. Under the content dir, each file is a content file where the filename matches the hash of the content itself.
 
 ## First build (cache population)
 
