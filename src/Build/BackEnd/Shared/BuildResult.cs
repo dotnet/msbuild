@@ -381,6 +381,12 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Gets or sets the flags that provide additional control over the build request.
+        /// See <see cref="Execution.BuildRequestDataFlags"/> for examples of the available flags.
+        /// </summary>
+        public BuildRequestDataFlags BuildRequestDataFlags { get; set; }
+
+        /// <summary>
         /// Returns the node packet type.
         /// </summary>
         NodePacketType INodePacket.Type

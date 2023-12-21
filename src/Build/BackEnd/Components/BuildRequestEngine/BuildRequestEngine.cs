@@ -331,7 +331,10 @@ namespace Microsoft.Build.BackEnd
                         // Grab the results from the requested configuration
                         IResultsCache cache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
                         BuildResult result = cache.GetResultsForConfiguration(request.ConfigurationId);
-                        BuildResult resultToReport = new BuildResult(request, result, null);
+                        BuildResult resultToReport = new BuildResult(request, result, null)
+                        {
+                            BuildRequestDataFlags = request.BuildRequestDataFlags,
+                        };
                         BuildRequestConfiguration config = ((IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache))[request.ConfigurationId];
 
                         // Retrieve the config if it has been cached, since this would contain our instance data.  It is safe to do this outside of a lock

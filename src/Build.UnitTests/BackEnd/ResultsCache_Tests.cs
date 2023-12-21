@@ -191,6 +191,75 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
+        public void TestCacheOnDifferentBuildFlagsPerRequest()
+        {
+            string targetName = "testTarget1";
+            int submissionId = 1;
+            int nodeRequestId = 0;
+            int configurationId = 1;
+
+            BuildRequest requestWithNoBuildDataFlags = new BuildRequest(
+                submissionId,
+                nodeRequestId,
+                configurationId,
+                new string[1] { targetName } /* escapedTargets */,
+                null /* hostServices */,
+                BuildEventContext.Invalid /* parentBuildEventContext */,
+                null /* parentRequest */,
+                BuildRequestDataFlags.None);
+
+            BuildRequest requestWithProvideProjectStateAfterBuildFlag = new BuildRequest(
+                submissionId,
+                nodeRequestId,
+                configurationId,
+                new string[1] { targetName } /* escapedTargets */,
+                null /* hostServices */,
+                BuildEventContext.Invalid /* parentBuildEventContext */,
+                null /* parentRequest */,
+                BuildRequestDataFlags.ProvideProjectStateAfterBuild);
+
+            BuildRequest requestWithNoBuildDataFlags2 = new BuildRequest(
+                submissionId,
+                nodeRequestId,
+                configurationId,
+                new string[1] { targetName } /* escapedTargets */,
+                null /* hostServices */,
+                BuildEventContext.Invalid /* parentBuildEventContext */,
+                null /* parentRequest */,
+                BuildRequestDataFlags.None);
+
+            BuildResult resultForRequestWithNoBuildDataFlags = new(requestWithNoBuildDataFlags);
+            resultForRequestWithNoBuildDataFlags.AddResultsForTarget(targetName, BuildResultUtilities.GetEmptySucceedingTargetResult());
+            ResultsCache cache = new();
+            cache.AddResult(resultForRequestWithNoBuildDataFlags);
+
+            ResultsCacheResponse cacheResponseForRequestWithNoBuildDataFlags = cache.SatisfyRequest(
+                requestWithNoBuildDataFlags,
+                new List<string>(),
+                new List<string>(new string[] { targetName }),
+                skippedResultsDoNotCauseCacheMiss: false);
+
+            ResultsCacheResponse cacheResponseWithProvideProjectStateAfterBuild = cache.SatisfyRequest(
+                requestWithProvideProjectStateAfterBuildFlag,
+                new List<string>(),
+                new List<string>(new string[] { targetName }),
+                skippedResultsDoNotCauseCacheMiss: false);
+
+            ResultsCacheResponse cacheResponseForRequestWithNoBuildDataFlags2 = cache.SatisfyRequest(
+                requestWithNoBuildDataFlags2,
+                new List<string>(),
+                new List<string>(new string[] { targetName }),
+                skippedResultsDoNotCauseCacheMiss: false);
+
+            Assert.Equal(ResultsCacheResponseType.Satisfied, cacheResponseForRequestWithNoBuildDataFlags.Type);
+
+            // Because ProvideProjectStateAfterBuildFlag was provided as a part of BuildRequest
+            Assert.Equal(ResultsCacheResponseType.NotSatisfied, cacheResponseWithProvideProjectStateAfterBuild.Type);
+
+            Assert.Equal(ResultsCacheResponseType.Satisfied, cacheResponseForRequestWithNoBuildDataFlags2.Type);
+        }
+
+        [Fact]
         public void TestClearResultsCache()
         {
             ResultsCache cache = new ResultsCache();
