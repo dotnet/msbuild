@@ -11,7 +11,7 @@ public enum ReaderErrorType
     /// <summary>
     /// The encountered event is completely unknown to the reader. It cannot interpret any part of it.
     /// </summary>
-    UnkownEventType,
+    UnknownEventType,
 
     /// <summary>
     /// The encountered event is known to the reader and reader is able to read the event as it knows it.

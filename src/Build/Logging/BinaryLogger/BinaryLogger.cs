@@ -75,6 +75,7 @@ namespace Microsoft.Build.Logging
         // The current version of the binary log representation.
         // Changes with each update of the binary log format.
         internal const int FileFormatVersion = 18;
+
         // The minimum version of the binary log reader that can read log of above version.
         // This should be changed only when the binary log format is changed in a way that would prevent it from being
         // read by older readers. (changing of the individual BuildEventArgs or adding new is fine - as reader can
@@ -147,7 +148,7 @@ namespace Microsoft.Build.Logging
             bool logPropertiesAndItemsAfterEvaluation = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation ?? true;
 
             ProcessParameters(out bool omitInitialInfo);
-            var replayEventsSource = eventSource as IBinaryLogReplaySource;
+            var replayEventSource = eventSource as IBinaryLogReplaySource;
 
             try
             {
@@ -169,7 +170,7 @@ namespace Microsoft.Build.Logging
 
                 stream = new FileStream(FilePath, FileMode.Create);
 
-                if (CollectProjectImports != ProjectImportsCollectionMode.None && replayEventsSource == null)
+                if (CollectProjectImports != ProjectImportsCollectionMode.None && replayEventSource == null)
                 {
                     projectImportsCollector = new ProjectImportsCollector(FilePath, CollectProjectImports == ProjectImportsCollectionMode.ZipFile);
                 }
@@ -206,33 +207,33 @@ namespace Microsoft.Build.Logging
                 eventArgsWriter.EmbedFile += EventArgsWriter_EmbedFile;
             }
 
-            if (replayEventsSource != null)
+            if (replayEventSource != null)
             {
                 if (CollectProjectImports == ProjectImportsCollectionMode.Embed)
                 {
-                    replayEventsSource.EmbeddedContentRead += args =>
+                    replayEventSource.EmbeddedContentRead += args =>
                         eventArgsWriter.WriteBlob(args.ContentKind, args.ContentStream);
                 }
                 else if (CollectProjectImports == ProjectImportsCollectionMode.ZipFile)
                 {
-                    replayEventsSource.EmbeddedContentRead += args =>
+                    replayEventSource.EmbeddedContentRead += args =>
                         ProjectImportsCollector.FlushBlobToFile(FilePath, args.ContentStream);
                 }
 
                 // If raw events are provided - let's try to use the advantage.
                 // But other subscribers can later on subscribe to structured events -
                 //  for this reason we do only subscribe delayed.
-                replayEventsSource.DeferredInitialize(
+                replayEventSource.DeferredInitialize(
                     // For raw events we cannot write the initial info - as we cannot write
                     //  at the same time as raw events are being written - this would break the deduplicated strings store.
                     // But we need to write the version info - but since we read/write raw - let's not change the version info.
                     () =>
                     {
-                        binaryWriter.Write(replayEventsSource.FileFormatVersion);
-                        binaryWriter.Write(replayEventsSource.MinimumReaderVersion);
-                        replayEventsSource.RawLogRecordReceived += RawEvents_LogDataSliceReceived;
+                        binaryWriter.Write(replayEventSource.FileFormatVersion);
+                        binaryWriter.Write(replayEventSource.MinimumReaderVersion);
+                        replayEventSource.RawLogRecordReceived += RawEvents_LogDataSliceReceived;
                         // Replay separated strings here as well (and do not deduplicate! It would skew string indexes)
-                        replayEventsSource.StringReadDone += strArg => eventArgsWriter.WriteStringRecord(strArg.StringToBeUsed);
+                        replayEventSource.StringReadDone += strArg => eventArgsWriter.WriteStringRecord(strArg.StringToBeUsed);
                     },
                     SubscribeToStructuredEvents);
             }

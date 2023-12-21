@@ -11,7 +11,12 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging
 {
-    internal interface IRawLogEventsSource
+    /// <summary>
+    /// Interface for replaying a binary log file (*.binlog)
+    /// </summary>
+    internal interface IBinaryLogReplaySource :
+        IEventSource,
+        IBuildEventArgsReaderNotifications
     {
         /// <summary>
         /// Event raised when non-textual log record is read.
@@ -40,17 +45,14 @@ namespace Microsoft.Build.Logging
         /// The minimum reader version for the binary log file.
         /// </summary>
         int MinimumReaderVersion { get; }
-    }
 
-    /// <summary>
-    /// Interface for replaying a binary log file (*.binlog)
-    /// </summary>
-    internal interface IBinaryLogReplaySource :
-        IEventSource,
-        IRawLogEventsSource,
-        IBuildEventArgsReaderNotifications,
-        IEmbeddedContentSource
-    { }
+        /// <summary>
+        /// Raised when the log reader encounters a project import archive (embedded content) in the stream.
+        /// The subscriber must read the exactly given length of binary data from the stream - otherwise exception is raised.
+        /// If no subscriber is attached, the data is skipped.
+        /// </summary>
+        event Action<EmbeddedContentEventArgs> EmbeddedContentRead;
+    }
 
     /// <summary>
     /// Provides a method to read a binary log file (*.binlog) and replay all stored BuildEventArgs
@@ -60,6 +62,12 @@ namespace Microsoft.Build.Logging
     public sealed class BinaryLogReplayEventSource : EventArgsDispatcher,
         IBinaryLogReplaySource
     {
+        private int? _fileFormatVersion;
+        private int? _minimumReaderVersion;
+
+        public int FileFormatVersion => _fileFormatVersion ?? throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_Source_VersionUninitialized"));
+        public int MinimumReaderVersion => _minimumReaderVersion ?? throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_Source_VersionUninitialized"));
+
         /// Touches the <see cref="ItemGroupLoggingHelper"/> static constructor
         /// to ensure it initializes <see cref="TaskParameterEventArgs.MessageGetter"/>
         /// and <see cref="TaskParameterEventArgs.DictionaryFactory"/>
@@ -280,8 +288,16 @@ namespace Microsoft.Build.Logging
             reader.RecoverableReadError -= RecoverableReadError;
         }
 
-        /// <inheritdoc cref="IRawLogEventsSource.DeferredInitialize"/>
-        void IRawLogEventsSource.DeferredInitialize(
+        // Following members are explicit implementations of the IBinaryLogReplaySource interface
+        //  to avoid exposing them publicly.
+        // We want an interface so that BinaryLogger can fine tune its initialization logic
+        //  in case the given event source is the replay source. On the other hand we don't want
+        //  to expose these members publicly because they are not intended to be used by the consumers.
+
+        private Action? _onRawReadingPossible;
+        private Action? _onStructuredReadingOnly;
+        /// <inheritdoc cref="IBinaryLogReplaySource.DeferredInitialize"/>
+        void IBinaryLogReplaySource.DeferredInitialize(
             Action onRawReadingPossible,
             Action onStructuredReadingOnly)
         {
@@ -289,16 +305,9 @@ namespace Microsoft.Build.Logging
             this._onStructuredReadingOnly += onStructuredReadingOnly;
         }
 
-        public int FileFormatVersion => _fileFormatVersion ?? throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_Source_VersionUninitialized"));
-        public int MinimumReaderVersion => _minimumReaderVersion ?? throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_Source_VersionUninitialized"));
-
-        private int? _fileFormatVersion;
-        private int? _minimumReaderVersion;
-        private Action? _onRawReadingPossible;
-        private Action? _onStructuredReadingOnly;
         private Action<EmbeddedContentEventArgs>? _embeddedContentRead;
-        /// <inheritdoc cref="IEmbeddedContentSource.EmbeddedContentRead"/>
-        event Action<EmbeddedContentEventArgs>? IEmbeddedContentSource.EmbeddedContentRead
+        /// <inheritdoc cref="IBinaryLogReplaySource.EmbeddedContentRead"/>
+        event Action<EmbeddedContentEventArgs>? IBinaryLogReplaySource.EmbeddedContentRead
         {
             // Explicitly implemented event has to declare explicit add/remove accessors
             //  https://stackoverflow.com/a/2268472/2308106
@@ -323,8 +332,8 @@ namespace Microsoft.Build.Logging
         }
 
         private Action<BinaryLogRecordKind, Stream>? _rawLogRecordReceived;
-        /// <inheritdoc cref="IRawLogEventsSource.RawLogRecordReceived"/>
-        event Action<BinaryLogRecordKind, Stream>? IRawLogEventsSource.RawLogRecordReceived
+        /// <inheritdoc cref="IBinaryLogReplaySource.RawLogRecordReceived"/>
+        event Action<BinaryLogRecordKind, Stream>? IBinaryLogReplaySource.RawLogRecordReceived
         {
             add => _rawLogRecordReceived += value;
             remove => _rawLogRecordReceived -= value;
