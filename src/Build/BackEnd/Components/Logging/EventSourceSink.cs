@@ -537,7 +537,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     // if a logger has failed politely, abort immediately
                     // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                     // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
+                    UnregisterAllEventHandlers();
                     throw;
                 }
                 catch (Exception exception)
@@ -548,7 +548,6 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
 
                     InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
-                    UnregisterAllEventHandlers();
                 }
             }
 
@@ -892,7 +891,6 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
 
                     InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
-                    UnregisterAllEventHandlers();
                 }
             }
         }
