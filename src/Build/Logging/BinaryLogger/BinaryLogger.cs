@@ -339,7 +339,6 @@ namespace Microsoft.Build.Logging
             AttachBLParameters();
         }
 
-
         /// <summary>
         /// Updates the current FilePath value based on instance configuration
         /// </summary>
