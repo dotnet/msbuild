@@ -151,11 +151,11 @@
       </trans-unit>
       <trans-unit id="FatalErrorWhileLoggingWithInnerExceptionAndStack">
         <source>MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
-{0}
-{1}</source>
+    {0}
+    {1}</source>
         <target state="new">MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
-{0}
-{1}</target>
+    {0}
+    {1}</target>
         <note>{StrBegin="MSB4017: "}UE: This message is used for a special exception that is thrown when a logger fails while logging an event (most
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
     special exception to abort the build.</note>
