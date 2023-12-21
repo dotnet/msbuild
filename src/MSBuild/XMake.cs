@@ -633,7 +633,6 @@ namespace Microsoft.Build.CommandLine
             string[] commandLine)
 #endif
         {
-            Debugger.Launch();
             DebuggerLaunchCheck();
 
             // Initialize new build telemetry and record start of this build, if not initialized already
