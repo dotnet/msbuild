@@ -21,7 +21,7 @@ namespace Microsoft.Build.Logging
             this.binaryLoggerParameters = GetLastArgumentPart(binaryLoggerParameters);
         }
 
-        public bool isBinaryLoggerSet { get; set; }
+        public bool IsBinaryLoggerSet { get; set; }
 
         public string InitProjectFile { get; set; } = string.Empty;
 
@@ -40,6 +40,42 @@ namespace Microsoft.Build.Logging
                 result = arguments[arguments.Length - 1];
             }
             return result;
+        }
+
+
+        /// <summary>
+        /// Generates the stringified representation of current instance
+        /// </summary>
+        /// <returns></returns>
+        public string GetStringifiedParameters()
+        {
+            var builtParameters = new StringBuilder();
+            // common configuration
+            builtParameters.Append("commonConfig=[");
+            builtParameters.Append($"InitProjectFile={InitProjectFile};");
+            builtParameters.Append($"IsBinaryLoggerSet={IsBinaryLoggerSet};");
+            builtParameters.Append(']');
+
+            builtParameters.Append($"blArguments=[binaryLoggerArguments={binaryLoggerArguments}]");
+            builtParameters.Append($"blParameters=[binaryLoggerParameters={binaryLoggerParameters}]");
+
+            return builtParameters.ToString();
+        }
+
+
+        /// <summary>
+        /// Generates the BinaryLoggerParameters instance based on the parameters provided
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        public BinaryLoggerParameters GenerateInstanceFromParameters(string parameters)
+        {
+            if (string.IsNullOrEmpty(parameters))
+            {
+                return null;
+            }
+            // TODO: parsing logic
+            return new BinaryLoggerParameters(Array.Empty<string>(), Array.Empty<string>());
         }
     }
 }

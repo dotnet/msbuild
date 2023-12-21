@@ -2634,7 +2634,7 @@ namespace Microsoft.Build.CommandLine
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLoggerParameters])
                     {
-                        isBinaryLoggerSet = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.BinaryLogger),
+                        IsBinaryLoggerSet = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.BinaryLogger),
                         InitProjectFile = projectFile
                     };
 
@@ -3811,7 +3811,7 @@ namespace Microsoft.Build.CommandLine
 
         private static void ProcessBinaryLogger(BinaryLoggerParameters binaryLoggerParameters, List<ILogger> loggers, ref LoggerVerbosity verbosity)
         {
-            if (!binaryLoggerParameters.isBinaryLoggerSet)
+            if (!binaryLoggerParameters.IsBinaryLoggerSet)
             {
                 return;
             }
