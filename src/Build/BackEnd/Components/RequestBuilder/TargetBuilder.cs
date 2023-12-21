@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -189,7 +188,6 @@ namespace Microsoft.Build.BackEnd
             BuildResult resultsToReport = new BuildResult(_buildResult, targetNames);
 
             // Return after-build project state if requested.
-            Debugger.Launch();
             if (_requestEntry.Request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.ProvideProjectStateAfterBuild))
             {
                 resultsToReport.ProjectStateAfterBuild = _projectInstance;
