@@ -1,3 +1,3 @@
 ﻿directory/[1mfile[m(1,2,3,4): [31;1merror[m [31;1mAA0000[m: Restore Failed
 
-Build [31;1mfailed with errors[m in 0.0s
+Build [31;1mfailed with errors[m in 5.0s

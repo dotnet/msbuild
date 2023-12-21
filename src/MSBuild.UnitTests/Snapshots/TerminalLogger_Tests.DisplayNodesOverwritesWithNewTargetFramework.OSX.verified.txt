@@ -1,5 +1,5 @@
 ﻿[?25l[1F
-  project [36;1mtfName[m [120G[12DBuild (0.0s)
+  project [36;1mtfName[m [120G[12DBuild (0.2s)
 [?25h[?25l[2F
-[K  project [36;1mtf2[m [120G[12DBuild (0.0s)
+[K  project [36;1mtf2[m [120G[12DBuild (0.2s)
 [?25h
