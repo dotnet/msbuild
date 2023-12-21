@@ -103,6 +103,8 @@ namespace Microsoft.Build.Logging
 
         private string FilePath { get; set; }
 
+        public BinaryLoggerParameters BinaryLoggerParameters { private get; set; }
+
         /// <summary>
         /// Boolean flag identifies if the log file was provided from parameters
         /// </summary>
@@ -115,17 +117,7 @@ namespace Microsoft.Build.Logging
         /// </remarks>
         public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Diagnostic;
 
-        /// <summary>
-        /// Gets or sets the parameters
-        /// </summary>
-        public string BLParameters { get; set; }
-
-        /// <summary>
-        /// Gets or sets the parameters. The only supported parameter is the output log file path (for example, "msbuild.binlog").
-        /// </summary>
         public string Parameters { get; set; }
-
-        public string InitProjectFile { get; set; }
 
         /// <summary>
         /// Initializes the logger by subscribing to events of the specified event source.
@@ -335,6 +327,11 @@ namespace Microsoft.Build.Logging
         /// </exception>
         private void ProcessParameters()
         {
+            if (BinaryLoggerParameters is null)
+            {
+                throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", ""));
+            }
+
             AttachBLArguments();
             AttachBLParameters();
         }
@@ -352,7 +349,8 @@ namespace Microsoft.Build.Logging
                     throw new LoggerException("Incompatible configuration provided");
                 }
 
-                FilePath = InitProjectFile + "." + DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()  + ".binlog";
+                var initProjectFilename = Path.GetFileName(BinaryLoggerParameters.InitProjectFile);
+                FilePath = initProjectFilename + "." + DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()  + ".binlog";
             }
             else
             {
@@ -363,7 +361,6 @@ namespace Microsoft.Build.Logging
             }
 
             KnownTelemetry.LoggingConfigurationTelemetry.BinaryLoggerUsedDefaultName = FilePath == "msbuild.binlog";
-
 
             try
             {
@@ -385,12 +382,12 @@ namespace Microsoft.Build.Logging
         /// <exception cref="LoggerException"></exception>
         private void AttachBLArguments()
         {
-            if (Parameters == null)
+            if (string.IsNullOrEmpty(BinaryLoggerParameters.binaryLoggerArguments))
             {
-                throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", ""));
+                return;
             }
 
-            var parameters = Parameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
+            var parameters = BinaryLoggerParameters.binaryLoggerArguments.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
 
             foreach (var parameter in parameters)
             {
@@ -430,12 +427,12 @@ namespace Microsoft.Build.Logging
         /// <exception cref="LoggerException"></exception>
         private void AttachBLParameters()
         {
-            if (BLParameters == null)
+            if (string.IsNullOrEmpty(BinaryLoggerParameters.binaryLoggerParameters))
             {
                 return;
             }
 
-            var parameters = BLParameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
+            var parameters = BinaryLoggerParameters.binaryLoggerParameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
             foreach (var parameter in parameters)
             {
                 if (parameter.Length > 0)

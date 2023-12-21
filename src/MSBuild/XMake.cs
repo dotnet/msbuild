@@ -1982,7 +1982,7 @@ namespace Microsoft.Build.CommandLine
                             }
                         }
 
-                        // Special case: for the switches "/m" (or "/maxCpuCount") and "/bl" (or "/binarylogger") we wish to pretend we saw a default argument
+                        // Special case: for the switches "/m" (or "/maxCpuCount") and "/prof" (or "/profileevaluation") we wish to pretend we saw a default argument
                         // This allows a subsequent /m:n on the command line to override it.
                         // We could create a new kind of switch with optional parameters, but it's a great deal of churn for this single case.
                         // Note that if no "/m" or "/maxCpuCount" switch -- either with or without parameters -- is present, then we still default to 1 cpu
@@ -2630,9 +2630,15 @@ namespace Microsoft.Build.CommandLine
                     // figure out which loggers are going to listen to build events
                     string[][] groupedFileLoggerParameters = commandLineSwitches.GetFileLoggerParameters();
 
-                    // TODO: update to pass a class of binary log parameters aggreated all in one
+                    var binaryLoggerParameters = new BinaryLoggerParameters(
+                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
+                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLoggerParameters])
+                    {
+                        isBinaryLoggerSet = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.BinaryLogger),
+                        InitProjectFile = projectFile
+                    };
+
                     loggers = ProcessLoggingSwitches(
-                        projectFile,
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Logger],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.DistributedLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Verbosity],
@@ -2642,9 +2648,7 @@ namespace Microsoft.Build.CommandLine
                         aggregatedTerminalLoggerParameters,
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters], // used by DistributedFileLogger
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters],
-                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
-                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLoggerParameters],
-                        commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.BinaryLogger),
+                        binaryLoggerParameters,
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation],
                         groupedFileLoggerParameters,
                         getProperty.Length + getItem.Length + getTargetResult.Length > 0,
@@ -3646,7 +3650,6 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         /// <returns>List of loggers.</returns>
         private static ILogger[] ProcessLoggingSwitches(
-            string startFile,
             string[] loggerSwitchParameters,
             string[] distributedLoggerSwitchParameters,
             string[] verbositySwitchParameters,
@@ -3656,9 +3659,7 @@ namespace Microsoft.Build.CommandLine
             string aggregatedTerminalLoggerParameters,
             string[] fileLoggerParameters,
             string[] consoleLoggerParameters,
-            string[] binaryLoggerArguments,
-            string[] binaryLoggerParameters,
-            bool isBinaryLoggerWasSet,
+            BinaryLoggerParameters binaryLoggerParameters,
             string[] profileEvaluationParameters,
             string[][] groupedFileLoggerParameters,
             bool useSimpleErrorLogger,
@@ -3683,7 +3684,8 @@ namespace Microsoft.Build.CommandLine
 
             var outVerbosity = verbosity;
 
-            ProcessBinaryLogger(isBinaryLoggerWasSet, startFile, binaryLoggerArguments, binaryLoggerParameters, loggers, ref outVerbosity);
+            // move to binary logger parameters
+            ProcessBinaryLogger(binaryLoggerParameters, loggers, ref outVerbosity);
 
             // When returning the result of evaluation from the command line, do not use custom loggers.
             if (!useSimpleErrorLogger)
@@ -3807,29 +3809,15 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static void ProcessBinaryLogger(bool isBinaryLoggerWasSet, string startFile, string[] binaryLoggerArguments, string[] binaryLoggerParameters, List<ILogger> loggers, ref LoggerVerbosity verbosity)
+        private static void ProcessBinaryLogger(BinaryLoggerParameters binaryLoggerParameters, List<ILogger> loggers, ref LoggerVerbosity verbosity)
         {
-            if (!isBinaryLoggerWasSet)
+            if (!binaryLoggerParameters.isBinaryLoggerSet)
             {
                 return;
             }
 
-            string arguments = string.Empty;
-            if (binaryLoggerArguments.Length > 0)
-            {
-                arguments = binaryLoggerArguments[binaryLoggerArguments.Length - 1];
-            }
-
-            string parameters = null;
-            if (binaryLoggerParameters != null && binaryLoggerParameters.Length > 0)
-            {
-                parameters = binaryLoggerParameters[binaryLoggerParameters.Length - 1];
-            }
-
-            var filenameExample = Path.GetFileName(startFile);
-
             // arguments
-            BinaryLogger logger = new BinaryLogger { Parameters = arguments, BLParameters = parameters, InitProjectFile = filenameExample };
+            BinaryLogger logger = new BinaryLogger { BinaryLoggerParameters = binaryLoggerParameters };
 
             // If we have a binary logger, force verbosity to diagnostic.
             // The only place where verbosity is used downstream is to determine whether to log task inputs.
