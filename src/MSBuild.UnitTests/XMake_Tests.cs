@@ -793,6 +793,22 @@ namespace Microsoft.Build.UnitTests
             results.ShouldNotContain(ResourceUtilities.GetResourceString("BuildFailedWithPropertiesItemsOrTargetResultsRequested"));
         }
 
+        [Fact]
+        public void BuildFailsWithBadPropertyName()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile project = env.CreateFile("testProject.csproj", @"
+<Project>
+  <Target Name=""Build"">
+  </Target>
+</Project>
+");
+            string results = RunnerUtilities.ExecMSBuild($" {project.Path} /p:someProperty:fdalse= ", out bool success);
+            success.ShouldBeFalse(results);
+
+            results.ShouldContain("error MSB4177: Invalid property.");
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]

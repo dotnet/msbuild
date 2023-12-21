@@ -9,12 +9,12 @@
       "src\\Framework\\Microsoft.Build.Framework.csproj",
       "src\\MSBuild.UnitTests\\Microsoft.Build.CommandLine.UnitTests.csproj",
       "src\\MSBuild\\MSBuild.csproj",
+      "src\\StringTools\\StringTools.csproj",
       "src\\Tasks.UnitTests\\Microsoft.Build.Tasks.UnitTests.csproj",
       "src\\Tasks\\Microsoft.Build.Tasks.csproj",
       "src\\Utilities.UnitTests\\Microsoft.Build.Utilities.UnitTests.csproj",
       "src\\Utilities\\Microsoft.Build.Utilities.csproj",
-      "src\\Xunit.NetCore.Extensions\\Xunit.NetCore.Extensions.csproj",
-      "src\\StringTools\\StringTools.csproj"
+      "src\\Xunit.NetCore.Extensions\\Xunit.NetCore.Extensions.csproj"
     ]
   }
 }
