@@ -842,13 +842,17 @@ namespace Microsoft.Build.BackEnd
                 {
                     // The build was likely cancelled. We do not need to log an error in this case.
                 }
-                else if (_projectLoggingContext is null)
+                else if (ex is InternalLoggerException)
                 {
-                    _nodeLoggingContext.LogError(BuildEventFileInfo.Empty, "UnhandledMSBuildError", ex.ToString());
+                    (((LoggingContext)_projectLoggingContext) ?? _nodeLoggingContext).LogError(
+                        BuildEventFileInfo.Empty,
+                        "FatalErrorWhileLoggingWithInnerExceptionAndStack",
+                        ex.InnerException?.Message ?? string.Empty,
+                        ex.StackTrace);
                 }
                 else
                 {
-                    _projectLoggingContext.LogError(BuildEventFileInfo.Empty, "UnhandledMSBuildError", ex.ToString());
+                    (((LoggingContext)_projectLoggingContext) ?? _nodeLoggingContext).LogError(BuildEventFileInfo.Empty, "UnhandledMSBuildError", ex.ToString());
                 }
 
                 if (ExceptionHandling.IsCriticalException(ex))

@@ -542,16 +542,13 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
                 catch (Exception exception)
                 {
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-
                     if (ExceptionHandling.IsCriticalException(exception))
                     {
                         throw;
                     }
 
                     InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
+                    UnregisterAllEventHandlers();
                 }
             }
 
@@ -873,9 +870,9 @@ namespace Microsoft.Build.BackEnd.Logging
                     // if a logger has failed politely, abort immediately
                     // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                     // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
+                    UnregisterAllEventHandlers();
 
-                    // We ought to dump this farther up the stack, but if for example a task is logging an event within a
+                    // We ought to dump this further up the stack, but if for example a task is logging an event within a
                     // catch(Exception) block and not rethrowing it, there's the possibility that this exception could
                     // just get silently eaten.  So better to have duplicates than to not log the problem at all. :)
                     ExceptionHandling.DumpExceptionToFile(exception);
@@ -884,11 +881,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
                 catch (Exception exception)
                 {
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-
-                    // We ought to dump this farther up the stack, but if for example a task is logging an event within a
+                    // We ought to dump this further up the stack, but if for example a task is logging an event within a
                     // catch(Exception) block and not rethrowing it, there's the possibility that this exception could
                     // just get silently eaten.  So better to have duplicates than to not log the problem at all. :)
                     ExceptionHandling.DumpExceptionToFile(exception);
@@ -899,6 +892,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
 
                     InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
+                    UnregisterAllEventHandlers();
                 }
             }
         }
