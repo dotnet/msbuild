@@ -1,4 +1,4 @@
-﻿directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mAA0000[m: Restore with Warning
+﻿]9;4;3;\directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mAA0000[m: Restore with Warning
 
-Build [33;1msucceeded with warnings[m in 0.0s
+Build [33;1msucceeded with warnings[m in 5.0s
 ]9;4;0;\
