@@ -322,8 +322,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
-        <source>A required NuGet assembly was not found. Expected Path: {0}</source>
-        <target state="translated">Не найдена обязательная сборка NuGet. Ожидаемый путь: {0}</target>
+        <source>A required NuGet assembly '{0}' could not be loaded.</source>
+        <target state="needs-review-translation">Не найдена обязательная сборка NuGet. Ожидаемый путь: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">

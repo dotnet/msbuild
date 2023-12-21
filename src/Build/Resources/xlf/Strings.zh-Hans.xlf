@@ -322,8 +322,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
-        <source>A required NuGet assembly was not found. Expected Path: {0}</source>
-        <target state="translated">未找到所需的 NuGet 程序集。所需路径: {0}</target>
+        <source>A required NuGet assembly '{0}' could not be loaded.</source>
+        <target state="needs-review-translation">未找到所需的 NuGet 程序集。所需路径: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">

@@ -323,7 +323,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Example, C:\MyProjects\MyProject\bin\Debug\MyAssembly.dll -->
     <TargetPath Condition=" '$(TargetPath)' == '' ">$(TargetDir)$(TargetFileName)</TargetPath>
 
-    <TargetRefPath Condition=" '$(TargetRefPath)' == '' and '$(ProduceReferenceAssembly)' == 'true' and ('$(ProduceReferenceAssemblyInOutDir)' == 'true' or '$([MSBuild]::AreFeaturesEnabled(17.0))' != 'true' ) ">$([MSBuild]::NormalizePath($(TargetDir), 'ref', $(TargetFileName)))</TargetRefPath>
+    <TargetRefPath Condition=" '$(TargetRefPath)' == '' and '$(ProduceReferenceAssembly)' == 'true' and '$(ProduceReferenceAssemblyInOutDir)' == 'true' ">$([MSBuild]::NormalizePath($(TargetDir), 'ref', $(TargetFileName)))</TargetRefPath>
     <TargetRefPath Condition=" '$(TargetRefPath)' == '' and '$(ProduceReferenceAssembly)' == 'true' ">$([MSBuild]::NormalizePath($(MSBuildProjectDirectory), $(IntermediateOutputPath), 'ref', $(TargetFileName)))</TargetRefPath>
 
     <!-- Example, C:\MyProjects\MyProject\ -->
@@ -385,11 +385,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <_GenerateBindingRedirectsIntermediateAppConfig>$(IntermediateOutputPath)$(TargetFileName).config</_GenerateBindingRedirectsIntermediateAppConfig>
   </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(MSBuildCopyMarkerName)' == ''">
+    <MSBuildCopyMarkerName>$(MSBuildProjectFile)</MSBuildCopyMarkerName>
+    <!-- For a long MSBuildProjectFile let's shorten this to 17 chars - using the first 8 chars of the filename and a filename hash. -->
+    <MSBuildCopyMarkerName Condition="'$(MSBuildCopyMarkerName.Length)' &gt; '17'">$(MSBuildProjectFile.Substring(0,8)).$([MSBuild]::StableStringHash($(MSBuildProjectFile)).ToString("X8"))</MSBuildCopyMarkerName>
+    <MSBuildCopyMarkerName>$(MSBuildCopyMarkerName).Up2Date</MSBuildCopyMarkerName>
+  </PropertyGroup>
 
   <ItemGroup>
     <IntermediateAssembly Include="$(IntermediateOutputPath)$(TargetName)$(TargetExt)"/>
     <FinalDocFile Include="@(DocFileItem->'$(OutDir)%(Filename)%(Extension)')"/>
-    <CopyUpToDateMarker Include="$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', '$(IntermediateOutputPath)', '$(MSBuildProjectFile).CopyComplete'))" />
+    <CopyUpToDateMarker Include="$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', '$(IntermediateOutputPath)', '$(MSBuildCopyMarkerName)'))" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(ProduceReferenceAssembly)' == 'true'">
@@ -1364,6 +1371,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <EmbeddedResource Remove="@(_Temp)" />
       <EmbeddedResource Include="@(_Temp)" />
+      <_Temp Remove="@(_Temp)" />
+    </ItemGroup>
+
+    <!-- RESOURCE ITEMS -->
+    <AssignLinkMetadata Items="@(Resource)"
+                        Condition="'@(Resource)' != '' and '%(Resource.DefiningProjectFullPath)' != '$(MSBuildProjectFullPath)' and $([MSBuild]::AreFeaturesEnabled('17.10'))">
+      <Output TaskParameter="OutputItems" ItemName="_Temp" />
+    </AssignLinkMetadata>
+
+    <ItemGroup Condition="$([MSBuild]::AreFeaturesEnabled('17.10'))">
+      <Resource Remove="@(_Temp)" />
+      <Resource Include="@(_Temp)" />
       <_Temp Remove="@(_Temp)" />
     </ItemGroup>
 
@@ -5005,7 +5024,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       This target enforces the dependency.
     -->
 
-    <MSBuildCopyContentTransitively Condition=" '$(MSBuildCopyContentTransitively)' == '' and $([MSBuild]::AreFeaturesEnabled('17.0'))">true</MSBuildCopyContentTransitively>
+    <MSBuildCopyContentTransitively Condition=" '$(MSBuildCopyContentTransitively)' == ''">true</MSBuildCopyContentTransitively>
 
     <_TargetsThatPrepareProjectReferences Condition=" '$(MSBuildCopyContentTransitively)' == 'true' ">
       AssignProjectConfiguration;
@@ -6781,7 +6800,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <Import Project="$(MsTestToolsTargets)" Condition="Exists('$(MsTestToolsTargets)')" />
-
+  
+  <PropertyGroup>
+    <UseMSBuildTestInfrastructure Condition="'$(UseMSBuildTestInfrastructure)' == ''">false</UseMSBuildTestInfrastructure>
+  </PropertyGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.Test.targets" Condition="'$(UseMSBuildTestInfrastructure)' == 'true'"/>
   <!-- App packaging support -->
 
   <!--
@@ -6814,5 +6837,4 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter\*" Condition="'$(ImportByWildcardAfterMicrosoftCommonTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter')"/>
   <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftCommonTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter')"/>
-
 </Project>

@@ -196,6 +196,11 @@
         <target state="translated">MSB3894: Při kopírování „{1}“ do „{2}“ došlo k výjimce {0} a HR je {3}</target>
         <note>{StrBegin="MSB3894: "} LOCALIZATION: {0} is exception.ToString(), {1} and {2} are paths, {3} is a number")</note>
       </trans-unit>
+      <trans-unit id="Copy.IncompatibleParameters">
+        <source>MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</source>
+        <target state="new">MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</target>
+        <note>{StrBegin="MSB3896: "}</note>
+      </trans-unit>
       <trans-unit id="Copy.LinkFailed">
         <source>MSB3893: Could not use a link to copy "{0}" to "{1}".</source>
         <target state="translated">MSB3893: Nedá se použít odkaz pro kopírování {0} do {1}.</target>
@@ -1067,7 +1072,7 @@
       <trans-unit id="GenerateResource.BinaryFormatterUse">
         <source>MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
            More information: https://aka.ms/msbuild/net8-binaryformatter</source>
-        <target state="translated">MSB3825: Prostředek „{0}“ typu „{1}“ je deserializován prostřednictvím BinaryFormatter za běhu. BinaryFormatter je zastaralý kvůli možným bezpečnostním rizikům a odebere se s .NET 9. Pokud ho chcete používat dál, nastavte vlastnost GenerateResourceWarnOnBinaryFormatterUse na false. 
+        <target state="translated">MSB3825: Prostředek „{0}“ typu „{1}“ je deserializován prostřednictvím BinaryFormatter za běhu. BinaryFormatter je zastaralý kvůli možným bezpečnostním rizikům a odebere se s .NET 9. Pokud ho chcete používat dál, nastavte vlastnost GenerateResourceWarnOnBinaryFormatterUse na false.
            Další informace: https://aka.ms/msbuild/net8-binaryformatter</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>

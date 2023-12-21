@@ -128,12 +128,12 @@
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
         <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
-        <target state="new">Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</target>
+        <target state="translated">Soru derleme BAŞARISIZ oldu. Güncel olmayan bir hedef veya görev ile karşılaştığından derleme işleminden erken çıkıldı.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionSuccess">
         <source>Question build succeeded. Up-to-date checks passed.</source>
-        <target state="new">Question build succeeded. Up-to-date checks passed.</target>
+        <target state="translated">Soru derleme başarılı oldu. Güncellik denetimleri başarılı oldu.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildInProgress">
@@ -322,8 +322,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
-        <source>A required NuGet assembly was not found. Expected Path: {0}</source>
-        <target state="translated">Gereken NuGet derlemesi bulunamadı. Beklenen Yol: {0}</target>
+        <source>A required NuGet assembly '{0}' could not be loaded.</source>
+        <target state="needs-review-translation">Gereken NuGet derlemesi bulunamadı. Beklenen Yol: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
@@ -563,7 +563,7 @@
       </trans-unit>
       <trans-unit id="TaskAssemblyLoadedWithAssemblyLoadContext">
         <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</source>
-        <target state="new">Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</target>
+        <target state="translated">Derleme {0}{1} sırasında yüklendi: {2} (konum: {3}, MVID: {4}, AssemblyLoadContext: {5})</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
