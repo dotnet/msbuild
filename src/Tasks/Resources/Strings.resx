@@ -2793,6 +2793,10 @@
     <value>MSB3895: Retrying on ERROR_ACCESS_DENIED because environment variable MSBUILDALWAYSRETRY=1</value>
     <comment>{StrBegin="MSB3895: "} LOCALIZATION: Do NOT translate MSBUILDALWAYSRETRY)</comment>
   </data>
+  <data name="Copy.IncompatibleParameters">
+    <value>MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</value>
+    <comment>{StrBegin="MSB3896: "}</comment>
+  </data>
 
   <!--
         MSB3901 - MSB3910   Task: Telemetry
