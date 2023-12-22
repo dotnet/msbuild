@@ -383,13 +383,8 @@ namespace Microsoft.Build.UnitTests
                 TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
                 TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
 
-                BinaryLogger loggerWithTL = new();
                 string logFileWithTL = env.ExpectFile(".binlog").Path;
-                loggerWithTL.Parameters = logFileWithTL;
-
-                BinaryLogger loggerWithoutTL = new();
                 string logFileWithoutTL = env.ExpectFile(".binlog").Path;
-                loggerWithoutTL.Parameters = logFileWithoutTL;
 
                 // Execute MSBuild with binary, file and terminal loggers
                 RunnerUtilities.ExecMSBuild($"{projectFile.Path} /m /bl:{logFileWithTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithTL.log")};verbosity=diagnostic -tl:on", out bool success);

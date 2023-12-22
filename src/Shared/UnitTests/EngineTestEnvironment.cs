@@ -195,8 +195,9 @@ namespace Microsoft.Build.UnitTests
         {
             var binaryLogger = new BinaryLogger();
             string binaryLoggerFilePath = Path.GetFullPath(Path.Combine(TestRoot, Guid.NewGuid().ToString() + ".binlog"));
-            binaryLogger.CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.None;
-            binaryLogger.Parameters = binaryLoggerFilePath;
+            var binaryLoggerParameters = new BinaryLoggerParameters($"ProjectImports=None;{binaryLoggerFilePath}");
+            binaryLogger.BinaryLoggerParameters = binaryLoggerParameters;
+
             return (binaryLogger, null);
         }
 

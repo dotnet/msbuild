@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,9 +12,13 @@ namespace Microsoft.Build.Logging
 {
     public class BinaryLoggerParameters
     {
-        public string binaryLoggerArguments { get; private set; }
+        public string binaryLoggerArguments { get; set; }
 
-        public string binaryLoggerParameters { get; private set; }
+        public string binaryLoggerParameters { get; set; }
+
+        public bool IsBinaryLoggerSet { get; set; }
+
+        public string InitProjectFile { get; set; } = string.Empty;
 
         public BinaryLoggerParameters(string binaryLoggerArguments, string binaryLoggerParameters)
         {
@@ -27,10 +32,6 @@ namespace Microsoft.Build.Logging
             binaryLoggerParameters = string.Empty;
         }
 
-        public bool IsBinaryLoggerSet { get; set; }
-
-        public string InitProjectFile { get; set; } = string.Empty;
-
 
         /// <summary>
         /// Generates the stringified representation of current instance
@@ -38,17 +39,16 @@ namespace Microsoft.Build.Logging
         /// <returns></returns>
         public string GetStringifiedParameters()
         {
-            var builtParameters = new StringBuilder();
-            // common configuration
-            builtParameters.Append("commonConfig=[");
-            builtParameters.Append($"InitProjectFile={InitProjectFile};");
-            builtParameters.Append($"IsBinaryLoggerSet={IsBinaryLoggerSet};");
-            builtParameters.Append(']');
+            // tmp
+            Dictionary<string, string> parameters = new Dictionary<string, string>()
+            {
+                { "initProjectFile", InitProjectFile },
+                { "isBinaryLoggerSet", IsBinaryLoggerSet.ToString() },
+                { "blArguments", binaryLoggerArguments },
+                { "blParameters", binaryLoggerParameters }
+            };
 
-            builtParameters.Append($"blArguments=[binaryLoggerArguments={binaryLoggerArguments}]");
-            builtParameters.Append($"blParameters=[binaryLoggerParameters={binaryLoggerParameters}]");
-
-            return builtParameters.ToString();
+            return string.Join(Environment.NewLine, parameters);
         }
 
 
