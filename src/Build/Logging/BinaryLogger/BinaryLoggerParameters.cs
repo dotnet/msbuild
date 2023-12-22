@@ -15,32 +15,21 @@ namespace Microsoft.Build.Logging
 
         public string binaryLoggerParameters { get; private set; }
 
-        public BinaryLoggerParameters(string[] binaryLoggerArguments, string[] binaryLoggerParameters)
+        public BinaryLoggerParameters(string binaryLoggerArguments, string binaryLoggerParameters)
         {
-            this.binaryLoggerArguments = GetLastArgumentPart(binaryLoggerArguments);
-            this.binaryLoggerParameters = GetLastArgumentPart(binaryLoggerParameters);
+            this.binaryLoggerArguments = binaryLoggerArguments;
+            this.binaryLoggerParameters = binaryLoggerParameters;
+        }
+
+        public BinaryLoggerParameters(string binaryLoggerArguments)
+        {
+            this.binaryLoggerArguments = binaryLoggerArguments;
+            binaryLoggerParameters = string.Empty;
         }
 
         public bool IsBinaryLoggerSet { get; set; }
 
         public string InitProjectFile { get; set; } = string.Empty;
-
-
-        /// <summary>
-        /// Gets the last argument from the provided array.
-        /// If the array is empty returns empty string
-        /// </summary>
-        /// <param name="arguments"></param>
-        /// <returns></returns>
-        private string GetLastArgumentPart(string[] arguments)
-        {
-            string result = string.Empty;
-            if (arguments != null && arguments.Length > 0)
-            {
-                result = arguments[arguments.Length - 1];
-            }
-            return result;
-        }
 
 
         /// <summary>
@@ -68,14 +57,14 @@ namespace Microsoft.Build.Logging
         /// </summary>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public BinaryLoggerParameters GenerateInstanceFromParameters(string parameters)
+        public BinaryLoggerParameters? GenerateInstanceFromParameters(string parameters)
         {
             if (string.IsNullOrEmpty(parameters))
             {
                 return null;
             }
             // TODO: parsing logic
-            return new BinaryLoggerParameters(Array.Empty<string>(), Array.Empty<string>());
+            return new BinaryLoggerParameters(string.Empty, string.Empty);
         }
     }
 }

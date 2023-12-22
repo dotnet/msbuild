@@ -88,9 +88,10 @@ namespace Microsoft.Build.UnitTests
         [InlineData(s_testProject2)]
         public void TestBinaryLoggerRoundtrip(string projectText)
         {
+            var binaryLoggerParameters = new BinaryLoggerParameters($"LogFile={_logFile}");
             var binaryLogger = new BinaryLogger();
 
-            binaryLogger.Parameters = _logFile;
+            binaryLogger.BinaryLoggerParameters = binaryLoggerParameters;
 
             var mockLogFromBuild = new MockLogger();
 
@@ -143,8 +144,9 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void BinaryLoggerShouldSupportFilePathExplicitParameter()
         {
+            var binaryLoggerParameters = new BinaryLoggerParameters($"LogFile={_logFile}");
             var binaryLogger = new BinaryLogger();
-            binaryLogger.Parameters = $"LogFile={_logFile}";
+            binaryLogger.BinaryLoggerParameters = binaryLoggerParameters;
 
             ObjectModelHelpers.BuildProjectExpectSuccess(s_testProject, binaryLogger);
         }
@@ -172,11 +174,10 @@ namespace Microsoft.Build.UnitTests
 </Project>";
                 TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
                 TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
-                BinaryLogger logger = new();
-                logger.Parameters = _logFile;
-                RunnerUtilities.ExecMSBuild($"{projectFile.Path} -bl:{logger.Parameters}", out bool success);
+
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} -bl:{_logFile}", out bool success);
                 success.ShouldBeTrue();
-                RunnerUtilities.ExecMSBuild($"{logger.Parameters} -flp:logfile={Path.Combine(logFolder.Path, "logFile.log")};verbosity=diagnostic", out success);
+                RunnerUtilities.ExecMSBuild($"{_logFile} -flp:logfile={Path.Combine(logFolder.Path, "logFile.log")};verbosity=diagnostic", out success);
                 success.ShouldBeTrue();
                 string text = File.ReadAllText(Path.Combine(logFolder.Path, "logFile.log"));
                 text.ShouldContain("EnvVar2");
@@ -230,10 +231,9 @@ namespace Microsoft.Build.UnitTests
                     """;
                 TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
                 TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
-                BinaryLogger logger = new();
-                logger.Parameters = _logFile;
+                
                 env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
-                RunnerUtilities.ExecMSBuild($"{projectFile.Path} -nr:False -bl:{logger.Parameters} -flp1:logfile={Path.Combine(logFolder.Path, "logFile.log")};verbosity=diagnostic -flp2:logfile={Path.Combine(logFolder.Path, "logFile2.log")};verbosity=normal", out bool success);
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} -nr:False -bl:{_logFile} -flp1:logfile={Path.Combine(logFolder.Path, "logFile.log")};verbosity=diagnostic -flp2:logfile={Path.Combine(logFolder.Path, "logFile2.log")};verbosity=normal", out bool success);
                 success.ShouldBeTrue();
 
                 string assemblyLoadedEventText =
@@ -245,7 +245,7 @@ namespace Microsoft.Build.UnitTests
                 string text2 = File.ReadAllText(Path.Combine(logFolder.Path, "logFile2.log"));
                 text2.ShouldNotContain(assemblyLoadedEventText);
                 text2.ShouldNotContain(additionalEventText);
-                RunnerUtilities.ExecMSBuild($"{logger.Parameters} -flp1:logfile={Path.Combine(logFolder.Path, "logFile3.log")};verbosity=diagnostic -flp2:logfile={Path.Combine(logFolder.Path, "logFile4.log")};verbosity=normal", out success);
+                RunnerUtilities.ExecMSBuild($"{_logFile} -flp1:logfile={Path.Combine(logFolder.Path, "logFile3.log")};verbosity=diagnostic -flp2:logfile={Path.Combine(logFolder.Path, "logFile4.log")};verbosity=normal", out success);
                 success.ShouldBeTrue();
                 text = File.ReadAllText(Path.Combine(logFolder.Path, "logFile3.log"));
                 text.ShouldContain(assemblyLoadedEventText);
@@ -263,8 +263,7 @@ namespace Microsoft.Build.UnitTests
             using var buildManager = new BuildManager();
             var binaryLogger = new BinaryLogger()
             {
-                Parameters = $"LogFile={_logFile}",
-                CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
+                BinaryLoggerParameters = new BinaryLoggerParameters($"ProjectImports=ZipFile;LogFile={_logFile}"),
             };
             var testProject = @"
 <Project>
@@ -307,8 +306,7 @@ namespace Microsoft.Build.UnitTests
             using var buildManager = new BuildManager();
             var binaryLogger = new BinaryLogger()
             {
-                Parameters = $"LogFile={_logFile}",
-                CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
+                BinaryLoggerParameters = new BinaryLoggerParameters($"ProjectImports=ZipFile;LogFile={_logFile}"),
             };
             var testProjectFmt = @"
 <Project>
@@ -355,9 +353,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void BinaryLoggerShouldNotThrowWhenMetadataCannotBeExpanded()
         {
+            var binaryLoggerParameters = new BinaryLoggerParameters($"LogFile={_logFile}");
             var binaryLogger = new BinaryLogger
             {
-                Parameters = $"LogFile={_logFile}"
+                BinaryLoggerParameters = binaryLoggerParameters,
             };
 
             const string project = @"
@@ -394,7 +393,7 @@ namespace Microsoft.Build.UnitTests
 
             var binaryLogger = new BinaryLogger
             {
-                Parameters = $"LogFile={_logFile}"
+                BinaryLoggerParameters = new BinaryLoggerParameters($"LogFile={_logFile}")
             };
 
             // To trigger #6323, there must be at least two project instances.
@@ -438,22 +437,21 @@ namespace Microsoft.Build.UnitTests
                             <Exec Command='echo a'/>
                         </Target>
                     </Project>";
-                BinaryLogger logger = new();
-                logger.Parameters = _logFile;
+
                 TransientTestFolder testFolder = env.CreateFolder(createFolder: true);
 
                 TransientTestFile projectFile1 = env.CreateFile(testFolder, "testProject01.proj", contents);
-                string consoleOutput1 = RunnerUtilities.ExecMSBuild($"{projectFile1.Path} -bl:{logger.Parameters} -verbosity:diag -nologo", out bool success1);
+                string consoleOutput1 = RunnerUtilities.ExecMSBuild($"{projectFile1.Path} -bl:{_logFile} -verbosity:diag -nologo", out bool success1);
                 success1.ShouldBeTrue();
-                var expected1 = $"-nologo -bl:{logger.Parameters} -verbosity:diag {projectFile1.Path}";
+                var expected1 = $"-nologo -bl:{_logFile} -verbosity:diag {projectFile1.Path}";
                 consoleOutput1.ShouldContain(expected1);
 
                 foreach (var verbosity in new string[] { "q", "m", "n", "d" })
                 {
                     TransientTestFile projectFile2 = env.CreateFile(testFolder, $"testProject_{verbosity}.proj", contents);
-                    string consoleOutput2 = RunnerUtilities.ExecMSBuild($"{projectFile2.Path} -bl:{logger.Parameters} -verbosity:{verbosity} -nologo", out bool success2);
+                    string consoleOutput2 = RunnerUtilities.ExecMSBuild($"{projectFile2.Path} -bl:{_logFile} -verbosity:{verbosity} -nologo", out bool success2);
                     success2.ShouldBeTrue();
-                    var expected2 = $"-nologo -bl:{logger.Parameters} -verbosity:{verbosity} {projectFile2.Path}";
+                    var expected2 = $"-nologo -bl:{_logFile} -verbosity:{verbosity} {projectFile2.Path}";
                     consoleOutput2.ShouldNotContain(expected2);
                 }
             }

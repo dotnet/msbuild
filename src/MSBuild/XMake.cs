@@ -2630,9 +2630,19 @@ namespace Microsoft.Build.CommandLine
                     // figure out which loggers are going to listen to build events
                     string[][] groupedFileLoggerParameters = commandLineSwitches.GetFileLoggerParameters();
 
-                    var binaryLoggerParameters = new BinaryLoggerParameters(
-                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
-                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLoggerParameters])
+                    var blArguments = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger].LastOrDefault();
+                    if(blArguments == null)
+                    {
+                        blArguments = string.Empty;
+                    }
+
+                    var blpArguments = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLoggerParameters].LastOrDefault();
+                    if (blpArguments == null)
+                    {
+                        blpArguments = string.Empty;
+                    }
+
+                    var binaryLoggerParameters = new BinaryLoggerParameters(blArguments, blpArguments)
                     {
                         IsBinaryLoggerSet = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.BinaryLogger),
                         InitProjectFile = projectFile
