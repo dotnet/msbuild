@@ -39,16 +39,13 @@ namespace Microsoft.Build.Logging
         /// <returns></returns>
         public string GetStringifiedParameters()
         {
-            // tmp
-            Dictionary<string, string> parameters = new Dictionary<string, string>()
-            {
-                { "initProjectFile", InitProjectFile },
-                { "isBinaryLoggerSet", IsBinaryLoggerSet.ToString() },
-                { "blArguments", binaryLoggerArguments },
-                { "blParameters", binaryLoggerParameters }
-            };
+            var parameters = new StringBuilder();
+            parameters.AppendLine($"initProjectFile={InitProjectFile}");
+            parameters.AppendLine($"isBinaryLoggerSet={IsBinaryLoggerSet}");
+            parameters.AppendLine($"blArguments={binaryLoggerArguments}");
+            parameters.AppendLine($"blParameters={binaryLoggerParameters}");
 
-            return string.Join(Environment.NewLine, parameters);
+            return parameters.ToString();
         }
 
 
@@ -57,14 +54,24 @@ namespace Microsoft.Build.Logging
         /// </summary>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public BinaryLoggerParameters? GenerateInstanceFromParameters(string parameters)
+        public static BinaryLoggerParameters? GenerateInstanceFromParameters(string parameters)
         {
             if (string.IsNullOrEmpty(parameters))
             {
                 return null;
             }
             // TODO: parsing logic
-            return new BinaryLoggerParameters(string.Empty, string.Empty);
+            var data = parameters.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+            var initProjectFile = data[0].Replace("initProjectFile=","");
+            var isBinaryLoggerSet = bool.Parse(data[1].Replace("isBinaryLoggerSet=", ""));
+            var blArguments = data[2].Replace("blArguments=", "");
+            var blParameters = data[3].Replace("blParameters=", "");
+
+            return new BinaryLoggerParameters(blArguments, blParameters)
+            {
+                InitProjectFile = initProjectFile,
+                IsBinaryLoggerSet = isBinaryLoggerSet
+            };
         }
     }
 }

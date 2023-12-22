@@ -224,7 +224,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (binaryLogger != null)
                 {
-                    string binaryLoggerFilePath = binaryLogger.Parameters;
+                    string binaryLoggerFilePath = binaryLogger.FilePath;
 
                     var actualLoggerPairs = GetLoggers().Where(l => l.logger is not BinaryLogger).ToArray();
                     expectedLoggerPairs = expectedLoggerPairs.Where(l => l.logger is not BinaryLogger).ToArray();

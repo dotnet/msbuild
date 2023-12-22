@@ -73,6 +73,9 @@ namespace Microsoft.Build.Logging
         private string _initialTargetOutputLogging;
         private bool _initialLogImports;
         private string _initialIsBinaryLoggerEnabled;
+        private BinaryLoggerParameters _binaryLoggerParameters;
+        private string _parameters;
+        private string _filePath;
 
         /// <summary>
         /// Describes whether to collect the project files (including imported project files) used during the build.
@@ -95,15 +98,29 @@ namespace Microsoft.Build.Logging
             /// </summary>
             ZipFile
         }
-
+            
         /// <summary>
         /// Gets or sets whether to capture and embed project and target source files used during the build.
         /// </summary>
         public ProjectImportsCollectionMode CollectProjectImports { get; set; } = ProjectImportsCollectionMode.Embed;
 
-        private string FilePath { get; set; }
+        public string FilePath
+        {
+            get { return _filePath; }
+            private set { _filePath = value; }
+        }
 
-        public BinaryLoggerParameters BinaryLoggerParameters { private get; set; }
+        public BinaryLoggerParameters BinaryLoggerParameters {
+            get
+            {
+                return _binaryLoggerParameters;
+            }
+            set
+            {
+                _binaryLoggerParameters = value;
+                _parameters = _binaryLoggerParameters.GetStringifiedParameters();
+            }
+        }
 
         /// <summary>
         /// Boolean flag identifies if the log file was provided from parameters
@@ -117,7 +134,17 @@ namespace Microsoft.Build.Logging
         /// </remarks>
         public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Diagnostic;
 
-        public string Parameters { get; set; }
+        public string Parameters {
+            get
+            {
+                return _parameters;
+            }
+            set
+            {
+                _parameters = value;
+                _binaryLoggerParameters = BinaryLoggerParameters.GenerateInstanceFromParameters(_parameters);
+            }
+        }
 
         /// <summary>
         /// Initializes the logger by subscribing to events of the specified event source.
