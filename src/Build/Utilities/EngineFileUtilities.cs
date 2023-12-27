@@ -551,11 +551,13 @@ namespace Microsoft.Build.Internal
         /// <returns>A Func that will return true IFF its argument matches any of the specified filespecs.</returns>
         internal static Func<string, bool> GetFileSpecMatchTester(IList<string> filespecsEscaped, string currentDirectory)
         {
-            var matchers = filespecsEscaped
-                .Select(fs => new Lazy<FileSpecMatcherTester>(() => FileSpecMatcherTester.Parse(currentDirectory, fs)))
-                .ToList();
+            List<FileSpecMatcherTester> matchers = new(filespecsEscaped.Count);
+            foreach (string fs in filespecsEscaped)
+            {
+                matchers.Add(FileSpecMatcherTester.Parse(currentDirectory, fs));
+            }
 
-            return file => matchers.Any(m => m.Value.IsMatch(file));
+            return file => matchers.Any(m => m.IsMatch(file));
         }
 
         internal sealed class IOCache
