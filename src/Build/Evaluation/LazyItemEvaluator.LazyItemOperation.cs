@@ -18,7 +18,6 @@ namespace Microsoft.Build.Evaluation
     {
         private abstract class LazyItemOperation : IItemOperation
         {
-            private readonly string _itemType;
             private readonly ImmutableDictionary<string, LazyItemList> _referencedItemLists;
 
             protected readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
@@ -36,7 +35,6 @@ namespace Microsoft.Build.Evaluation
             protected LazyItemOperation(OperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
             {
                 _itemElement = builder.ItemElement;
-                _itemType = builder.ItemType;
                 _itemSpec = builder.ItemSpec;
                 _referencedItemLists = builder.ReferencedItemLists.ToImmutable();
                 _conditionResult = builder.ConditionResult;
@@ -226,7 +224,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         // Metadata expressions are allowed here.
                         // Temporarily gather and expand these in a table so they can reference other metadata elements above.
-                        EvaluatorMetadataTable metadataTable = new EvaluatorMetadataTable(_itemType, capacity: metadata.Length);
+                        EvaluatorMetadataTable metadataTable = new EvaluatorMetadataTable(_itemElement.ItemType, capacity: metadata.Length);
                         _expander.Metadata = metadataTable;
 
                         // Also keep a list of everything so we can get the predecessor objects correct.
