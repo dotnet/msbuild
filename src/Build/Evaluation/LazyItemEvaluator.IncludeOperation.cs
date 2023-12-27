@@ -39,20 +39,17 @@ namespace Microsoft.Build.Evaluation
 
                 Lazy<Func<string, bool>>? excludeTester = null;
                 ImmutableList<string>.Builder excludePatterns = ImmutableList.CreateBuilder<string>();
-                if (_excludes != null)
+                // STEP 4: Evaluate, split, expand and subtract any Exclude
+                foreach (string exclude in _excludes)
                 {
-                    // STEP 4: Evaluate, split, expand and subtract any Exclude
-                    foreach (string exclude in _excludes)
-                    {
-                        string excludeExpanded = _expander.ExpandIntoStringLeaveEscaped(exclude, ExpanderOptions.ExpandPropertiesAndItems, _itemElement.ExcludeLocation);
-                        var excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(excludeExpanded);
-                        excludePatterns.AddRange(excludeSplits);
-                    }
+                    string excludeExpanded = _expander.ExpandIntoStringLeaveEscaped(exclude, ExpanderOptions.ExpandPropertiesAndItems, _itemElement.ExcludeLocation);
+                    var excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(excludeExpanded);
+                    excludePatterns.AddRange(excludeSplits);
+                }
 
-                    if (excludePatterns.Count > 0)
-                    {
-                        excludeTester = new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetFileSpecMatchTester(excludePatterns, _rootDirectory));
-                    }
+                if (excludePatterns.Count > 0)
+                {
+                    excludeTester = new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetFileSpecMatchTester(excludePatterns, _rootDirectory));
                 }
 
                 ISet<string>? excludePatternsForGlobs = null;
