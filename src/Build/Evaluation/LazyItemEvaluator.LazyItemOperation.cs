@@ -160,7 +160,41 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            protected void DecorateItemsWithMetadata(IEnumerable<ItemBatchingContext> itemBatchingContexts, ImmutableArray<ProjectMetadataElement> metadata, bool? needToExpandMetadata = null)
+            private IEnumerable<(I, IMetadataTable)> GetItemsFromItemBatchingContexts(ImmutableArray<ItemBatchingContext> itemBatchingContexts)
+            {
+                foreach (ItemBatchingContext context in itemBatchingContexts)
+                {
+                    yield return (context.OperationItem, context.GetMetadataTable());
+                }
+            }
+
+            private IEnumerable<(I, IMetadataTable)> GetItemsFromItems(ImmutableArray<I> items)
+            {
+                foreach (I item in items)
+                {
+                    yield return (item, item);
+                }
+            }
+
+            private IEnumerable<I> GetItemsFromItemTuple(IEnumerable<(I item, IMetadataTable)> tuples)
+            {
+                foreach (var tuple in tuples)
+                {
+                    yield return tuple.item;
+                }
+            }
+
+            protected void DecorateItemsWithMetadata(ImmutableArray<ItemBatchingContext> itemBatchingContexts, ImmutableArray<ProjectMetadataElement> metadata, bool? needToExpandMetadata = null)
+            {
+                DecorateItemsWithMetadata(GetItemsFromItemBatchingContexts(itemBatchingContexts), metadata, needToExpandMetadata);
+            }
+
+            protected void DecorateItemsWithMetadata(ImmutableArray<I> items, ImmutableArray<ProjectMetadataElement> metadata, bool? needToExpandMetadata = null)
+            {
+                DecorateItemsWithMetadata(GetItemsFromItems(items), metadata, needToExpandMetadata);
+            }
+
+            private void DecorateItemsWithMetadata(IEnumerable<(I item, IMetadataTable metadataTable)> itemBatchingContexts, ImmutableArray<ProjectMetadataElement> metadata, bool? needToExpandMetadata = null)
             {
                 if (metadata.Length > 0)
                 {
@@ -199,7 +233,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         foreach (var itemContext in itemBatchingContexts)
                         {
-                            _expander.Metadata = itemContext.GetMetadataTable();
+                            _expander.Metadata = itemContext.metadataTable;
 
                             foreach (var metadataElement in metadata)
                             {
@@ -210,7 +244,7 @@ namespace Microsoft.Build.Evaluation
 
                                 string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, metadataExpansionOptions, metadataElement.Location);
 
-                                itemContext.OperationItem.SetMetadata(metadataElement, FileUtilities.MaybeAdjustFilePath(evaluatedValue, metadataElement.ContainingProject.DirectoryPath));
+                                itemContext.item.SetMetadata(metadataElement, FileUtilities.MaybeAdjustFilePath(evaluatedValue, metadataElement.ContainingProject.DirectoryPath));
                             }
                         }
 
@@ -260,7 +294,7 @@ namespace Microsoft.Build.Evaluation
                         // This is valuable in the case where one item element evaluates to
                         // many items (either by semicolon or wildcards)
                         // and that item also has the same piece/s of metadata for each item.
-                        _itemFactory.SetMetadata(metadataList, itemBatchingContexts.Select(i => i.OperationItem));
+                        _itemFactory.SetMetadata(metadataList, GetItemsFromItemTuple(itemBatchingContexts));
 
                         // End of legal area for metadata expressions.
                         _expander.Metadata = null;

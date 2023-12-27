@@ -129,14 +129,14 @@ namespace Microsoft.Build.Evaluation
                 return itemsToAdd?.ToImmutable() ?? ImmutableArray<I>.Empty;
             }
 
-            private static ISet<string> BuildExcludePatternsForGlobs(ImmutableHashSet<string> globsToIgnore, ImmutableSegmentedList<string> excludePatterns)
+            private static ImmutableHashSet<string> BuildExcludePatternsForGlobs(ImmutableHashSet<string> globsToIgnore, ImmutableSegmentedList<string> excludePatterns)
             {
                 var anyExcludes = excludePatterns.Count > 0;
                 var anyGlobsToIgnore = globsToIgnore.Count > 0;
 
                 if (anyGlobsToIgnore && anyExcludes)
                 {
-                    return excludePatterns.Concat(globsToIgnore).ToImmutableHashSet();
+                    return globsToIgnore.Union(excludePatterns);
                 }
 
                 return anyExcludes ? excludePatterns.ToImmutableHashSet() : globsToIgnore;
@@ -144,7 +144,7 @@ namespace Microsoft.Build.Evaluation
 
             protected override void MutateItems(ImmutableArray<I> items)
             {
-                DecorateItemsWithMetadata(items.Select(i => new ItemBatchingContext(i)), _metadata);
+                DecorateItemsWithMetadata(items, _metadata);
             }
 
             protected override void SaveItems(ImmutableArray<I> items, OrderedItemDataCollection.Builder listBuilder)
