@@ -562,7 +562,7 @@ namespace Microsoft.Build.Evaluation
             {
                 // Expand properties here, because a property may have a value which is an item reference (ie "@(Bar)"), and
                 //  if so we need to add the right item reference
-                string evaluatedExclude = _expander.ExpandIntoStringLeaveEscaped(itemElement.Exclude, ExpanderOptions.ExpandProperties, itemElement.ExcludeLocation);
+                string evaluatedExclude = _expander.ExpandIntoStringLeaveEscaped(itemElement.Exclude, ExpanderOptions.ExpandPropertiesAndItems, itemElement.ExcludeLocation);
 
                 if (evaluatedExclude.Length > 0)
                 {
