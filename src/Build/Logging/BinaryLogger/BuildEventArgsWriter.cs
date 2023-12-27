@@ -260,7 +260,7 @@ namespace Microsoft.Build.Logging
 
             Write(kind);
             Write((int)stream.Length);
-            Write(stream);
+            WriteToOriginalStream(stream);
         }
 
         /// <summary>
@@ -1137,9 +1137,12 @@ namespace Microsoft.Build.Logging
             binaryWriter.Write(bytes);
         }
 
-        private void Write(Stream stream)
+        private void WriteToOriginalStream(Stream stream)
         {
-            stream.CopyTo(binaryWriter.BaseStream);
+            // WARNING: avoid calling binaryWriter.BaseStream here
+            // as it will flush the underlying stream - since that is a
+            // BufferedStream it will make buffering nearly useless
+            stream.CopyTo(originalStream);
         }
 
         private void Write(byte b)
