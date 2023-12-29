@@ -255,7 +255,7 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                if (NativeMethodsShared.IsWindows && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
                 {
                     var processes = GetProcessesLockingFile(file);
                     message = !string.IsNullOrEmpty(processes)
