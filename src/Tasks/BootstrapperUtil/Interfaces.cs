@@ -316,7 +316,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
     public enum ComponentsLocation
     {
         /// <summary>
-        /// Products will be found according to the redist vendor's designated URL 
+        /// Products will be found according to the redist vendor's designated URL
         /// </summary>
         HomeSite,
         /// <summary>

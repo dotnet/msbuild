@@ -144,14 +144,24 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildManager manager = new BuildManager();
                 ProjectCollection collection = new ProjectCollection();
 
+                string sleepCommand = Helpers.GetSleepCommand(TimeSpan.FromSeconds(10));
                 string contents = @"
                     <Project ToolsVersion ='Current'>
                      <Target Name='test'>
-                        <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
+                        <Exec Command='" + sleepCommand + @"'/>
                      </Target>
                     </Project>";
 
                 MockLogger logger = new MockLogger(_testOutput);
+                ManualResetEvent waitCommandExecuted = new ManualResetEvent(false);
+                string unescapedSleepCommand = sleepCommand.Replace("&quot;", "\"").Replace("&gt;", ">");
+                logger.AdditionalHandlers.Add((sender, args) =>
+                {
+                    if (unescapedSleepCommand.Equals(args.Message))
+                    {
+                        waitCommandExecuted.Set();
+                    }
+                });
 
                 var project = new Project(XmlReader.Create(new StringReader(contents)), null, MSBuildConstants.CurrentToolsVersion, collection)
                 {
@@ -169,11 +179,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 manager.BeginBuild(_parameters);
                 BuildSubmission asyncResult = manager.PendBuildRequest(data);
                 asyncResult.ExecuteAsync(null, null);
-                Thread.Sleep(500);
+                int timeoutMilliseconds = 2000;
+                bool isCommandExecuted = waitCommandExecuted.WaitOne(timeoutMilliseconds);
                 manager.CancelAllSubmissions();
-                asyncResult.WaitHandle.WaitOne();
+                bool isSubmissionComplated = asyncResult.WaitHandle.WaitOne(timeoutMilliseconds);
                 BuildResult result = asyncResult.BuildResult;
                 manager.EndBuild();
+                isCommandExecuted.ShouldBeTrue($"Waiting for that the sleep command is executed failed in the timeout period {timeoutMilliseconds} ms.");
+                isSubmissionComplated.ShouldBeTrue($"Waiting for that the build submission is completed failed in the timeout period {timeoutMilliseconds} ms.");
 
                 // No errors from cancelling a build.
                 logger.ErrorCount.ShouldBe(0);

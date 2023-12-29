@@ -273,7 +273,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
 
                 string return2 = cache.Add(builder.ToString(), document);
 
-                // Content of string should be the same.            
+                // Content of string should be the same.
                 Assert.Equal(builder.ToString(), return2);
 
                 // Returned references should be the same
@@ -285,7 +285,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         }
 
         /// <summary>
-        /// Adding a string equivalent to an existing instance but under a different document 
+        /// Adding a string equivalent to an existing instance but under a different document
         /// should return the existing instance.
         /// </summary>
         [Fact]
@@ -334,7 +334,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// WHITEBOX ASSUMPTION:
         /// The following method assumes knowledge of the ProjectStringCache internal implementation
         /// details, and may become invalid if those details change.
-        /// </remarks>        
+        /// </remarks>
         [Fact]
         public void RemoveLastInstanceDeallocatesEntry()
         {
@@ -370,7 +370,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         }
 
         /// <summary>
-        /// Removing one document containing a string which already existed in the collection 
+        /// Removing one document containing a string which already existed in the collection
         /// should still leave a reference in the collection, so that a subsequent add will
         /// return the existing reference.
         /// </summary>

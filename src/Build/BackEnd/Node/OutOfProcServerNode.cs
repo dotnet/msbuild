@@ -16,7 +16,7 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Experimental
 {
     /// <summary>
-    /// This class represents an implementation of INode for out-of-proc server nodes aka MSBuild server 
+    /// This class represents an implementation of INode for out-of-proc server nodes aka MSBuild server
     /// </summary>
     public sealed class OutOfProcServerNode : INode, INodePacketFactory, INodePacketHandler
     {
@@ -69,7 +69,7 @@ namespace Microsoft.Build.Experimental
 
         /// <summary>
         /// Indicate that cancel has been requested and initiated.
-        /// </summary>        
+        /// </summary>
         private bool _cancelRequested = false;
         private string _serverBusyMutexName = default!;
 
@@ -92,7 +92,7 @@ namespace Microsoft.Build.Experimental
         /// <summary>
         /// Starts up the server node and processes all build requests until the server is requested to shut down.
         /// </summary>
-        /// <param name="shutdownException">The exception which caused shutdown, if any.</param> 
+        /// <param name="shutdownException">The exception which caused shutdown, if any.</param>
         /// <returns>The reason for shutting down.</returns>
         public NodeEngineShutdownReason Run(out Exception? shutdownException)
         {

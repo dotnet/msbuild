@@ -17,7 +17,7 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
-    /// Each packet is split up into a region, the region contains the tests for 
+    /// Each packet is split up into a region, the region contains the tests for
     /// a given packet type.
     /// </summary>
     public class NodePackets_Tests
@@ -67,6 +67,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExtendedBuildMessageEventArgs extMessage = new("extMsg", "SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender", MessageImportance.Normal);
             ExtendedCustomBuildEventArgs extCustom = new("extCustom", "message", "help", "sender");
             CriticalBuildMessageEventArgs criticalMessage = new("Subcategory", "Code", "File", 1, 2, 3, 4, "{0}", "HelpKeyword", "Sender", DateTime.Now, "arg1");
+            ExtendedCriticalBuildMessageEventArgs extCriticalMessage = new("extCritMsg", "Subcategory", "Code", "File", 1, 2, 3, 4, "{0}", "HelpKeyword", "Sender", DateTime.Now, "arg1");
             PropertyInitialValueSetEventArgs propInit = new("prop", "val", "propsource", "message", "help", "sender", MessageImportance.Normal);
             MetaprojectGeneratedEventArgs metaProjectGenerated = new("metaName", "path", "message");
             PropertyReassignmentEventArgs propReassign = new("prop", "prevValue", "newValue", "loc", "message", "help", "sender", MessageImportance.Normal);
@@ -98,6 +99,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyLoggingPacket(extMessage, LoggingEventType.ExtendedBuildMessageEvent);
             VerifyLoggingPacket(extCustom, LoggingEventType.ExtendedCustomEvent);
             VerifyLoggingPacket(criticalMessage, LoggingEventType.CriticalBuildMessage);
+            VerifyLoggingPacket(extCriticalMessage, LoggingEventType.ExtendedCriticalBuildMessageEvent);
             VerifyLoggingPacket(propInit, LoggingEventType.PropertyInitialValueSet);
             VerifyLoggingPacket(metaProjectGenerated, LoggingEventType.MetaprojectGenerated);
             VerifyLoggingPacket(propReassign, LoggingEventType.PropertyReassignment);
@@ -299,6 +301,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },
+                    new ExtendedCriticalBuildMessageEventArgs("extCritMsg", "Subcategory", "Code", "File", 1, 2, 3, 4, "{0}", "HelpKeyword", "Sender", DateTime.Now, "arg1")
+                    {
+                        ExtendedData = "{'long-json':'mostly-strings'}",
+                        ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
+                        BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
+                    },
                 };
                 foreach (BuildEventArgs arg in testArgs)
                 {
@@ -318,7 +326,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         .RespectingRuntimeTypes()
                         // Since we use struct DictionaryEntry of class TaskItemData, generated DictionaryEntry.Equals compare TaskItemData by references.
                         // Bellow will instruct equivalency test to not use DictionaryEntry.Equals but its public members for equivalency tests.
-                        .ComparingByMembers<DictionaryEntry>() 
+                        .ComparingByMembers<DictionaryEntry>()
                         .WithTracing(), "Roundtrip deserialization of message type {0} should be equivalent", args.GetType().Name);
                 }
             }
@@ -329,7 +337,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify the LoggingMessagePacket is properly created from a build event. 
+        /// Verify the LoggingMessagePacket is properly created from a build event.
         /// This includes the packet type and the event type depending on which build event arg is passed in.
         /// </summary>
         /// <param name="buildEvent">Build event to put into a packet, and verify after packet creation</param>

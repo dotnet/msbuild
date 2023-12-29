@@ -303,7 +303,7 @@ namespace Microsoft.Build.UnitTests
             }
 
             items.Count.ShouldBe(expectedItems.Length,
-                () => $"got items \"{string.Join(", ", items)}\", expected \"{string.Join(", ", expectedItems)}\"");
+                customMessage: $"got items \"{string.Join(", ", items)}\", expected \"{string.Join(", ", expectedItems)}\"");
 
             expectedItems.Length.ShouldBe(expectedDirectMetadataPerItem.Length);
         }
@@ -461,7 +461,7 @@ namespace Microsoft.Build.UnitTests
 
         internal static void AssertItemHasMetadata(string key, string value, ProjectItem item)
         {
-            item.DirectMetadataCount.ShouldBe(1, () => $"Expected 1 metadata, ({key}), got {item.DirectMetadataCount}");
+            item.DirectMetadataCount.ShouldBe(1, customMessage: $"Expected 1 metadata, ({key}), got {item.DirectMetadataCount}");
             item.GetMetadataValue(key).ShouldBe(value);
         }
 
@@ -469,7 +469,7 @@ namespace Microsoft.Build.UnitTests
         {
             expected ??= new Dictionary<string, string>();
 
-            item.DirectMetadataCount.ShouldBe(expected.Keys.Count, () => $"Expected {expected.Keys.Count} metadata, ({string.Join(", ", expected.Keys)}), got {item.DirectMetadataCount}");
+            item.DirectMetadataCount.ShouldBe(expected.Keys.Count, customMessage: $"Expected {expected.Keys.Count} metadata, ({string.Join(", ", expected.Keys)}), got {item.DirectMetadataCount}");
 
             foreach (var key in expected.Keys)
             {

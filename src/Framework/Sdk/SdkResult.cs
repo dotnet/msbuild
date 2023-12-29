@@ -35,7 +35,7 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         ///     Resolved path to the SDK.
-        /// 
+        ///
         ///     Null if <see cref="Success"/> == false
         /// </summary>
         public virtual string Path { get => _path; protected set => _path = value; }
@@ -43,7 +43,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         ///     Resolved version of the SDK.
         ///     Can be null or empty if the resolver did not provide a version (e.g. a path based resolver)
-        /// 
+        ///
         ///     Null if <see cref="Success"/> == false
         /// </summary>
         public virtual string Version { get => _version; protected set => _version = value; }

@@ -319,7 +319,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Verify an exception is thrown when the simple name is not in the itemspec.
-        /// 
+        ///
         /// </summary>
         [Fact]
         public void CreateAssemblyNameExtensionWithNoSimpleName()
@@ -648,7 +648,7 @@ namespace Microsoft.Build.UnitTests
 
 
         /// <summary>
-        /// Make sure the reverse version comparer will compare the version in a way that would sort them in reverse order. 
+        /// Make sure the reverse version comparer will compare the version in a way that would sort them in reverse order.
         /// </summary>
         [Fact]
         public void VerifyReverseVersionComparer()

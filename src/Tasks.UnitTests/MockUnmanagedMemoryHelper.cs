@@ -17,7 +17,7 @@ namespace Microsoft.Build.UnitTests
     {
         private List<IntPtr> _allocatedHandles;
 
-        // Zero if we're allocating independent chunks of memory; 
+        // Zero if we're allocating independent chunks of memory;
         // Something else if we're allocating connected chunks of memory that we'll want to release with one ReleaseHandle
         private IntPtr _mainAllocationHandle = IntPtr.Zero;
 

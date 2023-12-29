@@ -23,7 +23,7 @@ namespace Microsoft.Build.Framework
     public class TargetFinishedEventArgs : BuildStatusEventArgs
     {
         /// <summary>
-        /// Default constructor 
+        /// Default constructor
         /// </summary>
         protected TargetFinishedEventArgs()
             : base()

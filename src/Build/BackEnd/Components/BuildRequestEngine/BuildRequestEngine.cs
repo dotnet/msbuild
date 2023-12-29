@@ -1122,7 +1122,7 @@ namespace Microsoft.Build.BackEnd
             lock (issuingEntry.GlobalLock)
             {
                 var existingResultsToReport = new List<BuildResult>();
-                var unresolvedConfigurationsAdded = new HashSet<NGen<int>>();
+                var unresolvedConfigurationsAdded = new HashSet<int>();
 
                 foreach (FullyQualifiedBuildRequest request in newRequests)
                 {

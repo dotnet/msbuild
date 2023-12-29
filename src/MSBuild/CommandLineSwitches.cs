@@ -106,6 +106,9 @@ namespace Microsoft.Build.CommandLine
             GraphBuild,
             InputResultsCaches,
             OutputResultsCache,
+#if FEATURE_REPORTFILEACCESSES
+            ReportFileAccesses,
+#endif
             LowPriority,
             Question,
             DetailedSummary,
@@ -268,6 +271,9 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "graphbuild", "graph" },               ParameterizedSwitch.GraphBuild,                 null,                           true,           null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "inputResultsCaches", "irc" },         ParameterizedSwitch.InputResultsCaches,         null,                           true,           null,                                  true,   true),
             new ParameterizedSwitchInfo(  new string[] { "outputResultsCache", "orc" },         ParameterizedSwitch.OutputResultsCache,         "DuplicateOutputResultsCache",  false,          null,                                  true,   true),
+#if FEATURE_REPORTFILEACCESSES
+            new ParameterizedSwitchInfo(  new string[] { "reportfileaccesses" },                ParameterizedSwitch.ReportFileAccesses,         null,                           false,          null,                                  true,   false),
+#endif
             new ParameterizedSwitchInfo(  new string[] { "lowpriority", "low" },                ParameterizedSwitch.LowPriority,                null,                           false,          null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "question", "q" },                     ParameterizedSwitch.Question,                   null,                           false,          null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "detailedsummary", "ds" },             ParameterizedSwitch.DetailedSummary,            null,                           false,          null,                                  true,   false),
@@ -299,12 +305,12 @@ namespace Microsoft.Build.CommandLine
                     {
                         parameterlessSwitch = switchInfo.parameterlessSwitch;
                         duplicateSwitchErrorMessage = switchInfo.duplicateSwitchErrorMessage;
-                        break;
+                        return true;
                     }
                 }
             }
 
-            return parameterlessSwitch != ParameterlessSwitch.Invalid;
+            return false;
         }
 
         /// <summary>
@@ -356,12 +362,12 @@ namespace Microsoft.Build.CommandLine
                         missingParametersErrorMessage = switchInfo.missingParametersErrorMessage;
                         unquoteParameters = switchInfo.unquoteParameters;
                         emptyParametersAllowed = switchInfo.emptyParametersAllowed;
-                        break;
+                        return true;
                     }
                 }
             }
 
-            return parameterizedSwitch != ParameterizedSwitch.Invalid;
+            return false;
         }
 
         /// <summary>
@@ -482,6 +488,11 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
+                    if (IsMultipleAllowedSwitchParameterDueToUnquote(unquoteParameters, parameterizedSwitch))
+                    {
+                        switchParameters = QuotingUtilities.Unquote(switchParameters);
+                    }
+
                     // store all the switch parameters
                     int emptyParameters;
                     _parameterizedSwitches[(int)parameterizedSwitch].parameters.AddRange(QuotingUtilities.SplitUnquoted(switchParameters, int.MaxValue, false /* discard empty parameters */, unquoteParameters, out emptyParameters, s_parameterSeparators));
@@ -643,6 +654,30 @@ namespace Microsoft.Build.CommandLine
             groupedFileLoggerParameters[9] = GetSpecificFileLoggerParameters(ParameterlessSwitch.FileLogger9, ParameterizedSwitch.FileLoggerParameters9);
 
             return groupedFileLoggerParameters;
+        }
+
+        /// <summary>
+        /// Checks if the provided multiple valued parametrized switch needs to be unquoted.
+        /// The method will return 'true' in case:
+        ///     The changewave 17.10 is not set and
+        ///     The parametrized switch is 'Target'
+        /// </summary>
+        private bool IsMultipleAllowedSwitchParameterDueToUnquote(bool unquoteParameter, ParameterizedSwitch parameterizedSwitch)
+        {
+            if (!unquoteParameter || !Traits.Instance.EscapeHatches.UnquoteTargetSwitchParameters)
+            {
+                return false;
+            }
+
+            // issue: https://github.com/dotnet/msbuild/issues/9442
+            // In order to align the parsing behaviour of Target property when MSBuild invoked from PowerShell or CMD,
+            // the target property value will be unquoted before processing further
+            if (parameterizedSwitch == ParameterizedSwitch.Target)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>

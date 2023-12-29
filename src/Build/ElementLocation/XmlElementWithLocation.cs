@@ -128,7 +128,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Overridden to convert the display of the element from open form (separate open and closed tags) to closed form 
+        /// Overridden to convert the display of the element from open form (separate open and closed tags) to closed form
         /// (single closed tag) if the last child is being removed. This is simply for tidiness of the project file.
         /// For example, removing the only piece of metadata from an item will leave behind one tag instead of two.
         /// </summary>

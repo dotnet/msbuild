@@ -32,7 +32,7 @@ namespace Microsoft.Build.BackEnd
         private readonly List<ITaskItem> _targetOutputs = new List<ITaskItem>();
 
         /// <summary>
-        /// A list of targets to build.  This is a required parameter.  If you want to build the 
+        /// A list of targets to build.  This is a required parameter.  If you want to build the
         /// default targets, use the <see cref="MSBuild"/> task and pass in Projects=$(MSBuildProjectFile).
         /// </summary>
         /// <value>Array of target names.</value>
@@ -92,8 +92,8 @@ namespace Microsoft.Build.BackEnd
             }
 
             // This is a list of string[].  That is, each element in the list is a string[].  Each
-            // string[] represents a set of target names to build.  Depending on the value 
-            // of the RunEachTargetSeparately parameter, we each just call the engine to run all 
+            // string[] represents a set of target names to build.  Depending on the value
+            // of the RunEachTargetSeparately parameter, we each just call the engine to run all
             // the targets together, or we call the engine separately for each target.
             List<string[]> targetLists = MSBuild.CreateTargetLists(Targets, RunEachTargetSeparately);
 

@@ -23,7 +23,7 @@ namespace Microsoft.Build.Logging
     /// <remarks>The logger is public so that it can be instantiated from MSBuild.exe via command-line switch.</remarks>
     public sealed class BinaryLogger : ILogger
     {
-        // version 2: 
+        // version 2:
         //   - new BuildEventContext.EvaluationId
         //   - new record kinds: ProjectEvaluationStarted, ProjectEvaluationFinished
         // version 3:
@@ -61,7 +61,9 @@ namespace Microsoft.Build.Logging
         //   - new record kind: ResponseFileUsedEventArgs
         // version 16:
         //   - AssemblyLoadBuildEventArgs
-        internal const int FileFormatVersion = 16;
+        // version 17:
+        //   - Added extended data for types implementing IExtendedBuildEventArgs
+        internal const int FileFormatVersion = 17;
 
         private Stream stream;
         private BinaryWriter binaryWriter;
@@ -108,7 +110,7 @@ namespace Microsoft.Build.Logging
         public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Diagnostic;
 
         /// <summary>
-        /// Gets or sets the parameters. The only supported parameter is the output log file path (for example, "msbuild.binlog"). 
+        /// Gets or sets the parameters. The only supported parameter is the output log file path (for example, "msbuild.binlog").
         /// </summary>
         public string Parameters { get; set; }
 

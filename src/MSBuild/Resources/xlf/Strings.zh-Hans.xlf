@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="BuildFailedWithPropertiesItemsOrTargetResultsRequested">
         <source>Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</source>
-        <target state="new">Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</target>
+        <target state="translated">生成失败。无法获取属性、项目和目标结果。在上面的 stderr 中查看详细信息。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -77,6 +77,13 @@
         <target state="translated">MSBUILD : error MSB1027: 不能在 MSBuild.rsp 自动响应文件中或由该自动响应文件引用的任何响应文件中指定 -noAutoResponse 开关。</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="DurationDisplay">
+        <source>({0:F1}s)</source>
+        <target state="new">({0:F1}s)</target>
+        <note>
+        {0}: duration in seconds with 1 decimal point
+      </note>
+      </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
         <source>  -question
                      (Experimental) Question whether there is any build work.
@@ -98,6 +105,24 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_42_ReportFileAccessesSwitch">
+        <source>  -reportFileAccesses[:True|False]
+                     Causes MSBuild to report file accesses to any configured
+                     project cache plugins.
+
+                     This flag is experimental and may not work as intended.
+    </source>
+        <target state="translated">  -reportFileAccesses[:True|False]
+                     导致 MSBuild 报告对任何已配置
+                     项目缓存插件的文件访问。
+
+                     此标志是实验性的，可能无法按预期工作。
+    </target>
+        <note>
+      LOCALIZATION: "-reportFileAccesses" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1064: 低优先级值无效。{0}</target>
@@ -115,6 +140,16 @@
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidReportFileAccessesValue">
+        <source>MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</source>
+        <target state="translated">MSBUILD : error MSB1063: 报表文件访问值无效。{0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1063: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -1288,7 +1323,7 @@
       </trans-unit>
       <trans-unit id="MissingGetItemError">
         <source>MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</source>
-        <target state="new">MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</target>
+        <target state="translated">MSBUILD : error MSB1014: 必须为 getItem 开关提供项名称。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1014: "}UE: This happens if the user does something like "msbuild.exe -getItem". The user must pass in an actual item name
       following the switch, as in "msbuild.exe -getItem:blah".
@@ -1297,7 +1332,7 @@
       </trans-unit>
       <trans-unit id="MissingGetPropertyError">
         <source>MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</source>
-        <target state="new">MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</target>
+        <target state="translated">MSBUILD : error MSB1010: 必须为 getProperty 开关提供属性名称。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1010: "}UE: This happens if the user does something like "msbuild.exe -getProperty". The user must pass in an actual property name
       following the switch, as in "msbuild.exe -getProperty:blah".
@@ -1306,7 +1341,7 @@
       </trans-unit>
       <trans-unit id="MissingGetTargetResultError">
         <source>MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</source>
-        <target state="new">MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</target>
+        <target state="translated">MSBUILD : error MSB1017: 必须为 getTargetResult 开关提供目标名称。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1017: "}UE: This happens if the user does something like "msbuild.exe -getTargetResult". The user must pass in an actual target name
       following the switch, as in "msbuild.exe -getTargetResult:blah".
@@ -1447,29 +1482,6 @@
         <target state="translated">进程 = "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectBuilding_NoTF">
-        <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3})</target>
-        <note>
-      Project building.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target
-      {3}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectBuilding_WithTF">
-        <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3} ({4})</target>
-        <note>
-      Project building including target framework information.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target framework
-      {3}: target
-      {4}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
         <target state="translated">{0}{1} {2} ({3})</target>
@@ -1593,7 +1605,7 @@
       </trans-unit>
       <trans-unit id="SolutionBuildInvalidForCommandLineEvaluation">
         <source>MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</source>
-        <target state="new">MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</target>
+        <target state="translated">MSBUILD : error MSB1063: 生成解决方案文件或解决方案筛选器文件时无法访问属性或项。此功能仅在生成单个项目时可用。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1063: "}UE: This happens if the user passes in a solution file when trying to access individual properties or items. The user must pass in a project file.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.

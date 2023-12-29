@@ -3,8 +3,6 @@
 
 using System.Diagnostics.Tracing;
 
-#nullable disable
-
 namespace Microsoft.Build.Eventing
 {
     /// <summary>
@@ -242,7 +240,7 @@ namespace Microsoft.Build.Eventing
             WriteEvent(27);
         }
 
-        [Event(28, Keywords = Keywords.All | Keywords.PerformanceLog)]
+        [Event(28, Keywords = Keywords.All | Keywords.PerformanceLog, Version = 1)]
         public void RarOverallStop(int assembliesCount, int assemblyFilesCount, int resolvedFilesCount, int resolvedDependencyFilesCount, int copyLocalFilesCount, bool findDependencies)
         {
             WriteEvent(28, assembliesCount, assemblyFilesCount, resolvedFilesCount, resolvedDependencyFilesCount, copyLocalFilesCount, findDependencies);
@@ -660,6 +658,18 @@ namespace Microsoft.Build.Eventing
         public void MSBuildServerBuildStop(string commandLine, int countOfConsoleMessages, long sumSizeOfConsoleMessages, string clientExitType, string serverExitType)
         {
             WriteEvent(90, commandLine, countOfConsoleMessages, sumSizeOfConsoleMessages, clientExitType, serverExitType);
+        }
+
+        [Event(91, Keywords = Keywords.All)]
+        public void ProjectCacheHandleBuildResultStart(string pluginTypeName, string projectPath, string targets)
+        {
+            WriteEvent(91, pluginTypeName, projectPath, targets);
+        }
+
+        [Event(92, Keywords = Keywords.All)]
+        public void ProjectCacheHandleBuildResultStop(string pluginTypeName, string projectPath, string targets)
+        {
+            WriteEvent(92, pluginTypeName, projectPath, targets);
         }
         #endregion
     }

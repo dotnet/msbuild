@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="BuildFailedWithPropertiesItemsOrTargetResultsRequested">
         <source>Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</source>
-        <target state="new">Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</target>
+        <target state="translated">Sestavení se nezdařilo. Nelze získat výsledky vlastností, položek a cíle. Viz podrobnosti ve stderr výše.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -77,6 +77,13 @@
         <target state="translated">MSBUILD : error MSB1027: Přepínač -noAutoResponse nelze zadat v souboru automatických odpovědí MSBuild.rsp ani v žádném jiném souboru odpovědí, na který se v souboru automatických odpovědí odkazuje.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="DurationDisplay">
+        <source>({0:F1}s)</source>
+        <target state="translated">({0:F1} s)</target>
+        <note>
+        {0}: duration in seconds with 1 decimal point
+      </note>
+      </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
         <source>  -question
                      (Experimental) Question whether there is any build work.
@@ -99,6 +106,24 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_42_ReportFileAccessesSwitch">
+        <source>  -reportFileAccesses[:True|False]
+                     Causes MSBuild to report file accesses to any configured
+                     project cache plugins.
+
+                     This flag is experimental and may not work as intended.
+    </source>
+        <target state="translated">  -reportFileAccesses[:True|False]
+                     Způsobí, že MSBuild bude hlásit přístupy k souborům ve všech konfigurovaných
+                     modulech plug-in pro mezipaměť projektu.
+
+                     Tento příznak je experimentální a nemusí fungovat podle očekávání.
+    </target>
+        <note>
+      LOCALIZATION: "-reportFileAccesses" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1064: Hodnota s nízkou prioritou není platná. {0}</target>
@@ -116,6 +141,16 @@
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidReportFileAccessesValue">
+        <source>MSBUILD : error MSB1063: Report file accesses value is not valid. {0}</source>
+        <target state="translated">MSBUILD : error MSB1063: Hodnota přístupů k souborům sestavy není platná. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1063: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -540,20 +575,17 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;protok_nást&gt;   Použít daný protokolovací nástroj k protokolování
-                     událostí nástroje MSBuild. Chcete-li zadat více protokolovacích.
-                     nástrojů, musíte je zadat jednotlivě.
-                     Syntaxe hodnoty &lt;protok_nást&gt;:
-                        [&lt;třída_protok_nást&gt;,]&lt;sestavení_protok_nást&gt;
-                        [;&lt;param_protok_nást&gt;]
-                     Syntaxe hodnoty &lt;třída_protok_nást&gt;:
-                        [&lt;část/úpl_obor_názvů&gt;.]&lt;náz_tř_protok_nást&gt;
-                     Syntaxe hodnoty &lt;sestavení_protok_nást&gt;:
-                        {&lt;název_sestavení&gt;[,&lt;strong name&gt;] | &lt;soubor_sestavení&gt;}
+        <target state="translated">  -logger:&lt;logger&gt;   Použít daný protokolovací nástroj k protokolování událostí nástroje MSBuild. Pokud chcete zadat 
+                     více protokolovacích nástrojů, musíte je zadat jednotlivě.
+                     Syntaxe hodnoty &lt;logger&gt; je:
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
+                     Syntaxe hodnoty &lt;logger class&gt; je:
+                       [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
+                     Syntaxe hodnoty &lt;logger assembly&gt; je:
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Parametry protokolovacího nástroje určují, jak MSBuild vytvoří protokolovací nástroj.
-                     Parametry &lt;param_protok_nást&gt; jsou volitelné a předávají se 
-                     protokolovacímu nástroji přesně v tom tvaru, v jakém
-                     byly zadány. (Krátký tvar: -l)
+                     Parametry &lt;logger parameters&gt; jsou volitelné a předávají se
+                     protokolovacímu nástroji přesně v tom tvaru, v jakém byly zadány. (Krátký tvar: -l)
                      Příklady:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
@@ -822,23 +854,20 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  -distributedlogger:&lt;centr_protok_nást&gt;*&lt;předáv_protok_nást&gt;                     
-                     Použít zadaný protokolovací nástroj pro protokolování událostí
-                     z nástroje MSBuild; ke každému uzlu připojit jinou instanci 
-                     protokolovacího nástroje. Chcete-li zadat více 
-                     protokolovacích nástrojů, uveďte je jednotlivě. 
+        <target state="translated">  -distributedLogger:&lt;central logger&gt;*&lt;forwarding logger&gt;
+                     Použít zadaný protokolovací nástroj pro protokolování událostí z nástroje MSBuild; ke každému uzlu připojit
+                     jinou instanci protokolovacího nástroje. Pokud chcete zadat více
+                     protokolovacích nástrojů, uveďte je jednotlivě.
                      (Krátký tvar: -dl)
-                     Syntaxe hodnoty &lt;protok_nást&gt;:
-                        [&lt;třída_protok_nást&gt;,]&lt;sestav_protok_nást&gt;
-                        [;&lt;param_protok_nást&gt;]
-                     Syntaxe hodnoty &lt;třída_protok_nást&gt;:
-                        [&lt;část/úpl_obor_názvů&gt;.]&lt;náz_tř_protok_nást&gt;
-                     Syntaxe hodnoty &lt;sestav_protok_nást&gt;:
-                        {&lt;název_sestavení&gt;[,&lt;strong name&gt;] | &lt;soubor_sestavení&gt;}
+                     Syntaxe hodnoty &lt;logger&gt; je:
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
+                     Syntaxe hodnoty &lt;logger class&gt; je:
+                       [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
+                     Syntaxe hodnoty &lt;logger assembly&gt; je:
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Parametry protokolovacího nástroje určují, jak MSBuild vytvoří protokolovací nástroj.
                      Parametry &lt;param_protok_nást&gt; jsou volitelné a předávají se
-                     protokolovacímu nástroji přesně v zadaném tvaru.
-                     (Krátký tvar: -l)
+                     protokolovacímu nástroji přesně v zadaném tvaru. (Krátký tvar: -l)
                      Příklady:
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
@@ -1026,7 +1055,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                                              Verbosity=diagnostic;Encoding=UTF-8
 
                        -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
-                       -flp1:warningsonly;logfile=msbuild.wrn 
+                       -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1301,7 +1330,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
       </trans-unit>
       <trans-unit id="MissingGetItemError">
         <source>MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</source>
-        <target state="new">MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</target>
+        <target state="translated">MSBUILD : error MSB1014: Je nutné zadat název položky pro přepínač getItem.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1014: "}UE: This happens if the user does something like "msbuild.exe -getItem". The user must pass in an actual item name
       following the switch, as in "msbuild.exe -getItem:blah".
@@ -1310,7 +1339,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
       </trans-unit>
       <trans-unit id="MissingGetPropertyError">
         <source>MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</source>
-        <target state="new">MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</target>
+        <target state="translated">MSBUILD : error MSB1010: Je nutné zadat název vlastnosti pro přepínač getProperty.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1010: "}UE: This happens if the user does something like "msbuild.exe -getProperty". The user must pass in an actual property name
       following the switch, as in "msbuild.exe -getProperty:blah".
@@ -1319,7 +1348,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
       </trans-unit>
       <trans-unit id="MissingGetTargetResultError">
         <source>MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</source>
-        <target state="new">MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</target>
+        <target state="translated">MSBUILD : error MSB1017: Je nutné zadat cílový název pro přepínač getTargetResult.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1017: "}UE: This happens if the user does something like "msbuild.exe -getTargetResult". The user must pass in an actual target name
       following the switch, as in "msbuild.exe -getTargetResult:blah".
@@ -1460,29 +1489,6 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
         <target state="translated">Proces = {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectBuilding_NoTF">
-        <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3}s)</target>
-        <note>
-      Project building.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target
-      {3}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectBuilding_WithTF">
-        <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
-        <note>
-      Project building including target framework information.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target framework
-      {3}: target
-      {4}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
         <target state="translated">{0}{1} {2} ({3}s)</target>
@@ -1606,7 +1612,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
       </trans-unit>
       <trans-unit id="SolutionBuildInvalidForCommandLineEvaluation">
         <source>MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</source>
-        <target state="new">MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</target>
+        <target state="translated">MSBUILD : error MSB1063: Při vytváření souborů řešení nebo souborů filtrů řešení nelze získat přístup k vlastnostem nebo položkám. Tato funkce je k dispozici jen při sestavování jednotlivých projektů.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1063: "}UE: This happens if the user passes in a solution file when trying to access individual properties or items. The user must pass in a project file.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.

@@ -667,7 +667,7 @@ namespace Microsoft.Build.Conversion
                     )
                 {
                     // If it's minor upgrade, or nothing changed and the project was already TV 4.0 or higher,
-                    // set the ToolsVersion back to its old value. 
+                    // set the ToolsVersion back to its old value.
                     xmakeProject.ToolsVersion = oldToolsVersion;
                 }
             }
@@ -888,7 +888,7 @@ namespace Microsoft.Build.Conversion
             {
                 if (String.Equals(propertyElement.Name, XMakeProjectStrings.TargetFrameworkSubset, StringComparison.OrdinalIgnoreCase))
                 {
-                    // For the Client profile, which was the only profile supported in Orcas SP1, we want to replace 
+                    // For the Client profile, which was the only profile supported in Orcas SP1, we want to replace
                     // <TargetFrameworkSubset/> with <TargetFrameworkProfile/>.
                     if (String.Equals(propertyElement.Value, XMakeProjectStrings.ClientProfile, StringComparison.OrdinalIgnoreCase))
                     {
@@ -899,7 +899,7 @@ namespace Microsoft.Build.Conversion
 
                     // In all cases, <TargetFrameworkSubset/> is no longer supported.  If it comes from the project
                     // that we're converting, then we forcibly remove it.  If it comes from some import... the user is
-                    // on their own.  
+                    // on their own.
                     if (propertyElement.ContainingProject == xmakeProject)
                     {
                         propertyElement.Parent.RemoveChild(propertyElement);
@@ -957,8 +957,8 @@ namespace Microsoft.Build.Conversion
             // local function: wraps specified string value into Exists('value')
             Func<string, string> exists = s => string.Format(CultureInfo.InvariantCulture, "Exists('{0}')", s);
 
-            // local function: 
-            // Creates property group element containing one property fsharpDev12PlusProperty with value 'path'. 
+            // local function:
+            // Creates property group element containing one property fsharpDev12PlusProperty with value 'path'.
             // If addCondition is true, property group will have Exists(path) condition
             Action<string, ProjectElementContainer> appendPropertyGroupForDev12PlusTargetsPath =
                 (path, parent) =>
@@ -1061,7 +1061,7 @@ namespace Microsoft.Build.Conversion
 
                 someNonNullImportElement.Parent.InsertBeforeChild(chooseElement, someNonNullImportElement);
 
-                // Expected fragment of the project file after upgrade 
+                // Expected fragment of the project file after upgrade
                 //<Choose>
                 //  <When Condition="'$(VisualStudioVersion)' == '11.0'">
                 //    <PropertyGroup>
@@ -1074,7 +1074,7 @@ namespace Microsoft.Build.Conversion
                 //    </PropertyGroup>
                 //  </Otherwise>
                 //</Choose>
-                //<Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />           
+                //<Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
 
                 var whenVsVersionIsDev11 = xmakeProject.CreateWhenElement("'$(VisualStudioVersion)' == '11.0'");
                 chooseElement.AppendChild(whenVsVersionIsDev11);
@@ -1148,7 +1148,7 @@ namespace Microsoft.Build.Conversion
                 }
             }
 
-            // try to find reference to FSharp.Core 
+            // try to find reference to FSharp.Core
             ProjectItemElement fsharpCoreItem = null;
             foreach (var item in xmakeProject.Items.Where(x => x.ItemType == ReferenceItemType))
             {
