@@ -67,7 +67,7 @@ namespace Microsoft.Build.UnitTests
                     projectFile1 += "..\\";
                 }
 
-                int rootLength = Path.GetPathRoot(tempPath).Length;
+                int rootLength = Path.GetPathRoot(tempProject).Length;
                 string tempPathNoRoot = tempProject.Substring(rootLength);
 
                 projectFile1 += tempPathNoRoot;
