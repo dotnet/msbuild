@@ -116,6 +116,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private ProjectInstance _projectStateAfterBuild;
 
+        private BuildRequestDataFlags _buildRequestDataFlags;
+
         private string _schedulerInducedError;
 
         private HashSet<string> _projectTargets;
@@ -204,7 +206,7 @@ namespace Microsoft.Build.Execution
             _nodeRequestId = request.NodeRequestId;
             _circularDependency = false;
             _baseOverallResult = true;
-            BuildRequestDataFlags = request.BuildRequestDataFlags;
+            _buildRequestDataFlags = request.BuildRequestDataFlags;
 
             if (existingResults == null)
             {
@@ -385,7 +387,11 @@ namespace Microsoft.Build.Execution
         /// Gets or sets the flags that provide additional control over the build request.
         /// See <see cref="Execution.BuildRequestDataFlags"/> for examples of the available flags.
         /// </summary>
-        public BuildRequestDataFlags BuildRequestDataFlags { get; }
+        public BuildRequestDataFlags BuildRequestDataFlags
+        {
+            get => _buildRequestDataFlags;
+            set => _buildRequestDataFlags = value;
+        }
 
         /// <summary>
         /// Returns the node packet type.
