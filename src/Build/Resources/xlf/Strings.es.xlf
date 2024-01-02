@@ -223,7 +223,7 @@
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
         <source>A required NuGet assembly '{0}' could not be loaded.</source>
-        <target state="new">A required NuGet assembly '{0}' could not be loaded.</target>
+        <target state="translated">No se pudo cargar un ensamblado NuGet necesario "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
