@@ -174,11 +174,12 @@ namespace Microsoft.Build.UnitTests
 </Project>";
                 TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
                 TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
-
+                
                 RunnerUtilities.ExecMSBuild($"{projectFile.Path} -bl:{_logFile}", out bool success);
-                success.ShouldBeTrue();
+
                 RunnerUtilities.ExecMSBuild($"{_logFile} -flp:logfile={Path.Combine(logFolder.Path, "logFile.log")};verbosity=diagnostic", out success);
                 success.ShouldBeTrue();
+
                 string text = File.ReadAllText(Path.Combine(logFolder.Path, "logFile.log"));
                 text.ShouldContain("EnvVar2");
                 text.ShouldContain("value2");

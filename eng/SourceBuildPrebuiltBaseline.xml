@@ -5,11 +5,15 @@
   <IgnorePatterns>
     <!-- Baseline 7.0 dependencies until msbuild targets net8 and uses a net8 arcade, SBRP, etc.
          These cannot be added to 7.0 SBRP, because they would are produced in the 7.0 build. -->
-    <UsagePattern IdentityGlob="System.Configuration.ConfigurationManager/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Diagnostics.EventLog/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Reflection.MetadataLoadContext/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Security.Cryptography.ProtectedData/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Text.Json/*7.0.3*" />
+    <UsagePattern IdentityGlob="System.Collections.Immutable/*8.0.0*" />
+    <UsagePattern IdentityGlob="System.Configuration.ConfigurationManager/*8.0.0*" />
+    <UsagePattern IdentityGlob="System.Diagnostics.EventLog/*8.0.0*" />
+    <UsagePattern IdentityGlob="System.Reflection.Metadata/*8.0.0*" />
+    <UsagePattern IdentityGlob="System.Reflection.MetadataLoadContext/*8.0.0*" />
+    <UsagePattern IdentityGlob="System.Resources.Extensions/*8.0.0*" />
+    <UsagePattern IdentityGlob="System.Security.Cryptography.ProtectedData/*8.0.0*" />
+    <UsagePattern IdentityGlob="System.Text.Json/*8.0.0*" />
+    <UsagePattern IdentityGlob="System.Threading.Tasks.Dataflow/*8.0.0*" />
   </IgnorePatterns>
   <Usages>
   </Usages>

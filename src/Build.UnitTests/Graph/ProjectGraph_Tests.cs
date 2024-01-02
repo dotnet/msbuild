@@ -681,13 +681,14 @@ namespace Microsoft.Build.Graph.UnitTests
             /*
              * This test exercises various key features of solution-based builds:
              *      From AssignProjectConfiguration:
-             *          Adding synthetic project references
+             *          Adding synthetic project references (defined both before and after the depending project)
              *          Resolving project configuration based on the sln
              *          Handling unresolved project references with ShouldUnsetParentConfigurationAndPlatform=true
              *          Handling unresolved project references with ShouldUnsetParentConfigurationAndPlatform=false
              *      Project types other than "well-known" MSBuild project types:
              *          Buildable project (wapproj)
              *          Solution folder
+             *      Project not included in build (also has solution dependencies as a regression test)
              * 
              */
             using (var env = TestEnvironment.Create())
@@ -697,9 +698,12 @@ namespace Microsoft.Build.Graph.UnitTests
                     # Visual Studio Version 17
                     VisualStudioVersion = 17.0.31903.59
                     MinimumVisualStudioVersion = 17.0.31903.59
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project8", "Project8.csproj", "{2022C11A-1405-4983-BEC2-3A8B0233108F}"
+                    EndProject
                     Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project1", "Project1.csproj", "{8761499A-7280-43C4-A32F-7F41C47CA6DF}"
                         ProjectSection(ProjectDependencies) = postProject
                             {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98} = {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F} = {2022C11A-1405-4983-BEC2-3A8B0233108F}
                         EndProjectSection
                     EndProject
                     Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Project2", "Project2.vcxproj", "{D638A8EF-3A48-45F2-913C-88B29FED03CB}"
@@ -707,6 +711,11 @@ namespace Microsoft.Build.Graph.UnitTests
                     Project("{13B669BE-BB05-4DDF-9536-439F39A36129}") = "Project3", "Project3.vcxproj", "{52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}"
                     EndProject
                     Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "Project6", "Project6.wapproj", "{CA5CAD1A-224A-4171-B13A-F16E576FDD12}"
+                    EndProject
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project7", "Project7.csproj", "{28C7025E-2AB6-4962-A001-1E5B2271837C}"
+                        ProjectSection(ProjectDependencies) = postProject
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98} = {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}
+                        EndProjectSection
                     EndProject
                     Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0392E290-973E-4086-A58E-F927AAA65B9A}"
                         ProjectSection(SolutionItems) = preProject
@@ -723,6 +732,18 @@ namespace Microsoft.Build.Graph.UnitTests
                             Release|x86 = Release|x86
                         EndGlobalSection
                         GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Debug|Win32.ActiveCfg = Debug|x86
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Debug|Win32.Build.0 = Debug|x86
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Debug|x64.ActiveCfg = Debug|x64
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Debug|x64.Build.0 = Debug|x64
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Debug|x86.ActiveCfg = Debug|x86
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Debug|x86.Build.0 = Debug|x86
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Release|Win32.ActiveCfg = Release|x86
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Release|Win32.Build.0 = Release|x86
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Release|x64.ActiveCfg = Release|x64
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Release|x64.Build.0 = Release|x64
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Release|x86.ActiveCfg = Release|x86
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Release|x86.Build.0 = Release|x86
                             {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|Win32.ActiveCfg = Debug|x86
                             {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|Win32.Build.0 = Debug|x86
                             {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.ActiveCfg = Debug|x64
@@ -777,14 +798,14 @@ namespace Microsoft.Build.Graph.UnitTests
                             {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Debug|x86.Build.0 = Debug|x86
                             {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Debug|x86.Deploy.0 = Debug|x86
                             {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|Win32.ActiveCfg = Release|x86
-                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|Win32.Build.0 = Release|x86
-                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|Win32.Deploy.0 = Release|x86
                             {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|x64.ActiveCfg = Release|x64
-                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|x64.Build.0 = Release|x64
-                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|x64.Deploy.0 = Release|x64
                             {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|x86.ActiveCfg = Release|x86
-                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|x86.Build.0 = Release|x86
-                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|x86.Deploy.0 = Release|x86
+                            {28C7025E-2AB6-4962-A001-1E5B2271837C}.Debug|Win32.ActiveCfg = Debug|x86
+                            {28C7025E-2AB6-4962-A001-1E5B2271837C}.Debug|x64.ActiveCfg = Debug|x64
+                            {28C7025E-2AB6-4962-A001-1E5B2271837C}.Debug|x86.ActiveCfg = Debug|x86
+                            {28C7025E-2AB6-4962-A001-1E5B2271837C}.Release|Win32.ActiveCfg = Release|x86
+                            {28C7025E-2AB6-4962-A001-1E5B2271837C}.Release|x64.ActiveCfg = Release|x64
+                            {28C7025E-2AB6-4962-A001-1E5B2271837C}.Release|x86.ActiveCfg = Release|x86
                         EndGlobalSection
                         GlobalSection(SolutionProperties) = preSolution
                             HideSolutionNode = FALSE
@@ -796,7 +817,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
                 ProjectRootElement project1Xml = ProjectRootElement.Create();
 
-                // Project 1 depends on Project 2 using ProjectReference but there is a sln-based dependency defined on Project 3 as well.
+                // Project 1 depends on Project 2 using ProjectReference but there is a sln-based dependency defined on Project 3 and 8 as well.
                 project1Xml.AddItem("ProjectReference", "Project2.vcxproj");
 
                 ProjectRootElement project2Xml = ProjectRootElement.Create();
@@ -814,6 +835,8 @@ namespace Microsoft.Build.Graph.UnitTests
                 ProjectRootElement project4Xml = ProjectRootElement.Create();
                 ProjectRootElement project5Xml = ProjectRootElement.Create();
                 ProjectRootElement project6Xml = ProjectRootElement.Create();
+                ProjectRootElement project7Xml = ProjectRootElement.Create();
+                ProjectRootElement project8Xml = ProjectRootElement.Create();
 
                 string project1Path = Path.Combine(env.DefaultTestDirectory.Path, "Project1.csproj");
                 string project2Path = Path.Combine(env.DefaultTestDirectory.Path, "Project2.vcxproj");
@@ -821,6 +844,8 @@ namespace Microsoft.Build.Graph.UnitTests
                 string project4Path = Path.Combine(env.DefaultTestDirectory.Path, "Project4.vcxproj");
                 string project5Path = Path.Combine(env.DefaultTestDirectory.Path, "Project5.vcxproj");
                 string project6Path = Path.Combine(env.DefaultTestDirectory.Path, "Project6.wapproj");
+                string project7Path = Path.Combine(env.DefaultTestDirectory.Path, "Project7.csproj");
+                string project8Path = Path.Combine(env.DefaultTestDirectory.Path, "Project8.csproj");
 
                 project1Xml.Save(project1Path);
                 project2Xml.Save(project2Path);
@@ -828,27 +853,33 @@ namespace Microsoft.Build.Graph.UnitTests
                 project4Xml.Save(project4Path);
                 project5Xml.Save(project5Path);
                 project6Xml.Save(project6Path);
+                project7Xml.Save(project7Path);
+                project8Xml.Save(project8Path);
 
                 var projectGraph = new ProjectGraph(slnFile.Path);
-                projectGraph.EntryPointNodes.Count.ShouldBe(4);
+                projectGraph.EntryPointNodes.Count.ShouldBe(5);
+                projectGraph.EntryPointNodes.Select(node => node.ProjectInstance.FullPath).ShouldBe(new[] { project1Path, project2Path, project3Path, project6Path, project8Path }, ignoreOrder: true);
                 projectGraph.GraphRoots.Count.ShouldBe(2);
                 projectGraph.GraphRoots.Select(node => node.ProjectInstance.FullPath).ShouldBe(new[] { project1Path, project6Path }, ignoreOrder: true);
-                projectGraph.ProjectNodes.Count.ShouldBe(6);
+                projectGraph.ProjectNodes.Count.ShouldBe(7);
 
                 ProjectGraphNode project1Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project1Path);
                 project1Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
                 project1Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
-                project1Node.ProjectReferences.Count.ShouldBe(2);
+                project1Node.ProjectReferences.Count.ShouldBe(3);
+                project1Node.ProjectReferences.Select(node => node.ProjectInstance.FullPath).ShouldBe(new[] { project2Path, project3Path, project8Path }, ignoreOrder: true);
 
                 ProjectGraphNode project2Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project2Path);
                 project2Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
                 project2Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("Win32");
                 project2Node.ProjectReferences.Count.ShouldBe(1);
+                project2Node.ProjectReferences.Select(node => node.ProjectInstance.FullPath).ShouldBe(new[] { project4Path }, ignoreOrder: true);
 
                 ProjectGraphNode project3Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project3Path);
                 project3Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
                 project3Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("Win32");
                 project3Node.ProjectReferences.Count.ShouldBe(1);
+                project3Node.ProjectReferences.Select(node => node.ProjectInstance.FullPath).ShouldBe(new[] { project5Path }, ignoreOrder: true);
 
                 // Configuration and Platform get unset
                 ProjectGraphNode project4Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project4Path);
@@ -867,6 +898,14 @@ namespace Microsoft.Build.Graph.UnitTests
                 project6Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
                 project6Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
                 project6Node.ProjectReferences.Count.ShouldBe(0);
+
+                // Project not included in the build
+                Assert.DoesNotContain(projectGraph.ProjectNodes, node => node.ProjectInstance.FullPath == project7Path);
+
+                ProjectGraphNode project8Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project8Path);
+                project8Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
+                project8Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
+                project8Node.ProjectReferences.Count.ShouldBe(0);
             }
         }
 

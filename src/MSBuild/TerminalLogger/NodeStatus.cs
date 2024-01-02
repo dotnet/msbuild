@@ -14,9 +14,9 @@ internal class NodeStatus
     public string Project { get; }
     public string? TargetFramework { get; }
     public string Target { get; }
-    public Stopwatch Stopwatch { get; }
+    public StopwatchAbstraction Stopwatch { get; }
 
-    public NodeStatus(string project, string? targetFramework, string target, Stopwatch stopwatch)
+    public NodeStatus(string project, string? targetFramework, string target, StopwatchAbstraction stopwatch)
     {
         Project = project;
         TargetFramework = targetFramework;
@@ -35,7 +35,7 @@ internal class NodeStatus
 
     public override string ToString()
     {
-        string duration = Stopwatch.Elapsed.TotalSeconds.ToString("F1");
+        string duration = Stopwatch.ElapsedSeconds.ToString("F1");
 
         return string.IsNullOrEmpty(TargetFramework)
             ? string.Format("{0}{1} {2} ({3}s)",
