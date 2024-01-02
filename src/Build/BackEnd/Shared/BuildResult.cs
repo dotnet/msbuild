@@ -204,6 +204,7 @@ namespace Microsoft.Build.Execution
             _nodeRequestId = request.NodeRequestId;
             _circularDependency = false;
             _baseOverallResult = true;
+            BuildRequestDataFlags = request.BuildRequestDataFlags;
 
             if (existingResults == null)
             {
@@ -384,7 +385,7 @@ namespace Microsoft.Build.Execution
         /// Gets or sets the flags that provide additional control over the build request.
         /// See <see cref="Execution.BuildRequestDataFlags"/> for examples of the available flags.
         /// </summary>
-        public BuildRequestDataFlags BuildRequestDataFlags { get; set; }
+        public BuildRequestDataFlags BuildRequestDataFlags { get; }
 
         /// <summary>
         /// Returns the node packet type.
