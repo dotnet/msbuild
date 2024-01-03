@@ -223,7 +223,7 @@
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
         <source>A required NuGet assembly '{0}' could not be loaded.</source>
-        <target state="needs-review-translation">未找到所需的 NuGet 程序集。所需路径: {0}</target>
+        <target state="translated">无法加载所需的 NuGet 程序集“{0}”。</target>
         <note />
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
@@ -2421,7 +2421,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="InvalidSdkFormat">
         <source>MSB4229: The value "{0}" is not valid for an Sdk specification. The attribute should be a semicolon-delimited list of Sdk-name/minimum-version pairs, separated by a forward slash.</source>
-        <target state="translated">MSB4229: 值“{0}”对 Sdk 规范无效。此属性应该是以分号分隔的Sdk-name/minimum-version 对 (用正斜杠分隔) 的列表。</target>
+        <target state="translated">MSB4229: 值“{0}”对 Sdk 规范无效。此属性应该是以分号分隔的Sdk-name/minimum-version 对（用正斜杠分隔）的列表。</target>
         <note>{StrBegin="MSB4229: "}</note>
       </trans-unit>
       <trans-unit id="TaskInstantiationFailureNotSupported">
