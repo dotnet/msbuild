@@ -85,7 +85,7 @@ to LoadFrom if the simple name wasn't resolved.
 
 The NuGet resolver has many dependencies and its version is frequently changing. Due to the way Visual Studio is composed, MSBuild does
 not know at its build time the exact version it will be loading at run-time. We would need a creative installer solution to be able to
-have MSbuild.exe.config contain the right entries to load this resolver the same way as `Microsoft.DotNet.MSBuildSdkResolver``. A more
+have MSbuild.exe.config contain the right entries to load this resolver the same way as `Microsoft.DotNet.MSBuildSdkResolver`. A more
 promising direction is loading this resolver into a separate AppDomain (see the section about NuGet.Frameworks below).
 
 The problem of JITting `Microsoft.Build.NuGetSdkResolver` remains unsolved for now.
@@ -112,7 +112,7 @@ paired with an SDK on users machine at run-time. Unlike SDK resolvers and NuGet.
 unit, this is a true dynamic inter-product dependency. Additionally, the task API is complex and involves a lot of functionality
 provided to tasks via callbacks (e.g. logging) so the overhead of cross-domain calls may be significant. And that's assuming that
 suitable native images exist in the first place, something that both VS and SDK installers would need to handle (task assemblies
-in each installed SDK are NGENed against each installer version of VS).
+in each installed SDK are NGENed against each installed version of VS).
 
 Hosting task assemblies in separate AppDomains looks like a major piece of work with uncertain outcome. We haven't tried it yet
 and most task code is JITted.
