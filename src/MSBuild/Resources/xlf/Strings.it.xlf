@@ -113,10 +113,10 @@
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
-                     Fa in modo che MSBuild segnali gli accessi ai file a qualsiasi
+                     Fa in modo che MSBuild segnali gli accessi ai file a qualsiasi file configurato
                      plug-in della cache del progetto.
 
-                     Questo flag è sperimentale e potrebbe non funzionare come previsto.
+Questo flag è sperimentale e potrebbe non funzionare come previsto.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -155,7 +155,7 @@
       </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
-        <target state="translated">Versione di MSBuild Ł{0} per {1}</target>
+        <target state="translated">Versione di MSBuild {0} per {1}</target>
         <note>LOCALIZATION: {0} contains the DLL version number. {1} contains the name of a runtime, like ".NET Framework", ".NET Core", or "Mono"</note>
       </trans-unit>
       <trans-unit id="CurrentDirectory">
@@ -583,8 +583,8 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
                        [&lt;classe&gt;,]&lt;assembly&gt;[,&lt;opzioni&gt;][;&lt;parametri&gt;]
                      La sintassi di &lt;classe logger&gt; è la seguente:
                        [&lt;spazio dei nomi parziale o completo&gt;.]&lt;nome classe logger&gt;
-                     La sintassi di &lt;logger assembly&gt; è la seguente:
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                     La sintassi di &lt;assembly logger&gt; è la seguente:
+                       {&lt;nome assembly&gt;[,&lt;strong name&gt;] | &lt;file di assembly&gt;}
                      Le opzioni di logger consentono di specificare in che modo MSBuild crea il logger.
                      I &lt;parametri logger&gt; sono facoltativi e vengono passati al
                      logger così come vengono digitati. Forma breve: -l.
@@ -865,8 +865,8 @@ Nota: livello di dettaglio dei logger di file
                        [&lt;classe&gt;,]&lt;assembly&gt;[,&lt;opzioni&gt;][;&lt;parametri&gt;]
                      La sintassi di &lt;classe logger&gt; è la seguente:
                        [&lt;spazio dei nomi parziale o completo&gt;.]&lt;nome classe logger&gt;
-                     La sintassi di &lt;logger assembly&gt; è la seguente:
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                     La sintassi di &lt;assembly logger&gt; è la seguente:
+                       {&lt;nome assembly&gt;[,&lt;strong name&gt;] | &lt;file di assembly&gt;}
                      Le opzioni di logger consentono di specificare in che modo MSBuild crea il logger.
                      I &lt;parametri logger&gt; sono facoltativi e vengono passati al
                      logger così come vengono digitati. Forma breve: -l
@@ -985,8 +985,9 @@ Nota: livello di dettaglio dei logger di file
                      è la directory corrente. Per impostazione predefinita, ai
                      file viene assegnato il nome "MSBuild&lt;idnodo&gt;.log". Il
                      percorso dei file e altri parametri di fileLogger possono
-                     essere specificati aggiungendo l'opzione "-fileLoggerParameters".
+                     essere specificati aggiungendo l'opzione
 
+                     "-fileLoggerParameters".
                      Se il nome di un file di log viene impostato con l'opzione
                      fileLoggerParameters, il logger distribuito userà il nome
                      file come modello e aggiungerà l'ID del nodo per creare un
@@ -2033,15 +2034,16 @@ Esegue la profilatura della valutazione di MSBuild e scrive
                        -restoreProperty:IsRestore=true;MyProperty=value
     </source>
         <target state="translated">  -restoreProperty:&lt;n&gt;=&lt;v&gt;
-                     Imposta queste proprietà a livello di progetto o ne esegue
-                     l'override solo durante il ripristino e non usa le
-                     proprietà specificate con l'argomento -property.
-                     &lt;v&gt; rappresenta il nome della proprietà e &lt;v&gt; il
-                     valore della proprietà. Usare il punto e virgola o la
-                     virgola per delimitare più proprietà o specificare ogni proprietà separatamente.
-                     (Forma breve: -rp)
-                     Esempio:
-                       -restoreProperty:IsRestore=true;MyProperty=value
+                      Imposta queste proprietà a livello di progetto o ne esegue
+                      l'override solo durante il ripristino e non usa le
+                      proprietà specificate con l'argomento -property.
+                      &lt;v&gt; rappresenta il nome della proprietà e &lt;v&gt; il
+                      valore della proprietà. Usare il punto e virgola o la
+                      virgola per delimitare più proprietà o specificare ogni
+                      proprietà separatamente.
+                      Forma breve: -rp.
+                      Esempio:
+                        -restoreProperty:IsRestore=true;MyProperty=value
     </target>
         <note>
       LOCALIZATION: "-restoreProperty" and "-rp" should not be localized.

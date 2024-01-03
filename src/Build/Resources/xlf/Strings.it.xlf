@@ -223,7 +223,7 @@
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
         <source>A required NuGet assembly '{0}' could not be loaded.</source>
-        <target state="needs-review-translation">Un assembly NuGet obbligatorio non è stato trovato. Percorso previsto: {0}</target>
+        <target state="translated">Non è stato possibile caricare un assembly NuGet obbligatorio '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
