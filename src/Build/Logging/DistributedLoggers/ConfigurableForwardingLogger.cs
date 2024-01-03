@@ -185,6 +185,7 @@ namespace Microsoft.Build.Logging
                     break;
                 case ProjectEvaluationStartedEventDescription:
                 case ProjectEvaluationFinishedEventDescription:
+                case ProjectEvaluationEventDescription:
                     eventSource.StatusEventRaised -= BuildStatusHandler;
                     eventSource.StatusEventRaised += BuildStatusHandler;
                     break;
@@ -385,10 +386,10 @@ namespace Microsoft.Build.Logging
         private void MessageHandler(object sender, BuildMessageEventArgs e)
         {
             bool forwardEvent =
-                _forwardLowImportanceMessages && e.Importance == MessageImportance.Low ||
-                _forwardNormalImportanceMessages && e.Importance == MessageImportance.Normal ||
-                _forwardHighImportanceMessages && e.Importance == MessageImportance.High ||
-                _forwardTaskCommandLine && e is TaskCommandLineEventArgs;
+                (_forwardLowImportanceMessages && e.Importance == MessageImportance.Low) ||
+                (_forwardNormalImportanceMessages && e.Importance == MessageImportance.Normal) ||
+                (_forwardHighImportanceMessages && e.Importance == MessageImportance.High) ||
+                (_forwardTaskCommandLine && e is TaskCommandLineEventArgs);
 
             if (forwardEvent)
             {
@@ -494,9 +495,24 @@ namespace Microsoft.Build.Logging
         private bool _showCommandLine = false;
 
         /// <summary>
-        /// Fine tunning of BuildMessageEventArgs forwarding
+        /// Fine-tuning of BuildMessageEventArgs forwarding
         /// </summary>
-        private bool _forwardLowImportanceMessages, _forwardNormalImportanceMessages, _forwardHighImportanceMessages, _forwardTaskCommandLine;
+        private bool _forwardLowImportanceMessages;
+
+        /// <summary>
+        /// Fine-tuning of BuildMessageEventArgs forwarding
+        /// </summary>
+        private bool _forwardNormalImportanceMessages;
+
+        /// <summary>
+        /// Fine-tuning of BuildMessageEventArgs forwarding
+        /// </summary>
+        private bool _forwardHighImportanceMessages;
+
+        /// <summary>
+        /// Fine-tuning of BuildMessageEventArgs forwarding
+        /// </summary>
+        private bool _forwardTaskCommandLine;
 
         /// <summary>
         /// Id of the node the logger is attached to
