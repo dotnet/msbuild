@@ -594,6 +594,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _savedCurrentDirectory);
             translator.Translate(ref _schedulerInducedError);
             translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
+            translator.TranslateEnum(ref _buildRequestDataFlags, (int)_buildRequestDataFlags);
         }
 
         /// <summary>
