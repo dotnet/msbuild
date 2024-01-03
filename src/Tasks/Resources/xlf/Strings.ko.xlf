@@ -198,7 +198,7 @@
       </trans-unit>
       <trans-unit id="Copy.IncompatibleParameters">
         <source>MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</source>
-        <target state="new">MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</target>
+        <target state="translated">MSB3896: "{0}" 및 "{1}" 모두 프로젝트 파일에서 매개 변수로 지정되었지만 함께 사용할 수는 없습니다. 하나 또는 다른 항목을 선택하세요.</target>
         <note>{StrBegin="MSB3896: "}</note>
       </trans-unit>
       <trans-unit id="Copy.LinkFailed">
@@ -2178,11 +2178,6 @@
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
         <target state="translated">재배포 가능 패키지 목록 파일 "{0}"의 FileList 요소에 null이거나 비어 있는 재배포 가능 패키지 이름이 있습니다. 재배포 가능 패키지 이름이 null이거나 비어 있지 않도록 하세요.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
-        <source>Updating assembly cache file "{0}".</source>
-        <target state="translated">어셈블리 캐시 파일 "{0}"을(를) 업데이트하는 중입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">

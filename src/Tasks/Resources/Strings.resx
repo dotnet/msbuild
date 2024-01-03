@@ -1776,10 +1776,6 @@
     <value>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</value>
     <comment></comment>
   </data>
-  <data name="ResolveAssemblyReference.WritingCacheFile">
-    <value>Updating assembly cache file "{0}".</value>
-    <comment></comment>
-  </data>
   <!--
         The ResolveComReference message bucket is: MSB3281 - MSB3320
 

@@ -198,7 +198,7 @@
       </trans-unit>
       <trans-unit id="Copy.IncompatibleParameters">
         <source>MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</source>
-        <target state="new">MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</target>
+        <target state="translated">MSB3896: V souboru projektu byl zadán jak parametr {0}, tak parametr {1}. Nelze je však použít oba najednou. Zvolte prosím jenom jeden z nich.</target>
         <note>{StrBegin="MSB3896: "}</note>
       </trans-unit>
       <trans-unit id="Copy.LinkFailed">
@@ -1072,7 +1072,7 @@
       <trans-unit id="GenerateResource.BinaryFormatterUse">
         <source>MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
            More information: https://aka.ms/msbuild/net8-binaryformatter</source>
-        <target state="translated">MSB3825: Prostředek „{0}“ typu „{1}“ je deserializován prostřednictvím BinaryFormatter za běhu. BinaryFormatter je zastaralý kvůli možným bezpečnostním rizikům a odebere se s .NET 9. Pokud ho chcete používat dál, nastavte vlastnost GenerateResourceWarnOnBinaryFormatterUse na false.
+        <target state="translated">MSB3825: Prostředek „{0}“ typu „{1}“ je deserializován prostřednictvím BinaryFormatter za běhu. BinaryFormatter je zastaralý kvůli možným bezpečnostním rizikům a odebere se s .NET 9. Pokud ho chcete používat dál, nastavte vlastnost GenerateResourceWarnOnBinaryFormatterUse na false. 
            Další informace: https://aka.ms/msbuild/net8-binaryformatter</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
@@ -2178,11 +2178,6 @@
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
         <target state="translated">Název redistribučního balíčku v elementu FileList v souboru seznamu redistribučního balíčku {0} je null nebo prázdný. Název redistribučního balíčku nesmí být null ani prázdný.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
-        <source>Updating assembly cache file "{0}".</source>
-        <target state="translated">Aktualizuje se soubor mezipaměti sestavení „{0}“.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
