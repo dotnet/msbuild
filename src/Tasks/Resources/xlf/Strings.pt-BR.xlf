@@ -2180,11 +2180,6 @@
         <target state="translated">O arquivo da lista de pacote redistribuível "{0}" tem um nome de Pacote Redistribuível nulo ou vazio no elemento FileList. Verifique se o Nome do Pacote Redistribuível não é nulo nem está vazio.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
-        <source>Updating assembly cache file "{0}".</source>
-        <target state="translated">Atualizando o arquivo de cache do assembly "{0}".</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
         <source>COM Reference '{0}' is the interop assembly for ActiveX control '{1}' but was marked to be linked by the compiler with the /link flag. This COM reference will be treated as a reference and will not be linked.</source>
         <target state="translated">A Referência COM "{0}" é o assembly de interoperabilidade para o controle ActiveX "{1}", mas foi marcada para ser vinculada pelo compilador com o sinalizador /link. Essa referência COM será tratada como uma referência e não será vinculada.</target>
