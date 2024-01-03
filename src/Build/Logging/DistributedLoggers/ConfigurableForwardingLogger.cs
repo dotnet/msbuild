@@ -243,6 +243,9 @@ namespace Microsoft.Build.Logging
 
         private void SetForwardingBasedOnVerbosity(IEventSource eventSource)
         {
+            eventSource.BuildStarted += ForwardEvent;
+            eventSource.BuildFinished += ForwardEvent;
+
             if (IsVerbosityAtLeast(LoggerVerbosity.Quiet))
             {
                 eventSource.ErrorRaised += ForwardEvent;
@@ -259,6 +262,7 @@ namespace Microsoft.Build.Logging
             {
                 // MessageHandler already subscribed
                 _forwardNormalImportanceMessages = true;
+                _forwardTaskCommandLine = true;
 
                 eventSource.ProjectStarted += ForwardEvent;
                 eventSource.ProjectFinished += ForwardEvent;
@@ -273,6 +277,7 @@ namespace Microsoft.Build.Logging
 
                 // MessageHandler already subscribed
                 _forwardLowImportanceMessages = true;
+                _forwardTaskCommandLine = true;
                 _forwardTaskCommandLine = true;
             }
 
