@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -20,7 +21,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The presence of any of these flags affects build result for the specified request.
         /// </summary>
-        private readonly BuildRequestDataFlags _flagsAffectingBuildResults = BuildRequestDataFlags.ProvideProjectStateAfterBuild | BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild;
+        private readonly BuildRequestDataFlags _flagsAffectingBuildResults = BuildRequestDataFlags.ProvideProjectStateAfterBuild;
 
         /// <summary>
         /// The table of all build results.  This table is indexed by configuration id and
@@ -168,7 +169,8 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_resultsByConfiguration.TryGetValue(request.ConfigurationId, out BuildResult allResults))
                 {
-                    bool buildDataFlagsSatisfied = CheckBuildDataFlagsResults(request.BuildRequestDataFlags, allResults.BuildRequestDataFlags);
+                    bool buildDataFlagsSatisfied = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_9)
+                        ? CheckBuildDataFlagsResults(request.BuildRequestDataFlags, allResults.BuildRequestDataFlags) : true;
 
                     if (buildDataFlagsSatisfied)
                     {
@@ -345,7 +347,12 @@ namespace Microsoft.Build.BackEnd
         /// <param name="buildResultDataFlags">The existing build result data flags.</param>
         /// <returns>False if there is any difference in the data flags that can cause missed build data, true otherwise.</returns>
         private bool CheckBuildDataFlagsResults(BuildRequestDataFlags buildRequestDataFlags, BuildRequestDataFlags buildResultDataFlags) =>
-            (buildRequestDataFlags & _flagsAffectingBuildResults) == (buildResultDataFlags & _flagsAffectingBuildResults);
+
+            // Even if both buildRequestDataFlags and buildResultDataFlags have ProvideSubsetOfStateAfterBuild flag,
+            // the underlying RequestedProjectState may have different user filters defined.
+            // It is more reliable to ignore the cached value. 
+            !buildRequestDataFlags.HasFlag(BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild)
+            & (buildRequestDataFlags & _flagsAffectingBuildResults) == (buildResultDataFlags & _flagsAffectingBuildResults);
 
         public IEnumerator<BuildResult> GetEnumerator()
         {
