@@ -169,7 +169,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_resultsByConfiguration.TryGetValue(request.ConfigurationId, out BuildResult allResults))
                 {
-                    bool buildDataFlagsSatisfied = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_9)
+                    bool buildDataFlagsSatisfied = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10)
                         ? CheckBuildDataFlagsResults(request.BuildRequestDataFlags, allResults.BuildRequestDataFlags) : true;
 
                     if (buildDataFlagsSatisfied)
