@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Collections;
@@ -568,7 +569,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // Produce the final results.
-                List<TaskItem> targetOutputItems = new List<TaskItem>();
+                List<TaskItem> targetOutputItems = null;
 
                 try
                 {
@@ -624,24 +625,32 @@ namespace Microsoft.Build.BackEnd
                         {
                             foreach (ItemBucket bucket in batchingBuckets)
                             {
-                                targetOutputItems.AddRange(bucket.Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation));
+                                if (targetOutputItems is null)
+                                {
+                                    targetOutputItems = bucket.Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation).ToList();
+                                }
+                                else
+                                {
+                                    targetOutputItems.AddRange(bucket.Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation));
+                                }
                             }
                         }
                         else
                         {
-                            HashSet<TaskItem> addedItems = new HashSet<TaskItem>();
-                            foreach (ItemBucket bucket in batchingBuckets)
+                            if (batchingBuckets.Count == 1)
                             {
-                                IList<TaskItem> itemsToAdd = bucket.Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation);
-
-                                foreach (TaskItem item in itemsToAdd)
+                                targetOutputItems = new HashSet<TaskItem>(batchingBuckets[0].Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation)).ToList();
+                            }
+                            else
+                            {
+                                HashSet<TaskItem> addedItems = new HashSet<TaskItem>();
+                                foreach (ItemBucket bucket in batchingBuckets)
                                 {
-                                    if (!addedItems.Contains(item))
-                                    {
-                                        targetOutputItems.Add(item);
-                                        addedItems.Add(item);
-                                    }
+                                    IList<TaskItem> itemsToAdd = bucket.Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation);
+                                    addedItems.UnionWith(itemsToAdd);
                                 }
+
+                                targetOutputItems = addedItems.ToList();
                             }
                         }
                     }
