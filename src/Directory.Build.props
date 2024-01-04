@@ -24,8 +24,8 @@
 
     <ProduceReferenceAssembly Condition="'$(IsTestProject)' != 'true'">true</ProduceReferenceAssembly>
 
-    <!-- Set up BeforeCommon.targets -->
-    <CustomBeforeMicrosoftCommonTargets>$(MSBuildThisFileDirectory)Directory.BeforeCommon.targets</CustomBeforeMicrosoftCommonTargets>
+    <!-- Set up BeforeCommon.targets. Arcade uses this property as well, so don't overwrite it. -->
+    <CustomBeforeMicrosoftCommonTargets>$(CustomBeforeMicrosoftCommonTargets);$(MSBuildThisFileDirectory)Directory.BeforeCommon.targets</CustomBeforeMicrosoftCommonTargets>
 
     <Platforms>AnyCPU;x64;arm64</Platforms>
 
