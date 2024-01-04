@@ -627,6 +627,7 @@ namespace Microsoft.Build.BackEnd
                             {
                                 if (targetOutputItems is null)
                                 {
+                                    // As an optimization, use the results for the first bucket and if there are no more buckets to process, only a single list is allocated.
                                     targetOutputItems = bucket.Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation).ToList();
                                 }
                                 else
@@ -637,6 +638,7 @@ namespace Microsoft.Build.BackEnd
                         }
                         else
                         {
+                            // Optimize for only one bucket by initializing the HashSet<T> with the first one's items in case there are a lot of items, it won't need to be resized.
                             if (batchingBuckets.Count == 1)
                             {
                                 targetOutputItems = new HashSet<TaskItem>(batchingBuckets[0].Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation)).ToList();
