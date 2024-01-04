@@ -83,12 +83,13 @@ to LoadFrom if the simple name wasn't resolved.
 
 ### Microsoft.Build.NuGetSdkResolver
 
-The NuGet resolver has many dependencies and its version is frequently changing. Due to the way Visual Studio is composed, MSBuild does
-not know at its build time the exact version it will be loading at run-time. We would need a creative installer solution to be able to
-have MSbuild.exe.config contain the right entries to load this resolver the same way as `Microsoft.DotNet.MSBuildSdkResolver`. A more
-promising direction is loading this resolver into a separate AppDomain (see the section about NuGet.Frameworks below).
+The NuGet resolver has many dependencies and its version is frequently changing, so the technique used for `Microsoft.DotNet.MSBuildSdkResolver`
+does not apply in its current state. However, the NuGet team it looking to address this by:
 
-The problem of JITting `Microsoft.Build.NuGetSdkResolver` remains unsolved for now.
+1) ILMerge'ing the resolver with its dependencies into a single assembly.
+2) Freezing the version of the assembly.
+
+When this happens, the cost of JITting `Microsoft.Build.NuGetSdkResolver` will be eliminated as well.
 
 ## NuGet.Frameworks
 
