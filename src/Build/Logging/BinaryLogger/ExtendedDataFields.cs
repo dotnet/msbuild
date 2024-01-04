@@ -17,4 +17,14 @@ internal class ExtendedDataFields
     public string ExtendedType { get; }
     public IDictionary<string, string?>? ExtendedMetadata { get; }
     public string? ExtendedData { get; }
+
+    /// <summary>
+    /// We need to this for Extended event args have Dictionary as ExtendedMetadata.
+    /// </summary>
+    public Dictionary<string, string?>? ExtendedMetadataAsDictionary =>
+        ExtendedMetadata == null ?
+            null :
+            ExtendedMetadata is Dictionary<string, string?> asDictionary ?
+                asDictionary :
+                new Dictionary<string, string?>(ExtendedMetadata);
 }

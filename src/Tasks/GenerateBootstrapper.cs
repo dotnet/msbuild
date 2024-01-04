@@ -98,12 +98,12 @@ namespace Microsoft.Build.Tasks
 
             if (BootstrapperItems != null)
             {
-                // The bootstrapper items may not be in the correct order, because XMake saves 
-                // items in alphabetical order.  So we will attempt to put items into the correct 
-                // order, according to the Products order in the search.  To do this, we add all 
-                // the items we are told to build into a hashtable, then go through our products 
-                // in order, looking to see if the item is built.  If it is, remove the item from 
-                // the hashtable.  All remaining items in the table can not be built, so errors 
+                // The bootstrapper items may not be in the correct order, because XMake saves
+                // items in alphabetical order.  So we will attempt to put items into the correct
+                // order, according to the Products order in the search.  To do this, we add all
+                // the items we are told to build into a hashtable, then go through our products
+                // in order, looking to see if the item is built.  If it is, remove the item from
+                // the hashtable.  All remaining items in the table can not be built, so errors
                 // will be issued.
                 var items = new Dictionary<string, ITaskItem>(StringComparer.OrdinalIgnoreCase);
 

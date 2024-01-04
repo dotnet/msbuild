@@ -205,7 +205,7 @@ namespace Microsoft.Build.UnitTests
             nodeLoggingEvent = new NodeLoggingEvent(null);
             nodeLoggingEvent.CreateFromStream(reader, loggingTypeCacheReads);
             Assert.IsTrue(nodeLoggingEvent.BuildEvent.GetType() ==typeof( TaskCommandLineEventArgs));
-            
+
             long streamReadEndPosition = stream.Position;
             Assert.AreEqual(streamWriteEndPosition, streamReadEndPosition, "Expected Read and Write Positions to match");
         }

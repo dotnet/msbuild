@@ -148,9 +148,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="request">The request whose results we should return</param>
         /// <param name="configInitialTargets">The initial targets for the request's configuration.</param>
         /// <param name="configDefaultTargets">The default targets for the request's configuration.</param>
-        /// <param name="skippedResultsDoNotCauseCacheMiss">If false, a cached skipped target will cause this method to return "NotSatisfied".  
-        /// If true, then as long as there is a result in the cache (regardless of whether it was skipped or not), this method 
-        /// will return "Satisfied". In most cases this should be false, but it may be set to true in a situation where there is no 
+        /// <param name="skippedResultsDoNotCauseCacheMiss">If false, a cached skipped target will cause this method to return "NotSatisfied".
+        /// If true, then as long as there is a result in the cache (regardless of whether it was skipped or not), this method
+        /// will return "Satisfied". In most cases this should be false, but it may be set to true in a situation where there is no
         /// chance of re-execution (which is the usual response to missing / skipped targets), and the caller just needs the data.</param>
         /// <returns>A response indicating the results, if any, and the targets needing to be built, if any.</returns>
         public ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss)
@@ -298,7 +298,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="result">The result to examine</param>
         /// <param name="targets">The targets to search for</param>
         /// <param name="targetsMissingResults">An optional list to be populated with missing targets</param>
-        /// <param name="skippedResultsAreOK">If true, a status of "skipped" counts as having valid results 
+        /// <param name="skippedResultsAreOK">If true, a status of "skipped" counts as having valid results
         /// for that target.  Otherwise, a skipped target is treated as equivalent to a missing target.</param>
         /// <returns>False if there were missing results, true otherwise.</returns>
         private static bool CheckResults(BuildResult result, List<string> targets, HashSet<string> targetsMissingResults, bool skippedResultsAreOK)
@@ -320,7 +320,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    // If the result was a failure and we have not seen any skipped targets up to this point, then we conclude we do 
+                    // If the result was a failure and we have not seen any skipped targets up to this point, then we conclude we do
                     // have results for this request, and they indicate failure.
                     if (result[target].ResultCode == TargetResultCode.Failure && (targetsMissingResults == null || targetsMissingResults.Count == 0))
                     {

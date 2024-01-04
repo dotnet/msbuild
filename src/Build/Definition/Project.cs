@@ -912,7 +912,7 @@ namespace Microsoft.Build.Evaluation
         /// uberGlob.IsMatch("foo.cs");
         /// ]]>
         /// </code>
-        /// 
+        ///
         /// </remarks>
         /// <returns>
         /// List of <see cref="GlobResult"/>.

@@ -96,9 +96,8 @@ stages:
       value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
     steps:
-    - task: NuGetToolInstaller@0
-      inputs:
-        versionSpec: '4.9.2'
+    - task: NuGetToolInstaller@1
+      displayName: 'Install NuGet.exe'
 
     - task: NuGetCommand@2
       displayName: Restore internal tools
@@ -311,4 +310,5 @@ stages:
         -TsaRepositoryName "dotnet-msbuild"
         -TsaCodebaseName "dotnet-msbuild"
         -TsaPublish $True
+        -CrScanAdditionalRunConfigParams @("SuppressionsPath < $(Build.SourcesDirectory)\eng\CredScanSuppressions.json")
         -PoliCheckAdditionalRunConfigParams @("UserExclusionPath < $(Build.SourcesDirectory)\eng\policheck_exclusions.xml")'

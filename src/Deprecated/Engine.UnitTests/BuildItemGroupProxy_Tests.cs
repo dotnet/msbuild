@@ -21,7 +21,7 @@ namespace Microsoft.Build.UnitTests
     {
         [Test]
         public void BasicProxying()
-        {          
+        {
             BuildItemGroup ig = new BuildItemGroup();
             BuildItem i1 = new BuildItem("name1", "value1");
             i1.SetMetadata("myMetaName", "myMetaValue");

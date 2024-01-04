@@ -158,6 +158,12 @@
   <data name="BuildFinishedFailure" xml:space="preserve">
     <value>Build FAILED.</value>
   </data>
+  <data name="BuildFinishedQuestionFailure" xml:space="preserve">
+    <value>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</value>
+  </data>
+  <data name="BuildFinishedQuestionSuccess" xml:space="preserve">
+    <value>Question build succeeded. Up-to-date checks passed.</value>
+  </data>
   <data name="BuildFinishedSuccess" xml:space="preserve">
     <value>Build succeeded.</value>
   </data>
@@ -1883,7 +1889,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Property initial value: $({0})="{1}" Source: {2}</value>
   </data>
   <data name="NuGetAssemblyNotFound" xml:space="preserve">
-    <value>A required NuGet assembly was not found. Expected Path: {0}</value>
+    <value>A required NuGet assembly '{0}' could not be loaded.</value>
   </data>
   <data name="StaticGraphConstructionMetrics" xml:space="preserve">
     <value>Static graph loaded in {0} seconds: {1} nodes, {2} edges</value>

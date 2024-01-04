@@ -43,7 +43,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the TaskParameter value. 
+        /// Gets or sets the TaskParameter value.
         /// Returns empty string if it is not present.
         /// </summary>
         public string TaskParameter
@@ -73,7 +73,7 @@ namespace Microsoft.Build.Construction
         public bool IsOutputProperty => PropertyName.Length > 0;
 
         /// <summary>
-        /// Gets or sets the ItemType value. 
+        /// Gets or sets the ItemType value.
         /// Returns empty string if it is not present.
         /// Removes the attribute if the value to set is empty.
         /// </summary>
@@ -96,7 +96,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the PropertyName value. 
+        /// Gets or sets the PropertyName value.
         /// Returns empty string if it is not present.
         /// Removes the attribute if the value to set is empty.
         /// </summary>

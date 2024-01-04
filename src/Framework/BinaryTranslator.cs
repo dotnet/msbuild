@@ -399,9 +399,9 @@ namespace Microsoft.Build.BackEnd
                 value = new System.TimeSpan(ticks);
             }
 
-            // MSBuildTaskHost is based on CLR 3.5, which does not have the 6-parameter constructor for BuildEventContext.  
-            // However, it also does not ever need to translate BuildEventContexts, so it should be perfectly safe to 
-            // compile this method out of that assembly. 
+            // MSBuildTaskHost is based on CLR 3.5, which does not have the 6-parameter constructor for BuildEventContext.
+            // However, it also does not ever need to translate BuildEventContexts, so it should be perfectly safe to
+            // compile this method out of that assembly.
 #if !CLR2COMPATIBILITY
 
             /// <summary>
@@ -635,7 +635,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Translates a dictionary of { string, T }.  
+            /// Translates a dictionary of { string, T }.
             /// </summary>
             /// <typeparam name="T">The reference type for the values</typeparam>
             /// <param name="dictionary">The dictionary to be translated.</param>
@@ -1084,9 +1084,9 @@ namespace Microsoft.Build.BackEnd
                 _writer.Write(value.Ticks);
             }
 
-            // MSBuildTaskHost is based on CLR 3.5, which does not have the 6-parameter constructor for BuildEventContext.  
-            // However, it also does not ever need to translate BuildEventContexts, so it should be perfectly safe to 
-            // compile this method out of that assembly. 
+            // MSBuildTaskHost is based on CLR 3.5, which does not have the 6-parameter constructor for BuildEventContext.
+            // However, it also does not ever need to translate BuildEventContexts, so it should be perfectly safe to
+            // compile this method out of that assembly.
 #if !CLR2COMPATIBILITY
 
             /// <summary>
@@ -1107,7 +1107,7 @@ namespace Microsoft.Build.BackEnd
                 _writer.Write(value.TargetId);
                 _writer.Write(value.TaskId);
             }
-#endif 
+#endif
 
             /// <summary>
             /// Translates a CultureInfo
@@ -1304,7 +1304,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Translates a dictionary of { string, T }.  
+            /// Translates a dictionary of { string, T }.
             /// </summary>
             /// <typeparam name="T">The reference type for the values, which implements INodePacketTranslatable.</typeparam>
             /// <param name="dictionary">The dictionary to be translated.</param>

@@ -70,11 +70,11 @@ namespace Microsoft.Build.Logging.SimpleErrorLogger
         {
             if (acceptAnsiColorCodes)
             {
-                Console.Error.Write(AnsiCodes.Colorize(message, color));
+                Console.Error.WriteLine(AnsiCodes.Colorize(message, color));
             }
             else
             {
-                Console.Error.Write(message);
+                Console.Error.WriteLine(message);
             }
         }
 

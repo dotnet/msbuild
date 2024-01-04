@@ -86,8 +86,8 @@ namespace Microsoft.Build.BackEnd
             internal string lpDesktop;
 
             /// <summary>
-            /// For console processes, this is the title displayed in the title bar if a new console window is created. 
-            /// If NULL, the name of the executable file is used as the window title instead. 
+            /// For console processes, this is the title displayed in the title bar if a new console window is created.
+            /// If NULL, the name of the executable file is used as the window title instead.
             /// This parameter must be NULL for GUI or console processes that do not create a new console window
             /// </summary>
             internal string lpTitle;
@@ -103,7 +103,7 @@ namespace Microsoft.Build.BackEnd
             internal Int32 dwY;
 
             /// <summary>
-            /// If dwFlags specifies STARTF_USESIZE, this member is the width of the window if a new window is created, in pixels. Otherwise, this member is ignored. 
+            /// If dwFlags specifies STARTF_USESIZE, this member is the width of the window if a new window is created, in pixels. Otherwise, this member is ignored.
             /// </summary>
             internal Int32 dwXSize;
 
@@ -118,12 +118,12 @@ namespace Microsoft.Build.BackEnd
             internal Int32 dwXCountChars;
 
             /// <summary>
-            /// If dwFlags specifies STARTF_USECOUNTCHARS, if a new console window is created in a console process, this member specifies the screen buffer height, in character rows. Otherwise, this member is ignored.dwFillAttribute 
+            /// If dwFlags specifies STARTF_USECOUNTCHARS, if a new console window is created in a console process, this member specifies the screen buffer height, in character rows. Otherwise, this member is ignored.dwFillAttribute
             /// </summary>
             internal Int32 dwYCountChars;
 
             /// <summary>
-            /// If dwFlags specifies STARTF_USEFILLATTRIBUTE, this member is the initial text and background colors if a new console window is created in a console application. Otherwise, this member is ignored. 
+            /// If dwFlags specifies STARTF_USEFILLATTRIBUTE, this member is the initial text and background colors if a new console window is created in a console application. Otherwise, this member is ignored.
             /// </summary>
             internal Int32 dwFillAttribute;
 
@@ -177,12 +177,12 @@ namespace Microsoft.Build.BackEnd
 
             /// <summary>
             /// A pointer to a security descriptor for the object that controls the sharing of it.
-            /// If NULL is specified for this member, the object is assigned the default security descriptor of the calling process. 
-            /// This is not the same as granting access to everyone by assigning a NULL discretionary access control list (DACL). 
+            /// If NULL is specified for this member, the object is assigned the default security descriptor of the calling process.
+            /// This is not the same as granting access to everyone by assigning a NULL discretionary access control list (DACL).
             /// The default security descriptor is based on the default DACL of the access token belonging to the calling process.
-            /// By default, the default DACL in the access token of a process allows access only to the user represented by the access token. 
-            /// If other users must access the object, you can either create a security descriptor with the appropriate access, 
-            /// or add ACEs to the DACL that grants access to a group of users. 
+            /// By default, the default DACL in the access token of a process allows access only to the user represented by the access token.
+            /// If other users must access the object, you can either create a security descriptor with the appropriate access,
+            /// or add ACEs to the DACL that grants access to a group of users.
             /// </summary>
             public IntPtr lpSecurityDescriptor;
 
@@ -212,7 +212,7 @@ namespace Microsoft.Build.BackEnd
 
             /// <summary>
             /// A value that can be used to identify a process.
-            /// The value is valid from the time the process is created until all handles to the process are closed and 
+            /// The value is valid from the time the process is created until all handles to the process are closed and
             /// the process object is freed; at this point, the identifier may be reused.
             /// </summary>
             public int dwProcessId;

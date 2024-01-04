@@ -21,16 +21,16 @@ namespace Microsoft.Build.Collections
     ///     - default enumerator is over values
     ///     - (marginal) enforces the correct key comparer
     ///     - potentially makes copy on write possible
-    /// 
+    ///
     /// Really a Dictionary&lt;string, T&gt; where the key (the name) is obtained from IKeyed.Key.
-    /// Is not observable, so if clients wish to observe modifications they must mediate them themselves and 
+    /// Is not observable, so if clients wish to observe modifications they must mediate them themselves and
     /// either not expose this collection or expose it through a readonly wrapper.
     /// At various places in this class locks are taken on the backing collection.  The reason for this is to allow
-    /// this class to be asynchronously enumerated.  This is accomplished by the CopyOnReadEnumerable which will 
+    /// this class to be asynchronously enumerated.  This is accomplished by the CopyOnReadEnumerable which will
     /// lock the backing collection when it does its deep cloning.  This prevents asynchronous access from corrupting
     /// the state of the enumeration until the collection has been fully copied.
-    /// 
-    /// Since we use the mutable ignore case comparer we need to make sure that we lock our self before we call the comparer since the comparer can call back 
+    ///
+    /// Since we use the mutable ignore case comparer we need to make sure that we lock our self before we call the comparer since the comparer can call back
     /// into this dictionary which could cause a deadlock if another thread is also accessing another method in the dictionary.
     /// </remarks>
     /// <typeparam name="T">Property or Metadata class type to store</typeparam>

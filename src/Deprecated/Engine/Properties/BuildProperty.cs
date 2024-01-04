@@ -27,19 +27,19 @@ namespace Microsoft.Build.BuildEngine
         // by the author.
         NormalProperty,
 
-        // An "imported" property is like a "normal" property, except that 
+        // An "imported" property is like a "normal" property, except that
         // instead of coming directly from the project file, its definition
         // is in one of the imported files (e.g., "CSharp.buildrules").
         ImportedProperty,
 
         // A "global" property is the kind that is set outside of the project file.
         // Once such a property is set, it cannot be overridden by the project file.
-        // For example, when the user sets a property via a switch on the XMake 
+        // For example, when the user sets a property via a switch on the XMake
         // command-line, this is a global property.  In the IDE case, "Configuration"
         // would be a global property set by the IDE.
         GlobalProperty,
 
-        // A "reserved" property behaves much like a read-only property, except 
+        // A "reserved" property behaves much like a read-only property, except
         // that the names are not arbitrary; they are chosen by us.  Also,
         // no user can ever set or override these properties.  For example,
         // "XMakeProjectName" would be a property that is only settable by
@@ -88,15 +88,15 @@ namespace Microsoft.Build.BuildEngine
         // this node may look like this:
         //      <WarningLevel Condition="...">4</WarningLevel>
         //
-        // If this property is not represented by an actual XML element in the 
+        // If this property is not represented by an actual XML element in the
         // project file, it's okay if this is null.
         private XmlElement propertyElement = null;
 
-        // This is the specific XML attribute in the above XML element which 
+        // This is the specific XML attribute in the above XML element which
         // contains the "Condition".
         private XmlAttribute conditionAttribute = null;
 
-        // If this property is persisted in the project file, then we need to 
+        // If this property is persisted in the project file, then we need to
         // store a reference to the parent <PropertyGroup>.
         private BuildPropertyGroup parentPersistedPropertyGroup = null;
 
@@ -696,7 +696,7 @@ namespace Microsoft.Build.BuildEngine
             BuildProperty compareToProperty
         )
         {
-            // Intentionally do not compare parentPersistedPropertyGroup, because this is 
+            // Intentionally do not compare parentPersistedPropertyGroup, because this is
             // just a back-pointer, and doesn't really contribute to the "identity" of
             // the property.
 
