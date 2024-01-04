@@ -196,6 +196,11 @@
         <target state="translated">MSB3894: Recebi {0} copiando "{1}" para {2} e o RH é {3}</target>
         <note>{StrBegin="MSB3894: "} LOCALIZATION: {0} is exception.ToString(), {1} and {2} are paths, {3} is a number")</note>
       </trans-unit>
+      <trans-unit id="Copy.IncompatibleParameters">
+        <source>MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</source>
+        <target state="translated">MSB3896: "{0}" e "{1}" foram especificados como parâmetros no arquivo de projeto, mas não podem ser usados juntos. Escolha um ou outro.</target>
+        <note>{StrBegin="MSB3896: "}</note>
+      </trans-unit>
       <trans-unit id="Copy.LinkFailed">
         <source>MSB3893: Could not use a link to copy "{0}" to "{1}".</source>
         <target state="translated">MSB3893: Não foi possível usar um link para copiar "{0}" para "{1}".</target>
@@ -1942,7 +1947,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnifiedReferenceDependsOn">
         <source>References which depend on or have been unified to "{0}" [{1}].</source>
-        <target state="new">References which depend on or have been unified to "{0}" [{1}].</target>
+        <target state="translated">Referências que dependem de ou foram unificadas para "{0}" [{1}].</target>
         <note> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnknownProcessorArchitecture">
@@ -2173,11 +2178,6 @@
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
         <target state="translated">O arquivo da lista de pacote redistribuível "{0}" tem um nome de Pacote Redistribuível nulo ou vazio no elemento FileList. Verifique se o Nome do Pacote Redistribuível não é nulo nem está vazio.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
-        <source>Updating assembly cache file "{0}".</source>
-        <target state="translated">Atualizando o arquivo de cache do assembly "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">

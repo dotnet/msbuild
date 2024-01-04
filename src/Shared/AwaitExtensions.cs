@@ -147,7 +147,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// A class which acts as a task scheduler and ensures each scheduled task gets its 
+        /// A class which acts as a task scheduler and ensures each scheduled task gets its
         /// own STA thread.
         /// </summary>
         private class OneSTAThreadPerTaskScheduler : TaskScheduler

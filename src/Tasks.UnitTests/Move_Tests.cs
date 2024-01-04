@@ -302,8 +302,8 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Move should overwrite any destination file even if it's not r/o
         /// if OverwriteReadOnlyFiles is set.
-        /// 
-        /// This is a regression test for bug 814744 where a move operation with OverwriteReadonlyFiles = true on a destination file with the readonly 
+        ///
+        /// This is a regression test for bug 814744 where a move operation with OverwriteReadonlyFiles = true on a destination file with the readonly
         /// flag not set caused the readonly flag to be set before the move which caused the move to fail.
         /// </summary>
         [Fact]
@@ -411,7 +411,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// MovedFiles should only include files that were successfully moved 
+        /// MovedFiles should only include files that were successfully moved
         /// (or skipped), not files for which there was an error.
         /// </summary>
         [WindowsOnlyFact(additionalMessage: "Under Unix all filenames are valid and this test is not useful.")]
@@ -777,7 +777,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// If the destination path is too long, the task should not bubble up
-        /// the System.IO.PathTooLongException 
+        /// the System.IO.PathTooLongException
         /// </summary>
         [WindowsFullFrameworkOnlyFact]
         public void Regress451057_ExitGracefullyIfPathNameIsTooLong()
@@ -813,7 +813,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// If the source path is too long, the task should not bubble up
-        /// the System.IO.PathTooLongException 
+        /// the System.IO.PathTooLongException
         /// </summary>
         [WindowsFullFrameworkOnlyFact]
         public void Regress451057_ExitGracefullyIfPathNameIsTooLong2()

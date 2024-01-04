@@ -13,7 +13,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 #if !CLR2COMPATIBILITY
-using Microsoft.Build.Framework.FileAccess;
+using Microsoft.Build.Experimental.FileAccess;
 #endif
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -541,13 +541,16 @@ namespace Microsoft.Build.CommandLine
                 }
             }
 
-            /// <inheritdoc/>
-            public override void ReportFileAccess(FileAccessData fileAccessData)
-            {
 #if FEATURE_REPORTFILEACCESSES
+            /// <summary>
+            /// Reports a file access from a task.
+            /// </summary>
+            /// <param name="fileAccessData">The file access to report.</param>
+            public void ReportFileAccess(FileAccessData fileAccessData)
+            {
                 _taskHost._fileAccessData.Add(fileAccessData);
-#endif
             }
+#endif
         }
 
         public EngineServices EngineServices { get; }

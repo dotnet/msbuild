@@ -69,6 +69,42 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        [UnixOnlyTheory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ExecSetsLocaleOnUnix(bool enableChangeWave)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("LANG", null);
+                env.SetEnvironmentVariable("LC_ALL", null);
+
+                if (enableChangeWave)
+                {
+                    ChangeWaves.ResetStateForTests();
+                    // Important: use the version here
+                    env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_10.ToString());
+                    BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+                }
+
+                Exec exec = PrepareExec("echo LANG=$LANG; echo LC_ALL=$LC_ALL;");
+                bool result = exec.Execute();
+                Assert.True(result);
+
+                MockEngine engine = (MockEngine)exec.BuildEngine;
+                if (enableChangeWave)
+                {
+                    engine.AssertLogContains("LANG=en_US.UTF-8");
+                    engine.AssertLogContains("LC_ALL=en_US.UTF-8");
+                }
+                else
+                {
+                    engine.AssertLogDoesntContain("LANG=en_US.UTF-8");
+                    engine.AssertLogDoesntContain("LC_ALL=en_US.UTF-8");
+                }
+            }
+        }
+
         /// <summary>
         /// Ensures that calling the Exec task does not leave any extra TEMP files
         /// lying around.
@@ -893,22 +929,6 @@ namespace Microsoft.Build.UnitTests
 
             // Both two lines should had gone to stdout
             Assert.Equal(2, exec.ConsoleOutput.Length);
-        }
-
-        /// <summary>
-        /// Test the CanEncode method with and without ANSI characters to determine if they can be encoded 
-        /// in the current system encoding.
-        /// </summary>
-        [WindowsOnlyFact]
-        public void CanEncodeTest()
-        {
-            var defaultEncoding = EncodingUtilities.CurrentSystemOemEncoding;
-
-            string nonAnsiCharacters = "\u521B\u5EFA";
-            string pathWithAnsiCharacters = @"c:\windows\system32\cmd.exe";
-
-            Assert.False(EncodingUtilities.CanEncodeString(defaultEncoding.CodePage, nonAnsiCharacters));
-            Assert.True(EncodingUtilities.CanEncodeString(defaultEncoding.CodePage, pathWithAnsiCharacters));
         }
 
         [Fact]

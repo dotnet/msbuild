@@ -211,9 +211,15 @@ namespace Microsoft.Build.CommandLine
         /// MSBuild no longer runs any arbitrary code (tasks or loggers) on the main thread, so it never needs the
         /// main thread to be in an STA. Accordingly, to avoid ambiguity, we explicitly use the [MTAThread] attribute.
         /// This doesn't actually do any work unless COM interop occurs for some reason.
+        /// We use the MultiDomainHost loader policy because we may create secondary AppDomains and need NGEN images
+        /// for Framework / GACed assemblies to be loaded domain neutral so their native images can be used.
+        /// See <see cref="NuGetFrameworkWrapper"/>.
         /// </remarks>
         /// <returns>0 on success, 1 on failure</returns>
         [MTAThread]
+#if FEATURE_APPDOMAIN
+        [LoaderOptimization(LoaderOptimization.MultiDomainHost)]
+#endif
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         public static int Main(
 #if !FEATURE_GET_COMMANDLINE
@@ -809,11 +815,18 @@ namespace Microsoft.Build.CommandLine
                     }
                     else if ((getProperty.Length > 0 || getItem.Length > 0) && (targets is null || targets.Length == 0))
                     {
-                        using (ProjectCollection collection = new(globalProperties, loggers, ToolsetDefinitionLocations.Default))
+                        try
                         {
-                            Project project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
-                            exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project);
-                            collection.LogBuildFinishedEvent(exitType == ExitType.Success);
+                            using (ProjectCollection collection = new(globalProperties, loggers, ToolsetDefinitionLocations.Default))
+                            {
+                                Project project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
+                                exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project);
+                                collection.LogBuildFinishedEvent(exitType == ExitType.Success);
+                            }
+                        }
+                        catch (InvalidProjectFileException)
+                        {
+                            exitType = ExitType.BuildError;
                         }
                     }
                     else // regular build
@@ -1031,28 +1044,20 @@ namespace Microsoft.Build.CommandLine
 
         private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, Project project)
         {
-            try
+            // Special case if the user requests exactly one property: skip json formatting
+            if (getProperty.Length == 1 && getItem.Length == 0)
             {
-                // Special case if the user requests exactly one property: skip json formatting
-                if (getProperty.Length == 1 && getItem.Length == 0)
-                {
-                    Console.WriteLine(project.GetPropertyValue(getProperty[0]));
-                }
-                else
-                {
-                    JsonOutputFormatter jsonOutputFormatter = new();
-                    jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
-                    jsonOutputFormatter.AddItemsInJsonFormat(getItem, project);
-                    Console.WriteLine(jsonOutputFormatter.ToString());
-                }
+                Console.WriteLine(project.GetPropertyValue(getProperty[0]));
+            }
+            else
+            {
+                JsonOutputFormatter jsonOutputFormatter = new();
+                jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
+                jsonOutputFormatter.AddItemsInJsonFormat(getItem, project);
+                Console.WriteLine(jsonOutputFormatter.ToString());
+            }
 
-                return ExitType.Success;
-            }
-            catch (InvalidProjectFileException e)
-            {
-                Console.Error.WriteLine(e.Message);
-                return ExitType.BuildError;
-            }
+            return ExitType.Success;
         }
 
         private static ExitType OutputBuildInformationInJson(BuildResult result, string[] getProperty, string[] getItem, string[] getTargetResult, ILogger[] loggers, ExitType exitType)
@@ -1538,11 +1543,15 @@ namespace Microsoft.Build.CommandLine
 
                             if (enableRestore || restoreOnly)
                             {
-                                result = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties);
+                                result = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties, saveProjectResult: saveProjectResult);
 
                                 if (result.OverallResult != BuildResultCode.Success)
                                 {
                                     return false;
+                                }
+                                else
+                                {
+                                    success = result.OverallResult == BuildResultCode.Success;
                                 }
                             }
 
@@ -1568,20 +1577,13 @@ namespace Microsoft.Build.CommandLine
                                                                                                                                         entryValue.Equals(propertyKvp.Value)))
                                             .Value;
                                     }
-                                    else
-                                    {
-                                        success = graphResult.OverallResult == BuildResultCode.Success;
-                                    }
+                                    success = graphResult.OverallResult == BuildResultCode.Success;
                                 }
                                 else
                                 {
                                     result = ExecuteBuild(buildManager, buildRequest);
+                                    success = result.OverallResult == BuildResultCode.Success;
                                 }
-                            }
-
-                            if (result != null && result.Exception == null)
-                            {
-                                success = result.OverallResult == BuildResultCode.Success;
                             }
                         }
                         finally
@@ -1762,7 +1764,7 @@ namespace Microsoft.Build.CommandLine
             return submission.Execute();
         }
 
-        private static BuildResult ExecuteRestore(string projectFile, string toolsVersion, BuildManager buildManager, Dictionary<string, string> globalProperties)
+        private static BuildResult ExecuteRestore(string projectFile, string toolsVersion, BuildManager buildManager, Dictionary<string, string> globalProperties, bool saveProjectResult = false)
         {
             // Make a copy of the global properties
             Dictionary<string, string> restoreGlobalProperties = new Dictionary<string, string>(globalProperties);
@@ -1779,13 +1781,19 @@ namespace Microsoft.Build.CommandLine
             //     make available an import that doesn't exist yet and the <Import /> might be missing a condition.
             //  - BuildRequestDataFlags.FailOnUnresolvedSdk to still fail in the case when an MSBuild project SDK can't be resolved since this is fatal and should
             //     fail the build.
+            BuildRequestDataFlags flags = BuildRequestDataFlags.ClearCachesAfterBuild | BuildRequestDataFlags.SkipNonexistentTargets | BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports | BuildRequestDataFlags.FailOnUnresolvedSdk;
+            if (saveProjectResult)
+            {
+                flags |= BuildRequestDataFlags.ProvideProjectStateAfterBuild;
+            }
+
             BuildRequestData restoreRequest = new BuildRequestData(
                 projectFile,
                 restoreGlobalProperties,
                 toolsVersion,
                 targetsToBuild: new[] { MSBuildConstants.RestoreTargetName },
                 hostServices: null,
-                flags: BuildRequestDataFlags.ClearCachesAfterBuild | BuildRequestDataFlags.SkipNonexistentTargets | BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports | BuildRequestDataFlags.FailOnUnresolvedSdk);
+                flags: flags);
 
             return ExecuteBuild(buildManager, restoreRequest);
         }
@@ -4484,7 +4492,15 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static void ShowVersion()
         {
-            Console.Write(ProjectCollection.Version.ToString());
+            // Change Version switch output to finish with a newline https://github.com/dotnet/msbuild/pull/9485
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+            {
+                Console.WriteLine(ProjectCollection.Version.ToString());
+            }
+            else
+            {
+                Console.Write(ProjectCollection.Version.ToString());
+            }
         }
     }
 }

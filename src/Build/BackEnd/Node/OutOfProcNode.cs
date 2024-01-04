@@ -586,7 +586,7 @@ namespace Microsoft.Build.Execution
             {
 #if RUNTIME_TYPE_NETCORE
                 if (packet is LogMessagePacketBase logMessage
-                    && logMessage.EventType == LoggingEventType.CustomEvent 
+                    && logMessage.EventType == LoggingEventType.CustomEvent
                     &&
                     (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8) || !Traits.Instance.EscapeHatches.IsBinaryFormatterSerializationAllowed)
                     && Traits.Instance.EscapeHatches.EnableWarningOnCustomBuildEvent)
@@ -729,7 +729,7 @@ namespace Microsoft.Build.Execution
             }
 
             // We want to make sure the global project collection has the toolsets which were defined on the parent
-            // so that any custom toolsets defined can be picked up by tasks who may use the global project collection but are 
+            // so that any custom toolsets defined can be picked up by tasks who may use the global project collection but are
             // executed on the child node.
             ICollection<Toolset> parentToolSets = _buildParameters.ToolsetProvider.Toolsets;
             if (parentToolSets != null)

@@ -270,10 +270,14 @@ namespace System.Deployment.Internal.CodeSigning
                                Sha256SignatureMethodUri);
 
 #if RUNTIME_TYPE_NETCORE
-            CryptoConfig.AddAlgorithm(typeof(SHA256),
+#pragma warning disable SYSLIB0021 // Type or member is obsolete
+            // SHA256 can not be used since it is an abstract class.
+            // CalculateHashValue internally calls CryptoConfig.CreateFromName and it causes instantiation problems.
+            CryptoConfig.AddAlgorithm(typeof(SHA256Managed),
                                Sha256DigestMethod);
+#pragma warning restore SYSLIB0021 // Type or member is obsolete
 #else
-            CryptoConfig.AddAlgorithm(typeof(System.Security.Cryptography.SHA256Cng),
+            CryptoConfig.AddAlgorithm(typeof(SHA256Cng),
                                Sha256DigestMethod);
 #endif
         }
@@ -758,7 +762,7 @@ namespace System.Deployment.Internal.CodeSigning
             // Add an enveloped and an Exc-C14N transform.
             reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
 #if (false) // BUGBUG: LTA transform complaining about issuer node not found.
-            reference.AddTransform(new XmlLicenseTransform()); 
+            reference.AddTransform(new XmlLicenseTransform());
 #endif
             reference.AddTransform(new XmlDsigExcC14NTransform());
 

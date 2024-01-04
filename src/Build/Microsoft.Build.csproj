@@ -44,7 +44,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildFromSource)' != 'true'">
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
+    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="System.IO.Compression" />
@@ -81,9 +81,6 @@
     </Compile>
     <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
       <Link>IConstrainedEqualityComparer.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\NGen.cs">
-      <Link>SharedUtilities\NGen.cs</Link>
     </Compile>
     <Compile Include="..\Shared\PropertyParser.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\PropertyParser.cs</Link>
@@ -157,6 +154,12 @@
     <Compile Include="BackEnd\Components\SdkResolution\TranslationHelpers.cs" />
     <Compile Include="FileSystem\*.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
+    <Compile Include="FileAccess\DesiredAccess.cs" />
+    <Compile Include="FileAccess\FileAccessData.cs" />
+    <Compile Include="FileAccess\FlagsAndAttributes.cs" />
+    <Compile Include="FileAccess\ProcessData.cs" />
+    <Compile Include="FileAccess\ReportedFileOperation.cs" />
+    <Compile Include="FileAccess\RequestedAccess.cs" />
     <Compile Include="Logging\BinaryLogger\ExtendedDataFields.cs" />
     <Compile Include="Logging\BinaryLogger\IBuildEventArgsReaderNotifications.cs" />
     <Compile Include="Logging\BinaryLogger\IBuildEventStringsReader.cs" />
@@ -223,6 +226,7 @@
     <Compile Include="BackEnd\Components\Scheduler\SchedulerCircularDependencyException.cs" />
     <Compile Include="BackEnd\Components\Scheduler\ScheduleTimeRecord.cs" />
     <Compile Include="BackEnd\Components\Scheduler\SchedulingPlan.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\CachingSdkResolverLoader.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\DefaultSdkResolver.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\ISdkResolverService.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\OutOfProcNodeSdkResolverService.cs" />
@@ -666,4 +670,54 @@
       <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
+
+  <PropertyGroup>
+    <NuGetFrameworkWrapperRedirects_FilePath>$(IntermediateOutputPath)NuGetFrameworkWrapper.redirects.cs</NuGetFrameworkWrapperRedirects_FilePath>
+  </PropertyGroup>
+
+  <!-- Extract binding redirects for Microsoft.Build from MSBuild.exe.config into a source file -->
+  <Target Name="GenerateAppDomainConfig"
+          Inputs="..\MSBuild\app.config;..\MSBuild\app.amd64.config"
+          Outputs="$(NuGetFrameworkWrapperRedirects_FilePath)"
+          BeforeTargets="CoreCompile"
+          Condition="'$(FeatureAppDomain)' == 'true'">
+    <PropertyGroup>
+      <BindingRedirectNamespace>&lt;Namespace Prefix='ns' Uri='urn:schemas-microsoft-com:asm.v1' /&gt;</BindingRedirectNamespace>
+      <BindingRedirectXPath>/configuration/runtime/ns:assemblyBinding/ns:dependentAssembly[ns:assemblyIdentity/@name='Microsoft.Build']</BindingRedirectXPath>
+    </PropertyGroup>
+
+    <XmlPeek XmlInputPath="..\MSBuild\app.config" Query="$(BindingRedirectXPath)" Namespaces="$(BindingRedirectNamespace)">
+      <Output TaskParameter="Result" ItemName="BindingRedirect32" />
+    </XmlPeek>
+    <XmlPeek XmlInputPath="..\MSBuild\app.amd64.config" Query="$(BindingRedirectXPath)" Namespaces="$(BindingRedirectNamespace)">
+      <Output TaskParameter="Result" ItemName="BindingRedirect64" />
+    </XmlPeek>
+
+    <PropertyGroup>
+      <NuGetFrameworkWrapperRedirects_Content><![CDATA[
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+namespace Microsoft.Build.Evaluation%3B;
+
+[System.CodeDom.Compiler.GeneratedCode("GenerateAppDomainConfig", "1.0")]
+internal sealed partial class NuGetFrameworkWrapper
+{
+    private const string _bindingRedirect32 = """;@(BindingRedirect32);"""%3B;
+    private const string _bindingRedirect64 = """;@(BindingRedirect64);"""%3B;
+}
+]]>
+      </NuGetFrameworkWrapperRedirects_Content>
+    </PropertyGroup>
+
+    <WriteLinesToFile File="$(NuGetFrameworkWrapperRedirects_FilePath)" Overwrite="true" WriteOnlyWhenDifferent="true" Lines="$(NuGetFrameworkWrapperRedirects_Content)" />
+
+    <ItemGroup>
+      <Compile Remove="$(NuGetFrameworkWrapperRedirects_FilePath)" />
+      <Compile Include="$(NuGetFrameworkWrapperRedirects_FilePath)">
+        <Link>Utilities\NuGetFrameworkWrapper.redirects.cs</Link>
+      </Compile>
+      <FileWrites Include="$(NuGetFrameworkWrapperRedirects_FilePath)" />
+    </ItemGroup>
+  </Target>
 </Project>

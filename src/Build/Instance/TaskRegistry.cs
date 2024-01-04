@@ -375,11 +375,11 @@ namespace Microsoft.Build.Execution
 
                 if (String.Equals(taskFactory, RegisteredTaskRecord.CodeTaskFactory, StringComparison.OrdinalIgnoreCase) || String.Equals(taskFactory, RegisteredTaskRecord.XamlTaskFactory, StringComparison.OrdinalIgnoreCase))
                 {
-                    // SHIM: One common pattern for people using CodeTaskFactory or XamlTaskFactory from M.B.T.v4.0.dll is to 
+                    // SHIM: One common pattern for people using CodeTaskFactory or XamlTaskFactory from M.B.T.v4.0.dll is to
                     // specify it using $(MSBuildToolsPath) -- which now no longer contains M.B.T.v4.0.dll.  This same pattern
-                    // may also occur if someone is using CodeTaskFactory or XamlTaskFactory from M.B.T.v12.0.dll.  So if we have a 
-                    // situation where the path being used doesn't contain the v4 or v12 tasks but DOES contain the v14+ tasks, just 
-                    // secretly substitute it here. 
+                    // may also occur if someone is using CodeTaskFactory or XamlTaskFactory from M.B.T.v12.0.dll.  So if we have a
+                    // situation where the path being used doesn't contain the v4 or v12 tasks but DOES contain the v14+ tasks, just
+                    // secretly substitute it here.
                     if (
                             assemblyFile != null &&
                             (assemblyFile.EndsWith(s_tasksV4Filename, StringComparison.OrdinalIgnoreCase) || assemblyFile.EndsWith(s_tasksV12Filename, StringComparison.OrdinalIgnoreCase)) &&
@@ -394,10 +394,10 @@ namespace Microsoft.Build.Execution
                     }
                     else if (assemblyName != null)
                     {
-                        // SHIM: Another common pattern for people using CodeTaskFactory or XamlTaskFactory from 
-                        // M.B.T.v4.0.dll is to specify it using AssemblyName with a simple name -- which works only if that 
-                        // that assembly is in the current directory.  Much like with the above case, if we detect that 
-                        // situation, secretly substitute it here so that the majority of task factory users aren't broken. 
+                        // SHIM: Another common pattern for people using CodeTaskFactory or XamlTaskFactory from
+                        // M.B.T.v4.0.dll is to specify it using AssemblyName with a simple name -- which works only if that
+                        // that assembly is in the current directory.  Much like with the above case, if we detect that
+                        // situation, secretly substitute it here so that the majority of task factory users aren't broken.
                         if
                             (
                                 assemblyName.Equals(s_tasksV4SimpleName, StringComparison.OrdinalIgnoreCase) &&
@@ -577,9 +577,9 @@ namespace Microsoft.Build.Execution
                             // otherwise, check the "short list" of everything else included here to see if one of them matches
                             foreach (RegisteredTaskRecord record in taskRecords.Values)
                             {
-                                // Just return the first one that actually matches.  There may be nulls in here as well, if we've previously attempted to 
-                                // find a variation on this task record and failed.  In that case, since it wasn't an exact match (otherwise it would have 
-                                // been picked up by the check above) just ignore it, the way we ignore task records that don't work with this set of 
+                                // Just return the first one that actually matches.  There may be nulls in here as well, if we've previously attempted to
+                                // find a variation on this task record and failed.  In that case, since it wasn't an exact match (otherwise it would have
+                                // been picked up by the check above) just ignore it, the way we ignore task records that don't work with this set of
                                 // parameters.
                                 if (record != null)
                                 {
@@ -592,7 +592,7 @@ namespace Microsoft.Build.Execution
                             }
                         }
 
-                        // otherwise, nothing fit, so act like we never hit the cache at all.  
+                        // otherwise, nothing fit, so act like we never hit the cache at all.
                     }
                 }
 
@@ -618,19 +618,19 @@ namespace Microsoft.Build.Execution
             else
             {
                 // Since this is a fuzzy match, we could conceivably have several sets of task identity parameters that match
-                // each other ... but might be mutually exclusive themselves.  E.g. CLR4|x86 and CLR2|x64 both match *|*.  
+                // each other ... but might be mutually exclusive themselves.  E.g. CLR4|x86 and CLR2|x64 both match *|*.
                 //
-                // To prevent us inadvertently leaking something incompatible, in this case, we need to store not just the 
-                // record that we got this time, but ALL of the records that have previously matched this key.  
-                // 
-                // Furthermore, the first level key needs to be the name of the task, not its identity -- otherwise we might 
-                // end up with multiple entries containing subsets of the same fuzzy-matchable tasks.  E.g. with the following 
-                // set of steps: 
+                // To prevent us inadvertently leaking something incompatible, in this case, we need to store not just the
+                // record that we got this time, but ALL of the records that have previously matched this key.
+                //
+                // Furthermore, the first level key needs to be the name of the task, not its identity -- otherwise we might
+                // end up with multiple entries containing subsets of the same fuzzy-matchable tasks.  E.g. with the following
+                // set of steps:
                 // 1. Look up Foo | bar
-                // 2. Look up Foo | * (goes into Foo | bar cache entry) 
+                // 2. Look up Foo | * (goes into Foo | bar cache entry)
                 // 3. Look up Foo | baz (gets its own entry because it doesn't match Foo | bar)
-                // 4. Look up Foo | * (should get the Foo | * under Foo | bar, but depending on what the dictionary looks up 
-                //    first, might get Foo | baz, which also matches, instead) 
+                // 4. Look up Foo | * (should get the Foo | * under Foo | bar, but depending on what the dictionary looks up
+                //    first, might get Foo | baz, which also matches, instead)
                 ConcurrentDictionary<RegisteredTaskIdentity, RegisteredTaskRecord> taskRecords
                     = _cachedTaskRecordsWithFuzzyMatch.GetOrAdd(taskIdentity.Name,
                         _ => new(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact));
@@ -916,7 +916,7 @@ namespace Microsoft.Build.Execution
                         return false;
                     }
 
-                    // have to have the same name 
+                    // have to have the same name
                     if (String.Equals(x.Name, y.Name, StringComparison.OrdinalIgnoreCase))
                     {
                         return IdentityParametersMatch(x.TaskIdentityParameters, y.TaskIdentityParameters, _exactMatchRequired);
@@ -939,9 +939,9 @@ namespace Microsoft.Build.Execution
 
                     int nameHash = String.IsNullOrEmpty(obj.Name) ? 0 : StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Name);
 
-                    // Since equality for the exact comparer depends on the exact values of the parameters, 
-                    // we need our hash code to depend on them as well. However, for fuzzy matches, we just 
-                    // need the ultimate meaning of the parameters to be the same. 
+                    // Since equality for the exact comparer depends on the exact values of the parameters,
+                    // we need our hash code to depend on them as well. However, for fuzzy matches, we just
+                    // need the ultimate meaning of the parameters to be the same.
                     string runtime = null;
                     string architecture = null;
 
@@ -961,12 +961,12 @@ namespace Microsoft.Build.Execution
                     }
                     else
                     {
-                        // Ideally, we'd like a hash code that returns the same thing for any runtime or 
-                        // architecture that is counted as a match in Runtime/ArchitectureValuesMatch.  
-                        // But since we can't really know that without having someone to compare against, 
-                        // in this case just give up and don't try to factor the runtime / architecture 
-                        // in, and take the minor hit of having more matching hash codes than we would 
-                        // have otherwise. 
+                        // Ideally, we'd like a hash code that returns the same thing for any runtime or
+                        // architecture that is counted as a match in Runtime/ArchitectureValuesMatch.
+                        // But since we can't really know that without having someone to compare against,
+                        // in this case just give up and don't try to factor the runtime / architecture
+                        // in, and take the minor hit of having more matching hash codes than we would
+                        // have otherwise.
                         paramHash = 0;
                     }
 
@@ -997,7 +997,7 @@ namespace Microsoft.Build.Execution
                             return false;
                         }
 
-                        // make sure that each parameter value matches as well 
+                        // make sure that each parameter value matches as well
                         foreach (KeyValuePair<string, string> param in x)
                         {
                             string value;
@@ -1034,7 +1034,7 @@ namespace Microsoft.Build.Execution
                             y.TryGetValue(XMakeAttributes.architecture, out architectureY);
                         }
 
-                        // null is OK -- it's treated as a "don't care" 
+                        // null is OK -- it's treated as a "don't care"
                         if (!XMakeAttributes.RuntimeValuesMatch(runtimeX, runtimeY))
                         {
                             return false;
@@ -1046,7 +1046,7 @@ namespace Microsoft.Build.Execution
                         }
                     }
 
-                    // if we didn't return before now, all parameters were found and matched.  
+                    // if we didn't return before now, all parameters were found and matched.
                     return true;
                 }
             }
@@ -1292,7 +1292,7 @@ namespace Microsoft.Build.Execution
                             if (TaskFactoryAttributeName == AssemblyTaskFactory || TaskFactoryAttributeName == TaskHostFactory)
                             {
                                 // Also we only need to check to see if the task name can be created by the factory if the taskName does not equal the Registered name
-                                // and the identity parameters don't match the factory's declared parameters. 
+                                // and the identity parameters don't match the factory's declared parameters.
                                 // This is because when the task factory is instantiated we try and load the Registered name from the task factory and fail it it cannot be loaded
                                 // therefore the fact that we have a factory means the Registered type and parameters can be created by the factory.
                                 if (RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Fuzzy.Equals(this.TaskIdentity, taskIdentity))
@@ -1399,7 +1399,7 @@ namespace Microsoft.Build.Execution
                     }
                     else
                     {
-                        // We are not one of the default factories. 
+                        // We are not one of the default factories.
                         TaskEngineAssemblyResolver resolver = null;
 
                         try
@@ -1424,7 +1424,7 @@ namespace Microsoft.Build.Execution
 
                                 if (loadedType == null)
                                 {
-                                    // We could not find the type (this is what null means from the Load method) but there is no reason given so we can only log the fact that 
+                                    // We could not find the type (this is what null means from the Load method) but there is no reason given so we can only log the fact that
                                     // we could not find the name given in the task factory attribute in the class specified in the assembly File or assemblyName fields.
                                     ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CouldNotFindFactory", TaskFactoryAttributeName, taskFactoryLoadInfo.AssemblyLocation);
                                 }
@@ -1701,7 +1701,7 @@ namespace Microsoft.Build.Execution
                         if (expandedType.StartsWith("Microsoft.Build.Framework.", StringComparison.OrdinalIgnoreCase) && !expandedType.Contains(","))
                         {
                             // This is workaround for internal bug https://devdiv.visualstudio.com/DevDiv/_workitems/edit/1448821
-                            // Visual Studio can load different version of Microsoft.Build.Framework.dll and non fully classified type could be resolved from it 
+                            // Visual Studio can load different version of Microsoft.Build.Framework.dll and non fully classified type could be resolved from it
                             // which cause InvalidProjectFileException with "UnsupportedTaskParameterTypeError" message.
                             // Another way to address this is to load types from compiled assembly - that would be more robust solution but also much more complex and risky code changes.
                             paramType = Type.GetType(expandedType + "," + typeof(ITaskItem).GetTypeInfo().Assembly.FullName, false /* don't throw on error */, true /* case-insensitive */) ??

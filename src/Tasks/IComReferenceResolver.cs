@@ -31,8 +31,8 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  ResolveComAssemblyReference
-         * 
-         * 
+         *
+         *
          */
         /// <summary>
         /// Resolves a COM wrapper assembly reference based on the COM references resolved so far. This method is necessary

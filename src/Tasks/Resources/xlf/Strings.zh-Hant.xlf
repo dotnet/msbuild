@@ -196,6 +196,11 @@
         <target state="translated">MSB3894: 擁有 {0} 將 "{1}" 複製至 "{2}"，且 HR 為 {3}</target>
         <note>{StrBegin="MSB3894: "} LOCALIZATION: {0} is exception.ToString(), {1} and {2} are paths, {3} is a number")</note>
       </trans-unit>
+      <trans-unit id="Copy.IncompatibleParameters">
+        <source>MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</source>
+        <target state="translated">MSB3896: "{0}" 和 "{1}" 都指定為專案檔中的參數，但不能一起使用。請選擇其中一個。</target>
+        <note>{StrBegin="MSB3896: "}</note>
+      </trans-unit>
       <trans-unit id="Copy.LinkFailed">
         <source>MSB3893: Could not use a link to copy "{0}" to "{1}".</source>
         <target state="translated">MSB3893: 無法使用連結將 "{0}" 複製到 "{1}"。</target>
@@ -1942,7 +1947,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnifiedReferenceDependsOn">
         <source>References which depend on or have been unified to "{0}" [{1}].</source>
-        <target state="new">References which depend on or have been unified to "{0}" [{1}].</target>
+        <target state="translated">依賴或已整合至 "{0}" [{1}] 的參考。</target>
         <note> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnknownProcessorArchitecture">
@@ -2173,11 +2178,6 @@
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
         <target state="translated">可轉散發套件清單檔 "{0}" 在 FileList 項目中的 Redist 名稱為 null 或空白。請確認 Redist 名稱不為 null 或空白。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
-        <source>Updating assembly cache file "{0}".</source>
-        <target state="translated">更新組件快取檔案 "{0}"。</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">

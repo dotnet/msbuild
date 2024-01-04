@@ -214,7 +214,7 @@ internal static class NativeMethods
         // 32-bit ARMv6
         ARMV6,
 
-        // PowerPC 64-bit (little-endian) 
+        // PowerPC 64-bit (little-endian)
         PPC64LE,
 
         // Who knows
@@ -1539,7 +1539,7 @@ internal static class NativeMethods
             // On posix OSes we expect console always supports VT100 coloring unless it is explicitly marked as "dumb".
             acceptAnsiColorCodes = Environment.GetEnvironmentVariable("TERM") != "dumb";
             // It wasn't redirected as tested above so we assume output is screen/console
-            outputIsScreen = true; 
+            outputIsScreen = true;
         }
         return (acceptAnsiColorCodes, outputIsScreen, originalConsoleMode);
     }

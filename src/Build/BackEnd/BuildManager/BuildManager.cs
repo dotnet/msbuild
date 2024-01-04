@@ -118,7 +118,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Set of active nodes in the system.
         /// </summary>
-        private readonly HashSet<NGen<int>> _activeNodes;
+        private readonly HashSet<int> _activeNodes;
 
         /// <summary>
         /// Event signalled when all nodes have shutdown.
@@ -128,7 +128,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Mapping of nodes to the configurations they know about.
         /// </summary>
-        private readonly Dictionary<NGen<int>, HashSet<NGen<int>>> _nodeIdToKnownConfigurations;
+        private readonly Dictionary<int, HashSet<int>> _nodeIdToKnownConfigurations;
 
         /// <summary>
         /// Flag indicating if we are currently shutting down.  When set, we stop processing packets other than NodeShutdown.
@@ -301,9 +301,9 @@ namespace Microsoft.Build.Execution
             _buildSubmissions = new Dictionary<int, BuildSubmission>();
             _graphBuildSubmissions = new Dictionary<int, GraphBuildSubmission>();
             _noActiveSubmissionsEvent = new AutoResetEvent(true);
-            _activeNodes = new HashSet<NGen<int>>();
+            _activeNodes = new HashSet<int>();
             _noNodesActiveEvent = new AutoResetEvent(true);
-            _nodeIdToKnownConfigurations = new Dictionary<NGen<int>, HashSet<NGen<int>>>();
+            _nodeIdToKnownConfigurations = new Dictionary<int, HashSet<int>>();
             _unnamedProjectInstanceToNames = new Dictionary<ProjectInstance, string>();
             _nextUnnamedProjectId = 1;
             _componentFactories = new BuildComponentFactoryCollection(this);
@@ -576,8 +576,7 @@ namespace Microsoft.Build.Execution
                 LogDeferredMessages(loggingService, _deferredBuildMessages);
 
                 // Log known deferred telemetry
-                KnownTelemetry.LoggingConfigurationTelemetry.UpdateEventProperties();
-                loggingService.LogTelemetry(buildEventContext: null, KnownTelemetry.LoggingConfigurationTelemetry.EventName, KnownTelemetry.LoggingConfigurationTelemetry.Properties);
+                loggingService.LogTelemetry(buildEventContext: null, KnownTelemetry.LoggingConfigurationTelemetry.EventName, KnownTelemetry.LoggingConfigurationTelemetry.GetProperties());
 
                 InitializeCaches();
 
@@ -1090,8 +1089,7 @@ namespace Microsoft.Build.Execution
                             }
                             _buildTelemetry.Host = host;
 
-                            _buildTelemetry.UpdateEventProperties();
-                            loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.Properties);
+                            loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;
                         }
@@ -1334,6 +1332,7 @@ namespace Microsoft.Build.Execution
                             _projectCacheService.InitializePluginsForVsScenario(
                                 ProjectCacheDescriptors.Values,
                                 resolvedConfiguration,
+                                submission.BuildRequestData.TargetNames,
                                 _executionCancellationTokenSource.Token);
                         }
 
@@ -1453,13 +1452,20 @@ namespace Microsoft.Build.Execution
             }
 
             ErrorUtilities.VerifyThrow(FileUtilities.IsSolutionFilename(config.ProjectFullPath), "{0} is not a solution", config.ProjectFullPath);
+
+            var buildEventContext = request.BuildEventContext;
+            if (buildEventContext == BuildEventContext.Invalid)
+            {
+                buildEventContext = new BuildEventContext(request.SubmissionId, 0, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+            }
+
             var instances = ProjectInstance.LoadSolutionForBuild(
                 config.ProjectFullPath,
                 config.GlobalProperties,
                 config.ExplicitToolsVersionSpecified ? config.ToolsVersion : null,
                 _buildParameters,
                 ((IBuildComponentHost)this).LoggingService,
-                request.BuildEventContext,
+                buildEventContext,
                 false /* loaded by solution parser*/,
                 config.RequestedTargets,
                 SdkResolverService,
@@ -1948,7 +1954,7 @@ namespace Microsoft.Build.Execution
 
             if (submission.BuildRequestData.GraphBuildOptions.Build)
             {
-                _projectCacheService.InitializePluginsForGraph(projectGraph, _executionCancellationTokenSource.Token);
+                _projectCacheService.InitializePluginsForGraph(projectGraph, submission.BuildRequestData.TargetNames, _executionCancellationTokenSource.Token);
 
                 var targetListTask = projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames);
 
@@ -2394,9 +2400,9 @@ namespace Microsoft.Build.Execution
 
             var response = new BuildRequestConfigurationResponse(unresolvedConfiguration.ConfigurationId, resolvedConfiguration.ConfigurationId, resolvedConfiguration.ResultsNodeId);
 
-            if (!_nodeIdToKnownConfigurations.TryGetValue(node, out HashSet<NGen<int>> configurationsOnNode))
+            if (!_nodeIdToKnownConfigurations.TryGetValue(node, out HashSet<int> configurationsOnNode))
             {
-                configurationsOnNode = new HashSet<NGen<int>>();
+                configurationsOnNode = new HashSet<int>();
                 _nodeIdToKnownConfigurations[node] = configurationsOnNode;
             }
 
@@ -2664,7 +2670,7 @@ namespace Microsoft.Build.Execution
                             // of which nodes have had configurations specifically assigned to them for building.  However, a node may
                             // have created a configuration based on a build request it needs to wait on.  In this
                             // case we need not send the configuration since it will already have been mapped earlier.
-                            if (!_nodeIdToKnownConfigurations.TryGetValue(response.NodeId, out HashSet<NGen<int>> configurationsOnNode) ||
+                            if (!_nodeIdToKnownConfigurations.TryGetValue(response.NodeId, out HashSet<int> configurationsOnNode) ||
                                !configurationsOnNode.Contains(response.BuildRequest.ConfigurationId))
                             {
                                 IConfigCache configCache = _componentFactories.GetComponent(BuildComponentType.ConfigCache) as IConfigCache;

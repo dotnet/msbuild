@@ -30,7 +30,7 @@ namespace Microsoft.Build.BuildEngine
     /// <example>
     /// &lt;UsingTask TaskName="Microsoft.Build.Tasks.Csc"                     ==> look for the "Csc" task in the
     ///            AssemblyName="Microsoft.Build.Tasks"/&gt;                       weakly-named "Microsoft.Build.Tasks" assembly
-    /// 
+    ///
     /// &lt;UsingTask TaskName="t1"                                            ==> look for the "t1" task in the
     ///            AssemblyName="mytasks, Culture=en, Version=1.0.0.0"/&gt;        strongly-named "mytasks" assembly
     ///

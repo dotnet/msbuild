@@ -45,7 +45,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Task classes and locations known to this project. 
+        /// Task classes and locations known to this project.
         /// This is the project-specific task registry, which is consulted before
         /// the toolset's task registry.
         /// </summary>
@@ -64,8 +64,8 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// The sub-toolset version that should be used with this toolset to determine 
-        /// the full set of properties to be used by the build. 
+        /// The sub-toolset version that should be used with this toolset to determine
+        /// the full set of properties to be used by the build.
         /// </summary>
         string SubToolsetVersion
         {
@@ -92,7 +92,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// List of names of the properties that, while global, are still treated as overridable 
+        /// List of names of the properties that, while global, are still treated as overridable
         /// </summary>
         ISet<string> GlobalPropertiesToTreatAsLocal
         {
@@ -174,7 +174,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Enumerator over all item definitions.
         /// Exposed for debugging display.
-        /// Ideally the dictionary would be exposed, but there are 
+        /// Ideally the dictionary would be exposed, but there are
         /// covariance problems. (A dictionary of Key, Value cannot be upcast
         /// to a Dictionary of Key, IValue).
         /// </summary>
@@ -186,7 +186,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Enumerator over all items.
         /// Exposed for debugging display.
-        /// Ideally the dictionary would be exposed, but there are 
+        /// Ideally the dictionary would be exposed, but there are
         /// covariance problems. (A dictionary of Key, Value cannot be upcast
         /// to a Dictionary of Key, IValue).
         /// </summary>
@@ -238,7 +238,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Properties encountered during evaluation. These are read during the first evaluation pass.
         /// Unlike those returned by the Properties property, these are ordered, and include any properties that
-        /// were subsequently overridden by others with the same name. It does not include any 
+        /// were subsequently overridden by others with the same name. It does not include any
         /// properties whose conditions did not evaluate to true.
         /// </summary>
         void AddToAllEvaluatedPropertiesList(P property);
@@ -246,7 +246,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Item definition metadata encountered during evaluation. These are read during the second evaluation pass.
         /// Unlike those returned by the ItemDefinitions property, these are ordered, and include any metadata that
-        /// were subsequently overridden by others with the same name and item type. It does not include any 
+        /// were subsequently overridden by others with the same name and item type. It does not include any
         /// elements whose conditions did not evaluate to true.
         /// </summary>
         void AddToAllEvaluatedItemDefinitionMetadataList(M itemDefinitionMetadatum);

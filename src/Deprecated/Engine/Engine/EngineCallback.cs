@@ -45,7 +45,7 @@ namespace Microsoft.Build.BuildEngine
             if (buildRequests.Length > 0)
             {
                 // We can safely assume that all requests need to be routed to the same engine because
-                // they originated from the same task 
+                // they originated from the same task
                 for (int i = 0; i < buildRequests.Length; i++)
                 {
                     ProcessBuildRequest(buildRequests[i]);
@@ -133,7 +133,7 @@ namespace Microsoft.Build.BuildEngine
                     {
                         ErrorUtilities.VerifyThrow(parentProject != null, "Parent project must be non-null");
 
-                        // This means the caller (the MSBuild task) wants us to use the same project as the calling 
+                        // This means the caller (the MSBuild task) wants us to use the same project as the calling
                         // project.  This allows people to avoid passing in the Projects parameter on the MSBuild task.
                         Project projectToBuild = parentProject;
 
@@ -216,7 +216,7 @@ namespace Microsoft.Build.BuildEngine
                 Console.WriteLine("Received result for HandleId " + buildResult.HandleId + ":" + buildResult.RequestId + " mapped to " + routingContext.ParentHandleId + ":" + routingContext.ParentRequestId);
             }
 
-            // Update the results with the original handle id and request id, so that 
+            // Update the results with the original handle id and request id, so that
             buildResult.HandleId = routingContext.ParentHandleId;
 
             // If the build result is created from a generated build request a done notice should be posted as other targets could be waiting for this target to finish
@@ -262,7 +262,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 // Property values are compared using case sensitive comparisons because the case of property values do have meaning.
                 // In this case we are using properties in a manner where we do not want case sensitive comparisons.
-                // There is not enough benefit for this one special case to add case insensitive 
+                // There is not enough benefit for this one special case to add case insensitive
                 // comparisons to build properties. We instead uppercase all of the keys for both get and set CachedEntries.
                 scopeProperties = new BuildPropertyGroup();
                 scopeProperties.SetProperty("CacheKey", cacheKey.ToUpper(CultureInfo.InvariantCulture));
@@ -315,7 +315,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 // Property values are compared using case sensitive comparisons because the case of property values do have meaning.
                 // In this case we are using properties in a manner where we do not want case sensitive comparisons.
-                // There is not enough benefit for this one special case to add case insensitive 
+                // There is not enough benefit for this one special case to add case insensitive
                 // comparisons to build properties. We instead uppercase all of the keys for both get and set CachedEntries.
                 scopeProperties = new BuildPropertyGroup();
                 scopeProperties.SetProperty("CacheKey", cacheKey.ToUpper(CultureInfo.InvariantCulture));
@@ -364,7 +364,7 @@ namespace Microsoft.Build.BuildEngine
         public void PostLoggingMessagesToHost(int nodeId, NodeLoggingEvent[] nodeLoggingEventArray)
         {
             // We can safely assume that all messages need to be routed to the same engine because
-            // they originated from the same task. This is true as long as we don't allow multiple engines within 
+            // they originated from the same task. This is true as long as we don't allow multiple engines within
             // a single process to utilize external nodes.
             if (nodeLoggingEventArray.Length > 0)
             {

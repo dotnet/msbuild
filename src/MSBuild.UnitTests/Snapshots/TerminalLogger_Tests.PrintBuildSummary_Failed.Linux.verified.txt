@@ -1,4 +1,4 @@
 ﻿]9;4;3;\[?25l[1F
 [?25h
-Build [31;1mfailed[m in 0.0s
+Build [31;1mfailed[m in 5.0s
 ]9;4;0;\

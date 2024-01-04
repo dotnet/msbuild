@@ -127,7 +127,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             // This is where we're going to build up the final string to return to the caller.
             StringBuilder escapedString = new StringBuilder(unescapedString);
 
-            // Replace each unescaped special character with an escape sequence one            
+            // Replace each unescaped special character with an escape sequence one
             foreach (char unescapedChar in charsToEscape)
             {
                 int unescapedCharCode = Convert.ToInt32(unescapedChar);
