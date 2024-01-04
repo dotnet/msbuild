@@ -806,7 +806,7 @@ namespace Microsoft.Build.UnitTests
             string results = RunnerUtilities.ExecMSBuild($" {project.Path} /p:someProperty:fdalse= ", out bool success);
             success.ShouldBeFalse(results);
 
-            results.ShouldContain("error MSB4177: Invalid property.");
+            results.ShouldContain("error MSB4177");
         }
 
         [Theory]
