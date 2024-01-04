@@ -1,13 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
-#nullable disable
 
 namespace Microsoft.Build.Logging
 {
@@ -42,7 +37,7 @@ namespace Microsoft.Build.Logging
         /// and warnings summary at the end of a build.
         /// </summary>
         /// <value>null</value>
-        public string Parameters
+        public string? Parameters
         {
             get { return _loggerParameters; }
             set { _loggerParameters = value; }
@@ -52,7 +47,7 @@ namespace Microsoft.Build.Logging
         /// This property is set by the build engine to allow a node loggers to forward messages to the
         /// central logger
         /// </summary>
-        public IEventRedirector BuildEventRedirector
+        public IEventRedirector? BuildEventRedirector
         {
             get { return _buildEventRedirector; }
             set { _buildEventRedirector = value; }
@@ -98,10 +93,8 @@ namespace Microsoft.Build.Logging
                     // We can't know whether the project items needed to find ForwardProjectContextDescription
                     // will be set on ProjectStarted or ProjectEvaluationFinished because we don't know
                     // all of the other loggers that will be attached. So turn both on.
-                    eventSource.StatusEventRaised -= BuildStatusHandler;
-                    eventSource.StatusEventRaised += BuildStatusHandler;
-                    eventSource.ProjectStarted -= ForwardEvent;
-                    eventSource.ProjectStarted += ForwardEvent;
+                    eventSource.HandleStatusEventRaised(BuildStatusHandler);
+                    eventSource.HandleProjectStarted(ForwardEvent);
                 }
             }
         }
@@ -120,74 +113,58 @@ namespace Microsoft.Build.Logging
             switch (parameterName.ToUpperInvariant())
             {
                 case BuildStartedEventDescription:
-                    eventSource.BuildStarted -= ForwardEvent;
-                    eventSource.BuildStarted += ForwardEvent;
+                    eventSource.HandleBuildStarted(ForwardEvent);
                     break;
                 case BuildFinishedEventDescription:
-                    eventSource.BuildFinished -= ForwardEvent;
-                    eventSource.BuildFinished += ForwardEvent;
+                    eventSource.HandleBuildFinished(ForwardEvent);
                     break;
                 case ProjectStartedEventDescription:
-                    eventSource.ProjectStarted -= ForwardEvent;
-                    eventSource.ProjectStarted += ForwardEvent;
+                    eventSource.HandleProjectStarted(ForwardEvent);
                     break;
                 case ProjectFinishedEventDescription:
-                    eventSource.ProjectFinished -= ForwardEvent;
-                    eventSource.ProjectFinished += ForwardEvent;
+                    eventSource.HandleProjectFinished(ForwardEvent);
                     break;
                 case TargetStartedEventDescription:
-                    eventSource.TargetStarted -= ForwardEvent;
-                    eventSource.TargetStarted += ForwardEvent;
+                    eventSource.HandleTargetStarted(ForwardEvent);
                     break;
                 case TargetFinishedEventDescription:
-                    eventSource.TargetFinished -= ForwardEvent;
-                    eventSource.TargetFinished += ForwardEvent;
+                    eventSource.HandleTargetFinished(ForwardEvent);
                     break;
                 case TaskStartedEventDescription:
-                    eventSource.TaskStarted -= ForwardEvent;
-                    eventSource.TaskStarted += ForwardEvent;
+                    eventSource.HandleTaskStarted(ForwardEvent);
                     break;
                 case TaskFinishedEventDescription:
-                    eventSource.TaskFinished -= ForwardEvent;
-                    eventSource.TaskFinished += ForwardEvent;
+                    eventSource.HandleTaskFinished(ForwardEvent);
                     break;
                 case ErrorEventDescription:
-                    eventSource.ErrorRaised -= ForwardEvent;
-                    eventSource.ErrorRaised += ForwardEvent;
+                    eventSource.HandleErrorRaised(ForwardEvent);
                     break;
                 case WarningEventDescription:
-                    eventSource.WarningRaised -= ForwardEvent;
-                    eventSource.WarningRaised += ForwardEvent;
+                    eventSource.HandleWarningRaised(ForwardEvent);
                     break;
                 case CustomEventDescription:
-                    eventSource.CustomEventRaised -= ForwardEvent;
-                    eventSource.CustomEventRaised += ForwardEvent;
+                    eventSource.HandleCustomEventRaised(ForwardEvent);
                     break;
                 case HighMessageEventDescription:
-                    eventSource.MessageRaised -= MessageHandler;
-                    eventSource.MessageRaised += MessageHandler;
+                    eventSource.HandleMessageRaised(MessageHandler);
                     _forwardHighImportanceMessages = true;
                     break;
                 case NormalMessageEventDescription:
-                    eventSource.MessageRaised -= MessageHandler;
-                    eventSource.MessageRaised += MessageHandler;
+                    eventSource.HandleMessageRaised(MessageHandler);
                     _forwardNormalImportanceMessages = true;
                     break;
                 case LowMessageEventDescription:
-                    eventSource.MessageRaised -= MessageHandler;
-                    eventSource.MessageRaised += MessageHandler;
+                    eventSource.HandleMessageRaised(MessageHandler);
                     _forwardLowImportanceMessages = true;
                     break;
                 case CommandLineDescription:
-                    eventSource.MessageRaised -= MessageHandler;
-                    eventSource.MessageRaised += MessageHandler;
+                    eventSource.HandleMessageRaised(MessageHandler);
                     _forwardTaskCommandLine = true;
                     break;
                 case ProjectEvaluationStartedEventDescription:
                 case ProjectEvaluationFinishedEventDescription:
                 case ProjectEvaluationEventDescription:
-                    eventSource.StatusEventRaised -= BuildStatusHandler;
-                    eventSource.StatusEventRaised += BuildStatusHandler;
+                    eventSource.HandleStatusEventRaised(BuildStatusHandler);
                     break;
                 case PerformanceSummaryDescription:
                     _showPerfSummary = true;
@@ -243,18 +220,18 @@ namespace Microsoft.Build.Logging
 
         private void SetForwardingBasedOnVerbosity(IEventSource eventSource)
         {
-            eventSource.BuildStarted += ForwardEvent;
-            eventSource.BuildFinished += ForwardEvent;
+            eventSource.HandleBuildStarted(ForwardEvent);
+            eventSource.HandleBuildFinished(ForwardEvent);
 
             if (IsVerbosityAtLeast(LoggerVerbosity.Quiet))
             {
-                eventSource.ErrorRaised += ForwardEvent;
-                eventSource.WarningRaised += ForwardEvent;
+                eventSource.HandleErrorRaised(ForwardEvent);
+                eventSource.HandleWarningRaised(ForwardEvent);
             }
 
             if (IsVerbosityAtLeast(LoggerVerbosity.Minimal))
             {
-                eventSource.MessageRaised += MessageHandler;
+                eventSource.HandleMessageRaised(MessageHandler);
                 _forwardHighImportanceMessages = true;
             }
 
@@ -264,56 +241,42 @@ namespace Microsoft.Build.Logging
                 _forwardNormalImportanceMessages = true;
                 _forwardTaskCommandLine = true;
 
-                eventSource.ProjectStarted += ForwardEvent;
-                eventSource.ProjectFinished += ForwardEvent;
-                eventSource.TargetStarted += ForwardEvent;
-                eventSource.TargetFinished += ForwardEvent;
+                eventSource.HandleProjectStarted(ForwardEvent);
+                eventSource.HandleProjectFinished(ForwardEvent);
+                eventSource.HandleTargetStarted(ForwardEvent);
+                eventSource.HandleTargetFinished(ForwardEvent);
             }
 
             if (IsVerbosityAtLeast(LoggerVerbosity.Detailed))
             {
-                eventSource.TaskStarted += ForwardEvent;
-                eventSource.TaskFinished += ForwardEvent;
+                eventSource.HandleTaskStarted(ForwardEvent);
+                eventSource.HandleTaskFinished(ForwardEvent);
 
                 // MessageHandler already subscribed
                 _forwardLowImportanceMessages = true;
-                _forwardTaskCommandLine = true;
-                _forwardTaskCommandLine = true;
             }
 
             if (IsVerbosityAtLeast(LoggerVerbosity.Diagnostic))
             {
-                eventSource.CustomEventRaised += ForwardEvent;
-                eventSource.StatusEventRaised += BuildStatusHandler;
+                eventSource.HandleCustomEventRaised(ForwardEvent);
+                eventSource.HandleStatusEventRaised(BuildStatusHandler);
             }
 
             if (_showSummary)
             {
-                // Prevent double subscribe
-                eventSource.ErrorRaised -= ForwardEvent;
-                eventSource.WarningRaised -= ForwardEvent;
-                eventSource.ErrorRaised += ForwardEvent;
-                eventSource.WarningRaised += ForwardEvent;
+                eventSource.HandleErrorRaised(ForwardEvent);
+                eventSource.HandleWarningRaised(ForwardEvent);
             }
 
             if (_showPerfSummary)
             {
-                // Prevent double subscribe
-                eventSource.TaskStarted -= ForwardEvent;
-                eventSource.TaskFinished -= ForwardEvent;
-                eventSource.TargetStarted -= ForwardEvent;
-                eventSource.TargetFinished -= ForwardEvent;
-                eventSource.ProjectStarted -= ForwardEvent;
-                eventSource.ProjectFinished -= ForwardEvent;
-                eventSource.StatusEventRaised -= BuildStatusHandler;
-
-                eventSource.TaskStarted += ForwardEvent;
-                eventSource.TaskFinished += ForwardEvent;
-                eventSource.TargetStarted += ForwardEvent;
-                eventSource.TargetFinished += ForwardEvent;
-                eventSource.ProjectStarted += ForwardEvent;
-                eventSource.ProjectFinished += ForwardEvent;
-                eventSource.StatusEventRaised += BuildStatusHandler;
+                eventSource.HandleTaskStarted(ForwardEvent);
+                eventSource.HandleTaskFinished(ForwardEvent);
+                eventSource.HandleTargetStarted(ForwardEvent);
+                eventSource.HandleTargetFinished(ForwardEvent);
+                eventSource.HandleProjectStarted(ForwardEvent);
+                eventSource.HandleProjectFinished(ForwardEvent);
+                eventSource.HandleStatusEventRaised(BuildStatusHandler);
             }
 
             if (_showCommandLine)
@@ -408,7 +371,7 @@ namespace Microsoft.Build.Logging
         /// <param name="e">The <see cref="BuildEventArgs"/> to forward.</param>
         protected virtual void ForwardToCentralLogger(BuildEventArgs e)
         {
-            _buildEventRedirector.ForwardEvent(e);
+            _buildEventRedirector?.ForwardEvent(e);
         }
 
         /// <summary>
@@ -431,7 +394,7 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Console logger parameters.
         /// </summary>
-        private string _loggerParameters = null;
+        private string? _loggerParameters = null;
 
         /// <summary>
         /// Console logger parameters delimiters.
@@ -470,7 +433,7 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// A pointer to the central logger
         /// </summary>
-        private IEventRedirector _buildEventRedirector;
+        private IEventRedirector? _buildEventRedirector;
 
         /// <summary>
         /// Indicates if the events to forward are being set by the parameters sent to the logger
