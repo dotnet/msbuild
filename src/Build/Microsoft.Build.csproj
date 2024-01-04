@@ -251,6 +251,7 @@
     <Compile Include="Collections\RetrievableEntryHashSet\BitHelper.cs" />
     <Compile Include="Collections\RetrievableEntryHashSet\HashSetDebugView.cs" />
     <Compile Include="Collections\RetrievableEntryHashSet\HashHelpers.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\IRetrievableEntryHashSet.cs" />
     <Compile Include="Construction\ImplicitImportLocation.cs" />
     <Compile Include="Construction\ProjectSdkElement.cs" />
     <Compile Include="Definition\ProjectOptions.cs" />
@@ -369,6 +370,8 @@
     <Compile Include="Collections\CopyOnWritePropertyDictionary.cs" />
     <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
     <Compile Include="Collections\HashTableUtility.cs" />
+    <Compile Include="Collections\IConstrainableDictionary.cs" />
+    <Compile Include="Collections\IItemDictionary.cs" />
     <Compile Include="Collections\ItemDictionary.cs" />
     <Compile Include="Collections\IImmutable.cs" />
     <Compile Include="Collections\MultiDictionary.cs" />
@@ -491,6 +494,9 @@
     <Compile Include="Globbing\IMSBuildGlob.cs" />
     <Compile Include="Globbing\Visitor\ParsedGlobCollector.cs" />
     <!-- #### INSTANCE MODEL ### -->
+    <Compile Include="Instance\IImmutableInstanceProvider.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableElementCollectionConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableItemDictionary.cs" />
     <Compile Include="Instance\ReflectableTaskPropertyInfo.cs" />
     <Compile Include="Instance\HostServices.cs" />
     <Compile Include="Instance\ProjectTargetInstanceChild.cs" />
