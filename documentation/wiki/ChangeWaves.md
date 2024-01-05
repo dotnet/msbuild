@@ -31,6 +31,7 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 - [Change Version switch output to finish with a newline](https://github.com/dotnet/msbuild/pull/9485)
 - [Load Microsoft.DotNet.MSBuildSdkResolver into default load context (MSBuild.exe only)](https://github.com/dotnet/msbuild/pull/9439)
 - [Load NuGet.Frameworks into secondary AppDomain (MSBuild.exe only)](https://github.com/dotnet/msbuild/pull/9446)
+- [ResultsCache ignores some of the BuildRequest data, may return incorrect results](https://github.com/dotnet/msbuild/pull/9565)
 
 ### 17.8
 - [[RAR] Don't do I/O on SDK-provided references](https://github.com/dotnet/msbuild/pull/8688)
