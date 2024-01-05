@@ -487,7 +487,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private void UpdateFileReference(BaseReference f, string targetFrameworkVersion)
         {
-            if (String.IsNullOrEmpty(f.ResolvedPath))
+            if (string.IsNullOrEmpty(f.ResolvedPath))
             {
                 throw new FileNotFoundException(null, f.SourcePath);
             }
@@ -506,22 +506,33 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             f.Size = size;
 
             //
-            // .NETCore Launcher.exe based Deployment: If the filereference is for apphost.exe, we need to change
-            // the ResolvedPath and TargetPath to {assemblyname}.exe before we write the manifest, so that the
-            // manifest does not have a file reference to apphost.exe
+            // .NET >= 5 ClickOnce: If the file reference is for apphost.exe, we need to change the filename
+            // in ResolvedPath to TargetPath so we don't end up publishing the file as apphost.exe.
+            // If the TargetPath is not present, we will fallback to AssemblyName.
             //
             string fileName = Path.GetFileName(f.ResolvedPath);
             if (LauncherBasedDeployment &&
-                fileName.Equals(Constants.AppHostExe, StringComparison.InvariantCultureIgnoreCase) &&
-                !String.IsNullOrEmpty(AssemblyName))
+                fileName.Equals(Constants.AppHostExe, StringComparison.InvariantCultureIgnoreCase))
             {
-                f.ResolvedPath = Path.Combine(Path.GetDirectoryName(f.ResolvedPath), AssemblyName);
-                f.TargetPath = BaseReference.GetDefaultTargetPath(f.ResolvedPath);
+                if (!string.IsNullOrEmpty(f.TargetPath))
+                {
+                    f.ResolvedPath = Path.Combine(Path.GetDirectoryName(f.ResolvedPath), f.TargetPath);
+                }
+                else if (!string.IsNullOrEmpty(AssemblyName))
+                {
+                    f.ResolvedPath = Path.Combine(Path.GetDirectoryName(f.ResolvedPath), AssemblyName);
+                    f.TargetPath = BaseReference.GetDefaultTargetPath(f.ResolvedPath);
+                }
+                else
+                {
+                    Debug.Assert(false, "AssemblyName cannot be empty");
+                    OutputMessages.AddWarningMessage("GenerateManifest.InvalidValue", "AssemblyName");
+                }
             }
 
-            if (String.IsNullOrEmpty(f.TargetPath))
+            if (string.IsNullOrEmpty(f.TargetPath))
             {
-                if (!String.IsNullOrEmpty(f.SourcePath))
+                if (!string.IsNullOrEmpty(f.SourcePath))
                 {
                     f.TargetPath = BaseReference.GetDefaultTargetPath(f.SourcePath);
                 }
