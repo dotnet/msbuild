@@ -292,8 +292,6 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         protected MessageImportance StandardErrorImportanceToUse => _standardErrorImportanceToUse;
 
-        protected nint ProcessHandle { get; set; }
-
         #endregion
 
         #region Private properties
@@ -326,6 +324,8 @@ namespace Microsoft.Build.Utilities
         /// Overridable function called after <see cref="Process.Start()"/> in <see cref="ExecuteTool"/>
         /// </summary>
         protected virtual void ProcessStarted() { }
+
+        protected virtual void ProcessStarted(nint processHandle) { }
 
         /// <summary>
         /// Gets the fully qualified tool name. Should return ToolExe if ToolTask should search for the tool
@@ -725,10 +725,9 @@ namespace Microsoft.Build.Utilities
                     proc.StandardInput.Dispose();
                 }
 
-                ProcessHandle = proc.Handle;
-
                 // Call user-provided hook for code that should execute immediately after the process starts
-                this.ProcessStarted();
+                ProcessStarted();
+                ProcessStarted(proc.Handle);
 
                 // sign up for stderr callbacks
                 proc.BeginErrorReadLine();
