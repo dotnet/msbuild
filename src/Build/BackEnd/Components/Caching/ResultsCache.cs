@@ -21,7 +21,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The presence of any of these flags affects build result for the specified request.
         /// </summary>
-        private readonly BuildRequestDataFlags _flagsAffectingBuildResults = BuildRequestDataFlags.ProvideProjectStateAfterBuild;
+        private const BuildRequestDataFlags FlagsAffectingBuildResults = BuildRequestDataFlags.ProvideProjectStateAfterBuild;
 
         /// <summary>
         /// The table of all build results.  This table is indexed by configuration id and
@@ -346,13 +346,13 @@ namespace Microsoft.Build.BackEnd
         /// <param name="buildRequestDataFlags">The current request build flags.</param>
         /// <param name="buildResultDataFlags">The existing build result data flags.</param>
         /// <returns>False if there is any difference in the data flags that can cause missed build data, true otherwise.</returns>
-        private bool CheckBuildDataFlagsResults(BuildRequestDataFlags buildRequestDataFlags, BuildRequestDataFlags buildResultDataFlags) =>
+        private static bool CheckBuildDataFlagsResults(BuildRequestDataFlags buildRequestDataFlags, BuildRequestDataFlags buildResultDataFlags) =>
 
             // Even if both buildRequestDataFlags and buildResultDataFlags have ProvideSubsetOfStateAfterBuild flag,
             // the underlying RequestedProjectState may have different user filters defined.
             // It is more reliable to ignore the cached value. 
             !buildRequestDataFlags.HasFlag(BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild)
-            & (buildRequestDataFlags & _flagsAffectingBuildResults) == (buildResultDataFlags & _flagsAffectingBuildResults);
+            && (buildRequestDataFlags & FlagsAffectingBuildResults) == (buildResultDataFlags & FlagsAffectingBuildResults);
 
         public IEnumerator<BuildResult> GetEnumerator()
         {

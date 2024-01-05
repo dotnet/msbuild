@@ -116,6 +116,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private ProjectInstance _projectStateAfterBuild;
 
+        /// <summary>
+        /// The flags provide additional control over the build results and may affect the cached value.
+        /// </summary>
         private BuildRequestDataFlags _buildRequestDataFlags;
 
         private string _schedulerInducedError;
@@ -384,14 +387,10 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Gets or sets the flags that provide additional control over the build request.
+        /// Gets the flags that were used in the build request to which these results are associated.
         /// See <see cref="Execution.BuildRequestDataFlags"/> for examples of the available flags.
         /// </summary>
-        public BuildRequestDataFlags BuildRequestDataFlags
-        {
-            get => _buildRequestDataFlags;
-            set => _buildRequestDataFlags = value;
-        }
+        public BuildRequestDataFlags BuildRequestDataFlags => _buildRequestDataFlags;
 
         /// <summary>
         /// Returns the node packet type.
