@@ -139,6 +139,11 @@ internal sealed partial class TerminalLogger : INodeLogger
     private bool _manualRefresh;
 
     /// <summary>
+    /// True if we've logged the ".NET SDK is preview" message.
+    /// </summary>
+    private bool _loggedPreviewMessage;
+
+    /// <summary>
     /// List of events the logger needs as parameters to the <see cref="ConfigurableForwardingLogger"/>.
     /// </summary>
     /// <remarks>
@@ -569,6 +574,16 @@ internal sealed partial class TerminalLogger : INodeLogger
             if (IsImmediateMessage(message))
             {
                 RenderImmediateMessage(message);
+            }
+
+            if (e.Code == "NETSDK1057" && !_loggedPreviewMessage)
+            {
+                // The SDK will log the high-pri "not-a-warning" message NETSDK1057
+                // when it's a preview version up to MaxCPUCount times, but that's
+                // an implementation detail--the user cares about at most one.
+
+                RenderImmediateMessage(message);
+                _loggedPreviewMessage = true;
             }
         }
     }
