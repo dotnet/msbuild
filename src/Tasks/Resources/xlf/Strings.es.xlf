@@ -118,7 +118,7 @@
       </trans-unit>
       <trans-unit id="AxTlbBaseTask.StrongNameUtils.NoPublicKeySpecified">
         <source>MSB3654: Delay signing requires that at least a public key be specified.  Please either supply a public key using the KeyFile or KeyContainer properties, or disable delay signing.</source>
-        <target state="translated">MSB3654: La firma retrasada requiere que se especifique al menos una clave pública.  Proporcione una clave pública mediante las propiedades KeyFile o KeyContainer, o deshabilite la firma retrasada.</target>
+        <target state="translated">MSB3654: La firma retardada requiere que se especifique al menos una clave pública.  Proporcione una clave pública mediante las propiedades KeyFile o KeyContainer, o deshabilite la firma retardada.</target>
         <note>{StrBegin="MSB3654: "}</note>
       </trans-unit>
       <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
@@ -195,6 +195,11 @@
         <source>MSB3894: Got {0} copying "{1}" to "{2}" and HR is {3}</source>
         <target state="translated">MSB3894: Se obtuvo {0} al copiar "{1}" en "{2}" y HR es {3}</target>
         <note>{StrBegin="MSB3894: "} LOCALIZATION: {0} is exception.ToString(), {1} and {2} are paths, {3} is a number")</note>
+      </trans-unit>
+      <trans-unit id="Copy.IncompatibleParameters">
+        <source>MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</source>
+        <target state="translated">MSB3896: "{0}" y "{1}" se especificaron como parámetros en el archivo de proyecto, pero no se pueden usar juntos. Elija una u otra.</target>
+        <note>{StrBegin="MSB3896: "}</note>
       </trans-unit>
       <trans-unit id="Copy.LinkFailed">
         <source>MSB3893: Could not use a link to copy "{0}" to "{1}".</source>
@@ -2175,11 +2180,6 @@
         <target state="translated">El archivo de lista de paquetes redistribuibles "{0}" tiene un nombre Redist NULL o vacío en el elemento FileList. Asegúrese de que el nombre Redist no sea NULL ni esté vacío.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
-        <source>Updating assembly cache file "{0}".</source>
-        <target state="translated">Actualizando el archivo de caché de ensamblado "{0}".</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
         <source>COM Reference '{0}' is the interop assembly for ActiveX control '{1}' but was marked to be linked by the compiler with the /link flag. This COM reference will be treated as a reference and will not be linked.</source>
         <target state="translated">La referencia COM '{0}' es el ensamblado de interoperabilidad del control ActiveX '{1}' pero estaba marcada para su vinculación por el compilador con la marca /link. Esta referencia COM se tratará como una referencia y no se vinculará.</target>
@@ -2302,7 +2302,7 @@
       </trans-unit>
       <trans-unit id="ResolveComReference.LoadingDelaySignedAssemblyWithStrongNameVerificationEnabled">
         <source>MSB3295: Failed to load an assembly. Please make sure you have disabled strong name verification for your public key if you want to generate delay signed wrappers. {0}</source>
-        <target state="translated">MSB3295: No se pudo cargar un ensamblado. Asegúrese de que deshabilitó la comprobación de nombres seguros para su clave pública si desea generar contenedores de firma con retraso. {0}</target>
+        <target state="translated">MSB3295: No se pudo cargar un ensamblado. Asegúrese de que deshabilitó la comprobación de nombres seguros para su clave pública si desea generar contenedores de firma retardada. {0}</target>
         <note>{StrBegin="MSB3295: "}</note>
       </trans-unit>
       <trans-unit id="ResolveComReference.MissingOrUnknownComReferenceAttribute">
@@ -2511,7 +2511,7 @@
       </trans-unit>
       <trans-unit id="StrongNameUtils.NoPublicKeySpecified">
         <source>MSB3353: Public key necessary for delay signing was not specified.</source>
-        <target state="translated">MSB3353: No se especificó la clave pública necesaria para la firma con retraso.</target>
+        <target state="translated">MSB3353: No se especificó la clave pública necesaria para la firma retardada.</target>
         <note>{StrBegin="MSB3353: "}</note>
       </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">

@@ -88,7 +88,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Construct a lookup over specified items and properties.
         /// </summary>
-        internal Lookup(ItemDictionary<ProjectItemInstance> projectItems, PropertyDictionary<ProjectPropertyInstance> properties)
+        internal Lookup(IItemDictionary<ProjectItemInstance> projectItems, PropertyDictionary<ProjectPropertyInstance> properties)
         {
             ErrorUtilities.VerifyThrowInternalNull(projectItems, nameof(projectItems));
             ErrorUtilities.VerifyThrowInternalNull(properties, nameof(properties));
@@ -120,7 +120,7 @@ namespace Microsoft.Build.BackEnd
         // Convenience private properties
         // "Primary" is the "top" or "innermost" scope
         // "Secondary" is the next from the top.
-        private ItemDictionary<ProjectItemInstance> PrimaryTable
+        private IItemDictionary<ProjectItemInstance> PrimaryTable
         {
             get { return _lookupScopes.First.Value.Items; }
             set { _lookupScopes.First.Value.Items = value; }
@@ -150,7 +150,7 @@ namespace Microsoft.Build.BackEnd
             set { _lookupScopes.First.Value.PropertySets = value; }
         }
 
-        private ItemDictionary<ProjectItemInstance> SecondaryTable
+        private IItemDictionary<ProjectItemInstance> SecondaryTable
         {
             get { return _lookupScopes.First.Next.Value.Items; }
             set { _lookupScopes.First.Next.Value.Items = value; }
@@ -870,7 +870,7 @@ namespace Microsoft.Build.BackEnd
         /// Applies a list of modifications to the appropriate <see cref="ItemDictionary{ProjectItemInstance}" /> in a main table.
         /// If any modifications conflict, these modifications win.
         /// </summary>
-        private void ApplyModificationsToTable(ItemDictionary<ProjectItemInstance> table, string itemType, ItemsMetadataUpdateDictionary modify)
+        private void ApplyModificationsToTable(IItemDictionary<ProjectItemInstance> table, string itemType, ItemsMetadataUpdateDictionary modify)
         {
             ICollection<ProjectItemInstance> existing = table[itemType];
             if (existing != null)
@@ -1295,7 +1295,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Contains all of the original items at this level in the Lookup
             /// </summary>
-            private ItemDictionary<ProjectItemInstance> _items;
+            private IItemDictionary<ProjectItemInstance> _items;
 
             /// <summary>
             /// Contains all of the items which have been added at this level in the Lookup
@@ -1344,7 +1344,7 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private bool _truncateLookupsAtThisScope;
 
-            internal Scope(Lookup lookup, string description, ItemDictionary<ProjectItemInstance> items, PropertyDictionary<ProjectPropertyInstance> properties)
+            internal Scope(Lookup lookup, string description, IItemDictionary<ProjectItemInstance> items, PropertyDictionary<ProjectPropertyInstance> properties)
             {
                 _owningLookup = lookup;
                 _description = description;
@@ -1364,7 +1364,7 @@ namespace Microsoft.Build.BackEnd
             /// include adds or removes unless it's the table in
             /// the outermost scope.
             /// </summary>
-            internal ItemDictionary<ProjectItemInstance> Items
+            internal IItemDictionary<ProjectItemInstance> Items
             {
                 get { return _items; }
                 set { _items = value; }

@@ -196,6 +196,11 @@
         <target state="translated">MSB3894: "{1}" を "{2}" にコピー中に {0}が発生しました。HR は {3} です</target>
         <note>{StrBegin="MSB3894: "} LOCALIZATION: {0} is exception.ToString(), {1} and {2} are paths, {3} is a number")</note>
       </trans-unit>
+      <trans-unit id="Copy.IncompatibleParameters">
+        <source>MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</source>
+        <target state="translated">MSB3896: "{0}" と "{1}" の両方がプロジェクト ファイルのパラメーターとして指定されましたが、一緒に使用することはできません。どちらか一方を選択してください。</target>
+        <note>{StrBegin="MSB3896: "}</note>
+      </trans-unit>
       <trans-unit id="Copy.LinkFailed">
         <source>MSB3893: Could not use a link to copy "{0}" to "{1}".</source>
         <target state="translated">MSB3893: リンクを使用して "{0}" を "{1}" にコピーできませんでした。</target>
@@ -2173,11 +2178,6 @@
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
         <target state="translated">再頒布可能パッケージ リスト ファイル "{0}" の FileList 要素に null または空の再頒布可能パッケージ名があります。再頒布可能パッケージ名が null または空でないことを確認してください。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
-        <source>Updating assembly cache file "{0}".</source>
-        <target state="translated">アセンブリ キャッシュ ファイル "{0}" を更新しています。</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">

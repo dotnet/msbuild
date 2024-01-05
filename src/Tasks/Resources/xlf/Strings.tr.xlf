@@ -196,6 +196,11 @@
         <target state="translated">MSB3894: {0} için {1} yolu {2} yoluna kopyalandı ve HR: {3}</target>
         <note>{StrBegin="MSB3894: "} LOCALIZATION: {0} is exception.ToString(), {1} and {2} are paths, {3} is a number")</note>
       </trans-unit>
+      <trans-unit id="Copy.IncompatibleParameters">
+        <source>MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</source>
+        <target state="translated">MSB3896: "{0}" ve "{1}" proje dosyasında parametre olarak belirtilmiş ancak birlikte kullanılamaz. Lütfen birini veya diğerini seçin.</target>
+        <note>{StrBegin="MSB3896: "}</note>
+      </trans-unit>
       <trans-unit id="Copy.LinkFailed">
         <source>MSB3893: Could not use a link to copy "{0}" to "{1}".</source>
         <target state="translated">MSB3893: "{0}" dosyasını "{1}" yoluna kopyalama bağlantısı kullanılamadı.</target>
@@ -2173,11 +2178,6 @@
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
         <target state="translated">"{0}" yeniden dağıtım liste dosyasının FileList öğesindeki Redist adı null veya boş. Redist adının null veya boş olmadığından emin olun.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
-        <source>Updating assembly cache file "{0}".</source>
-        <target state="translated">Derleme önbelleği dosyası "{0}" güncelleştiriliyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">

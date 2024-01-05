@@ -575,17 +575,20 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;logger&gt;   Použít daný protokolovací nástroj k protokolování událostí nástroje MSBuild. Pokud chcete zadat 
-                     více protokolovacích nástrojů, musíte je zadat jednotlivě.
-                     Syntaxe hodnoty &lt;logger&gt; je:
-                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
-                     Syntaxe hodnoty &lt;logger class&gt; je:
-                       [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
-                     Syntaxe hodnoty &lt;logger assembly&gt; je:
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+        <target state="translated">  -logger:&lt;protok_nást&gt;   Použít daný protokolovací nástroj k protokolování
+                     událostí nástroje MSBuild. Chcete-li zadat více protokolovacích.
+                     nástrojů, musíte je zadat jednotlivě.
+                     Syntaxe hodnoty &lt;protok_nást&gt;:
+                        [&lt;třída_protok_nást&gt;,]&lt;sestavení_protok_nást&gt;
+                        [;&lt;param_protok_nást&gt;]
+                     Syntaxe hodnoty &lt;třída_protok_nást&gt;:
+                        [&lt;část/úpl_obor_názvů&gt;.]&lt;náz_tř_protok_nást&gt;
+                     Syntaxe hodnoty &lt;sestavení_protok_nást&gt;:
+                        {&lt;název_sestavení&gt;[,&lt;strong name&gt;] | &lt;soubor_sestavení&gt;}
                      Parametry protokolovacího nástroje určují, jak MSBuild vytvoří protokolovací nástroj.
-                     Parametry &lt;logger parameters&gt; jsou volitelné a předávají se
-                     protokolovacímu nástroji přesně v tom tvaru, v jakém byly zadány. (Krátký tvar: -l)
+                     Parametry &lt;param_protok_nást&gt; jsou volitelné a předávají se 
+                     protokolovacímu nástroji přesně v tom tvaru, v jakém
+                     byly zadány. (Krátký tvar: -l)
                      Příklady:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
@@ -854,20 +857,23 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  -distributedLogger:&lt;central logger&gt;*&lt;forwarding logger&gt;
-                     Použít zadaný protokolovací nástroj pro protokolování událostí z nástroje MSBuild; ke každému uzlu připojit
-                     jinou instanci protokolovacího nástroje. Pokud chcete zadat více
-                     protokolovacích nástrojů, uveďte je jednotlivě.
+        <target state="translated">  -distributedlogger:&lt;centr_protok_nást&gt;*&lt;předáv_protok_nást&gt;                     
+                     Použít zadaný protokolovací nástroj pro protokolování událostí
+                     z nástroje MSBuild; ke každému uzlu připojit jinou instanci 
+                     protokolovacího nástroje. Chcete-li zadat více 
+                     protokolovacích nástrojů, uveďte je jednotlivě. 
                      (Krátký tvar: -dl)
-                     Syntaxe hodnoty &lt;logger&gt; je:
-                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
-                     Syntaxe hodnoty &lt;logger class&gt; je:
-                       [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
-                     Syntaxe hodnoty &lt;logger assembly&gt; je:
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                     Syntaxe hodnoty &lt;protok_nást&gt;:
+                        [&lt;třída_protok_nást&gt;,]&lt;sestav_protok_nást&gt;
+                        [;&lt;param_protok_nást&gt;]
+                     Syntaxe hodnoty &lt;třída_protok_nást&gt;:
+                        [&lt;část/úpl_obor_názvů&gt;.]&lt;náz_tř_protok_nást&gt;
+                     Syntaxe hodnoty &lt;sestav_protok_nást&gt;:
+                        {&lt;název_sestavení&gt;[,&lt;strong name&gt;] | &lt;soubor_sestavení&gt;}
                      Parametry protokolovacího nástroje určují, jak MSBuild vytvoří protokolovací nástroj.
                      Parametry &lt;param_protok_nást&gt; jsou volitelné a předávají se
-                     protokolovacímu nástroji přesně v zadaném tvaru. (Krátký tvar: -l)
+                     protokolovacímu nástroji přesně v zadaném tvaru.
+                     (Krátký tvar: -l)
                      Příklady:
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
@@ -1055,7 +1061,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                                              Verbosity=diagnostic;Encoding=UTF-8
 
                        -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
-                       -flp1:warningsonly;logfile=msbuild.wrn
+                       -flp1:warningsonly;logfile=msbuild.wrn 
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1467,11 +1473,12 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
         <note>{StrBegin="MSBUILD : error MSB1062: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-warnnotaserror" and "-warnaserror" should not be localized.</note>
       </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
-        <source>The specified logger could not be created and will not be used. {0}</source>
-        <target state="translated">Zadaný protokolovací nástroj nebylo možné vytvořit a nebude se používat. {0}</target>
+        <source>The specified logger "{0}" could not be created and will not be used. {1}</source>
+        <target state="new">The specified logger "{0}" could not be created and will not be used. {1}</target>
         <note>
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
-      LOCALIZATION: {0} contains the exception message explaining why the
+      LOCALIZATION: {0} contains the logger description passed on the command line or in a
+      response file. {1} contains the exception message explaining why the
       logger could not be created -- this message comes from the CLR/FX and is localized.
     </note>
       </trans-unit>

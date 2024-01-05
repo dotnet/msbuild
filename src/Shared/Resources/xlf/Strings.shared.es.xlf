@@ -17,6 +17,11 @@
         <target state="translated">Compilación iniciada.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CollectionCopyToFailureProvidedArrayIsTooSmall">
+        <source>The number of elements in the collection is greater than the available space in the destination array (when starting at the specified index).</source>
+        <target state="new">The number of elements in the collection is greater than the available space in the destination array (when starting at the specified index).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ConflictingTaskAssembly">
         <source>MSB4008: A conflicting assembly for the task assembly "{0}" has been found at "{1}".</source>
         <target state="translated">MSB4008: Se detectó un ensamblado conflictivo para el ensamblado de tarea "{0}" en "{1}".</target>

@@ -1776,10 +1776,6 @@
     <value>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</value>
     <comment></comment>
   </data>
-  <data name="ResolveAssemblyReference.WritingCacheFile">
-    <value>Updating assembly cache file "{0}".</value>
-    <comment></comment>
-  </data>
   <!--
         The ResolveComReference message bucket is: MSB3281 - MSB3320
 
@@ -2792,6 +2788,10 @@
   <data name="Copy.RetryingOnAccessDenied">
     <value>MSB3895: Retrying on ERROR_ACCESS_DENIED because environment variable MSBUILDALWAYSRETRY=1</value>
     <comment>{StrBegin="MSB3895: "} LOCALIZATION: Do NOT translate MSBUILDALWAYSRETRY)</comment>
+  </data>
+  <data name="Copy.IncompatibleParameters">
+    <value>MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</value>
+    <comment>{StrBegin="MSB3896: "}</comment>
   </data>
 
   <!--

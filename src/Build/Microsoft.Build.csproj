@@ -251,6 +251,7 @@
     <Compile Include="Collections\RetrievableEntryHashSet\BitHelper.cs" />
     <Compile Include="Collections\RetrievableEntryHashSet\HashSetDebugView.cs" />
     <Compile Include="Collections\RetrievableEntryHashSet\HashHelpers.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\IRetrievableEntryHashSet.cs" />
     <Compile Include="Construction\ImplicitImportLocation.cs" />
     <Compile Include="Construction\ProjectSdkElement.cs" />
     <Compile Include="Definition\ProjectOptions.cs" />
@@ -369,6 +370,8 @@
     <Compile Include="Collections\CopyOnWritePropertyDictionary.cs" />
     <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
     <Compile Include="Collections\HashTableUtility.cs" />
+    <Compile Include="Collections\IConstrainableDictionary.cs" />
+    <Compile Include="Collections\IItemDictionary.cs" />
     <Compile Include="Collections\ItemDictionary.cs" />
     <Compile Include="Collections\IImmutable.cs" />
     <Compile Include="Collections\MultiDictionary.cs" />
@@ -491,6 +494,9 @@
     <Compile Include="Globbing\IMSBuildGlob.cs" />
     <Compile Include="Globbing\Visitor\ParsedGlobCollector.cs" />
     <!-- #### INSTANCE MODEL ### -->
+    <Compile Include="Instance\IImmutableInstanceProvider.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableElementCollectionConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableItemDictionary.cs" />
     <Compile Include="Instance\ReflectableTaskPropertyInfo.cs" />
     <Compile Include="Instance\HostServices.cs" />
     <Compile Include="Instance\ProjectTargetInstanceChild.cs" />
@@ -670,4 +676,54 @@
       <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
+
+  <PropertyGroup>
+    <NuGetFrameworkWrapperRedirects_FilePath>$(IntermediateOutputPath)NuGetFrameworkWrapper.redirects.cs</NuGetFrameworkWrapperRedirects_FilePath>
+  </PropertyGroup>
+
+  <!-- Extract binding redirects for Microsoft.Build from MSBuild.exe.config into a source file -->
+  <Target Name="GenerateAppDomainConfig"
+          Inputs="..\MSBuild\app.config;..\MSBuild\app.amd64.config"
+          Outputs="$(NuGetFrameworkWrapperRedirects_FilePath)"
+          BeforeTargets="CoreCompile"
+          Condition="'$(FeatureAppDomain)' == 'true'">
+    <PropertyGroup>
+      <BindingRedirectNamespace>&lt;Namespace Prefix='ns' Uri='urn:schemas-microsoft-com:asm.v1' /&gt;</BindingRedirectNamespace>
+      <BindingRedirectXPath>/configuration/runtime/ns:assemblyBinding/ns:dependentAssembly[ns:assemblyIdentity/@name='Microsoft.Build']</BindingRedirectXPath>
+    </PropertyGroup>
+
+    <XmlPeek XmlInputPath="..\MSBuild\app.config" Query="$(BindingRedirectXPath)" Namespaces="$(BindingRedirectNamespace)">
+      <Output TaskParameter="Result" ItemName="BindingRedirect32" />
+    </XmlPeek>
+    <XmlPeek XmlInputPath="..\MSBuild\app.amd64.config" Query="$(BindingRedirectXPath)" Namespaces="$(BindingRedirectNamespace)">
+      <Output TaskParameter="Result" ItemName="BindingRedirect64" />
+    </XmlPeek>
+
+    <PropertyGroup>
+      <NuGetFrameworkWrapperRedirects_Content><![CDATA[
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+namespace Microsoft.Build.Evaluation%3B;
+
+[System.CodeDom.Compiler.GeneratedCode("GenerateAppDomainConfig", "1.0")]
+internal sealed partial class NuGetFrameworkWrapper
+{
+    private const string _bindingRedirect32 = """;@(BindingRedirect32);"""%3B;
+    private const string _bindingRedirect64 = """;@(BindingRedirect64);"""%3B;
+}
+]]>
+      </NuGetFrameworkWrapperRedirects_Content>
+    </PropertyGroup>
+
+    <WriteLinesToFile File="$(NuGetFrameworkWrapperRedirects_FilePath)" Overwrite="true" WriteOnlyWhenDifferent="true" Lines="$(NuGetFrameworkWrapperRedirects_Content)" />
+
+    <ItemGroup>
+      <Compile Remove="$(NuGetFrameworkWrapperRedirects_FilePath)" />
+      <Compile Include="$(NuGetFrameworkWrapperRedirects_FilePath)">
+        <Link>Utilities\NuGetFrameworkWrapper.redirects.cs</Link>
+      </Compile>
+      <FileWrites Include="$(NuGetFrameworkWrapperRedirects_FilePath)" />
+    </ItemGroup>
+  </Target>
 </Project>

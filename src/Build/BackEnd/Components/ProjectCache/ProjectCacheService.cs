@@ -95,7 +95,10 @@ namespace Microsoft.Build.Experimental.ProjectCache
         /// <summary>
         /// Optimization which frontloads plugin initialization since we have an entire graph.
         /// </summary>
-        public void InitializePluginsForGraph(ProjectGraph projectGraph, CancellationToken cancellationToken)
+        public void InitializePluginsForGraph(
+            ProjectGraph projectGraph,
+            ICollection<string> requestedTargets,
+            CancellationToken cancellationToken)
         {
             EnsureNotDisposed();
 
@@ -111,7 +114,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                             foreach (ProjectCacheDescriptor projectCacheDescriptor in GetProjectCacheDescriptors(node.ProjectInstance))
                             {
                                 // Intentionally fire-and-forget to asynchronously initialize the plugin. Any exceptions will bubble up later when querying.
-                                _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph, buildRequestConfiguration: null, cancellationToken)
+                                _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph, buildRequestConfiguration: null, requestedTargets, cancellationToken)
                                     .ContinueWith(t => { }, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted);
                             }
                         });
@@ -122,6 +125,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         public void InitializePluginsForVsScenario(
             IEnumerable<ProjectCacheDescriptor> projectCacheDescriptors,
             BuildRequestConfiguration buildRequestConfiguration,
+            ICollection<string> requestedTargets,
             CancellationToken cancellationToken)
         {
             EnsureNotDisposed();
@@ -144,7 +148,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                         projectCacheDescriptor =>
                         {
                             // Intentionally fire-and-forget to asynchronously initialize the plugin. Any exceptions will bubble up later when querying.
-                            _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph: null, buildRequestConfiguration, cancellationToken)
+                            _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph: null, buildRequestConfiguration, requestedTargets, cancellationToken)
                                 .ContinueWith(t => { }, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted);
                         });
                 },
@@ -155,12 +159,13 @@ namespace Microsoft.Build.Experimental.ProjectCache
             ProjectCacheDescriptor projectCacheDescriptor,
             ProjectGraph? projectGraph,
             BuildRequestConfiguration? buildRequestConfiguration,
+            ICollection<string> requestedTargets,
             CancellationToken cancellationToken)
             => _projectCachePlugins.GetOrAdd(
                 projectCacheDescriptor,
                 // The use of Lazy is because ConcurrentDictionary doesn't guarantee the value factory executes only once if there are multiple simultaneous callers,
                 // so this ensures that CreateAndInitializePluginAsync is only called exactly once.
-                descriptor => new Lazy<Task<ProjectCachePlugin>>(() => CreateAndInitializePluginAsync(descriptor, projectGraph, buildRequestConfiguration, cancellationToken)))
+                descriptor => new Lazy<Task<ProjectCachePlugin>>(() => CreateAndInitializePluginAsync(descriptor, projectGraph, buildRequestConfiguration, requestedTargets, cancellationToken)))
                .Value;
 
         private IEnumerable<ProjectCacheDescriptor> GetProjectCacheDescriptors(ProjectInstance projectInstance)
@@ -189,6 +194,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             ProjectCacheDescriptor projectCacheDescriptor,
             ProjectGraph? projectGraph,
             BuildRequestConfiguration? buildRequestConfiguration,
+            ICollection<string> requestedTargets,
             CancellationToken cancellationToken)
         {
             BuildEventContext buildEventContext = BuildEventContext.Invalid;
@@ -241,6 +247,9 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 ? GetGraphEntryPoints(buildRequestConfiguration)
                 : null;
 
+            // In practice, the underlying type of the ICollection is a List<string> so attempt to cast first
+            IReadOnlyList<string> requestedTargetsList = requestedTargets as List<string> ?? requestedTargets.ToList();
+
             _loggingService.LogComment(buildEventContext, MessageImportance.High, "LoadingProjectCachePlugin", pluginTypeName);
             MSBuildEventSource.Log.ProjectCacheBeginBuildStart(pluginTypeName);
 
@@ -250,6 +259,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     new CacheContext(
                         projectCacheDescriptor.PluginSettings,
                         DefaultMSBuildFileSystem.Instance,
+                        requestedTargetsList,
                         projectGraph,
                         graphEntryPoints),
                     pluginLogger,
@@ -517,7 +527,8 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     continue;
                 }
 
-                ProjectCachePlugin plugin = await GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph: null, buildRequestConfiguration, cancellationToken);
+                ICollection<string> requestedTargetsList = buildRequestConfiguration.RequestedTargets as ICollection<string> ?? buildRequestConfiguration.RequestedTargets.ToList();
+                ProjectCachePlugin plugin = await GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph: null, buildRequestConfiguration, requestedTargetsList, cancellationToken);
                 try
                 {
                     // Rethrow any initialization exception.
