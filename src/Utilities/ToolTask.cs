@@ -292,6 +292,8 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         protected MessageImportance StandardErrorImportanceToUse => _standardErrorImportanceToUse;
 
+        protected nint ProcessHandle { get; set; }
+
         #endregion
 
         #region Private properties
@@ -722,6 +724,8 @@ namespace Microsoft.Build.Utilities
                 {
                     proc.StandardInput.Dispose();
                 }
+
+                ProcessHandle = proc.Handle;
 
                 // Call user-provided hook for code that should execute immediately after the process starts
                 this.ProcessStarted();
