@@ -7,6 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 #endif
 using System.Reflection;
+#if FEATURE_ASSEMBLYLOADCONTEXT
+using System.Runtime.Loader;
+#endif
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 
@@ -152,16 +155,24 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
             string? assemblyName = args.LoadedAssembly.FullName;
             string assemblyPath = args.LoadedAssembly.IsDynamic ? string.Empty : args.LoadedAssembly.Location;
             Guid mvid = args.LoadedAssembly.ManifestModule.ModuleVersionId;
+#if FEATURE_ASSEMBLYLOADCONTEXT
+            // AssemblyLoadContext.GetLoadContext returns null when the assembly isn't a RuntimeAssembly, which should not be the case here.
+            // Name would only be null if the AssemblyLoadContext didn't supply a name, but MSBuildLoadContext does.
+            string appDomainDescriptor = AssemblyLoadContext.GetLoadContext(args.LoadedAssembly)?.Name ?? "Unknown";
+#else
             string? appDomainDescriptor = _appDomain.IsDefaultAppDomain()
                 ? null
                 : $"{_appDomain.Id}|{_appDomain.FriendlyName}";
+#endif
 
+            AssemblyLoadBuildEventArgs buildArgs = new(_context, _initiator, assemblyName, assemblyPath, mvid, appDomainDescriptor);
 
-            AssemblyLoadBuildEventArgs buildArgs = new(_context, _initiator, assemblyName, assemblyPath, mvid, appDomainDescriptor)
+            // Fix #8816 - when LoggingContext does not have BuildEventContext it is unable to log anything
+            if (_loggingContext?.BuildEventContext != null)
             {
-                BuildEventContext = _loggingContext?.BuildEventContext ?? BuildEventContext.Invalid
-            };
-            _loggingContext?.LogBuildEvent(buildArgs);
+                buildArgs.BuildEventContext = _loggingContext.BuildEventContext;
+                _loggingContext.LogBuildEvent(buildArgs);
+            }
             _loggingService?.LogBuildEvent(buildArgs);
         }
 

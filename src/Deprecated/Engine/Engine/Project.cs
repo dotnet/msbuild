@@ -80,7 +80,7 @@ namespace Microsoft.Build.BuildEngine
 
         // We need to know if the projectContextId which was generated during the
         // instantiation of the project instance has been used. If the Id has been used,
-        // which would make the value true, we will then generate a new projectContextId 
+        // which would make the value true, we will then generate a new projectContextId
         // on the next project started event
         private bool haveUsedInitialProjectContextId;
 
@@ -607,7 +607,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                // Return the concatenation of the initial target names from the main project and the ones from 
+                // Return the concatenation of the initial target names from the main project and the ones from
                 // all the imported projects.  Join target names together with semicolons in between.
                 return String.Join("; ", (string[])this.CombinedInitialTargetNames.ToArray(typeof(string)));
             }
@@ -782,7 +782,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                // We could have a toolsversion already (either from the Project element, or 
+                // We could have a toolsversion already (either from the Project element, or
                 // from an externally set override value). If not, read it off the Project
                 // element now
                 if (!OverridingToolsVersion)
@@ -2753,7 +2753,7 @@ namespace Microsoft.Build.BuildEngine
                     {
                         if (String.Equals(originalItem.Name, itemName, StringComparison.OrdinalIgnoreCase))
                         {
-                            // If the new item that the user is trying to add is already covered by 
+                            // If the new item that the user is trying to add is already covered by
                             // a wildcard in an existing item of the project, then there's really
                             // no need to physically touch the project file.  As long as the new item
                             // is on disk, the next reevaluation will automatically pick it up.  When
@@ -2779,7 +2779,7 @@ namespace Microsoft.Build.BuildEngine
 
                                 // Don't bother adding to item lists by name, as we're going to have to evaluate the project as a whole later anyway
 
-                                // We haven't actually changed the XML for the project, because we're 
+                                // We haven't actually changed the XML for the project, because we're
                                 // just piggybacking onto an existing item that was a wildcard.  However,
                                 // we should reevaluate on the next build.
                                 this.MarkProjectAsDirtyForReevaluation();
@@ -3283,7 +3283,7 @@ namespace Microsoft.Build.BuildEngine
                      buildContext.CurrentBuildContextState != ProjectBuildState.BuildContextState.RequestFilled)
                 {
                     // If the target that threw an exception is being built due to an
-                    // dependson or onerror relationship, it is necessary to make sure 
+                    // dependson or onerror relationship, it is necessary to make sure
                     // the buildrequests waiting on targets below it get notified of the failure. In single
                     // threaded mode there is only a single outstanding request so this issue is avoided.
                     if (exitedDueToError)
@@ -3346,7 +3346,7 @@ namespace Microsoft.Build.BuildEngine
 
         internal void CalculateNextActionForProjectContext(ProjectBuildState buildContext)
         {
-            // If the build request has been already complete 
+            // If the build request has been already complete
             if (buildContext.CurrentBuildContextState == ProjectBuildState.BuildContextState.RequestFilled)
             {
                 return;
@@ -3408,7 +3408,7 @@ namespace Microsoft.Build.BuildEngine
                             // Check if there are no more targets to run
                             if (buildContext.GetNextTarget() == null)
                             {
-                                // The request is complete 
+                                // The request is complete
                                 buildContext.RecordBuildCompletion(true);
                             }
                             else
@@ -3523,9 +3523,9 @@ namespace Microsoft.Build.BuildEngine
                     // Flag the start of the project build.
                     //
                     // This also passes all the current properties/items and their values. The logger might want to use the
-                    // object it gets from this event to see updated property/item values later in the build: so be 
-                    // careful to use the original "evaluatedProperties" and "evaluatedItems" table, not the clone 
-                    // "EvaluatedProperties" or "EvaluatedItems" table. It's fine to pass these live tables, because we're 
+                    // object it gets from this event to see updated property/item values later in the build: so be
+                    // careful to use the original "evaluatedProperties" and "evaluatedItems" table, not the clone
+                    // "EvaluatedProperties" or "EvaluatedItems" table. It's fine to pass these live tables, because we're
                     // wrapping them in read-only proxies.
                     BuildPropertyGroup propertyGroupForStartedEvent = this.evaluatedProperties;
 
@@ -3848,7 +3848,7 @@ namespace Microsoft.Build.BuildEngine
 
             try
             {
-                // Make the correct project directory available. This is needed because it is 
+                // Make the correct project directory available. This is needed because it is
                 // used for evaluating "exists" in conditional expressions, for example on <Import> elements.
                 Project.PerThreadProjectDirectory = ProjectDirectory;
 
@@ -4279,7 +4279,7 @@ namespace Microsoft.Build.BuildEngine
                 }
                 finally
                 {
-                    // We reset the path back to the original value in case the 
+                    // We reset the path back to the original value in case the
                     // host is depending on the current directory to find projects
                     Project.PerThreadProjectDirectory = currentPerThreadProjectDirectory;
                 }
@@ -4376,7 +4376,7 @@ namespace Microsoft.Build.BuildEngine
             // used as a key into the overall hash table, is case-insensitive.
             BuildItemGroup itemListByNameIgnoringCondition = (BuildItemGroup)this.evaluatedItemsByNameIgnoringCondition[item.Name];
 
-            // If no such BuildItemGroup exists yet, create a new BuildItemGroup and add it to 
+            // If no such BuildItemGroup exists yet, create a new BuildItemGroup and add it to
             // the hashtable of ItemGroups by type.
             if (itemListByNameIgnoringCondition == null)
             {
@@ -4403,7 +4403,7 @@ namespace Microsoft.Build.BuildEngine
             // used as a key into the overall hash table, is case-insensitive.
             BuildItemGroup itemListByName = (BuildItemGroup)this.evaluatedItemsByName[item.Name];
 
-            // If no such BuildItemGroup exists yet, create a new BuildItemGroup and add it to 
+            // If no such BuildItemGroup exists yet, create a new BuildItemGroup and add it to
             // the hashtable of ItemGroups by type.
             if (itemListByName == null)
             {

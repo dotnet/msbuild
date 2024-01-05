@@ -3,9 +3,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Xml;
-using Microsoft.Build.Collections;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
@@ -46,7 +44,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Condition should never be set, but the getter returns null instead of throwing 
+        /// Condition should never be set, but the getter returns null instead of throwing
         /// because a nonexistent condition is implicitly true
         /// </summary>
         public override string Condition
@@ -60,7 +58,7 @@ namespace Microsoft.Build.Construction
         /// Get the When children.
         /// Will contain at least one entry.
         /// </summary>
-        public ICollection<ProjectWhenElement> WhenElements => new ReadOnlyCollection<ProjectWhenElement>(Children.OfType<ProjectWhenElement>());
+        public ICollection<ProjectWhenElement> WhenElements => GetChildrenOfType<ProjectWhenElement>();
 
         /// <summary>
         /// Get any Otherwise child.

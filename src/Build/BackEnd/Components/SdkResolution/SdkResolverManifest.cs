@@ -14,7 +14,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     /// <summary>
     /// Serialization contract for an SDK Resolver manifest
     /// </summary>
-    internal class SdkResolverManifest
+    internal sealed class SdkResolverManifest
     {
         private SdkResolverManifest()
         {
@@ -33,17 +33,17 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <remarks>
         /// This field should be used only for logging purposes. Do not use for any actual processing, unless that are tests.
         /// </remarks>
-        public string DisplayName { get; set; }
+        public string DisplayName { get; private set; }
 
         /// <summary>
         /// Path for resolvers dll location.
         /// </summary>
-        public string Path { get; set; }
+        public string Path { get; private set; }
 
         /// <summary>
-        /// Regex which matches all the sdk names that could be resolved by the resolvers associated with given manifest.  
+        /// Regex which matches all the sdk names that could be resolved by the resolvers associated with given manifest.
         /// </summary>
-        public Regex ResolvableSdkRegex { get; set; }
+        public Regex ResolvableSdkRegex { get; private set; }
 
         /// <summary>
         /// The time-out interval for the name pattern regex in milliseconds.
@@ -58,8 +58,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// Deserialize the file into an SdkResolverManifest.
         /// </summary>
         /// <param name="filePath">Path to the manifest xml file.</param>
+        /// <param name="manifestFolder">Path to the directory containing the manifest.</param>
         /// <returns>New deserialized collection instance.</returns>
-        internal static SdkResolverManifest Load(string filePath)
+        internal static SdkResolverManifest Load(string filePath, string manifestFolder)
         {
             XmlReaderSettings readerSettings = new XmlReaderSettings()
             {
@@ -76,7 +77,16 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 {
                     if (reader.NodeType == XmlNodeType.Element && reader.Name == "SdkResolver")
                     {
-                        return ParseSdkResolverElement(reader, filePath);
+                        SdkResolverManifest manifest = ParseSdkResolverElement(reader, filePath);
+
+                        manifest.Path = FileUtilities.FixFilePath(manifest.Path);
+                        if (!System.IO.Path.IsPathRooted(manifest.Path))
+                        {
+                            manifest.Path = System.IO.Path.Combine(manifestFolder, manifest.Path);
+                            manifest.Path = System.IO.Path.GetFullPath(manifest.Path);
+                        }
+
+                        return manifest;
                     }
                     else
                     {
@@ -110,7 +120,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                                     string pattern = reader.ReadElementContentAsString();
                                     try
                                     {
-                                        manifest.ResolvableSdkRegex = new Regex(pattern, RegexOptions.Compiled | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(SdkResolverPatternRegexTimeoutMsc));
+                                        RegexOptions regexOptions = RegexOptions.CultureInvariant;
+                                        // For the kind of patterns used here, compiled regexes on .NET Framework tend to run slower than interpreted ones.
+#if RUNTIME_TYPE_NETCORE
+                                        regexOptions |= RegexOptions.Compiled;
+#endif
+                                        manifest.ResolvableSdkRegex = new Regex(pattern, regexOptions, TimeSpan.FromMilliseconds(SdkResolverPatternRegexTimeoutMsc));
                                     }
                                     catch (ArgumentException ex)
                                     {

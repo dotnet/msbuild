@@ -17,10 +17,20 @@
         <target state="translated">La génération a démarré.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CollectionCopyToFailureProvidedArrayIsTooSmall">
+        <source>The number of elements in the collection is greater than the available space in the destination array (when starting at the specified index).</source>
+        <target state="new">The number of elements in the collection is greater than the available space in the destination array (when starting at the specified index).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ConflictingTaskAssembly">
         <source>MSB4008: A conflicting assembly for the task assembly "{0}" has been found at "{1}".</source>
         <target state="translated">MSB4008: un assembly en conflit avec l'assembly de tâche "{0}" a été trouvé sur "{1}".</target>
         <note>{StrBegin="MSB4008: "}UE: This message is shown when the type/class of a task cannot be resolved uniquely from a single assembly.</note>
+      </trans-unit>
+      <trans-unit id="DeprecatedEventSerialization">
+        <source>Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
+        <target state="translated">Utilisation de BinaryFormatter non sécurisé lors de la sérialisation d’un type d’événement personnalisé '{0}'. Cette opération sera bientôt déconseillée. Utilisez Extended*EventArgs à la place. Plus d’informations : https://aka.ms/msbuild/eventargs</target>
+        <note />
       </trans-unit>
       <trans-unit id="ExpectedEventToBeSerializable">
         <source>Event type "{0}" was expected to be serializable using the .NET serializer. The event was not serializable and has been ignored.</source>
@@ -31,6 +41,11 @@
         <source>{0} ({1},{2})</source>
         <target state="translated">{0} ({1},{2})</target>
         <note>A file location to be embedded in a string.</note>
+      </trans-unit>
+      <trans-unit id="LoggingBeforeTaskInitialization">
+        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
+        <target state="translated">MSB6005: La tâche a tenté d'ouvrir une session avant d'être initialisée. Le message était le suivant : {0}</target>
+        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
       </trans-unit>
       <trans-unit id="ModifyingTaskHostEnvironmentHeader">
         <source>Making the following modifications to the environment received from the parent node before applying it to the task host:</source>
@@ -310,7 +325,7 @@
       </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">
         <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined.</source>
-        <target state="new">MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined.</target>
+        <target state="translated">MSB5029: La valeur «{0}» de l’attribut «{1}» dans l’élément &lt;{2}&gt; dans le fichier «{3}» est un caractère générique qui entraîne l’énumération de tous les fichiers sur le lecteur, ce qui n’était probablement pas prévu. Vérifiez que les propriétés référencées sont toujours définies.</target>
         <note>{StrBegin="MSB5029: "}UE: This is a generic message that is displayed when we find a project element that has a drive enumerating wildcard value for one of its
       attributes e.g. &lt;Compile Include="$(NotAlwaysDefined)\**\*.cs"&gt; -- if the property is undefined, the value of Include should not result in enumerating all files on drive.</note>
       </trans-unit>

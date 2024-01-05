@@ -181,6 +181,12 @@ namespace Microsoft.Build.Tasks
                 TaskType = exportedTypes.FirstOrDefault(type => type.Name.Equals(taskName, StringComparison.OrdinalIgnoreCase))
                            ?? exportedTypes.Where(i => i.FullName != null).FirstOrDefault(type => type.FullName.Equals(taskName, StringComparison.OrdinalIgnoreCase) || type.FullName.EndsWith(taskName, StringComparison.OrdinalIgnoreCase));
 
+                if (TaskType == null)
+                {
+                    _log.LogErrorWithCodeFromResources("CodeTaskFactory.CouldNotFindTaskInAssembly", taskName);
+                    return false;
+                }
+
                 if (taskInfo.CodeType == RoslynCodeTaskFactoryCodeType.Class && parameterGroup.Count == 0)
                 {
                     // If the user specified a whole class but nothing in <ParameterGroup />, automatically derive

@@ -193,8 +193,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             var document = new XmlDocument();
             try
             {
-                var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                using (XmlReader xmlReader = XmlReader.Create(path, readerSettings))
+                var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+                FileStream fs = File.OpenRead(path);
+                using (XmlReader xmlReader = XmlReader.Create(fs, readerSettings))
                 {
                     document.Load(xmlReader);
                 }
@@ -275,7 +276,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     }
                     catch (ArgumentException e) when (e.HResult == unchecked((int)0x80070057))
                     {
-                        // 0x80070057 - "Value does not fall within the expected range." is returned from 
+                        // 0x80070057 - "Value does not fall within the expected range." is returned from
                         // GetAssemblyIdentityFromFile for WinMD components
                     }
                 }

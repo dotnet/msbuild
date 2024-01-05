@@ -89,7 +89,8 @@ namespace Microsoft.Build.CommandLine
             FileLoggerParameters7,
             FileLoggerParameters8,
             FileLoggerParameters9,
-            LiveLogger,
+            TerminalLogger,
+            TerminalLoggerParameters,
             NodeReuse,
             Preprocess,
             Targets,
@@ -105,9 +106,15 @@ namespace Microsoft.Build.CommandLine
             GraphBuild,
             InputResultsCaches,
             OutputResultsCache,
+#if FEATURE_REPORTFILEACCESSES
+            ReportFileAccesses,
+#endif
             LowPriority,
             Question,
             DetailedSummary,
+            GetProperty,
+            GetItem,
+            GetTargetResult,
             NumberOfParameterizedSwitches,
         }
 
@@ -246,7 +253,9 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters7", "flp7" },     ParameterizedSwitch.FileLoggerParameters7,      null,                           false,          "MissingFileLoggerParameterError",     true,   false),
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters8", "flp8" },     ParameterizedSwitch.FileLoggerParameters8,      null,                           false,          "MissingFileLoggerParameterError",     true,   false),
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters9", "flp9" },     ParameterizedSwitch.FileLoggerParameters9,      null,                           false,          "MissingFileLoggerParameterError",     true,   false),
-            new ParameterizedSwitchInfo(  new string[] { "livelogger", "ll", "terminallogger", "tl" }, ParameterizedSwitch.LiveLogger,          null,                           true,          null,                                  true,   true),
+            // To not break existing use, keep supporting live logger switches
+            new ParameterizedSwitchInfo(  new string[] { "livelogger", "ll", "terminallogger", "tl" }, ParameterizedSwitch.TerminalLogger,      null,                           true,           null,                                  true,   true),
+            new ParameterizedSwitchInfo(  new string[] { "terminalloggerparameters", "tlp" },   ParameterizedSwitch.TerminalLoggerParameters,   null,                           false,          "MissingTerminalLoggerParameterError", true,   false),
             new ParameterizedSwitchInfo(  new string[] { "nodereuse", "nr" },                   ParameterizedSwitch.NodeReuse,                  null,                           false,          "MissingNodeReuseParameterError",      true,   false),
             new ParameterizedSwitchInfo(  new string[] { "preprocess", "pp" },                  ParameterizedSwitch.Preprocess,                 null,                           false,          null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "targets", "ts" },                     ParameterizedSwitch.Targets,                    null,                           false,          null,                                  true,   false),
@@ -262,9 +271,15 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "graphbuild", "graph" },               ParameterizedSwitch.GraphBuild,                 null,                           true,           null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "inputResultsCaches", "irc" },         ParameterizedSwitch.InputResultsCaches,         null,                           true,           null,                                  true,   true),
             new ParameterizedSwitchInfo(  new string[] { "outputResultsCache", "orc" },         ParameterizedSwitch.OutputResultsCache,         "DuplicateOutputResultsCache",  false,          null,                                  true,   true),
+#if FEATURE_REPORTFILEACCESSES
+            new ParameterizedSwitchInfo(  new string[] { "reportfileaccesses" },                ParameterizedSwitch.ReportFileAccesses,         null,                           false,          null,                                  true,   false),
+#endif
             new ParameterizedSwitchInfo(  new string[] { "lowpriority", "low" },                ParameterizedSwitch.LowPriority,                null,                           false,          null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "question", "q" },                     ParameterizedSwitch.Question,                   null,                           false,          null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "detailedsummary", "ds" },             ParameterizedSwitch.DetailedSummary,            null,                           false,          null,                                  true,   false),
+            new ParameterizedSwitchInfo(  new string[] { "getProperty" },                       ParameterizedSwitch.GetProperty,                null,                           true,           "MissingGetPropertyError",             true,   false),
+            new ParameterizedSwitchInfo(  new string[] { "getItem" },                           ParameterizedSwitch.GetItem,                    null,                           true,           "MissingGetItemError",                 true,   false),
+            new ParameterizedSwitchInfo(  new string[] { "getTargetResult" },                   ParameterizedSwitch.GetTargetResult,            null,                           true,           "MissingGetTargetResultError",         true,   false),
         };
 
         /// <summary>
@@ -286,27 +301,16 @@ namespace Microsoft.Build.CommandLine
             {
                 foreach (string parameterlessSwitchName in switchInfo.switchNames)
                 {
-                    if (String.Equals(switchName, parameterlessSwitchName, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(switchName, parameterlessSwitchName, StringComparison.OrdinalIgnoreCase))
                     {
                         parameterlessSwitch = switchInfo.parameterlessSwitch;
                         duplicateSwitchErrorMessage = switchInfo.duplicateSwitchErrorMessage;
-                        break;
+                        return true;
                     }
                 }
             }
 
-            return parameterlessSwitch != ParameterlessSwitch.Invalid;
-        }
-
-        /// <summary>
-        /// Identifies/detects a switch that takes no parameters.
-        /// </summary>
-        internal static bool IsParameterlessSwitch(
-            string switchName)
-        {
-            ParameterlessSwitch parameterlessSwitch;
-            string duplicateSwitchErrorMessage;
-            return CommandLineSwitches.IsParameterlessSwitch(switchName, out parameterlessSwitch, out duplicateSwitchErrorMessage);
+            return false;
         }
 
         /// <summary>
@@ -339,7 +343,7 @@ namespace Microsoft.Build.CommandLine
             {
                 foreach (string parameterizedSwitchName in switchInfo.switchNames)
                 {
-                    if (String.Equals(switchName, parameterizedSwitchName, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(switchName, parameterizedSwitchName, StringComparison.OrdinalIgnoreCase))
                     {
                         parameterizedSwitch = switchInfo.parameterizedSwitch;
                         duplicateSwitchErrorMessage = switchInfo.duplicateSwitchErrorMessage;
@@ -347,12 +351,12 @@ namespace Microsoft.Build.CommandLine
                         missingParametersErrorMessage = switchInfo.missingParametersErrorMessage;
                         unquoteParameters = switchInfo.unquoteParameters;
                         emptyParametersAllowed = switchInfo.emptyParametersAllowed;
-                        break;
+                        return true;
                     }
                 }
             }
 
-            return parameterizedSwitch != ParameterizedSwitch.Invalid;
+            return false;
         }
 
         /// <summary>
@@ -465,7 +469,7 @@ namespace Microsoft.Build.CommandLine
             // check if the switch has multiple parameters
             if (multipleParametersAllowed)
             {
-                if (String.Empty.Equals(switchParameters) && emptyParametersAllowed)
+                if (string.Empty.Equals(switchParameters) && emptyParametersAllowed)
                 {
                     // Store a null parameter if its allowed
                     _parameterizedSwitches[(int)parameterizedSwitch].parameters.Add(null);
@@ -473,6 +477,11 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
+                    if (IsMultipleAllowedSwitchParameterDueToUnquote(unquoteParameters, parameterizedSwitch))
+                    {
+                        switchParameters = QuotingUtilities.Unquote(switchParameters);
+                    }
+
                     // store all the switch parameters
                     int emptyParameters;
                     _parameterizedSwitches[(int)parameterizedSwitch].parameters.AddRange(QuotingUtilities.SplitUnquoted(switchParameters, int.MaxValue, false /* discard empty parameters */, unquoteParameters, out emptyParameters, s_parameterSeparators));
@@ -531,7 +540,7 @@ namespace Microsoft.Build.CommandLine
             commandLineA.Sort(StringComparer.OrdinalIgnoreCase);
             commandLineB.Sort(StringComparer.OrdinalIgnoreCase);
 
-            return (String.Join(" ", commandLineA).Trim() + " " + String.Join(" ", commandLineB).Trim()).Trim();
+            return (string.Join(" ", commandLineA).Trim() + " " + string.Join(" ", commandLineB).Trim()).Trim();
         }
 
         /// <summary>
@@ -634,6 +643,30 @@ namespace Microsoft.Build.CommandLine
             groupedFileLoggerParameters[9] = GetSpecificFileLoggerParameters(ParameterlessSwitch.FileLogger9, ParameterizedSwitch.FileLoggerParameters9);
 
             return groupedFileLoggerParameters;
+        }
+
+        /// <summary>
+        /// Checks if the provided multiple valued parametrized switch needs to be unquoted.
+        /// The method will return 'true' in case:
+        ///     The changewave 17.10 is not set and
+        ///     The parametrized switch is 'Target'
+        /// </summary>
+        private bool IsMultipleAllowedSwitchParameterDueToUnquote(bool unquoteParameter, ParameterizedSwitch parameterizedSwitch)
+        {
+            if (!unquoteParameter || !Traits.Instance.EscapeHatches.UnquoteTargetSwitchParameters)
+            {
+                return false;
+            }
+
+            // issue: https://github.com/dotnet/msbuild/issues/9442
+            // In order to align the parsing behaviour of Target property when MSBuild invoked from PowerShell or CMD,
+            // the target property value will be unquoted before processing further
+            if (parameterizedSwitch == ParameterizedSwitch.Target)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>

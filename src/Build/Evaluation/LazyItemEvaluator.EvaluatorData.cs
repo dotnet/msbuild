@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
@@ -19,16 +21,16 @@ namespace Microsoft.Build.Evaluation
     {
         private class EvaluatorData : IEvaluatorData<P, I, M, D>
         {
-            private IEvaluatorData<P, I, M, D> _wrappedData;
-            private Func<string, ICollection<I>> _itemGetter;
+            private readonly IEvaluatorData<P, I, M, D> _wrappedData;
+            private readonly IReadOnlyDictionary<string, LazyItemList> _itemsByType;
 
-            public EvaluatorData(IEvaluatorData<P, I, M, D> wrappedData, Func<string, ICollection<I>> itemGetter)
+            public EvaluatorData(IEvaluatorData<P, I, M, D> wrappedData, IReadOnlyDictionary<string, LazyItemList> itemsByType)
             {
                 _wrappedData = wrappedData;
-                _itemGetter = itemGetter;
+                _itemsByType = itemsByType;
             }
 
-            public ItemDictionary<I> Items
+            public IItemDictionary<I> Items
             {
                 get
                 {
@@ -46,9 +48,10 @@ namespace Microsoft.Build.Evaluation
 
             public ICollection<I> GetItems(string itemType)
             {
-                return _itemGetter(itemType);
+                return _itemsByType.TryGetValue(itemType, out LazyItemList items)
+                    ? items.GetMatchedItems(globsToIgnore: ImmutableHashSet<string>.Empty)
+                    : Array.Empty<I>();
             }
-
 
             public IDictionary<string, List<TargetSpecification>> AfterTargets
             {

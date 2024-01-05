@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Microsoft.Build.Framework.BuildException;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions; // for SecurityPermissionAttribute
 #endif
@@ -13,14 +15,14 @@ namespace Microsoft.Build.Framework
 {
     /// <summary>
     /// Exception that should be thrown by a logger when it cannot continue.
-    /// Allows a logger to force the build to stop in an explicit way, when, for example, it 
+    /// Allows a logger to force the build to stop in an explicit way, when, for example, it
     /// receives invalid parameters, or cannot write to disk.
     /// </summary>
     // WARNING: marking a type [Serializable] without implementing ISerializable imposes a serialization contract -- it is a
     // promise to never change the type's fields i.e. the type is immutable; adding new fields in the next version of the type
     // without following certain special FX guidelines, can break both forward and backward compatibility
     [Serializable]
-    public class LoggerException : Exception
+    public class LoggerException : BuildExceptionBase
     {
         /// <summary>
         /// Default constructor.
@@ -75,11 +77,14 @@ namespace Microsoft.Build.Framework
         #region Serialization (update when adding new class members)
 
         /// <summary>
-        /// Protected constructor used for (de)serialization. 
+        /// Protected constructor used for (de)serialization.
         /// If we ever add new members to this class, we'll need to update this.
         /// </summary>
         /// <param name="info">Serialization info</param>
         /// <param name="context">Streaming context</param>
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
         protected LoggerException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -96,6 +101,9 @@ namespace Microsoft.Build.Framework
 #if FEATURE_SECURITY_PERMISSIONS
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
 #endif
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
@@ -104,7 +112,22 @@ namespace Microsoft.Build.Framework
             info.AddValue("helpKeyword", helpKeyword);
         }
 
-        #endregion
+        protected override IDictionary<string, string> FlushCustomState()
+        {
+            return new Dictionary<string, string>()
+            {
+                { nameof(errorCode), errorCode },
+                { nameof(helpKeyword), helpKeyword },
+            };
+        }
+
+        protected override void InitializeCustomState(IDictionary<string, string> state)
+        {
+            errorCode = state[nameof(errorCode)];
+            helpKeyword = state[nameof(helpKeyword)];
+        }
+
+#endregion
 
         #region Properties
 

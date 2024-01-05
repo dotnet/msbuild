@@ -172,12 +172,13 @@ namespace Microsoft.Build.UnitTests
 </Project>";
                 TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
                 TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
-                BinaryLogger logger = new();
-                logger.Parameters = _logFile;
-                RunnerUtilities.ExecMSBuild($"{projectFile.Path} -bl:{logger.Parameters}", out bool success);
+                
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} -bl:{_logFile}", out bool success);
                 success.ShouldBeTrue();
-                RunnerUtilities.ExecMSBuild($"{logger.Parameters} -flp:logfile={Path.Combine(logFolder.Path, "logFile.log")};verbosity=diagnostic", out success);
+
+                RunnerUtilities.ExecMSBuild($"{_logFile} -flp:logfile={Path.Combine(logFolder.Path, "logFile.log")};verbosity=diagnostic", out success);
                 success.ShouldBeTrue();
+
                 string text = File.ReadAllText(Path.Combine(logFolder.Path, "logFile.log"));
                 text.ShouldContain("EnvVar2");
                 text.ShouldContain("value2");
@@ -188,8 +189,13 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        public void AssemblyLoadsDuringTaskRunLogged()
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "Tests if the AppDomain used to load the task is included in the log text for the event, which is true only on Framework.")]
+        public void AssemblyLoadsDuringTaskRunLoggedWithAppDomain() => AssemblyLoadsDuringTaskRun("AppDomain: [Default]");
+
+        [DotNetOnlyFact(additionalMessage: "Tests if the AssemblyLoadContext used to load the task is included in the log text for the event, which is true only on Core.")]
+        public void AssemblyLoadsDuringTaskRunLoggedWithAssemblyLoadContext() => AssemblyLoadsDuringTaskRun("AssemblyLoadContext: Default");
+
+        private void AssemblyLoadsDuringTaskRun(string additionalEventText)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
@@ -201,7 +207,7 @@ namespace Microsoft.Build.UnitTests
                         TaskFactory="RoslynCodeTaskFactory"
                         AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
                         <ParameterGroup />
-                        <Task> 
+                        <Task>
                           <Using Namespace="System"/>
                           <Using Namespace="System.IO"/>
                           <Using Namespace="System.Reflection"/>
@@ -225,15 +231,29 @@ namespace Microsoft.Build.UnitTests
                     """;
                 TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
                 TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
-                BinaryLogger logger = new();
-                logger.Parameters = _logFile;
+                
                 env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
-                RunnerUtilities.ExecMSBuild($"{projectFile.Path} -nr:False -bl:{logger.Parameters}", out bool success);
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} -nr:False -bl:{_logFile} -flp1:logfile={Path.Combine(logFolder.Path, "logFile.log")};verbosity=diagnostic -flp2:logfile={Path.Combine(logFolder.Path, "logFile2.log")};verbosity=normal", out bool success);
                 success.ShouldBeTrue();
-                RunnerUtilities.ExecMSBuild($"{logger.Parameters} -flp:logfile={Path.Combine(logFolder.Path, "logFile.log")};verbosity=diagnostic", out success);
-                success.ShouldBeTrue();
+
+                string assemblyLoadedEventText =
+                    "Assembly loaded during TaskRun (InlineCode.HelloWorld): System.Diagnostics.Debug";
                 string text = File.ReadAllText(Path.Combine(logFolder.Path, "logFile.log"));
-                text.ShouldContain("Assembly loaded during TaskRun (InlineCode.HelloWorld): System.Diagnostics.Debug");
+                text.ShouldContain(assemblyLoadedEventText);
+                text.ShouldContain(additionalEventText);
+                // events should not be in logger with verbosity normal
+                string text2 = File.ReadAllText(Path.Combine(logFolder.Path, "logFile2.log"));
+                text2.ShouldNotContain(assemblyLoadedEventText);
+                text2.ShouldNotContain(additionalEventText);
+                RunnerUtilities.ExecMSBuild($"{_logFile} -flp1:logfile={Path.Combine(logFolder.Path, "logFile3.log")};verbosity=diagnostic -flp2:logfile={Path.Combine(logFolder.Path, "logFile4.log")};verbosity=normal", out success);
+                success.ShouldBeTrue();
+                text = File.ReadAllText(Path.Combine(logFolder.Path, "logFile3.log"));
+                text.ShouldContain(assemblyLoadedEventText);
+                text.ShouldContain(additionalEventText);
+                // events should not be in logger with verbosity normal
+                text2 = File.ReadAllText(Path.Combine(logFolder.Path, "logFile4.log"));
+                text2.ShouldNotContain(assemblyLoadedEventText);
+                text2.ShouldNotContain(additionalEventText);
             }
         }
 
@@ -263,7 +283,7 @@ namespace Microsoft.Build.UnitTests
             // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
             // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"),
-                () => $"Embedded files: {string.Join(",", zipArchive.Entries)}");
+                $"Embedded files: {string.Join(",", zipArchive.Entries)}");
         }
 
         [RequiresSymbolicLinksFact]
@@ -323,13 +343,13 @@ namespace Microsoft.Build.UnitTests
             // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
             // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"),
-                () => $"Embedded files: {string.Join(",", zipArchive.Entries)}");
+                customMessage: $"Embedded files: {string.Join(",", zipArchive.Entries)}");
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(symlinkName),
-                () => $"Embedded files: {string.Join(",", zipArchive.Entries)}");
+                customMessage: $"Embedded files: {string.Join(",", zipArchive.Entries)}");
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(symlinkLvl2Name),
-                () => $"Embedded files: {string.Join(",", zipArchive.Entries)}");
+                customMessage: $"Embedded files: {string.Join(",", zipArchive.Entries)}");
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(emptyFileName),
-                () => $"Embedded files: {string.Join(",", zipArchive.Entries)}");
+                customMessage: $"Embedded files: {string.Join(",", zipArchive.Entries)}");
         }
 
         [Fact]
@@ -418,22 +438,22 @@ namespace Microsoft.Build.UnitTests
                             <Exec Command='echo a'/>
                         </Target>
                     </Project>";
-                BinaryLogger logger = new();
-                logger.Parameters = _logFile;
+
+
                 TransientTestFolder testFolder = env.CreateFolder(createFolder: true);
 
                 TransientTestFile projectFile1 = env.CreateFile(testFolder, "testProject01.proj", contents);
-                string consoleOutput1 = RunnerUtilities.ExecMSBuild($"{projectFile1.Path} -bl:{logger.Parameters} -verbosity:diag -nologo", out bool success1);
+                string consoleOutput1 = RunnerUtilities.ExecMSBuild($"{projectFile1.Path} -bl:{_logFile} -verbosity:diag -nologo", out bool success1);
                 success1.ShouldBeTrue();
-                var expected1 = $"-nologo -bl:{logger.Parameters} -verbosity:diag {projectFile1.Path}";
+                var expected1 = $"-nologo -bl:{_logFile} -verbosity:diag {projectFile1.Path}";
                 consoleOutput1.ShouldContain(expected1);
 
                 foreach (var verbosity in new string[] { "q", "m", "n", "d" })
                 {
                     TransientTestFile projectFile2 = env.CreateFile(testFolder, $"testProject_{verbosity}.proj", contents);
-                    string consoleOutput2 = RunnerUtilities.ExecMSBuild($"{projectFile2.Path} -bl:{logger.Parameters} -verbosity:{verbosity} -nologo", out bool success2);
+                    string consoleOutput2 = RunnerUtilities.ExecMSBuild($"{projectFile2.Path} -bl:{_logFile} -verbosity:{verbosity} -nologo", out bool success2);
                     success2.ShouldBeTrue();
-                    var expected2 = $"-nologo -bl:{logger.Parameters} -verbosity:{verbosity} {projectFile2.Path}";
+                    var expected2 = $"-nologo -bl:{_logFile} -verbosity:{verbosity} {projectFile2.Path}";
                     consoleOutput2.ShouldNotContain(expected2);
                 }
             }

@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Xml;
 using Microsoft.Build.Collections;
 using Microsoft.Build.ObjectModelRemoting;
@@ -126,7 +125,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Gets any output children.
         /// </summary>
-        public ICollection<ProjectOutputElement> Outputs => new Collections.ReadOnlyCollection<ProjectOutputElement>(Children.OfType<ProjectOutputElement>());
+        public ICollection<ProjectOutputElement> Outputs => GetChildrenOfType<ProjectOutputElement>();
 
         /// <summary>
         /// Enumerable over the unevaluated parameters on the task.
@@ -450,7 +449,7 @@ namespace Microsoft.Build.Construction
                     {
                         // By pulling off and caching the Location early here, it becomes frozen for the life of this object.
                         // That means that if the name of the file is changed after first load (possibly from null) it will
-                        // remain the old value here. Correctly, this should cache the attribute not the location. Fixing 
+                        // remain the old value here. Correctly, this should cache the attribute not the location. Fixing
                         // that will need profiling, though, as this cache was added for performance.
                         _parameters[attribute.Name] = (attribute.Value, attribute.Location);
                     }

@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests
             {
                 TransientTestFile file = env.CreateFile();
                 arc.SerializeCache(file.Path, null);
-                arc2 = StateFileBase.DeserializeCache(file.Path, null, typeof(AssemblyRegistrationCache)) as AssemblyRegistrationCache;
+                arc2 = StateFileBase.DeserializeCache<AssemblyRegistrationCache>(file.Path, null);
             }
 
             arc2._assemblies.Count.ShouldBe(arc._assemblies.Count);

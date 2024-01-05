@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests
             {
                 TransientTestFile file = env.CreateFile();
                 cache.SerializeCache(file.Path, null);
-                cache2 = StateFileBase.DeserializeCache(file.Path, null, typeof(ResolveComReferenceCache)) as ResolveComReferenceCache;
+                cache2 = StateFileBase.DeserializeCache<ResolveComReferenceCache>(file.Path, null);
             }
 
             cache2.tlbImpLocation.ShouldBe(cache.tlbImpLocation);
@@ -85,7 +85,7 @@ namespace Microsoft.Build.UnitTests
 
         /*
          * Method:  CheckComReferenceAttributeVerificationForNameItems
-         * 
+         *
          * Checks if verification of Com reference item metadata works properly
          */
         [Fact]
@@ -148,7 +148,7 @@ namespace Microsoft.Build.UnitTests
 
         /*
          * Method:  CheckComReferenceAttributeInitializationForNameItems
-         * 
+         *
          * Checks if missing optional attributes for COM name references get initialized correctly
          */
         [Fact]
@@ -181,7 +181,7 @@ namespace Microsoft.Build.UnitTests
 
         /*
          * Method:  CheckComReferenceAttributeInitializationForFileItems
-         * 
+         *
          * Checks if missing optional attributes for COM file references get initialized correctly
          */
         [Fact]
@@ -395,7 +395,7 @@ namespace Microsoft.Build.UnitTests
             retValue = rcr.IsExistingDependencyReference(notInProjectAttr, out referenceInfo);
             Assert.True(!retValue && referenceInfo == null); // "not in project ref should not be found"
 
-            // Now, try to resolve a non-existent ComAssemblyReference. 
+            // Now, try to resolve a non-existent ComAssemblyReference.
             string path;
             IComReferenceResolver resolver = (IComReferenceResolver)rcr;
             Assert.False(resolver.ResolveComAssemblyReference("MyAssembly", out path));
@@ -431,11 +431,11 @@ namespace Microsoft.Build.UnitTests
             ComReferenceInfo newTlbInfo = (ComReferenceInfo)rcr.allProjectRefs[3];
             Assert.Equal(axRefInfo.primaryOfAxImpRef, newTlbInfo); // "axRefInfo should hold back reference to tlbRefInfo"
             Assert.True(ComReference.AreTypeLibAttrEqual(newTlbInfo.attr, axRefInfo.attr)); // "The added reference should have the same attributes as the Ax reference"
-            Assert.Equal(newTlbInfo.typeLibName, axRefInfo.typeLibName); // "The added reference should have the same type lib name as the Ax reference"
-            Assert.Equal(newTlbInfo.strippedTypeLibPath, axRefInfo.strippedTypeLibPath); // "The added reference should have the same type lib path as the Ax reference"
+            Assert.Equal(axRefInfo.typeLibName, newTlbInfo.typeLibName); // "The added reference should have the same type lib name as the Ax reference"
+            Assert.Equal(axRefInfo.strippedTypeLibPath, newTlbInfo.strippedTypeLibPath); // "The added reference should have the same type lib path as the Ax reference"
 
             Assert.Equal(newTlbInfo.taskItem.ItemSpec, axRefInfo.taskItem.ItemSpec); // "The added reference should have the same task item spec as the Ax reference"
-            Assert.Equal(newTlbInfo.taskItem.GetMetadata(ComReferenceItemMetadataNames.wrapperTool), ComReferenceTypes.primaryortlbimp); // "The added reference should have the tlbimp/primary wrapper tool"
+            Assert.Equal(ComReferenceTypes.primaryortlbimp, newTlbInfo.taskItem.GetMetadata(ComReferenceItemMetadataNames.wrapperTool)); // "The added reference should have the tlbimp/primary wrapper tool"
 
             rcr.AddMissingTlbReferences();
             Assert.Equal(4, rcr.allProjectRefs.Count); // "There should still be four references"

@@ -1122,7 +1122,7 @@ namespace Microsoft.Build.BackEnd
             lock (issuingEntry.GlobalLock)
             {
                 var existingResultsToReport = new List<BuildResult>();
-                var unresolvedConfigurationsAdded = new HashSet<NGen<int>>();
+                var unresolvedConfigurationsAdded = new HashSet<int>();
 
                 foreach (FullyQualifiedBuildRequest request in newRequests)
                 {
@@ -1322,9 +1322,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="config">The configuration to be mapped.</param>
         private void IssueConfigurationRequest(BuildRequestConfiguration config)
         {
-            ErrorUtilities.VerifyThrowArgument(config.WasGeneratedByNode, "InvalidConfigurationId");
+            ErrorUtilities.VerifyThrow(config.WasGeneratedByNode, "InvalidConfigurationId");
             ErrorUtilities.VerifyThrowArgumentNull(config, nameof(config));
-            ErrorUtilities.VerifyThrowInvalidOperation(_unresolvedConfigurations.HasConfiguration(config.ConfigurationId), "NoUnresolvedConfiguration");
+            ErrorUtilities.VerifyThrow(_unresolvedConfigurations.HasConfiguration(config.ConfigurationId), "NoUnresolvedConfiguration");
             TraceEngine("Issuing configuration request for node config {0}", config.ConfigurationId);
             RaiseNewConfigurationRequest(config);
         }

@@ -4,32 +4,26 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Threading;
 
-#nullable disable
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
+using BuildEventContext = Microsoft.Build.Framework.BuildEventContext;
+using ElementLocation = Microsoft.Build.Construction.ElementLocation;
+using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 namespace Microsoft.Build.Evaluation
 {
-    using Microsoft.Build.BackEnd.Logging;
-    using Microsoft.Build.Shared;
-    using Microsoft.Build.Shared.FileSystem;
-    using BuildEventContext = Microsoft.Build.Framework.BuildEventContext;
-    using ElementLocation = Microsoft.Build.Construction.ElementLocation;
-    using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-    using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
-
     internal static class ConditionEvaluator
     {
-        private static readonly Lazy<Regex> s_singlePropertyRegex = new Lazy<Regex>(
-            () => new Regex(@"^\$\(([^\$\(\)]*)\)$", RegexOptions.Compiled));
-
         /// <summary>
         /// Update our table which keeps track of all the properties that are referenced
         /// inside of a condition and the string values that they are being tested against.
         /// So, for example, if the condition was " '$(Configuration)' == 'Debug' ", we
         /// would get passed in leftValue="$(Configuration)" and rightValueExpanded="Debug".
-        /// This call would add the string "Debug" to the list of possible values for the 
+        /// This call would add the string "Debug" to the list of possible values for the
         /// "Configuration" property.
         ///
         /// This method also handles the case when two or more properties are being
@@ -61,16 +55,14 @@ namespace Microsoft.Build.Evaluation
                     var lastPiece = pieceSeparator < 0;
                     var pieceEnd = lastPiece ? leftValue.Length : pieceSeparator;
 
-                    var singlePropertyMatch = s_singlePropertyRegex.Value.Match(leftValue, pieceStart, pieceEnd - pieceStart);
-
-                    if (singlePropertyMatch.Success)
+                    if (TryGetSingleProperty(leftValue.AsSpan(), pieceStart, pieceEnd - pieceStart, out ReadOnlySpan<char> propertyName))
                     {
                         // Find the first vertical bar on the right-hand-side expression.
                         var indexOfVerticalBar = rightValueExpanded.IndexOf('|');
                         string rightValueExpandedPiece;
 
                         // If there was no vertical bar, then just use the remainder of the right-hand-side
-                        // expression as the value of the property, and terminate the loop after this iteration.  
+                        // expression as the value of the property, and terminate the loop after this iteration.
                         // Also, if we're on the last segment of the left-hand-side, then use the remainder
                         // of the right-hand-side expression as the value of the property.
                         if ((indexOfVerticalBar == -1) || lastPiece)
@@ -81,25 +73,20 @@ namespace Microsoft.Build.Evaluation
                         else
                         {
                             // If we found a vertical bar, then the portion before the vertical bar is the
-                            // property value which we will store in our table.  Then remove that portion 
+                            // property value which we will store in our table.  Then remove that portion
                             // from the original string so that the next iteration of the loop can easily search
                             // for the first vertical bar again.
                             rightValueExpandedPiece = rightValueExpanded.Substring(0, indexOfVerticalBar);
                             rightValueExpanded = rightValueExpanded.Substring(indexOfVerticalBar + 1);
                         }
 
-                        // Capture the property name out of the regular expression.
-                        var propertyName = singlePropertyMatch.Groups[1].ToString();
-
                         // Get the string collection for this property name, if one already exists.
-                        List<string> conditionedPropertyValues;
-
-                        // If this property is not already represented in the table, add a new entry
-                        // for it.
-                        if (!conditionedPropertiesTable.TryGetValue(propertyName, out conditionedPropertyValues))
+                        // If not already in the table, add a new entry for it.
+                        string propertyNameString = propertyName.ToString();
+                        if (!conditionedPropertiesTable.TryGetValue(propertyNameString, out List<string>? conditionedPropertyValues))
                         {
                             conditionedPropertyValues = new List<string>();
-                            conditionedPropertiesTable[propertyName] = conditionedPropertyValues;
+                            conditionedPropertiesTable[propertyNameString] = conditionedPropertyValues;
                         }
 
                         // If the "rightValueExpanded" is not already in the string collection
@@ -120,6 +107,32 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
+        // Internal for testing purposes
+        internal static bool TryGetSingleProperty(ReadOnlySpan<char> input, int beginning, int length, out ReadOnlySpan<char> propertyName)
+        {
+            // This code is simulating the regex pattern: ^\$\(([^\$\(\)]*)\)$
+            if (input.Length < beginning + 3 ||
+                input[beginning] != '$' ||
+                input[beginning + 1] != '(' ||
+                input[beginning + length - 1] != ')' ||
+                ContainsInvalidCharacter(input.Slice(beginning + 2, length - 3)))
+            {
+                propertyName = null;
+                return false;
+            }
+
+            propertyName = input.Slice(beginning + 2, length - 3);
+            return true;
+
+            static bool ContainsInvalidCharacter(ReadOnlySpan<char> span)
+            {
+                return
+                    span.IndexOf('$') != -1 ||
+                    span.IndexOf('(') != -1 ||
+                    span.IndexOf(')') != -1;
+            }
+        }
+
         // Implements a pool of expression trees for each condition.
         // This is because an expression tree is a mutually exclusive resource (has non thread safe state while it evaluates).
         // During high demand when all expression trees are busy evaluating, a new expression tree is created and added to the pool.
@@ -130,11 +143,11 @@ namespace Microsoft.Build.Evaluation
             private readonly ConcurrentDictionary<string, ConcurrentStack<GenericExpressionNode>> _conditionPools;
             private int _mOptimisticSize;
 
-            public int OptimisticSize => _mOptimisticSize;
+            public readonly int OptimisticSize => _mOptimisticSize;
 
             public ExpressionTreeForCurrentOptionsWithSize(ConcurrentDictionary<string, ConcurrentStack<GenericExpressionNode>> conditionPools)
             {
-                this._conditionPools = conditionPools;
+                _conditionPools = conditionPools;
                 _mOptimisticSize = conditionPools.Count;
             }
 
@@ -176,8 +189,8 @@ namespace Microsoft.Build.Evaluation
             ILoggingService loggingServices,
             BuildEventContext buildEventContext,
             IFileSystem fileSystem,
-            ProjectRootElementCacheBase projectRootElementCache = null,
-            LoggingContext loggingContext = null)
+            ProjectRootElementCacheBase? projectRootElementCache = null,
+            LoggingContext? loggingContext = null)
             where P : class, IProperty
             where I : class, IItem
         {
@@ -186,7 +199,7 @@ namespace Microsoft.Build.Evaluation
                 options,
                 expander,
                 expanderOptions,
-                null /* do not collect conditioned properties */,
+                conditionedPropertiesTable: null /* do not collect conditioned properties */,
                 evaluationDirectory,
                 elementLocation,
                 loggingServices,
@@ -208,14 +221,14 @@ namespace Microsoft.Build.Evaluation
             ParserOptions options,
             Expander<P, I> expander,
             ExpanderOptions expanderOptions,
-            Dictionary<string, List<string>> conditionedPropertiesTable,
+            Dictionary<string, List<string>>? conditionedPropertiesTable,
             string evaluationDirectory,
             ElementLocation elementLocation,
             ILoggingService loggingServices,
             BuildEventContext buildEventContext,
             IFileSystem fileSystem,
-            ProjectRootElementCacheBase projectRootElementCache = null,
-            LoggingContext loggingContext = null)
+            ProjectRootElementCacheBase? projectRootElementCache = null,
+            LoggingContext? loggingContext = null)
             where P : class, IProperty
             where I : class, IItem
         {
@@ -343,13 +356,13 @@ namespace Microsoft.Build.Evaluation
             ///     If this is null, as it is for command line builds, conditioned properties
             ///     are not recorded.
             /// </summary>
-            Dictionary<string, List<string>> ConditionedPropertiesInProject { get; }
+            Dictionary<string, List<string>>? ConditionedPropertiesInProject { get; }
 
             /// <summary>
             ///     May return null if the expression would expand to non-empty and it broke out early.
             ///     Otherwise, returns the correctly expanded expression.
             /// </summary>
-            string ExpandIntoStringBreakEarly(string expression, LoggingContext loggingContext = null);
+            string ExpandIntoStringBreakEarly(string expression, LoggingContext? loggingContext = null);
 
             /// <summary>
             ///     Expands the specified expression into a list of TaskItem's.
@@ -359,18 +372,18 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             ///     Expands the specified expression into a string.
             /// </summary>
-            string ExpandIntoString(string expression, LoggingContext loggingContext = null);
+            string ExpandIntoString(string expression, LoggingContext? loggingContext = null);
 
             /// <summary>
             ///     PRE cache
             /// </summary>
-            ProjectRootElementCacheBase LoadedProjectsCache { get; }
+            ProjectRootElementCacheBase? LoadedProjectsCache { get; }
 
             IFileSystem FileSystem { get; }
         }
 
         /// <summary>
-        /// All the state necessary for the evaluation of conditionals so that the expression tree 
+        /// All the state necessary for the evaluation of conditionals so that the expression tree
         /// is stateless and reusable
         /// </summary>
         internal class ConditionEvaluationState<P, I> : IConditionEvaluationState
@@ -398,22 +411,22 @@ namespace Microsoft.Build.Evaluation
             /// If this is null, as it is for command line builds, conditioned properties
             /// are not recorded.
             /// </summary>
-            public Dictionary<string, List<string>> ConditionedPropertiesInProject { get; }
+            public Dictionary<string, List<string>>? ConditionedPropertiesInProject { get; }
 
             /// <summary>
-            /// PRE collection. 
+            /// PRE collection.
             /// </summary>
-            public ProjectRootElementCacheBase LoadedProjectsCache { get; }
+            public ProjectRootElementCacheBase? LoadedProjectsCache { get; }
 
             internal ConditionEvaluationState(
                 string condition,
                 Expander<P, I> expander,
                 ExpanderOptions expanderOptions,
-                Dictionary<string, List<string>> conditionedPropertiesInProject,
+                Dictionary<string, List<string>>? conditionedPropertiesInProject,
                 string evaluationDirectory,
                 ElementLocation elementLocation,
                 IFileSystem fileSystem,
-                ProjectRootElementCacheBase projectRootElementCache = null)
+                ProjectRootElementCacheBase? projectRootElementCache = null)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(condition, nameof(condition));
                 ErrorUtilities.VerifyThrowArgumentNull(expander, nameof(expander));
@@ -434,7 +447,7 @@ namespace Microsoft.Build.Evaluation
             /// May return null if the expression would expand to non-empty and it broke out early.
             /// Otherwise, returns the correctly expanded expression.
             /// </summary>
-            public string ExpandIntoStringBreakEarly(string expression, LoggingContext loggingContext = null)
+            public string ExpandIntoStringBreakEarly(string expression, LoggingContext? loggingContext = null)
             {
                 var originalValue = _expander.WarnForUninitializedProperties;
 
@@ -467,7 +480,7 @@ namespace Microsoft.Build.Evaluation
             /// <param name="expression">The expression to expand.</param>
             /// <param name="loggingContext"></param>
             /// <returns>The expanded string.</returns>
-            public string ExpandIntoString(string expression, LoggingContext loggingContext = null)
+            public string ExpandIntoString(string expression, LoggingContext? loggingContext = null)
             {
                 var originalValue = _expander.WarnForUninitializedProperties;
 

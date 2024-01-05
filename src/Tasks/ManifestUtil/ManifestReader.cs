@@ -61,15 +61,17 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 // if first two bytes are "MZ" then we're looking at an .exe or a .dll not a .manifest
                 if ((buffer[0] == 0x4D) && (buffer[1] == 0x5A))
                 {
-                    Stream m = EmbeddedManifestReader.Read(path);
-                    if (m == null)
+                    using (Stream m = EmbeddedManifestReader.Read(path))
                     {
-                        throw new BadImageFormatException(null, path);
-                    }
+                        if (m == null)
+                        {
+                            throw new BadImageFormatException(null, path);
+                        }
 
-                    using (XmlReader xr = XmlReader.Create(m, xrSettings))
-                    {
-                        document.Load(xr);
+                        using (XmlReader xr = XmlReader.Create(m, xrSettings))
+                        {
+                            document.Load(xr);
+                        }
                     }
                 }
                 else

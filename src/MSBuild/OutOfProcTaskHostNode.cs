@@ -5,14 +5,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Globalization;
-using System.Threading;
+using System.IO;
 using System.Reflection;
-
+using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+#if !CLR2COMPATIBILITY
+using Microsoft.Build.Experimental.FileAccess;
+#endif
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 #if FEATURE_APPDOMAIN
@@ -163,6 +165,13 @@ namespace Microsoft.Build.CommandLine
         /// The task object cache.
         /// </summary>
         private RegisteredTaskObjectCacheBase _registeredTaskObjectCache;
+#endif
+
+#if FEATURE_REPORTFILEACCESSES
+        /// <summary>
+        /// The file accesses reported by the most recently completed task.
+        /// </summary>
+        private List<FileAccessData> _fileAccessData = new List<FileAccessData>();
 #endif
 
         /// <summary>
@@ -531,11 +540,22 @@ namespace Microsoft.Build.CommandLine
                     return _taskHost._currentConfiguration.IsTaskInputLoggingEnabled;
                 }
             }
+
+#if FEATURE_REPORTFILEACCESSES
+            /// <summary>
+            /// Reports a file access from a task.
+            /// </summary>
+            /// <param name="fileAccessData">The file access to report.</param>
+            public void ReportFileAccess(FileAccessData fileAccessData)
+            {
+                _taskHost._fileAccessData.Add(fileAccessData);
+            }
+#endif
         }
 
         public EngineServices EngineServices { get; }
 
-        #endregion
+#endregion
 
 #endif
 
@@ -936,8 +956,11 @@ namespace Microsoft.Build.CommandLine
                     lock (_taskCompleteLock)
                     {
                         _taskCompletePacket = new TaskHostTaskComplete(
-                                                        taskResult,
-                                                        currentEnvironment);
+                            taskResult,
+#if FEATURE_REPORTFILEACCESSES
+                            _fileAccessData,
+#endif
+                            currentEnvironment);
                     }
 
 #if FEATURE_APPDOMAIN
@@ -956,11 +979,20 @@ namespace Microsoft.Build.CommandLine
                     lock (_taskCompleteLock)
                     {
                         // Create a minimal taskCompletePacket to carry the exception so that the TaskHostTask does not hang while waiting
-                        _taskCompletePacket = new TaskHostTaskComplete(new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedAfterExecution, e), null);
+                        _taskCompletePacket = new TaskHostTaskComplete(
+                            new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedAfterExecution, e),
+#if FEATURE_REPORTFILEACCESSES
+                            _fileAccessData,
+#endif
+                            null);
                     }
                 }
                 finally
                 {
+#if FEATURE_REPORTFILEACCESSES
+                    _fileAccessData = new List<FileAccessData>();
+#endif
+
                     // Call CleanupTask to unload any domains and other necessary cleanup in the taskWrapper
                     _taskWrapper.CleanupTask();
 
@@ -1146,7 +1178,11 @@ namespace Microsoft.Build.CommandLine
         {
             if (_nodeEndpoint?.LinkStatus == LinkStatus.Active)
             {
-                if (!e.GetType().GetTypeInfo().IsSerializable)
+#pragma warning disable SYSLIB0050
+                // Types which are not serializable and are not IExtendedBuildEventArgs as
+                // those always implement custom serialization by WriteToStream and CreateFromStream.
+                if (!e.GetType().GetTypeInfo().IsSerializable && e is not IExtendedBuildEventArgs)
+#pragma warning disable SYSLIB0050
                 {
                     // log a warning and bail.  This will end up re-calling SendBuildEvent, but we know for a fact
                     // that the warning that we constructed is serializable, so everything should be good.
@@ -1154,7 +1190,8 @@ namespace Microsoft.Build.CommandLine
                     return;
                 }
 
-                _nodeEndpoint.SendData(new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(_currentConfiguration.NodeId, e)));
+                LogMessagePacket logMessage = new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(_currentConfiguration.NodeId, e));
+                _nodeEndpoint.SendData(logMessage);
             }
         }
 

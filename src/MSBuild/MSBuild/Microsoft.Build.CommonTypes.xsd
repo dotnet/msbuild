@@ -214,6 +214,13 @@ elementFormDefault="qualified">
                   </xs:documentation>
                 </xs:annotation>
               </xs:element>
+              <xs:element name="VersionOverride">
+                <xs:annotation>
+                  <xs:documentation>
+                    <!-- _locID_text="PackageReference_VersionOverride" _locComment="" -->When using Central Package Management (CPM), overrides the centrally defined version for this package.  If the project is not using CPM, this element has no effect.
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
             </xs:choice>
           </xs:sequence>
           <xs:attribute name="Include" type="xs:string">
@@ -262,6 +269,13 @@ elementFormDefault="qualified">
             <xs:annotation>
               <xs:documentation>
                 <!-- _locID_text="PackageReference_Attribute_GeneratePathProperty" _locComment="" -->Set to true to generate a Pkg* property that points to the restored location of the NuGet package contents
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="VersionOverride" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="PackageReference_Attribute_VersionOverride" _locComment="" -->When using Central Package Management (CPM), overrides the centrally defined version for this package.  If the project is not using CPM, this attribute has no effect.
               </xs:documentation>
             </xs:annotation>
           </xs:attribute>
@@ -1844,6 +1858,11 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="EnableDefaultItems" _locComment="" -->Defaults to true, and if set to false will disable all default item globs.</xs:documentation>
         </xs:annotation>
     </xs:element>
+    <xs:element name="IsAotCompatible" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="IsAotCompatible" _locComment="" -->Indicates whether a class library is compatible with native AOT. Setting to true will enable analyzers for trimming, single file, and AOT.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="IsWebBootstrapper" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="JCPA" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="Keyword" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -1928,6 +1947,11 @@ elementFormDefault="qualified">
         </xs:annotation>
     </xs:element>
     <xs:element name="OSVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="BaseOutputPath" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="BaseOutputPath" _locComment="" -->Base path of output folder, where all configuration-specific output folders will be created. Default value is bin\.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="OutputPath" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="OutputPath" _locComment="" -->Path to output folder, with trailing slash</xs:documentation>

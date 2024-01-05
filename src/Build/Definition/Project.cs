@@ -912,7 +912,7 @@ namespace Microsoft.Build.Evaluation
         /// uberGlob.IsMatch("foo.cs");
         /// ]]>
         /// </code>
-        /// 
+        ///
         /// </remarks>
         /// <returns>
         /// List of <see cref="GlobResult"/>.
@@ -1807,18 +1807,6 @@ namespace Microsoft.Build.Evaluation
         {
             ErrorUtilities.VerifyThrowInternalNull(otherXml, nameof(otherXml));
             ErrorUtilities.VerifyThrowInvalidOperation(ReferenceEquals(Xml, otherXml), "OM_CannotModifyEvaluatedObjectInImportedFile", otherXml.Location.File);
-        }
-
-        /// <summary>
-        /// Returns <see cref="IDirectoryCache"/> as provided by the <see cref="IDirectoryCacheFactory"/> passed when creating the
-        /// project, specific for a given evaluation ID.
-        /// </summary>
-        /// <param name="evaluationId">The evaluation ID for which the cache is requested.</param>
-        /// <returns>An <see cref="IDirectoryCache"/> implementation, or null if this project has no <see cref="IDirectoryCacheFactory"/>
-        /// associated with it or it returned null.</returns>
-        internal IDirectoryCache GetDirectoryCacheForEvaluation(int evaluationId)
-        {
-            return _directoryCacheFactory?.GetDirectoryCacheForEvaluation(evaluationId);
         }
 
         /// <summary>
@@ -3737,6 +3725,7 @@ namespace Microsoft.Build.Evaluation
                     loggingServiceForEvaluation,
                     new ProjectItemFactory(Owner),
                     ProjectCollection,
+                    Owner._directoryCacheFactory,
                     ProjectCollection.ProjectRootElementCache,
                     s_buildEventContext,
                     evaluationContext.SdkResolverService,
@@ -4129,7 +4118,7 @@ namespace Microsoft.Build.Evaluation
             /// Items in this project, ordered within groups of item types.
             /// Protected by an upcast to IEnumerable.
             /// </summary>
-            public ItemDictionary<ProjectItem> Items { get; private set; }
+            public IItemDictionary<ProjectItem> Items { get; private set; }
 
             public List<ProjectItemElement> EvaluatedItemElements { get; private set; }
 

@@ -113,7 +113,7 @@ namespace Microsoft.Build.Logging
         /// <param name="pruneSmallItems">Whether small items should be pruned. This is called with false on some tests since the result may vary depending on the evaluator speed</param>
         /// <remarks>
         /// Not thread safe. After this method is called, the assumption is that no new ProjectEvaluationFinishedEventArgs will arrive.
-        /// In the regular code path, this method is called only once per build. But some test cases may call it multiple times to validate 
+        /// In the regular code path, this method is called only once per build. But some test cases may call it multiple times to validate
         /// the aggregated data.
         /// </remarks>
         internal ProfilerResult GetAggregatedResult(bool pruneSmallItems = true)
@@ -219,7 +219,7 @@ namespace Microsoft.Build.Logging
 
             // Let's build an index of profiled locations by id, to speed up subsequent queries
             var idTable = aggregatedLocations.ToDictionary(pair => pair.Key.Id,
-                pair => new Pair<EvaluationLocation, ProfiledLocation>(pair.Key, pair.Value));
+                pair => new KeyValuePair<EvaluationLocation, ProfiledLocation>(pair.Key, pair.Value));
 
             // We want to keep all evaluation pass entries plus the big enough regular entries
             foreach (var prunedPair in aggregatedLocations.Where(pair =>
@@ -237,7 +237,7 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Finds the first ancestor of parentId (which could be itself) that is either an evaluation pass location or a big enough profiled data.
         /// </summary>
-        private static long? FindBigEnoughParentId(IDictionary<long, Pair<EvaluationLocation, ProfiledLocation>> idTable,
+        private static long? FindBigEnoughParentId(IDictionary<long, KeyValuePair<EvaluationLocation, ProfiledLocation>> idTable,
             long? parentId)
         {
             // The parent id is null, which means the item was pointing to an evaluation pass item. So we keep it as is.
@@ -278,7 +278,7 @@ namespace Microsoft.Build.Logging
         /// Pretty prints the aggregated results and saves it to disk.
         /// </summary>
         /// <remarks>
-        /// If the extension of the file to log is 'md', markdown content is generated. Otherwise, it falls 
+        /// If the extension of the file to log is 'md', markdown content is generated. Otherwise, it falls
         /// back to a tab separated format.
         /// </remarks>
         private void GenerateProfilerReport()

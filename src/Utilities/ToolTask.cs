@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -345,7 +345,16 @@ namespace Microsoft.Build.Utilities
         /// Implemented in the derived class
         /// </summary>
         /// <returns>true, if successful</returns>
-        protected internal virtual bool ValidateParameters() => true; // Default is no validation (ie. parameters are always valid, hence the true return value). This is useful for tools that don't need validation.
+        protected internal virtual bool ValidateParameters()
+        {
+            if (TaskProcessTerminationTimeout < -1 && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6))
+            {
+                Log.LogWarningWithCodeFromResources("ToolTask.InvalidTerminationTimeout", TaskProcessTerminationTimeout);
+                return false;
+            }
+
+            return true;
+        }
 
         /// <summary>
         /// Returns true if task execution is not necessary. Executed after ValidateParameters
@@ -945,7 +954,7 @@ namespace Microsoft.Build.Utilities
                     LogShared.LogWarningWithCodeFromResources("Shared.KillingProcessByCancellation", processName);
                 }
 
-                int timeout = 5000;
+                int timeout = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) && TaskProcessTerminationTimeout >= -1 ? TaskProcessTerminationTimeout : 5000;
                 string timeoutFromEnvironment = Environment.GetEnvironmentVariable("MSBUILDTOOLTASKCANCELPROCESSWAITTIMEOUT");
                 if (timeoutFromEnvironment != null)
                 {
@@ -1398,7 +1407,7 @@ namespace Microsoft.Build.Utilities
 
                         string batchFileForCommandLine = _temporaryBatchFile;
 
-                        // If for some crazy reason the path has a & character and a space in it
+                        // If for some reason the path has a & character and a space in it
                         // then get the short path of the temp path, which should not have spaces in it
                         // and then escape the &
                         if (batchFileForCommandLine.Contains("&") && !batchFileForCommandLine.Contains("^&"))

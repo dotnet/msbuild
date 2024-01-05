@@ -16,7 +16,7 @@ namespace Microsoft.Build.Evaluation
     {
         private const string Separator = "\t";
 
-        /// <inheritdoc/> 
+        /// <inheritdoc/>
         internal override void AppendHeader(StringBuilder stringBuilder)
         {
             AppendDefaultHeaderWithSeparator(stringBuilder, Separator);

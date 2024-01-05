@@ -81,7 +81,7 @@ namespace Microsoft.Build.BuildEngine
         internal const string defaultSolutionWrapperProjectToolsVersion = "4.0";
 
         /// <summary>
-        /// Current version of this MSBuild Engine assembly in the 
+        /// Current version of this MSBuild Engine assembly in the
         /// form, e.g, "4.0"
         /// </summary>
         internal static string AssemblyVersion

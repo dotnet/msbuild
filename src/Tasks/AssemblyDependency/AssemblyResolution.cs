@@ -22,7 +22,7 @@ namespace Microsoft.Build.Tasks
     ///
     ///     [path-to-frameworks]\System.Xml.dll
     ///
-    /// 
+    ///
     /// </summary>
     internal static class AssemblyResolution
     {

@@ -14,12 +14,12 @@ namespace Microsoft.Build.BuildEngine.Shared
     /// This exception is to be thrown whenever an assumption we have made in the code turns out to be false. Thus, if this
     /// exception ever gets thrown, it is because of a bug in our own code, not because of something the user or project author
     /// did wrong.
-    /// 
+    ///
     /// !~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~
     /// WARNING: When this file is shared into multiple assemblies each assembly will view this as a different type.
     ///          Don't throw this exception from one assembly and catch it in another.
     /// !~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~
-    ///     
+    ///
     /// </summary>
     /// <owner>RGoel</owner>
     [Serializable]

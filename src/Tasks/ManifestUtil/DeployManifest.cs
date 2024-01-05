@@ -129,7 +129,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         /// <summary>
-        /// codes from GetInstallableFrameworkForTargetFxInternal in 
+        /// codes from GetInstallableFrameworkForTargetFxInternal in
         /// env/vscore/package/FxMultiTargeting/FrameworkMultiTargetingInternal.cs
         /// </summary>
         private static FrameworkNameVersioning GetInstallableFrameworkName(FrameworkNameVersioning frameworkName)
@@ -153,7 +153,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 }
             }
 
-            // If the installable framework value is not in the redist, there was no redist, or no matching FX we return the sent TFM,  
+            // If the installable framework value is not in the redist, there was no redist, or no matching FX we return the sent TFM,
             // this means frameworks that are installable themselves don't need to specify this property
             // and that all unknown frameworks are assumed to be installable.
             if (installableFramework == null)
@@ -213,8 +213,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             try
             {
                 var doc = new XmlDocument();
-                var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                using (XmlReader xr = XmlReader.Create(redistListFilePath, xrSettings))
+                var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+                FileStream fs = File.OpenRead(redistListFilePath);
+                using (XmlReader xr = XmlReader.Create(fs, xrSettings))
                 {
                     doc.Load(xr);
                     XmlNode fileListNode = doc.DocumentElement;
@@ -275,7 +276,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             catch (OverflowException)
             {
-                // continue 
+                // continue
             }
 
             return version;

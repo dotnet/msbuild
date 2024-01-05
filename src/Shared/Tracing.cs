@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 #if DEBUG
+using System.Globalization;
 using System.Reflection;
 #endif
 
@@ -18,7 +19,7 @@ namespace Microsoft.Build.Internal
     /// </summary>
     internal static class Tracing
     {
-        // Disabling warning about unused fields -- this is effectively a 
+        // Disabling warning about unused fields -- this is effectively a
         // debug-only class, so these fields cause a build break in RET
 #pragma warning disable 649
         /// <summary>
@@ -43,7 +44,7 @@ namespace Microsoft.Build.Internal
 
         /// <summary>
         /// Short name of the current assembly - to distinguish statics when this type is shared into different assemblies
-        /// </summary> 
+        /// </summary>
         private static string s_currentAssemblyName;
 #pragma warning restore 649
 
@@ -58,7 +59,7 @@ namespace Microsoft.Build.Internal
 
             string val = Environment.GetEnvironmentVariable("MSBUILDTRACEINTERVAL");
             double seconds;
-            if (!String.IsNullOrEmpty(val) && System.Double.TryParse(val, out seconds))
+            if (!String.IsNullOrEmpty(val) && System.Double.TryParse(val, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture.NumberFormat, out seconds))
             {
                 s_interval = TimeSpan.FromSeconds(seconds);
             }
@@ -140,7 +141,6 @@ namespace Microsoft.Build.Internal
         /// Dump all the named counters, if any
         /// </summary>
         [Conditional("DEBUG")]
-        [SuppressMessage("Microsoft.MSInternal", "CA908:AvoidTypesThatRequireJitCompilationInPrecompiledAssemblies", Justification = "Debug only")]
         internal static void Dump()
         {
             if (s_counts.Count > 0)

@@ -31,7 +31,7 @@ namespace Microsoft.Build.BackEnd
         /// Constructor for deserialization
         /// </summary>
         private LogMessagePacket(ITranslator translator)
-            : base(translator)
+            : base(translator, new TargetFinishedTranslator(TranslateTargetFinishedEvent))
         {
         }
 

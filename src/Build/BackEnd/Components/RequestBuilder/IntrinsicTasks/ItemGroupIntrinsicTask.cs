@@ -167,7 +167,7 @@ namespace Microsoft.Build.BackEnd
             // Second, expand the item include and exclude, and filter existing metadata as appropriate.
             List<ProjectItemInstance> itemsToAdd = ExpandItemIntoItems(child, bucket.Expander, keepMetadata, removeMetadata, loggingContext);
 
-            // Third, expand the metadata.           
+            // Third, expand the metadata.
             foreach (ProjectItemGroupTaskMetadataInstance metadataInstance in child.Metadata)
             {
                 bool condition = ConditionEvaluator.EvaluateCondition(
@@ -196,7 +196,7 @@ namespace Microsoft.Build.BackEnd
 
                     string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, expanderOptions, metadataInstance.Location, loggingContext);
 
-                    // This both stores the metadata so we can add it to all the items we just created later, and 
+                    // This both stores the metadata so we can add it to all the items we just created later, and
                     // exposes this metadata to further metadata evaluations in subsequent loop iterations.
                     metadataTable.SetValue(metadataInstance.Name, evaluatedValue);
                 }
@@ -236,7 +236,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Remove items from the world. Removes to items that are part of the project manifest are backed up, so 
+        /// Remove items from the world. Removes to items that are part of the project manifest are backed up, so
         /// they can be reverted when the project is reset after the end of the build.
         /// </summary>
         /// <param name="child">The item specification to evaluate and remove.</param>
@@ -280,7 +280,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Modifies items in the world - specifically, changes their metadata. Changes to items that are part of the project manifest are backed up, so 
+        /// Modifies items in the world - specifically, changes their metadata. Changes to items that are part of the project manifest are backed up, so
         /// they can be reverted when the project is reset after the end of the build.
         /// </summary>
         /// <param name="child">The item specification to evaluate and modify.</param>
@@ -413,27 +413,28 @@ namespace Microsoft.Build.BackEnd
 
             // Split Include on any semicolons, and take each split in turn
             var includeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedInclude);
-            ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(this.Project, originalItem.ItemType);
+            ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(Project, originalItem.ItemType);
+
+            // EngineFileUtilities.GetFileListEscaped api invocation evaluates excludes by default.
+            // If the code process any expression like "@(x)", we need to handle excludes explicitly using EvaluateExcludePaths().
+            bool anyTransformExprProceeded = false;
 
             foreach (string includeSplit in includeSplits)
             {
                 // If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
-                bool throwaway;
-
-                IList<ProjectItemInstance> itemsFromSplit = expander.ExpandSingleItemVectorExpressionIntoItems(includeSplit,
+                IList<ProjectItemInstance> itemsFromSplit = expander.ExpandSingleItemVectorExpressionIntoItems(
+                    includeSplit,
                     itemFactory,
                     ExpanderOptions.ExpandItems,
                     false /* do not include null expansion results */,
-                    out throwaway,
+                    out _,
                     originalItem.IncludeLocation);
 
                 if (itemsFromSplit != null)
                 {
                     // Expression is in form "@(X)", so add these items directly.
-                    foreach (ProjectItemInstance item in itemsFromSplit)
-                    {
-                        items.Add(item);
-                    }
+                    items.AddRange(itemsFromSplit);
+                    anyTransformExprProceeded = true;
                 }
                 else
                 {
@@ -463,34 +464,17 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            // Evaluate, split, expand and subtract any Exclude
-            HashSet<string> excludesUnescapedForComparison = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (string excludeSplit in excludes)
+            // There is a need to Evaluate Exclude part explicitly because of of the expressions had the form "@(X)".
+            if (anyTransformExprProceeded)
             {
-                string[] excludeSplitFiles = EngineFileUtilities.GetFileListUnescaped(
-                    Project.Directory,
-                    excludeSplit,
-                    loggingMechanism: LoggingContext,
-                    excludeLocation: originalItem.ExcludeLocation);
+                // Calculate all Exclude
+                var excludesUnescapedForComparison = EvaluateExcludePaths(excludes, originalItem.ExcludeLocation);
 
-                foreach (string excludeSplitFile in excludeSplitFiles)
-                {
-                    excludesUnescapedForComparison.Add(excludeSplitFile.NormalizeForPathComparison());
-                }
+                // Subtract any Exclude
+                items = items
+                    .Where(i => !excludesUnescapedForComparison.Contains(((IItem)i).EvaluatedInclude.NormalizeForPathComparison()))
+                    .ToList();
             }
-
-            List<ProjectItemInstance> remainingItems = new List<ProjectItemInstance>();
-
-            for (int i = 0; i < items.Count; i++)
-            {
-                if (!excludesUnescapedForComparison.Contains(((IItem)items[i]).EvaluatedInclude.NormalizeForPathComparison()))
-                {
-                    remainingItems.Add(items[i]);
-                }
-            }
-
-            items = remainingItems;
 
             // Filter the metadata as appropriate
             if (keepMetadata != null)
@@ -517,6 +501,32 @@ namespace Microsoft.Build.BackEnd
             }
 
             return items;
+        }
+
+        /// <summary>
+        /// Returns a list of all items specified in Exclude parameter.
+        /// If no items match, returns empty list.
+        /// </summary>
+        /// <param name="excludes">The items to match</param>
+        /// <param name="excludeLocation">The specification to match against the items.</param>
+        /// <returns>A list of matching items</returns>
+        private HashSet<string> EvaluateExcludePaths(IReadOnlyList<string> excludes, ElementLocation excludeLocation)
+        {
+            HashSet<string> excludesUnescapedForComparison = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (string excludeSplit in excludes)
+            {
+                string[] excludeSplitFiles = EngineFileUtilities.GetFileListUnescaped(
+                    Project.Directory,
+                    excludeSplit,
+                    loggingMechanism: LoggingContext,
+                    excludeLocation: excludeLocation);
+                foreach (string excludeSplitFile in excludeSplitFiles)
+                {
+                    excludesUnescapedForComparison.Add(excludeSplitFile.NormalizeForPathComparison());
+                }
+            }
+
+            return excludesUnescapedForComparison;
         }
 
         /// <summary>
@@ -671,7 +681,7 @@ namespace Microsoft.Build.BackEnd
             #region IMetadataTable Members
             // NOTE:  Leaving these methods public so as to avoid having to explicitly define them
             // through the IMetadataTable interface and then cast everywhere they're used.  This class
-            // is private, so it ultimately doesn't matter. 
+            // is private, so it ultimately doesn't matter.
 
             /// <summary>
             /// Gets the specified metadata value.  Returns an empty string if none is set.

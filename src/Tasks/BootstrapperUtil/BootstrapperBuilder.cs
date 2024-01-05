@@ -52,7 +52,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
         private const string ENGINE_PATH = "Engine"; // relative to bootstrapper path
         private const string SCHEMA_PATH = "Schemas"; // relative to bootstrapper path
-        private const string PACKAGE_PATH = "Packages"; // relative to bootstrapper path 
+        private const string PACKAGE_PATH = "Packages"; // relative to bootstrapper path
         private const string RESOURCES_PATH = "";
 
         private const string BOOTSTRAPPER_NAMESPACE = "http://schemas.microsoft.com/developer/2004/01/bootstrapper";
@@ -202,7 +202,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     configElement.AppendChild(applicationElement);
                 }
 
-                // Key: File hash, Value: A DictionaryEntry whose Key is "EULAx" and value is a 
+                // Key: File hash, Value: A DictionaryEntry whose Key is "EULAx" and value is a
                 // fully qualified path to a eula. It can be any eula that matches the hash.
                 var eulas = new Dictionary<string, KeyValuePair<string, string>>(StringComparer.Ordinal);
 
@@ -532,14 +532,15 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 foreach (string subDirectory in Directory.GetDirectories(startDirectory))
                 {
                     string resourceDirectory = System.IO.Path.Combine(startDirectory, subDirectory);
-                    string resourceFile = System.IO.Path.Combine(resourceDirectory, SETUP_RESOURCES_FILE);
-                    if (FileSystems.Default.FileExists(resourceFile))
+                    string resourceFilePath = System.IO.Path.Combine(resourceDirectory, SETUP_RESOURCES_FILE);
+                    if (FileSystems.Default.FileExists(resourceFilePath))
                     {
                         var resourceDoc = new XmlDocument();
                         try
                         {
-                            var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                            using (var xr = XmlReader.Create(resourceFile, xrs))
+                            var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+                            FileStream fs = File.OpenRead(resourceFilePath);
+                            using (var xr = XmlReader.Create(fs, xrs))
                             {
                                 resourceDoc.Load(xr);
                             }
@@ -759,7 +760,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 }
 
                 // If we could not remove any products and there are still products in the queue
-                // there must be a loop in it. We'll break the loop by removing the dependencies 
+                // there must be a loop in it. We'll break the loop by removing the dependencies
                 // of the first project in the queue;
                 if (buildQueue.Count > 0 && productsToRemove.Count == 0)
                 {
@@ -836,8 +837,9 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 #pragma warning disable 618 // Using XmlValidatingReader. TODO: We need to switch to using XmlReader.Create() with validation.
                         var validatingReader = new XmlValidatingReader(xmlReader);
 #pragma warning restore 618
-                        var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                        using (XmlReader xr = XmlReader.Create(schemaPath, xrSettings))
+                        var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+                        FileStream fs = File.OpenRead(schemaPath);
+                        using (XmlReader xr = XmlReader.Create(fs, xrSettings))
                         {
                             try
                             {
@@ -1016,7 +1018,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                                             ReplacePackageFileAttributes(langElement, EULA_ATTRIBUTE, packageFilesNode, "PackageFile", "OldName", "SourcePath");
                                         }
 
-                                        // in general, we prefer the attributes of the language document over the 
+                                        // in general, we prefer the attributes of the language document over the
                                         //  attributes of the base document.  Copy attributes from the lang to the merged,
                                         //  and then merge all unique elements into merge
                                         foreach (XmlAttribute attribute in langElement.Attributes)
@@ -1238,12 +1240,12 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             XmlNode baseNode = baseElement.SelectSingleNode(BOOTSTRAPPER_PREFIX + ":" + strNodeName, _xmlNamespaceManager);
 
             // There are 4 basic cases to be dealt with:
-            // Case #    1       2       3       4      
+            // Case #    1       2       3       4
             // base      null    null    present present
             // lang      null    present null    present
             // Result    null    lang    base    combine
             //
-            // Cases 1 - 3 are pretty trivial.  
+            // Cases 1 - 3 are pretty trivial.
             if (baseNode == null)
             {
                 if (langNode != null)
@@ -2036,27 +2038,27 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 }
                 catch (IOException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
                 catch (ArgumentException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
                 catch (NotSupportedException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
                 catch (XmlException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
             }
@@ -2075,22 +2077,22 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 }
                 catch (IOException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
                 catch (ArgumentException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
                 catch (NotSupportedException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
             }
@@ -2240,12 +2242,12 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         {
             var includedProducts = new Dictionary<string, Product>(StringComparer.OrdinalIgnoreCase)
             {
-                // Add in this product in case there is a circular includes: 
+                // Add in this product in case there is a circular includes:
                 // we won't continue to explore this product.  It will be removed later.
                 { product.ProductCode, product }
             };
 
-            // Recursively add included products 
+            // Recursively add included products
             foreach (Product p in product.Includes)
             {
                 AddIncludedProducts(p, includedProducts);

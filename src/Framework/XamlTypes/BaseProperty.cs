@@ -12,9 +12,9 @@ using System.Windows.Markup;
 namespace Microsoft.Build.Framework.XamlTypes
 {
     /// <summary>
-    /// Represents a <see cref="Rule"/> property. 
+    /// Represents a <see cref="Rule"/> property.
     /// </summary>
-    /// <remarks> 
+    /// <remarks>
     /// <para>This represents schema information (name, allowed values, etc) of a <see cref="Rule"/> property.
     /// Since this is just schema information, there is no field like "Value" used to get/set the value of this
     /// property.</para>
@@ -71,10 +71,10 @@ namespace Microsoft.Build.Framework.XamlTypes
         #region Properties
 
         /// <summary>
-        /// The name of this <see cref="BaseProperty"/>. 
+        /// The name of this <see cref="BaseProperty"/>.
         /// </summary>
         /// <remarks>
-        /// This field is mandatory and culture invariant. The value of this field cannot be set to the empty string. 
+        /// This field is mandatory and culture invariant. The value of this field cannot be set to the empty string.
         /// </remarks>
         public string Name
         {
@@ -83,10 +83,10 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// The name that could be used by a prospective UI client to display this <see cref="BaseProperty"/>. 
+        /// The name that could be used by a prospective UI client to display this <see cref="BaseProperty"/>.
         /// </summary>
         /// <remarks>
-        /// This field is optional and is culture sensitive. When this property is not set, it is assigned the same 
+        /// This field is optional and is culture sensitive. When this property is not set, it is assigned the same
         /// value as the <see cref="Name"/> property (and hence, would not be localized).
         /// </remarks>
         [Localizable(true)]
@@ -104,9 +104,9 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// Description of this <see cref="BaseProperty"/> for use by a prospective UI client. 
+        /// Description of this <see cref="BaseProperty"/> for use by a prospective UI client.
         /// </summary>
-        /// <remarks> 
+        /// <remarks>
         /// This field is optional and is culture sensitive.
         /// </remarks>
         [Localizable(true)]
@@ -135,7 +135,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         /// The URL of the help page for this property that will be opened when the user hits F1.
         /// </summary>
         /// <remarks>
-        /// This property is higher in priority that <see cref="HelpContext"/> + <see cref="HelpFile"/> 
+        /// This property is higher in priority that <see cref="HelpContext"/> + <see cref="HelpFile"/>
         /// (i.e., these two properties are ignored if <see cref="HelpUrl"/>
         /// is specified), but lower in priority than <see cref="F1Keyword"/>.
         /// This field is optional and is culture insensitive.
@@ -152,7 +152,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         /// <summary>
         /// The help file to use when the user hits F1. Must specify <see cref="HelpContext"/> along with this.
         /// </summary>
-        /// <remarks> 
+        /// <remarks>
         /// This property goes along with <see cref="HelpContext"/>. <seealso cref="HelpContext"/>. This
         /// form of specifying the help page for a property takes lower precedence than both <see cref="F1Keyword"/>
         /// and <see cref="HelpUrl"/>.
@@ -169,7 +169,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         /// The help context to use when the user hits F1. Must specify <see cref="HelpFile"/> along with this.
         /// </summary>
         /// <remarks>
-        /// This property uses the <see cref="HelpFile"/> property to display the help context of the specified 
+        /// This property uses the <see cref="HelpFile"/> property to display the help context of the specified
         /// help file. This field is optional. This
         /// form of specifying the help page for a property takes lower precedence than both <see cref="F1Keyword"/>
         /// and <see cref="HelpUrl"/>.
@@ -181,17 +181,17 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// The name of the category to which this property belongs to. 
+        /// The name of the category to which this property belongs to.
         /// </summary>
         /// <remarks>
         /// <para>
-        /// If the value of this field  does not correspond to the <c>Name</c> 
+        /// If the value of this field  does not correspond to the <c>Name</c>
         /// property of a <see cref="Category"/> element defined in
         /// the containing <see cref="Rule"/>, a default <see cref="Category"/> with this name
-        /// is auto-generated and added to the containing <see cref="Rule"/> class. 
+        /// is auto-generated and added to the containing <see cref="Rule"/> class.
         /// </para>
         /// <para>
-        /// This field is optional and is culture invariant. 
+        /// This field is optional and is culture invariant.
         /// </para>
         /// <para>
         /// When this field is not specified, this property is added to a
@@ -215,7 +215,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// Tells if this property is a read-only property. 
+        /// Tells if this property is a read-only property.
         /// </summary>
         /// <remarks>
         /// This field is optional and its default value is "false".
@@ -276,7 +276,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         /// This field is optional and culture invariant.
         /// </remarks>
         /// <example>
-        /// Example: Consider <c>/D:WIN32</c>. In this switch and value representation, ":" is the separator since its separates the switch <c>D</c> 
+        /// Example: Consider <c>/D:WIN32</c>. In this switch and value representation, ":" is the separator since its separates the switch <c>D</c>
         /// from its value <c>WIN32</c>.
         /// </example>
         public string Separator
@@ -321,7 +321,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// Specifies the default value for this property. 
+        /// Specifies the default value for this property.
         /// </summary>
         /// <remarks>
         /// This field is optional and whether, for a <see cref="StringProperty"/>,
@@ -335,10 +335,10 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// The data source where the current value of this property is stored. 
+        /// The data source where the current value of this property is stored.
         /// </summary>
         /// <remarks>
-        /// If defined, it overrides the 
+        /// If defined, it overrides the
         /// <see cref="Rule.DataSource"/> property on the containing <see cref="Rule"/>. This field is mandatory only if the parent
         /// <see cref="Rule"/> does not have the data source initialized. The getter for this property returns
         /// only the <see cref="DataSource"/> set directly on this <see cref="BaseProperty"/> instance.
@@ -350,7 +350,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// Additional attributes of this <see cref="BaseProperty"/>. 
+        /// Additional attributes of this <see cref="BaseProperty"/>.
         /// </summary>
         /// <remarks>
         /// This can be used as a grab bag of additional metadata of this property that are not
@@ -379,7 +379,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// List of value editors for this property. 
+        /// List of value editors for this property.
         /// </summary>
         /// <remarks>
         /// This field is optional.
@@ -395,9 +395,9 @@ namespace Microsoft.Build.Framework.XamlTypes
     }
 
     /// <summary>
-    /// Represents a <see cref="Rule"/> property. 
+    /// Represents a <see cref="Rule"/> property.
     /// </summary>
-    /// <remarks> 
+    /// <remarks>
     /// <para>This represents schema information (name, allowed values, etc) of a <see cref="Rule"/> property.
     /// Since this is just schema information, there is no field like "Value" used to get/set the value of this
     /// property.</para>

@@ -14,6 +14,7 @@ using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -144,6 +145,7 @@ namespace Microsoft.Build.Execution
 
             _componentFactories = new BuildComponentFactoryCollection(this);
             _componentFactories.RegisterDefaultFactories();
+            SerializationContractInitializer.Initialize();
             _packetFactory = new NodePacketFactory();
 
             _buildRequestEngine = (this as IBuildComponentHost).GetComponent(BuildComponentType.RequestEngine) as IBuildRequestEngine;
@@ -152,10 +154,14 @@ namespace Microsoft.Build.Execution
 
             // Create a factory for the out-of-proc SDK resolver service which can pass our SendPacket delegate to be used for sending packets to the main node
             OutOfProcNodeSdkResolverServiceFactory sdkResolverServiceFactory = new OutOfProcNodeSdkResolverServiceFactory(SendPacket);
-
             ((IBuildComponentHost)this).RegisterFactory(BuildComponentType.SdkResolverService, sdkResolverServiceFactory.CreateInstance);
-
             _sdkResolverService = (this as IBuildComponentHost).GetComponent(BuildComponentType.SdkResolverService) as ISdkResolverService;
+
+#if FEATURE_REPORTFILEACCESSES
+            ((IBuildComponentHost)this).RegisterFactory(
+                BuildComponentType.FileAccessManager,
+                (componentType) => OutOfProcNodeFileAccessManager.CreateComponent(componentType, SendPacket));
+#endif
 
             if (s_projectRootElementCacheBase == null)
             {
@@ -368,6 +374,13 @@ namespace Microsoft.Build.Execution
             {
                 _nodeEndpoint.SendData(result);
             }
+
+#if FEATURE_REPORTFILEACCESSES
+            if (_buildParameters.ReportFileAccesses)
+            {
+                FileAccessManager.NotifyFileAccessCompletion(result.GlobalRequestId);
+            }
+#endif
         }
 
         /// <summary>
@@ -571,7 +584,29 @@ namespace Microsoft.Build.Execution
         {
             if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
             {
+#if RUNTIME_TYPE_NETCORE
+                if (packet is LogMessagePacketBase logMessage
+                    && logMessage.EventType == LoggingEventType.CustomEvent
+                    &&
+                    (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8) || !Traits.Instance.EscapeHatches.IsBinaryFormatterSerializationAllowed)
+                    && Traits.Instance.EscapeHatches.EnableWarningOnCustomBuildEvent)
+                {
+                    BuildEventArgs buildEvent = logMessage.NodeBuildEvent.Value.Value;
+
+                    // Serializing unknown CustomEvent which has to use unsecure BinaryFormatter by TranslateDotNet<T>
+                    // Since BinaryFormatter is deprecated in dotnet 8+, log error so users discover root cause easier
+                    // then by reading CommTrace where it would be otherwise logged as critical infra error.
+                    _loggingService.LogError(_loggingContext?.BuildEventContext ?? BuildEventContext.Invalid, null, BuildEventFileInfo.Empty,
+                            "DeprecatedEventSerialization",
+                            buildEvent?.GetType().Name ?? string.Empty);
+                }
+                else
+                {
+                    _nodeEndpoint.SendData(packet);
+                }
+#else
                 _nodeEndpoint.SendData(packet);
+#endif
             }
         }
 
@@ -694,7 +729,7 @@ namespace Microsoft.Build.Execution
             }
 
             // We want to make sure the global project collection has the toolsets which were defined on the parent
-            // so that any custom toolsets defined can be picked up by tasks who may use the global project collection but are 
+            // so that any custom toolsets defined can be picked up by tasks who may use the global project collection but are
             // executed on the child node.
             ICollection<Toolset> parentToolSets = _buildParameters.ToolsetProvider.Toolsets;
             if (parentToolSets != null)

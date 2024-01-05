@@ -48,6 +48,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <DirectoryBuildTargetsPath Condition="'$(_DirectoryBuildTargetsBasePath)' != '' and '$(_DirectoryBuildTargetsFile)' != ''">$([System.IO.Path]::Combine('$(_DirectoryBuildTargetsBasePath)', '$(_DirectoryBuildTargetsFile)'))</DirectoryBuildTargetsPath>
   </PropertyGroup>
 
+  <Import Project="$(CustomBeforeDirectoryBuildTargets)" Condition="'$(CustomBeforeDirectoryBuildTargets)' != ''" />
+
   <Import Project="$(DirectoryBuildTargetsPath)" Condition="'$(ImportDirectoryBuildTargets)' == 'true' and exists('$(DirectoryBuildTargetsPath)')"/>
+
+  <Import Project="$(CustomAfterDirectoryBuildTargets)" Condition="'$(CustomAfterDirectoryBuildTargets)' != ''" />
 
 </Project>

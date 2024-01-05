@@ -117,10 +117,10 @@ namespace Microsoft.Build
                         int length = (int)memoryStream.Length;
                         n = (rawPosition + readLength) < length ? readLength : length - rawPosition;
 
-                        // Attempt to track down an intermittent failure -- n should not ever be negative, but 
-                        // we're occasionally seeing it when we do the decoder.GetChars below -- by providing 
+                        // Attempt to track down an intermittent failure -- n should not ever be negative, but
+                        // we're occasionally seeing it when we do the decoder.GetChars below -- by providing
                         // a bit more information when we do hit the error, in the place where (by code inspection)
-                        // the actual error seems most likely to be occurring. 
+                        // the actual error seems most likely to be occurring.
                         if (n < 0)
                         {
                             ErrorUtilities.ThrowInternalError("From calculating based on the memorystream, about to read n = {0}. length = {1}, rawPosition = {2}, readLength = {3}, stringLength = {4}, currPos = {5}.", n, length, rawPosition, readLength, stringLength, currPos);
@@ -191,10 +191,18 @@ namespace Microsoft.Build
         /// <remarks>
         /// The caller is responsible for managing the lifetime of the returned buffer and for passing it to <see cref="Create"/>.
         /// </remarks>
-        internal static SharedReadBuffer CreateSharedBuffer()
+        internal static BinaryReaderFactory CreateSharedBuffer()
         {
             return new Buffer();
         }
+
+        /// <summary>
+        /// A placeholder instructing InterningBinaryReader to use pooled buffer (to avoid extra allocations).
+        /// </summary>
+        /// <remarks>
+        /// Lifetime of the pooled buffer is managed by InterningBinaryReader (tied to BinaryReader lifetime wrapping the buffer)
+        /// </remarks>
+        internal static BinaryReaderFactory PoolingBuffer => NullBuffer.Instance;
 
         /// <summary>
         /// Gets a buffer from the pool or creates a new one.
@@ -232,7 +240,7 @@ namespace Microsoft.Build
         /// Create a BinaryReader. It will either be an interning reader or standard binary reader
         /// depending on whether the interning reader is possible given the buffer and stream.
         /// </summary>
-        internal static BinaryReader Create(Stream stream, SharedReadBuffer sharedBuffer)
+        private static BinaryReader Create(Stream stream, BinaryReaderFactory sharedBuffer)
         {
             Buffer buffer = (Buffer)sharedBuffer;
             if (buffer != null)
@@ -243,9 +251,9 @@ namespace Microsoft.Build
         }
 
         /// <summary>
-        /// Holds thepreallocated buffer. 
+        /// Holds thepreallocated buffer.
         /// </summary>
-        private class Buffer : SharedReadBuffer
+        private class Buffer : BinaryReaderFactory
         {
             private char[] _charBuffer;
             private byte[] _byteBuffer;
@@ -280,13 +288,24 @@ namespace Microsoft.Build
                     return _byteBuffer;
                 }
             }
-        }
-    }
 
-    /// <summary>
-    /// Opaque holder of shared buffer.
-    /// </summary>
-    internal abstract class SharedReadBuffer
-    {
+            public override BinaryReader Create(Stream stream)
+            {
+                return InterningBinaryReader.Create(stream, this);
+            }
+        }
+
+        private class NullBuffer : BinaryReaderFactory
+        {
+            private NullBuffer()
+            { }
+
+            public static readonly BinaryReaderFactory Instance = new NullBuffer();
+
+            public override BinaryReader Create(Stream stream)
+            {
+                return InterningBinaryReader.Create(stream, null);
+            }
+        }
     }
 }

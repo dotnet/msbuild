@@ -43,7 +43,7 @@ namespace Microsoft.Build.Evaluation
 
                 _lazyEvaluator = lazyEvaluator;
 
-                _evaluatorData = new EvaluatorData(_lazyEvaluator._outerEvaluatorData, itemType => GetReferencedItems(itemType, ImmutableHashSet<string>.Empty));
+                _evaluatorData = new EvaluatorData(_lazyEvaluator._outerEvaluatorData, _referencedItemLists);
                 _itemFactory = new ItemFactoryWrapper(_itemElement, _lazyEvaluator._itemFactory);
                 _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, _lazyEvaluator.EvaluationContext);
 
@@ -72,28 +72,16 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Produce the items to operate on. For example, create new ones or select existing ones
             /// </summary>
-            protected virtual ImmutableList<I> SelectItems(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            protected virtual ImmutableArray<I> SelectItems(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
                 return listBuilder.Select(itemData => itemData.Item)
-                                  .ToImmutableList();
+                                  .ToImmutableArray();
             }
 
             // todo Refactoring: MutateItems should clone each item before mutation. See https://github.com/dotnet/msbuild/issues/2328
-            protected virtual void MutateItems(ImmutableList<I> items) { }
+            protected virtual void MutateItems(ImmutableArray<I> items) { }
 
-            protected virtual void SaveItems(ImmutableList<I> items, OrderedItemDataCollection.Builder listBuilder) { }
-
-            private IList<I> GetReferencedItems(string itemType, ImmutableHashSet<string> globsToIgnore)
-            {
-                if (_referencedItemLists.TryGetValue(itemType, out var itemList))
-                {
-                    return itemList.GetMatchedItems(globsToIgnore);
-                }
-                else
-                {
-                    return ImmutableList<I>.Empty;
-                }
-            }
+            protected virtual void SaveItems(ImmutableArray<I> items, OrderedItemDataCollection.Builder listBuilder) { }
 
             [DebuggerDisplay(@"{DebugString()}")]
             protected readonly struct ItemBatchingContext
@@ -174,16 +162,16 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            protected void DecorateItemsWithMetadata(IEnumerable<ItemBatchingContext> itemBatchingContexts, ImmutableList<ProjectMetadataElement> metadata, bool? needToExpandMetadata = null)
+            protected void DecorateItemsWithMetadata(IEnumerable<ItemBatchingContext> itemBatchingContexts, ImmutableArray<ProjectMetadataElement> metadata, bool? needToExpandMetadata = null)
             {
-                if (metadata.Count > 0)
+                if (metadata.Length > 0)
                 {
                     ////////////////////////////////////////////////////
                     // UNDONE: Implement batching here.
                     //
-                    // We want to allow built-in metadata in metadata values here. 
+                    // We want to allow built-in metadata in metadata values here.
                     // For example, so that an Idl file can specify that its Tlb output should be named %(Filename).tlb.
-                    // 
+                    //
                     // In other words, we want batching. However, we won't need to go to the trouble of using the regular batching code!
                     // That's because that code is all about grouping into buckets of similar items. In this context, we're not
                     // invoking a task, and it's fine to process each item individually, which will always give the correct results.
@@ -195,7 +183,7 @@ namespace Microsoft.Build.Evaluation
                     //    or whether they contain any custom metadata && the Include involved an @(itemlist) expression.
                     // -- if either case is found, we go ahead and evaluate all the metadata separately for each item.
                     // -- otherwise we can do the old thing (evaluating all metadata once then applying to all items)
-                    // 
+                    //
                     // This algorithm gives the correct results except when:
                     // -- batchable expressions exist on the include, exclude, or condition on the item element itself
                     //
@@ -238,11 +226,11 @@ namespace Microsoft.Build.Evaluation
                     {
                         // Metadata expressions are allowed here.
                         // Temporarily gather and expand these in a table so they can reference other metadata elements above.
-                        EvaluatorMetadataTable metadataTable = new EvaluatorMetadataTable(_itemType);
+                        EvaluatorMetadataTable metadataTable = new EvaluatorMetadataTable(_itemType, capacity: metadata.Length);
                         _expander.Metadata = metadataTable;
 
                         // Also keep a list of everything so we can get the predecessor objects correct.
-                        List<Pair<ProjectMetadataElement, string>> metadataList = new List<Pair<ProjectMetadataElement, string>>(metadata.Count);
+                        List<KeyValuePair<ProjectMetadataElement, string>> metadataList = new(metadata.Length);
 
                         foreach (var metadataElement in metadata)
                         {
@@ -264,7 +252,7 @@ namespace Microsoft.Build.Evaluation
                             evaluatedValue = FileUtilities.MaybeAdjustFilePath(evaluatedValue, metadataElement.ContainingProject.DirectoryPath);
 
                             metadataTable.SetValue(metadataElement, evaluatedValue);
-                            metadataList.Add(new Pair<ProjectMetadataElement, string>(metadataElement, evaluatedValue));
+                            metadataList.Add(new KeyValuePair<ProjectMetadataElement, string>(metadataElement, evaluatedValue));
                         }
 
                         // Apply those metadata to each item
@@ -282,7 +270,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            private static IEnumerable<string> GetMetadataValuesAndConditions(ImmutableList<ProjectMetadataElement> metadata)
+            private static IEnumerable<string> GetMetadataValuesAndConditions(ImmutableArray<ProjectMetadataElement> metadata)
             {
                 foreach (var metadataElement in metadata)
                 {
@@ -291,7 +279,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            protected bool NeedToExpandMetadataForEachItem(ImmutableList<ProjectMetadataElement> metadata, out ItemsAndMetadataPair itemsAndMetadataFound)
+            protected bool NeedToExpandMetadataForEachItem(ImmutableArray<ProjectMetadataElement> metadata, out ItemsAndMetadataPair itemsAndMetadataFound)
             {
                 itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(GetMetadataValuesAndConditions(metadata));
 

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -18,6 +18,7 @@
          This is important for the MSBuild.VSSetup project, which "references" both the x86 and x64
          versions of this project -->
     <RuntimeIdentifiers Condition="'$(DotNetBuildFromSource)' != 'true'">win7-x86;win7-x64</RuntimeIdentifiers>
+    <UseRidGraph>true</UseRidGraph>
 
     <EnableDefaultItems>false</EnableDefaultItems>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -48,7 +49,8 @@
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <AddAppConfigToBuildOutputs>false</AddAppConfigToBuildOutputs>
 
-    <DebugType Condition="'$(Platform)' == 'x64'">full</DebugType><!-- Setting DebugType here goes hand in hand with eng\AfterSigning.targets. This is to prompt the x64 build to produce a 'full' .pdb that's `more compatible` then 'portable' and 'embedded' .pdbs. This doesn't get set on 32 bit architecture, which will default to 'embedded' and 'pdb2pdb' will convert those as needed. See https://github.com/dotnet/msbuild/pull/5070 for context. -->
+    <!-- Setting DebugType here goes hand in hand with eng\AfterSigning.targets. This is to prompt the x64 build to produce a 'full' .pdb that's `more compatible` then 'portable' and 'embedded' .pdbs. This doesn't get set on 32 bit architecture, which will default to 'embedded' and 'pdb2pdb' will convert those as needed. See https://github.com/dotnet/msbuild/pull/5070 for context. -->
+    <DebugType Condition="'$(Platform)' == 'x64'">full</DebugType>
     <DefineConstants>$(DefineConstants);MSBUILDENTRYPOINTEXE</DefineConstants>
   </PropertyGroup>
 
@@ -70,38 +72,26 @@
     <Compile Include="..\Shared\CollectionHelpers.cs" />
     <Compile Include="..\Shared\FileDelegates.cs">
       <Link>FileDelegates.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\FileUtilities.cs">
       <Link>FileUtilities.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Build\Instance\ReflectableTaskPropertyInfo.cs" />
     <Compile Include="..\Shared\FileUtilitiesRegex.cs">
       <Link>FileUtilitiesRegex.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
       <Link>IConstrainedEqualityComparer.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\QuotingUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="..\Shared\QuotingUtilities.cs" />
     <Compile Include="..\Shared\RegisteredTaskObjectCacheBase.cs">
       <Link>RegisteredTaskObjectCacheBase.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ResourceUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\EscapingUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\ErrorUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\Modifiers.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="..\Shared\ResourceUtilities.cs" />
+    <Compile Include="..\Shared\EscapingUtilities.cs" />
+    <Compile Include="..\Shared\ErrorUtilities.cs" />
+    <Compile Include="..\Shared\Modifiers.cs" />
+    <Compile Include="..\Shared\XMakeElements.cs" />
     <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs" />
     <Compile Include="..\Shared\IKeyed.cs" />
@@ -110,15 +100,11 @@
     <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
     <Compile Include="..\Shared\ExceptionHandling.cs" />
-    <Compile Include="..\Shared\EventArgsFormatting.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="..\Shared\EventArgsFormatting.cs" />
     <Compile Include="..\Shared\TempFileUtilities.cs">
       <Link>TempFileUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\XMakeAttributes.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="..\Shared\XMakeAttributes.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />
     <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" />
     <Compile Include="..\Shared\INodePacket.cs" />
@@ -126,10 +112,7 @@
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\NodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
-    <Compile Include="..\Shared\ITranslatable.cs" />
-    <Compile Include="..\Shared\ITranslator.cs" />
     <Compile Include="..\Shared\TranslatorHelpers.cs" />
-    <Compile Include="..\Shared\BinaryTranslator.cs" />
     <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\InterningBinaryReader.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
@@ -139,57 +122,35 @@
     <Compile Include="..\Shared\TaskLoader.cs" />
     <Compile Include="..\Shared\MSBuildLoadContext.cs" Condition="'$(TargetFrameworkIdentifier)'!='.NETFramework'" />
     <Compile Include="..\Shared\TypeLoader.cs" />
-    <Compile Include="..\Shared\LoadedType.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyLoadInfo.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="..\Shared\LoadedType.cs" />
+    <Compile Include="..\Shared\AssemblyLoadInfo.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
     <Compile Include="..\Shared\NodeShutdown.cs" />
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
-    <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyNameExtension.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs" />
+    <Compile Include="..\Shared\AssemblyNameExtension.cs" />
     <Compile Include="..\Shared\ThreadPoolExtensions.cs" />
     <Compile Include="..\Shared\StringExtensions.cs" />
-    <Compile Include="AssemblyInfo.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyResources.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="CommandLineSwitches.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="CommandLineSwitchException.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="AssemblyResources.cs" />
+    <Compile Include="AutomaticEncodingRestorer.cs" />
+    <Compile Include="CommandLineSwitches.cs" />
+    <Compile Include="CommandLineSwitchException.cs" />
     <Compile Include="..\Shared\CoreCLRAssemblyLoader.cs" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
-    <Compile Include="DistributedLoggerRecord.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="LiveLogger\*.cs" />
-    <Compile Include="InitializationException.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="DistributedLoggerRecord.cs" />
+    <Compile Include="TerminalLogger\*.cs" />
+    <Compile Include="InitializationException.cs" />
     <Compile Include="MSBuildClientApp.cs" />
     <Compile Include="NodeEndpointOutOfProcTaskHost.cs" />
     <Compile Include="LogMessagePacket.cs" />
-    <Compile Include="ProjectSchemaValidationHandler.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="ProjectSchemaValidationHandler.cs" />
     <Compile Include="OutOfProcTaskHostNode.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapperBase.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapper.cs" />
     <Compile Include="PerformanceLogEventListener.cs" />
-    <Compile Include="XMake.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="JsonOutputFormatter.cs" />
+    <Compile Include="XMake.cs" />
     <!-- This is to enable CodeMarkers in MSBuild.exe -->
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />
@@ -215,16 +176,17 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
   </ItemGroup>
-    <!-- Manually download this library for RoslynCodeTaskFactory.
+  <!-- Manually download this library for RoslynCodeTaskFactory.
            See target AddRefAssemblies below. -->
-    <ItemGroup>
-      <PackageDownload Include="netstandard.library">
-        <Version>[2.0.3]</Version>
-      </PackageDownload>
-    </ItemGroup>
+  <ItemGroup>
+    <PackageDownload Include="netstandard.library">
+      <Version>[2.0.3]</Version>
+    </PackageDownload>
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <!-- File for Assemblies we depend on -->
     <Reference Include="System" />
@@ -245,7 +207,7 @@
 
   <!-- Xsds are not TF or arch-specific so copy once them in the outer build -->
   <Target Name="CopyXsds" BeforeTargets="Build" Condition="'$(IsInnerBuild)' != 'true'">
-    <Copy SourceFiles="@(XsdsForVS)" DestinationFiles="@(XsdsForVS-&gt;'$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'xsd'))%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="$(SkipCopyUnchangedFiles)" />
+    <Copy SourceFiles="@(XsdsForVS)" DestinationFiles="@(XsdsForVS-&gt;'$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'xsd'))%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
 
   <!-- Include MSBuild.deps.json and MSBuild.runtimeconfig.json in ContentWithTargetPath so they will be copied to the output folder of projects
@@ -294,6 +256,7 @@
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.props" TargetFramework="%(_TargetFrameworks.Identity)" Subdirectory="Current\" />
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.tasks" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.Test.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Managed.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Managed.Before.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Managed.After.targets" TargetFramework="%(_TargetFrameworks.Identity)" />

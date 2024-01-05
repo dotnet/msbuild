@@ -21,10 +21,13 @@ namespace Microsoft.Build.Framework
         public const int Version1 = 1;
 
         /// <summary>
-        /// An explicit version of this class. Must be incremented whenever new members are added. Derived classes should override
-        /// the property to return the version actually being implemented.
+        /// Gets an explicit version of this class.
         /// </summary>
-        public virtual int Version => Version1; // Not updated since we have not shipped 17.0 yet. This comment is meant to bypass RequiredVersionBumps check in build.ps1 for PR #8336. If the changes in the file are cosmetic, change PR# in this comment to silence the build error on CI build.
+        /// <remarks>
+        /// Must be incremented whenever new members are added. Derived classes should override
+        /// the property to return the version actually being implemented.
+        /// </remarks>
+        public virtual int Version => Version1;
 
         /// <summary>
         /// Returns <see langword="true"/> if the given message importance is not guaranteed to be ignored by registered loggers.

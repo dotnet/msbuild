@@ -38,7 +38,7 @@ namespace Microsoft.Build.Construction
     /// project file schema.
     /// This class and its related classes allow a complete MSBuild project or targets file to be read and written.
     /// Comments and whitespace cannot be edited through this model at present.
-    /// 
+    ///
     /// Each project root element is associated with exactly one ProjectCollection. This allows the owner of that project collection
     /// to control its lifetime and not be surprised by edits via another project collection.
     /// </summary>
@@ -113,9 +113,9 @@ namespace Microsoft.Build.Construction
         private string _escapedFullPath;
 
         /// <summary>
-        /// The directory that the project is in. 
+        /// The directory that the project is in.
         /// Essential for evaluating relative paths.
-        /// If the project is not loaded from disk, returns the current-directory from 
+        /// If the project is not loaded from disk, returns the current-directory from
         /// the time the project was loaded - this is the same behavior as Whidbey/Orcas.
         /// </summary>
         private string _directory;
@@ -271,7 +271,7 @@ namespace Microsoft.Build.Construction
         internal event EventHandler<ProjectXmlChangedEventArgs> OnProjectXmlChanged;
 
         /// <summary>
-        /// Condition should never be set, but the getter returns null instead of throwing 
+        /// Condition should never be set, but the getter returns null instead of throwing
         /// because a nonexistent condition is implicitly true
         /// </summary>
         public override string Condition
@@ -287,89 +287,89 @@ namespace Microsoft.Build.Construction
         /// <remarks>
         /// The name is inconsistent to make it more understandable, per API review.
         /// </remarks>
-        public ICollection<ProjectChooseElement> ChooseElements => new ReadOnlyCollection<ProjectChooseElement>(Children.OfType<ProjectChooseElement>());
+        public ICollection<ProjectChooseElement> ChooseElements => GetChildrenOfType<ProjectChooseElement>();
 
         /// <summary>
         /// Get a read-only collection of the child item definition groups, if any
         /// </summary>
-        public ICollection<ProjectItemDefinitionGroupElement> ItemDefinitionGroups => new ReadOnlyCollection<ProjectItemDefinitionGroupElement>(Children.OfType<ProjectItemDefinitionGroupElement>());
+        public ICollection<ProjectItemDefinitionGroupElement> ItemDefinitionGroups => GetChildrenOfType<ProjectItemDefinitionGroupElement>();
 
         /// <summary>
         /// Get a read-only collection of the child item definitions, if any, in all item definition groups anywhere in the project file.
         /// </summary>
-        public ICollection<ProjectItemDefinitionElement> ItemDefinitions => new ReadOnlyCollection<ProjectItemDefinitionElement>(AllChildren.OfType<ProjectItemDefinitionElement>());
+        public ICollection<ProjectItemDefinitionElement> ItemDefinitions => new ReadOnlyCollection<ProjectItemDefinitionElement>(GetAllChildrenOfType<ProjectItemDefinitionElement>());
 
         /// <summary>
         /// Get a read-only collection over the child item groups, if any.
         /// Does not include any that may not be at the root, i.e. inside Choose elements.
         /// </summary>
-        public ICollection<ProjectItemGroupElement> ItemGroups => new ReadOnlyCollection<ProjectItemGroupElement>(Children.OfType<ProjectItemGroupElement>());
+        public ICollection<ProjectItemGroupElement> ItemGroups => GetChildrenOfType<ProjectItemGroupElement>();
 
         /// <summary>
         /// Get a read-only collection of the child items, if any, in all item groups anywhere in the project file.
         /// Not restricted to root item groups: traverses through Choose elements.
         /// </summary>
-        public ICollection<ProjectItemElement> Items => new ReadOnlyCollection<ProjectItemElement>(AllChildren.OfType<ProjectItemElement>());
+        public ICollection<ProjectItemElement> Items => new ReadOnlyCollection<ProjectItemElement>(GetAllChildrenOfType<ProjectItemElement>());
 
         /// <summary>
         /// Get a read-only collection of the child import groups, if any.
         /// </summary>
-        public ICollection<ProjectImportGroupElement> ImportGroups => new ReadOnlyCollection<ProjectImportGroupElement>(Children.OfType<ProjectImportGroupElement>());
+        public ICollection<ProjectImportGroupElement> ImportGroups => GetChildrenOfType<ProjectImportGroupElement>();
 
         /// <summary>
         /// Get a read-only collection of the child imports
         /// </summary>
-        public ICollection<ProjectImportElement> Imports => new ReadOnlyCollection<ProjectImportElement>(AllChildren.OfType<ProjectImportElement>());
+        public ICollection<ProjectImportElement> Imports => new ReadOnlyCollection<ProjectImportElement>(GetAllChildrenOfType<ProjectImportElement>());
 
         /// <summary>
         /// Get a read-only collection of the child property groups, if any.
         /// Does not include any that may not be at the root, i.e. inside Choose elements.
         /// </summary>
-        public ICollection<ProjectPropertyGroupElement> PropertyGroups => new ReadOnlyCollection<ProjectPropertyGroupElement>(Children.OfType<ProjectPropertyGroupElement>());
+        public ICollection<ProjectPropertyGroupElement> PropertyGroups => GetChildrenOfType<ProjectPropertyGroupElement>();
 
         /// <summary>
         /// Geta read-only collection of the child properties, if any, in all property groups anywhere in the project file.
         /// Not restricted to root property groups: traverses through Choose elements.
         /// </summary>
-        public ICollection<ProjectPropertyElement> Properties => new ReadOnlyCollection<ProjectPropertyElement>(AllChildren.OfType<ProjectPropertyElement>());
+        public ICollection<ProjectPropertyElement> Properties => new ReadOnlyCollection<ProjectPropertyElement>(GetAllChildrenOfType<ProjectPropertyElement>());
 
         /// <summary>
         /// Get a read-only collection of the child targets
         /// </summary>
-        public ICollection<ProjectTargetElement> Targets => new ReadOnlyCollection<ProjectTargetElement>(Children.OfType<ProjectTargetElement>());
+        public ICollection<ProjectTargetElement> Targets => GetChildrenOfType<ProjectTargetElement>();
 
         /// <summary>
         /// Get a read-only collection of the child usingtasks, if any
         /// </summary>
-        public ICollection<ProjectUsingTaskElement> UsingTasks => new ReadOnlyCollection<ProjectUsingTaskElement>(Children.OfType<ProjectUsingTaskElement>());
+        public ICollection<ProjectUsingTaskElement> UsingTasks => GetChildrenOfType<ProjectUsingTaskElement>();
 
         /// <summary>
         /// Get a read-only collection of the child item groups, if any, in reverse order
         /// </summary>
-        public ICollection<ProjectItemGroupElement> ItemGroupsReversed => new ReadOnlyCollection<ProjectItemGroupElement>(ChildrenReversed.OfType<ProjectItemGroupElement>());
+        public ICollection<ProjectItemGroupElement> ItemGroupsReversed => GetChildrenReversedOfType<ProjectItemGroupElement>();
 
         /// <summary>
         /// Get a read-only collection of the child item definition groups, if any, in reverse order
         /// </summary>
-        public ICollection<ProjectItemDefinitionGroupElement> ItemDefinitionGroupsReversed => new ReadOnlyCollection<ProjectItemDefinitionGroupElement>(ChildrenReversed.OfType<ProjectItemDefinitionGroupElement>());
+        public ICollection<ProjectItemDefinitionGroupElement> ItemDefinitionGroupsReversed => GetChildrenReversedOfType<ProjectItemDefinitionGroupElement>();
 
         /// <summary>
         /// Get a read-only collection of the child import groups, if any, in reverse order
         /// </summary>
-        public ICollection<ProjectImportGroupElement> ImportGroupsReversed => new ReadOnlyCollection<ProjectImportGroupElement>(ChildrenReversed.OfType<ProjectImportGroupElement>());
+        public ICollection<ProjectImportGroupElement> ImportGroupsReversed => GetChildrenReversedOfType<ProjectImportGroupElement>();
 
         /// <summary>
         /// Get a read-only collection of the child property groups, if any, in reverse order
         /// </summary>
-        public ICollection<ProjectPropertyGroupElement> PropertyGroupsReversed => new ReadOnlyCollection<ProjectPropertyGroupElement>(ChildrenReversed.OfType<ProjectPropertyGroupElement>());
+        public ICollection<ProjectPropertyGroupElement> PropertyGroupsReversed => GetChildrenReversedOfType<ProjectPropertyGroupElement>();
 
         #endregion
 
         /// <summary>
-        /// The directory that the project is in. 
+        /// The directory that the project is in.
         /// Essential for evaluating relative paths.
         /// Is never null, even if the FullPath does not contain directory information.
-        /// If the project has not been loaded from disk and has not been given a path, returns the current-directory from 
+        /// If the project has not been loaded from disk and has not been given a path, returns the current-directory from
         /// the time the project was loaded - this is the same behavior as Whidbey/Orcas.
         /// If the project has not been loaded from disk but has been given a path, this path may not exist.
         /// </summary>
@@ -582,20 +582,20 @@ namespace Microsoft.Build.Construction
         /// Version number of this object.
         /// A host can compare this to a stored version number to determine whether
         /// a project's XML has changed, even if it has also been saved since.
-        /// 
+        ///
         /// The actual value is meaningless: an edit may increment it more than once,
         /// so it should only be compared to a stored value.
         /// </summary>
         /// <remarks>
-        /// Used by the Project class to figure whether changes have occurred that 
+        /// Used by the Project class to figure whether changes have occurred that
         /// it might want to pick up by reevaluation.
-        /// 
+        ///
         /// Used by the ProjectRootElement class to determine whether it needs to save.
-        /// 
+        ///
         /// This number is unique to the appdomain. That means that it is possible
         /// to know when a ProjectRootElement has been unloaded (perhaps after modification) and
         /// reloaded -- the version won't reset to '0'.
-        /// 
+        ///
         /// We're assuming we don't have over 2 billion edits.
         /// </remarks>
         public int Version
@@ -687,11 +687,11 @@ namespace Microsoft.Build.Construction
         internal bool IsMemberOfProjectCollection => _projectFileLocation != null;
 
         /// <summary>
-        /// Indicates whether there are any targets in this project 
+        /// Indicates whether there are any targets in this project
         /// that use the "Returns" attribute.  If so, then this project file
         /// is automatically assumed to be "Returns-enabled", and the default behavior
-        /// for targets without Returns attributes changes from using the Outputs to 
-        /// returning nothing by default. 
+        /// for targets without Returns attributes changes from using the Outputs to
+        /// returning nothing by default.
         /// </summary>
         internal bool ContainsTargetsWithReturnsAttribute { get; set; }
 
@@ -702,7 +702,7 @@ namespace Microsoft.Build.Construction
         /// Not public as we do not wish to encourage the use of ProjectExtensions.
         /// </remarks>
         internal ProjectExtensionsElement ProjectExtensions
-            => ChildrenReversed.OfType<ProjectExtensionsElement>().FirstOrDefault();
+            => GetChildrenReversedOfType<ProjectExtensionsElement>().FirstOrDefault();
 
         /// <summary>
         /// Returns an unlocalized indication of how this file was last dirtied.
@@ -1305,7 +1305,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Creates an import group. 
+        /// Creates an import group.
         /// Caller must add it to the location of choice in the project.
         /// </summary>
         public ProjectImportGroupElement CreateImportGroupElement()
@@ -1436,7 +1436,7 @@ namespace Microsoft.Build.Construction
         /// Creates a using task.
         /// Caller must add it to the location of choice in the project.
         /// Exactly one of assembly file and assembly name must be provided.
-        /// Also allows providing optional runtime and architecture specifiers.  Null is OK. 
+        /// Also allows providing optional runtime and architecture specifiers.  Null is OK.
         /// </summary>
         public ProjectUsingTaskElement CreateUsingTaskElement(string taskName, string assemblyFile, string assemblyName, string runtime, string architecture)
         {
@@ -1537,8 +1537,8 @@ namespace Microsoft.Build.Construction
                 FileInfo fileInfo = FileUtilities.GetFileInfoNoThrow(_projectFileLocation.File);
 
                 // If the file was deleted by a race with someone else immediately after it was written above
-                // then we obviously can't read the write time. In this obscure case, we'll retain the 
-                // older last write time, which at worst would cause the next load to unnecessarily 
+                // then we obviously can't read the write time. In this obscure case, we'll retain the
+                // older last write time, which at worst would cause the next load to unnecessarily
                 // come from disk.
                 if (fileInfo != null)
                 {
@@ -1616,7 +1616,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Reload the existing project root element from its file.
         /// An <see cref="InvalidOperationException"/> is thrown if the project root element is not associated with any file on disk.
-        /// 
+        ///
         /// See <see cref="ProjectRootElement.ReloadFrom(XmlReader, bool, bool?)"/>
         /// </summary>
         public void Reload(bool throwIfUnsavedChanges = true, bool? preserveFormatting = null)
@@ -1629,7 +1629,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Reload the existing project root element from the given path
         /// An <see cref="InvalidOperationException"/> is thrown if the path does not exist.
-        /// 
+        ///
         /// See <see cref="ProjectRootElement.ReloadFrom(XmlReader, bool, bool?)"/>
         /// </summary>
         public void ReloadFrom(string path, bool throwIfUnsavedChanges = true, bool? preserveFormatting = null)
@@ -1648,14 +1648,14 @@ namespace Microsoft.Build.Construction
 
         /// <summary>
         /// Reload the existing project root element from the given <paramref name="reader"/>
-        /// A reload operation completely replaces the state of this <see cref="ProjectRootElement"/> object. This operation marks the 
-        /// object as dirty (see <see cref="ProjectRootElement.MarkDirty"/> for side effects). 
-        /// 
+        /// A reload operation completely replaces the state of this <see cref="ProjectRootElement"/> object. This operation marks the
+        /// object as dirty (see <see cref="ProjectRootElement.MarkDirty"/> for side effects).
+        ///
         /// If the new state has invalid XML or MSBuild syntax, then this method throws an <see cref="InvalidProjectFileException"/>.
         /// When this happens, the state of this object does not change.
-        /// 
+        ///
         /// Reloading from an XMLReader will retain the previous root element location (<see cref="FullPath"/>, <see cref="DirectoryPath"/>, <see cref="ProjectFileLocation"/>).
-        /// 
+        ///
         /// </summary>
         /// <param name="reader">Reader to read from</param>
         /// <param name="throwIfUnsavedChanges">
@@ -1905,15 +1905,18 @@ namespace Microsoft.Build.Construction
                 }
             }
 
-            foreach (var sdkNode in Children.OfType<ProjectSdkElement>())
+            foreach (ProjectElement child in ChildrenEnumerable)
             {
-                var referencedSdk = new SdkReference(
-                    sdkNode.XmlElement.GetAttribute("Name"),
-                    sdkNode.XmlElement.GetAttribute("Version"),
-                    sdkNode.XmlElement.GetAttribute("MinimumVersion"));
+                if (child is ProjectSdkElement sdkNode)
+                {
+                    var referencedSdk = new SdkReference(
+                        sdkNode.XmlElement.GetAttribute("Name"),
+                        sdkNode.XmlElement.GetAttribute("Version"),
+                        sdkNode.XmlElement.GetAttribute("MinimumVersion"));
 
-                nodes.Add(ProjectImportElement.CreateImplicit("Sdk.props", currentProjectOrImport, ImplicitImportLocation.Top, referencedSdk, sdkNode));
-                nodes.Add(ProjectImportElement.CreateImplicit("Sdk.targets", currentProjectOrImport, ImplicitImportLocation.Bottom, referencedSdk, sdkNode));
+                    nodes.Add(ProjectImportElement.CreateImplicit("Sdk.props", currentProjectOrImport, ImplicitImportLocation.Top, referencedSdk, sdkNode));
+                    nodes.Add(ProjectImportElement.CreateImplicit("Sdk.targets", currentProjectOrImport, ImplicitImportLocation.Bottom, referencedSdk, sdkNode));
+                }
             }
 
             return nodes;

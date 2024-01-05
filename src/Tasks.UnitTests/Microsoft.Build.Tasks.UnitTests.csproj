@@ -4,6 +4,7 @@
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
     <IsPackable>false</IsPackable>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 
     <AssemblyName>Microsoft.Build.Tasks.UnitTests</AssemblyName>
     <IsTestProject>true</IsTestProject>
@@ -16,6 +17,8 @@
 
   <ItemGroup>
     <PackageReference Include="Shouldly" />
+    <PackageReference Include="Verify.Xunit" />
+
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
@@ -31,6 +34,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="PresentationFramework" Condition="$([MSBuild]::IsOSPlatform('windows'))" />
@@ -57,6 +61,9 @@
     <Compile Include="..\Shared\ProcessExtensions.cs" />
     <Compile Include="..\UnitTests.Shared\EnvironmentProvider.cs" />
     <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" />
+    <Compile Include="..\UnitTests.Shared\DriveMapping.cs" />
+    <Compile Include="..\UnitTests.Shared\DummyMappedDrive.cs" />
+    <Compile Include="..\UnitTests.Shared\DummyMappedDriveUtils.cs" />
     <Compile Include="..\Shared\UnitTests\LongPathSupportDisabledFactAttribute.cs">
       <Link>Shared\LongPathSupportDisabledFactAttribute.cs</Link>
     </Compile>
@@ -72,12 +79,24 @@
     <None Include="..\Shared\UnitTests\xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="TestResources\Projects\Custom_COM\Custom_COM\Class1.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestResources\Projects\Custom_COM\Custom_COM.sln">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestResources\Projects\Custom_COM\Custom_COM\Custom_COM.csproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestResources\Projects\Custom_COM\Custom_COM\Properties\AssemblyInfo.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
-  <ItemGroup> 
-    <Content Include="TestDocuments\**"> 
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory> 
-    </Content> 
+  <ItemGroup>
+    <Content Include="TestDocuments\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
@@ -144,7 +163,16 @@
 
   <ItemGroup>
     <None Update="ResourceHandling\*.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="TestResources\Projects\Custom_COM\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestResources\ClickOnceProfile.pubxml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestResources\lorem.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestResources\mycert.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

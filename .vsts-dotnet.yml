@@ -2,6 +2,7 @@ trigger:
 - main
 - vs*
 - exp/*
+- perf/*
 
 # If defined here, these values are not overrideable
 # Once they exist, we should define these as "runtime parameters"
@@ -23,12 +24,9 @@ variables:
   - name: SourceBranch
     value: $(IbcSourceBranchName)
   # If we're not on a vs* branch, use main as our optprof collection branch
-  # NOTE: the code is temporarily fixed. For the branches that should use opt-prof from the main branch we should use the latest working Opt-Prof collected from main 20230217.4.
   - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
-    - name: OptProfDrop
-      value: 'OptimizationData/DotNet-msbuild-Trusted/main/20230217.4/7352286/1'   
     - name: SourceBranch
-      value: ''
+      value: main
   # if OptProfDropName is set as a parameter, set OptProfDrop to the parameter and unset SourceBranch
   - ${{ if ne(parameters.OptProfDropName, 'default') }}:
     - name: OptProfDrop
@@ -39,21 +37,42 @@ variables:
     value: .NETCore
   - name: _DotNetValidationArtifactsCategory
     value: .NETCoreValidation
+  - name: EnableReleaseOneLocBuild
+    value: true
   - name: Codeql.Enabled
     value: true
+  - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+    - group: DotNet-MSBuild-SDLValidation-Params
 
 stages:
 - stage: build
   displayName: Build
 
   jobs:
-  - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}: # should track next-release's active dev branch
-    - template: /eng/common/templates/job/onelocbuild.yml
-      parameters:
-        LclSource: lclFilesfromPackage
-        LclPackageId: 'LCL-JUNO-PROD-MSBUILD'
-        MirrorRepo: 'msbuild'
-        MirrorBranch: 'main' # should match condition above
+  - ${{ if and( ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+    # The localization setup for release/ branches. Note difference in LclPackageId. main branch is handled separately below.
+    # Used for vs17.2, vs17.4, vs17.6 etc. branches only.
+    # When the branch is setup for localization (the localization ticket needs to be created - https://aka.ms/ceChangeLocConfig, requesting change from one release branch to another),
+    #  set 'EnableReleaseOneLocBuild' to true.
+    - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/vs') }}:
+      - template: /eng/common/templates/job/onelocbuild.yml
+        parameters:
+          MirrorRepo: 'msbuild'
+          LclSource: lclFilesfromPackage
+          LclPackageId: 'LCL-JUNO-PROD-MSBUILDREL'
+          MirrorBranch: ${{ replace(variables['Build.SourceBranch'], 'refs/heads/', '') }}
+          JobNameSuffix: '_release'
+          condition: ${{ variables.EnableReleaseOneLocBuild }}
+    # The localization setup for main branch. Note difference in package ID. Should not be used with release/ branches.
+    - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+      - template: /eng/common/templates/job/onelocbuild.yml
+        parameters:
+          MirrorRepo: 'msbuild'
+          LclSource: lclFilesfromPackage
+          LclPackageId: 'LCL-JUNO-PROD-MSBUILD'
+          MirrorBranch: 'main'
+          JobNameSuffix: '_main'
+          condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
 
   - job: Windows_NT
     pool:
@@ -77,9 +96,8 @@ stages:
       value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
     steps:
-    - task: NuGetToolInstaller@0
-      inputs:
-        versionSpec: '4.9.2'
+    - task: NuGetToolInstaller@1
+      displayName: 'Install NuGet.exe'
 
     - task: NuGetCommand@2
       displayName: Restore internal tools
@@ -147,7 +165,7 @@ stages:
 
     # Build VS bootstrapper
     # Generates $(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
-    - task: MicroBuildBuildVSBootstrapper@2
+    - task: MicroBuildBuildVSBootstrapper@3
       inputs:
         vsMajorVersion: $(VisualStudio.MajorVersion)
         channelName: $(VisualStudio.ChannelName)
@@ -199,6 +217,7 @@ stages:
       inputs:
         DropName: $(VisualStudio.DropName)
         DropFolder: 'artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+        DropRetentionDays: '30' # extended by insertion + VS release
         AccessToken: '$(System.AccessToken)'
         DropServiceUri: 'https://devdiv.artifacts.visualstudio.com'
         VSDropServiceUri: 'https://vsdrop.corp.microsoft.com/file/v1'
@@ -250,11 +269,14 @@ stages:
       displayName: Execute cleanup tasks
       condition: succeededOrFailed()
 
-  - template: /eng/common/templates/job/source-build.yml
-    parameters:
-      platform:
-        name: 'Managed'
-        container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7'
+    - template: /eng/common/templates/steps/component-governance.yml
+      parameters:
+        ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), or(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs'), eq(variables['Build.SourceBranch'], 'refs/heads/main'))) }}:
+          disableComponentGovernance: false
+        ${{ else }}:
+          disableComponentGovernance: true
+
+  - template: /eng/common/templates/jobs/source-build.yml
 
   - template: /eng/common/templates/job/publish-build-assets.yml
     parameters:
@@ -275,3 +297,18 @@ stages:
       enableSymbolValidation: false
       enableSourceLinkValidation: false
       enableNugetValidation: false
+      SDLValidationParameters:
+        enable: true
+        continueOnError: false
+        params: ' -SourceToolsList @("policheck","credscan")
+        -TsaInstanceURL "$(_TsaInstanceURL)"
+        -TsaProjectName "$(_TsaProjectName)"
+        -TsaNotificationEmail "$(_TsaNotificationEmail)"
+        -TsaCodebaseAdmin "$(_TsaCodebaseAdmin)"
+        -TsaBugAreaPath "$(_TsaBugAreaPath)"
+        -TsaIterationPath "$(_TsaIterationPath)"
+        -TsaRepositoryName "dotnet-msbuild"
+        -TsaCodebaseName "dotnet-msbuild"
+        -TsaPublish $True
+        -CrScanAdditionalRunConfigParams @("SuppressionsPath < $(Build.SourcesDirectory)\eng\CredScanSuppressions.json")
+        -PoliCheckAdditionalRunConfigParams @("UserExclusionPath < $(Build.SourcesDirectory)\eng\policheck_exclusions.xml")'

@@ -157,8 +157,8 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             VerifyActiveProxy();
 
-            // If we are in building across process we need the events to be serializable. This method will 
-            // check to see if we are building with multiple process and if the event is serializable. It will 
+            // If we are in building across process we need the events to be serializable. This method will
+            // check to see if we are building with multiple process and if the event is serializable. It will
             // also log a warning if the event is not serializable and drop the logging message.
             if (IsRunningMultipleNodes && !IsEventSerializable(e))
             {
@@ -178,8 +178,8 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             VerifyActiveProxy();
 
-            // If we are in building across process we need the events to be serializable. This method will 
-            // check to see if we are building with multiple process and if the event is serializable. It will 
+            // If we are in building across process we need the events to be serializable. This method will
+            // check to see if we are building with multiple process and if the event is serializable. It will
             // also log a warning if the event is not serializable and drop the logging message.
             if (IsRunningMultipleNodes && !IsEventSerializable(e))
             {
@@ -199,8 +199,8 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             VerifyActiveProxy();
 
-            // If we are in building across process we need the events to be serializable. This method will 
-            // check to see if we are building with multiple process and if the event is serializable. It will 
+            // If we are in building across process we need the events to be serializable. This method will
+            // check to see if we are building with multiple process and if the event is serializable. It will
             // also log a warning if the event is not serializable and drop the logging message.
             if (IsRunningMultipleNodes && !IsEventSerializable(e))
             {
@@ -220,8 +220,8 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             VerifyActiveProxy();
 
-            // If we are in building across process we need the events to be serializable. This method will 
-            // check to see if we are building with multiple process and if the event is serializable. It will 
+            // If we are in building across process we need the events to be serializable. This method will
+            // check to see if we are building with multiple process and if the event is serializable. It will
             // also log a warning if the event is not serializable and drop the logging message.
             if (IsRunningMultipleNodes && !IsEventSerializable(e))
             {
@@ -262,7 +262,7 @@ namespace Microsoft.Build.BackEnd
             ILease lease = (ILease)base.InitializeLifetimeService();
 
             // Set how long a lease should be initially. Once a lease expires
-            // the remote object will be disconnected and it will be marked as being availiable 
+            // the remote object will be disconnected and it will be marked as being availiable
             // for garbage collection
             int initialLeaseTime = 1;
 
@@ -284,7 +284,7 @@ namespace Microsoft.Build.BackEnd
             // increase the lease time allowing the object to stay in memory
             _sponsor = new ClientSponsor();
 
-            // When a new lease is requested lets make it last 1 minutes longer. 
+            // When a new lease is requested lets make it last 1 minutes longer.
             int leaseExtensionTime = 1;
 
             string leaseExtensionTimeFromEnvironment = Environment.GetEnvironmentVariable("MSBUILDENGINEPROXYLEASEEXTENSIONTIME");
@@ -337,7 +337,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool IsEventSerializable(BuildEventArgs e)
         {
-            if (!e.GetType().GetTypeInfo().IsSerializable)
+#pragma warning disable SYSLIB0050
+            // Types which are not serializable and are not IExtendedBuildEventArgs as
+            // those always implement custom serialization by WriteToStream and CreateFromStream.
+            if (!e.GetType().GetTypeInfo().IsSerializable && e is not IExtendedBuildEventArgs)
+#pragma warning restore SYSLIB0050
             {
                 _loggingContext.LogWarning(null, new BuildEventFileInfo(string.Empty), "ExpectedEventToBeSerializable", e.GetType().Name);
                 return false;

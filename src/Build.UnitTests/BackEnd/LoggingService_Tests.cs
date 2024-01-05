@@ -1068,7 +1068,7 @@ namespace Microsoft.Build.UnitTests.Logging
         public void ImportanceReflectsUnknownLoggerVerbosity()
         {
             // Minimum message importance is Low (i.e. we're logging everything) even when all registered loggers have
-            // Normal verbosity if at least of one them is not on our whitelist.
+            // Normal verbosity if at least of one them is not on our allowlist.
             _initializedService.RegisterLogger(new ConsoleLogger(LoggerVerbosity.Normal));
             _initializedService.RegisterLogger(new MockLogger() { Verbosity = LoggerVerbosity.Normal });
             _initializedService.RegisterLogger(CreateConfigurableForwardingLogger(LoggerVerbosity.Normal));

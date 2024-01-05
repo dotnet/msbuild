@@ -14,7 +14,7 @@ namespace Microsoft.Build.BuildEngine
     internal static class VCProjectParser
     {
         /// <summary>
-        /// For a given VC project, retrieves the projects it references 
+        /// For a given VC project, retrieves the projects it references
         /// </summary>
         /// <param name="projectPath"></param>
         /// <returns></returns>

@@ -14,18 +14,18 @@ using Xunit;
 namespace Microsoft.Build.UnitTests
 {
     /***************************************************************************
-     * 
+     *
      * Class:       MockEngine
-     * 
+     *
      * In order to execute tasks, we have to pass in an Engine object, so the
      * task can log events.  It doesn't have to be the real Engine object, just
      * something that implements the IBuildEngine2 interface.  So, we mock up
      * a fake engine object here, so we're able to execute tasks from the unit tests.
-     * 
+     *
      * The unit tests could have instantiated the real Engine object, but then
      * we would have had to take a reference onto the Microsoft.Build.Engine assembly, which
      * is somewhat of a no-no for task assemblies.
-     * 
+     *
      **************************************************************************/
     internal sealed class MockEngine : IBuildEngine3
     {

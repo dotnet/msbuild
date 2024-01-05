@@ -5,7 +5,9 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
 
@@ -21,7 +23,7 @@ namespace Microsoft.Build.Logging
     /// <remarks>The logger is public so that it can be instantiated from MSBuild.exe via command-line switch.</remarks>
     public sealed class BinaryLogger : ILogger
     {
-        // version 2: 
+        // version 2:
         //   - new BuildEventContext.EvaluationId
         //   - new record kinds: ProjectEvaluationStarted, ProjectEvaluationFinished
         // version 3:
@@ -59,7 +61,9 @@ namespace Microsoft.Build.Logging
         //   - new record kind: ResponseFileUsedEventArgs
         // version 16:
         //   - AssemblyLoadBuildEventArgs
-        internal const int FileFormatVersion = 16;
+        // version 17:
+        //   - Added extended data for types implementing IExtendedBuildEventArgs
+        internal const int FileFormatVersion = 17;
 
         private Stream stream;
         private BinaryWriter binaryWriter;
@@ -106,7 +110,7 @@ namespace Microsoft.Build.Logging
         public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Diagnostic;
 
         /// <summary>
-        /// Gets or sets the parameters. The only supported parameter is the output log file path (for example, "msbuild.binlog"). 
+        /// Gets or sets the parameters. The only supported parameter is the output log file path (for example, "msbuild.binlog").
         /// </summary>
         public string Parameters { get; set; }
 
@@ -190,6 +194,8 @@ namespace Microsoft.Build.Logging
             LogInitialInfo();
 
             eventSource.AnyEventRaised += EventSource_AnyEventRaised;
+
+            KnownTelemetry.LoggingConfigurationTelemetry.BinaryLogger = true;
         }
 
         private void EventArgsWriter_EmbedFile(string filePath)
@@ -226,12 +232,32 @@ namespace Microsoft.Build.Logging
 
             if (projectImportsCollector != null)
             {
+                projectImportsCollector.Close();
+
                 if (CollectProjectImports == ProjectImportsCollectionMode.Embed)
                 {
-                    eventArgsWriter.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, projectImportsCollector.GetAllBytes());
+                    var archiveFilePath = projectImportsCollector.ArchiveFilePath;
+
+                    // It is possible that the archive couldn't be created for some reason.
+                    // Only embed it if it actually exists.
+                    if (FileSystems.Default.FileExists(archiveFilePath))
+                    {
+                        using (FileStream fileStream = File.OpenRead(archiveFilePath))
+                        {
+                            if (fileStream.Length > int.MaxValue)
+                            {
+                                LogMessage("Imported files archive exceeded 2GB limit and it's not embedded.");
+                            }
+                            else
+                            {
+                                eventArgsWriter.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, fileStream);
+                            }
+                        }
+
+                        File.Delete(archiveFilePath);
+                    }
                 }
 
-                projectImportsCollector.Close();
                 projectImportsCollector = null;
             }
 
@@ -335,6 +361,7 @@ namespace Microsoft.Build.Logging
             {
                 FilePath = "msbuild.binlog";
             }
+            KnownTelemetry.LoggingConfigurationTelemetry.BinaryLoggerUsedDefaultName = FilePath == "msbuild.binlog";
 
             try
             {

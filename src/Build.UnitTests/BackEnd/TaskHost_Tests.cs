@@ -386,6 +386,61 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Test that extended custom events are logged properly
+        /// </summary>
+        [Fact]
+        public void TestLogExtendedCustomEventNotSerializableMP()
+        {
+            _mockHost.BuildParameters.MaxNodeCount = 4;
+
+            // Log the custom event args.  (Pretend that the task actually did this.)
+            _taskHost.LogCustomEvent(new ExtendedCustomBuildEventArgs("testExtCustomBuildEvent", "ext message", null, null));
+
+            // Make sure our custom logger received the actual custom event and not some fake.
+            Assert.True(_customLogger.LastCustom is ExtendedCustomBuildEventArgs); // "Expected custom build Event"
+            Assert.Equal("ext message", _customLogger.LastCustom.Message);
+        }
+
+        [Fact]
+        public void TestLogExtendedCustomErrorNotSerializableMP()
+        {
+            _mockHost.BuildParameters.MaxNodeCount = 4;
+
+            // Log the custom event args.  (Pretend that the task actually did this.)
+            _taskHost.LogErrorEvent(new ExtendedBuildErrorEventArgs("testExtCustomBuildError", null, null, null, 0, 0, 0, 0,"ext err message", null, null));
+
+            // Make sure our custom logger received the actual custom event and not some fake.
+            Assert.True(_customLogger.LastError is ExtendedBuildErrorEventArgs); // "Expected custom build Event"
+            Assert.Equal("ext err message", _customLogger.LastError.Message);
+        }
+
+        [Fact]
+        public void TestLogExtendedCustomWarningNotSerializableMP()
+        {
+            _mockHost.BuildParameters.MaxNodeCount = 4;
+
+            // Log the custom event args.  (Pretend that the task actually did this.)
+            _taskHost.LogWarningEvent(new ExtendedBuildWarningEventArgs("testExtCustomBuildWarning", null, null, null, 0, 0, 0, 0, "ext warn message", null, null));
+
+            // Make sure our custom logger received the actual custom event and not some fake.
+            Assert.True(_customLogger.LastWarning is ExtendedBuildWarningEventArgs); // "Expected custom build Event"
+            Assert.Equal("ext warn message", _customLogger.LastWarning.Message);
+        }
+
+        [Fact]
+        public void TestLogExtendedCustomMessageNotSerializableMP()
+        {
+            _mockHost.BuildParameters.MaxNodeCount = 4;
+
+            // Log the custom event args.  (Pretend that the task actually did this.)
+            _taskHost.LogMessageEvent(new ExtendedBuildMessageEventArgs("testExtCustomBuildMessage", "ext message", null, null, MessageImportance.Normal));
+
+            // Make sure our custom logger received the actual custom event and not some fake.
+            Assert.True(_customLogger.LastMessage is ExtendedBuildMessageEventArgs); // "Expected custom build Event"
+            Assert.Equal("ext message", _customLogger.LastMessage.Message);
+        }
+
+        /// <summary>
         /// Test that errors are logged properly
         /// </summary>
         [Fact]

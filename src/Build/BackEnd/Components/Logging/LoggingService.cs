@@ -218,17 +218,17 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// A list of warnings to treat as errors for an associated <see cref="BuildEventContext"/>.  If an empty set, all warnings are treated as errors.
         /// </summary>
-        private IDictionary<int, ISet<string>> _warningsAsErrorsByProject;
+        private IDictionary<WarningsConfigKey, ISet<string>> _warningsAsErrorsByProject;
 
         /// <summary>
         /// A list of warnings to not to be promoted to errors for an associated <see cref="BuildEventContext"/>.
         /// </summary>
-        private IDictionary<int, ISet<string>> _warningsNotAsErrorsByProject;
+        private IDictionary<WarningsConfigKey, ISet<string>> _warningsNotAsErrorsByProject;
 
         /// <summary>
         /// A list of warnings to treat as messages for an associated <see cref="BuildEventContext"/>.
         /// </summary>
-        private IDictionary<int, ISet<string>> _warningsAsMessagesByProject;
+        private IDictionary<WarningsConfigKey, ISet<string>> _warningsAsMessagesByProject;
 
         /// <summary>
         /// The minimum message importance that must be logged because there is a possibility that a logger consumes it.
@@ -463,6 +463,11 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Gets or sets a value that will error when the build process fails an up-to-date check.
+        /// </summary>
+        public bool Question { get; set; }
+
+        /// <summary>
         /// The list of descriptions which describe how to create forwarding loggers on a node.
         /// This is used by the node provider to get a list of registered descriptions so that
         /// they can be transmitted to child nodes.
@@ -623,9 +628,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="warningsByProject">A dictionary of all warnings to be treated special by for which projects.</param>
         /// <param name="warnings">Warning codes we already know should be promoted, demoted, or not promoted as relevant.</param>
         /// <returns></returns>
-        private ICollection<string> GetWarningsForProject(BuildEventContext context, IDictionary<int, ISet<string>> warningsByProject, ISet<string> warnings)
+        private ICollection<string> GetWarningsForProject(BuildEventContext context, IDictionary<WarningsConfigKey, ISet<string>> warningsByProject, ISet<string> warnings)
         {
-            int key = GetWarningsAsErrorOrMessageKey(context);
+            WarningsConfigKey key = GetWarningsConfigKey(context);
 
             if (warningsByProject != null && warningsByProject.TryGetValue(key, out ISet<string> newWarnings))
             {
@@ -678,13 +683,13 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="warningsByProject">Dictionary with what warnings are currently known (by project) that we will add to.</param>
         /// <param name="buildEventContext">Context for the project to be added</param>
         /// <param name="codes">Codes to add</param>
-        private void AddWarningsAsMessagesOrErrors(ref IDictionary<int, ISet<string>> warningsByProject, BuildEventContext buildEventContext, ISet<string> codes)
+        private void AddWarningsAsMessagesOrErrors(ref IDictionary<WarningsConfigKey, ISet<string>> warningsByProject, BuildEventContext buildEventContext, ISet<string> codes)
         {
             lock (_lockObject)
             {
-                int key = GetWarningsAsErrorOrMessageKey(buildEventContext);
+                WarningsConfigKey key = GetWarningsConfigKey(buildEventContext);
 
-                warningsByProject ??= new ConcurrentDictionary<int, ISet<string>>();
+                warningsByProject ??= new ConcurrentDictionary<WarningsConfigKey, ISet<string>>();
 
                 if (!warningsByProject.ContainsKey(key))
                 {
@@ -797,6 +802,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 // this information default to 1
                 _maxCPUCount = buildComponentHost.BuildParameters.MaxNodeCount;
 
+                Question = buildComponentHost.BuildParameters.Question;
+
                 // Ask the component host if onlyLogCriticalEvents is true or false. If the host does
                 // not have this information default to false.
                 _onlyLogCriticalEvents = buildComponentHost.BuildParameters.OnlyLogCriticalEvents;
@@ -901,7 +908,58 @@ namespace Microsoft.Build.BackEnd.Logging
 
             LogMessagePacket loggingPacket = (LogMessagePacket)packet;
             InjectNonSerializedData(loggingPacket);
+
+            WarnOnDeprecatedCustomArgsSerialization(loggingPacket);
+
             ProcessLoggingEvent(loggingPacket.NodeBuildEvent);
+        }
+
+        /// <summary>
+        /// Serializing unknown CustomEvent which has to use unsecure BinaryFormatter by TranslateDotNet.
+        /// Since BinaryFormatter is going to be deprecated, log warning so users can use new Extended*EventArgs instead of custom
+        /// EventArgs derived from existing EventArgs.
+        /// </summary>
+        private void WarnOnDeprecatedCustomArgsSerialization(LogMessagePacket loggingPacket)
+        {
+            if (loggingPacket.EventType == LoggingEventType.CustomEvent
+                && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8)
+                && Traits.Instance.EscapeHatches.EnableWarningOnCustomBuildEvent)
+            {
+                BuildEventArgs buildEvent = loggingPacket.NodeBuildEvent.Value.Value;
+                BuildEventContext buildEventContext = buildEvent?.BuildEventContext ?? BuildEventContext.Invalid;
+
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                    out string warningCode,
+                    out string helpKeyword,
+                    "DeprecatedEventSerialization",
+                    buildEvent?.GetType().Name ?? string.Empty);
+
+                BuildWarningEventArgs warning = new(
+                    null,
+                    warningCode,
+                    BuildEventFileInfo.Empty.File,
+                    BuildEventFileInfo.Empty.Line,
+                    BuildEventFileInfo.Empty.Column,
+                    BuildEventFileInfo.Empty.EndLine,
+                    BuildEventFileInfo.Empty.EndColumn,
+                    message,
+                    helpKeyword,
+                    "MSBuild");
+
+                warning.BuildEventContext = buildEventContext;
+                if (warning.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
+                {
+                    warning.ProjectFile = buildEvent switch
+                    {
+                        BuildMessageEventArgs buildMessageEvent => buildMessageEvent.ProjectFile,
+                        BuildErrorEventArgs buildErrorEvent => buildErrorEvent.ProjectFile,
+                        BuildWarningEventArgs buildWarningEvent => buildWarningEvent.ProjectFile,
+                        _ => null,
+                    };
+                }
+
+                ProcessLoggingEvent(warning);
+            }
         }
 
         /// <summary>
@@ -947,13 +1005,13 @@ namespace Microsoft.Build.BackEnd.Logging
 
                     // Get the Id of the eventSourceSink which was created for the first logger.
                     // We keep a reference to this Id so that all other central loggers registered on this logging service (from registerLogger)
-                    // will be attached to that eventSource sink so that they get all of the events forwarded by 
+                    // will be attached to that eventSource sink so that they get all of the events forwarded by
                     // forwarded by the CentralForwardingLogger
                     _centralForwardingLoggerSinkId = centralForwardingLoggerDescription.LoggerId;
                 }
                 else
                 {
-                    // We have already create a forwarding logger and have a single eventSink which 
+                    // We have already create a forwarding logger and have a single eventSink which
                     // a logger can listen to inorder to get all events in the system
                     EventSourceSink eventSource = (EventSourceSink)_eventSinkDictionary[_centralForwardingLoggerSinkId];
 
@@ -984,7 +1042,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
 
-            // UNDONE: (Logging) This should re-initialize this logging service. 
+            // UNDONE: (Logging) This should re-initialize this logging service.
         }
 
         /// <summary>
@@ -1243,18 +1301,17 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         #region Private Methods
-        private static int GetWarningsAsErrorOrMessageKey(BuildEventContext buildEventContext)
+        private static WarningsConfigKey GetWarningsConfigKey(BuildEventContext buildEventContext)
         {
-            var hash = 17;
-            hash = (hash * 31) + buildEventContext.ProjectInstanceId;
-            hash = (hash * 31) + buildEventContext.ProjectContextId;
-            return hash;
+            return new WarningsConfigKey(buildEventContext.ProjectInstanceId, buildEventContext.ProjectContextId);
         }
 
-        private static int GetWarningsAsErrorOrMessageKey(BuildEventArgs buildEventArgs)
+        private static WarningsConfigKey GetWarningsConfigKey(BuildEventArgs buildEventArgs)
         {
-            return GetWarningsAsErrorOrMessageKey(buildEventArgs.BuildEventContext);
+            return GetWarningsConfigKey(buildEventArgs.BuildEventContext);
         }
+
+        private readonly record struct WarningsConfigKey(int InstanceId, int ContextId);
 
         /// <summary>
         /// Create a logging thread to process the logging queue.
@@ -1438,65 +1495,122 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 if (ShouldTreatWarningAsMessage(warningEvent))
                 {
-                    loggingEvent = new BuildMessageEventArgs(
-                        warningEvent.Subcategory,
-                        warningEvent.Code,
-                        warningEvent.File,
-                        warningEvent.LineNumber,
-                        warningEvent.ColumnNumber,
-                        warningEvent.EndLineNumber,
-                        warningEvent.EndColumnNumber,
-                        warningEvent.Message,
-                        warningEvent.HelpKeyword,
-                        warningEvent.SenderName,
-                        MessageImportance.Low,
-                        warningEvent.Timestamp)
+                    if (buildEventArgs is ExtendedBuildWarningEventArgs extWarningEvent)
                     {
-                        BuildEventContext = warningEvent.BuildEventContext,
-                        ProjectFile = warningEvent.ProjectFile,
-                    };
+                        buildEventArgs = new ExtendedBuildMessageEventArgs(
+                                extWarningEvent.ExtendedType,
+                                extWarningEvent.Subcategory,
+                                extWarningEvent.Code,
+                                extWarningEvent.File,
+                                extWarningEvent.LineNumber,
+                                extWarningEvent.ColumnNumber,
+                                extWarningEvent.EndLineNumber,
+                                extWarningEvent.EndColumnNumber,
+                                extWarningEvent.Message,
+                                extWarningEvent.HelpKeyword,
+                                extWarningEvent.SenderName,
+                                MessageImportance.Low,
+                                extWarningEvent.Timestamp)
+                        {
+                            BuildEventContext = warningEvent.BuildEventContext,
+                            ProjectFile = warningEvent.ProjectFile,
+                            ExtendedMetadata = extWarningEvent.ExtendedMetadata,
+                            ExtendedData = extWarningEvent.ExtendedData,
+                        };
+                    }
+                    else
+                    {
+                        buildEventArgs = new BuildMessageEventArgs(
+                            warningEvent.Subcategory,
+                            warningEvent.Code,
+                            warningEvent.File,
+                            warningEvent.LineNumber,
+                            warningEvent.ColumnNumber,
+                            warningEvent.EndLineNumber,
+                            warningEvent.EndColumnNumber,
+                            warningEvent.Message,
+                            warningEvent.HelpKeyword,
+                            warningEvent.SenderName,
+                            MessageImportance.Low,
+                            warningEvent.Timestamp)
+                        {
+                            BuildEventContext = warningEvent.BuildEventContext,
+                            ProjectFile = warningEvent.ProjectFile,
+                        };
+                    }
                 }
                 else if (ShouldTreatWarningAsError(warningEvent))
                 {
-                    loggingEvent = new BuildErrorEventArgs(
-                        warningEvent.Subcategory,
-                        warningEvent.Code,
-                        warningEvent.File,
-                        warningEvent.LineNumber,
-                        warningEvent.ColumnNumber,
-                        warningEvent.EndLineNumber,
-                        warningEvent.EndColumnNumber,
-                        warningEvent.Message,
-                        warningEvent.HelpKeyword,
-                        warningEvent.SenderName,
-                        warningEvent.Timestamp)
+                    if (warningEvent is ExtendedBuildWarningEventArgs extWarningEvent)
                     {
-                        BuildEventContext = warningEvent.BuildEventContext,
-                        ProjectFile = warningEvent.ProjectFile,
-                    };
+                        buildEventArgs = new ExtendedBuildErrorEventArgs(
+                            extWarningEvent.ExtendedType,
+                            extWarningEvent.Subcategory,
+                            extWarningEvent.Code,
+                            extWarningEvent.File,
+                            extWarningEvent.LineNumber,
+                            extWarningEvent.ColumnNumber,
+                            extWarningEvent.EndLineNumber,
+                            extWarningEvent.EndColumnNumber,
+                            extWarningEvent.Message,
+                            extWarningEvent.HelpKeyword,
+                            extWarningEvent.SenderName,
+                            extWarningEvent.Timestamp)
+                        {
+                            BuildEventContext = warningEvent.BuildEventContext,
+                            ProjectFile = warningEvent.ProjectFile,
+                            ExtendedMetadata = extWarningEvent.ExtendedMetadata,
+                            ExtendedData = extWarningEvent.ExtendedData,
+                        };
+                    }
+                    else
+                    {
+                        buildEventArgs = new BuildErrorEventArgs(
+                            warningEvent.Subcategory,
+                            warningEvent.Code,
+                            warningEvent.File,
+                            warningEvent.LineNumber,
+                            warningEvent.ColumnNumber,
+                            warningEvent.EndLineNumber,
+                            warningEvent.EndColumnNumber,
+                            warningEvent.Message,
+                            warningEvent.HelpKeyword,
+                            warningEvent.SenderName,
+                            warningEvent.Timestamp)
+                        {
+                            BuildEventContext = warningEvent.BuildEventContext,
+                            ProjectFile = warningEvent.ProjectFile,
+                        };
+                    }
                 }
             }
 
-            if (loggingEvent is BuildErrorEventArgs errorEvent)
+            if (buildEventArgs is BuildErrorEventArgs errorEvent)
             {
                 // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
                 _buildSubmissionIdsThatHaveLoggedErrors.Add(errorEvent.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
             }
 
-            if (loggingEvent is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
+            if (buildEventArgs is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
             {
-                int key = GetWarningsAsErrorOrMessageKey(projectFinishedEvent);
+                WarningsConfigKey key = GetWarningsConfigKey(projectFinishedEvent);
                 _warningsAsErrorsByProject?.Remove(key);
                 _warningsNotAsErrorsByProject?.Remove(key);
                 _warningsAsMessagesByProject?.Remove(key);
             }
 
-            if (loggingEvent is BuildEventArgs loggingEventBuildArgs)
+            if (loggingEvent is BuildEventArgs)
             {
-                RouteBuildEvent(loggingEventBuildArgs);
+                RouteBuildEvent(buildEventArgs);
             }
             else if (loggingEvent is KeyValuePair<int, BuildEventArgs> loggingEventKeyValuePair)
             {
+                if (loggingEventKeyValuePair.Value != buildEventArgs)
+                {
+                    // buildEventArgs has been altered, lets use that new one
+                    loggingEventKeyValuePair = new KeyValuePair<int, BuildEventArgs>(loggingEventKeyValuePair.Key, buildEventArgs);
+                }
+
                 RouteBuildEvent(loggingEventKeyValuePair);
             }
         }
@@ -1534,10 +1648,10 @@ namespace Microsoft.Build.BackEnd.Logging
                 // them.
                 _filterEventSource.Consume(eventArg);
 
-                // Now that the forwarding loggers have been given the chance to log the build started and finished events we need to check the 
+                // Now that the forwarding loggers have been given the chance to log the build started and finished events we need to check the
                 // central logger sinks to see if they have received the events or not. If the sink has not received the event we need to send it to the
                 // logger for backwards compatibility with orcas.
-                // In addition we need to make sure we manually forward the events because in orcas the forwarding loggers were not allowed to 
+                // In addition we need to make sure we manually forward the events because in orcas the forwarding loggers were not allowed to
                 // forward build started or build finished events. In the new OM we allow the loggers to forward the events. However since orcas did not forward them
                 // we need to support loggers which cannot forward the events.
                 if (eventArg is BuildStartedEventArgs)
@@ -1651,8 +1765,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 // The null logger has no effect on minimum verbosity.
                 Execution.BuildManager.NullLogger => null,
 
-                // The live logger consumes only high priority messages.
-                _ => innerLogger.GetType().FullName == "Microsoft.Build.Logging.LiveLogger.LiveLogger"
+                // The terminal logger consumes only high priority messages.
+                _ => innerLogger.GetType().FullName == "Microsoft.Build.Logging.TerminalLogger.TerminalLogger"
                     ? MessageImportance.High
                     // If the logger is not on our allow list, there are no importance guarantees. Fall back to "any importance".
                     : MessageImportance.Low,
@@ -1751,7 +1865,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // This only applies if the user specified <MSBuildWarningsAsMessages /> and there is a valid ProjectInstanceId
             if (_warningsAsMessagesByProject != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
             {
-                if (_warningsAsMessagesByProject.TryGetValue(GetWarningsAsErrorOrMessageKey(warningEvent), out ISet<string> codesByProject))
+                if (_warningsAsMessagesByProject.TryGetValue(GetWarningsConfigKey(warningEvent), out ISet<string> codesByProject))
                 {
                     return codesByProject?.Contains(warningEvent.Code) == true;
                 }
@@ -1762,7 +1876,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         private bool WarningAsErrorNotOverriden(BuildWarningEventArgs warningEvent)
         {
-            int key = GetWarningsAsErrorOrMessageKey(warningEvent);
+            WarningsConfigKey key = GetWarningsConfigKey(warningEvent);
 
             return WarningsNotAsErrors?.Contains(warningEvent.Code) != true && !(_warningsNotAsErrorsByProject?.TryGetValue(key, out ISet<string> notToError) == true && notToError.Contains(warningEvent.Code));
         }
@@ -1789,7 +1903,7 @@ namespace Microsoft.Build.BackEnd.Logging
             if (_warningsAsErrorsByProject != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
             {
                 // Attempt to get the list of warnings to treat as errors for the current project
-                int key = GetWarningsAsErrorOrMessageKey(warningEvent);
+                WarningsConfigKey key = GetWarningsConfigKey(warningEvent);
                 if (_warningsAsErrorsByProject.TryGetValue(key, out ISet<string> codesByProject))
                 {
                     // We create an empty set if all warnings should be treated as errors so that should be checked first.

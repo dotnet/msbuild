@@ -18,7 +18,7 @@ namespace Microsoft.Build.UnitTests
         /*
         * Method:   AppendItemWithInvalidBooleanAttribute
         *
-        * When appending an ITaskItem[] where some of the flags are 'bool', it's possible that 
+        * When appending an ITaskItem[] where some of the flags are 'bool', it's possible that
         * the boolean flag has a string value that cannot be converted to a boolean. In this
         * case we expect an exception.
         */

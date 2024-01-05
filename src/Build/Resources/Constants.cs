@@ -132,17 +132,17 @@ namespace Microsoft.Build.Internal
         internal const string VisualStudioVersionPropertyName = "VisualStudioVersion";
 
         /// <summary>
-        /// Name of the property used to select which sub-toolset to use. 
+        /// Name of the property used to select which sub-toolset to use.
         /// </summary>
         internal const string SubToolsetVersionPropertyName = VisualStudioVersionPropertyName;
 
         /// <summary>
-        /// Value we should be setting VisualStudioVersion as the ultimate fallback when Dev10 is installed. 
+        /// Value we should be setting VisualStudioVersion as the ultimate fallback when Dev10 is installed.
         /// </summary>
         internal const string Dev10SubToolsetValue = "10.0";
 
         /// <summary>
-        /// Current version of this MSBuild Engine assembly in the 
+        /// Current version of this MSBuild Engine assembly in the
         /// form, e.g, "4.0"
         /// </summary>
         internal static string AssemblyVersion
@@ -231,12 +231,12 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
-        /// Tries to retrieve the type information for a type name / method name combination. 
-        /// 
+        /// Tries to retrieve the type information for a type name / method name combination.
+        ///
         /// It does 2 lookups:
         /// 1st try: 'typeFullName'
         /// 2nd try: 'typeFullName::simpleMethodName'
-        /// 
+        ///
         /// </summary>
         /// <param name="typeFullName">namespace qualified type name</param>
         /// <param name="simpleMethodName">name of the method</param>
@@ -365,6 +365,15 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("Microsoft.Build.Utilities.ToolLocationHelper", new Tuple<string, Type>("Microsoft.Build.Utilities.ToolLocationHelper, Microsoft.Build.Utilities.Core, Version=" + MSBuildConstants.CurrentAssemblyVersion + ", Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", null));
                         availableStaticMethods.TryAdd("System.Runtime.InteropServices.RuntimeInformation", runtimeInformationType);
                         availableStaticMethods.TryAdd("System.Runtime.InteropServices.OSPlatform", osPlatformType);
+#if NET5_0_OR_GREATER
+                        var operatingSystemType = new Tuple<string, Type>(null, typeof(OperatingSystem));
+                        availableStaticMethods.TryAdd("System.OperatingSystem", operatingSystemType);
+#else
+                        // Add alternate type for System.OperatingSystem static methods which aren't available on .NET Framework.
+                        var operatingSystemType = new Tuple<string, Type>("Microsoft.Build.Framework.OperatingSystem, Microsoft.Build.Framework, Version=" + MSBuildConstants.CurrentAssemblyVersion + ", Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", null);
+                        availableStaticMethods.TryAdd("System.OperatingSystem", operatingSystemType);
+                        availableStaticMethods.TryAdd("Microsoft.Build.Framework.OperatingSystem", operatingSystemType);
+#endif
 
                         s_availableStaticMethods = availableStaticMethods;
                     }

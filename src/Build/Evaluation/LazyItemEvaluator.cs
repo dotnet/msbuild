@@ -52,20 +52,13 @@ namespace Microsoft.Build.Evaluation
         {
             _outerEvaluatorData = data;
             _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData, evaluationContext);
-            _evaluatorData = new EvaluatorData(_outerEvaluatorData, itemType => GetItems(itemType));
+            _evaluatorData = new EvaluatorData(_outerEvaluatorData, _itemLists);
             _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, evaluationContext);
             _itemFactory = itemFactory;
             _loggingContext = loggingContext;
             _evaluationProfiler = evaluationProfiler;
 
             EvaluationContext = evaluationContext;
-        }
-
-        private ImmutableList<I> GetItems(string itemType)
-        {
-            return _itemLists.TryGetValue(itemType, out LazyItemList itemList) ?
-                itemList.GetMatchedItems(ImmutableHashSet<string>.Empty) :
-                ImmutableList<I>.Empty;
         }
 
         public bool EvaluateConditionWithCurrentState(ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions)
@@ -492,7 +485,7 @@ namespace Microsoft.Build.Evaluation
 
         private class OperationBuilderWithMetadata : OperationBuilder
         {
-            public ImmutableList<ProjectMetadataElement>.Builder Metadata = ImmutableList.CreateBuilder<ProjectMetadataElement>();
+            public readonly ImmutableArray<ProjectMetadataElement>.Builder Metadata = ImmutableArray.CreateBuilder<ProjectMetadataElement>();
 
             public OperationBuilderWithMetadata(ProjectItemElement itemElement, bool conditionResult) : base(itemElement, conditionResult)
             {

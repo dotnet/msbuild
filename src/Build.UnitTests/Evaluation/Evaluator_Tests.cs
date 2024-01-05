@@ -2651,18 +2651,18 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Version.TryParse(msbuildVersionProperty, out Version msbuildVersionAsVersion).ShouldBeTrue();
 
             msbuildVersionAsVersion.Minor.ShouldBeInRange(0, 20,
-                () => $"minor version {msbuildVersionProperty} looks fishy. If we're really in x.20.0, go ahead and change the constant. This is to guard against being nonsensical like 16.200.19");
+                customMessage: $"minor version {msbuildVersionProperty} looks fishy. If we're really in x.20.0, go ahead and change the constant. This is to guard against being nonsensical like 16.200.19");
 
             // Version parses missing elements into -1, and this property should be Major.Minor.Patch only
             msbuildVersionAsVersion.Revision.ShouldBe(-1);
 
             msbuildFileVersionProperty.ShouldBe(ProjectCollection.Version.ToString());
             ProjectCollection.Version.ToString().ShouldStartWith(msbuildVersionProperty,
-                "ProjectCollection.Version should match the property MSBuildVersion, but can contain another version part");
+                customMessage: "ProjectCollection.Version should match the property MSBuildVersion, but can contain another version part");
 
             msbuildSemanticVersionProperty.ShouldBe(ProjectCollection.DisplayVersion);
             ProjectCollection.DisplayVersion.ShouldStartWith(msbuildVersionProperty,
-                "DisplayVersion is semver2 while MSBuildVersion is Major.Minor.Build but should be a prefix match");
+                customMessage: "DisplayVersion is semver2 while MSBuildVersion is Major.Minor.Build but should be a prefix match");
         }
 
 
@@ -4473,6 +4473,38 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
+        [Theory]
+        [InlineData("$(Hello)", 0, 8, "Hello")]
+        [InlineData("$(Hello)|$(World)", 9, 8, "World")]
+        [InlineData("$(He()o)", 0, 8, null)]
+        [InlineData("$)Hello(", 0, 8, null)]
+        [InlineData("$(Helloo", 0, 8, null)]
+        [InlineData("$Heello)", 0, 8, null)]
+        [InlineData("$(He$$o)", 0, 8, null)]
+        [InlineData(" $(Helo)", 0, 8, null)]
+        [InlineData("$(Helo) ", 0, 8, null)]
+        [InlineData("$()", 0, 3, "")]
+        [InlineData("$( Hello )", 0, 10, " Hello ")]
+        [InlineData("$(He-ll-o)", 0, 10, "He-ll-o")]
+        [InlineData("$(He ll o)", 0, 10, "He ll o")]
+        [InlineData("aaa$(Hello)", 3, 8, "Hello")]
+        [InlineData("aaa$(Hello)bbb", 3, 8, "Hello")]
+        public void TryGetSingleProperty(string input, int start, int length, string expected)
+        {
+            bool result = ConditionEvaluator.TryGetSingleProperty(input.AsSpan(), start, length, out ReadOnlySpan<char> actual);
+
+            if (expected is null)
+            {
+                Assert.False(result);
+                Assert.True(actual.IsEmpty);
+            }
+            else
+            {
+                Assert.True(result);
+                Assert.Equal(expected, actual.ToString());
+            }
+        }
+
         [Fact]
         public void VerifyMSBuildLastModifiedProjectForImport()
         {
@@ -4565,7 +4597,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void VerifyPropertyTrackingLoggingDefault()
         {
             // Having just environment variables defined should default to nothing being logged except one environment variable read.
-            this.VerifyPropertyTrackingLoggingScenario(
+            VerifyPropertyTrackingLoggingScenario(
                 null,
                 logger =>
                 {
@@ -4584,7 +4616,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<PropertyReassignmentEventArgs>()
-                        .ShouldBeEmpty();
+                        .Count()
+                        .ShouldBe(2);
 
                     logger
                         .AllBuildEvents
@@ -4596,7 +4629,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void VerifyPropertyTrackingLoggingPropertyReassignment()
         {
-            this.VerifyPropertyTrackingLoggingScenario(
+            VerifyPropertyTrackingLoggingScenario(
                 "1",
                 logger =>
                 {
@@ -4645,13 +4678,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                     logger
                         .AllBuildEvents
-                        .OfType<PropertyReassignmentEventArgs>()
+                        .OfType<PropertyInitialValueSetEventArgs>()
                         .ShouldBeEmpty();
 
                     logger
-                        .AllBuildEvents
-                        .OfType<PropertyInitialValueSetEventArgs>()
-                        .ShouldBeEmpty();
+                       .AllBuildEvents
+                       .OfType<PropertyReassignmentEventArgs>()
+                       .Count()
+                       .ShouldBe(2);
                 });
         }
 
@@ -4884,6 +4918,55 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 project.Build().ShouldBeTrue();
 
                 loggerEvaluatorAction?.Invoke(logger);
+            }
+        }
+
+        /// <summary>
+        /// Log when a property is being assigned a new value.
+        /// </summary>
+        [Fact]
+        public void VerifyLogPropertyReassignment()
+        {
+            string propertyName = "Prop";
+            string propertyOldValue = "OldValue";
+            string propertyNewValue = "NewValue";
+            string testtargets = ObjectModelHelpers.CleanupFileContents(@$"
+                                <Project xmlns='msbuildnamespace'>
+                                     <PropertyGroup>
+                                         <{propertyName}>{propertyOldValue}</{propertyName}>
+                                         <{propertyName}>{propertyNewValue}</{propertyName}>
+                                     </PropertyGroup>
+                                  <Target Name=""Test""/>
+                                </Project>");
+
+            string tempPath = Path.GetTempPath();
+            string targetDirectory = Path.Combine(tempPath, "LogPropertyAssignments");
+            string testTargetPath = Path.Combine(targetDirectory, "test.proj");
+
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.CreateFolder(targetDirectory);
+                env.CreateFile(testTargetPath, testtargets);
+
+                MockLogger logger = new()
+                {
+                    Verbosity = LoggerVerbosity.Diagnostic,
+                };
+                ProjectCollection pc = new();
+                pc.RegisterLogger(logger);
+                Project project = pc.LoadProject(testTargetPath);
+
+                bool result = project.Build();
+                result.ShouldBeTrue();
+                logger.BuildMessageEvents
+                      .OfType<PropertyReassignmentEventArgs>()
+                      .ShouldContain(r => r.PropertyName == propertyName
+                      && r.PreviousValue == propertyOldValue
+                      && r.NewValue == propertyNewValue
+                      && r.Message.StartsWith($"{
+                          ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                              "PropertyReassignment", propertyName, propertyNewValue, propertyOldValue, string.Empty)}"));
+                logger.BuildMessageEvents.ShouldBeOfTypes(new[] { typeof(PropertyReassignmentEventArgs) });
             }
         }
 

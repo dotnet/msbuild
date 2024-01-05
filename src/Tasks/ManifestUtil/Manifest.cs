@@ -376,15 +376,16 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         internal static void UpdateEntryPoint(string inputPath, string outputPath, string updatedApplicationPath, string applicationManifestPath, string targetFrameworkVersion)
         {
             var document = new XmlDocument();
-            var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-            using (XmlReader xr = XmlReader.Create(inputPath, xrSettings))
+            var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+            FileStream fs = File.OpenRead(inputPath);
+            using (XmlReader xr = XmlReader.Create(fs, xrSettings))
             {
                 document.Load(xr);
             }
             XmlNamespaceManager nsmgr = XmlNamespaces.GetNamespaceManager(document.NameTable);
             AssemblyIdentity appManifest = AssemblyIdentity.FromManifest(applicationManifestPath);
 
-            // update path to application manifest            
+            // update path to application manifest
             XmlNode codeBaseNode = null;
             foreach (string xpath in XPaths.codebasePaths)
             {
@@ -610,7 +611,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 return;
             }
 
-            var identityList = new Dictionary<string, NGen<bool>>();
+            var identityList = new Dictionary<string, bool>();
             foreach (AssemblyReference assembly in AssemblyReferences)
             {
                 if (assembly.AssemblyIdentity != null)
@@ -694,7 +695,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     }
                 }
 
-                // Either we are looking at the entry point assembly or the assembly is not platform neutral. 
+                // Either we are looking at the entry point assembly or the assembly is not platform neutral.
                 // We need to compare the application's platform to the component's platform,
                 // if they don't match then flag component as a mismatch...
                 return !String.Equals(AssemblyIdentity.ProcessorArchitecture, assembly.AssemblyIdentity.ProcessorArchitecture, StringComparison.OrdinalIgnoreCase);

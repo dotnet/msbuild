@@ -13,6 +13,7 @@ using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -25,6 +26,26 @@ namespace Microsoft.Build.UnitTests
         {
             // touch the type so that static constructor runs
             _ = ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix;
+        }
+
+        [Fact]
+        public void WriteBlobFromStream()
+        {
+            byte[] bytes = new byte[] { 1, 2, 3, 4, 5 };
+            MemoryStream inputStream = new MemoryStream(bytes);
+
+            MemoryStream outputStream = new MemoryStream();
+            using BinaryWriter binaryWriter = new BinaryWriter(outputStream);
+            BuildEventArgsWriter writer = new BuildEventArgsWriter(binaryWriter);
+
+            writer.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, inputStream);
+            binaryWriter.Flush();
+
+            outputStream.Position = 0;
+            BinaryReader binaryReader = new BinaryReader(outputStream);
+            Assert.Equal(BinaryLogRecordKind.ProjectImportArchive, (BinaryLogRecordKind)binaryReader.Read7BitEncodedInt());
+            Assert.Equal(bytes.Length, binaryReader.Read7BitEncodedInt());
+            Assert.Equal(bytes, binaryReader.ReadBytes(bytes.Length));
         }
 
         [Theory]
@@ -242,6 +263,48 @@ namespace Microsoft.Build.UnitTests
                 e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
         }
 
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void RoundtripExtendedErrorEventArgs_SerializedAsError(bool withOptionalData)
+        {
+            var args = new ExtendedBuildErrorEventArgs(
+                "extendedDataType",
+                "Subcategory",
+                "Code",
+                "File",
+                1,
+                2,
+                3,
+                4,
+                "Message with arguments: '{0}'",
+                "Help",
+                "SenderName",
+                DateTime.Parse("9/1/2021 12:02:07 PM"),
+                withOptionalData ? new object[] { "argument0" } : null)
+            {
+                ExtendedData = withOptionalData ? "{'long-json':'mostly-strings'}" : null,
+                ExtendedMetadata = withOptionalData ? new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } } : null,
+                BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+            };
+
+            Roundtrip(args,
+                e => e.Code,
+                e => e.ColumnNumber.ToString(),
+                e => e.EndColumnNumber.ToString(),
+                e => e.EndLineNumber.ToString(),
+                e => e.File,
+                e => e.LineNumber.ToString(),
+                e => e.Message,
+                e => e.ProjectFile,
+                e => e.Subcategory,
+                e => e.ExtendedType,
+                e => TranslationHelpers.ToString(e.ExtendedMetadata),
+                e => e.ExtendedData,
+                e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -271,6 +334,47 @@ namespace Microsoft.Build.UnitTests
                 e => e.Message,
                 e => e.ProjectFile,
                 e => e.Subcategory,
+                e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void RoundtripExtendedWarningEventArgs_SerializedAsWarning(bool withOptionalData)
+        {
+            var args = new ExtendedBuildWarningEventArgs(
+                "extendedDataType",
+                "Subcategory",
+                "Code",
+                "File",
+                1,
+                2,
+                3,
+                4,
+                "Message with arguments: '{0}'",
+                "Help",
+                "SenderName",
+                DateTime.Parse("9/1/2021 12:02:07 PM"),
+                withOptionalData ? new object[] { "argument0" } : null)
+                {
+                    ExtendedData = withOptionalData ? "{'long-json':'mostly-strings'}" : null,
+                    ExtendedMetadata = withOptionalData ? new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } } : null,
+                    BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+                };
+
+            Roundtrip(args,
+                e => e.Code,
+                e => e.ColumnNumber.ToString(),
+                e => e.EndColumnNumber.ToString(),
+                e => e.EndLineNumber.ToString(),
+                e => e.File,
+                e => e.LineNumber.ToString(),
+                e => e.Message,
+                e => e.ProjectFile,
+                e => e.Subcategory,
+                e => e.ExtendedType,
+                e => TranslationHelpers.ToString(e.ExtendedMetadata),
+                e => e.ExtendedData,
                 e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
         }
 
@@ -308,6 +412,132 @@ namespace Microsoft.Build.UnitTests
                 e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void RoundtripExtendedBuildMessageEventArgs_SerializedAsMessage(bool withOptionalData)
+        {
+            var args = new ExtendedBuildMessageEventArgs(
+                "extendedDataType",
+                "Subcategory",
+                "Code",
+                "File",
+                1,
+                2,
+                3,
+                4,
+                "Message",
+                "Help",
+                "SenderName",
+                MessageImportance.High,
+                DateTime.Parse("12/12/2015 06:11:56 PM"),
+                withOptionalData ? new object[] { "argument0" } : null)
+            {
+                ExtendedData = withOptionalData ? "{'long-json':'mostly-strings'}" : null,
+                ExtendedMetadata = withOptionalData ? new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } } : null,
+                BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+            };
+
+            Roundtrip(args,
+                e => e.Code,
+                e => e.ColumnNumber.ToString(),
+                e => e.EndColumnNumber.ToString(),
+                e => e.EndLineNumber.ToString(),
+                e => e.File,
+                e => e.LineNumber.ToString(),
+                e => e.Message,
+                e => e.Importance.ToString(),
+                e => e.ProjectFile,
+                e => e.Subcategory,
+                e => e.ExtendedType,
+                e => TranslationHelpers.ToString(e.ExtendedMetadata),
+                e => e.ExtendedData,
+                e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
+        }
+
+        [Fact]
+        public void RoundtripAssemblyLoadBuild()
+        {
+            string assemblyName = Guid.NewGuid().ToString();
+            string assemblyPath = Guid.NewGuid().ToString();
+            Guid mvid = Guid.NewGuid();
+            string loadingInitiator = Guid.NewGuid().ToString();
+            string appDomainName = Guid.NewGuid().ToString();
+            AssemblyLoadingContext context =
+                (AssemblyLoadingContext)(new Random().Next(Enum.GetNames(typeof(AssemblyLoadingContext)).Length));
+
+            AssemblyLoadBuildEventArgs args = new(context, loadingInitiator, assemblyName, assemblyPath, mvid, appDomainName);
+
+            Roundtrip(args,
+                e => e.Code,
+                e => e.ColumnNumber.ToString(),
+                e => e.EndColumnNumber.ToString(),
+                e => e.EndLineNumber.ToString(),
+                e => e.File,
+                e => e.LineNumber.ToString(),
+                e => e.Message,
+                e => e.Importance.ToString(),
+                e => e.ProjectFile,
+                e => e.Subcategory,
+                e => e.LoadingContext.ToString(),
+                e => e.AssemblyName,
+                e => e.AssemblyPath,
+                e => e.MVID.ToString(),
+                e => e.AppDomainDescriptor,
+                e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ExtendedCustomBuildEventArgs_SerializedAsMessage(bool withOptionalData)
+        {
+            ExtendedCustomBuildEventArgs args = new(
+                type: "TypeOfExtendedCustom",
+                message: withOptionalData ? "a message with args {0} {1}" : null,
+                helpKeyword: withOptionalData ? "MSBT123" : null,
+                senderName: withOptionalData ? $"UnitTest {Guid.NewGuid()}" : null,
+                eventTimestamp: withOptionalData ? DateTime.Parse("3/1/2017 11:11:56 AM") : DateTime.Now,
+                messageArgs: withOptionalData ? new object[] { "arg0val", "arg1val" } : null)
+            {
+                ExtendedData = withOptionalData ? "{'long-json':'mostly-strings'}" : null,
+                ExtendedMetadata = withOptionalData ? new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } } : null,
+                BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+            };
+
+
+            var memoryStream = new MemoryStream();
+            var binaryWriter = new BinaryWriter(memoryStream);
+            var buildEventArgsWriter = new BuildEventArgsWriter(binaryWriter);
+            buildEventArgsWriter.Write(args);
+
+            memoryStream.Position = 0;
+            var binaryReader = new BinaryReader(memoryStream);
+
+            using var buildEventArgsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
+            var deserialized = buildEventArgsReader.Read();
+            ExtendedBuildMessageEventArgs desArgs = (ExtendedBuildMessageEventArgs)deserialized;
+
+            desArgs.ShouldBeOfType(typeof(ExtendedBuildMessageEventArgs));
+            desArgs.Message.ShouldBe(args.Message);
+            desArgs.HelpKeyword.ShouldBe(args.HelpKeyword);
+            desArgs.SenderName.ShouldBe(args.SenderName);
+            desArgs.Importance.ShouldBe(MessageImportance.Normal);
+            desArgs.Timestamp.ShouldBe(args.Timestamp);
+            desArgs.ExtendedType.ShouldBe(args.ExtendedType);
+
+            if (withOptionalData)
+            {
+                desArgs.BuildEventContext.ShouldBe(args.BuildEventContext);
+                desArgs.ExtendedData.ShouldBe(args.ExtendedData);
+                TranslationHelpers.ToString(desArgs.ExtendedMetadata).ShouldBe(TranslationHelpers.ToString(args.ExtendedMetadata));
+            }
+            else
+            {
+                desArgs.BuildEventContext.ShouldBe(BuildEventContext.Invalid);
+            }
+        }
+
         [Fact]
         public void RoundtripResponseFileUsedEventArgs()
         {
@@ -342,6 +572,48 @@ namespace Microsoft.Build.UnitTests
                 e => e.Message,
                 e => e.ProjectFile,
                 e => e.Subcategory);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void RoundtripExtendedCriticalBuildMessageEventArgs(bool withOptionalData)
+        {
+            var args = new ExtendedCriticalBuildMessageEventArgs(
+                "extCrit",
+                "Subcategory",
+                "Code",
+                "File",
+                1,
+                2,
+                3,
+                4,
+                "Message",
+                "Help",
+                "SenderName",
+                DateTime.Parse("12/12/2015 06:11:56 PM"),
+                withOptionalData ? new object[] { "argument0" } : null)
+            {
+                ExtendedData = withOptionalData ? "{'long-json':'mostly-strings'}" : null,
+                ExtendedMetadata = withOptionalData ? new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } } : null,
+                BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+            };
+
+
+            Roundtrip(args,
+                e => e.Code,
+                e => e.ColumnNumber.ToString(),
+                e => e.EndColumnNumber.ToString(),
+                e => e.EndLineNumber.ToString(),
+                e => e.File,
+                e => e.LineNumber.ToString(),
+                e => e.Message,
+                e => e.ProjectFile,
+                e => e.Subcategory,
+                e => e.ExtendedType,
+                e => TranslationHelpers.ToString(e.ExtendedMetadata),
+                e => e.ExtendedData,
+                e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
         }
 
         [Fact]
@@ -669,7 +941,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(length, memoryStream.Position);
 
             Assert.NotNull(deserializedArgs);
-            Assert.Equal(args.GetType(), deserializedArgs.GetType());
+            Assert.Equal(typeof(T), deserializedArgs.GetType());
 
             foreach (var field in fieldsToCompare)
             {

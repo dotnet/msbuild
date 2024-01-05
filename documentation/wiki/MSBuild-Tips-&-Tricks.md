@@ -58,11 +58,20 @@ Use this command-line to approximate what the design-time build does:
 /t:CollectResolvedSDKReferencesDesignTime;DebugSymbolsProjectOutputGroup;CollectPackageReferences;ResolveComReferencesDesignTime;ContentFilesProjectOutputGroup;DocumentationProjectOutputGroupDependencies;SGenFilesOutputGroup;ResolveProjectReferencesDesignTime;SourceFilesProjectOutputGroup;DebugSymbolsProjectOutputGroupDependencies;SatelliteDllsProjectOutputGroup;BuiltProjectOutputGroup;SGenFilesOutputGroupDependencies;ResolveAssemblyReferencesDesignTime;CollectAnalyzersDesignTime;CollectSDKReferencesDesignTime;DocumentationProjectOutputGroup;PriFilesOutputGroup;BuiltProjectOutputGroupDependencies;ResolvePackageDependenciesDesignTime;SatelliteDllsProjectOutputGroupDependencies;SDKRedistOutputGroup;CompileDesignTime /p:SkipCompilerExecution=true /p:ProvideCommandLineArgs=true /p:BuildingInsideVisualStudio=true /p:DesignTimeBuild=true
 ```
 
-# Extend all builds (at system-wide level)
-See https://www.simple-talk.com/dotnet/.net-tools/extending-msbuild, "Extending all builds" section. Also read about [MSBuildUserExtensionsPath](https://referencesource.microsoft.com/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/Microsoft.Common.props,33), [CustomBeforeMicrosoftCommonProps](https://referencesource.microsoft.com/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/Microsoft.Common.props,68), [CustomBeforeMicrosoftCommonTargets](https://referencesource.microsoft.com/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/bin_/amd64/Microsoft.Common.targets,71), and CustomAfterMicrosoftCommonProps/CustomAfterMicrosoftCommonTargets.
+# Diagnose WPF temporary assembly compilation issues
 
-Example:
-Create this file (Custom.props) in `C:\Users\username\AppData\Local\Microsoft\MSBuild\Current\Microsoft.Common.targets\ImportAfter`:
+Set the property `GenerateTemporaryTargetAssemblyDebuggingInformation` on the `GenerateTemporaryTargetAssembly` task:
+https://referencesource.microsoft.com/#PresentationBuildTasks/BuildTasks/Microsoft/Build/Tasks/Windows/GenerateTemporaryTargetAssembly.cs,4571677f19ba0d24,references
+
+If the property `$(GenerateTemporaryTargetAssemblyDebuggingInformation)` is set, the temporary project generated during XAML project build will not be deleted and will be available for inspection. This is only available in the recent versions of .NET Framework, so check if your `Microsoft.WinFX.targets` file has it.
+
+Also the name of the project was renamed from `*.tmp_proj` to `*_wpftmp.csproj` so the file extension is now C#: `WpfApp1_jzmidb3d_wpftmp.csproj`
+
+# Extending builds
+
+See the "Extending All Builds" section from [this article](https://www.red-gate.com/simple-talk/development/dotnet-development/extending-msbuild/). Also read about [`CustomBeforeMicrosoftCommonProps`](https://referencesource.microsoft.com/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/Microsoft.Common.props,68), [`CustomBeforeMicrosoftCommonTargets`](https://referencesource.microsoft.com/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/bin_/amd64/Microsoft.Common.targets,71), and `CustomAfterMicrosoftCommonProps`/`CustomAfterMicrosoftCommonTargets`. And don't miss the explainer below.
+
+Create a file, say `Custom.props`, with the following contents:
 
 ```
 <?xml version="1.0" encoding="utf-8"?>
@@ -73,13 +82,56 @@ Create this file (Custom.props) in `C:\Users\username\AppData\Local\Microsoft\MS
 </Project>
 ```
 
-then build any project. It will have MyCustomProperty set to Value!
+and place it in one of the locations described below, then build any project. It will have `MyCustomProperty` set to `Value!`.
 
-# Diagnose WPF temporary assembly compilation issues
+## User-wide level (`MSBuildUserExtensionsPath`)
 
-Set the property `GenerateTemporaryTargetAssemblyDebuggingInformation` on the `GenerateTemporaryTargetAssembly` task:
-https://referencesource.microsoft.com/#PresentationBuildTasks/BuildTasks/Microsoft/Build/Tasks/Windows/GenerateTemporaryTargetAssembly.cs,4571677f19ba0d24,references
+In one of the following locations (`%LOCALAPPDATA%` evaluating to something like `C:\Users\username\AppData\Local`):
 
-If the property `$(GenerateTemporaryTargetAssemblyDebuggingInformation)` is set, the temporary project generated during XAML project build will not be deleted and will be available for inspection. This is only available in the recent versions of .NET Framework, so check if your `Microsoft.WinFX.targets` file has it.
+* `%LOCALAPPDATA%\Microsoft\MSBuild\Current\Imports\Microsoft.Common.props\ImportBefore`
+  * aka: `$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportBefore`
+* `%LOCALAPPDATA%\Microsoft\MSBuild\Current\Imports\Microsoft.Common.props\ImportAfter`
+  * aka: `$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter`
+* `%LOCALAPPDATA%\Microsoft\MSBuild\Current\Microsoft.Common.targets\ImportBefore`
+  * aka: `$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportBefore`
+* `%LOCALAPPDATA%\Microsoft\MSBuild\Current\Microsoft.Common.targets\ImportAfter`
+  * aka: `$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter`
 
-Also the name of the project was renamed from `*.tmp_proj` to `*_wpftmp.csproj` so the file extension is now C#: `WpfApp1_jzmidb3d_wpftmp.csproj`
+**Note:** the above locations are in the order in which they are imported by `Microsoft.Common.props` and `Microsoft.Common.targets` respectively. Setting your properties later, overwrites previous values. And mind the additional directory level `Imports\` for the files imported by `Microsoft.Common.props`.
+
+**Also note:** [`$(MSBuildUserExtensionsPath)`](https://learn.microsoft.com/visualstudio/msbuild/customize-your-local-build#msbuildextensionspath-and-msbuilduserextensionspath) is equal to `%LOCALAPPDATA%\Microsoft\MSBuild`.
+
+## MSBuild-wide level (`MSBuildExtensionsPath`)
+
+There is another MSBuild-wide location imported by `Microsoft.Common.props` from underneath `$(MSBuildToolsRoot)`, the installation directory of MSBuild, - which, when using it from modern Visual Studio versions, would often equal `$(VsInstallRoot)\MSBuild`. It goes by the name [`MSBuildExtensionsPath`](https://learn.microsoft.com/visualstudio/msbuild/customize-your-local-build#msbuildextensionspath-and-msbuilduserextensionspath).
+
+* `$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportBefore`
+* `$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter`
+* `$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportBefore`
+* `$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter`
+
+The principle is the same, drop a valid MSBuild file into one of these locations to extend your build according to whatever you put into the respective MSBuild file.
+
+**Note:** The value of `$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props` after evaluation would be something like `C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Imports\Microsoft.Common.Props`.
+
+**Also note:** technically the imports happen from `Microsoft.Common.CurrentVersion.targets` where the above directories say `Microsoft.Common.targets`.
+
+## Explainer: the underlying extension mechanisms and related mechanisms
+
+The above explanations are only half the truth, though.
+
+* The file extension of the file doesn't matter - it's a convention. Any file conforming to the MSBuild XML schema in that location should get picked up and imported.
+* `Microsoft.Common.props` and `Microsoft.Common.targets` conditionally imports from the locations mentioned throughout this section, you can use properties to suppress this extension mechanism, say from the command line:
+  * For user-wide locations set these properties to something else than `true` respectively:
+    * `ImportUserLocationsByWildcardBeforeMicrosoftCommonProps`
+    * `ImportUserLocationsByWildcardAfterMicrosoftCommonProps`
+    * `ImportUserLocationsByWildcardBeforeMicrosoftCommonTargets`
+    * `ImportUserLocationsByWildcardAfterMicrosoftCommonTargets`
+  * For MSBuild-wide locations set these properties to something else than `true` respectively:
+    * `ImportByWildcardBeforeMicrosoftCommonProps`
+    * `ImportByWildcardAfterMicrosoftCommonProps`
+    * `ImportByWildcardBeforeMicrosoftCommonTargets`
+    * `ImportByWildcardAfterMicrosoftCommonTargets`
+* The `Directory.*.props`, `Directory.*.targets` et. al. also offer ways to extend your build. They are fairly well-known and documented:
+  * [`Directory.Build.props` and `Directory.Build.targets`](https://learn.microsoft.com/visualstudio/msbuild/customize-by-directory)
+  * [`Directory.Solution.props` and `Directory.Solution.targets`](https://learn.microsoft.com/visualstudio/msbuild/customize-solution-build) as well as `before.{solutionname}.sln.targets` and `after.{solutionname}.sln.targets` can be used to inject properties, item definitions, items and targets into your build
