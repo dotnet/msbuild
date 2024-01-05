@@ -60,7 +60,6 @@ namespace Microsoft.Build.Internal
         internal const string frameworkToolsRoot = "MSBuildFrameworkToolsRoot";
         internal const string interactive = "MSBuildInteractive";
         internal const string msbuilddisablefeaturesfromversion = "MSBuildDisableFeaturesFromVersion";
-        internal const string windowsKitsPath = "WindowsKitsDirectory";
 
         /// <summary>
         /// Lookup for reserved property names. Intentionally do not include MSBuildExtensionsPath* or MSBuildUserExtensionsPath in this list.  We need tasks to be able to override those.

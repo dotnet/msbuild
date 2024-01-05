@@ -101,7 +101,6 @@ namespace Microsoft.Build.Shared
 
 #if FEATURE_WIN32_REGISTRY
         private const string fallbackDotNetFrameworkSdkRegistryInstallPath = "SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows";
-        private const string windowsKitsInstalledRootsRegistryPath = "SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots";
 #endif // FEATURE_WIN32_REGISTRY
         internal const string fallbackDotNetFrameworkSdkInstallKeyValue = "CurrentInstallFolder";
 
@@ -620,25 +619,6 @@ namespace Microsoft.Build.Shared
                 }
 
                 return s_pathToV4ToolsInFallbackDotNetFrameworkSdk;
-            }
-        }
-
-        private static string pathOfInstalledWindowsKits = null;
-
-        internal static string PathOfInstalledWindowsKits
-        {
-            get
-            {
-                #if FEATURE_WIN32_REGISTRY
-                if (FrameworkLocationHelper.pathOfInstalledWindowsKits == null)
-                {
-                    FrameworkLocationHelper.pathOfInstalledWindowsKits = FindRegistryValueUnderKey(
-                       windowsKitsInstalledRootsRegistryPath,
-                       "KitsRoot10");
-                }
-                #endif
-
-                return FrameworkLocationHelper.pathOfInstalledWindowsKits;
             }
         }
 

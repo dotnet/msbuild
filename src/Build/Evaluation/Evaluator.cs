@@ -1143,7 +1143,7 @@ namespace Microsoft.Build.Evaluation
             SetBuiltInProperty(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild);
             SetBuiltInProperty(ReservedPropertyNames.fileVersion, CachedFileVersion);
             SetBuiltInProperty(ReservedPropertyNames.semanticVersion, ProjectCollection.DisplayVersion);
-            SetBuiltInProperty(ReservedPropertyNames.windowsKitsPath, FrameworkLocationHelper.PathOfInstalledWindowsKits);
+
             ValidateChangeWaveState();
 
             SetBuiltInProperty(ReservedPropertyNames.msbuilddisablefeaturesfromversion, ChangeWaves.DisabledWave.ToString());
