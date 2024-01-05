@@ -21,7 +21,11 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The presence of any of these flags affects build result for the specified request.
         /// </summary>
-        private const BuildRequestDataFlags FlagsAffectingBuildResults = BuildRequestDataFlags.ProvideProjectStateAfterBuild;
+        private const BuildRequestDataFlags FlagsAffectingBuildResults =
+            BuildRequestDataFlags.ProvideProjectStateAfterBuild
+            | BuildRequestDataFlags.SkipNonexistentTargets
+            | BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports
+            | BuildRequestDataFlags.FailOnUnresolvedSdk;
 
         /// <summary>
         /// The table of all build results.  This table is indexed by configuration id and
