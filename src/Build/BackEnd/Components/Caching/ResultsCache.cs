@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -17,6 +18,15 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal class ResultsCache : IResultsCache
     {
+        /// <summary>
+        /// The presence of any of these flags affects build result for the specified request.
+        /// </summary>
+        private const BuildRequestDataFlags FlagsAffectingBuildResults =
+            BuildRequestDataFlags.ProvideProjectStateAfterBuild
+            | BuildRequestDataFlags.SkipNonexistentTargets
+            | BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports
+            | BuildRequestDataFlags.FailOnUnresolvedSdk;
+
         /// <summary>
         /// The table of all build results.  This table is indexed by configuration id and
         /// contains BuildResult objects which have all of the target information.
@@ -139,13 +149,14 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Attempts to satisfy the request from the cache.  The request can be satisfied only if:
-        /// 1. All specified targets in the request have successful results in the cache or if the sequence of target results
+        /// 1. The passed BuildRequestDataFlags can not affect the result data.
+        /// 2. All specified targets in the request have successful results in the cache or if the sequence of target results
         ///    includes 0 or more successful targets followed by at least one failed target.
-        /// 2. All initial targets in the configuration for the request have non-skipped results in the cache.
-        /// 3. If there are no specified targets, then all default targets in the request must have non-skipped results
+        /// 3. All initial targets in the configuration for the request have non-skipped results in the cache.
+        /// 4. If there are no specified targets, then all default targets in the request must have non-skipped results
         ///    in the cache.
         /// </summary>
-        /// <param name="request">The request whose results we should return</param>
+        /// <param name="request">The request whose results we should return.</param>
         /// <param name="configInitialTargets">The initial targets for the request's configuration.</param>
         /// <param name="configDefaultTargets">The default targets for the request's configuration.</param>
         /// <param name="skippedResultsDoNotCauseCacheMiss">If false, a cached skipped target will cause this method to return "NotSatisfied".
@@ -156,59 +167,60 @@ namespace Microsoft.Build.BackEnd
         public ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss)
         {
             ErrorUtilities.VerifyThrow(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
-            ResultsCacheResponse response = new ResultsCacheResponse(ResultsCacheResponseType.NotSatisfied);
+            ResultsCacheResponse response = new(ResultsCacheResponseType.NotSatisfied);
 
             lock (_resultsByConfiguration)
             {
                 if (_resultsByConfiguration.TryGetValue(request.ConfigurationId, out BuildResult allResults))
                 {
-                    // Check for targets explicitly specified.
-                    bool explicitTargetsSatisfied = CheckResults(allResults, request.Targets, response.ExplicitTargetsToBuild, skippedResultsDoNotCauseCacheMiss);
+                    bool buildDataFlagsSatisfied = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10)
+                        ? CheckBuildDataFlagsResults(request.BuildRequestDataFlags, allResults.BuildRequestDataFlags) : true;
 
-                    if (explicitTargetsSatisfied)
+                    if (buildDataFlagsSatisfied)
                     {
-                        // All of the explicit targets, if any, have been satisfied
-                        response.Type = ResultsCacheResponseType.Satisfied;
+                        // Check for targets explicitly specified.
+                        bool explicitTargetsSatisfied = CheckResults(allResults, request.Targets, response.ExplicitTargetsToBuild, skippedResultsDoNotCauseCacheMiss);
 
-                        // Check for the initial targets.  If we don't know what the initial targets are, we assume they are not satisfied.
-                        if (configInitialTargets == null || !CheckResults(allResults, configInitialTargets, null, skippedResultsDoNotCauseCacheMiss))
+                        if (explicitTargetsSatisfied)
                         {
-                            response.Type = ResultsCacheResponseType.NotSatisfied;
-                        }
+                            // All of the explicit targets, if any, have been satisfied
+                            response.Type = ResultsCacheResponseType.Satisfied;
 
-                        // We could still be missing implicit targets, so check those...
-                        if (request.Targets.Count == 0)
-                        {
-                            // Check for the default target, if necessary.  If we don't know what the default targets are, we
-                            // assume they are not satisfied.
-                            if (configDefaultTargets == null || !CheckResults(allResults, configDefaultTargets, null, skippedResultsDoNotCauseCacheMiss))
+                            // Check for the initial targets.  If we don't know what the initial targets are, we assume they are not satisfied.
+                            if (configInitialTargets == null || !CheckResults(allResults, configInitialTargets, null, skippedResultsDoNotCauseCacheMiss))
                             {
                                 response.Type = ResultsCacheResponseType.NotSatisfied;
                             }
-                        }
 
-                        // Now report those results requested, if they are satisfied.
-                        if (response.Type == ResultsCacheResponseType.Satisfied)
-                        {
-                            List<string> targetsToAddResultsFor = new List<string>(configInitialTargets);
-
-                            // Now report either the explicit targets or the default targets
-                            if (request.Targets.Count > 0)
+                            // We could still be missing implicit targets, so check those...
+                            if (request.Targets.Count == 0)
                             {
-                                targetsToAddResultsFor.AddRange(request.Targets);
-                            }
-                            else
-                            {
-                                targetsToAddResultsFor.AddRange(configDefaultTargets);
+                                // Check for the default target, if necessary.  If we don't know what the default targets are, we
+                                // assume they are not satisfied.
+                                if (configDefaultTargets == null || !CheckResults(allResults, configDefaultTargets, null, skippedResultsDoNotCauseCacheMiss))
+                                {
+                                    response.Type = ResultsCacheResponseType.NotSatisfied;
+                                }
                             }
 
-                            response.Results = new BuildResult(request, allResults, targetsToAddResultsFor.ToArray(), null);
+                            // Now report those results requested, if they are satisfied.
+                            if (response.Type == ResultsCacheResponseType.Satisfied)
+                            {
+                                List<string> targetsToAddResultsFor = new List<string>(configInitialTargets);
+
+                                // Now report either the explicit targets or the default targets
+                                if (request.Targets.Count > 0)
+                                {
+                                    targetsToAddResultsFor.AddRange(request.Targets);
+                                }
+                                else
+                                {
+                                    targetsToAddResultsFor.AddRange(configDefaultTargets);
+                                }
+
+                                response.Results = new BuildResult(request, allResults, targetsToAddResultsFor.ToArray(), null);
+                            }
                         }
-                    }
-                    else
-                    {
-                        // Some targets were not satisfied.
-                        response.Type = ResultsCacheResponseType.NotSatisfied;
                     }
                 }
             }
@@ -331,6 +343,20 @@ namespace Microsoft.Build.BackEnd
 
             return returnValue;
         }
+
+        /// <summary>
+        /// Checks results for the specified build flags.
+        /// </summary>
+        /// <param name="buildRequestDataFlags">The current request build flags.</param>
+        /// <param name="buildResultDataFlags">The existing build result data flags.</param>
+        /// <returns>False if there is any difference in the data flags that can cause missed build data, true otherwise.</returns>
+        private static bool CheckBuildDataFlagsResults(BuildRequestDataFlags buildRequestDataFlags, BuildRequestDataFlags buildResultDataFlags) =>
+
+            // Even if both buildRequestDataFlags and buildResultDataFlags have ProvideSubsetOfStateAfterBuild flag,
+            // the underlying RequestedProjectState may have different user filters defined.
+            // It is more reliable to ignore the cached value. 
+            !buildRequestDataFlags.HasFlag(BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild)
+            && (buildRequestDataFlags & FlagsAffectingBuildResults) == (buildResultDataFlags & FlagsAffectingBuildResults);
 
         public IEnumerator<BuildResult> GetEnumerator()
         {
