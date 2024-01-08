@@ -575,8 +575,7 @@ internal sealed partial class TerminalLogger : INodeLogger
             {
                 RenderImmediateMessage(message);
             }
-
-            if (e.Code == "NETSDK1057" && !_loggedPreviewMessage)
+            else if (e.Code == "NETSDK1057" && !_loggedPreviewMessage)
             {
                 // The SDK will log the high-pri "not-a-warning" message NETSDK1057
                 // when it's a preview version up to MaxCPUCount times, but that's
