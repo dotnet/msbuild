@@ -7,14 +7,14 @@ using System.IO;
 
 namespace Microsoft.Build.UnitTests
 {
-    internal sealed class StreamHelpers
+    public sealed class StreamHelpers
     {
         /// <summary>
         /// Take a string and convert it to a StreamReader.
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        internal static StreamReader StringToStreamReader(string value)
+        public static StreamReader StringToStreamReader(string value)
         {
             MemoryStream m = new MemoryStream();
 #if FEATURE_ENCODING_DEFAULT
@@ -36,7 +36,7 @@ namespace Microsoft.Build.UnitTests
          * Take a string and convert it into a Stream.
          * Use the default encoding which means this machine's ANSI codepage.
          */
-        internal static Stream StringToStream(string value)
+        public static Stream StringToStream(string value)
         {
 #if FEATURE_ENCODING_DEFAULT
             return StringToStream(value, System.Text.Encoding.Default); // We want this to be Default which is ANSI
@@ -51,7 +51,7 @@ namespace Microsoft.Build.UnitTests
          * Take a string and convert it into a Stream.
          * Takes an alternate encoding type
          */
-        internal static Stream StringToStream(string value, System.Text.Encoding encoding)
+        public static Stream StringToStream(string value, System.Text.Encoding encoding)
         {
             MemoryStream m = new MemoryStream();
             TextWriter w = new StreamWriter(m, encoding); // HIGHCHAR: StringToStream helper accepts encoding from caller.
