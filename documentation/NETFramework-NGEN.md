@@ -56,27 +56,27 @@ entry pointing to the right assemblies, because this requires knowing the exact 
 
 ### Microsoft.DotNet.MSBuildSdkResolver
 
-This is the base resolver, capable of resolving "in-box" SDKs that ship with the .NET SDK, and workloads. Since the resolver assembly
+This is the most-commonly-used resolver, capable of resolving "in-box" SDKs that ship with the .NET SDK and .NET SDK workloads. Since the resolver assembly
 is located at a known path relative to MSBuild and has very few dependencies, none of which are used anywhere else, we have decided to
-freeze the version of the resolver plus dependencies, so that their full names can be specified in MSBuild.exe.config, e.g.
+freeze the version of the resolver plus dependencies, so that their full names can be specified in `MSBuild.exe.config`, e.g.
 
-```
+```xml
     <dependentAssembly>
       <assemblyIdentity name="Microsoft.DotNet.MSBuildSdkResolver" culture="neutral" publicKeyToken="adb9793829ddae60" />
       <codeBase version="8.0.100.0" href=".\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\Microsoft.DotNet.MSBuildSdkResolver.dll" />
     </dependentAssembly>
 ```
 
-Additionally, MSBuild.exe.config has the following entry, which enables us to refer to the resolver by simple name.
+Additionally, `MSBuild.exe.config` has the following entry, which enables us to refer to the resolver by simple name.
 
-```
+```xml
 <qualifyAssembly partialName="Microsoft.DotNet.MSBuildSdkResolver" fullName="Microsoft.DotNet.MSBuildSdkResolver, Version=8.0.100.0, Culture=neutral, PublicKeyToken=adb9793829ddae60" />
 ```
 
 This has a small advantage compared to hardcoding `Microsoft.DotNet.MSBuildSdkResolver, Version=8.0.100.0, Culture=neutral, PublicKeyToken=adb9793829ddae60`
 directly in the code, as it can be modified to work in non-standard environments just by editing the app config appropriately.
 
-The resolver loading logic in MSBuild has been updated to call `Assembly.Load(AssemblyName)` where the `AssemblyName` specifies the
+The resolver loading logic in MSBuild [has been updated](https://github.com/dotnet/msbuild/pull/9439) to call `Assembly.Load(AssemblyName)` where the `AssemblyName` specifies the
 simple name of the assembly, e.g. `Microsoft.DotNet.MSBuildSdkResolver`, as well as its `CodeBase` (file path). This way the CLR assembly
 loader will try to load the assembly into the default context first - a necessary condition for the native image to be used - and fall back
 to LoadFrom if the simple name wasn't resolved.
@@ -84,7 +84,7 @@ to LoadFrom if the simple name wasn't resolved.
 ### Microsoft.Build.NuGetSdkResolver
 
 The NuGet resolver has many dependencies and its version is frequently changing, so the technique used for `Microsoft.DotNet.MSBuildSdkResolver`
-does not apply in its current state. However, the NuGet team it looking to address this by:
+does not apply in its current state. However, the NuGet team is [looking to address this](https://github.com/NuGet/Home/issues/11441) by:
 
 1) ILMerge'ing the resolver with its dependencies into a single assembly.
 2) Freezing the version of the assembly.
@@ -113,7 +113,7 @@ paired with an SDK on users machine at run-time. Unlike SDK resolvers and NuGet.
 unit, this is a true dynamic inter-product dependency. Additionally, the task API is complex and involves a lot of functionality
 provided to tasks via callbacks (e.g. logging) so the overhead of cross-domain calls may be significant. And that's assuming that
 suitable native images exist in the first place, something that both VS and SDK installers would need to handle (task assemblies
-in each installed SDK are NGENed against each installed version of VS).
+in each installed SDK would need to be NGENed against each installed version of VS).
 
 Hosting task assemblies in separate AppDomains looks like a major piece of work with uncertain outcome. We haven't tried it yet
 and most task code is JITted.
