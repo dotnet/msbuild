@@ -155,7 +155,7 @@ namespace Microsoft.Build.Logging
         public static BuildEventArgsReader OpenBuildEventsReader(
             BinaryReader binaryReader,
             bool closeInput,
-            bool allowForwardCompatibility = true)
+            bool allowForwardCompatibility = false)
         {
             int fileFormatVersion = binaryReader.ReadInt32();
             // Is this the new log format that contains the minimum reader version?
