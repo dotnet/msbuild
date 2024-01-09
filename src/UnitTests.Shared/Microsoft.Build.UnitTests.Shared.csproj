@@ -9,6 +9,8 @@
     <IsTestLibrary>true</IsTestLibrary>
   </PropertyGroup>
   <ItemGroup>
+    <!-- Implicit references to xunit.core and xunit.assert in test projects by Arcade
+         cause restore failures if PackageVersion is in the normal .props file. -->
     <PackageReference Include="xunit.assert" VersionOverride="$(XUnitVersion)" />
     <PackageReference Include="xunit.core" VersionOverride="$(XUnitVersion)" />
     <PackageReference Include="Shouldly" />
