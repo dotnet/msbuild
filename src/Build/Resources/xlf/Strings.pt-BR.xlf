@@ -451,6 +451,11 @@
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
     </note>
       </trans-unit>
+      <trans-unit id="SuccededToResolveSDK">
+        <source>SDK "{0}" successfully resolved.</source>
+        <target state="new">SDK "{0}" successfully resolved.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskAcquiredCores">
         <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
         <target state="translated">A tarefa "{0}" solicitou {1} núcleos, adquiriu {2} núcleos e agora contém {3} núcleos no total.</target>
