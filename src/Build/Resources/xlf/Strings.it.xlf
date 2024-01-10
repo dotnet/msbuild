@@ -452,8 +452,8 @@
     </note>
       </trans-unit>
       <trans-unit id="SucceededToResolveSDK">
-        <source>SDK "{0}" successfully resolved.</source>
-        <target state="new">SDK "{0}" successfully resolved.</target>
+        <source>SDK "{0}" was successfully resolved.</source>
+        <target state="new">SDK "{0}" was successfully resolved.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskAcquiredCores">
