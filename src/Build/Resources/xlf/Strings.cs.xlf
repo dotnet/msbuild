@@ -451,7 +451,7 @@
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
     </note>
       </trans-unit>
-      <trans-unit id="SuccededToResolveSDK">
+      <trans-unit id="SucceededToResolveSDK">
         <source>SDK "{0}" successfully resolved.</source>
         <target state="new">SDK "{0}" successfully resolved.</target>
         <note />

@@ -355,7 +355,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                 if (result.Success)
                 {
-                    loggingContext.LogComment(MessageImportance.Low, "SuccededToResolveSDK", sdk.ToString());
+                    loggingContext.LogComment(MessageImportance.Low, "SucceededToResolveSDK", sdk.ToString());
 
                     LogWarnings(loggingContext, sdkReferenceLocation, result.Warnings);
 

@@ -1324,7 +1324,7 @@
     <value>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
   {1}</value>
   </data>
-  <data name="SuccededToResolveSDK" xml:space="preserve">
+  <data name="SucceededToResolveSDK" xml:space="preserve">
     <value>SDK "{0}" successfully resolved.</value>
   </data>
   <data name="CouldNotRunNuGetSdkResolver" xml:space="preserve">
