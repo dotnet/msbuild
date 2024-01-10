@@ -527,6 +527,10 @@
     <value>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</value>
     <comment>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</comment>
   </data>
+  <data name="ImportedProjectFromVSDistribution" xml:space="preserve">
+    <value>MSB4278: The imported project {0} is from the Visual Studio distribution of MSBuild. Build with MSBuild.exe in a Developer Command Prompt. </value>
+    <comment>{StrBegin="MSB4278: "}LOCALIZATION: &lt;Import&gt; should not be localized.</comment>
+  </data>
   <data name="ImportedProjectFromExtensionsPathNotFoundFromAppConfig" xml:space="preserve">
     <value>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . These search paths are defined in "{4}". Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</value>
     <comment>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</comment>
@@ -2013,7 +2017,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <!--
         The Build message bucket is: MSB4000 - MSB4999
 
-        Next message code should be MSB4278
+        Next message code should be MSB4279
 
         Don't forget to update this comment after using a new code.
   -->
