@@ -336,7 +336,7 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+                var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true, IgnoreWhitespace = true };
                 using (XmlReader xr = XmlReader.Create(File.OpenRead(appConfigItem.ItemSpec), xrs))
                 {
                     document = XDocument.Load(xr);
