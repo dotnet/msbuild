@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="CollectionCopyToFailureProvidedArrayIsTooSmall">
         <source>The number of elements in the collection is greater than the available space in the destination array (when starting at the specified index).</source>
-        <target state="new">The number of elements in the collection is greater than the available space in the destination array (when starting at the specified index).</target>
+        <target state="translated">Koleksiyondaki öğe sayısı hedef dizideki kullanılabilir boşluğun boyutundan (belirtilen dizinden başlayarak) daha büyük.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConflictingTaskAssembly">
