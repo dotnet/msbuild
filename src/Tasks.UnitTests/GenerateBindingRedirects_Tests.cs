@@ -264,10 +264,10 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                TransientTestFolder rootTestFolder = _env.CreateFolder(); 
-                TransientTestFolder testFolder = _env.CreateFolder(Path.Combine(rootTestFolder.Path, "𬴂龨苘爫麤υ㏑䡫3"));
+                TransientTestFolder rootTestFolder = env.CreateFolder(); 
+                TransientTestFolder testFolder = env.CreateFolder(Path.Combine(rootTestFolder.Path, "\uD873\uDD02\u9FA8\u82D8\u722B\u9EA4\u03C5\u33D1\uE038\u486B\u0033"));
                 string appConfigContents = WriteAppConfigRuntimeSection(string.Empty, testFolder);
-                string outputAppConfigFile = _env.ExpectFile(".config").Path;
+                string outputAppConfigFile = env.ExpectFile(".config").Path;
 
                 TaskItemMock redirect = new TaskItemMock("System, Version=10.0.0.0, Culture=Neutral, PublicKeyToken='b77a5c561934e089'", "40.0.0.0");
 
