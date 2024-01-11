@@ -105,7 +105,7 @@ namespace Microsoft.Build.UnitTests
                 if (FileSystems.Default.FileExists(potentialVersionsPropsPath))
                 {
                     XDocument doc = null;
-                    var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+                    var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true, IgnoreWhitespace = true };
                     using (XmlReader xr = XmlReader.Create(File.OpenRead(potentialVersionsPropsPath), xrs))
                     {
                         doc = XDocument.Load(xr);
