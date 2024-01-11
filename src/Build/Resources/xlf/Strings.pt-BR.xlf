@@ -390,6 +390,11 @@
         <target state="translated">Atualmente, o relatório de acessos a arquivos só tem suporte usando o tipo x64 do MSBuild.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SDKResolverAttempt">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}". {2}</source>
+        <target state="new">The "{0}" resolver attempted to resolve the SDK "{1}". {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
         <source>MSB4242: SDK Resolver Failure: "{0}"</source>
         <target state="translated">MSB4242: Falha no Resolvedor do SDK: "{0}"</target>
@@ -452,8 +457,8 @@
     </note>
       </trans-unit>
       <trans-unit id="SucceededToResolveSDK">
-        <source>The SDK "{0}" was successfully resolved by the SDK resolver "{1}". SDK Result: "Path : {2}, Version : {3}"</source>
-        <target state="new">The SDK "{0}" was successfully resolved by the SDK resolver "{1}". SDK Result: "Path : {2}, Version : {3}"</target>
+        <source>The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</source>
+        <target state="new">The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskAcquiredCores">
@@ -2585,13 +2590,6 @@ Utilização:          {0} Utilização Média: {1:###.0}</target>
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
         <target state="translated">MSB4241: a referência do SDK "{0}" versão "{1}" foi resolvida para a versão "{2}". Talvez você estava usando um versão diferente que a esperada caso não tenha atualizado a versão referenciada de maneira correspondente.</target>
         <note>{StrBegin="MSB4241: "}
-      LOCALIZATION:  Do not localize the word SDK.
-    </note>
-      </trans-unit>
-      <trans-unit id="SdkResolving">
-        <source>Resolving SDK '{0}'...</source>
-        <target state="translated">Resolvendo o SDK '{0}'...</target>
-        <note>
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>

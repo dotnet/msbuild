@@ -312,8 +312,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             // Loop through resolvers which have already been sorted by priority, returning the first result that was successful
             SdkLogger buildEngineLogger = new SdkLogger(loggingContext);
 
-            loggingContext.LogComment(MessageImportance.Low, "SdkResolving", sdk.ToString());
-
             foreach (SdkResolver sdkResolver in resolvers)
             {
                 SdkResolverContext context = new SdkResolverContext(buildEngineLogger, projectPath, solutionPath, ProjectCollection.Version, interactive, isRunningInVisualStudio)
@@ -370,6 +368,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                     sdkResult = result;
                     return true;
+                }
+                else
+                {
+                    string resultWarningsAndErrors = (result.Warnings?.Any() == true ? "\nWarnings:\n" + string.Join("\n", result.Warnings) : string.Empty)
+                        + (result.Errors?.Any() == true ? "\nErrors:\n" + string.Join("\n", result.Errors) : string.Empty);
+
+                    loggingContext.LogComment(MessageImportance.Low, "SDKResolverAttempt", sdkResolver.Name, sdk.ToString(), resultWarningsAndErrors);
                 }
 
                 results.Add(result);

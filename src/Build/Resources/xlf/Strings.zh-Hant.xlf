@@ -390,6 +390,11 @@
         <target state="translated">目前只支援使用 MSBuild 的 x64 變體來報告檔案存取。</target>
         <note />
       </trans-unit>
+      <trans-unit id="SDKResolverAttempt">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}". {2}</source>
+        <target state="new">The "{0}" resolver attempted to resolve the SDK "{1}". {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
         <source>MSB4242: SDK Resolver Failure: "{0}"</source>
         <target state="translated">MSB4242: SDK 解析程式失敗: "{0}"</target>
@@ -452,8 +457,8 @@
     </note>
       </trans-unit>
       <trans-unit id="SucceededToResolveSDK">
-        <source>The SDK "{0}" was successfully resolved by the SDK resolver "{1}". SDK Result: "Path : {2}, Version : {3}"</source>
-        <target state="new">The SDK "{0}" was successfully resolved by the SDK resolver "{1}". SDK Result: "Path : {2}, Version : {3}"</target>
+        <source>The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</source>
+        <target state="new">The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskAcquiredCores">
@@ -2585,13 +2590,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
         <target state="translated">MSB4241: SDK 參考 "{0}" 版本 "{1}" 已改為解析成版本 "{2}"。若您未將參考的版本更新為符合的版本，您可能使用了與預期不同的版本。</target>
         <note>{StrBegin="MSB4241: "}
-      LOCALIZATION:  Do not localize the word SDK.
-    </note>
-      </trans-unit>
-      <trans-unit id="SdkResolving">
-        <source>Resolving SDK '{0}'...</source>
-        <target state="translated">正在解析 SDK '{0}'...</target>
-        <note>
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>

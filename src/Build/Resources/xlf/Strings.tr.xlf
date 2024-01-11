@@ -390,6 +390,11 @@
         <target state="translated">Raporlama dosyası erişimleri şu anda yalnızca MSBuild x64 varyantı kullanıldığında destekleniyor.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SDKResolverAttempt">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}". {2}</source>
+        <target state="new">The "{0}" resolver attempted to resolve the SDK "{1}". {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
         <source>MSB4242: SDK Resolver Failure: "{0}"</source>
         <target state="translated">MSB4242: SDK Çözümleyici Hatası: "{0}"</target>
@@ -452,8 +457,8 @@
     </note>
       </trans-unit>
       <trans-unit id="SucceededToResolveSDK">
-        <source>The SDK "{0}" was successfully resolved by the SDK resolver "{1}". SDK Result: "Path : {2}, Version : {3}"</source>
-        <target state="new">The SDK "{0}" was successfully resolved by the SDK resolver "{1}". SDK Result: "Path : {2}, Version : {3}"</target>
+        <source>The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</source>
+        <target state="new">The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskAcquiredCores">
@@ -2585,13 +2590,6 @@ Kullanım:             {0} Ortalama Kullanım: {1:###.0}</target>
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
         <target state="translated">MSB4241: "{0}" SDK başvurusunun "{1}" sürümü, bunun yerine sürüm "{2}" olarak çözümlendi. Başvurulan sürümü eşleşecek şekilde güncelleştirmezseniz beklenen sürümden farklı bir sürüm kullanıyor olabilirsiniz.</target>
         <note>{StrBegin="MSB4241: "}
-      LOCALIZATION:  Do not localize the word SDK.
-    </note>
-      </trans-unit>
-      <trans-unit id="SdkResolving">
-        <source>Resolving SDK '{0}'...</source>
-        <target state="translated">'{0}' SDK’sı çözümleniyor...</target>
-        <note>
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>

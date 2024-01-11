@@ -390,6 +390,11 @@
         <target state="translated">Gli accessi ai file di report sono attualmente supportati solo con la versione x64 di MSBuild.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SDKResolverAttempt">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}". {2}</source>
+        <target state="new">The "{0}" resolver attempted to resolve the SDK "{1}". {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
         <source>MSB4242: SDK Resolver Failure: "{0}"</source>
         <target state="translated">MSB4242: errore sistema di risoluzione SDK: "{0}"</target>
@@ -452,8 +457,8 @@
     </note>
       </trans-unit>
       <trans-unit id="SucceededToResolveSDK">
-        <source>The SDK "{0}" was successfully resolved by the SDK resolver "{1}". SDK Result: "Path : {2}, Version : {3}"</source>
-        <target state="new">The SDK "{0}" was successfully resolved by the SDK resolver "{1}". SDK Result: "Path : {2}, Version : {3}"</target>
+        <source>The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</source>
+        <target state="new">The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskAcquiredCores">
@@ -2585,13 +2590,6 @@ Utilizzo:          {0} Utilizzo medio: {1:###.0}</target>
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
         <target state="translated">MSB4241: la versione "{1}" del riferimento "{0}" all'SDK è stata risolta nella versione "{2}". Se non si aggiorna la versione di riferimento in modo che corrisponda, è possibile che la versione in uso sia diversa da quella prevista.</target>
         <note>{StrBegin="MSB4241: "}
-      LOCALIZATION:  Do not localize the word SDK.
-    </note>
-      </trans-unit>
-      <trans-unit id="SdkResolving">
-        <source>Resolving SDK '{0}'...</source>
-        <target state="translated">Risoluzione dell'SDK '{0}'...</target>
-        <note>
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>

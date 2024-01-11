@@ -94,8 +94,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             result.Path.ShouldBe("path");
 
-            _logger.BuildMessageEvents.Any(i => i.Message.StartsWith($"The SDK \"{sdk}\" was successfully resolved")).ShouldBeTrue();
-
             _logger.WarningCount.ShouldBe(1);
             _logger.Warnings.First().Code.ShouldStartWith("MSB4241");
         }
@@ -125,7 +123,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false, failOnUnresolvedSdk: true);
 
             result.Path.ShouldBe("resolverpathwithresolvablesdkpattern2");
-            _logger.BuildMessageEvents.Any(i => i.Message.StartsWith($"The SDK \"{sdk}\" was successfully resolved")).ShouldBeTrue();
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolverWithResolvableSdkPattern2 running");
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldNotContain("MockSdkResolver1 running");
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldNotContain("MockSdkResolver2 running");
@@ -143,7 +140,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false, failOnUnresolvedSdk: true);
 
             result.Path.ShouldBe("resolverpath1");
-            _logger.BuildMessageEvents.Any(i => i.Message.StartsWith($"The SDK \"{sdk}\" was successfully resolved")).ShouldBeTrue();
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolver1 running");
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldNotContain("MockSdkResolverWithResolvableSdkPattern1 running");
         }
@@ -165,7 +161,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false, failOnUnresolvedSdk: true);
 
                 result.Path.ShouldBe("resolverpath1");
-                _logger.BuildMessageEvents.Any(i => i.Message.StartsWith($"The SDK \"{sdk}\" was successfully resolved")).ShouldBeTrue();
                 _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolver1 running");
                 _logger.BuildMessageEvents.Select(i => i.Message).ShouldNotContain("MockSdkResolverWithResolvableSdkPattern1 running");
                 ChangeWaves.ResetStateForTests();
@@ -184,9 +179,24 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false, failOnUnresolvedSdk: true);
 
             result.Path.ShouldBe("resolverpathwithresolvablesdkpattern1");
-            _logger.BuildMessageEvents.Any(i => i.Message.StartsWith($"The SDK \"{sdk}\" was successfully resolved")).ShouldBeTrue();
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolverWithResolvableSdkPattern1 running");
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldNotContain("MockSdkResolver1 running");
+        }
+
+        [Fact]
+        public void AssertSdkResolutionMessagesAreLogged()
+        {
+            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy());
+            SdkReference sdk = new SdkReference("1sdkName", "referencedVersion", "minimumVersion");
+
+            var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false, failOnUnresolvedSdk: true);
+
+            // First resolver attemopted to resolve, but failed.
+            var errorMessage = "\nErrors:\n" + ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SDKResolverReturnedNull", nameof(MockResolverReturnsNull));
+            _logger.BuildMessageEvents.Select(i => i.Message)
+                .ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SDKResolverAttempt", nameof(MockResolverReturnsNull), sdk.ToString(), errorMessage));
+            // Second resolver succeeded.
+            _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SucceededToResolveSDK", sdk.ToString(), nameof(MockSdkResolver1), result.Path, result.Version));
         }
 
         [Fact]
@@ -201,8 +211,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false, failOnUnresolvedSdk: true);
 
             result.Path.ShouldBe("resolverpath2");
-            _logger.BuildMessageEvents.Any(i => i.Message.StartsWith($"The SDK \"{sdk}\" was successfully resolved")).ShouldBeTrue();
-
             // Both resolvers should run, and no ERROR string.
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolver1 running");
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolver2 running");
@@ -372,7 +380,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             ValidateExpectedPropertiesAndItems(includePropertiesAndItems, result);
 
-            _logger.BuildMessageEvents.Any(i => i.Message.StartsWith($"The SDK \"{sdk}\" was successfully resolved")).ShouldBeTrue(); 
             _logger.WarningCount.ShouldBe(0);
         }
 
@@ -409,7 +416,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             ValidateExpectedPropertiesAndItems(true, result);
 
-            _logger.BuildMessageEvents.Any(i => i.Message.StartsWith($"The SDK \"{sdk}\" was successfully resolved")).ShouldBeTrue();
             _logger.WarningCount.ShouldBe(0);
         }
 
@@ -462,7 +468,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             ValidateExpectedPropertiesAndItems(includePropertiesAndItems, result);
 
-            _logger.BuildMessageEvents.Any(i => i.Message.StartsWith($"The SDK \"{sdk}\" was successfully resolved")).ShouldBeTrue();
             _logger.WarningCount.ShouldBe(0);
         }
 
@@ -508,7 +513,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             ValidateExpectedPropertiesAndItems(true, result);
 
-            _logger.BuildMessageEvents.Any(i => i.Message.StartsWith($"The SDK \"{sdk}\" was successfully resolved")).ShouldBeTrue();
             _logger.WarningCount.ShouldBe(1);
             _logger.Warnings.First().Code.ShouldStartWith("MSB4241");
         }
