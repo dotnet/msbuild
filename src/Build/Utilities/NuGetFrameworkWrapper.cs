@@ -176,7 +176,7 @@ namespace Microsoft.Build.Evaluation
       <DisableFXClosureWalk enabled="true" />
       <DeferFXClosureWalk enabled="true" />
       <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
-        {(Environment.Is64BitProcess ? _bindingRedirect64 : _bindingRedirect32)}
+        {(Environment.Is64BitProcess ? _bindingRedirects64 : _bindingRedirects32)}
         <dependentAssembly>
           <assemblyIdentity name="{NuGetFrameworksAssemblyName}" publicKeyToken="{publicKeyTokenString}" culture="{assemblyName.CultureName}" />
           <codeBase version="{assemblyName.Version}" href="{assemblyPath}" />
