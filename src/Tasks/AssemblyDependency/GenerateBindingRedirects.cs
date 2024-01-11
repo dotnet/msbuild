@@ -10,6 +10,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using System.IO;
+using System.Xml;
 
 #nullable disable
 
@@ -335,7 +336,12 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                document = XDocument.Load(appConfigItem.ItemSpec);
+                var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true, IgnoreWhitespace = true };
+                using (XmlReader xr = XmlReader.Create(File.OpenRead(appConfigItem.ItemSpec), xrs))
+                {
+                    document = XDocument.Load(xr);
+                }
+
                 if (document.Root == null || document.Root.Name != "configuration")
                 {
                     Log.LogErrorWithCodeFromResources("GenerateBindingRedirects.MissingConfigurationNode");
