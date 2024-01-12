@@ -1061,7 +1061,7 @@
       </trans-unit>
       <trans-unit id="GenerateManifest.WriteOutputManifestFailed">
         <source>MSB3173: Unable to write manifest '{0}'. {1} {2}</source>
-        <target state="new">MSB3173: Unable to write manifest '{0}'. {1} {2}</target>
+        <target state="translated">MSB3173: невозможно записать манифест "{0}". {1} {2}</target>
         <note>{StrBegin="MSB3173: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.InvalidRequestedExecutionLevel">
@@ -2516,7 +2516,7 @@
       </trans-unit>
       <trans-unit id="Task.FileLocked">
         <source>The file is locked by: "{0}"</source>
-        <target state="new">The file is locked by: "{0}"</target>
+        <target state="translated">"{0}" блокирует этот файл</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">

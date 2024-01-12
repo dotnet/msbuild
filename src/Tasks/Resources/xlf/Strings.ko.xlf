@@ -1061,7 +1061,7 @@
       </trans-unit>
       <trans-unit id="GenerateManifest.WriteOutputManifestFailed">
         <source>MSB3173: Unable to write manifest '{0}'. {1} {2}</source>
-        <target state="new">MSB3173: Unable to write manifest '{0}'. {1} {2}</target>
+        <target state="translated">MSB3173: '{0}' 매니페스트를 쓸 수 없습니다. {1} {2}</target>
         <note>{StrBegin="MSB3173: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.InvalidRequestedExecutionLevel">
@@ -2516,7 +2516,7 @@
       </trans-unit>
       <trans-unit id="Task.FileLocked">
         <source>The file is locked by: "{0}"</source>
-        <target state="new">The file is locked by: "{0}"</target>
+        <target state="translated">파일이 "{0}"에 의해 잠겨 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
