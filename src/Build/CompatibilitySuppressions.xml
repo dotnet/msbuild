@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- https://learn.microsoft.com/en-us/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <!-- Changes to the Experimental namespace are considered non-breaking, and this ctor should be used only internally, not by plugin code. -->
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Microsoft.Build.Experimental.FileAccess.FileAccessData.#ctor(Microsoft.Build.Experimental.FileAccess.ReportedFileOperation,Microsoft.Build.Experimental.FileAccess.RequestedAccess,System.UInt32,System.UInt32,Microsoft.Build.Experimental.FileAccess.DesiredAccess,Microsoft.Build.Experimental.FileAccess.FlagsAndAttributes,System.String,System.String,System.Boolean)</Target>
