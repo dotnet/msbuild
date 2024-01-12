@@ -390,6 +390,17 @@
         <target state="translated">파일 액세스 보고는 현재 x64 버전의 MSBuild를 사용하는 경우에만 지원됩니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SDKResolverAttempt">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}".
+Warnings: {2}
+Errors: {3}</source>
+        <target state="new">The "{0}" resolver attempted to resolve the SDK "{1}".
+Warnings: {2}
+Errors: {3}</target>
+        <note>
+      LOCALIZATION: Do not localize the word SDK. "{2}" is new line separated warnings or "null". "{3}" is new line separated errors or "null".
+    </note>
+      </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
         <source>MSB4242: SDK Resolver Failure: "{0}"</source>
         <target state="translated">MSB4242: SDK 해결 프로그램 오류: "{0}"</target>
@@ -450,6 +461,11 @@
         <note>
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
     </note>
+      </trans-unit>
+      <trans-unit id="SucceededToResolveSDK">
+        <source>The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</source>
+        <target state="new">The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</target>
+        <note />
       </trans-unit>
       <trans-unit id="TaskAcquiredCores">
         <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
@@ -2580,13 +2596,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
         <target state="translated">MSB4241: SDK 참조 "{0}" 버전 "{1}"이(가) 대신 "{2}" 버전으로 확인되었습니다. 참조된 버전을 일치하도록 업데이트하지 않는 경우 예상과 다른 버전을 사용할 수 있습니다.</target>
         <note>{StrBegin="MSB4241: "}
-      LOCALIZATION:  Do not localize the word SDK.
-    </note>
-      </trans-unit>
-      <trans-unit id="SdkResolving">
-        <source>Resolving SDK '{0}'...</source>
-        <target state="translated">SDK '{0}'을(를) 확인하는 중...</target>
-        <note>
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>
