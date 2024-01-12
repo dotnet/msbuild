@@ -718,6 +718,7 @@ namespace Microsoft.Build.CommandLine
                 string[] getProperty = Array.Empty<string>();
                 string[] getItem = Array.Empty<string>();
                 string[] getTargetResult = Array.Empty<string>();
+                string getResultOutputFile = string.Empty;
                 BuildResult result = null;
 #if FEATURE_REPORTFILEACCESSES
                 bool reportFileAccesses = false;
@@ -764,6 +765,7 @@ namespace Microsoft.Build.CommandLine
                                             ref getProperty,
                                             ref getItem,
                                             ref getTargetResult,
+                                            ref getResultOutputFile,
                                             recursing: false,
 #if FEATURE_GET_COMMANDLINE
                                             commandLine);
@@ -820,7 +822,8 @@ namespace Microsoft.Build.CommandLine
                             using (ProjectCollection collection = new(globalProperties, loggers, ToolsetDefinitionLocations.Default))
                             {
                                 Project project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
-                                exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project);
+                                TextWriter output = getResultOutputFile.Length > 0 ? new StreamWriter(getResultOutputFile) : Console.Out;
+                                exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project, output);
                                 collection.LogBuildFinishedEvent(exitType == ExitType.Success);
                             }
                         }
@@ -882,7 +885,8 @@ namespace Microsoft.Build.CommandLine
 
                     if (outputPropertiesItemsOrTargetResults && targets?.Length > 0 && result is not null)
                     {
-                        exitType = OutputBuildInformationInJson(result, getProperty, getItem, getTargetResult, loggers, exitType);
+                        TextWriter outputStream = getResultOutputFile.Length > 0 ? new StreamWriter(getResultOutputFile) : Console.Out;
+                        exitType = OutputBuildInformationInJson(result, getProperty, getItem, getTargetResult, loggers, exitType, outputStream);
                     }
 
                     if (!string.IsNullOrEmpty(timerOutputFilename))
@@ -1042,25 +1046,25 @@ namespace Microsoft.Build.CommandLine
             return exitType;
         }
 
-        private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, Project project)
+        private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, Project project, TextWriter outputStream)
         {
             // Special case if the user requests exactly one property: skip json formatting
             if (getProperty.Length == 1 && getItem.Length == 0)
             {
-                Console.WriteLine(project.GetPropertyValue(getProperty[0]));
+                outputStream.WriteLine(project.GetPropertyValue(getProperty[0]));
             }
             else
             {
                 JsonOutputFormatter jsonOutputFormatter = new();
                 jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
                 jsonOutputFormatter.AddItemsInJsonFormat(getItem, project);
-                Console.WriteLine(jsonOutputFormatter.ToString());
+                outputStream.WriteLine(jsonOutputFormatter.ToString());
             }
 
             return ExitType.Success;
         }
 
-        private static ExitType OutputBuildInformationInJson(BuildResult result, string[] getProperty, string[] getItem, string[] getTargetResult, ILogger[] loggers, ExitType exitType)
+        private static ExitType OutputBuildInformationInJson(BuildResult result, string[] getProperty, string[] getItem, string[] getTargetResult, ILogger[] loggers, ExitType exitType, TextWriter outputStream)
         {
             ProjectInstance builtProject = result.ProjectStateAfterBuild;
 
@@ -1078,7 +1082,7 @@ namespace Microsoft.Build.CommandLine
             // Special case if the user requests exactly one property: skip the json formatting
             else if (getProperty.Length == 1 && getItem.Length == 0 && getTargetResult.Length == 0)
             {
-                Console.WriteLine(builtProject.GetPropertyValue(getProperty[0]));
+                outputStream.WriteLine(builtProject.GetPropertyValue(getProperty[0]));
             }
             else
             {
@@ -1086,7 +1090,7 @@ namespace Microsoft.Build.CommandLine
                 jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => builtProject.GetPropertyValue(property));
                 jsonOutputFormatter.AddItemInstancesInJsonFormat(getItem, builtProject);
                 jsonOutputFormatter.AddTargetResultsInJsonFormat(getTargetResult, result);
-                Console.WriteLine(jsonOutputFormatter.ToString());
+                outputStream.WriteLine(jsonOutputFormatter.ToString());
             }
 
             return exitType;
@@ -2417,6 +2421,7 @@ namespace Microsoft.Build.CommandLine
             ref string[] getProperty,
             ref string[] getItem,
             ref string[] getTargetResult,
+            ref string getResultOutputFile,
             bool recursing,
             string commandLine)
         {
@@ -2552,6 +2557,7 @@ namespace Microsoft.Build.CommandLine
                                                            ref getProperty,
                                                            ref getItem,
                                                            ref getTargetResult,
+                                                           ref getResultOutputFile,
                                                            recursing: true,
                                                            commandLine);
                     }
@@ -2563,7 +2569,8 @@ namespace Microsoft.Build.CommandLine
                     getProperty = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetProperty] ?? Array.Empty<string>();
                     getItem = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetItem] ?? Array.Empty<string>();
                     getTargetResult = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetTargetResult] ?? Array.Empty<string>();
-                    if (getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0)
+                    getResultOutputFile = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetResultOutputFile].FirstOrDefault() ?? string.Empty;
+                    if ((getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0) && getResultOutputFile.Length == 0)
                     {
                         commandLineSwitches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.Verbosity, "q", "q", true, true, true);
                     }
@@ -2650,7 +2657,7 @@ namespace Microsoft.Build.CommandLine
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation],
                         groupedFileLoggerParameters,
-                        getProperty.Length + getItem.Length + getTargetResult.Length > 0,
+                        (getProperty.Length + getItem.Length + getTargetResult.Length > 0) && getResultOutputFile.Length == 0,
                         out distributedLoggerRecords,
                         out verbosity,
                         out originalVerbosity,
