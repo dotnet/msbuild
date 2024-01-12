@@ -391,9 +391,15 @@
         <note />
       </trans-unit>
       <trans-unit id="SDKResolverAttempt">
-        <source>The "{0}" resolver attempted to resolve the SDK "{1}". {2}</source>
-        <target state="new">The "{0}" resolver attempted to resolve the SDK "{1}". {2}</target>
-        <note />
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}".
+Warnings: {2}
+Errors: {3}</source>
+        <target state="new">The "{0}" resolver attempted to resolve the SDK "{1}".
+Warnings: {2}
+Errors: {3}</target>
+        <note>
+      LOCALIZATION: "{2}" is new line separated warnings or "null". "{3}" is new line separated errors or "null".
+    </note>
       </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
         <source>MSB4242: SDK Resolver Failure: "{0}"</source>

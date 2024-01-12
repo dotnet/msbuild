@@ -192,9 +192,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false, failOnUnresolvedSdk: true);
 
             // First resolver attemopted to resolve, but failed.
-            var errorMessage = "\nErrors:\n" + ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SDKResolverReturnedNull", nameof(MockResolverReturnsNull));
-            _logger.BuildMessageEvents.Select(i => i.Message)
-                .ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SDKResolverAttempt", nameof(MockResolverReturnsNull), sdk.ToString(), errorMessage));
+            _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SDKResolverAttempt", nameof(MockResolverReturnsNull), sdk.ToString(), "null",
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SDKResolverReturnedNull", nameof(MockResolverReturnsNull))));
             // Second resolver succeeded.
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SucceededToResolveSDK", sdk.ToString(), nameof(MockSdkResolver1), result.Path, result.Version));
         }

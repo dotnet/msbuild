@@ -371,10 +371,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 }
                 else
                 {
-                    string resultWarningsAndErrors = (result.Warnings?.Any() == true ? "\nWarnings:\n" + string.Join("\n", result.Warnings) : string.Empty)
-                        + (result.Errors?.Any() == true ? "\nErrors:\n" + string.Join("\n", result.Errors) : string.Empty);
+                    string resultWarnings = result.Warnings?.Any() == true ? string.Join(Environment.NewLine, result.Warnings) : "null";
+                    string resultErrors = result.Errors?.Any() == true ? string.Join(Environment.NewLine, result.Errors) : "null";
 
-                    loggingContext.LogComment(MessageImportance.Low, "SDKResolverAttempt", sdkResolver.Name, sdk.ToString(), resultWarningsAndErrors);
+                    loggingContext.LogComment(MessageImportance.Low, "SDKResolverAttempt", sdkResolver.Name, sdk.ToString(), resultWarnings, resultErrors);
                 }
 
                 results.Add(result);
