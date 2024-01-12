@@ -398,7 +398,7 @@ Errors: {3}</source>
 Warnings: {2}
 Errors: {3}</target>
         <note>
-      LOCALIZATION: "{2}" is new line separated warnings or "null". "{3}" is new line separated errors or "null".
+      LOCALIZATION: Do not localize the word SDK. "{2}" is new line separated warnings or "null". "{3}" is new line separated errors or "null".
     </note>
       </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
