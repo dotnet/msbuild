@@ -1332,7 +1332,7 @@
 Warnings: {2}
 Errors: {3}</value>
     <comment>
-      LOCALIZATION: "{2}" is new line separated warnings or "null". "{3}" is new line separated errors or "null".
+      LOCALIZATION: Do not localize the word SDK. "{2}" is new line separated warnings or "null". "{3}" is new line separated errors or "null".
     </comment>
   </data>
   <data name="CouldNotRunNuGetSdkResolver" xml:space="preserve">
