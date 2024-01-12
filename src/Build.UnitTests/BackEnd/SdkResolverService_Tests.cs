@@ -111,7 +111,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             e.Sdk.Name.ShouldBe("1sdkName");
         }
 
-
         [Fact]
         // Scenario: MockSdkResolverWithResolvableSdkPattern2 is a specific resolver (i.e. resolver with pattern)
         // and it successfully resolves sdk.
@@ -182,6 +181,21 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             result.Path.ShouldBe("resolverpathwithresolvablesdkpattern1");
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolverWithResolvableSdkPattern1 running");
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldNotContain("MockSdkResolver1 running");
+        }
+
+        [Fact]
+        public void AssertSdkResolutionMessagesAreLogged()
+        {
+            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy());
+            SdkReference sdk = new SdkReference("1sdkName", "referencedVersion", "minimumVersion");
+
+            var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false, failOnUnresolvedSdk: true);
+
+            // First resolver attempted to resolve, but failed.
+            _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SDKResolverAttempt", nameof(MockResolverReturnsNull), sdk.ToString(), "null",
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SDKResolverReturnedNull", nameof(MockResolverReturnsNull))));
+            // Second resolver succeeded.
+            _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SucceededToResolveSDK", sdk.ToString(), nameof(MockSdkResolver1), result.Path, result.Version));
         }
 
         [Fact]
