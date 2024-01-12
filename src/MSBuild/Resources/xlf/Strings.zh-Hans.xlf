@@ -17,7 +17,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="translated">在 {1} 中生成 {0}</target>
+        <target state="translated">在 {1} 秒内生成 {0}</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -1461,7 +1461,7 @@
       </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
         <source>The specified logger "{0}" could not be created and will not be used. {1}</source>
-        <target state="new">The specified logger "{0}" could not be created and will not be used. {1}</target>
+        <target state="translated">无法创建指定的记录器“{0}”，因此将不会使用它。{1}</target>
         <note>
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: {0} contains the logger description passed on the command line or in a
@@ -1563,14 +1563,14 @@
       </trans-unit>
       <trans-unit id="RestoreComplete">
         <source>Restore complete ({0}s)</source>
-        <target state="translated">还原完成({0})</target>
+        <target state="translated">还原完成({0} 秒)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
     </note>
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
         <source>Restore {0} in {1}s</source>
-        <target state="translated">在 {1} 中还原 {0}</target>
+        <target state="translated">在 {1} 秒内还原 {0}</target>
         <note>
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)

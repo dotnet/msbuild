@@ -2516,7 +2516,7 @@
       </trans-unit>
       <trans-unit id="Task.FileLocked">
         <source>The file is locked by: "{0}"</source>
-        <target state="new">The file is locked by: "{0}"</target>
+        <target state="translated">O arquivo é bloqueado por: "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
