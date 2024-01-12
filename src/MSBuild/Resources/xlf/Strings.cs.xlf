@@ -1474,7 +1474,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
       </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
         <source>The specified logger "{0}" could not be created and will not be used. {1}</source>
-        <target state="new">The specified logger "{0}" could not be created and will not be used. {1}</target>
+        <target state="translated">Zadaný protokolovací nástroj {0} nebylo možné vytvořit a nebude se používat. {1}</target>
         <note>
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: {0} contains the logger description passed on the command line or in a

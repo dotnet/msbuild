@@ -260,6 +260,22 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         [Fact]
+        public void AppConfigWhenFilePlacedInLocationWithGB18030Characters()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder rootTestFolder = env.CreateFolder(); 
+                TransientTestFolder testFolder = env.CreateFolder(Path.Combine(rootTestFolder.Path, "\uD873\uDD02\u9FA8\u82D8\u722B\u9EA4\u03C5\u33D1\uE038\u486B\u0033"));
+                string appConfigContents = WriteAppConfigRuntimeSection(string.Empty, testFolder);
+                string outputAppConfigFile = env.ExpectFile(".config").Path;
+
+                TaskItemMock redirect = new TaskItemMock("System, Version=10.0.0.0, Culture=Neutral, PublicKeyToken='b77a5c561934e089'", "40.0.0.0");
+
+                _ = Should.NotThrow(() => GenerateBindingRedirects(appConfigContents, outputAppConfigFile, redirect));
+            }
+        }
+
+        [Fact]
         public void AppConfigFileNotSavedWhenIdentical()
         {
             string appConfigFile = WriteAppConfigRuntimeSection(string.Empty);
@@ -306,11 +322,10 @@ namespace Microsoft.Build.Tasks.UnitTests
             GenerateBindingRedirects bindingRedirects = new GenerateBindingRedirects
             {
                 BuildEngine = engine,
-                SuggestedRedirects = suggestedRedirects ?? System.Array.Empty<ITaskItem>(),
+                SuggestedRedirects = suggestedRedirects ?? Array.Empty<ITaskItem>(),
                 AppConfigFile = new TaskItem(appConfigFile),
                 OutputAppConfigFile = new TaskItem(outputAppConfig)
             };
-
 
             bool executionResult = bindingRedirects.Execute();
 
@@ -324,7 +339,9 @@ namespace Microsoft.Build.Tasks.UnitTests
             };
         }
 
-        private string WriteAppConfigRuntimeSection(string runtimeSection)
+        private string WriteAppConfigRuntimeSection(
+            string runtimeSection,
+            TransientTestFolder transientTestFolder = null)
         {
             string formatString =
 @"<configuration>
@@ -334,7 +351,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 </configuration>";
             string appConfigContents = string.Format(formatString, runtimeSection);
 
-            string appConfigFile = _env.CreateFile(".config").Path;
+            string appConfigFile = _env.CreateFile(transientTestFolder ?? new TransientTestFolder(), ".config").Path;
             File.WriteAllText(appConfigFile, appConfigContents);
             return appConfigFile;
         }
