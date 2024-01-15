@@ -915,7 +915,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
-        public void importOnVSPathutputsRightError()
+        public void ImportWithVSPathThrowsCorrectError()
         {
             InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>(() =>
             {
