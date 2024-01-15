@@ -914,6 +914,44 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
+        [Fact]
+        public void importOnVSPathutputsRightError()
+        {
+            InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string projectPath = null;
+                string importPath = null;
+
+                try
+                {
+                    // Does not matter that the file or folder does not exist, we are checking for the VS pathing here
+                    importPath = "path\\that\\does\\not\\exist\\Microsoft\\VisualStudio\\FileName.txt";
+                    projectPath = FileUtilities.GetTemporaryFileName();
+
+                    string import = ObjectModelHelpers.CleanupFileContents(@"
+                            <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
+                            </Project>
+                        ");
+
+                    File.WriteAllText(projectPath, import);
+
+                    string content = ObjectModelHelpers.CleanupFileContents(@"
+                            <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
+                                <Import Project='" + importPath + @"'/>
+                            </Project>
+                        ");
+
+                    Project project = new Project(XmlReader.Create(new StringReader(content)));
+                }
+                finally
+                {
+                    File.Delete(projectPath);
+                }
+            });
+
+            Assert.Contains("MSB4278", ex.ErrorCode);
+        }
+
         /// <summary>
         /// RecordDuplicateButNotCircularImports should not record circular imports (which do come under the category of "duplicate imports".
         /// </summary>
