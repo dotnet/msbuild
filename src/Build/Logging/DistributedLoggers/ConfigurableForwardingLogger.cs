@@ -298,17 +298,20 @@ namespace Microsoft.Build.Logging
         /// </returns>
         internal MessageImportance GetMinimumMessageImportance()
         {
-            return _verbosity switch
+            if (_forwardLowImportanceMessages)
             {
-                LoggerVerbosity.Minimal => MessageImportance.High,
-                LoggerVerbosity.Normal => MessageImportance.Normal,
-                LoggerVerbosity.Detailed => MessageImportance.Low,
-                LoggerVerbosity.Diagnostic => MessageImportance.Low,
-
-                // The logger does not log messages of any importance.
-                LoggerVerbosity.Quiet => MessageImportance.High - 1,
-                _ => MessageImportance.High - 1,
-            };
+                return MessageImportance.Low;
+            }
+            if (_forwardNormalImportanceMessages)
+            {
+                return MessageImportance.Normal;
+            }
+            if (_forwardHighImportanceMessages)
+            {
+                return MessageImportance.High;
+            }
+            // The logger does not log messages of any importance.
+            return MessageImportance.High - 1;
         }
 
         /// <summary>
