@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(FullFrameworkTFM);$(LatestDotNetCoreForMSBuild)</TargetFrameworks>
-    <TargetFrameworks Condition="'$(MonoBuild)'=='true'">$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <AssemblyName>Microsoft.Build.UnitTests.Shared</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsShipping>false</IsShipping>
