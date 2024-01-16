@@ -202,8 +202,6 @@ namespace Microsoft.Build.Logging
 
             ParseParameters(eventSource);
 
-            ResetLoggerState();
-
             if (!_forwardingSetFromParameters)
             {
                 SetForwardingBasedOnVerbosity(eventSource);
@@ -312,15 +310,6 @@ namespace Microsoft.Build.Logging
             }
             // The logger does not log messages of any importance.
             return MessageImportance.High - 1;
-        }
-
-        /// <summary>
-        /// Reset the states of per-build member variables.
-        /// Used when a build is finished, but the logger might be needed for the next build.
-        /// </summary>
-        private void ResetLoggerState()
-        {
-            // No state needs resetting
         }
 
         /// <summary>
