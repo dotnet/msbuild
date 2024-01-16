@@ -658,6 +658,12 @@ namespace Microsoft.Build.Utilities
             return startInfo;
         }
 
+        public virtual Process StartTask (Process proc)
+        {
+            proc.Start();
+            return proc;
+        }
+
         /// <summary>
         /// Writes out a temporary response file and shell-executes the tool requested.  Enables concurrent
         /// logging of the output of the tool.
@@ -714,7 +720,7 @@ namespace Microsoft.Build.Utilities
                 ExitCode = -1;
 
                 // Start the process
-                proc.Start();
+                StartTask(proc);
 
                 // Close the input stream. This is done to prevent commands from
                 // blocking the build waiting for input from the user.
