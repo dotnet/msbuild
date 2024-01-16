@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using FluentAssertions;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
@@ -892,6 +893,232 @@ namespace Microsoft.Build.UnitTests
 
                 Assert.Throws<EndOfStreamException>(() => buildEventArgsReader.Read());
             }
+        }
+
+        [Fact]
+        public void ForwardCompatibleRead_HandleAppendOnlyChanges()
+        {
+            // Let's not write any strings prior the first event - to make locating (and overwriting) the size byte(s) easier.
+            BuildErrorEventArgs error = new(null, null, null, 1, 2, 3, 4, null, null, null);
+            BuildFinishedEventArgs finished = new("Message", "HelpKeyword", true);
+
+            var memoryStream = new MemoryStream();
+            var binaryWriter = new BinaryWriter(memoryStream);
+            var binaryReader = new BinaryReader(memoryStream);
+            var buildEventArgsWriter = new BuildEventArgsWriter(binaryWriter);
+
+            buildEventArgsWriter.Write(error);
+
+            // Some future data that are not known in current version
+            binaryWriter.Write(new byte[] { 1, 2, 3, 4 });
+
+
+            int positionAfterFirstEvent = (int)memoryStream.Position;
+            memoryStream.Position = 0;
+            // event type
+            Microsoft.Build.Shared.BinaryReaderExtensions.Read7BitEncodedInt(binaryReader);
+            int eventSizePos = (int)memoryStream.Position;
+            int eventSize = Microsoft.Build.Shared.BinaryReaderExtensions.Read7BitEncodedInt(binaryReader);
+            int positionAfterFirstEventSize = (int)memoryStream.Position;
+            memoryStream.Position = eventSizePos;
+            // the extra 4 bytes
+            Microsoft.Build.Shared.BinaryWriterExtensions.Write7BitEncodedInt(binaryWriter, eventSize + 4);
+            memoryStream.Position.ShouldBe(positionAfterFirstEventSize, "The event size need to be overwritten in place - without overwriting any bytes after the size info");
+            memoryStream.Position = positionAfterFirstEvent;
+
+            buildEventArgsWriter.Write(finished);
+
+            // Remember num of bytes written - we should read them all.
+            long length = memoryStream.Length;
+            // Now move back to the beginning of the stream and start reading.
+            memoryStream.Position = 0;
+
+            using var buildEventArgsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion)
+            {
+                SkipUnknownEventParts = true
+            };
+
+            List<BinaryLogReaderErrorEventArgs> readerErrors = new();
+            buildEventArgsReader.RecoverableReadError += readerErrors.Add;
+
+            var deserializedError = (BuildErrorEventArgs)buildEventArgsReader.Read();
+
+            readerErrors.Count.ShouldBe(1);
+            readerErrors[0].ErrorType.ShouldBe(ReaderErrorType.UnknownEventData);
+            readerErrors[0].RecordKind.ShouldBe(BinaryLogRecordKind.Error);
+
+            deserializedError.Should().BeEquivalentTo(error);
+
+            var deserializedFinished = (BuildFinishedEventArgs)buildEventArgsReader.Read();
+
+            readerErrors.Count.ShouldBe(1);
+
+            deserializedFinished.Should().BeEquivalentTo(finished);
+
+            // There is nothing else in the stream
+            memoryStream.Position.Should().Be(length);
+        }
+
+        [Fact]
+        public void ForwardCompatibleRead_HandleUnknownEvent()
+        {
+            // Let's not write any strings prior the first event - to make locating (and overwriting) the event type byte(s) easier.
+            BuildErrorEventArgs error = new(null, null, null, 1, 2, 3, 4, null, null, null);
+            BuildFinishedEventArgs finished = new("Message", "HelpKeyword", true);
+
+            var memoryStream = new MemoryStream();
+            var binaryWriter = new BinaryWriter(memoryStream);
+            var binaryReader = new BinaryReader(memoryStream);
+            var buildEventArgsWriter = new BuildEventArgsWriter(binaryWriter);
+
+            buildEventArgsWriter.Write(error);
+
+            int positionAfterFirstEvent = (int)memoryStream.Position;
+            memoryStream.Position = 0;
+            // event type
+            Microsoft.Build.Shared.BinaryReaderExtensions.Read7BitEncodedInt(binaryReader);
+            int eventSizePos = (int)memoryStream.Position;
+            memoryStream.Position = 0;
+
+            // some future type that is not known in current version
+            BinaryLogRecordKind unknownType = (BinaryLogRecordKind) Enum.GetValues(typeof(BinaryLogRecordKind)).Cast<BinaryLogRecordKind>().Select(e => (int)e).Max() + 2;
+            Microsoft.Build.Shared.BinaryWriterExtensions.Write7BitEncodedInt(binaryWriter, (int)unknownType);
+            memoryStream.Position.ShouldBe(eventSizePos, "The event type need to be overwritten in place - without overwriting any bytes after the type info");
+            memoryStream.Position = positionAfterFirstEvent;
+
+            buildEventArgsWriter.Write(finished);
+
+            // Remember num of bytes written - we should read them all.
+            long length = memoryStream.Length;
+            // Now move back to the beginning of the stream and start reading.
+            memoryStream.Position = 0;
+
+            List<BinaryLogReaderErrorEventArgs> readerErrors = new();
+            using var buildEventArgsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion)
+            {
+                SkipUnknownEvents = true
+            };
+
+            buildEventArgsReader.RecoverableReadError += readerErrors.Add;
+
+            var deserializedEvent = buildEventArgsReader.Read();
+
+            readerErrors.Count.ShouldBe(1);
+            readerErrors[0].ErrorType.ShouldBe(ReaderErrorType.UnknownEventType);
+            readerErrors[0].RecordKind.ShouldBe(unknownType);
+
+            deserializedEvent.Should().BeEquivalentTo(finished);
+
+            // There is nothing else in the stream
+            memoryStream.Position.Should().Be(length);
+        }
+
+        [Fact]
+        public void ForwardCompatibleRead_HandleMismatchedFormatOfEvent()
+        {
+            // BuildErrorEventArgs error = new("Subcategory", "Code", "File", 1, 2, 3, 4, "Message", "HelpKeyword", "SenderName");
+            BuildErrorEventArgs error = new(null, null, null, 1, 2, 3, 4, null, null, null);
+            BuildFinishedEventArgs finished = new("Message", "HelpKeyword", true);
+
+            var memoryStream = new MemoryStream();
+            var binaryWriter = new BinaryWriter(memoryStream);
+            var binaryReader = new BinaryReader(memoryStream);
+            var buildEventArgsWriter = new BuildEventArgsWriter(binaryWriter);
+
+            buildEventArgsWriter.Write(error);
+
+            int positionAfterFirstEvent = (int)memoryStream.Position;
+            memoryStream.Position = 0;
+            // event type
+            Microsoft.Build.Shared.BinaryReaderExtensions.Read7BitEncodedInt(binaryReader);
+            int eventSize = Microsoft.Build.Shared.BinaryReaderExtensions.Read7BitEncodedInt(binaryReader);
+            // overwrite the entire event with garbage
+            binaryWriter.Write(Enumerable.Repeat(byte.MaxValue, eventSize).ToArray());
+
+            memoryStream.Position.ShouldBe(positionAfterFirstEvent, "The event need to be overwritten in place - without overwriting any bytes after the size info");
+
+            buildEventArgsWriter.Write(finished);
+
+            // Remember num of bytes written - we should read them all.
+            long length = memoryStream.Length;
+            // Now move back to the beginning of the stream and start reading.
+            memoryStream.Position = 0;
+
+            using var buildEventArgsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion)
+            {
+                SkipUnknownEvents = true
+            };
+
+            List<BinaryLogReaderErrorEventArgs> readerErrors = new();
+            buildEventArgsReader.RecoverableReadError += readerErrors.Add;
+
+            var deserializedEvent = buildEventArgsReader.Read();
+
+            readerErrors.Count.ShouldBe(1);
+            readerErrors[0].ErrorType.ShouldBe(ReaderErrorType.UnknownFormatOfEventData);
+            readerErrors[0].RecordKind.ShouldBe(BinaryLogRecordKind.Error);
+            readerErrors[0].GetFormattedMessage().ShouldContain("FormatException");
+
+            deserializedEvent.Should().BeEquivalentTo(finished);
+
+            // There is nothing else in the stream
+            memoryStream.Position.Should().Be(length);
+        }
+
+        [Fact]
+        public void ForwardCompatibleRead_HandleRemovalOfDataFromEventDefinition()
+        {
+            // BuildErrorEventArgs error = new("Subcategory", "Code", "File", 1, 2, 3, 4, "Message", "HelpKeyword", "SenderName");
+            BuildErrorEventArgs error = new(null, null, null, 1, 2, 3, 4, null, null, null);
+            BuildFinishedEventArgs finished = new("Message", "HelpKeyword", true);
+
+            var memoryStream = new MemoryStream();
+            var binaryWriter = new BinaryWriter(memoryStream);
+            var binaryReader = new BinaryReader(memoryStream);
+            var buildEventArgsWriter = new BuildEventArgsWriter(binaryWriter);
+
+            buildEventArgsWriter.Write(error);
+
+            int positionAfterFirstEvent = (int)memoryStream.Position;
+            memoryStream.Position = 0;
+            // event type
+            Microsoft.Build.Shared.BinaryReaderExtensions.Read7BitEncodedInt(binaryReader);
+            int eventSizePos = (int)memoryStream.Position;
+            int eventSize = Microsoft.Build.Shared.BinaryReaderExtensions.Read7BitEncodedInt(binaryReader);
+            int positionAfterFirstEventSize = (int)memoryStream.Position;
+            memoryStream.Position = eventSizePos;
+            // simulate there are 4 bytes less in the future version of the event - while our reader expects those
+            Microsoft.Build.Shared.BinaryWriterExtensions.Write7BitEncodedInt(binaryWriter, eventSize - 4);
+            memoryStream.Position.ShouldBe(positionAfterFirstEventSize, "The event size need to be overwritten in place - without overwriting any bytes after the size info");
+            // remove the 4 bytes - so that actual size of event is inline with it's written size.
+            memoryStream.Position = positionAfterFirstEvent - 4;
+
+            buildEventArgsWriter.Write(finished);
+
+            // Remember num of bytes written - we should read them all.
+            long length = memoryStream.Length;
+            // Now move back to the beginning of the stream and start reading.
+            memoryStream.Position = 0;
+
+            using var buildEventArgsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion)
+            {
+                SkipUnknownEvents = true
+            };
+
+            List<BinaryLogReaderErrorEventArgs> readerErrors = new();
+            buildEventArgsReader.RecoverableReadError += readerErrors.Add;
+
+            var deserializedEvent = buildEventArgsReader.Read();
+
+            readerErrors.Count.ShouldBe(1);
+            readerErrors[0].ErrorType.ShouldBe(ReaderErrorType.UnknownFormatOfEventData);
+            readerErrors[0].RecordKind.ShouldBe(BinaryLogRecordKind.Error);
+            readerErrors[0].GetFormattedMessage().ShouldContain("EndOfStreamException");
+
+            deserializedEvent.Should().BeEquivalentTo(finished);
+
+            // There is nothing else in the stream
+            memoryStream.Position.Should().Be(length);
         }
 
         private string ToString(BuildEventContext context)

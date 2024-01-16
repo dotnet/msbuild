@@ -6,7 +6,7 @@ using System;
 namespace Microsoft.Build.Logging
 {
     /// <summary>
-    /// An event args for <see cref="IBuildEventStringsReader.StringReadDone"/> callback.
+    /// An event args for <see cref="IBuildEventArgsReaderNotifications.StringReadDone"/> callback.
     /// </summary>
     public sealed class StringReadEventArgs : EventArgs
     {
