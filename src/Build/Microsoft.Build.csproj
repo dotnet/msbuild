@@ -681,7 +681,9 @@
     <NuGetFrameworkWrapperRedirects_FilePath>$(IntermediateOutputPath)NuGetFrameworkWrapper.redirects.cs</NuGetFrameworkWrapperRedirects_FilePath>
   </PropertyGroup>
 
-  <!-- Extract binding redirects for Microsoft.Build from MSBuild.exe.config into a source file -->
+  <!-- Extract binding redirects for MSBuild and dependencies from MSBuild.exe.config into a source file.
+       This allows us to create secondary AppDomains with the same redirects at run-time, see
+       https://github.com/dotnet/msbuild/blob/main/documentation/NETFramework-NGEN.md#nugetframeworks -->
   <Target Name="GenerateAppDomainConfig"
           Inputs="..\MSBuild\app.config;..\MSBuild\app.amd64.config"
           Outputs="$(NuGetFrameworkWrapperRedirects_FilePath)"

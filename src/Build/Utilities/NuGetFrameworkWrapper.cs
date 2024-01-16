@@ -157,6 +157,11 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public override object InitializeLifetimeService() => null;
 
+        /// <summary>
+        /// Creates <see cref="AppDomainSetup"/> suitable for loading Microsoft.Build, NuGet.Frameworks, and dependencies.
+        /// See https://github.com/dotnet/msbuild/blob/main/documentation/NETFramework-NGEN.md#nugetframeworks for the motivation
+        /// to use a separate AppDomain.
+        /// </summary>
         private static AppDomainSetup CreateAppDomainSetup(AssemblyName assemblyName, string assemblyPath)
         {
             byte[] publicKeyToken = assemblyName.GetPublicKeyToken();

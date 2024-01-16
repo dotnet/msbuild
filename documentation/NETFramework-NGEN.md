@@ -102,7 +102,9 @@ right binding redirects, allowing MSBuild to use `Assembly.Load` and get the nat
 
 This approach has some small startup cost (building the config, creating AppDomain & a `MarshalByRefObject`) and a small run-time overhead
 of cross-domain calls. The former is orders of magnitude smaller that the startup hit of JITting and the latter is negligible as long as
-the types moved across the AppDomain boundary do not require expensive marshaling.
+the types moved across the AppDomain boundary do not require expensive marshaling. Additionally, the requirement to execute code in multiple
+AppDomains necessitates the use of `LoaderOptimization.MultiDomain` for loading all assemblies domain-neutral. This may come with run-time
+cost for certain code patterns, although none has been measured in MSBuild scenarios.
 
 ## Task assemblies
 
