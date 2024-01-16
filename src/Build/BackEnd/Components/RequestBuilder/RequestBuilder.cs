@@ -844,19 +844,14 @@ namespace Microsoft.Build.BackEnd
                 }
                 else if (ex is InternalLoggerException)
                 {
-                    string realMessage = ex.Message;
-                    Exception realEx = ex;
-                    while (realEx.InnerException is not null)
-                    {
-                        realEx = realEx.InnerException;
-                        realMessage = realEx.Message;
-                    }
-
-                    (((LoggingContext)_projectLoggingContext) ?? _nodeLoggingContext).LogError(
+                    string realMessage = TaskLoggingHelper.GetInnerExceptionMessageString(ex);
+                    LoggingContext loggingContext = ((LoggingContext)_projectLoggingContext) ?? _nodeLoggingContext;
+                    loggingContext.LogError(
                         BuildEventFileInfo.Empty,
-                        "FatalErrorWhileLoggingWithInnerExceptionAndStack",
-                        realMessage,
-                        realEx.StackTrace);
+                        "FatalErrorWhileLoggingWithInnerException",
+                        realMessage);
+
+                    loggingContext.LogCommentFromText(MessageImportance.Low, ex.ToString());
                 }
                 else
                 {

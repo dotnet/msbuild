@@ -469,10 +469,9 @@
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
     special exception to abort the build.</comment>
   </data>
-  <data name="FatalErrorWhileLoggingWithInnerExceptionAndStack" xml:space="preserve">
+  <data name="FatalErrorWhileLoggingWithInnerException" xml:space="preserve">
     <value>MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
-    {0}
-    {1}</value>
+    {0}</value>
     <comment>{StrBegin="MSB4017: "}UE: This message is used for a special exception that is thrown when a logger fails while logging an event (most
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
     special exception to abort the build.</comment>
