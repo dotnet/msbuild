@@ -1061,7 +1061,7 @@
       </trans-unit>
       <trans-unit id="GenerateManifest.WriteOutputManifestFailed">
         <source>MSB3173: Unable to write manifest '{0}'. {1} {2}</source>
-        <target state="new">MSB3173: Unable to write manifest '{0}'. {1} {2}</target>
+        <target state="translated">MSB3173: No se puede escribir el manifiesto '{0}'. {1} {2}</target>
         <note>{StrBegin="MSB3173: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.InvalidRequestedExecutionLevel">
