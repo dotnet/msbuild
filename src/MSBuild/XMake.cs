@@ -1061,6 +1061,8 @@ namespace Microsoft.Build.CommandLine
                 outputStream.WriteLine(jsonOutputFormatter.ToString());
             }
 
+            outputStream.Flush();
+
             return ExitType.Success;
         }
 
@@ -1092,6 +1094,8 @@ namespace Microsoft.Build.CommandLine
                 jsonOutputFormatter.AddTargetResultsInJsonFormat(getTargetResult, result);
                 outputStream.WriteLine(jsonOutputFormatter.ToString());
             }
+
+            outputStream.Flush();
 
             return exitType;
         }
