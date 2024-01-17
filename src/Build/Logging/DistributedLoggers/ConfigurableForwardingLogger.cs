@@ -289,10 +289,12 @@ namespace Microsoft.Build.Logging
 
         /// <summary>
         /// Returns the minimum importance of messages logged by this logger.
+        /// Forwarding logger might be configured to forward messages of particular importance regardless of the verbosity level of said logger.
+        /// This method properly reflects that.
         /// </summary>
         /// <returns>
-        /// The minimum message importance corresponding to this logger's verbosity or (MessageImportance.High - 1)
-        /// if this logger does not log messages of any importance.
+        /// The minimum message importance corresponding to this logger's verbosity or configuration of forwarding of messages of particular importance level.
+        /// If this logger is not configured to forward messages of any importance and verbosity is not explicitly set, then (MessageImportance.High - 1) is returned.
         /// </returns>
         internal MessageImportance GetMinimumMessageImportance()
         {
