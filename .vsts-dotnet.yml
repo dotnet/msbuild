@@ -94,13 +94,10 @@ stages:
       value: 'int.main'
     - name: VisualStudio.DropName
       value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
-    - name: NUGET_PACKAGES
-      value:
 
     steps:
-    - task: NuGetToolInstaller@0
-      inputs:
-        versionSpec: '4.9.2'
+    - task: NuGetToolInstaller@1
+      displayName: 'Install NuGet.exe'
 
     - task: NuGetCommand@2
       displayName: Restore internal tools

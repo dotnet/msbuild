@@ -18,7 +18,7 @@ public sealed class ExtendedBuildWarningEventArgs : BuildWarningEventArgs, IExte
     public string ExtendedType { get; set; }
 
     /// <inheritdoc />
-    public IDictionary<string, string?>? ExtendedMetadata { get; set; }
+    public Dictionary<string, string?>? ExtendedMetadata { get; set; }
 
     /// <inheritdoc />
     public string? ExtendedData { get; set; }

@@ -1,13 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
-#nullable disable
 
 namespace Microsoft.Build.Logging
 {
@@ -22,9 +17,7 @@ namespace Microsoft.Build.Logging
         /// Default constructor.
         /// </summary>
         public ConfigurableForwardingLogger()
-        {
-            InitializeForwardingTable();
-        }
+        { }
         #endregion
 
         #region Properties
@@ -44,7 +37,7 @@ namespace Microsoft.Build.Logging
         /// and warnings summary at the end of a build.
         /// </summary>
         /// <value>null</value>
-        public string Parameters
+        public string? Parameters
         {
             get { return _loggerParameters; }
             set { _loggerParameters = value; }
@@ -54,7 +47,7 @@ namespace Microsoft.Build.Logging
         /// This property is set by the build engine to allow a node loggers to forward messages to the
         /// central logger
         /// </summary>
-        public IEventRedirector BuildEventRedirector
+        public IEventRedirector? BuildEventRedirector
         {
             get { return _buildEventRedirector; }
             set { _buildEventRedirector = value; }
@@ -73,34 +66,9 @@ namespace Microsoft.Build.Logging
         #region Methods
 
         /// <summary>
-        /// Initialize the Forwarding Table with the default values
-        /// </summary>
-        private void InitializeForwardingTable()
-        {
-            _forwardingTable = new Dictionary<string, int>(16, StringComparer.OrdinalIgnoreCase);
-            _forwardingTable[BuildStartedEventDescription] = 0;
-            _forwardingTable[BuildFinishedEventDescription] = 0;
-            _forwardingTable[ProjectStartedEventDescription] = 0;
-            _forwardingTable[ProjectFinishedEventDescription] = 0;
-            _forwardingTable[ProjectEvaluationEventDescription] = 0;
-            _forwardingTable[TargetStartedEventDescription] = 0;
-            _forwardingTable[TargetFinishedEventDescription] = 0;
-            _forwardingTable[TaskStartedEventDescription] = 0;
-            _forwardingTable[TaskFinishedEventDescription] = 0;
-            _forwardingTable[ErrorEventDescription] = 0;
-            _forwardingTable[WarningEventDescription] = 0;
-            _forwardingTable[HighMessageEventDescription] = 0;
-            _forwardingTable[NormalMessageEventDescription] = 0;
-            _forwardingTable[LowMessageEventDescription] = 0;
-            _forwardingTable[CustomEventDescription] = 0;
-            _forwardingTable[CommandLineDescription] = 0;
-            _forwardingSetFromParameters = false;
-        }
-
-        /// <summary>
         /// Parses out the logger parameters from the Parameters string.
         /// </summary>
-        private void ParseParameters()
+        private void ParseParameters(IEventSource eventSource)
         {
             if (_loggerParameters != null)
             {
@@ -109,7 +77,7 @@ namespace Microsoft.Build.Logging
                 {
                     if (parameterComponents[param].Length > 0)
                     {
-                        ApplyParameter(parameterComponents[param]);
+                        ApplyParameter(eventSource, parameterComponents[param]);
                     }
                 }
                 // Setting events to forward on the commandline will override the verbosity and other switches such as
@@ -125,8 +93,8 @@ namespace Microsoft.Build.Logging
                     // We can't know whether the project items needed to find ForwardProjectContextDescription
                     // will be set on ProjectStarted or ProjectEvaluationFinished because we don't know
                     // all of the other loggers that will be attached. So turn both on.
-                    _forwardingTable[ProjectStartedEventDescription] = 1;
-                    _forwardingTable[ProjectEvaluationEventDescription] = 1;
+                    eventSource.HandleStatusEventRaised(BuildStatusHandler);
+                    eventSource.HandleProjectStarted(ForwardEvent);
                 }
             }
         }
@@ -135,39 +103,93 @@ namespace Microsoft.Build.Logging
         /// Logger parameters can be used to enable and disable specific event types.
         /// Otherwise, the verbosity is used to choose which events to forward.
         /// </summary>
-        private void ApplyParameter(string parameterName)
+        private void ApplyParameter(IEventSource eventSource, string parameterName)
         {
             ErrorUtilities.VerifyThrowArgumentNull(parameterName, nameof(parameterName));
 
-            if (_forwardingTable.ContainsKey(parameterName))
+            bool isEventForwardingParameter = true;
+
+            // Careful - we need to brace before double specified parameters - hence the unsubscriptions before subscriptions
+            switch (parameterName.ToUpperInvariant())
             {
-                _forwardingSetFromParameters = true;
-                _forwardingTable[parameterName] = 1;
-            }
-            else if (String.Equals(parameterName, ProjectEvaluationStartedEventDescription, StringComparison.OrdinalIgnoreCase) ||
-                String.Equals(parameterName, ProjectEvaluationFinishedEventDescription, StringComparison.OrdinalIgnoreCase))
-            {
-                _forwardingSetFromParameters = true;
-                _forwardingTable[ProjectEvaluationEventDescription] = 1;
+                case BuildStartedEventDescription:
+                    eventSource.HandleBuildStarted(ForwardEvent);
+                    break;
+                case BuildFinishedEventDescription:
+                    eventSource.HandleBuildFinished(ForwardEvent);
+                    break;
+                case ProjectStartedEventDescription:
+                    eventSource.HandleProjectStarted(ForwardEvent);
+                    break;
+                case ProjectFinishedEventDescription:
+                    eventSource.HandleProjectFinished(ForwardEvent);
+                    break;
+                case TargetStartedEventDescription:
+                    eventSource.HandleTargetStarted(ForwardEvent);
+                    break;
+                case TargetFinishedEventDescription:
+                    eventSource.HandleTargetFinished(ForwardEvent);
+                    break;
+                case TaskStartedEventDescription:
+                    eventSource.HandleTaskStarted(ForwardEvent);
+                    break;
+                case TaskFinishedEventDescription:
+                    eventSource.HandleTaskFinished(ForwardEvent);
+                    break;
+                case ErrorEventDescription:
+                    eventSource.HandleErrorRaised(ForwardEvent);
+                    break;
+                case WarningEventDescription:
+                    eventSource.HandleWarningRaised(ForwardEvent);
+                    break;
+                case CustomEventDescription:
+                    eventSource.HandleCustomEventRaised(ForwardEvent);
+                    break;
+                case HighMessageEventDescription:
+                    eventSource.HandleMessageRaised(MessageHandler);
+                    _forwardHighImportanceMessages = true;
+                    break;
+                case NormalMessageEventDescription:
+                    eventSource.HandleMessageRaised(MessageHandler);
+                    _forwardNormalImportanceMessages = true;
+                    break;
+                case LowMessageEventDescription:
+                    eventSource.HandleMessageRaised(MessageHandler);
+                    _forwardLowImportanceMessages = true;
+                    break;
+                case CommandLineDescription:
+                    eventSource.HandleMessageRaised(MessageHandler);
+                    _forwardTaskCommandLine = true;
+                    break;
+                case ProjectEvaluationStartedEventDescription:
+                case ProjectEvaluationFinishedEventDescription:
+                case ProjectEvaluationEventDescription:
+                    eventSource.HandleStatusEventRaised(BuildStatusHandler);
+                    break;
+                case PerformanceSummaryDescription:
+                    _showPerfSummary = true;
+                    isEventForwardingParameter = false;
+                    break;
+                case NoSummaryDescription:
+                    _showSummary = false;
+                    isEventForwardingParameter = false;
+                    break;
+                case ShowCommandLineDescription:
+                    _showCommandLine = true;
+                    isEventForwardingParameter = false;
+                    break;
+                case ForwardProjectContextDescription:
+                    _forwardProjectContext = true;
+                    isEventForwardingParameter = false;
+                    break;
+                default:
+                    isEventForwardingParameter = false;
+                    break;
             }
 
-            // If any of the following parameters are set, we will make sure we forward the events
-            // necessary for the central logger to emit the requested information
-            if (String.Equals(parameterName, PerformanceSummaryDescription, StringComparison.OrdinalIgnoreCase))
+            if (isEventForwardingParameter)
             {
-                _showPerfSummary = true;
-            }
-            else if (String.Equals(parameterName, NoSummaryDescription, StringComparison.OrdinalIgnoreCase))
-            {
-                _showSummary = false;
-            }
-            else if (String.Equals(parameterName, ShowCommandLineDescription, StringComparison.OrdinalIgnoreCase))
-            {
-                _showCommandLine = true;
-            }
-            else if (string.Equals(parameterName, ForwardProjectContextDescription, StringComparison.OrdinalIgnoreCase))
-            {
-                _forwardProjectContext = true;
+                _forwardingSetFromParameters = true;
             }
         }
 
@@ -178,28 +200,14 @@ namespace Microsoft.Build.Logging
         {
             ErrorUtilities.VerifyThrowArgumentNull(eventSource, nameof(eventSource));
 
-            ParseParameters();
+            ParseParameters(eventSource);
 
             ResetLoggerState();
 
             if (!_forwardingSetFromParameters)
             {
-                SetForwardingBasedOnVerbosity();
+                SetForwardingBasedOnVerbosity(eventSource);
             }
-
-            eventSource.BuildStarted += BuildStartedHandler;
-            eventSource.BuildFinished += BuildFinishedHandler;
-            eventSource.ProjectStarted += ProjectStartedHandler;
-            eventSource.ProjectFinished += ProjectFinishedHandler;
-            eventSource.TargetStarted += TargetStartedHandler;
-            eventSource.TargetFinished += TargetFinishedHandler;
-            eventSource.TaskStarted += TaskStartedHandler;
-            eventSource.TaskFinished += TaskFinishedHandler;
-            eventSource.ErrorRaised += ErrorHandler;
-            eventSource.WarningRaised += WarningHandler;
-            eventSource.MessageRaised += MessageHandler;
-            eventSource.CustomEventRaised += CustomEventHandler;
-            eventSource.StatusEventRaised += BuildStatusHandler;
         }
 
         /// <summary>
@@ -210,69 +218,74 @@ namespace Microsoft.Build.Logging
             Initialize(eventSource);
         }
 
-        private void SetForwardingBasedOnVerbosity()
+        private void SetForwardingBasedOnVerbosity(IEventSource eventSource)
         {
-            _forwardingTable[BuildStartedEventDescription] = 1;
-            _forwardingTable[BuildFinishedEventDescription] = 1;
+            eventSource.HandleBuildStarted(ForwardEvent);
+            eventSource.HandleBuildFinished(ForwardEvent);
 
             if (IsVerbosityAtLeast(LoggerVerbosity.Quiet))
             {
-                _forwardingTable[ErrorEventDescription] = 1;
-                _forwardingTable[WarningEventDescription] = 1;
+                eventSource.HandleErrorRaised(ForwardEvent);
+                eventSource.HandleWarningRaised(ForwardEvent);
             }
 
             if (IsVerbosityAtLeast(LoggerVerbosity.Minimal))
             {
-                _forwardingTable[HighMessageEventDescription] = 1;
+                eventSource.HandleMessageRaised(MessageHandler);
+                _forwardHighImportanceMessages = true;
             }
 
             if (IsVerbosityAtLeast(LoggerVerbosity.Normal))
             {
-                _forwardingTable[NormalMessageEventDescription] = 1;
-                _forwardingTable[ProjectStartedEventDescription] = 1;
-                _forwardingTable[ProjectFinishedEventDescription] = 1;
-                _forwardingTable[TargetStartedEventDescription] = 1;
-                _forwardingTable[TargetFinishedEventDescription] = 1;
-                _forwardingTable[CommandLineDescription] = 1;
+                // MessageHandler already subscribed
+                _forwardNormalImportanceMessages = true;
+                _forwardTaskCommandLine = true;
+
+                eventSource.HandleProjectStarted(ForwardEvent);
+                eventSource.HandleProjectFinished(ForwardEvent);
+                eventSource.HandleTargetStarted(ForwardEvent);
+                eventSource.HandleTargetFinished(ForwardEvent);
             }
 
             if (IsVerbosityAtLeast(LoggerVerbosity.Detailed))
             {
-                _forwardingTable[TargetStartedEventDescription] = 1;
-                _forwardingTable[TargetFinishedEventDescription] = 1;
-                _forwardingTable[TaskStartedEventDescription] = 1;
-                _forwardingTable[TaskFinishedEventDescription] = 1;
-                _forwardingTable[LowMessageEventDescription] = 1;
+                eventSource.HandleTaskStarted(ForwardEvent);
+                eventSource.HandleTaskFinished(ForwardEvent);
+
+                // MessageHandler already subscribed
+                _forwardLowImportanceMessages = true;
             }
 
             if (IsVerbosityAtLeast(LoggerVerbosity.Diagnostic))
             {
-                _forwardingTable[CustomEventDescription] = 1;
-                _forwardingTable[ProjectEvaluationEventDescription] = 1;
+                eventSource.HandleCustomEventRaised(ForwardEvent);
+                eventSource.HandleStatusEventRaised(BuildStatusHandler);
             }
 
             if (_showSummary)
             {
-                _forwardingTable[ErrorEventDescription] = 1;
-                _forwardingTable[WarningEventDescription] = 1;
+                eventSource.HandleErrorRaised(ForwardEvent);
+                eventSource.HandleWarningRaised(ForwardEvent);
             }
 
             if (_showPerfSummary)
             {
-                _forwardingTable[TargetStartedEventDescription] = 1;
-                _forwardingTable[TargetFinishedEventDescription] = 1;
-                _forwardingTable[TaskStartedEventDescription] = 1;
-                _forwardingTable[TaskFinishedEventDescription] = 1;
-                _forwardingTable[TargetStartedEventDescription] = 1;
-                _forwardingTable[TargetFinishedEventDescription] = 1;
-                _forwardingTable[ProjectStartedEventDescription] = 1;
-                _forwardingTable[ProjectFinishedEventDescription] = 1;
-                _forwardingTable[ProjectEvaluationEventDescription] = 1;
+                eventSource.HandleTaskStarted(ForwardEvent);
+                eventSource.HandleTaskFinished(ForwardEvent);
+                eventSource.HandleTargetStarted(ForwardEvent);
+                eventSource.HandleTargetFinished(ForwardEvent);
+                eventSource.HandleProjectStarted(ForwardEvent);
+                eventSource.HandleProjectFinished(ForwardEvent);
+                eventSource.HandleStatusEventRaised(BuildStatusHandler);
             }
 
             if (_showCommandLine)
             {
-                _forwardingTable[CommandLineDescription] = 1;
+                // Prevent double subscribe
+                eventSource.MessageRaised -= MessageHandler;
+                eventSource.MessageRaised += MessageHandler;
+
+                _forwardTaskCommandLine = true;
             }
         }
 
@@ -285,20 +298,17 @@ namespace Microsoft.Build.Logging
         /// </returns>
         internal MessageImportance GetMinimumMessageImportance()
         {
-            if (_forwardingTable[LowMessageEventDescription] == 1)
+            return _verbosity switch
             {
-                return MessageImportance.Low;
-            }
-            if (_forwardingTable[NormalMessageEventDescription] == 1)
-            {
-                return MessageImportance.Normal;
-            }
-            if (_forwardingTable[HighMessageEventDescription] == 1)
-            {
-                return MessageImportance.High;
-            }
-            // The logger does not log messages of any importance.
-            return MessageImportance.High - 1;
+                LoggerVerbosity.Minimal => MessageImportance.High,
+                LoggerVerbosity.Normal => MessageImportance.Normal,
+                LoggerVerbosity.Detailed => MessageImportance.Low,
+                LoggerVerbosity.Diagnostic => MessageImportance.Low,
+
+                // The logger does not log messages of any importance.
+                LoggerVerbosity.Quiet => MessageImportance.High - 1,
+                _ => MessageImportance.High - 1,
+            };
         }
 
         /// <summary>
@@ -319,178 +329,37 @@ namespace Microsoft.Build.Logging
         }
 
         /// <summary>
-        /// Handler for build started events
+        /// Handler for build events
         /// </summary>
         /// <param name="sender">sender (should be null)</param>
         /// <param name="e">event arguments</param>
-        private void BuildStartedHandler(object sender, BuildStartedEventArgs e)
+        private void ForwardEvent(object sender, BuildEventArgs e)
         {
-            // This is false by default
-            if (_forwardingTable[BuildStartedEventDescription] == 1)
-            {
-                ForwardToCentralLogger(e);
-            }
-        }
-
-        /// <summary>
-        /// Handler for build finished events
-        /// </summary>
-        /// <param name="sender">sender (should be null)</param>
-        /// <param name="e">event arguments</param>
-        private void BuildFinishedHandler(object sender, BuildFinishedEventArgs e)
-        {
-            // This is false by default
-            if (_forwardingTable[BuildFinishedEventDescription] == 1)
-            {
-                ForwardToCentralLogger(e);
-            }
-            ResetLoggerState();
-        }
-
-        /// <summary>
-        /// Handler for project started events
-        /// </summary>
-        /// <param name="sender">sender (should be null)</param>
-        /// <param name="e">event arguments</param>
-        private void ProjectStartedHandler(object sender, ProjectStartedEventArgs e)
-        {
-            if (_forwardingTable[ProjectStartedEventDescription] == 1)
-            {
-                ForwardToCentralLogger(e);
-            }
-        }
-
-        /// <summary>
-        /// Handler for project finished events
-        /// </summary>
-        /// <param name="sender">sender (should be null)</param>
-        /// <param name="e">event arguments</param>
-        private void ProjectFinishedHandler(object sender, ProjectFinishedEventArgs e)
-        {
-            if (_forwardingTable[ProjectFinishedEventDescription] == 1)
-            {
-                ForwardToCentralLogger(e);
-            }
-        }
-
-        /// <summary>
-        /// Handler for target started events
-        /// </summary>
-        /// <param name="sender">sender (should be null)</param>
-        /// <param name="e">event arguments</param>
-        private void TargetStartedHandler(object sender, TargetStartedEventArgs e)
-        {
-            if (_forwardingTable[TargetStartedEventDescription] == 1)
-            {
-                ForwardToCentralLogger(e);
-            }
-        }
-
-        /// <summary>
-        /// Handler for target finished events
-        /// </summary>
-        /// <param name="sender">sender (should be null)</param>
-        /// <param name="e">event arguments</param>
-        private void TargetFinishedHandler(object sender, TargetFinishedEventArgs e)
-        {
-            if (_forwardingTable[TargetFinishedEventDescription] == 1)
-            {
-                ForwardToCentralLogger(e);
-            }
-        }
-
-        /// <summary>
-        /// Handler for task started events
-        /// </summary>
-        /// <param name="sender">sender (should be null)</param>
-        /// <param name="e">event arguments</param>
-        private void TaskStartedHandler(object sender, TaskStartedEventArgs e)
-        {
-            if (_forwardingTable[TaskStartedEventDescription] == 1)
-            {
-                ForwardToCentralLogger(e);
-            }
-        }
-
-        /// <summary>
-        /// Handler for task finished events
-        /// </summary>
-        /// <param name="sender">sender (should be null)</param>
-        /// <param name="e">event arguments</param>
-        private void TaskFinishedHandler(object sender, TaskFinishedEventArgs e)
-        {
-            if (_forwardingTable[TaskFinishedEventDescription] == 1)
-            {
-                ForwardToCentralLogger(e);
-            }
-        }
-
-        /// <summary>
-        /// Prints an error event
-        /// </summary>
-        private void ErrorHandler(object sender, BuildErrorEventArgs e)
-        {
-            if (_forwardingTable[ErrorEventDescription] == 1)
-            {
-                ForwardToCentralLogger(e);
-            }
-        }
-
-        /// <summary>
-        /// Prints a warning event
-        /// </summary>
-        private void WarningHandler(object sender, BuildWarningEventArgs e)
-        {
-            if (_forwardingTable[WarningEventDescription] == 1)
-            {
-                ForwardToCentralLogger(e);
-            }
-        }
-
-        /// <summary>
-        /// Prints a message event
-        /// </summary>
-        private void MessageHandler(object sender, BuildMessageEventArgs e)
-        {
-            bool forwardEvent = false;
-
-            if (_forwardingTable[LowMessageEventDescription] == 1 && e.Importance == MessageImportance.Low)
-            {
-                forwardEvent = true;
-            }
-            else if (_forwardingTable[NormalMessageEventDescription] == 1 && e.Importance == MessageImportance.Normal)
-            {
-                forwardEvent = true;
-            }
-            else if (_forwardingTable[HighMessageEventDescription] == 1 && e.Importance == MessageImportance.High)
-            {
-                forwardEvent = true;
-            }
-            else if (_forwardingTable[CommandLineDescription] == 1 && e is TaskCommandLineEventArgs)
-            {
-                forwardEvent = true;
-            }
-
-            if (forwardEvent)
-            {
-                ForwardToCentralLogger(e);
-            }
-        }
-
-        /// <summary>
-        /// Prints a custom event
-        /// </summary>
-        private void CustomEventHandler(object sender, CustomBuildEventArgs e)
-        {
-            if (_forwardingTable[CustomEventDescription] == 1)
-            {
-                ForwardToCentralLogger(e);
-            }
+            ForwardToCentralLogger(e);
         }
 
         private void BuildStatusHandler(object sender, BuildStatusEventArgs e)
         {
-            if (_forwardingTable[ProjectEvaluationEventDescription] == 1 && (e is ProjectEvaluationStartedEventArgs || e is ProjectEvaluationFinishedEventArgs))
+            if (e is ProjectEvaluationStartedEventArgs || e is ProjectEvaluationFinishedEventArgs)
+            {
+                ForwardToCentralLogger(e);
+            }
+        }
+
+        /// <summary>
+        /// Tailored handler for BuildMessageEventArgs - fine tunes forwarding of messages.
+        /// </summary>
+        /// <param name="sender">sender (should be null)</param>
+        /// <param name="e">event arguments</param>
+        private void MessageHandler(object sender, BuildMessageEventArgs e)
+        {
+            bool forwardEvent =
+                (_forwardLowImportanceMessages && e.Importance == MessageImportance.Low) ||
+                (_forwardNormalImportanceMessages && e.Importance == MessageImportance.Normal) ||
+                (_forwardHighImportanceMessages && e.Importance == MessageImportance.High) ||
+                (_forwardTaskCommandLine && e is TaskCommandLineEventArgs);
+
+            if (forwardEvent)
             {
                 ForwardToCentralLogger(e);
             }
@@ -502,7 +371,7 @@ namespace Microsoft.Build.Logging
         /// <param name="e">The <see cref="BuildEventArgs"/> to forward.</param>
         protected virtual void ForwardToCentralLogger(BuildEventArgs e)
         {
-            _buildEventRedirector.ForwardEvent(e);
+            _buildEventRedirector?.ForwardEvent(e);
         }
 
         /// <summary>
@@ -525,7 +394,7 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Console logger parameters.
         /// </summary>
-        private string _loggerParameters = null;
+        private string? _loggerParameters = null;
 
         /// <summary>
         /// Console logger parameters delimiters.
@@ -562,16 +431,9 @@ namespace Microsoft.Build.Logging
         #region Per-build Members
 
         /// <summary>
-        /// A table indicating if a particular event type should be forwarded
-        /// The value is type int rather than bool to avoid the problem of JITting generics.
-        /// <see cref="Dictionary{String, Int}" /> is already compiled into mscorlib.
-        /// </summary>
-        private Dictionary<string, int> _forwardingTable;
-
-        /// <summary>
         /// A pointer to the central logger
         /// </summary>
-        private IEventRedirector _buildEventRedirector;
+        private IEventRedirector? _buildEventRedirector;
 
         /// <summary>
         /// Indicates if the events to forward are being set by the parameters sent to the logger
@@ -599,6 +461,26 @@ namespace Microsoft.Build.Logging
         /// When true the commandline message is sent
         /// </summary>
         private bool _showCommandLine = false;
+
+        /// <summary>
+        /// Fine-tuning of BuildMessageEventArgs forwarding
+        /// </summary>
+        private bool _forwardLowImportanceMessages;
+
+        /// <summary>
+        /// Fine-tuning of BuildMessageEventArgs forwarding
+        /// </summary>
+        private bool _forwardNormalImportanceMessages;
+
+        /// <summary>
+        /// Fine-tuning of BuildMessageEventArgs forwarding
+        /// </summary>
+        private bool _forwardHighImportanceMessages;
+
+        /// <summary>
+        /// Fine-tuning of BuildMessageEventArgs forwarding
+        /// </summary>
+        private bool _forwardTaskCommandLine;
 
         /// <summary>
         /// Id of the node the logger is attached to

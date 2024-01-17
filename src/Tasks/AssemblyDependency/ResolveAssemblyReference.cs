@@ -2066,12 +2066,6 @@ namespace Microsoft.Build.Tasks
             {
                 // Either the cache is dirty (we added or updated an item) or the number of items actually used is less than what
                 // we got by reading the state file prior to execution. Serialize the cache into the state file.
-                if (FailIfNotIncremental)
-                {
-                    Log.LogErrorFromResources("ResolveAssemblyReference.WritingCacheFile", _stateFile);
-                    return;
-                }
-
                 _cache.SerializeCache(_stateFile, Log);
             }
         }

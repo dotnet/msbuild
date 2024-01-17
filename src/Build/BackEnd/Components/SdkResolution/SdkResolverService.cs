@@ -312,8 +312,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             // Loop through resolvers which have already been sorted by priority, returning the first result that was successful
             SdkLogger buildEngineLogger = new SdkLogger(loggingContext);
 
-            loggingContext.LogComment(MessageImportance.Low, "SdkResolving", sdk.ToString());
-
             foreach (SdkResolver sdkResolver in resolvers)
             {
                 SdkResolverContext context = new SdkResolverContext(buildEngineLogger, projectPath, solutionPath, ProjectCollection.Version, interactive, isRunningInVisualStudio)
@@ -355,6 +353,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                 if (result.Success)
                 {
+                    loggingContext.LogComment(MessageImportance.Low, "SucceededToResolveSDK", sdk.ToString(), sdkResolver.Name, result.Path ?? "null", result.Version ?? "null");
+
                     LogWarnings(loggingContext, sdkReferenceLocation, result.Warnings);
 
                     if (!IsReferenceSameVersion(sdk, result.Version))
@@ -368,6 +368,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                     sdkResult = result;
                     return true;
+                }
+                else if (loggingContext.LoggingService.MinimumRequiredMessageImportance >= MessageImportance.Low)
+                {
+                    string resultWarnings = result.Warnings?.Any() == true ? string.Join(Environment.NewLine, result.Warnings) : "null";
+                    string resultErrors = result.Errors?.Any() == true ? string.Join(Environment.NewLine, result.Errors) : "null";
+
+                    loggingContext.LogComment(MessageImportance.Low, "SDKResolverAttempt", sdkResolver.Name, sdk.ToString(), resultWarnings, resultErrors);
                 }
 
                 results.Add(result);
