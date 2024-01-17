@@ -488,8 +488,9 @@ namespace Microsoft.Build.Execution
                 {
                     Environment.SetEnvironmentVariable(entry.Key, entry.Value);
                 }
-            }
 
+                Traits.UpdateFromEnvironment();
+            }
             try
             {
                 // Shut down logging, which will cause all queued logging messages to be sent.
@@ -722,11 +723,12 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            // Now set the new environment
+            // Now set the new environment and update Traits class accordingly
             foreach (KeyValuePair<string, string> environmentPair in _buildParameters.BuildProcessEnvironment)
             {
                 Environment.SetEnvironmentVariable(environmentPair.Key, environmentPair.Value);
             }
+            Traits.UpdateFromEnvironment();
 
             // We want to make sure the global project collection has the toolsets which were defined on the parent
             // so that any custom toolsets defined can be picked up by tasks who may use the global project collection but are
