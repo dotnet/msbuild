@@ -28,6 +28,8 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 - [Warning on serialization custom events by default in .NET framework](https://github.com/dotnet/msbuild/pull/9318)
 - [Cache SDK resolver data process-wide](https://github.com/dotnet/msbuild/pull/9335)
 - [Target parameters will be unquoted](https://github.com/dotnet/msbuild/pull/9452), meaning  the ';' symbol in the parameter target name will always be treated as separator
+- [Add Link metadata to Resources in AssignLinkMetadata target](https://github.com/dotnet/msbuild/pull/9464)
+- [Update Traits when environment has been changed](https://github.com/dotnet/msbuild/pull/9655)
 
 ### 17.8
 - [[RAR] Don't do I/O on SDK-provided references](https://github.com/dotnet/msbuild/pull/8688)
