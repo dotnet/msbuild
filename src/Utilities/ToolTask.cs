@@ -658,7 +658,12 @@ namespace Microsoft.Build.Utilities
             return startInfo;
         }
 
-        public virtual Process StartTask (Process proc)
+        /// <summary>
+        /// Starts the process during task execution
+        /// </summary>
+        /// <param name="proc"></param>
+        /// <returns></returns>
+        protected virtual Process StartToolProcess(Process proc)
         {
             proc.Start();
             return proc;
@@ -720,7 +725,7 @@ namespace Microsoft.Build.Utilities
                 ExitCode = -1;
 
                 // Start the process
-                StartTask(proc);
+                proc = StartToolProcess(proc);
 
                 // Close the input stream. This is done to prevent commands from
                 // blocking the build waiting for input from the user.
