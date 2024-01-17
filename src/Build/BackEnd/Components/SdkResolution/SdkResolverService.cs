@@ -445,6 +445,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             {
                 _sdkResolverLoader = resolverLoader;
             }
+            else
+            {
+                _sdkResolverLoader = CachingSdkResolverLoader.Instance;
+            }
 
             _specificResolversManifestsRegistry = null;
             _generalResolversManifestsRegistry = null;
