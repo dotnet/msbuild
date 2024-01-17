@@ -138,7 +138,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             // 1. DefaultSdkResolver checks the Sdks subdirectory of our SDK installation. Note that the work of resolving the
             //    SDK version using machine-wide state and global.json (step 1.1. in `MSBuild.exe` above) has already been done
             //    by the `dotnet` muxer. We know which SDK (capital letters) we are in, so the in-box Sdk lookup is trivial.
-            // 2. If no match, Microsoft.DotNet.MSBuildSdkResolver is loaded and asked to resolve the Sdk required by the project.
+            // 2. If no match, Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver is loaded and asked to resolve the Sdk required by the project.
             //    2.1. It checks installed workloads.
             // 3. If no match still, Microsoft.Build.NuGetSdkResolver is loaded and asked to resolve the Sdk.
             //
