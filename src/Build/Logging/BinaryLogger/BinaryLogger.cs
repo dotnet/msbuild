@@ -63,7 +63,24 @@ namespace Microsoft.Build.Logging
         //   - AssemblyLoadBuildEventArgs
         // version 17:
         //   - Added extended data for types implementing IExtendedBuildEventArgs
-        internal const int FileFormatVersion = 17;
+        // version 18:
+        //   - Making ProjectStartedEventArgs, ProjectEvaluationFinishedEventArgs, AssemblyLoadBuildEventArgs equal
+        //     between de/serialization roundtrips.
+        //   - Adding serialized events lengths - to support forward compatible reading
+
+        // This should be never changed.
+        // The minimum version of the binary log reader that can read log of above version.
+        internal const int ForwardCompatibilityMinimalVersion = 18;
+
+        // The current version of the binary log representation.
+        // Changes with each update of the binary log format.
+        internal const int FileFormatVersion = 18;
+
+        // The minimum version of the binary log reader that can read log of above version.
+        // This should be changed only when the binary log format is changed in a way that would prevent it from being
+        // read by older readers. (changing of the individual BuildEventArgs or adding new is fine - as reader can
+        // skip them if they are not known to it. Example of change requiring the increment would be the introduction of strings deduplication)
+        internal const int MinimumReaderVersion = 18;
 
         private Stream stream;
         private BinaryWriter binaryWriter;
@@ -92,7 +109,7 @@ namespace Microsoft.Build.Logging
             /// <summary>
             /// Create an external .ProjectImports.zip archive for the project files.
             /// </summary>
-            ZipFile
+            ZipFile,
         }
 
         /// <summary>
@@ -115,7 +132,7 @@ namespace Microsoft.Build.Logging
         public string Parameters { get; set; }
 
         /// <summary>
-        /// Initializes the logger by subscribing to events of the specified event source.
+        /// Initializes the logger by subscribing to events of the specified event source and embedded content source.
         /// </summary>
         public void Initialize(IEventSource eventSource)
         {
@@ -130,7 +147,8 @@ namespace Microsoft.Build.Logging
             Traits.Instance.EscapeHatches.LogProjectImports = true;
             bool logPropertiesAndItemsAfterEvaluation = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation ?? true;
 
-            ProcessParameters();
+            ProcessParameters(out bool omitInitialInfo);
+            var replayEventSource = eventSource as IBinaryLogReplaySource;
 
             try
             {
@@ -152,7 +170,7 @@ namespace Microsoft.Build.Logging
 
                 stream = new FileStream(FilePath, FileMode.Create);
 
-                if (CollectProjectImports != ProjectImportsCollectionMode.None)
+                if (CollectProjectImports != ProjectImportsCollectionMode.None && replayEventSource == null)
                 {
                     projectImportsCollector = new ProjectImportsCollector(FilePath, CollectProjectImports == ProjectImportsCollectionMode.ZipFile);
                 }
@@ -189,13 +207,57 @@ namespace Microsoft.Build.Logging
                 eventArgsWriter.EmbedFile += EventArgsWriter_EmbedFile;
             }
 
-            binaryWriter.Write(FileFormatVersion);
+            if (replayEventSource != null)
+            {
+                if (CollectProjectImports == ProjectImportsCollectionMode.Embed)
+                {
+                    replayEventSource.EmbeddedContentRead += args =>
+                        eventArgsWriter.WriteBlob(args.ContentKind, args.ContentStream);
+                }
+                else if (CollectProjectImports == ProjectImportsCollectionMode.ZipFile)
+                {
+                    replayEventSource.EmbeddedContentRead += args =>
+                        ProjectImportsCollector.FlushBlobToFile(FilePath, args.ContentStream);
+                }
 
-            LogInitialInfo();
-
-            eventSource.AnyEventRaised += EventSource_AnyEventRaised;
+                // If raw events are provided - let's try to use the advantage.
+                // But other subscribers can later on subscribe to structured events -
+                //  for this reason we do only subscribe delayed.
+                replayEventSource.DeferredInitialize(
+                    // For raw events we cannot write the initial info - as we cannot write
+                    //  at the same time as raw events are being written - this would break the deduplicated strings store.
+                    // But we need to write the version info - but since we read/write raw - let's not change the version info.
+                    () =>
+                    {
+                        binaryWriter.Write(replayEventSource.FileFormatVersion);
+                        binaryWriter.Write(replayEventSource.MinimumReaderVersion);
+                        replayEventSource.RawLogRecordReceived += RawEvents_LogDataSliceReceived;
+                        // Replay separated strings here as well (and do not deduplicate! It would skew string indexes)
+                        replayEventSource.StringReadDone += strArg => eventArgsWriter.WriteStringRecord(strArg.StringToBeUsed);
+                    },
+                    SubscribeToStructuredEvents);
+            }
+            else
+            {
+                SubscribeToStructuredEvents();
+            }
 
             KnownTelemetry.LoggingConfigurationTelemetry.BinaryLogger = true;
+
+            void SubscribeToStructuredEvents()
+            {
+                // Write the version info - the latest version is written only for structured events replaying
+                //  as raw events do not change structure - hence the version is the same as the one they were written with.
+                binaryWriter.Write(FileFormatVersion);
+                binaryWriter.Write(MinimumReaderVersion);
+
+                if (!omitInitialInfo)
+                {
+                    LogInitialInfo();
+                }
+
+                eventSource.AnyEventRaised += EventSource_AnyEventRaised;
+            }
         }
 
         private void EventArgsWriter_EmbedFile(string filePath)
@@ -236,26 +298,11 @@ namespace Microsoft.Build.Logging
 
                 if (CollectProjectImports == ProjectImportsCollectionMode.Embed)
                 {
-                    var archiveFilePath = projectImportsCollector.ArchiveFilePath;
+                    projectImportsCollector.ProcessResult(
+                        streamToEmbed => eventArgsWriter.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, streamToEmbed),
+                        LogMessage);
 
-                    // It is possible that the archive couldn't be created for some reason.
-                    // Only embed it if it actually exists.
-                    if (FileSystems.Default.FileExists(archiveFilePath))
-                    {
-                        using (FileStream fileStream = File.OpenRead(archiveFilePath))
-                        {
-                            if (fileStream.Length > int.MaxValue)
-                            {
-                                LogMessage("Imported files archive exceeded 2GB limit and it's not embedded.");
-                            }
-                            else
-                            {
-                                eventArgsWriter.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, fileStream);
-                            }
-                        }
-
-                        File.Delete(archiveFilePath);
-                    }
+                    projectImportsCollector.DeleteArchive();
                 }
 
                 projectImportsCollector = null;
@@ -270,6 +317,11 @@ namespace Microsoft.Build.Logging
                 stream.Dispose();
                 stream = null;
             }
+        }
+
+        private void RawEvents_LogDataSliceReceived(BinaryLogRecordKind recordKind, Stream stream)
+        {
+            eventArgsWriter.WriteBlob(recordKind, stream);
         }
 
         private void EventSource_AnyEventRaised(object sender, BuildEventArgs e)
@@ -304,7 +356,7 @@ namespace Microsoft.Build.Logging
             {
                 projectImportsCollector.AddFile(projectArgs.ProjectFile);
             }
-            else if (e is MetaprojectGeneratedEventArgs metaprojectArgs)
+            else if (e is MetaprojectGeneratedEventArgs { metaprojectXml: { } } metaprojectArgs)
             {
                 projectImportsCollector.AddFileFromMemory(metaprojectArgs.ProjectFile, metaprojectArgs.metaprojectXml);
             }
@@ -319,13 +371,14 @@ namespace Microsoft.Build.Logging
         /// </summary>
         /// <exception cref="LoggerException">
         /// </exception>
-        private void ProcessParameters()
+        private void ProcessParameters(out bool omitInitialInfo)
         {
             if (Parameters == null)
             {
                 throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", ""));
             }
 
+            omitInitialInfo = false;
             var parameters = Parameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
             foreach (var parameter in parameters)
             {
@@ -340,6 +393,10 @@ namespace Microsoft.Build.Logging
                 else if (string.Equals(parameter, "ProjectImports=ZipFile", StringComparison.OrdinalIgnoreCase))
                 {
                     CollectProjectImports = ProjectImportsCollectionMode.ZipFile;
+                }
+                else if (string.Equals(parameter, "OmitInitialInfo", StringComparison.OrdinalIgnoreCase))
+                {
+                    omitInitialInfo = true;
                 }
                 else if (parameter.EndsWith(".binlog", StringComparison.OrdinalIgnoreCase))
                 {

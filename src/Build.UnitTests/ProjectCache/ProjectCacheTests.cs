@@ -557,6 +557,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         currentBuildEnvironment.Mode,
                         currentBuildEnvironment.CurrentMSBuildExePath,
                         currentBuildEnvironment.RunningTests,
+                        currentBuildEnvironment.RunningInMSBuildExe,
                         runningInVisualStudio: true,
                         visualStudioPath: currentBuildEnvironment.VisualStudioInstallRootDirectory));
 
@@ -674,6 +675,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         currentBuildEnvironment.Mode,
                         currentBuildEnvironment.CurrentMSBuildExePath,
                         currentBuildEnvironment.RunningTests,
+                        currentBuildEnvironment.RunningInMSBuildExe,
                         runningInVisualStudio: true,
                         visualStudioPath: currentBuildEnvironment.VisualStudioInstallRootDirectory));
 
@@ -1440,6 +1442,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         currentBuildEnvironment.Mode,
                         currentBuildEnvironment.CurrentMSBuildExePath,
                         currentBuildEnvironment.RunningTests,
+                        currentBuildEnvironment.RunningInMSBuildExe,
                         runningInVisualStudio: true,
                         visualStudioPath: currentBuildEnvironment.VisualStudioInstallRootDirectory));
 

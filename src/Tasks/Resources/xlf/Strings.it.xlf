@@ -123,12 +123,12 @@
       </trans-unit>
       <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
         <source>MSB3991: '{0}' is not set or empty. When {1} is false, make sure to set a non-empty value for '{0}'.</source>
-        <target state="translated">MSB3991: “{0}” non è impostato o è vuoto. Quando {1} è false, assicurarsi di impostare un valore non vuoto per "{0}".</target>
+        <target state="translated">MSB3991: '{0}' non è impostato o è vuoto. Quando {1} è false, assicurarsi di impostare un valore non vuoto per '{0}'.</target>
         <note>{StrBegin="MSB3991: "}</note>
       </trans-unit>
       <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullRootElementName">
         <source>MSB3992: '{0}' is not set. When {1} is true, make sure to set a value for '{0}'.</source>
-        <target state="translated">MSB3992: "{0}" non impostato. Quando {1} è true, assicurarsi di impostare un valore per "{0}".</target>
+        <target state="translated">MSB3992: '{0}' non è impostato. Quando {1} è true, assicurarsi di impostare un valore per '{0}'.</target>
         <note>{StrBegin="MSB3992: "}</note>
       </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
@@ -195,6 +195,11 @@
         <source>MSB3894: Got {0} copying "{1}" to "{2}" and HR is {3}</source>
         <target state="translated">MSB3894: Ottenuto {0} copiando "{1}" in "{2}" e HR è {3}"</target>
         <note>{StrBegin="MSB3894: "} LOCALIZATION: {0} is exception.ToString(), {1} and {2} are paths, {3} is a number")</note>
+      </trans-unit>
+      <trans-unit id="Copy.IncompatibleParameters">
+        <source>MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</source>
+        <target state="translated">MSB3896: i parametri "{0}" e "{1}" sono stati specificati come parametri nel file di progetto, ma non possono essere usati insieme. Scegliere uno o l'altro.</target>
+        <note>{StrBegin="MSB3896: "}</note>
       </trans-unit>
       <trans-unit id="Copy.LinkFailed">
         <source>MSB3893: Could not use a link to copy "{0}" to "{1}".</source>
@@ -1055,8 +1060,8 @@
         <note>{StrBegin="MSB3183: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.WriteOutputManifestFailed">
-        <source>MSB3173: Unable to write manifest '{0}'. {1}</source>
-        <target state="translated">MSB3173: non è possibile scrivere il manifesto '{0}'. {1}</target>
+        <source>MSB3173: Unable to write manifest '{0}'. {1} {2}</source>
+        <target state="translated">MSB3173: non è possibile scrivere il manifesto '{0}'. {1} {2}</target>
         <note>{StrBegin="MSB3173: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.InvalidRequestedExecutionLevel">
@@ -2175,11 +2180,6 @@
         <target state="translated">Il file di elenco di pacchetti ridistribuibili "{0}" include un nome di Redist Null o vuoto nell'elemento FileList. Verificare che il nome di Redist non sia Null o vuoto.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
-        <source>Updating assembly cache file "{0}".</source>
-        <target state="translated">Aggiornamento del file della cache di assembly "{0}".</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
         <source>COM Reference '{0}' is the interop assembly for ActiveX control '{1}' but was marked to be linked by the compiler with the /link flag. This COM reference will be treated as a reference and will not be linked.</source>
         <target state="translated">Il riferimento COM '{0}' è l'assembly di interoperabilità per il controllo ActiveX '{1}', tuttavia è stato contrassegnato dal compilatore con il flag /link per il collegamento. Il riferimento COM verrà trattato come riferimento e non verrà collegato.</target>
@@ -2513,6 +2513,11 @@
         <source>MSB3353: Public key necessary for delay signing was not specified.</source>
         <target state="translated">MSB3353: chiave pubblica necessaria per la firma ritardata non specificata.</target>
         <note>{StrBegin="MSB3353: "}</note>
+      </trans-unit>
+      <trans-unit id="Task.FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="translated">Il file è bloccato da: "{0}"</target>
+        <note />
       </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
         <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
@@ -3398,11 +3403,6 @@
         <source>MSB4801: The task factory "{0}" is not supported on the .NET Core version of MSBuild.</source>
         <target state="translated">MSB4801: la factory delle attività "{0}" non è supportata nella versione .NET Core di MSBuild.</target>
         <note>{StrBegin="MSB4801: "}</note>
-      </trans-unit>
-      <trans-unit id="Copy.FileLocked">
-        <source>The file is locked by: "{0}"</source>
-        <target state="translated">Il file è bloccato da: "{0}"</target>
-        <note />
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeType">
         <source>MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</source>

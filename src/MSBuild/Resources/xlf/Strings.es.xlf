@@ -116,7 +116,7 @@
                      Hace que MSBuild informe de los accesos a los archivos a cualquier
                      complemento de caché de proyectos.
 
-                     Esta marca es experimental y puede que no funcione según lo previsto.
+Esta marca es experimental y puede que no funcione según lo previsto.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -571,14 +571,18 @@
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
         <target state="translated">  -logger:&lt;registrador&gt;   Use este registrador para registrar eventos
-                     de MSBuild. Para especificar varios registradores, especifique cada uno de ellos por separado.
+                     de MSBuild. Para especificar varios registradores, especifique
+                     cada uno de ellos por separado.
                      La sintaxis de &lt;registrador&gt; es:
-                       [&lt;clase&gt;,]&lt;assembly&gt;[,&lt;opciones&gt;][;&lt;parámetros&gt;]
+                       [&lt;clase&gt;,]&lt;ensamblado&gt;[,&lt;opciones&gt;][;&lt;parámetros&gt;]
                      La sintaxis de &lt;clase del registrador&gt; es:
-                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre de clase del registrador&gt;
-                       La sintaxis de &lt;ensamblado del registrador&gt; es:
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
-                     Las opciones del registrador especifican cómo crea MSBuild el registrador.
+                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre de
+                       clase del registrador&gt;
+                     La sintaxis de &lt;ensamblado del registrador&gt; es:
+                       {&lt;nombre del ensamblado&gt;[,&lt;strong name&gt;] | &lt;archivo
+                       de ensamblado&gt;}
+                     Las opciones del registrador especifican cómo crea MSBuild
+                     el registrador.
                      Los &lt;parámetros del registrador&gt; son opcionales y se pasan
                      al registrador tal como se escriben. (Forma corta: -l)
                      Ejemplos:
@@ -855,12 +859,15 @@
                      Para especificar varios registradores, especifique cada uno
                      de ellos por separado. (Forma corta: -dl)
                      La sintaxis de &lt;registrador&gt; es:
-                       [&lt;clase&gt;,]&lt;assembly&gt;[,&lt;opciones&gt;][;&lt;parámetros&gt;]
+                       [&lt;clase&gt;,]&lt;ensamblado&gt;[,&lt;opciones&gt;][;&lt;parámetros&gt;]
                      La sintaxis de &lt;clase del registrador&gt; es:
-                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre de la clase del registrador&gt;
+                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre
+                       de la clase del registrador&gt;
                      La sintaxis de &lt;ensamblado del registrador&gt; es:
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
-                     Las opciones del registrador especifican cómo crea MSBuild el registrador.
+                       {&lt;nombre del ensamblado&gt;[,&lt;strong name&gt;] | &lt;archivo
+                      de ensamblado&gt;}
+                     Las opciones del registrador especifican cómo crea MSBuild
+                     el registrador.
                      Los &lt;parámetros del registrador&gt; son opcionales y se pasan
                      al registrador tal como se escriben. (Forma corta: -l)
                      Ejemplos:
@@ -1460,11 +1467,12 @@
         <note>{StrBegin="MSBUILD : error MSB1062: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-warnnotaserror" and "-warnaserror" should not be localized.</note>
       </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
-        <source>The specified logger could not be created and will not be used. {0}</source>
-        <target state="translated">No se pudo crear el registrador especificado y no se usará. {0}</target>
+        <source>The specified logger "{0}" could not be created and will not be used. {1}</source>
+        <target state="translated">No se pudo crear el registrador especificado por "{0}" y no se usará. {1}</target>
         <note>
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
-      LOCALIZATION: {0} contains the exception message explaining why the
+      LOCALIZATION: {0} contains the logger description passed on the command line or in a
+      response file. {1} contains the exception message explaining why the
       logger could not be created -- this message comes from the CLR/FX and is localized.
     </note>
       </trans-unit>
