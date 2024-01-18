@@ -173,6 +173,8 @@ namespace Microsoft.Build.BackEnd
                     (Experimental.FileAccess.ReportedFileOperation)fileAccessData.Operation,
                     (Experimental.FileAccess.RequestedAccess)fileAccessData.RequestedAccess,
                     fileAccessData.ProcessId,
+                    fileAccessData.Id,
+                    fileAccessData.CorrelationId,
                     fileAccessData.Error,
                     (Experimental.FileAccess.DesiredAccess)fileAccessData.DesiredAccess,
                     (Experimental.FileAccess.FlagsAndAttributes)fileAccessData.FlagsAndAttributes,
