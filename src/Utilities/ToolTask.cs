@@ -659,9 +659,11 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Starts the process during task execution
+        /// Expect task to override this method if they need information about the process or process events during task execution.
+        /// Implementation should make sure that the task is started in this method.
+        /// Starts the process during task execution. 
         /// </summary>
-        /// <param name="proc"></param>
+        /// <param name="proc">Process that will be executed by ToolTask</param>
         /// <returns></returns>
         protected virtual Process StartToolProcess(Process proc)
         {
