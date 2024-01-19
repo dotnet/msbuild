@@ -101,7 +101,7 @@
       </trans-unit>
       <trans-unit id="Binlog_StreamUtils_MustBeReadable">
         <source>Stream must be readable.</source>
-        <target state="new">Stream must be readable.</target>
+        <target state="translated">Le flux doit être lisible.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_StreamUtils_SeekNonOrigin">
