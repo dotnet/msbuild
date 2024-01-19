@@ -476,19 +476,7 @@ namespace Microsoft.Build.Execution
             // If the node was never configured, this will be null.
             if (_savedEnvironment != null)
             {
-                foreach (KeyValuePair<string, string> entry in CommunicationsUtilities.GetEnvironmentVariables())
-                {
-                    if (!_savedEnvironment.ContainsKey(entry.Key))
-                    {
-                        Environment.SetEnvironmentVariable(entry.Key, null);
-                    }
-                }
-
-                foreach (KeyValuePair<string, string> entry in _savedEnvironment)
-                {
-                    Environment.SetEnvironmentVariable(entry.Key, entry.Value);
-                }
-
+                CommunicationsUtilities.SetEnvironment(_savedEnvironment);
                 Traits.UpdateFromEnvironment();
             }
             try
@@ -714,20 +702,8 @@ namespace Microsoft.Build.Execution
                 NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
             }
 
-            // Replicate the environment.  First, unset any environment variables set by the previous configuration.
-            if (_currentConfiguration != null)
-            {
-                foreach (string key in _currentConfiguration.BuildParameters.BuildProcessEnvironment.Keys)
-                {
-                    Environment.SetEnvironmentVariable(key, null);
-                }
-            }
-
-            // Now set the new environment and update Traits class accordingly
-            foreach (KeyValuePair<string, string> environmentPair in _buildParameters.BuildProcessEnvironment)
-            {
-                Environment.SetEnvironmentVariable(environmentPair.Key, environmentPair.Value);
-            }
+            // Replicate the environment.
+            CommunicationsUtilities.SetEnvironment(_buildParameters.BuildProcessEnvironment);
             Traits.UpdateFromEnvironment();
 
             // We want to make sure the global project collection has the toolsets which were defined on the parent
