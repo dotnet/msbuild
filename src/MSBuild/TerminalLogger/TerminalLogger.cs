@@ -57,6 +57,8 @@ internal sealed partial class TerminalLogger : INodeLogger
 
     internal const TerminalColor TargetFrameworkColor = TerminalColor.Cyan;
 
+    internal Func<StopwatchAbstraction>? CreateStopwatch = null;
+
     /// <summary>
     /// Protects access to state shared between the logger callbacks and the rendering thread.
     /// </summary>
@@ -135,6 +137,11 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// Should the logger's test environment refresh the console output manually instead of using a background thread?
     /// </summary>
     private bool _manualRefresh;
+
+    /// <summary>
+    /// True if we've logged the ".NET SDK is preview" message.
+    /// </summary>
+    private bool _loggedPreviewMessage;
 
     /// <summary>
     /// List of events the logger needs as parameters to the <see cref="ConfigurableForwardingLogger"/>.
@@ -318,7 +325,7 @@ internal sealed partial class TerminalLogger : INodeLogger
             {
                 targetFramework = null;
             }
-            _projects[c] = new(targetFramework);
+            _projects[c] = new(targetFramework, CreateStopwatch?.Invoke());
 
             // First ever restore in the build is starting.
             if (e.TargetNames == "Restore" && !_restoreFinished)
@@ -358,7 +365,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                 {
                     EraseNodes();
 
-                    string duration = project.Stopwatch.Elapsed.TotalSeconds.ToString("F1");
+                    string duration = project.Stopwatch.ElapsedSeconds.ToString("F1");
                     ReadOnlyMemory<char>? outputPath = project.OutputPath;
 
                     string projectFile = e.ProjectFile is not null ?
@@ -567,6 +574,15 @@ internal sealed partial class TerminalLogger : INodeLogger
             if (IsImmediateMessage(message))
             {
                 RenderImmediateMessage(message);
+            }
+            else if (e.Code == "NETSDK1057" && !_loggedPreviewMessage)
+            {
+                // The SDK will log the high-pri "not-a-warning" message NETSDK1057
+                // when it's a preview version up to MaxCPUCount times, but that's
+                // an implementation detail--the user cares about at most one.
+
+                RenderImmediateMessage(message);
+                _loggedPreviewMessage = true;
             }
         }
     }

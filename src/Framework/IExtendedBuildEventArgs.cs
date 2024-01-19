@@ -22,7 +22,7 @@ public interface IExtendedBuildEventArgs
     ///   - data which needed in custom code to properly routing this message without interpreting/deserializing <see cref="ExtendedData"/>.
     ///   - simple extended data can be transferred in form of dictionary key-value per one extended property.
     /// </summary>
-    IDictionary<string, string?>? ExtendedMetadata { get; set; }
+    Dictionary<string, string?>? ExtendedMetadata { get; set; }
 
     /// <summary>
     /// Transparent data as string.

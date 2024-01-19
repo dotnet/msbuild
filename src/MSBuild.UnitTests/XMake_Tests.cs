@@ -524,6 +524,91 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void VersionSwitch()
+        {
+            using TestEnvironment env = UnitTests.TestEnvironment.Create();
+
+            // Ensure Change Wave 17.10 is enabled.
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "");
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+            List<string> cmdLine = new()
+            {
+#if !FEATURE_RUN_EXE_IN_TESTS
+                EnvironmentProvider.GetDotnetExePath(),
+#endif
+                FileUtilities.EnsureDoubleQuotes(RunnerUtilities.PathToCurrentlyRunningMsBuildExe),
+                "-nologo",
+                "-version"
+            };
+
+            using Process process = new()
+            {
+                StartInfo =
+                {
+                    FileName = cmdLine[0],
+                    Arguments = string.Join(" ", cmdLine.Skip(1)),
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                },
+            };
+
+            process.Start();
+            process.WaitForExit();
+            process.ExitCode.ShouldBe(0);
+
+            string output = process.StandardOutput.ReadToEnd();
+            output.EndsWith(Environment.NewLine).ShouldBeTrue();
+
+            process.Close();
+        }
+
+        /// <summary>
+        /// PR: Change Version switch output to finish with a newline https://github.com/dotnet/msbuild/pull/9485
+        /// </summary>
+        [Fact]
+        public void VersionSwitchDisableChangeWave()
+        {
+            using TestEnvironment env = UnitTests.TestEnvironment.Create();
+
+            // Disable Change Wave 17.10
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_10.ToString());
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+            List<string> cmdLine = new()
+            {
+#if !FEATURE_RUN_EXE_IN_TESTS
+                EnvironmentProvider.GetDotnetExePath(),
+#endif
+                FileUtilities.EnsureDoubleQuotes(RunnerUtilities.PathToCurrentlyRunningMsBuildExe),
+                "-nologo",
+                "-version"
+            };
+
+            using Process process = new()
+            {
+                StartInfo =
+                {
+                    FileName = cmdLine[0],
+                    Arguments = string.Join(" ", cmdLine.Skip(1)),
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                },
+            };
+
+            process.Start();
+            process.WaitForExit();
+            process.ExitCode.ShouldBe(0);
+
+            string output = process.StandardOutput.ReadToEnd();
+            output.EndsWith(Environment.NewLine).ShouldBeFalse();
+
+            process.Close();
+        }
+
+        [Fact]
         public void ErrorCommandLine()
         {
             string oldValueForMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
@@ -618,6 +703,17 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
+        [Fact]
+        public void GetPropertyWithInvalidProjectThrowsInvalidProjectFileExceptionNotInternalError()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile project = env.CreateFile("testProject.csproj", "Project");
+            string result = RunnerUtilities.ExecMSBuild($" {project.Path} -getProperty:Foo", out bool success);
+            success.ShouldBeFalse();
+            result.ShouldContain("MSB4025");
+            result.ShouldNotContain("MSB1025");
+        }
+
         [Theory]
         [InlineData("-getProperty:Foo;Bar", true, "EvalValue", false, false, false, true, false)]
         [InlineData("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false, true, false)]
@@ -695,6 +791,22 @@ namespace Microsoft.Build.UnitTests
             results.Contains("MyTarget").ShouldBe(targetResultPresent);
             results.Contains("\"Result\": \"Success\"").ShouldBe(targetResultPresent || restoreOnly);
             results.ShouldNotContain(ResourceUtilities.GetResourceString("BuildFailedWithPropertiesItemsOrTargetResultsRequested"));
+        }
+
+        [Fact]
+        public void BuildFailsWithBadPropertyName()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile project = env.CreateFile("testProject.csproj", @"
+<Project>
+  <Target Name=""Build"">
+  </Target>
+</Project>
+");
+            string results = RunnerUtilities.ExecMSBuild($" {project.Path} /p:someProperty:fdalse= ", out bool success);
+            success.ShouldBeFalse(results);
+
+            results.ShouldContain("error MSB4177");
         }
 
         [Theory]
@@ -2372,13 +2484,13 @@ $@"<Project>
         }
 
         [Theory]
-        [InlineData("-logger:,\"nonExistentlogger.dll\",IsOptional;Foo")]
-        [InlineData("-logger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo")]
-        [InlineData("-logger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC")]
-        [InlineData("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional;Foo")]
-        [InlineData("-distributedlogger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo")]
-        [InlineData("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC")]
-        public void MissingOptionalLoggersAreIgnored(string logger)
+        [InlineData("-logger:,\"nonExistentlogger.dll\",IsOptional;Foo", "nonExistentLogger.dll")]
+        [InlineData("-logger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo", "ClassA")]
+        [InlineData("-logger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC", "nonExistentLogger.dll")]
+        [InlineData("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional;Foo", "nonExistentLogger.dll")]
+        [InlineData("-distributedlogger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo", "ClassA")]
+        [InlineData("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC", "nonExistentLogger.dll")]
+        public void MissingOptionalLoggersAreIgnored(string logger, string expectedLoggerName)
         {
             string projectString =
                 "<Project>" +
@@ -2392,7 +2504,7 @@ $@"<Project>
             var output = RunnerUtilities.ExecMSBuild(parametersLoggerOptional, out bool successfulExit, _output);
             successfulExit.ShouldBe(true);
             output.ShouldContain("Hello", customMessage: output);
-            output.ShouldContain("The specified logger could not be created and will not be used.", customMessage: output);
+            output.ShouldContain($"The specified logger \"{expectedLoggerName}\" could not be created and will not be used.", customMessage: output);
         }
 
         [Theory]

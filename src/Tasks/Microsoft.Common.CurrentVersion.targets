@@ -323,7 +323,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Example, C:\MyProjects\MyProject\bin\Debug\MyAssembly.dll -->
     <TargetPath Condition=" '$(TargetPath)' == '' ">$(TargetDir)$(TargetFileName)</TargetPath>
 
-    <TargetRefPath Condition=" '$(TargetRefPath)' == '' and '$(ProduceReferenceAssembly)' == 'true' and ('$(ProduceReferenceAssemblyInOutDir)' == 'true' or '$([MSBuild]::AreFeaturesEnabled(17.0))' != 'true' ) ">$([MSBuild]::NormalizePath($(TargetDir), 'ref', $(TargetFileName)))</TargetRefPath>
+    <TargetRefPath Condition=" '$(TargetRefPath)' == '' and '$(ProduceReferenceAssembly)' == 'true' and '$(ProduceReferenceAssemblyInOutDir)' == 'true' ">$([MSBuild]::NormalizePath($(TargetDir), 'ref', $(TargetFileName)))</TargetRefPath>
     <TargetRefPath Condition=" '$(TargetRefPath)' == '' and '$(ProduceReferenceAssembly)' == 'true' ">$([MSBuild]::NormalizePath($(MSBuildProjectDirectory), $(IntermediateOutputPath), 'ref', $(TargetFileName)))</TargetRefPath>
 
     <!-- Example, C:\MyProjects\MyProject\ -->
@@ -388,9 +388,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   
   <PropertyGroup Condition="'$(MSBuildCopyMarkerName)' == ''">
     <MSBuildCopyMarkerName>$(MSBuildProjectFile)</MSBuildCopyMarkerName>
-    <!-- For a long MSBuildProjectFile let's shorten this to 17 chars - using the first 8 chars of the filename and either the ProjectGuid if it exists -->
-    <MSBuildCopyMarkerName Condition="'$(MSBuildCopyMarkerName.Length)' &gt; '17' and '$(ProjectGuid)' != ''">$(MSBuildProjectFile.Substring(0,8)).$(ProjectGuid.Substring(1,8))</MSBuildCopyMarkerName>
-    <!-- or a filename hash if the guid is not present (in such case the filename was not shortened and is still over 17 chars long). -->
+    <!-- For a long MSBuildProjectFile let's shorten this to 17 chars - using the first 8 chars of the filename and a filename hash. -->
     <MSBuildCopyMarkerName Condition="'$(MSBuildCopyMarkerName.Length)' &gt; '17'">$(MSBuildProjectFile.Substring(0,8)).$([MSBuild]::StableStringHash($(MSBuildProjectFile)).ToString("X8"))</MSBuildCopyMarkerName>
     <MSBuildCopyMarkerName>$(MSBuildCopyMarkerName).Up2Date</MSBuildCopyMarkerName>
   </PropertyGroup>
@@ -5026,7 +5024,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       This target enforces the dependency.
     -->
 
-    <MSBuildCopyContentTransitively Condition=" '$(MSBuildCopyContentTransitively)' == '' and $([MSBuild]::AreFeaturesEnabled('17.0'))">true</MSBuildCopyContentTransitively>
+    <MSBuildCopyContentTransitively Condition=" '$(MSBuildCopyContentTransitively)' == ''">true</MSBuildCopyContentTransitively>
 
     <_TargetsThatPrepareProjectReferences Condition=" '$(MSBuildCopyContentTransitively)' == 'true' ">
       AssignProjectConfiguration;

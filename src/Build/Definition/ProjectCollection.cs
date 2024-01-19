@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Threading;
 using System.Xml;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
@@ -1732,6 +1733,7 @@ namespace Microsoft.Build.Evaluation
             {
                 try
                 {
+                    (LoggingService as LoggingService)?.WaitForLoggingToProcessEvents();
                     ((IBuildComponent)LoggingService).ShutdownComponent();
                 }
                 catch (LoggerException)

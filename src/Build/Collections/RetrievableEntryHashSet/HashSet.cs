@@ -82,9 +82,7 @@ namespace Microsoft.Build.Collections
 #if FEATURE_SECURITY_PERMISSIONS
     [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
 #endif
-    internal class RetrievableEntryHashSet<T> : ICollection<T>,
-        ISerializable, IDeserializationCallback,
-        IDictionary<string, T>
+    internal class RetrievableEntryHashSet<T> : IRetrievableEntryHashSet<T>
         where T : class, IKeyed
     {
         // store lower 31 bits of hash code

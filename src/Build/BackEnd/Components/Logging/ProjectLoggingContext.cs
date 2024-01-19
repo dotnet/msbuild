@@ -81,7 +81,7 @@ namespace Microsoft.Build.BackEnd.Logging
             List<string> targets,
             string toolsVersion,
             PropertyDictionary<ProjectPropertyInstance> projectProperties,
-            ItemDictionary<ProjectItemInstance> projectItems,
+            IItemDictionary<ProjectItemInstance> projectItems,
             BuildEventContext parentBuildEventContext,
             int evaluationId,
             int projectContextId)

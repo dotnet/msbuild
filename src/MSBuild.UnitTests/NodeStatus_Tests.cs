@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -21,7 +21,7 @@ namespace Microsoft.Build.CommandLine.UnitTests;
 [UsesVerify]
 public class NodeStatus_Tests
 {
-    private readonly NodeStatus _status = new("Namespace.Project", "TargetFramework", "Target", new());
+    private readonly NodeStatus _status = new("Namespace.Project", "TargetFramework", "Target", new MockStopwatch());
 
     public NodeStatus_Tests()
     {
@@ -31,32 +31,32 @@ public class NodeStatus_Tests
     [Fact]
     public async Task EverythingFits()
     {
-        NodesFrame frame = new(new[] { _status }, width: 80, height: 5);
+        NodesFrame frame = new([_status], width: 80, height: 5);
 
-        await Verify(frame.RenderNodeStatus(_status).ToString());
+        await Verify(frame.RenderNodeStatus(0).ToString());
     }
 
     [Fact]
     public async Task TargetIsTruncatedFirst()
     {
-        NodesFrame frame = new(new[] { _status }, width: 45, height: 5);
+        NodesFrame frame = new([_status], width: 45, height: 5);
 
-        await Verify(frame.RenderNodeStatus(_status).ToString());
+        await Verify(frame.RenderNodeStatus(0).ToString());
     }
 
     [Fact]
     public async Task NamespaceIsTruncatedNext()
     {
-        NodesFrame frame = new(new[] { _status }, width: 40, height: 5);
+        NodesFrame frame = new([_status], width: 40, height: 5);
 
-        await Verify(frame.RenderNodeStatus(_status).ToString());
+        await Verify(frame.RenderNodeStatus(0).ToString());
     }
 
     [Fact]
     public async Task GoesToProject()
     {
-        NodesFrame frame = new(new[] { _status }, width: 10, height: 5);
+        NodesFrame frame = new([_status], width: 10, height: 5);
 
-        await Verify(frame.RenderNodeStatus(_status).ToString());
+        await Verify(frame.RenderNodeStatus(0).ToString());
     }
 }
