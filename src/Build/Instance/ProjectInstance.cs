@@ -248,6 +248,11 @@ namespace Microsoft.Build.Execution
         {
         }
 
+        public ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, EvaluationContext context, bool interactive = false)
+            : this(projectFile, globalProperties, toolsVersion, subToolsetVersion, projectCollection, projectLoadSettings: null, evaluationContext: context, directoryCacheFactory: null, interactive: false)
+        {
+        }
+
         /// <summary>
         /// Creates a ProjectInstance directly.
         /// No intermediate Project object is created.

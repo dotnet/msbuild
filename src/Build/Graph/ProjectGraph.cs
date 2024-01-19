@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
@@ -55,6 +56,8 @@ namespace Microsoft.Build.Graph
             ProjectCollection projectCollection);
 
         private readonly Lazy<IReadOnlyCollection<ProjectGraphNode>> _projectNodesTopologicallySorted;
+
+        private readonly EvaluationContext _evaluationContext = EvaluationContext.Create(EvaluationContext.SharingPolicy.Shared);
 
         private GraphBuilder.GraphEdges Edges { get; }
 
@@ -742,16 +745,31 @@ namespace Microsoft.Build.Graph
             return targets;
         }
 
-        internal static ProjectInstance DefaultProjectInstanceFactory(
+        internal ProjectInstance DefaultProjectInstanceFactory(
             string projectPath,
             Dictionary<string, string> globalProperties,
             ProjectCollection projectCollection)
+        {
+            return StaticProjectInstanceFactory(
+                                projectPath,
+                                globalProperties,
+                                projectCollection,
+                                _evaluationContext);
+        }
+
+        internal static ProjectInstance StaticProjectInstanceFactory(
+            string projectPath,
+            Dictionary<string, string> globalProperties,
+            ProjectCollection projectCollection,
+            EvaluationContext evaluationContext)
         {
             return new ProjectInstance(
                 projectPath,
                 globalProperties,
                 MSBuildConstants.CurrentToolsVersion,
-                projectCollection);
+                subToolsetVersion: null,
+                projectCollection,
+                evaluationContext);
         }
 
         private struct ProjectGraphBuildRequest : IEquatable<ProjectGraphBuildRequest>

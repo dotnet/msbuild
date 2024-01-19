@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -107,10 +108,11 @@ namespace Microsoft.Build.Graph.UnitTests
                     (projectPath, globalProperties, projectCollection) =>
                     {
                         factoryCalled = true;
-                        return ProjectGraph.DefaultProjectInstanceFactory(
+                        return ProjectGraph.StaticProjectInstanceFactory(
                             projectPath,
                             globalProperties,
-                            projectCollection);
+                            projectCollection,
+                            EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated));
                     });
                 projectGraph.ProjectNodes.Count.ShouldBe(1);
                 projectGraph.ProjectNodes.First().ProjectInstance.FullPath.ShouldBe(entryProject.Path);
