@@ -2501,6 +2501,11 @@ namespace Microsoft.Build.CommandLine
                 {
                     ShowVersion();
                 }
+                // if featureavailability switch is set, just show the feature availability and quit (ignore the other switches)
+                else if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.FeatureAvailability))
+                {
+                    ShowFeatureAvailability(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FeatureAvailability]);
+                }
                 else
                 {
                     bool foundProjectAutoResponseFile = CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, recursing, commandLine, out projectFile);
@@ -4501,6 +4506,13 @@ namespace Microsoft.Build.CommandLine
             {
                 Console.Write(ProjectCollection.Version.ToString());
             }
+        }
+
+        private static void ShowFeatureAvailability(string[] parameters)
+        {
+            string featureName = parameters[0];
+            var availability = FeatureAvailabilityChecker.CheckFeatureAvailability(featureName);
+            Console.WriteLine(availability);
         }
     }
 }

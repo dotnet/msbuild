@@ -77,6 +77,11 @@
         <target state="translated">MSBUILD : error MSB1027: Přepínač -noAutoResponse nelze zadat v souboru automatických odpovědí MSBuild.rsp ani v žádném jiném souboru odpovědí, na který se v souboru automatických odpovědí odkazuje.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="DuplicateFeatureAvailability">
+        <source>MSBUILD : error MSB1068: Only one feature availability can be specified.</source>
+        <target state="new">MSBUILD : error MSB1068: Only one feature availability can be specified.</target>
+        <note>{StrBegin="MSBUILD : error MSB1068: "}</note>
+      </trans-unit>
       <trans-unit id="DurationDisplay">
         <source>({0:F1}s)</source>
         <target state="translated">({0:F1} s)</target>
@@ -1333,6 +1338,15 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
         <source>MSBuild logs and debug information will be at "{0}"</source>
         <target state="translated">Protokoly MSBuild a informace o ladění budou dostupné v „{0}“</target>
         <note />
+      </trans-unit>
+      <trans-unit id="MissingFeatureAvailabilityError">
+        <source>MSBUILD : error MSB1067: Must provide a property name for the featureavailability switch.</source>
+        <target state="new">MSBUILD : error MSB1067: Must provide a property name for the featureavailability switch.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureavailability". The user must pass in an actual property name
+      following the switch, as in "msbuild.exe -featureavailability:blah".
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
       </trans-unit>
       <trans-unit id="MissingGetItemError">
         <source>MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</source>
