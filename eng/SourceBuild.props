@@ -7,7 +7,9 @@
     <SourceBuildManagedOnly>true</SourceBuildManagedOnly>
   </PropertyGroup>
 
-  <Target Name="ConfigureInnerBuildArgs" BeforeTargets="GetSourceBuildCommandConfiguration">
+  <Target Name="ConfigureInnerBuildArgs"
+          BeforeTargets="GetSourceBuildCommandConfiguration"
+          Condition="'$(DotNetBuildFromSource)' == 'true'">
     <PropertyGroup>
       <InnerBuildArgs>$(InnerBuildArgs) /p:Projects="$(InnerSourceBuildRepoRoot)\MSBuild.SourceBuild.slnf"</InnerBuildArgs>
       <!-- Disable package validation as source build filters out target frameworks. -->
