@@ -31,7 +31,7 @@
          causing it to be downloaded and flagged by component governance -->
     <PackageReference Include="Newtonsoft.Json" />
 
-    <!-- Add this explicitly since it's marked as Private in MSBuild.csproj, but we need these at runtime. -->
+    <!-- Add this explicitly since it's marked as Private in MSBuild.csproj, but we need these at runtime to be like VS. -->
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
   </ItemGroup>
 
