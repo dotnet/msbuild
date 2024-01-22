@@ -702,8 +702,21 @@ namespace Microsoft.Build.Execution
                 NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
             }
 
-            // Replicate the environment.
-            CommunicationsUtilities.SetEnvironment(_buildParameters.BuildProcessEnvironment);
+            // Replicate the environment.  First, unset any environment variables set by the previous configuration.
+            if (_currentConfiguration != null)
+            {
+                foreach (string key in _currentConfiguration.BuildParameters.BuildProcessEnvironment.Keys)
+                {
+                    Environment.SetEnvironmentVariable(key, null);
+                }
+            }
+
+            // Now set the new environment and update Traits class accordingly
+            foreach (KeyValuePair<string, string> environmentPair in _buildParameters.BuildProcessEnvironment)
+            {
+                Environment.SetEnvironmentVariable(environmentPair.Key, environmentPair.Value);
+            }
+
             Traits.UpdateFromEnvironment();
 
             // We want to make sure the global project collection has the toolsets which were defined on the parent
