@@ -53,8 +53,8 @@ namespace Microsoft.Build.Framework
         /// <returns>A feature status <see cref="FeatureStatus"/>.</returns>
         public static FeatureStatus CheckFeatureAvailability(string featureName)
         {
-            return _featureStatusMap.ContainsKey(featureName) ?
-                _featureStatusMap[featureName] : FeatureStatus.NotFound;
+            return _featureStatusMap.TryGetValue(featureName, out FeatureStatus status) ?
+                 status : FeatureStatus.NotFound;
         }
     }
 }
