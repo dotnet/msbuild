@@ -15,6 +15,8 @@ using System.Linq;
 using System.Reflection;
 using System.Security;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Build.Collections;
@@ -1053,7 +1055,6 @@ namespace Microsoft.Build.CommandLine
             {
                 JsonOutputFormatter jsonOutputFormatter = new();
                 jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
-                jsonOutputFormatter.AddItemsInJsonFormat(getItem, project);
                 Console.WriteLine(jsonOutputFormatter.ToString());
             }
 
@@ -4508,11 +4509,25 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static void ShowFeatureAvailability(string[] parameters)
+        private static void ShowFeatureAvailability(string[] features)
         {
-            string featureName = parameters[0];
-            var availability = FeatureAvailabilityChecker.CheckFeatureAvailability(featureName);
-            Console.WriteLine(availability);
+            if (features.Length == 1)
+            {
+                string featureName = features[0];
+                FeatureStatus availability = FeatureAvailabilityChecker.CheckFeatureAvailability(featureName);
+                Console.WriteLine(availability);
+            }
+            else
+            {
+                var jsonNode = new JsonObject();
+                foreach (string featureName in features)
+                {
+                    jsonNode[featureName] = FeatureAvailabilityChecker.CheckFeatureAvailability(featureName).ToString();
+                }
+
+                var s_options = new JsonSerializerOptions() { AllowTrailingCommas = false, WriteIndented = true };
+                Console.WriteLine(jsonNode.ToJsonString(s_options));
+            }
         }
     }
 }

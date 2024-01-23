@@ -1405,10 +1405,6 @@
     <value>MSBUILD : error MSB1058: Only one output results cache can be specified.</value>
     <comment>{StrBegin="MSBUILD : error MSB1058: "}</comment>
   </data>
-  <data name="DuplicateFeatureAvailability" UESanitized="true" Visibility="Public">
-    <value>MSBUILD : error MSB1068: Only one feature availability can be specified.</value>
-    <comment>{StrBegin="MSBUILD : error MSB1068: "}</comment>
-  </data>
   <data name="OptionalLoggerCreationMessage" UESanitized="true" Visibility="Public">
     <value>The specified logger "{0}" could not be created and will not be used. {1}</value>
     <comment>
@@ -1571,7 +1567,7 @@
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1069.
+        Next error code should be MSB1068.
 
         Don't forget to update this comment after using the new code.
   -->

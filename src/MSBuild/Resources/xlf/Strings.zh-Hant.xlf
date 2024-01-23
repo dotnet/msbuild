@@ -77,11 +77,6 @@
         <target state="translated">MSBUILD : error MSB1027: -noAutoResponse 參數不能在 MSBuild.rsp 自動回應檔中指定，也不能在自動回應檔所參考的任何回應檔中指定。</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
-      <trans-unit id="DuplicateFeatureAvailability">
-        <source>MSBUILD : error MSB1068: Only one feature availability can be specified.</source>
-        <target state="new">MSBUILD : error MSB1068: Only one feature availability can be specified.</target>
-        <note>{StrBegin="MSBUILD : error MSB1068: "}</note>
-      </trans-unit>
       <trans-unit id="DurationDisplay">
         <source>({0:F1}s)</source>
         <target state="translated">({0:F1} 秒)</target>

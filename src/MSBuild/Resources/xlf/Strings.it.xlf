@@ -77,11 +77,6 @@
         <target state="translated">MSBUILD : error MSB1027: non è possibile specificare l'opzione -noAutoResponse nel file di risposta automatica MSBuild.rsp o in file di risposta a cui il file di risposta automatica fa riferimento.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
-      <trans-unit id="DuplicateFeatureAvailability">
-        <source>MSBUILD : error MSB1068: Only one feature availability can be specified.</source>
-        <target state="new">MSBUILD : error MSB1068: Only one feature availability can be specified.</target>
-        <note>{StrBegin="MSBUILD : error MSB1068: "}</note>
-      </trans-unit>
       <trans-unit id="DurationDisplay">
         <source>({0:F1}s)</source>
         <target state="translated">({0:F1}s)</target>
