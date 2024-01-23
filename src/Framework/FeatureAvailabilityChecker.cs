@@ -15,6 +15,11 @@ namespace Microsoft.Build.Framework
     public enum FeatureStatus
     {
         /// <summary>
+        /// The feature is not found.
+        /// </summary>
+        NotFound,
+
+        /// <summary>
         /// The feature is available.
         /// </summary>
         Available,
@@ -23,15 +28,6 @@ namespace Microsoft.Build.Framework
         /// The feature is not available.
         /// </summary>
         NotAvailable,
-
-        /// <summary>
-        /// The feature is not found.
-        /// </summary>
-        NotFound,
-
-        // TODO: Add more status if needed
-        // Preview,
-        // Deprecated,
     }
 
     /// <summary>
