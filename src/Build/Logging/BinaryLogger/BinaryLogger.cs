@@ -406,12 +406,13 @@ namespace Microsoft.Build.Logging
         /// </exception>
         private void ProcessParameters(out bool omitInitialInfo)
         {
+            omitInitialInfo = false;
             if (BinaryLoggerParameters is null)
             {
                 throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", ""));
             }
 
-            AttachBLArguments();
+            AttachBLArguments(ref omitInitialInfo);
             AttachBLParameters();
         }
 
@@ -459,7 +460,7 @@ namespace Microsoft.Build.Logging
         /// Available arguments: ProjectImports=None, ProjectImports=Embed, ProjectImports=ZipFile,[LogFile=]filename.binlog
         /// </summary>
         /// <exception cref="LoggerException"></exception>
-        private void AttachBLArguments()
+        private void AttachBLArguments(ref bool omitInitialInfo)
         {
             if (string.IsNullOrEmpty(BinaryLoggerParameters.binaryLoggerArguments))
             {
@@ -468,8 +469,7 @@ namespace Microsoft.Build.Logging
 
             var parameters = BinaryLoggerParameters.binaryLoggerArguments.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
 
-            omitInitialInfo = false;
-            var parameters = Parameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
+           // var parameters = Parameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
             foreach (var parameter in parameters)
             {
                 if (string.Equals(parameter, "ProjectImports=None", StringComparison.OrdinalIgnoreCase))
