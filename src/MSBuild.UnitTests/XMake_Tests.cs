@@ -1525,6 +1525,44 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Directory.Build.rsp in the directory of the specified project/solution should be respected when searching the files (solution/proj) to build.
+        /// </summary>
+        [Fact]
+        public void ResponseFileInProjectDirectoryWithSolutionProjectDifferentNamesShouldBeRespected()
+        {
+            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            string projectPath = Path.Combine(directory, "projectFile.proj");
+            string solutionPath = Path.Combine(directory, "solutionFile.sln");
+            string rspPath = Path.Combine(directory, "Directory.Build.rsp");
+
+            try
+            {
+                Directory.CreateDirectory(directory);
+
+                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Message Text='Completed'/></Target></Project>");
+                File.WriteAllText(projectPath, content);
+
+                string rspContent = "-ignoreProjectExtensions:.sln";
+                File.WriteAllText(rspPath, rspContent);
+
+                // Incorrect sln file format, which will result fail if picked by msbuild for building
+                File.WriteAllText(solutionPath, string.Empty);
+
+                var msbuildParameters = "\"" + directory + "\"";
+
+                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+                successfulExit.ShouldBeTrue();
+            }
+            finally
+            {
+                File.Delete(projectPath);
+                File.Delete(solutionPath);
+                File.Delete(rspPath);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
+            }
+        }
+
+        /// <summary>
         /// Any msbuild.rsp in the directory of the specified project/solution should be read, and should
         /// take priority over any other response files. Sanity test when there isn't one.
         /// </summary>
