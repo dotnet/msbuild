@@ -469,6 +469,13 @@
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
     special exception to abort the build.</comment>
   </data>
+  <data name="FatalErrorWhileLoggingWithInnerException" xml:space="preserve">
+    <value>MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
+    {0}</value>
+    <comment>{StrBegin="MSB4017: "}UE: This message is used for a special exception that is thrown when a logger fails while logging an event (most
+    likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
+    special exception to abort the build.</comment>
+  </data>
   <data name="General.TwoVectorsMustHaveSameLength">
     <value>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</value>
     <comment>{StrBegin="MSB3094: "}</comment>
@@ -1324,6 +1331,17 @@
     <value>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
   {1}</value>
   </data>
+  <data name="SucceededToResolveSDK" xml:space="preserve">
+    <value>The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</value>
+  </data>
+  <data name="SDKResolverAttempt" xml:space="preserve">
+    <value>The "{0}" resolver attempted to resolve the SDK "{1}".
+Warnings: {2}
+Errors: {3}</value>
+    <comment>
+      LOCALIZATION: Do not localize the word SDK. "{2}" is new line separated warnings or "null". "{3}" is new line separated errors or "null".
+    </comment>
+  </data>
   <data name="CouldNotRunNuGetSdkResolver" xml:space="preserve">
     <value>The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</value>
   </data>
@@ -1352,7 +1370,7 @@
     <comment>{StrBegin="MSB4068: "}</comment>
   </data>
   <data name="UnsupportedLogFileFormat" xml:space="preserve">
-    <value>MSB4235: The log file format version is {0}, whereas this version of MSBuild only supports versions up to {1}.</value>
+    <value>MSB4235: The log file format version is {0} with minimum required reader version {1}, whereas this version of MSBuild only supports versions up to {2}.</value>
     <comment>{StrBegin="MSB4235: "}</comment>
   </data>
   <data name="UnsupportedTaskParameterTypeError" xml:space="preserve">
@@ -1769,12 +1787,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION:  Do not localize the word SDK.
     </comment>
   </data>
-  <data name="SdkResolving" xml:space="preserve">
-    <value>Resolving SDK '{0}'...</value>
-    <comment>
-      LOCALIZATION:  Do not localize the word SDK.
-    </comment>
-  </data>
   <data name="ProjectGraphDoesNotSupportProjectReferenceWithToolset" xml:space="preserve">
     <value>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</value>
     <comment>
@@ -2009,6 +2021,75 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="ReportFileAccessesX64Only" xml:space="preserve">
     <value>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</value>
+  </data>
+  <data name="Binlog_Source_MultiSubscribeError" xml:space="preserve">
+    <value>Structured events and raw events cannot be replayed at the same time.</value>
+  </data>
+  <data name="Binlog_Source_MissingSubscribeError" xml:space="preserve">
+    <value>No subscribers for any events.</value>
+  </data>
+  <data name="Binlog_Source_VersionUninitialized" xml:space="preserve">
+    <value>Version info not yet initialized. Replay must be called first.</value>
+  </data>
+  <data name="Binlog_MissingRecoverableErrorSubscribeError" xml:space="preserve">
+    <value>Subscription to RecoverableReadError is mandatory during forward compatible reading.</value>
+  </data>
+  <data name="Binlog_ImportFileSizeError" xml:space="preserve">
+    <value>Imported files archive exceeded 2GB limit and it's not embedded.</value>
+  </data>
+  <data name="Binlog_FwdCompatUnsupported" xml:space="preserve">
+    <value>Forward compatible reading is not supported for file format version {0} (needs >= 18).</value>
+    <comment>
+      LOCALIZATION: {0} is an integer number denoting version.
+    </comment>
+  </data>
+  <data name="Binlog_ReaderSkippingRecord" xml:space="preserve">
+    <value>Skipping the record.</value>
+  </data>
+  <data name="Binlog_ReaderMismatchedRead" xml:space="preserve">
+    <value>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</value>
+    <comment>
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an exception type and {3} the exception message string.
+    </comment>
+  </data>
+  <data name="Binlog_ReaderUnknownType" xml:space="preserve">
+    <value>BuildEvent record number {0} (serialized size: {1}) is of unsupported type: {2}.</value>
+    <comment>
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is a string or integer value indicating type.
+    </comment>
+  </data>
+  <data name="Binlog_ReaderUnderRead" xml:space="preserve">
+    <value>BuildEvent record number {0} was expected to read exactly {1} bytes from the stream, but read {2} instead.</value>
+    <comment>
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an integer value indicating number of bytes.
+    </comment>
+  </data>
+  <data name="Binlog_ArchiveFile_AcquiredAsStream" xml:space="preserve">
+    <value>Content already acquired as StreamReader via GetContentReader.</value>
+  </data>
+  <data name="Binlog_ArchiveFile_AcquiredAsString" xml:space="preserve">
+    <value>Content already acquired as string via GetContent or initialized as string only.</value>
+  </data>
+  <data name="Binlog_ArchiveFile_NotSetAfterAcquire" xml:space="preserve">
+    <value>ArchiveFile was obtained, but the final edited version was not set.</value>
+  </data>
+  <data name="Binlog_StreamUtils_MustBeReadable" xml:space="preserve">
+    <value>Stream must be readable.</value>
+  </data>
+  <data name="Binlog_StreamUtils_SeekNonOrigin" xml:space="preserve">
+    <value>Only seeking from SeekOrigin.Current is supported.</value>
+  </data>
+  <data name="Binlog_StreamUtils_SetLengthUnsupported" xml:space="preserve">
+    <value>Changing the stream length is not supported.</value>
+  </data>
+  <data name="Binlog_StreamUtils_WriteUnsupported" xml:space="preserve">
+    <value>Writing is not supported.</value>
+  </data>
+  <data name="Binlog_StreamUtils_UnsupportedSkipOffset" xml:space="preserve">
+    <value>Attempt to skip {0} bytes, only non-negative offset up to int.MaxValue is allowed.</value>
+    <comment>
+      LOCALIZATION: {0} is integer number denoting number of bytes. 'int.MaxValue' should not be translated.
+    </comment>
   </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999

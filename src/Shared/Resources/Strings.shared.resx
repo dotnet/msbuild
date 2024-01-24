@@ -1,20 +1,96 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
                 <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
-              <xsd:attribute name="UESanitized" type="xsd:boolean" msdata:Ordinal="3" />
-              <xsd:attribute name="Visibility" type="Visibility_Type" msdata:Ordinal="4" />
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="5" />
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="6" />
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
@@ -28,130 +104,123 @@
         </xsd:choice>
       </xsd:complexType>
     </xsd:element>
-    <xsd:simpleType name="Visibility_Type">
-      <xsd:restriction base="xsd:string">
-        <xsd:enumeration value="Public" />
-        <xsd:enumeration value="Obsolete" />
-        <xsd:enumeration value="Private_OM" />
-      </xsd:restriction>
-    </xsd:simpleType>
   </xsd:schema>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
   <resheader name="version">
-    <value>1.3</value>
+    <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="BuildAborted" Visibility="Public">
+  <data name="BuildAborted" xml:space="preserve">
     <value>MSB4188: Build was canceled.</value>
     <comment>{StrBegin="MSB4188: "} Error when the build stops suddenly for some reason. For example, because a child node died.</comment>
   </data>
-  <data name="BuildEngineCallbacksInTaskHostUnsupported" Visibility="Public">
+  <data name="BuildEngineCallbacksInTaskHostUnsupported" xml:space="preserve">
     <value>MSB5022: The MSBuild task host does not support running tasks that perform IBuildEngine callbacks. If you wish to perform these operations, please run your task in the core MSBuild process instead.  A task will automatically execute in the task host if the UsingTask has been attributed with a "Runtime" or "Architecture" value, or the task invocation has been attributed with an "MSBuildRuntime" or "MSBuildArchitecture" value, that does not match the current runtime or architecture of MSBuild.</value>
     <comment>{StrBegin="MSB5022: "} "Runtime", "Architecture", "MSBuildRuntime", and "MSBuildArchitecture" are all attributes in the project file, and thus should not be localized.</comment>
   </data>
-  <data name="BuildStarted" UESanitized="false" Visibility="Public">
+  <data name="BuildStarted" xml:space="preserve">
     <value>Build started.</value>
   </data>
-  <data name="ConflictingTaskAssembly" Visibility="Public">
+  <data name="ConflictingTaskAssembly" xml:space="preserve">
     <value>MSB4008: A conflicting assembly for the task assembly "{0}" has been found at "{1}".</value>
     <comment>{StrBegin="MSB4008: "}UE: This message is shown when the type/class of a task cannot be resolved uniquely from a single assembly.</comment>
   </data>
-  <data name="ExpectedEventToBeSerializable" Visibility="Public">
+  <data name="ExpectedEventToBeSerializable" xml:space="preserve">
     <value>Event type "{0}" was expected to be serializable using the .NET serializer. The event was not serializable and has been ignored.</value>
   </data>
-  <data name="DeprecatedEventSerialization" Visibility="Public">
+  <data name="DeprecatedEventSerialization" xml:space="preserve">
     <value>Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</value>
   </data>
-  <data name="FileLocation" Visibility="Public">
+  <data name="FileLocation" xml:space="preserve">
     <value>{0} ({1},{2})</value>
     <comment>A file location to be embedded in a string.</comment>
   </data>
-  <data name="ModifyingTaskHostEnvironmentHeader" Visibility="Public">
+  <data name="ModifyingTaskHostEnvironmentHeader" xml:space="preserve">
     <value>Making the following modifications to the environment received from the parent node before applying it to the task host:</value>
     <comment>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</comment>
   </data>
-  <data name="ModifyingTaskHostEnvironmentVariable" Visibility="Public">
+  <data name="ModifyingTaskHostEnvironmentVariable" xml:space="preserve">
     <value>  Setting '{0}' to '{1}' rather than the parent environment's value, '{2}'.</value>
     <comment>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</comment>
   </data>
-  <data name="InvalidProjectFile" Visibility="Public">
+  <data name="InvalidProjectFile" xml:space="preserve">
     <value>MSB4025: The project file could not be loaded. {0}</value>
     <comment>{StrBegin="MSB4025: "}UE: This message is shown when the project file given to the engine cannot be loaded because the filename/path is
     invalid, or due to lack of permissions, or incorrect XML. The project filename is not part of the message because it is
     provided separately to loggers.
     LOCALIZATION: {0} is a localized message from the CLR/FX explaining why the project is invalid.</comment>
   </data>
-  <data name="InvalidVerbosity" Visibility="Public">
+  <data name="InvalidVerbosity" xml:space="preserve">
     <value>MSB4103: "{0}" is not a valid logger verbosity level.</value>
     <comment>{StrBegin="MSB4103: "}</comment>
   </data>
-  <data name="InvalidLogFileFormat" Visibility="Public">
+  <data name="InvalidLogFileFormat" xml:space="preserve">
     <value>MSB4233: There was an exception while reading the log file: {0}</value>
     <comment>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</comment>
   </data>
-  <data name="MissingProject" Visibility="Private_OM">
+  <data name="MissingProject" xml:space="preserve">
     <value>MSBuild is expecting a valid "{0}" object.</value>
   </data>
-  <data name="UnrecognizedToolsVersion" Visibility="Public">
+  <data name="UnrecognizedToolsVersion" xml:space="preserve">
     <value>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</value>
     <comment>{StrBegin="MSB4132: "}LOCALIZATION: {1} contains a comma separated list.</comment>
   </data>
-  <data name="NameInvalid" Visibility="Public">
+  <data name="NameInvalid" xml:space="preserve">
     <value>MSB5016: The name "{0}" contains an invalid character "{1}".</value>
     <comment>{StrBegin="MSB5016: "}</comment>
   </data>
-  <data name="Shared.CannotChangeItemSpecModifiers" Visibility="Private_OM">
+  <data name="Shared.CannotChangeItemSpecModifiers" xml:space="preserve">
     <value>"{0}" is a reserved item metadata, and cannot be modified or deleted.</value>
     <comment>UE: Tasks and OM users are not allowed to remove or change the value of the built-in metadata on items e.g. the meta-data "FullPath", "RelativeDir", etc. are reserved.</comment>
   </data>
-  <data name="Shared.CannotConvertStringToBool" Visibility="Public">
+  <data name="Shared.CannotConvertStringToBool" xml:space="preserve">
     <value>The string "{0}" cannot be converted to a boolean (true/false) value.</value>
   </data>
-  <data name="Shared.FailedCreatingTempFile" Visibility="Public">
+  <data name="Shared.FailedCreatingTempFile" xml:space="preserve">
     <value>MSB5003: Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</value>
     <comment>{StrBegin="MSB5003: "}</comment>
   </data>
-  <data name="Shared.FailedDeletingTempFile" Visibility="Public">
+  <data name="Shared.FailedDeletingTempFile" xml:space="preserve">
     <value>MSB5018: Failed to delete the temporary file "{0}". {1}</value>
     <comment>{StrBegin="MSB5018: "}</comment>
   </data>
-  <data name="Shared.InvalidFilespecForTransform" Visibility="Public">
+  <data name="Shared.InvalidFilespecForTransform" xml:space="preserve">
     <value>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</value>
     <comment>UE: This message is shown when the user tries to perform path manipulations using one of the built-in item metadata e.g. %(RootDir), on an item-spec that's not a valid path. LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</comment>
   </data>
-  <data name="TaskNotMarshalByRef" Visibility="Public">
+  <data name="TaskNotMarshalByRef" xml:space="preserve">
     <value>MSB4077: The "{0}" task has been marked with the attribute LoadInSeparateAppDomain, but does not derive from MarshalByRefObject. Check that the task derives from MarshalByRefObject or AppDomainIsolatedTask.</value>
     <comment>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</comment>
   </data>
-  <data name="FrameworkLocationHelper.UnsupportedFrameworkVersion" Visibility="Private_OM">
+  <data name="FrameworkLocationHelper.UnsupportedFrameworkVersion" xml:space="preserve">
     <value>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</value>
   </data>
-  <data name="FrameworkLocationHelper.UnsupportedFrameworkVersionForWindowsSdk" Visibility="Private_OM">
+  <data name="FrameworkLocationHelper.UnsupportedFrameworkVersionForWindowsSdk" xml:space="preserve">
     <value>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</value>
   </data>
-  <data name="FrameworkLocationHelper.UnsupportedVisualStudioVersion" Visibility="Private_OM">
+  <data name="FrameworkLocationHelper.UnsupportedVisualStudioVersion" xml:space="preserve">
     <value>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</value>
   </data>
-  <data name="FrameworkLocationHelper.CouldNotGenerateReferenceAssemblyDirectory">
+  <data name="FrameworkLocationHelper.CouldNotGenerateReferenceAssemblyDirectory" xml:space="preserve">
     <value>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</value>
     <comment>No Error code because this resource will be used in an exception. The error code is discarded if it is included</comment>
   </data>
-  <data name="DirectoryNotFound" Visibility="Public">
+  <data name="DirectoryNotFound" xml:space="preserve">
     <value>Could not find directory path: {0}</value>
     <comment>Directory must exist</comment>
   </data>
-  <data name="UnauthorizedAccess" Visibility="Public">
+  <data name="UnauthorizedAccess" xml:space="preserve">
     <value>You do not have access to: {0}</value>
     <comment>Directory must have access</comment>
   </data>
-  <data name="SubCategoryForSchemaValidationErrors" Visibility="Public">
+  <data name="SubCategoryForSchemaValidationErrors" xml:space="preserve">
     <value>Schema validation</value>
     <comment>
       UE: this fragment is used to describe errors that are caused by schema validation. For example, if a normal error is
@@ -160,124 +229,123 @@
       LOCALIZATION: This fragment needs to be localized.
     </comment>
   </data>
-  <data name="Shared.KillingProcess">
+  <data name="Shared.KillingProcess" xml:space="preserve">
     <value>MSB5002: Terminating the task executable "{0}" because it did not finish within the specified limit of {1} milliseconds.</value>
     <comment>{StrBegin="MSB5002: "}</comment>
   </data>
-  <data name="Shared.ParameterCannotBeNull" Visibility="Public">
+  <data name="Shared.ParameterCannotBeNull" xml:space="preserve">
     <value>Parameter "{0}" cannot be null.</value>
   </data>
-  <data name="Shared.ParameterCannotHaveInvalidPathChars" Visibility="Public">
+  <data name="Shared.ParameterCannotHaveInvalidPathChars" xml:space="preserve">
     <value>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</value>
   </data>
-  <data name="Shared.ParameterCannotHaveZeroLength" Visibility="Public">
+  <data name="Shared.ParameterCannotHaveZeroLength" xml:space="preserve">
     <value>Parameter "{0}" cannot have zero length.</value>
   </data>
-  <data name="Shared.ParametersMustHaveTheSameLength" Visibility="Public">
+  <data name="Shared.ParametersMustHaveTheSameLength" xml:space="preserve">
     <value>Parameters "{0}" and "{1}" must have the same number of elements.</value>
   </data>
-  <data name="Shared.TaskResourceNotFound" Visibility="Private_OM">
+  <data name="Shared.TaskResourceNotFound" xml:space="preserve">
     <value>The resource string "{0}" for the "{1}" task cannot be found. Confirm that the resource name "{0}" is correctly spelled, and the resource exists in the task's assembly.</value>
   </data>
-  <data name="Shared.TaskResourcesNotRegistered" Visibility="Private_OM">
+  <data name="Shared.TaskResourcesNotRegistered" xml:space="preserve">
     <value>The "{0}" task has not registered its resources. In order to use the "TaskLoggingHelper.FormatResourceString()" method this task needs to register its resources either during construction, or via the "TaskResources" property.</value>
     <comment>LOCALIZATION: "TaskLoggingHelper.FormatResourceString()" and "TaskResources" should not be localized.</comment>
   </data>
-  <data name="SolutionParseDuplicateProject" Visibility="Public">
+  <data name="SolutionParseDuplicateProject" xml:space="preserve">
     <value>MSB5004: The solution file has two projects named "{0}".</value>
     <comment>{StrBegin="MSB5004: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
-  <data name="SolutionParseInvalidProjectFileNameCharacters" Visibility="Public">
+  <data name="SolutionParseInvalidProjectFileNameCharacters" xml:space="preserve">
     <value>MSB5005: Error parsing project section for project "{0}". The project file name "{1}" contains invalid characters.</value>
     <comment>{StrBegin="MSB5005: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
-  <data name="SolutionParseInvalidProjectFileNameEmpty" Visibility="Public">
+  <data name="SolutionParseInvalidProjectFileNameEmpty" xml:space="preserve">
     <value>MSB5006: Error parsing project section for project "{0}". The project file name is empty.</value>
     <comment>{StrBegin="MSB5006: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
-  <data name="SolutionParseInvalidProjectSolutionConfigurationEntry" Visibility="Public">
+  <data name="SolutionParseInvalidProjectSolutionConfigurationEntry" xml:space="preserve">
     <value>MSB5007: Error parsing the project configuration section in solution file. The entry "{0}" is invalid.</value>
     <comment>{StrBegin="MSB5007: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
-  <data name="SolutionParseInvalidSolutionConfigurationEntry" Visibility="Public">
+  <data name="SolutionParseInvalidSolutionConfigurationEntry" xml:space="preserve">
     <value>MSB5008: Error parsing the solution configuration section in solution file. The entry "{0}" is invalid.</value>
     <comment>{StrBegin="MSB5008: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
-  <data name="SolutionParseNestedProjectErrorWithNameAndGuid" Visibility="Public">
+  <data name="SolutionParseNestedProjectErrorWithNameAndGuid" xml:space="preserve">
     <value>MSB5009: Error parsing the project "{0}" section with GUID: "{1}". It is nested under "{2}" but that project is not found in the solution.</value>
     <comment>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
-  <data name="SolutionParseNestedProjectError" Visibility="Public">
+  <data name="SolutionParseNestedProjectError" xml:space="preserve">
     <value>MSB5009: Error parsing the nested project section in solution file.</value>
     <comment>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
-  <data name="SolutionParseNestedProjectUndefinedError" Visibility="Public">
+  <data name="SolutionParseNestedProjectUndefinedError" xml:space="preserve">
     <value>MSB5023: Error parsing the nested project section in solution file. A project with the GUID "{0}" is listed as being nested under project "{1}", but does not exist in the solution.</value>
     <comment>{StrBegin="MSB5023: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
-  <data name="SolutionParseNoHeaderError" Visibility="Public">
+  <data name="SolutionParseNoHeaderError" xml:space="preserve">
     <value>MSB5010: No file format header found.</value>
     <comment>{StrBegin="MSB5010: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
-  <data name="SolutionParseProjectDepGuidError" Visibility="Public">
+  <data name="SolutionParseProjectDepGuidError" xml:space="preserve">
     <value>MSB5011: Parent project GUID not found in "{0}" project dependency section.</value>
     <comment>{StrBegin="MSB5011: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
-  <data name="SolutionParseProjectEofError" Visibility="Public">
+  <data name="SolutionParseProjectEofError" xml:space="preserve">
     <value>MSB5012: Unexpected end-of-file reached inside "{0}" project section.</value>
     <comment>{StrBegin="MSB5012: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
-  <data name="SolutionParseProjectError" Visibility="Public">
+  <data name="SolutionParseProjectError" xml:space="preserve">
     <value>MSB5013: Error parsing a project section.</value>
     <comment>{StrBegin="MSB5013: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
-  <data name="SolutionParseVersionMismatchError" Visibility="Public">
+  <data name="SolutionParseVersionMismatchError" xml:space="preserve">
     <value>MSB5014: File format version is not recognized.  MSBuild can only read solution files between versions {0}.0 and {1}.0, inclusive.</value>
     <comment>{StrBegin="MSB5014: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
-  <data name="SolutionParseWebProjectPropertiesError" Visibility="Public">
+  <data name="SolutionParseWebProjectPropertiesError" xml:space="preserve">
     <value>MSB5015: The properties could not be read from the WebsiteProperties section of the "{0}" project.</value>
     <comment>{StrBegin="MSB5015: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
-  <data name="UnrecognizedSolutionComment" Visibility="Public">
+  <data name="UnrecognizedSolutionComment" xml:space="preserve">
     <value>Unrecognized solution version "{0}", attempting to continue.</value>
   </data>
-  <data name="SubCategoryForSolutionParsingErrors" Visibility="Public">
+  <data name="SubCategoryForSolutionParsingErrors" xml:space="preserve">
     <value>Solution file</value>
     <comment>UE: this fragment is used to describe errors found while parsing solution files. For example, if a normal error is
       displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from solution parsing would look like this:
       "MSBUILD : Solution file error MSB0000: This is an error."
       LOCALIZATION: This fragment needs to be localized.</comment>
   </data>
-  <data name="Shared.InvalidProjectFile" Visibility="Public">
+  <data name="Shared.InvalidProjectFile" xml:space="preserve">
     <value>MSB5019: The project file is malformed: "{0}". {1}</value>
     <comment>{StrBegin="MSB5019: "}</comment>
   </data>
-  <data name="Shared.ProjectFileCouldNotBeLoaded" Visibility="Public">
+  <data name="Shared.ProjectFileCouldNotBeLoaded" xml:space="preserve">
     <value>MSB5020: Could not load the project file: "{0}". {1}</value>
     <comment>{StrBegin="MSB5020: "}</comment>
   </data>
-  <data name="Shared.KillingProcessByCancellation">
+  <data name="Shared.KillingProcessByCancellation" xml:space="preserve">
     <value>MSB5021: Terminating the task executable "{0}" and its child processes because the build was canceled.</value>
     <comment>{StrBegin="MSB5021: "}</comment>
   </data>
-  <data name="Shared.CanNotFindValidMSBuildLocation">
+  <data name="Shared.CanNotFindValidMSBuildLocation" xml:space="preserve">
     <value>MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</value>
     <comment>{StrBegin="MSB5024: "}</comment>
   </data>
-  <data name="Shared.PathTooLong">
+  <data name="Shared.PathTooLong" xml:space="preserve">
     <value>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</value>
-    <comment></comment>
   </data>
-  <data name="SolutionFilterJsonParsingError" Visibility="Public">
+  <data name="SolutionFilterJsonParsingError" xml:space="preserve">
     <value>MSB5025: Json in solution filter file "{0}" is incorrectly formatted.</value>
     <comment>{StrBegin="MSB5025: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
-  <data name="SolutionFilterMissingSolutionError" Visibility="Public">
+  <data name="SolutionFilterMissingSolutionError" xml:space="preserve">
     <value>MSB5026: The solution filter file at "{0}" specifies there will be a solution file at "{1}", but that file does not exist.</value>
     <comment>{StrBegin="MSB5026: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
-  <data name="SolutionFilterFilterContainsProjectNotInSolution" Visibility="Public">
+  <data name="SolutionFilterFilterContainsProjectNotInSolution" xml:space="preserve">
     <value>MSB5028: Solution filter file at "{0}" includes project "{1}" that is not in the solution file at "{2}".</value>
     <comment>{StrBegin="MSB5028: "}UE: The project filename is provided separately to loggers.</comment>
   </data>
@@ -286,29 +354,14 @@
     <comment>{StrBegin="MSB5029: "}UE: This is a generic message that is displayed when we find a project element that has a drive enumerating wildcard value for one of its
       attributes e.g. &lt;Compile Include="$(NotAlwaysDefined)\**\*.cs"&gt; -- if the property is undefined, the value of Include should not result in enumerating all files on drive.</comment>
   </data>
-  <data name="LoggingBeforeTaskInitialization" UESanitized="false" Visibility="Public">
+  <data name="LoggingBeforeTaskInitialization" xml:space="preserve">
     <value>MSB6005: Task attempted to log before it was initialized. Message was: {0}</value>
     <comment>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</comment>
   </data>
-  <!--
-        The shared message bucket is: MSB5001 - MSB5999
-
-        Next message code should be MSB5030
-
-        Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
-            <none>
-
-        Retired codes which have shipped so cannot be reused
-            MSB5017
-
-        Don't forget to update this comment after using a new code.
-  -->
-  <!-- #################################################################################################-->
-  <!-- ############################## Collection-related strings #######################################-->
-  <!-- #################################################################################################-->
-  <!-- The OM_ prefix indicates at the point of use that there is no error code in the message;
-       these should not be used in an InvalidProjectFileException -->
-  <data name="OM_NotSupportedReadOnlyCollection">
+  <data name="OM_NotSupportedReadOnlyCollection" xml:space="preserve">
     <value>This collection is read-only.</value>
+  </data>
+  <data name="CollectionCopyToFailureProvidedArrayIsTooSmall" xml:space="preserve">
+    <value>The number of elements in the collection is greater than the available space in the destination array (when starting at the specified index).</value>
   </data>
 </root>

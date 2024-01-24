@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -252,6 +252,7 @@
     <Compile Include="Collections\RetrievableEntryHashSet\BitHelper.cs" />
     <Compile Include="Collections\RetrievableEntryHashSet\HashSetDebugView.cs" />
     <Compile Include="Collections\RetrievableEntryHashSet\HashHelpers.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\IRetrievableEntryHashSet.cs" />
     <Compile Include="Construction\ImplicitImportLocation.cs" />
     <Compile Include="Construction\ProjectSdkElement.cs" />
     <Compile Include="Definition\ProjectOptions.cs" />
@@ -370,6 +371,8 @@
     <Compile Include="Collections\CopyOnWritePropertyDictionary.cs" />
     <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
     <Compile Include="Collections\HashTableUtility.cs" />
+    <Compile Include="Collections\IConstrainableDictionary.cs" />
+    <Compile Include="Collections\IItemDictionary.cs" />
     <Compile Include="Collections\ItemDictionary.cs" />
     <Compile Include="Collections\IImmutable.cs" />
     <Compile Include="Collections\MultiDictionary.cs" />
@@ -492,6 +495,9 @@
     <Compile Include="Globbing\IMSBuildGlob.cs" />
     <Compile Include="Globbing\Visitor\ParsedGlobCollector.cs" />
     <!-- #### INSTANCE MODEL ### -->
+    <Compile Include="Instance\IImmutableInstanceProvider.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableElementCollectionConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableItemDictionary.cs" />
     <Compile Include="Instance\ReflectableTaskPropertyInfo.cs" />
     <Compile Include="Instance\HostServices.cs" />
     <Compile Include="Instance\ProjectTargetInstanceChild.cs" />
@@ -528,6 +534,8 @@
     <Compile Include="Logging\BinaryLogger\BuildEventArgsReader.cs" />
     <Compile Include="Logging\BinaryLogger\BuildEventArgsWriter.cs" />
     <Compile Include="Logging\BinaryLogger\ProjectImportsCollector.cs" />
+    <Compile Include="Logging\BinaryLogger\ExtendedDataFields.cs" />
+    <Compile Include="Logging\BinaryLogger\Postprocessing\*.cs" />
     <Compile Include="Logging\ConsoleLogger.cs" />
     <Compile Include="Logging\DistributedLoggers\DistributedFileLogger.cs" />
     <Compile Include="Logging\DistributedLoggers\ConfigurableForwardingLogger.cs" />
@@ -676,22 +684,24 @@
     <NuGetFrameworkWrapperRedirects_FilePath>$(IntermediateOutputPath)NuGetFrameworkWrapper.redirects.cs</NuGetFrameworkWrapperRedirects_FilePath>
   </PropertyGroup>
 
-  <!-- Extract binding redirects for Microsoft.Build from MSBuild.exe.config into a source file -->
+  <!-- Extract binding redirects for MSBuild and dependencies from MSBuild.exe.config into a source file.
+       This allows us to create secondary AppDomains with the same redirects at run-time, see
+       https://github.com/dotnet/msbuild/blob/main/documentation/NETFramework-NGEN.md#nugetframeworks -->
   <Target Name="GenerateAppDomainConfig"
-          Inputs="..\MSBuild\app.config;..\MSBuild\app.amd64.config"
+          Inputs="..\MSBuild\app.config;..\MSBuild\app.amd64.config;$(MSBuildThisFileFullPath)"
           Outputs="$(NuGetFrameworkWrapperRedirects_FilePath)"
           BeforeTargets="CoreCompile"
           Condition="'$(FeatureAppDomain)' == 'true'">
     <PropertyGroup>
       <BindingRedirectNamespace>&lt;Namespace Prefix='ns' Uri='urn:schemas-microsoft-com:asm.v1' /&gt;</BindingRedirectNamespace>
-      <BindingRedirectXPath>/configuration/runtime/ns:assemblyBinding/ns:dependentAssembly[ns:assemblyIdentity/@name='Microsoft.Build']</BindingRedirectXPath>
+      <BindingRedirectXPath>/configuration/runtime/ns:assemblyBinding/*</BindingRedirectXPath>
     </PropertyGroup>
 
     <XmlPeek XmlInputPath="..\MSBuild\app.config" Query="$(BindingRedirectXPath)" Namespaces="$(BindingRedirectNamespace)">
-      <Output TaskParameter="Result" ItemName="BindingRedirect32" />
+      <Output TaskParameter="Result" ItemName="BindingRedirects32" />
     </XmlPeek>
     <XmlPeek XmlInputPath="..\MSBuild\app.amd64.config" Query="$(BindingRedirectXPath)" Namespaces="$(BindingRedirectNamespace)">
-      <Output TaskParameter="Result" ItemName="BindingRedirect64" />
+      <Output TaskParameter="Result" ItemName="BindingRedirects64" />
     </XmlPeek>
 
     <PropertyGroup>
@@ -704,8 +714,8 @@ namespace Microsoft.Build.Evaluation%3B;
 [System.CodeDom.Compiler.GeneratedCode("GenerateAppDomainConfig", "1.0")]
 internal sealed partial class NuGetFrameworkWrapper
 {
-    private const string _bindingRedirect32 = """;@(BindingRedirect32);"""%3B;
-    private const string _bindingRedirect64 = """;@(BindingRedirect64);"""%3B;
+    private const string _bindingRedirects32 = """;@(BindingRedirects32);"""%3B;
+    private const string _bindingRedirects64 = """;@(BindingRedirects64);"""%3B;
 }
 ]]>
       </NuGetFrameworkWrapperRedirects_Content>

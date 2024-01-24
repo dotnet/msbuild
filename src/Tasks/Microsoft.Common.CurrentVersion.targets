@@ -4491,10 +4491,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         either have the .exe/.dll extension or their publish status has been overriden in VS so they will show up in the PublishFiles collection.
         The PublishProtocol property is available only in .NET>=5 so we will used that to exclude .NET FX 4.X case.
       -->
-      <_ClickOnceTransitiveContentItemsTemp Include="@(_TransitiveItemsToCopyToOutputDirectory->'%(TargetPath)')" Condition="'$(PublishProtocol)' == 'ClickOnce'" >
+      <_ClickOnceTransitiveContentItemsTemp Include="@(_TransitiveItemsToCopyToOutputDirectory->WithoutMetadataValue('CopyToPublishDirectory', 'Never')->'%(TargetPath)')" Condition="'$(PublishProtocol)' == 'ClickOnce'" >
         <SavedIdentity>%(Identity)</SavedIdentity>
       </_ClickOnceTransitiveContentItemsTemp>
       <_ClickOnceTransitiveContentItems Include="@(_ClickOnceTransitiveContentItemsTemp->'%(SavedIdentity)')" Condition="'%(Identity)'=='@(PublishFile)' Or '%(Extension)'=='.exe' Or '%(Extension)'=='.dll'" />
+
+      <!-- 
+        ClickOnce content items is union of transitive content items and content items from this project.
+        We also exclude content items from this project that have set CopyToPublishDirectory to Never.
+      -->
+      <_ClickOnceContentItems Include="@(ContentWithTargetPath->WithoutMetadataValue('CopyToPublishDirectory', 'Never'))" />
+      <_ClickOnceContentItems Include="@(_ClickOnceTransitiveContentItems)" />
 
       <!--
         For .NET>=5, we need to check if we need to publish any copylocal items from None group. For such items to be published, they either
@@ -4502,12 +4509,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         The PublishProtocol property is available only in .NET>=5 so we will used that to exclude .NET FX 4.X case.
       -->
       <!-- Include items from None group for publishing -->
-      <_ClickOnceNoneItemsTemp Include="@(_NoneWithTargetPath->'%(TargetPath)')" Condition="'$(PublishProtocol)'=='Clickonce' And ('%(_NoneWithTargetPath.CopyToOutputDirectory)'=='Always' or '%(_NoneWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest')">
+      <_ClickOnceNoneItemsTemp Include="@(_NoneWithTargetPath->WithoutMetadataValue('CopyToPublishDirectory', 'Never')->'%(TargetPath)')" Condition="'$(PublishProtocol)'=='Clickonce' And ('%(_NoneWithTargetPath.CopyToOutputDirectory)'=='Always' or '%(_NoneWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest')">
         <SavedIdentity>%(Identity)</SavedIdentity>
       </_ClickOnceNoneItemsTemp>
       <_ClickOnceNoneItems Include="@(_ClickOnceNoneItemsTemp->'%(SavedIdentity)')" Condition="'%(Identity)'=='@(PublishFile)' Or '%(Extension)'=='.exe' Or '%(Extension)'=='.dll'" />
 
-      <_ClickOnceFiles Include="@(ContentWithTargetPath);@(_DeploymentManifestIconFile);@(AppConfigWithTargetPath);@(NetCoreRuntimeJsonFilesForClickOnce);@(_ClickOnceRuntimeCopyLocalItems);@(_ClickOnceNoneItems);@(_ClickOnceTransitiveContentItems)"/>
+      <_ClickOnceFiles Include="@(_ClickOnceContentItems);@(_DeploymentManifestIconFile);@(AppConfigWithTargetPath);@(NetCoreRuntimeJsonFilesForClickOnce);@(_ClickOnceRuntimeCopyLocalItems);@(_ClickOnceNoneItems)" />
+
+      <!-- clear temporary item groups to free memory -->
+      <_ClickOnceNoneItemsTemp Remove="@(_ClickOnceNoneItemsTemp)"/>
+      <_ClickOnceNoneItems Remove="@(_ClickOnceNoneItems)"/>
+      <_ClickOnceTransitiveContentItemsTemp Remove="@(_ClickOnceTransitiveContentItemsTemp)"/>
+      <_ClickOnceTransitiveContentItems Remove="@(_ClickOnceTransitiveContentItems)"/>
+      <_ClickOnceContentItems Remove="@(_ClickOnceContentItems)"/>
+      <_ClickOnceRuntimeCopyLocalItems Remove="@(_ClickOnceRuntimeCopyLocalItems)"/>
     </ItemGroup>
 
     <!-- For single file publish, we need to include the SF bundle EXE, application icon file and files excluded from the bundle EXE in the clickonce manifest -->
