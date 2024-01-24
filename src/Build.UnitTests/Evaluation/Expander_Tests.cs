@@ -4333,6 +4333,20 @@ $(
             Assert.True(Guid.TryParse(result, out Guid guid));
         }
 
+        // TODO: update features list
+        [Theory]
+        [InlineData("NonExistingFeature", "NotFound")]
+        [InlineData("Feature1", "Available")]
+        [InlineData("Feature2", "NotAvailable")]
+        public void PropertyFunctionCheckFeatureAvailability(string featureName, string availability)
+        {
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default);
+
+            var result = expander.ExpandIntoStringLeaveEscaped($"$([MSBuild]::CheckFeatureAvailability({featureName}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            Assert.Equal(availability, result);
+        }
+
         [Fact]
         public void PropertyFunctionIntrinsicFunctionGetCurrentToolsDirectory()
         {

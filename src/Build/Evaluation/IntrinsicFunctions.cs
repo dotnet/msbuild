@@ -574,6 +574,11 @@ namespace Microsoft.Build.Evaluation
             return ChangeWaves.AreFeaturesEnabled(wave);
         }
 
+        internal static string CheckFeatureAvailability(string featureName)
+        {
+            return FeatureAvailabilityChecker.CheckFeatureAvailability(featureName).ToString();
+        }
+
         public static string GetCurrentToolsDirectory()
         {
             return BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
