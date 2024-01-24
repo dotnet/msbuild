@@ -60,7 +60,7 @@ namespace Microsoft.Build.Logging
             {
                 return null;
             }
-            // TODO: parsing logic
+
             var data = parameters.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
             var initProjectFile = data[0].Replace("initProjectFile=","");
             var isBinaryLoggerSet = bool.Parse(data[1].Replace("isBinaryLoggerSet=", ""));
