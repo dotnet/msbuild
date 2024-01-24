@@ -1055,6 +1055,7 @@ namespace Microsoft.Build.CommandLine
             {
                 JsonOutputFormatter jsonOutputFormatter = new();
                 jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
+                jsonOutputFormatter.AddItemsInJsonFormat(getItem, project);
                 Console.WriteLine(jsonOutputFormatter.ToString());
             }
 
