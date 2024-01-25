@@ -2556,7 +2556,6 @@ namespace Microsoft.Build.CommandLine
                                                            commandLine);
                     }
 
-                    // why not process the project parameter here?
                     projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
 
                     // figure out which targets we are building

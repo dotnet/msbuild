@@ -1530,36 +1530,15 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFileInProjectDirectoryWithSolutionProjectDifferentNamesShouldBeRespected()
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(directory, "projectFile.proj");
-            string solutionPath = Path.Combine(directory, "solutionFile.sln");
-            string rspPath = Path.Combine(directory, "Directory.Build.rsp");
+            var directory = _env.CreateFolder();
+            var content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Message Text='Completed'/></Target></Project>");
+            directory.CreateFile("projectFile.proj", content);
+            directory.CreateFile("solutionFile.sln", string.Empty);
+            directory.CreateFile("Directory.Build.rsp", "-ignoreProjectExtensions:.sln");
 
-            try
-            {
-                Directory.CreateDirectory(directory);
-
-                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Message Text='Completed'/></Target></Project>");
-                File.WriteAllText(projectPath, content);
-
-                string rspContent = "-ignoreProjectExtensions:.sln";
-                File.WriteAllText(rspPath, rspContent);
-
-                // Incorrect sln file format, which will result fail if picked by msbuild for building
-                File.WriteAllText(solutionPath, string.Empty);
-
-                var msbuildParameters = "\"" + directory + "\"";
-
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
-                successfulExit.ShouldBeTrue();
-            }
-            finally
-            {
-                File.Delete(projectPath);
-                File.Delete(solutionPath);
-                File.Delete(rspPath);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
-            }
+            var msbuildParameters = "\"" + directory.Path + "\"";
+            RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
         }
 
         /// <summary>
