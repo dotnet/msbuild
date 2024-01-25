@@ -73,7 +73,6 @@ namespace Microsoft.Build.UnitTests
         </Project>";
 
         private readonly TestEnvironment _env;
-        private string _logFile;
 
         public BinaryLoggerTests(ITestOutputHelper output)
         {
@@ -81,8 +80,6 @@ namespace Microsoft.Build.UnitTests
 
             // this is needed to ensure the binary logger does not pollute the environment
             _env.WithEnvironmentInvariant();
-
-            _logFile = _env.ExpectFile(".binlog").Path;
         }
 
         public enum BinlogRoundtripTestReplayMode
@@ -101,6 +98,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData(s_testProject2, BinlogRoundtripTestReplayMode.RawEvents)]
         public void TestBinaryLoggerRoundtrip(string projectText, BinlogRoundtripTestReplayMode replayMode)
         {
+            string _logFile = _env.ExpectFile(".binlog").Path;
             var binaryLoggerParameters = new BinaryLoggerParameters($"LogFile={_logFile}");
             var binaryLogger = new BinaryLogger();
 
@@ -209,6 +207,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData(s_testProject2, BinlogRoundtripTestReplayMode.RawEvents)]
         public void TestBinaryLoggerRoundtripEquality(string projectText, BinlogRoundtripTestReplayMode replayMode)
         {
+            string _logFile = _env.ExpectFile(".binlog").Path;
             var binaryLogger = new BinaryLogger();
 
             binaryLogger.BinaryLoggerParameters = new BinaryLoggerParameters(_logFile);
@@ -322,6 +321,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void BinaryLoggerShouldSupportFilePathExplicitParameter()
         {
+            string _logFile = _env.ExpectFile(".binlog").Path;
             var binaryLoggerParameters = new BinaryLoggerParameters($"LogFile={_logFile}");
             var binaryLogger = new BinaryLogger();
             binaryLogger.BinaryLoggerParameters = binaryLoggerParameters;
@@ -332,6 +332,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void UnusedEnvironmentVariablesDoNotAppearInBinaryLog()
         {
+            string _logFile = _env.ExpectFile(".binlog").Path;
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("EnvVar1", "itsValue");
@@ -378,6 +379,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                string _logFile = _env.ExpectFile(".binlog").Path;
                 string contents = $"""
                     <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Hello">
                       <!-- This simple inline task displays "Hello, world!" -->
@@ -439,6 +441,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void BinaryLoggerShouldEmbedFilesViaTaskOutput()
         {
+            string _logFile = _env.ExpectFile(".binlog").Path;
             using var buildManager = new BuildManager();
             var binaryLogger = new BinaryLogger()
             {
@@ -464,9 +467,36 @@ namespace Microsoft.Build.UnitTests
                 $"Embedded files: {string.Join(",", zipArchive.Entries)}");
         }
 
+        [Fact]
+        public void BinaryLoggerShouldReportIncompatibleError()
+        {
+            using var buildManager = new BuildManager();
+            using var env = TestEnvironment.Create();
+            var tmpLogFile = env.GetTempFile(".binlog").Path;
+
+            var binaryLogger = new BinaryLogger()
+            {
+                BinaryLoggerParameters = new BinaryLoggerParameters($"LogFile={tmpLogFile}", "uniqueFileName"),
+            };
+
+            var referenceProject = env.CreateTestProjectWithFiles("reference.proj", @"
+         <Project>
+            <Target Name='Target2'>
+               <Exec Command='echo a'/>
+            </Target>
+         </Project>");
+
+            var message = Should.Throw<LoggerException>(() => buildManager.Build(new BuildParameters() { Loggers = new ILogger[] { binaryLogger } },
+                new BuildRequestData(referenceProject.ProjectFile, new Dictionary<string, string>(), null, new string[] { "Target2" }, null)))
+                .Message.Should().Contain("Incompatible configuration provided");
+
+            binaryLogger.Shutdown();
+        }
+
         [RequiresSymbolicLinksFact]
         public void BinaryLoggerShouldEmbedSymlinkFilesViaTaskOutput()
         {
+            string _logFile = _env.ExpectFile(".binlog").Path;
             string testFileName = "foobar.txt";
             string symlinkName = "symlink1.txt";
             string symlinkLvl2Name = "symlink2.txt";
@@ -532,6 +562,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void BinaryLoggerShouldNotThrowWhenMetadataCannotBeExpanded()
         {
+            string _logFile = _env.ExpectFile(".binlog").Path;
+
             var binaryLoggerParameters = new BinaryLoggerParameters($"LogFile={_logFile}");
             var binaryLogger = new BinaryLogger
             {
@@ -564,6 +596,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void MessagesCanBeLoggedWhenProjectsAreCached()
         {
+            string _logFile = _env.ExpectFile(".binlog").Path;
+
             using var env = TestEnvironment.Create();
 
             env.SetEnvironmentVariable("MSBUILDDEBUGFORCECACHING", "1");
@@ -610,6 +644,8 @@ namespace Microsoft.Build.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                string _logFile = _env.ExpectFile(".binlog").Path;
+
                 var contents = @"
                     <Project>
                         <Target Name='Target2'>
