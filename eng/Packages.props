@@ -23,7 +23,7 @@
     <PackageVersion Include="System.Net.Http" Version="$(SystemNetHttpVersion)" />
     <PackageVersion Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
     <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextVersion)" />
-    <PackageVersion Include="System.Resources.Extensions" Version="$(SystemResourcesExtensionsPackageVersion)" />
+    <PackageVersion Include="System.Resources.Extensions" Version="$(SystemResourcesExtensionsVersion)" />
     <PackageVersion Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafeVersion)" />
     <PackageVersion Include="System.Security.Principal.Windows" Version="$(SystemSecurityPrincipalWindowsVersion)" />
     <PackageVersion Include="System.Text.Encoding.CodePages" Version="$(SystemTextEncodingCodePagesVersion)" />
@@ -31,5 +31,18 @@
     <PackageVersion Include="System.Threading.Channels" Version="$(SystemThreadingChannelsVersion)" />
     <PackageVersion Include="System.Threading.Tasks.Dataflow" Version="$(SystemThreadingTasksDataflowVersion)" />
     <PackageVersion Include="xunit.console" Version="$(XUnitVersion)" />
+
+  </ItemGroup>
+
+  <!-- This set of packages will use different versions based on building binaries for VS. In non-UB modes this has no effect. -->
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageVersion Update="System.Text.Json" Version="$(SystemTextJsonNetFrameworkVersion)" />
+    <PackageVersion Update="System.Collections.Immutable" Version="$(SystemCollectionsImmutableNetFrameworkVersion)" />
+    <PackageVersion Update="System.Configuration.ConfigurationManager" Version="$(SystemConfigurationConfigurationManagerNetFrameworkVersion)" />
+    <PackageVersion Update="System.Reflection.Metadata" Version="$(SystemReflectionMetadataNetFrameworkVersion)" />
+    <PackageVersion Update="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextNetFrameworkVersion)" />
+    <PackageVersion Update="System.Resources.Extensions" Version="$(SystemResourcesExtensionsNetFrameworkVersion)" />
+    <PackageVersion Update="System.Threading.Tasks.Dataflow" Version="$(SystemThreadingTasksDataflowNetFrameworkVersion)" />
+    <PackageVersion Update="System.Threading.Channels" Version="$(SystemThreadingChannelsNetFrameworkVersion)" />
   </ItemGroup>
 </Project>
