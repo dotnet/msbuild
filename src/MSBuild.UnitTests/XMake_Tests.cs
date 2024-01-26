@@ -1439,6 +1439,7 @@ namespace Microsoft.Build.UnitTests
 
             string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
             successfulExit.ShouldBeTrue();
+            output.ShouldContain("[A=]");
         }
 
         /// <summary>
