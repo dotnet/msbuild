@@ -1964,7 +1964,7 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="UseArtifactsOutput" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="UseArtifactsOutput" _locComment="" -->Indicate whether to opt into the centralized output path format. All build outputs from all projects are gathered into a common location, separated by project.</xs:documentation>
+            <xs:documentation><!-- _locID_text="UseArtifactsOutput" _locComment="" -->Indicate whether to opt into the centralized output path format. All build outputs from all projects are gathered into a common location, separated by project. More info: https://learn.microsoft.com/en-us/dotnet/core/sdk/artifacts-output</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="ArtifactsPath" type="msb:StringPropertyType" substitutionGroup="msb:Property">
