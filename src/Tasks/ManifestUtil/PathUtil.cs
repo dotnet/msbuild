@@ -46,7 +46,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             string resolvedPath = Resolve(path);
             Uri u = new Uri(resolvedPath);
             //
-            // GB18030: Uri class does not correctly encode chars in the PUA range for file paths:
+            // GB18030: Uri class does not correctly encode chars in the PUA range for implicit 
+            // file paths (paths without explicit scheme):
             // https://github.com/dotnet/runtime/issues/89538
             // Workaround is to use UriBuilder with the file scheme specified explicitly to 
             // correctly encode the PUA chars.
