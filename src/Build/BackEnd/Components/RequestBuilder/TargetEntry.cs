@@ -569,7 +569,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // Produce the final results.
-                List<TaskItem> targetOutputItems = null;
+                TaskItem[] targetOutputItems = Array.Empty<TaskItem>();
 
                 try
                 {
@@ -623,25 +623,28 @@ namespace Microsoft.Build.BackEnd
 
                         if (keepDupes)
                         {
+                            List<TaskItem> targetOutputItemsList = new();
                             foreach (ItemBucket bucket in batchingBuckets)
                             {
                                 if (targetOutputItems is null)
                                 {
                                     // As an optimization, use the results for the first bucket and if there are no more buckets to process, only a single list is allocated.
-                                    targetOutputItems = bucket.Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation).ToList();
+                                    targetOutputItemsList = bucket.Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation).ToList();
                                 }
                                 else
                                 {
-                                    targetOutputItems.AddRange(bucket.Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation));
+                                    targetOutputItemsList.AddRange(bucket.Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation));
                                 }
                             }
+
+                            targetOutputItems = targetOutputItemsList.ToArray();
                         }
                         else
                         {
                             // Optimize for only one bucket by initializing the HashSet<T> with the first one's items in case there are a lot of items, it won't need to be resized.
                             if (batchingBuckets.Count == 1)
                             {
-                                targetOutputItems = new HashSet<TaskItem>(batchingBuckets[0].Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation)).ToList();
+                                targetOutputItems = new HashSet<TaskItem>(batchingBuckets[0].Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation)).ToArray();
                             }
                             else
                             {
@@ -652,7 +655,7 @@ namespace Microsoft.Build.BackEnd
                                     addedItems.UnionWith(itemsToAdd);
                                 }
 
-                                targetOutputItems = addedItems.ToList();
+                                targetOutputItems = addedItems.ToArray();
                             }
                         }
                     }
@@ -660,10 +663,10 @@ namespace Microsoft.Build.BackEnd
                 finally
                 {
                     // log the last target finished since we now have the target outputs.
-                    targetLoggingContext?.LogTargetBatchFinished(projectFullPath, targetSuccess, targetOutputItems?.Count > 0 ? targetOutputItems : null);
+                    targetLoggingContext?.LogTargetBatchFinished(projectFullPath, targetSuccess, targetOutputItems.Length > 0 ? targetOutputItems : null);
                 }
 
-                _targetResult = new TargetResult(targetOutputItems?.ToArray() ?? Array.Empty<TaskItem>(), aggregateResult, targetLoggingContext?.BuildEventContext);
+                _targetResult = new TargetResult(targetOutputItems, aggregateResult, targetLoggingContext?.BuildEventContext);
 
                 if (aggregateResult.ResultCode == WorkUnitResultCode.Failed && aggregateResult.ActionCode == WorkUnitActionCode.Stop)
                 {
