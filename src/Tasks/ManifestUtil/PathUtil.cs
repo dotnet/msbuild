@@ -229,13 +229,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         private static bool IsAsciiString(string str)
-        {
-            foreach (char c in str)
-            {
-                if (c > 127)
-                {  return false; }
-            }
-            return true;
-        }
+            => str.All(Char.IsAscii)
     }
 }
