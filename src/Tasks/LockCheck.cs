@@ -7,6 +7,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -242,6 +244,31 @@ namespace Microsoft.Build.Tasks
         internal static string GetProcessesLockingFile(string filePath)
         {
             return string.Join(", ", GetLockingProcessInfos(filePath).Select(p => $"{p.ApplicationName} ({p.ProcessId})"));
+        }
+
+        /// <summary>
+        /// Try to get a message to inform the user which processes have a lock on a given file.
+        /// </summary>
+        internal static string GetLockedFileMessage(string file)
+        {
+            string message = string.Empty;
+
+            try
+            {
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+                {
+                    var processes = GetProcessesLockingFile(file);
+                    message = !string.IsNullOrEmpty(processes)
+                        ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("Task.FileLocked", processes)
+                        : String.Empty;
+                }
+            }
+            catch (Exception)
+            {
+                // Never throw if we can't get the processes locking the file.
+            }
+
+            return message;
         }
 
         internal static IEnumerable<ProcessInfo> GetLockingProcessInfos(params string[] paths)

@@ -211,9 +211,15 @@ namespace Microsoft.Build.CommandLine
         /// MSBuild no longer runs any arbitrary code (tasks or loggers) on the main thread, so it never needs the
         /// main thread to be in an STA. Accordingly, to avoid ambiguity, we explicitly use the [MTAThread] attribute.
         /// This doesn't actually do any work unless COM interop occurs for some reason.
+        /// We use the MultiDomain loader policy because we may create secondary AppDomains and need NGEN images
+        /// for our as well as Framework assemblies to be loaded domain neutral so their native images can be used.
+        /// See <see cref="NuGetFrameworkWrapper"/>.
         /// </remarks>
         /// <returns>0 on success, 1 on failure</returns>
         [MTAThread]
+#if FEATURE_APPDOMAIN
+        [LoaderOptimization(LoaderOptimization.MultiDomain)]
+#endif
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         public static int Main(
 #if !FEATURE_GET_COMMANDLINE
@@ -4274,7 +4280,7 @@ namespace Microsoft.Build.CommandLine
             }
             catch (Exception e) when (loggerDescription.IsOptional)
             {
-                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OptionalLoggerCreationMessage", e.Message));
+                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OptionalLoggerCreationMessage", loggerDescription.Name, e.Message));
                 return false;
             }
 

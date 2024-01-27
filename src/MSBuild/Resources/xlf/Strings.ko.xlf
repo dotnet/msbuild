@@ -573,11 +573,11 @@
         <target state="translated">  -logger:&lt;로거&gt;   이 로거를 사용하여 MSBuild의 이벤트를 기록합니다. 여러
                      로거를 지정하려면 각 로거를 개별적으로 지정합니다.
                      &lt;로거&gt; 구문은 다음과 같습니다.
-                       [&lt;클래스&gt;,]&lt;assembly&gt;[,&lt;옵션&gt;][;&lt;매개 변수&gt;]
+                       [&lt;클래스&gt;,]&lt;어셈블리&gt;[,&lt;옵션&gt;][;&lt;매개 변수&gt;]
                      &lt;로거 클래스&gt; 구문은 다음과 같습니다.
                        [&lt;부분 또는 전체 네임스페이스&gt;.]&lt;로거 클래스 이름&gt;
                      &lt;로거 어셈블리&gt; 구문은 다음과 같습니다.
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                       {&lt;어셈블리 이름&gt;[,&lt;strong name&gt;] | &lt;어셈블리 파일&gt;}
                      로거 옵션은 MSBuild가 로거를 만드는 방법을 지정합니다.
                      &lt;로거 매개 변수&gt;는 선택 사항이고 입력한 대로 정확히
                      로거에 전달됩니다. (약식: -l)
@@ -855,11 +855,11 @@
                      로거를 지정하려면 각 로거를 개별적으로 지정합니다.
                      (약식 -dl)
                      &lt;로거&gt; 구문은 다음과 같습니다.
-                       [&lt;클래스&gt;,]&lt;assembly&gt;[,&lt;옵션&gt;][;&lt;매개 변수&gt;]
+                       [&lt;클래스&gt;,]&lt;어셈블리&gt;[,&lt;옵션&gt;][;&lt;매개 변수&gt;]
                      &lt;로거 클래스&gt; 구문은 다음과 같습니다.
                        [&lt;부분 또는 전체 네임스페이스&gt;.]&lt;로거 클래스 이름&gt;
                      &lt;로거 어셈블리&gt; 구문은 다음과 같습니다.
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                       {&lt;어셈블리 이름&gt;[,&lt;strong name&gt;] | &lt;어셈블리 파일&gt;}
                      로거 옵션은 MSBuild가 로거를 만드는 방법을 지정합니다.
                       &lt;로거 매개 변수&gt;는 선택 사항이고
                      입력한 대로 정확히 로거에 전달됩니다. (약식: -l)
@@ -1460,11 +1460,12 @@
         <note>{StrBegin="MSBUILD : error MSB1062: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-warnnotaserror" and "-warnaserror" should not be localized.</note>
       </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
-        <source>The specified logger could not be created and will not be used. {0}</source>
-        <target state="translated">지정된 로거를 만들 수 없어 지정된 로거가 사용되지 않습니다. {0}</target>
+        <source>The specified logger "{0}" could not be created and will not be used. {1}</source>
+        <target state="translated">지정한 로거 "{0}"을(를) 만들 수 없으므로 사용할 수 없습니다. {1}</target>
         <note>
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
-      LOCALIZATION: {0} contains the exception message explaining why the
+      LOCALIZATION: {0} contains the logger description passed on the command line or in a
+      response file. {1} contains the exception message explaining why the
       logger could not be created -- this message comes from the CLR/FX and is localized.
     </note>
       </trans-unit>

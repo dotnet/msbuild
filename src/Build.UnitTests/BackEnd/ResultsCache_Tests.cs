@@ -13,8 +13,6 @@ using Microsoft.Build.Unittest;
 using Shouldly;
 using Xunit;
 
-
-
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd
@@ -188,6 +186,127 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.True(AreResultsIdenticalForTarget(result, response.Results, "testTarget2"));
             Assert.False(response.Results.HasResultsForTarget("testTarget"));
             Assert.Equal(BuildResultCode.Success, response.Results.OverallResult);
+        }
+
+        [Fact]
+        public void TestCacheOnDifferentBuildFlagsPerRequest_ProvideProjectStateAfterBuild()
+        {
+            string targetName = "testTarget1";
+            int submissionId = 1;
+            int nodeRequestId = 0;
+            int configurationId = 1;
+
+            BuildRequest requestWithNoBuildDataFlags = new BuildRequest(
+               submissionId,
+               nodeRequestId,
+               configurationId,
+               new string[1] { targetName } /* escapedTargets */,
+               null /* hostServices */,
+               BuildEventContext.Invalid /* parentBuildEventContext */,
+               null /* parentRequest */,
+               BuildRequestDataFlags.None);
+
+            BuildRequest requestWithProjectStateFlag = new BuildRequest(
+               submissionId,
+               nodeRequestId,
+               configurationId,
+               new string[1] { targetName } /* escapedTargets */,
+               null /* hostServices */,
+               BuildEventContext.Invalid /* parentBuildEventContext */,
+               null /* parentRequest */,
+               BuildRequestDataFlags.ProvideProjectStateAfterBuild);
+
+            BuildRequest requestWithNoBuildDataFlags2 = new BuildRequest(
+               submissionId,
+               nodeRequestId,
+               configurationId,
+               new string[1] { targetName } /* escapedTargets */,
+               null /* hostServices */,
+               BuildEventContext.Invalid /* parentBuildEventContext */,
+               null /* parentRequest */,
+               BuildRequestDataFlags.None);
+
+            BuildResult resultForRequestWithNoBuildDataFlags = new(requestWithNoBuildDataFlags);
+            resultForRequestWithNoBuildDataFlags.AddResultsForTarget(targetName, BuildResultUtilities.GetEmptySucceedingTargetResult());
+            ResultsCache cache = new();
+            cache.AddResult(resultForRequestWithNoBuildDataFlags);
+
+            ResultsCacheResponse cacheResponseForRequestWithNoBuildDataFlags = cache.SatisfyRequest(
+               requestWithNoBuildDataFlags,
+               new List<string>(),
+               new List<string>(new string[] { targetName }),
+               skippedResultsDoNotCauseCacheMiss: false);
+
+            ResultsCacheResponse cachedResponseForProjectState = cache.SatisfyRequest(
+               requestWithProjectStateFlag,
+               new List<string>(),
+               new List<string>(new string[] { targetName }),
+               skippedResultsDoNotCauseCacheMiss: false);
+
+            ResultsCacheResponse cacheResponseForNoBuildDataFlags2 = cache.SatisfyRequest(
+               requestWithNoBuildDataFlags2,
+               new List<string>(),
+               new List<string>(new string[] { targetName }),
+               skippedResultsDoNotCauseCacheMiss: false);
+
+            Assert.Equal(ResultsCacheResponseType.Satisfied, cacheResponseForRequestWithNoBuildDataFlags.Type);
+
+            // Because ProvideProjectStateAfterBuildFlag was provided as a part of BuildRequest
+            Assert.Equal(ResultsCacheResponseType.NotSatisfied, cachedResponseForProjectState.Type);
+
+            Assert.Equal(ResultsCacheResponseType.Satisfied, cacheResponseForNoBuildDataFlags2.Type);
+        }
+
+        [Fact]
+        public void TestCacheOnDifferentBuildFlagsPerRequest_ProvideSubsetOfStateAfterBuild()
+        {
+            string targetName = "testTarget1";
+            int submissionId = 1;
+            int nodeRequestId = 0;
+            int configurationId = 1;
+
+            BuildRequest requestWithSubsetFlag1 = new BuildRequest(
+                submissionId,
+                nodeRequestId,
+                configurationId,
+                new string[1] { targetName } /* escapedTargets */,
+                null /* hostServices */,
+                BuildEventContext.Invalid /* parentBuildEventContext */,
+                null /* parentRequest */,
+                BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild);
+
+            BuildRequest requestWithSubsetFlag2 = new BuildRequest(
+                submissionId,
+                nodeRequestId,
+                configurationId,
+                new string[1] { targetName } /* escapedTargets */,
+                null /* hostServices */,
+                BuildEventContext.Invalid /* parentBuildEventContext */,
+                null /* parentRequest */,
+                BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild);
+
+            BuildResult resultForRequestWithSubsetFlag1 = new(requestWithSubsetFlag1);
+            resultForRequestWithSubsetFlag1.AddResultsForTarget(targetName, BuildResultUtilities.GetEmptySucceedingTargetResult());
+            ResultsCache cache = new();
+            cache.AddResult(resultForRequestWithSubsetFlag1);
+
+            ResultsCacheResponse cachedResponseWithSubsetFlag1 = cache.SatisfyRequest(
+            requestWithSubsetFlag1,
+            new List<string>(),
+            new List<string>(new string[] { targetName }),
+            skippedResultsDoNotCauseCacheMiss: false);
+
+            ResultsCacheResponse cachedResponseWithSubsetFlag2 = cache.SatisfyRequest(
+                requestWithSubsetFlag2,
+                new List<string>(),
+                new List<string>(new string[] { targetName }),
+                skippedResultsDoNotCauseCacheMiss: false);
+
+            // It was agreed not to return cache results if ProvideSubsetOfStateAfterBuild is passed,
+            // because RequestedProjectState may have different user filters defined.
+            // It is more reliable to ignore the cached value. 
+            Assert.Equal(ResultsCacheResponseType.NotSatisfied, cachedResponseWithSubsetFlag1.Type);
+            Assert.Equal(ResultsCacheResponseType.NotSatisfied, cachedResponseWithSubsetFlag2.Type);    
         }
 
         [Fact]
