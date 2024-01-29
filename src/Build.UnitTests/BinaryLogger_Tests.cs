@@ -493,6 +493,34 @@ namespace Microsoft.Build.UnitTests
             binaryLogger.Shutdown();
         }
 
+        [Fact]
+        public void BinaryLoggerShouldGenerateUniqueLoggerName()
+        {
+            using var buildManager = new BuildManager();
+            using var env = TestEnvironment.Create();
+            env.SetCurrentDirectory(env.DefaultTestDirectory.Path);
+
+            var binaryLogger = new BinaryLogger()
+            {
+                BinaryLoggerParameters = new BinaryLoggerParameters("", "uniqueFileName") { InitProjectFile= "reference.proj" },
+            };
+
+            var referenceProject = env.CreateTestProjectWithFiles("reference.proj", @"
+         <Project>
+            <Target Name='Target2'>
+               <Exec Command='echo a'/>
+            </Target>
+         </Project>");
+
+            Should.NotThrow(() => buildManager.Build(new BuildParameters() { Loggers = new ILogger[] { binaryLogger } },
+                new BuildRequestData(referenceProject.ProjectFile, new Dictionary<string, string>(), null, new string[] { "Target2" }, null)));
+
+            var binlogFiles = Directory.GetFiles(env.DefaultTestDirectory.Path, "*.binlog");
+            
+            binlogFiles.Length.ShouldBe(1);
+            binlogFiles[0].ShouldContain("reference.proj");
+        }
+
         [RequiresSymbolicLinksFact]
         public void BinaryLoggerShouldEmbedSymlinkFilesViaTaskOutput()
         {
