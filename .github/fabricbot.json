@@ -82,9 +82,9 @@
             }
           },
           {
-            "name": "noLabel",
+            "name": "hasLabel",
             "parameters": {
-              "label": "needs-triage"
+              "label": "triaged"
             }
           },
           {
@@ -220,9 +220,9 @@
             }
           },
           {
-            "name": "noLabel",
+            "name": "hasLabel",
             "parameters": {
-              "label": "needs-triage"
+              "label": "triaged"
             }
           }
         ],
@@ -293,9 +293,9 @@
             }
           },
           {
-            "name": "addLabel",
+            "name": "removeLabel",
             "parameters": {
-              "label": "needs-triage"
+              "label": "triaged"
             }
           }
         ]
@@ -343,12 +343,12 @@
         "eventNames": [
           "issue_comment"
         ],
-        "taskName": "Apply needs-triage to closed stale issues that get comments",
+        "taskName": "Remove triaged to closed stale issues that get comments",
         "actions": [
           {
-            "name": "addLabel",
+            "name": "removeLabel",
             "parameters": {
-              "label": "needs-triage"
+              "label": "triaged"
             }
           }
         ]
@@ -370,9 +370,9 @@
               }
             },
             {
-              "name": "hasLabel",
+              "name": "noLabel",
               "parameters": {
-                "label": "needs-triage"
+                "label": "triaged"
               }
             }
           ]
@@ -382,12 +382,12 @@
           "issues",
           "project_card"
         ],
-        "taskName": "remove needs-triage when needs-more-info is applied",
+        "taskName": "Add triaged when needs-more-info is applied",
         "actions": [
           {
-            "name": "removeLabel",
+            "name": "addLabel",
             "parameters": {
-              "label": "needs-triage"
+              "label": "triaged"
             }
           }
         ]
@@ -425,9 +425,9 @@
         "taskName": "author responds to `needs-more-info` gets `author-responded`",
         "actions": [
           {
-            "name": "addLabel",
+            "name": "removeLabel",
             "parameters": {
-              "label": "needs-triage"
+              "label": "triaged"
             }
           },
           {
