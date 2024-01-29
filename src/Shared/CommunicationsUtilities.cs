@@ -377,7 +377,7 @@ namespace Microsoft.Build.Internal
         {
             if (newEnvironment != null)
             {
-                // First, empty out any old variables
+                // First, delete all no longer set variables
                 foreach (KeyValuePair<string, string> entry in CommunicationsUtilities.GetEnvironmentVariables())
                 {
                     if (!newEnvironment.ContainsKey(entry.Key))
