@@ -229,6 +229,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         private static bool IsAsciiString(string str)
-            => str.All(Char.IsAscii)
+            => str.All(Char.IsAscii);
     }
 }
