@@ -1964,12 +1964,12 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="UseArtifactsOutput" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="UseArtifactsOutput" _locComment="" -->Indicate whether to opt into the centralized output path format. All build outputs from all projects are gathered into a common location, separated by project. More info: https://learn.microsoft.com/en-us/dotnet/core/sdk/artifacts-output</xs:documentation>
+            <xs:documentation><!-- _locID_text="UseArtifactsOutput" _locComment="" -->Use a centralized location for all outputs of this project. The location of the centralized outputs is set by the ArtifactsPath property. Project outputs are grouped by kind, then by project. See https://learn.microsoft.com/en-us/dotnet/core/sdk/artifacts-output for complete details.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="ArtifactsPath" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="ArtifactsPath" _locComment="" -->The artifacts path. All output from the project, including build, publish, and pack output, will go in subfolders under the specified path.</xs:documentation>
+            <xs:documentation><!-- _locID_text="ArtifactsPath" _locComment="" -->The path to use for the centralized outputs - if set, UseArtifactsOutput will be defaulted to true. Project outputs will be placed under this path grouped by kind, then by project. See https://learn.microsoft.com/en-us/dotnet/core/sdk/artifacts-output for complete details.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="PackageOutputPath" substitutionGroup="msb:Property">
