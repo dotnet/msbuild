@@ -270,10 +270,14 @@ namespace System.Deployment.Internal.CodeSigning
                                Sha256SignatureMethodUri);
 
 #if RUNTIME_TYPE_NETCORE
-            CryptoConfig.AddAlgorithm(typeof(SHA256),
+#pragma warning disable SYSLIB0021 // Type or member is obsolete
+            // SHA256 can not be used since it is an abstract class.
+            // CalculateHashValue internally calls CryptoConfig.CreateFromName and it causes instantiation problems.
+            CryptoConfig.AddAlgorithm(typeof(SHA256Managed),
                                Sha256DigestMethod);
+#pragma warning restore SYSLIB0021 // Type or member is obsolete
 #else
-            CryptoConfig.AddAlgorithm(typeof(System.Security.Cryptography.SHA256Cng),
+            CryptoConfig.AddAlgorithm(typeof(SHA256Cng),
                                Sha256DigestMethod);
 #endif
         }
@@ -758,7 +762,7 @@ namespace System.Deployment.Internal.CodeSigning
             // Add an enveloped and an Exc-C14N transform.
             reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
 #if (false) // BUGBUG: LTA transform complaining about issuer node not found.
-            reference.AddTransform(new XmlLicenseTransform()); 
+            reference.AddTransform(new XmlLicenseTransform());
 #endif
             reference.AddTransform(new XmlDsigExcC14NTransform());
 
@@ -810,12 +814,27 @@ namespace System.Deployment.Internal.CodeSigning
 
                 try
                 {
-                    byte[] nonce = new byte[24];
+                    byte[] nonce = new byte[32];
 
                     using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
                     {
                         rng.GetBytes(nonce);
                     }
+
+                    // Eventually, CryptEncodeObjectEx(...) is called on a CRYPT_TIMESTAMP_REQUEST with this nonce,
+                    // and CryptEncodeObjectEx(...) interprets the nonce as a little endian, DER-encoded integer value
+                    // (without tag and length), and may even strip leading bytes from the big endian representation
+                    // of the byte sequence to achieve proper integer DER encoding.
+                    //
+                    // If the nonce is changed after the client generates it, the timestamp server would receive
+                    // and return a nonce that does not agree with the client's original nonce.
+                    //
+                    // To ensure this does not happen, ensure that the most significant byte in the little
+                    // endian byte sequence is in the 0x01-0x7F range; clear that byte's most significant bit
+                    // and set that byte's least significant bit.
+ 
+                    nonce[nonce.Length - 1] &= 0x7f;
+                    nonce[nonce.Length - 1] |= 0x01;
 
                     Win32.CRYPT_TIMESTAMP_PARA para = new Win32.CRYPT_TIMESTAMP_PARA()
                     {

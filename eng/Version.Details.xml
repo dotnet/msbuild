@@ -1,90 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="8.0.0-alpha.1.23424.1">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="8.0.0-alpha.1.24061.1">
       <Uri>https://github.com/dotnet/source-build-reference-packages</Uri>
-      <Sha>93c23409e630c4f267234540b0e3557b76a53ef4</Sha>
+      <Sha>453a37ef7ae6c335cd49b3b9ab7713c87faeb265</Sha>
       <SourceBuild RepoName="source-build-reference-packages" ManagedOnly="true" />
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.CodeDom" Version="7.0.0">
-      <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
+    <Dependency Name="System.CodeDom" Version="8.0.0">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
+      <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
     </Dependency>
     <!-- Necessary for source-build due to being a transitive dependency of System.Reflection.MetadataLoadContext.
       This allows the package to be retrieved from previously-source-built artifacts and flow in as dependencies
       of the packages produced by msbuild. -->
-    <Dependency Name="System.Collections.Immutable" Version="7.0.0">
-      <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
+    <Dependency Name="System.Collections.Immutable" Version="8.0.0">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
+      <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the package to be retrieved from previously-source-built artifacts
       and flow in as dependencies of the packages produced by msbuild. -->
-    <Dependency Name="System.Configuration.ConfigurationManager" Version="7.0.0">
-      <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
+    <Dependency Name="System.Configuration.ConfigurationManager" Version="8.0.0">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
+      <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the package to be retrieved from previously-source-built artifacts
       and flow in as dependencies of the packages produced by msbuild. -->
-    <Dependency Name="System.Reflection.Metadata" Version="7.0.0">
-      <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
+    <Dependency Name="System.Reflection.Metadata" Version="8.0.0">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
+      <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the package to be retrieved from previously-source-built artifacts
       and flow in as dependencies of the packages produced by msbuild. -->
-    <Dependency Name="System.Reflection.MetadataLoadContext" Version="7.0.0">
-      <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
+    <Dependency Name="System.Reflection.MetadataLoadContext" Version="8.0.0">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
+      <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Resources.Extensions" Version="7.0.0">
-      <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
+    <Dependency Name="System.Resources.Extensions" Version="8.0.0">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
+      <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the package to be retrieved from previously-source-built artifacts
       and flow in as dependencies of the packages produced by msbuild. -->
-    <Dependency Name="System.Security.Cryptography.Pkcs" Version="7.0.2">
-      <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
+    <Dependency Name="System.Security.Cryptography.Pkcs" Version="8.0.0">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
+      <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Security.Cryptography.Xml" Version="7.0.1">
-      <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
+    <Dependency Name="System.Security.Cryptography.Xml" Version="8.0.0">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
+      <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
     </Dependency>
-    <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Security.Permissions" Version="7.0.0">
-      <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
+    <Dependency Name="System.Text.Json" Version="8.0.0">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
+      <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
     </Dependency>
-    <Dependency Name="System.Text.Json" Version="7.0.3">
-      <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>5b20af47d99620150c53eaf5db8636fdf730b126</Sha>
+    <Dependency Name="System.Threading.Tasks.Dataflow" Version="8.0.0">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
+      <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
+    </Dependency>
+    <Dependency Name="System.Threading.Channels" Version="8.0.0">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
+      <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="8.0.0-beta.23425.2">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="8.0.0-beta.24059.4">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>90c167d5c57de4a8bced566379dbd893556c94e8</Sha>
+      <Sha>61ae141d2bf3534619265c8f691fd55dc3e75147</Sha>
       <SourceBuild RepoName="arcade" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XliffTasks" Version="1.0.0-beta.23423.1" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
+    <Dependency Name="Microsoft.DotNet.XliffTasks" Version="1.0.0-beta.23475.1" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
       <Uri>https://github.com/dotnet/xliff-tasks</Uri>
-      <Sha>ed9a83526483c094fb51e7000b6f816ce6cb0325</Sha>
+      <Sha>73f0850939d96131c28cf6ea6ee5aacb4da0083a</Sha>
       <SourceBuild RepoName="xliff-tasks" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.8.0-preview.1.82">
+    <Dependency Name="NuGet.Build.Tasks" Version="6.9.0-preview.1.70">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>7bb6ca5f6930d23fd93820dfc9c6a4373c8fd691</Sha>
+      <Sha>6a82332d4936d893fb1e22fd86f2e3cb4d54c471</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.8.0-2.23426.1">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.9.0-3.23629.3">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>34268d1bb9370c7b01c742303a895a99daf10d6a</Sha>
+      <Sha>ebb588725e707db23d8723b633258e7eb918277b</Sha>
       <SourceBuild RepoName="roslyn" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="8.0.0-beta.23425.2">
+    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="8.0.0-beta.24059.4">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>90c167d5c57de4a8bced566379dbd893556c94e8</Sha>
+      <Sha>61ae141d2bf3534619265c8f691fd55dc3e75147</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

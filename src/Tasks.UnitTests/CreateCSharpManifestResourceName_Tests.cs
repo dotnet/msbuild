@@ -756,7 +756,7 @@ namespace ClassLibrary2
 namespace ClassLibrary3
 #endif
 {
-    class MyForm 
+    class MyForm
     {
     }
 }"),

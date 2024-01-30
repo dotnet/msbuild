@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Threading;
 using System.Xml;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
@@ -1154,7 +1155,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     // We need to update the set of global properties to merge in the ProjectCollection global properties --
                     // otherwise we might end up declaring "not matching" a project that actually does ... and then throw
-                    // an exception when we go to actually add the newly created project to the ProjectCollection. 
+                    // an exception when we go to actually add the newly created project to the ProjectCollection.
                     // BUT remember that project global properties win -- don't override a property that already exists.
                     foreach (KeyValuePair<string, string> globalProperty in GlobalProperties)
                     {
@@ -1171,9 +1172,9 @@ namespace Microsoft.Build.Evaluation
 
                 if (toolsVersion == null)
                 {
-                    // Load the project XML to get any ToolsVersion attribute. 
+                    // Load the project XML to get any ToolsVersion attribute.
                     // If there isn't already an equivalent project loaded, the real load we'll do will be satisfied from the cache.
-                    // If there is already an equivalent project loaded, we'll never need this XML -- but it'll already 
+                    // If there is already an equivalent project loaded, we'll never need this XML -- but it'll already
                     // have been loaded by that project so it will have been satisfied from the ProjectRootElementCache.
                     // Either way, no time wasted.
                     try
@@ -1350,7 +1351,7 @@ namespace Microsoft.Build.Evaluation
 
                 // Aggressively release any strings from all the contributing documents.
                 // It's fine if we cache less (by now we likely did a lot of loading and got the benefits)
-                // If we don't do this, we could be releasing the last reference to a 
+                // If we don't do this, we could be releasing the last reference to a
                 // ProjectRootElement, causing it to fall out of the weak cache leaving its strings and XML
                 // behind in the string cache.
                 project.Xml.XmlDocument.ClearAnyCachedStrings();
@@ -1549,6 +1550,13 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Logs a BuildFinished event. This is used specifically when a ProjectCollection is created but never actually built, yet a BuildFinished event
+        /// is still desired. As an example, if a Project is just meant to be evaluated, but a binlog is also collected, that binlog should be able to
+        /// say the build succeeded or failed. This provides a mechanism to achieve that.
+        /// </summary>
+        public void LogBuildFinishedEvent(bool success) => _loggingService.LogBuildFinished(success);
+
+        /// <summary>
         /// Called by a Project object to load itself into this collection.
         /// If the project was already loaded under a different name, it is unloaded.
         /// Stores the project in the list of loaded projects if it has a name.
@@ -1571,12 +1579,12 @@ namespace Microsoft.Build.Evaluation
                     ErrorUtilities.VerifyThrowInvalidOperation(existed, "OM_ProjectWasNotLoaded");
                 }
 
-                // The only time this ever gets called with a null full path is when the project is first being 
-                // constructed.  The mere fact that this method is being called means that this project will belong 
-                // to this project collection.  As such, it has already had all necessary global properties applied 
-                // when being constructed -- we don't need to do anything special here. 
-                // If we did add global properties here, we would just end up either duplicating work or possibly 
-                // wiping out global properties set on the project meant to override the ProjectCollection copies. 
+                // The only time this ever gets called with a null full path is when the project is first being
+                // constructed.  The mere fact that this method is being called means that this project will belong
+                // to this project collection.  As such, it has already had all necessary global properties applied
+                // when being constructed -- we don't need to do anything special here.
+                // If we did add global properties here, we would just end up either duplicating work or possibly
+                // wiping out global properties set on the project meant to override the ProjectCollection copies.
                 _loadedProjects.AddProject(project);
 
                 if (_hostServices != null)
@@ -1725,6 +1733,7 @@ namespace Microsoft.Build.Evaluation
             {
                 try
                 {
+                    (LoggingService as LoggingService)?.WaitForLoggingToProcessEvents();
                     ((IBuildComponent)LoggingService).ShutdownComponent();
                 }
                 catch (LoggerException)

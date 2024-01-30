@@ -1123,7 +1123,7 @@ namespace Microsoft.Build.Tasks
                             LogReferenceDependenciesAndSourceItemsToStringBuilder(conflictCandidate.ConflictVictorName.FullName, victor, logDependencies);
 
                             // Log the reference which lost the conflict and the dependencies and source items which caused it.
-                            LogReferenceDependenciesAndSourceItemsToStringBuilder(fusionName, conflictCandidate, logDependencies.AppendLine());
+                            LogReferenceDependenciesAndSourceItemsToStringBuilder(fusionName, conflictCandidate, logDependencies.AppendLine(), referenceIsUnified: true);
 
                             string output = StringBuilderCache.GetStringAndRelease(logConflict);
                             string details = string.Empty;
@@ -1207,7 +1207,7 @@ namespace Microsoft.Build.Tasks
 
                                         assemblyIdentityAttributes.Add(new XAttribute("name", idealRemappingPartialAssemblyName.Name));
 
-                                        // We use "neutral" for "Invariant Language (Invariant Country)" in assembly names.
+                                        // We use "neutral" for "Invariant Language (Invariant Country/Region)" in assembly names.
                                         var cultureString = idealRemappingPartialAssemblyName.CultureName;
                                         assemblyIdentityAttributes.Add(new XAttribute("culture", String.IsNullOrEmpty(idealRemappingPartialAssemblyName.CultureName) ? "neutral" : idealRemappingPartialAssemblyName.CultureName));
 
@@ -1320,11 +1320,14 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Log the source items and dependencies which lead to a given item.
         /// </summary>
-        private void LogReferenceDependenciesAndSourceItemsToStringBuilder(string fusionName, Reference conflictCandidate, StringBuilder log)
+        private void LogReferenceDependenciesAndSourceItemsToStringBuilder(string fusionName, Reference conflictCandidate, StringBuilder log, bool referenceIsUnified = false)
         {
             ErrorUtilities.VerifyThrowInternalNull(conflictCandidate, nameof(conflictCandidate));
             log.Append(Strings.FourSpaces);
-            log.Append(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ReferenceDependsOn", fusionName, conflictCandidate.FullPath));
+
+            string resource = referenceIsUnified ? "ResolveAssemblyReference.UnifiedReferenceDependsOn" : "ResolveAssemblyReference.ReferenceDependsOn";
+
+            log.Append(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(resource, fusionName, conflictCandidate.FullPath));
 
             if (conflictCandidate.IsPrimary)
             {
@@ -2063,12 +2066,6 @@ namespace Microsoft.Build.Tasks
             {
                 // Either the cache is dirty (we added or updated an item) or the number of items actually used is less than what
                 // we got by reading the state file prior to execution. Serialize the cache into the state file.
-                if (FailIfNotIncremental)
-                {
-                    Log.LogErrorFromResources("ResolveAssemblyReference.WritingCacheFile", _stateFile);
-                    return;
-                }
-
                 _cache.SerializeCache(_stateFile, Log);
             }
         }

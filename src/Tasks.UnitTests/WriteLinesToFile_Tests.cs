@@ -71,7 +71,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 File.Delete(file);
 
-                // Write ANSI .. that won't work! 
+                // Write ANSI .. that won't work!
                 a = new WriteLinesToFile
                 {
                     BuildEngine = new MockEngine(_output),

@@ -557,6 +557,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         currentBuildEnvironment.Mode,
                         currentBuildEnvironment.CurrentMSBuildExePath,
                         currentBuildEnvironment.RunningTests,
+                        currentBuildEnvironment.RunningInMSBuildExe,
                         runningInVisualStudio: true,
                         visualStudioPath: currentBuildEnvironment.VisualStudioInstallRootDirectory));
 
@@ -674,6 +675,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         currentBuildEnvironment.Mode,
                         currentBuildEnvironment.CurrentMSBuildExePath,
                         currentBuildEnvironment.RunningTests,
+                        currentBuildEnvironment.RunningInMSBuildExe,
                         runningInVisualStudio: true,
                         visualStudioPath: currentBuildEnvironment.VisualStudioInstallRootDirectory));
 
@@ -1440,6 +1442,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         currentBuildEnvironment.Mode,
                         currentBuildEnvironment.CurrentMSBuildExePath,
                         currentBuildEnvironment.RunningTests,
+                        currentBuildEnvironment.RunningInMSBuildExe,
                         runningInVisualStudio: true,
                         visualStudioPath: currentBuildEnvironment.VisualStudioInstallRootDirectory));
 
@@ -1547,7 +1550,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         // This test ensures that scheduling proxy builds on the inproc node works nicely within the Scheduler
         // if the BuildRequestConfigurations for those proxy builds have built before (or are still building) on
         // the out of proc node.
-        // More details: https://github.com/dotnet/msbuild/pull/6635 
+        // More details: https://github.com/dotnet/msbuild/pull/6635
         public void ProxyCacheHitsOnPreviousCacheMissesShouldWork()
         {
             var cacheNotApplicableTarget = "NATarget";

@@ -912,7 +912,7 @@ namespace Microsoft.Build.Evaluation
         /// uberGlob.IsMatch("foo.cs");
         /// ]]>
         /// </code>
-        /// 
+        ///
         /// </remarks>
         /// <returns>
         /// List of <see cref="GlobResult"/>.
@@ -4118,7 +4118,7 @@ namespace Microsoft.Build.Evaluation
             /// Items in this project, ordered within groups of item types.
             /// Protected by an upcast to IEnumerable.
             /// </summary>
-            public ItemDictionary<ProjectItem> Items { get; private set; }
+            public IItemDictionary<ProjectItem> Items { get; private set; }
 
             public List<ProjectItemElement> EvaluatedItemElements { get; private set; }
 

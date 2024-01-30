@@ -26,6 +26,16 @@
         <note>{StrBegin="MSB4003: "}UE: Tasks are not allowed to use incorrect case for reserved attributes on the task nodes e.g. "continueonerror"
     instead of the "ContinueOnError".</note>
       </trans-unit>
+      <trans-unit id="BuildFinishedQuestionFailure">
+        <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
+        <target state="translated">問題建立失敗。建置提早結束，因為它遇到不是最新的目標或工作。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildFinishedQuestionSuccess">
+        <source>Question build succeeded. Up-to-date checks passed.</source>
+        <target state="translated">問題建立成功。最新版本檢查已通過。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildInProgress">
         <source>The operation cannot be completed because a build is already in progress.</source>
         <target state="translated">無法完成作業，因為建置已經在進行中。</target>
@@ -212,8 +222,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
-        <source>A required NuGet assembly was not found. Expected Path: {0}</source>
-        <target state="translated">找不到必要的 NuGet 元件。預期的路徑: {0}</target>
+        <source>A required NuGet assembly '{0}' could not be loaded.</source>
+        <target state="translated">無法載入必要的 NuGet 組件 '{0}'。</target>
         <note />
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
@@ -262,6 +272,11 @@
       <trans-unit id="ProjectCacheException">
         <source>MSB4273: The project cache threw an unhandled exception from the {0} method.</source>
         <target state="translated">MSB4273: 專案快取從 {0} 方法擲回未處理的例外狀況。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheHandleBuildResultFailed">
+        <source>MSB4269: The project cache failed while handling a build result for the following project: {0}.</source>
+        <target state="translated">MSB4269: 處理下列專案的組建結果時，專案快取失敗: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheHitWithDefaultTargets">
@@ -370,6 +385,22 @@
         <target state="translated">MSB4274: 停用 inproc 節點會在使用可發出 proxy 組建要求的專案快取外掛程式時，導致效能降低。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ReportFileAccessesX64Only">
+        <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
+        <target state="translated">目前只支援使用 MSBuild 的 x64 變體來報告檔案存取。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKResolverAttempt">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}".
+Warnings: {2}
+Errors: {3}</source>
+        <target state="new">The "{0}" resolver attempted to resolve the SDK "{1}".
+Warnings: {2}
+Errors: {3}</target>
+        <note>
+      LOCALIZATION: Do not localize the word SDK. "{2}" is new line separated warnings or "null". "{3}" is new line separated errors or "null".
+    </note>
+      </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
         <source>MSB4242: SDK Resolver Failure: "{0}"</source>
         <target state="translated">MSB4242: SDK 解析程式失敗: "{0}"</target>
@@ -431,6 +462,11 @@
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
     </note>
       </trans-unit>
+      <trans-unit id="SucceededToResolveSDK">
+        <source>The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</source>
+        <target state="new">The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskAcquiredCores">
         <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
         <target state="translated">工作 "{0}" 已要求 {1} 個核心、已取得 {2} 個核心，現在共保留 {3} 個核心。</target>
@@ -439,6 +475,11 @@
       <trans-unit id="TaskAssemblyLoaded">
         <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</source>
         <target state="translated">組件在 {0}{1} 期間載入: {2} (位置: {3}，MVID: {4}，AppDomain: {5})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TaskAssemblyLoadedWithAssemblyLoadContext">
+        <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</source>
+        <target state="translated">組件在 {0}{1} 期間載入: {2} (位置: {3}，MVID: {4}，AssemblyLoadContext: {5})</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
@@ -2555,13 +2596,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
         <target state="translated">MSB4241: SDK 參考 "{0}" 版本 "{1}" 已改為解析成版本 "{2}"。若您未將參考的版本更新為符合的版本，您可能使用了與預期不同的版本。</target>
         <note>{StrBegin="MSB4241: "}
-      LOCALIZATION:  Do not localize the word SDK.
-    </note>
-      </trans-unit>
-      <trans-unit id="SdkResolving">
-        <source>Resolving SDK '{0}'...</source>
-        <target state="translated">正在解析 SDK '{0}'...</target>
-        <note>
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>

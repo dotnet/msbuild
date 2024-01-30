@@ -26,6 +26,16 @@
         <note>{StrBegin="MSB4003: "}UE: Tasks are not allowed to use incorrect case for reserved attributes on the task nodes e.g. "continueonerror"
     instead of the "ContinueOnError".</note>
       </trans-unit>
+      <trans-unit id="BuildFinishedQuestionFailure">
+        <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
+        <target state="translated">Soru derleme BAŞARISIZ oldu. Güncel olmayan bir hedef veya görev ile karşılaştığından derleme işleminden erken çıkıldı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildFinishedQuestionSuccess">
+        <source>Question build succeeded. Up-to-date checks passed.</source>
+        <target state="translated">Soru derleme başarılı oldu. Güncellik denetimleri başarılı oldu.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildInProgress">
         <source>The operation cannot be completed because a build is already in progress.</source>
         <target state="translated">Bir oluşturma zaten devam ettiği için işlem tamamlanamıyor.</target>
@@ -212,8 +222,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
-        <source>A required NuGet assembly was not found. Expected Path: {0}</source>
-        <target state="translated">Gereken NuGet derlemesi bulunamadı. Beklenen Yol: {0}</target>
+        <source>A required NuGet assembly '{0}' could not be loaded.</source>
+        <target state="translated">Gerekli bir NuGet '{0}' derlemesi yüklenemedi.</target>
         <note />
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
@@ -262,6 +272,11 @@
       <trans-unit id="ProjectCacheException">
         <source>MSB4273: The project cache threw an unhandled exception from the {0} method.</source>
         <target state="translated">MSB4273: Proje önbelleği {0} yönteminden yakalanamayan özel durum oluşturdu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheHandleBuildResultFailed">
+        <source>MSB4269: The project cache failed while handling a build result for the following project: {0}.</source>
+        <target state="translated">MSB4269: Proje önbelleği şu proje için bir derleme sonucu işlenirken başarısız oldu: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheHitWithDefaultTargets">
@@ -370,6 +385,22 @@
         <target state="translated">MSB4274: InProc düğümünün devre dışı bırakılması, ara sunucu oluşturma istekleri gönderen proje önbelleği eklentileri kullanılırken performans düşüşüne yol açar.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ReportFileAccessesX64Only">
+        <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
+        <target state="translated">Raporlama dosyası erişimleri şu anda yalnızca MSBuild x64 varyantı kullanıldığında destekleniyor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKResolverAttempt">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}".
+Warnings: {2}
+Errors: {3}</source>
+        <target state="new">The "{0}" resolver attempted to resolve the SDK "{1}".
+Warnings: {2}
+Errors: {3}</target>
+        <note>
+      LOCALIZATION: Do not localize the word SDK. "{2}" is new line separated warnings or "null". "{3}" is new line separated errors or "null".
+    </note>
+      </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
         <source>MSB4242: SDK Resolver Failure: "{0}"</source>
         <target state="translated">MSB4242: SDK Çözümleyici Hatası: "{0}"</target>
@@ -431,6 +462,11 @@
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
     </note>
       </trans-unit>
+      <trans-unit id="SucceededToResolveSDK">
+        <source>The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</source>
+        <target state="new">The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskAcquiredCores">
         <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
         <target state="translated">"{0}" görevi {1} çekirdek istedi, {2} çekirdek aldı ve şu anda toplam {3} çekirdek tutuyor.</target>
@@ -439,6 +475,11 @@
       <trans-unit id="TaskAssemblyLoaded">
         <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</source>
         <target state="translated">Derleme {0}{1} sırasında yüklendi: {2} (konum: {3}, MVID: {4}, AppDomain: {5})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TaskAssemblyLoadedWithAssemblyLoadContext">
+        <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</source>
+        <target state="translated">Derleme {0}{1} sırasında yüklendi: {2} (konum: {3}, MVID: {4}, AssemblyLoadContext: {5})</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
@@ -2555,13 +2596,6 @@ Kullanım:             {0} Ortalama Kullanım: {1:###.0}</target>
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
         <target state="translated">MSB4241: "{0}" SDK başvurusunun "{1}" sürümü, bunun yerine sürüm "{2}" olarak çözümlendi. Başvurulan sürümü eşleşecek şekilde güncelleştirmezseniz beklenen sürümden farklı bir sürüm kullanıyor olabilirsiniz.</target>
         <note>{StrBegin="MSB4241: "}
-      LOCALIZATION:  Do not localize the word SDK.
-    </note>
-      </trans-unit>
-      <trans-unit id="SdkResolving">
-        <source>Resolving SDK '{0}'...</source>
-        <target state="translated">'{0}' SDK’sı çözümleniyor...</target>
-        <note>
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>

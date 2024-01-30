@@ -191,6 +191,16 @@
         <target state="translated">Tworzenie twardego łącza w celu skopiowania „{0}” do „{1}”.</target>
         <note>LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
+      <trans-unit id="Copy.IOException">
+        <source>MSB3894: Got {0} copying "{1}" to "{2}" and HR is {3}</source>
+        <target state="translated">MSB3894: „Mam {0} kopiowane z „{1}” do „{2}”, a HR to {3}”</target>
+        <note>{StrBegin="MSB3894: "} LOCALIZATION: {0} is exception.ToString(), {1} and {2} are paths, {3} is a number")</note>
+      </trans-unit>
+      <trans-unit id="Copy.IncompatibleParameters">
+        <source>MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</source>
+        <target state="translated">MSB3896: parametry „{0}” i „{1}” zostały określone jako parametry w pliku projektu, ale nie mogą być używane razem. Wybierz jeden lub drugi.</target>
+        <note>{StrBegin="MSB3896: "}</note>
+      </trans-unit>
       <trans-unit id="Copy.LinkFailed">
         <source>MSB3893: Could not use a link to copy "{0}" to "{1}".</source>
         <target state="translated">MSB3893: Nie można użyć linku w celu skopiowania ścieżki „{0}” do ścieżki „{1}”.</target>
@@ -220,6 +230,11 @@
         <source>Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</source>
         <target state="translated">Nie można użyć twardego linku do skopiowania „{0}” do „{1}”. Zamiast tego kopiuje plik za pomocą linku symbolicznego. {2}</target>
         <note>LOCALIZATION: {0} and {1} are paths. {2} is an optional localized message.</note>
+      </trans-unit>
+      <trans-unit id="Copy.RetryingOnAccessDenied">
+        <source>MSB3895: Retrying on ERROR_ACCESS_DENIED because environment variable MSBUILDALWAYSRETRY=1</source>
+        <target state="translated">MSB3895: ponowienie próby w przypadku ERROR_ACCESS_DENIED, ponieważ zmienną środowiskową jest MSBUILDALWAYSRETRY = 1</target>
+        <note>{StrBegin="MSB3895: "} LOCALIZATION: Do NOT translate MSBUILDALWAYSRETRY)</note>
       </trans-unit>
       <trans-unit id="Copy.SourceIsDirectory">
         <source>MSB3025: The source file "{0}" is actually a directory.  The "Copy" task does not support copying directories.</source>
@@ -1045,8 +1060,8 @@
         <note>{StrBegin="MSB3183: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.WriteOutputManifestFailed">
-        <source>MSB3173: Unable to write manifest '{0}'. {1}</source>
-        <target state="translated">MSB3173: Nie można zapisać manifestu '{0}'. {1}</target>
+        <source>MSB3173: Unable to write manifest '{0}'. {1} {2}</source>
+        <target state="translated">MSB3173: Nie można zapisać manifestu „{0}”. {1} {2}</target>
         <note>{StrBegin="MSB3173: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.InvalidRequestedExecutionLevel">
@@ -1930,6 +1945,11 @@
         <target state="translated">Znaleziono nieprawidłowy nagłówek PE. Plik implementacji nie zostanie użyty.</target>
         <note>This message can be used as the {1} in MSB3272</note>
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.UnifiedReferenceDependsOn">
+        <source>References which depend on or have been unified to "{0}" [{1}].</source>
+        <target state="translated">Odwołania, które są zależne lub zostały ujednolicone dla „{0}” [{1}].</target>
+        <note> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
+      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnknownProcessorArchitecture">
         <source>MSB3273: Unknown processor architecture. The implementation file "{0}" for "{1}" had an ImageFileMachine value of "0x{2}". If you wish to use this implementation file make sure the "ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch" property in your project is set to "Warning" or "None".</source>
         <target state="translated">MSB3273: Nieznana architektura procesora. Plik implementacji {0} dla „{1}” ma wartość ImageFileMachine równą „0x{2}”. Jeśli chcesz użyć tego pliku implementacji, upewnij się, że dla właściwości „ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch” w projekcie jest ustawiona wartość „Warning” lub „None”.</target>
@@ -2158,11 +2178,6 @@
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
         <target state="translated">Plik z listą pakietów redystrybucyjnych „{0}” ma nazwę Redist równą null lub pustą w elemencie FileList. Upewnij się, że nazwa Redist nie ma wartości null ani nie jest pusta.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
-        <source>Updating assembly cache file "{0}".</source>
-        <target state="translated">Aktualizowanie pliku pamięci podręcznej zestawu „{0}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
@@ -2498,6 +2513,11 @@
         <source>MSB3353: Public key necessary for delay signing was not specified.</source>
         <target state="translated">MSB3353: Klucz publiczny jest niezbędny, ponieważ nie określono znaku opóźnienia.</target>
         <note>{StrBegin="MSB3353: "}</note>
+      </trans-unit>
+      <trans-unit id="Task.FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="translated">Plik jest zablokowany przez: „{0}”</target>
+        <note />
       </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
         <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
@@ -3383,11 +3403,6 @@
         <source>MSB4801: The task factory "{0}" is not supported on the .NET Core version of MSBuild.</source>
         <target state="translated">MSB4801: Fabryka zadań „{0}” nie jest obsługiwana przez wersję programu MSBuild dla platformy .NET Core.</target>
         <note>{StrBegin="MSB4801: "}</note>
-      </trans-unit>
-      <trans-unit id="Copy.FileLocked">
-        <source>The file is locked by: "{0}"</source>
-        <target state="translated">Plik jest zablokowany przez: „{0}”</target>
-        <note />
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeType">
         <source>MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</source>

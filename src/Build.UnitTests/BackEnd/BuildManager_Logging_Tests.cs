@@ -88,7 +88,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [WindowsFullFrameworkOnlyTheory]
         [InlineData("1", true)]
         [InlineData("0", false)]
-        [InlineData(null, false)]
+        [InlineData(null, true)]
         public void Build_WithCustomBuildArgs_Framework(string envVariableValue, bool isWarningExpected) =>
             TestCustomEventWarning<BuildWarningEventArgs>(envVariableValue, isWarningExpected);
 
@@ -155,9 +155,15 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// </summary>
         public void Dispose()
         {
-            _buildManager.Dispose();
-            _projectCollection.Dispose();
-            _env.Dispose();
+            try
+            {
+                _buildManager.Dispose();
+                _projectCollection.Dispose();
+            }
+            finally
+            {
+                _env.Dispose();
+            }
         }
     }
 }

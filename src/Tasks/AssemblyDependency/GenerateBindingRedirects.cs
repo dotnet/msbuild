@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -10,6 +10,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using System.IO;
+using System.Xml;
 
 #nullable disable
 
@@ -139,13 +140,6 @@ namespace Microsoft.Build.Tasks
                     doc.Save(stream);
                 }
             }
-            else if (outputExists)
-            {
-                // if the file exists and the content is up to date, then touch the output file.
-                var now = DateTime.Now;
-                File.SetLastAccessTime(OutputAppConfigFile.ItemSpec, now);
-                File.SetLastWriteTime(OutputAppConfigFile.ItemSpec, now);
-            }
 
             return !Log.HasLoggedErrors;
         }
@@ -171,7 +165,7 @@ namespace Microsoft.Build.Tasks
             var cultureString = suggestedRedirect.CultureName;
             if (String.IsNullOrEmpty(cultureString))
             {
-                // We use "neutral" for "Invariant Language (Invariant Country)" in assembly names.
+                // We use "neutral" for "Invariant Language (Invariant Country/Region)" in assembly names.
                 cultureString = "neutral";
             }
 
@@ -342,7 +336,12 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                document = XDocument.Load(appConfigItem.ItemSpec);
+                var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true, IgnoreWhitespace = true };
+                using (XmlReader xr = XmlReader.Create(File.OpenRead(appConfigItem.ItemSpec), xrs))
+                {
+                    document = XDocument.Load(xr);
+                }
+
                 if (document.Root == null || document.Root.Name != "configuration")
                 {
                     Log.LogErrorWithCodeFromResources("GenerateBindingRedirects.MissingConfigurationNode");

@@ -189,6 +189,11 @@ namespace Microsoft.Build.Framework
         public readonly bool AlwaysDoImmutableFilesUpToDateCheck = Environment.GetEnvironmentVariable("MSBUILDDONOTCACHEMODIFICATIONTIME") == "1";
 
         /// <summary>
+        /// When copying over an existing file, copy directly into the existing file rather than deleting and recreating.
+        /// </summary>
+        public readonly bool CopyWithoutDelete = Environment.GetEnvironmentVariable("MSBUILDCOPYWITHOUTDELETE") == "1";
+
+        /// <summary>
         /// Emit events for project imports.
         /// </summary>
         private bool? _logProjectImports;
@@ -387,13 +392,42 @@ namespace Microsoft.Build.Framework
 #if RUNTIME_TYPE_NETCORE
                     return true;
 #else
-                    return false;
+                    return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10);
 #endif
                 }
 
                 return value == "1";
             }
         }
+
+        public bool UnquoteTargetSwitchParameters
+        {
+            get
+            {
+                return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10);
+            }
+        }
+
+        private bool? _isBinaryFormatterSerializationAllowed;
+        public bool IsBinaryFormatterSerializationAllowed
+        {
+            get
+            {
+                if (!_isBinaryFormatterSerializationAllowed.HasValue)
+                {
+#if RUNTIME_TYPE_NETCORE
+                    AppContext.TryGetSwitch("System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization",
+                        out bool enabled);
+                    _isBinaryFormatterSerializationAllowed = enabled;
+#else
+                    _isBinaryFormatterSerializationAllowed = true;
+#endif
+                }
+
+                return _isBinaryFormatterSerializationAllowed.Value;
+            }
+        }
+
 
         private static bool? ParseNullableBoolFromEnvironmentVariable(string environmentVariable)
         {
@@ -517,10 +551,10 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// Formats the given string using the variable arguments passed in.
-        /// 
+        ///
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
-        /// 
+        ///
         /// Thread safe.
         /// </summary>
         /// <param name="unformatted">The string to format.</param>
@@ -537,7 +571,7 @@ namespace Microsoft.Build.Framework
             if ((args?.Length > 0))
             {
 #if DEBUG
-                // If you accidentally pass some random type in that can't be converted to a string, 
+                // If you accidentally pass some random type in that can't be converted to a string,
                 // FormatResourceString calls ToString() which returns the full name of the type!
                 foreach (object param in args)
                 {

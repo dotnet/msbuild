@@ -40,8 +40,7 @@ public class LoggingConfigurationTelemetry_Tests
         telemetry.BinaryLogger.ShouldBe(false);
         telemetry.BinaryLoggerUsedDefaultName.ShouldBe(false);
 
-        telemetry.UpdateEventProperties();
-        telemetry.Properties.Where(kv => kv.Value != bool.FalseString).ShouldBeEmpty();
+        telemetry.GetProperties().Where(kv => kv.Value != bool.FalseString).ShouldBeEmpty();
     }
 
     [Fact]
@@ -65,21 +64,20 @@ public class LoggingConfigurationTelemetry_Tests
             BinaryLoggerUsedDefaultName = true
         };
 
-        telemetry.UpdateEventProperties();
-
-        telemetry.Properties["TerminalLogger"].ShouldBe(bool.TrueString);
-        telemetry.Properties["TerminalLoggerUserIntent"].ShouldBe("on");
-        telemetry.Properties["TerminalLoggerUserIntentSource"].ShouldBe("arg");
-        telemetry.Properties["TerminalLoggerDefault"].ShouldBe("auto");
-        telemetry.Properties["TerminalLoggerDefaultSource"].ShouldBe("sdk");
-        telemetry.Properties["ConsoleLogger"].ShouldBe(bool.TrueString);
-        telemetry.Properties["ConsoleLoggerType"].ShouldBe("serial");
-        telemetry.Properties["ConsoleLoggerVerbosity"].ShouldBe("minimal");
-        telemetry.Properties["FileLogger"].ShouldBe(bool.TrueString);
-        telemetry.Properties["FileLoggerType"].ShouldBe("serial");
-        telemetry.Properties["FileLoggersCount"].ShouldBe("2");
-        telemetry.Properties["FileLoggerVerbosity"].ShouldBe("normal");
-        telemetry.Properties["BinaryLogger"].ShouldBe(bool.TrueString);
-        telemetry.Properties["BinaryLoggerUsedDefaultName"].ShouldBe(bool.TrueString);
+        var properties = telemetry.GetProperties();
+        properties["TerminalLogger"].ShouldBe(bool.TrueString);
+        properties["TerminalLoggerUserIntent"].ShouldBe("on");
+        properties["TerminalLoggerUserIntentSource"].ShouldBe("arg");
+        properties["TerminalLoggerDefault"].ShouldBe("auto");
+        properties["TerminalLoggerDefaultSource"].ShouldBe("sdk");
+        properties["ConsoleLogger"].ShouldBe(bool.TrueString);
+        properties["ConsoleLoggerType"].ShouldBe("serial");
+        properties["ConsoleLoggerVerbosity"].ShouldBe("minimal");
+        properties["FileLogger"].ShouldBe(bool.TrueString);
+        properties["FileLoggerType"].ShouldBe("serial");
+        properties["FileLoggersCount"].ShouldBe("2");
+        properties["FileLoggerVerbosity"].ShouldBe("normal");
+        properties["BinaryLogger"].ShouldBe(bool.TrueString);
+        properties["BinaryLoggerUsedDefaultName"].ShouldBe(bool.TrueString);
     }
 }

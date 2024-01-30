@@ -145,7 +145,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Is this file's IncludeHash set to false?
         /// Is this file System.Data.Entity.dll?
-        /// Is this file Client Sentinel Assembly? 
+        /// Is this file Client Sentinel Assembly?
         /// </summary>
         private static bool IsExcludedFileOrSP1File(ITaskItem candidateFile)
         {

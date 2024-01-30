@@ -214,6 +214,13 @@ elementFormDefault="qualified">
                   </xs:documentation>
                 </xs:annotation>
               </xs:element>
+              <xs:element name="VersionOverride">
+                <xs:annotation>
+                  <xs:documentation>
+                    <!-- _locID_text="PackageReference_VersionOverride" _locComment="" -->When using Central Package Management (CPM), overrides the centrally defined version for this package.  If the project is not using CPM, this element has no effect.
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
             </xs:choice>
           </xs:sequence>
           <xs:attribute name="Include" type="xs:string">
@@ -262,6 +269,13 @@ elementFormDefault="qualified">
             <xs:annotation>
               <xs:documentation>
                 <!-- _locID_text="PackageReference_Attribute_GeneratePathProperty" _locComment="" -->Set to true to generate a Pkg* property that points to the restored location of the NuGet package contents
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="VersionOverride" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="PackageReference_Attribute_VersionOverride" _locComment="" -->When using Central Package Management (CPM), overrides the centrally defined version for this package.  If the project is not using CPM, this attribute has no effect.
               </xs:documentation>
             </xs:annotation>
           </xs:attribute>

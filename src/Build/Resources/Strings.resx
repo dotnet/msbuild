@@ -158,6 +158,12 @@
   <data name="BuildFinishedFailure" xml:space="preserve">
     <value>Build FAILED.</value>
   </data>
+  <data name="BuildFinishedQuestionFailure" xml:space="preserve">
+    <value>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</value>
+  </data>
+  <data name="BuildFinishedQuestionSuccess" xml:space="preserve">
+    <value>Question build succeeded. Up-to-date checks passed.</value>
+  </data>
   <data name="BuildFinishedSuccess" xml:space="preserve">
     <value>Build succeeded.</value>
   </data>
@@ -1318,6 +1324,17 @@
     <value>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
   {1}</value>
   </data>
+  <data name="SucceededToResolveSDK" xml:space="preserve">
+    <value>The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</value>
+  </data>
+  <data name="SDKResolverAttempt" xml:space="preserve">
+    <value>The "{0}" resolver attempted to resolve the SDK "{1}".
+Warnings: {2}
+Errors: {3}</value>
+    <comment>
+      LOCALIZATION: Do not localize the word SDK. "{2}" is new line separated warnings or "null". "{3}" is new line separated errors or "null".
+    </comment>
+  </data>
   <data name="CouldNotRunNuGetSdkResolver" xml:space="preserve">
     <value>The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</value>
   </data>
@@ -1763,12 +1780,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION:  Do not localize the word SDK.
     </comment>
   </data>
-  <data name="SdkResolving" xml:space="preserve">
-    <value>Resolving SDK '{0}'...</value>
-    <comment>
-      LOCALIZATION:  Do not localize the word SDK.
-    </comment>
-  </data>
   <data name="ProjectGraphDoesNotSupportProjectReferenceWithToolset" xml:space="preserve">
     <value>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</value>
     <comment>
@@ -1883,7 +1894,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Property initial value: $({0})="{1}" Source: {2}</value>
   </data>
   <data name="NuGetAssemblyNotFound" xml:space="preserve">
-    <value>A required NuGet assembly was not found. Expected Path: {0}</value>
+    <value>A required NuGet assembly '{0}' could not be loaded.</value>
   </data>
   <data name="StaticGraphConstructionMetrics" xml:space="preserve">
     <value>Static graph loaded in {0} seconds: {1} nodes, {2} edges</value>
@@ -1905,6 +1916,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="ProjectCacheShutdownFailed" xml:space="preserve">
     <value>MSB4268: The project cache failed to shut down properly.</value>
+  </data>
+  <data name="ProjectCacheHandleBuildResultFailed" xml:space="preserve">
+    <value>MSB4269: The project cache failed while handling a build result for the following project: {0}.</value>
   </data>
   <data name="NoProjectCachePluginFoundInAssembly" xml:space="preserve">
     <value>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</value>
@@ -1984,6 +1998,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="TaskAssemblyLoaded" xml:space="preserve">
     <value>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</value>
   </data>
+  <data name="TaskAssemblyLoadedWithAssemblyLoadContext" xml:space="preserve">
+    <value>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</value>
+  </data>
   <data name="NodeReused" xml:space="preserve">
     <value>Reusing node {0} (PID: {1}).</value>
   </data>
@@ -1994,6 +2011,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="CannotCopyFromElementOfThatType" xml:space="preserve">
     <value>MSB4277: Cannot copy from object of that type.</value>
     <comment>{StrBegin="MSB4277: "}</comment>
+  </data>
+  <data name="ReportFileAccessesX64Only" xml:space="preserve">
+    <value>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</value>
   </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999

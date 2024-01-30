@@ -111,7 +111,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             e.Sdk.Name.ShouldBe("1sdkName");
         }
 
-
         [Fact]
         // Scenario: MockSdkResolverWithResolvableSdkPattern2 is a specific resolver (i.e. resolver with pattern)
         // and it successfully resolves sdk.
@@ -131,7 +130,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
         [Fact]
         // Scenario: MockSdkResolverWithResolvableSdkPattern1 is a specific resolver, it is loaded but did not resolve sdk.
-        // MockSdkResolver1 is a general resolver (i.e. resolver without pattern), it resolves sdk on a fallback. 
+        // MockSdkResolver1 is a general resolver (i.e. resolver without pattern), it resolves sdk on a fallback.
         public void AssertFirstResolverCanResolve()
         {
             SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy());
@@ -182,6 +181,21 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             result.Path.ShouldBe("resolverpathwithresolvablesdkpattern1");
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolverWithResolvableSdkPattern1 running");
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldNotContain("MockSdkResolver1 running");
+        }
+
+        [Fact]
+        public void AssertSdkResolutionMessagesAreLogged()
+        {
+            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy());
+            SdkReference sdk = new SdkReference("1sdkName", "referencedVersion", "minimumVersion");
+
+            var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false, failOnUnresolvedSdk: true);
+
+            // First resolver attempted to resolve, but failed.
+            _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SDKResolverAttempt", nameof(MockResolverReturnsNull), sdk.ToString(), "null",
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SDKResolverReturnedNull", nameof(MockResolverReturnsNull))));
+            // Second resolver succeeded.
+            _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SucceededToResolveSDK", sdk.ToString(), nameof(MockSdkResolver1), result.Path, result.Version));
         }
 
         [Fact]
@@ -638,13 +652,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 _resolversWithPatterns = new List<(string ResolvableSdkPattern, SdkResolver Resolver)>();
             }
 
-            internal override IList<SdkResolver> LoadAllResolvers(LoggingContext loggingContext, ElementLocation location)
+            internal override IReadOnlyList<SdkResolver> LoadAllResolvers(ElementLocation location)
             {
                 return _resolvers.OrderBy(i => i.Priority).ToList();
             }
 
-            internal override IList<SdkResolverManifest> GetResolversManifests(LoggingContext loggingContext,
-            ElementLocation location)
+            internal override IReadOnlyList<SdkResolverManifest> GetResolversManifests(ElementLocation location)
             {
                 var manifests = new List<SdkResolverManifest>();
                 foreach (SdkResolver resolver in _resolvers)
@@ -663,7 +676,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 return manifests;
             }
 
-            protected internal override IList<SdkResolver> LoadResolversFromManifest(SdkResolverManifest manifest, LoggingContext loggingContext, ElementLocation location)
+            protected internal override IReadOnlyList<SdkResolver> LoadResolversFromManifest(SdkResolverManifest manifest, ElementLocation location)
             {
                 var resolvers = new List<SdkResolver>();
                 foreach (var resolver in _resolvers)
@@ -683,7 +696,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 return resolvers.OrderBy(t => t.Priority).ToList();
             }
 
-            internal override IList<SdkResolver> GetDefaultResolvers(LoggingContext loggingContext, ElementLocation location)
+            internal override IReadOnlyList<SdkResolver> GetDefaultResolvers()
             {
                 return new List<SdkResolver>();
             }

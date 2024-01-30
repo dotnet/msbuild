@@ -26,6 +26,16 @@
         <note>{StrBegin="MSB4003: "}UE: Tasks are not allowed to use incorrect case for reserved attributes on the task nodes e.g. "continueonerror"
     instead of the "ContinueOnError".</note>
       </trans-unit>
+      <trans-unit id="BuildFinishedQuestionFailure">
+        <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
+        <target state="translated">Vytvoření otázky SELHALO. Vytváření bylo předčasně ukončeno, protože se při něm narazilo na cíl nebo úlohu, které nebyly aktuální.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildFinishedQuestionSuccess">
+        <source>Question build succeeded. Up-to-date checks passed.</source>
+        <target state="translated">Otázka byla úspěšně vytvořena. Kontroly aktuálnosti proběhly úspěšně.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildInProgress">
         <source>The operation cannot be completed because a build is already in progress.</source>
         <target state="translated">Operaci nebylo možno dokončit, protože sestavení již probíhá.</target>
@@ -212,8 +222,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
-        <source>A required NuGet assembly was not found. Expected Path: {0}</source>
-        <target state="translated">Požadované sestavení NuGet se nenašlo. Očekávaná cesta: {0}</target>
+        <source>A required NuGet assembly '{0}' could not be loaded.</source>
+        <target state="translated">Nepovedlo se načíst požadované sestavení NuGet {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
@@ -262,6 +272,11 @@
       <trans-unit id="ProjectCacheException">
         <source>MSB4273: The project cache threw an unhandled exception from the {0} method.</source>
         <target state="translated">MSB4273: Mezipaměť projektu vyvolala neošetřenou výjimku z metody {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheHandleBuildResultFailed">
+        <source>MSB4269: The project cache failed while handling a build result for the following project: {0}.</source>
+        <target state="translated">MSB4269: Mezipaměť projektu selhala při zpracování výsledku sestavení pro následující projekt: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheHitWithDefaultTargets">
@@ -370,6 +385,22 @@
         <target state="translated">MSB4274: Zakázání uzlu inproc způsobí snížení výkonu při používání modulů plug-in mezipaměti projektu, které vysílají žádosti o sestavení proxy serveru.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ReportFileAccessesX64Only">
+        <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
+        <target state="translated">Přístupy k souborům sestav se v současné době podporují jenom pomocí varianty x64 nástroje MSBuild.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKResolverAttempt">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}".
+Warnings: {2}
+Errors: {3}</source>
+        <target state="new">The "{0}" resolver attempted to resolve the SDK "{1}".
+Warnings: {2}
+Errors: {3}</target>
+        <note>
+      LOCALIZATION: Do not localize the word SDK. "{2}" is new line separated warnings or "null". "{3}" is new line separated errors or "null".
+    </note>
+      </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
         <source>MSB4242: SDK Resolver Failure: "{0}"</source>
         <target state="translated">MSB4242: Selhání překladače sady SDK: {0}</target>
@@ -431,6 +462,11 @@
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
     </note>
       </trans-unit>
+      <trans-unit id="SucceededToResolveSDK">
+        <source>The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</source>
+        <target state="new">The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskAcquiredCores">
         <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
         <target state="translated">Úloha {0} požadovala tento počet jader: {1}. Získala tento počet jader: {2}. Teď používá celkem tento počet jader: {3}</target>
@@ -439,6 +475,11 @@
       <trans-unit id="TaskAssemblyLoaded">
         <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</source>
         <target state="translated">Sestavení načtené během {0}{1}: {2} (umístění: {3}, MVID: {4}, AppDomain: {5})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TaskAssemblyLoadedWithAssemblyLoadContext">
+        <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</source>
+        <target state="translated">Sestavení načteno během {0}{1}: {2} (umístění: {3}, MVID: {4}, AssemblyLoadContext: {5})</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
@@ -2555,13 +2596,6 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
         <target state="translated">MSB4241: Odkaz na sadu SDK {0} verze {1} byl místo toho přeložen na verzi {2}. Pokud neaktualizujete odkazovanou verzi tak, aby se shodovala, může se používat jiná verze, než kterou očekáváte.</target>
         <note>{StrBegin="MSB4241: "}
-      LOCALIZATION:  Do not localize the word SDK.
-    </note>
-      </trans-unit>
-      <trans-unit id="SdkResolving">
-        <source>Resolving SDK '{0}'...</source>
-        <target state="translated">Překládá se sada SDK {0}...</target>
-        <note>
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>

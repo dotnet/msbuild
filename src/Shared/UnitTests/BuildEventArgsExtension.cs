@@ -17,7 +17,7 @@ namespace Microsoft.Build.UnitTests
     {
         /// <summary>
         /// Extension method to help our tests without adding shipping code.
-        /// Compare this build event context with another object to determine 
+        /// Compare this build event context with another object to determine
         /// equality. This means the values inside the object are identical.
         /// </summary>
         /// <param name="args">The 'this' object</param>
@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Extension method to help our tests without adding shipping code.
-        /// Compare this build event context with another object to determine 
+        /// Compare this build event context with another object to determine
         /// equality. This means the values inside the object are identical.
         /// </summary>
         /// <param name="args">The 'this' object</param>
@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Compare this build event context with another object to determine 
+        /// Compare this build event context with another object to determine
         /// equality. This means the values inside the object are identical.
         /// </summary>
         /// <param name="obj">Object to compare to this object</param>
@@ -160,7 +160,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Compare this build event context with another object to determine 
+        /// Compare this build event context with another object to determine
         /// equality. This means the values inside the object are identical.
         /// </summary>
         /// <param name="obj">Object to compare to this object</param>
@@ -206,7 +206,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Compare this build event context with another object to determine 
+        /// Compare this build event context with another object to determine
         /// equality. This means the values inside the object are identical.
         /// </summary>
         /// <param name="obj">Object to compare to this object</param>
@@ -227,7 +227,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Compare this build event context with another object to determine 
+        /// Compare this build event context with another object to determine
         /// equality. This means the values inside the object are identical.
         /// </summary>
         /// <param name="obj">Object to compare to this object</param>
@@ -248,7 +248,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Compare this build event context with another object to determine 
+        /// Compare this build event context with another object to determine
         /// equality. This means the values inside the object are identical.
         /// </summary>
         /// <param name="obj">Object to compare to this object</param>
@@ -269,7 +269,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Compare this build event context with another object to determine 
+        /// Compare this build event context with another object to determine
         /// equality. This means the values inside the object are identical.
         /// </summary>
         /// <param name="obj">Object to compare to this object</param>
@@ -290,7 +290,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Compare this build event context with another object to determine 
+        /// Compare this build event context with another object to determine
         /// equality. This means the values inside the object are identical.
         /// </summary>
         /// <param name="obj">Object to compare to this object</param>
@@ -320,7 +320,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Compare this build event context with another object to determine 
+        /// Compare this build event context with another object to determine
         /// equality. This means the values inside the object are identical.
         /// </summary>
         /// <param name="obj">Object to compare to this object</param>
@@ -385,7 +385,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Compare this build event context with another object to determine 
+        /// Compare this build event context with another object to determine
         /// equality. This means the values inside the object are identical.
         /// </summary>
         /// <param name="obj">Object to compare to this object</param>
@@ -411,7 +411,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Compare this build event context with another object to determine 
+        /// Compare this build event context with another object to determine
         /// equality. This means the values inside the object are identical.
         /// </summary>
         /// <param name="obj">Object to compare to this object</param>

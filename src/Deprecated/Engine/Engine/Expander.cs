@@ -36,7 +36,7 @@ namespace Microsoft.Build.BuildEngine
         // instead of using the overhead of a lookup
         private BuildPropertyGroup properties;
 
-        // Table of metadata values. 
+        // Table of metadata values.
         // May have some qualified keys (type.name) or all unqualified.
         // If all unqualified, the implicitMetadataItemType field indicates the type.
         private Dictionary<string, string> itemMetadata;
@@ -211,8 +211,8 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// Expands item metadata, properties, and items (in that order), and produces a list of TaskItems.
-        /// 
-        /// All data accessed through the TaskItem (ItemSpec and metadata) is going to be unescaped, so it's nice 
+        ///
+        /// All data accessed through the TaskItem (ItemSpec and metadata) is going to be unescaped, so it's nice
         /// and ready for a task to consume.
         /// </summary>
         /// <param name="expression"></param>
@@ -463,7 +463,7 @@ namespace Microsoft.Build.BuildEngine
             // where we've essentially read up to and copied into the target string.
             int sourceIndex = 0;
 
-            // Search for "$(" in the sourceString.  Loop until we don't find it 
+            // Search for "$(" in the sourceString.  Loop until we don't find it
             // any more.
             while (propertyStartIndex != -1)
             {
@@ -496,9 +496,9 @@ namespace Microsoft.Build.BuildEngine
                 {
                     // Aha, we found the closing parenthesis.  All the stuff in
                     // between the "$(" and the ")" constitutes the property body.
-                    // Note: Current propertyStartIndex points to the "$", and 
+                    // Note: Current propertyStartIndex points to the "$", and
                     // propertyEndIndex points to the ")".  That's why we have to
-                    // add 2 for the start of the substring, and subtract 2 for 
+                    // add 2 for the start of the substring, and subtract 2 for
                     // the length.
                     string propertyBody = expression.Substring(propertyStartIndex + 2, propertyEndIndex - propertyStartIndex - 2);
 
@@ -525,7 +525,7 @@ namespace Microsoft.Build.BuildEngine
                         propertyValue = LookupProperty(properties, propertyBody, expressionNode);
                     }
 
-                    // If it's a property function result, it may return null, so check before we add it.  
+                    // If it's a property function result, it may return null, so check before we add it.
                     if (propertyValue != null)
                     {
                         // Append the property value to our targetString, and advance
@@ -553,7 +553,7 @@ namespace Microsoft.Build.BuildEngine
                 // PERF: This method is called very often - of the order of 3,000 times per project.
                 // StringBuilder by default is initialized with a 16 char string and doubles the length
                 // whenever it's too short. We want to avoid reallocation but also avoid excessive allocation.
-                // The length of the source string turns out to be a fair compromise. (The final result may 
+                // The length of the source string turns out to be a fair compromise. (The final result may
                 // be longer or it may be shorter.)
                 StringBuilder result = new StringBuilder(expression.Length);
 
@@ -759,7 +759,7 @@ namespace Microsoft.Build.BuildEngine
                 }
             }
 
-            // Find the property value in our property collection.  This 
+            // Find the property value in our property collection.  This
             // will automatically return "" (empty string) if the property
             // doesn't exist in the collection, and we're not executing a static function
             if (!String.IsNullOrEmpty(propertyName))
@@ -1180,10 +1180,10 @@ namespace Microsoft.Build.BuildEngine
                     }
 
                     // Handle special cases where the object type needs to affect the choice of method
-                    // The default binder and method invoke, often chooses the incorrect Equals and CompareTo and 
+                    // The default binder and method invoke, often chooses the incorrect Equals and CompareTo and
                     // fails the comparison, because what we have on the right is generally a string.
                     // This special casing is to realize that its a comparison that is taking place and handle the
-                    // argument type coercion accordingly; effectively pre-preparing the argument type so 
+                    // argument type coercion accordingly; effectively pre-preparing the argument type so
                     // that it matches the left hand side ready for the default binder�s method invoke.
                     if (objectInstance != null && args.Length == 1 && (String.Equals("Equals", this.name, StringComparison.OrdinalIgnoreCase) || String.Equals("CompareTo", this.name, StringComparison.OrdinalIgnoreCase)))
                     {
@@ -1215,7 +1215,7 @@ namespace Microsoft.Build.BuildEngine
                             if ((bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
                             {
                                 // The standard binder failed, so do our best to coerce types into the arguments for the function
-                                // This may happen if the types need coercion, but it may also happen if the object represents a type that contains open type parameters, that is, ContainsGenericParameters returns true. 
+                                // This may happen if the types need coercion, but it may also happen if the object represents a type that contains open type parameters, that is, ContainsGenericParameters returns true.
                                 functionResult = LateBindExecute(ex, bindingFlags, objectInstance, args, false /* is not constructor */);
                             }
                             else
@@ -1668,7 +1668,7 @@ namespace Microsoft.Build.BuildEngine
                 // becomes possible through an empty argument between commas.
                 ErrorUtilities.VerifyThrowArgumentNull(argumentBuilder, nameof(argumentBuilder));
                 // we reached the end of an argument, add the builder's final result
-                // to our arguments. 
+                // to our arguments.
                 string argValue = argumentBuilder.ToString().Trim();
                 // We support passing of null through the argument constant value null
                 if (String.Equals("null", argValue, StringComparison.OrdinalIgnoreCase))
@@ -1717,7 +1717,7 @@ namespace Microsoft.Build.BuildEngine
                             // We'll also allow the user to specify the leaf or full type name on the enum
                             string argument = args[n].ToString().Replace('|', ',').Replace(typeFullName, "").Replace(typeLeafName, "");
 
-                            // Parse the string representation of the argument into the destination enum                                
+                            // Parse the string representation of the argument into the destination enum
                             coercedArguments[n] = Enum.Parse(enumType, argument);
                         }
                         else
@@ -1869,7 +1869,7 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// Expands all embedded item metadata in the given string, using the bucketed items.
-        /// 
+        ///
         /// This method leaves the expression escaped.  Callers may need to unescape on their own as appropriate.
         /// </summary>
         /// <remarks>

@@ -21,9 +21,9 @@ namespace Microsoft.Build.Execution
         public abstract string Condition { get; }
 
         /// <summary>
-        /// Full path to the file in which the originating element was originally 
+        /// Full path to the file in which the originating element was originally
         /// defined.
-        /// If it originated in a project that was not loaded and has never been 
+        /// If it originated in a project that was not loaded and has never been
         /// given a path, returns an empty string.
         /// </summary>
         public string FullPath

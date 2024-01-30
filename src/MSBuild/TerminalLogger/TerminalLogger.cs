@@ -1,15 +1,16 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-
-using System.Text;
+using System.Linq;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
+#if NET7_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
+#endif
 #if NETFRAMEWORK
 using Microsoft.IO;
 #else
@@ -24,8 +25,21 @@ namespace Microsoft.Build.Logging.TerminalLogger;
 /// <remarks>
 /// Uses ANSI/VT100 control codes to erase and overwrite lines as the build is progressing.
 /// </remarks>
-internal sealed class TerminalLogger : INodeLogger
+internal sealed partial class TerminalLogger : INodeLogger
 {
+    private const string FilePathPattern = " -> ";
+
+#if NET7_0_OR_GREATER
+    [StringSyntax(StringSyntaxAttribute.Regex)]
+    private const string ImmediateMessagePattern = @"\[CredentialProvider\]|--interactive";
+    private const RegexOptions Options = RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture;
+
+    [GeneratedRegex(ImmediateMessagePattern, Options)]
+    private static partial Regex ImmediateMessageRegex();
+#else
+    private static readonly string[] _immediateMessageKeywords = { "[CredentialProvider]", "--interactive" };
+#endif
+
     /// <summary>
     /// A wrapper over the project context ID passed to us in <see cref="IEventSource"/> logger events.
     /// </summary>
@@ -37,35 +51,13 @@ internal sealed class TerminalLogger : INodeLogger
     }
 
     /// <summary>
-    /// Encapsulates the per-node data shown in live node output.
-    /// </summary>
-    internal record NodeStatus(string Project, string? TargetFramework, string Target, Stopwatch Stopwatch)
-    {
-        public override string ToString()
-        {
-            string duration = Stopwatch.Elapsed.TotalSeconds.ToString("F1");
-
-            return string.IsNullOrEmpty(TargetFramework)
-                ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectBuilding_NoTF",
-                    Indentation,
-                    Project,
-                    Target,
-                    duration)
-                : ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectBuilding_WithTF",
-                    Indentation,
-                    Project,
-                    AnsiCodes.Colorize(TargetFramework, TargetFrameworkColor),
-                    Target,
-                    duration);
-        }
-    }
-
-    /// <summary>
     /// The indentation to use for all build output.
     /// </summary>
-    private const string Indentation = "  ";
+    internal const string Indentation = "  ";
 
-    private const TerminalColor TargetFrameworkColor = TerminalColor.Cyan;
+    internal const TerminalColor TargetFrameworkColor = TerminalColor.Cyan;
+
+    internal Func<StopwatchAbstraction>? CreateStopwatch = null;
 
     /// <summary>
     /// Protects access to state shared between the logger callbacks and the rendering thread.
@@ -116,8 +108,13 @@ internal sealed class TerminalLogger : INodeLogger
     private bool _restoreFailed;
 
     /// <summary>
+    /// True if restore happened and finished.
+    /// </summary>
+    private bool _restoreFinished = false;
+
+    /// <summary>
     /// The project build context corresponding to the <c>Restore</c> initial target, or null if the build is currently
-    /// bot restoring.
+    /// not restoring.
     /// </summary>
     private ProjectContext? _restoreContext;
 
@@ -140,6 +137,11 @@ internal sealed class TerminalLogger : INodeLogger
     /// Should the logger's test environment refresh the console output manually instead of using a background thread?
     /// </summary>
     private bool _manualRefresh;
+
+    /// <summary>
+    /// True if we've logged the ".NET SDK is preview" message.
+    /// </summary>
+    private bool _loggedPreviewMessage;
 
     /// <summary>
     /// List of events the logger needs as parameters to the <see cref="ConfigurableForwardingLogger"/>.
@@ -192,12 +194,16 @@ internal sealed class TerminalLogger : INodeLogger
     public LoggerVerbosity Verbosity { get => LoggerVerbosity.Minimal; set { } }
 
     /// <inheritdoc/>
-    public string Parameters { get => ""; set { } }
+    public string Parameters
+    {
+        get => ""; set { }
+    }
 
     /// <inheritdoc/>
     public void Initialize(IEventSource eventSource, int nodeCount)
     {
-        _nodes = new NodeStatus[nodeCount];
+        // When MSBUILDNOINPROCNODE enabled, NodeId's reported by build start with 2. We need to reserve an extra spot for this case.
+        _nodes = new NodeStatus[nodeCount + 1];
 
         Initialize(eventSource);
     }
@@ -226,7 +232,10 @@ internal sealed class TerminalLogger : INodeLogger
     /// <inheritdoc/>
     public void Shutdown()
     {
+        _cts.Cancel();
+        _refresher?.Join();
         Terminal.Dispose();
+        _cts.Dispose();
     }
 
     #endregion
@@ -316,13 +325,15 @@ internal sealed class TerminalLogger : INodeLogger
             {
                 targetFramework = null;
             }
-            _projects[c] = new(targetFramework);
-        }
+            _projects[c] = new(targetFramework, CreateStopwatch?.Invoke());
 
-        if (e.TargetNames == "Restore")
-        {
-            _restoreContext = c;
-            _nodes[0] = new NodeStatus(e.ProjectFile!, null, "Restore", _projects[c].Stopwatch);
+            // First ever restore in the build is starting.
+            if (e.TargetNames == "Restore" && !_restoreFinished)
+            {
+                _restoreContext = c;
+                int nodeIndex = NodeIndexForContext(buildEventContext);
+                _nodes[nodeIndex] = new NodeStatus(e.ProjectFile!, null, "Restore", _projects[c].Stopwatch);
+            }
         }
     }
 
@@ -340,10 +351,7 @@ internal sealed class TerminalLogger : INodeLogger
         // Mark node idle until something uses it again
         if (_restoreContext is null)
         {
-            lock (_lock)
-            {
-                _nodes[NodeIndexForContext(buildEventContext)] = null;
-            }
+            UpdateNodeStatus(buildEventContext, null);
         }
 
         ProjectContext c = new(buildEventContext);
@@ -357,7 +365,7 @@ internal sealed class TerminalLogger : INodeLogger
                 {
                     EraseNodes();
 
-                    string duration = project.Stopwatch.Elapsed.TotalSeconds.ToString("F1");
+                    string duration = project.Stopwatch.ElapsedSeconds.ToString("F1");
                     ReadOnlyMemory<char>? outputPath = project.OutputPath;
 
                     string projectFile = e.ProjectFile is not null ?
@@ -395,6 +403,7 @@ internal sealed class TerminalLogger : INodeLogger
                         }
 
                         _restoreContext = null;
+                        _restoreFinished = true;
                     }
                     // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
                     else if (project.OutputPath is not null || project.BuildMessages is not null)
@@ -495,10 +504,16 @@ internal sealed class TerminalLogger : INodeLogger
 
             string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
             NodeStatus nodeStatus = new(projectFile, project.TargetFramework, e.TargetName, project.Stopwatch);
-            lock (_lock)
-            {
-                _nodes[NodeIndexForContext(buildEventContext)] = nodeStatus;
-            }
+            UpdateNodeStatus(buildEventContext, nodeStatus);
+        }
+    }
+
+    private void UpdateNodeStatus(BuildEventContext buildEventContext, NodeStatus? nodeStatus)
+    {
+        lock (_lock)
+        {
+            int nodeIndex = NodeIndexForContext(buildEventContext);
+            _nodes[nodeIndex] = nodeStatus;
         }
     }
 
@@ -518,10 +533,7 @@ internal sealed class TerminalLogger : INodeLogger
         if (_restoreContext is null && buildEventContext is not null && e.TaskName == "MSBuild")
         {
             // This will yield the node, so preemptively mark it idle
-            lock (_lock)
-            {
-                _nodes[NodeIndexForContext(buildEventContext)] = null;
-            }
+            UpdateNodeStatus(buildEventContext, null);
 
             if (_projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
             {
@@ -546,7 +558,7 @@ internal sealed class TerminalLogger : INodeLogger
         {
             // Detect project output path by matching high-importance messages against the "$(MSBuildProjectName) -> ..."
             // pattern used by the CopyFilesToOutputDirectory target.
-            int index = message.IndexOf(" -> ", StringComparison.Ordinal);
+            int index = message.IndexOf(FilePathPattern, StringComparison.Ordinal);
             if (index > 0)
             {
                 var projectFileName = Path.GetFileName(e.ProjectFile.AsSpan());
@@ -558,6 +570,20 @@ internal sealed class TerminalLogger : INodeLogger
                     project.OutputPath = outputPath;
                 }
             }
+
+            if (IsImmediateMessage(message))
+            {
+                RenderImmediateMessage(message);
+            }
+            else if (e.Code == "NETSDK1057" && !_loggedPreviewMessage)
+            {
+                // The SDK will log the high-pri "not-a-warning" message NETSDK1057
+                // when it's a preview version up to MaxCPUCount times, but that's
+                // an implementation detail--the user cares about at most one.
+
+                RenderImmediateMessage(message);
+                _loggedPreviewMessage = true;
+            }
         }
     }
 
@@ -566,16 +592,14 @@ internal sealed class TerminalLogger : INodeLogger
     /// </summary>
     private void WarningRaised(object sender, BuildWarningEventArgs e)
     {
-        var buildEventContext = e.BuildEventContext;
-        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
-        {
-            string message = EventArgsFormatting.FormatEventMessage(
+        BuildEventContext? buildEventContext = e.BuildEventContext;
+        string message = EventArgsFormatting.FormatEventMessage(
                 category: AnsiCodes.Colorize("warning", TerminalColor.Yellow),
                 subcategory: e.Subcategory,
                 message: e.Message,
                 code: AnsiCodes.Colorize(e.Code, TerminalColor.Yellow),
                 file: HighlightFileName(e.File),
-                projectFile: null,
+                projectFile: e.ProjectFile ?? null,
                 lineNumber: e.LineNumber,
                 endLineNumber: e.EndLineNumber,
                 columnNumber: e.ColumnNumber,
@@ -583,25 +607,48 @@ internal sealed class TerminalLogger : INodeLogger
                 threadId: e.ThreadId,
                 logOutputProperties: null);
 
+        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+        {
+            if (IsImmediateMessage(message))
+            {
+                RenderImmediateMessage(message);
+            }
+
             project.AddBuildMessage(MessageSeverity.Warning, message);
         }
+        else
+        {
+            // It is necessary to display warning messages reported by MSBuild, even if it's not tracked in _projects collection.
+            RenderImmediateMessage(message);
+            _buildHasWarnings = true;
+        }
     }
+
+    /// <summary>
+    /// Detect markers that require special attention from a customer.
+    /// </summary>
+    /// <param name="message">Raised event.</param>
+    /// <returns>true if marker is detected.</returns>
+    private bool IsImmediateMessage(string message) =>
+#if NET7_0_OR_GREATER
+        ImmediateMessageRegex().IsMatch(message);
+#else
+        _immediateMessageKeywords.Any(imk => message.IndexOf(imk, StringComparison.OrdinalIgnoreCase) >= 0);
+#endif
 
     /// <summary>
     /// The <see cref="IEventSource.ErrorRaised"/> callback.
     /// </summary>
     private void ErrorRaised(object sender, BuildErrorEventArgs e)
     {
-        var buildEventContext = e.BuildEventContext;
-        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
-        {
-            string message = EventArgsFormatting.FormatEventMessage(
+        BuildEventContext? buildEventContext = e.BuildEventContext;
+        string message = EventArgsFormatting.FormatEventMessage(
                 category: AnsiCodes.Colorize("error", TerminalColor.Red),
                 subcategory: e.Subcategory,
                 message: e.Message,
                 code: AnsiCodes.Colorize(e.Code, TerminalColor.Red),
                 file: HighlightFileName(e.File),
-                projectFile: null,
+                projectFile: e.ProjectFile ?? null,
                 lineNumber: e.LineNumber,
                 endLineNumber: e.EndLineNumber,
                 columnNumber: e.ColumnNumber,
@@ -609,7 +656,15 @@ internal sealed class TerminalLogger : INodeLogger
                 threadId: e.ThreadId,
                 logOutputProperties: null);
 
+        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+        {
             project.AddBuildMessage(MessageSeverity.Error, message);
+        }
+        else
+        {
+            // It is necessary to display error messages reported by MSBuild, even if it's not tracked in _projects collection.
+            RenderImmediateMessage(message);
+            _buildHasErrors = true;
         }
     }
 
@@ -622,10 +677,9 @@ internal sealed class TerminalLogger : INodeLogger
     /// </summary>
     private void ThreadProc()
     {
-        while (!_cts.IsCancellationRequested)
+        // 1_000 / 30 is a poor approx of 30Hz
+        while (!_cts.Token.WaitHandle.WaitOne(1_000 / 30))
         {
-            Thread.Sleep(1_000 / 30); // poor approx of 30Hz
-
             lock (_lock)
             {
                 DisplayNodes();
@@ -681,137 +735,6 @@ internal sealed class TerminalLogger : INodeLogger
         _currentFrame.Clear();
     }
 
-    /// <summary>
-    /// Capture states on nodes to be rendered on display.
-    /// </summary>
-    private sealed class NodesFrame
-    {
-        private readonly List<string> _nodeStrings = new();
-        private readonly StringBuilder _renderBuilder = new();
-
-        public int Width { get; }
-        public int Height { get; }
-        public int NodesCount { get; private set; }
-
-        public NodesFrame(NodeStatus?[] nodes, int width, int height)
-        {
-            Width = width;
-            Height = height;
-            Init(nodes);
-        }
-
-        public string NodeString(int index)
-        {
-            if (index >= NodesCount)
-            {
-                throw new ArgumentOutOfRangeException(nameof(index));
-            }
-
-            return _nodeStrings[index];
-        }
-
-        private void Init(NodeStatus?[] nodes)
-        {
-            int i = 0;
-            foreach (NodeStatus? n in nodes)
-            {
-                if (n is null)
-                {
-                    continue;
-                }
-                string str = n.ToString();
-
-                if (i < _nodeStrings.Count)
-                {
-                    _nodeStrings[i] = str;
-                }
-                else
-                {
-                    _nodeStrings.Add(str);
-                }
-                i++;
-
-                // We cant output more than what fits on screen
-                // -2 because cursor command F cant reach, in Windows Terminal, very 1st line, and last line is empty caused by very last WriteLine
-                if (i >= Height - 2)
-                {
-                    break;
-                }
-            }
-
-            NodesCount = i;
-        }
-
-        private ReadOnlySpan<char> FitToWidth(ReadOnlySpan<char> input)
-        {
-            return input.Slice(0, Math.Min(input.Length, Width - 1));
-        }
-
-        /// <summary>
-        /// Render VT100 string to update from current to next frame.
-        /// </summary>
-        public string Render(NodesFrame previousFrame)
-        {
-            StringBuilder sb = _renderBuilder;
-            sb.Clear();
-
-            int i = 0;
-            for (; i < NodesCount; i++)
-            {
-                var needed = FitToWidth(NodeString(i).AsSpan());
-
-                // Do we have previous node string to compare with?
-                if (previousFrame.NodesCount > i)
-                {
-                    var previous = FitToWidth(previousFrame.NodeString(i).AsSpan());
-
-                    if (!previous.SequenceEqual(needed))
-                    {
-                        int commonPrefixLen = previous.CommonPrefixLength(needed);
-
-                        if (commonPrefixLen != 0 && needed.Slice(0, commonPrefixLen).IndexOf('\x1b') == -1)
-                        {
-                            // no escape codes, so can trivially skip substrings
-                            sb.Append($"{AnsiCodes.CSI}{commonPrefixLen}{AnsiCodes.MoveForward}");
-                            sb.Append(needed.Slice(commonPrefixLen));
-                        }
-                        else
-                        {
-                            sb.Append(needed);
-                        }
-
-                        // Shall we clear rest of line
-                        if (needed.Length < previous.Length)
-                        {
-                            sb.Append($"{AnsiCodes.CSI}{AnsiCodes.EraseInLine}");
-                        }
-                    }
-                }
-                else
-                {
-                    // From now on we have to simply WriteLine
-                    sb.Append(needed);
-                }
-
-                // Next line
-                sb.AppendLine();
-            }
-
-            // clear no longer used lines
-            if (i < previousFrame.NodesCount)
-            {
-                sb.Append($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
-            }
-
-            return sb.ToString();
-        }
-
-        public void Clear()
-        {
-            NodesCount = 0;
-        }
-    }
-
     #endregion
 
     #region Helpers
@@ -842,6 +765,21 @@ internal sealed class TerminalLogger : INodeLogger
         else
         {
             return AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Succeeded"), TerminalColor.Green);
+        }
+    }
+
+    /// <summary>
+    /// Print a build messages to the output that require special customer's attention.
+    /// </summary>
+    /// <param name="message">Build message needed to be shown immediately.</param>
+    private void RenderImmediateMessage(string message)
+    {
+        lock (_lock)
+        {
+            // Calling erase helps to clear the screen before printing the message
+            // The immediate output will not overlap with node status reporting
+            EraseNodes();
+            Terminal.WriteLine(message);
         }
     }
 

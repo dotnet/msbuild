@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// This interface defines a "parallel aware logger" in the build system. A parallel aware logger 
+    /// This interface defines a "parallel aware logger" in the build system. A parallel aware logger
     /// will accept a cpu count and be aware that any cpu count greater than 1 means the events will
-    /// be received from the logger from each cpu as the events are logged. 
+    /// be received from the logger from each cpu as the events are logged.
     /// </summary>
     [ComVisible(true)]
     public interface INodeLogger : ILogger

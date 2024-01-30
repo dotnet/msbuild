@@ -142,7 +142,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
-        /// This property returns the list of error codes for warnings/errors that were generated during solution parsing. 
+        /// This property returns the list of error codes for warnings/errors that were generated during solution parsing.
         /// UNIT TESTING ONLY
         /// </summary>
         internal ArrayList SolutionParserErrorCodes
@@ -414,11 +414,11 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <summary>
         /// This method searches the first two lines of the solution file opened by the specified
         /// StreamReader for the solution file header.  An exception is thrown if it is not found.
-        /// 
+        ///
         /// The solution file header looks like this:
-        /// 
+        ///
         ///     Microsoft Visual Studio Solution File, Format Version 9.00
-        /// 
+        ///
         /// </summary>
         /// <owner>RGoel</owner>
         private void ParseFileHeader()
@@ -454,11 +454,11 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// This method extracts the whole part of the version number from the specified line
         /// containing the solution file format header, and throws an exception if the version number
         /// is outside of the valid range.
-        /// 
+        ///
         /// The solution file header looks like this:
-        /// 
+        ///
         ///     Microsoft Visual Studio Solution File, Format Version 9.00
-        /// 
+        ///
         /// </summary>
         /// <param name="versionString"></param>
         /// <owner>RGoel</owner>
@@ -506,7 +506,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
-        /// 
+        ///
         /// This method processes a "Project" section in the solution file opened by the specified
         /// StreamReader, and returns a populated ProjectInSolution instance, if successful.
         /// An exception is thrown if the solution file is invalid.
@@ -519,7 +519,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         ///          ...
         ///      EndProjectSection
         ///  EndProject
-        /// 
+        ///
         /// </summary>
         /// <param name="firstLine"></param>
         /// <returns></returns>
@@ -567,7 +567,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                 else if (line.StartsWith("ProjectSection(WebsiteProperties)", StringComparison.Ordinal))
                 {
                     // We have a WebsiteProperties section.  This section is present only in Venus
-                    // projects, and contains properties that we'll need in order to call the 
+                    // projects, and contains properties that we'll need in order to call the
                     // AspNetCompiler task.
                     line = ReadLine();
                     while ((line?.StartsWith("EndProjectSection", StringComparison.Ordinal) == false))
@@ -593,7 +593,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             {
                 // Add the project to the collection
                 AddProjectToSolution(proj);
-                // If the project is an etp project then parse the etp project file 
+                // If the project is an etp project then parse the etp project file
                 // to get the projects contained in it.
                 if (IsEtpProjectFile(proj.RelativePath))
                 {
@@ -603,7 +603,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         } // ParseProject()
 
         /// <summary>
-        /// This method will parse a .etp project recursively and 
+        /// This method will parse a .etp project recursively and
         /// add all the projects found to projects and projectsInOrder
         /// </summary>
         /// <param name="etpProj">ETP Project</param>
@@ -648,8 +648,8 @@ namespace Microsoft.Build.BuildEngine.Shared
 
                 // We need to parse the .etp project file to get the names of projects contained
                 // in the .etp Project. The projects are listed under /EFPROJECT/GENERAL/References/Reference node in the .etp project file.
-                // The /EFPROJECT/GENERAL/Views/ProjectExplorer node will not necessarily contain 
-                // all the projects in the .etp project. Therefore, we need to look at 
+                // The /EFPROJECT/GENERAL/Views/ProjectExplorer node will not necessarily contain
+                // all the projects in the .etp project. Therefore, we need to look at
                 // /EFPROJECT/GENERAL/References/Reference.
                 // Find the /EFPROJECT/GENERAL/References/Reference node
                 // Note that this is case sensitive
@@ -676,10 +676,10 @@ namespace Microsoft.Build.BuildEngine.Shared
                             proj.ProjectGuid = projGuidNode.InnerText;
                         }
                         // It is ok for a project to not have a guid inside an etp project.
-                        // If a solution file contains a project without a guid it fails to 
-                        // load in Everett. But if an etp project contains a project without 
+                        // If a solution file contains a project without a guid it fails to
+                        // load in Everett. But if an etp project contains a project without
                         // a guid it loads well in Everett and p2p references to/from this project
-                        // are preserved. So we should make sure that we don�t error in this 
+                        // are preserved. So we should make sure that we don�t error in this
                         // situation while upgrading.
                         else
                         {
@@ -700,7 +700,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             // handle security errors
             catch (SecurityException e)
             {
-                // Log a warning 
+                // Log a warning
                 string errorCode, ignoredKeyword;
                 string warning = ResourceUtilities.FormatResourceString(out errorCode, out ignoredKeyword, "Shared.ProjectFileCouldNotBeLoaded",
                     etpProj.RelativePath, e.Message);
@@ -710,7 +710,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             // handle errors in path resolution
             catch (NotSupportedException e)
             {
-                // Log a warning 
+                // Log a warning
                 string errorCode, ignoredKeyword;
                 string warning = ResourceUtilities.FormatResourceString(out errorCode, out ignoredKeyword, "Shared.ProjectFileCouldNotBeLoaded",
                     etpProj.RelativePath, e.Message);
@@ -720,7 +720,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             // handle errors in loading project file
             catch (IOException e)
             {
-                // Log a warning 
+                // Log a warning
                 string errorCode, ignoredKeyword;
                 string warning = ResourceUtilities.FormatResourceString(out errorCode, out ignoredKeyword, "Shared.ProjectFileCouldNotBeLoaded",
                     etpProj.RelativePath, e.Message);
@@ -730,17 +730,17 @@ namespace Microsoft.Build.BuildEngine.Shared
             // handle errors in loading project file
             catch (UnauthorizedAccessException e)
             {
-                // Log a warning 
+                // Log a warning
                 string errorCode, ignoredKeyword;
                 string warning = ResourceUtilities.FormatResourceString(out errorCode, out ignoredKeyword, "Shared.ProjectFileCouldNotBeLoaded",
                     etpProj.RelativePath, e.Message);
                 solutionParserWarnings.Add(warning);
                 solutionParserErrorCodes.Add(errorCode);
             }
-            // handle XML parsing errors 
+            // handle XML parsing errors
             catch (XmlException e)
             {
-                // Log a warning 
+                // Log a warning
                 string errorCode, ignoredKeyword;
                 string warning = ResourceUtilities.FormatResourceString(out errorCode, out ignoredKeyword, "Shared.InvalidProjectFile",
                    etpProj.RelativePath, e.Message);
@@ -814,7 +814,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             //
             // Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "c:\...\myfirstwebsite\", "..\..\..\..\..\..\rajeev\temp\websites\myfirstwebsite", "{956CC04E-FD59-49A9-9099-96888CB6F366}"
             //     ProjectSection(WebsiteProperties) = preProject
-            //       ProjectReferences = "{FD705688-88D1-4C22-9BFF-86235D89C2FC}|CSClassLibrary1.dll;{F0726D09-042B-4A7A-8A01-6BED2422BD5D}|VCClassLibrary1.dll;" 
+            //       ProjectReferences = "{FD705688-88D1-4C22-9BFF-86235D89C2FC}|CSClassLibrary1.dll;{F0726D09-042B-4A7A-8A01-6BED2422BD5D}|VCClassLibrary1.dll;"
             //       Debug.AspNetCompiler.VirtualPath = "/publishfirst"
             //       Debug.AspNetCompiler.PhysicalPath = "..\..\..\..\..\..\rajeev\temp\websites\myfirstwebsite\"
             //       Debug.AspNetCompiler.TargetPath = "..\..\..\..\..\..\rajeev\temp\publishfirst\"
@@ -936,7 +936,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             }
             else
             {
-                // ProjectReferences = "{FD705688-88D1-4C22-9BFF-86235D89C2FC}|CSClassLibrary1.dll;{F0726D09-042B-4A7A-8A01-6BED2422BD5D}|VCClassLibrary1.dll;" 
+                // ProjectReferences = "{FD705688-88D1-4C22-9BFF-86235D89C2FC}|CSClassLibrary1.dll;{F0726D09-042B-4A7A-8A01-6BED2422BD5D}|VCClassLibrary1.dll;"
                 if (string.Equals(propertyName, "ProjectReferences", StringComparison.OrdinalIgnoreCase))
                 {
                     string[] projectReferenceEntries = propertyValue.Split(new char[] { ';' });
@@ -945,7 +945,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                     {
                         int indexOfBar = projectReferenceEntry.IndexOf('|');
 
-                        // indexOfBar could be -1 if we had semicolons in the file names, so skip entries that 
+                        // indexOfBar could be -1 if we had semicolons in the file names, so skip entries that
                         // don't contain a guid. File names may not contain the '|' character
                         if (indexOfBar != -1)
                         {
@@ -993,7 +993,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// Parse the first line of a Project section of a solution file. This line should look like:
         ///
         ///  Project("{Project type GUID}") = "Project name", "Relative path to project file", "{Project GUID}"
-        /// 
+        ///
         /// </summary>
         /// <param name="firstLine"></param>
         /// <param name="proj"></param>
@@ -1076,11 +1076,11 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
-        /// Read solution configuration section. 
+        /// Read solution configuration section.
         /// </summary>
         /// <remarks>
         /// A sample section:
-        /// 
+        ///
         /// GlobalSection(SolutionConfigurationPlatforms) = preSolution
         ///     Debug|Any CPU = Debug|Any CPU
         ///     Release|Any CPU = Release|Any CPU
@@ -1104,7 +1104,7 @@ namespace Microsoft.Build.BuildEngine.Shared
 
                 string[] configurationNames = str.Split(nameValueSeparators);
 
-                // There should be exactly one '=' character, separating two names. 
+                // There should be exactly one '=' character, separating two names.
                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(configurationNames.Length == 2, "SubCategoryForSolutionParsingErrors",
                     new BuildEventFileInfo(SolutionFile, this.currentLineNumber, 0), "SolutionParseInvalidSolutionConfigurationEntry", str);
 
@@ -1135,7 +1135,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// </summary>
         /// <remarks>
         /// A sample (incomplete) section:
-        /// 
+        ///
         /// GlobalSection(ProjectConfigurationPlatforms) = postSolution
         /// 	{6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
         /// 	{6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.Build.0 = Debug|Any CPU
@@ -1166,7 +1166,7 @@ namespace Microsoft.Build.BuildEngine.Shared
 
                 string[] nameValue = str.Split(new char[] { '=' });
 
-                // There should be exactly one '=' character, separating the name and value. 
+                // There should be exactly one '=' character, separating the name and value.
                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(nameValue.Length == 2, "SubCategoryForSolutionParsingErrors",
                     new BuildEventFileInfo(SolutionFile, this.currentLineNumber, 0), "SolutionParseInvalidProjectSolutionConfigurationEntry", str);
 
@@ -1178,18 +1178,18 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
-        /// Read the project configuration information for every project in the solution, using pre-cached 
-        /// solution section data. 
+        /// Read the project configuration information for every project in the solution, using pre-cached
+        /// solution section data.
         /// </summary>
         /// <param name="rawProjectConfigurationsEntries">Cached data from the project configuration section</param>
         /// <owner>LukaszG</owner>
         internal void ProcessProjectConfigurationSection(Hashtable rawProjectConfigurationsEntries)
         {
-            // Instead of parsing the data line by line, we parse it project by project, constructing the 
-            // entry name (e.g. "{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}.Release|Any CPU.ActiveCfg") and retrieving its 
+            // Instead of parsing the data line by line, we parse it project by project, constructing the
+            // entry name (e.g. "{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}.Release|Any CPU.ActiveCfg") and retrieving its
             // value from the raw data. The reason for this is that the IDE does it this way, and as the result
             // the '.' character is allowed in configuration names although it technically separates different
-            // parts of the entry name string. This could lead to ambiguous results if we tried to parse 
+            // parts of the entry name string. This could lead to ambiguous results if we tried to parse
             // the entry name instead of constructing it and looking it up. Although it's pretty unlikely that
             // this would ever be a problem, it's safer to do it the same way VS IDE does it.
             char[] configPlatformSeparators = new char[] { ConfigurationInSolution.configurationPlatformSeparator };
@@ -1207,9 +1207,9 @@ namespace Microsoft.Build.BuildEngine.Shared
                             project.ProjectGuid, solutionConfiguration.FullName);
 
                         // The "Build.0" entry tells us whether to build the project configuration in the given solution configuration.
-                        // Technically, it specifies a configuration name of its own which seems to be a remnant of an initial, 
-                        // more flexible design of solution configurations (as well as the '.0' suffix - no higher values are ever used). 
-                        // The configuration name is not used, and the whole entry means "build the project configuration" 
+                        // Technically, it specifies a configuration name of its own which seems to be a remnant of an initial,
+                        // more flexible design of solution configurations (as well as the '.0' suffix - no higher values are ever used).
+                        // The configuration name is not used, and the whole entry means "build the project configuration"
                         // if it's present in the solution file, and "don't build" if it's not.
                         string entryNameBuild = string.Format(CultureInfo.InvariantCulture, "{0}.{1}.Build.0",
                             project.ProjectGuid, solutionConfiguration.FullName);

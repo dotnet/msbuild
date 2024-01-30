@@ -293,7 +293,7 @@
     <value>MSB3030: Could not copy the file "{0}" because it was not found.</value>
     <comment>{StrBegin="MSB3030: "} LOCALIZATION: {0} is a number.</comment>
   </data>
-  <data name="Copy.FileLocked">
+  <data name="Task.FileLocked">
     <value>The file is locked by: "{0}"</value>
   </data>
 
@@ -915,7 +915,7 @@
     <comment>{StrBegin="MSB3183: "}</comment>
   </data>
   <data name="GenerateManifest.WriteOutputManifestFailed">
-    <value>MSB3173: Unable to write manifest '{0}'. {1}</value>
+    <value>MSB3173: Unable to write manifest '{0}'. {1} {2}</value>
     <comment>{StrBegin="MSB3173: "}</comment>
   </data>
   <data name="GenerateManifest.InvalidRequestedExecutionLevel">
@@ -1692,6 +1692,10 @@
     <value>References which depend on "{0}" [{1}].</value>
     <comment> This will look like references which depend on "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</comment>
   </data>
+  <data name="ResolveAssemblyReference.UnifiedReferenceDependsOn">
+    <value>References which depend on or have been unified to "{0}" [{1}].</value>
+    <comment> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</comment>
+  </data>
   <data name="ResolveAssemblyReference.UnResolvedPrimaryItemSpec">
     <value>Unresolved primary reference with an item include of "{0}".</value>
     <comment> This messages is for a reference which could not be resolved, however we have its item spec and will display that. {0} will be somethign like  System or A, Version=xxx</comment>
@@ -1770,10 +1774,6 @@
   </data>
   <data name="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
     <value>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</value>
-    <comment></comment>
-  </data>
-  <data name="ResolveAssemblyReference.WritingCacheFile">
-    <value>Updating assembly cache file "{0}".</value>
     <comment></comment>
   </data>
   <!--
@@ -2780,6 +2780,18 @@
   <data name="Copy.LinkFailed" xml:space="preserve">
     <value>MSB3893: Could not use a link to copy "{0}" to "{1}".</value>
     <comment>{StrBegin="MSB3893: "} LOCALIZATION: {0} and {1} are paths.</comment>
+  </data>
+  <data name="Copy.IOException">
+    <value>MSB3894: Got {0} copying "{1}" to "{2}" and HR is {3}</value>
+    <comment>{StrBegin="MSB3894: "} LOCALIZATION: {0} is exception.ToString(), {1} and {2} are paths, {3} is a number")</comment>
+  </data>
+  <data name="Copy.RetryingOnAccessDenied">
+    <value>MSB3895: Retrying on ERROR_ACCESS_DENIED because environment variable MSBUILDALWAYSRETRY=1</value>
+    <comment>{StrBegin="MSB3895: "} LOCALIZATION: Do NOT translate MSBUILDALWAYSRETRY)</comment>
+  </data>
+  <data name="Copy.IncompatibleParameters">
+    <value>MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</value>
+    <comment>{StrBegin="MSB3896: "}</comment>
   </data>
 
   <!--

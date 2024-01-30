@@ -16,15 +16,25 @@ internal sealed class Project
     /// Initialized a new <see cref="Project"/> with the given <paramref name="targetFramework"/>.
     /// </summary>
     /// <param name="targetFramework">The target framework of the project or null if not multi-targeting.</param>
-    public Project(string? targetFramework)
+    public Project(string? targetFramework, StopwatchAbstraction? stopwatch)
     {
         TargetFramework = targetFramework;
+
+        if (stopwatch is not null)
+        {
+            stopwatch.Start();
+            Stopwatch = stopwatch;
+        }
+        else
+        {
+            Stopwatch = SystemStopwatch.StartNew();
+        }
     }
 
     /// <summary>
     /// A stopwatch to time the build of the project.
     /// </summary>
-    public Stopwatch Stopwatch { get; } = Stopwatch.StartNew();
+    public StopwatchAbstraction Stopwatch { get; }
 
     /// <summary>
     /// Full path to the primary output of the project, if known.

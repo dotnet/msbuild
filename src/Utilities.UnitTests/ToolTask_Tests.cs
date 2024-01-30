@@ -853,7 +853,7 @@ namespace Microsoft.Build.UnitTests
             task.ValidateParameters().ShouldBe(!isInvalidValid);
             task.TerminationTimeout.ShouldBe(timeout);
         }
-		
+
 		/// <summary>
         /// Verifies that a ToolTask instance can return correct results when executed multiple times with timeout.
         /// </summary>

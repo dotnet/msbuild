@@ -79,7 +79,7 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// A description of the location where the property was defined,
-        /// such as a registry key path or a path to a config file and 
+        /// such as a registry key path or a path to a config file and
         /// line number.
         /// </summary>
         public IElementLocation Source
