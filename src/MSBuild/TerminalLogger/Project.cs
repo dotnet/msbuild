@@ -46,6 +46,8 @@ internal sealed class Project
     /// </summary>
     public string? TargetFramework { get; }
 
+    public bool IsTestProject { get; set; }
+
     /// <summary>
     /// A lazily initialized list of build messages/warnings/errors raised during the build.
     /// </summary>

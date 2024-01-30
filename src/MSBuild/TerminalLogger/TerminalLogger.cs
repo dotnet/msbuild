@@ -8,6 +8,12 @@ using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
+using System.Collections.Concurrent;
+using static System.Net.Mime.MediaTypeNames;
+
+
+
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
 #endif
@@ -58,6 +64,8 @@ internal sealed partial class TerminalLogger : INodeLogger
     internal const TerminalColor TargetFrameworkColor = TerminalColor.Cyan;
 
     internal Func<StopwatchAbstraction>? CreateStopwatch = null;
+
+    internal static string[] MessageSeparator = new[] { "||||" };
 
     /// <summary>
     /// Protects access to state shared between the logger callbacks and the rendering thread.
@@ -170,6 +178,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// The two directory separator characters to be passed to methods like <see cref="String.IndexOfAny(char[])"/>.
     /// </summary>
     private static readonly char[] PathSeparators = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
+    private ConcurrentBag<TestSummary> _testRunSummaries = new();
 
     /// <summary>
     /// Default constructor, used by the MSBuild logger infra.
@@ -271,6 +280,9 @@ internal sealed partial class TerminalLogger : INodeLogger
 
         _projects.Clear();
 
+        var testRunSummaries = _testRunSummaries;
+        _testRunSummaries = new ConcurrentBag<TestSummary>();
+
         Terminal.BeginUpdate();
         try
         {
@@ -290,6 +302,26 @@ internal sealed partial class TerminalLogger : INodeLogger
                     buildResult,
                     duration));
             }
+
+            if (testRunSummaries.Any())
+            {
+                
+                var total = testRunSummaries.Sum(t => t.Total);
+                var failed = testRunSummaries.Sum(t => t.Failed);
+                var passed = testRunSummaries.Sum(t => t.Passed);
+                var skipped = testRunSummaries.Sum(t => t.Skipped);
+                var testDuration = testRunSummaries.Aggregate(TimeSpan.Zero,(t, s) => t + s.Duration);
+                if (testRunSummaries.Any(t => t.Failed > 0) || _buildHasErrors)
+                {
+                    var testResult = $"Test run {AnsiCodes.Colorize("failed", TerminalColor.Red)}. Total: {total} Failed: {failed} Passed: {passed} Skipped: {skipped}, Duration: {duration}";
+                    Terminal.WriteLine(testResult);
+                }
+                else
+                {
+                    var testResult = $"Test run {AnsiCodes.Colorize("passed", TerminalColor.Green)}. Total: {total} Failed: {failed} Passed: {passed} Skipped: {skipped}, Duration: {duration}";
+                    Terminal.WriteLine(testResult);
+                }
+            }
         }
         finally
         {
@@ -300,6 +332,7 @@ internal sealed partial class TerminalLogger : INodeLogger
 
             Terminal.EndUpdate();
         }
+
 
         _buildHasErrors = false;
         _buildHasWarnings = false;
@@ -406,26 +439,48 @@ internal sealed partial class TerminalLogger : INodeLogger
                         _restoreFinished = true;
                     }
                     // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
-                    else if (project.OutputPath is not null || project.BuildMessages is not null)
+                    else if (project.OutputPath is not null || project.BuildMessages is not null || project.IsTestProject)
                     {
                         // Show project build complete and its output
-
-                        if (string.IsNullOrEmpty(project.TargetFramework))
+                        if (project.IsTestProject)
                         {
-                            Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_NoTF",
-                                Indentation,
-                                projectFile,
-                                buildResult,
-                                duration));
+                            if (string.IsNullOrEmpty(project.TargetFramework))
+                            {
+                                Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_NoTF",
+                                    Indentation,
+                                    projectFile,
+                                    buildResult,
+                                    duration));
+                            }
+                            else
+                            {
+                                Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_WithTF",
+                                    Indentation,
+                                    projectFile,
+                                    AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
+                                    buildResult,
+                                    duration));
+                            }
                         }
                         else
                         {
-                            Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTF",
-                                Indentation,
-                                projectFile,
-                                AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
-                                buildResult,
-                                duration));
+                            if (string.IsNullOrEmpty(project.TargetFramework))
+                            {
+                                Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_NoTF",
+                                    Indentation,
+                                    projectFile,
+                                    buildResult,
+                                    duration));
+                            }
+                            else
+                            {
+                                Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTF",
+                                    Indentation,
+                                    projectFile,
+                                    AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
+                                    buildResult,
+                                    duration));
+                            }
                         }
 
                         // Print the output path as a link if we have it.
@@ -498,12 +553,22 @@ internal sealed partial class TerminalLogger : INodeLogger
     private void TargetStarted(object sender, TargetStartedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
+        Debug.WriteLine($"Target started {e.TargetName}");
         if (_restoreContext is null && buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
             project.Stopwatch.Start();
 
             string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
-            NodeStatus nodeStatus = new(projectFile, project.TargetFramework, e.TargetName, project.Stopwatch);
+
+            var isTestTarget = e.TargetName == "_VSTestMSBuild2";
+
+            var targetName = isTestTarget ? "Testing" : e.TargetName;
+            if (isTestTarget)
+            {
+                project.IsTestProject = true;
+            }
+
+            NodeStatus nodeStatus = new(projectFile, project.TargetFramework, targetName, project.Stopwatch);
             UpdateNodeStatus(buildEventContext, nodeStatus);
         }
     }
@@ -530,14 +595,17 @@ internal sealed partial class TerminalLogger : INodeLogger
     private void TaskStarted(object sender, TaskStartedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
-        if (_restoreContext is null && buildEventContext is not null && e.TaskName == "MSBuild")
+        if (_restoreContext is null && buildEventContext is not null)
         {
-            // This will yield the node, so preemptively mark it idle
-            UpdateNodeStatus(buildEventContext, null);
-
-            if (_projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+            if (e.TaskName == "MSBuild")
             {
-                project.Stopwatch.Stop();
+                // This will yield the node, so preemptively mark it idle
+                UpdateNodeStatus(buildEventContext, null);
+
+                if (_projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+                {
+                    project.Stopwatch.Stop();
+                }
             }
         }
     }
@@ -556,6 +624,8 @@ internal sealed partial class TerminalLogger : INodeLogger
         string? message = e.Message;
         if (message is not null && e.Importance == MessageImportance.High)
         {
+            Debug.WriteLine($"MSBUILD MESSAGE: {message}");
+            var hasProject = _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project);
             // Detect project output path by matching high-importance messages against the "$(MSBuildProjectName) -> ..."
             // pattern used by the CopyFilesToOutputDirectory target.
             int index = message.IndexOf(FilePathPattern, StringComparison.Ordinal);
@@ -563,17 +633,71 @@ internal sealed partial class TerminalLogger : INodeLogger
             {
                 var projectFileName = Path.GetFileName(e.ProjectFile.AsSpan());
                 if (!projectFileName.IsEmpty &&
-                    message.AsSpan().StartsWith(Path.GetFileNameWithoutExtension(projectFileName)) &&
-                    _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+                    message.AsSpan().StartsWith(Path.GetFileNameWithoutExtension(projectFileName)) && hasProject)
                 {
                     ReadOnlyMemory<char> outputPath = e.Message.AsMemory().Slice(index + 4);
-                    project.OutputPath = outputPath;
+                    project!.OutputPath = outputPath;
                 }
             }
 
             if (IsImmediateMessage(message))
             {
                 RenderImmediateMessage(message);
+            }
+            else if (hasProject && project!.IsTestProject)
+            {
+                var node = _nodes[NodeIndexForContext(buildEventContext)];
+
+                if (e.Subcategory == "VSTESTTLPASSED")
+                {
+                    // 0 - localized result indicator
+                    // 1 - display name
+                    // 2 - duration
+                    var data = message.Split(MessageSeparator, StringSplitOptions.None);
+                    var indicator = data[0];
+                    var displayName = data[1];
+                    var duration = data[2];                    
+
+                    // TODO: Re-enable colorization. I think there is a "bug" in RenderNodeStatus, that does not account for Target containing
+                    // ANSI codes, which will make it render shorter on the screen. So when text is replaces, the duration is seen twice on the screen.
+                    var testResult = $"{AnsiCodes.Colorize(indicator, TerminalColor.Green)} {displayName}";
+                    var status = new NodeStatus(node!.Project, node.TargetFramework, testResult, project.Stopwatch);
+                    UpdateNodeStatus(buildEventContext, status);
+                }
+                else if (e.Subcategory == "VSTESTTLSKIPPED")
+                {
+                    // 0 - localized result indicator
+                    // 1 - display name
+                    var data = message.Split(MessageSeparator, StringSplitOptions.None);
+                    var indicator = data[0];
+                    var displayName = data[1];
+                    var testResult = $"{AnsiCodes.Colorize(indicator, TerminalColor.Yellow)} {displayName}";
+                    var status = new NodeStatus(node!.Project, node.TargetFramework, testResult, project.Stopwatch);
+                    UpdateNodeStatus(buildEventContext, status);
+                }
+                else if (e.Subcategory == "VSTESTTLFINISH")
+                {
+                    // 0 - total tests
+                    // 1 - passed tests
+                    // 2 - skipped tests
+                    // 3 - failed tests
+                    // 4 - duration
+                    var data = message.Split(MessageSeparator, StringSplitOptions.None);
+                    _ = int.TryParse(data[0], out int total);
+                    _ = int.TryParse(data[1], out int passed);
+                    _ = int.TryParse(data[2], out int skipped);
+                    _ = int.TryParse(data[3], out int failed);
+                    _ = double.TryParse(data[4], out double durationInMs);
+
+                    _testRunSummaries.Add(new TestSummary
+                    {
+                        Total = total,
+                        Passed = passed,
+                        Skipped = skipped,
+                        Failed = failed,
+                        Duration = TimeSpan.FromMilliseconds(durationInMs)
+                    });
+                }
             }
             else if (e.Code == "NETSDK1057" && !_loggedPreviewMessage)
             {
