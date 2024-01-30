@@ -31,7 +31,7 @@ namespace Microsoft.Build.Framework
     }
 
     /// <summary>
-    /// This class is used to check if a feature is available or not.
+    /// This class is used to manage features.
     /// </summary>
     public static class Features
     {
