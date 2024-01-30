@@ -4516,7 +4516,7 @@ namespace Microsoft.Build.CommandLine
             if (features.Length == 1)
             {
                 string featureName = features[0];
-                FeatureStatus availability = FeatureAvailabilityChecker.CheckFeatureAvailability(featureName);
+                FeatureStatus availability = Features.CheckFeatureAvailability(featureName);
                 Console.WriteLine(availability);
             }
             else
@@ -4524,7 +4524,7 @@ namespace Microsoft.Build.CommandLine
                 var jsonNode = new JsonObject();
                 foreach (string featureName in features)
                 {
-                    jsonNode[featureName] = FeatureAvailabilityChecker.CheckFeatureAvailability(featureName).ToString();
+                    jsonNode[featureName] = Features.CheckFeatureAvailability(featureName).ToString();
                 }
 
                 var s_options = new JsonSerializerOptions() { AllowTrailingCommas = false, WriteIndented = true };

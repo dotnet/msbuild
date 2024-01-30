@@ -33,7 +33,7 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// This class is used to check if a feature is available or not.
     /// </summary>
-    public static class FeatureAvailabilityChecker
+    public static class Features
     {
         private static Dictionary<string, FeatureStatus> _featureStatusMap = new Dictionary<string, FeatureStatus>
         {

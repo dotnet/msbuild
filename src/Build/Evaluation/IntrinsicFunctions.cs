@@ -576,7 +576,7 @@ namespace Microsoft.Build.Evaluation
 
         internal static string CheckFeatureAvailability(string featureName)
         {
-            return FeatureAvailabilityChecker.CheckFeatureAvailability(featureName).ToString();
+            return Features.CheckFeatureAvailability(featureName).ToString();
         }
 
         public static string GetCurrentToolsDirectory()
