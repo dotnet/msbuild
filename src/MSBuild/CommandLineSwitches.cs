@@ -50,8 +50,7 @@ namespace Microsoft.Build.CommandLine
 #if DEBUG
             WaitForDebugger,
 #endif
-            NumberOfParameterlessSwitches,
-            FeautureAvailability
+            NumberOfParameterlessSwitches
         }
 
         /// <summary>
