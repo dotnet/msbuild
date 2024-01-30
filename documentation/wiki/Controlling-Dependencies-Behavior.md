@@ -4,7 +4,7 @@ MSBuild recognizes a [few types of references](https://learn.microsoft.com/previ
 
 ## Access to transitive dependencies
 
-Following sections will describe details of transitive dependencies accessibility for `ProjectReference`, `PackageReference` and `Reference`. To summarize the content: Projects requiring access to particular dependency (project, package or assembly) should allways explicitly declare the required dependency (via the appropriate item). 
+Following sections will describe details of transitive dependencies accessibility for `ProjectReference`, `PackageReference` and `Reference`. To summarize the content: Projects requiring access to particular dependency (project, package or assembly) should always explicitly declare the required dependency (via the appropriate item). 
 
 The possibility of the transitive access should however be acknowledged and wherever the strict separation of architectural layers is required - a dedicated metadata (`DisableTransitiveProjectReferences` or `PrivateAssets`) should be used.
 
@@ -109,7 +109,7 @@ public class PersonsAccessor
 
 ## Access to transitive assembly references
 
-`Reference` (AKA assemly reference) referenced by a project is not transitively accessible from projects referncing the said directly referencing project:
+`Reference` (AKA assembly reference) referenced by a project is not transitively accessible from projects referencing the said directly referencing project:
 
 ```xml
 <ItemGroup>
