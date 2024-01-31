@@ -28,6 +28,11 @@ namespace Microsoft.Build.Framework
         /// The feature is not available.
         /// </summary>
         NotAvailable,
+
+        /// <summary>
+        /// The feature is in preview.
+        /// </summary>
+        Preview,
     }
 
     /// <summary>
