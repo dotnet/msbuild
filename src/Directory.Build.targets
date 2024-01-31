@@ -118,6 +118,9 @@
     </ItemGroup>
   </Target>
 
+  <!-- This target creates a type library for the assemblies in a package. It requires desktop msbuild to locate the tooling
+       Type libraries are still needed by Visual Studio in some cases, like the legacy C# project system.
+       It calls into msbuild via COM, and needs the type library to do so. -->
   <Target Name="CreateTypeLib" BeforeTargets="AfterBuild" Inputs="$(TargetPath)" Outputs="$(TargetDir)$(TargetName).tlb;$(TargetDir)x64\$(TargetName).tlb" Condition="'$(BuildingInsideVisualStudio)' != 'true' and '$(CreateTlb)' == 'true' and $([MSBuild]::IsOSPlatform('windows')) and '$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MSBuildRuntimeType)' != 'Core'">
     <PropertyGroup>
       <TlbExpPath>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPathToDotNetFrameworkSdkFile('tlbexp.exe'))</TlbExpPath>
