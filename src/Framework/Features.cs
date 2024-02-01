@@ -43,8 +43,6 @@ namespace Microsoft.Build.Framework
         private static readonly Dictionary<string, FeatureStatus> _featureStatusMap = new Dictionary<string, FeatureStatus>
         {
             // TODO: Fill in the dictionary with the features and their status
-            { "Feature1", FeatureStatus.Available },
-            { "Feature2", FeatureStatus.NotAvailable },
         };
 
         /// <summary>
