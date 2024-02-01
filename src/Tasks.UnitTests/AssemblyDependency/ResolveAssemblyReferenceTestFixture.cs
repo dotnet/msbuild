@@ -51,8 +51,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         internal static Dictionary<string, int> uniqueGetAssemblyName = null;
 
         internal static bool useFrameworkFileExists = false;
-
-        [StringSyntax(StringSyntaxAttribute.Xml)]
         internal const string REDISTLIST = """
             <FileList  Redist="Microsoft-Windows-CLRCoreComp.4.0" Name=".NET Framework 4" RuntimeVersion="4.0" ToolsVersion="12.0">
               <File AssemblyName="Accessibility" Version="4.0.0.0" PublicKeyToken="b03f5f7f11d50a3a" Culture="neutral" ProcessorArchitecture="MSIL" InGac="true" />
