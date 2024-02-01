@@ -15,9 +15,9 @@ namespace Microsoft.Build.Framework
     public enum FeatureStatus
     {
         /// <summary>
-        /// The feature is not found.
+        /// The feature availability is not determined.
         /// </summary>
-        NotFound,
+        Undefined,
 
         /// <summary>
         /// The feature is available.
@@ -53,7 +53,7 @@ namespace Microsoft.Build.Framework
         public static FeatureStatus CheckFeatureAvailability(string featureName)
         {
             return _featureStatusMap.TryGetValue(featureName, out FeatureStatus status) ?
-                 status : FeatureStatus.NotFound;
+                 status : FeatureStatus.Undefined;
         }
     }
 }
