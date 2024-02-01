@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -12,6 +14,7 @@ using System.Diagnostics;
 
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 #endif
 #if NETFRAMEWORK
 using Microsoft.IO;
@@ -41,6 +44,8 @@ internal sealed partial class TerminalLogger : INodeLogger
 #else
     private static readonly string[] _immediateMessageKeywords = { "[CredentialProvider]", "--interactive" };
 #endif
+
+    private static readonly string[] newLineStrings = { "\r\n", "\n" };
 
     /// <summary>
     /// A wrapper over the project context ID passed to us in <see cref="IEventSource"/> logger events.
@@ -545,7 +550,21 @@ internal sealed partial class TerminalLogger : INodeLogger
                     {
                         foreach (BuildMessage buildMessage in project.BuildMessages)
                         {
-                            Terminal.WriteLine($"{Indentation}{Indentation}{buildMessage.Message}");
+                            if (buildMessage.Message.IndexOf('\n') == -1) // Check for multi-line message
+                            {
+                                Terminal.WriteLine($"{Indentation}{Indentation}{buildMessage.Message}");
+                            }
+                            else
+                            {
+                                string[] lines = buildMessage.Message.Split(newLineStrings, StringSplitOptions.None);
+
+                                Terminal.WriteLine($"{Indentation}{Indentation}{lines[0]}");
+
+                                for (int i = 1; i < lines.Length; i++)
+                                {
+                                    Terminal.WriteLine($"{Indentation}{Indentation}{Indentation}{lines[i]}");
+                                }
+                            }
                         }
                     }
 
@@ -725,19 +744,16 @@ internal sealed partial class TerminalLogger : INodeLogger
     private void WarningRaised(object sender, BuildWarningEventArgs e)
     {
         BuildEventContext? buildEventContext = e.BuildEventContext;
-        string message = EventArgsFormatting.FormatEventMessage(
+        string message = FormatEventMessage(
                 category: AnsiCodes.Colorize("warning", TerminalColor.Yellow),
                 subcategory: e.Subcategory,
                 message: e.Message,
                 code: AnsiCodes.Colorize(e.Code, TerminalColor.Yellow),
                 file: HighlightFileName(e.File),
-                projectFile: e.ProjectFile ?? null,
                 lineNumber: e.LineNumber,
                 endLineNumber: e.EndLineNumber,
                 columnNumber: e.ColumnNumber,
-                endColumnNumber: e.EndColumnNumber,
-                threadId: e.ThreadId,
-                logOutputProperties: null);
+                endColumnNumber: e.EndColumnNumber);
 
         if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
@@ -774,19 +790,16 @@ internal sealed partial class TerminalLogger : INodeLogger
     private void ErrorRaised(object sender, BuildErrorEventArgs e)
     {
         BuildEventContext? buildEventContext = e.BuildEventContext;
-        string message = EventArgsFormatting.FormatEventMessage(
+        string message = FormatEventMessage(
                 category: AnsiCodes.Colorize("error", TerminalColor.Red),
                 subcategory: e.Subcategory,
                 message: e.Message,
                 code: AnsiCodes.Colorize(e.Code, TerminalColor.Red),
                 file: HighlightFileName(e.File),
-                projectFile: e.ProjectFile ?? null,
                 lineNumber: e.LineNumber,
                 endLineNumber: e.EndLineNumber,
                 columnNumber: e.ColumnNumber,
-                endColumnNumber: e.EndColumnNumber,
-                threadId: e.ThreadId,
-                logOutputProperties: null);
+                endColumnNumber: e.EndColumnNumber);
 
         if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
@@ -936,6 +949,68 @@ internal sealed partial class TerminalLogger : INodeLogger
         return index >= 0
             ? $"{path.Substring(0, index + 1)}{AnsiCodes.MakeBold(path.Substring(index + 1))}"
             : path;
+    }
+
+    internal static string FormatEventMessage(
+            string category,
+            string subcategory,
+            string? message,
+            string code,
+            string? file,
+            int lineNumber,
+            int endLineNumber,
+            int columnNumber,
+            int endColumnNumber)
+    {
+        using SpanBasedStringBuilder builder = new(128);
+
+        if (string.IsNullOrEmpty(file))
+        {
+            builder.Append("MSBUILD : ");    // Should not be localized.
+        }
+        else
+        {
+            builder.Append(file);
+
+            if (lineNumber == 0)
+            {
+                builder.Append(" : ");
+            }
+            else
+            {
+                if (columnNumber == 0)
+                {
+                    builder.Append(endLineNumber == 0 ?
+                        $"({lineNumber}): " :
+                        $"({lineNumber}-{endLineNumber}): ");
+                }
+                else
+                {
+                    if (endLineNumber == 0)
+                    {
+                        builder.Append(endColumnNumber == 0 ?
+                            $"({lineNumber},{endColumnNumber}): " :
+                            $"({lineNumber},{columnNumber}-{endColumnNumber}): ");
+                    }
+                    else
+                    {
+                        builder.Append(endColumnNumber == 0 ?
+                            $"({lineNumber}-{endLineNumber},{columnNumber}): " :
+                            $"({lineNumber},{columnNumber},{endLineNumber},{endColumnNumber}): ");
+                    }
+                }
+            }
+        }
+
+        if (!string.IsNullOrEmpty(subcategory))
+        {
+            builder.Append(subcategory);
+            builder.Append(" ");
+        }
+
+        builder.Append($"{category} {code}: {message}");
+
+        return builder.ToString();
     }
 
     #endregion

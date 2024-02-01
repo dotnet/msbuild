@@ -52,6 +52,9 @@ namespace Microsoft.Build.UnitTests
             _terminallogger.CreateStopwatch = () => new MockStopwatch();
 
             UseProjectRelativeDirectory("Snapshots");
+
+            // Avoids issues with different cultures on different machines
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
         }
 
         #region IEventSource implementation
@@ -220,7 +223,7 @@ namespace Microsoft.Build.UnitTests
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
-                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning!"));
+                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("A \n Multi \r\n Line \n Warning!"));
             });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
