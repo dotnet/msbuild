@@ -30,7 +30,7 @@ namespace Microsoft.Build.Framework
         NotAvailable,
 
         /// <summary>
-        /// The feature is in preview.
+        /// The feature is in preview, subject to change API or behavior between releases.
         /// </summary>
         Preview,
     }
