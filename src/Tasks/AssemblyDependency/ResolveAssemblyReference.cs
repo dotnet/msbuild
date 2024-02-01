@@ -102,6 +102,7 @@ namespace Microsoft.Build.Tasks
             public static string ResolvedFrom;
             public static string SearchedAssemblyFoldersEx;
             public static string SearchPath;
+            public static string SearchPathAddedByParentAssembly;
             public static string TargetedProcessorArchitectureDoesNotMatch;
             public static string UnificationByAppConfig;
             public static string UnificationByAutoUnify;
@@ -153,6 +154,7 @@ namespace Microsoft.Build.Tasks
                 ResolvedFrom = GetResourceFourSpaces("ResolveAssemblyReference.ResolvedFrom");
                 SearchedAssemblyFoldersEx = GetResourceEightSpaces("ResolveAssemblyReference.SearchedAssemblyFoldersEx");
                 SearchPath = EightSpaces + GetResource("ResolveAssemblyReference.SearchPath");
+                SearchPathAddedByParentAssembly = EightSpaces + GetResource("ResolveAssemblyReference.SearchPathAddedByParentAssembly");
                 TargetedProcessorArchitectureDoesNotMatch = GetResourceEightSpaces("ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch");
                 UnificationByAppConfig = GetResourceFourSpaces("ResolveAssemblyReference.UnificationByAppConfig");
                 UnificationByAutoUnify = GetResourceFourSpaces("ResolveAssemblyReference.UnificationByAutoUnify");
@@ -1791,7 +1793,14 @@ namespace Microsoft.Build.Tasks
                     if (lastSearchPath != location.SearchPath)
                     {
                         lastSearchPath = location.SearchPath;
-                        Log.LogMessage(importance, Strings.SearchPath, lastSearchPath);
+                        if (location.ParentAssembly != null)
+                        {
+                            Log.LogMessage(importance, Strings.SearchPathAddedByParentAssembly, lastSearchPath, location.ParentAssembly);
+                        }
+                        else
+                        {
+                            Log.LogMessage(importance, Strings.SearchPath, lastSearchPath);
+                        }                 
                         if (logAssemblyFoldersMinimal)
                         {
                             Log.LogMessage(importance, Strings.SearchedAssemblyFoldersEx);

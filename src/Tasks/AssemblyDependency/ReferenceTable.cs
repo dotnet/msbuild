@@ -1279,10 +1279,11 @@ namespace Microsoft.Build.Tasks
             // First, look for the dependency in the parents' directories. Unless they are resolved from the GAC or assemblyFoldersEx then
             // we should make sure we use the GAC and assemblyFolders resolvers themserves rather than a directory resolver to find the reference.
             // This way we dont get assemblies pulled from the GAC or AssemblyFolders but dont have the marking that they were pulled form there.
-            var parentReferenceFolders = new List<string>();
+            var parentReferenceDirectoriesMap = new Dictionary<string, List<string>>();
             foreach (Reference parentReference in reference.GetDependees())
             {
-                CalculateParentAssemblyDirectories(parentReferenceFolders, parentReference);
+                parentReferenceDirectoriesMap[parentReference.FullPath] = new List<string>();
+                CalculateParentAssemblyDirectories(parentReferenceDirectoriesMap[parentReference.FullPath], parentReference);
             }
 
             // Build the set of resolvers.
@@ -1298,9 +1299,9 @@ namespace Microsoft.Build.Tasks
             else
             {
                 // Do not probe near dependees if the reference is primary and resolved externally. If resolved externally, the search paths should have been specified in such a way to point to the assembly file.
-                if (assemblyName == null || !_externallyResolvedPrimaryReferences.Contains(assemblyName.Name))
+                if (parentReferenceDirectoriesMap.Count > 0 && (assemblyName == null || !_externallyResolvedPrimaryReferences.Contains(assemblyName.Name)))
                 {
-                    jaggedResolvers.Add(AssemblyResolution.CompileDirectories(parentReferenceFolders, _fileExists, _getAssemblyName, _getRuntimeVersion, _targetedRuntimeVersion));
+                    jaggedResolvers.Add(AssemblyResolution.CompileDirectories(parentReferenceDirectoriesMap, _fileExists, _getAssemblyName, _getRuntimeVersion, _targetedRuntimeVersion));
                 }
 
                 jaggedResolvers.Add(Resolvers);

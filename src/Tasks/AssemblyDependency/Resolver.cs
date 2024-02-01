@@ -96,6 +96,11 @@ namespace Microsoft.Build.Tasks
             out bool userRequestedSpecificFile);
 
         /// <summary>
+        /// The parent assembly that was used for the SearchPath.
+        /// </summary>
+        internal string ParentAssembly { get; set; }
+
+        /// <summary>
         /// The search path element that this resolver is based on.
         /// </summary>
         public string SearchPath => searchPathElement;
@@ -118,7 +123,8 @@ namespace Microsoft.Build.Tasks
                 considered = new ResolutionSearchLocation
                 {
                     FileNameAttempted = fullPath,
-                    SearchPath = searchPathElement
+                    SearchPath = searchPathElement,
+                    ParentAssembly = this.ParentAssembly
                 };
             }
 

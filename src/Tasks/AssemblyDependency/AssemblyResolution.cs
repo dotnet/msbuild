@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.AssemblyFoldersFromConfig;
@@ -213,16 +214,24 @@ namespace Microsoft.Build.Tasks
         /// Build a resolver array from a set of directories to resolve directly from.
         /// </summary>
         internal static Resolver[] CompileDirectories(
-            List<string> directories,
+            Dictionary<string, List<string>> parentReferenceDirectoriesMap,
             FileExists fileExists,
             GetAssemblyName getAssemblyName,
             GetAssemblyRuntimeVersion getRuntimeVersion,
             Version targetedRuntimeVersion)
         {
-            var resolvers = new Resolver[directories.Count];
-            for (int i = 0; i < directories.Count; i++)
+            int totalResolversCount = parentReferenceDirectoriesMap.Values.Sum(list => list.Count);
+            var resolvers = new Resolver[totalResolversCount];
+            int index = 0;
+
+            foreach (var parentReferenceDirectories in parentReferenceDirectoriesMap)
             {
-                resolvers[i] = new DirectoryResolver(directories[i], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion);
+                foreach (var directory in parentReferenceDirectories.Value)
+                {
+                    resolvers[index] = new DirectoryResolver(directory, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion);
+                    resolvers[index].ParentAssembly = parentReferenceDirectories.Key;
+                    index++;
+                }
             }
 
             return resolvers;
