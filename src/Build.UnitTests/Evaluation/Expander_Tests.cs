@@ -4336,8 +4336,6 @@ $(
         // TODO: update features list
         [Theory]
         [InlineData("NonExistingFeature", "NotFound")]
-        [InlineData("Feature1", "Available")]
-        [InlineData("Feature2", "NotAvailable")]
         public void PropertyFunctionCheckFeatureAvailability(string featureName, string availability)
         {
             var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default);
