@@ -549,7 +549,21 @@ internal sealed partial class TerminalLogger : INodeLogger
                     {
                         foreach (BuildMessage buildMessage in project.BuildMessages)
                         {
-                            Terminal.WriteLine($"{Indentation}{Indentation}{buildMessage.Message}");
+                            if (buildMessage.Message.IndexOf('\n') == -1) // Check for multi-line message
+                            {
+                                Terminal.WriteLine($"{Indentation}{Indentation}{buildMessage.Message}");
+                            }
+                            else
+                            {
+                                string[] lines = buildMessage.Message.Split(newLineStrings, StringSplitOptions.None);
+
+                                Terminal.WriteLine($"{Indentation}{Indentation}{lines[0]}");
+
+                                for (int i = 1; i < lines.Length; i++)
+                                {
+                                    Terminal.WriteLine($"{Indentation}{Indentation}{Indentation}{lines[i]}");
+                                }
+                            }
                         }
                     }
 
