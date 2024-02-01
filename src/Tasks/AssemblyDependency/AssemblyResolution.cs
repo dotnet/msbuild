@@ -228,8 +228,10 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (var directory in parentReferenceDirectories.Value)
                 {
-                    resolvers[index] = new DirectoryResolver(directory, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion);
-                    resolvers[index].ParentAssembly = parentReferenceDirectories.Key;
+                    resolvers[index] = new DirectoryResolver(directory, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion)
+                    {
+                        ParentAssembly = parentReferenceDirectories.Key
+                    };
                     index++;
                 }
             }
