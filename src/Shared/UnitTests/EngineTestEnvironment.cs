@@ -176,7 +176,7 @@ namespace Microsoft.Build.UnitTests
         private (ILogger, Func<string>) GetSerialLogger()
         {
             var sb = new StringBuilder();
-            var serialFromBuild = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, t => sb.Append(t), colorSet: null, colorReset: null);
+            var serialFromBuild = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, t => sb.Append(t), colorSet: null, colorReset: null, encoding: null);
             serialFromBuild.Parameters = "NOPERFORMANCESUMMARY";
             return (serialFromBuild, () => sb.ToString());
         }
@@ -184,7 +184,7 @@ namespace Microsoft.Build.UnitTests
         private (ILogger, Func<string>) GetParallelLogger()
         {
             var sb = new StringBuilder();
-            var parallelFromBuild = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, t => sb.Append(t), colorSet: null, colorReset: null);
+            var parallelFromBuild = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, t => sb.Append(t), colorSet: null, colorReset: null, encoding: null);
             parallelFromBuild.Parameters = "NOPERFORMANCESUMMARY";
             return (parallelFromBuild, () => sb.ToString());
         }

@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -50,7 +51,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 verbosity,
                 new WriteHandler(Console.Out.Write),
                 new ColorSetter(SetColor),
-                new ColorResetter(ResetColor))
+                new ColorResetter(ResetColor),
+                Encoding.UTF8)
         {
             // do nothing
         }
@@ -62,9 +64,10 @@ namespace Microsoft.Build.BackEnd.Logging
             LoggerVerbosity verbosity,
             WriteHandler write,
             ColorSetter colorSet,
-            ColorResetter colorReset)
+            ColorResetter colorReset,
+            Encoding encoding)
         {
-            InitializeConsoleMethods(verbosity, write, colorSet, colorReset);
+            InitializeConsoleMethods(verbosity, write, colorSet, colorReset, encoding);
             _deferredMessages = new Dictionary<BuildEventContext, List<BuildMessageEventArgs>>(s_compareContextNodeId);
             _buildEventManager = new BuildEventManager();
         }

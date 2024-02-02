@@ -108,11 +108,11 @@ namespace Microsoft.Build.UnitTests
             var mockLogFromBuild = new MockLogger();
 
             var serialFromBuildText = new StringBuilder();
-            var serialFromBuild = new SerialConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => serialFromBuildText.Append(t), colorSet: null, colorReset: null);
+            var serialFromBuild = new SerialConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => serialFromBuildText.Append(t), colorSet: null, colorReset: null, encoding: null);
             serialFromBuild.Parameters = "NOPERFORMANCESUMMARY";
 
             var parallelFromBuildText = new StringBuilder();
-            var parallelFromBuild = new ParallelConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => parallelFromBuildText.Append(t), colorSet: null, colorReset: null);
+            var parallelFromBuild = new ParallelConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => parallelFromBuildText.Append(t), colorSet: null, colorReset: null, encoding: null);
             parallelFromBuild.Parameters = "NOPERFORMANCESUMMARY";
 
             // build and log into binary logger, mock logger, serial and parallel console loggers
@@ -156,11 +156,11 @@ namespace Microsoft.Build.UnitTests
             var mockLogFromPlayback = new MockLogger();
 
             var serialFromPlaybackText = new StringBuilder();
-            var serialFromPlayback = new SerialConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => serialFromPlaybackText.Append(t), colorSet: null, colorReset: null);
+            var serialFromPlayback = new SerialConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => serialFromPlaybackText.Append(t), colorSet: null, colorReset: null, encoding: null);
             serialFromPlayback.Parameters = "NOPERFORMANCESUMMARY";
 
             var parallelFromPlaybackText = new StringBuilder();
-            var parallelFromPlayback = new ParallelConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => parallelFromPlaybackText.Append(t), colorSet: null, colorReset: null);
+            var parallelFromPlayback = new ParallelConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => parallelFromPlaybackText.Append(t), colorSet: null, colorReset: null, encoding: null);
             parallelFromPlayback.Parameters = "NOPERFORMANCESUMMARY";
 
             var binaryLogReader = new BinaryLogReplayEventSource();

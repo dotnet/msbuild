@@ -416,11 +416,15 @@ namespace Microsoft.Build.BackEnd.Logging
             // do nothing...
         }
 
-        internal void InitializeConsoleMethods(LoggerVerbosity logverbosity, WriteHandler logwriter, ColorSetter colorSet, ColorResetter colorReset)
+        internal void InitializeConsoleMethods(LoggerVerbosity logverbosity, WriteHandler logwriter, ColorSetter colorSet, ColorResetter colorReset, Encoding encoding)
         {
             Verbosity = logverbosity;
             WriteHandler = logwriter;
             IsRunningWithCharacterFileType();
+            if (encoding != null)
+            {
+                Console.OutputEncoding = encoding;
+            }
             // This is a workaround, because the Console class provides no way to check that a color
             // can actually be set or not. Color cannot be set if the console has been redirected
             // in certain ways (e.g. how BUILD.EXE does it)

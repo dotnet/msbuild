@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
@@ -40,7 +41,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 verbosity,
                 new WriteHandler(Console.Out.Write),
                 new ColorSetter(SetColor),
-                new ColorResetter(ResetColor))
+                new ColorResetter(ResetColor),
+                Encoding.UTF8)
         {
             // do nothing
         }
@@ -56,9 +58,10 @@ namespace Microsoft.Build.BackEnd.Logging
             LoggerVerbosity verbosity,
             WriteHandler write,
             ColorSetter colorSet,
-            ColorResetter colorReset)
+            ColorResetter colorReset,
+            Encoding encoding)
         {
-            InitializeConsoleMethods(verbosity, write, colorSet, colorReset);
+            InitializeConsoleMethods(verbosity, write, colorSet, colorReset, encoding);
         }
 
         #endregion

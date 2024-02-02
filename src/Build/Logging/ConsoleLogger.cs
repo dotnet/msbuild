@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Text;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
@@ -54,6 +55,7 @@ namespace Microsoft.Build.Logging
         private string _parameters;
         private bool _skipProjectStartedText = false;
         private bool? _showSummary;
+        private Encoding _encoding = Encoding.UTF8;
 
         #region Constructors
 
@@ -72,7 +74,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         /// <param name="verbosity">Verbosity level.</param>
         public ConsoleLogger(LoggerVerbosity verbosity) :
-            this(verbosity, Console.Out.Write, BaseConsoleLogger.SetColor, BaseConsoleLogger.ResetColor)
+            this(verbosity, Write, BaseConsoleLogger.SetColor, BaseConsoleLogger.ResetColor)
         {
             // do nothing
         }
@@ -94,6 +96,20 @@ namespace Microsoft.Build.Logging
             _write = write;
             _colorSet = colorSet;
             _colorReset = colorReset;
+
+            if (EncodingUtilities.GetExternalOverriddenUILanguageIfSupportableWithEncoding() != null)
+            {
+                _encoding = Encoding.UTF8;
+            }
+        }
+
+        /// <summary>
+        /// Write the text to the log.
+        /// </summary>
+        /// <param name="text">The text to write to the log</param>
+        private static void Write(string text)
+        {
+            Console.Out.Write(text);
         }
 
         /// <summary>
@@ -142,6 +158,20 @@ namespace Microsoft.Build.Logging
                         // Use ansi color codes if current target console do support it
                         preferConsoleColor = ConsoleConfiguration.AcceptAnsiColorCodes;
                     }
+                    if (string.Equals(param, "ENCODING", StringComparison.OrdinalIgnoreCase))
+                    {
+                        try
+                        {
+                            _encoding = Encoding.GetEncoding(param);
+                        }
+                        catch (ArgumentException ex)
+                        {
+                            // Can't change strings at this point, so for now we are using the exception string
+                            // verbatim, and supplying a error code directly.
+                            // This should move into the .resx later.
+                            throw new LoggerException(ex.Message, ex.InnerException, "MSB4128", null);
+                        }
+                    }
                 }
             }
 
@@ -158,7 +188,7 @@ namespace Microsoft.Build.Logging
 
             if (_numberOfProcessors == 1 && !useMPLogger)
             {
-                _consoleLogger = new SerialConsoleLogger(_verbosity, _write, _colorSet, _colorReset);
+                _consoleLogger = new SerialConsoleLogger(_verbosity, _write, _colorSet, _colorReset, _encoding);
                 if (this is FileLogger)
                 {
                     KnownTelemetry.LoggingConfigurationTelemetry.FileLoggerType = "serial";
@@ -170,7 +200,7 @@ namespace Microsoft.Build.Logging
             }
             else
             {
-                _consoleLogger = new ParallelConsoleLogger(_verbosity, _write, _colorSet, _colorReset);
+                _consoleLogger = new ParallelConsoleLogger(_verbosity, _write, _colorSet, _colorReset, _encoding);
                 if (this is FileLogger)
                 {
                     KnownTelemetry.LoggingConfigurationTelemetry.FileLoggerType = "parallel";
