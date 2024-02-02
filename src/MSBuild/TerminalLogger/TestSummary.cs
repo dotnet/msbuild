@@ -11,6 +11,5 @@ namespace Microsoft.Build.Logging.TerminalLogger
         public int Passed { get; set; }
         public int Skipped { get; set; }
         public int Failed { get; set; }
-        public TimeSpan Duration { get; set; }
     }
 }

@@ -65,8 +65,6 @@ internal sealed partial class TerminalLogger : INodeLogger
 
     internal Func<StopwatchAbstraction>? CreateStopwatch = null;
 
-    internal static string[] MessageSeparator = new[] { "||||" };
-
     /// <summary>
     /// Protects access to state shared between the logger callbacks and the rendering thread.
     /// </summary>
@@ -179,6 +177,8 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private static readonly char[] PathSeparators = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
     private ConcurrentBag<TestSummary> _testRunSummaries = new();
+    private DateTime? _testStartTime;
+    private DateTime? _testEndTime;
 
     /// <summary>
     /// Default constructor, used by the MSBuild logger infra.
@@ -305,20 +305,19 @@ internal sealed partial class TerminalLogger : INodeLogger
 
             if (testRunSummaries.Any())
             {
-                
                 var total = testRunSummaries.Sum(t => t.Total);
                 var failed = testRunSummaries.Sum(t => t.Failed);
                 var passed = testRunSummaries.Sum(t => t.Passed);
                 var skipped = testRunSummaries.Sum(t => t.Skipped);
-                var testDuration = testRunSummaries.Aggregate(TimeSpan.Zero,(t, s) => t + s.Duration);
+                var testDuration = (_testStartTime != null && _testEndTime != null ? (_testEndTime - _testStartTime).Value.TotalSeconds : 0).ToString("F1");
                 if (testRunSummaries.Any(t => t.Failed > 0) || _buildHasErrors)
                 {
-                    var testResult = $"Test run {AnsiCodes.Colorize("failed", TerminalColor.Red)}. Total: {total} Failed: {failed} Passed: {passed} Skipped: {skipped}, Duration: {duration}";
+                    var testResult = $"Test run {AnsiCodes.Colorize("failed", TerminalColor.Red)}. Total: {total} Failed: {failed} Passed: {passed} Skipped: {skipped}, Duration: {testDuration}s";
                     Terminal.WriteLine(testResult);
                 }
                 else
                 {
-                    var testResult = $"Test run {AnsiCodes.Colorize("passed", TerminalColor.Green)}. Total: {total} Failed: {failed} Passed: {passed} Skipped: {skipped}, Duration: {duration}";
+                    var testResult = $"Test run {AnsiCodes.Colorize("passed", TerminalColor.Green)}. Total: {total} Failed: {failed} Passed: {passed} Skipped: {skipped}, Duration: {testDuration}s";
                     Terminal.WriteLine(testResult);
                 }
             }
@@ -553,7 +552,6 @@ internal sealed partial class TerminalLogger : INodeLogger
     private void TargetStarted(object sender, TargetStartedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
-        Debug.WriteLine($"Target started {e.TargetName}");
         if (_restoreContext is null && buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
             project.Stopwatch.Start();
@@ -565,6 +563,12 @@ internal sealed partial class TerminalLogger : INodeLogger
             var targetName = isTestTarget ? "Testing" : e.TargetName;
             if (isTestTarget)
             {
+                // Use the minimal start time, so if we run tests in parallel, we can calculate duration
+                // as this start time, minus time when tests finished.
+                _testStartTime = _testStartTime == null
+                    ? e.Timestamp
+                    : e.Timestamp < _testStartTime
+                        ? e.Timestamp : _testStartTime;
                 project.IsTestProject = true;
             }
 
@@ -587,6 +591,13 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private void TargetFinished(object sender, TargetFinishedEventArgs e)
     {
+        if (e.TargetName == "_VSTestMSBuild")
+        {
+            _testEndTime = _testEndTime == null
+                    ? e.Timestamp
+                    : e.Timestamp > _testEndTime
+                        ? e.Timestamp : _testEndTime;
+        }
     }
 
     /// <summary>
@@ -624,7 +635,6 @@ internal sealed partial class TerminalLogger : INodeLogger
         string? message = e.Message;
         if (message is not null && e.Importance == MessageImportance.High)
         {
-            Debug.WriteLine($"MSBUILD MESSAGE: {message}");
             var hasProject = _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project);
             // Detect project output path by matching high-importance messages against the "$(MSBuildProjectName) -> ..."
             // pattern used by the CopyFilesToOutputDirectory target.
@@ -648,55 +658,49 @@ internal sealed partial class TerminalLogger : INodeLogger
             {
                 var node = _nodes[NodeIndexForContext(buildEventContext)];
 
-                if (e.Subcategory == "VSTESTTLPASSED")
+                if (e is IExtendedBuildEventArgs extendedMessage)
                 {
-                    // 0 - localized result indicator
-                    // 1 - display name
-                    // 2 - duration
-                    var data = message.Split(MessageSeparator, StringSplitOptions.None);
-                    var indicator = data[0];
-                    var displayName = data[1];
-                    var duration = data[2];                    
-
-                    // TODO: Re-enable colorization. I think there is a "bug" in RenderNodeStatus, that does not account for Target containing
-                    // ANSI codes, which will make it render shorter on the screen. So when text is replaces, the duration is seen twice on the screen.
-                    var testResult = $"{AnsiCodes.Colorize(indicator, TerminalColor.Green)} {displayName}";
-                    var status = new NodeStatus(node!.Project, node.TargetFramework, testResult, project.Stopwatch);
-                    UpdateNodeStatus(buildEventContext, status);
-                }
-                else if (e.Subcategory == "VSTESTTLSKIPPED")
-                {
-                    // 0 - localized result indicator
-                    // 1 - display name
-                    var data = message.Split(MessageSeparator, StringSplitOptions.None);
-                    var indicator = data[0];
-                    var displayName = data[1];
-                    var testResult = $"{AnsiCodes.Colorize(indicator, TerminalColor.Yellow)} {displayName}";
-                    var status = new NodeStatus(node!.Project, node.TargetFramework, testResult, project.Stopwatch);
-                    UpdateNodeStatus(buildEventContext, status);
-                }
-                else if (e.Subcategory == "VSTESTTLFINISH")
-                {
-                    // 0 - total tests
-                    // 1 - passed tests
-                    // 2 - skipped tests
-                    // 3 - failed tests
-                    // 4 - duration
-                    var data = message.Split(MessageSeparator, StringSplitOptions.None);
-                    _ = int.TryParse(data[0], out int total);
-                    _ = int.TryParse(data[1], out int passed);
-                    _ = int.TryParse(data[2], out int skipped);
-                    _ = int.TryParse(data[3], out int failed);
-                    _ = double.TryParse(data[4], out double durationInMs);
-
-                    _testRunSummaries.Add(new TestSummary
+                    switch (extendedMessage.ExtendedType)
                     {
-                        Total = total,
-                        Passed = passed,
-                        Skipped = skipped,
-                        Failed = failed,
-                        Duration = TimeSpan.FromMilliseconds(durationInMs)
-                    });
+                        case "VSTESTTLPASSED":
+                            {
+                                var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
+                                var displayName = extendedMessage.ExtendedMetadata!["displayName"];
+
+                                var testResult = $"{AnsiCodes.Colorize(indicator, TerminalColor.Green)} {displayName}";
+                                var status = new NodeStatus(node!.Project, node.TargetFramework, testResult, project.Stopwatch);
+                                UpdateNodeStatus(buildEventContext, status);
+                                break;
+                            }
+
+                        case "VSTESTTLSKIPPED":
+                            {
+                                var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
+                                var displayName = extendedMessage.ExtendedMetadata!["displayName"];
+
+                                var testResult = $"{AnsiCodes.Colorize(indicator, TerminalColor.Yellow)} {displayName}";
+                                var status = new NodeStatus(node!.Project, node.TargetFramework, testResult, project.Stopwatch);
+                                UpdateNodeStatus(buildEventContext, status);
+                                break;
+                            }
+
+                        case "VSTESTTLFINISH":
+                            {
+                                _ = int.TryParse(extendedMessage.ExtendedMetadata!["total"]!, out int total);
+                                _ = int.TryParse(extendedMessage.ExtendedMetadata!["passed"]!, out int passed);
+                                _ = int.TryParse(extendedMessage.ExtendedMetadata!["skipped"]!, out int skipped);
+                                _ = int.TryParse(extendedMessage.ExtendedMetadata!["failed"]!, out int failed);
+
+                                _testRunSummaries.Add(new TestSummary
+                                {
+                                    Total = total,
+                                    Passed = passed,
+                                    Skipped = skipped,
+                                    Failed = failed,
+                                });
+                                break;
+                            }
+                    }
                 }
             }
             else if (e.Code == "NETSDK1057" && !_loggedPreviewMessage)
