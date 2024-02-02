@@ -550,21 +550,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                     {
                         foreach (BuildMessage buildMessage in project.BuildMessages)
                         {
-                            if (buildMessage.Message.IndexOf('\n') == -1) // Check for multi-line message
-                            {
-                                Terminal.WriteLine($"{Indentation}{Indentation}{buildMessage.Message}");
-                            }
-                            else
-                            {
-                                string[] lines = buildMessage.Message.Split(newLineStrings, StringSplitOptions.None);
-
-                                Terminal.WriteLine($"{Indentation}{Indentation}{lines[0]}");
-
-                                for (int i = 1; i < lines.Length; i++)
-                                {
-                                    Terminal.WriteLine($"{Indentation}{Indentation}{Indentation}{lines[i]}");
-                                }
-                            }
+                            Terminal.WriteLine($"{Indentation}{Indentation}{buildMessage.Message}");
                         }
                     }
 
@@ -962,6 +948,7 @@ internal sealed partial class TerminalLogger : INodeLogger
             int columnNumber,
             int endColumnNumber)
     {
+        message ??= string.Empty;
         using SpanBasedStringBuilder builder = new(128);
 
         if (string.IsNullOrEmpty(file))
@@ -1008,7 +995,22 @@ internal sealed partial class TerminalLogger : INodeLogger
             builder.Append(" ");
         }
 
-        builder.Append($"{category} {code}: {message}");
+        builder.Append($"{category} {code}: ");
+
+        // render multi-line message in a special way
+        if (message.IndexOf('\n') >= 0)
+        {
+            string[] lines = message.Split(newLineStrings, StringSplitOptions.None);
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                builder.Append($"{Environment.NewLine}{Indentation}{Indentation}{Indentation}{lines[i]}");
+            }
+        }
+        else
+        {
+            builder.Append(message);
+        }
 
         return builder.ToString();
     }
