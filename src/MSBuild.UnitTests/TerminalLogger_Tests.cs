@@ -99,7 +99,6 @@ namespace Microsoft.Build.UnitTests
         {
             _terminallogger.Shutdown();
             Thread.CurrentThread.CurrentCulture = _originalCulture;
-
         }
 
         #endregion
@@ -227,7 +226,7 @@ namespace Microsoft.Build.UnitTests
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
-                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("A \n Multi \r\n Line \n Warning!"));
+                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("A\nMulti\r\nLine\nWarning!"));
             });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
