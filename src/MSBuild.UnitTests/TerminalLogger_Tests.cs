@@ -42,6 +42,8 @@ namespace Microsoft.Build.UnitTests
 
         private VerifySettings _settings = new();
 
+        private readonly CultureInfo _originalCulture = Thread.CurrentThread.CurrentCulture;
+
         public TerminalLogger_Tests()
         {
             _mockTerminal = new Terminal(_outputWriter);
@@ -96,6 +98,8 @@ namespace Microsoft.Build.UnitTests
         public void Dispose()
         {
             _terminallogger.Shutdown();
+            Thread.CurrentThread.CurrentCulture = _originalCulture;
+
         }
 
         #endregion
