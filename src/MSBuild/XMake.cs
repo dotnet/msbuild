@@ -2917,7 +2917,7 @@ namespace Microsoft.Build.CommandLine
         private static string GetProjectDirectory(string[] projectSwitchParameters)
         {
             string projectDirectory = ".";
-            ErrorUtilities.VerifyThrow(projectSwitchParameters.Length <= 1, "It should not be possible to specify more than 1 project at a time.");
+            ErrorUtilities.VerifyThrow(projectSwitchParameters.Length <= 1, "Expect exactly one project at a time.");
 
             if (projectSwitchParameters.Length == 1)
             {
@@ -3404,7 +3404,7 @@ namespace Microsoft.Build.CommandLine
                                  string[] projectsExtensionsToIgnore,
                                  DirectoryGetFiles getFiles)
         {
-            ErrorUtilities.VerifyThrow(parameters.Length <= 1, "It should not be possible to specify more than 1 project at a time.");
+            ErrorUtilities.VerifyThrow(parameters.Length <= 1, "Expect exactly one project at a time.");
             string projectFile = null;
 
             string projectDirectory = null;

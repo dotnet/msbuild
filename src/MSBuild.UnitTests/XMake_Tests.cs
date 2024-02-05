@@ -1449,7 +1449,7 @@ namespace Microsoft.Build.UnitTests
         public void ResponseFileInProjectDirectoryWithSolutionProjectDifferentNamesShouldBeRespected()
         {
             var directory = _env.CreateFolder();
-            var content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Message Text='Completed'/></Target></Project>");
+            var content = ObjectModelHelpers.CleanupFileContents("<Project><Target Name='t'><Message Text='Completed'/></Target></Project>");
             directory.CreateFile("projectFile.proj", content);
             directory.CreateFile("solutionFile.sln", string.Empty);
             directory.CreateFile("Directory.Build.rsp", "-ignoreProjectExtensions:.sln");
