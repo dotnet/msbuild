@@ -1011,8 +1011,9 @@ internal sealed partial class TerminalLogger : INodeLogger
                 }
                 else
                 {
+                    builder.AppendLine();
                     builder.Append(indent);
-                    builder.AppendLine(line);
+                    builder.Append(line);
                 }
             }
         }
@@ -1030,8 +1031,9 @@ internal sealed partial class TerminalLogger : INodeLogger
         while (start < text.Length)
         {
             int length = Math.Min(maxLength - indent.Length, text.Length - start);
+            sb.AppendLine();
             sb.Append(indent);
-            sb.AppendLine(text.Substring(start, length));
+            sb.Append(text.Substring(start, length));
 
             start += length;
         }
