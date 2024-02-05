@@ -808,7 +808,7 @@ internal sealed partial class TerminalLogger : INodeLogger
             : path;
     }
 
-    internal static string FormatEventMessage(
+    private string FormatEventMessage(
             string category,
             string subcategory,
             string? message,
@@ -820,7 +820,7 @@ internal sealed partial class TerminalLogger : INodeLogger
             int endColumnNumber)
     {
         message ??= string.Empty;
-        using SpanBasedStringBuilder builder = new(128);
+        StringBuilder builder = new(128);
 
         if (string.IsNullOrEmpty(file))
         {
@@ -863,7 +863,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         if (!string.IsNullOrEmpty(subcategory))
         {
             builder.Append(subcategory);
-            builder.Append(" ");
+            builder.Append(' ');
         }
 
         builder.Append($"{category} {code}: ");
@@ -871,11 +871,20 @@ internal sealed partial class TerminalLogger : INodeLogger
         // render multi-line message in a special way
         if (message.IndexOf('\n') >= 0)
         {
+            const string indent = $"{Indentation}{Indentation}{Indentation}";
             string[] lines = message.Split(newLineStrings, StringSplitOptions.None);
 
-            for (int i = 0; i < lines.Length; i++)
+            foreach (string line in lines)
             {
-                builder.Append($"{Environment.NewLine}{Indentation}{Indentation}{Indentation}{lines[i]}");
+                if (indent.Length + line.Length > Terminal.Width) // custom wrapping with indentation
+                {
+                    WrapText(builder, line, Terminal.Width, indent);
+                }
+                else
+                {
+                    builder.Append(indent);
+                    builder.AppendLine(line);
+                }
             }
         }
         else
@@ -884,6 +893,19 @@ internal sealed partial class TerminalLogger : INodeLogger
         }
 
         return builder.ToString();
+    }
+
+    private static void WrapText(StringBuilder sb, string text, int maxLength, string indent)
+    {
+        int start = 0;
+        while (start < text.Length)
+        {
+            int length = Math.Min(maxLength - indent.Length, text.Length - start);
+            sb.Append(indent);
+            sb.AppendLine(text.Substring(start, length));
+
+            start += length;
+        }
     }
 
     #endregion
