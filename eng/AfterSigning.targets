@@ -1,12 +1,15 @@
 <Project>
-    <Target Name="CopyAMD64Symbols" Condition="'$(OfficialBuild)' == 'true' AND '$(ArcadeBuildFromSource)' != 'true'" BeforeTargets="Build">
+    <!-- Don't attempt to copy the PDBs at all when building on core on non-windows platforms. -->
+    <Target Name="CopyAMD64Symbols" Condition="'$(OfficialBuild)' == 'true' AND $([MSBuild]::IsOSPlatform('windows'))" BeforeTargets="Build">
         <Copy
             SourceFiles="$(ArtifactsBinDir)MSBuild\x64\Release\net472\MSBuild.pdb"
             DestinationFolder="$(ArtifactsSymStoreDirectory)\MSBuild\net472\amd64"
             />
+        <!-- Excluded when building using msbuild core because msbuild core doesn't support targeting 3.5
+             See src\MSBuildTaskHost\MSBuildTaskHost.csproj-->
         <Copy
             SourceFiles="$(ArtifactsBinDir)MSBuildTaskHost\x64\Release\net35\MSBuildTaskHost.pdb"
             DestinationFolder="$(ArtifactsSymStoreDirectory)\MSBuildTaskHost\net35\amd64"
-            />
+            Condition="'$(MSBuildRuntimeType)' != 'Core' and '$(MonoBuild)' != 'true'"/>
     </Target>
 </Project>

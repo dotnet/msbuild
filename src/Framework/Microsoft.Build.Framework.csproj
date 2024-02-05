@@ -3,7 +3,9 @@
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
-    <CreateTlb>true</CreateTlb>
+    <!-- Do not create Tlbs when building in .NET product mode. The packages are not shipped to VS,
+         only their contents redisted within the SDK. -->
+    <CreateTlb Condition="'$(DotNetBuild)' != 'true'">true</CreateTlb>
     <IsPackable>true</IsPackable>
     <PackageDescription>This package contains the $(MSBuildProjectName) assembly which is a common assembly used by other MSBuild assemblies.</PackageDescription>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>

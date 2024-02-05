@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Collections;
@@ -568,7 +569,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // Produce the final results.
-                List<TaskItem> targetOutputItems = new List<TaskItem>();
+                TaskItem[] targetOutputItems = Array.Empty<TaskItem>();
 
                 try
                 {
@@ -622,26 +623,39 @@ namespace Microsoft.Build.BackEnd
 
                         if (keepDupes)
                         {
+                            List<TaskItem> targetOutputItemsList = new();
                             foreach (ItemBucket bucket in batchingBuckets)
                             {
-                                targetOutputItems.AddRange(bucket.Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation));
+                                if (targetOutputItems is null)
+                                {
+                                    // As an optimization, use the results for the first bucket and if there are no more buckets to process, only a single list is allocated.
+                                    targetOutputItemsList = bucket.Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation).ToList();
+                                }
+                                else
+                                {
+                                    targetOutputItemsList.AddRange(bucket.Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation));
+                                }
                             }
+
+                            targetOutputItems = targetOutputItemsList.ToArray();
                         }
                         else
                         {
-                            HashSet<TaskItem> addedItems = new HashSet<TaskItem>();
-                            foreach (ItemBucket bucket in batchingBuckets)
+                            // Optimize for only one bucket by initializing the HashSet<T> with the first one's items in case there are a lot of items, it won't need to be resized.
+                            if (batchingBuckets.Count == 1)
                             {
-                                IList<TaskItem> itemsToAdd = bucket.Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation);
-
-                                foreach (TaskItem item in itemsToAdd)
+                                targetOutputItems = new HashSet<TaskItem>(batchingBuckets[0].Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation)).ToArray();
+                            }
+                            else
+                            {
+                                HashSet<TaskItem> addedItems = new HashSet<TaskItem>();
+                                foreach (ItemBucket bucket in batchingBuckets)
                                 {
-                                    if (!addedItems.Contains(item))
-                                    {
-                                        targetOutputItems.Add(item);
-                                        addedItems.Add(item);
-                                    }
+                                    IList<TaskItem> itemsToAdd = bucket.Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation);
+                                    addedItems.UnionWith(itemsToAdd);
                                 }
+
+                                targetOutputItems = addedItems.ToArray();
                             }
                         }
                     }
@@ -649,10 +663,10 @@ namespace Microsoft.Build.BackEnd
                 finally
                 {
                     // log the last target finished since we now have the target outputs.
-                    targetLoggingContext?.LogTargetBatchFinished(projectFullPath, targetSuccess, targetOutputItems?.Count > 0 ? targetOutputItems : null);
+                    targetLoggingContext?.LogTargetBatchFinished(projectFullPath, targetSuccess, targetOutputItems.Length > 0 ? targetOutputItems : null);
                 }
 
-                _targetResult = new TargetResult(targetOutputItems.ToArray(), aggregateResult, targetLoggingContext?.BuildEventContext);
+                _targetResult = new TargetResult(targetOutputItems, aggregateResult, targetLoggingContext?.BuildEventContext);
 
                 if (aggregateResult.ResultCode == WorkUnitResultCode.Failed && aggregateResult.ActionCode == WorkUnitActionCode.Stop)
                 {

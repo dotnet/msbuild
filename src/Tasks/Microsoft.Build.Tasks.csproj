@@ -11,7 +11,9 @@
     <AssemblyName>Microsoft.Build.Tasks.Core</AssemblyName>
     <RootNamespace>Microsoft.Build.Tasks</RootNamespace>
     <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_TASKS</DefineConstants>
-    <CreateTlb>true</CreateTlb>
+    <!-- Do not create Tlbs when building in .NET product mode. The packages are not shipped to VS,
+         only their contents redisted within the SDK. -->
+    <CreateTlb Condition="'$(DotNetBuild)' != 'true'">true</CreateTlb>
     <IsPackable>true</IsPackable>
     <PackageDescription>This package contains the $(MSBuildProjectName) assembly which implements the commonly used tasks of MSBuild.</PackageDescription>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>

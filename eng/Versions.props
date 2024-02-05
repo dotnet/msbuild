@@ -37,9 +37,10 @@
     <SystemNetHttpVersion>4.3.4</SystemNetHttpVersion>
     <SystemReflectionMetadataLoadContextVersion>8.0.0</SystemReflectionMetadataLoadContextVersion>
     <SystemReflectionMetadataVersion>8.0.0</SystemReflectionMetadataVersion>
-    <SystemResourcesExtensionsPackageVersion>8.0.0</SystemResourcesExtensionsPackageVersion>
+    <SystemResourcesExtensionsVersion>8.0.0</SystemResourcesExtensionsVersion>
     <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
     <SystemTextEncodingCodePagesVersion>7.0.0</SystemTextEncodingCodePagesVersion>
+    <SystemTextJsonVersion>8.0.0</SystemTextJsonVersion>
     <SystemThreadingChannelsVersion>8.0.0</SystemThreadingChannelsVersion>
     <SystemThreadingTasksDataflowVersion>8.0.0</SystemThreadingTasksDataflowVersion>
   </PropertyGroup>
@@ -55,7 +56,6 @@
     <MicrosoftNetCompilersToolsetVersion>4.9.0-3.23629.3</MicrosoftNetCompilersToolsetVersion>
     <NuGetBuildTasksVersion>6.9.0-preview.1.70</NuGetBuildTasksVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
-    <SystemTextJsonVersion>8.0.0</SystemTextJsonVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386
