@@ -19,6 +19,7 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.NetCore.Extensions;
+using Xunit.Sdk;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
@@ -8621,6 +8622,32 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // The reference is not worth persisting in the per-instance cache.
             rar._cache.IsDirty.ShouldBeFalse();
+        }
+
+        [Fact]
+        public void LogsParentAssemblyForEveryConsideredAndRejectedSearchPath()
+        {
+            InitializeRARwithMockEngine(_output, out MockEngine mockEngine, out ResolveAssemblyReference rar);
+
+            rar.Assemblies = new ITaskItem[]
+            {
+                new TaskItem(@"C:\Program Files\dotnet\sdk\8.0.101\Microsoft.Build.dll"),
+                new TaskItem(@"Microsoft.Build.Framework, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"),
+            };
+
+            rar.SearchPaths = new string[]
+            {
+                "{CandidateAssemblyFiles}",
+                "{HintPathFromItem}",
+                "{TargetFrameworkDirectory}",
+                "{RawFileName}",
+            };
+
+            rar.Execute().ShouldBeTrue();
+
+            mockEngine.AssertLogContains(rar.Log.FormatResourceString("ResolveAssemblyReference.SearchPathAddedByParentAssembly",
+                @"C:\Program Files\dotnet\sdk\8.0.101",
+                @"C:\Program Files\dotnet\sdk\8.0.101\Microsoft.Build.dll"));
         }
 
         [Fact]
