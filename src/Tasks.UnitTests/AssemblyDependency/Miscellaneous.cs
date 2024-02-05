@@ -8637,9 +8637,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             rar.SearchPaths = new string[]
             {
-                "{CandidateAssemblyFiles}",
-                "{HintPathFromItem}",
-                "{TargetFrameworkDirectory}",
                 "{RawFileName}",
             };
 
