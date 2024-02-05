@@ -1282,8 +1282,13 @@ namespace Microsoft.Build.Tasks
             var parentReferenceDirectoriesMap = new Dictionary<string, List<string>>();
             foreach (Reference parentReference in reference.GetDependees())
             {
-                parentReferenceDirectoriesMap[parentReference.FullPath] = new List<string>();
-                CalculateParentAssemblyDirectories(parentReferenceDirectoriesMap[parentReference.FullPath], parentReference);
+                if (!parentReferenceDirectoriesMap.TryGetValue(parentReference.FullPath, out List<string> value))
+                {
+                    value = new List<string>();
+                    parentReferenceDirectoriesMap[parentReference.FullPath] = value;
+                }
+
+                CalculateParentAssemblyDirectories(value, parentReference);
             }
 
             // Build the set of resolvers.
