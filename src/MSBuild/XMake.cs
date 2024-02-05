@@ -4527,8 +4527,8 @@ namespace Microsoft.Build.CommandLine
                     jsonNode[featureName] = Features.CheckFeatureAvailability(featureName).ToString();
                 }
 
-                var s_options = new JsonSerializerOptions() { AllowTrailingCommas = false, WriteIndented = true };
-                Console.WriteLine(jsonNode.ToJsonString(s_options));
+                var options = new JsonSerializerOptions() { AllowTrailingCommas = false, WriteIndented = true };
+                Console.WriteLine(jsonNode.ToJsonString(options));
             }
         }
     }
