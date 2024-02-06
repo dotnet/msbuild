@@ -576,6 +576,26 @@ namespace Microsoft.Build.UnitTests
             emptyParametersAllowed.ShouldBeFalse();
         }
 
+        [Theory]
+        [InlineData("featureavailability")]
+        [InlineData("fa")]
+        public void FeatureAvailibilitySwitchIdentificationTest(string switchName)
+        {
+            CommandLineSwitches.IsParameterizedSwitch(
+                switchName,
+                out CommandLineSwitches.ParameterizedSwitch parameterizedSwitch,
+                out string duplicateSwitchErrorMessage,
+                out bool multipleParametersAllowed,
+                out string missingParametersErrorMessage,
+                out _,
+                out _);
+
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.FeatureAvailability);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeTrue();
+            missingParametersErrorMessage.ShouldNotBeNullOrEmpty();
+        }
+
         [Fact]
         public void TargetsSwitchParameter()
         {

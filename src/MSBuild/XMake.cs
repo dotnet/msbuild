@@ -15,6 +15,8 @@ using System.Linq;
 using System.Reflection;
 using System.Security;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Build.Collections;
@@ -2445,7 +2447,8 @@ namespace Microsoft.Build.CommandLine
                                   !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Preprocess) &&
                                   !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetProperty) &&
                                   !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetItem) &&
-                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetTargetResult);
+                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetTargetResult) &&
+                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.FeatureAvailability);
 
             // show copyright message if nologo switch is not set
             // NOTE: we heed the nologo switch even if there are switch errors
@@ -2500,6 +2503,11 @@ namespace Microsoft.Build.CommandLine
                 if (commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Version])
                 {
                     ShowVersion();
+                }
+                // if featureavailability switch is set, just show the feature availability and quit (ignore the other switches)
+                else if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.FeatureAvailability))
+                {
+                    ShowFeatureAvailability(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FeatureAvailability]);
                 }
                 else
                 {
@@ -4527,6 +4535,27 @@ namespace Microsoft.Build.CommandLine
             else
             {
                 Console.Write(ProjectCollection.Version.ToString());
+            }
+        }
+
+        private static void ShowFeatureAvailability(string[] features)
+        {
+            if (features.Length == 1)
+            {
+                string featureName = features[0];
+                FeatureStatus availability = Features.CheckFeatureAvailability(featureName);
+                Console.WriteLine(availability);
+            }
+            else
+            {
+                var jsonNode = new JsonObject();
+                foreach (string featureName in features)
+                {
+                    jsonNode[featureName] = Features.CheckFeatureAvailability(featureName).ToString();
+                }
+
+                var options = new JsonSerializerOptions() { AllowTrailingCommas = false, WriteIndented = true };
+                Console.WriteLine(jsonNode.ToJsonString(options));
             }
         }
     }
