@@ -52,9 +52,14 @@ namespace Microsoft.Build.Tasks
         protected bool compareProcessorArchitecture;
 
         /// <summary>
+        /// The parent assembly that was used for the SearchPath.
+        /// </summary>
+        internal readonly string parentAssembly;
+
+        /// <summary>
         /// Construct.
         /// </summary>
-        protected Resolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVersion, ProcessorArchitecture targetedProcessorArchitecture, bool compareProcessorArchitecture)
+        protected Resolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVersion, ProcessorArchitecture targetedProcessorArchitecture, bool compareProcessorArchitecture, string parentAssembly = null)
         {
             this.searchPathElement = searchPathElement;
             this.getAssemblyName = getAssemblyName;
@@ -63,6 +68,7 @@ namespace Microsoft.Build.Tasks
             this.targetedRuntimeVersion = targetedRuntimeVersion;
             this.targetProcessorArchitecture = targetedProcessorArchitecture;
             this.compareProcessorArchitecture = compareProcessorArchitecture;
+            this.parentAssembly = parentAssembly;
         }
 
         /// <summary>
@@ -96,11 +102,6 @@ namespace Microsoft.Build.Tasks
             out bool userRequestedSpecificFile);
 
         /// <summary>
-        /// The parent assembly that was used for the SearchPath.
-        /// </summary>
-        internal string ParentAssembly { get; set; }
-
-        /// <summary>
         /// The search path element that this resolver is based on.
         /// </summary>
         public string SearchPath => searchPathElement;
@@ -124,7 +125,7 @@ namespace Microsoft.Build.Tasks
                 {
                     FileNameAttempted = fullPath,
                     SearchPath = searchPathElement,
-                    ParentAssembly = this.ParentAssembly
+                    ParentAssembly = parentAssembly
                 };
             }
 

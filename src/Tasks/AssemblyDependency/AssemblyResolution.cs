@@ -203,7 +203,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    resolvers[p] = new DirectoryResolver(searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion);
+                    resolvers[p] = new DirectoryResolver(searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion, null);
                 }
             }
             return resolvers;
@@ -222,10 +222,7 @@ namespace Microsoft.Build.Tasks
             var resolvers = new Resolver[parentReferenceDirectories.Count];
             for (int i = 0; i < parentReferenceDirectories.Count; i++)
             {
-                resolvers[i] = new DirectoryResolver(parentReferenceDirectories[i].Item2, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion)
-                {
-                    ParentAssembly = parentReferenceDirectories[i].Item1
-                };
+                resolvers[i] = new DirectoryResolver(parentReferenceDirectories[i].Item2, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion, parentReferenceDirectories[i].Item1);
             }
 
             return resolvers;
