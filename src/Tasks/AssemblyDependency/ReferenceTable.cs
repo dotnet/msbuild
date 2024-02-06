@@ -1220,7 +1220,7 @@ namespace Microsoft.Build.Tasks
         /// The only time we do not want to do this is if the parent assembly came from the GAC or AssemblyFoldersEx then we want the assembly
         /// to be found using those resolvers so that our GAC and AssemblyFolders checks later on will work on those assemblies.
         /// </summary>
-        internal static void CalculateParentAssemblyDirectories(List<string> parentReferenceFolders, Reference parentReference)
+        internal static void CalculateParentAssemblyDirectories(List<(string, string)> parentReferenceFolders, Reference parentReference)
         {
             string parentReferenceFolder = parentReference.DirectoryName;
             string parentReferenceResolvedSearchPath = parentReference.ResolvedSearchPath;
@@ -1240,7 +1240,7 @@ namespace Microsoft.Build.Tasks
             if (!parentReferencesAdded.Contains(parentReferenceFolder) && !parentReferenceResolvedFromGAC && !parentReferenceResolvedFromAssemblyFolders)
             {
                 parentReferencesAdded.Add(parentReferenceFolder);
-                parentReferenceFolders.Add(parentReferenceFolder);
+                parentReferenceFolders.Add(new (parentReference.FullPath, parentReferenceFolder));
             }
         }
 
@@ -1279,16 +1279,10 @@ namespace Microsoft.Build.Tasks
             // First, look for the dependency in the parents' directories. Unless they are resolved from the GAC or assemblyFoldersEx then
             // we should make sure we use the GAC and assemblyFolders resolvers themserves rather than a directory resolver to find the reference.
             // This way we dont get assemblies pulled from the GAC or AssemblyFolders but dont have the marking that they were pulled form there.
-            var parentReferenceDirectoriesMap = new Dictionary<string, List<string>>();
+            var parentReferenceFolders = new List<(string, string)>();
             foreach (Reference parentReference in reference.GetDependees())
             {
-                if (!parentReferenceDirectoriesMap.TryGetValue(parentReference.FullPath, out List<string> value))
-                {
-                    value = new List<string>();
-                    parentReferenceDirectoriesMap[parentReference.FullPath] = value;
-                }
-
-                CalculateParentAssemblyDirectories(value, parentReference);
+                CalculateParentAssemblyDirectories(parentReferenceFolders, parentReference);
             }
 
             // Build the set of resolvers.
@@ -1304,9 +1298,9 @@ namespace Microsoft.Build.Tasks
             else
             {
                 // Do not probe near dependees if the reference is primary and resolved externally. If resolved externally, the search paths should have been specified in such a way to point to the assembly file.
-                if (parentReferenceDirectoriesMap.Count > 0 && (assemblyName == null || !_externallyResolvedPrimaryReferences.Contains(assemblyName.Name)))
+                if (parentReferenceFolders.Count > 0 && (assemblyName == null || !_externallyResolvedPrimaryReferences.Contains(assemblyName.Name)))
                 {
-                    jaggedResolvers.Add(AssemblyResolution.CompileDirectories(parentReferenceDirectoriesMap, _fileExists, _getAssemblyName, _getRuntimeVersion, _targetedRuntimeVersion));
+                    jaggedResolvers.Add(AssemblyResolution.CompileDirectories(parentReferenceFolders, _fileExists, _getAssemblyName, _getRuntimeVersion, _targetedRuntimeVersion));
                 }
 
                 jaggedResolvers.Add(Resolvers);

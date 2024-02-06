@@ -3237,7 +3237,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ParentAssemblyResolvedFromAForGac()
         {
-            var parentReferenceFolders = new List<string>();
+            var parentReferenceFolders = new List<(string, string)>();
             var referenceList = new List<Reference>();
 
             var taskItem = new TaskItem("Microsoft.VisualStudio.Interopt, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
@@ -3266,7 +3266,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
 
             Assert.Single(parentReferenceFolders);
-            Assert.Equal(reference2.ResolvedSearchPath, parentReferenceFolders[0]);
+            Assert.Equal(reference2.ResolvedSearchPath, parentReferenceFolders[0].Item2);
         }
 
         /// <summary>

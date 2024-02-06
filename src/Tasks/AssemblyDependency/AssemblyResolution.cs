@@ -214,26 +214,19 @@ namespace Microsoft.Build.Tasks
         /// Build a resolver array from a set of directories to resolve directly from.
         /// </summary>
         internal static Resolver[] CompileDirectories(
-            Dictionary<string, List<string>> parentReferenceDirectoriesMap,
+            List<(string, string)> parentReferenceDirectories,
             FileExists fileExists,
             GetAssemblyName getAssemblyName,
             GetAssemblyRuntimeVersion getRuntimeVersion,
             Version targetedRuntimeVersion)
         {
-            int totalResolversCount = parentReferenceDirectoriesMap.Values.Sum(list => list.Count);
-            var resolvers = new Resolver[totalResolversCount];
-            int index = 0;
-
-            foreach (var parentReferenceDirectories in parentReferenceDirectoriesMap)
+            var resolvers = new Resolver[parentReferenceDirectories.Count];
+            for (int i = 0; i < parentReferenceDirectories.Count; i++)
             {
-                foreach (var directory in parentReferenceDirectories.Value)
+                resolvers[i] = new DirectoryResolver(parentReferenceDirectories[i].Item2, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion)
                 {
-                    resolvers[index] = new DirectoryResolver(directory, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion)
-                    {
-                        ParentAssembly = parentReferenceDirectories.Key
-                    };
-                    index++;
-                }
+                    ParentAssembly = parentReferenceDirectories[i].Item1
+                };
             }
 
             return resolvers;
