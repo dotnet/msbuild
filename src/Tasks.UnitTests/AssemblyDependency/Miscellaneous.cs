@@ -8631,8 +8631,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             rar.Assemblies = new ITaskItem[]
             {
-                new TaskItem(@"C:\Program Files\dotnet\sdk\8.0.101\Microsoft.Build.dll"),
-                new TaskItem(@"Microsoft.Build.Framework, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"),
+                new TaskItem(@"C:\DirectoryTest\A.dll"),
+                new TaskItem("B"),
             };
 
             rar.SearchPaths = new string[]
@@ -8640,11 +8640,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 "{RawFileName}",
             };
 
-            rar.Execute().ShouldBeTrue();
+            Execute(rar).ShouldBeTrue();
 
             mockEngine.AssertLogContains(rar.Log.FormatResourceString("ResolveAssemblyReference.SearchPathAddedByParentAssembly",
-                @"C:\Program Files\dotnet\sdk\8.0.101",
-                @"C:\Program Files\dotnet\sdk\8.0.101\Microsoft.Build.dll"));
+                @"C:\DirectoryTest",
+                @"C:\DirectoryTest\A.dll"));
         }
 
         [Fact]

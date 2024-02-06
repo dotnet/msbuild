@@ -613,7 +613,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             s_netstandardDllPath,
             @"C:\SystemRuntime\Regular.dll",
             s_dependsOnNuGet_ADllPath,
-            s_nugetCache_N_Lib_NDllPath
+            s_nugetCache_N_Lib_NDllPath,
+            @"C:\DirectoryTest\A.dll",
+            @"C:\DirectoryTest\B.dll",
         };
 
         /// <summary>
@@ -2480,6 +2482,19 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 {
                     new AssemblyNameExtension("N, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null")
                 };
+            }
+
+            if (String.Equals(path, @"C:\DirectoryTest\A.dll", StringComparison.OrdinalIgnoreCase))
+            {
+                return new AssemblyNameExtension[]
+                {
+                    GetAssemblyName(@"C:\DirectoryTest\B.dll")
+                };
+            }
+
+            if (path.StartsWith(@"C:\DirectoryTest\B.dll", StringComparison.OrdinalIgnoreCase))
+            {
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             // Use a default list.
