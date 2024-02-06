@@ -19,7 +19,6 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.NetCore.Extensions;
-using Xunit.Sdk;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
