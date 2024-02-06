@@ -2492,7 +2492,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (path.StartsWith(@"C:\DirectoryTest\B.dll", StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(path, @"C:\DirectoryTest\B.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return Array.Empty<AssemblyNameExtension>();
             }
