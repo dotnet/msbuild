@@ -15,11 +15,17 @@ namespace Microsoft.Build.Tasks
     internal class DirectoryResolver : Resolver
     {
         /// <summary>
+        /// The parent assembly that was used for the SearchPath.
+        /// </summary>
+        public readonly string parentAssembly;
+
+        /// <summary>
         /// Construct.
         /// </summary>
         public DirectoryResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion, string parentAssembly)
-            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false, parentAssembly)
+            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false)
         {
+            this.parentAssembly = parentAssembly;
         }
 
         /// <inheritdoc/>
@@ -42,6 +48,12 @@ namespace Microsoft.Build.Tasks
 
             // Resolve to the given path.
             string resolvedPath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, searchPathElement, assembliesConsideredAndRejected);
+
+            foreach (var searchLocation in assembliesConsideredAndRejected)
+            {
+                searchLocation.ParentAssembly = parentAssembly;
+            }
+
             if (resolvedPath != null)
             {
                 foundPath = resolvedPath;

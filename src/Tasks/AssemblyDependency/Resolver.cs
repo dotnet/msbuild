@@ -52,14 +52,9 @@ namespace Microsoft.Build.Tasks
         protected bool compareProcessorArchitecture;
 
         /// <summary>
-        /// The parent assembly that was used for the SearchPath.
-        /// </summary>
-        internal readonly string parentAssembly;
-
-        /// <summary>
         /// Construct.
         /// </summary>
-        protected Resolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVersion, ProcessorArchitecture targetedProcessorArchitecture, bool compareProcessorArchitecture, string parentAssembly = null)
+        protected Resolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVersion, ProcessorArchitecture targetedProcessorArchitecture, bool compareProcessorArchitecture)
         {
             this.searchPathElement = searchPathElement;
             this.getAssemblyName = getAssemblyName;
@@ -68,7 +63,6 @@ namespace Microsoft.Build.Tasks
             this.targetedRuntimeVersion = targetedRuntimeVersion;
             this.targetProcessorArchitecture = targetedProcessorArchitecture;
             this.compareProcessorArchitecture = compareProcessorArchitecture;
-            this.parentAssembly = parentAssembly;
         }
 
         /// <summary>
@@ -124,8 +118,7 @@ namespace Microsoft.Build.Tasks
                 considered = new ResolutionSearchLocation
                 {
                     FileNameAttempted = fullPath,
-                    SearchPath = searchPathElement,
-                    ParentAssembly = parentAssembly
+                    SearchPath = searchPathElement
                 };
             }
 
