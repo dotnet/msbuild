@@ -176,8 +176,25 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// The two directory separator characters to be passed to methods like <see cref="String.IndexOfAny(char[])"/>.
     /// </summary>
     private static readonly char[] PathSeparators = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
+
+    /// <summary>
+    /// One summary per finished project test run.
+    /// </summary>
     private ConcurrentBag<TestSummary> _testRunSummaries = new();
+
+    /// <summary>
+    /// Name of target that identifies a project that has tests.
+    /// </summary>
+    private static string _testTarget = "_TestRunStart";
+
+    /// <summary>
+    /// Time of the oldest observed test target start.
+    /// </summary>
     private DateTime? _testStartTime;
+
+    /// <summary>
+    /// Time of the most recently observed test target finished.
+    /// </summary>
     private DateTime? _testEndTime;
 
     /// <summary>
@@ -280,7 +297,7 @@ internal sealed partial class TerminalLogger : INodeLogger
 
         _projects.Clear();
 
-        var testRunSummaries = _testRunSummaries;
+        var testRunSummaries = _testRunSummaries.ToList();
         _testRunSummaries = new ConcurrentBag<TestSummary>();
 
         Terminal.BeginUpdate();
@@ -331,7 +348,6 @@ internal sealed partial class TerminalLogger : INodeLogger
 
             Terminal.EndUpdate();
         }
-
 
         _buildHasErrors = false;
         _buildHasWarnings = false;
@@ -438,6 +454,8 @@ internal sealed partial class TerminalLogger : INodeLogger
                         _restoreFinished = true;
                     }
                     // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
+                    // If this is a test project, print it always, so user can see either a success or failure, otherwise success is hidden
+                    // and it is hard to see if project finished, or did not run at all.
                     else if (project.OutputPath is not null || project.BuildMessages is not null || project.IsTestProject)
                     {
                         // Show project build complete and its output
@@ -558,7 +576,7 @@ internal sealed partial class TerminalLogger : INodeLogger
 
             string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
 
-            var isTestTarget = e.TargetName == "_VSTestMSBuild2";
+            var isTestTarget = e.TargetName == _testTarget;
 
             var targetName = isTestTarget ? "Testing" : e.TargetName;
             if (isTestTarget)
@@ -591,7 +609,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private void TargetFinished(object sender, TargetFinishedEventArgs e)
     {
-        if (e.TargetName == "_VSTestMSBuild")
+        if (e.TargetName == _testTarget)
         {
             _testEndTime = _testEndTime == null
                     ? e.Timestamp
@@ -658,33 +676,34 @@ internal sealed partial class TerminalLogger : INodeLogger
             {
                 var node = _nodes[NodeIndexForContext(buildEventContext)];
 
-                if (e is IExtendedBuildEventArgs extendedMessage)
+                // Consumes test update messages produced by VSTest and MSTest runner.
+                if (node != null && e is IExtendedBuildEventArgs extendedMessage)
                 {
                     switch (extendedMessage.ExtendedType)
                     {
-                        case "VSTESTTLPASSED":
+                        case "TLTESTPASSED":
                             {
                                 var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
                                 var displayName = extendedMessage.ExtendedMetadata!["displayName"];
 
                                 var testResult = $"{AnsiCodes.Colorize(indicator, TerminalColor.Green)} {displayName}";
-                                var status = new NodeStatus(node!.Project, node.TargetFramework, testResult, project.Stopwatch);
+                                var status = new NodeStatus(node.Project, node.TargetFramework, testResult, project.Stopwatch);
                                 UpdateNodeStatus(buildEventContext, status);
                                 break;
                             }
 
-                        case "VSTESTTLSKIPPED":
+                        case "TLTESTSKIPPED":
                             {
                                 var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
                                 var displayName = extendedMessage.ExtendedMetadata!["displayName"];
 
                                 var testResult = $"{AnsiCodes.Colorize(indicator, TerminalColor.Yellow)} {displayName}";
-                                var status = new NodeStatus(node!.Project, node.TargetFramework, testResult, project.Stopwatch);
+                                var status = new NodeStatus(node.Project, node.TargetFramework, testResult, project.Stopwatch);
                                 UpdateNodeStatus(buildEventContext, status);
                                 break;
                             }
 
-                        case "VSTESTTLFINISH":
+                        case "TLTESTFINISH":
                             {
                                 _ = int.TryParse(extendedMessage.ExtendedMetadata!["total"]!, out int total);
                                 _ = int.TryParse(extendedMessage.ExtendedMetadata!["passed"]!, out int passed);
