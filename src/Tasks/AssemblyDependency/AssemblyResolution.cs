@@ -12,6 +12,8 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
+    internal readonly record struct DirectoryWithParentAssembly(string Directory, string ParentAssembly);
+
     /// <summary>
     /// Utility class encapsulates steps to resolve assembly references.
     /// For example, this class has the code that will take:
@@ -213,7 +215,7 @@ namespace Microsoft.Build.Tasks
         /// Build a resolver array from a set of directories to resolve directly from.
         /// </summary>
         internal static Resolver[] CompileDirectories(
-            List<(string, string)> parentReferenceDirectories,
+            List<DirectoryWithParentAssembly> parentReferenceDirectories,
             FileExists fileExists,
             GetAssemblyName getAssemblyName,
             GetAssemblyRuntimeVersion getRuntimeVersion,
@@ -222,7 +224,7 @@ namespace Microsoft.Build.Tasks
             var resolvers = new Resolver[parentReferenceDirectories.Count];
             for (int i = 0; i < parentReferenceDirectories.Count; i++)
             {
-                resolvers[i] = new DirectoryResolver(parentReferenceDirectories[i].Item2, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion, parentReferenceDirectories[i].Item1);
+                resolvers[i] = new DirectoryResolver(parentReferenceDirectories[i].Directory, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion, parentReferenceDirectories[i].ParentAssembly);
             }
 
             return resolvers;
