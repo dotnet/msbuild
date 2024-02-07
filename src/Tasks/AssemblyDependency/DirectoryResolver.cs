@@ -46,14 +46,27 @@ namespace Microsoft.Build.Tasks
             foundPath = null;
             userRequestedSpecificFile = false;
 
-            // Resolve to the given path.
-            string resolvedPath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, searchPathElement, assembliesConsideredAndRejected);
+            string resolvedPath;
 
-            foreach (var searchLocation in assembliesConsideredAndRejected)
+            if (parentAssembly != null)
             {
-                searchLocation.ParentAssembly = parentAssembly;
-            }
+                var searchLocationsWithParentAssembly = new List<ResolutionSearchLocation>();
 
+                // Resolve to the given path.
+                resolvedPath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, searchPathElement, searchLocationsWithParentAssembly);
+
+                foreach (var searchLocation in searchLocationsWithParentAssembly)
+                {
+                    searchLocation.ParentAssembly = parentAssembly;
+                }
+
+                assembliesConsideredAndRejected.AddRange(searchLocationsWithParentAssembly);
+            }
+            else
+            {
+                resolvedPath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, searchPathElement, assembliesConsideredAndRejected);
+            }
+     
             if (resolvedPath != null)
             {
                 foundPath = resolvedPath;
