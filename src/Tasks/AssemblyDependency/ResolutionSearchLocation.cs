@@ -24,6 +24,11 @@ namespace Microsoft.Build.Tasks
         internal string SearchPath { get; set; }
 
         /// <summary>
+        /// The parent assembly that was used for the SearchPath.
+        /// </summary>
+        internal string ParentAssembly { get; set; }
+
+        /// <summary>
         /// The name of the assembly found at that location. Will be null if there was no assembly there.
         /// </summary>
         internal AssemblyNameExtension AssemblyName { get; set; }
