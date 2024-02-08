@@ -2948,13 +2948,13 @@ namespace Microsoft.Build.CommandLine
 
 
         /// <summary>
-        /// Identifies if there is rsp files near the project file 
+        /// Identifies if there is rsp files near the project file
         /// </summary>
         /// <returns>true if there autoresponse file was found</returns>
         private static bool CheckAndGatherProjectAutoResponseFile(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches commandLineSwitches, bool recursing, string commandLine)
         {
             bool found = false;
-           
+
             var projectDirectory = GetProjectDirectory(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project]);
 
             if (!recursing && !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
@@ -4512,6 +4512,14 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_4_HelpSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_16_Examples"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_37_DocsLink"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_43_GetPropertySwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_44_GetItemSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_45_GetTargetResultSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_46_FeatureAvailabilitySwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_47_TerminalLoggerSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_48_TerminalLoggerParametersSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_49_WaitForDebuggerSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_50_NodeModeSwitch"));
         }
 
         /// <summary>
