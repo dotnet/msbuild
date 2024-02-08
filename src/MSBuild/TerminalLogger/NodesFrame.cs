@@ -67,7 +67,7 @@ internal sealed class NodesFrame
         if (renderedWidth > Width)
         {
             renderedWidth -= renderedTarget.Length;
-            target = string.Empty;
+            renderedTarget = target = string.Empty;
 
             if (renderedWidth > Width)
             {
