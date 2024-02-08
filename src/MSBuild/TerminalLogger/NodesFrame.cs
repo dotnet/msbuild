@@ -54,11 +54,19 @@ internal sealed class NodesFrame
         string? targetFramework = status.TargetFramework;
         string target = status.Target;
 
-        int renderedWidth = Length(durationString, project, targetFramework, target);
+        // The target may contain ANSI codes, we need to remove them to get the real
+        // size of the string as it will be printed on the screen, so when we move cursor
+        // backwards we move it by the amount of characters that will be seen by user, and not
+        // by the amount of characters + ANSI codes (that won't be seen).
+        // If we don't remove ANSI codes, the cursor will move too much too the left, and time
+        // time will render before the end of line, instead of at the end of line.
+        var renderedTarget = AnsiCodes.RemoveAnsiCodes(target);
+
+        int renderedWidth = Length(durationString, project, targetFramework, renderedTarget);
 
         if (renderedWidth > Width)
         {
-            renderedWidth -= target.Length;
+            renderedWidth -= renderedTarget.Length;
             target = string.Empty;
 
             if (renderedWidth > Width)
@@ -74,7 +82,7 @@ internal sealed class NodesFrame
             }
         }
 
-        return $"{TerminalLogger.Indentation}{project}{(targetFramework is null ? string.Empty : " ")}{AnsiCodes.Colorize(targetFramework, TerminalLogger.TargetFrameworkColor)} {AnsiCodes.SetCursorHorizontal(MaxColumn)}{AnsiCodes.MoveCursorBackward(target.Length + durationString.Length + 1)}{target} {durationString}".AsSpan();
+        return $"{TerminalLogger.Indentation}{project}{(targetFramework is null ? string.Empty : " ")}{AnsiCodes.Colorize(targetFramework, TerminalLogger.TargetFrameworkColor)} {AnsiCodes.SetCursorHorizontal(MaxColumn)}{AnsiCodes.MoveCursorBackward(renderedTarget.Length + durationString.Length + 1)}{target} {durationString}".AsSpan();
 
         static int Length(string durationString, string project, string? targetFramework, string target) =>
                 TerminalLogger.Indentation.Length +
@@ -91,6 +99,9 @@ internal sealed class NodesFrame
     {
         StringBuilder sb = _renderBuilder;
         sb.Clear();
+
+        // Move cursor back to 1st line of nodes.
+        sb.AppendLine($"{AnsiCodes.CSI}{previousFrame.NodesCount + 1}{AnsiCodes.MoveUpToLineStart}");
 
         int i = 0;
         for (; i < NodesCount; i++)

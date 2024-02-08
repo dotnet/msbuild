@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Text.RegularExpressions;
+
 namespace Microsoft.Build.Logging.TerminalLogger;
 
 /// <summary>
@@ -150,4 +152,14 @@ internal static class AnsiCodes
     /// <param name="column">Column index.</param>
     /// <returns>Control codes to set the desired position.</returns>
     public static string SetCursorHorizontal(int column) => $"{CSI}{column}G";
+
+    /// <summary>
+    /// Removes all ANSI codes from the text.
+    /// </summary>
+    /// <param name="text"></param>
+    /// <returns></returns>
+    public static string RemoveAnsiCodes(string text)
+    {
+        return new Regex(@"\x1B\[[^@-~]*[@-~]").Replace(text, "");
+    }
 }
