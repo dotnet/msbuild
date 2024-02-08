@@ -93,8 +93,9 @@ configuration:
       - payloadType: Issues
       - labelAdded:
           label: needs-more-info
-      - isNotLabeledWith:
-          label: triaged
+      - not:
+          hasLabel:
+            label: triaged
       then:
       - addLabel:
           label: triaged
