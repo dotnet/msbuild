@@ -124,6 +124,11 @@ internal static class AnsiCodes
     /// </remarks>
     public const string RemoveProgress = "\x1b]9;4;0;\x1b\\";
 
+    /// <summary>
+    /// Remove all ANSI escape codes from a string.
+    /// </summary>
+    private static readonly Regex RemoveAnsiRegex = new Regex(@"\x1B\[[^@-~]*[@-~]", RegexOptions.Compiled);
+
     public static string Colorize(string? s, TerminalColor color)
     {
         if (string.IsNullOrWhiteSpace(s))
@@ -160,6 +165,6 @@ internal static class AnsiCodes
     /// <returns></returns>
     public static string RemoveAnsiCodes(string text)
     {
-        return new Regex(@"\x1B\[[^@-~]*[@-~]").Replace(text, "");
+        return RemoveAnsiRegex.Replace(text, "");
     }
 }
