@@ -961,8 +961,8 @@ namespace Microsoft.Build.Tasks
                     return;
                 }
 
-                string[] subDirectories = _getDirectories(reference.DirectoryName, "*");
-                string sateliteFilename = subDirectories.Length > 0
+                IEnumerable<string> subDirectories = _getDirectories(reference.DirectoryName, "*");
+                string satelliteFilename = subDirectories.Any()
                     ? reference.FileNameWithoutExtension + ".resources.dll"
                     : string.Empty;
 
@@ -973,11 +973,11 @@ namespace Microsoft.Build.Tasks
 
                     if (CultureInfoCache.IsValidCultureString(cultureName))
                     {
-                        string satelliteAssembly = Path.Combine(subDirectory, sateliteFilename);
+                        string satelliteAssembly = Path.Combine(subDirectory, satelliteFilename);
                         if (_fileExists(satelliteAssembly))
                         {
                             // This is valid satellite assembly.
-                            reference.AddSatelliteFile(Path.Combine(cultureName, sateliteFilename));
+                            reference.AddSatelliteFile(Path.Combine(cultureName, satelliteFilename));
                         }
                     }
                 }
@@ -2773,6 +2773,7 @@ namespace Microsoft.Build.Tasks
                 ITaskItem item = new TaskItem(Path.Combine(reference.DirectoryName, serializationAssemblyFile));
                 // Clone metadata.
                 referenceItem.CopyMetadataTo(item);
+                MSBuildEventSource.Log.TaskItemCopyMetadataToStart();
 
                 // Add the serialization assembly item.
                 serializationAssemblyItems.Add(item);
