@@ -1619,4 +1619,9 @@
       {4}: duration in seconds with 1 decimal point
     </comment>
   </data>
+  <data name="TestSummary" xml:space="preserve">
+    <value>Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</value>
+    <comment>{0} string, localized result e.g. Failed surrounded by ANSI colors.
+{1-5} whole number</comment>
+  </data>
 </root>

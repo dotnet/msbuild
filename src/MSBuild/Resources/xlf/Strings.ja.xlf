@@ -1664,6 +1664,12 @@
       {4}: duration in seconds with 1 decimal point
     </note>
       </trans-unit>
+      <trans-unit id="TestSummary">
+        <source>Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</source>
+        <target state="new">Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</target>
+        <note>{0} string, localized result e.g. Failed surrounded by ANSI colors.
+{1-5} whole number</note>
+      </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>
         <target state="translated">MSBUILD : error MSB1002: このスイッチにはパラメーターを指定できません。</target>

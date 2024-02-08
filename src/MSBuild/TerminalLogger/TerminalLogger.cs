@@ -10,9 +10,6 @@ using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System.Collections.Concurrent;
-using static System.Net.Mime.MediaTypeNames;
-
-
 
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
@@ -327,16 +324,18 @@ internal sealed partial class TerminalLogger : INodeLogger
                 var passed = testRunSummaries.Sum(t => t.Passed);
                 var skipped = testRunSummaries.Sum(t => t.Skipped);
                 var testDuration = (_testStartTime != null && _testEndTime != null ? (_testEndTime - _testStartTime).Value.TotalSeconds : 0).ToString("F1");
-                if (testRunSummaries.Any(t => t.Failed > 0) || _buildHasErrors)
-                {
-                    var testResult = $"Test run {AnsiCodes.Colorize("failed", TerminalColor.Red)}. Total: {total} Failed: {failed} Passed: {passed} Skipped: {skipped}, Duration: {testDuration}s";
-                    Terminal.WriteLine(testResult);
-                }
-                else
-                {
-                    var testResult = $"Test run {AnsiCodes.Colorize("passed", TerminalColor.Green)}. Total: {total} Failed: {failed} Passed: {passed} Skipped: {skipped}, Duration: {testDuration}s";
-                    Terminal.WriteLine(testResult);
-                }
+
+                var colorizedResult = testRunSummaries.Any(t => t.Failed > 0) || _buildHasErrors
+                    ? AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Failed"), TerminalColor.Red)
+                    : AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Succeeded"), TerminalColor.Green);
+
+                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary",
+                    colorizedResult,
+                    total,
+                    failed,
+                    passed,
+                    skipped,
+                    testDuration));
             }
         }
         finally
