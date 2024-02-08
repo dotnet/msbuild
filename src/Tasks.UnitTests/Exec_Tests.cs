@@ -1037,14 +1037,20 @@ echo line 3"" />
         [Fact]
         public void ConsoleOutputDoesNotTrimLeadingWhitespace()
         {
-            Exec exec = PrepareExec("type .\\Exec_Tests.Attachments\\leading-whitespace.txt");
-            exec.ConsoleToMSBuild = true;
+            string lineWithLeadingWhitespace = "    line with some leading whitespace";
 
-            bool result = exec.Execute();
+            using (var env = TestEnvironment.Create(_output))
+            {
+                var textFilePath = env.CreateFile("leading-whitespace.txt", lineWithLeadingWhitespace).Path;
+                Exec exec = PrepareExec($"type {textFilePath}");
+                exec.ConsoleToMSBuild = true;
 
-            result.ShouldBeTrue();
-            exec.ConsoleOutput.Length.ShouldBe(1);
-            exec.ConsoleOutput[0].ItemSpec.ShouldBe("    line with some leading whitespace");
+                bool result = exec.Execute();
+
+                result.ShouldBeTrue();
+                exec.ConsoleOutput.Length.ShouldBe(1);
+                exec.ConsoleOutput[0].ItemSpec.ShouldBe(lineWithLeadingWhitespace);
+            }
         }
     }
 
