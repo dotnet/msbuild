@@ -14,6 +14,7 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+using Microsoft.NET.StringTools;
 using Microsoft.Win32;
 
 // Needed for DoesTaskHostExistForParameters
@@ -398,11 +399,11 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Hash the string independent of bitness and target framework.
+        /// Hash the string independent of bitness, target framework and default codepage of the environment.
         /// </summary>
         internal static int StableStringHash(string toHash)
         {
-            return CommunicationsUtilities.GetHashCode(toHash);
+            return FowlerNollVo1aHash.ComputeHash32(toHash);
         }
 
         /// <summary>
