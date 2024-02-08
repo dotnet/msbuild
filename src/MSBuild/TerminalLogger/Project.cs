@@ -47,7 +47,7 @@ internal sealed class Project
     public string? TargetFramework { get; }
 
     /// <summary>
-    /// True when the project has run target with name "_TestRunStart" defined in <see cref="TerminalLogger._testTarget"/>.
+    /// True when the project has run target with name "_TestRunStart" defined in <see cref="TerminalLogger._testStartTarget"/>.
     /// </summary>
     public bool IsTestProject { get; set; }
 

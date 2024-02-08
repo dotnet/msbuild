@@ -180,9 +180,9 @@ internal sealed partial class TerminalLogger : INodeLogger
     private ConcurrentBag<TestSummary> _testRunSummaries = new();
 
     /// <summary>
-    /// Name of target that identifies a project that has tests.
+    /// Name of target that identifies a project that has tests, and that they just started.
     /// </summary>
-    private static string _testTarget = "_TestRunStart";
+    private static string _testStartTarget = "_TestRunStart";
 
     /// <summary>
     /// Time of the oldest observed test target start.
@@ -351,6 +351,8 @@ internal sealed partial class TerminalLogger : INodeLogger
         _buildHasErrors = false;
         _buildHasWarnings = false;
         _restoreFailed = false;
+        _testStartTime = null;
+        _testEndTime = null;
     }
 
     /// <summary>
@@ -575,7 +577,7 @@ internal sealed partial class TerminalLogger : INodeLogger
 
             string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
 
-            var isTestTarget = e.TargetName == _testTarget;
+            var isTestTarget = e.TargetName == _testStartTarget;
 
             var targetName = isTestTarget ? "Testing" : e.TargetName;
             if (isTestTarget)
@@ -608,13 +610,6 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private void TargetFinished(object sender, TargetFinishedEventArgs e)
     {
-        if (e.TargetName == _testTarget)
-        {
-            _testEndTime = _testEndTime == null
-                    ? e.Timestamp
-                    : e.Timestamp > _testEndTime
-                        ? e.Timestamp : _testEndTime;
-        }
     }
 
     /// <summary>
@@ -713,6 +708,11 @@ internal sealed partial class TerminalLogger : INodeLogger
                                     Skipped = skipped,
                                     Failed = failed,
                                 });
+
+                                _testEndTime = _testEndTime == null
+                                        ? e.Timestamp
+                                        : e.Timestamp > _testEndTime
+                                            ? e.Timestamp : _testEndTime;
                                 break;
                             }
                     }
