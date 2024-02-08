@@ -1321,6 +1321,15 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
         <target state="translated">Les journaux MSBuild et les informations de débogage seront au "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="MissingFeatureAvailabilityError">
+        <source>MSBUILD : error MSB1067: Must provide a feature name for the featureavailability switch.</source>
+        <target state="new">MSBUILD : error MSB1067: Must provide a feature name for the featureavailability switch.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureavailability". The user must pass in an actual feature name
+      following the switch, as in "msbuild.exe -featureavailability:blah".
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="MissingGetItemError">
         <source>MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</source>
         <target state="new">MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</target>
