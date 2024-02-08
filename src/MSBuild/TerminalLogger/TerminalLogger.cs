@@ -623,17 +623,14 @@ internal sealed partial class TerminalLogger : INodeLogger
     private void TaskStarted(object sender, TaskStartedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
-        if (_restoreContext is null && buildEventContext is not null)
+        if (_restoreContext is null && buildEventContext is not null && e.TaskName == "MSBuild")
         {
-            if (e.TaskName == "MSBuild")
-            {
-                // This will yield the node, so preemptively mark it idle
-                UpdateNodeStatus(buildEventContext, null);
+            // This will yield the node, so preemptively mark it idle
+            UpdateNodeStatus(buildEventContext, null);
 
-                if (_projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
-                {
-                    project.Stopwatch.Stop();
-                }
+            if (_projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+            {
+                project.Stopwatch.Stop();
             }
         }
     }
