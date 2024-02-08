@@ -52,6 +52,31 @@ namespace Microsoft.NET.StringTools
         }
 
         /// <summary>
+        /// Computes 32 bit Fowler/Noll/Vo-1a inspired hash of a string.
+        /// The hashing algorithm process the data by the whole 16bit chars, instead of by bytes.
+        ///  this speeds up the hashing process almost by 2x, while not significantly increasing collisions rate.
+        /// Analysis: https://github.com/KirillOsenkov/MSBuildStructuredLog/wiki/String-Hashing#faster-fnv-1a
+        /// </summary>
+        /// <param name="text">String to be hashed.</param>
+        /// <returns>32 bit unsigned hash</returns>
+        public static int ComputeHash32Fast(string text)
+        {
+            uint hash = fnvOffsetBasisA32Bit;
+
+            unchecked
+            {
+                for (int i = 0; i < text.Length; i++)
+                {
+                    char ch = text[i];
+
+                    hash = (hash ^ ch) * fnvPrimeA32Bit;
+                }
+            }
+
+            return unchecked((int)hash);
+        }
+
+        /// <summary>
         /// Computes 64 bit Fowler/Noll/Vo-1a inspired hash of a string.
         /// The hashing algorithm process the data by the whole 16bit chars, instead of by bytes.
         ///  this speeds up the hashing process almost by 2x, while not significantly increasing collisions rate.
