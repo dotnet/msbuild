@@ -1962,6 +1962,16 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="OutputType" _locComment="" -->Type of output to generate (WinExe, Exe, or Library)</xs:documentation>
         </xs:annotation>
     </xs:element>
+    <xs:element name="UseArtifactsOutput" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="UseArtifactsOutput" _locComment="" -->Use a centralized location for all outputs of this project. The location of the centralized outputs is set by the ArtifactsPath property. Project outputs are grouped by kind, then by project. See https://learn.microsoft.com/en-us/dotnet/core/sdk/artifacts-output for complete details.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="ArtifactsPath" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="ArtifactsPath" _locComment="" -->The path to use for the centralized outputs - if set, UseArtifactsOutput will be defaulted to true. Project outputs will be placed under this path grouped by kind, then by project. See https://learn.microsoft.com/en-us/dotnet/core/sdk/artifacts-output for complete details.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="PackageOutputPath" substitutionGroup="msb:Property">
       <xs:annotation>
         <xs:documentation><!-- _locID_text="PackageOutputPath" -->Path to the output folder for the package generated when calling Pack.</xs:documentation>

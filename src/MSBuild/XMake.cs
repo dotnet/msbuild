@@ -15,6 +15,8 @@ using System.Linq;
 using System.Reflection;
 using System.Security;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Build.Collections;
@@ -307,11 +309,11 @@ namespace Microsoft.Build.CommandLine
             {
                 GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out string fullCommandLine);
                 CommandLineSwitches commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
-                if (CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, false, fullCommandLine, out string projectFile))
+                if (CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, false, fullCommandLine))
                 {
                     commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
                 }
-
+                string projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
                 if (commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Help] ||
                     commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode) ||
                     commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Version] ||
@@ -2445,7 +2447,8 @@ namespace Microsoft.Build.CommandLine
                                   !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Preprocess) &&
                                   !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetProperty) &&
                                   !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetItem) &&
-                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetTargetResult);
+                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetTargetResult) &&
+                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.FeatureAvailability);
 
             // show copyright message if nologo switch is not set
             // NOTE: we heed the nologo switch even if there are switch errors
@@ -2501,9 +2504,14 @@ namespace Microsoft.Build.CommandLine
                 {
                     ShowVersion();
                 }
+                // if featureavailability switch is set, just show the feature availability and quit (ignore the other switches)
+                else if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.FeatureAvailability))
+                {
+                    ShowFeatureAvailability(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FeatureAvailability]);
+                }
                 else
                 {
-                    bool foundProjectAutoResponseFile = CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, recursing, commandLine, out projectFile);
+                    bool foundProjectAutoResponseFile = CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, recursing, commandLine);
 
                     if (foundProjectAutoResponseFile)
                     {
@@ -2555,6 +2563,8 @@ namespace Microsoft.Build.CommandLine
                                                            recursing: true,
                                                            commandLine);
                     }
+
+                    projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
 
                     // figure out which targets we are building
                     targets = ProcessTargetSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Target]);
@@ -2912,18 +2922,43 @@ namespace Microsoft.Build.CommandLine
             return commandLineSwitches;
         }
 
-        private static bool CheckAndGatherProjectAutoResponseFile(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches commandLineSwitches, bool recursing, string commandLine, out string projectFile)
+        private static string GetProjectDirectory(string[] projectSwitchParameters)
+        {
+            string projectDirectory = ".";
+            ErrorUtilities.VerifyThrow(projectSwitchParameters.Length <= 1, "Expect exactly one project at a time.");
+
+            if (projectSwitchParameters.Length == 1)
+            {
+                var projectFile = FileUtilities.FixFilePath(projectSwitchParameters[0]);
+
+                if (FileSystems.Default.DirectoryExists(projectFile))
+                {
+                    // the provided argument value is actually the directory
+                    projectDirectory = projectFile;
+                }
+                else
+                {
+                    InitializationException.VerifyThrow(FileSystems.Default.FileExists(projectFile), "ProjectNotFoundError", projectFile);
+                    projectDirectory = Path.GetDirectoryName(Path.GetFullPath(projectFile));
+                }
+            }
+
+            return projectDirectory;
+        }
+
+
+        /// <summary>
+        /// Identifies if there is rsp files near the project file 
+        /// </summary>
+        /// <returns>true if there autoresponse file was found</returns>
+        private static bool CheckAndGatherProjectAutoResponseFile(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches commandLineSwitches, bool recursing, string commandLine)
         {
             bool found = false;
-
-            // figure out what project we are building
-            projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
+           
+            var projectDirectory = GetProjectDirectory(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project]);
 
             if (!recursing && !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
             {
-                // gather any switches from an msbuild.rsp that is next to the project or solution file itself
-                string projectDirectory = Path.GetDirectoryName(Path.GetFullPath(projectFile));
-
                 // gather any switches from the first Directory.Build.rsp found in the project directory or above
                 string directoryResponseFile = FileUtilities.GetPathOfFileAbove(directoryResponseFileName, projectDirectory);
 
@@ -3377,7 +3412,7 @@ namespace Microsoft.Build.CommandLine
                                  string[] projectsExtensionsToIgnore,
                                  DirectoryGetFiles getFiles)
         {
-            ErrorUtilities.VerifyThrow(parameters.Length <= 1, "It should not be possible to specify more than 1 project at a time.");
+            ErrorUtilities.VerifyThrow(parameters.Length <= 1, "Expect exactly one project at a time.");
             string projectFile = null;
 
             string projectDirectory = null;
@@ -4500,6 +4535,27 @@ namespace Microsoft.Build.CommandLine
             else
             {
                 Console.Write(ProjectCollection.Version.ToString());
+            }
+        }
+
+        private static void ShowFeatureAvailability(string[] features)
+        {
+            if (features.Length == 1)
+            {
+                string featureName = features[0];
+                FeatureStatus availability = Features.CheckFeatureAvailability(featureName);
+                Console.WriteLine(availability);
+            }
+            else
+            {
+                var jsonNode = new JsonObject();
+                foreach (string featureName in features)
+                {
+                    jsonNode[featureName] = Features.CheckFeatureAvailability(featureName).ToString();
+                }
+
+                var options = new JsonSerializerOptions() { AllowTrailingCommas = false, WriteIndented = true };
+                Console.WriteLine(jsonNode.ToJsonString(options));
             }
         }
     }

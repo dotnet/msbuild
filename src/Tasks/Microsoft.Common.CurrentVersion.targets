@@ -3949,6 +3949,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <PropertyGroup>
     <CreateSatelliteAssembliesDependsOn>
+      $(CreateSatelliteAssembliesDependsOn);
       _GenerateSatelliteAssemblyInputs;
       ComputeIntermediateSatelliteAssemblies;
       GenerateSatelliteAssemblies

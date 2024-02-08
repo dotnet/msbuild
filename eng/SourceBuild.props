@@ -7,11 +7,12 @@
     <SourceBuildManagedOnly>true</SourceBuildManagedOnly>
   </PropertyGroup>
 
-  <Target Name="ConfigureInnerBuildArgs"
-          BeforeTargets="GetSourceBuildCommandConfiguration"
-          Condition="'$(ArcadeBuildFromSource)' == 'true'">
+  <Target Name="ConfigureInnerBuildArgs" BeforeTargets="GetSourceBuildCommandConfiguration"
+          Condition="'$(ArcadeBuildFromSource)' == 'true' or '$(DotNetBuildSourceOnly)' == 'true'">
     <PropertyGroup>
+      <!-- Filter down projects aggressively in source-only modes. -->
       <InnerBuildArgs>$(InnerBuildArgs) /p:Projects="$(InnerSourceBuildRepoRoot)MSBuild.SourceBuild.slnf"</InnerBuildArgs>
+
       <!-- Disable package validation as source build filters out target frameworks. -->
       <InnerBuildArgs>$(InnerBuildArgs) /p:EnablePackageValidation=false</InnerBuildArgs>
     </PropertyGroup>

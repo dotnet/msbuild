@@ -25,7 +25,10 @@
           src/Framework/README.md
           src/Utilities/README.md
      -->
-    <LatestDotNetCoreForMSBuild>$(NetCurrent)</LatestDotNetCoreForMSBuild>
+     <!-- When building in source-only modes, let the TFM float based on what arcade is in use.
+          When building in normal modes (independent build or a dotnet product build), set explicitly. -->
+    <LatestDotNetCoreForMSBuild>net8.0</LatestDotNetCoreForMSBuild>
+    <LatestDotNetCoreForMSBuild Condition="'$(DotNetBuildFromSource)' == 'true' or '$(DotNetBuildSourceOnly)' == 'true'">$(NetCurrent)</LatestDotNetCoreForMSBuild>
   </PropertyGroup>
 
   <PropertyGroup>
