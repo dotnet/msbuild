@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using Microsoft.Build.Evaluation;
@@ -1032,6 +1033,19 @@ echo line 3"" />
                     result.OverallResult.ShouldBe(BuildResultCode.Success);
                 }
             }
+        }
+
+        [Fact]
+        public void ConsoleOutputDoesNotTrimLeadingWhitespace()
+        {
+            Exec exec = PrepareExec("type .\\Exec_Tests.Attachments\\leading-whitespace.txt");
+            exec.ConsoleToMSBuild = true;
+
+            bool result = exec.Execute();
+
+            result.ShouldBeTrue();
+            exec.ConsoleOutput.Length.ShouldBe(1);
+            exec.ConsoleOutput[0].ItemSpec.ShouldBe("    line with some leading whitespace");
         }
     }
 

@@ -410,7 +410,7 @@ namespace Microsoft.Build.Tasks
 
             if (ConsoleToMSBuild)
             {
-                string trimmedTextLine = singleLine.Trim();
+                string trimmedTextLine = singleLine.TrimEnd();
                 if (trimmedTextLine.Length > 0)
                 {
                     // The lines read may be unescaped, so we need to escape them
