@@ -37,4 +37,13 @@
     <RemoveDir Directories="$(_PackageFolderInGlobalPackages)"
                Condition="Exists('$(_PackageFolderInGlobalPackages)')" />
   </Target>
+
+  <!-- Make APICompat use roslyn from the toolset SDK instead of from the toolset package. This avoids unification issues on desktop msbuild.
+       TODO: Remove when a 8.0.200 or 9.0 SDK is consumed. -->
+  <Target Name="FixAPICompatWorkAroundRoslynMove" AfterTargets="CollectApiCompatInputs">
+    <PropertyGroup>
+      <RoslynAssembliesPath>$(RoslynTargetsPath)</RoslynAssembliesPath>
+    </PropertyGroup>
+  </Target>
+
 </Project>
