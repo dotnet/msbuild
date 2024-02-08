@@ -88,7 +88,7 @@ configuration:
       then:
       - removeLabel:
           label: triaged
-      description: Remove label triaged to closed stale issues that get comments
+      description: Remove label triaged from closed stale issues that get comments
     - if:
       - payloadType: Issues
       - labelAdded:
@@ -99,7 +99,7 @@ configuration:
       then:
       - addLabel:
           label: triaged
-      description: Add label triaged when needs-more-info is applied
+      description: Add label triaged to issue when needs-more-info is applied
     - if:
       - payloadType: Issue_Comment
       - isActivitySender:
