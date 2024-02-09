@@ -1042,7 +1042,7 @@ echo line 3"" />
             using (var env = TestEnvironment.Create(_output))
             {
                 var textFilePath = env.CreateFile("leading-whitespace.txt", lineWithLeadingWhitespace).Path;
-                Exec exec = PrepareExec($"type {textFilePath}");
+                Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? $"type {textFilePath}" : $"cat {textFilePath}");
                 exec.ConsoleToMSBuild = true;
 
                 bool result = exec.Execute();
