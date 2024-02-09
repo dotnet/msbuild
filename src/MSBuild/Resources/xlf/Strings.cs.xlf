@@ -138,7 +138,7 @@
                       used, write out the values after the build.
     </target>
         <note>
-      LOCALIZATION: "-getProperty:" should not be localized.
+      LOCALIZATION: "-getProperty" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
@@ -234,7 +234,7 @@
                         -termionalLoggerParameters:default=auto
     </target>
         <note>
-      LOCALIZATION: "-termionalLoggerParameters"  and "-tlp"should not be localized.
+      LOCALIZATION: "-termionalLoggerParameters"  and "-tlp" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
