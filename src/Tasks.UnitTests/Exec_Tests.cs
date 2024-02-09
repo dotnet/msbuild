@@ -1033,6 +1033,25 @@ echo line 3"" />
                 }
             }
         }
+
+        [Fact]
+        public void ConsoleOutputDoesNotTrimLeadingWhitespace()
+        {
+            string lineWithLeadingWhitespace = "    line with some leading whitespace";
+
+            using (var env = TestEnvironment.Create(_output))
+            {
+                var textFilePath = env.CreateFile("leading-whitespace.txt", lineWithLeadingWhitespace).Path;
+                Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? $"type {textFilePath}" : $"cat {textFilePath}");
+                exec.ConsoleToMSBuild = true;
+
+                bool result = exec.Execute();
+
+                result.ShouldBeTrue();
+                exec.ConsoleOutput.Length.ShouldBe(1);
+                exec.ConsoleOutput[0].ItemSpec.ShouldBe(lineWithLeadingWhitespace);
+            }
+        }
     }
 
     internal sealed class ExecWrapper : Exec
