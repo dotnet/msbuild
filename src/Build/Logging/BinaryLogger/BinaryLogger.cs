@@ -90,7 +90,7 @@ namespace Microsoft.Build.Logging
         private string _initialTargetOutputLogging;
         private bool _initialLogImports;
         private string _initialIsBinaryLoggerEnabled;
-        private BinaryLoggerParameters _binaryLoggerParameters;
+        private BinaryLoggerConfiguration _binaryLoggerConfiguration;
         private string _parameters;
         private string _filePath;
 
@@ -127,15 +127,15 @@ namespace Microsoft.Build.Logging
             private set { _filePath = value; }
         }
 
-        public BinaryLoggerParameters BinaryLoggerParameters {
+        public BinaryLoggerConfiguration BinaryLoggerConfiguration {
             get
             {
-                return _binaryLoggerParameters;
+                return _binaryLoggerConfiguration;
             }
             set
             {
-                _binaryLoggerParameters = value;
-                _parameters = _binaryLoggerParameters.GetStringifiedParameters();
+                _binaryLoggerConfiguration = value;
+                _parameters = _binaryLoggerConfiguration.GetStringifiedParameters();
             }
         }
 
@@ -159,7 +159,7 @@ namespace Microsoft.Build.Logging
             set
             {
                 _parameters = value;
-                _binaryLoggerParameters = BinaryLoggerParameters.GenerateInstanceFromParameters(_parameters);
+                _binaryLoggerConfiguration = BinaryLoggerConfiguration.GenerateInstanceFromParameters(_parameters);
             }
         }
 
@@ -407,7 +407,7 @@ namespace Microsoft.Build.Logging
         private void ProcessParameters(out bool omitInitialInfo)
         {
             omitInitialInfo = false;
-            if (BinaryLoggerParameters is null)
+            if (BinaryLoggerConfiguration is null)
             {
                 throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", ""));
             }
@@ -426,10 +426,10 @@ namespace Microsoft.Build.Logging
             {
                 if (FilePath != null)
                 {
-                    throw new LoggerException("Incompatible configuration provided");
+                    throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("IncompatibleBinaryLoggerConfiguration"));
                 }
 
-                var initProjectFilename = Path.GetFileName(BinaryLoggerParameters.InitProjectFile);
+                var initProjectFilename = Path.GetFileName(BinaryLoggerConfiguration.InitProjectFile);
                 FilePath = initProjectFilename + "." + DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()  + ".binlog";
             }
             else
@@ -462,12 +462,12 @@ namespace Microsoft.Build.Logging
         /// <exception cref="LoggerException"></exception>
         private void AttachBLArguments(ref bool omitInitialInfo)
         {
-            if (string.IsNullOrEmpty(BinaryLoggerParameters.binaryLoggerArguments))
+            if (string.IsNullOrEmpty(BinaryLoggerConfiguration.blArguments))
             {
                 return;
             }
 
-            var parameters = BinaryLoggerParameters.binaryLoggerArguments.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
+            var parameters = BinaryLoggerConfiguration.blArguments.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
 
            // var parameters = Parameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
             foreach (var parameter in parameters)
@@ -512,12 +512,12 @@ namespace Microsoft.Build.Logging
         /// <exception cref="LoggerException"></exception>
         private void AttachBLParameters()
         {
-            if (string.IsNullOrEmpty(BinaryLoggerParameters.binaryLoggerParameters))
+            if (string.IsNullOrEmpty(BinaryLoggerConfiguration.blpArguments))
             {
                 return;
             }
 
-            var parameters = BinaryLoggerParameters.binaryLoggerParameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
+            var parameters = BinaryLoggerConfiguration.blpArguments.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
             foreach (var parameter in parameters)
             {
                 if (parameter.Length > 0)

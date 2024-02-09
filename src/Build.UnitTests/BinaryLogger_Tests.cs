@@ -99,10 +99,10 @@ namespace Microsoft.Build.UnitTests
         public void TestBinaryLoggerRoundtrip(string projectText, BinlogRoundtripTestReplayMode replayMode)
         {
             string _logFile = _env.ExpectFile(".binlog").Path;
-            var binaryLoggerParameters = new BinaryLoggerParameters($"LogFile={_logFile}");
+            var binaryLoggerConfiguration = new BinaryLoggerConfiguration($"LogFile={_logFile}");
             var binaryLogger = new BinaryLogger();
 
-            binaryLogger.BinaryLoggerParameters = binaryLoggerParameters;
+            binaryLogger.BinaryLoggerConfiguration = binaryLoggerConfiguration;
 
             var mockLogFromBuild = new MockLogger();
 
@@ -141,7 +141,7 @@ namespace Microsoft.Build.UnitTests
 
                         BinaryLogger outputBinlog = new BinaryLogger()
                         {
-                            BinaryLoggerParameters = new BinaryLoggerParameters(fileToReplay)
+                            BinaryLoggerConfiguration = new BinaryLoggerConfiguration(fileToReplay)
                         };
                         outputBinlog.Initialize(logReader);
                         logReader.Replay(_logFile);
@@ -210,7 +210,7 @@ namespace Microsoft.Build.UnitTests
             string _logFile = _env.ExpectFile(".binlog").Path;
             var binaryLogger = new BinaryLogger();
 
-            binaryLogger.BinaryLoggerParameters = new BinaryLoggerParameters(_logFile);
+            binaryLogger.BinaryLoggerConfiguration = new BinaryLoggerConfiguration(_logFile);
 
             // build and log into binary logger
             using (ProjectCollection collection = new())
@@ -232,7 +232,7 @@ namespace Microsoft.Build.UnitTests
 
             BinaryLogger outputBinlog = new BinaryLogger()
             {
-                BinaryLoggerParameters = new BinaryLoggerParameters($"LogFile={replayedLogFile};OmitInitialInfo")
+                BinaryLoggerConfiguration = new BinaryLoggerConfiguration($"LogFile={replayedLogFile};OmitInitialInfo")
             };
             outputBinlog.Initialize(logReader);
             logReader.Replay(_logFile);
@@ -322,9 +322,9 @@ namespace Microsoft.Build.UnitTests
         public void BinaryLoggerShouldSupportFilePathExplicitParameter()
         {
             string _logFile = _env.ExpectFile(".binlog").Path;
-            var binaryLoggerParameters = new BinaryLoggerParameters($"LogFile={_logFile}");
+            var binaryLoggerConfiguration = new BinaryLoggerConfiguration($"LogFile={_logFile}");
             var binaryLogger = new BinaryLogger();
-            binaryLogger.BinaryLoggerParameters = binaryLoggerParameters;
+            binaryLogger.BinaryLoggerConfiguration = binaryLoggerConfiguration;
 
             ObjectModelHelpers.BuildProjectExpectSuccess(s_testProject, binaryLogger);
         }
@@ -445,7 +445,7 @@ namespace Microsoft.Build.UnitTests
             using var buildManager = new BuildManager();
             var binaryLogger = new BinaryLogger()
             {
-                BinaryLoggerParameters = new BinaryLoggerParameters($"ProjectImports=ZipFile;LogFile={_logFile}"),
+                BinaryLoggerConfiguration = new BinaryLoggerConfiguration($"ProjectImports=ZipFile;LogFile={_logFile}"),
             };
             var testProject = @"
 <Project>
@@ -476,7 +476,7 @@ namespace Microsoft.Build.UnitTests
 
             var binaryLogger = new BinaryLogger()
             {
-                BinaryLoggerParameters = new BinaryLoggerParameters($"LogFile={tmpLogFile}", "uniqueFileName"),
+                BinaryLoggerConfiguration = new BinaryLoggerConfiguration($"LogFile={tmpLogFile}", "uniqueFileName"),
             };
 
             var referenceProject = env.CreateTestProjectWithFiles("reference.proj", @"
@@ -486,9 +486,9 @@ namespace Microsoft.Build.UnitTests
             </Target>
          </Project>");
 
-            var message = Should.Throw<LoggerException>(() => buildManager.Build(new BuildParameters() { Loggers = new ILogger[] { binaryLogger } },
+            Should.Throw<LoggerException>(() => buildManager.Build(new BuildParameters() { Loggers = new ILogger[] { binaryLogger } },
                 new BuildRequestData(referenceProject.ProjectFile, new Dictionary<string, string>(), null, new string[] { "Target2" }, null)))
-                .Message.Should().Contain("Incompatible configuration provided");
+                .Message.Should().Contain("Incompatible binary logger parameter(s) provided");
 
             binaryLogger.Shutdown();
         }
@@ -502,7 +502,7 @@ namespace Microsoft.Build.UnitTests
 
             var binaryLogger = new BinaryLogger()
             {
-                BinaryLoggerParameters = new BinaryLoggerParameters("", "uniqueFileName") { InitProjectFile= "reference.proj" },
+                BinaryLoggerConfiguration = new BinaryLoggerConfiguration("", "uniqueFileName") { InitProjectFile= "reference.proj" },
             };
 
             var referenceProject = env.CreateTestProjectWithFiles("reference.proj", @"
@@ -543,7 +543,7 @@ namespace Microsoft.Build.UnitTests
             using var buildManager = new BuildManager();
             var binaryLogger = new BinaryLogger()
             {
-                BinaryLoggerParameters = new BinaryLoggerParameters($"ProjectImports=ZipFile;LogFile={_logFile}"),
+                BinaryLoggerConfiguration = new BinaryLoggerConfiguration($"ProjectImports=ZipFile;LogFile={_logFile}"),
             };
             var testProjectFmt = @"
 <Project>
@@ -592,10 +592,10 @@ namespace Microsoft.Build.UnitTests
         {
             string _logFile = _env.ExpectFile(".binlog").Path;
 
-            var binaryLoggerParameters = new BinaryLoggerParameters($"LogFile={_logFile}");
+            var binaryLoggerConfiguration = new BinaryLoggerConfiguration($"LogFile={_logFile}");
             var binaryLogger = new BinaryLogger
             {
-                BinaryLoggerParameters = binaryLoggerParameters,
+                BinaryLoggerConfiguration = binaryLoggerConfiguration,
             };
 
             const string project = @"
@@ -634,7 +634,7 @@ namespace Microsoft.Build.UnitTests
 
             var binaryLogger = new BinaryLogger
             {
-                BinaryLoggerParameters = new BinaryLoggerParameters($"LogFile={_logFile}")
+                BinaryLoggerConfiguration = new BinaryLoggerConfiguration($"LogFile={_logFile}")
             };
 
             // To trigger #6323, there must be at least two project instances.

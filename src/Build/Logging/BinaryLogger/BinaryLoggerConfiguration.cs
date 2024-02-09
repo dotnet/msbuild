@@ -10,26 +10,26 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Logging
 {
-    public class BinaryLoggerParameters
+    public class BinaryLoggerConfiguration
     {
-        public string binaryLoggerArguments { get; set; }
+        public string blArguments { get; set; }
 
-        public string binaryLoggerParameters { get; set; }
+        public string blpArguments { get; set; }
 
         public bool IsBinaryLoggerSet { get; set; }
 
         public string InitProjectFile { get; set; } = string.Empty;
 
-        public BinaryLoggerParameters(string binaryLoggerArguments, string binaryLoggerParameters)
+        public BinaryLoggerConfiguration(string blArguments, string blpArguments)
         {
-            this.binaryLoggerArguments = binaryLoggerArguments;
-            this.binaryLoggerParameters = binaryLoggerParameters;
+            this.blArguments = blArguments;
+            this.blpArguments = blpArguments;
         }
 
-        public BinaryLoggerParameters(string binaryLoggerArguments)
+        public BinaryLoggerConfiguration(string blArguments)
         {
-            this.binaryLoggerArguments = binaryLoggerArguments;
-            binaryLoggerParameters = string.Empty;
+            this.blArguments = blArguments;
+            blpArguments = string.Empty;
         }
 
 
@@ -42,19 +42,19 @@ namespace Microsoft.Build.Logging
             var parameters = new StringBuilder();
             parameters.AppendLine($"initProjectFile={InitProjectFile}");
             parameters.AppendLine($"isBinaryLoggerSet={IsBinaryLoggerSet}");
-            parameters.AppendLine($"blArguments={binaryLoggerArguments}");
-            parameters.AppendLine($"blParameters={binaryLoggerParameters}");
+            parameters.AppendLine($"blArguments={blArguments}");
+            parameters.AppendLine($"blpArguments={blpArguments}");
 
             return parameters.ToString();
         }
 
 
         /// <summary>
-        /// Generates the BinaryLoggerParameters instance based on the parameters provided
+        /// Generates the BinaryLoggerConfiguration instance based on the parameters provided
         /// </summary>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public static BinaryLoggerParameters? GenerateInstanceFromParameters(string parameters)
+        public static BinaryLoggerConfiguration? GenerateInstanceFromParameters(string parameters)
         {
             if (string.IsNullOrEmpty(parameters))
             {
@@ -65,9 +65,9 @@ namespace Microsoft.Build.Logging
             var initProjectFile = data[0].Replace("initProjectFile=","");
             var isBinaryLoggerSet = bool.Parse(data[1].Replace("isBinaryLoggerSet=", ""));
             var blArguments = data[2].Replace("blArguments=", "");
-            var blParameters = data[3].Replace("blParameters=", "");
+            var blParameters = data[3].Replace("blpArguments=", "");
 
-            return new BinaryLoggerParameters(blArguments, blParameters)
+            return new BinaryLoggerConfiguration(blArguments, blParameters)
             {
                 InitProjectFile = initProjectFile,
                 IsBinaryLoggerSet = isBinaryLoggerSet

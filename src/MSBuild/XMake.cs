@@ -2651,7 +2651,7 @@ namespace Microsoft.Build.CommandLine
                         blpArguments = string.Empty;
                     }
 
-                    var binaryLoggerParameters = new BinaryLoggerParameters(blArguments, blpArguments)
+                    var binaryLoggerConfiguration = new BinaryLoggerConfiguration(blArguments, blpArguments)
                     {
                         IsBinaryLoggerSet = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.BinaryLogger),
                         InitProjectFile = projectFile
@@ -2667,7 +2667,7 @@ namespace Microsoft.Build.CommandLine
                         aggregatedTerminalLoggerParameters,
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters], // used by DistributedFileLogger
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters],
-                        binaryLoggerParameters,
+                        binaryLoggerConfiguration,
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation],
                         groupedFileLoggerParameters,
                         getProperty.Length + getItem.Length + getTargetResult.Length > 0,
@@ -3703,7 +3703,7 @@ namespace Microsoft.Build.CommandLine
             string aggregatedTerminalLoggerParameters,
             string[] fileLoggerParameters,
             string[] consoleLoggerParameters,
-            BinaryLoggerParameters binaryLoggerParameters,
+            BinaryLoggerConfiguration binaryLoggerConfiguration,
             string[] profileEvaluationParameters,
             string[][] groupedFileLoggerParameters,
             bool useSimpleErrorLogger,
@@ -3729,7 +3729,7 @@ namespace Microsoft.Build.CommandLine
             var outVerbosity = verbosity;
 
             // move to binary logger parameters
-            ProcessBinaryLogger(binaryLoggerParameters, loggers, ref outVerbosity);
+            ProcessBinaryLogger(binaryLoggerConfiguration, loggers, ref outVerbosity);
 
             // When returning the result of evaluation from the command line, do not use custom loggers.
             if (!useSimpleErrorLogger)
@@ -3853,15 +3853,15 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static void ProcessBinaryLogger(BinaryLoggerParameters binaryLoggerParameters, List<ILogger> loggers, ref LoggerVerbosity verbosity)
+        private static void ProcessBinaryLogger(BinaryLoggerConfiguration binaryLoggerConfiguration, List<ILogger> loggers, ref LoggerVerbosity verbosity)
         {
-            if (!binaryLoggerParameters.IsBinaryLoggerSet)
+            if (!binaryLoggerConfiguration.IsBinaryLoggerSet)
             {
                 return;
             }
 
             // arguments
-            BinaryLogger logger = new BinaryLogger { BinaryLoggerParameters = binaryLoggerParameters };
+            BinaryLogger logger = new BinaryLogger { BinaryLoggerConfiguration = binaryLoggerConfiguration };
 
             // If we have a binary logger, force verbosity to diagnostic.
             // The only place where verbosity is used downstream is to determine whether to log task inputs.

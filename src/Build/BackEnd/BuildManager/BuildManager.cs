@@ -669,7 +669,7 @@ namespace Microsoft.Build.Execution
 
                 var binlogPath = DebugUtils.FindNextAvailableDebugFilePath($"{DebugUtils.ProcessInfoString}_BuildManager_{_hostName}.binlog");
 
-                var logger = new BinaryLogger { BinaryLoggerParameters = new BinaryLoggerParameters(binlogPath) };
+                var logger = new BinaryLogger { BinaryLoggerConfiguration = new BinaryLoggerConfiguration(binlogPath) };
 
                 return (loggers ?? Enumerable.Empty<ILogger>()).Concat(new[] { logger });
             }
