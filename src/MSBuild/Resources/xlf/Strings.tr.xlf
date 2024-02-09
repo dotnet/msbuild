@@ -125,16 +125,16 @@
       </trans-unit>
       <trans-unit id="HelpMessage_43_GetPropertySwitch">
         <source>  -getProperty:propertyName,...
-                    Write out the value of the property or properties after
-                    evaluation, without executing the build,or if either
-                    the -targets option or the -getTargetResult option is
-                    used, write out the values after the build.
+                      Write out the value of the property or properties after
+                      evaluation, without executing the build, or if either
+                      the -targets option or the -getTargetResult option is
+                      used, write out the values after the build.
     </source>
         <target state="new">  -getProperty:propertyName,...
-                    Write out the value of the property or properties after
-                    evaluation, without executing the build,or if either
-                    the -targets option or the -getTargetResult option is
-                    used, write out the values after the build.
+                      Write out the value of the property or properties after
+                      evaluation, without executing the build, or if either
+                      the -targets option or the -getTargetResult option is
+                      used, write out the values after the build.
     </target>
         <note>
       LOCALIZATION: "-getProperty:" should not be localized.
@@ -143,16 +143,16 @@
       </trans-unit>
       <trans-unit id="HelpMessage_44_GetItemSwitch">
         <source>  -getItem:itemName,...
-                    Write out the value of the item or items after evaluation
-                    without executing the build, or if either the -targets
-                    option or the -getTargetResult option is used, write out
-                    the values after the build.
+                      Write out the value of the item or items after evaluation
+                      without executing the build, or if either the -targets
+                      option or the -getTargetResult option is used, write out
+                      the values after the build.
     </source>
         <target state="new">  -getItem:itemName,...
-                    Write out the value of the item or items after evaluation
-                    without executing the build, or if either the -targets
-                    option or the -getTargetResult option is used, write out
-                    the values after the build.
+                      Write out the value of the item or items after evaluation
+                      without executing the build, or if either the -targets
+                      option or the -getTargetResult option is used, write out
+                      the values after the build.
     </target>
         <note>
       LOCALIZATION: "-getItem" should not be localized.
@@ -161,10 +161,10 @@
       </trans-unit>
       <trans-unit id="HelpMessage_45_GetTargetResultSwitch">
         <source>  -getTargetResult:targetName,...
-                    Write out the output values of the specified targets.
+                      Write out the output values of the specified targets.
     </source>
         <target state="new">  -getTargetResult:targetName,...
-                    Write out the output values of the specified targets.
+                      Write out the output values of the specified targets.
     </target>
         <note>
       LOCALIZATION: "-getTargetResult" should not be localized.
@@ -173,14 +173,14 @@
       </trans-unit>
       <trans-unit id="HelpMessage_46_FeatureAvailabilitySwitch">
         <source>  -featureavailability:featureName,...
-                    Check feature availability, The result is one of
-                    "Undefined", "Available", "NotAvailable" strings.
-                    (Short form: -fa)
+                      Check feature availability, The result is one of
+                      "Undefined", "Available", "NotAvailable" strings.
+                      (Short form: -fa)
     </source>
         <target state="new">  -featureavailability:featureName,...
-                    Check feature availability, The result is one of
-                    "Undefined", "Available", "NotAvailable" strings.
-                    (Short form: -fa)
+                      Check feature availability, The result is one of
+                      "Undefined", "Available", "NotAvailable" strings.
+                      (Short form: -fa)
     </target>
         <note>
       LOCALIZATION: "-featureavailability" and "-fa" should not be localized.
@@ -189,18 +189,18 @@
       </trans-unit>
       <trans-unit id="HelpMessage_47_TerminalLoggerSwitch">
         <source>  -terminallogger
-                    users are able to opt-in and use the TerminalLogger,
-                    EXCEPT when:
-                      The terminal does not support ANSI codes or color
-                      Output is redirected to a file or pipe
-                    (Short form: -tl)
+                      Users are able to opt-in and use the TerminalLogger,
+                      EXCEPT when:
+                      - The terminal does not support ANSI codes or color
+                      - Output is redirected to a file or pipe
+                      (Short form: -tl)
     </source>
         <target state="new">  -terminallogger
-                    users are able to opt-in and use the TerminalLogger,
-                    EXCEPT when:
-                      The terminal does not support ANSI codes or color
-                      Output is redirected to a file or pipe
-                    (Short form: -tl)
+                      Users are able to opt-in and use the TerminalLogger,
+                      EXCEPT when:
+                      - The terminal does not support ANSI codes or color
+                      - Output is redirected to a file or pipe
+                      (Short form: -tl)
     </target>
         <note>
       LOCALIZATION: "-terminallogger" and "-tl" should not be localized.
@@ -209,24 +209,28 @@
       </trans-unit>
       <trans-unit id="HelpMessage_48_TerminalLoggerParametersSwitch">
         <source>  -termionalLoggerParameters:default=[auto|false|true]
-                    users are able to opt-in and use the TerminalLogger.
-                    `true` forces TerminalLogger to be used even wwhen it would be disabled
-                    `false` forces TerminalLogger to not be used even when it would be enabled
-                    `auto` enables TerminalLogger when the terminal supports it and the session
-                     doesn't have redirected stdout/stderr
-                    (Short form: -tlp)
-                    Example:
-                      -termionalLoggerParameters:default=auto
+                      Users are able to opt-in and use the TerminalLogger.
+                      - `true` forces TerminalLogger to be used even wwhen it
+                      would be disabled.
+                      - `false` forces TerminalLogger to not be used even when
+                      it would be enabled.
+                      - `auto` enables TerminalLogger when the terminal supports
+                      it and the session doesn't have redirected stdout/stderr
+                      (Short form: -tlp)
+                      Example:
+                        -termionalLoggerParameters:default=auto
     </source>
         <target state="new">  -termionalLoggerParameters:default=[auto|false|true]
-                    users are able to opt-in and use the TerminalLogger.
-                    `true` forces TerminalLogger to be used even wwhen it would be disabled
-                    `false` forces TerminalLogger to not be used even when it would be enabled
-                    `auto` enables TerminalLogger when the terminal supports it and the session
-                     doesn't have redirected stdout/stderr
-                    (Short form: -tlp)
-                    Example:
-                      -termionalLoggerParameters:default=auto
+                      Users are able to opt-in and use the TerminalLogger.
+                      - `true` forces TerminalLogger to be used even wwhen it
+                      would be disabled.
+                      - `false` forces TerminalLogger to not be used even when
+                      it would be enabled.
+                      - `auto` enables TerminalLogger when the terminal supports
+                      it and the session doesn't have redirected stdout/stderr
+                      (Short form: -tlp)
+                      Example:
+                        -termionalLoggerParameters:default=auto
     </target>
         <note>
       LOCALIZATION: "-termionalLoggerParameters"  and "-tlp"should not be localized.
@@ -235,12 +239,12 @@
       </trans-unit>
       <trans-unit id="HelpMessage_49_WaitForDebuggerSwitch">
         <source>  -waitfordebugger
-                    Add wait for debugger command line switch (/wfd) in Debug build.
-                    (Short form: -wfd)
+                      Wait for debugger command line switch in Debug build.
+                      (Short form: -wfd)
     </source>
         <target state="new">  -waitfordebugger
-                    Add wait for debugger command line switch (/wfd) in Debug build.
-                    (Short form: -wfd)
+                      Wait for debugger command line switch in Debug build.
+                      (Short form: -wfd)
     </target>
         <note>
       LOCALIZATION: "-waitfordebugger" and "-wfd" should not be localized.
@@ -249,18 +253,20 @@
       </trans-unit>
       <trans-unit id="HelpMessage_50_NodeModeSwitch">
         <source>  -nodemode:number
-                    It's used when MSBuild spawns a process, indicating that MSBuild
-                    should start up in "Out of process worker node" mode.
-                    (Short form: -nmode)
-                    Example:
-                       -nodemode:1
+                      It's used when MSBuild spawns a process, indicating that
+                      MSBuild should start up in "Out of process worker node"
+                      mode.
+                      (Short form: -nmode)
+                      Example:
+                        -nodemode:1
     </source>
         <target state="new">  -nodemode:number
-                    It's used when MSBuild spawns a process, indicating that MSBuild
-                    should start up in "Out of process worker node" mode.
-                    (Short form: -nmode)
-                    Example:
-                       -nodemode:1
+                      It's used when MSBuild spawns a process, indicating that
+                      MSBuild should start up in "Out of process worker node"
+                      mode.
+                      (Short form: -nmode)
+                      Example:
+                        -nodemode:1
     </target>
         <note>
       LOCALIZATION: "-nodemode" and "-nmode" should not be localized.

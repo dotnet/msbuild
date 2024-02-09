@@ -879,22 +879,22 @@
   </data>
   <data name="HelpMessage_43_GetPropertySwitch" Visibility="Public">
     <value>  -getProperty:propertyName,...
-                    Write out the value of the property or properties after
-                    evaluation, without executing the build,or if either
-                    the -targets option or the -getTargetResult option is
-                    used, write out the values after the build.
+                      Write out the value of the property or properties after
+                      evaluation, without executing the build, or if either
+                      the -targets option or the -getTargetResult option is
+                      used, write out the values after the build.
     </value>
     <comment>
-      LOCALIZATION: "-getProperty:" should not be localized.
+      LOCALIZATION: "-getProperty" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
   <data name="HelpMessage_44_GetItemSwitch" Visibility="Public">
     <value>  -getItem:itemName,...
-                    Write out the value of the item or items after evaluation
-                    without executing the build, or if either the -targets
-                    option or the -getTargetResult option is used, write out
-                    the values after the build.
+                      Write out the value of the item or items after evaluation
+                      without executing the build, or if either the -targets
+                      option or the -getTargetResult option is used, write out
+                      the values after the build.
     </value>
     <comment>
       LOCALIZATION: "-getItem" should not be localized.
@@ -903,7 +903,7 @@
   </data>
   <data name="HelpMessage_45_GetTargetResultSwitch" Visibility="Public">
     <value>  -getTargetResult:targetName,...
-                    Write out the output values of the specified targets.
+                      Write out the output values of the specified targets.
     </value>
     <comment>
       LOCALIZATION: "-getTargetResult" should not be localized.
@@ -912,9 +912,9 @@
   </data>
   <data name="HelpMessage_46_FeatureAvailabilitySwitch" Visibility="Public">
     <value>  -featureavailability:featureName,...
-                    Check feature availability, The result is one of
-                    "Undefined", "Available", "NotAvailable" strings.
-                    (Short form: -fa)
+                      Check feature availability, The result is one of
+                      "Undefined", "Available", "NotAvailable" strings.
+                      (Short form: -fa)
     </value>
     <comment>
       LOCALIZATION: "-featureavailability" and "-fa" should not be localized.
@@ -923,11 +923,11 @@
   </data>
   <data name="HelpMessage_47_TerminalLoggerSwitch" Visibility="Public">
     <value>  -terminallogger
-                    users are able to opt-in and use the TerminalLogger,
-                    EXCEPT when:
-                      The terminal does not support ANSI codes or color
-                      Output is redirected to a file or pipe
-                    (Short form: -tl)
+                      Users are able to opt-in and use the TerminalLogger,
+                      EXCEPT when:
+                      - The terminal does not support ANSI codes or color
+                      - Output is redirected to a file or pipe
+                      (Short form: -tl)
     </value>
     <comment>
       LOCALIZATION: "-terminallogger" and "-tl" should not be localized.
@@ -936,24 +936,26 @@
   </data>
   <data name="HelpMessage_48_TerminalLoggerParametersSwitch" Visibility="Public">
     <value>  -termionalLoggerParameters:default=[auto|false|true]
-                    users are able to opt-in and use the TerminalLogger.
-                    `true` forces TerminalLogger to be used even wwhen it would be disabled
-                    `false` forces TerminalLogger to not be used even when it would be enabled
-                    `auto` enables TerminalLogger when the terminal supports it and the session
-                     doesn't have redirected stdout/stderr
-                    (Short form: -tlp)
-                    Example:
-                      -termionalLoggerParameters:default=auto
+                      Users are able to opt-in and use the TerminalLogger.
+                      - `true` forces TerminalLogger to be used even wwhen it
+                      would be disabled.
+                      - `false` forces TerminalLogger to not be used even when
+                      it would be enabled.
+                      - `auto` enables TerminalLogger when the terminal supports
+                      it and the session doesn't have redirected stdout/stderr
+                      (Short form: -tlp)
+                      Example:
+                        -termionalLoggerParameters:default=auto
     </value>
     <comment>
-      LOCALIZATION: "-termionalLoggerParameters"  and "-tlp"should not be localized.
+      LOCALIZATION: "-termionalLoggerParameters"  and "-tlp" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
   <data name="HelpMessage_49_WaitForDebuggerSwitch" Visibility="Public">
     <value>  -waitfordebugger
-                    Add wait for debugger command line switch (/wfd) in Debug build.
-                    (Short form: -wfd)
+                      Wait for debugger command line switch in Debug build.
+                      (Short form: -wfd)
     </value>
     <comment>
       LOCALIZATION: "-waitfordebugger" and "-wfd" should not be localized.
@@ -962,11 +964,12 @@
   </data>
   <data name="HelpMessage_50_NodeModeSwitch" Visibility="Public">
     <value>  -nodemode:number
-                    It's used when MSBuild spawns a process, indicating that MSBuild
-                    should start up in "Out of process worker node" mode.
-                    (Short form: -nmode)
-                    Example:
-                       -nodemode:1
+                      It's used when MSBuild spawns a process, indicating that
+                      MSBuild should start up in "Out of process worker node"
+                      mode.
+                      (Short form: -nmode)
+                      Example:
+                        -nodemode:1
     </value>
     <comment>
       LOCALIZATION: "-nodemode" and "-nmode" should not be localized.
