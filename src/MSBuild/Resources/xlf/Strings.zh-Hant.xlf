@@ -1323,7 +1323,7 @@
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureavailability switch.</source>
-        <target state="new">MSBUILD : error MSB1067: Must provide a feature name for the featureavailability switch.</target>
+        <target state="translated">MSBUILD : error MSB1067: 必須為功能可用性切換提供功能名稱。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureavailability". The user must pass in an actual feature name
       following the switch, as in "msbuild.exe -featureavailability:blah".
