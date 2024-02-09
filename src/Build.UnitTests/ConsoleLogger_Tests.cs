@@ -1927,6 +1927,30 @@ namespace Microsoft.Build.UnitTests
             ((bool)L.ShowSummary).ShouldBeFalse();
         }
 
+        [Fact]
+        public void TestInvalidEncoding()
+        {
+            // To verify it could set the encoding through the parameter, set non-default encoding.
+            Console.OutputEncoding = Encoding.ASCII;
+            ConsoleLogger logger = new ConsoleLogger(LoggerVerbosity.Normal, Console.Write, null, null);
+            logger.Parameters = "encoding=foo";
+            ObjectModelHelpers.BuildProjectExpectSuccess(s_dummyProjectContents, logger);
+            // If invalid encoding is inputted use default encoding UTF-8.
+            Console.OutputEncoding.ShouldBe(Encoding.UTF8);
+        }
+
+        [Fact]
+        public void TestValidEncoding()
+        {
+            // To verify it could set the encoding through the parameter, set non-default encoding.
+            Console.OutputEncoding = Encoding.ASCII;
+            ConsoleLogger logger = new ConsoleLogger(LoggerVerbosity.Normal, Console.Write, null, null);
+            var encodingName = "UTF-16";
+            logger.Parameters = $"encoding={encodingName}";
+            ObjectModelHelpers.BuildProjectExpectSuccess(s_dummyProjectContents, logger);
+            Console.OutputEncoding.ShouldBe(Encoding.GetEncoding(encodingName));
+        }
+
         /// <summary>
         /// ResetConsoleLoggerState should reset the state of the console logger
         /// </summary>
