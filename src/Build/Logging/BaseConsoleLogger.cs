@@ -87,7 +87,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     continue;
                 }
 
-                string[] parameterAndValue = parameter.Split(s_parameterValueSplitCharacter);
+                string[] parameterAndValue = parameter.Split(parameterValueSplitCharacter);
                 ApplyParameter(parameterAndValue[0], parameterAndValue.Length > 1 ? parameterAndValue[1] : null);
             }
         }
@@ -423,7 +423,16 @@ namespace Microsoft.Build.BackEnd.Logging
             IsRunningWithCharacterFileType();
             if (encoding != null)
             {
-                Console.OutputEncoding = encoding;
+                // Some encoding is not supported by Console class, such as UTF-32 encoding.
+                // In that case, use UTF-8 encoding by default.
+                try
+                {
+                    Console.OutputEncoding = encoding;
+                }
+                catch (IOException)
+                {
+                    Console.OutputEncoding = Encoding.UTF8;
+                }
             }
             // This is a workaround, because the Console class provides no way to check that a color
             // can actually be set or not. Color cannot be set if the console has been redirected
@@ -1147,7 +1156,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Console logger parameter value split character.
         /// </summary>
-        private static readonly char[] s_parameterValueSplitCharacter = MSBuildConstants.EqualsChar;
+        internal static readonly char[] parameterValueSplitCharacter = MSBuildConstants.EqualsChar;
 
         /// <summary>
         /// When true, accumulate performance numbers.

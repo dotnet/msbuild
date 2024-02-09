@@ -158,11 +158,12 @@ namespace Microsoft.Build.Logging
                         // Use ansi color codes if current target console do support it
                         preferConsoleColor = ConsoleConfiguration.AcceptAnsiColorCodes;
                     }
-                    if (string.Equals(param, "ENCODING", StringComparison.OrdinalIgnoreCase))
+                    var parameterAndValue = param.Split(BaseConsoleLogger.parameterValueSplitCharacter);
+                    if (parameterAndValue.Length == 2 && string.Equals(parameterAndValue[0], "ENCODING", StringComparison.OrdinalIgnoreCase))
                     {
                         try
                         {
-                            _encoding = Encoding.GetEncoding(param);
+                            _encoding = Encoding.GetEncoding(parameterAndValue[1]);
                         }
                         catch (ArgumentException ex)
                         {
