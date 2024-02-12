@@ -32,6 +32,7 @@ using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
+using Microsoft.Build.Logging.Analyzers;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.NET.StringTools;
@@ -628,6 +629,7 @@ namespace Microsoft.Build.Execution
             {
                 ILoggingService loggingService = CreateLoggingService(
                     AppendDebuggingLoggers(_buildParameters.Loggers),
+                    _buildParameters.BuildAnalysisLoggerFactory,
                     _buildParameters.ForwardingLoggers,
                     _buildParameters.WarningsAsErrors,
                     _buildParameters.WarningsNotAsErrors,
@@ -2943,7 +2945,13 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates a logging service around the specified set of loggers.
         /// </summary>
-        private ILoggingService CreateLoggingService(IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> forwardingLoggers, ISet<string> warningsAsErrors, ISet<string> warningsNotAsErrors, ISet<string> warningsAsMessages)
+        private ILoggingService CreateLoggingService(
+            IEnumerable<ILogger> loggers,
+            IBuildAnalysisLoggerFactory buildAnalysisLoggerFactory,
+            IEnumerable<ForwardingLoggerRecord> forwardingLoggers,
+            ISet<string> warningsAsErrors,
+            ISet<string> warningsNotAsErrors,
+            ISet<string> warningsAsMessages)
         {
             Debug.Assert(Monitor.IsEntered(_syncLock));
 
@@ -2966,6 +2974,15 @@ namespace Microsoft.Build.Execution
             loggingService.WarningsAsErrors = warningsAsErrors;
             loggingService.WarningsNotAsErrors = warningsNotAsErrors;
             loggingService.WarningsAsMessages = warningsAsMessages;
+
+            if (buildAnalysisLoggerFactory != null)
+            {
+                loggers = (loggers ?? Enumerable.Empty<ILogger>()).Concat(new[]
+                {
+                    buildAnalysisLoggerFactory.CreateBuildAnalysisLogger(
+                        new AnalyzerLoggingContextFactory(loggingService))
+                });
+            }
 
             try
             {

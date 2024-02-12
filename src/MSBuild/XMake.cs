@@ -19,6 +19,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading;
+using Microsoft.Build.Analyzers.Infrastructure;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
@@ -717,6 +718,7 @@ namespace Microsoft.Build.CommandLine
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
                 bool question = false;
+                IBuildAnalysisLoggerFactory buildAnalysisLoggerFactory = null;
                 string[] getProperty = Array.Empty<string>();
                 string[] getItem = Array.Empty<string>();
                 string[] getTargetResult = Array.Empty<string>();
@@ -763,6 +765,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                             ref lowPriority,
                                             ref question,
+                                            ref buildAnalysisLoggerFactory,
                                             ref getProperty,
                                             ref getItem,
                                             ref getTargetResult,
@@ -863,6 +866,7 @@ namespace Microsoft.Build.CommandLine
                                     graphBuildOptions,
                                     lowPriority,
                                     question,
+                                    buildAnalysisLoggerFactory,
                                     inputResultsCaches,
                                     outputResultsCache,
                                     saveProjectResult: outputPropertiesItemsOrTargetResults,
@@ -1244,6 +1248,7 @@ namespace Microsoft.Build.CommandLine
             GraphBuildOptions graphBuildOptions,
             bool lowPriority,
             bool question,
+            IBuildAnalysisLoggerFactory buildAnalysisLoggerFactory,
             string[] inputResultsCaches,
             string outputResultsCache,
             bool saveProjectResult,
@@ -1445,6 +1450,7 @@ namespace Microsoft.Build.CommandLine
                     parameters.InputResultsCacheFiles = inputResultsCaches;
                     parameters.OutputResultsCacheFile = outputResultsCache;
                     parameters.Question = question;
+                    parameters.BuildAnalysisLoggerFactory = buildAnalysisLoggerFactory;
 #if FEATURE_REPORTFILEACCESSES
                     parameters.ReportFileAccesses = reportFileAccesses;
 #endif
@@ -2416,6 +2422,7 @@ namespace Microsoft.Build.CommandLine
 #endif
             ref bool lowPriority,
             ref bool question,
+            ref IBuildAnalysisLoggerFactory buildAnalysisLoggerFactory,
             ref string[] getProperty,
             ref string[] getItem,
             ref string[] getTargetResult,
@@ -2557,6 +2564,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                                            ref lowPriority,
                                                            ref question,
+                                                           ref buildAnalysisLoggerFactory,
                                                            ref getProperty,
                                                            ref getItem,
                                                            ref getTargetResult,
@@ -2638,6 +2646,8 @@ namespace Microsoft.Build.CommandLine
 
                     question = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Question);
 
+                    buildAnalysisLoggerFactory = ProcessBuildAnalysisLoggerFactorySwitch(commandLineSwitches);
+
                     inputResultsCaches = ProcessInputResultsCaches(commandLineSwitches);
 
                     outputResultsCache = ProcessOutputResultsCache(commandLineSwitches);
@@ -2710,6 +2720,13 @@ namespace Microsoft.Build.CommandLine
             ErrorUtilities.VerifyThrow(!invokeBuild || !string.IsNullOrEmpty(projectFile), "We should have a project file if we're going to build.");
 
             return invokeBuild;
+        }
+
+        private static IBuildAnalysisLoggerFactory ProcessBuildAnalysisLoggerFactorySwitch(CommandLineSwitches commandLineSwitches)
+        {
+            // todo: opt-in behavior: https://github.com/dotnet/msbuild/issues/9723
+            bool isAnalysisEnabled = true;
+            return isAnalysisEnabled ? new BuildAnalysisLoggerFactory() : null;
         }
 
         private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)

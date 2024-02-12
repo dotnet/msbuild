@@ -196,6 +196,7 @@
     <PackageReference Include="System.Runtime" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Analyzers\Microsoft.Build.Analyzers.csproj" />
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" PrivateAssets="All" />
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
