@@ -10,6 +10,7 @@ using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Experimental;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
@@ -309,6 +310,7 @@ namespace Microsoft.Build.Execution
             DiscardBuildResults = other.DiscardBuildResults;
             LowPriority = other.LowPriority;
             Question = other.Question;
+            BuildAnalysisLoggerFactory = other.BuildAnalysisLoggerFactory;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
         }
 
@@ -833,6 +835,11 @@ namespace Microsoft.Build.Execution
             get => _question;
             set => _question = value;
         }
+
+        /// <summary>
+        /// Gets or sets a factory for build analysis infrastructure logger
+        /// </summary>
+        public IBuildAnalysisLoggerFactory BuildAnalysisLoggerFactory { get; set; }
 
         /// <summary>
         /// Gets or sets the project cache description to use for all <see cref="BuildSubmission"/> or <see cref="GraphBuildSubmission"/>
