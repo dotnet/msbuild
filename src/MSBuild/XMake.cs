@@ -1983,7 +1983,7 @@ namespace Microsoft.Build.CommandLine
                             }
                         }
 
-                        // Special case: for the switches "/m" (or "/maxCpuCount") and "/bl" (or "/binarylogger") we wish to pretend we saw a default argument
+                        // Special case: for the switches "/m" (or "/maxCpuCount") and "/prof" (or "/profileevaluation") we wish to pretend we saw a default argument
                         // This allows a subsequent /m:n on the command line to override it.
                         // We could create a new kind of switch with optional parameters, but it's a great deal of churn for this single case.
                         // Note that if no "/m" or "/maxCpuCount" switch -- either with or without parameters -- is present, then we still default to 1 cpu
@@ -1996,20 +1996,12 @@ namespace Microsoft.Build.CommandLine
                                 int numberOfCpus = NativeMethodsShared.GetLogicalCoreCount();
                                 switchParameters = $":{numberOfCpus}";
                             }
-                            else if (string.Equals(switchName, "bl", StringComparison.OrdinalIgnoreCase) ||
-                                string.Equals(switchName, "binarylogger", StringComparison.OrdinalIgnoreCase))
-                            {
-                                // we have to specify at least one parameter otherwise it's impossible to distinguish the situation
-                                // where /bl is not specified at all vs. where /bl is specified without the file name.
-                                switchParameters = ":msbuild.binlog";
-                            }
                             else if (string.Equals(switchName, "prof", StringComparison.OrdinalIgnoreCase) ||
                                      string.Equals(switchName, "profileevaluation", StringComparison.OrdinalIgnoreCase))
                             {
                                 switchParameters = ":no-file";
                             }
                         }
-
                         if (CommandLineSwitches.IsParameterlessSwitch(switchName, out var parameterlessSwitch, out var duplicateSwitchErrorMessage))
                         {
                             GatherParameterlessCommandLineSwitch(commandLineSwitches, parameterlessSwitch, switchParameters, duplicateSwitchErrorMessage, unquotedCommandLineArg, commandLine);
@@ -2647,6 +2639,24 @@ namespace Microsoft.Build.CommandLine
                     // figure out which loggers are going to listen to build events
                     string[][] groupedFileLoggerParameters = commandLineSwitches.GetFileLoggerParameters();
 
+                    var blArguments = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger].LastOrDefault();
+                    if(blArguments == null)
+                    {
+                        blArguments = string.Empty;
+                    }
+
+                    var blpArguments = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLoggerParameters].LastOrDefault();
+                    if (blpArguments == null)
+                    {
+                        blpArguments = string.Empty;
+                    }
+
+                    var binaryLoggerConfiguration = new BinaryLoggerConfiguration(blArguments, blpArguments)
+                    {
+                        IsBinaryLoggerSet = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.BinaryLogger),
+                        InitProjectFile = projectFile
+                    };
+
                     loggers = ProcessLoggingSwitches(
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Logger],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.DistributedLogger],
@@ -2657,7 +2667,7 @@ namespace Microsoft.Build.CommandLine
                         aggregatedTerminalLoggerParameters,
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters], // used by DistributedFileLogger
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters],
-                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
+                        binaryLoggerConfiguration,
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation],
                         groupedFileLoggerParameters,
                         getProperty.Length + getItem.Length + getTargetResult.Length > 0,
@@ -3693,7 +3703,7 @@ namespace Microsoft.Build.CommandLine
             string aggregatedTerminalLoggerParameters,
             string[] fileLoggerParameters,
             string[] consoleLoggerParameters,
-            string[] binaryLoggerParameters,
+            BinaryLoggerConfiguration binaryLoggerConfiguration,
             string[] profileEvaluationParameters,
             string[][] groupedFileLoggerParameters,
             bool useSimpleErrorLogger,
@@ -3717,7 +3727,9 @@ namespace Microsoft.Build.CommandLine
             var loggers = new List<ILogger>();
 
             var outVerbosity = verbosity;
-            ProcessBinaryLogger(binaryLoggerParameters, loggers, ref outVerbosity);
+
+            // move to binary logger parameters
+            ProcessBinaryLogger(binaryLoggerConfiguration, loggers, ref outVerbosity);
 
             // When returning the result of evaluation from the command line, do not use custom loggers.
             if (!useSimpleErrorLogger)
@@ -3744,7 +3756,7 @@ namespace Microsoft.Build.CommandLine
 
             ProcessDistributedFileLogger(distributedFileLogger, fileLoggerParameters, distributedLoggerRecords, loggers, cpuCount);
 
-            ProcessFileLoggers(groupedFileLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
+            ProcessFileLoggers(groupedFileLoggerParameters, distributedLoggerRecords, cpuCount, loggers);
 
             verbosity = outVerbosity;
 
@@ -3786,7 +3798,7 @@ namespace Microsoft.Build.CommandLine
         /// Add a file logger with the appropriate parameters to the loggers list for each
         /// non-empty set of file logger parameters provided.
         /// </summary>
-        private static void ProcessFileLoggers(string[][] groupedFileLoggerParameters, List<DistributedLoggerRecord> distributedLoggerRecords, LoggerVerbosity verbosity, int cpuCount, List<ILogger> loggers)
+        private static void ProcessFileLoggers(string[][] groupedFileLoggerParameters, List<DistributedLoggerRecord> distributedLoggerRecords, int cpuCount, List<ILogger> loggers)
         {
             for (int i = 0; i < groupedFileLoggerParameters.Length; i++)
             {
@@ -3841,16 +3853,15 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static void ProcessBinaryLogger(string[] binaryLoggerParameters, List<ILogger> loggers, ref LoggerVerbosity verbosity)
+        private static void ProcessBinaryLogger(BinaryLoggerConfiguration binaryLoggerConfiguration, List<ILogger> loggers, ref LoggerVerbosity verbosity)
         {
-            if (binaryLoggerParameters == null || binaryLoggerParameters.Length == 0)
+            if (!binaryLoggerConfiguration.IsBinaryLoggerSet)
             {
                 return;
             }
 
-            string arguments = binaryLoggerParameters[binaryLoggerParameters.Length - 1];
-
-            BinaryLogger logger = new BinaryLogger { Parameters = arguments };
+            // arguments
+            BinaryLogger logger = new BinaryLogger { BinaryLoggerConfiguration = binaryLoggerConfiguration };
 
             // If we have a binary logger, force verbosity to diagnostic.
             // The only place where verbosity is used downstream is to determine whether to log task inputs.

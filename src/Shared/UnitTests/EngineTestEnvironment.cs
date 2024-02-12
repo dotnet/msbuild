@@ -195,8 +195,9 @@ namespace Microsoft.Build.UnitTests
         {
             var binaryLogger = new BinaryLogger();
             string binaryLoggerFilePath = Path.GetFullPath(Path.Combine(TestRoot, Guid.NewGuid().ToString() + ".binlog"));
-            binaryLogger.CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.None;
-            binaryLogger.Parameters = binaryLoggerFilePath;
+            var binaryLoggerConfiguration = new BinaryLoggerConfiguration($"ProjectImports=None;{binaryLoggerFilePath}");
+            binaryLogger.BinaryLoggerConfiguration = binaryLoggerConfiguration;
+
             return (binaryLogger, null);
         }
 
@@ -223,7 +224,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (binaryLogger != null)
                 {
-                    string binaryLoggerFilePath = binaryLogger.Parameters;
+                    string binaryLoggerFilePath = binaryLogger.FilePath;
 
                     var actualLoggerPairs = GetLoggers().Where(l => l.logger is not BinaryLogger).ToArray();
                     expectedLoggerPairs = expectedLoggerPairs.Where(l => l.logger is not BinaryLogger).ToArray();

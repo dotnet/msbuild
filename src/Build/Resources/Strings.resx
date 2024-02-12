@@ -2019,6 +2019,10 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>MSB4277: Cannot copy from object of that type.</value>
     <comment>{StrBegin="MSB4277: "}</comment>
   </data>
+  <data name="IncompatibleBinaryLoggerConfiguration" xml:space="preserve">
+    <value>MSB4278: Incompatible binary logger parameter(s) provided: Only one of the provided configuration should be present for binary logger: binlog file argument of binaryLogger switch or uniqueFileName of binaryLoggerParameter switch.</value>
+    <comment>{StrBegin="MSB4278: "}</comment>
+  </data>
   <data name="ReportFileAccessesX64Only" xml:space="preserve">
     <value>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</value>
   </data>
@@ -2094,7 +2098,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <!--
         The Build message bucket is: MSB4000 - MSB4999
 
-        Next message code should be MSB4278
+        Next message code should be MSB4279
 
         Don't forget to update this comment after using a new code.
   -->

@@ -73,7 +73,6 @@ namespace Microsoft.Build.UnitTests
         </Project>";
 
         private readonly TestEnvironment _env;
-        private string _logFile;
 
         public BinaryLoggerTests(ITestOutputHelper output)
         {
@@ -81,8 +80,6 @@ namespace Microsoft.Build.UnitTests
 
             // this is needed to ensure the binary logger does not pollute the environment
             _env.WithEnvironmentInvariant();
-
-            _logFile = _env.ExpectFile(".binlog").Path;
         }
 
         public enum BinlogRoundtripTestReplayMode
@@ -101,18 +98,20 @@ namespace Microsoft.Build.UnitTests
         [InlineData(s_testProject2, BinlogRoundtripTestReplayMode.RawEvents)]
         public void TestBinaryLoggerRoundtrip(string projectText, BinlogRoundtripTestReplayMode replayMode)
         {
+            string _logFile = _env.ExpectFile(".binlog").Path;
+            var binaryLoggerConfiguration = new BinaryLoggerConfiguration($"LogFile={_logFile}");
             var binaryLogger = new BinaryLogger();
 
-            binaryLogger.Parameters = _logFile;
+            binaryLogger.BinaryLoggerConfiguration = binaryLoggerConfiguration;
 
             var mockLogFromBuild = new MockLogger();
 
             var serialFromBuildText = new StringBuilder();
-            var serialFromBuild = new SerialConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => serialFromBuildText.Append(t), colorSet: null, colorReset: null);
+            var serialFromBuild = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, t => serialFromBuildText.Append(t), colorSet: null, colorReset: null);
             serialFromBuild.Parameters = "NOPERFORMANCESUMMARY";
 
             var parallelFromBuildText = new StringBuilder();
-            var parallelFromBuild = new ParallelConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => parallelFromBuildText.Append(t), colorSet: null, colorReset: null);
+            var parallelFromBuild = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, t => parallelFromBuildText.Append(t), colorSet: null, colorReset: null);
             parallelFromBuild.Parameters = "NOPERFORMANCESUMMARY";
 
             // build and log into binary logger, mock logger, serial and parallel console loggers
@@ -142,7 +141,7 @@ namespace Microsoft.Build.UnitTests
 
                         BinaryLogger outputBinlog = new BinaryLogger()
                         {
-                            Parameters = fileToReplay
+                            BinaryLoggerConfiguration = new BinaryLoggerConfiguration(fileToReplay)
                         };
                         outputBinlog.Initialize(logReader);
                         logReader.Replay(_logFile);
@@ -156,11 +155,11 @@ namespace Microsoft.Build.UnitTests
             var mockLogFromPlayback = new MockLogger();
 
             var serialFromPlaybackText = new StringBuilder();
-            var serialFromPlayback = new SerialConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => serialFromPlaybackText.Append(t), colorSet: null, colorReset: null);
+            var serialFromPlayback = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, t => serialFromPlaybackText.Append(t), colorSet: null, colorReset: null);
             serialFromPlayback.Parameters = "NOPERFORMANCESUMMARY";
 
             var parallelFromPlaybackText = new StringBuilder();
-            var parallelFromPlayback = new ParallelConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => parallelFromPlaybackText.Append(t), colorSet: null, colorReset: null);
+            var parallelFromPlayback = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, t => parallelFromPlaybackText.Append(t), colorSet: null, colorReset: null);
             parallelFromPlayback.Parameters = "NOPERFORMANCESUMMARY";
 
             var binaryLogReader = new BinaryLogReplayEventSource();
@@ -208,9 +207,10 @@ namespace Microsoft.Build.UnitTests
         [InlineData(s_testProject2, BinlogRoundtripTestReplayMode.RawEvents)]
         public void TestBinaryLoggerRoundtripEquality(string projectText, BinlogRoundtripTestReplayMode replayMode)
         {
+            string _logFile = _env.ExpectFile(".binlog").Path;
             var binaryLogger = new BinaryLogger();
 
-            binaryLogger.Parameters = _logFile;
+            binaryLogger.BinaryLoggerConfiguration = new BinaryLoggerConfiguration(_logFile);
 
             // build and log into binary logger
             using (ProjectCollection collection = new())
@@ -232,7 +232,7 @@ namespace Microsoft.Build.UnitTests
 
             BinaryLogger outputBinlog = new BinaryLogger()
             {
-                Parameters = $"LogFile={replayedLogFile};OmitInitialInfo"
+                BinaryLoggerConfiguration = new BinaryLoggerConfiguration($"LogFile={replayedLogFile};OmitInitialInfo")
             };
             outputBinlog.Initialize(logReader);
             logReader.Replay(_logFile);
@@ -321,8 +321,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void BinaryLoggerShouldSupportFilePathExplicitParameter()
         {
+            string _logFile = _env.ExpectFile(".binlog").Path;
+            var binaryLoggerConfiguration = new BinaryLoggerConfiguration($"LogFile={_logFile}");
             var binaryLogger = new BinaryLogger();
-            binaryLogger.Parameters = $"LogFile={_logFile}";
+            binaryLogger.BinaryLoggerConfiguration = binaryLoggerConfiguration;
 
             ObjectModelHelpers.BuildProjectExpectSuccess(s_testProject, binaryLogger);
         }
@@ -330,6 +332,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void UnusedEnvironmentVariablesDoNotAppearInBinaryLog()
         {
+            string _logFile = _env.ExpectFile(".binlog").Path;
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("EnvVar1", "itsValue");
@@ -352,7 +355,6 @@ namespace Microsoft.Build.UnitTests
                 TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
                 
                 RunnerUtilities.ExecMSBuild($"{projectFile.Path} -bl:{_logFile}", out bool success);
-                success.ShouldBeTrue();
 
                 RunnerUtilities.ExecMSBuild($"{_logFile} -flp:logfile={Path.Combine(logFolder.Path, "logFile.log")};verbosity=diagnostic", out success);
                 success.ShouldBeTrue();
@@ -377,6 +379,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                string _logFile = _env.ExpectFile(".binlog").Path;
                 string contents = $"""
                     <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Hello">
                       <!-- This simple inline task displays "Hello, world!" -->
@@ -438,11 +441,11 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void BinaryLoggerShouldEmbedFilesViaTaskOutput()
         {
+            string _logFile = _env.ExpectFile(".binlog").Path;
             using var buildManager = new BuildManager();
             var binaryLogger = new BinaryLogger()
             {
-                Parameters = $"LogFile={_logFile}",
-                CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
+                BinaryLoggerConfiguration = new BinaryLoggerConfiguration($"ProjectImports=ZipFile;LogFile={_logFile}"),
             };
             var testProject = @"
 <Project>
@@ -464,9 +467,64 @@ namespace Microsoft.Build.UnitTests
                 $"Embedded files: {string.Join(",", zipArchive.Entries)}");
         }
 
+        [Fact]
+        public void BinaryLoggerShouldReportIncompatibleError()
+        {
+            using var buildManager = new BuildManager();
+            using var env = TestEnvironment.Create();
+            var tmpLogFile = env.GetTempFile(".binlog").Path;
+
+            var binaryLogger = new BinaryLogger()
+            {
+                BinaryLoggerConfiguration = new BinaryLoggerConfiguration($"LogFile={tmpLogFile}", "uniqueFileName"),
+            };
+
+            var referenceProject = env.CreateTestProjectWithFiles("reference.proj", @"
+         <Project>
+            <Target Name='Target2'>
+               <Exec Command='echo a'/>
+            </Target>
+         </Project>");
+
+            Should.Throw<LoggerException>(() => buildManager.Build(new BuildParameters() { Loggers = new ILogger[] { binaryLogger } },
+                new BuildRequestData(referenceProject.ProjectFile, new Dictionary<string, string>(), null, new string[] { "Target2" }, null)))
+                .Message.Should().Contain("Incompatible binary logger parameter(s) provided");
+
+            binaryLogger.Shutdown();
+        }
+
+        [Fact]
+        public void BinaryLoggerShouldGenerateUniqueLoggerName()
+        {
+            using var buildManager = new BuildManager();
+            using var env = TestEnvironment.Create();
+            env.SetCurrentDirectory(env.DefaultTestDirectory.Path);
+
+            var binaryLogger = new BinaryLogger()
+            {
+                BinaryLoggerConfiguration = new BinaryLoggerConfiguration("", "uniqueFileName") { InitProjectFile= "reference.proj" },
+            };
+
+            var referenceProject = env.CreateTestProjectWithFiles("reference.proj", @"
+         <Project>
+            <Target Name='Target2'>
+               <Exec Command='echo a'/>
+            </Target>
+         </Project>");
+
+            Should.NotThrow(() => buildManager.Build(new BuildParameters() { Loggers = new ILogger[] { binaryLogger } },
+                new BuildRequestData(referenceProject.ProjectFile, new Dictionary<string, string>(), null, new string[] { "Target2" }, null)));
+
+            var binlogFiles = Directory.GetFiles(env.DefaultTestDirectory.Path, "*.binlog");
+            
+            binlogFiles.Length.ShouldBe(1);
+            binlogFiles[0].ShouldContain("reference.proj");
+        }
+
         [RequiresSymbolicLinksFact]
         public void BinaryLoggerShouldEmbedSymlinkFilesViaTaskOutput()
         {
+            string _logFile = _env.ExpectFile(".binlog").Path;
             string testFileName = "foobar.txt";
             string symlinkName = "symlink1.txt";
             string symlinkLvl2Name = "symlink2.txt";
@@ -485,8 +543,7 @@ namespace Microsoft.Build.UnitTests
             using var buildManager = new BuildManager();
             var binaryLogger = new BinaryLogger()
             {
-                Parameters = $"LogFile={_logFile}",
-                CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
+                BinaryLoggerConfiguration = new BinaryLoggerConfiguration($"ProjectImports=ZipFile;LogFile={_logFile}"),
             };
             var testProjectFmt = @"
 <Project>
@@ -533,9 +590,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void BinaryLoggerShouldNotThrowWhenMetadataCannotBeExpanded()
         {
+            string _logFile = _env.ExpectFile(".binlog").Path;
+
+            var binaryLoggerConfiguration = new BinaryLoggerConfiguration($"LogFile={_logFile}");
             var binaryLogger = new BinaryLogger
             {
-                Parameters = $"LogFile={_logFile}"
+                BinaryLoggerConfiguration = binaryLoggerConfiguration,
             };
 
             const string project = @"
@@ -564,6 +624,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void MessagesCanBeLoggedWhenProjectsAreCached()
         {
+            string _logFile = _env.ExpectFile(".binlog").Path;
+
             using var env = TestEnvironment.Create();
 
             env.SetEnvironmentVariable("MSBUILDDEBUGFORCECACHING", "1");
@@ -572,7 +634,7 @@ namespace Microsoft.Build.UnitTests
 
             var binaryLogger = new BinaryLogger
             {
-                Parameters = $"LogFile={_logFile}"
+                BinaryLoggerConfiguration = new BinaryLoggerConfiguration($"LogFile={_logFile}")
             };
 
             // To trigger #6323, there must be at least two project instances.
@@ -610,13 +672,14 @@ namespace Microsoft.Build.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                string _logFile = _env.ExpectFile(".binlog").Path;
+
                 var contents = @"
                     <Project>
                         <Target Name='Target2'>
                             <Exec Command='echo a'/>
                         </Target>
                     </Project>";
-
 
                 TransientTestFolder testFolder = env.CreateFolder(createFolder: true);
 

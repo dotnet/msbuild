@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using System.Reflection.Metadata;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
@@ -89,6 +90,9 @@ namespace Microsoft.Build.Logging
         private string _initialTargetOutputLogging;
         private bool _initialLogImports;
         private string _initialIsBinaryLoggerEnabled;
+        private BinaryLoggerConfiguration _binaryLoggerConfiguration;
+        private string _parameters;
+        private string _filePath;
 
         /// <summary>
         /// Describes whether to collect the project files (including imported project files) used during the build.
@@ -111,13 +115,34 @@ namespace Microsoft.Build.Logging
             /// </summary>
             ZipFile,
         }
-
+            
         /// <summary>
         /// Gets or sets whether to capture and embed project and target source files used during the build.
         /// </summary>
         public ProjectImportsCollectionMode CollectProjectImports { get; set; } = ProjectImportsCollectionMode.Embed;
 
-        private string FilePath { get; set; }
+        public string FilePath
+        {
+            get { return _filePath; }
+            private set { _filePath = value; }
+        }
+
+        public BinaryLoggerConfiguration BinaryLoggerConfiguration {
+            get
+            {
+                return _binaryLoggerConfiguration;
+            }
+            set
+            {
+                _binaryLoggerConfiguration = value;
+                _parameters = _binaryLoggerConfiguration.GetStringifiedParameters();
+            }
+        }
+
+        /// <summary>
+        /// Boolean flag identifies if the log file was provided from parameters
+        /// </summary>
+        private bool IsUniqueLogFile { get; set; }
 
         /// <summary> Gets or sets the verbosity level.</summary>
         /// <remarks>
@@ -126,10 +151,17 @@ namespace Microsoft.Build.Logging
         /// </remarks>
         public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Diagnostic;
 
-        /// <summary>
-        /// Gets or sets the parameters. The only supported parameter is the output log file path (for example, "msbuild.binlog").
-        /// </summary>
-        public string Parameters { get; set; }
+        public string Parameters {
+            get
+            {
+                return _parameters;
+            }
+            set
+            {
+                _parameters = value;
+                _binaryLoggerConfiguration = BinaryLoggerConfiguration.GenerateInstanceFromParameters(_parameters);
+            }
+        }
 
         /// <summary>
         /// Initializes the logger by subscribing to events of the specified event source and embedded content source.
@@ -148,6 +180,7 @@ namespace Microsoft.Build.Logging
             bool logPropertiesAndItemsAfterEvaluation = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation ?? true;
 
             ProcessParameters(out bool omitInitialInfo);
+            UpdateFilePathBaseodOnParameters();
             var replayEventSource = eventSource as IBinaryLogReplaySource;
 
             try
@@ -373,13 +406,70 @@ namespace Microsoft.Build.Logging
         /// </exception>
         private void ProcessParameters(out bool omitInitialInfo)
         {
-            if (Parameters == null)
+            omitInitialInfo = false;
+            if (BinaryLoggerConfiguration is null)
             {
                 throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", ""));
             }
 
-            omitInitialInfo = false;
-            var parameters = Parameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
+            AttachBLArguments(ref omitInitialInfo);
+            AttachBLParameters();
+        }
+
+        /// <summary>
+        /// Updates the current FilePath value based on instance configuration
+        /// </summary>
+        /// <exception cref="LoggerException"></exception>
+        private void UpdateFilePathBaseodOnParameters()
+        {
+            if (IsUniqueLogFile)
+            {
+                if (FilePath != null)
+                {
+                    throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("IncompatibleBinaryLoggerConfiguration"));
+                }
+
+                var initProjectFilename = Path.GetFileName(BinaryLoggerConfiguration.InitProjectFile);
+                FilePath = initProjectFilename + "." + DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()  + ".binlog";
+            }
+            else
+            {
+                if (FilePath == null)
+                {
+                    FilePath = "msbuild.binlog";
+                }
+            }
+
+            KnownTelemetry.LoggingConfigurationTelemetry.BinaryLoggerUsedDefaultName = FilePath == "msbuild.binlog";
+
+            try
+            {
+                FilePath = Path.GetFullPath(FilePath);
+            }
+            catch (Exception e)
+            {
+                string errorCode;
+                string helpKeyword;
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, "InvalidFileLoggerFile", FilePath, e.Message);
+                throw new LoggerException(message, e, errorCode, helpKeyword);
+            }
+        }
+
+        /// <summary>
+        /// Process the arguments provided to the bl flag
+        /// Available arguments: ProjectImports=None, ProjectImports=Embed, ProjectImports=ZipFile,[LogFile=]filename.binlog
+        /// </summary>
+        /// <exception cref="LoggerException"></exception>
+        private void AttachBLArguments(ref bool omitInitialInfo)
+        {
+            if (string.IsNullOrEmpty(BinaryLoggerConfiguration.blArguments))
+            {
+                return;
+            }
+
+            var parameters = BinaryLoggerConfiguration.blArguments.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
+
+           // var parameters = Parameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
             foreach (var parameter in parameters)
             {
                 if (string.Equals(parameter, "ProjectImports=None", StringComparison.OrdinalIgnoreCase))
@@ -413,23 +503,34 @@ namespace Microsoft.Build.Logging
                     throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", parameter));
                 }
             }
+        }
 
-            if (FilePath == null)
+        /// <summary>
+        /// Process the arguments provided to the blp flag
+        /// Available arguments: uniqueFileName
+        /// </summary>
+        /// <exception cref="LoggerException"></exception>
+        private void AttachBLParameters()
+        {
+            if (string.IsNullOrEmpty(BinaryLoggerConfiguration.blpArguments))
             {
-                FilePath = "msbuild.binlog";
+                return;
             }
-            KnownTelemetry.LoggingConfigurationTelemetry.BinaryLoggerUsedDefaultName = FilePath == "msbuild.binlog";
 
-            try
+            var parameters = BinaryLoggerConfiguration.blpArguments.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var parameter in parameters)
             {
-                FilePath = Path.GetFullPath(FilePath);
-            }
-            catch (Exception e)
-            {
-                string errorCode;
-                string helpKeyword;
-                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, "InvalidFileLoggerFile", FilePath, e.Message);
-                throw new LoggerException(message, e, errorCode, helpKeyword);
+                if (parameter.Length > 0)
+                {
+                    if (parameter.Equals("uniqueFileName", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        IsUniqueLogFile = true;
+                    }
+                }
+                else
+                {
+                    throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", parameter));
+                }
             }
         }
     }
