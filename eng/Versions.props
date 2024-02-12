@@ -54,7 +54,7 @@
     <MicrosoftExtensionsDependencyModelVersion>7.0.0</MicrosoftExtensionsDependencyModelVersion>
     <MicrosoftIORedistVersion>6.0.0</MicrosoftIORedistVersion>
     <MicrosoftNetCompilersToolsetVersion>4.10.0-2.24109.17</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>6.10.0-preview.1.18</NuGetBuildTasksVersion>
+    <NuGetBuildTasksVersion>6.10.0-preview.2.32</NuGetBuildTasksVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
