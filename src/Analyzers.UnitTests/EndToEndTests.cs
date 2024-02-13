@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.UnitTests;
@@ -13,7 +14,7 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.Build.Engine.UnitTests.Analyzers
+namespace Microsoft.Build.Analyzers.UnitTests
 {
     public class EndToEndTests
     {
@@ -27,8 +28,6 @@ namespace Microsoft.Build.Engine.UnitTests.Analyzers
         }
 
         [Fact]
-        // WARNING!: this test is using a bootstrap - so a build.cmd needs to be run prior this test can properly capture the
-        //  changes in the production code
         public void SampleAnalyzerIntegrationTest()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -113,7 +112,7 @@ namespace Microsoft.Build.Engine.UnitTests.Analyzers
                 // env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
                 env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
                 // string output = RunnerUtilities.ExecMSBuild($"{projectFile.Path} /m:1 -nr:False", out bool success);
-                string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} /m:1 -nr:False -restore", out bool success);
+                string output = BootstrapRunner.ExecBootstrapedMSBuild($"{projectFile.Path} /m:1 -nr:False -restore", out bool success);
                 _env.Output.WriteLine(output);
                 success.ShouldBeTrue();
                 // The conflicting outputs warning appears
