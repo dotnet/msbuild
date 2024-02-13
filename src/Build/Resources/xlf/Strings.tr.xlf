@@ -160,8 +160,8 @@
         <note>{StrBegin="MSB4259: "}</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromVSDistribution">
-        <source>MSB4278: The imported project {0} is from the Visual Studio distribution of MSBuild. Build with MSBuild.exe in a Developer Command Prompt. </source>
-        <target state="new">MSB4278: The imported project {0} is from the Visual Studio distribution of MSBuild. Build with MSBuild.exe in a Developer Command Prompt. </target>
+        <source>MSB4278: The imported project {0} does not exist and appears to be part of Visual Studio. This project may require MSBuild.exe and fail to build in the dotnet CLI. </source>
+        <target state="new">MSB4278: The imported project {0} does not exist and appears to be part of Visual Studio. This project may require MSBuild.exe and fail to build in the dotnet CLI. </target>
         <note>{StrBegin="MSB4278: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">

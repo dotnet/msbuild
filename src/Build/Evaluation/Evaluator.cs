@@ -2304,9 +2304,7 @@ namespace Microsoft.Build.Evaluation
                                 continue;
                             }
 
-#if !FEATURE_VISUALSTUDIOSETUP
                             VerifyVSDistributionPath(importElement.Project, importLocationInProject);
-#endif
 
                             ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "ImportedProjectNotFound",
                                                                       importFileUnescaped, importExpressionEscaped);
@@ -2581,9 +2579,7 @@ namespace Microsoft.Build.Evaluation
 
             string stringifiedListOfSearchPaths = StringifyList(onlyFallbackSearchPaths);
 
-#if !FEATURE_VISUALSTUDIOSETUP
             VerifyVSDistributionPath(importElement.Project, importElement.ProjectLocation);
-#endif
 
 #if FEATURE_SYSTEM_CONFIGURATION
             string configLocation = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
@@ -2649,6 +2645,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
+        [Conditional("FEATURE_GUIDE_TO_VS_ON_UNSUPPORTED_PROJECTS")]
         private void VerifyVSDistributionPath(string path, ElementLocation importLocationInProject)
         {
             if (path.IndexOf("Microsoft\\VisualStudio", StringComparison.OrdinalIgnoreCase) >= 0

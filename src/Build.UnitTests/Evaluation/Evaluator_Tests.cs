@@ -914,7 +914,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
+        [DotNetOnlyFact("Tests .NET SDK-only error")]
         public void ImportWithVSPathThrowsCorrectError()
         {
             InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>(() =>
