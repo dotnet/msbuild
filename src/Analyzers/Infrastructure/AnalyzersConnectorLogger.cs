@@ -7,8 +7,10 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Logging.Analyzers;
 
 namespace Microsoft.Build.Analyzers.Infrastructure;
 internal sealed class AnalyzersConnectorLogger(IBuildAnalysisLoggingContextFactory loggingContextFactory, IBuildAnalysisManager buildAnalysisManager)
@@ -20,6 +22,7 @@ internal sealed class AnalyzersConnectorLogger(IBuildAnalysisLoggingContextFacto
     public void Initialize(IEventSource eventSource)
     {
         eventSource.AnyEventRaised += EventSource_AnyEventRaised;
+        eventSource.BuildFinished += EventSource_BuildFinished;
     }
 
     private void EventSource_AnyEventRaised(object sender, BuildEventArgs e)
@@ -27,8 +30,6 @@ internal sealed class AnalyzersConnectorLogger(IBuildAnalysisLoggingContextFacto
         if (e is ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs &&
             !(projectEvaluationFinishedEventArgs.ProjectFile?.EndsWith(".metaproj") ?? false))
         {
-            // Debugger.Launch();
-
             try
             {
                 buildAnalysisManager.ProcessEvaluationFinishedEventArgs(
@@ -45,8 +46,18 @@ internal sealed class AnalyzersConnectorLogger(IBuildAnalysisLoggingContextFacto
         // here handling of other event types
     }
 
-    public void Shutdown()
+    private void EventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
     {
+        BuildEventContext buildEventContext = e.BuildEventContext ?? new BuildEventContext(
+            BuildEventContext.InvalidNodeId, BuildEventContext.InvalidTargetId,
+            BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+
+        LoggingContext loggingContext = loggingContextFactory.CreateLoggingContext(buildEventContext).ToLoggingContext();
+
         // TODO: here flush the tracing stats: https://github.com/dotnet/msbuild/issues/9629
+        loggingContext.LogCommentFromText(MessageImportance.High, buildAnalysisManager.CreateTracingStats());
     }
+
+    public void Shutdown()
+    { }
 }

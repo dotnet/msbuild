@@ -12,7 +12,9 @@ namespace Microsoft.Build.Experimental;
 
 public interface IBuildAnalysisManager
 {
-    internal void ProcessEvaluationFinishedEventArgs(
+    void ProcessEvaluationFinishedEventArgs(
         IBuildAnalysisLoggingContext buildAnalysisContext,
         ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs);
+
+    string CreateTracingStats();
 }

@@ -15,6 +15,10 @@
   <ItemGroup>
     <ProjectReference Include="..\Analyzers\Microsoft.Build.Analyzers.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
+    <ProjectReference Include="..\MSBuild.Bootstrap\MSBuild.Bootstrap.csproj" >
+      <Private>false</Private>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>

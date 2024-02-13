@@ -18,7 +18,7 @@ namespace Microsoft.Build.Analyzers.UnitTests
         // This should ideally be part of RunnerUtilities - however then we'd need to enforce
         //  all test projects to import the BootStrapMSBuild.props file and declare the BootstrapLocationAttribute.
         // Better solution would be to have a single test utility project - instead of linked code files.
-        public static string ExecBootstrapedMSBuild(string msbuildParameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
+        public static string ExecBootstrapedMSBuild(string msbuildParameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper? outputHelper = null)
         {
             var binaryFolder = Assembly.GetExecutingAssembly()
                 .GetCustomAttribute<BootstrapLocationAttribute>()!
