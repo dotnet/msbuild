@@ -528,7 +528,7 @@
     <comment>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</comment>
   </data>
   <data name="ImportedProjectFromVSDistribution" xml:space="preserve">
-    <value>MSB4278: The imported project {0} does not exist and appears to be part of Visual Studio. This project may require MSBuild.exe and fail to build in the dotnet CLI. </value>
+    <value>MSB4278: The imported file {0} does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </value>
     <comment>{StrBegin="MSB4278: "}LOCALIZATION: &lt;Import&gt; should not be localized.</comment>
   </data>
   <data name="ImportedProjectFromExtensionsPathNotFoundFromAppConfig" xml:space="preserve">
