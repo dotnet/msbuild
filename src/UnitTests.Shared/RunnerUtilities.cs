@@ -34,24 +34,6 @@ namespace Microsoft.Build.UnitTests.Shared
         }
 
         /// <summary>
-        /// Invoke the currently running msbuild and return the stdout, stderr, and process exit status.
-        /// This method may invoke msbuild via other runtimes.
-        /// </summary>
-        public static string ExecBootstrapedMSBuild(string msbuildParameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
-        {
-            // TODO: use proper way of passing the bootsrtrap location: https://github.com/dotnet/msbuild/issues/9729
-            string basePath = PathToCurrentlyRunningMsBuildExe.Substring(0, PathToCurrentlyRunningMsBuildExe.IndexOf(@"artifacts\bin", StringComparison.InvariantCultureIgnoreCase));
-#if NET
-            string pathToExecutable = EnvironmentProvider.GetDotnetExePath();
-            msbuildParameters = Path.Combine(basePath, @"artifacts\bin\bootstrap\net8.0\MSBuild\msbuild.dll") + " " + msbuildParameters;
-#else
-            string pathToExecutable =
-                Path.Combine(basePath, @"artifacts\bin\bootstrap\net472\MSBuild\Current\Bin\amd64\msbuild.exe");
-#endif
-            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper);
-        }
-
-        /// <summary>
         /// Invoke msbuild.exe with the given parameters and return the stdout, stderr, and process exit status.
         /// This method may invoke msbuild via other runtimes.
         /// </summary>
