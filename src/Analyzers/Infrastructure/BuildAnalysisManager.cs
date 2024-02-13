@@ -60,13 +60,7 @@ internal sealed class BuildAnalysisManager : IBuildAnalysisManager
     public void ProcessEvaluationFinishedEventArgs(IBuildAnalysisLoggingContext buildAnalysisContext,
         ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
     {
-        LoggingContext? loggingContext = (buildAnalysisContext as AnalyzerLoggingContext)!;
-
-        if (loggingContext == null)
-        {
-            // error out
-            return;
-        }
+        LoggingContext loggingContext = buildAnalysisContext.ToLoggingContext();
 
         Dictionary<string, string> propertiesLookup = new Dictionary<string, string>();
         Internal.Utilities.EnumerateProperties(evaluationFinishedEventArgs.Properties, propertiesLookup,
@@ -92,7 +86,7 @@ internal sealed class BuildAnalysisManager : IBuildAnalysisManager
 
     // TODO: tracing: https://github.com/dotnet/msbuild/issues/9629
     // should have infra as well, should log to AnalyzersConnectorLogger upon shutdown (if requested)
-    internal string CreateTracingStats()
+    public string CreateTracingStats()
     {
         return string.Join(Environment.NewLine,
             _analyzers.Select(a => GetAnalyzerDescriptor(a.BuildAnalyzer) + ": " + a.Elapsed));

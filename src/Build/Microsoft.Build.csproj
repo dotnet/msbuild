@@ -162,6 +162,7 @@
     <Compile Include="FileAccess\RequestedAccess.cs" />
     <Compile Include="Logging\Analyzers\AnalyzerLoggingContext.cs" />
     <Compile Include="Logging\Analyzers\AnalyzerLoggingContextFactory.cs" />
+    <Compile Include="Logging\Analyzers\BuildAnalysisLoggingContextExtensions.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />

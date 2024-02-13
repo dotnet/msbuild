@@ -1,6 +1,6 @@
 <Project>
 
-  <Import Project="..\..\eng\BootStrapMSBuild.props" />
+  <Import Project="BootStrapMSBuild.props" />
   
   <!--
   Copies the binaries of MSBuild to a bootstrap folder so we can rebuild msbuild with itself.
