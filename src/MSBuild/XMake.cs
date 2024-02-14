@@ -19,7 +19,6 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Microsoft.Build.Analyzers.Infrastructure;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
@@ -2725,7 +2724,7 @@ namespace Microsoft.Build.CommandLine
         private static IBuildAnalysisLoggerFactory ProcessBuildAnalysisLoggerFactorySwitch(CommandLineSwitches commandLineSwitches)
         {
             // todo: opt-in behavior: https://github.com/dotnet/msbuild/issues/9723
-            bool isAnalysisEnabled = true;
+            bool isAnalysisEnabled = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Analyze);
             return isAnalysisEnabled ? new BuildAnalysisLoggerFactory() : null;
         }
 
