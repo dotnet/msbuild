@@ -924,7 +924,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 // Does not matter that the file or folder does not exist, we are checking for the VS pathing here
                 importPath = "path\\that\\does\\not\\exist\\Microsoft\\VisualStudio\\FileName.txt";
 
-                string content = ObjectModelHelpers.CleanupFileContents(@"
+                var content = env.CreateTestProjectWithFiles(@"
                     <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
                         <Import Project='" + importPath + @"'/>
                     </Project>
@@ -932,7 +932,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>(() =>
                 {
-                        Project project = new Project(XmlReader.Create(new StringReader(content)));
+                        Project project = new Project(content.ProjectFile, null, null);
                 });
 
                 Assert.Contains("MSB4278", ex.ErrorCode);
