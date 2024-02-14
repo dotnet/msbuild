@@ -917,39 +917,26 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [DotNetOnlyFact("Tests .NET SDK-only error")]
         public void ImportWithVSPathThrowsCorrectError()
         {
-            InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>(() =>
+            string importPath = null;
+
+            using (TestEnvironment env = TestEnvironment.Create())
             {
-                string projectPath = null;
-                string importPath = null;
+                // Does not matter that the file or folder does not exist, we are checking for the VS pathing here
+                importPath = "path\\that\\does\\not\\exist\\Microsoft\\VisualStudio\\FileName.txt";
 
-                try
+                string content = ObjectModelHelpers.CleanupFileContents(@"
+                    <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
+                        <Import Project='" + importPath + @"'/>
+                    </Project>
+                ");
+
+                InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>(() =>
                 {
-                    // Does not matter that the file or folder does not exist, we are checking for the VS pathing here
-                    importPath = "path\\that\\does\\not\\exist\\Microsoft\\VisualStudio\\FileName.txt";
-                    projectPath = FileUtilities.GetTemporaryFileName();
+                        Project project = new Project(XmlReader.Create(new StringReader(content)));
+                });
 
-                    string import = ObjectModelHelpers.CleanupFileContents(@"
-                            <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
-                            </Project>
-                        ");
-
-                    File.WriteAllText(projectPath, import);
-
-                    string content = ObjectModelHelpers.CleanupFileContents(@"
-                            <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
-                                <Import Project='" + importPath + @"'/>
-                            </Project>
-                        ");
-
-                    Project project = new Project(XmlReader.Create(new StringReader(content)));
-                }
-                finally
-                {
-                    File.Delete(projectPath);
-                }
-            });
-
-            Assert.Contains("MSB4278", ex.ErrorCode);
+                Assert.Contains("MSB4278", ex.ErrorCode);
+            }
         }
 
         /// <summary>
