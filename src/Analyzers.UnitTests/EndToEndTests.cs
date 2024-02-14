@@ -112,7 +112,7 @@ namespace Microsoft.Build.Analyzers.UnitTests
                 // env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
                 env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
                 // string output = RunnerUtilities.ExecMSBuild($"{projectFile.Path} /m:1 -nr:False", out bool success);
-                string output = BootstrapRunner.ExecBootstrapedMSBuild($"{projectFile.Path} /m:1 -nr:False -restore", out bool success);
+                string output = BootstrapRunner.ExecBootstrapedMSBuild($"{projectFile.Path} /m:1 -nr:False -restore -analyze", out bool success);
                 _env.Output.WriteLine(output);
                 success.ShouldBeTrue();
                 // The conflicting outputs warning appears
