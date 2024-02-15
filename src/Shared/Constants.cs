@@ -75,7 +75,7 @@ namespace Microsoft.Build.Shared
         internal const string MSBuildRestoreSessionId = nameof(MSBuildRestoreSessionId);
 
         /// <summary>
-        /// A property set during a in implicit restore (/restore) or explicit restore (/t:restore) to indicate that a restore is executing.
+        /// A property set during an implicit restore (/restore) or explicit restore (/t:restore) to indicate that a restore is executing.
         /// </summary>
         internal const string MSBuildIsRestoring = nameof(MSBuildIsRestoring);
 
