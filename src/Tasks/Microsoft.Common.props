@@ -65,7 +65,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         the pre-restore files in the binary log and then NuGet won't be able to embed the generated one after restore.  If some other
         project extension mechanism wants to import project extensions during restore, they need to explicitly set ImportProjectExtensionProps
     -->
-    <ImportProjectExtensionProps Condition="'$(ImportProjectExtensionProps)' == '' And '$(MSBuildIsRestoring)' == 'true'">false</ImportProjectExtensionProps>
+    <ImportProjectExtensionProps Condition="$([MSBuild]::AreFeaturesEnabled('17.10')) And '$(ImportProjectExtensionProps)' == '' And '$(MSBuildIsRestoring)' == 'true'">false</ImportProjectExtensionProps>
     
     <ImportProjectExtensionProps Condition="'$(ImportProjectExtensionProps)' == ''">true</ImportProjectExtensionProps>
     <_InitialMSBuildProjectExtensionsPath Condition=" '$(ImportProjectExtensionProps)' == 'true' ">$(MSBuildProjectExtensionsPath)</_InitialMSBuildProjectExtensionsPath>
