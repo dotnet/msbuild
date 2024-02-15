@@ -37,7 +37,7 @@ namespace Microsoft.Build.Analyzers.UnitTests
             }
 #if NET
             string pathToExecutable = EnvironmentProvider.GetDotnetExePath()!;
-            msbuildParameters = Path.Combine(binaryFolder, "msbuild.dll") + " " + msbuildParameters;
+            msbuildParameters = Path.Combine(binaryFolder, "MSBuild.dll") + " " + msbuildParameters;
 #else
             string pathToExecutable =
                 Path.Combine(binaryFolder, "msbuild.exe");
