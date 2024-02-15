@@ -22,7 +22,6 @@ using VerifyXunit;
 using Xunit;
 
 using static VerifyXunit.Verifier;
-using System.IO.Compression;
 
 #nullable disable
 
@@ -695,7 +694,7 @@ namespace InlineTask
 
             string projectImportsZipPath = Path.ChangeExtension(binLogFile, ".ProjectImports.zip");
             using var fileStream = new System.IO.FileStream(projectImportsZipPath, System.IO.FileMode.Open);
-            using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
+            using var zipArchive = new System.IO.Compression.ZipArchive(fileStream, System.IO.Compression.ZipArchiveMode.Read);
 
             // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
             // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
