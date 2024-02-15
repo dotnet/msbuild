@@ -14,6 +14,9 @@
 
     <!-- Needed to ensure that RuntimeTargetsCopyLocalItems is populated for full framework -->
     <DisableRuntimeTargets>false</DisableRuntimeTargets>
+
+    <!-- Disable build acceleration for this non-standard project. The Bootstrap target must run after any of the dependencies changes.  -->
+    <AccelerateBuildsInVisualStudio>false</AccelerateBuildsInVisualStudio>
   </PropertyGroup>
 
   <Target Name="Bootstrap" DependsOnTargets="$(BootstrapDependsOn)"
