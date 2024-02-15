@@ -27,7 +27,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// A task factory which can take code dom supported languages and create a task out of it
     /// </summary>
-    public class CodeTaskFactory : ITaskFactory
+    public class CodeTaskFactory : ITaskFactory, IHasSourceFilePath
     {
         /// <summary>
         /// This dictionary keeps track of custom references to compiled assemblies.  The in-memory assembly is loaded from a byte
@@ -160,6 +160,8 @@ namespace Microsoft.Build.Tasks
         /// Gets the type of the generated task.
         /// </summary>
         public Type TaskType { get; private set; }
+
+        public string SourceFilePath { get; private set; }
 
         /// <summary>
         /// Get the type information for all task parameters.
@@ -301,6 +303,10 @@ namespace Microsoft.Build.Tasks
                 if (TaskType == null)
                 {
                     _log.LogErrorWithCodeFromResources("CodeTaskFactory.CouldNotFindTaskInAssembly", _nameOfTask);
+                }
+                else
+                {
+                    SourceFilePath = _sourcePath;
                 }
             }
 

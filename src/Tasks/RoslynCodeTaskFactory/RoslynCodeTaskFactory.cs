@@ -22,7 +22,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
-    public sealed class RoslynCodeTaskFactory : ITaskFactory
+    public sealed class RoslynCodeTaskFactory : ITaskFactory, IHasSourceFilePath
     {
         /// <summary>
         /// A set of default namespaces to add so that user does not have to include them.  Make sure that these are covered
@@ -125,6 +125,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public Type TaskType { get; private set; }
 
+        public string SourceFilePath { get; private set; }
+
         /// <inheritdoc cref="ITaskFactory.CleanupTask(ITask)"/>
         public void CleanupTask(ITask task)
         {
@@ -199,6 +201,11 @@ namespace Microsoft.Build.Tasks
                             i.GetCustomAttribute<RequiredAttribute>() != null))
                         .ToArray();
                 }
+            }
+
+            if (TaskType != null)
+            {
+                SourceFilePath = taskInfo.Source;
             }
 
             // Initialization succeeded if we found a type matching the task name from the compiled assembly
@@ -446,6 +453,7 @@ namespace Microsoft.Build.Tasks
 
                 // Instead of using the inner text of the <Code /> element, read the specified file as source code
                 taskInfo.CodeType = RoslynCodeTaskFactoryCodeType.Class;
+                taskInfo.Source = sourceAttribute.Value;
                 taskInfo.SourceCode = File.ReadAllText(sourceAttribute.Value.Trim());
             }
 

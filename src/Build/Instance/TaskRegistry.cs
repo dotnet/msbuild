@@ -1492,6 +1492,14 @@ namespace Microsoft.Build.Execution
                                         }
                                     }
 
+                                    // Embed the source file
+                                    if (initialized && factory.TaskType != null &&
+                                        factory is IHasSourceFilePath factoryWithSourceFilePath &&
+                                        factoryWithSourceFilePath.SourceFilePath != null)
+                                    {
+                                        taskFactoryLoggingHost.LoggingContext.LogIncludeFile(factoryWithSourceFilePath.SourceFilePath);
+                                    }
+
                                     // Throw an error if the ITaskFactory did not set the TaskType property.  If the property is null, it can cause NullReferenceExceptions in our code
                                     if (initialized && factory.TaskType == null)
                                     {
