@@ -16,7 +16,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.Analyzers.UnitTests
 {
-    public class EndToEndTests
+    public class EndToEndTests : IDisposable
     {
         private readonly TestEnvironment _env;
         public EndToEndTests(ITestOutputHelper output)
@@ -26,6 +26,8 @@ namespace Microsoft.Build.Analyzers.UnitTests
             // this is needed to ensure the binary logger does not pollute the environment
             _env.WithEnvironmentInvariant();
         }
+
+        public void Dispose() => _env.Dispose();
 
         [Fact]
         public void SampleAnalyzerIntegrationTest()
@@ -43,44 +45,44 @@ namespace Microsoft.Build.Analyzers.UnitTests
                       </PropertyGroup>
                       
                       <PropertyGroup Condition="$(Test) == true">
-                     <TestProperty>Test</TestProperty>
-                     </PropertyGroup>
+                        <TestProperty>Test</TestProperty>
+                      </PropertyGroup>
                      
-                     <ItemGroup>
-                      <ProjectReference Include=".\FooBar-Copy.csproj" />
+                      <ItemGroup>
+                        <ProjectReference Include=".\FooBar-Copy.csproj" />
                       </ItemGroup>
                       
                       <Target Name="Hello">
-                      <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
-                    </Target>
+                        <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
+                      </Target>
                     
                     </Project>
                     """;
 
                 string contents2 = $"""
-                                   <Project Sdk="Microsoft.NET.Sdk">
+                    <Project Sdk="Microsoft.NET.Sdk">
                                    
-                                     <PropertyGroup>
-                                       <OutputType>Exe</OutputType>
-                                       <TargetFramework>net8.0</TargetFramework>
-                                       <ImplicitUsings>enable</ImplicitUsings>
-                                       <Nullable>enable</Nullable>
-                                     </PropertyGroup>
+                      <PropertyGroup>
+                        <OutputType>Exe</OutputType>
+                        <TargetFramework>net8.0</TargetFramework>
+                        <ImplicitUsings>enable</ImplicitUsings>
+                        <Nullable>enable</Nullable>
+                      </PropertyGroup>
                                      
-                                     <PropertyGroup Condition="$(Test) == true">
-                                    <TestProperty>Test</TestProperty>
-                                    </PropertyGroup>
+                      <PropertyGroup Condition="$(Test) == true">
+                        <TestProperty>Test</TestProperty>
+                      </PropertyGroup>
                                     
-                                    <ItemGroup>
-                                   <Reference Include="bin/foo.dll" />
-                                   </ItemGroup>
+                      <ItemGroup>
+                        <Reference Include="bin/foo.dll" />
+                      </ItemGroup>
                                     
-                                    <Target Name="Hello">
-                                     <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
-                                   </Target>
+                      <Target Name="Hello">
+                        <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
+                      </Target>
                                    
-                                   </Project>
-                                   """;
+                    </Project>
+                    """;
                 TransientTestFolder workFolder = env.CreateFolder(createFolder: true);
                 TransientTestFile projectFile = env.CreateFile(workFolder, "FooBar.csproj", contents);
                 TransientTestFile projectFile2 = env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
