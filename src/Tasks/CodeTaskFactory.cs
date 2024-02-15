@@ -161,7 +161,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public Type TaskType { get; private set; }
 
-        public string SourceFilePath { get; private set; }
+        public string SourceFilePath { get => _sourcePath; }
 
         /// <summary>
         /// Get the type information for all task parameters.
@@ -303,10 +303,6 @@ namespace Microsoft.Build.Tasks
                 if (TaskType == null)
                 {
                     _log.LogErrorWithCodeFromResources("CodeTaskFactory.CouldNotFindTaskInAssembly", _nameOfTask);
-                }
-                else
-                {
-                    SourceFilePath = _sourcePath;
                 }
             }
 
@@ -1032,8 +1028,8 @@ namespace Microsoft.Build.Tasks
 
                 return result;
             }
-        }
     }
+        }
 #else
     /// <summary>
     /// A task factory which can take code dom supported languages and create a task out of it
@@ -1058,7 +1054,7 @@ namespace Microsoft.Build.Tasks
             log.LogErrorWithCodeFromResources("TaskFactoryNotSupportedFailure", nameof(CodeTaskFactory));
 
             return false;
-        }
+    }
 
         public TaskPropertyInfo[] GetTaskParameters()
         {

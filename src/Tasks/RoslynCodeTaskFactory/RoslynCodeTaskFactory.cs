@@ -166,8 +166,9 @@ namespace Microsoft.Build.Tasks
             // Attempt to parse and extract everything from the <UsingTask />
             if (!TryLoadTaskBody(_log, _taskName, taskBody, _parameters, out RoslynCodeTaskFactoryTaskInfo taskInfo))
             {
+                SourceFilePath = taskInfo.Source;
                 return false;
-            }
+            }         
 
             // Attempt to compile an assembly (or get one from the cache)
             if (!TryCompileInMemoryAssembly(taskFactoryLoggingHost, taskInfo, out Assembly assembly))
@@ -201,11 +202,6 @@ namespace Microsoft.Build.Tasks
                             i.GetCustomAttribute<RequiredAttribute>() != null))
                         .ToArray();
                 }
-            }
-
-            if (TaskType != null)
-            {
-                SourceFilePath = taskInfo.Source;
             }
 
             // Initialization succeeded if we found a type matching the task name from the compiled assembly

@@ -1493,8 +1493,7 @@ namespace Microsoft.Build.Execution
                                     }
 
                                     // Embed the source file
-                                    if (initialized && factory.TaskType != null &&
-                                        factory is IHasSourceFilePath factoryWithSourceFilePath &&
+                                    if (factory is IHasSourceFilePath factoryWithSourceFilePath &&
                                         factoryWithSourceFilePath.SourceFilePath != null)
                                     {
                                         taskFactoryLoggingHost.LoggingContext.LogIncludeFile(factoryWithSourceFilePath.SourceFilePath);
