@@ -1330,7 +1330,7 @@ Esta marca es experimental y puede que no funcione según lo previsto.
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureavailability switch.</source>
-        <target state="new">MSBUILD : error MSB1067: Must provide a feature name for the featureavailability switch.</target>
+        <target state="translated">MSBUILD : error MSB1067: debe proporcionar un nombre de característica para el conmutador de disponibilidad de características.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureavailability". The user must pass in an actual feature name
       following the switch, as in "msbuild.exe -featureavailability:blah".
