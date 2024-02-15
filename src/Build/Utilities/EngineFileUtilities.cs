@@ -191,10 +191,12 @@ namespace Microsoft.Build.Internal
             FileMatcher.SearchAction action = FileMatcher.SearchAction.None;
             string excludeFileSpec = string.Empty;
 
-            var noWildcards = !FilespecHasWildcards(filespecEscaped) || FilespecMatchesLazyWildcard(filespecEscaped, forceEvaluateWildCards);
-
+            var filespecHasNoWildCards = !FilespecHasWildcards(filespecEscaped);
+            var filespecMatchesLazyWildcard = FilespecMatchesLazyWildcard(filespecEscaped, forceEvaluateWildCards);
+            var excludeSpecsAreEmpty = excludeSpecsEscaped?.Any() != true;
+            
             // It is possible to return original string if no wildcard matches and no entries in Exclude set.
-            if (noWildcards && excludeSpecsEscaped?.Any() != true)
+            if ( filespecMatchesLazyWildcard || (filespecHasNoWildCards && excludeSpecsAreEmpty) )
             {
                 // Just return the original string.
                 fileList = new string[] { returnEscaped ? filespecEscaped : EscapingUtilities.UnescapeAll(filespecEscaped) };
