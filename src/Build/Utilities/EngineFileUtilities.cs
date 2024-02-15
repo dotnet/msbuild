@@ -195,7 +195,9 @@ namespace Microsoft.Build.Internal
             var filespecMatchesLazyWildcard = FilespecMatchesLazyWildcard(filespecEscaped, forceEvaluateWildCards);
             var excludeSpecsAreEmpty = excludeSpecsEscaped?.Any() != true;
             
-            // It is possible to return original string if no wildcard matches and no entries in Exclude set.
+            // Return original value if:
+            //      FileSpec matches lazyloading regex or
+            //      file has no wildcard and excludeSpecs are empty
             if ( filespecMatchesLazyWildcard || (filespecHasNoWildCards && excludeSpecsAreEmpty) )
             {
                 // Just return the original string.
