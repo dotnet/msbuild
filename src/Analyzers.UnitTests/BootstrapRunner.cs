@@ -11,6 +11,10 @@ using System.Threading.Tasks;
 using Microsoft.Build.UnitTests.Shared;
 using Xunit.Abstractions;
 
+#if FEATURE_MSIOREDIST
+using Path = Microsoft.IO.Path;
+#endif
+
 namespace Microsoft.Build.Analyzers.UnitTests
 {
     internal static class BootstrapRunner
@@ -20,10 +24,17 @@ namespace Microsoft.Build.Analyzers.UnitTests
         // Better solution would be to have a single test utility project - instead of linked code files.
         public static string ExecBootstrapedMSBuild(string msbuildParameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper? outputHelper = null)
         {
-            var binaryFolder = Assembly.GetExecutingAssembly()
-                .GetCustomAttribute<BootstrapLocationAttribute>()!
-                .BootstrapMsbuildBinaryLocation;
+            BootstrapLocationAttribute attribute = Assembly.GetExecutingAssembly().GetCustomAttribute<BootstrapLocationAttribute>()
+                ?? throw new InvalidOperationException("This test assembly does not have the BootstrapLocationAttribute");
 
+            string binaryFolder = attribute.BootstrapMsbuildBinaryLocation;
+            string? bindirOverride = Environment.GetEnvironmentVariable("MSBUILD_BOOTSTRAPPED_BINDIR");
+            if (!string.IsNullOrEmpty(bindirOverride))
+            {
+                // The bootstrap environment has moved to another location. Assume the same relative layout and adjust the path.
+                string relativePath = Path.GetRelativePath(attribute.BootstrapRoot, binaryFolder);
+                binaryFolder = Path.GetFullPath(relativePath, bindirOverride);
+            }
 #if NET
             string pathToExecutable = EnvironmentProvider.GetDotnetExePath()!;
             msbuildParameters = Path.Combine(binaryFolder, "msbuild.dll") + " " + msbuildParameters;

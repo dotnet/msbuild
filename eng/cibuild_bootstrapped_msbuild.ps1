@@ -119,6 +119,9 @@ try {
   # Opt into performance logging. https://github.com/dotnet/msbuild/issues/5900
   $env:DOTNET_PERFLOG_DIR=$PerfLogDir
 
+  # Expose stage 1 path so unit tests can find the bootstrapped MSBuild.
+  $env:MSBUILD_BOOTSTRAPPED_BINDIR=$Stage1BinDir
+
   # When using bootstrapped MSBuild:
   # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
   # - Do run tests
