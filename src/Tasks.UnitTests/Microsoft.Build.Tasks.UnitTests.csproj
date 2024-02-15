@@ -106,11 +106,6 @@
     <Compile Remove="XamlTestHelpers.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(MonoBuild)' == 'true'">
-    <Compile Remove="LC_Tests.cs" />
-    <Compile Remove="SGen_Tests.cs" />
-  </ItemGroup>
-
   <ItemGroup Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
     <Compile Remove="Al_Tests.cs" />
     <Compile Remove="AppConfig_Tests.cs" />
