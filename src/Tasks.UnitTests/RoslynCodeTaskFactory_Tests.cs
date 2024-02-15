@@ -653,39 +653,41 @@ namespace InlineTask
 
             var env = TestEnvironment.Create();
             TransientTestFolder folder = env.CreateFolder(createFolder: true);
-            TransientTestFile taskClass = env.CreateFile(folder, $"{taskName}.cs", $@"namespace InlineTask
-{{
-    using Microsoft.Build.Utilities;
+            TransientTestFile taskClass = env.CreateFile(folder, $"{taskName}.cs", $$"""
+                namespace InlineTask
+                {
+                    using Microsoft.Build.Utilities;
 
-    public class {taskName} : Task
-    {{
-        public override bool Execute()
-        {{
-            Log.LogMessage(""Hello, world!"");
-            return !Log.HasLoggedErrors;
-        }}
-    }}
-}}
-");         
-            TransientTestFile assemblyProj = env.CreateFile(folder, csprojFileName, $@"
-<Project>
+                    public class {{taskName}} : Task
+                    {
+                        public override bool Execute()
+                        {
+                            Log.LogMessage("Hello, world!");
+                            return !Log.HasLoggedErrors;
+                        }
+                    }
+                }
+                """);         
+            TransientTestFile assemblyProj = env.CreateFile(folder, csprojFileName, $"""
+                <Project>
 
-  <UsingTask
-    TaskName=""{taskName}""
-    TaskFactory=""RoslynCodeTaskFactory""
-    AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
-    <Task>
-      <Code Type=""Class"" Language=""cs"" Source=""{taskClass.Path}"">
-      </Code>
-    </Task>
-  </UsingTask>
+                  <UsingTask
+                    TaskName="{taskName}"
+                    TaskFactory="RoslynCodeTaskFactory"
+                    AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+                    <Task>
+                      <Code Type="Class" Language="cs" Source="{taskClass.Path}">
+                      </Code>
+                    </Task>
+                  </UsingTask>
 
-    <Target Name=""{targetName}"">
-        <{taskName} />
-    </Target>
+                    <Target Name="{targetName}">
+                        <{taskName} />
+                    </Target>
 
-</Project>
-                ");
+                </Project>
+                """);
+
 
             string binLogFile = Path.Combine(folder.Path, "log.binlog");
             string output = RunnerUtilities.ExecMSBuild($"{assemblyProj.Path} /t:{targetName} /bl:\"LogFile={binLogFile};ProjectImports=ZipFile\"", out bool success);
