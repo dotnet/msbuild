@@ -531,63 +531,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void EmbedsSourceFileFromRoslynCodeTaskFactoryInBinlog()
-        {
-            string taskName = "HelloTask";
-            string csprojFileName = "EmbedsSourceFileInTheBinlogTest.csproj";
-            string targetName = "SayHello";
-
-            TransientTestFolder folder = _env.CreateFolder(createFolder: true);
-            TransientTestFile taskClass = _env.CreateFile(folder, $"{taskName}.cs", $@"namespace InlineTask
-{{
-    using Microsoft.Build.Utilities;
-
-    public class {taskName} : Task
-    {{
-        public override bool Execute()
-        {{
-            Log.LogMessage(""Hello, world!"");
-            return !Log.HasLoggedErrors;
-        }}
-    }}
-}}
-");
-
-            TransientTestFile assemblyProj = _env.CreateFile(folder, csprojFileName, $@"
-<Project>
-
-  <UsingTask
-    TaskName=""{taskName}""
-    TaskFactory=""RoslynCodeTaskFactory""
-    AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
-    <Task>
-      <Code Type=""Class"" Language=""cs"" Source=""{taskClass.Path}"">
-      </Code>
-    </Task>
-  </UsingTask>
-
-    <Target Name=""{targetName}"">
-        <{taskName} />
-    </Target>
-
-</Project>
-                ");
-
-            string output = RunnerUtilities.ExecMSBuild($"{assemblyProj.Path} /t:{targetName} /bl:\"LogFile={_logFile};ProjectImports=ZipFile\"", out bool success);
-
-            success.ShouldBeTrue();
-
-            string projectImportsZipPath = Path.ChangeExtension(_logFile, ".ProjectImports.zip");
-            using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
-            using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
-
-            // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
-            // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
-            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith($"{taskName}.cs"),
-                "");
-        }
-
-        [Fact]
         public void BinaryLoggerShouldNotThrowWhenMetadataCannotBeExpanded()
         {
             var binaryLogger = new BinaryLogger

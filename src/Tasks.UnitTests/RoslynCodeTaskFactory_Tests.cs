@@ -22,6 +22,7 @@ using VerifyXunit;
 using Xunit;
 
 using static VerifyXunit.Verifier;
+using System.IO.Compression;
 
 #nullable disable
 
@@ -642,6 +643,64 @@ namespace InlineTask
                 var logger = proj.BuildProjectExpectFailure();
                 logger.AssertLogContains(errorMessage);
             }
+        }
+
+        [Fact]
+        public void EmbedsSourceFileInBinlog()
+        {
+            string taskName = "HelloTask";
+            string csprojFileName = "EmbedsSourceFileInTheBinlogTest.csproj";
+            string targetName = "SayHello";
+
+            var env = TestEnvironment.Create();
+            TransientTestFolder folder = env.CreateFolder(createFolder: true);
+            TransientTestFile taskClass = env.CreateFile(folder, $"{taskName}.cs", $@"namespace InlineTask
+{{
+    using Microsoft.Build.Utilities;
+
+    public class {taskName} : Task
+    {{
+        public override bool Execute()
+        {{
+            Log.LogMessage(""Hello, world!"");
+            return !Log.HasLoggedErrors;
+        }}
+    }}
+}}
+");         
+            TransientTestFile assemblyProj = env.CreateFile(folder, csprojFileName, $@"
+<Project>
+
+  <UsingTask
+    TaskName=""{taskName}""
+    TaskFactory=""RoslynCodeTaskFactory""
+    AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
+    <Task>
+      <Code Type=""Class"" Language=""cs"" Source=""{taskClass.Path}"">
+      </Code>
+    </Task>
+  </UsingTask>
+
+    <Target Name=""{targetName}"">
+        <{taskName} />
+    </Target>
+
+</Project>
+                ");
+
+            string binLogFile = Path.Combine(folder.Path, "log.binlog");
+            string output = RunnerUtilities.ExecMSBuild($"{assemblyProj.Path} /t:{targetName} /bl:\"LogFile={binLogFile};ProjectImports=ZipFile\"", out bool success);
+
+            success.ShouldBeTrue();
+
+            string projectImportsZipPath = Path.ChangeExtension(binLogFile, ".ProjectImports.zip");
+            using var fileStream = new System.IO.FileStream(projectImportsZipPath, System.IO.FileMode.Open);
+            using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
+
+            // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
+            // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
+            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith($"{taskName}.cs"),
+                "");
         }
 
 #if !FEATURE_RUN_EXE_IN_TESTS
