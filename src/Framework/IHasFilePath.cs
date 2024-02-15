@@ -5,6 +5,6 @@ namespace Microsoft.Build.Framework
 {
     public interface IHasSourceFilePath
     {
-        string SourceFilePath { get; }
+        string? SourceFilePath { get; }
     }
 }
