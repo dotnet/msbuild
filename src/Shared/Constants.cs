@@ -70,7 +70,7 @@ namespace Microsoft.Build.Shared
         internal const string MSBuildDummyGlobalPropertyHeader = "MSBuildProjectInstance";
 
         /// <summary>
-        /// A property set during a in implicit restore (/restore) or explicit restore (/t:restore) to ensure that the evaluations are not re-used during build
+        /// A property set during an implicit restore (/restore) or explicit restore (/t:restore) to ensure that the evaluations are not re-used during build
         /// </summary>
         internal const string MSBuildRestoreSessionId = nameof(MSBuildRestoreSessionId);
 
