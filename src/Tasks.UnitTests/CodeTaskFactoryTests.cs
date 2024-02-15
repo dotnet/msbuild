@@ -18,6 +18,7 @@ namespace Microsoft.Build.UnitTests
     using System.CodeDom.Compiler;
     using System.IO.Compression;
     using Microsoft.Build.Logging;
+    using Shouldly;
 
     public sealed class CodeTaskFactoryTests
     {
@@ -1117,7 +1118,7 @@ namespace Microsoft.Build.UnitTests
 
                 Helpers.BuildProjectWithNewOMAndBinaryLogger(projectFileContents, binaryLogger, out bool result);
 
-                Assert.True(result);
+                result.ShouldBeTrue();
 
                 string projectImportsZipPath = Path.ChangeExtension(binaryLogFile, ".ProjectImports.zip");
                 using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
