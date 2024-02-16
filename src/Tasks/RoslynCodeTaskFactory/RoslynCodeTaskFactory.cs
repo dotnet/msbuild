@@ -166,9 +166,10 @@ namespace Microsoft.Build.Tasks
             // Attempt to parse and extract everything from the <UsingTask />
             if (!TryLoadTaskBody(_log, _taskName, taskBody, _parameters, out RoslynCodeTaskFactoryTaskInfo taskInfo))
             {
-                SourceFilePath = taskInfo.Source;
                 return false;
-            }         
+            }
+
+            SourceFilePath = taskInfo.Source;
 
             // Attempt to compile an assembly (or get one from the cache)
             if (!TryCompileInMemoryAssembly(taskFactoryLoggingHost, taskInfo, out Assembly assembly))
