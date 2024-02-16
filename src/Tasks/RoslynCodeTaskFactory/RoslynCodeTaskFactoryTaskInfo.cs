@@ -35,7 +35,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ISet<string> References { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-
         /// <summary>
         /// Gets or sets the source of the assembly.
         /// </summary>
