@@ -1138,6 +1138,70 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        [Fact]
+        public void EmbedsSourceFileInBinlogWhenFailsToCompile()
+        {
+            string sourceFileContentThatFailsToCompile = @"
+                    namespace Microsoft.Build.NonShippingTasks
+                    {
+                        public class LogNameValue_ClassSourcesTest : Task
+                        {
+                            private string 
+";
+
+            string tempFileDirectory = Path.GetTempPath();
+            string tempFileName = Guid.NewGuid().ToString() + ".cs";
+            string tempSourceFile = Path.Combine(tempFileDirectory, tempFileName);
+            File.WriteAllText(tempSourceFile, sourceFileContentThatFailsToCompile);
+
+            try
+            {
+                string projectFileContents = @"
+                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
+                        <UsingTask TaskName=`LogNameValue_ClassSourcesTest` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll`>
+                        <ParameterGroup>
+                            <Name ParameterType='System.String' />
+                            <Value ParameterType='System.String' />
+                        </ParameterGroup>
+                        <Task>
+                            <Code Source='" + tempSourceFile + @"'/>
+                         </Task>
+                         </UsingTask>
+                        <Target Name=`Build`>
+                            <LogNameValue_ClassSourcesTest Name='MyName' Value='MyValue'/>
+                        </Target>
+                    </Project>";
+
+                string binaryLogFile = Path.Combine(tempFileDirectory, "output.binlog");
+                var binaryLogger = new BinaryLogger()
+                {
+                    Parameters = $"LogFile={binaryLogFile}",
+                    CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
+                };
+
+                Helpers.BuildProjectWithNewOMAndBinaryLogger(projectFileContents, binaryLogger, out bool result);
+
+                result.ShouldBeFalse();
+
+                string projectImportsZipPath = Path.ChangeExtension(binaryLogFile, ".ProjectImports.zip");
+                using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
+                using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
+
+                // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
+                // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
+                zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(tempFileName),
+                    "");
+            }
+            finally
+            {
+                if (File.Exists(tempSourceFile))
+                {
+                    File.Delete(tempSourceFile);
+                }
+            }
+        }
+
+
         /// <summary>
         /// Code factory test where the TMP directory does not exist.
         /// See https://github.com/dotnet/msbuild/issues/328 for details.
