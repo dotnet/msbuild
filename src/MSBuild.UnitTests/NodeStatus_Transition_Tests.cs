@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using Microsoft.Build.Logging.TerminalLogger;
-
+using Shouldly;
 using VerifyTests;
 using VerifyXunit;
 using Xunit;
@@ -26,6 +26,15 @@ public class NodeStatus_Transition_Tests
     public NodeStatus_Transition_Tests()
     {
         UseProjectRelativeDirectory("Snapshots");
+    }
+
+    [Fact]
+    public void NodeStatusTargetThrowsForInputWithAnsi()
+    {
+#if DEBUG
+        Func<NodeStatus> newNodeStatus = () => new NodeStatus("project", "tfm", AnsiCodes.Colorize("colorized target", TerminalColor.Green), new MockStopwatch());
+        newNodeStatus.ShouldThrow<Exception>().Message.ShouldContain("Target should not contain any escape codes, if you want to colorize target use the other constructor.");
+#endif
     }
 
     [Fact]
@@ -68,7 +77,7 @@ public class NodeStatus_Transition_Tests
                 new("Namespace.Project", "TargetFramework", "Testing", new MockStopwatch())
             ],
             [
-               new("Namespace.Project", "TargetFramework", $"{AnsiCodes.Colorize("failed", TerminalColor.Red)} MyTestName1", new MockStopwatch())
+               new("Namespace.Project", "TargetFramework", TerminalColor.Red, "failed", "MyTestName1", new MockStopwatch())
             ]);
 
         await VerifyReplay(rendered);
@@ -80,7 +89,7 @@ public class NodeStatus_Transition_Tests
         // This test look like there is no change between the frames, but we ask the stopwatch for time they will increase the number.
         // We need this because animations check that NodeStatus reference is the same.
         // And we cannot use MockStopwatch because we don't know when to call Tick on them, and if we do it right away, the time will update in "both" nodes.
-        NodeStatus node = new("Namespace.Project", "TargetFramework", $"{AnsiCodes.Colorize("passed", TerminalColor.Green)} MyTestName1", new TickingStopwatch());
+        NodeStatus node = new("Namespace.Project", "TargetFramework", TerminalColor.Green, "passed", "MyTestName1", new TickingStopwatch());
         var rendered = Animate(
             [
                 node,

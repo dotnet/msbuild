@@ -13,13 +13,26 @@ internal class NodeStatus
 {
     public string Project { get; }
     public string? TargetFramework { get; }
+    public TerminalColor TargetPrefixColor { get; } = TerminalColor.Default;
+    public string? TargetPrefix { get; }
     public string Target { get; }
     public StopwatchAbstraction Stopwatch { get; }
 
     public NodeStatus(string project, string? targetFramework, string target, StopwatchAbstraction stopwatch)
     {
+        Debug.Assert(!target.Contains("\x1B"), "Target should not contain any escape codes, if you want to colorize target use the other constructor.");
         Project = project;
         TargetFramework = targetFramework;
+        Target = target;
+        Stopwatch = stopwatch;
+    }
+
+    public NodeStatus(string project, string? targetFramework, TerminalColor targetPrefixColor, string targetPrefix, string target, StopwatchAbstraction stopwatch)
+    {
+        Project = project;
+        TargetFramework = targetFramework;
+        TargetPrefixColor = targetPrefixColor;
+        TargetPrefix = targetPrefix;
         Target = target;
         Stopwatch = stopwatch;
     }
@@ -31,7 +44,9 @@ internal class NodeStatus
         obj is NodeStatus status &&
         Project == status.Project &&
         TargetFramework == status.TargetFramework &&
-        Target == status.Target;
+        Target == status.Target &&
+        TargetPrefixColor == status.TargetPrefixColor &&
+        TargetPrefix == status.TargetPrefix;
 
     public override string ToString()
     {

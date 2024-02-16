@@ -675,10 +675,9 @@ internal sealed partial class TerminalLogger : INodeLogger
                         case "TLTESTPASSED":
                             {
                                 var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
-                                var displayName = extendedMessage.ExtendedMetadata!["displayName"];
+                                var displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
 
-                                var testResult = $"{AnsiCodes.Colorize(indicator, TerminalColor.Green)} {displayName}";
-                                var status = new NodeStatus(node.Project, node.TargetFramework, testResult, project.Stopwatch);
+                                var status = new NodeStatus(node.Project, node.TargetFramework, TerminalColor.Green, indicator, displayName, project.Stopwatch);
                                 UpdateNodeStatus(buildEventContext, status);
                                 break;
                             }
@@ -686,10 +685,9 @@ internal sealed partial class TerminalLogger : INodeLogger
                         case "TLTESTSKIPPED":
                             {
                                 var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
-                                var displayName = extendedMessage.ExtendedMetadata!["displayName"];
+                                var displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
 
-                                var testResult = $"{AnsiCodes.Colorize(indicator, TerminalColor.Yellow)} {displayName}";
-                                var status = new NodeStatus(node.Project, node.TargetFramework, testResult, project.Stopwatch);
+                                var status = new NodeStatus(node.Project, node.TargetFramework, TerminalColor.Yellow, indicator, displayName, project.Stopwatch);
                                 UpdateNodeStatus(buildEventContext, status);
                                 break;
                             }

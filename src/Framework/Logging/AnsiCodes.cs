@@ -124,11 +124,6 @@ internal static class AnsiCodes
     /// </remarks>
     public const string RemoveProgress = "\x1b]9;4;0;\x1b\\";
 
-    /// <summary>
-    /// Remove all ANSI escape codes from a string.
-    /// </summary>
-    private static readonly Regex RemoveAnsiRegex = new Regex(@"\x1B\[[^@-~]*[@-~]", RegexOptions.Compiled);
-
     public static string Colorize(string? s, TerminalColor color)
     {
         if (string.IsNullOrWhiteSpace(s))
@@ -157,14 +152,4 @@ internal static class AnsiCodes
     /// <param name="column">Column index.</param>
     /// <returns>Control codes to set the desired position.</returns>
     public static string SetCursorHorizontal(int column) => $"{CSI}{column}G";
-
-    /// <summary>
-    /// Removes all ANSI codes from the text.
-    /// </summary>
-    /// <param name="text"></param>
-    /// <returns></returns>
-    public static string RemoveAnsiCodes(string text)
-    {
-        return RemoveAnsiRegex.Replace(text, "");
-    }
 }

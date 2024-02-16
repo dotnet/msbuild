@@ -53,21 +53,21 @@ internal sealed class NodesFrame
         string project = status.Project;
         string? targetFramework = status.TargetFramework;
         string target = status.Target;
+        string? targetPrefix = status.TargetPrefix;
+        TerminalColor targetPrefixColor = status.TargetPrefixColor;
 
-        // The target may contain ANSI codes, we need to remove them to get the real
-        // size of the string as it will be printed on the screen, so when we move cursor
-        // backwards we move it by the amount of characters that will be seen by user, and not
-        // by the amount of characters + ANSI codes (that won't be seen).
-        // If we don't remove ANSI codes, the cursor will move too much too the left, and time
-        // time will render before the end of line, instead of at the end of line.
-        var renderedTarget = AnsiCodes.RemoveAnsiCodes(target);
+        var targetWithoutAnsiLength = targetPrefix != null
+            // +1 because we will join them by space in the final output.
+            ? targetPrefix.Length + 1 + target.Length
+            : target.Length;
 
-        int renderedWidth = Length(durationString, project, targetFramework, renderedTarget);
+        int renderedWidth = Length(durationString, project, targetFramework, targetWithoutAnsiLength);
 
         if (renderedWidth > Width)
         {
-            renderedWidth -= renderedTarget.Length;
-            renderedTarget = target = string.Empty;
+            renderedWidth -= targetWithoutAnsiLength;
+            targetPrefix = target = string.Empty;
+            targetWithoutAnsiLength = 0;
 
             if (renderedWidth > Width)
             {
@@ -82,13 +82,14 @@ internal sealed class NodesFrame
             }
         }
 
-        return $"{TerminalLogger.Indentation}{project}{(targetFramework is null ? string.Empty : " ")}{AnsiCodes.Colorize(targetFramework, TerminalLogger.TargetFrameworkColor)} {AnsiCodes.SetCursorHorizontal(MaxColumn)}{AnsiCodes.MoveCursorBackward(renderedTarget.Length + durationString.Length + 1)}{target} {durationString}".AsSpan();
+        var renderedTarget = targetPrefix != null ? $"{AnsiCodes.Colorize(targetPrefix, targetPrefixColor)} {target}" : target;
+        return $"{TerminalLogger.Indentation}{project}{(targetFramework is null ? string.Empty : " ")}{AnsiCodes.Colorize(targetFramework, TerminalLogger.TargetFrameworkColor)} {AnsiCodes.SetCursorHorizontal(MaxColumn)}{AnsiCodes.MoveCursorBackward(targetWithoutAnsiLength + durationString.Length + 1)}{renderedTarget} {durationString}".AsSpan();
 
-        static int Length(string durationString, string project, string? targetFramework, string target) =>
+        static int Length(string durationString, string project, string? targetFramework, int targetWithoutAnsiLength) =>
                 TerminalLogger.Indentation.Length +
                 project.Length + 1 +
                 (targetFramework?.Length ?? -1) + 1 +
-                target.Length + 1 +
+                targetWithoutAnsiLength + 1 +
                 durationString.Length;
     }
 
