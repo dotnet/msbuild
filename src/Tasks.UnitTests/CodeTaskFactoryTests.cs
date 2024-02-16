@@ -1201,7 +1201,6 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-
         /// <summary>
         /// Code factory test where the TMP directory does not exist.
         /// See https://github.com/dotnet/msbuild/issues/328 for details.
