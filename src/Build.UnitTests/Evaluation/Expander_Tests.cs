@@ -3890,8 +3890,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
             result.ShouldBe(metadatumValue);
         }
 
-        [Fact]
-        public void PropertyFunctionHashCodeSameOnlyIfStringSame()
+        public static IEnumerable<object[]> GetHashAlgoTypes()
+            => Enum.GetNames(typeof(IntrinsicFunctions.StringHashingAlgorithm))
+                .Append(null)
+                .Select(t => new object[] { t });
+
+        [Theory]
+        [MemberData(nameof(GetHashAlgoTypes))]
+        public void PropertyFunctionHashCodeSameOnlyIfStringSame(string hashType)
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
@@ -3906,8 +3912,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 "cat12s",
                 "cat1s"
             };
-            int[] hashes = stringsToHash.Select(toHash =>
-                (int)expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::StableStringHash('{toHash}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance))
+            string hashTypeString = hashType == null ? "" : $", '{hashType}'";
+            object[] hashes = stringsToHash.Select(toHash =>
+                expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::StableStringHash('{toHash}'{hashTypeString}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance))
                 .ToArray();
             for (int a = 0; a < hashes.Length; a++)
             {
@@ -3923,6 +3930,33 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     }
                 }
             }
+        }
+
+        [Theory]
+        [MemberData(nameof(GetHashAlgoTypes))]
+        public void PropertyFunctionHashCodeReturnsExpectedType(string hashType)
+        {
+            PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+            Type expectedType;
+
+            expectedType = hashType switch
+            {
+                null => typeof(int),
+                "Legacy" => typeof(int),
+                "Fnv1a32bit" => typeof(int),
+                "Fnv1a32bitFast" => typeof(int),
+                "Fnv1a64bit" => typeof(long),
+                "Fnv1a64bitFast" => typeof(long),
+                "Sha256" => typeof(string),
+                _ => throw new ArgumentOutOfRangeException(nameof(hashType))
+            };
+
+
+            string hashTypeString = hashType == null ? "" : $", '{hashType}'";
+            object hashValue = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::StableStringHash('FooBar'{hashTypeString}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            hashValue.ShouldBeOfType(expectedType);
         }
 
         [Theory]
