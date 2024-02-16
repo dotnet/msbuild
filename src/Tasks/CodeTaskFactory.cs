@@ -1028,8 +1028,8 @@ namespace Microsoft.Build.Tasks
 
                 return result;
             }
-    }
         }
+    }
 #else
     /// <summary>
     /// A task factory which can take code dom supported languages and create a task out of it
@@ -1054,7 +1054,7 @@ namespace Microsoft.Build.Tasks
             log.LogErrorWithCodeFromResources("TaskFactoryNotSupportedFailure", nameof(CodeTaskFactory));
 
             return false;
-    }
+        }
 
         public TaskPropertyInfo[] GetTaskParameters()
         {
