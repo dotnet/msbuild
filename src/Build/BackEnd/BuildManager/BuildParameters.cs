@@ -310,7 +310,7 @@ namespace Microsoft.Build.Execution
             DiscardBuildResults = other.DiscardBuildResults;
             LowPriority = other.LowPriority;
             Question = other.Question;
-            BuildAnalysisLoggerFactory = other.BuildAnalysisLoggerFactory;
+            BuildCopLoggerFactory = other.BuildCopLoggerFactory;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
         }
 
@@ -839,7 +839,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Gets or sets a factory for build analysis infrastructure logger
         /// </summary>
-        public IBuildAnalysisLoggerFactory BuildAnalysisLoggerFactory { get; set; }
+        public IBuildCopLoggerFactory BuildCopLoggerFactory { get; set; }
 
         /// <summary>
         /// Gets or sets the project cache description to use for all <see cref="BuildSubmission"/> or <see cref="GraphBuildSubmission"/>

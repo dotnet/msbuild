@@ -19,9 +19,9 @@ public class BuildAnalysisContext
 
     internal BuildAnalysisContext(LoggingContext loggingContext) => _loggingContext = loggingContext;
 
-    public void ReportResult(BuildAnalysisResult result)
+    public void ReportResult(BuildAnalyzerResult result)
     {
-        BuildEventArgs eventArgs = result.ToEventArgs(ConfigurationProvider.GetMergedConfiguration(result.BuildAnalysisRule).Severity);
+        BuildEventArgs eventArgs = result.ToEventArgs(ConfigurationProvider.GetMergedConfiguration(result.BuildAnalyzerRule).Severity);
         eventArgs.BuildEventContext = _loggingContext.BuildEventContext;
         _loggingContext.LogBuildEvent(eventArgs);
     }

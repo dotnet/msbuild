@@ -8,8 +8,8 @@ namespace Microsoft.Build.Experimental;
 public abstract class BuildAnalyzer
 {
     public abstract string FriendlyName { get; }
-    public abstract ImmutableArray<BuildAnalysisRule> SupportedRules { get; }
+    public abstract ImmutableArray<BuildAnalyzerRule> SupportedRules { get; }
     public abstract void Initialize(ConfigurationContext configurationContext);
 
-    public abstract void RegisterActions(IBuildAnalyzerContext context);
+    public abstract void RegisterActions(IBuildCopContext context);
 }

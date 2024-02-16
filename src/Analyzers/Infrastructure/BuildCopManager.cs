@@ -19,14 +19,14 @@ using Microsoft.Build.Logging.Analyzers;
 
 namespace Microsoft.Build.Analyzers.Infrastructure;
 
-internal sealed class BuildAnalysisManager : IBuildAnalysisManager
+internal sealed class BuildCopManager : IBuildCopManager
 {
     private readonly List<BuildAnalyzerTracingWrapper> _analyzers = new();
-    private readonly CentralBuildAnalyzerContext _centralContext = new();
+    private readonly BuildCopCentralContext _buildCopCentralContext = new();
 
-    private BuildAnalysisManager() { }
+    private BuildCopManager() { }
 
-    internal static IBuildAnalysisManager Instance => CreateBuildAnalysisManager();
+    internal static IBuildCopManager Instance => CreateBuildAnalysisManager();
 
     public void RegisterAnalyzer(BuildAnalyzer analyzer)
     {
@@ -47,7 +47,7 @@ internal sealed class BuildAnalysisManager : IBuildAnalysisManager
         ConfigurationContext configurationContext = ConfigurationContext.Null;
         analyzer.Initialize(configurationContext);
         var wrappedAnalyzer = new BuildAnalyzerTracingWrapper(analyzer);
-        var wrappedContext = new BuildAnalyzerContext(wrappedAnalyzer, _centralContext);
+        var wrappedContext = new BuildCopContext(wrappedAnalyzer, _buildCopCentralContext);
         analyzer.RegisterActions(wrappedContext);
         _analyzers.Add(wrappedAnalyzer);
     }
@@ -70,9 +70,9 @@ internal sealed class BuildAnalysisManager : IBuildAnalysisManager
             new ReadOnlyDictionary<string, string>(propertiesLookup),
             evaluationFinishedEventArgs.ProjectFile!);
 
-        _centralContext.RunEvaluatedPropertiesActions(context);
+        _buildCopCentralContext.RunEvaluatedPropertiesActions(context);
 
-        if (_centralContext.HasParsedItemsActions)
+        if (_buildCopCentralContext.HasParsedItemsActions)
         {
             ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(evaluationFinishedEventArgs.ProjectFile!, /*unused*/
                 null, /*unused*/null, _cache, false /*Not explicitly loaded - unused*/);
@@ -80,12 +80,12 @@ internal sealed class BuildAnalysisManager : IBuildAnalysisManager
             ParsedItemsContext parsedItemsContext = new ParsedItemsContext(loggingContext,
                 new ItemsHolder(xml.Items, xml.ItemGroups));
 
-            _centralContext.RunParsedItemsActions(parsedItemsContext);
+            _buildCopCentralContext.RunParsedItemsActions(parsedItemsContext);
         }
     }
 
     // TODO: tracing: https://github.com/dotnet/msbuild/issues/9629
-    // should have infra as well, should log to AnalyzersConnectorLogger upon shutdown (if requested)
+    // should have infra as well, should log to BuildCopConnectorLogger upon shutdown (if requested)
     public string CreateTracingStats()
     {
         return string.Join(Environment.NewLine,
@@ -95,9 +95,9 @@ internal sealed class BuildAnalysisManager : IBuildAnalysisManager
             => buildAnalyzer.FriendlyName + " (" + buildAnalyzer.GetType() + ")";
     }
 
-    internal static BuildAnalysisManager CreateBuildAnalysisManager()
+    internal static BuildCopManager CreateBuildAnalysisManager()
     {
-        var buildAnalysisManager = new BuildAnalysisManager();
+        var buildAnalysisManager = new BuildCopManager();
         buildAnalysisManager.RegisterAnalyzer(new SharedOutputPathAnalyzer());
         // ... Register other internal analyzers
         return buildAnalysisManager;

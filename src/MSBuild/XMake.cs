@@ -715,7 +715,7 @@ namespace Microsoft.Build.CommandLine
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
                 bool question = false;
-                IBuildAnalysisLoggerFactory buildAnalysisLoggerFactory = null;
+                IBuildCopLoggerFactory buildCopLoggerFactory = null;
                 string[] getProperty = Array.Empty<string>();
                 string[] getItem = Array.Empty<string>();
                 string[] getTargetResult = Array.Empty<string>();
@@ -762,7 +762,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                             ref lowPriority,
                                             ref question,
-                                            ref buildAnalysisLoggerFactory,
+                                            ref buildCopLoggerFactory,
                                             ref getProperty,
                                             ref getItem,
                                             ref getTargetResult,
@@ -863,7 +863,7 @@ namespace Microsoft.Build.CommandLine
                                     graphBuildOptions,
                                     lowPriority,
                                     question,
-                                    buildAnalysisLoggerFactory,
+                                    buildCopLoggerFactory,
                                     inputResultsCaches,
                                     outputResultsCache,
                                     saveProjectResult: outputPropertiesItemsOrTargetResults,
@@ -1245,7 +1245,7 @@ namespace Microsoft.Build.CommandLine
             GraphBuildOptions graphBuildOptions,
             bool lowPriority,
             bool question,
-            IBuildAnalysisLoggerFactory buildAnalysisLoggerFactory,
+            IBuildCopLoggerFactory buildCopLoggerFactory,
             string[] inputResultsCaches,
             string outputResultsCache,
             bool saveProjectResult,
@@ -1447,7 +1447,7 @@ namespace Microsoft.Build.CommandLine
                     parameters.InputResultsCacheFiles = inputResultsCaches;
                     parameters.OutputResultsCacheFile = outputResultsCache;
                     parameters.Question = question;
-                    parameters.BuildAnalysisLoggerFactory = buildAnalysisLoggerFactory;
+                    parameters.BuildCopLoggerFactory = buildCopLoggerFactory;
 #if FEATURE_REPORTFILEACCESSES
                     parameters.ReportFileAccesses = reportFileAccesses;
 #endif
@@ -2419,7 +2419,7 @@ namespace Microsoft.Build.CommandLine
 #endif
             ref bool lowPriority,
             ref bool question,
-            ref IBuildAnalysisLoggerFactory buildAnalysisLoggerFactory,
+            ref IBuildCopLoggerFactory buildCopLoggerFactory,
             ref string[] getProperty,
             ref string[] getItem,
             ref string[] getTargetResult,
@@ -2555,7 +2555,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                                            ref lowPriority,
                                                            ref question,
-                                                           ref buildAnalysisLoggerFactory,
+                                                           ref buildCopLoggerFactory,
                                                            ref getProperty,
                                                            ref getItem,
                                                            ref getTargetResult,
@@ -2635,7 +2635,7 @@ namespace Microsoft.Build.CommandLine
 
                     question = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Question);
 
-                    buildAnalysisLoggerFactory = ProcessBuildAnalysisLoggerFactorySwitch(commandLineSwitches);
+                    buildCopLoggerFactory = ProcessBuildAnalysisLoggerFactorySwitch(commandLineSwitches);
 
                     inputResultsCaches = ProcessInputResultsCaches(commandLineSwitches);
 
@@ -2711,11 +2711,11 @@ namespace Microsoft.Build.CommandLine
             return invokeBuild;
         }
 
-        private static IBuildAnalysisLoggerFactory ProcessBuildAnalysisLoggerFactorySwitch(CommandLineSwitches commandLineSwitches)
+        private static IBuildCopLoggerFactory ProcessBuildAnalysisLoggerFactorySwitch(CommandLineSwitches commandLineSwitches)
         {
             // todo: opt-in behavior: https://github.com/dotnet/msbuild/issues/9723
             bool isAnalysisEnabled = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Analyze);
-            return isAnalysisEnabled ? new BuildAnalysisLoggerFactory() : null;
+            return isAnalysisEnabled ? new BuildCopLoggerFactory() : null;
         }
 
         private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)

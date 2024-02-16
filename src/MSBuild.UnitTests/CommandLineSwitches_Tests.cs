@@ -1165,7 +1165,7 @@ namespace Microsoft.Build.UnitTests
                                         graphBuildOptions: null,
                                         lowPriority: false,
                                         question: false,
-                                        buildAnalysisLoggerFactory: null,
+                                        buildCopLoggerFactory: null,
                                         inputResultsCaches: null,
                                         outputResultsCache: null,
                                         saveProjectResult: false,
