@@ -33,6 +33,7 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 - [Load Microsoft.DotNet.MSBuildSdkResolver into default load context (MSBuild.exe only)](https://github.com/dotnet/msbuild/pull/9439)
 - [Load NuGet.Frameworks into secondary AppDomain (MSBuild.exe only)](https://github.com/dotnet/msbuild/pull/9446)
 - [Update Traits when environment has been changed](https://github.com/dotnet/msbuild/pull/9655)
+- [Exec task does not trim leading whitespaces for ConsoleOutput](https://github.com/dotnet/msbuild/pull/9722)
 
 
 ### 17.8

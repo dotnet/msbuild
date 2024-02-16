@@ -410,7 +410,10 @@ namespace Microsoft.Build.Tasks
 
             if (ConsoleToMSBuild)
             {
-                string trimmedTextLine = singleLine.Trim();
+                string trimmedTextLine = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10) ?
+                    singleLine.TrimEnd() :
+                    singleLine.Trim();
+
                 if (trimmedTextLine.Length > 0)
                 {
                     // The lines read may be unescaped, so we need to escape them

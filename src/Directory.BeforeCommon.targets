@@ -89,6 +89,7 @@
     <CompilerToolsDir>$([System.IO.Path]::Combine($(ToolPackagesDir)Microsoft.Net.Compilers, $(CompilerToolsVersion), "tools"))$([System.IO.Path]::DirectorySeparatorChar)</CompilerToolsDir>
     <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLYLOADCONTEXT</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_RUNTIMEINFORMATION</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_GUIDE_TO_VS_ON_UNSUPPORTED_PROJECTS</DefineConstants>
     <DefineConstants>$(DefineConstants);USE_MSBUILD_DLL_EXTN</DefineConstants>
     <DefineConstants>$(DefineConstants);WORKAROUND_COREFX_19110</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_SYMLINK_TARGET</DefineConstants>
