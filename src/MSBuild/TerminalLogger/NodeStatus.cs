@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Diagnostics;
 using Microsoft.Build.Shared;
 
@@ -27,7 +28,12 @@ internal class NodeStatus
     /// <param name="stopwatch">Duration of the current step. Written on right after target.</param>
     public NodeStatus(string project, string? targetFramework, string target, StopwatchAbstraction stopwatch)
     {
-        Debug.Assert(!target.Contains("\x1B"), "Target should not contain any escape codes, if you want to colorize target use the other constructor.");
+#if DEBUG
+        if (target.Contains("\x1B"))
+        {
+            throw new ArgumentException("Target should not contain any escape codes, if you want to colorize target use the other constructor.");
+        }
+#endif
         Project = project;
         TargetFramework = targetFramework;
         Target = target;

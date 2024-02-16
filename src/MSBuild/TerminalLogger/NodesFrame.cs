@@ -56,7 +56,7 @@ internal sealed class NodesFrame
         string? targetPrefix = status.TargetPrefix;
         TerminalColor targetPrefixColor = status.TargetPrefixColor;
 
-        var targetWithoutAnsiLength = targetPrefix != null
+        var targetWithoutAnsiLength = !string.IsNullOrWhiteSpace(targetPrefix)
             // +1 because we will join them by space in the final output.
             ? targetPrefix.Length + 1 + target.Length
             : target.Length;
@@ -82,7 +82,7 @@ internal sealed class NodesFrame
             }
         }
 
-        var renderedTarget = targetPrefix != null ? $"{AnsiCodes.Colorize(targetPrefix, targetPrefixColor)} {target}" : target;
+        var renderedTarget = !string.IsNullOrWhiteSpace(targetPrefix) ? $"{AnsiCodes.Colorize(targetPrefix, targetPrefixColor)} {target}" : target;
         return $"{TerminalLogger.Indentation}{project}{(targetFramework is null ? string.Empty : " ")}{AnsiCodes.Colorize(targetFramework, TerminalLogger.TargetFrameworkColor)} {AnsiCodes.SetCursorHorizontal(MaxColumn)}{AnsiCodes.MoveCursorBackward(targetWithoutAnsiLength + durationString.Length + 1)}{renderedTarget} {durationString}".AsSpan();
 
         static int Length(string durationString, string project, string? targetFramework, int targetWithoutAnsiLength) =>

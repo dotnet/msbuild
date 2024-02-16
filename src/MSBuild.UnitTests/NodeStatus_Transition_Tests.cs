@@ -33,7 +33,7 @@ public class NodeStatus_Transition_Tests
     {
 #if DEBUG
         Func<NodeStatus> newNodeStatus = () => new NodeStatus("project", "tfm", AnsiCodes.Colorize("colorized target", TerminalColor.Green), new MockStopwatch());
-        newNodeStatus.ShouldThrow<Exception>().Message.ShouldContain("Target should not contain any escape codes, if you want to colorize target use the other constructor.");
+        newNodeStatus.ShouldThrow<ArgumentException>().Message.ShouldContain("Target should not contain any escape codes, if you want to colorize target use the other constructor.");
 #endif
     }
 
