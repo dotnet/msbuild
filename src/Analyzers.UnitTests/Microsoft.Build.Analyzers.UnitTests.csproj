@@ -4,7 +4,10 @@
   <Import Project="..\Shared\DebuggingSources.proj" />
 
   <PropertyGroup>
-    <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
+    <!-- Don't build a netfx version of this unit with dotnet, as the netfx bootstrap layout created with 'dotnet build' is incomplete. -->
+    <TargetFrameworks>$(LatestDotNetCoreForMSBuild)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(MSBuildRuntimeType)' == 'Full'">$(FullFrameworkTFM);$(TargetFrameworks)</TargetFrameworks>
+
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
     <IsPackable>false</IsPackable>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
