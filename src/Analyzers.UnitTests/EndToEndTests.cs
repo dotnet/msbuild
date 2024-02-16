@@ -111,14 +111,25 @@ namespace Microsoft.Build.Analyzers.UnitTests
                     }
                     """);
 
-                // env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
-                env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
-                // string output = RunnerUtilities.ExecMSBuild($"{projectFile.Path} /m:1 -nr:False", out bool success);
-                string output = BootstrapRunner.ExecBootstrapedMSBuild($"{projectFile.Path} /m:1 -nr:False -restore -analyze", out bool success);
-                _env.Output.WriteLine(output);
-                success.ShouldBeTrue();
-                // The conflicting outputs warning appears
-                output.ShouldContain("BC0101");
+                // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".
+                // This discrepancy breaks path equality checks in analyzers if we pass to MSBuild full path to the initial project.
+                // TODO: See if there is a way of fixing it in the engine.
+                TransientTestState testState = _env.SetCurrentDirectory(Path.GetDirectoryName(projectFile.Path));
+                try
+                {
+                    // env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
+                    env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
+                    // string output = RunnerUtilities.ExecMSBuild($"{projectFile.Path} /m:1 -nr:False", out bool success);
+                    string output = BootstrapRunner.ExecBootstrapedMSBuild($"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -analyze", out bool success);
+                    _env.Output.WriteLine(output);
+                    success.ShouldBeTrue();
+                    // The conflicting outputs warning appears
+                    output.ShouldContain("BC0101");
+                }
+                finally
+                {
+                    testState.Revert();
+                }
             }
         }
     }
