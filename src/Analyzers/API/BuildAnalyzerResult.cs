@@ -8,40 +8,40 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Experimental;
 
-public class BuildAnalysisResult
+public class BuildAnalyzerResult
 {
-    public static BuildAnalysisResult Create(BuildAnalysisRule rule, ElementLocation location, params string[] messageArgs)
+    public static BuildAnalyzerResult Create(BuildAnalyzerRule rule, ElementLocation location, params string[] messageArgs)
     {
-        return new BuildAnalysisResult(rule, location, messageArgs);
+        return new BuildAnalyzerResult(rule, location, messageArgs);
     }
 
-    public BuildAnalysisResult(BuildAnalysisRule buildAnalysisRule, ElementLocation location, string[] messageArgs)
+    public BuildAnalyzerResult(BuildAnalyzerRule buildAnalyzerRule, ElementLocation location, string[] messageArgs)
     {
-        BuildAnalysisRule = buildAnalysisRule;
+        BuildAnalyzerRule = buildAnalyzerRule;
         Location = location;
         MessageArgs = messageArgs;
     }
 
-    internal BuildEventArgs ToEventArgs(BuildAnalysisResultSeverity severity)
+    internal BuildEventArgs ToEventArgs(BuildAnalyzerResultSeverity severity)
         => severity switch
         {
-            BuildAnalysisResultSeverity.Info => new BuildAnalysisResultMessage(this),
-            BuildAnalysisResultSeverity.Warning => new BuildAnalysisResultWarning(this),
-            BuildAnalysisResultSeverity.Error => new BuildAnalysisResultError(this),
+            BuildAnalyzerResultSeverity.Info => new BuildAnalysisResultMessage(this),
+            BuildAnalyzerResultSeverity.Warning => new BuildAnalysisResultWarning(this),
+            BuildAnalyzerResultSeverity.Error => new BuildAnalysisResultError(this),
             _ => throw new ArgumentOutOfRangeException(nameof(severity), severity, null),
         };
 
-    public BuildAnalysisRule BuildAnalysisRule { get; }
+    public BuildAnalyzerRule BuildAnalyzerRule { get; }
     public ElementLocation Location { get; }
     public string[] MessageArgs { get; }
 
     private string? _message;
-    public string Message => _message ??= $"{(Equals(Location ?? ElementLocation.EmptyLocation, ElementLocation.EmptyLocation) ? string.Empty : (Location!.LocationString + ": "))}{BuildAnalysisRule.Id}: {string.Format(BuildAnalysisRule.MessageFormat, MessageArgs)}";
+    public string Message => _message ??= $"{(Equals(Location ?? ElementLocation.EmptyLocation, ElementLocation.EmptyLocation) ? string.Empty : (Location!.LocationString + ": "))}{BuildAnalyzerRule.Id}: {string.Format(BuildAnalyzerRule.MessageFormat, MessageArgs)}";
 }
 
 public sealed class BuildAnalysisResultWarning : BuildWarningEventArgs
 {
-    public BuildAnalysisResultWarning(BuildAnalysisResult result)
+    public BuildAnalysisResultWarning(BuildAnalyzerResult result)
     {
         this.Message = result.Message;
     }
@@ -66,7 +66,7 @@ public sealed class BuildAnalysisResultWarning : BuildWarningEventArgs
 
 public sealed class BuildAnalysisResultError : BuildErrorEventArgs
 {
-    public BuildAnalysisResultError(BuildAnalysisResult result)
+    public BuildAnalysisResultError(BuildAnalyzerResult result)
     {
         this.Message = result.Message;
     }
@@ -91,7 +91,7 @@ public sealed class BuildAnalysisResultError : BuildErrorEventArgs
 
 public sealed class BuildAnalysisResultMessage : BuildMessageEventArgs
 {
-    public BuildAnalysisResultMessage(BuildAnalysisResult result)
+    public BuildAnalysisResultMessage(BuildAnalyzerResult result)
     {
         this.Message = result.Message;
     }

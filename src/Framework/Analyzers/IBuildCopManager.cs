@@ -6,15 +6,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Build.Analyzers.Infrastructure;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Experimental;
 
-public class BuildAnalysisLoggerFactory : IBuildAnalysisLoggerFactory
+public interface IBuildCopManager
 {
-    public ILogger CreateBuildAnalysisLogger(IBuildAnalysisLoggingContextFactory loggingContextFactory)
-    {
-        return new AnalyzersConnectorLogger(loggingContextFactory, BuildAnalysisManager.Instance);
-    }
+    void ProcessEvaluationFinishedEventArgs(
+        IBuildAnalysisLoggingContext buildAnalysisContext,
+        ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs);
+
+    string CreateTracingStats();
 }

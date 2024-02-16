@@ -74,7 +74,7 @@ internal static class ConfigurationProvider
     /// </summary>
     /// <param name="analyzerRule"></param>
     /// <returns></returns>
-    public static BuildAnalyzerConfigurationInternal GetMergedConfiguration(BuildAnalysisRule analyzerRule)
+    public static BuildAnalyzerConfigurationInternal GetMergedConfiguration(BuildAnalyzerRule analyzerRule)
     {
         if (!_editorConfig.TryGetValue(analyzerRule.Id, out BuildAnalyzerConfiguration? editorConfig))
         {

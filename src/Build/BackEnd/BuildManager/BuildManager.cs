@@ -629,7 +629,7 @@ namespace Microsoft.Build.Execution
             {
                 ILoggingService loggingService = CreateLoggingService(
                     AppendDebuggingLoggers(_buildParameters.Loggers),
-                    _buildParameters.BuildAnalysisLoggerFactory,
+                    _buildParameters.BuildCopLoggerFactory,
                     _buildParameters.ForwardingLoggers,
                     _buildParameters.WarningsAsErrors,
                     _buildParameters.WarningsNotAsErrors,
@@ -2947,7 +2947,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private ILoggingService CreateLoggingService(
             IEnumerable<ILogger> loggers,
-            IBuildAnalysisLoggerFactory buildAnalysisLoggerFactory,
+            IBuildCopLoggerFactory buildCopLoggerFactory,
             IEnumerable<ForwardingLoggerRecord> forwardingLoggers,
             ISet<string> warningsAsErrors,
             ISet<string> warningsNotAsErrors,
@@ -2975,11 +2975,11 @@ namespace Microsoft.Build.Execution
             loggingService.WarningsNotAsErrors = warningsNotAsErrors;
             loggingService.WarningsAsMessages = warningsAsMessages;
 
-            if (buildAnalysisLoggerFactory != null)
+            if (buildCopLoggerFactory != null)
             {
                 loggers = (loggers ?? Enumerable.Empty<ILogger>()).Concat(new[]
                 {
-                    buildAnalysisLoggerFactory.CreateBuildAnalysisLogger(
+                    buildCopLoggerFactory.CreateBuildAnalysisLogger(
                         new AnalyzerLoggingContextFactory(loggingService))
                 });
             }

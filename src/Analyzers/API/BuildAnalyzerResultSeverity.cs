@@ -3,7 +3,7 @@
 
 namespace Microsoft.Build.Experimental;
 
-public enum BuildAnalysisResultSeverity
+public enum BuildAnalyzerResultSeverity
 {
     Info,
     Warning,

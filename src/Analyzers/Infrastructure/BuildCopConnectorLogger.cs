@@ -4,6 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +16,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Logging.Analyzers;
 
 namespace Microsoft.Build.Analyzers.Infrastructure;
-internal sealed class AnalyzersConnectorLogger(IBuildAnalysisLoggingContextFactory loggingContextFactory, IBuildAnalysisManager buildAnalysisManager)
+internal sealed class BuildCopConnectorLogger(IBuildAnalysisLoggingContextFactory loggingContextFactory, IBuildCopManager buildCopManager)
     : ILogger
 {
     public LoggerVerbosity Verbosity { get; set; }
@@ -32,7 +35,7 @@ internal sealed class AnalyzersConnectorLogger(IBuildAnalysisLoggingContextFacto
         {
             try
             {
-                buildAnalysisManager.ProcessEvaluationFinishedEventArgs(
+                buildCopManager.ProcessEvaluationFinishedEventArgs(
                     loggingContextFactory.CreateLoggingContext(e.BuildEventContext!),
                     projectEvaluationFinishedEventArgs);
             }
@@ -55,7 +58,7 @@ internal sealed class AnalyzersConnectorLogger(IBuildAnalysisLoggingContextFacto
         LoggingContext loggingContext = loggingContextFactory.CreateLoggingContext(buildEventContext).ToLoggingContext();
 
         // TODO: here flush the tracing stats: https://github.com/dotnet/msbuild/issues/9629
-        loggingContext.LogCommentFromText(MessageImportance.High, buildAnalysisManager.CreateTracingStats());
+        loggingContext.LogCommentFromText(MessageImportance.High, buildCopManager.CreateTracingStats());
     }
 
     public void Shutdown()

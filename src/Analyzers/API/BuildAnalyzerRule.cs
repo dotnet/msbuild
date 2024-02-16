@@ -3,9 +3,9 @@
 
 namespace Microsoft.Build.Experimental;
 
-public class BuildAnalysisRule
+public class BuildAnalyzerRule
 {
-    public BuildAnalysisRule(string id, string title, string description, string category, string messageFormat,
+    public BuildAnalyzerRule(string id, string title, string description, string category, string messageFormat,
         BuildAnalyzerConfiguration defaultConfiguration)
     {
         Id = id;
