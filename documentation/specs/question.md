@@ -32,7 +32,7 @@ else
 ```
 
 ## Shipping Tasks
-When question switch is used, it will modify the shipping task with these behavior.  Note: this is still experimental and can change.
+When `/question` switch is used, it will modify the shipping task with these behavior.  Note: this is still experimental and can change.
 
 `Exec`
 Doesn't have an up-to-date check.  It will always run.
