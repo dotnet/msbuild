@@ -9,7 +9,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
-using System.Collections.Concurrent;
 
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
@@ -177,7 +176,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// One summary per finished project test run.
     /// </summary>
-    private ConcurrentBag<TestSummary> _testRunSummaries = new();
+    private List<TestSummary> _testRunSummaries = new();
 
     /// <summary>
     /// Name of target that identifies a project that has tests, and that they just started.
@@ -294,9 +293,6 @@ internal sealed partial class TerminalLogger : INodeLogger
 
         _projects.Clear();
 
-        var testRunSummaries = _testRunSummaries.ToList();
-        _testRunSummaries = new ConcurrentBag<TestSummary>();
-
         Terminal.BeginUpdate();
         try
         {
@@ -317,15 +313,15 @@ internal sealed partial class TerminalLogger : INodeLogger
                     duration));
             }
 
-            if (testRunSummaries.Any())
+            if (_testRunSummaries.Any())
             {
-                var total = testRunSummaries.Sum(t => t.Total);
-                var failed = testRunSummaries.Sum(t => t.Failed);
-                var passed = testRunSummaries.Sum(t => t.Passed);
-                var skipped = testRunSummaries.Sum(t => t.Skipped);
+                var total = _testRunSummaries.Sum(t => t.Total);
+                var failed = _testRunSummaries.Sum(t => t.Failed);
+                var passed = _testRunSummaries.Sum(t => t.Passed);
+                var skipped = _testRunSummaries.Sum(t => t.Skipped);
                 var testDuration = (_testStartTime != null && _testEndTime != null ? (_testEndTime - _testStartTime).Value.TotalSeconds : 0).ToString("F1");
 
-                var colorizedResult = testRunSummaries.Any(t => t.Failed > 0) || _buildHasErrors
+                var colorizedResult = _testRunSummaries.Any(t => t.Failed > 0) || _buildHasErrors
                     ? AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Failed"), TerminalColor.Red)
                     : AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Succeeded"), TerminalColor.Green);
 
@@ -348,6 +344,7 @@ internal sealed partial class TerminalLogger : INodeLogger
             Terminal.EndUpdate();
         }
 
+        _testRunSummaries.Clear();
         _buildHasErrors = false;
         _buildHasWarnings = false;
         _restoreFailed = false;
@@ -699,13 +696,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                                 _ = int.TryParse(extendedMessage.ExtendedMetadata!["skipped"]!, out int skipped);
                                 _ = int.TryParse(extendedMessage.ExtendedMetadata!["failed"]!, out int failed);
 
-                                _testRunSummaries.Add(new TestSummary
-                                {
-                                    Total = total,
-                                    Passed = passed,
-                                    Skipped = skipped,
-                                    Failed = failed,
-                                });
+                                _testRunSummaries.Add(new TestSummary(total, passed, skipped, failed));
 
                                 _testEndTime = _testEndTime == null
                                         ? e.Timestamp

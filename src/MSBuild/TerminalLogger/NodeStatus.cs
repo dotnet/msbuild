@@ -50,13 +50,10 @@ internal class NodeStatus
     /// <param name="target">The currently running work, usually the currently runnig target. Written on right.</param>
     /// <param name="stopwatch">Duration of the current step. Written on right after target.</param>
     public NodeStatus(string project, string? targetFramework, TerminalColor targetPrefixColor, string targetPrefix, string target, StopwatchAbstraction stopwatch)
+        : this(project, targetFramework, target, stopwatch)
     {
-        Project = project;
-        TargetFramework = targetFramework;
         TargetPrefixColor = targetPrefixColor;
         TargetPrefix = targetPrefix;
-        Target = target;
-        Stopwatch = stopwatch;
     }
 
     /// <summary>

@@ -5,11 +5,5 @@ using System;
 
 namespace Microsoft.Build.Logging.TerminalLogger
 {
-    internal class TestSummary
-    {
-        public int Total { get; set; }
-        public int Passed { get; set; }
-        public int Skipped { get; set; }
-        public int Failed { get; set; }
-    }
+    internal readonly record struct TestSummary(int Total, int Passed, int Skipped, int Failed);
 }
