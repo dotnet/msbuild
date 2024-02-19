@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -97,5 +98,17 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             return result;
         }
+
+        /// <summary>
+        /// Used for unit tests only.
+        /// </summary>
+        /// <param name="resolverLoader">An <see cref="SdkResolverLoader"/> to use for loading SDK resolvers.</param>
+        /// <param name="resolvers">Explicit set of SdkResolvers to use for all SDK resolution.</param>
+        internal new void InitializeForTests(SdkResolverLoader resolverLoader = null, IReadOnlyList<SdkResolver> resolvers = null)
+        {
+            _cache.Clear();
+            base.InitializeForTests(resolverLoader, resolvers);
+        }
+
     }
 }
