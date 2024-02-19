@@ -58,7 +58,7 @@ internal sealed class NodesFrame
 
         var targetWithoutAnsiLength = !string.IsNullOrWhiteSpace(targetPrefix)
             // +1 because we will join them by space in the final output.
-            ? targetPrefix.Length + 1 + target.Length
+            ? targetPrefix!.Length + 1 + target.Length
             : target.Length;
 
         int renderedWidth = Length(durationString, project, targetFramework, targetWithoutAnsiLength);
