@@ -109,6 +109,5 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             _cache.Clear();
             base.InitializeForTests(resolverLoader, resolvers);
         }
-
     }
 }
