@@ -18,8 +18,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-MONO|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'" />
   <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
     <Reference Include="System" />
     <Reference Include="System.Core" />
