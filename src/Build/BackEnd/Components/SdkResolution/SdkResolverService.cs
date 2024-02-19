@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -74,7 +75,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             ? CachingSdkResolverLoader.Instance
             : new SdkResolverLoader();
 
-        public SdkResolverService()
+        protected SdkResolverService()
         {
         }
 

@@ -26,7 +26,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     /// </summary>
     internal sealed class MainNodeSdkResolverService : HostedSdkResolverServiceBase
     {
-        private readonly ISdkResolverService _cachedSdkResolver = new CachingSdkResolverService();
+        private readonly ISdkResolverService _cachedSdkResolver = CachingSdkResolverService.Instance;
 
         /// <summary>
         /// A factory which is registered to create an instance of this class.

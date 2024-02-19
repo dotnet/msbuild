@@ -281,7 +281,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     "1.0.0",
                     Enumerable.Empty<string>()));
 
-            var service = new CachingSdkResolverService();
+            var service = CachingSdkResolverService.Instance;
             service.InitializeForTests(
                 null,
                 new List<SdkResolver>
@@ -532,7 +532,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     "1.0.0",
                     Enumerable.Empty<string>()));
 
-            var service = new CachingSdkResolverService();
+            var service = CachingSdkResolverService.Instance;
             service.InitializeForTests(
                 null,
                 new List<SdkResolver>
@@ -560,7 +560,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             // Start with interactive false
             bool interactive = false;
 
-            var service = new CachingSdkResolverService();
+            var service = CachingSdkResolverService.Instance;
 
             service.InitializeForTests(
                 resolvers: new List<SdkResolver>
@@ -593,7 +593,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             bool isRunningInVisualStudio = false;
 
-            var service = new CachingSdkResolverService();
+            var service = CachingSdkResolverService.Instance;
             service.InitializeForTests(
                 resolvers: new List<SdkResolver>
                 {

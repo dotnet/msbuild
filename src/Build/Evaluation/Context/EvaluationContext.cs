@@ -56,7 +56,7 @@ namespace Microsoft.Build.Evaluation.Context
         {
             Policy = policy;
 
-            SdkResolverService = sdkResolverService ?? new CachingSdkResolverService();
+            SdkResolverService = sdkResolverService ?? CachingSdkResolverService.Instance;
             FileEntryExpansionCache = fileEntryExpansionCache ?? new ConcurrentDictionary<string, IReadOnlyList<string>>();
             FileSystem = fileSystem ?? new CachingFileSystemWrapper(FileSystems.Default);
             FileMatcher = new FileMatcher(FileSystem, FileEntryExpansionCache);

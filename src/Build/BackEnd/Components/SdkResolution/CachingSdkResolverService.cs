@@ -21,6 +21,20 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// </summary>
         private readonly ConcurrentDictionary<int, ConcurrentDictionary<string, Lazy<SdkResult>>> _cache = new ConcurrentDictionary<int, ConcurrentDictionary<string, Lazy<SdkResult>>>();
 
+        /// <summary>
+        /// Stores the singleton instance for a particular process.
+        /// </summary>
+        private static readonly Lazy<CachingSdkResolverService> InstanceLazy = new Lazy<CachingSdkResolverService>(() => new CachingSdkResolverService(), isThreadSafe: true);
+
+        private CachingSdkResolverService()
+        {
+        }
+
+        /// <summary>
+        /// Gets the current instance of <see cref="CachingSdkResolverService"/> for this process.
+        /// </summary>
+        public static new CachingSdkResolverService Instance => InstanceLazy.Value;
+
         public override void ClearCache(int submissionId)
         {
             base.ClearCache(submissionId);
