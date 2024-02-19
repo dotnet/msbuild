@@ -19,11 +19,11 @@ using static VerifyXunit.Verifier;
 namespace Microsoft.Build.CommandLine.UnitTests;
 
 [UsesVerify]
-public class NodeStatus_Tests
+public class NodeStatus_SizeChange_Tests
 {
     private readonly NodeStatus _status = new("Namespace.Project", "TargetFramework", "Target", new MockStopwatch());
 
-    public NodeStatus_Tests()
+    public NodeStatus_SizeChange_Tests()
     {
         UseProjectRelativeDirectory("Snapshots");
     }

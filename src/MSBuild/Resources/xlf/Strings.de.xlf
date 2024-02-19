@@ -1651,6 +1651,35 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
         <target state="translated">Die Terminalprotokollierung wurde nicht verwendet, da die Ausgabe an eine Datei umgeleitet wird.</target>
         <note />
       </trans-unit>
+      <trans-unit id="TestProjectFinished_NoTF">
+        <source>{0}{1} test {2} ({3}s)</source>
+        <target state="new">{0}{1} test {2} ({3}s)</target>
+        <note>
+      Project finished summary.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: BuildResult_{X}
+      {3}: duration in seconds with 1 decimal point
+    </note>
+      </trans-unit>
+      <trans-unit id="TestProjectFinished_WithTF">
+        <source>{0}{1} test {2} {3} ({4}s)</source>
+        <target state="new">{0}{1} test {2} {3} ({4}s)</target>
+        <note>
+      Project finished summary including target framework information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: BuildResult_{X}
+      {4}: duration in seconds with 1 decimal point
+    </note>
+      </trans-unit>
+      <trans-unit id="TestSummary">
+        <source>Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</source>
+        <target state="new">Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</target>
+        <note>{0} string, localized result e.g. Failed surrounded by ANSI colors.
+{1-5} whole number</note>
+      </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>
         <target state="translated">MSBUILD : error MSB1002: Der Schalter erlaubt keine Parameter.</target>
