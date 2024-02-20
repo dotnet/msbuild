@@ -25,6 +25,7 @@
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
+    <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
     <ProjectReference Include="..\Samples\PortableTask\PortableTask.csproj" ReferenceOutputAssembly="false" Private="false" />
     <ProjectReference Include="..\Samples\Dependency\Dependency.csproj" ReferenceOutputAssembly="false" Private="false" />
   </ItemGroup>
@@ -46,28 +47,12 @@
     <Compile Include="..\Shared\UnitTests\EscapingUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\MockEngine.cs" />
-    <Compile Include="..\Shared\UnitTests\MockLogger.cs" />
     <Compile Include="..\Shared\UnitTests\NativeMethodsShared_Tests.cs">
       <Link>NativeMethodsShared_Tests.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\UnitTests\ObjectModelHelpers.cs" />
     <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
     <Compile Include="..\Shared\QuotingUtilities.cs" />
-    <Compile Include="..\Shared\UnitTests\EngineTestEnvironment.cs" />
-    <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
-      <Link>TestEnvironment.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\ProcessExtensions.cs" />
-    <Compile Include="..\UnitTests.Shared\EnvironmentProvider.cs" />
-    <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" />
-    <Compile Include="..\UnitTests.Shared\DriveMapping.cs" />
-    <Compile Include="..\UnitTests.Shared\DummyMappedDrive.cs" />
-    <Compile Include="..\UnitTests.Shared\DummyMappedDriveUtils.cs" />
-    <Compile Include="..\Shared\UnitTests\LongPathSupportDisabledFactAttribute.cs">
-      <Link>Shared\LongPathSupportDisabledFactAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\UnitTests.Shared\RequiresSymbolicLinksFactAttribute.cs" />
 
     <EmbeddedResource Include="SampleResx" />
     <EmbeddedResource Include="AssemblyDependency\CacheFileSamples\Microsoft.VisualStudio.LanguageServices.Implementation.csprojAssemblyReference.cache" />
