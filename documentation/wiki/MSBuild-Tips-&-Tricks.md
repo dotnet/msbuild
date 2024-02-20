@@ -14,29 +14,7 @@ See the [MSBuild Command-Line Reference](https://learn.microsoft.com/visualstudi
 
 # Environment Variables
 
- * `MSBuildDebugEngine=1` & `MSBUILDDEBUGPATH=<DIRECTORY>`
-  * Set this to cause any MSBuild invocation launched within this environment to emit binary logs and additional debugging information to `<DIRECTORY>`. Useful when debugging build or evaluation issues when you can't directly influence the MSBuild invocation, such as in Visual Studio.
- * `MSBUILDTARGETOUTPUTLOGGING=1`
-   * Set this to enable [printing all target outputs to the log](https://learn.microsoft.com/archive/blogs/msbuild/displaying-target-output-items-using-the-console-logger).
- * `MSBUILDLOGTASKINPUTS=1`
-   * Log task inputs (not needed if there are any diagnostic loggers already).
- * `MSBUILDEMITSOLUTION=1`
-   * Save the generated .proj file for the .sln that is used to build the solution.
- * `MSBUILDENABLEALLPROPERTYFUNCTIONS=1`
-   * Enable [additional property functions](https://devblogs.microsoft.com/visualstudio/msbuild-property-functions/).
- * `MSBUILDLOGVERBOSERARSEARCHRESULTS=1`
-   * In ResolveAssemblyReference task, log verbose search results.
- * `MSBUILDLOGCODETASKFACTORYOUTPUT=1`
-   * Dump generated code for task to a <GUID>.txt file in the TEMP directory
- * `MSBUILDDISABLENODEREUSE=1`
-   * Set this to not leave MSBuild processes behind (see `/nr:false` above, but the environment variable is useful to also set this for Visual Studio for example).
- * `MSBUILDLOGASYNC=1`
-   * Enable asynchronous logging.
- * `MSBUILDDEBUGONSTART=1`
-   * Launch debugger on build start.
-   * Setting the value of 2 allows for manually attaching a debugger to a process ID.
- * `MSBUILDDEBUGSCHEDULER=1` & `MSBUILDDEBUGPATH=<DIRECTORY>`
-   * Dumps scheduler state at specified directory (`MSBUILDDEBUGSCHEDULER` is implied by `MSBuildDebugEngine`).
+The list of environment variables could be found [here](./MSBuild-Environment-Variables.md)
 
 # TreatAsLocalProperty
 If MSBuild.exe is passed properties on the command line, such as `/p:Platform=AnyCPU` then this value overrides whatever assignments you have to that property inside property groups. For instance, `<Platform>x86</Platform>` will be ignored. To make sure your local assignment to properties overrides whatever they pass on the command line, add the following at the top of your MSBuild project file:
