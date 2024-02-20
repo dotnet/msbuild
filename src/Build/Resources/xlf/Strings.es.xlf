@@ -26,6 +26,116 @@
         <note>{StrBegin="MSB4003: "}UE: Tasks are not allowed to use incorrect case for reserved attributes on the task nodes e.g. "continueonerror"
     instead of the "ContinueOnError".</note>
       </trans-unit>
+      <trans-unit id="Binlog_ArchiveFile_AcquiredAsStream">
+        <source>Content already acquired as StreamReader via GetContentReader.</source>
+        <target state="translated">Contenido ya adquirido como StreamReader a través de GetContentReader.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_ArchiveFile_AcquiredAsString">
+        <source>Content already acquired as string via GetContent or initialized as string only.</source>
+        <target state="translated">Contenido ya adquirido como cadena a través de GetContent o inicializado solo como cadena.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_ArchiveFile_NotSetAfterAcquire">
+        <source>ArchiveFile was obtained, but the final edited version was not set.</source>
+        <target state="translated">Se obtuvo ArchiveFile, pero no se estableció la versión editada final.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_FwdCompatUnsupported">
+        <source>Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</source>
+        <target state="translated">No se admite la lectura compatible con reenvíos para la versión {0} de formato de archivo (necesita &gt;= 18).</target>
+        <note>
+      LOCALIZATION: {0} is an integer number denoting version.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_ImportFileSizeError">
+        <source>Imported files archive exceeded 2GB limit and it's not embedded.</source>
+        <target state="translated">El archivo de archivos importados superó el límite de 2 GB y no está incrustado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_MissingRecoverableErrorSubscribeError">
+        <source>Subscription to RecoverableReadError is mandatory during forward compatible reading.</source>
+        <target state="translated">La suscripción a RecoverableReadError es obligatoria durante la lectura compatible con versiones posteriores.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_ReaderMismatchedRead">
+        <source>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</source>
+        <target state="translated">El registro BuildEvent número {0} (tamaño serializado: {1}) intentó realizar lecturas no permitidas (detalles: {2}: {3}).</target>
+        <note>
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an exception type and {3} the exception message string.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_ReaderSkippingRecord">
+        <source>Skipping the record.</source>
+        <target state="translated">Omitiendo el registro.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_ReaderUnderRead">
+        <source>BuildEvent record number {0} was expected to read exactly {1} bytes from the stream, but read {2} instead.</source>
+        <target state="translated">Se esperaba que el registro BuildEvent número {0} leyera exactamente {1} bytes del flujo, pero en su lugar leyó {2}.</target>
+        <note>
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an integer value indicating number of bytes.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_ReaderUnknownType">
+        <source>BuildEvent record number {0} (serialized size: {1}) is of unsupported type: {2}.</source>
+        <target state="translated">El registro BuildEvent número {0} (tamaño serializado: {1}) es de tipo no compatible: {2}.</target>
+        <note>
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is a string or integer value indicating type.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_Source_MissingSubscribeError">
+        <source>No subscribers for any events.</source>
+        <target state="translated">No hay suscriptores para ningún evento.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_Source_MultiSubscribeError">
+        <source>Structured events and raw events cannot be replayed at the same time.</source>
+        <target state="translated">Los eventos estructurados y los eventos sin procesar no se pueden reproducir al mismo tiempo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_Source_VersionUninitialized">
+        <source>Version info not yet initialized. Replay must be called first.</source>
+        <target state="translated">La información de versión aún no se ha inicializado. La reproducción debe llamarse primero.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_MustBeReadable">
+        <source>Stream must be readable.</source>
+        <target state="translated">La secuencia debe ser legible.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_SeekNonOrigin">
+        <source>Only seeking from SeekOrigin.Current is supported.</source>
+        <target state="translated">Solo se admite la búsqueda desde SeekOrigin.Current.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_SetLengthUnsupported">
+        <source>Changing the stream length is not supported.</source>
+        <target state="translated">No se admite cambiar la longitud de la secuencia.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_UnsupportedSkipOffset">
+        <source>Attempt to skip {0} bytes, only non-negative offset up to int.MaxValue is allowed.</source>
+        <target state="translated">Intento de omisión de {0} bytes, solo se permite un desplazamiento no negativo hasta int.MaxValue.</target>
+        <note>
+      LOCALIZATION: {0} is integer number denoting number of bytes. 'int.MaxValue' should not be translated.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_WriteUnsupported">
+        <source>Writing is not supported.</source>
+        <target state="translated">No se admite la escritura.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildFinishedQuestionFailure">
+        <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
+        <target state="translated">La creación de la pregunta ha FALLADO. La creación finalizó antes de tiempo al encontrar un objetivo o tarea que no estaba actualizado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildFinishedQuestionSuccess">
+        <source>Question build succeeded. Up-to-date checks passed.</source>
+        <target state="translated">La creación de preguntas ha tenido éxito. Comprobaciones actualizadas superadas.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildInProgress">
         <source>The operation cannot be completed because a build is already in progress.</source>
         <target state="translated">La operación no se puede completar porque ya hay una compilación en curso.</target>
@@ -139,6 +249,15 @@
   {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="FatalErrorWhileLoggingWithInnerException">
+        <source>MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
+    {0}</source>
+        <target state="translated">MSB4017: La compilación se detuvo de manera inesperada por un error inesperado en el registrador.
+    {0}</target>
+        <note>{StrBegin="MSB4017: "}UE: This message is used for a special exception that is thrown when a logger fails while logging an event (most
+    likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
+    special exception to abort the build.</note>
+      </trans-unit>
       <trans-unit id="General.TwoVectorsMustHaveSameLength">
         <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
         <target state="translated">MSB3094: "{2}" hace referencia a {0} elementos y "{3}" hace referencia a {1} elementos. Deben tener el mismo número de elementos.</target>
@@ -148,6 +267,11 @@
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: Espacio inesperado en la posición "{1}" de la condición "{0}". ¿Olvidó quitar un espacio?</target>
         <note>{StrBegin="MSB4259: "}</note>
+      </trans-unit>
+      <trans-unit id="ImportedProjectFromVSDistribution">
+        <source>MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </source>
+        <target state="new">MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </target>
+        <note>{StrBegin="MSB4278: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
         <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
@@ -212,8 +336,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
-        <source>A required NuGet assembly was not found. Expected Path: {0}</source>
-        <target state="translated">No se encontró un ensamblado de NuGet necesario. Ruta de acceso esperada: {0}</target>
+        <source>A required NuGet assembly '{0}' could not be loaded.</source>
+        <target state="translated">No se pudo cargar un ensamblado NuGet necesario "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
@@ -380,6 +504,17 @@
         <target state="translated">Los accesos a archivos de informes solo se admiten actualmente con el tipo x64 de MSBuild.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SDKResolverAttempt">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}".
+Warnings: {2}
+Errors: {3}</source>
+        <target state="translated">El resolvedor "{0}" intentó resolver el SDK "{1}".
+Advertencias: {2}
+Errores: {3}</target>
+        <note>
+      LOCALIZATION: Do not localize the word SDK. "{2}" is new line separated warnings or "null". "{3}" is new line separated errors or "null".
+    </note>
+      </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
         <source>MSB4242: SDK Resolver Failure: "{0}"</source>
         <target state="translated">MSB4242: Error del solucionador del SDK: "{0}"</target>
@@ -441,6 +576,11 @@
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
     </note>
       </trans-unit>
+      <trans-unit id="SucceededToResolveSDK">
+        <source>The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</source>
+        <target state="translated">El SDK "{0}" se resolvió correctamente mediante el resolvedor "{1}" a la ubicación "{2}" y la versión "{3}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskAcquiredCores">
         <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
         <target state="translated">La tarea "{0}" solicitó {1} núcleos, adquirió {2} núcleos y ahora retiene un total de {3} núcleos.</target>
@@ -453,7 +593,7 @@
       </trans-unit>
       <trans-unit id="TaskAssemblyLoadedWithAssemblyLoadContext">
         <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</source>
-        <target state="new">Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</target>
+        <target state="translated">Ensamblado cargado durante {0}{1}: {2}(ubicación: {3}, MVID: {4}, AssemblyLoadContext: {5})</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
@@ -2480,8 +2620,8 @@ Utilización:          Utilización media de {0}: {1:###.0}</target>
         <note>{StrBegin="MSB4238: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedLogFileFormat">
-        <source>MSB4235: The log file format version is {0}, whereas this version of MSBuild only supports versions up to {1}.</source>
-        <target state="translated">MSB4235: La versión del formato del archivo de registro es {0}, mientras que la versión de MSBuild solo admite versiones hasta {1}.</target>
+        <source>MSB4235: The log file format version is {0} with minimum required reader version {1}, whereas this version of MSBuild only supports versions up to {2}.</source>
+        <target state="translated">MSB4235: la versión del formato del archivo de registro es {0} con la versión mínima necesaria del lector {1}, mientras que esta versión de MSBuild solo admite versiones de hasta {2}.</target>
         <note>{StrBegin="MSB4235: "}</note>
       </trans-unit>
       <trans-unit id="ProjectEvaluationPerformanceSummary">
@@ -2570,13 +2710,6 @@ Utilización:          Utilización media de {0}: {1:###.0}</target>
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
         <target state="translated">MSB4241: La referencia del SKD "{0}", versión "{1}", se resolvió en la versión "{2}". Podría estar utilizando una versión diferente de la esperada si no actualiza la versión de referencia para que coincida.</target>
         <note>{StrBegin="MSB4241: "}
-      LOCALIZATION:  Do not localize the word SDK.
-    </note>
-      </trans-unit>
-      <trans-unit id="SdkResolving">
-        <source>Resolving SDK '{0}'...</source>
-        <target state="translated">Resolviendo SDK "{0}"...</target>
-        <note>
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>

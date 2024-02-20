@@ -233,7 +233,7 @@ namespace Microsoft.Build.Tasks
                     // If we are targeting a given processor architecture check to see if they match, if we are targeting MSIL then any architecture will do.
                     if (compareProcessorArchitecture)
                     {
-                        // Only reject the assembly if the target processor architecture does not match the assemby processor architecture and the assembly processor architecture is not NONE or MSIL.
+                        // Only reject the assembly if the target processor architecture does not match the assembly processor architecture and the assembly processor architecture is not NONE or MSIL.
                         if (
                               targetAssemblyName.AssemblyName.ProcessorArchitecture != targetProcessorArchitecture &&  /* The target and assembly architectures do not match*/
                               (targetProcessorArchitecture != ProcessorArchitecture.None && targetAssemblyName.AssemblyName.ProcessorArchitecture != ProcessorArchitecture.None)  /*The assembly is not none*/

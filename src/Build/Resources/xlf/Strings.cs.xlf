@@ -26,6 +26,116 @@
         <note>{StrBegin="MSB4003: "}UE: Tasks are not allowed to use incorrect case for reserved attributes on the task nodes e.g. "continueonerror"
     instead of the "ContinueOnError".</note>
       </trans-unit>
+      <trans-unit id="Binlog_ArchiveFile_AcquiredAsStream">
+        <source>Content already acquired as StreamReader via GetContentReader.</source>
+        <target state="translated">Obsah se už získal jako StreamReader přes GetContentReader.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_ArchiveFile_AcquiredAsString">
+        <source>Content already acquired as string via GetContent or initialized as string only.</source>
+        <target state="translated">Obsah se už získal jako řetězec přes GetContent nebo se inicializoval jenom jako řetězec.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_ArchiveFile_NotSetAfterAcquire">
+        <source>ArchiveFile was obtained, but the final edited version was not set.</source>
+        <target state="translated">Byla získána hodnota ArchiveFile, nebyla ale nastavena konečná upravená verze.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_FwdCompatUnsupported">
+        <source>Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</source>
+        <target state="translated">Čtení s dopřednou kompatibilitou není podporováno pro formát souboru verze {0} (musí být &gt;= 18).</target>
+        <note>
+      LOCALIZATION: {0} is an integer number denoting version.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_ImportFileSizeError">
+        <source>Imported files archive exceeded 2GB limit and it's not embedded.</source>
+        <target state="translated">Archiv importovaných souborů překročil limit 2 GB a není vložený.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_MissingRecoverableErrorSubscribeError">
+        <source>Subscription to RecoverableReadError is mandatory during forward compatible reading.</source>
+        <target state="translated">Odběr události RecoverableReadError je při čtení s dopřednou kompatibilitou povinný.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_ReaderMismatchedRead">
+        <source>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</source>
+        <target state="translated">Záznam BuildEvent s číslem {0} (serializovaná velikost: {1}) se pokusil provést nepovolené čtení (podrobnosti: {2}: {3}).</target>
+        <note>
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an exception type and {3} the exception message string.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_ReaderSkippingRecord">
+        <source>Skipping the record.</source>
+        <target state="translated">Záznam se přeskakuje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_ReaderUnderRead">
+        <source>BuildEvent record number {0} was expected to read exactly {1} bytes from the stream, but read {2} instead.</source>
+        <target state="translated">Bylo očekáváno, že záznam BuildEvent s číslem {0} přečte ze streamu přesně {1} bajtů, ale místo toho přečetl: {2}.</target>
+        <note>
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an integer value indicating number of bytes.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_ReaderUnknownType">
+        <source>BuildEvent record number {0} (serialized size: {1}) is of unsupported type: {2}.</source>
+        <target state="translated">Záznam BuildEvent s číslem {0} (serializovaná velikost: {1}) má nepodporovaný typ: {2}.</target>
+        <note>
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is a string or integer value indicating type.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_Source_MissingSubscribeError">
+        <source>No subscribers for any events.</source>
+        <target state="translated">Žádní odběratelé pro žádné události</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_Source_MultiSubscribeError">
+        <source>Structured events and raw events cannot be replayed at the same time.</source>
+        <target state="translated">Strukturované události a nezpracované události nelze opětovně přehrát současně.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_Source_VersionUninitialized">
+        <source>Version info not yet initialized. Replay must be called first.</source>
+        <target state="translated">Informace o verzi se ještě neinicializovaly. Jako první se musí volat opětovné přehrání (Replay).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_MustBeReadable">
+        <source>Stream must be readable.</source>
+        <target state="translated">Stream musí být čitelný.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_SeekNonOrigin">
+        <source>Only seeking from SeekOrigin.Current is supported.</source>
+        <target state="translated">Podporuje se jenom hledání ze SeekOrigin.Current.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_SetLengthUnsupported">
+        <source>Changing the stream length is not supported.</source>
+        <target state="translated">Změna délky streamu není podporována.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_UnsupportedSkipOffset">
+        <source>Attempt to skip {0} bytes, only non-negative offset up to int.MaxValue is allowed.</source>
+        <target state="translated">Došlo k pokusu o přeskočení {0} bajtů. Je povolen pouze nezáporný posun až do hodnoty int.MaxValue.</target>
+        <note>
+      LOCALIZATION: {0} is integer number denoting number of bytes. 'int.MaxValue' should not be translated.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_WriteUnsupported">
+        <source>Writing is not supported.</source>
+        <target state="translated">Zápis není podporován.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildFinishedQuestionFailure">
+        <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
+        <target state="translated">Vytvoření otázky SELHALO. Vytváření bylo předčasně ukončeno, protože se při něm narazilo na cíl nebo úlohu, které nebyly aktuální.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildFinishedQuestionSuccess">
+        <source>Question build succeeded. Up-to-date checks passed.</source>
+        <target state="translated">Otázka byla úspěšně vytvořena. Kontroly aktuálnosti proběhly úspěšně.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildInProgress">
         <source>The operation cannot be completed because a build is already in progress.</source>
         <target state="translated">Operaci nebylo možno dokončit, protože sestavení již probíhá.</target>
@@ -139,6 +249,15 @@
   {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="FatalErrorWhileLoggingWithInnerException">
+        <source>MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
+    {0}</source>
+        <target state="translated">MSB4017: Sestavování bylo neočekávaně zastaveno z důvodu neočekávané chyby protokolovacího nástroje.
+    {0}</target>
+        <note>{StrBegin="MSB4017: "}UE: This message is used for a special exception that is thrown when a logger fails while logging an event (most
+    likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
+    special exception to abort the build.</note>
+      </trans-unit>
       <trans-unit id="General.TwoVectorsMustHaveSameLength">
         <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
         <target state="translated">MSB3094: Položka {2} odkazuje na {0} položek a položka {3} odkazuje na {1} položek. Musí mít stejný počet položek.</target>
@@ -148,6 +267,11 @@
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: Na pozici {1} podmínky {0} je neočekávaná mezera. Nezapomněli jste ji odebrat?</target>
         <note>{StrBegin="MSB4259: "}</note>
+      </trans-unit>
+      <trans-unit id="ImportedProjectFromVSDistribution">
+        <source>MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </source>
+        <target state="new">MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </target>
+        <note>{StrBegin="MSB4278: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
         <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
@@ -212,8 +336,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
-        <source>A required NuGet assembly was not found. Expected Path: {0}</source>
-        <target state="translated">Požadované sestavení NuGet se nenašlo. Očekávaná cesta: {0}</target>
+        <source>A required NuGet assembly '{0}' could not be loaded.</source>
+        <target state="translated">Nepovedlo se načíst požadované sestavení NuGet {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
@@ -380,6 +504,17 @@
         <target state="translated">Přístupy k souborům sestav se v současné době podporují jenom pomocí varianty x64 nástroje MSBuild.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SDKResolverAttempt">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}".
+Warnings: {2}
+Errors: {3}</source>
+        <target state="translated">Překladač {0} se pokusil přeložit sadu SDK {1}.
+Upozornění: {2}
+Chyby: {3}</target>
+        <note>
+      LOCALIZATION: Do not localize the word SDK. "{2}" is new line separated warnings or "null". "{3}" is new line separated errors or "null".
+    </note>
+      </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
         <source>MSB4242: SDK Resolver Failure: "{0}"</source>
         <target state="translated">MSB4242: Selhání překladače sady SDK: {0}</target>
@@ -440,6 +575,11 @@
         <note>
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
     </note>
+      </trans-unit>
+      <trans-unit id="SucceededToResolveSDK">
+        <source>The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</source>
+        <target state="translated">Sada SDK {0} byla úspěšně přeložena překladačem {1} na umístění {2} a verzi {3}.</target>
+        <note />
       </trans-unit>
       <trans-unit id="TaskAcquiredCores">
         <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
@@ -2480,8 +2620,8 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
         <note>{StrBegin="MSB4238: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedLogFileFormat">
-        <source>MSB4235: The log file format version is {0}, whereas this version of MSBuild only supports versions up to {1}.</source>
-        <target state="translated">MSB4235: Verze formátu souboru protokolu je {0}, ale tato verze nástroje MSBuild podporuje jenom verze do {1}.</target>
+        <source>MSB4235: The log file format version is {0} with minimum required reader version {1}, whereas this version of MSBuild only supports versions up to {2}.</source>
+        <target state="translated">MSB4235: Verze formátu souboru protokolu je {0} s minimální požadovanou verzí čtečky {1}, zatímco tato verze nástroje MSBuild podporuje pouze verze do {2}.</target>
         <note>{StrBegin="MSB4235: "}</note>
       </trans-unit>
       <trans-unit id="ProjectEvaluationPerformanceSummary">
@@ -2570,13 +2710,6 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
         <target state="translated">MSB4241: Odkaz na sadu SDK {0} verze {1} byl místo toho přeložen na verzi {2}. Pokud neaktualizujete odkazovanou verzi tak, aby se shodovala, může se používat jiná verze, než kterou očekáváte.</target>
         <note>{StrBegin="MSB4241: "}
-      LOCALIZATION:  Do not localize the word SDK.
-    </note>
-      </trans-unit>
-      <trans-unit id="SdkResolving">
-        <source>Resolving SDK '{0}'...</source>
-        <target state="translated">Překládá se sada SDK {0}...</target>
-        <note>
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>

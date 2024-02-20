@@ -2,7 +2,7 @@
 
   <!--
   Copies the binaries of MSBuild to a bootstrap folder so we can rebuild msbuild with itself.
-  On netcore and mono it performs a directory copy.
+  On netcore it performs a directory copy.
   On full framework it performs a more involved deployment.
    -->
 
@@ -11,7 +11,6 @@
     <BootstrapDestination Condition="'$(Platform)' == 'x64' or '$(Platform)' == 'arm64'">$(BootstrapDestination)$(Platform)\</BootstrapDestination>
     <BootstrapDestination>$(BootstrapDestination)$(TargetFramework.ToLowerInvariant())\MSBuild\</BootstrapDestination>
 
-    <!-- TODO: Mono build should use BootstrapNetCore logic -->
     <BootstrapDependsOn Condition="$(TargetFramework.StartsWith('net4'))">BootstrapFull</BootstrapDependsOn>
     <BootstrapDependsOn Condition="!$(TargetFramework.StartsWith('net4'))">BootstrapNetCore</BootstrapDependsOn>
 
@@ -72,10 +71,8 @@
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\Tracker*.exe" />
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\FileTracker*.dll" />
       <SdkResolverFiles Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\**\*.*" />
-      <NuGetSdkResolverManifest Include= "$(RepoRoot)src\MSBuild\SdkResolvers\VS\Microsoft.Build.NuGetSdkResolver.xml" Condition="'$(MonoBuild)' != 'true'" />
-      <NuGetSdkResolverManifest Include= "$(RepoRoot)src\MSBuild\SdkResolvers\Standalone\Microsoft.Build.NuGetSdkResolver.xml" Condition="'$(MonoBuild)' == 'true'" />
+      <NuGetSdkResolverManifest Include="$(RepoRoot)src\MSBuild\SdkResolvers\VS\Microsoft.Build.NuGetSdkResolver.xml" />
       <InstalledSdks Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Sdks\**\*.*" />
-      <InstalledSdks Include="$(MSBuildBinPath)\Sdks\**\*" Condition="'$(MonoBuild)' == 'true'" />
 
       <InstalledStaticAnalysisTools Include="$(VsInstallRoot)\Team Tools\Static Analysis Tools\**\*.*" />
 
@@ -140,11 +137,6 @@
 
     <Copy SourceFiles="@(InstalledSdks)"
           DestinationFiles="@(InstalledSdks -> '$(BootstrapDestination)Sdks\%(RecursiveDir)%(Filename)%(Extension)')"
-          Condition="'$(MonoBuild)' != 'true'"
-          SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(InstalledSdks)"
-          DestinationFiles="@(InstalledSdks -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\Sdks\%(RecursiveDir)%(Filename)%(Extension)')"
-          Condition="'$(MonoBuild)' == 'true'"
           SkipUnchangedFiles="true" />
 
     <Copy SourceFiles="@(InstalledStaticAnalysisTools)"
@@ -155,13 +147,8 @@
           DestinationFiles="@(InstalledNuGetFiles->'$(BootstrapDestination)Microsoft\NuGet\%(Filename)%(Extension)')"
           SkipUnchangedFiles="true" />
 
-    <Copy Condition="'$(MonoBuild)' != 'true'"
-          SourceFiles="@(_NuGetRuntimeDependencies)"
+    <Copy SourceFiles="@(_NuGetRuntimeDependencies)"
           DestinationFolder="$(BootstrapDestination)..\Common7\IDE\CommonExtensions\Microsoft\NuGet\"
-          SkipUnchangedFiles="true" />
-    <Copy Condition="'$(MonoBuild)' == 'true'"
-          SourceFiles="@(_NuGetRuntimeDependencies)"
-          DestinationFolder="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin"
           SkipUnchangedFiles="true" />
 
     <Copy SourceFiles="@(NuGetSdkResolverManifest)"

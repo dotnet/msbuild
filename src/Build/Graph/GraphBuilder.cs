@@ -281,8 +281,6 @@ namespace Microsoft.Build.Graph
                         string.Join(";", solution.SolutionParserErrorCodes)));
             }
 
-            IReadOnlyCollection<ProjectInSolution> projectsInSolution = GetBuildableProjects(solution);
-
             // Mimic behavior of SolutionProjectGenerator
             SolutionConfigurationInSolution currentSolutionConfiguration = SelectSolutionConfiguration(solution, solutionEntryPoint.GlobalProperties);
             solutionGlobalPropertiesBuilder["Configuration"] = currentSolutionConfiguration.ConfigurationName;
@@ -307,40 +305,71 @@ namespace Microsoft.Build.Graph
             // Project configurations are reused heavily, so cache the global properties for each
             Dictionary<string, ImmutableDictionary<string, string>> globalPropertiesForProjectConfiguration = new(StringComparer.OrdinalIgnoreCase);
 
-            var newEntryPoints = new List<ProjectGraphEntryPoint>(projectsInSolution.Count);
+            IReadOnlyList<ProjectInSolution> projectsInSolution = solution.ProjectsInOrder;
+            List<ProjectGraphEntryPoint> newEntryPoints = new(projectsInSolution.Count);
+            Dictionary<string, IReadOnlyCollection<string>> solutionDependencies = new();
 
             foreach (ProjectInSolution project in projectsInSolution)
             {
-                if (project.ProjectConfigurations.Count == 0)
+                if (!SolutionFile.IsBuildableProject(project))
                 {
                     continue;
                 }
 
                 ProjectConfigurationInSolution projectConfiguration = SelectProjectConfiguration(currentSolutionConfiguration, project.ProjectConfigurations);
 
-                if (projectConfiguration.IncludeInBuild)
+                if (!SolutionProjectGenerator.WouldProjectBuild(solution, currentSolutionConfiguration.FullName, project, projectConfiguration))
                 {
-                    if (!globalPropertiesForProjectConfiguration.TryGetValue(projectConfiguration.FullName, out ImmutableDictionary<string, string> projectGlobalProperties))
-                    {
-                        solutionGlobalPropertiesBuilder["Configuration"] = projectConfiguration.ConfigurationName;
-                        solutionGlobalPropertiesBuilder["Platform"] = projectConfiguration.PlatformName;
+                    continue;
+                }
 
-                        projectGlobalProperties = solutionGlobalPropertiesBuilder.ToImmutable();
-                        globalPropertiesForProjectConfiguration.Add(projectConfiguration.FullName, projectGlobalProperties);
+                if (!globalPropertiesForProjectConfiguration.TryGetValue(projectConfiguration.FullName, out ImmutableDictionary<string, string> projectGlobalProperties))
+                {
+                    solutionGlobalPropertiesBuilder["Configuration"] = projectConfiguration.ConfigurationName;
+                    solutionGlobalPropertiesBuilder["Platform"] = projectConfiguration.PlatformName;
+
+                    projectGlobalProperties = solutionGlobalPropertiesBuilder.ToImmutable();
+                    globalPropertiesForProjectConfiguration.Add(projectConfiguration.FullName, projectGlobalProperties);
+                }
+
+                newEntryPoints.Add(new ProjectGraphEntryPoint(project.AbsolutePath, projectGlobalProperties));
+
+                if (project.Dependencies.Count > 0)
+                {
+                    // code snippet cloned from SolutionProjectGenerator.GetSolutionConfiguration
+
+                    List<string> solutionDependenciesForProject = new(project.Dependencies.Count);
+                    foreach (string dependencyProjectGuid in project.Dependencies)
+                    {
+                        if (!solution.ProjectsByGuid.TryGetValue(dependencyProjectGuid, out ProjectInSolution dependencyProject))
+                        {
+                            ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                                "SubCategoryForSolutionParsingErrors",
+                                new BuildEventFileInfo(solution.FullPath),
+                                "SolutionParseProjectDepNotFoundError",
+                                project.ProjectGuid,
+                                dependencyProjectGuid);
+                        }
+
+                        // Add it to the list of dependencies, but only if it should build in this solution configuration
+                        // (If a project is not selected for build in the solution configuration, it won't build even if it's depended on by something that IS selected for build)
+                        // .. and only if it's known to be MSBuild format, as projects can't use the information otherwise
+                        if (dependencyProject.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat)
+                        {
+                            solutionDependenciesForProject.Add(dependencyProject.AbsolutePath);
+                        }
                     }
 
-                    newEntryPoints.Add(new ProjectGraphEntryPoint(project.AbsolutePath, projectGlobalProperties));
+                    if (solutionDependenciesForProject.Count > 0)
+                    {
+                        solutionDependencies.Add(project.AbsolutePath, solutionDependenciesForProject);
+                    }
                 }
             }
 
             newEntryPoints.TrimExcess();
 
-            return (newEntryPoints, GetSolutionDependencies(solution));
-
-            IReadOnlyCollection<ProjectInSolution> GetBuildableProjects(SolutionFile solutionFile)
-            {
-                return solutionFile.ProjectsInOrder.Where(p => p.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat && solutionFile.ProjectShouldBuild(p.RelativePath)).ToImmutableArray();
-            }
+            return (newEntryPoints, solutionDependencies);
 
             SolutionConfigurationInSolution SelectSolutionConfiguration(SolutionFile solutionFile, IDictionary<string, string> globalProperties)
             {
@@ -370,43 +399,6 @@ namespace Microsoft.Build.Graph
 
                 var partiallyMarchedConfig = projectConfigs.FirstOrDefault(pc => pc.Value.ConfigurationName.Equals(solutionConfig.ConfigurationName, StringComparison.OrdinalIgnoreCase)).Value;
                 return partiallyMarchedConfig ?? projectConfigs.First().Value;
-            }
-
-            IReadOnlyDictionary<string, IReadOnlyCollection<string>> GetSolutionDependencies(SolutionFile solutionFile)
-            {
-                var solutionDependencies = new Dictionary<string, IReadOnlyCollection<string>>();
-
-                foreach (var projectWithDependencies in solutionFile.ProjectsInOrder.Where(p => p.Dependencies.Count != 0))
-                {
-                    solutionDependencies[projectWithDependencies.AbsolutePath] = projectWithDependencies.Dependencies.Select(
-                        dependencyGuid =>
-                        {
-                            // code snippet cloned from SolutionProjectGenerator.AddPropertyGroupForSolutionConfiguration
-
-                            if (!solutionFile.ProjectsByGuid.TryGetValue(dependencyGuid, out var dependencyProject))
-                            {
-                                // If it's not itself part of the solution, that's an invalid solution
-                                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
-                                    dependencyProject != null,
-                                    "SubCategoryForSolutionParsingErrors",
-                                    new BuildEventFileInfo(solutionFile.FullPath),
-                                    "SolutionParseProjectDepNotFoundError",
-                                    projectWithDependencies.ProjectGuid,
-                                    dependencyGuid);
-                            }
-
-                            // Add it to the list of dependencies, but only if it should build in this solution configuration
-                            // (If a project is not selected for build in the solution configuration, it won't build even if it's depended on by something that IS selected for build)
-                            // .. and only if it's known to be MSBuild format, as projects can't use the information otherwise
-                            return dependencyProject?.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat
-                                ? dependencyProject.AbsolutePath
-                                : null;
-                        })
-                        .Where(p => p != null)
-                        .ToArray();
-                }
-
-                return solutionDependencies;
             }
         }
 

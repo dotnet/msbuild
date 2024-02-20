@@ -32,10 +32,6 @@
     <!-- Replace with MSBuild::IsBsdLike once the initial msbuild knows about it -->
     <XunitOptions Condition="$([MSBuild]::IsOSPlatform('FREEBSD')) Or $([MSBuild]::IsOSPlatform('NETBSD')) Or $([MSBuild]::IsOSPlatform('OPENBSD'))">$(XunitOptions) -notrait category=nonfreebsdtests</XunitOptions>
 
-    <XunitOptions Condition="'$(MonoBuild)' == 'true'">$(XunitOptions) -notrait category=non-mono-tests -notrait category=nonmonotests</XunitOptions>
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('osx')) and '$(MonoBuild)' == 'true'">$(XunitOptions) -notrait category=mono-osx-failing</XunitOptions>
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('windows')) and '$(MonoBuild)' == 'true'">$(XunitOptions) -notrait category=mono-windows-failing</XunitOptions>
-
     <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">$(XunitOptions) -notrait category=nonnetcoreapptests</XunitOptions>
     <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(XunitOptions) -notrait category=nonnetfxtests</XunitOptions>
 
@@ -108,11 +104,6 @@
     </ItemGroup>
   </Target>
 
-  <!-- Override in-box GenerateSatelliteAssemblies, as we are using CoreGenerateSatelliteAssemblies instead.
-       With https://github.com/dotnet/msbuild/pull/2726 this is no longer necessary, but that change is not
-       in VS 15.5 (which is what we use for Jenkins right now). -->
-  <Target Name="GenerateSatelliteAssemblies" />
-
   <Target Name="RemoveSatelliteDllsFromBuildOutputInPackage"
           BeforeTargets="GenerateNuspec"
           Condition=" '$(IncludeSatelliteOutputInPack)' == 'false' ">
@@ -125,6 +116,9 @@
     </ItemGroup>
   </Target>
 
+  <!-- This target creates a type library for the assemblies in a package. It requires desktop msbuild to locate the tooling
+       Type libraries are still needed by Visual Studio in some cases, like the legacy C# project system.
+       It calls into msbuild via COM, and needs the type library to do so. -->
   <Target Name="CreateTypeLib" BeforeTargets="AfterBuild" Inputs="$(TargetPath)" Outputs="$(TargetDir)$(TargetName).tlb;$(TargetDir)x64\$(TargetName).tlb" Condition="'$(BuildingInsideVisualStudio)' != 'true' and '$(CreateTlb)' == 'true' and $([MSBuild]::IsOSPlatform('windows')) and '$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MSBuildRuntimeType)' != 'Core'">
     <PropertyGroup>
       <TlbExpPath>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPathToDotNetFrameworkSdkFile('tlbexp.exe'))</TlbExpPath>

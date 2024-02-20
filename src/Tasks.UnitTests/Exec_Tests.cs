@@ -69,6 +69,42 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        [UnixOnlyTheory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ExecSetsLocaleOnUnix(bool enableChangeWave)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("LANG", null);
+                env.SetEnvironmentVariable("LC_ALL", null);
+
+                if (enableChangeWave)
+                {
+                    ChangeWaves.ResetStateForTests();
+                    // Important: use the version here
+                    env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_10.ToString());
+                    BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+                }
+
+                Exec exec = PrepareExec("echo LANG=$LANG; echo LC_ALL=$LC_ALL;");
+                bool result = exec.Execute();
+                Assert.True(result);
+
+                MockEngine engine = (MockEngine)exec.BuildEngine;
+                if (enableChangeWave)
+                {
+                    engine.AssertLogContains("LANG=en_US.UTF-8");
+                    engine.AssertLogContains("LC_ALL=en_US.UTF-8");
+                }
+                else
+                {
+                    engine.AssertLogDoesntContain("LANG=en_US.UTF-8");
+                    engine.AssertLogDoesntContain("LC_ALL=en_US.UTF-8");
+                }
+            }
+        }
+
         /// <summary>
         /// Ensures that calling the Exec task does not leave any extra TEMP files
         /// lying around.
@@ -155,16 +191,8 @@ namespace Microsoft.Build.UnitTests
             // ToolTask does not log an error on timeout.
             mockEngine.Errors.ShouldBe(0);
 
-            if (NativeMethodsShared.IsMono)
-            {
-                const int STILL_ACTIVE = 259; // When Process.WaitForExit times out.
-                exec.ExitCode.ShouldBeOneOf(137, STILL_ACTIVE);
-            }
-            else
-            {
-                // On non-Windows the exit code of a killed process is 128 + SIGKILL = 137
-                exec.ExitCode.ShouldBe(NativeMethodsShared.IsWindows ? -1 : 137);
-            }
+            // On non-Windows the exit code of a killed process is 128 + SIGKILL = 137
+            exec.ExitCode.ShouldBe(NativeMethodsShared.IsWindows ? -1 : 137);
         }
 
         [UnixOnlyFact]
@@ -995,6 +1023,25 @@ echo line 3"" />
 
                     result.OverallResult.ShouldBe(BuildResultCode.Success);
                 }
+            }
+        }
+
+        [Fact]
+        public void ConsoleOutputDoesNotTrimLeadingWhitespace()
+        {
+            string lineWithLeadingWhitespace = "    line with some leading whitespace";
+
+            using (var env = TestEnvironment.Create(_output))
+            {
+                var textFilePath = env.CreateFile("leading-whitespace.txt", lineWithLeadingWhitespace).Path;
+                Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? $"type {textFilePath}" : $"cat {textFilePath}");
+                exec.ConsoleToMSBuild = true;
+
+                bool result = exec.Execute();
+
+                result.ShouldBeTrue();
+                exec.ConsoleOutput.Length.ShouldBe(1);
+                exec.ConsoleOutput[0].ItemSpec.ShouldBe(lineWithLeadingWhitespace);
             }
         }
     }

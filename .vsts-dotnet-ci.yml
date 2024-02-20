@@ -35,6 +35,11 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: always()
+  - task: CmdLine@2
+    displayName: 'Set flag to publish Verify *.received.* files when test step fails'
+    condition: failed()
+    inputs:
+      script: 'echo "##vso[task.setvariable variable=publishverify]Yes"'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
@@ -49,6 +54,22 @@ jobs:
       ArtifactName: 'FullOnWindows test logs'
     continueOnError: true
     condition: always()
+  - task: CopyFiles@2
+    condition: eq(variables['publishverify'], 'Yes')
+    displayName: 'Copy Verify *.received.* files to Artifact Staging'
+    inputs:
+      contents: '**\*.received.*'
+      targetFolder: '$(Build.ArtifactStagingDirectory)\Verify'
+      cleanTargetFolder: true
+      overWrite: true
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Verify *.received.* files as Artifacts'
+    name: 'verifypublish'
+    condition: eq(variables['publishverify'], 'Yes')
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)\Verify'
+      ArtifactName: 'Windows-on-full Verify $(System.JobAttempt)'
+
 
 - job: BootstrapMSBuildOnCoreWindows
   displayName: "Windows Core"
@@ -185,6 +206,11 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: always()
+  - task: CmdLine@2
+    displayName: 'Set flag to publish Verify *.received.* files when test step fails'
+    condition: failed()
+    inputs:
+      script: 'echo "##vso[task.setvariable variable=publishverify]Yes"'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
@@ -199,6 +225,21 @@ jobs:
       ArtifactName: 'CoreOnLinux test logs'
     continueOnError: true
     condition: always()
+  - task: CopyFiles@2
+    condition: eq(variables['publishverify'], 'Yes')
+    displayName: 'Copy Verify *.received.* files to Artifact Staging'
+    inputs:
+      contents: '**/*.received.*'
+      targetFolder: '$(Build.ArtifactStagingDirectory)/Verify'
+      cleanTargetFolder: true
+      overWrite: true
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Verify *.received.* files as Artifacts'
+    name: 'verifypublish'
+    condition: eq(variables['publishverify'], 'Yes')
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/Verify'
+      ArtifactName: 'Linux Verify $(System.JobAttempt)'
 
 - job: CoreOnMac
   displayName: "macOS Core"
@@ -219,6 +260,11 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: always()
+  - task: CmdLine@2
+    displayName: 'Set flag to publish Verify *.received.* files when test step fails'
+    condition: failed()
+    inputs:
+      script: 'echo "##vso[task.setvariable variable=publishverify]Yes"'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
@@ -233,5 +279,20 @@ jobs:
       ArtifactName: 'CoreOnMac test logs'
     continueOnError: true
     condition: always()
+  - task: CopyFiles@2
+    condition: eq(variables['publishverify'], 'Yes')
+    displayName: 'Copy Verify *.received.* files to Artifact Staging'
+    inputs:
+      contents: '**/*.received.*'
+      targetFolder: '$(Build.ArtifactStagingDirectory)/Verify'
+      cleanTargetFolder: true
+      overWrite: true
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Verify *.received.* files as Artifacts'
+    name: 'verifypublish'
+    condition: eq(variables['publishverify'], 'Yes')
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/Verify'
+      ArtifactName: 'macOS Verify $(System.JobAttempt)'
 
 - template: /eng/common/templates/jobs/source-build.yml

@@ -463,6 +463,11 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Gets or sets a value that will error when the build process fails an up-to-date check.
+        /// </summary>
+        public bool Question { get; set; }
+
+        /// <summary>
         /// The list of descriptions which describe how to create forwarding loggers on a node.
         /// This is used by the node provider to get a list of registered descriptions so that
         /// they can be transmitted to child nodes.
@@ -796,6 +801,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Get the number of initial nodes the host is running with, if the component host does not have
                 // this information default to 1
                 _maxCPUCount = buildComponentHost.BuildParameters.MaxNodeCount;
+
+                Question = buildComponentHost.BuildParameters.Question;
 
                 // Ask the component host if onlyLogCriticalEvents is true or false. If the host does
                 // not have this information default to false.
