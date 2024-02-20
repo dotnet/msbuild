@@ -10,19 +10,9 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
 
 namespace Microsoft.Build.Experimental;
-public enum ItemType
-{
-    ProjectReference,
-    PackageReference,
-    Compile,
-    EmbeddedResource
-}
 
 public static class ItemTypeExtensions
 {
-    public static IEnumerable<ProjectItemElement> GetItemsOfType(this IEnumerable<ProjectItemElement> items, ItemType itemType)
-        => GetItemsOfType(items, itemType.ToString());
-
     public static IEnumerable<ProjectItemElement> GetItemsOfType(this IEnumerable<ProjectItemElement> items,
         string itemType)
     {
@@ -35,9 +25,6 @@ public class ItemsHolder(IEnumerable<ProjectItemElement> items, IEnumerable<Proj
 {
     public IEnumerable<ProjectItemElement> Items { get; } = items;
     public IEnumerable<ProjectItemGroupElement> ItemGroups { get; } = itemGroups;
-
-    public IEnumerable<ProjectItemElement> GetItemsOfType(ItemType itemType)
-        => Items.GetItemsOfType(itemType);
 
     public IEnumerable<ProjectItemElement> GetItemsOfType(string itemType)
     {

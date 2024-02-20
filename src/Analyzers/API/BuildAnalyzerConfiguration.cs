@@ -8,8 +8,6 @@ public class BuildAnalyzerConfiguration
     public static BuildAnalyzerConfiguration Default { get; } = new()
     {
         LifeTimeScope = Experimental.LifeTimeScope.PerProject,
-        SupportedInvocationConcurrency = InvocationConcurrency.Parallel,
-        PerformanceWeightClass = Experimental.PerformanceWeightClass.Normal,
         EvaluationAnalysisScope = Experimental.EvaluationAnalysisScope.AnalyzedProjectOnly,
         Severity = BuildAnalyzerResultSeverity.Info,
         IsEnabled = false,
@@ -18,8 +16,6 @@ public class BuildAnalyzerConfiguration
     public static BuildAnalyzerConfiguration Null { get; } = new();
 
     public LifeTimeScope? LifeTimeScope { get; internal init; }
-    public InvocationConcurrency? SupportedInvocationConcurrency { get; internal init; }
-    public PerformanceWeightClass? PerformanceWeightClass { get; internal init; }
     public EvaluationAnalysisScope? EvaluationAnalysisScope { get; internal init; }
     public BuildAnalyzerResultSeverity? Severity { get; internal init; }
     public bool? IsEnabled { get; internal init; }

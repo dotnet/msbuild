@@ -85,11 +85,9 @@ internal static class ConfigurationProvider
 
         return new BuildAnalyzerConfigurationInternal()
         {
-            SupportedInvocationConcurrency = GetConfigValue(editorConfig, defaultConfig, cfg => cfg.SupportedInvocationConcurrency),
             EvaluationAnalysisScope = GetConfigValue(editorConfig, defaultConfig, cfg => cfg.EvaluationAnalysisScope),
             IsEnabled = GetConfigValue(editorConfig, defaultConfig, cfg => cfg.IsEnabled),
             LifeTimeScope = GetConfigValue(editorConfig, defaultConfig, cfg => cfg.LifeTimeScope),
-            PerformanceWeightClass = GetConfigValue(editorConfig, defaultConfig, cfg => cfg.PerformanceWeightClass),
             Severity = GetConfigValue(editorConfig, defaultConfig, cfg => cfg.Severity)
         };
 

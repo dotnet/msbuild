@@ -16,8 +16,6 @@ namespace Microsoft.Build.Analyzers.Infrastructure;
 internal sealed class BuildAnalyzerConfigurationInternal
 {
     public LifeTimeScope LifeTimeScope { get; internal init; }
-    public InvocationConcurrency SupportedInvocationConcurrency { get; internal init; }
-    public PerformanceWeightClass PerformanceWeightClass { get; internal init; }
     public EvaluationAnalysisScope EvaluationAnalysisScope { get; internal init; }
     public BuildAnalyzerResultSeverity Severity { get; internal init; }
     public bool IsEnabled { get; internal init; }
