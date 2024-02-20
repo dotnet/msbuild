@@ -16,9 +16,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Analyzers\Microsoft.Build.Analyzers.csproj" />
+    <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
+    <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
-    <ProjectReference Include="..\MSBuild.Bootstrap\MSBuild.Bootstrap.csproj" >
+    <ProjectReference Include="..\MSBuild.Bootstrap\MSBuild.Bootstrap.csproj">
       <Private>false</Private>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
@@ -38,45 +39,35 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\UnitTests\TestEnvironment.cs" >
-      <Link>Shared\TestEnvironment.cs</Link>
-    </Compile>
-
-    <Compile Include="..\Shared\FileUtilities.cs" >
+    <Compile Include="..\Shared\FileUtilities.cs">
       <Link>Shared\FileUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\TempFileUtilities.cs" >
+    <Compile Include="..\Shared\TempFileUtilities.cs">
       <Link>Shared\TempFileUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ErrorUtilities.cs" >
+    <Compile Include="..\Shared\ErrorUtilities.cs">
       <Link>Shared\ErrorUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\EscapingUtilities.cs" >
+    <Compile Include="..\Shared\EscapingUtilities.cs">
       <Link>Shared\EscapingUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\BuildEnvironmentHelper.cs" >
+    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>Shared\BuildEnvironmentHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ProcessExtensions.cs" >
+    <Compile Include="..\Shared\ProcessExtensions.cs">
       <Link>Shared\ProcessExtensions.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ResourceUtilities.cs" >
+    <Compile Include="..\Shared\ResourceUtilities.cs">
       <Link>Shared\ResourceUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ExceptionHandling.cs" >
+    <Compile Include="..\Shared\ExceptionHandling.cs">
       <Link>Shared\ExceptionHandling.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\FileUtilitiesRegex.cs" >
+    <Compile Include="..\Shared\FileUtilitiesRegex.cs">
       <Link>Shared\FileUtilitiesRegex.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\UnitTests\AssemblyResources.cs" >
+    <Compile Include="..\Shared\UnitTests\AssemblyResources.cs">
       <Link>Shared\AssemblyResources.cs</Link>
-    </Compile>
-    <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" >
-      <Link>Shared\RunnerUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\UnitTests.Shared\EnvironmentProvider.cs" >
-      <Link>Shared\EnvironmentProvider.cs</Link>
     </Compile>
   </ItemGroup>
 

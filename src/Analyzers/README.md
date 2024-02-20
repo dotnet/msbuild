@@ -1,3 +1,0 @@
-# Microsoft.Build.Analyzers
-
-TBD
