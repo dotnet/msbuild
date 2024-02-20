@@ -4367,9 +4367,9 @@ $(
             Assert.True(Guid.TryParse(result, out Guid guid));
         }
 
-        // TODO: update features list
         [Theory]
         [InlineData("NonExistingFeature", "Undefined")]
+        [InlineData("EvaluationContext_SharedSDKCachePolicy", "Available")]
         public void PropertyFunctionCheckFeatureAvailability(string featureName, string availability)
         {
             var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default);
