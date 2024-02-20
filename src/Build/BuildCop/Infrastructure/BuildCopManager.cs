@@ -4,20 +4,16 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Build.Analyzers.Analyzers;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.BuildCop.Analyzers;
+using Microsoft.Build.BuildCop.Logging;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Experimental;
+using Microsoft.Build.Experimental.BuildCop;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Logging.Analyzers;
 
-namespace Microsoft.Build.Analyzers.Infrastructure;
+namespace Microsoft.Build.BuildCop.Infrastructure;
 
 internal sealed class BuildCopManager : IBuildCopManager
 {

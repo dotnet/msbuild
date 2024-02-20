@@ -3,7 +3,7 @@
 
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.Experimental;
+namespace Microsoft.Build.Experimental.BuildCop;
 
 public interface IBuildAnalysisLoggingContextFactory
 {

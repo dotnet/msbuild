@@ -6,7 +6,7 @@ using System.IO;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.Experimental;
+namespace Microsoft.Build.Experimental.BuildCop;
 
 public class BuildAnalyzerResult
 {

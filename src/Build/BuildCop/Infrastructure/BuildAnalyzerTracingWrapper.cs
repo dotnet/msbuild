@@ -3,8 +3,9 @@
 
 using System;
 using System.Diagnostics;
+using Microsoft.Build.Experimental.BuildCop;
 
-namespace Microsoft.Build.Experimental;
+namespace Microsoft.Build.BuildCop.Infrastructure;
 
 internal sealed class BuildAnalyzerTracingWrapper
 {

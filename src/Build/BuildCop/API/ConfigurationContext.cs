@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Build.Experimental;
+namespace Microsoft.Build.Experimental.BuildCop;
 
 /// <summary>
 /// Holder of an optional configuration from .editorconfig file (not recognized by infrastructure)

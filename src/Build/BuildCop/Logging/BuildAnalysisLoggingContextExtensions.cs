@@ -3,9 +3,9 @@
 
 using System;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Experimental;
+using Microsoft.Build.Experimental.BuildCop;
 
-namespace Microsoft.Build.Logging.Analyzers;
+namespace Microsoft.Build.BuildCop.Logging;
 
 internal static class BuildAnalysisLoggingContextExtensions
 {

@@ -9,10 +9,9 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Text.Json;
-using System.Threading.Tasks;
-using Microsoft.Build.Experimental;
+using Microsoft.Build.Experimental.BuildCop;
 
-namespace Microsoft.Build.Analyzers.Infrastructure;
+namespace Microsoft.Build.BuildCop.Infrastructure;
 
 // TODO: https://github.com/dotnet/msbuild/issues/9628
 internal static class ConfigurationProvider

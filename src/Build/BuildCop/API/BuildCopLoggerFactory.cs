@@ -6,10 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Build.Analyzers.Infrastructure;
+using Microsoft.Build.BuildCop.Infrastructure;
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.Experimental;
+namespace Microsoft.Build.Experimental.BuildCop;
 
 public class BuildCopLoggerFactory : IBuildCopLoggerFactory
 {

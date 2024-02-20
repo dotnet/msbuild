@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Logging;
 
-namespace Microsoft.Build.Experimental;
+namespace Microsoft.Build.Experimental.BuildCop;
 public class EvaluatedPropertiesContext : BuildAnalysisContext
 {
     internal EvaluatedPropertiesContext(

@@ -1,14 +1,14 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Microsoft.Build.Experimental;
+namespace Microsoft.Build.Experimental.BuildCop;
 
 public class BuildAnalyzerConfiguration
 {
     public static BuildAnalyzerConfiguration Default { get; } = new()
     {
-        LifeTimeScope = Experimental.LifeTimeScope.PerProject,
-        EvaluationAnalysisScope = Experimental.EvaluationAnalysisScope.AnalyzedProjectOnly,
+        LifeTimeScope = BuildCop.LifeTimeScope.PerProject,
+        EvaluationAnalysisScope = BuildCop.EvaluationAnalysisScope.AnalyzedProjectOnly,
         Severity = BuildAnalyzerResultSeverity.Info,
         IsEnabled = false,
     };

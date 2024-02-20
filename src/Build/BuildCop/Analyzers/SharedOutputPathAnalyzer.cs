@@ -4,12 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.IO;
+using Microsoft.Build.BuildCop.Infrastructure;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Experimental;
+using Microsoft.Build.Experimental.BuildCop;
 
-namespace Microsoft.Build.Analyzers.Analyzers;
+namespace Microsoft.Build.BuildCop.Analyzers;
 
 // Some background on ids:
 //  * https://github.com/dotnet/roslyn-analyzers/blob/main/src/Utilities/Compiler/DiagnosticCategoryAndIdRanges.txt
