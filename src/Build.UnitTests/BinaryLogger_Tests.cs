@@ -5,8 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
+using System.Reflection;
 using System.Text;
-
+using FluentAssertions;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -83,10 +85,21 @@ namespace Microsoft.Build.UnitTests
             _logFile = _env.ExpectFile(".binlog").Path;
         }
 
+        public enum BinlogRoundtripTestReplayMode
+        {
+            NoReplay,
+            Structured,
+            RawEvents
+        }
+
         [Theory]
-        [InlineData(s_testProject)]
-        [InlineData(s_testProject2)]
-        public void TestBinaryLoggerRoundtrip(string projectText)
+        [InlineData(s_testProject, BinlogRoundtripTestReplayMode.NoReplay)]
+        [InlineData(s_testProject, BinlogRoundtripTestReplayMode.Structured)]
+        [InlineData(s_testProject, BinlogRoundtripTestReplayMode.RawEvents)]
+        [InlineData(s_testProject2, BinlogRoundtripTestReplayMode.NoReplay)]
+        [InlineData(s_testProject2, BinlogRoundtripTestReplayMode.Structured)]
+        [InlineData(s_testProject2, BinlogRoundtripTestReplayMode.RawEvents)]
+        public void TestBinaryLoggerRoundtrip(string projectText, BinlogRoundtripTestReplayMode replayMode)
         {
             var binaryLogger = new BinaryLogger();
 
@@ -110,6 +123,36 @@ namespace Microsoft.Build.UnitTests
                 project.Build(new ILogger[] { binaryLogger, mockLogFromBuild, serialFromBuild, parallelFromBuild }).ShouldBeTrue();
             }
 
+            string fileToReplay;
+            switch (replayMode)
+            {
+                case BinlogRoundtripTestReplayMode.NoReplay:
+                    fileToReplay = _logFile;
+                    break;
+                case BinlogRoundtripTestReplayMode.Structured:
+                case BinlogRoundtripTestReplayMode.RawEvents:
+                    {
+                        var logReader = new BinaryLogReplayEventSource();
+                        fileToReplay = _env.ExpectFile(".binlog").Path;
+                        if (replayMode == BinlogRoundtripTestReplayMode.Structured)
+                        {
+                            // need dummy handler to force structured replay
+                            logReader.BuildFinished += (_, _) => { };
+                        }
+
+                        BinaryLogger outputBinlog = new BinaryLogger()
+                        {
+                            Parameters = fileToReplay
+                        };
+                        outputBinlog.Initialize(logReader);
+                        logReader.Replay(_logFile);
+                        outputBinlog.Shutdown();
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(replayMode), replayMode, null);
+            }
+
             var mockLogFromPlayback = new MockLogger();
 
             var serialFromPlaybackText = new StringBuilder();
@@ -126,7 +169,10 @@ namespace Microsoft.Build.UnitTests
             parallelFromPlayback.Initialize(binaryLogReader);
 
             // read the binary log and replay into mockLogger2
-            binaryLogReader.Replay(_logFile);
+            binaryLogReader.Replay(fileToReplay);
+            mockLogFromPlayback.Shutdown();
+            serialFromPlayback.Shutdown();
+            parallelFromPlayback.Shutdown();
 
             // the binlog will have more information than recorded by the text log
             mockLogFromPlayback.FullLog.ShouldContainWithoutWhitespace(mockLogFromBuild.FullLog);
@@ -138,6 +184,138 @@ namespace Microsoft.Build.UnitTests
 
             serialActual.ShouldContainWithoutWhitespace(serialExpected);
             parallelActual.ShouldContainWithoutWhitespace(parallelExpected);
+        }
+
+        /// <summary>
+        /// This test validate that binlog file content is identical upon replaying.
+        /// The identity can be defined via 3 ways:
+        ///   * byte-for-byte equality
+        ///   * byte-for-byte equality of unzipped content
+        ///   * structured equality of events
+        ///
+        /// They are ordered by their strength (the byte-for-byte equality implies the other two, etc.),
+        ///  but we mainly care about the structured equality. If the more strong equalities are broken -
+        ///  the assertions can be simply removed.
+        /// However the structured equality is important - it guarantees that binlog reading and writing functionality
+        ///  is not dropping or altering any information.
+        /// </summary>
+        /// <param name="projectText"></param>
+        /// <param name="replayMode"></param>
+        [Theory]
+        [InlineData(s_testProject, BinlogRoundtripTestReplayMode.Structured)]
+        [InlineData(s_testProject, BinlogRoundtripTestReplayMode.RawEvents)]
+        [InlineData(s_testProject2, BinlogRoundtripTestReplayMode.Structured)]
+        [InlineData(s_testProject2, BinlogRoundtripTestReplayMode.RawEvents)]
+        public void TestBinaryLoggerRoundtripEquality(string projectText, BinlogRoundtripTestReplayMode replayMode)
+        {
+            var binaryLogger = new BinaryLogger();
+
+            binaryLogger.Parameters = _logFile;
+
+            // build and log into binary logger
+            using (ProjectCollection collection = new())
+            {
+                Project project = ObjectModelHelpers.CreateInMemoryProject(collection, projectText);
+                // make sure the project file makes it to the binlog (it has file existence check)
+                File.WriteAllText(project.FullPath, projectText);
+                project.Build(new ILogger[] { binaryLogger }).ShouldBeTrue();
+                File.Delete(project.FullPath);
+            }
+
+            var logReader = new BinaryLogReplayEventSource();
+            string replayedLogFile = _env.ExpectFile(".binlog").Path;
+            if (replayMode == BinlogRoundtripTestReplayMode.Structured)
+            {
+                // need dummy handler to force structured replay
+                logReader.BuildFinished += (_, _) => { };
+            }
+
+            BinaryLogger outputBinlog = new BinaryLogger()
+            {
+                Parameters = $"LogFile={replayedLogFile};OmitInitialInfo"
+            };
+            outputBinlog.Initialize(logReader);
+            logReader.Replay(_logFile);
+            outputBinlog.Shutdown();
+
+            AssertBinlogsHaveEqualContent(_logFile, replayedLogFile);
+            // If this assertation complicates development - it can possibly be removed
+            // The structured equality above should be enough.
+            AssertFilesAreBinaryEqualAfterUnpack(_logFile, replayedLogFile);
+        }
+
+        private static void AssertFilesAreBinaryEqualAfterUnpack(string firstPath, string secondPath)
+        {
+            using var br1 = BinaryLogReplayEventSource.OpenReader(firstPath);
+            using var br2 = BinaryLogReplayEventSource.OpenReader(secondPath);
+            const int bufferSize = 4096;
+
+            int readCount = 0;
+            while (br1.ReadBytes(bufferSize) is { Length: > 0 } bytes1)
+            {
+                var bytes2 = br2.ReadBytes(bufferSize);
+
+                bytes1.SequenceEqual(bytes2).ShouldBeTrue(
+                    $"Buffers starting at position {readCount} differ. First:{Environment.NewLine}{string.Join(",", bytes1)}{Environment.NewLine}Second:{Environment.NewLine}{string.Join(",", bytes2)}");
+                readCount += bufferSize;
+            }
+
+            br2.ReadBytes(bufferSize).Length.ShouldBe(0, "Second buffer contains bytes after first file end");
+        }
+
+        private static void AssertBinlogsHaveEqualContent(string firstPath, string secondPath)
+        {
+            using var reader1 = BinaryLogReplayEventSource.OpenBuildEventsReader(firstPath);
+            using var reader2 = BinaryLogReplayEventSource.OpenBuildEventsReader(secondPath);
+
+            Dictionary<string, string> embedFiles1 = new();
+            Dictionary<string, string> embedFiles2 = new();
+
+            reader1.ArchiveFileEncountered += arg
+                => AddArchiveFile(embedFiles1, arg);
+
+            // This would be standard subscribe:
+            // reader2.ArchiveFileEncountered += arg
+            //    => AddArchiveFile(embedFiles2, arg);
+
+            // We however use the AddArchiveFileFromStringHandler - to exercise it
+            // and to assert it's equality with ArchiveFileEncountered handler
+            string currentFileName = null;
+            reader2.ArchiveFileEncountered +=
+                ((Action<StringReadEventArgs>)AddArchiveFileFromStringHandler).ToArchiveFileHandler();
+
+            int i = 0;
+            while (reader1.Read() is { } ev1)
+            {
+                i++;
+                var ev2 = reader2.Read();
+
+                ev1.Should().BeEquivalentTo(ev2,
+                    $"Binlogs ({firstPath} and {secondPath}) should be equal at event {i}");
+            }
+            // Read the second reader - to confirm there are no more events
+            //  and to force the embedded files to be read.
+            reader2.Read().ShouldBeNull($"Binlogs ({firstPath} and {secondPath}) are not equal - second has more events >{i + 1}");
+
+            Assert.Equal(embedFiles1, embedFiles2);
+
+            void AddArchiveFile(Dictionary<string, string> files, ArchiveFileEventArgs arg)
+            {
+                ArchiveFile embedFile = arg.ArchiveData.ToArchiveFile();
+                files.Add(embedFile.FullPath, embedFile.Content);
+            }
+
+            void AddArchiveFileFromStringHandler(StringReadEventArgs args)
+            {
+                if (currentFileName == null)
+                {
+                    currentFileName = args.OriginalString;
+                    return;
+                }
+
+                embedFiles2.Add(currentFileName, args.OriginalString);
+                currentFileName = null;
+            }
         }
 
         [Fact]

@@ -1061,7 +1061,7 @@
       </trans-unit>
       <trans-unit id="GenerateManifest.WriteOutputManifestFailed">
         <source>MSB3173: Unable to write manifest '{0}'. {1} {2}</source>
-        <target state="new">MSB3173: Unable to write manifest '{0}'. {1} {2}</target>
+        <target state="translated">MSB3173: Nie można zapisać manifestu „{0}”. {1} {2}</target>
         <note>{StrBegin="MSB3173: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.InvalidRequestedExecutionLevel">
@@ -1685,6 +1685,11 @@
         <note>
       LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
     </note>
+      </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.SearchPathAddedByParentAssembly">
+        <source>For SearchPath "{0}" (added by referencing assembly "{1}").</source>
+        <target state="translated">Dla elementu SearchPath „{0}” (dodanego przez odwołanie do zestawu „{1}”).</target>
+        <note> {1} is the name of the parent assembly for which SearchPath was used.</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.SearchedAssemblyFoldersEx">
         <source>Considered AssemblyFoldersEx locations.</source>
@@ -2516,7 +2521,7 @@
       </trans-unit>
       <trans-unit id="Task.FileLocked">
         <source>The file is locked by: "{0}"</source>
-        <target state="new">The file is locked by: "{0}"</target>
+        <target state="translated">Plik jest zablokowany przez: „{0}”</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">

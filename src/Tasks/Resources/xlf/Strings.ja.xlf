@@ -1061,7 +1061,7 @@
       </trans-unit>
       <trans-unit id="GenerateManifest.WriteOutputManifestFailed">
         <source>MSB3173: Unable to write manifest '{0}'. {1} {2}</source>
-        <target state="new">MSB3173: Unable to write manifest '{0}'. {1} {2}</target>
+        <target state="translated">MSB3173: マニフェスト '{0}' を書き込めません。{1}{2}</target>
         <note>{StrBegin="MSB3173: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.InvalidRequestedExecutionLevel">
@@ -1685,6 +1685,11 @@
         <note>
       LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
     </note>
+      </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.SearchPathAddedByParentAssembly">
+        <source>For SearchPath "{0}" (added by referencing assembly "{1}").</source>
+        <target state="translated">SearchPath "{0}" の場合 (アセンブリ "{1}" を参照して追加)。</target>
+        <note> {1} is the name of the parent assembly for which SearchPath was used.</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.SearchedAssemblyFoldersEx">
         <source>Considered AssemblyFoldersEx locations.</source>
@@ -2516,7 +2521,7 @@
       </trans-unit>
       <trans-unit id="Task.FileLocked">
         <source>The file is locked by: "{0}"</source>
-        <target state="new">The file is locked by: "{0}"</target>
+        <target state="translated">このファイルは "{0}" によってロックされています。</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">

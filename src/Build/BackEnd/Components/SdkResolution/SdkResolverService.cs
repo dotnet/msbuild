@@ -118,6 +118,53 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
         public virtual SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio, bool failOnUnresolvedSdk)
         {
+            // If we are running in .NET core, we ask the built-in default resolver first.
+            // - It is a perf optimization (no need to discover and load any of the plug-in assemblies to resolve an "in-box" Sdk).
+            // - It brings `dotnet build` to parity with `MSBuild.exe` functionally, as the Framework build of Microsoft.DotNet.MSBuildSdkResolver
+            //   contains the same logic and it is the first resolver in priority order.
+            //
+            // In an attempt to avoid confusion, this text uses "SDK" to refer to the installation unit, e.g. "C:\Program Files\dotnet\sdk\8.0.100",
+            // and "Sdk" to refer to the set of imports for targeting a specific project type, e.g. "Microsoft.NET.Sdk.Web".
+            //
+            // Here's the flow on Framework (`MSBuild.exe`):
+            // 1. Microsoft.DotNet.MSBuildSdkResolver is loaded and asked to resolve the Sdk required by the project.
+            //    1.1. It resolves the SDK (as in installation directory) using machine-wide state and global.json.
+            //    1.2. It checks the Sdks subdirectory of the SDK installation directory for a matching in-box Sdk.
+            //    1.3. If no match, checks installed workloads.
+            // 2. If no match so far, Microsoft.Build.NuGetSdkResolver is loaded and asked to resolve the Sdk.
+            // 3. If no match still, DefaultSdkResolver checks the Sdks subdirectory of the Visual Studio\MSBuild directory.
+            //
+            // Here's the flow on Core (`dotnet build`):
+            // 1. DefaultSdkResolver checks the Sdks subdirectory of our SDK installation. Note that the work of resolving the
+            //    SDK version using machine-wide state and global.json (step 1.1. in `MSBuild.exe` above) has already been done
+            //    by the `dotnet` muxer. We know which SDK (capital letters) we are in, so the in-box Sdk lookup is trivial.
+            // 2. If no match, Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver is loaded and asked to resolve the Sdk required by the project.
+            //    2.1. It checks installed workloads.
+            // 3. If no match still, Microsoft.Build.NuGetSdkResolver is loaded and asked to resolve the Sdk.
+            //
+            // Overall, while Sdk resolvers look like a general plug-in system, there are good reasons why some of the logic is hard-coded.
+            // It's not really meant to be modified outside of very special/internal scenarios.
+#if NETCOREAPP
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+            {
+                if (TryResolveSdkUsingSpecifiedResolvers(
+                    _sdkResolverLoader.GetDefaultResolvers(),
+                    BuildEventContext.InvalidSubmissionId, // disables GetResolverState/SetResolverState
+                    sdk,
+                    loggingContext,
+                    sdkReferenceLocation,
+                    solutionPath,
+                    projectPath,
+                    interactive,
+                    isRunningInVisualStudio,
+                    out SdkResult sdkResult,
+                    out _,
+                    out _))
+                {
+                    return sdkResult;
+                }
+            }
+#endif
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
             {
                 return ResolveSdkUsingResolversWithPatternsFirst(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio, failOnUnresolvedSdk);
@@ -312,8 +359,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             // Loop through resolvers which have already been sorted by priority, returning the first result that was successful
             SdkLogger buildEngineLogger = new SdkLogger(loggingContext);
 
-            loggingContext.LogComment(MessageImportance.Low, "SdkResolving", sdk.ToString());
-
             foreach (SdkResolver sdkResolver in resolvers)
             {
                 SdkResolverContext context = new SdkResolverContext(buildEngineLogger, projectPath, solutionPath, ProjectCollection.Version, interactive, isRunningInVisualStudio)
@@ -355,6 +400,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                 if (result.Success)
                 {
+                    loggingContext.LogComment(MessageImportance.Low, "SucceededToResolveSDK", sdk.ToString(), sdkResolver.Name, result.Path ?? "null", result.Version ?? "null");
+
                     LogWarnings(loggingContext, sdkReferenceLocation, result.Warnings);
 
                     if (!IsReferenceSameVersion(sdk, result.Version))
@@ -368,6 +415,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                     sdkResult = result;
                     return true;
+                }
+                else if (loggingContext.LoggingService.MinimumRequiredMessageImportance >= MessageImportance.Low)
+                {
+                    string resultWarnings = result.Warnings?.Any() == true ? string.Join(Environment.NewLine, result.Warnings) : "null";
+                    string resultErrors = result.Errors?.Any() == true ? string.Join(Environment.NewLine, result.Errors) : "null";
+
+                    loggingContext.LogComment(MessageImportance.Low, "SDKResolverAttempt", sdkResolver.Name, sdk.ToString(), resultWarnings, resultErrors);
                 }
 
                 results.Add(result);
@@ -390,6 +444,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             if (resolverLoader != null)
             {
                 _sdkResolverLoader = resolverLoader;
+            }
+            else
+            {
+                _sdkResolverLoader = CachingSdkResolverLoader.Instance;
             }
 
             _specificResolversManifestsRegistry = null;
@@ -479,15 +537,20 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                 _manifestToResolvers = new Dictionary<SdkResolverManifest, IReadOnlyList<SdkResolver>>();
 
-                // Load and add the manifest for the default resolvers, located directly in this dll.
-                IReadOnlyList<SdkResolver> defaultResolvers = _sdkResolverLoader.GetDefaultResolvers();
                 SdkResolverManifest sdkDefaultResolversManifest = null;
-                if (defaultResolvers.Count > 0)
+#if NETCOREAPP
+                if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+#endif
                 {
-                    MSBuildEventSource.Log.SdkResolverServiceLoadResolversStart();
-                    sdkDefaultResolversManifest = new SdkResolverManifest(DisplayName: "DefaultResolversManifest", Path: null, ResolvableSdkRegex: null);
-                    _manifestToResolvers[sdkDefaultResolversManifest] = defaultResolvers;
-                    MSBuildEventSource.Log.SdkResolverServiceLoadResolversStop(sdkDefaultResolversManifest.DisplayName ?? string.Empty, defaultResolvers.Count);
+                    // Load and add the manifest for the default resolvers, located directly in this dll.
+                    IReadOnlyList<SdkResolver> defaultResolvers = _sdkResolverLoader.GetDefaultResolvers();
+                    if (defaultResolvers.Count > 0)
+                    {
+                        MSBuildEventSource.Log.SdkResolverServiceLoadResolversStart();
+                        sdkDefaultResolversManifest = new SdkResolverManifest(DisplayName: "DefaultResolversManifest", Path: null, ResolvableSdkRegex: null);
+                        _manifestToResolvers[sdkDefaultResolversManifest] = defaultResolvers;
+                        MSBuildEventSource.Log.SdkResolverServiceLoadResolversStop(sdkDefaultResolversManifest.DisplayName ?? string.Empty, defaultResolvers.Count);
+                    }
                 }
 
                 MSBuildEventSource.Log.SdkResolverServiceFindResolversManifestsStop(allResolversManifests.Count);

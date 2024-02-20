@@ -33,10 +33,6 @@ variables:
       value: ${{parameters.OptProfDropName}}
     - name: SourceBranch
       value: ''
-  - name: _DotNetArtifactsCategory
-    value: .NETCore
-  - name: _DotNetValidationArtifactsCategory
-    value: .NETCoreValidation
   - name: EnableReleaseOneLocBuild
     value: true
   - name: Codeql.Enabled
@@ -83,8 +79,6 @@ stages:
     timeoutInMinutes: 180
 
     variables:
-    - group: DotNet-Blob-Feed
-    - group: DotNet-Symbol-Publish
     - group: Publish-Build-Assets
     - name: TeamName
       value: MSBuild
@@ -136,12 +130,6 @@ stages:
                 /p:VisualStudioDropAccessToken=$(System.AccessToken)
                 /p:VisualStudioDropName=$(VisualStudio.DropName)
                 /p:DotNetSignType=$(SignType)
-                /p:DotNetPublishToBlobFeed=true
-                /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
-                /p:DotNetPublishBlobFeedUrl=https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
-                /p:PublishToSymbolServer=true
-                /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
-                /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
                 /p:TeamName=MSBuild
                 /p:DotNetPublishUsingPipelines=true
                 /p:VisualStudioIbcDrop=$(OptProfDrop)
