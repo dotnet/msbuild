@@ -1046,45 +1046,45 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void EmbedsSourceFileInBinlog()
         {
-            string sourceFileContent = @"
-                                       using System;
-                    using System.Collections.Generic;
-                    using System.Text;
-                    using Microsoft.Build.Utilities;
-                    using Microsoft.Build.Framework;
+            string sourceFileContent = """
+                using System;
+                using System.Collections.Generic;
+                using System.Text;
+                using Microsoft.Build.Utilities;
+                using Microsoft.Build.Framework;
 
-                    namespace Microsoft.Build.NonShippingTasks
+                namespace Microsoft.Build.NonShippingTasks
+                {
+                    public class LogNameValue_ClassSourcesTest : Task
                     {
-                        public class LogNameValue_ClassSourcesTest : Task
+                        private string variableName;
+                        private string variableValue;
+
+
+                        [Required]
+                        public string Name
                         {
-                            private string variableName;
-                            private string variableValue;
+                            get { return variableName; }
+                            set { variableName = value; }
+                        }
 
 
-                            [Required]
-                            public string Name
-                            {
-                                get { return variableName; }
-                                set { variableName = value; }
-                            }
+                        public string Value
+                        {
+                            get { return variableValue; }
+                            set { variableValue = value; }
+                        }
 
 
-                            public string Value
-                            {
-                                get { return variableValue; }
-                                set { variableValue = value; }
-                            }
-
-
-                            public override bool Execute()
-                            {
-                                // Set the process environment
-                                Log.LogMessage(""Setting {0}={1}"", this.variableName, this.variableValue);
-                                return true;
-                            }
+                        public override bool Execute()
+                        {
+                            // Set the process environment
+                            Log.LogMessage("Setting {0}={1}", this.variableName, this.variableValue);
+                            return true;
                         }
                     }
-";
+                }
+                """;
 
             string tempFileDirectory = Path.GetTempPath();
             string tempFileName = Guid.NewGuid().ToString() + ".cs";
@@ -1093,7 +1093,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                string projectFileContents = @"
+                string projectFileContents = $"""
                     <Project ToolsVersion='msbuilddefaulttoolsversion'>
                         <UsingTask TaskName=`LogNameValue_ClassSourcesTest` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll`>
                         <ParameterGroup>
@@ -1101,13 +1101,14 @@ namespace Microsoft.Build.UnitTests
                             <Value ParameterType='System.String' />
                         </ParameterGroup>
                         <Task>
-                            <Code Source='" + tempSourceFile + @"'/>
+                            <Code Source='{tempSourceFile}'/>
                          </Task>
                          </UsingTask>
                         <Target Name=`Build`>
                             <LogNameValue_ClassSourcesTest Name='MyName' Value='MyValue'/>
                         </Target>
-                    </Project>";
+                    </Project>
+                    """;
 
                 string binaryLogFile = Path.Combine(tempFileDirectory, "output.binlog");
                 var binaryLogger = new BinaryLogger()
@@ -1141,13 +1142,13 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void EmbedsSourceFileInBinlogWhenFailsToCompile()
         {
-            string sourceFileContentThatFailsToCompile = @"
-                    namespace Microsoft.Build.NonShippingTasks
+            string sourceFileContentThatFailsToCompile = """
+                namespace Microsoft.Build.NonShippingTasks
+                {
+                    public class LogNameValue_ClassSourcesTest : Task
                     {
-                        public class LogNameValue_ClassSourcesTest : Task
-                        {
-                            private string 
-";
+                        private string
+                """;
 
             string tempFileDirectory = Path.GetTempPath();
             string tempFileName = Guid.NewGuid().ToString() + ".cs";
@@ -1156,7 +1157,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                string projectFileContents = @"
+                string projectFileContents = $"""
                     <Project ToolsVersion='msbuilddefaulttoolsversion'>
                         <UsingTask TaskName=`LogNameValue_ClassSourcesTest` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll`>
                         <ParameterGroup>
@@ -1164,13 +1165,14 @@ namespace Microsoft.Build.UnitTests
                             <Value ParameterType='System.String' />
                         </ParameterGroup>
                         <Task>
-                            <Code Source='" + tempSourceFile + @"'/>
+                            <Code Source='{tempSourceFile}'/>
                          </Task>
                          </UsingTask>
                         <Target Name=`Build`>
                             <LogNameValue_ClassSourcesTest Name='MyName' Value='MyValue'/>
                         </Target>
-                    </Project>";
+                    </Project>
+                    """;
 
                 string binaryLogFile = Path.Combine(tempFileDirectory, "output.binlog");
                 var binaryLogger = new BinaryLogger()
