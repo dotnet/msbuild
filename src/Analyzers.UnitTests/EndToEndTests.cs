@@ -32,105 +32,96 @@ namespace Microsoft.Build.Analyzers.UnitTests
         [Fact]
         public void SampleAnalyzerIntegrationTest()
         {
-            using (TestEnvironment env = TestEnvironment.Create())
-            {
-                string contents = $"""
-                    <Project Sdk="Microsoft.NET.Sdk" DefaultTargets="Hello">
+            string contents = $"""
+                <Project Sdk="Microsoft.NET.Sdk" DefaultTargets="Hello">
                     
-                      <PropertyGroup>
-                        <OutputType>Exe</OutputType>
-                        <TargetFramework>net8.0</TargetFramework>
-                        <ImplicitUsings>enable</ImplicitUsings>
-                        <Nullable>enable</Nullable>
-                      </PropertyGroup>
+                    <PropertyGroup>
+                    <OutputType>Exe</OutputType>
+                    <TargetFramework>net8.0</TargetFramework>
+                    <ImplicitUsings>enable</ImplicitUsings>
+                    <Nullable>enable</Nullable>
+                    </PropertyGroup>
                       
-                      <PropertyGroup Condition="$(Test) == true">
-                        <TestProperty>Test</TestProperty>
-                      </PropertyGroup>
+                    <PropertyGroup Condition="$(Test) == true">
+                    <TestProperty>Test</TestProperty>
+                    </PropertyGroup>
                      
-                      <ItemGroup>
-                        <ProjectReference Include=".\FooBar-Copy.csproj" />
-                      </ItemGroup>
+                    <ItemGroup>
+                    <ProjectReference Include=".\FooBar-Copy.csproj" />
+                    </ItemGroup>
                       
-                      <Target Name="Hello">
-                        <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
-                      </Target>
+                    <Target Name="Hello">
+                    <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
+                    </Target>
                     
-                    </Project>
-                    """;
+                </Project>
+                """;
 
-                string contents2 = $"""
-                    <Project Sdk="Microsoft.NET.Sdk">
+            string contents2 = $"""
+                <Project Sdk="Microsoft.NET.Sdk">
                                    
-                      <PropertyGroup>
-                        <OutputType>Exe</OutputType>
-                        <TargetFramework>net8.0</TargetFramework>
-                        <ImplicitUsings>enable</ImplicitUsings>
-                        <Nullable>enable</Nullable>
-                      </PropertyGroup>
+                    <PropertyGroup>
+                    <OutputType>Exe</OutputType>
+                    <TargetFramework>net8.0</TargetFramework>
+                    <ImplicitUsings>enable</ImplicitUsings>
+                    <Nullable>enable</Nullable>
+                    </PropertyGroup>
                                      
-                      <PropertyGroup Condition="$(Test) == true">
-                        <TestProperty>Test</TestProperty>
-                      </PropertyGroup>
+                    <PropertyGroup Condition="$(Test) == true">
+                    <TestProperty>Test</TestProperty>
+                    </PropertyGroup>
                                     
-                      <ItemGroup>
-                        <Reference Include="bin/foo.dll" />
-                      </ItemGroup>
+                    <ItemGroup>
+                    <Reference Include="bin/foo.dll" />
+                    </ItemGroup>
                                     
-                      <Target Name="Hello">
-                        <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
-                      </Target>
+                    <Target Name="Hello">
+                    <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
+                    </Target>
                                    
-                    </Project>
-                    """;
-                TransientTestFolder workFolder = env.CreateFolder(createFolder: true);
-                TransientTestFile projectFile = env.CreateFile(workFolder, "FooBar.csproj", contents);
-                TransientTestFile projectFile2 = env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
+                </Project>
+                """;
+            TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
+            TransientTestFile projectFile = _env.CreateFile(workFolder, "FooBar.csproj", contents);
+            TransientTestFile projectFile2 = _env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
 
-                // var cache = new SimpleProjectRootElementCache();
-                // ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile.Path, /*unused*/null, /*unused*/null, cache, false /*Not explicitly loaded - unused*/);
+            // var cache = new SimpleProjectRootElementCache();
+            // ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile.Path, /*unused*/null, /*unused*/null, cache, false /*Not explicitly loaded - unused*/);
 
 
-                TransientTestFile config = env.CreateFile(workFolder, "editorconfig.json",
-                    /*lang=json,strict*/
-                    """
-                    {
-                        "BC0101": {
-                            "IsEnabled": true,
-                            "Severity": "Error"
-                        },
-                        "COND0543": {
-                            "IsEnabled": false,
-                            "Severity": "Error",
-                    		"EvaluationAnalysisScope": "AnalyzedProjectOnly",
-                    		"CustomSwitch": "QWERTY"
-                        },
-                        "BLA": {
-                            "IsEnabled": false
-                        }
+            TransientTestFile config = _env.CreateFile(workFolder, "editorconfig.json",
+                /*lang=json,strict*/
+                """
+                {
+                    "BC0101": {
+                        "IsEnabled": true,
+                        "Severity": "Error"
+                    },
+                    "COND0543": {
+                        "IsEnabled": false,
+                        "Severity": "Error",
+                        "EvaluationAnalysisScope": "AnalyzedProjectOnly",
+                        "CustomSwitch": "QWERTY"
+                    },
+                    "BLA": {
+                        "IsEnabled": false
                     }
-                    """);
+                }
+                """);
 
-                // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".
-                // This discrepancy breaks path equality checks in analyzers if we pass to MSBuild full path to the initial project.
-                // TODO: See if there is a way of fixing it in the engine.
-                TransientTestState testState = _env.SetCurrentDirectory(Path.GetDirectoryName(projectFile.Path));
-                try
-                {
-                    // env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
-                    env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
-                    // string output = RunnerUtilities.ExecMSBuild($"{projectFile.Path} /m:1 -nr:False", out bool success);
-                    string output = BootstrapRunner.ExecBootstrapedMSBuild($"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -analyze", out bool success);
-                    _env.Output.WriteLine(output);
-                    success.ShouldBeTrue();
-                    // The conflicting outputs warning appears
-                    output.ShouldContain("BC0101");
-                }
-                finally
-                {
-                    testState.Revert();
-                }
-            }
+            // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".
+            // This discrepancy breaks path equality checks in analyzers if we pass to MSBuild full path to the initial project.
+            // TODO: See if there is a way of fixing it in the engine.
+            _env.SetCurrentDirectory(Path.GetDirectoryName(projectFile.Path));
+
+            // env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
+            _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
+            // string output = RunnerUtilities.ExecMSBuild($"{projectFile.Path} /m:1 -nr:False", out bool success);
+            string output = BootstrapRunner.ExecBootstrapedMSBuild($"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -analyze", out bool success);
+            _env.Output.WriteLine(output);
+            success.ShouldBeTrue();
+            // The conflicting outputs warning appears
+            output.ShouldContain("BC0101");
         }
     }
 }
