@@ -1,8 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\Shared\FileSystemSources.proj" />
-  <Import Project="..\Shared\DebuggingSources.proj" />
-
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
@@ -22,6 +19,7 @@
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
+    <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,17 +27,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\UnitTests\TestEnvironment.cs" />
-    <Compile Include="..\Shared\FileUtilities.cs" />
-    <Compile Include="..\Shared\TempFileUtilities.cs" />
-    <Compile Include="..\Shared\ErrorUtilities.cs" />
     <Compile Include="..\Shared\EscapingUtilities.cs" />
-    <Compile Include="..\Shared\BuildEnvironmentHelper.cs" />
     <Compile Include="..\Shared\ProcessExtensions.cs" />
     <Compile Include="..\Shared\ResourceUtilities.cs" />
-    <Compile Include="..\Shared\ExceptionHandling.cs" />
     <Compile Include="..\Shared\FileUtilitiesRegex.cs" />
-    <Compile Include="..\Shared\UnitTests\AssemblyResources.cs" />
   </ItemGroup>
 
   <ItemGroup>

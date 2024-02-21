@@ -873,12 +873,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string GenerateProgramFiles32()
         {
-            // With Mono, all we look for in Files32 should be found in the below location
-            if (!NativeMethodsShared.IsWindows && NativeMethodsShared.IsMono)
-            {
-                return Path.Combine(NativeMethodsShared.FrameworkBasePath, "xbuild");
-            }
-
             // On a 64 bit machine we always want to use the program files x86.  If we are running as a 64 bit process then this variable will be set correctly
             // If we are on a 32 bit machine or running as a 32 bit process then this variable will be null and the programFiles variable will be correct.
             string programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
@@ -897,12 +891,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string GenerateProgramFiles64()
         {
-            // With Mono, all we look for in Files32 should be found in the below location
-            if (!NativeMethodsShared.IsWindows && NativeMethodsShared.IsMono)
-            {
-                return Path.Combine(NativeMethodsShared.FrameworkBasePath, "xbuild");
-            }
-
             string programFilesX64;
             if (string.Equals(programFiles, programFiles32))
             {

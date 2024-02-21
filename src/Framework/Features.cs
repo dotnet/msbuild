@@ -42,7 +42,8 @@ namespace Microsoft.Build.Framework
     {
         private static readonly Dictionary<string, FeatureStatus> _featureStatusMap = new Dictionary<string, FeatureStatus>
         {
-            // TODO: Fill in the dictionary with the features and their status
+            { "EvaluationContext_SharedSDKCachePolicy", FeatureStatus.Available }, // EvaluationContext supports the SharingPolicy.SharedSDKCache flag.
+            // Add more features here.
         };
 
         /// <summary>
