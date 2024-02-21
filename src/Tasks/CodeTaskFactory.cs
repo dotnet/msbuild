@@ -660,23 +660,6 @@ namespace Microsoft.Build.Tasks
                 {
                     candidateAssemblyLocation = candidateAssembly.Location;
                 }
-                else if (NativeMethodsShared.IsMono)
-                {
-                    string path = Path.Combine(
-                        NativeMethodsShared.FrameworkCurrentPath,
-                        "Facades",
-                        Path.GetFileName(partialName));
-                    if (!FileSystems.Default.FileExists(path))
-                    {
-                        var newPath = path + ".dll";
-                        path = !FileSystems.Default.FileExists(newPath) ? path + ".exe" : newPath;
-                    }
-                    candidateAssembly = Assembly.UnsafeLoadFrom(path);
-                    if (candidateAssembly != null)
-                    {
-                        candidateAssemblyLocation = candidateAssembly.Location;
-                    }
-                }
 #pragma warning restore 618, 612
                 return candidateAssemblyLocation;
             }
