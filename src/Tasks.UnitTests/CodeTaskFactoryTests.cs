@@ -1046,7 +1046,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void EmbedsSourceFileInBinlog()
         {
-            string sourceFileContent = """
+            const string sourceFileContent = """
                 using System;
                 using System.Collections.Generic;
                 using System.Text;
@@ -1086,14 +1086,13 @@ namespace Microsoft.Build.UnitTests
                 }
                 """;
 
-            string tempFileDirectory = Path.GetTempPath();
-            string tempFileName = Guid.NewGuid().ToString() + ".cs";
-            string tempSourceFile = Path.Combine(tempFileDirectory, tempFileName);
-            File.WriteAllText(tempSourceFile, sourceFileContent);
+            using TestEnvironment env = TestEnvironment.Create();
 
-            try
-            {
-                string projectFileContents = $"""
+            const string sourceFileName = "LogNameValue.cs";
+
+            env.CreateFile(sourceFileName, sourceFileContent);
+
+            string projectFileContents = $"""
                     <Project ToolsVersion='msbuilddefaulttoolsversion'>
                         <UsingTask TaskName=`LogNameValue_ClassSourcesTest` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll`>
                         <ParameterGroup>
@@ -1101,7 +1100,7 @@ namespace Microsoft.Build.UnitTests
                             <Value ParameterType='System.String' />
                         </ParameterGroup>
                         <Task>
-                            <Code Source='{tempSourceFile}'/>
+                            <Code Source='{sourceFileName}'/>
                          </Task>
                          </UsingTask>
                         <Target Name=`Build`>
@@ -1110,33 +1109,26 @@ namespace Microsoft.Build.UnitTests
                     </Project>
                     """;
 
-                string binaryLogFile = Path.Combine(tempFileDirectory, "output.binlog");
-                var binaryLogger = new BinaryLogger()
-                {
-                    Parameters = $"LogFile={binaryLogFile}",
-                    CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
-                };
+            TransientTestFile binlog = env.ExpectFile(".binlog");
 
-                Helpers.BuildProjectWithNewOMAndBinaryLogger(projectFileContents, binaryLogger, out bool result);
-
-                result.ShouldBeTrue();
-
-                string projectImportsZipPath = Path.ChangeExtension(binaryLogFile, ".ProjectImports.zip");
-                using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
-                using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
-
-                // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
-                // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
-                zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(tempFileName),
-                    "");
-            }
-            finally
+            var binaryLogger = new BinaryLogger()
             {
-                if (File.Exists(tempSourceFile))
-                {
-                    File.Delete(tempSourceFile);
-                }
-            }
+                Parameters = $"LogFile={binlog.Path}",
+                CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
+            };
+
+            Helpers.BuildProjectWithNewOMAndBinaryLogger(projectFileContents, binaryLogger, out bool result);
+
+            result.ShouldBeTrue();
+
+            string projectImportsZipPath = Path.ChangeExtension(binlog.Path, ".ProjectImports.zip");
+            using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
+            using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
+
+            // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
+            // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
+            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(sourceFileName),
+                $"Binlog's embedded files didn't have the expected {sourceFileName}.");
         }
 
         [Fact]
@@ -1150,14 +1142,13 @@ namespace Microsoft.Build.UnitTests
                         private string
                 """;
 
-            string tempFileDirectory = Path.GetTempPath();
-            string tempFileName = Guid.NewGuid().ToString() + ".cs";
-            string tempSourceFile = Path.Combine(tempFileDirectory, tempFileName);
-            File.WriteAllText(tempSourceFile, sourceFileContentThatFailsToCompile);
+            using TestEnvironment env = TestEnvironment.Create();
 
-            try
-            {
-                string projectFileContents = $"""
+            const string sourceFileName = "FailsToCompile.cs";
+
+            env.CreateFile(sourceFileName, sourceFileContentThatFailsToCompile);
+
+            string projectFileContents = $"""
                     <Project ToolsVersion='msbuilddefaulttoolsversion'>
                         <UsingTask TaskName=`LogNameValue_ClassSourcesTest` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll`>
                         <ParameterGroup>
@@ -1165,7 +1156,7 @@ namespace Microsoft.Build.UnitTests
                             <Value ParameterType='System.String' />
                         </ParameterGroup>
                         <Task>
-                            <Code Source='{tempSourceFile}'/>
+                            <Code Source='{sourceFileName}'/>
                          </Task>
                          </UsingTask>
                         <Target Name=`Build`>
@@ -1174,33 +1165,25 @@ namespace Microsoft.Build.UnitTests
                     </Project>
                     """;
 
-                string binaryLogFile = Path.Combine(tempFileDirectory, "output.binlog");
-                var binaryLogger = new BinaryLogger()
-                {
-                    Parameters = $"LogFile={binaryLogFile}",
-                    CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
-                };
-
-                Helpers.BuildProjectWithNewOMAndBinaryLogger(projectFileContents, binaryLogger, out bool result);
-
-                result.ShouldBeFalse();
-
-                string projectImportsZipPath = Path.ChangeExtension(binaryLogFile, ".ProjectImports.zip");
-                using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
-                using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
-
-                // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
-                // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
-                zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(tempFileName),
-                    "");
-            }
-            finally
+            TransientTestFile binlog = env.ExpectFile(".binlog");
+            var binaryLogger = new BinaryLogger()
             {
-                if (File.Exists(tempSourceFile))
-                {
-                    File.Delete(tempSourceFile);
-                }
-            }
+                Parameters = $"LogFile={binlog.Path}",
+                CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
+            };
+
+            Helpers.BuildProjectWithNewOMAndBinaryLogger(projectFileContents, binaryLogger, out bool result);
+
+            result.ShouldBeFalse();
+
+            string projectImportsZipPath = Path.ChangeExtension(binlog.Path, ".ProjectImports.zip");
+            using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
+            using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
+
+            // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
+            // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
+            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(sourceFileName),
+                $"Binlog's embedded files didn't have the expected {sourceFileName}.");
         }
 
         /// <summary>
