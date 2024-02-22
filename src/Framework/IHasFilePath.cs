@@ -3,7 +3,7 @@
 
 namespace Microsoft.Build.Framework
 {
-    public interface IHasSourceFilePath
+    internal interface IHasSourceFilePath
     {
         string? SourceFilePath { get; }
     }
