@@ -710,7 +710,7 @@ namespace InlineTask
             string csprojFileName = "EmbedsSourceFileInTheBinlogTest.csproj";
             string targetName = "SayHello";
 
-            var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create();
             TransientTestFolder folder = env.CreateFolder(createFolder: true);
             TransientTestFile classThatFailsToCompile = env.CreateFile(folder, $"{taskName}.cs", $$"""
                 namespace InlineTask
