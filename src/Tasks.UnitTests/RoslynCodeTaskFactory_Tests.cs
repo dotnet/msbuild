@@ -700,7 +700,7 @@ namespace InlineTask
             // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
             // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith($"{taskName}.cs"),
-                "");
+                $"Binlog's embedded files didn't have the expected {taskName}.cs.");
         }
 
         [Fact]
