@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-#if FEATURE_CODETASKFACTORY
+
 
     using System.CodeDom.Compiler;
     using System.IO.Compression;
@@ -1046,68 +1046,46 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void EmbedsSourceFileInBinlog()
         {
-            const string sourceFileContent = """
-                using System;
-                using System.Collections.Generic;
-                using System.Text;
-                using Microsoft.Build.Utilities;
-                using Microsoft.Build.Framework;
+            string taskName = "HelloTask";
+            string targetName = "SayHello";
 
-                namespace Microsoft.Build.NonShippingTasks
+            using TestEnvironment env = TestEnvironment.Create();
+            var folder = env.CreateFolder(createFolder: true);
+            var taskClass = env.CreateFile(folder, $"{taskName}.cs", $$"""
+                namespace InlineTask
                 {
-                    public class LogNameValue_ClassSourcesTest : Task
+                    using Microsoft.Build.Utilities;
+
+                    public class {{taskName}} : Task
                     {
-                        private string variableName;
-                        private string variableValue;
-
-
-                        [Required]
-                        public string Name
-                        {
-                            get { return variableName; }
-                            set { variableName = value; }
-                        }
-
-
-                        public string Value
-                        {
-                            get { return variableValue; }
-                            set { variableValue = value; }
-                        }
-
-
                         public override bool Execute()
                         {
-                            // Set the process environment
-                            Log.LogMessage("Setting {0}={1}", this.variableName, this.variableValue);
-                            return true;
+                            Log.LogMessage("Hello, world!");
+                            return !Log.HasLoggedErrors;
                         }
                     }
                 }
-                """;
-
-            using TestEnvironment env = TestEnvironment.Create();
-
-            const string sourceFileName = "LogNameValue.cs";
-
-            env.CreateFile(sourceFileName, sourceFileContent);
+                """);
 
             string projectFileContents = $"""
-                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName=`LogNameValue_ClassSourcesTest` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll`>
-                        <ParameterGroup>
-                            <Name ParameterType='System.String' />
-                            <Value ParameterType='System.String' />
-                        </ParameterGroup>
-                        <Task>
-                            <Code Source='{sourceFileName}'/>
-                         </Task>
-                         </UsingTask>
-                        <Target Name=`Build`>
-                            <LogNameValue_ClassSourcesTest Name='MyName' Value='MyValue'/>
-                        </Target>
-                    </Project>
-                    """;
+                <Project>
+
+                  <UsingTask
+                    TaskName="{taskName}"
+                    TaskFactory="CodeTaskFactory"
+                    AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+                    <Task>
+                      <Code Type="Class" Language="cs" Source="{taskClass.Path}">
+                      </Code>
+                    </Task>
+                  </UsingTask>
+
+                    <Target Name="{targetName}">
+                        <{taskName} />
+                    </Target>
+
+                </Project>
+                """;
 
             TransientTestFile binlog = env.ExpectFile(".binlog");
 
@@ -1127,45 +1105,49 @@ namespace Microsoft.Build.UnitTests
 
             // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
             // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
-            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(sourceFileName),
-                $"Binlog's embedded files didn't have the expected {sourceFileName}.");
+            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith($"{taskName}.cs"),
+                $"Binlog's embedded files didn't have the expected {taskName}.cs.");
         }
 
         [Fact]
         public void EmbedsSourceFileInBinlogWhenFailsToCompile()
         {
-            string sourceFileContentThatFailsToCompile = """
-                namespace Microsoft.Build.NonShippingTasks
-                {
-                    public class LogNameValue_ClassSourcesTest : Task
-                    {
-                        private string
-                """;
+            string taskName = "HelloTask";
+            string targetName = "SayHello";
 
             using TestEnvironment env = TestEnvironment.Create();
+            var folder = env.CreateFolder(createFolder: true);
+            var taskClass = env.CreateFile(folder, $"{taskName}.cs", $$"""
+                namespace InlineTask
+                {
+                    using Microsoft.Build.Utilities;
 
-            const string sourceFileName = "FailsToCompile.cs";
-
-            env.CreateFile(sourceFileName, sourceFileContentThatFailsToCompile);
+                    public class {{taskName}} : Task
+                    {
+                """);
 
             string projectFileContents = $"""
-                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName=`LogNameValue_ClassSourcesTest` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll`>
-                        <ParameterGroup>
-                            <Name ParameterType='System.String' />
-                            <Value ParameterType='System.String' />
-                        </ParameterGroup>
-                        <Task>
-                            <Code Source='{sourceFileName}'/>
-                         </Task>
-                         </UsingTask>
-                        <Target Name=`Build`>
-                            <LogNameValue_ClassSourcesTest Name='MyName' Value='MyValue'/>
-                        </Target>
-                    </Project>
-                    """;
+                <Project>
+
+                  <UsingTask
+                    TaskName="{taskName}"
+                    TaskFactory="CodeTaskFactory"
+                    AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+                    <Task>
+                      <Code Type="Class" Language="cs" Source="{taskClass.Path}">
+                      </Code>
+                    </Task>
+                  </UsingTask>
+
+                    <Target Name="{targetName}">
+                        <{taskName} />
+                    </Target>
+
+                </Project>
+                """;
 
             TransientTestFile binlog = env.ExpectFile(".binlog");
+
             var binaryLogger = new BinaryLogger()
             {
                 Parameters = $"LogFile={binlog.Path}",
@@ -1182,8 +1164,8 @@ namespace Microsoft.Build.UnitTests
 
             // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
             // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
-            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(sourceFileName),
-                $"Binlog's embedded files didn't have the expected {sourceFileName}.");
+            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith($"{taskName}.cs"),
+                $"Binlog's embedded files didn't have the expected {taskName}.cs.");
         }
 
         /// <summary>
@@ -1267,37 +1249,4 @@ namespace Microsoft.Build.UnitTests
             mockLogger.AssertLogContains("Hello, World!");
         }
     }
-#else
-    public sealed class CodeTaskFactoryTests
-    {
-        [Fact]
-        public void CodeTaskFactoryNotSupported()
-        {
-            string projectFileContents = @"
-                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` >
-                         <ParameterGroup>
-                             <Text/>
-                          </ParameterGroup>
-                            <Task>
-                                <Code>
-                                     Log.LogMessage(MessageImportance.High, Text);
-                                </Code>
-                            </Task>
-                        </UsingTask>
-                        <Target Name=`Build`>
-                            <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory Text=`Hello, World!` />
-                        </Target>
-                    </Project>";
-
-            MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectFailure(projectFileContents, allowTaskCrash: false);
-
-            BuildErrorEventArgs error = mockLogger.Errors.FirstOrDefault();
-
-            Assert.NotNull(error);
-            Assert.Equal("MSB4801", error.Code);
-            Assert.Contains("CodeTaskFactory", error.Message);
-        }
-    }
-#endif
 }
