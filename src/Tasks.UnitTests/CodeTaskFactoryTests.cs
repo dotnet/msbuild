@@ -1047,9 +1047,8 @@ namespace Microsoft.Build.UnitTests
         public void EmbedsSourceFileInBinlog()
         {
             string taskName = "HelloTask";
-            string targetName = "SayHello";
 
-            using TestEnvironment env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create();
             var folder = env.CreateFolder(createFolder: true);
             var taskClass = env.CreateFile(folder, $"{taskName}.cs", $$"""
                 namespace InlineTask
@@ -1080,7 +1079,7 @@ namespace Microsoft.Build.UnitTests
                     </Task>
                   </UsingTask>
 
-                    <Target Name="{targetName}">
+                    <Target Name="SayHello">
                         <{taskName} />
                     </Target>
 
@@ -1113,9 +1112,8 @@ namespace Microsoft.Build.UnitTests
         public void EmbedsSourceFileInBinlogWhenFailsToCompile()
         {
             string taskName = "HelloTask";
-            string targetName = "SayHello";
 
-            using TestEnvironment env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create();
             var folder = env.CreateFolder(createFolder: true);
             var taskClass = env.CreateFile(folder, $"{taskName}.cs", $$"""
                 namespace InlineTask
@@ -1139,7 +1137,7 @@ namespace Microsoft.Build.UnitTests
                     </Task>
                   </UsingTask>
 
-                    <Target Name="{targetName}">
+                    <Target Name="SayHello">
                         <{taskName} />
                     </Target>
 
