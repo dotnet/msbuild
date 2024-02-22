@@ -1271,8 +1271,11 @@ namespace Microsoft.Build.UnitTests
                             <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory Text=`Hello, World!` />
                         </Target>
                     </Project>";
+
             MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectFailure(projectFileContents, allowTaskCrash: false);
+
             BuildErrorEventArgs error = mockLogger.Errors.FirstOrDefault();
+
             Assert.NotNull(error);
             Assert.Equal("MSB4801", error.Code);
             Assert.Contains("CodeTaskFactory", error.Message);
