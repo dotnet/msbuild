@@ -1492,13 +1492,6 @@ namespace Microsoft.Build.Execution
                                         }
                                     }
 
-                                    // Embed the source file
-                                    if (factory is IHasSourceFilePath factoryWithSourceFilePath &&
-                                        factoryWithSourceFilePath.SourceFilePath != null)
-                                    {
-                                        taskFactoryLoggingHost.LoggingContext.LogIncludeFile(factoryWithSourceFilePath.SourceFilePath);
-                                    }
-
                                     // Throw an error if the ITaskFactory did not set the TaskType property.  If the property is null, it can cause NullReferenceExceptions in our code
                                     if (initialized && factory.TaskType == null)
                                     {
@@ -1507,6 +1500,19 @@ namespace Microsoft.Build.Execution
                                 }
                                 finally
                                 {
+                                    // Embed the source file
+                                    if (factory is IHasSourceFilePath factoryWithSourceFilePath &&
+                                        factoryWithSourceFilePath.SourceFilePath != null)
+                                    {
+                                        taskFactoryLoggingHost.LoggingContext.LogIncludeFile(factoryWithSourceFilePath.SourceFilePath);
+
+                                        if (factoryWithSourceFilePath.IsGeneratedSourceFile &&
+                                            factoryWithSourceFilePath.DeleteGeneratedSourceFile &&
+                                            FileSystems.Default.FileExists(factoryWithSourceFilePath.SourceFilePath))
+                                        {
+                                            File.Delete(factoryWithSourceFilePath.SourceFilePath);
+                                        }
+                                    }
 #if FEATURE_APPDOMAIN
                                     taskFactoryLoggingHost.MarkAsInactive();
 #endif

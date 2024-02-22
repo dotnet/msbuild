@@ -692,6 +692,7 @@ namespace InlineTask
             string output = RunnerUtilities.ExecMSBuild($"{assemblyProj.Path} /t:{targetName} /bl:\"LogFile={binLogFile};ProjectImports=ZipFile\"", out bool success);
 
             success.ShouldBeTrue();
+            File.Exists(taskClass.Path).ShouldBeTrue();
 
             string projectImportsZipPath = Path.ChangeExtension(binLogFile, ".ProjectImports.zip");
             using var fileStream = new System.IO.FileStream(projectImportsZipPath, System.IO.FileMode.Open);
@@ -751,6 +752,7 @@ namespace InlineTask
             string output = RunnerUtilities.ExecMSBuild($"{assemblyProj.Path} /t:{targetName} /bl:\"LogFile={binLogFile};ProjectImports=ZipFile\"", out bool success);
 
             success.ShouldBeFalse();
+            File.Exists(classThatFailsToCompile.Path).ShouldBeTrue();
 
             string projectImportsZipPath = Path.ChangeExtension(binLogFile, ".ProjectImports.zip");
             using var fileStream = new System.IO.FileStream(projectImportsZipPath, System.IO.FileMode.Open);

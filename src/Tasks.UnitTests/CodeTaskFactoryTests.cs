@@ -1097,6 +1097,7 @@ namespace Microsoft.Build.UnitTests
             Helpers.BuildProjectWithNewOMAndBinaryLogger(projectFileContents, binaryLogger, out bool result);
 
             result.ShouldBeTrue();
+            File.Exists(taskClass.Path).ShouldBeTrue();
 
             string projectImportsZipPath = Path.ChangeExtension(binlog.Path, ".ProjectImports.zip");
             using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
@@ -1115,7 +1116,7 @@ namespace Microsoft.Build.UnitTests
 
             using var env = TestEnvironment.Create();
             var folder = env.CreateFolder(createFolder: true);
-            var taskClass = env.CreateFile(folder, $"{taskName}.cs", $$"""
+            var classThatFailsToCompile = env.CreateFile(folder, $"{taskName}.cs", $$"""
                 namespace InlineTask
                 {
                     using Microsoft.Build.Utilities;
@@ -1132,7 +1133,7 @@ namespace Microsoft.Build.UnitTests
                     TaskFactory="CodeTaskFactory"
                     AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
                     <Task>
-                      <Code Type="Class" Language="cs" Source="{taskClass.Path}">
+                      <Code Type="Class" Language="cs" Source="{classThatFailsToCompile.Path}">
                       </Code>
                     </Task>
                   </UsingTask>
@@ -1155,6 +1156,7 @@ namespace Microsoft.Build.UnitTests
             Helpers.BuildProjectWithNewOMAndBinaryLogger(projectFileContents, binaryLogger, out bool result);
 
             result.ShouldBeFalse();
+            File.Exists(classThatFailsToCompile.Path).ShouldBeTrue();
 
             string projectImportsZipPath = Path.ChangeExtension(binlog.Path, ".ProjectImports.zip");
             using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);

@@ -6,5 +6,9 @@ namespace Microsoft.Build.Framework
     internal interface IHasSourceFilePath
     {
         string? SourceFilePath { get; }
+
+        bool IsGeneratedSourceFile { get; }
+
+        bool DeleteGeneratedSourceFile { get; }
     }
 }

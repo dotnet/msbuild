@@ -163,6 +163,10 @@ namespace Microsoft.Build.Tasks
 
         public string SourceFilePath { get => _sourcePath; }
 
+        public bool IsGeneratedSourceFile { get; private set; }
+
+        public bool DeleteGeneratedSourceFile { get => true; }
+
         /// <summary>
         /// Get the type information for all task parameters.
         /// </summary>
@@ -232,6 +236,8 @@ namespace Microsoft.Build.Tasks
                 {
                     _type = "Class";
                 }
+
+                IsGeneratedSourceFile = false;
             }
 
             _referencedAssemblies = ExtractReferencedAssemblies();

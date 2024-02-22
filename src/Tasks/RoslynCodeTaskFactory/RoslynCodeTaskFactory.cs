@@ -121,6 +121,10 @@ namespace Microsoft.Build.Tasks
 
         public string SourceFilePath { get; private set; }
 
+        public bool IsGeneratedSourceFile { get; private set; }
+
+        public bool DeleteGeneratedSourceFile { get; private set; }
+
         /// <inheritdoc cref="ITaskFactory.CleanupTask(ITask)"/>
         public void CleanupTask(ITask task)
         {
@@ -164,6 +168,7 @@ namespace Microsoft.Build.Tasks
             }
 
             SourceFilePath = taskInfo.Source;
+            IsGeneratedSourceFile = taskInfo.Source != null ? false : true;
 
             // Attempt to compile an assembly (or get one from the cache)
             if (!TryCompileInMemoryAssembly(taskFactoryLoggingHost, taskInfo, out Assembly assembly))
@@ -686,12 +691,17 @@ namespace Microsoft.Build.Tasks
 
             // Delete the code file unless compilation failed or the environment variable MSBUILDLOGCODETASKFACTORYOUTPUT
             // is set (which allows for debugging problems)
-            bool deleteSourceCodeFile = Environment.GetEnvironmentVariable("MSBUILDLOGCODETASKFACTORYOUTPUT") == null;
+            DeleteGeneratedSourceFile = Environment.GetEnvironmentVariable("MSBUILDLOGCODETASKFACTORYOUTPUT") == null;
 
             try
             {
                 // Create the code
                 File.WriteAllText(sourceCodePath, taskInfo.SourceCode);
+
+                if (IsGeneratedSourceFile)
+                {
+                    SourceFilePath = sourceCodePath;
+                }
 
                 // Execute the compiler.  We re-use the existing build task by hosting it and giving it our IBuildEngine instance for logging
                 RoslynCodeTaskFactoryCompilerBase managedCompiler = null;
@@ -746,18 +756,21 @@ namespace Microsoft.Build.Tasks
 
                     if (!managedCompiler.Execute())
                     {
-                        deleteSourceCodeFile = false;
+                        DeleteGeneratedSourceFile = false;
 
                         _log.LogErrorWithCodeFromResources("CodeTaskFactory.FindSourceFileAt", sourceCodePath);
 
                         return false;
                     }
 
-                    if (!deleteSourceCodeFile)
+                    if (!DeleteGeneratedSourceFile)
                     {
                         // Log the location of the code file because MSBUILDLOGCODETASKFACTORYOUTPUT was set.
                         _log.LogMessageFromResources(MessageImportance.Low, "CodeTaskFactory.FindSourceFileAt", sourceCodePath);
                     }
+
+                    // Log the location of the code file in binlog
+                    _log.LogMessageFromResources(MessageImportance.Low, "CodeTaskFactory.FindSourceFileInBinlogAt", sourceCodePath);
                 }
 
                 // Return the assembly which is loaded into memory
@@ -778,11 +791,6 @@ namespace Microsoft.Build.Tasks
                 if (FileSystems.Default.FileExists(assemblyPath))
                 {
                     File.Delete(assemblyPath);
-                }
-
-                if (deleteSourceCodeFile && FileSystems.Default.FileExists(sourceCodePath))
-                {
-                    File.Delete(sourceCodePath);
                 }
             }
         }

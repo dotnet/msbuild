@@ -2513,6 +2513,9 @@
   <data name="CodeTaskFactory.FindSourceFileAt" xml:space="preserve">
     <value>The source file for this compilation can be found at: "{0}"</value>
   </data>
+  <data name="CodeTaskFactory.FindSourceFileInBinlogAt" xml:space="preserve">
+    <value>The source file for this compilation can be found embedded in binlog at: "{0}"</value>
+  </data>
   <data name="CodeTaskFactory.HaveReflectionOnlyAssembly" xml:space="preserve">
     <value>The reference assembly "{0}" is a metadata only assembly.</value>
   </data>
