@@ -476,20 +476,9 @@ namespace Microsoft.Build.Execution
             // If the node was never configured, this will be null.
             if (_savedEnvironment != null)
             {
-                foreach (KeyValuePair<string, string> entry in CommunicationsUtilities.GetEnvironmentVariables())
-                {
-                    if (!_savedEnvironment.ContainsKey(entry.Key))
-                    {
-                        Environment.SetEnvironmentVariable(entry.Key, null);
-                    }
-                }
-
-                foreach (KeyValuePair<string, string> entry in _savedEnvironment)
-                {
-                    Environment.SetEnvironmentVariable(entry.Key, entry.Value);
-                }
+                CommunicationsUtilities.SetEnvironment(_savedEnvironment);
+                Traits.UpdateFromEnvironment();
             }
-
             try
             {
                 // Shut down logging, which will cause all queued logging messages to be sent.
@@ -722,11 +711,13 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            // Now set the new environment
+            // Now set the new environment and update Traits class accordingly
             foreach (KeyValuePair<string, string> environmentPair in _buildParameters.BuildProcessEnvironment)
             {
                 Environment.SetEnvironmentVariable(environmentPair.Key, environmentPair.Value);
             }
+
+            Traits.UpdateFromEnvironment();
 
             // We want to make sure the global project collection has the toolsets which were defined on the parent
             // so that any custom toolsets defined can be picked up by tasks who may use the global project collection but are

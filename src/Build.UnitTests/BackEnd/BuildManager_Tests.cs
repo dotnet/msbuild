@@ -325,8 +325,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Theory(Skip = "https://github.com/dotnet/msbuild/issues/1975")]
-#elif MONO
-        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Theory(Skip = "https://github.com/dotnet/msbuild/issues/2057")]
 #endif
@@ -403,11 +401,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A simple successful build, out of process only.
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void SimpleBuildOutOfProcess()
         {
             RunOutOfProcBuild(_ => _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1"));
@@ -416,11 +410,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A simple successful build, out of process only. Triggered by setting build parameters' DisableInProcNode to true.
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void DisableInProcNode()
         {
             RunOutOfProcBuild(buildParameters => buildParameters.DisableInProcNode = true);
@@ -466,11 +456,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.NotEqual(Process.GetCurrentProcess().Id, processId); // "Build is expected to be out-of-proc. In fact it was in-proc."
         }
 
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void RequestedResultsAreSatisfied()
         {
             const string contents = @"
@@ -689,8 +675,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1976")]
-#elif MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -742,8 +726,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1976")]
-#elif MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -811,11 +793,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Make sure when if the environment variable MsBuildForwardPropertiesFromChild is set to empty and
         /// we launch a child node that we get no properties
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void ForwardNoPropertiesLaunchChildNode()
         {
             string contents = CleanupFileContents(@"
@@ -855,8 +833,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/933")]
-#elif MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -916,11 +892,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// When a child node is launched by default we should not send any properties.
         /// we launch a child node that we get no properties
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void ForwardNoPropertiesLaunchChildNodeDefault()
         {
             string contents = CleanupFileContents(@"
@@ -2139,11 +2111,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that disabling the in-proc node doesn't cause projects which don't require it to fail.
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void Regress239661()
         {
             string contents = CleanupFileContents(@"
@@ -2201,11 +2169,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Ensures that properties and items are transferred to the out-of-proc node when an instance is used to start the build.
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void ProjectInstanceTransfersToOOPNode()
         {
             string contents = CleanupFileContents(@"
@@ -2266,11 +2230,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Ensures that a limited set of properties are transferred from a project instance to an OOP node.
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void ProjectInstanceLimitedTransferToOOPNode()
         {
             string contents = CleanupFileContents(@"
@@ -2566,8 +2526,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/933")]
-#elif MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2665,11 +2623,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// second request will bail out where the first request did, as though it had
         /// executed the target, rather than skipping and continuing.
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void VerifyMultipleRequestForSameProjectWithErrors_Simple()
         {
             var projA = _env.CreateFile(".proj").Path;
@@ -2748,11 +2702,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// expected in the first request, but be skipped by the second (since if it's "skipping
         /// unsuccessful", it can assume that all other OnError targets have also already been run)
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void VerifyMultipleRequestForSameProjectWithErrors_OnErrorChain()
         {
             var projA = _env.CreateFile(".proj").Path;
@@ -2867,11 +2817,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// they're marked as ContinueOnError=ErrorAndContinue, then we won't bail, but
         /// will continue executing (on the first request) or skipping (on the second)
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void VerifyMultipleRequestForSameProjectWithErrors_ErrorAndContinue()
         {
             var projA = _env.CreateFile(".proj").Path;
@@ -2957,11 +2903,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test verifies that if the errors are in AfterTargets, we still
         /// exit as though the target that those targets run after has already run.
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void VerifyMultipleRequestForSameProjectWithErrors_AfterTargets()
         {
             var projA = _env.CreateFile(".proj").Path;
@@ -3244,11 +3186,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// submissions aren't restricted to running strictly serially by the single in-proc
         /// node.
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1245")]
-#else
         [Fact]
-#endif
         public void TestSimultaneousSubmissionsWithLegacyThreadingData_P2P_MP()
         {
             string projectContent1 = @"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>

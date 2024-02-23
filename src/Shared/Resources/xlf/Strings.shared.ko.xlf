@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="CollectionCopyToFailureProvidedArrayIsTooSmall">
         <source>The number of elements in the collection is greater than the available space in the destination array (when starting at the specified index).</source>
-        <target state="new">The number of elements in the collection is greater than the available space in the destination array (when starting at the specified index).</target>
+        <target state="translated">컬렉션의 요소 수가 대상 배열에서 사용 가능한 공간보다 큽니다(지정된 인덱스에서 시작할 때).</target>
         <note />
       </trans-unit>
       <trans-unit id="ConflictingTaskAssembly">

@@ -53,13 +53,21 @@ internal sealed class NodesFrame
         string project = status.Project;
         string? targetFramework = status.TargetFramework;
         string target = status.Target;
+        string? targetPrefix = status.TargetPrefix;
+        TerminalColor targetPrefixColor = status.TargetPrefixColor;
 
-        int renderedWidth = Length(durationString, project, targetFramework, target);
+        var targetWithoutAnsiLength = !string.IsNullOrWhiteSpace(targetPrefix)
+            // +1 because we will join them by space in the final output.
+            ? targetPrefix!.Length + 1 + target.Length
+            : target.Length;
+
+        int renderedWidth = Length(durationString, project, targetFramework, targetWithoutAnsiLength);
 
         if (renderedWidth > Width)
         {
-            renderedWidth -= target.Length;
-            target = string.Empty;
+            renderedWidth -= targetWithoutAnsiLength;
+            targetPrefix = target = string.Empty;
+            targetWithoutAnsiLength = 0;
 
             if (renderedWidth > Width)
             {
@@ -74,13 +82,14 @@ internal sealed class NodesFrame
             }
         }
 
-        return $"{TerminalLogger.Indentation}{project}{(targetFramework is null ? string.Empty : " ")}{AnsiCodes.Colorize(targetFramework, TerminalLogger.TargetFrameworkColor)} {AnsiCodes.SetCursorHorizontal(MaxColumn)}{AnsiCodes.MoveCursorBackward(target.Length + durationString.Length + 1)}{target} {durationString}".AsSpan();
+        var renderedTarget = !string.IsNullOrWhiteSpace(targetPrefix) ? $"{AnsiCodes.Colorize(targetPrefix, targetPrefixColor)} {target}" : target;
+        return $"{TerminalLogger.Indentation}{project}{(targetFramework is null ? string.Empty : " ")}{AnsiCodes.Colorize(targetFramework, TerminalLogger.TargetFrameworkColor)} {AnsiCodes.SetCursorHorizontal(MaxColumn)}{AnsiCodes.MoveCursorBackward(targetWithoutAnsiLength + durationString.Length + 1)}{renderedTarget} {durationString}".AsSpan();
 
-        static int Length(string durationString, string project, string? targetFramework, string target) =>
+        static int Length(string durationString, string project, string? targetFramework, int targetWithoutAnsiLength) =>
                 TerminalLogger.Indentation.Length +
                 project.Length + 1 +
                 (targetFramework?.Length ?? -1) + 1 +
-                target.Length + 1 +
+                targetWithoutAnsiLength + 1 +
                 durationString.Length;
     }
 
@@ -91,6 +100,9 @@ internal sealed class NodesFrame
     {
         StringBuilder sb = _renderBuilder;
         sb.Clear();
+
+        // Move cursor back to 1st line of nodes.
+        sb.AppendLine($"{AnsiCodes.CSI}{previousFrame.NodesCount + 1}{AnsiCodes.MoveUpToLineStart}");
 
         int i = 0;
         for (; i < NodesCount; i++)

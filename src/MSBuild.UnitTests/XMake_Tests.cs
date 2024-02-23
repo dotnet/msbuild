@@ -526,7 +526,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void VersionSwitch()
         {
-            using TestEnvironment env = UnitTests.TestEnvironment.Create();
+            using TestEnvironment env = TestEnvironment.Create();
 
             // Ensure Change Wave 17.10 is enabled.
             ChangeWaves.ResetStateForTests();
@@ -570,7 +570,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void VersionSwitchDisableChangeWave()
         {
-            using TestEnvironment env = UnitTests.TestEnvironment.Create();
+            using TestEnvironment env = TestEnvironment.Create();
 
             // Disable Change Wave 17.10
             ChangeWaves.ResetStateForTests();
@@ -1311,33 +1311,15 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFileInProjectDirectoryExplicit()
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, AutoResponseFileName);
+            var directory = _env.CreateFolder();
+            string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+            var projectPath = directory.CreateFile("my.proj", content).Path;
+            directory.CreateFile(AutoResponseFileName, "/p:A=1");
+            var msbuildParameters = "\"" + projectPath + "\"";
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
 
-            try
-            {
-                Directory.CreateDirectory(directory);
-
-                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
-                File.WriteAllText(projectPath, content);
-
-                string rspContent = "/p:A=1";
-                File.WriteAllText(rspPath, rspContent);
-
-                var msbuildParameters = "\"" + projectPath + "\"";
-
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
-                successfulExit.ShouldBeTrue();
-
-                output.ShouldContain("[A=1]");
-            }
-            finally
-            {
-                File.Delete(projectPath);
-                File.Delete(rspPath);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
-            }
+            output.ShouldContain("[A=1]");
         }
 
         /// <summary>
@@ -1346,33 +1328,17 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFileInProjectDirectoryRandomName()
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, "foo.rsp");
+            var directory = _env.CreateFolder();
+            string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+            var projectPath = directory.CreateFile("my.proj", content).Path;
+            directory.CreateFile("foo.rsp", "/p:A=1");
 
-            try
-            {
-                Directory.CreateDirectory(directory);
+            var msbuildParameters = "\"" + projectPath + "\"";
 
-                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
-                File.WriteAllText(projectPath, content);
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
 
-                string rspContent = "/p:A=1";
-                File.WriteAllText(rspPath, rspContent);
-
-                var msbuildParameters = "\"" + projectPath + "\"";
-
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
-                successfulExit.ShouldBeTrue();
-
-                output.ShouldContain("[A=]");
-            }
-            finally
-            {
-                File.Delete(projectPath);
-                File.Delete(rspPath);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
-            }
+            output.ShouldContain("[A=]");
         }
 
         /// <summary>
@@ -1382,33 +1348,18 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFileInProjectDirectoryCommandLineWins()
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, AutoResponseFileName);
+            var directory = _env.CreateFolder();
 
-            try
-            {
-                Directory.CreateDirectory(directory);
+            string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+            var projectPath = directory.CreateFile("my.proj", content).Path;
+            directory.CreateFile(AutoResponseFileName, "/p:A=1");
 
-                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
-                File.WriteAllText(projectPath, content);
+            var msbuildParameters = "\"" + projectPath + "\"" + " /p:A=2";
 
-                string rspContent = "/p:A=1";
-                File.WriteAllText(rspPath, rspContent);
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
 
-                var msbuildParameters = "\"" + projectPath + "\"" + " /p:A=2";
-
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
-                successfulExit.ShouldBeTrue();
-
-                output.ShouldContain("[A=2]");
-            }
-            finally
-            {
-                File.Delete(projectPath);
-                File.Delete(rspPath);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
-            }
+            output.ShouldContain("[A=2]");
         }
 
         /// <summary>
@@ -1495,33 +1446,17 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFileInProjectDirectoryItselfWithNoAutoResponseSwitch()
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, AutoResponseFileName);
+            var directory = _env.CreateFolder();
+            string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+            var projectPath = directory.CreateFile("my.proj", content).Path;
+            directory.CreateFile(AutoResponseFileName, "/p:A=1 /noautoresponse");
 
-            try
-            {
-                Directory.CreateDirectory(directory);
+            var msbuildParameters = "\"" + projectPath + "\"";
 
-                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
-                File.WriteAllText(projectPath, content);
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeFalse();
 
-                string rspContent = "/p:A=1 /noautoresponse";
-                File.WriteAllText(rspPath, rspContent);
-
-                var msbuildParameters = "\"" + projectPath + "\"";
-
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
-                successfulExit.ShouldBeFalse();
-
-                output.ShouldContain("MSB1027"); // msbuild.rsp cannot have /noautoresponse in it
-            }
-            finally
-            {
-                File.Delete(projectPath);
-                File.Delete(rspPath);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
-            }
+            output.ShouldContain("MSB1027"); // msbuild.rsp cannot have /noautoresponse in it
         }
 
         /// <summary>
@@ -1530,33 +1465,33 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFileInProjectDirectoryButCommandLineNoAutoResponseSwitch()
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, AutoResponseFileName);
+            var directory = _env.CreateFolder();
+            string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+            var projectPath = directory.CreateFile("my.proj", content).Path;
+            directory.CreateFile(AutoResponseFileName, "/p:A=1 /noautoresponse");
 
-            try
-            {
-                Directory.CreateDirectory(directory);
+            var msbuildParameters = "\"" + projectPath + "\" /noautoresponse";
 
-                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
-                File.WriteAllText(projectPath, content);
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
+            output.ShouldContain("[A=]");
+        }
 
-                string rspContent = "/p:A=1 /noautoresponse";
-                File.WriteAllText(rspPath, rspContent);
+        /// <summary>
+        /// Directory.Build.rsp in the directory of the specified project/solution should be respected when searching the files (solution/proj) to build.
+        /// </summary>
+        [Fact]
+        public void ResponseFileInProjectDirectoryWithSolutionProjectDifferentNamesShouldBeRespected()
+        {
+            var directory = _env.CreateFolder();
+            var content = ObjectModelHelpers.CleanupFileContents("<Project><Target Name='t'><Message Text='Completed'/></Target></Project>");
+            directory.CreateFile("projectFile.proj", content);
+            directory.CreateFile("solutionFile.sln", string.Empty);
+            directory.CreateFile("Directory.Build.rsp", "-ignoreProjectExtensions:.sln");
 
-                var msbuildParameters = "\"" + projectPath + "\" /noautoresponse";
-
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
-                successfulExit.ShouldBeTrue();
-
-                output.ShouldContain("[A=]");
-            }
-            finally
-            {
-                File.Delete(projectPath);
-                File.Delete(rspPath);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
-            }
+            var msbuildParameters = "\"" + directory.Path + "\"";
+            RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
         }
 
         /// <summary>
@@ -1566,28 +1501,17 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFileInProjectDirectoryNullCase()
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(directory, "my.proj");
+            var directory = _env.CreateFolder();
+            string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
 
-            try
-            {
-                Directory.CreateDirectory(directory);
+            var projectPath = directory.CreateFile("my.proj", content).Path;
 
-                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
-                File.WriteAllText(projectPath, content);
+            var msbuildParameters = "\"" + projectPath + "\"";
 
-                var msbuildParameters = "\"" + projectPath + "\"";
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
 
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
-                successfulExit.ShouldBeTrue();
-
-                output.ShouldContain("[A=]");
-            }
-            finally
-            {
-                File.Delete(projectPath);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
-            }
+            output.ShouldContain("[A=]");
         }
 
         /// <summary>
@@ -1966,7 +1890,7 @@ namespace Microsoft.Build.UnitTests
             internal IgnoreProjectExtensionsHelper(string[] filesInDirectory)
             {
                 _directoryFileNameList = new List<string>();
-                foreach (string file in filesInDirectory)
+                foreach (var file in filesInDirectory)
                 {
                     _directoryFileNameList.Add(file);
                 }
