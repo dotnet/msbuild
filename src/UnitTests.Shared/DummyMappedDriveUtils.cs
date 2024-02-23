@@ -8,7 +8,7 @@ using Microsoft.Build.UnitTests.Shared;
 
 namespace Microsoft.Build.UnitTests.Shared;
 
-internal static class DummyMappedDriveUtils
+public static class DummyMappedDriveUtils
 {
     public static string UpdatePathToMappedDrive(string path, char driveLetter)
     {

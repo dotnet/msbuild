@@ -10,6 +10,6 @@
         <Copy
             SourceFiles="$(ArtifactsBinDir)MSBuildTaskHost\x64\Release\net35\MSBuildTaskHost.pdb"
             DestinationFolder="$(ArtifactsSymStoreDirectory)\MSBuildTaskHost\net35\amd64"
-            Condition="'$(MSBuildRuntimeType)' != 'Core' and '$(MonoBuild)' != 'true'"/>
+            Condition="'$(MSBuildRuntimeType)' != 'Core'"/>
     </Target>
 </Project>

@@ -10,10 +10,9 @@
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
     <SemanticVersioningV1>true</SemanticVersioningV1>
     <MicroBuildPluginsSwixBuildVersion>1.1.87</MicroBuildPluginsSwixBuildVersion>
-    <MonoBuild Condition="'$(Configuration)' == 'Debug-MONO' or '$(Configuration)' == 'Release-MONO'">true</MonoBuild>
   </PropertyGroup>
   <!-- Repo Toolset Features -->
-  <PropertyGroup Condition="'$(MonoBuild)' != 'true'">
+  <PropertyGroup>
     <UsingToolIbcOptimization>true</UsingToolIbcOptimization>
     <!-- Force a specific compiler version because record changes cause genapi output to flip-flop -->
     <UsingToolMicrosoftNetCompilers>true</UsingToolMicrosoftNetCompilers>
@@ -53,8 +52,8 @@
     <MicrosoftDotNetXUnitExtensionsVersion>8.0.0-beta.24060.4</MicrosoftDotNetXUnitExtensionsVersion>
     <MicrosoftExtensionsDependencyModelVersion>7.0.0</MicrosoftExtensionsDependencyModelVersion>
     <MicrosoftIORedistVersion>6.0.0</MicrosoftIORedistVersion>
-    <MicrosoftNetCompilersToolsetVersion>4.10.0-2.24104.1</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>6.10.0-preview.1.18</NuGetBuildTasksVersion>
+    <MicrosoftNetCompilersToolsetVersion>4.10.0-2.24116.4</MicrosoftNetCompilersToolsetVersion>
+    <NuGetBuildTasksVersion>6.10.0-preview.2.36</NuGetBuildTasksVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">

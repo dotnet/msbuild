@@ -191,16 +191,8 @@ namespace Microsoft.Build.UnitTests
             // ToolTask does not log an error on timeout.
             mockEngine.Errors.ShouldBe(0);
 
-            if (NativeMethodsShared.IsMono)
-            {
-                const int STILL_ACTIVE = 259; // When Process.WaitForExit times out.
-                exec.ExitCode.ShouldBeOneOf(137, STILL_ACTIVE);
-            }
-            else
-            {
-                // On non-Windows the exit code of a killed process is 128 + SIGKILL = 137
-                exec.ExitCode.ShouldBe(NativeMethodsShared.IsWindows ? -1 : 137);
-            }
+            // On non-Windows the exit code of a killed process is 128 + SIGKILL = 137
+            exec.ExitCode.ShouldBe(NativeMethodsShared.IsWindows ? -1 : 137);
         }
 
         [UnixOnlyFact]
