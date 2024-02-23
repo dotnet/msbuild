@@ -1343,19 +1343,19 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
                     else
                     {
-                        _emptyQueueEvent.Set();
+                        _emptyQueueEvent?.Set();
 
                         // Wait for next event, or finish.
-                        if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty)
+                        if (!completeAdding.IsCancellationRequested && _eventQueue?.IsEmpty == true)
                         {
                             WaitHandle.WaitAny(waitHandlesForNextEvent);
                         }
 
-                        _emptyQueueEvent.Reset();
+                        _emptyQueueEvent?.Reset();
                     }
-                } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
+                } while (_eventQueue?.IsEmpty != false|| !completeAdding.IsCancellationRequested);
 
-                _emptyQueueEvent.Set();
+                _emptyQueueEvent?.Set();
             }
         }
 
