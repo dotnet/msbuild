@@ -1353,7 +1353,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
                         _emptyQueueEvent?.Reset();
                     }
-                } while (_eventQueue?.IsEmpty == false || !completeAdding.IsCancellationRequested);
+                } while (!completeAdding.IsCancellationRequested || _eventQueue?.IsEmpty == false);
 
                 _emptyQueueEvent?.Set();
             }
