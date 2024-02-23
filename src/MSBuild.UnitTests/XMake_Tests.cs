@@ -810,6 +810,41 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
+        [InlineData("-getProperty:Foo", "propertyContent")]
+        [InlineData("-getItem:Bar", "ItemContent")]
+        [InlineData("-getTargetResult:Biz", "Success")]
+        public void GetStarOutputsToFileIfRequested(string extraSwitch, string result)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile project = env.CreateFile("testProject.csproj", @"
+<Project>
+  <PropertyGroup>
+    <Foo>propertyContent</Foo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Bar Include=""ItemContent"" />
+  </ItemGroup>
+
+  <Target Name=""Biz"" />
+</Project>
+");
+            string resultFile = Path.Combine(Path.GetDirectoryName(project.Path), "resultFile.txt");
+            File.Exists(resultFile).ShouldBeFalse();
+            try
+            {
+                string results = RunnerUtilities.ExecMSBuild($" {project.Path} {extraSwitch} -getResultOutputFile:{resultFile}", out bool success);
+                success.ShouldBeTrue();
+                File.Exists(resultFile).ShouldBeTrue();
+                File.ReadAllText(resultFile).ShouldContain(result);
+            }
+            finally
+            {
+                File.Delete(resultFile);
+            }
+        }
+
+        [Theory]
         [InlineData(true)]
         [InlineData(false)]
         public void BuildFailsWithCompileErrorAndRestore(bool isGraphBuild)
