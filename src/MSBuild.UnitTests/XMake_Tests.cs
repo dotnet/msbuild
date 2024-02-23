@@ -829,19 +829,11 @@ namespace Microsoft.Build.UnitTests
   <Target Name=""Biz"" />
 </Project>
 ");
-            string resultFile = Path.Combine(Path.GetDirectoryName(project.Path), "resultFile.txt");
-            File.Exists(resultFile).ShouldBeFalse();
-            try
-            {
-                string results = RunnerUtilities.ExecMSBuild($" {project.Path} {extraSwitch} -getResultOutputFile:{resultFile}", out bool success);
-                success.ShouldBeTrue();
-                File.Exists(resultFile).ShouldBeTrue();
-                File.ReadAllText(resultFile).ShouldContain(result);
-            }
-            finally
-            {
-                File.Delete(resultFile);
-            }
+            string resultFile = env.GetTempFile(".tmp").Path;
+            string results = RunnerUtilities.ExecMSBuild($" {project.Path} {extraSwitch} -getResultOutputFile:{resultFile}", out bool success);
+            success.ShouldBeTrue();
+            File.Exists(resultFile).ShouldBeTrue();
+            File.ReadAllText(resultFile).ShouldContain(result);
         }
 
         [Theory]
