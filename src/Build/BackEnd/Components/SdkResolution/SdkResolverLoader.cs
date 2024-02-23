@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Xml;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -36,15 +37,20 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         internal virtual IReadOnlyList<SdkResolver> GetDefaultResolvers()
         {
+
+            MSBuildEventSource.Log.SdkResolverLoadResolversStart();
             var resolvers = !string.Equals(IncludeDefaultResolver, "false", StringComparison.OrdinalIgnoreCase) ?
                 new List<SdkResolver> { new DefaultSdkResolver() }
                 : new List<SdkResolver>();
 
+            MSBuildEventSource.Log.SdkResolverLoadResolversStop(string.Empty, resolvers.Count);
             return resolvers;
         }
 
         internal virtual IReadOnlyList<SdkResolver> LoadAllResolvers(ElementLocation location)
         {
+            MSBuildEventSource.Log.SdkResolverLoadAllResolversStart();
+
             var resolvers = !string.Equals(IncludeDefaultResolver, "false", StringComparison.OrdinalIgnoreCase) ?
                 new List<SdkResolver> { new DefaultSdkResolver() }
                 : new List<SdkResolver>();
@@ -62,13 +68,18 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 LoadResolvers(potentialResolver, location, resolvers);
             }
 
+            MSBuildEventSource.Log.SdkResolverLoadAllResolversStop(resolvers.Count);
+
             return resolvers.OrderBy(t => t.Priority).ToList();
         }
 
         internal virtual IReadOnlyList<SdkResolverManifest> GetResolversManifests(ElementLocation location)
         {
-            return FindPotentialSdkResolversManifests(
+            MSBuildEventSource.Log.SdkResolverFindResolversManifestsStart();
+            var allResolversManifests = FindPotentialSdkResolversManifests(
                 Path.Combine(BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot, "SdkResolvers"), location);
+            MSBuildEventSource.Log.SdkResolverFindResolversManifestsStop(allResolversManifests.Count);
+            return allResolversManifests;
         }
 
         /// <summary>
@@ -248,8 +259,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         protected internal virtual IReadOnlyList<SdkResolver> LoadResolversFromManifest(SdkResolverManifest manifest, ElementLocation location)
         {
+            MSBuildEventSource.Log.SdkResolverLoadResolversStart();
             var resolvers = new List<SdkResolver>();
             LoadResolvers(manifest.Path, location, resolvers);
+            MSBuildEventSource.Log.SdkResolverLoadResolversStop(manifest.DisplayName ?? string.Empty, resolvers.Count);
             return resolvers;
         }
 

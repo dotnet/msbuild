@@ -251,10 +251,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                         if (!_manifestToResolvers.TryGetValue(resolverManifest, out newResolvers))
                         {
                             // Loading of the needed resolvers.
-                            MSBuildEventSource.Log.SdkResolverServiceLoadResolversStart();
                             newResolvers = _sdkResolverLoader.LoadResolversFromManifest(resolverManifest, sdkReferenceLocation);
                             _manifestToResolvers[resolverManifest] = newResolvers;
-                            MSBuildEventSource.Log.SdkResolverServiceLoadResolversStop(resolverManifest.DisplayName ?? string.Empty, newResolvers.Count);
                         }
                     }
                 }
@@ -466,9 +464,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     return;
                 }
 
-                MSBuildEventSource.Log.SdkResolverServiceInitializeStart();
                 _resolversList = _sdkResolverLoader.LoadAllResolvers(location);
-                MSBuildEventSource.Log.SdkResolverServiceInitializeStop(_resolversList.Count);
             }
         }
 
@@ -481,7 +477,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     return;
                 }
 
-                MSBuildEventSource.Log.SdkResolverServiceFindResolversManifestsStart();
                 var allResolversManifests = _sdkResolverLoader.GetResolversManifests(location);
 
                 _manifestToResolvers = new Dictionary<SdkResolverManifest, IReadOnlyList<SdkResolver>>();
@@ -491,13 +486,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 SdkResolverManifest sdkDefaultResolversManifest = null;
                 if (defaultResolvers.Count > 0)
                 {
-                    MSBuildEventSource.Log.SdkResolverServiceLoadResolversStart();
                     sdkDefaultResolversManifest = new SdkResolverManifest(DisplayName: "DefaultResolversManifest", Path: null, ResolvableSdkRegex: null);
                     _manifestToResolvers[sdkDefaultResolversManifest] = defaultResolvers;
-                    MSBuildEventSource.Log.SdkResolverServiceLoadResolversStop(sdkDefaultResolversManifest.DisplayName ?? string.Empty, defaultResolvers.Count);
                 }
-
-                MSBuildEventSource.Log.SdkResolverServiceFindResolversManifestsStop(allResolversManifests.Count);
 
                 // Break the list of all resolvers manifests into two parts: manifests with specific and general resolvers.
                 _specificResolversManifestsRegistry = new List<SdkResolverManifest>();
