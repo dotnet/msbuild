@@ -22,8 +22,8 @@ Some of the env variables listed here are unsupported, meaning there is no guara
 * `MSBUILDLOGASYNC=1`
    * Enable asynchronous logging.
 * `MSBUILDDEBUGONSTART=1`
-   * Launch debugger on build start. This can work better on non-Windows operating systems.
-   * Setting the value of 2 allows for manually attaching a debugger to a process ID.
+   * Launch debugger on build start. 
+   * Setting the value of 2 allows for manually attaching a debugger to a process ID. This can work better on non-Windows operating systems.
 * `MSBUILDDEBUGSCHEDULER=1` & `MSBUILDDEBUGPATH=<DIRECTORY>`
    * Dumps scheduler state at specified directory (`MSBUILDDEBUGSCHEDULER` is implied by `MSBuildDebugEngine`).
 
