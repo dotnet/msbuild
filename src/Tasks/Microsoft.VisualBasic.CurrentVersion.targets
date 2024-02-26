@@ -237,13 +237,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          ChecksumAlgorithm="$(ChecksumAlgorithm)"
          CodeAnalysisRuleSet="$(ResolvedCodeAnalysisRuleSet)"
          CodePage="$(CodePage)"
-         DebugType="$(DebugType)"
+         DebugType="none"
          DefineConstants="$(FinalDefineConstants)"
          DelaySign="$(DelaySign)"
          DisableSdkPath="$(DisableSdkPath)"
          DisabledWarnings="$(NoWarn)"
          DocumentationFile="@(DocFileItem)"
-         EmbedAllSources="$(EmbedAllSources)"
+         EmbedAllSources="false"
          EmbeddedFiles="@(EmbeddedFiles)"
          EmitDebugInformation="$(DebugSymbols)"
          EnvironmentVariables="$(VbcEnvironment)"
@@ -275,16 +275,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          OptionInfer="$(OptionInfer)"
          OptionStrict="$(OptionStrict)"
          OptionStrictType="$(OptionStrictType)"
-         OutputAssembly="@(IntermediateAssembly)"
-         OutputRefAssembly="@(IntermediateRefAssembly)"
-         PdbFile="$(PdbFile)"
+         OutputAssembly="@(XamlIntermediateAssembly)"
+         OutputRefAssembly=""
+         PdbFile=""
          Platform="$(PlatformTarget)"
          Prefer32Bit="$(Prefer32Bit)"
          PreferredUILang="$(PreferredUILang)"
          ProjectName="$(MSBuildProjectName)"
          ProvideCommandLineArgs="$(ProvideCommandLineArgs)"
-         References="@(ReferencePathWithRefAssemblies)"
-         RefOnly="$(ProduceOnlyReferenceAssembly)"
+         References="@(ReferencePath)"
+         RefOnly="false"
          RemoveIntegerChecks="$(RemoveIntegerChecks)"
          ReportAnalyzer="$(ReportAnalyzer)"
          ReportIVTs="$(ReportIVTs)"
@@ -317,9 +317,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          Win32Resource="$(Win32Resource)"
          VBRuntime="$(VBRuntime)"
          PathMap="$(PathMap)"
-         SourceLink="$(SourceLink)">
-      <Output TaskParameter="CommandLineArgs" ItemName="VbcCommandLineArgs" />
-    </Vbc>
+         SourceLink="$(SourceLink)" />
 
  <!-- Only Applicable to the regular CoreCompile:
               <ItemGroup>
