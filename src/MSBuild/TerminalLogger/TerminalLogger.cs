@@ -10,8 +10,10 @@ using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
 
+
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
+
 #endif
 #if NETFRAMEWORK
 using Microsoft.IO;
@@ -201,6 +203,12 @@ internal sealed partial class TerminalLogger : INodeLogger
         Terminal = new Terminal();
     }
 
+    public TerminalLogger(LoggerVerbosity verbosity)
+        : this()
+    {
+        Verbosity = verbosity;
+    }
+
     /// <summary>
     /// Internal constructor accepting a custom <see cref="ITerminal"/> for testing.
     /// </summary>
@@ -212,8 +220,14 @@ internal sealed partial class TerminalLogger : INodeLogger
 
     #region INodeLogger implementation
 
+    private LoggerVerbosity _verbosity = LoggerVerbosity.Minimal;
+
     /// <inheritdoc/>
-    public LoggerVerbosity Verbosity { get => LoggerVerbosity.Minimal; set { } }
+    public LoggerVerbosity Verbosity
+    {
+        get { return _verbosity; }
+        set { _verbosity = value; }
+    }
 
     /// <inheritdoc/>
     public string Parameters
@@ -295,43 +309,46 @@ internal sealed partial class TerminalLogger : INodeLogger
 
         Terminal.BeginUpdate();
         try
-        {
-            string duration = (e.Timestamp - _buildStartTime).TotalSeconds.ToString("F1");
-            string buildResult = RenderBuildResult(e.Succeeded, _buildHasErrors, _buildHasWarnings);
-
-            Terminal.WriteLine("");
-            if (_restoreFailed)
+        { 
+            if (Verbosity > LoggerVerbosity.Quiet)
             {
-                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
-                    buildResult,
-                    duration));
-            }
-            else
-            {
-                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildFinished",
-                    buildResult,
-                    duration));
-            }
+                string duration = (e.Timestamp - _buildStartTime).TotalSeconds.ToString("F1");
+                string buildResult = RenderBuildResult(e.Succeeded, _buildHasErrors, _buildHasWarnings);
 
-            if (_testRunSummaries.Any())
-            {
-                var total = _testRunSummaries.Sum(t => t.Total);
-                var failed = _testRunSummaries.Sum(t => t.Failed);
-                var passed = _testRunSummaries.Sum(t => t.Passed);
-                var skipped = _testRunSummaries.Sum(t => t.Skipped);
-                var testDuration = (_testStartTime != null && _testEndTime != null ? (_testEndTime - _testStartTime).Value.TotalSeconds : 0).ToString("F1");
+                Terminal.WriteLine("");
+                if (_restoreFailed)
+                {
+                    Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
+                        buildResult,
+                        duration));
+                }
+                else
+                {
+                    Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildFinished",
+                        buildResult,
+                        duration));
+                }
 
-                var colorizedResult = _testRunSummaries.Any(t => t.Failed > 0) || _buildHasErrors
-                    ? AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Failed"), TerminalColor.Red)
-                    : AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Succeeded"), TerminalColor.Green);
+                if (_testRunSummaries.Any())
+                {
+                    var total = _testRunSummaries.Sum(t => t.Total);
+                    var failed = _testRunSummaries.Sum(t => t.Failed);
+                    var passed = _testRunSummaries.Sum(t => t.Passed);
+                    var skipped = _testRunSummaries.Sum(t => t.Skipped);
+                    var testDuration = (_testStartTime != null && _testEndTime != null ? (_testEndTime - _testStartTime).Value.TotalSeconds : 0).ToString("F1");
 
-                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary",
-                    colorizedResult,
-                    total,
-                    failed,
-                    passed,
-                    skipped,
-                    testDuration));
+                    var colorizedResult = _testRunSummaries.Any(t => t.Failed > 0) || _buildHasErrors
+                        ? AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Failed"), TerminalColor.Red)
+                        : AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Succeeded"), TerminalColor.Green);
+
+                    Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary",
+                        colorizedResult,
+                        total,
+                        failed,
+                        passed,
+                        skipped,
+                        testDuration));
+                }
             }
         }
         finally
@@ -400,166 +417,170 @@ internal sealed partial class TerminalLogger : INodeLogger
             UpdateNodeStatus(buildEventContext, null);
         }
 
-        ProjectContext c = new(buildEventContext);
-
-        if (_projects.TryGetValue(c, out Project? project))
+        // Add project summary to the static part of the Console only if verbosity is higher than Quiet.
+        if (Verbosity > LoggerVerbosity.Quiet)
         {
-            lock (_lock)
+            ProjectContext c = new(buildEventContext);
+
+            if (_projects.TryGetValue(c, out Project? project))
             {
-                Terminal.BeginUpdate();
-                try
+                lock (_lock)
                 {
-                    EraseNodes();
-
-                    string duration = project.Stopwatch.ElapsedSeconds.ToString("F1");
-                    ReadOnlyMemory<char>? outputPath = project.OutputPath;
-
-                    string projectFile = e.ProjectFile is not null ?
-                        Path.GetFileNameWithoutExtension(e.ProjectFile) :
-                        string.Empty;
-
-                    // Build result. One of 'failed', 'succeeded with warnings', or 'succeeded' depending on the build result and diagnostic messages
-                    // reported during build.
-                    bool haveErrors = project.BuildMessages?.Exists(m => m.Severity == MessageSeverity.Error) == true;
-                    bool haveWarnings = project.BuildMessages?.Exists(m => m.Severity == MessageSeverity.Warning) == true;
-
-                    string buildResult = RenderBuildResult(e.Succeeded, haveErrors, haveWarnings);
-
-                    // Check if we're done restoring.
-                    if (c == _restoreContext)
+                    Terminal.BeginUpdate();
+                    try
                     {
-                        if (e.Succeeded)
-                        {
-                            if (haveErrors || haveWarnings)
-                            {
-                                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
-                                    buildResult,
-                                    duration));
-                            }
-                            else
-                            {
-                                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreComplete",
-                                    duration));
-                            }
-                        }
-                        else
-                        {
-                            // It will be reported after build finishes.
-                            _restoreFailed = true;
-                        }
+                        EraseNodes();
 
-                        _restoreContext = null;
-                        _restoreFinished = true;
-                    }
-                    // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
-                    // If this is a test project, print it always, so user can see either a success or failure, otherwise success is hidden
-                    // and it is hard to see if project finished, or did not run at all.
-                    else if (project.OutputPath is not null || project.BuildMessages is not null || project.IsTestProject)
-                    {
-                        // Show project build complete and its output
-                        if (project.IsTestProject)
-                        {
-                            if (string.IsNullOrEmpty(project.TargetFramework))
-                            {
-                                Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_NoTF",
-                                    Indentation,
-                                    projectFile,
-                                    buildResult,
-                                    duration));
-                            }
-                            else
-                            {
-                                Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_WithTF",
-                                    Indentation,
-                                    projectFile,
-                                    AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
-                                    buildResult,
-                                    duration));
-                            }
-                        }
-                        else
-                        {
-                            if (string.IsNullOrEmpty(project.TargetFramework))
-                            {
-                                Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_NoTF",
-                                    Indentation,
-                                    projectFile,
-                                    buildResult,
-                                    duration));
-                            }
-                            else
-                            {
-                                Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTF",
-                                    Indentation,
-                                    projectFile,
-                                    AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
-                                    buildResult,
-                                    duration));
-                            }
-                        }
+                        string duration = project.Stopwatch.ElapsedSeconds.ToString("F1");
+                        ReadOnlyMemory<char>? outputPath = project.OutputPath;
 
-                        // Print the output path as a link if we have it.
-                        if (outputPath is not null)
+                        string projectFile = e.ProjectFile is not null ?
+                            Path.GetFileNameWithoutExtension(e.ProjectFile) :
+                            string.Empty;
+
+                        // Build result. One of 'failed', 'succeeded with warnings', or 'succeeded' depending on the build result and diagnostic messages
+                        // reported during build.
+                        bool haveErrors = project.BuildMessages?.Exists(m => m.Severity == MessageSeverity.Error) == true;
+                        bool haveWarnings = project.BuildMessages?.Exists(m => m.Severity == MessageSeverity.Warning) == true;
+
+                        string buildResult = RenderBuildResult(e.Succeeded, haveErrors, haveWarnings);
+
+                        // Check if we're done restoring.
+                        if (c == _restoreContext)
                         {
-                            ReadOnlySpan<char> outputPathSpan = outputPath.Value.Span;
-                            ReadOnlySpan<char> url = outputPathSpan;
-                            try
+                            if (e.Succeeded)
                             {
-                                // If possible, make the link point to the containing directory of the output.
-                                url = Path.GetDirectoryName(url);
-                            }
-                            catch
-                            {
-                                // Ignore any GetDirectoryName exceptions.
-                            }
-
-                            // Generates file:// schema url string which is better handled by various Terminal clients than raw folder name.
-                            string urlString = url.ToString();
-                            if (Uri.TryCreate(urlString, UriKind.Absolute, out Uri? uri))
-                            {
-                                urlString = uri.AbsoluteUri;
-                            }
-
-                            // If the output path is under the initial working directory, make the console output relative to that to save space.
-                            if (outputPathSpan.StartsWith(_initialWorkingDirectory.AsSpan(), FileUtilities.PathComparison))
-                            {
-                                if (outputPathSpan.Length > _initialWorkingDirectory.Length
-                                    && (outputPathSpan[_initialWorkingDirectory.Length] == Path.DirectorySeparatorChar
-                                        || outputPathSpan[_initialWorkingDirectory.Length] == Path.AltDirectorySeparatorChar))
+                                if (haveErrors || haveWarnings)
                                 {
-                                    outputPathSpan = outputPathSpan.Slice(_initialWorkingDirectory.Length + 1);
+                                    Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
+                                        buildResult,
+                                        duration));
+                                }
+                                else
+                                {
+                                    Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreComplete",
+                                        duration));
+                                }
+                            }
+                            else
+                            {
+                                // It will be reported after build finishes.
+                                _restoreFailed = true;
+                            }
+
+                            _restoreContext = null;
+                            _restoreFinished = true;
+                        }
+                        // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
+                        // If this is a test project, print it always, so user can see either a success or failure, otherwise success is hidden
+                        // and it is hard to see if project finished, or did not run at all.
+                        else if (project.OutputPath is not null || project.BuildMessages is not null || project.IsTestProject)
+                        {
+                            // Show project build complete and its output
+                            if (project.IsTestProject)
+                            {
+                                if (string.IsNullOrEmpty(project.TargetFramework))
+                                {
+                                    Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_NoTF",
+                                        Indentation,
+                                        projectFile,
+                                        buildResult,
+                                        duration));
+                                }
+                                else
+                                {
+                                    Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_WithTF",
+                                        Indentation,
+                                        projectFile,
+                                        AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
+                                        buildResult,
+                                        duration));
+                                }
+                            }
+                            else
+                            {
+                                if (string.IsNullOrEmpty(project.TargetFramework))
+                                {
+                                    Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_NoTF",
+                                        Indentation,
+                                        projectFile,
+                                        buildResult,
+                                        duration));
+                                }
+                                else
+                                {
+                                    Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTF",
+                                        Indentation,
+                                        projectFile,
+                                        AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
+                                        buildResult,
+                                        duration));
                                 }
                             }
 
-                            Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath",
-                                $"{AnsiCodes.LinkPrefix}{urlString}{AnsiCodes.LinkInfix}{outputPathSpan.ToString()}{AnsiCodes.LinkSuffix}"));
-                        }
-                        else
-                        {
-                            Terminal.WriteLine(string.Empty);
-                        }
-                    }
+                            // Print the output path as a link if we have it.
+                            if (outputPath is not null)
+                            {
+                                ReadOnlySpan<char> outputPathSpan = outputPath.Value.Span;
+                                ReadOnlySpan<char> url = outputPathSpan;
+                                try
+                                {
+                                    // If possible, make the link point to the containing directory of the output.
+                                    url = Path.GetDirectoryName(url);
+                                }
+                                catch
+                                {
+                                    // Ignore any GetDirectoryName exceptions.
+                                }
 
-                    // Print diagnostic output under the Project -> Output line.
-                    if (project.BuildMessages is not null)
+                                // Generates file:// schema url string which is better handled by various Terminal clients than raw folder name.
+                                string urlString = url.ToString();
+                                if (Uri.TryCreate(urlString, UriKind.Absolute, out Uri? uri))
+                                {
+                                    urlString = uri.AbsoluteUri;
+                                }
+
+                                // If the output path is under the initial working directory, make the console output relative to that to save space.
+                                if (outputPathSpan.StartsWith(_initialWorkingDirectory.AsSpan(), FileUtilities.PathComparison))
+                                {
+                                    if (outputPathSpan.Length > _initialWorkingDirectory.Length
+                                        && (outputPathSpan[_initialWorkingDirectory.Length] == Path.DirectorySeparatorChar
+                                            || outputPathSpan[_initialWorkingDirectory.Length] == Path.AltDirectorySeparatorChar))
+                                    {
+                                        outputPathSpan = outputPathSpan.Slice(_initialWorkingDirectory.Length + 1);
+                                    }
+                                }
+
+                                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath",
+                                    $"{AnsiCodes.LinkPrefix}{urlString}{AnsiCodes.LinkInfix}{outputPathSpan.ToString()}{AnsiCodes.LinkSuffix}"));
+                            }
+                            else
+                            {
+                                Terminal.WriteLine(string.Empty);
+                            }
+                        }
+
+                        // Print diagnostic output under the Project -> Output line.
+                        if (project.BuildMessages is not null)
+                        {
+                            foreach (BuildMessage buildMessage in project.BuildMessages)
+                            {
+                                Terminal.WriteLine($"{Indentation}{Indentation}{buildMessage.Message}");
+                            }
+                        }
+
+                        _buildHasErrors |= haveErrors;
+                        _buildHasWarnings |= haveWarnings;
+
+                        DisplayNodes();
+                    }
+                    finally
                     {
-                        foreach (BuildMessage buildMessage in project.BuildMessages)
-                        {
-                            Terminal.WriteLine($"{Indentation}{Indentation}{buildMessage.Message}");
-                        }
+                        Terminal.EndUpdate();
                     }
-
-                    _buildHasErrors |= haveErrors;
-                    _buildHasWarnings |= haveWarnings;
-
-                    DisplayNodes();
-                }
-                finally
-                {
-                    Terminal.EndUpdate();
                 }
             }
-        }
+        }  
     }
 
     /// <summary>
@@ -642,6 +663,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         if (message is not null && e.Importance == MessageImportance.High)
         {
             var hasProject = _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project);
+
             // Detect project output path by matching high-importance messages against the "$(MSBuildProjectName) -> ..."
             // pattern used by the CopyFilesToOutputDirectory target.
             int index = message.IndexOf(FilePathPattern, StringComparison.Ordinal);
@@ -653,14 +675,31 @@ internal sealed partial class TerminalLogger : INodeLogger
                 {
                     ReadOnlyMemory<char> outputPath = e.Message.AsMemory().Slice(index + 4);
                     project!.OutputPath = outputPath;
+                    return;
                 }
             }
 
-            if (IsImmediateMessage(message))
+            if (Verbosity > LoggerVerbosity.Quiet)
             {
-                RenderImmediateMessage(message);
+                // Show immediate messages to the user.
+                if (IsImmediateMessage(message))
+                {
+                    RenderImmediateMessage(message);
+                    return;
+                }
+                if (e.Code == "NETSDK1057" && !_loggedPreviewMessage)
+                {
+                    // The SDK will log the high-pri "not-a-warning" message NETSDK1057
+                    // when it's a preview version up to MaxCPUCount times, but that's
+                    // an implementation detail--the user cares about at most one.
+
+                    RenderImmediateMessage(message);
+                    _loggedPreviewMessage = true;
+                    return;
+                }
             }
-            else if (hasProject && project!.IsTestProject)
+
+            if (hasProject && project!.IsTestProject)
             {
                 var node = _nodes[NodeIndexForContext(buildEventContext)];
 
@@ -691,30 +730,40 @@ internal sealed partial class TerminalLogger : INodeLogger
 
                         case "TLTESTFINISH":
                             {
-                                _ = int.TryParse(extendedMessage.ExtendedMetadata!["total"]!, out int total);
-                                _ = int.TryParse(extendedMessage.ExtendedMetadata!["passed"]!, out int passed);
-                                _ = int.TryParse(extendedMessage.ExtendedMetadata!["skipped"]!, out int skipped);
-                                _ = int.TryParse(extendedMessage.ExtendedMetadata!["failed"]!, out int failed);
+                                // Collect test run summary.
+                                if (Verbosity > LoggerVerbosity.Quiet)
+                                {
+                                    _ = int.TryParse(extendedMessage.ExtendedMetadata!["total"]!, out int total);
+                                    _ = int.TryParse(extendedMessage.ExtendedMetadata!["passed"]!, out int passed);
+                                    _ = int.TryParse(extendedMessage.ExtendedMetadata!["skipped"]!, out int skipped);
+                                    _ = int.TryParse(extendedMessage.ExtendedMetadata!["failed"]!, out int failed);
 
-                                _testRunSummaries.Add(new TestSummary(total, passed, skipped, failed));
+                                    _testRunSummaries.Add(new TestSummary(total, passed, skipped, failed));
 
-                                _testEndTime = _testEndTime == null
-                                        ? e.Timestamp
-                                        : e.Timestamp > _testEndTime
-                                            ? e.Timestamp : _testEndTime;
+                                    _testEndTime = _testEndTime == null
+                                            ? e.Timestamp
+                                            : e.Timestamp > _testEndTime
+                                                ? e.Timestamp : _testEndTime;
+                                }
+                                
                                 break;
                             }
                     }
+                    return;
                 }
             }
-            else if (e.Code == "NETSDK1057" && !_loggedPreviewMessage)
-            {
-                // The SDK will log the high-pri "not-a-warning" message NETSDK1057
-                // when it's a preview version up to MaxCPUCount times, but that's
-                // an implementation detail--the user cares about at most one.
 
-                RenderImmediateMessage(message);
-                _loggedPreviewMessage = true;
+            if (Verbosity > LoggerVerbosity.Normal)
+            {
+                if (hasProject)
+                {
+                    project!.AddBuildMessage(MessageSeverity.Message, message);
+                }
+                else
+                {
+                    // Display messages reported by MSBuild, even if it's not tracked in _projects collection.
+                    RenderImmediateMessage(message);
+                }
             }
         }
     }
@@ -739,7 +788,9 @@ internal sealed partial class TerminalLogger : INodeLogger
                 threadId: e.ThreadId,
                 logOutputProperties: null);
 
-        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+        if (buildEventContext is not null
+            && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project)
+            && Verbosity > LoggerVerbosity.Quiet)
         {
             if (IsImmediateMessage(message))
             {
@@ -750,7 +801,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         }
         else
         {
-            // It is necessary to display warning messages reported by MSBuild, even if it's not tracked in _projects collection.
+            // It is necessary to display warning messages reported by MSBuild, even if it's not tracked in _projects collection or the verbosity is Quiet.
             RenderImmediateMessage(message);
             _buildHasWarnings = true;
         }
@@ -788,13 +839,15 @@ internal sealed partial class TerminalLogger : INodeLogger
                 threadId: e.ThreadId,
                 logOutputProperties: null);
 
-        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+        if (buildEventContext is not null
+            && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project)
+            && Verbosity > LoggerVerbosity.Quiet)
         {
             project.AddBuildMessage(MessageSeverity.Error, message);
         }
         else
         {
-            // It is necessary to display error messages reported by MSBuild, even if it's not tracked in _projects collection.
+            // It is necessary to display error messages reported by MSBuild, even if it's not tracked in _projects collection or the verbosity is Quiet.
             RenderImmediateMessage(message);
             _buildHasErrors = true;
         }

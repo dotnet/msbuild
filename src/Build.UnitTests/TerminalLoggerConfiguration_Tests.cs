@@ -23,6 +23,7 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
     private readonly TestEnvironment _env;
 
     private readonly string _cmd;
+    private readonly string _cmd2;
 
     public TerminalLoggerConfiguration_Tests(ITestOutputHelper output)
     {
@@ -40,7 +41,19 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
                 </Target>
             </Project>
             """);
-        _cmd = $"{projectFile.Path} -target:Hello -logger:{typeof(MockLogger).FullName},{typeof(MockLogger).Assembly.Location};ReportTelemetry";
+        TransientTestFile projectFile2 = _env.CreateFile(logFolder, "myProj2.proj", $"""
+            <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Hello">
+                <Target Name="Hello2">
+                    <Message Text="high verbosity" Importance="high"/>
+                    <Message Text="high verbosity --interactive" Importance="high"/>
+                    <Message Text="normal verbosity" Importance="normal"/>
+                    <Message Text="low verbosity" Importance="low"/>
+                    <Warning Text="warning"/>
+                </Target>
+            </Project>
+            """);
+
+        _cmd2 = $"{projectFile2.Path} -target:Hello2 -logger:{typeof(MockLogger).FullName},{typeof(MockLogger).Assembly.Location};ReportTelemetry";
     }
 
     /// <summary>

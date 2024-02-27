@@ -30,6 +30,12 @@ namespace Microsoft.Build.UnitTests
     {
         private const int _nodeCount = 8;
         private const string _eventSender = "Test";
+
+        private const string _immediateMessageString =
+            "The plugin credential provider could not acquire credentials." +
+            "Authentication may require manual action. Consider re-running the command with --interactive for `dotnet`, " +
+            "/p:NuGetInteractive=\"true\" for MSBuild or removing the -NonInteractive switch for `NuGet`";
+
         private readonly string _projectFile = NativeMethods.IsUnixLike ? "/src/project.proj" : @"C:\src\project.proj";
 
         private StringWriter _outputWriter = new();
@@ -38,7 +44,10 @@ namespace Microsoft.Build.UnitTests
         private readonly TerminalLogger _terminallogger;
 
         private readonly DateTime _buildStartTime = new DateTime(2023, 3, 30, 16, 30, 0);
+        private readonly DateTime _targetStartTime = new DateTime(2023, 3, 30, 16, 30, 1);
+        private readonly DateTime _messageTime = new DateTime(2023, 3, 30, 16, 30, 2);
         private readonly DateTime _buildFinishTime = new DateTime(2023, 3, 30, 16, 30, 5);
+
 
         private VerifySettings _settings = new();
 
@@ -132,7 +141,7 @@ namespace Microsoft.Build.UnitTests
 
         private TargetStartedEventArgs MakeTargetStartedEventArgs(string projectFile, string targetName)
         {
-            return new TargetStartedEventArgs("", "", targetName, projectFile, targetFile: projectFile)
+            return new TargetStartedEventArgs("", "", targetName, projectFile, targetFile: projectFile, String.Empty, TargetBuiltReason.None, _targetStartTime)
             {
                 BuildEventContext = MakeBuildEventContext(),
             };
@@ -170,11 +179,20 @@ namespace Microsoft.Build.UnitTests
             };
         }
 
-        private BuildMessageEventArgs MakeMessageEventArgs(string message)
+        private BuildMessageEventArgs MakeMessageEventArgs(string message, MessageImportance importance)
         {
-            return new BuildMessageEventArgs(message, "keyword", null, MessageImportance.High)
+            return new BuildMessageEventArgs(message, "keyword", null, importance)
             {
                 BuildEventContext = MakeBuildEventContext(),
+            };
+        }
+
+        private BuildMessageEventArgs MakeExtendedMessageEventArgs(string message, MessageImportance importance, string extendedType, Dictionary<string, string?>? extendedMetadata)
+        {
+            return new ExtendedBuildMessageEventArgs(extendedType, message, "keyword", null, importance, _messageTime)
+            {
+                BuildEventContext = MakeBuildEventContext(),
+                ExtendedMetadata = extendedMetadata
             };
         }
 
@@ -202,6 +220,23 @@ namespace Microsoft.Build.UnitTests
 
             TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(_projectFile, "Task", succeeded));
             TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(_projectFile, "Build", succeeded));
+
+            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(_projectFile, succeeded));
+            BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
+        }
+
+        private void InvokeLoggerCallbacksForTestProject(bool succeeded, Action additionalCallbacks)
+        {
+            BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
+            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile));
+
+            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile, "_TestRunStart"));
+            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(_projectFile, "Task"));
+
+            additionalCallbacks();
+
+            TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(_projectFile, "Task", succeeded));
+            TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(_projectFile, "_TestRunStart", succeeded));
 
             ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(_projectFile, succeeded));
             BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
@@ -247,10 +282,7 @@ namespace Microsoft.Build.UnitTests
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
-                MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs(
-                    "The plugin credential provider could not acquire credentials." +
-                    "Authentication may require manual action. Consider re-running the command with --interactive for `dotnet`, " +
-                    "/p:NuGetInteractive=\"true\" for MSBuild or removing the -NonInteractive switch for `NuGet`"));
+                MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs(_immediateMessageString, MessageImportance.High));
             });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
@@ -261,7 +293,7 @@ namespace Microsoft.Build.UnitTests
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
-                MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs("--anycustomarg"));
+                MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs("--anycustomarg", MessageImportance.High));
             });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
@@ -314,6 +346,100 @@ namespace Microsoft.Build.UnitTests
         }
 
         #endregion
+
+        private void CallAllTypesOfMessagesWarningAndError()
+        {
+            MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs(_immediateMessageString, MessageImportance.High));
+            MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs("High importance message!", MessageImportance.High));
+            MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs("Normal importance message!", MessageImportance.Normal));
+            MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs("Low importance message!", MessageImportance.Low));
+            WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning!"));
+            ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error!"));
+        }
+
+        private void CallAllTypesOfTestMessages()
+        {
+            MessageRaised?.Invoke(_eventSender, MakeExtendedMessageEventArgs(
+                "Test passed.",
+                MessageImportance.High,
+                "TLTESTPASSED",
+                new Dictionary<string, string?>() { { "displayName", "testName1" }, { "localizedResult", "passed" } }));
+            MessageRaised?.Invoke(_eventSender, MakeExtendedMessageEventArgs(
+                "Test skipped.",
+                MessageImportance.High,
+                "TLTESTSKIPPED",
+                new Dictionary<string, string?>() { { "displayName", "testName2" }, { "localizedResult", "skipped" } }));
+            MessageRaised?.Invoke(_eventSender, MakeExtendedMessageEventArgs(
+                "Test results.",
+                MessageImportance.High,
+                "TLTESTFINISH",
+                new Dictionary<string, string?>() { { "total", "10" }, { "passed", "7" }, { "skipped", "2" }, { "failed", "1" } }));
+        }
+
+        [Fact]
+        public Task PrintBuildSummaryQuietVerbosity_FailedWithErrors()
+        {
+            _terminallogger.Verbosity = LoggerVerbosity.Quiet;
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, CallAllTypesOfMessagesWarningAndError);
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+
+        [Fact]
+        public Task PrintBuildSummaryMinimalVerbosity_FailedWithErrors()
+        {
+            _terminallogger.Verbosity = LoggerVerbosity.Minimal;
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, CallAllTypesOfMessagesWarningAndError);
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintBuildSummaryNormalVerbosity_FailedWithErrors()
+        {
+            _terminallogger.Verbosity = LoggerVerbosity.Normal;
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, CallAllTypesOfMessagesWarningAndError);
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintBuildSummaryDetailedVerbosity_FailedWithErrors()
+        {
+            _terminallogger.Verbosity = LoggerVerbosity.Detailed;
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, CallAllTypesOfMessagesWarningAndError);
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+
+        [Fact]
+        public Task PrintBuildSummaryDiagnosticVerbosity_FailedWithErrors()
+        {
+            _terminallogger.Verbosity = LoggerVerbosity.Diagnostic;
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, CallAllTypesOfMessagesWarningAndError);
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintTestSummaryNormalVerbosity_Succeded()
+        {
+            _terminallogger.Verbosity = LoggerVerbosity.Normal;
+            InvokeLoggerCallbacksForTestProject(succeeded: true, CallAllTypesOfTestMessages);
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintTestSummaryQuietVerbosity_Succeded()
+        {
+            _terminallogger.Verbosity = LoggerVerbosity.Quiet;
+            InvokeLoggerCallbacksForTestProject(succeeded: true, CallAllTypesOfTestMessages);
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
 
         [Fact]
         public void DisplayNodesShowsCurrent()
