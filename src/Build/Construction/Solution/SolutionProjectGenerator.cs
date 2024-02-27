@@ -648,7 +648,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Returns true if the specified project will build in the currently selected solution configuration.
         /// </summary>
-        private static bool WouldProjectBuild(SolutionFile solutionFile, string selectedSolutionConfiguration, ProjectInSolution project, ProjectConfigurationInSolution projectConfiguration)
+        internal static bool WouldProjectBuild(SolutionFile solutionFile, string selectedSolutionConfiguration, ProjectInSolution project, ProjectConfigurationInSolution projectConfiguration)
         {
             // If the solution filter does not contain this project, do not build it.
             if (!solutionFile.ProjectShouldBuild(project.RelativePath))

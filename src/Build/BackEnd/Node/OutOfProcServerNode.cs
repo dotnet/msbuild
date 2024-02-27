@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -357,7 +358,10 @@ namespace Microsoft.Build.Experimental
 
             // Set build process context
             Directory.SetCurrentDirectory(command.StartupDirectory);
+
             CommunicationsUtilities.SetEnvironment(command.BuildProcessEnvironment);
+            Traits.UpdateFromEnvironment();
+
             Thread.CurrentThread.CurrentCulture = command.Culture;
             Thread.CurrentThread.CurrentUICulture = command.UICulture;
 

@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CheckMessageFromStreamParsesErrorsAndMessagesCorrectly()
         {
-            IBuildEngine2 mockEngine = new MockEngine();
+            IBuildEngine2 mockEngine = new MockEngine3();
             Task t = new MockTask();
             t.BuildEngine = mockEngine;
 
@@ -109,7 +109,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LogCommandLine()
         {
-            MockEngine mockEngine = new MockEngine();
+            MockEngine3 mockEngine = new MockEngine3();
             Task t = new MockTask();
             t.BuildEngine = mockEngine;
 
@@ -124,7 +124,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LogMessageWithUnmatchedCurly()
         {
-            MockEngine mockEngine = new MockEngine();
+            MockEngine3 mockEngine = new MockEngine3();
             Task t = new MockTask();
             t.BuildEngine = mockEngine;
 
@@ -144,7 +144,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LogFromResources()
         {
-            MockEngine mockEngine = new MockEngine();
+            MockEngine3 mockEngine = new MockEngine3();
             Task t = new MockTask();
             t.BuildEngine = mockEngine;
 
@@ -183,7 +183,7 @@ namespace Microsoft.Build.UnitTests
                 // This closes the reader
                 File.WriteAllText(file, contents);
 
-                MockEngine mockEngine = new MockEngine();
+                MockEngine3 mockEngine = new MockEngine3();
                 Task t = new MockTask();
                 t.BuildEngine = mockEngine;
                 t.Log.LogMessagesFromFile(file, MessageImportance.High);
@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests
                 mockEngine.Warnings.ShouldBe(1);
                 mockEngine.Messages.ShouldBe(3);
 
-                mockEngine = new MockEngine();
+                mockEngine = new MockEngine3();
                 t = new MockTask();
                 t.BuildEngine = mockEngine;
                 t.Log.LogMessagesFromFile(file);
@@ -238,7 +238,7 @@ namespace Microsoft.Build.UnitTests
             string message = "exception message";
             string stackTrace = "TaskLoggingHelperTests.TestLogFromException";
 
-            MockEngine engine = new MockEngine();
+            MockEngine3 engine = new MockEngine3();
             MockTask task = new MockTask();
             task.BuildEngine = engine;
 
@@ -297,7 +297,7 @@ namespace Microsoft.Build.UnitTests
                 new InvalidOperationException("The operation was invalid"),
                 new IOException("An I/O error occurred"));
 
-            MockEngine engine = new MockEngine();
+            MockEngine3 engine = new MockEngine3();
             MockTask task = new MockTask
             {
                 BuildEngine = engine

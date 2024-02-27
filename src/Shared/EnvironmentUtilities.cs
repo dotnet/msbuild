@@ -15,9 +15,9 @@ namespace Microsoft.Build.Shared
 
         public static bool IsWellKnownEnvironmentDerivedProperty(string propertyName)
         {
-            return propertyName.StartsWith("MSBUILD") ||
-                propertyName.StartsWith("COMPLUS_") ||
-                propertyName.StartsWith("DOTNET_");
+            return propertyName.StartsWith("MSBUILD", StringComparison.OrdinalIgnoreCase) ||
+                propertyName.StartsWith("COMPLUS_", StringComparison.OrdinalIgnoreCase) ||
+                propertyName.StartsWith("DOTNET_", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

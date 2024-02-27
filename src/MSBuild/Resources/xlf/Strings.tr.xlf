@@ -77,6 +77,13 @@
         <target state="translated">MSBUILD : error MSB1027: -noAutoResponse anahtarı, MSBuild.rsp otomatik yanıt dosyasında ve bu dosyanın başvuruda bulunduğu herhangi bir yanıt dosyasında belirtilemez.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="DurationDisplay">
+        <source>({0:F1}s)</source>
+        <target state="translated">({0:F1}s)</target>
+        <note>
+        {0}: duration in seconds with 1 decimal point
+      </note>
+      </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
         <source>  -question
                      (Experimental) Question whether there is any build work.
@@ -149,7 +156,7 @@
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
         <target state="translated">{1} için MSBuild sürüm {0}</target>
-        <note>LOCALIZATION: {0} contains the DLL version number. {1} contains the name of a runtime, like ".NET Framework", ".NET Core", or "Mono"</note>
+        <note>LOCALIZATION: {0} contains the DLL version number. {1} contains the name of a runtime, like ".NET Framework" or ".NET Core"</note>
       </trans-unit>
       <trans-unit id="CurrentDirectory">
         <source>Current directory = "{0}"</source>
@@ -1318,6 +1325,15 @@
         <target state="translated">MSBuild günlükleri ve hata ayıklama bilgileri "{0}" yolunda olacak</target>
         <note />
       </trans-unit>
+      <trans-unit id="MissingFeatureAvailabilityError">
+        <source>MSBUILD : error MSB1067: Must provide a feature name for the featureavailability switch.</source>
+        <target state="translated">MSBUILD : error MSB1067: Özellik kullanılabilirlik anahtarı için bir özellik adı belirtilmesi gerekli.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureavailability". The user must pass in an actual feature name
+      following the switch, as in "msbuild.exe -featureavailability:blah".
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="MissingGetItemError">
         <source>MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</source>
         <target state="translated">MSBUILD : error MSB1014: getItem anahtarı için bir öğe adı sağlanması gerekiyor.</target>
@@ -1457,11 +1473,12 @@
         <note>{StrBegin="MSBUILD : error MSB1062: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-warnnotaserror" and "-warnaserror" should not be localized.</note>
       </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
-        <source>The specified logger could not be created and will not be used. {0}</source>
-        <target state="translated">Belirtilen günlükçü oluşturulamadığından kullanılamıyor. {0}</target>
+        <source>The specified logger "{0}" could not be created and will not be used. {1}</source>
+        <target state="translated">Belirtilen "{0}" günlükçüsü oluşturulamadı ve kullanılmayacak. {1}</target>
         <note>
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
-      LOCALIZATION: {0} contains the exception message explaining why the
+      LOCALIZATION: {0} contains the logger description passed on the command line or in a
+      response file. {1} contains the exception message explaining why the
       logger could not be created -- this message comes from the CLR/FX and is localized.
     </note>
       </trans-unit>
@@ -1478,29 +1495,6 @@
         <source>Process = "{0}"</source>
         <target state="translated">İşlem = "{0}"</target>
         <note />
-      </trans-unit>
-      <trans-unit id="ProjectBuilding_NoTF">
-        <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3}sn)</target>
-        <note>
-      Project building.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target
-      {3}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectBuilding_WithTF">
-        <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3}({4}sn)</target>
-        <note>
-      Project building including target framework information.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target framework
-      {3}: target
-      {4}: duration in seconds with 1 decimal point
-    </note>
       </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
@@ -1659,6 +1653,35 @@
         <source>Terminal Logger was not used because the output is being redirected to a file.</source>
         <target state="translated">Çıkış bir dosyaya yeniden yönlendirildiği için Terminal Günlükçüsü kullanılmadı.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="TestProjectFinished_NoTF">
+        <source>{0}{1} test {2} ({3}s)</source>
+        <target state="new">{0}{1} test {2} ({3}s)</target>
+        <note>
+      Project finished summary.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: BuildResult_{X}
+      {3}: duration in seconds with 1 decimal point
+    </note>
+      </trans-unit>
+      <trans-unit id="TestProjectFinished_WithTF">
+        <source>{0}{1} test {2} {3} ({4}s)</source>
+        <target state="new">{0}{1} test {2} {3} ({4}s)</target>
+        <note>
+      Project finished summary including target framework information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: BuildResult_{X}
+      {4}: duration in seconds with 1 decimal point
+    </note>
+      </trans-unit>
+      <trans-unit id="TestSummary">
+        <source>Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</source>
+        <target state="new">Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</target>
+        <note>{0} string, localized result e.g. Failed surrounded by ANSI colors.
+{1-5} whole number</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>

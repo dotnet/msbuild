@@ -50,6 +50,7 @@ namespace Microsoft.Build.CommandLine
 #if DEBUG
             WaitForDebugger,
 #endif
+            // This has to be kept as last enum value
             NumberOfParameterlessSwitches
         }
 
@@ -115,6 +116,8 @@ namespace Microsoft.Build.CommandLine
             GetProperty,
             GetItem,
             GetTargetResult,
+            FeatureAvailability,
+            // This has to be kept as last enum value
             NumberOfParameterizedSwitches,
         }
 
@@ -278,8 +281,9 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "question", "q" },                     ParameterizedSwitch.Question,                   null,                           false,          null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "detailedsummary", "ds" },             ParameterizedSwitch.DetailedSummary,            null,                           false,          null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "getProperty" },                       ParameterizedSwitch.GetProperty,                null,                           true,           "MissingGetPropertyError",             true,   false),
-            new ParameterizedSwitchInfo(  new string[] { "getItem" },                           ParameterizedSwitch.GetItem,                    null,                           true,           "MissingGetItemError",             true,   false),
-            new ParameterizedSwitchInfo(  new string[] { "getTargetResult" },                   ParameterizedSwitch.GetTargetResult,            null,                           true,           "MissingGetTargetResultError",             true,   false),
+            new ParameterizedSwitchInfo(  new string[] { "getItem" },                           ParameterizedSwitch.GetItem,                    null,                           true,           "MissingGetItemError",                 true,   false),
+            new ParameterizedSwitchInfo(  new string[] { "getTargetResult" },                   ParameterizedSwitch.GetTargetResult,            null,                           true,           "MissingGetTargetResultError",         true,   false),
+            new ParameterizedSwitchInfo(  new string[] { "featureavailability", "fa" },         ParameterizedSwitch.FeatureAvailability,        null,                           true,           "MissingFeatureAvailabilityError",     true,   false),
         };
 
         /// <summary>
@@ -301,27 +305,16 @@ namespace Microsoft.Build.CommandLine
             {
                 foreach (string parameterlessSwitchName in switchInfo.switchNames)
                 {
-                    if (String.Equals(switchName, parameterlessSwitchName, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(switchName, parameterlessSwitchName, StringComparison.OrdinalIgnoreCase))
                     {
                         parameterlessSwitch = switchInfo.parameterlessSwitch;
                         duplicateSwitchErrorMessage = switchInfo.duplicateSwitchErrorMessage;
-                        break;
+                        return true;
                     }
                 }
             }
 
-            return parameterlessSwitch != ParameterlessSwitch.Invalid;
-        }
-
-        /// <summary>
-        /// Identifies/detects a switch that takes no parameters.
-        /// </summary>
-        internal static bool IsParameterlessSwitch(
-            string switchName)
-        {
-            ParameterlessSwitch parameterlessSwitch;
-            string duplicateSwitchErrorMessage;
-            return CommandLineSwitches.IsParameterlessSwitch(switchName, out parameterlessSwitch, out duplicateSwitchErrorMessage);
+            return false;
         }
 
         /// <summary>
@@ -354,7 +347,7 @@ namespace Microsoft.Build.CommandLine
             {
                 foreach (string parameterizedSwitchName in switchInfo.switchNames)
                 {
-                    if (String.Equals(switchName, parameterizedSwitchName, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(switchName, parameterizedSwitchName, StringComparison.OrdinalIgnoreCase))
                     {
                         parameterizedSwitch = switchInfo.parameterizedSwitch;
                         duplicateSwitchErrorMessage = switchInfo.duplicateSwitchErrorMessage;
@@ -362,12 +355,12 @@ namespace Microsoft.Build.CommandLine
                         missingParametersErrorMessage = switchInfo.missingParametersErrorMessage;
                         unquoteParameters = switchInfo.unquoteParameters;
                         emptyParametersAllowed = switchInfo.emptyParametersAllowed;
-                        break;
+                        return true;
                     }
                 }
             }
 
-            return parameterizedSwitch != ParameterizedSwitch.Invalid;
+            return false;
         }
 
         /// <summary>
@@ -480,7 +473,7 @@ namespace Microsoft.Build.CommandLine
             // check if the switch has multiple parameters
             if (multipleParametersAllowed)
             {
-                if (String.Empty.Equals(switchParameters) && emptyParametersAllowed)
+                if (string.Empty.Equals(switchParameters) && emptyParametersAllowed)
                 {
                     // Store a null parameter if its allowed
                     _parameterizedSwitches[(int)parameterizedSwitch].parameters.Add(null);
@@ -488,6 +481,11 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
+                    if (IsMultipleAllowedSwitchParameterDueToUnquote(unquoteParameters, parameterizedSwitch))
+                    {
+                        switchParameters = QuotingUtilities.Unquote(switchParameters);
+                    }
+
                     // store all the switch parameters
                     int emptyParameters;
                     _parameterizedSwitches[(int)parameterizedSwitch].parameters.AddRange(QuotingUtilities.SplitUnquoted(switchParameters, int.MaxValue, false /* discard empty parameters */, unquoteParameters, out emptyParameters, s_parameterSeparators));
@@ -546,7 +544,7 @@ namespace Microsoft.Build.CommandLine
             commandLineA.Sort(StringComparer.OrdinalIgnoreCase);
             commandLineB.Sort(StringComparer.OrdinalIgnoreCase);
 
-            return (String.Join(" ", commandLineA).Trim() + " " + String.Join(" ", commandLineB).Trim()).Trim();
+            return (string.Join(" ", commandLineA).Trim() + " " + string.Join(" ", commandLineB).Trim()).Trim();
         }
 
         /// <summary>
@@ -649,6 +647,30 @@ namespace Microsoft.Build.CommandLine
             groupedFileLoggerParameters[9] = GetSpecificFileLoggerParameters(ParameterlessSwitch.FileLogger9, ParameterizedSwitch.FileLoggerParameters9);
 
             return groupedFileLoggerParameters;
+        }
+
+        /// <summary>
+        /// Checks if the provided multiple valued parametrized switch needs to be unquoted.
+        /// The method will return 'true' in case:
+        ///     The changewave 17.10 is not set and
+        ///     The parametrized switch is 'Target'
+        /// </summary>
+        private bool IsMultipleAllowedSwitchParameterDueToUnquote(bool unquoteParameter, ParameterizedSwitch parameterizedSwitch)
+        {
+            if (!unquoteParameter || !Traits.Instance.EscapeHatches.UnquoteTargetSwitchParameters)
+            {
+                return false;
+            }
+
+            // issue: https://github.com/dotnet/msbuild/issues/9442
+            // In order to align the parsing behaviour of Target property when MSBuild invoked from PowerShell or CMD,
+            // the target property value will be unquoted before processing further
+            if (parameterizedSwitch == ParameterizedSwitch.Target)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
