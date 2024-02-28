@@ -13,6 +13,8 @@ using System.Diagnostics;
 using Microsoft.Build.Framework.Logging;
 using System.Globalization;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Utilities;
+
 
 
 #if NET7_0_OR_GREATER
@@ -279,6 +281,11 @@ internal sealed partial class TerminalLogger : INodeLogger
         eventSource.MessageRaised += MessageRaised;
         eventSource.WarningRaised += WarningRaised;
         eventSource.ErrorRaised += ErrorRaised;
+
+        if (eventSource is IEventSource3 eventSource3)
+        {
+            eventSource3.IncludeTaskInputs();
+        }
 
         if (eventSource is IEventSource4 eventSource4)
         {
@@ -778,9 +785,9 @@ internal sealed partial class TerminalLogger : INodeLogger
         }
     }
 
-    private void TryReadSourceControlInformationForProject(BuildEventContext? context, IList<ProjectItemInstance> sourceRoots)
+    private void TryReadSourceControlInformationForProject(BuildEventContext? context, IEnumerable<ITaskItem>? sourceRoots)
     {
-        if (context is null)
+        if (context is null || sourceRoots is null)
         {
             return;
         }
@@ -788,10 +795,10 @@ internal sealed partial class TerminalLogger : INodeLogger
         var projectContext = new ProjectContext(context);
         if (_projects.TryGetValue(projectContext, out Project? project))
         {
-            var sourceControlSourceRoot = sourceRoots.FirstOrDefault(root => root.HasMetadata("SourceControl"));
+            var sourceControlSourceRoot = sourceRoots.FirstOrDefault(root => !string.IsNullOrEmpty(root.GetMetadata("SourceControl")));
             if (sourceControlSourceRoot is not null)
             {
-                project.SourceRoot = sourceControlSourceRoot.EvaluatedInclude.AsMemory();
+                project.SourceRoot = sourceControlSourceRoot.ItemSpec.AsMemory();
             }
         }
     }
@@ -826,9 +833,16 @@ internal sealed partial class TerminalLogger : INodeLogger
         }
 
         string? message = e.Message;
-        if (e is TaskParameterEventArgs taskArgs && taskArgs.ItemType.Equals("SourceRoot", StringComparison.OrdinalIgnoreCase))
+        if (e is TaskParameterEventArgs taskArgs)
         {
-            TryReadSourceControlInformationForProject(taskArgs.BuildEventContext, taskArgs.Items as IList<ProjectItemInstance>);
+            Debug.WriteLine(taskArgs.BuildEventContext?.TaskId);
+            if (taskArgs.Kind == TaskParameterMessageKind.AddItem)
+            {
+                if (taskArgs.ItemType.Equals("SourceRoot", StringComparison.OrdinalIgnoreCase))
+                {
+                    TryReadSourceControlInformationForProject(taskArgs.BuildEventContext, taskArgs.Items as IList<ProjectItemInstance>);
+                }
+            }
         }
         if (message is not null && e.Importance == MessageImportance.High)
         {
