@@ -13,7 +13,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// A class containing an extension to BuildEventArgs
     /// </summary>
-    internal static class BuildEventArgsExtension
+    public static class BuildEventArgsExtension
     {
         /// <summary>
         /// Extension method to help our tests without adding shipping code.

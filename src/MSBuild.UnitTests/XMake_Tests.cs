@@ -1443,6 +1443,23 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Directory.Build.rsp in the directory of the specified project/solution should be respected when searching the files (solution/proj) to build.
+        /// </summary>
+        [Fact]
+        public void ResponseFileInProjectDirectoryWithSolutionProjectDifferentNamesShouldBeRespected()
+        {
+            var directory = _env.CreateFolder();
+            var content = ObjectModelHelpers.CleanupFileContents("<Project><Target Name='t'><Message Text='Completed'/></Target></Project>");
+            directory.CreateFile("projectFile.proj", content);
+            directory.CreateFile("solutionFile.sln", string.Empty);
+            directory.CreateFile("Directory.Build.rsp", "-ignoreProjectExtensions:.sln");
+
+            var msbuildParameters = "\"" + directory.Path + "\"";
+            RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
+        }
+
+        /// <summary>
         /// Any msbuild.rsp in the directory of the specified project/solution should be read, and should
         /// take priority over any other response files. Sanity test when there isn't one.
         /// </summary>

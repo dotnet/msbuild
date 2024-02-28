@@ -544,7 +544,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ProcessorArchitecture Condition="'$(ProcessorArchitecture)'==''">$(PROCESSOR_ARCHITECTURE)</ProcessorArchitecture>
   </PropertyGroup>
 
-  <!-- Sensible defaults for the most-commonly-desired MSBuildRuntime and MSBuildArchitecture values. The Core and Mono runtimes do not currently support specifying task architecture or runtime.
+  <!-- Sensible defaults for the most-commonly-desired MSBuildRuntime and MSBuildArchitecture values. The Core runtime does not currently support specifying task architecture or runtime.
        If support for out-of-proc task execution is added on other runtimes, make sure each task's logic is checked against the current state of support. -->
   <PropertyGroup Condition="'$(DisableOutOfProcTaskHost)' == '' and '$(MSBuildRuntimeType)' == 'Full'">
     <TargetFrameworkAsMSBuildRuntime Condition="'$(TargetFrameworkVersion)' == 'v2.0' or '$(TargetFrameworkVersion)' == 'v3.0' or '$(TargetFrameworkVersion)' == 'v3.5'">CLR2</TargetFrameworkAsMSBuildRuntime>
@@ -3949,6 +3949,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <PropertyGroup>
     <CreateSatelliteAssembliesDependsOn>
+      $(CreateSatelliteAssembliesDependsOn);
       _GenerateSatelliteAssemblyInputs;
       ComputeIntermediateSatelliteAssemblies;
       GenerateSatelliteAssemblies

@@ -5,7 +5,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(FullFrameworkTFM);$(LatestDotNetCoreForMSBuild)</TargetFrameworks>
-    <TargetFrameworks Condition="'$(MonoBuild)'=='true'">$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <RootNamespace>Microsoft.Build</RootNamespace>
     <AssemblyName>Microsoft.Build</AssemblyName>
 
@@ -15,7 +14,9 @@
     <EnableDefaultItems>false</EnableDefaultItems>
 
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
-    <CreateTlb>true</CreateTlb>
+    <!-- Do not create Tlbs when building in .NET product mode. The packages are not shipped to VS,
+         only their contents redisted within the SDK. -->
+    <CreateTlb Condition="'$(DotNetBuild)' != 'true'">true</CreateTlb>
     <IsPackable>true</IsPackable>
     <PackageDescription>This package contains the $(MSBuildProjectName) assembly which is used to create, edit, and evaluate MSBuild projects.</PackageDescription>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
@@ -35,7 +36,6 @@
     <PackageReference Include="System.Security.Principal.Windows" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
 
-    <PackageReference Include="System.Reflection.Metadata" Condition="'$(MonoBuild)' == 'true'" />
     <PackageReference Include="System.Reflection.MetadataLoadContext" />
 
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />

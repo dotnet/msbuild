@@ -10,10 +10,9 @@
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
     <SemanticVersioningV1>true</SemanticVersioningV1>
     <MicroBuildPluginsSwixBuildVersion>1.1.87</MicroBuildPluginsSwixBuildVersion>
-    <MonoBuild Condition="'$(Configuration)' == 'Debug-MONO' or '$(Configuration)' == 'Release-MONO'">true</MonoBuild>
   </PropertyGroup>
   <!-- Repo Toolset Features -->
-  <PropertyGroup Condition="'$(MonoBuild)' != 'true'">
+  <PropertyGroup>
     <UsingToolIbcOptimization>true</UsingToolIbcOptimization>
     <!-- Force a specific compiler version because record changes cause genapi output to flip-flop -->
     <UsingToolMicrosoftNetCompilers>true</UsingToolMicrosoftNetCompilers>
@@ -37,9 +36,10 @@
     <SystemNetHttpVersion>4.3.4</SystemNetHttpVersion>
     <SystemReflectionMetadataLoadContextVersion>8.0.0</SystemReflectionMetadataLoadContextVersion>
     <SystemReflectionMetadataVersion>8.0.0</SystemReflectionMetadataVersion>
-    <SystemResourcesExtensionsPackageVersion>8.0.0</SystemResourcesExtensionsPackageVersion>
+    <SystemResourcesExtensionsVersion>8.0.0</SystemResourcesExtensionsVersion>
     <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
     <SystemTextEncodingCodePagesVersion>7.0.0</SystemTextEncodingCodePagesVersion>
+    <SystemTextJsonVersion>8.0.0</SystemTextJsonVersion>
     <SystemThreadingChannelsVersion>8.0.0</SystemThreadingChannelsVersion>
     <SystemThreadingTasksDataflowVersion>8.0.0</SystemThreadingTasksDataflowVersion>
   </PropertyGroup>
@@ -52,10 +52,9 @@
     <MicrosoftDotNetXUnitExtensionsVersion>8.0.0-beta.24060.4</MicrosoftDotNetXUnitExtensionsVersion>
     <MicrosoftExtensionsDependencyModelVersion>7.0.0</MicrosoftExtensionsDependencyModelVersion>
     <MicrosoftIORedistVersion>6.0.0</MicrosoftIORedistVersion>
-    <MicrosoftNetCompilersToolsetVersion>4.9.0-3.23629.3</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>6.9.0-preview.1.70</NuGetBuildTasksVersion>
+    <MicrosoftNetCompilersToolsetVersion>4.10.0-2.24122.4</MicrosoftNetCompilersToolsetVersion>
+    <NuGetBuildTasksVersion>6.10.0-preview.2.44</NuGetBuildTasksVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
-    <SystemTextJsonVersion>8.0.0</SystemTextJsonVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386
