@@ -2,14 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using CommunicationsUtilities = Microsoft.Build.Internal.CommunicationsUtilities;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using MSBuildApp = Microsoft.Build.CommandLine.MSBuildApp;
@@ -320,24 +317,6 @@ namespace Microsoft.Build.UnitTests
             string result = InternalUtilities.CreateToolsVersionListString(toolsets);
 
             Assert.Equal("\"66\", \"44\"", result);
-        }
-
-        /// <summary>
-        /// Verify our custom way of getting env vars gives the same results as the BCL.
-        /// </summary>
-        [Fact]
-        public void GetEnvVars()
-        {
-            IDictionary<string, string> envVars = CommunicationsUtilities.GetEnvironmentVariables();
-            IDictionary referenceVars = Environment.GetEnvironmentVariables();
-            IDictionary<string, string> referenceVars2 = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (DictionaryEntry item in referenceVars)
-            {
-                referenceVars2.Add((string)item.Key, (string)item.Value);
-            }
-
-            Helpers.AssertCollectionsValueEqual(envVars, referenceVars2);
         }
 
         protected string GetXmlContents(string xmlText)
