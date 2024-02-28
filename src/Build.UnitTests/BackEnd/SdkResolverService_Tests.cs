@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -28,12 +29,15 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     {
         private readonly MockLogger _logger;
         private readonly LoggingContext _loggingContext;
+        private readonly EventSourceTestHelper _eventSourceTestListener;
 
         public SdkResolverService_Tests()
         {
             _logger = new MockLogger();
             ILoggingService loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             loggingService.RegisterLogger(_logger);
+
+            _eventSourceTestListener = new EventSourceTestHelper();
 
             _loggingContext = new MockLoggingContext(
                 loggingService,
@@ -42,6 +46,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
         public void Dispose()
         {
+            _eventSourceTestListener.Dispose();
             SdkResolverService.Instance.InitializeForTests();
         }
 
@@ -76,6 +81,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 "notfound"
             })));
             _logger.Warnings.Select(i => i.Message).ShouldBe(new[] { "WARNING4", "WARNING2" });
+            
         }
 
         [Fact]
@@ -101,6 +107,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             _logger.WarningCount.ShouldBe(1);
             _logger.Warnings.First().Code.ShouldStartWith("MSB4241");
+
+            var resultsOfEventSource = _eventSourceTestListener.GetEvents();
+            resultsOfEventSource.Count.ShouldBe(2);
         }
 
         [Fact]
@@ -114,6 +123,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             SdkResolverException e = Should.Throw<SdkResolverException>(() => SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false, failOnUnresolvedSdk: true));
             e.Resolver.Name.ShouldBe("MockSdkResolverThrows");
             e.Sdk.Name.ShouldBe("1sdkName");
+
+            var resultsOfEventSource = _eventSourceTestListener.GetEvents();
+            resultsOfEventSource.Count.ShouldBe(16);
         }
 
         [Fact]
