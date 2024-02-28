@@ -1147,11 +1147,6 @@ namespace Microsoft.Build.BackEnd
                         RequestEntry.Request.BuildRequestDataFlags,
                         RequestEntry.Request.SubmissionId,
                         _nodeLoggingContext.BuildEventContext.NodeId);
-
-                    // todo: in a using scope (autocleanup)
-                    buildCopManager.EndProjectEvaluation(
-                        BuildCopDataSource.BuildExecution,
-                        _requestEntry.Request.ParentBuildEventContext);
                 }
             }
             catch
@@ -1164,6 +1159,12 @@ namespace Microsoft.Build.BackEnd
                     _requestEntry.RequestConfiguration.ToolsVersion);
 
                 throw;
+            }
+            finally
+            {
+                buildCopManager.EndProjectEvaluation(
+                    BuildCopDataSource.BuildExecution,
+                    _requestEntry.Request.ParentBuildEventContext);
             }
 
             _projectLoggingContext = _nodeLoggingContext.LogProjectStarted(_requestEntry);
@@ -1222,7 +1223,7 @@ namespace Microsoft.Build.BackEnd
                 MSBuildEventSource.Log.BuildProjectStop(_requestEntry.RequestConfiguration.ProjectFullPath, string.Join(", ", allTargets));
             }
 
-            buildCopManager.EndProjectEvaluation(
+            buildCopManager.EndProjectRequest(
                 BuildCopDataSource.BuildExecution,
                 _requestEntry.Request.ParentBuildEventContext);
 

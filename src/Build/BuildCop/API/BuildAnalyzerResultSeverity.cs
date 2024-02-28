@@ -3,6 +3,9 @@
 
 namespace Microsoft.Build.Experimental.BuildCop;
 
+/// <summary>
+/// The severity of reported result (or preconfigured or user configured severity for a rule).
+/// </summary>
 public enum BuildAnalyzerResultSeverity
 {
     Info,

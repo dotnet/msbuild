@@ -840,7 +840,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Gets or sets a factory for build analysis infrastructure logger
+        /// Gets or sets an indication of build analysis enablement.
         /// </summary>
         public bool IsBuildCopEnabled
         {

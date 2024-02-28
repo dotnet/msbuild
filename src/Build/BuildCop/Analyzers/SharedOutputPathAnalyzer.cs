@@ -12,12 +12,7 @@ using Microsoft.Build.Experimental.BuildCop;
 
 namespace Microsoft.Build.BuildCop.Analyzers;
 
-// Some background on ids:
-//  * https://github.com/dotnet/roslyn-analyzers/blob/main/src/Utilities/Compiler/DiagnosticCategoryAndIdRanges.txt
-//  * https://github.com/dotnet/roslyn/issues/40351
-//
-// quick suggestion now - let's force external ids to start with 'X', for ours - avoid 'MSB'
-//  maybe - BT - build static/styling; BA - build authoring; BE - build execution/environment; BC - build configuration
+
 
 internal sealed class SharedOutputPathAnalyzer : BuildAnalyzer
 {
