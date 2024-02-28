@@ -83,7 +83,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             }
             finally
             {
-                MSBuildEventSource.Log.SdkResolverFindResolversManifestsStop(allResolversManifests is null ? 0 : allResolversManifests.Count);
+                MSBuildEventSource.Log.SdkResolverFindResolversManifestsStop(allResolversManifests?.Count ?? 0);
             }
             return allResolversManifests;
         }
