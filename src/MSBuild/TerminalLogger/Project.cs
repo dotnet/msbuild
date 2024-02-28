@@ -42,6 +42,11 @@ internal sealed class Project
     public ReadOnlyMemory<char>? OutputPath { get; set; }
 
     /// <summary>
+    /// Full path to the 'root' of this project's source control repository, if known.
+    /// </summary>
+    public ReadOnlyMemory<char>? SourceRoot { get; set; }
+
+    /// <summary>
     /// The target framework of the project or null if not multi-targeting.
     /// </summary>
     public string? TargetFramework { get; }
