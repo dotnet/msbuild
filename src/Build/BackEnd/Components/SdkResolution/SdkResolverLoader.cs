@@ -50,8 +50,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     new List<SdkResolver> { new DefaultSdkResolver() }
                     : new List<SdkResolver>();
             try
-            {
-                
+            {   
                 var potentialResolvers = FindPotentialSdkResolvers(
                     Path.Combine(BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, "SdkResolvers"), location);
 
@@ -64,7 +63,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 {
                     LoadResolvers(potentialResolver, location, resolvers);
                 }
-
             }
             finally
             {
