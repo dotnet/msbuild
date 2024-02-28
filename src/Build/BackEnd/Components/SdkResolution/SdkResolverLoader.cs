@@ -75,7 +75,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         internal virtual IReadOnlyList<SdkResolverManifest> GetResolversManifests(ElementLocation location)
         {
             MSBuildEventSource.Log.SdkResolverFindResolversManifestsStart();
-            IReadOnlyList <SdkResolverManifest> allResolversManifests = null;
+            IReadOnlyList<SdkResolverManifest> allResolversManifests = null;
             try
             {
                 allResolversManifests = FindPotentialSdkResolversManifests(
