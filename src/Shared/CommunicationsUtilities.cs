@@ -265,7 +265,7 @@ namespace Microsoft.Build.Internal
         /// </summary>
         /// <remarks>
         /// .NET Framework implementation of SetEnvironmentVariable checks the length of the value and throws an exception if
-        /// it's greater than or equal to 32,767 characters. This limitation does not exist on modern Windows.
+        /// it's greater than or equal to 32,767 characters. This limitation does not exist on modern Windows or .NET.
         /// </remarks>
         internal static void SetEnvironmentVariable(string name, string value)
         {
