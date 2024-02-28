@@ -1,31 +1,36 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Threading;
 using Microsoft.Build.Experimental.BuildCop;
 
 namespace Microsoft.Build.BuildCop.Infrastructure;
 
-internal sealed class BuildCopContext(BuildAnalyzerTracingWrapper analyzer, BuildCopCentralContext buildCopCentralContext) : IBuildCopContext
+internal sealed class BuildCopContext(BuildAnalyzerWrapper analyzerWrapper, BuildCopCentralContext buildCopCentralContext) : IBuildCopContext
 {
-    public void RegisterEvaluatedPropertiesAction(EvaluatedPropertiesAction evaluatedPropertiesAction)
+    private int _evaluatedPropertiesActionCount;
+    private int _parsedItemsActionCount;
+
+    public void RegisterEvaluatedPropertiesAction(Action<BuildAnalysisContext<EvaluatedPropertiesAnalysisData>> evaluatedPropertiesAction)
     {
-        void WrappedEvaluatedPropertiesAction(EvaluatedPropertiesContext context)
+        if (Interlocked.Increment(ref _evaluatedPropertiesActionCount) > 1)
         {
-            using var _ = analyzer.StartSpan();
-            evaluatedPropertiesAction(context);
+            throw new BuildCopConfigurationException(
+                $"Analyzer '{analyzerWrapper.BuildAnalyzer.FriendlyName}' attempted to call '{nameof(RegisterEvaluatedPropertiesAction)}' multiple times.");
         }
 
-        buildCopCentralContext.RegisterEvaluatedPropertiesAction(WrappedEvaluatedPropertiesAction);
+        buildCopCentralContext.RegisterEvaluatedPropertiesAction(analyzerWrapper, evaluatedPropertiesAction);
     }
 
-    public void RegisterParsedItemsAction(ParsedItemsAction parsedItemsAction)
+    public void RegisterParsedItemsAction(Action<BuildAnalysisContext<ParsedItemsAnalysisData>> parsedItemsAction)
     {
-        void WrappedParsedItemsAction(ParsedItemsContext context)
+        if (Interlocked.Increment(ref _parsedItemsActionCount) > 1)
         {
-            using var _ = analyzer.StartSpan();
-            parsedItemsAction(context);
+            throw new BuildCopConfigurationException(
+                $"Analyzer '{analyzerWrapper.BuildAnalyzer.FriendlyName}' attempted to call '{nameof(RegisterParsedItemsAction)}' multiple times.");
         }
 
-        buildCopCentralContext.RegisterParsedItemsAction(WrappedParsedItemsAction);
+        buildCopCentralContext.RegisterParsedItemsAction(analyzerWrapper, parsedItemsAction);
     }
 }

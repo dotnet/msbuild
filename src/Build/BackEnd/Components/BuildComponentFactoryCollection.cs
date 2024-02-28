@@ -2,8 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.BuildCop.Infrastructure;
 using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Shared;
 
@@ -76,6 +78,8 @@ namespace Microsoft.Build.BackEnd
             // NodeEndpoint,
             _componentEntriesByType[BuildComponentType.LoggingService] = new BuildComponentEntry(BuildComponentType.LoggingService, null);
             _componentEntriesByType[BuildComponentType.RequestBuilder] = new BuildComponentEntry(BuildComponentType.RequestBuilder, RequestBuilder.CreateComponent, CreationPattern.CreateAlways);
+            // This conditionally registers real or no-op implementation based on BuildParameters
+            _componentEntriesByType[BuildComponentType.BuildCop] = new BuildComponentEntry(BuildComponentType.BuildCop, BuildCopManagerProvider.CreateComponent, CreationPattern.Singleton);
             _componentEntriesByType[BuildComponentType.TargetBuilder] = new BuildComponentEntry(BuildComponentType.TargetBuilder, TargetBuilder.CreateComponent, CreationPattern.CreateAlways);
             _componentEntriesByType[BuildComponentType.TaskBuilder] = new BuildComponentEntry(BuildComponentType.TaskBuilder, TaskBuilder.CreateComponent, CreationPattern.CreateAlways);
             _componentEntriesByType[BuildComponentType.RegisteredTaskObjectCache] = new BuildComponentEntry(BuildComponentType.RegisteredTaskObjectCache, RegisteredTaskObjectCache.CreateComponent, CreationPattern.Singleton);

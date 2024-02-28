@@ -3,10 +3,31 @@
 
 namespace Microsoft.Build.Experimental.BuildCop;
 
+/// <summary>
+/// For datasource events that can differentiate from where exactly they originate - e.g.
+///  For a condition string or AST - was that directly in hte analyzed project or imported?
+///
+/// Ignored by infrastructure if the current datasource doesn't support this level of setting.
+/// </summary>
 public enum EvaluationAnalysisScope
 {
+    /// <summary>
+    /// Only the data from currently analyzed project will be sent to the analyzer. Imports will be discarded.
+    /// </summary>
     AnalyzedProjectOnly,
+
+    /// <summary>
+    /// Only the data from currently analyzed project and imports from files under the entry project or solution will be sent to the analyzer. Other imports will be discarded.
+    /// </summary>
     AnalyzedProjectWithImportsFromCurrentWorkTree,
+
+    /// <summary>
+    /// Imports from SDKs will not be sent to the analyzer. Other imports will be sent.
+    /// </summary>
     AnalyzedProjectWithImportsWithoutSdks,
+
+    /// <summary>
+    /// All data will be sent to the analyzer.
+    /// </summary>
     AnalyzedProjectWithAllImports,
 }

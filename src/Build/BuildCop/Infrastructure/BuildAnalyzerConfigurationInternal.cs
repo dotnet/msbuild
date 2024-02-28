@@ -10,8 +10,25 @@ namespace Microsoft.Build.BuildCop.Infrastructure;
 /// </summary>
 internal sealed class BuildAnalyzerConfigurationInternal
 {
-    public LifeTimeScope LifeTimeScope { get; internal init; }
-    public EvaluationAnalysisScope EvaluationAnalysisScope { get; internal init; }
-    public BuildAnalyzerResultSeverity Severity { get; internal init; }
-    public bool IsEnabled { get; internal init; }
+    public BuildAnalyzerConfigurationInternal(string ruleId, EvaluationAnalysisScope evaluationAnalysisScope, BuildAnalyzerResultSeverity severity, bool isEnabled)
+    {
+        RuleId = ruleId;
+        EvaluationAnalysisScope = evaluationAnalysisScope;
+        Severity = severity;
+        IsEnabled = isEnabled;
+    }
+
+    public string RuleId { get; }
+    public EvaluationAnalysisScope EvaluationAnalysisScope { get; }
+    public BuildAnalyzerResultSeverity Severity { get; }
+    public bool IsEnabled { get; }
+
+    // Intentionally not checking the RuleId
+    //  as for analyzers with multiple rules, we can squash config to a single one,
+    //  if the ruleId is the only thing differing.
+    public bool IsEqual(BuildAnalyzerConfigurationInternal? other) =>
+        other != null &&
+        Severity == other.Severity &&
+        IsEnabled == other.IsEnabled &&
+        EvaluationAnalysisScope == other.EvaluationAnalysisScope;
 }

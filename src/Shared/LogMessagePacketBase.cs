@@ -9,6 +9,11 @@ using System.Reflection;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 
+#if !TASKHOST
+using Microsoft.Build.Experimental.BuildCop;
+using Microsoft.Build.BuildCop.Infrastructure;
+#endif
+
 #if !TASKHOST && !MSBUILDENTRYPOINTEXE
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework.Profiler;
@@ -205,6 +210,31 @@ namespace Microsoft.Build.Shared
         /// Event is <see cref="ExtendedCriticalBuildMessageEventArgs"/>
         /// </summary>
         ExtendedCriticalBuildMessageEvent = 33,
+
+        /// <summary>
+        /// Event is <see cref="BuildCopResultMessage"/>
+        /// </summary>
+        BuildCopMessageEvent = 34,
+
+        /// <summary>
+        /// Event is <see cref="BuildCopResultWarning"/>
+        /// </summary>
+        BuildCopWarningEvent = 35,
+
+        /// <summary>
+        /// Event is <see cref="BuildCopResultError"/>
+        /// </summary>
+        BuildCopErrorEvent = 36,
+
+        /// <summary>
+        /// Event is <see cref="BuildCopTracingEventArgs"/>
+        /// </summary>
+        BuildCopTracingEvent = 37,
+
+        /// <summary>
+        /// Event is <see cref="BuildCopAcquisitionEventArgs"/>
+        /// </summary>
+        BuildCopAcquisitionEvent = 38,
     }
     #endregion
 
@@ -610,6 +640,11 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.PropertyInitialValueSet => new PropertyInitialValueSetEventArgs(),
                 LoggingEventType.PropertyReassignment => new PropertyReassignmentEventArgs(),
                 LoggingEventType.UninitializedPropertyRead => new UninitializedPropertyReadEventArgs(),
+                LoggingEventType.BuildCopMessageEvent => new BuildCopResultMessage(),
+                LoggingEventType.BuildCopWarningEvent => new BuildCopResultWarning(),
+                LoggingEventType.BuildCopErrorEvent => new BuildCopResultError(),
+                LoggingEventType.BuildCopAcquisitionEvent => new BuildCopAcquisitionEventArgs(),
+                LoggingEventType.BuildCopTracingEvent => new BuildCopTracingEventArgs(),
 #endif
                 _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
             };
@@ -720,6 +755,26 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(UninitializedPropertyReadEventArgs))
             {
                 return LoggingEventType.UninitializedPropertyRead;
+            }
+            else if (eventType == typeof(BuildCopResultMessage))
+            {
+                return LoggingEventType.BuildCopMessageEvent;
+            }
+            else if (eventType == typeof(BuildCopResultWarning))
+            {
+                return LoggingEventType.BuildCopWarningEvent;
+            }
+            else if (eventType == typeof(BuildCopResultError))
+            {
+                return LoggingEventType.BuildCopErrorEvent;
+            }
+            else if (eventType == typeof(BuildCopAcquisitionEventArgs))
+            {
+                return LoggingEventType.BuildCopAcquisitionEvent;
+            }
+            else if (eventType == typeof(BuildCopTracingEventArgs))
+            {
+                return LoggingEventType.BuildCopTracingEvent;
             }
 #endif
             else if (eventType == typeof(TargetStartedEventArgs))

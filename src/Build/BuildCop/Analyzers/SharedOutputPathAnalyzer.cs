@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using Microsoft.Build.BuildCop.Infrastructure;
 using Microsoft.Build.Construction;
@@ -27,7 +28,7 @@ internal sealed class SharedOutputPathAnalyzer : BuildAnalyzer
 
     public override string FriendlyName => "MSBuild.SharedOutputPathAnalyzer";
 
-    public override ImmutableArray<BuildAnalyzerRule> SupportedRules { get; } =[SupportedRule];
+    public override IReadOnlyList<BuildAnalyzerRule> SupportedRules { get; } =[SupportedRule];
 
     public override void Initialize(ConfigurationContext configurationContext)
     {
@@ -42,17 +43,17 @@ internal sealed class SharedOutputPathAnalyzer : BuildAnalyzer
     private readonly Dictionary<string, string> _projectsPerOutputPath = new(StringComparer.CurrentCultureIgnoreCase);
     private readonly HashSet<string> _projects = new(StringComparer.CurrentCultureIgnoreCase);
 
-    private void EvaluatedPropertiesAction(EvaluatedPropertiesContext context)
+    private void EvaluatedPropertiesAction(BuildAnalysisContext<EvaluatedPropertiesAnalysisData> context)
     {
-        if (!_projects.Add(context.ProjectFilePath))
+        if (!_projects.Add(context.Data.ProjectFilePath))
         {
             return;
         }
 
         string? binPath, objPath;
 
-        context.EvaluatedProperties.TryGetValue("OutputPath", out binPath);
-        context.EvaluatedProperties.TryGetValue("IntermediateOutputPath", out objPath);
+        context.Data.EvaluatedProperties.TryGetValue("OutputPath", out binPath);
+        context.Data.EvaluatedProperties.TryGetValue("IntermediateOutputPath", out objPath);
 
         string? absoluteBinPath = CheckAndAddFullOutputPath(binPath, context);
         if (
@@ -65,14 +66,14 @@ internal sealed class SharedOutputPathAnalyzer : BuildAnalyzer
         }
     }
 
-    private string? CheckAndAddFullOutputPath(string? path, EvaluatedPropertiesContext context)
+    private string? CheckAndAddFullOutputPath(string? path, BuildAnalysisContext<EvaluatedPropertiesAnalysisData> context)
     {
         if (string.IsNullOrEmpty(path))
         {
             return path;
         }
 
-        string projectPath = context.ProjectFilePath;
+        string projectPath = context.Data.ProjectFilePath;
 
         if (!Path.IsPathRooted(path))
         {
@@ -81,7 +82,7 @@ internal sealed class SharedOutputPathAnalyzer : BuildAnalyzer
 
         if (_projectsPerOutputPath.TryGetValue(path!, out string? conflictingProject))
         {
-            context.ReportResult(BuildAnalyzerResult.Create(
+            context.ReportResult(BuildCopResult.Create(
                 SupportedRule,
                 // TODO: let's support transmitting locations of specific properties
                 ElementLocation.EmptyLocation,

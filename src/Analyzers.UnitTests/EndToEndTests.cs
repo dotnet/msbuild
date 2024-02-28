@@ -29,8 +29,10 @@ namespace Microsoft.Build.Analyzers.UnitTests
 
         public void Dispose() => _env.Dispose();
 
-        [Fact]
-        public void SampleAnalyzerIntegrationTest()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void SampleAnalyzerIntegrationTest(bool buildInOutOfProcessNode)
         {
             string contents = $"""
                 <Project Sdk="Microsoft.NET.Sdk" DefaultTargets="Hello">
@@ -114,7 +116,7 @@ namespace Microsoft.Build.Analyzers.UnitTests
             // TODO: See if there is a way of fixing it in the engine.
             _env.SetCurrentDirectory(Path.GetDirectoryName(projectFile.Path));
 
-            // env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
+            _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", buildInOutOfProcessNode ? "1" : "0");
             _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
             // string output = RunnerUtilities.ExecMSBuild($"{projectFile.Path} /m:1 -nr:False", out bool success);
             string output = BootstrapRunner.ExecBootstrapedMSBuild($"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -analyze", out bool success);

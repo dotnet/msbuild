@@ -32,12 +32,12 @@ public class ItemsHolder(IEnumerable<ProjectItemElement> items, IEnumerable<Proj
     }
 }
 
-public class ParsedItemsContext : BuildAnalysisContext
+public class ParsedItemsAnalysisData : AnalysisData
 {
-    internal ParsedItemsContext(
-        LoggingContext loggingContext,
+    internal ParsedItemsAnalysisData(
+        string projectFilePath,
         ItemsHolder itemsHolder) :
-        base(loggingContext) => ItemsHolder = itemsHolder;
+        base(projectFilePath) => ItemsHolder = itemsHolder;
 
     public ItemsHolder ItemsHolder { get; }
 }

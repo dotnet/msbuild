@@ -209,6 +209,8 @@ namespace Microsoft.Build.Execution
 
         private bool _question;
 
+        private bool _isBuildCopEnabled;
+
         /// <summary>
         /// The settings used to load the project under build
         /// </summary>
@@ -311,7 +313,7 @@ namespace Microsoft.Build.Execution
             DiscardBuildResults = other.DiscardBuildResults;
             LowPriority = other.LowPriority;
             Question = other.Question;
-            BuildCopLoggerFactory = other.BuildCopLoggerFactory;
+            IsBuildCopEnabled = other.IsBuildCopEnabled;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
         }
 
@@ -840,7 +842,11 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Gets or sets a factory for build analysis infrastructure logger
         /// </summary>
-        public IBuildCopLoggerFactory BuildCopLoggerFactory { get; set; }
+        public bool IsBuildCopEnabled
+        {
+            get => _isBuildCopEnabled;
+            set => _isBuildCopEnabled = value;
+        }
 
         /// <summary>
         /// Gets or sets the project cache description to use for all <see cref="BuildSubmission"/> or <see cref="GraphBuildSubmission"/>
@@ -906,6 +912,7 @@ namespace Microsoft.Build.Execution
             translator.TranslateEnum(ref _projectLoadSettings, (int)_projectLoadSettings);
             translator.Translate(ref _interactive);
             translator.Translate(ref _question);
+            translator.Translate(ref _isBuildCopEnabled);
             translator.TranslateEnum(ref _projectIsolationMode, (int)_projectIsolationMode);
             translator.Translate(ref _reportFileAccesses);
 

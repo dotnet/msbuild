@@ -21,6 +21,7 @@ using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.BuildCop.Infrastructure;
 using Microsoft.Build.BuildCop.Logging;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
@@ -630,7 +631,6 @@ namespace Microsoft.Build.Execution
             {
                 ILoggingService loggingService = CreateLoggingService(
                     AppendDebuggingLoggers(_buildParameters.Loggers),
-                    _buildParameters.BuildCopLoggerFactory,
                     _buildParameters.ForwardingLoggers,
                     _buildParameters.WarningsAsErrors,
                     _buildParameters.WarningsNotAsErrors,
@@ -2948,7 +2948,6 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private ILoggingService CreateLoggingService(
             IEnumerable<ILogger> loggers,
-            IBuildCopLoggerFactory buildCopLoggerFactory,
             IEnumerable<ForwardingLoggerRecord> forwardingLoggers,
             ISet<string> warningsAsErrors,
             ISet<string> warningsNotAsErrors,
@@ -2976,12 +2975,15 @@ namespace Microsoft.Build.Execution
             loggingService.WarningsNotAsErrors = warningsNotAsErrors;
             loggingService.WarningsAsMessages = warningsAsMessages;
 
-            if (buildCopLoggerFactory != null)
+            var buildCopManagerProvider =
+                ((IBuildComponentHost)this).GetComponent(BuildComponentType.BuildCop) as BuildCopManagerProvider;
+            buildCopManagerProvider!.Instance.SetDataSource(BuildCopDataSource.EventArgs);
+
+            if (((IBuildComponentHost)this).BuildParameters.IsBuildCopEnabled)
             {
                 loggers = (loggers ?? Enumerable.Empty<ILogger>()).Concat(new[]
                 {
-                    buildCopLoggerFactory.CreateBuildAnalysisLogger(
-                        new AnalyzerLoggingContextFactory(loggingService))
+                    new BuildCopConnectorLogger(new AnalyzerLoggingContextFactory(loggingService), buildCopManagerProvider.Instance)
                 });
             }
 
