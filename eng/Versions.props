@@ -14,8 +14,6 @@
   <!-- Repo Toolset Features -->
   <PropertyGroup>
     <UsingToolIbcOptimization>true</UsingToolIbcOptimization>
-    <!-- Force a specific compiler version because record changes cause genapi output to flip-flop -->
-    <UsingToolMicrosoftNetCompilers>true</UsingToolMicrosoftNetCompilers>
     <UsingToolVisualStudioIbcTraining>true</UsingToolVisualStudioIbcTraining>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
     <UsingToolVSSDK>true</UsingToolVSSDK>
