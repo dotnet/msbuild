@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -12,6 +12,8 @@ using System.Text.RegularExpressions;
 using System.Diagnostics;
 using Microsoft.Build.Framework.Logging;
 using System.Globalization;
+using Microsoft.Build.Execution;
+
 
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
@@ -217,7 +219,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     private bool _hasUsedCache = false;
 
     /// <summary>
-    /// Whether to show TaskCommandLineEventArgs high-priority messages. 
+    /// Whether to show TaskCommandLineEventArgs high-priority messages.
     /// </summary>
     private bool _showCommandLine = false;
 
@@ -650,19 +652,35 @@ internal sealed partial class TerminalLogger : INodeLogger
                                 urlString = uri.ToString();
                             }
 
+                            var relativeDisplayPathSpan = outputPathSpan;
+                            var workingDirectorySpan = _initialWorkingDirectory.AsSpan();
                             // If the output path is under the initial working directory, make the console output relative to that to save space.
-                            if (outputPathSpan.StartsWith(_initialWorkingDirectory.AsSpan(), FileUtilities.PathComparison))
+                            if (outputPathSpan.StartsWith(workingDirectorySpan, FileUtilities.PathComparison))
                             {
-                                if (outputPathSpan.Length > _initialWorkingDirectory.Length
-                                    && (outputPathSpan[_initialWorkingDirectory.Length] == Path.DirectorySeparatorChar
-                                        || outputPathSpan[_initialWorkingDirectory.Length] == Path.AltDirectorySeparatorChar))
+                                if (outputPathSpan.Length > workingDirectorySpan.Length
+                                    && (outputPathSpan[workingDirectorySpan.Length] == Path.DirectorySeparatorChar
+                                        || outputPathSpan[workingDirectorySpan.Length] == Path.AltDirectorySeparatorChar))
                                 {
-                                    outputPathSpan = outputPathSpan.Slice(_initialWorkingDirectory.Length + 1);
+                                    relativeDisplayPathSpan = outputPathSpan.Slice(workingDirectorySpan.Length + 1);
+                                }
+                            }
+                            // if the output path isn't under the working directory, but is under the source root, make the output relative to that to save space
+                            else if (project.SourceRoot is not null)
+                            {
+                                var sourceRootSpan = project.SourceRoot.Value.Span;
+                                if (outputPathSpan.StartsWith(sourceRootSpan, FileUtilities.PathComparison))
+                                {
+                                    if (outputPathSpan.Length > sourceRootSpan.Length
+                                        && (outputPathSpan[sourceRootSpan.Length] == Path.DirectorySeparatorChar
+                                            || outputPathSpan[sourceRootSpan.Length] == Path.AltDirectorySeparatorChar))
+                                    {
+                                        relativeDisplayPathSpan = outputPathSpan.Slice(sourceRootSpan.Length + 1);
+                                    }
                                 }
                             }
 
                             Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath",
-                                $"{AnsiCodes.LinkPrefix}{urlString}{AnsiCodes.LinkInfix}{outputPathSpan.ToString()}{AnsiCodes.LinkSuffix}"));
+                                $"{AnsiCodes.LinkPrefix}{urlString}{AnsiCodes.LinkInfix}{relativeDisplayPathSpan.ToString()}{AnsiCodes.LinkSuffix}"));
                         }
                         else
                         {
@@ -760,6 +778,24 @@ internal sealed partial class TerminalLogger : INodeLogger
         }
     }
 
+    private void TryReadSourceControlInformationForProject(BuildEventContext? context, IList<ProjectItemInstance> sourceRoots)
+    {
+        if (context is null)
+        {
+            return;
+        }
+
+        var projectContext = new ProjectContext(context);
+        if (_projects.TryGetValue(projectContext, out Project? project))
+        {
+            var sourceControlSourceRoot = sourceRoots.FirstOrDefault(root => root.HasMetadata("SourceControl"));
+            if (sourceControlSourceRoot is not null)
+            {
+                project.SourceRoot = sourceControlSourceRoot.EvaluatedInclude.AsMemory();
+            }
+        }
+    }
+
     /// <summary>
     /// The <see cref="IEventSource.TaskStarted"/> callback.
     /// </summary>
@@ -790,6 +826,10 @@ internal sealed partial class TerminalLogger : INodeLogger
         }
 
         string? message = e.Message;
+        if (e is TaskParameterEventArgs taskArgs && taskArgs.ItemType.Equals("SourceRoot", StringComparison.OrdinalIgnoreCase))
+        {
+            TryReadSourceControlInformationForProject(taskArgs.BuildEventContext, taskArgs.Items as IList<ProjectItemInstance>);
+        }
         if (message is not null && e.Importance == MessageImportance.High)
         {
             var hasProject = _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project);
