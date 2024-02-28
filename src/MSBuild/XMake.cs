@@ -1774,7 +1774,10 @@ namespace Microsoft.Build.CommandLine
             // Add/set a property with a random value to ensure that restore happens under a different evaluation context
             // If the evaluation context is not different, then projects won't be re-evaluated after restore
             // The initializer syntax can't be used just in case a user set this property to a value
-            restoreGlobalProperties["MSBuildRestoreSessionId"] = Guid.NewGuid().ToString("D");
+            restoreGlobalProperties[MSBuildConstants.MSBuildRestoreSessionId] = Guid.NewGuid().ToString("D");
+
+            // Add a property to indicate that a Restore is executing
+            restoreGlobalProperties[MSBuildConstants.MSBuildIsRestoring] = bool.TrueString;
 
             // Create a new request with a Restore target only and specify:
             //  - BuildRequestDataFlags.ClearCachesAfterBuild to ensure the projects will be reloaded from disk for subsequent builds
