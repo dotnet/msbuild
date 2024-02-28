@@ -270,7 +270,7 @@
       </trans-unit>
       <trans-unit id="ImportedProjectFromVSDistribution">
         <source>MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </source>
-        <target state="new">MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </target>
+        <target state="translated">MSB4278: 匯入的檔案 "{0}" 不存在，而且似乎是 Visual Studio 元件的一部分。此檔案可能需要 MSBuild.exe 才能成功匯入，因此可能無法在 dotnet CLI 中建置。 </target>
         <note>{StrBegin="MSB4278: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
@@ -285,7 +285,7 @@
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
         <source>EvaluationContext objects created with SharingPolicy.Isolated or SharingPolicy.SharedSDKCache do not support being passed an MSBuildFileSystemBase file system.</source>
-        <target state="needs-review-translation">使用 SharingPolicy.Isolated 建立的 EvaluationContext 物件不支援以 MSBuildFileSystemBase 檔案系統傳遞。</target>
+        <target state="translated">使用 SharingPolicy.Isolated 或 SharingPolicy.SharedSDKCache 建立的 EvaluationContext 物件不支援以 MSBuildFileSystemBase 檔案系統傳遞。</target>
         <note />
       </trans-unit>
       <trans-unit id="ItemReferencingSelfInTarget">
