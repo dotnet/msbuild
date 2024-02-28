@@ -37,38 +37,39 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         internal virtual IReadOnlyList<SdkResolver> GetDefaultResolvers()
         {
-
-            MSBuildEventSource.Log.SdkResolverLoadResolversStart();
             var resolvers = !string.Equals(IncludeDefaultResolver, "false", StringComparison.OrdinalIgnoreCase) ?
                 new List<SdkResolver> { new DefaultSdkResolver() }
                 : new List<SdkResolver>();
-
-            MSBuildEventSource.Log.SdkResolverLoadResolversStop(string.Empty, resolvers.Count);
             return resolvers;
         }
 
         internal virtual IReadOnlyList<SdkResolver> LoadAllResolvers(ElementLocation location)
         {
             MSBuildEventSource.Log.SdkResolverLoadAllResolversStart();
-
             var resolvers = !string.Equals(IncludeDefaultResolver, "false", StringComparison.OrdinalIgnoreCase) ?
-                new List<SdkResolver> { new DefaultSdkResolver() }
-                : new List<SdkResolver>();
-
-            var potentialResolvers = FindPotentialSdkResolvers(
-                Path.Combine(BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, "SdkResolvers"), location);
-
-            if (potentialResolvers.Count == 0)
+                    new List<SdkResolver> { new DefaultSdkResolver() }
+                    : new List<SdkResolver>();
+            try
             {
-                return resolvers;
-            }
+                
+                var potentialResolvers = FindPotentialSdkResolvers(
+                    Path.Combine(BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, "SdkResolvers"), location);
 
-            foreach (var potentialResolver in potentialResolvers)
+                if (potentialResolvers.Count == 0)
+                {
+                    return resolvers;
+                }
+
+                foreach (var potentialResolver in potentialResolvers)
+                {
+                    LoadResolvers(potentialResolver, location, resolvers);
+                }
+
+            }
+            finally
             {
-                LoadResolvers(potentialResolver, location, resolvers);
+                MSBuildEventSource.Log.SdkResolverLoadAllResolversStop(resolvers.Count);
             }
-
-            MSBuildEventSource.Log.SdkResolverLoadAllResolversStop(resolvers.Count);
 
             return resolvers.OrderBy(t => t.Priority).ToList();
         }
@@ -76,9 +77,16 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         internal virtual IReadOnlyList<SdkResolverManifest> GetResolversManifests(ElementLocation location)
         {
             MSBuildEventSource.Log.SdkResolverFindResolversManifestsStart();
-            var allResolversManifests = FindPotentialSdkResolversManifests(
+            IReadOnlyList <SdkResolverManifest> allResolversManifests = null;
+            try
+            {
+                allResolversManifests = FindPotentialSdkResolversManifests(
                 Path.Combine(BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot, "SdkResolvers"), location);
-            MSBuildEventSource.Log.SdkResolverFindResolversManifestsStop(allResolversManifests.Count);
+            }
+            finally
+            {
+                MSBuildEventSource.Log.SdkResolverFindResolversManifestsStop(allResolversManifests is null ? 0 : allResolversManifests.Count);
+            }
             return allResolversManifests;
         }
 
@@ -261,8 +269,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         {
             MSBuildEventSource.Log.SdkResolverLoadResolversStart();
             var resolvers = new List<SdkResolver>();
-            LoadResolvers(manifest.Path, location, resolvers);
-            MSBuildEventSource.Log.SdkResolverLoadResolversStop(manifest.DisplayName ?? string.Empty, resolvers.Count);
+            try
+            {
+                LoadResolvers(manifest.Path, location, resolvers);
+            }
+            finally
+            {
+                MSBuildEventSource.Log.SdkResolverLoadResolversStop(manifest.DisplayName ?? string.Empty, resolvers.Count);
+            }
             return resolvers;
         }
 
