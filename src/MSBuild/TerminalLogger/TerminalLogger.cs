@@ -245,8 +245,6 @@ internal sealed partial class TerminalLogger : INodeLogger
         eventSource.TargetFinished += TargetFinished;
         eventSource.TaskStarted += TaskStarted;
 
-        eventSource.StatusEventRaised += StatusMessageRaised;
-
         eventSource.MessageRaised += MessageRaised;
         eventSource.WarningRaised += WarningRaised;
         eventSource.ErrorRaised += ErrorRaised;
@@ -260,21 +258,6 @@ internal sealed partial class TerminalLogger : INodeLogger
         {
             eventSource4.IncludeEvaluationPropertiesAndItems();
         }
-    }
-
-    private void StatusMessageRaised(object sender, BuildStatusEventArgs e)
-    {
-        // if (e is TaskParameterEventArgs taskArgs)
-        // {
-        //     Debug.WriteLine(taskArgs.BuildEventContext.TaskId)
-        //     if (taskArgs.Kind == TaskParameterMessageKind.AddItem)
-        //     {
-        //         if (taskArgs.ItemType.Equals("SourceRoot", StringComparison.OrdinalIgnoreCase))
-        //         {
-        //             TryReadSourceControlInformationForProject(taskArgs.BuildEventContext, taskArgs.Items as IList<ProjectItemInstance>);
-        //         }
-        //     }
-        // }
     }
 
     /// <inheritdoc/>
