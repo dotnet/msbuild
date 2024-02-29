@@ -107,9 +107,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             _logger.WarningCount.ShouldBe(1);
             _logger.Warnings.First().Code.ShouldStartWith("MSB4241");
-
-            var resultsOfEventSource = _eventSourceTestListener.GetEvents();
-            resultsOfEventSource.Count.ShouldBe(2);
         }
 
         [Fact]
@@ -123,9 +120,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             SdkResolverException e = Should.Throw<SdkResolverException>(() => SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false, failOnUnresolvedSdk: true));
             e.Resolver.Name.ShouldBe("MockSdkResolverThrows");
             e.Sdk.Name.ShouldBe("1sdkName");
-
-            var resultsOfEventSource = _eventSourceTestListener.GetEvents();
-            resultsOfEventSource.Count.ShouldBe(16);
         }
 
         [Fact]
@@ -213,6 +207,22 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SDKResolverReturnedNull", nameof(MockResolverReturnsNull))));
             // Second resolver succeeded.
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SucceededToResolveSDK", sdk.ToString(), nameof(MockSdkResolver1), result.Path, result.Version));
+        }
+
+        [Fact]
+        public void AssertSdkResolutionMessagesAreLoggedInEventSource()
+        {
+            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy(false, false, true));
+            SdkReference sdk = new SdkReference("1sdkName", "referencedVersion", "minimumVersion");
+
+            SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false, failOnUnresolvedSdk: true);
+            var eventsLogged = _eventSourceTestListener.GetEvents();
+            eventsLogged.Count.ShouldBe(2);
+            eventsLogged.ShouldContain(x => x.EventId == 64); // Start of the sdk resolve
+
+            var sdkStopEvent = eventsLogged.FirstOrDefault(x => x.EventId == 65); // End sdk resolve
+            sdkStopEvent.ShouldNotBeNull();
+            sdkStopEvent.Payload[1].ShouldBe("1sdkName");
         }
 
         [Fact]

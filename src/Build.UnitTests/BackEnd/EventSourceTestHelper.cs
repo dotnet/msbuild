@@ -40,13 +40,17 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         public override void Dispose() {
-            DisableEvents(_eventSources);
+            if (_eventSources  != null)
+            {
+                DisableEvents(_eventSources);
+            }
+            
             base.Dispose();
         }
 
         /// <summary>
         /// Returns the events that were emitted till invocation of this method.
-        /// The events are cleared from the in-memory store and are populated again. 
+        /// The events are cleared from the in-memory store and are populated again in <see cref="OnEventWritten"/>. 
         /// </summary>
         /// <returns>List of the events that were emitted for eventSource</returns>
         internal List<EventWrittenEventArgs> GetEvents()
