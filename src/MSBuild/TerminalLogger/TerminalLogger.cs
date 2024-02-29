@@ -675,14 +675,15 @@ internal sealed partial class TerminalLogger : INodeLogger
                             else if (project.SourceRoot is not null)
                             {
                                 var sourceRootSpan = project.SourceRoot.Value.Span;
+                                var relativePathFromWorkingDirToSourceRoot = Path.GetRelativePath(workingDirectorySpan.ToString(), sourceRootSpan.ToString()).AsSpan();
                                 if (outputPathSpan.StartsWith(sourceRootSpan, FileUtilities.PathComparison))
                                 {
                                     if (outputPathSpan.Length > sourceRootSpan.Length
                                         // offsets are -1 here compared to above for reasons
-                                        && (outputPathSpan[sourceRootSpan.Length - 1 ] == Path.DirectorySeparatorChar
+                                        && (outputPathSpan[sourceRootSpan.Length - 1] == Path.DirectorySeparatorChar
                                             || outputPathSpan[sourceRootSpan.Length - 1] == Path.AltDirectorySeparatorChar))
                                     {
-                                        relativeDisplayPathSpan = outputPathSpan.Slice(sourceRootSpan.Length);
+                                        relativeDisplayPathSpan = Path.Combine(relativePathFromWorkingDirToSourceRoot.ToString(), outputPathSpan.Slice(sourceRootSpan.Length).ToString()).AsSpan();
                                     }
                                 }
                             }
