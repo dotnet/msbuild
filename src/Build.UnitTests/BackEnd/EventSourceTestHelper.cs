@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
-    internal class EventSourceTestHelper : EventListener
+    internal sealed class EventSourceTestHelper : EventListener
     {
         private readonly string eventSourceName = "Microsoft-Build";
         private readonly List<EventWrittenEventArgs> emittedEvents;

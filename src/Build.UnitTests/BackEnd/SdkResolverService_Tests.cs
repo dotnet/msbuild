@@ -81,7 +81,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 "notfound"
             })));
             _logger.Warnings.Select(i => i.Message).ShouldBe(new[] { "WARNING4", "WARNING2" });
-            
         }
 
         [Fact]
