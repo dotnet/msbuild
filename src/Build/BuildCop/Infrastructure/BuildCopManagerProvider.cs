@@ -47,7 +47,9 @@ internal sealed class BuildCopManagerProvider : IBuildComponent
 
         if (s_isInitialized)
         {
-            throw new InvalidOperationException("BuildCopManagerProvider is already initialized");
+            // TODO: change to interlocked
+            return;
+            // throw new InvalidOperationException("BuildCopManagerProvider is already initialized");
         }
         s_isInitialized = true;
 
