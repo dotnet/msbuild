@@ -678,10 +678,11 @@ internal sealed partial class TerminalLogger : INodeLogger
                                 if (outputPathSpan.StartsWith(sourceRootSpan, FileUtilities.PathComparison))
                                 {
                                     if (outputPathSpan.Length > sourceRootSpan.Length
-                                        && (outputPathSpan[sourceRootSpan.Length] == Path.DirectorySeparatorChar
-                                            || outputPathSpan[sourceRootSpan.Length] == Path.AltDirectorySeparatorChar))
+                                        // offsets are -1 here compared to above for reasons
+                                        && (outputPathSpan[sourceRootSpan.Length - 1 ] == Path.DirectorySeparatorChar
+                                            || outputPathSpan[sourceRootSpan.Length - 1] == Path.AltDirectorySeparatorChar))
                                     {
-                                        relativeDisplayPathSpan = outputPathSpan.Slice(sourceRootSpan.Length + 1);
+                                        relativeDisplayPathSpan = outputPathSpan.Slice(sourceRootSpan.Length);
                                     }
                                 }
                             }
@@ -795,9 +796,17 @@ internal sealed partial class TerminalLogger : INodeLogger
         var projectContext = new ProjectContext(context);
         if (_projects.TryGetValue(projectContext, out Project? project))
         {
+            if (project.SourceRoot is not null)
+            {
+                return;
+            }
             var sourceControlSourceRoot = sourceRoots.FirstOrDefault(root => !string.IsNullOrEmpty(root.GetMetadata("SourceControl")));
             if (sourceControlSourceRoot is not null)
             {
+                // This takes the first root from source control the first time it's added to the build.
+                // This seems to be the Target InitializeSourceControlInformationFromSourceControlManager.
+                // So far this has been acceptable, but if a SourceRoot would be modified by a task later on
+                // (e.g. TranslateGitHubUrlsInSourceControlInformation) we would lose that modification.
                 project.SourceRoot = sourceControlSourceRoot.ItemSpec.AsMemory();
             }
         }
