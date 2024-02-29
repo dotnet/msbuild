@@ -158,7 +158,9 @@
     <Compile Include="BuildCop\Analyzers\SharedOutputPathAnalyzer.cs" />
     <Compile Include="BuildCop\Infrastructure\BuildCopConfigurationException.cs" />
     <Compile Include="BuildCop\Infrastructure\BuildEventsProcessor.cs" />
+    <Compile Include="BuildCop\Infrastructure\IBuildCopManagerProvider.cs" />
     <Compile Include="BuildCop\Infrastructure\NullBuildCopManager.cs" />
+    <Compile Include="BuildCop\Infrastructure\NullBuildCopManagerProvider.cs" />
     <Compile Include="BuildCop\Infrastructure\TracingReporter.cs" />
     <Compile Include="BuildCop\OM\BuildAnalysisContext.cs" />
     <Compile Include="BuildCop\API\BuildAnalyzer.cs" />

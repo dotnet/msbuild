@@ -11,7 +11,6 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BuildCop.Acquisition;
 using Microsoft.Build.BuildCop.Infrastructure;
 using Microsoft.Build.Framework;
-using static Microsoft.Build.BuildCop.Infrastructure.BuildCopManagerProvider;
 
 namespace Microsoft.Build.Experimental.BuildCop;
 
@@ -23,6 +22,9 @@ internal enum BuildCopDataSource
     ValuesCount = BuildExecution + 1
 }
 
+/// <summary>
+/// The central manager for the BuildCop - this is the integration point with MSBuild infrastructure.
+/// </summary>
 internal interface IBuildCopManager
 {
     void ProcessEvaluationFinishedEventArgs(
