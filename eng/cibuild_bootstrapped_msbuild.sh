@@ -30,6 +30,9 @@ while [[ $# -gt 0 ]]; do
       host_type=$2
       shift 2
       ;;
+    --onlyDocChanged)
+      onlyDocChanged=$2
+      shift 2
     *)
       properties="$properties $1"
       shift 1
@@ -99,7 +102,7 @@ export DOTNET_HOST_PATH="$_InitializeDotNetCli/dotnet"
 # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
 # - Do run tests
 # - Don't try to create a bootstrap deployment
-if [ $onlyDocChanged = false ]
+if [ $onlyDocChanged == false ]
 then
     . "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties
 
