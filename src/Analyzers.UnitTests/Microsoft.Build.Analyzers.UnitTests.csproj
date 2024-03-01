@@ -11,25 +11,16 @@
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
     <IsPackable>false</IsPackable>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-    <RootNamespace>Microsoft.Build.Analyzers.UnitTests</RootNamespace>
-    <AssemblyName>Microsoft.Build.Analyzers.UnitTests</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
-    <ProjectReference Include="..\MSBuild.Bootstrap\MSBuild.Bootstrap.csproj">
-      <Private>false</Private>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Collections.Immutable" />
-    <PackageReference Include="FluentAssertions" />
-    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
     <PackageReference Include="Shouldly" />
     <PackageReference Include="System.Net.Http" />
   </ItemGroup>
@@ -79,14 +70,5 @@
     <None Include="..\Shared\UnitTests\xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <Import Project="..\..\eng\BootStrapMSBuild.props" />
-
-  <ItemGroup>
-    <AssemblyAttribute Include="Microsoft.Build.Analyzers.UnitTests.BootstrapLocationAttribute">
-      <_Parameter1>$(ArtifactsBinDir)</_Parameter1>
-      <_Parameter2>$(BootstrapBinaryDestination)</_Parameter2>
-    </AssemblyAttribute>
   </ItemGroup>
 </Project>
