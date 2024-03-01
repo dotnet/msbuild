@@ -43,7 +43,7 @@ jobs:
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
-    condition: eq($(onlyDocChanged), false)
+    condition: eq(variables.onlyDocChanged, 'False')
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
     inputs:
@@ -55,7 +55,7 @@ jobs:
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
-    condition: eq($(onlyDocChanged), false)
+    condition: eq(variables.onlyDocChanged, 'False')
   - task: CmdLine@2
     displayName: 'Set flag to publish Verify *.received.* files when test step fails'
     condition: failed()
@@ -74,7 +74,7 @@ jobs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'FullOnWindows test logs'
     continueOnError: true
-    condition: eq($(onlyDocChanged), false)
+    condition: eq(variables.onlyDocChanged, 'False')
   - task: CopyFiles@2
     condition: eq(variables['publishverify'], 'Yes')
     displayName: 'Copy Verify *.received.* files to Artifact Staging'
