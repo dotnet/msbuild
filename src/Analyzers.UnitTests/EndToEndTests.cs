@@ -80,36 +80,26 @@ namespace Microsoft.Build.Analyzers.UnitTests
                     <Target Name="Hello">
                     <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
                     </Target>
-                                   
                 </Project>
                 """;
             TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
             TransientTestFile projectFile = _env.CreateFile(workFolder, "FooBar.csproj", contents);
             TransientTestFile projectFile2 = _env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
+            TransientTestFile config = _env.CreateFile(workFolder, ".editorconfig",
+            """
+            root=true
 
-            // var cache = new SimpleProjectRootElementCache();
-            // ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile.Path, /*unused*/null, /*unused*/null, cache, false /*Not explicitly loaded - unused*/);
+            [*.csproj]
+            msbuild_analyzer.BC0101.IsEnabled=false
+            msbuild_analyzer.BC0101.severity=warning
 
+            msbuild_analyzer.COND0543.IsEnabled=false
+            msbuild_analyzer.COND0543.severity=Error
+            msbuild_analyzer.COND0543.EvaluationAnalysisScope=AnalyzedProjectOnly
+            msbuild_analyzer.COND0543.CustomSwitch=QWERTY
 
-            TransientTestFile config = _env.CreateFile(workFolder, "editorconfig.json",
-                /*lang=json,strict*/
-                """
-                {
-                    "BC0101": {
-                        "IsEnabled": true,
-                        "Severity": "Error"
-                    },
-                    "COND0543": {
-                        "IsEnabled": false,
-                        "Severity": "Error",
-                        "EvaluationAnalysisScope": "AnalyzedProjectOnly",
-                        "CustomSwitch": "QWERTY"
-                    },
-                    "BLA": {
-                        "IsEnabled": false
-                    }
-                }
-                """);
+            msbuild_analyzer.BLA.IsEnabled=false
+            """);
 
             // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".
             // This discrepancy breaks path equality checks in analyzers if we pass to MSBuild full path to the initial project.
@@ -123,7 +113,7 @@ namespace Microsoft.Build.Analyzers.UnitTests
             _env.Output.WriteLine(output);
             success.ShouldBeTrue();
             // The conflicting outputs warning appears
-            output.ShouldContain("BC0101");
+            output.ShouldContain("warning : BC0101");
         }
     }
 }

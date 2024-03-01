@@ -11,6 +11,7 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using Microsoft.Build.Experimental.BuildCop;
 using System.Configuration;
+using Microsoft.Build.BuildCop.Infrastructure.EditorConfig;
 
 namespace Microsoft.Build.BuildCop.Infrastructure;
 
@@ -19,56 +20,10 @@ namespace Microsoft.Build.BuildCop.Infrastructure;
 //  Let's flip form statics to instance, with exposed interface (so that we can easily swap implementations)
 internal static class ConfigurationProvider
 {
+    private static IEditorConfigParser s_editorConfigParser = new EditorConfigParser();
     // TODO: This module should have a mechanism for removing unneeded configurations
     //  (disabled rules and analyzers that need to run in different node)
-    private static readonly Dictionary<string, BuildAnalyzerConfiguration> _editorConfig = LoadConfiguration();
-
-    // This is just a testing implementation for quicker unblock of testing.
-    // Real implementation will use .editorconfig file.
-    // Sample json:
-    /////*lang=json,strict*/
-    ////"""
-    ////    {
-    ////        "ABC123": {
-    ////            "IsEnabled": true,
-    ////            "Severity": "Info"
-    ////        },
-    ////        "COND0543": {
-    ////            "IsEnabled": false,
-    ////            "Severity": "Error",
-    ////    		"EvaluationAnalysisScope": "AnalyzedProjectOnly",
-    ////    		"CustomSwitch": "QWERTY"
-    ////        },
-    ////        "BLA": {
-    ////            "IsEnabled": false
-    ////        }
-    ////    }
-    ////    """
-    //
-    // Plus there will need to be a mechanism of distinguishing different configs in different folders
-    //  - e.g. - what to do if we analyze two projects (not sharing output path) and they have different .editorconfig files?
-    private static Dictionary<string, BuildAnalyzerConfiguration> LoadConfiguration()
-    {
-        const string configFileName = "editorconfig.json";
-        string configPath = configFileName;
-
-        if (!File.Exists(configPath))
-        {
-            // TODO: pass the current project path
-            var dir = Environment.CurrentDirectory;
-            configPath = Path.Combine(dir, configFileName);
-
-            if (!File.Exists(configPath))
-            {
-                return new Dictionary<string, BuildAnalyzerConfiguration>();
-            }
-        }
-
-        var json = File.ReadAllText(configPath);
-        var DeserializationOptions = new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } };
-        return JsonSerializer.Deserialize<Dictionary<string, BuildAnalyzerConfiguration>>(json, DeserializationOptions) ??
-               new Dictionary<string, BuildAnalyzerConfiguration>();
-    }
+    private static readonly Dictionary<string, BuildAnalyzerConfiguration> _editorConfig = new Dictionary<string, BuildAnalyzerConfiguration>();
 
     /// <summary>
     /// Gets the user specified unrecognized configuration for the given analyzer rule.
@@ -120,7 +75,7 @@ internal static class ConfigurationProvider
 
         for (int idx = 0; idx < userConfigs.Length; idx++)
         {
-            configurations[idx] = ConfigurationProvider.MergeConfiguration(
+            configurations[idx] = MergeConfiguration(
                 analyzer.SupportedRules[idx].Id,
                 analyzer.SupportedRules[idx].DefaultConfiguration,
                 userConfigs[idx]);
@@ -155,6 +110,23 @@ internal static class ConfigurationProvider
         if (!_editorConfig.TryGetValue(ruleId, out BuildAnalyzerConfiguration? editorConfig))
         {
             editorConfig = BuildAnalyzerConfiguration.Null;
+        }
+
+        var config = s_editorConfigParser.Parse(projectFullPath);
+        var keyTosearch = $"msbuild_analyzer.{ruleId}.";
+        var dictionaryConfig = new Dictionary<string, string>();
+
+        foreach (var kv in config)
+        {
+            if (kv.Key.StartsWith(keyTosearch, StringComparison.OrdinalIgnoreCase))
+            {
+                dictionaryConfig[kv.Key.Replace(keyTosearch.ToLower(), "")] = kv.Value;
+            }
+        }
+
+        if (dictionaryConfig.Any())
+        {
+            return BuildAnalyzerConfiguration.Create(dictionaryConfig);
         }
 
         return editorConfig;

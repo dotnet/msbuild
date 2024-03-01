@@ -176,6 +176,10 @@
     <Compile Include="BuildCop\Infrastructure\BuildCopManagerProvider.cs" />
     <Compile Include="BuildCop\Infrastructure\ConfigurationProvider.cs" />
     <Compile Include="BuildCop\Infrastructure\CustomConfigurationData.cs" />
+    <Compile Include="BuildCop\Infrastructure\EditorConfig\EditorConfigFile.cs" />
+    <Compile Include="BuildCop\Infrastructure\EditorConfig\EditorConfigGlobsMatcher.cs" />
+    <Compile Include="BuildCop\Infrastructure\EditorConfig\EditorConfigParser.cs" />
+    <Compile Include="BuildCop\Infrastructure\EditorConfig\IEditorConfigParser.cs" />
     <Compile Include="BuildCop\Infrastructure\IBuildCopContext.cs" />
     <Compile Include="BuildCop\Infrastructure\IBuildCopManager.cs" />
     <Compile Include="BuildCop\Logging\IBuildAnalysisLoggingContext.cs" />

@@ -1,6 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Generic;
+using System;
+
 namespace Microsoft.Build.Experimental.BuildCop;
 
 /// <summary>
@@ -42,4 +45,37 @@ public class BuildAnalyzerConfiguration
     /// If some rules are enabled and some are not, the analyzer will be run and reports will be post-filtered.
     /// </summary>
     public bool? IsEnabled { get; internal init; }
+
+    public static BuildAnalyzerConfiguration Create(Dictionary<string, string> configDictionary)
+    {
+        return new()
+        {
+            EvaluationAnalysisScope = TryExtractValue("EvaluationAnalysisScope", configDictionary, out EvaluationAnalysisScope evaluationAnalysisScope) ? evaluationAnalysisScope : null,
+            Severity = TryExtractValue("severity", configDictionary, out BuildAnalyzerResultSeverity severity) ? severity : null,
+            IsEnabled = TryExtractValue("IsEnabled", configDictionary, out bool test) ? test : null,
+        };
+    }
+
+    private static bool TryExtractValue<T>(string key, Dictionary<string, string> config, out T value) where T : struct
+    {
+        value = default;
+        if (!config.ContainsKey(key))
+        {
+            return false;
+        }
+
+        if (typeof(T) == typeof(bool))
+        {
+            if (bool.TryParse(config[key], out bool boolValue))
+            {
+                value = (T)(object)boolValue;
+                return true;
+            }
+        }
+        else if(typeof(T).IsEnum)
+        {
+            return Enum.TryParse(config[key], true, out value);
+        }
+        return false;
+    }
 }
