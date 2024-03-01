@@ -33,7 +33,7 @@ jobs:
     displayName: cibuild_bootstrapped_msbuild.cmd
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
-      arguments: $(onlyDocChanged)
+      arguments: -onlyDocChanged $(onlyDocChanged)
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
