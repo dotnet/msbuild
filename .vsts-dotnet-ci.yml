@@ -94,6 +94,9 @@ jobs:
 
 - job: BootstrapMSBuildOnCoreWindows
   displayName: "Windows Core"
+  dependsOn: IfOnlyDocumentionChanged
+  variables:
+    onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
   pool:
     vmImage: 'windows-2022'
   steps:
@@ -101,7 +104,7 @@ jobs:
     displayName: cibuild_bootstrapped_msbuild.cmd
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
-      arguments: '-msbuildEngine dotnet'
+      arguments: '-msbuildEngine dotnet -onlyDocChanged $(onlyDocChanged)'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
@@ -111,7 +114,7 @@ jobs:
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
-    condition: always()
+    condition: eq(variables.onlyDocChanged, 'False')
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
     inputs:
@@ -123,7 +126,7 @@ jobs:
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
-    condition: always()
+    condition: eq(variables.onlyDocChanged, 'False')
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
@@ -137,10 +140,13 @@ jobs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'CoreOnWindows test logs'
     continueOnError: true
-    condition: always()
+    condition: eq(variables.onlyDocChanged, 'False')
 
 - job: FullReleaseOnWindows
   displayName: "Windows Full Release (no bootstrap)"
+  dependsOn: IfOnlyDocumentionChanged
+  variables:
+    onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
   pool:
     ${{ if eq(variables['System.TeamProject'], 'public') }}:
       name: NetCore-Public
@@ -154,6 +160,13 @@ jobs:
     inputs:
       filename: 'eng/cibuild.cmd'
       arguments: '-configuration Release -test'
+    condition: eq(variables.onlyDocChanged, 'False')
+  - task: BatchScript@1
+    displayName: cibuild.cmd without test
+    inputs:
+      filename: 'eng/cibuild.cmd'
+      arguments: '-configuration Release'
+    condition: eq(variables.onlyDocChanged, 'True')
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
@@ -163,7 +176,7 @@ jobs:
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
-    condition: always()
+    condition: eq(variables.onlyDocChanged, 'False')
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
     inputs:
@@ -175,7 +188,7 @@ jobs:
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
-    condition: always()
+    condition: eq(variables.onlyDocChanged, 'False'))
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
@@ -189,7 +202,7 @@ jobs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'FullOnWindows Release test logs'
     continueOnError: true
-    condition: always()
+    condition: eq(variables.onlyDocChanged, 'False')
 
 # Unavailable in dnceng-public as of 9/1/2022; should be restored soon.
 # - job: RichCodeNavIndex
@@ -210,10 +223,13 @@ jobs:
 
 - job: CoreBootstrappedOnLinux
   displayName: "Linux Core"
+  dependsOn: IfOnlyDocumentionChanged
+  variables:
+    onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
   pool:
     vmImage: 'ubuntu-latest'
   steps:
-  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh'
+  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged)
     displayName: CI Build
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
@@ -226,7 +242,7 @@ jobs:
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
-    condition: always()
+    condition: eq(variables.onlyDocChanged, 'False')
   - task: CmdLine@2
     displayName: 'Set flag to publish Verify *.received.* files when test step fails'
     condition: failed()
@@ -245,7 +261,7 @@ jobs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'CoreOnLinux test logs'
     continueOnError: true
-    condition: always()
+    condition: eq(variables.onlyDocChanged, 'False')
   - task: CopyFiles@2
     condition: eq(variables['publishverify'], 'Yes')
     displayName: 'Copy Verify *.received.* files to Artifact Staging'
@@ -264,10 +280,13 @@ jobs:
 
 - job: CoreOnMac
   displayName: "macOS Core"
+  dependsOn: IfOnlyDocumentionChanged
+  variables:
+    onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
   pool:
     vmImage: 'macOS-latest'
   steps:
-  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh'
+  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged)
     displayName: CI Build
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
@@ -280,7 +299,7 @@ jobs:
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
-    condition: always()
+    condition: eq(variables.onlyDocChanged, 'False')
   - task: CmdLine@2
     displayName: 'Set flag to publish Verify *.received.* files when test step fails'
     condition: failed()
@@ -299,7 +318,7 @@ jobs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'CoreOnMac test logs'
     continueOnError: true
-    condition: always()
+    condition: eq(variables.onlyDocChanged, 'False')
   - task: CopyFiles@2
     condition: eq(variables['publishverify'], 'Yes')
     displayName: 'Copy Verify *.received.* files to Artifact Staging'
