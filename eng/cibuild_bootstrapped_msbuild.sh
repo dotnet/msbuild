@@ -3,7 +3,7 @@
 configuration="Debug"
 host_type="core"
 build_stage1=true
-onlyDocChanged=true
+onlyDocChanged=false
 properties=
 extra_properties=
 
