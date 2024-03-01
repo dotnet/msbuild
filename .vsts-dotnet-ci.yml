@@ -24,7 +24,7 @@ jobs:
 - job: BootstrapMSBuildOnFullFrameworkWindows
   dependsOn: IfOnlyDocumentionChanged
   variables:
-    onlyDocChanged: $($[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ])
+    onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
   displayName: "Windows Full"
   pool:
     vmImage: 'windows-2022'
@@ -33,7 +33,7 @@ jobs:
     displayName: cibuild_bootstrapped_msbuild.cmd
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
-      arguments: -onlyDocChanged $($(onlyDocChanged))
+      arguments: -onlyDocChanged $(onlyDocChanged)
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
