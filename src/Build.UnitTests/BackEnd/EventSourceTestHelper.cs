@@ -10,6 +10,24 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
+    /// <summary>
+    /// This class provides the ability to fetch events emitted from the "Microsoft-Build" EventSource.
+    /// The instance listens and saves emitted events in-memory.
+    /// To fetch the events, use the <see cref="GetEvents"/> method.
+    /// Note that the current implementation of this class does not have protection against concurrent usage in tests.
+    /// If used in tests, ensure to rely on unique variables, names, or IDs. For example usage: <see cref="SdkResolverService_Tests.AssertSdkResolutionMessagesAreLoggedInEventSource"/>.
+    /// 
+    /// Reference: <see href="https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.tracing.eventlistener"/>
+    /// <example>
+    /// <code>
+    /// // ...
+    /// using var eventSourceTestListener = new EventSourceTestHelper();
+    /// // ...
+    /// var events = eventSourceTestListener.GetEvents();
+    /// // verification
+    /// </code>
+    /// </example>
+    /// </summary>
     internal sealed class EventSourceTestHelper : EventListener
     {
         private readonly string eventSourceName = "Microsoft-Build";

@@ -29,15 +29,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     {
         private readonly MockLogger _logger;
         private readonly LoggingContext _loggingContext;
-        private readonly EventSourceTestHelper _eventSourceTestListener;
 
         public SdkResolverService_Tests()
         {
             _logger = new MockLogger();
             ILoggingService loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             loggingService.RegisterLogger(_logger);
-
-            _eventSourceTestListener = new EventSourceTestHelper();
 
             _loggingContext = new MockLoggingContext(
                 loggingService,
@@ -46,7 +43,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
         public void Dispose()
         {
-            _eventSourceTestListener.Dispose();
             SdkResolverService.Instance.InitializeForTests();
         }
 
@@ -211,12 +207,13 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void AssertSdkResolutionMessagesAreLoggedInEventSource()
         {
+            using var eventSourceTestListener = new EventSourceTestHelper();
             SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy(false, false, true));
             var sdkName = Guid.NewGuid().ToString();
             SdkReference sdk = new SdkReference(sdkName, "referencedVersion", "minimumVersion");
 
             SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false, failOnUnresolvedSdk: true);
-            var eventsLogged = _eventSourceTestListener.GetEvents();
+            var eventsLogged = eventSourceTestListener.GetEvents();
             eventsLogged.ShouldContain(x => x.EventId == 64); // Start of the sdk resolve
             eventsLogged.ShouldContain(x => x.EventId == 65 && x.Payload[1].ToString() == sdkName);
         }
