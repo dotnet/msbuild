@@ -4,6 +4,7 @@ Param(
   [string] $configuration = "Debug",
   [switch] $prepareMachine,
   [bool] $buildStage1 = $True,
+  [bool] $onlyDocChanged = $False,
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
@@ -123,7 +124,12 @@ try {
   # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
   # - Do run tests
   # - Don't try to create a bootstrap deployment
-  & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /p:CreateBootstrap=false /nr:false @properties
+  if ($onlyDocChanged) {
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=false /nr:false @properties
+  }
+  else {
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /p:CreateBootstrap=false /nr:false @properties
+  }
 
   exit $lastExitCode
 }

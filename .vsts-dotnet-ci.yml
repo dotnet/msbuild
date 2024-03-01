@@ -4,7 +4,27 @@ trigger:
 - vs*
 
 jobs:
+- job: IfOnlyDocumentionChanged
+  displayName: "Decide whether only docs are updated"
+  steps:
+  - powershell: |
+      $changedFiles = git diff --name-only HEAD HEAD~1
+      $onlyDocChanged = $true
+      foreach ($file in $changedFiles) {
+        $isUnderDocumentation = $file.FullName -match "documentation"
+        if(!$isUnderDocumentation)
+        {
+          $onlyDocChanged = $false
+          break;
+        }
+      }
+      Write-Host "##vso[task.setvariable variable=onlyDocChanged;isoutput=true]$onlyDocChanged"
+    name: SetIfOnlyDocumentionChangedVaribale
+    displayName: Determine if Test Results should run
 - job: BootstrapMSBuildOnFullFrameworkWindows
+  dependsOn: IfOnlyDocumentionChanged
+  variables:
+    onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
   displayName: "Windows Full"
   pool:
     vmImage: 'windows-2022'
@@ -13,6 +33,7 @@ jobs:
     displayName: cibuild_bootstrapped_msbuild.cmd
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
+      arguments: $(onlyDocChanged)
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
@@ -22,7 +43,7 @@ jobs:
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
-    condition: always()
+    condition: eq($(onlyDocChanged), false)
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
     inputs:
@@ -34,7 +55,7 @@ jobs:
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
-    condition: always()
+    condition: eq($(onlyDocChanged), false)
   - task: CmdLine@2
     displayName: 'Set flag to publish Verify *.received.* files when test step fails'
     condition: failed()
@@ -53,7 +74,7 @@ jobs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'FullOnWindows test logs'
     continueOnError: true
-    condition: always()
+    condition: eq($(onlyDocChanged), false)
   - task: CopyFiles@2
     condition: eq(variables['publishverify'], 'Yes')
     displayName: 'Copy Verify *.received.* files to Artifact Staging'
