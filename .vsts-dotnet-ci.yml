@@ -9,6 +9,7 @@ jobs:
   steps:
   - powershell: |
       $changedFiles = git diff --name-only HEAD HEAD~1
+      $changedFiles
       $onlyDocChanged = 1
       foreach ($file in $changedFiles) {
         $isUnderDocumentation = $file -match "documentation/"
