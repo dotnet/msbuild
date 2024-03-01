@@ -40,6 +40,7 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
                 </Target>
             </Project>
             """);
+        _cmd = $"{projectFile.Path} -target:Hello -logger:{typeof(MockLogger).FullName},{typeof(MockLogger).Assembly.Location};ReportTelemetry";
     }
 
     /// <summary>
