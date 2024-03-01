@@ -33,6 +33,7 @@ while [[ $# -gt 0 ]]; do
     --onlyDocChanged)
       onlyDocChanged=$2
       shift 2
+      ;;
     *)
       properties="$properties $1"
       shift 1
