@@ -4,7 +4,7 @@ Param(
   [string] $configuration = "Debug",
   [switch] $prepareMachine,
   [bool] $buildStage1 = $True,
-  [bool] $onlyDocChanged = $false,
+  [string] $onlyDocChanged = "FALSE",
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
