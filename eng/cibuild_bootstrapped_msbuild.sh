@@ -30,7 +30,7 @@ while [[ $# -gt 0 ]]; do
       host_type=$2
       shift 2
       ;;
-    --onlyDocChanged)
+    --onlydocchanged)
       onlyDocChanged=$2
       shift 2
       ;;
