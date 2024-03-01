@@ -11,7 +11,7 @@ jobs:
       $changedFiles = git diff --name-only HEAD HEAD~1
       $onlyDocChanged = 1
       foreach ($file in $changedFiles) {
-        $isUnderDocumentation = $file.FullName -match "documentation"
+        $isUnderDocumentation = $file -match "documentation/"
         if(!$isUnderDocumentation)
         {
           $onlyDocChanged = 0
