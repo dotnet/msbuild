@@ -58,7 +58,7 @@ public class BuildAnalyzerConfiguration
         {
             EvaluationAnalysisScope = TryExtractValue(nameof(EvaluationAnalysisScope).ToLower(), configDictionary, out EvaluationAnalysisScope evaluationAnalysisScope) ? evaluationAnalysisScope : null,
             Severity = TryExtractValue(nameof(Severity).ToLower(), configDictionary, out BuildAnalyzerResultSeverity severity) ? severity : null,
-            IsEnabled = TryExtractValue(nameof(IsEnabled).ToLower(), configDictionary, out bool test) ? test : null,
+            IsEnabled = TryExtractValue(nameof(IsEnabled).ToLower(), configDictionary, out bool isEnabled) ? isEnabled : null,
         };
     }
 

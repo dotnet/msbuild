@@ -1,8 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\Shared\FileSystemSources.proj" />
-  <Import Project="..\Shared\DebuggingSources.proj" />
-
   <PropertyGroup>
     <!-- Don't build a netfx version of this unit with dotnet, as the netfx bootstrap layout created with 'dotnet build' is incomplete. -->
     <TargetFrameworks>$(LatestDotNetCoreForMSBuild)</TargetFrameworks>
@@ -39,35 +36,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\FileUtilities.cs">
-      <Link>Shared\FileUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\TempFileUtilities.cs">
-      <Link>Shared\TempFileUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ErrorUtilities.cs">
-      <Link>Shared\ErrorUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\EscapingUtilities.cs">
-      <Link>Shared\EscapingUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
-      <Link>Shared\BuildEnvironmentHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ProcessExtensions.cs">
-      <Link>Shared\ProcessExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ResourceUtilities.cs">
-      <Link>Shared\ResourceUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ExceptionHandling.cs">
-      <Link>Shared\ExceptionHandling.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileUtilitiesRegex.cs">
-      <Link>Shared\FileUtilitiesRegex.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\UnitTests\AssemblyResources.cs">
-      <Link>Shared\AssemblyResources.cs</Link>
+      <Link>SharedUtilities\AssemblyResources.cs</Link>
     </Compile>
   </ItemGroup>
 

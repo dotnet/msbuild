@@ -38,6 +38,7 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
 
             while (editorConfigFile != string.Empty)
             {
+                // TODO: Change the API of EditorconfigFile Parse to accept the text value instead of file path. 
                 var editorConfigData = EditorConfigFile.Parse(editorConfigFile);
                 editorConfigDataFromFilesList.Add(editorConfigData);
 
@@ -80,6 +81,6 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
             return resultingDictionary;
         }
 
-        private string NormalizeWithForwardSlash(string p) => Path.DirectorySeparatorChar == '/' ? p : p.Replace(Path.DirectorySeparatorChar, '/');
+        private static string NormalizeWithForwardSlash(string p) => Path.DirectorySeparatorChar == '/' ? p : p.Replace(Path.DirectorySeparatorChar, '/');
     }
 }
