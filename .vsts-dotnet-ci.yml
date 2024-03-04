@@ -5,7 +5,7 @@ trigger:
 
 jobs:
 - job: IfOnlyDocumentionChanged
-  displayName: "Decide whether only docs are updated"
+  displayName: "Check whether Test Results need to be executed"
   steps:
   - powershell: |
       $changedFiles = git diff --name-only HEAD HEAD~1
@@ -21,7 +21,7 @@ jobs:
       }
       Write-Host "##vso[task.setvariable variable=onlyDocChanged;isoutput=true]$onlyDocChanged"
     name: SetIfOnlyDocumentionChangedVaribale
-    displayName: Determine if Test Results should run
+    displayName: Check whether only documentation has been updated
 - job: BootstrapMSBuildOnFullFrameworkWindows
   dependsOn: IfOnlyDocumentionChanged
   variables:
