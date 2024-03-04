@@ -90,11 +90,11 @@ namespace Microsoft.Build.Analyzers.UnitTests
             root=true
 
             [*.csproj]
-            msbuild_analyzer.BC0101.IsEnabled=false
-            msbuild_analyzer.BC0101.severity=warning
+            msbuild_analyzer.BC0101.IsEnabled=true
+            msbuild_analyzer.BC0101.Severity=warning
 
             msbuild_analyzer.COND0543.IsEnabled=false
-            msbuild_analyzer.COND0543.severity=Error
+            msbuild_analyzer.COND0543.Severity=Error
             msbuild_analyzer.COND0543.EvaluationAnalysisScope=AnalyzedProjectOnly
             msbuild_analyzer.COND0543.CustomSwitch=QWERTY
 

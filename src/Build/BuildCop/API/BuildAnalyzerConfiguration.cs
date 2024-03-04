@@ -46,13 +46,19 @@ public class BuildAnalyzerConfiguration
     /// </summary>
     public bool? IsEnabled { get; internal init; }
 
+    /// <summary>
+    /// Creates a <see cref="BuildAnalyzerConfiguration"/> object based on the provided configuration dictionary.
+    /// If key, equals to the name of the property in lowercase, exists in the dictionary => the value is parsed and assigned to the instance property value.
+    /// </summary>
+    /// <param name="configDictionary">The configuration dictionary containing the settings for the build analyzer.</param>
+    /// <returns>A new instance of <see cref="BuildAnalyzerConfiguration"/> with the specified settings.</returns>
     public static BuildAnalyzerConfiguration Create(Dictionary<string, string> configDictionary)
     {
         return new()
         {
-            EvaluationAnalysisScope = TryExtractValue("EvaluationAnalysisScope", configDictionary, out EvaluationAnalysisScope evaluationAnalysisScope) ? evaluationAnalysisScope : null,
-            Severity = TryExtractValue("severity", configDictionary, out BuildAnalyzerResultSeverity severity) ? severity : null,
-            IsEnabled = TryExtractValue("IsEnabled", configDictionary, out bool test) ? test : null,
+            EvaluationAnalysisScope = TryExtractValue(nameof(EvaluationAnalysisScope).ToLower(), configDictionary, out EvaluationAnalysisScope evaluationAnalysisScope) ? evaluationAnalysisScope : null,
+            Severity = TryExtractValue(nameof(Severity).ToLower(), configDictionary, out BuildAnalyzerResultSeverity severity) ? severity : null,
+            IsEnabled = TryExtractValue(nameof(IsEnabled).ToLower(), configDictionary, out bool test) ? test : null,
         };
     }
 
