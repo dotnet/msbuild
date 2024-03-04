@@ -68,7 +68,7 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
         }
 
         /// <summary>
-        /// Takes a <see cref="Section.Name"/> and creates a matcher that
+        /// Takes a <see cref="EditorConfigFile.Section.Name"/> and creates a matcher that
         /// matches the given language. Returns null if the section name is
         /// invalid.
         /// </summary>

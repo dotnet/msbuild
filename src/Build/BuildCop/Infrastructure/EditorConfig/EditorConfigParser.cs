@@ -15,7 +15,7 @@ using static Microsoft.Build.BuildCop.Infrastructure.EditorConfig.EditorConfigGl
 
 namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
 {
-    public class EditorConfigParser : IEditorConfigParser
+    internal class EditorConfigParser : IEditorConfigParser
     {
         private const string EditorconfigFile = ".editorconfig";
         private Dictionary<string, Dictionary<string, string>> filePathConfigCache;
@@ -82,5 +82,4 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
 
         private string NormalizeWithForwardSlash(string p) => Path.DirectorySeparatorChar == '/' ? p : p.Replace(Path.DirectorySeparatorChar, '/');
     }
-
 }

@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
 {
-    public interface IEditorConfigParser
+    internal interface IEditorConfigParser
     {
-        Dictionary<string, string> Parse(string filePath);
+        public Dictionary<string, string> Parse(string filePath);
     }
 }

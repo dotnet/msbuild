@@ -17,7 +17,7 @@ namespace Microsoft.Build.BuildCop.Infrastructure;
 
 
 // TODO: https://github.com/dotnet/msbuild/issues/9628
-//  Let's flip form statics to instance, with exposed interface (so that we can easily swap implementations)
+// Let's flip form statics to instance, with exposed interface (so that we can easily swap implementations)
 internal static class ConfigurationProvider
 {
     private static IEditorConfigParser s_editorConfigParser = new EditorConfigParser();

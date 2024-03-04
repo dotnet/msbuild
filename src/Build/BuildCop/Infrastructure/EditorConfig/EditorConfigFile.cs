@@ -49,7 +49,7 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
         internal Section GlobalSection { get; }
 
         /// <summary>
-        /// The path passed to <see cref="Parse(string, string)"/> during construction.
+        /// The path passed to <see cref="Parse(string)"/> during construction.
         /// </summary>
         internal string PathToFile { get; }
 
@@ -97,7 +97,7 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
             {
                 while (sr.Peek() >= 0)
                 {
-                    string line = sr.ReadLine();
+                    string? line = sr.ReadLine();
 
                     if (string.IsNullOrWhiteSpace(line))
                     {
