@@ -2773,7 +2773,6 @@ namespace Microsoft.Build.Tasks
                 ITaskItem item = new TaskItem(Path.Combine(reference.DirectoryName, serializationAssemblyFile));
                 // Clone metadata.
                 referenceItem.CopyMetadataTo(item);
-                MSBuildEventSource.Log.TaskItemCopyMetadataToStart();
 
                 // Add the serialization assembly item.
                 serializationAssemblyItems.Add(item);
