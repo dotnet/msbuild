@@ -81,13 +81,6 @@ try {
     $buildToolPath = Join-Path $bootstrapRoot "net472\MSBuild\Current\Bin\MSBuild.exe"
     $buildToolCommand = "";
     $buildToolFramework = "net472"
-
-    if ($configuration -eq "Debug-MONO" -or $configuration -eq "Release-MONO")
-    {
-      # Copy MSBuild.dll to MSBuild.exe so we can run it without a host
-      $sourceDll = Join-Path $bootstrapRoot "net472\MSBuild\Current\Bin\MSBuild.dll"
-      Copy-Item -Path $sourceDll -Destination $msbuildToUse
-    }
   }
   else
   {

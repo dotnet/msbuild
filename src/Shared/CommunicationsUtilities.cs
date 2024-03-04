@@ -426,7 +426,7 @@ namespace Microsoft.Build.Internal
         internal static void ReadEndOfHandshakeSignal(
             this PipeStream stream,
             bool isProvider
-#if NETCOREAPP2_1_OR_GREATER || MONO
+#if NETCOREAPP2_1_OR_GREATER
             , int timeout
 #endif
             )
@@ -436,7 +436,7 @@ namespace Microsoft.Build.Internal
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
             int valueRead = stream.ReadIntForHandshake(
                 byteToAccept: null
-#if NETCOREAPP2_1_OR_GREATER || MONO
+#if NETCOREAPP2_1_OR_GREATER
             , timeout
 #endif
                 );
@@ -462,7 +462,7 @@ namespace Microsoft.Build.Internal
         /// If specified, leading byte matches one in the supplied array if any, returns rejection byte and throws IOException.
         /// </summary>
         internal static int ReadIntForHandshake(this PipeStream stream, byte? byteToAccept
-#if NETCOREAPP2_1_OR_GREATER || MONO
+#if NETCOREAPP2_1_OR_GREATER
             , int timeout
 #endif
             )
@@ -470,7 +470,7 @@ namespace Microsoft.Build.Internal
         {
             byte[] bytes = new byte[4];
 
-#if NETCOREAPP2_1_OR_GREATER || MONO
+#if NETCOREAPP2_1_OR_GREATER
             if (!NativeMethodsShared.IsWindows)
             {
                 // Enforce a minimum timeout because the Windows code can pass

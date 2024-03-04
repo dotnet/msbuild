@@ -116,6 +116,7 @@ namespace Microsoft.Build.CommandLine
             GetProperty,
             GetItem,
             GetTargetResult,
+            GetResultOutputFile,
             FeatureAvailability,
             // This has to be kept as last enum value
             NumberOfParameterizedSwitches,
@@ -283,6 +284,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "getProperty" },                       ParameterizedSwitch.GetProperty,                null,                           true,           "MissingGetPropertyError",             true,   false),
             new ParameterizedSwitchInfo(  new string[] { "getItem" },                           ParameterizedSwitch.GetItem,                    null,                           true,           "MissingGetItemError",                 true,   false),
             new ParameterizedSwitchInfo(  new string[] { "getTargetResult" },                   ParameterizedSwitch.GetTargetResult,            null,                           true,           "MissingGetTargetResultError",         true,   false),
+            new ParameterizedSwitchInfo(  new string[] { "getResultOutputFile" },               ParameterizedSwitch.GetResultOutputFile,        null,                           true,           "MissingGetResultFileError",           true,   false),
             new ParameterizedSwitchInfo(  new string[] { "featureavailability", "fa" },         ParameterizedSwitch.FeatureAvailability,        null,                           true,           "MissingFeatureAvailabilityError",     true,   false),
         };
 

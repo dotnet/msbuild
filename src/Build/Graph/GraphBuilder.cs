@@ -137,7 +137,7 @@ namespace Microsoft.Build.Graph
             {
                 var currentNode = parsedProject.Value.GraphNode;
 
-                var requiresTransitiveProjectReferences = _projectInterpretation.RequiresTransitiveProjectReferences(currentNode.ProjectInstance);
+                var requiresTransitiveProjectReferences = _projectInterpretation.RequiresTransitiveProjectReferences(currentNode);
 
                 foreach (var referenceInfo in parsedProject.Value.ReferenceInfos)
                 {
@@ -572,7 +572,7 @@ namespace Microsoft.Build.Graph
         {
             var referenceInfos = new List<ProjectInterpretation.ReferenceInfo>();
 
-            foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject.ProjectInstance, _projectCollection, GetInstanceForPlatformNegotiationWithCaching))
+            foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject, _projectCollection, GetInstanceForPlatformNegotiationWithCaching))
             {
                 if (FileUtilities.IsSolutionFilename(referenceInfo.ReferenceConfiguration.ProjectFullPath))
                 {

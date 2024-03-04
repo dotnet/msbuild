@@ -2346,15 +2346,6 @@ namespace Microsoft.Build.Utilities
                                 break;
                             }
                             referencePaths.Add(path);
-                            if (NativeMethodsShared.IsMono)
-                            {
-                                // On Mono, some directories contain Facades subdirectory with valid assemblies
-                                var facades = Path.Combine(path, "Facades");
-                                if (FileSystems.Default.DirectoryExists(Path.Combine(path, "Facades")))
-                                {
-                                    referencePaths.Add(facades);
-                                }
-                            }
                         }
                         else if (path == null)
                         {
@@ -3121,15 +3112,13 @@ namespace Microsoft.Build.Utilities
             // If the redist list does not exist then the entire chain is incorrect.
             if (!FileSystems.Default.FileExists(redistFilePath))
             {
-                // Under MONO a directory may chain to one that has no redist list
-                var chainReference = NativeMethodsShared.IsMono ? string.Empty : null;
                 lock (s_locker)
                 {
-                    s_chainedReferenceAssemblyPath[path] = chainReference;
-                    s_cachedTargetFrameworkDisplayNames[path] = chainReference;
+                    s_chainedReferenceAssemblyPath[path] = null;
+                    s_cachedTargetFrameworkDisplayNames[path] = null;
                 }
 
-                return chainReference;
+                return null;
             }
 
             string includeFramework = null;
@@ -3162,13 +3151,6 @@ namespace Microsoft.Build.Utilities
                                     {
                                         displayName = reader.Value;
                                         continue;
-                                    }
-
-                                    // Mono may redirect this to another place
-                                    if (NativeMethodsShared.IsMono && string.Equals(reader.Name, "TargetFrameworkDirectory", StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        // The new folder is relative to the place where the FrameworkList.
-                                        redirectPath = Path.GetFullPath(Path.Combine(redistListFolder, FileUtilities.FixFilePath(reader.Value)));
                                     }
                                 }
                                 while (reader.MoveToNextAttribute());

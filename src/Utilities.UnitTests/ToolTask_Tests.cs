@@ -124,7 +124,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 t.ToolPath = NativeMethodsShared.IsWindows ? @"C:\MyAlternatePath" : "/MyAlternatePath";
 
@@ -140,7 +140,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 t.ToolPath = NativeMethodsShared.IsWindows ? @"C:\MyAlternatePath" : "/MyAlternatePath";
 
@@ -156,7 +156,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
 
                 // "cmd.exe" croaks big-time when given a very long command-line.  It pops up a message box on
@@ -182,7 +182,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows ? "/C garbagegarbagegarbagegarbage.exe" : "-c garbagegarbagegarbagegarbage.exe";
 
@@ -207,7 +207,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                                                 ? "/C echo Main.cs(17,20): error CS0168: The variable 'foo' is declared but never used"
@@ -233,7 +233,7 @@ namespace Microsoft.Build.UnitTests
         public void DoNotFormatTaskCommandOrMessage()
         {
             MyTool t = new MyTool();
-            MockEngine engine = new MockEngine();
+            MockEngine3 engine = new MockEngine3();
             t.BuildEngine = engine;
             // Unmatched curly would crash if they did
             t.MockCommandLineCommands = NativeMethodsShared.IsWindows
@@ -252,7 +252,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                                                 ? "/C Echo 'Who made you king anyways' 1>&2"
@@ -275,7 +275,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 t.LogStandardErrorAsError = true;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
@@ -299,7 +299,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 t.LogStandardErrorAsError = true;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
@@ -324,7 +324,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 t.FullToolName = NativeMethodsShared.IsWindows ? "c:\\baz\\foo.exe" : "/baz/foo.exe";
 
@@ -345,7 +345,7 @@ namespace Microsoft.Build.UnitTests
             string copyName = NativeMethodsShared.IsWindows ? "xcopy.exe" : "cp";
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 t.FullToolName = shellName;
                 string systemPath = NativeMethodsShared.IsUnixLike ? "/bin" : Environment.GetFolderPath(Environment.SpecialFolder.System);
@@ -372,7 +372,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 t.FullToolName = "doesnotexist.exe";
 
@@ -392,7 +392,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 string toolName = NativeMethodsShared.IsWindows ? "cmd.exe" : "sh";
                 t.FullToolName = toolName;
@@ -418,7 +418,7 @@ namespace Microsoft.Build.UnitTests
 
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 engine.MinimumMessageImportance = MessageImportance.High;
 
                 t.BuildEngine = engine;
@@ -446,7 +446,7 @@ namespace Microsoft.Build.UnitTests
 
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 engine.MinimumMessageImportance = MessageImportance.High;
 
                 t.BuildEngine = engine;
@@ -480,7 +480,7 @@ namespace Microsoft.Build.UnitTests
 
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 // The command we're giving is the command to spew the contents of the temp
                 // file we created above.
@@ -510,7 +510,7 @@ namespace Microsoft.Build.UnitTests
         public void EnvironmentVariablesToToolTask()
         {
             MyTool task = new MyTool();
-            task.BuildEngine = new MockEngine();
+            task.BuildEngine = new MockEngine3();
             string userVarName = NativeMethodsShared.IsWindows ? "username" : "user";
             task.EnvironmentVariables = new[] { "a=b", "c=d", userVarName + "=x" /* built-in */, "path=" /* blank value */};
             bool result = task.Execute();
@@ -541,7 +541,7 @@ namespace Microsoft.Build.UnitTests
         public void EnvironmentVariablesToToolTaskEqualsSign()
         {
             MyTool task = new MyTool();
-            task.BuildEngine = new MockEngine();
+            task.BuildEngine = new MockEngine3();
             task.EnvironmentVariables = new[] { "a=b=c" };
             bool result = task.Execute();
 
@@ -556,7 +556,7 @@ namespace Microsoft.Build.UnitTests
         public void EnvironmentVariablesToToolTaskInvalid1()
         {
             MyTool task = new MyTool();
-            task.BuildEngine = new MockEngine();
+            task.BuildEngine = new MockEngine3();
             task.EnvironmentVariables = new[] { "x" };
             bool result = task.Execute();
 
@@ -571,7 +571,7 @@ namespace Microsoft.Build.UnitTests
         public void EnvironmentVariablesToToolTaskInvalid2()
         {
             MyTool task = new MyTool();
-            task.BuildEngine = new MockEngine();
+            task.BuildEngine = new MockEngine3();
             task.EnvironmentVariables = new[] { "" };
             bool result = task.Execute();
 
@@ -586,7 +586,7 @@ namespace Microsoft.Build.UnitTests
         public void EnvironmentVariablesToToolTaskInvalid3()
         {
             MyTool task = new MyTool();
-            task.BuildEngine = new MockEngine();
+            task.BuildEngine = new MockEngine3();
             task.EnvironmentVariables = new[] { "=a;b=c" };
             bool result = task.Execute();
 
@@ -601,7 +601,7 @@ namespace Microsoft.Build.UnitTests
         public void EnvironmentVariablesToToolTaskNotSet()
         {
             MyTool task = new MyTool();
-            task.BuildEngine = new MockEngine();
+            task.BuildEngine = new MockEngine3();
             task.EnvironmentVariables = null;
             bool result = task.Execute();
 
@@ -633,7 +633,7 @@ namespace Microsoft.Build.UnitTests
 
                     MyTool task = new MyTool
                     {
-                        BuildEngine = new MockEngine(),
+                        BuildEngine = new MockEngine3(),
                         FullToolName = toolName,
                     };
                     bool result = task.Execute();
@@ -683,7 +683,7 @@ namespace Microsoft.Build.UnitTests
             MyTool task = new MyTool();
             task.DoProcessStartInfoMutation = (p) => p.Environment.Remove("a");
 
-            task.BuildEngine = new MockEngine();
+            task.BuildEngine = new MockEngine3();
             task.EnvironmentVariables = new[] { "a=b" };
             bool result = task.Execute();
 
@@ -695,7 +695,7 @@ namespace Microsoft.Build.UnitTests
         public void VisualBasicLikeEscapedQuotesInCommandAreNotMadeForwardSlashes()
         {
             MyTool t = new MyTool();
-            MockEngine engine = new MockEngine();
+            MockEngine3 engine = new MockEngine3();
             t.BuildEngine = engine;
             t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                                             ? "/C echo \"hello \\\"world\\\"\""
@@ -779,7 +779,7 @@ namespace Microsoft.Build.UnitTests
 
             var output = testEnvironment.ExpectFile();
 
-            MockEngine engine = new MockEngine();
+            MockEngine3 engine = new MockEngine3();
 
             var task = new ToolTaskThatNeedsUnicode
             {
@@ -846,7 +846,7 @@ namespace Microsoft.Build.UnitTests
             // Task under test:
             var task = new ToolTaskSetsTerminationTimeout
             {
-                BuildEngine = new MockEngine()
+                BuildEngine = new MockEngine3()
             };
 
             task.TerminationTimeout = timeout;
@@ -874,7 +874,7 @@ namespace Microsoft.Build.UnitTests
         {
             using var env = TestEnvironment.Create(_output);
 
-            MockEngine engine = new();
+            MockEngine3 engine = new();
 
             // Task under test:
             var task = new ToolTaskThatSleeps

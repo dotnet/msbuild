@@ -268,6 +268,11 @@
         <target state="translated">MSB4259: "{0}" 조건의 "{1}" 위치에 예기치 않은 공백이 있습니다. 공백을 제거했는지 확인하세요.</target>
         <note>{StrBegin="MSB4259: "}</note>
       </trans-unit>
+      <trans-unit id="ImportedProjectFromVSDistribution">
+        <source>MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </source>
+        <target state="translated">MSB4278: 가져온 파일 "{0}"이(가) 존재하지 않으므로 Visual Studio 구성 요소의 일부인 것 같습니다. 이 파일을 성공적으로 가져오려면 MSBuild.exe가 필요할 수 있으므로 dotnet CLI에서 빌드하지 못할 수 있습니다. </target>
+        <note>{StrBegin="MSB4278: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
+      </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
         <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
         <target state="translated">MSB4255: 다음 입력 결과 캐시 파일이 존재하지 않습니다. "{0}"</target>
@@ -279,8 +284,8 @@
         <note />
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
-        <source>EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system.</source>
-        <target state="translated">SharingPolicy.Isolated로 만든 EvaluationContext 개체는 MSBuildFileSystemBase 파일 시스템 전달을 지원하지 않습니다.</target>
+        <source>EvaluationContext objects created with SharingPolicy.Isolated or SharingPolicy.SharedSDKCache do not support being passed an MSBuildFileSystemBase file system.</source>
+        <target state="translated">SharingPolicy.Isolated 또는 SharingPolicy.SharedSDKCache로 만든 EvaluationContext 개체는 MSBuildFileSystemBase 파일 시스템 전달을 지원하지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ItemReferencingSelfInTarget">
