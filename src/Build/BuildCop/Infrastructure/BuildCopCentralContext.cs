@@ -15,6 +15,12 @@ namespace Microsoft.Build.BuildCop.Infrastructure;
 /// </summary>
 internal sealed class BuildCopCentralContext
 {
+    private readonly ConfigurationProvider _configurationProvider;
+    internal BuildCopCentralContext(ConfigurationProvider configurationProvider)
+    {
+        _configurationProvider = configurationProvider;
+    }
+
     private record CallbackRegistry(
         List<(BuildAnalyzerWrapper, Action<BuildAnalysisContext<EvaluatedPropertiesAnalysisData>>)> EvaluatedPropertiesActions,
         List<(BuildAnalyzerWrapper, Action<BuildAnalysisContext<ParsedItemsAnalysisData>>)> ParsedItemsActions)
@@ -112,7 +118,7 @@ internal sealed class BuildCopCentralContext
                 else
                 {
                     configPerRule =
-                        ConfigurationProvider.GetMergedConfigurations(projectFullPath,
+                        _configurationProvider.GetMergedConfigurations(projectFullPath,
                             analyzerCallback.Item1.BuildAnalyzer);
                     if (configPerRule.All(c => !c.IsEnabled))
                     {

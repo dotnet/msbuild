@@ -18,12 +18,12 @@ namespace Microsoft.Build.BuildCop.Infrastructure;
 
 // TODO: https://github.com/dotnet/msbuild/issues/9628
 // Let's flip form statics to instance, with exposed interface (so that we can easily swap implementations)
-internal static class ConfigurationProvider
+internal class ConfigurationProvider
 {
-    private static IEditorConfigParser s_editorConfigParser = new EditorConfigParser();
+    private IEditorConfigParser s_editorConfigParser = new EditorConfigParser();
     // TODO: This module should have a mechanism for removing unneeded configurations
     //  (disabled rules and analyzers that need to run in different node)
-    private static readonly Dictionary<string, BuildAnalyzerConfiguration> _editorConfig = new Dictionary<string, BuildAnalyzerConfiguration>();
+    private readonly Dictionary<string, BuildAnalyzerConfiguration> _editorConfig = new Dictionary<string, BuildAnalyzerConfiguration>();
 
     /// <summary>
     /// Gets the user specified unrecognized configuration for the given analyzer rule.
@@ -35,7 +35,7 @@ internal static class ConfigurationProvider
     /// <param name="projectFullPath"></param>
     /// <param name="ruleId"></param>
     /// <returns></returns>
-    public static CustomConfigurationData GetCustomConfiguration(string projectFullPath, string ruleId)
+    public CustomConfigurationData GetCustomConfiguration(string projectFullPath, string ruleId)
     {
         return CustomConfigurationData.Null;
     }
@@ -47,27 +47,27 @@ internal static class ConfigurationProvider
     /// <param name="ruleId"></param>
     /// <throws><see cref="BuildCopConfigurationException"/> If CustomConfigurationData differs in a build for a same ruleId</throws>
     /// <returns></returns>
-    public static void CheckCustomConfigurationDataValidity(string projectFullPath, string ruleId)
+    public void CheckCustomConfigurationDataValidity(string projectFullPath, string ruleId)
     {
         // TBD
     }
 
-    public static BuildAnalyzerConfigurationInternal[] GetMergedConfigurations(
+    public BuildAnalyzerConfigurationInternal[] GetMergedConfigurations(
         string projectFullPath,
         BuildAnalyzer analyzer)
         => FillConfiguration(projectFullPath, analyzer.SupportedRules, GetMergedConfiguration);
 
-    public static BuildAnalyzerConfiguration[] GetUserConfigurations(
+    public BuildAnalyzerConfiguration[] GetUserConfigurations(
         string projectFullPath,
         IReadOnlyList<string> ruleIds)
         => FillConfiguration(projectFullPath, ruleIds, GetUserConfiguration);
 
-    public static CustomConfigurationData[] GetCustomConfigurations(
+    public  CustomConfigurationData[] GetCustomConfigurations(
         string projectFullPath,
         IReadOnlyList<string> ruleIds)
         => FillConfiguration(projectFullPath, ruleIds, GetCustomConfiguration);
 
-    public static BuildAnalyzerConfigurationInternal[] GetMergedConfigurations(
+    public BuildAnalyzerConfigurationInternal[] GetMergedConfigurations(
         BuildAnalyzerConfiguration[] userConfigs,
         BuildAnalyzer analyzer)
     {
@@ -84,7 +84,7 @@ internal static class ConfigurationProvider
         return configurations;
     }
 
-    private static TConfig[] FillConfiguration<TConfig, TRule>(string projectFullPath, IReadOnlyList<TRule> ruleIds, Func<string, TRule, TConfig> configurationProvider)
+    private TConfig[] FillConfiguration<TConfig, TRule>(string projectFullPath, IReadOnlyList<TRule> ruleIds, Func<string, TRule, TConfig> configurationProvider)
     {
         TConfig[] configurations = new TConfig[ruleIds.Count];
         for (int i = 0; i < ruleIds.Count; i++)
@@ -105,7 +105,7 @@ internal static class ConfigurationProvider
     /// <param name="projectFullPath"></param>
     /// <param name="ruleId"></param>
     /// <returns></returns>
-    public static BuildAnalyzerConfiguration GetUserConfiguration(string projectFullPath, string ruleId)
+    public BuildAnalyzerConfiguration GetUserConfiguration(string projectFullPath, string ruleId)
     {
         if (!_editorConfig.TryGetValue(ruleId, out BuildAnalyzerConfiguration? editorConfig))
         {
@@ -139,10 +139,10 @@ internal static class ConfigurationProvider
     /// <param name="projectFullPath"></param>
     /// <param name="analyzerRule"></param>
     /// <returns></returns>
-    public static BuildAnalyzerConfigurationInternal GetMergedConfiguration(string projectFullPath, BuildAnalyzerRule analyzerRule)
+    public BuildAnalyzerConfigurationInternal GetMergedConfiguration(string projectFullPath, BuildAnalyzerRule analyzerRule)
         => GetMergedConfiguration(projectFullPath, analyzerRule.Id, analyzerRule.DefaultConfiguration);
 
-    public static BuildAnalyzerConfigurationInternal MergeConfiguration(
+    public BuildAnalyzerConfigurationInternal MergeConfiguration(
         string ruleId,
         BuildAnalyzerConfiguration defaultConfig,
         BuildAnalyzerConfiguration editorConfig)
@@ -152,13 +152,13 @@ internal static class ConfigurationProvider
             isEnabled: GetConfigValue(editorConfig, defaultConfig, cfg => cfg.IsEnabled),
             severity: GetConfigValue(editorConfig, defaultConfig, cfg => cfg.Severity));
 
-    private static BuildAnalyzerConfigurationInternal GetMergedConfiguration(
+    private BuildAnalyzerConfigurationInternal GetMergedConfiguration(
         string projectFullPath,
         string ruleId,
         BuildAnalyzerConfiguration defaultConfig)
         => MergeConfiguration(ruleId, defaultConfig, GetUserConfiguration(projectFullPath, ruleId));
 
-    private static T GetConfigValue<T>(
+    private T GetConfigValue<T>(
         BuildAnalyzerConfiguration editorConfigValue,
         BuildAnalyzerConfiguration defaultValue,
         Func<BuildAnalyzerConfiguration, T?> propertyGetter) where T : struct

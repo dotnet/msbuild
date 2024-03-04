@@ -67,7 +67,8 @@ internal sealed class BuildCopManagerProvider : IBuildComponent
     private sealed class BuildCopManager : IBuildCopManager
     {
         private readonly TracingReporter _tracingReporter = new TracingReporter();
-        private readonly BuildCopCentralContext _buildCopCentralContext = new();
+        private readonly ConfigurationProvider _configurationProvider = new ConfigurationProvider();
+        private readonly BuildCopCentralContext _buildCopCentralContext;
         private readonly ILoggingService _loggingService;
         private readonly List<BuildAnalyzerFactoryContext> _analyzersRegistry =[];
         private readonly bool[] _enabledDataSources = new bool[(int)BuildCopDataSource.ValuesCount];
@@ -115,6 +116,7 @@ internal sealed class BuildCopManagerProvider : IBuildComponent
         internal BuildCopManager(ILoggingService loggingService)
         {
             _loggingService = loggingService;
+            _buildCopCentralContext = new(_configurationProvider);
             _buildEventsProcessor = new(_buildCopCentralContext);
         }
 
@@ -180,7 +182,7 @@ internal sealed class BuildCopManagerProvider : IBuildComponent
             if (analyzerFactoryContext.MaterializedAnalyzer == null)
             {
                 BuildAnalyzerConfiguration[] userConfigs =
-                    ConfigurationProvider.GetUserConfigurations(projectFullPath, analyzerFactoryContext.RuleIds);
+                    _configurationProvider.GetUserConfigurations(projectFullPath, analyzerFactoryContext.RuleIds);
 
                 if (userConfigs.All(c => !(c.IsEnabled ?? analyzerFactoryContext.IsEnabledByDefault)))
                 {
@@ -189,7 +191,7 @@ internal sealed class BuildCopManagerProvider : IBuildComponent
                 }
 
                 CustomConfigurationData[] customConfigData =
-                    ConfigurationProvider.GetCustomConfigurations(projectFullPath, analyzerFactoryContext.RuleIds);
+                    _configurationProvider.GetCustomConfigurations(projectFullPath, analyzerFactoryContext.RuleIds);
 
                 ConfigurationContext configurationContext = ConfigurationContext.FromDataEnumeration(customConfigData);
 
@@ -208,7 +210,7 @@ internal sealed class BuildCopManagerProvider : IBuildComponent
                         $"The analyzer '{analyzer.FriendlyName}' exposes rules '{analyzer.SupportedRules.Select(r => r.Id).ToCsvString()}', but different rules were declared during registration: '{analyzerFactoryContext.RuleIds.ToCsvString()}'");
                 }
 
-                configurations = ConfigurationProvider.GetMergedConfigurations(userConfigs, analyzer);
+                configurations = _configurationProvider.GetMergedConfigurations(userConfigs, analyzer);
 
                 // technically all analyzers rules could be disabled, but that would mean
                 // that the provided 'IsEnabledByDefault' value wasn't correct - the only
@@ -223,9 +225,9 @@ internal sealed class BuildCopManagerProvider : IBuildComponent
             {
                 wrapper = analyzerFactoryContext.MaterializedAnalyzer;
 
-                configurations = ConfigurationProvider.GetMergedConfigurations(projectFullPath, wrapper.BuildAnalyzer);
+                configurations = _configurationProvider.GetMergedConfigurations(projectFullPath, wrapper.BuildAnalyzer);
 
-                ConfigurationProvider.CheckCustomConfigurationDataValidity(projectFullPath,
+                _configurationProvider.CheckCustomConfigurationDataValidity(projectFullPath,
                     analyzerFactoryContext.RuleIds[0]);
 
                 // Update the wrapper
