@@ -12,7 +12,7 @@ jobs:
       $changedFiles
       $onlyDocChanged = 1
       foreach ($file in $changedFiles) {
-        $isUnderDocumentation = $file -match "documentation/"
+        $isUnderDocumentation = $file -match "^documentation/"
         if(!$isUnderDocumentation)
         {
           $onlyDocChanged = 0
