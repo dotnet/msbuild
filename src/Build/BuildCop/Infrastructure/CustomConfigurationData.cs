@@ -15,17 +15,27 @@ namespace Microsoft.Build.Experimental.BuildCop;
 ///  that were attribute to a particular rule, but were not recognized by the infrastructure.
 /// The configuration data that is recognized by the infrastructure is passed as <see cref="BuildAnalyzerConfiguration"/>.
 /// </summary>
-/// <param name="ruleId"></param>
-public class CustomConfigurationData(string ruleId)
+public class CustomConfigurationData
 {
     public static CustomConfigurationData Null { get; } = new(string.Empty);
 
     public static bool NotNull(CustomConfigurationData data) => !Null.Equals(data);
 
+    public CustomConfigurationData(string ruleId)
+    {
+        RuleId = ruleId;
+    }
+
+    public CustomConfigurationData(string ruleId, Dictionary<string, string> properties)
+    {
+        RuleId = ruleId;
+        ConfigurationData = properties;
+    }
+
     /// <summary>
     /// Identifier of the rule that the configuration data is for.
     /// </summary>
-    public string RuleId { get; init; } = ruleId;
+    public string RuleId { get; init; }
 
     /// <summary>
     /// Key-value pairs of unstructured data from .editorconfig file.

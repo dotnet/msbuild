@@ -17,7 +17,6 @@ namespace Microsoft.Build.BuildCop.Infrastructure;
 
 
 // TODO: https://github.com/dotnet/msbuild/issues/9628
-// Let's flip form statics to instance, with exposed interface (so that we can easily swap implementations)
 internal class ConfigurationProvider
 {
     private IEditorConfigParser s_editorConfigParser = new EditorConfigParser();
@@ -37,7 +36,13 @@ internal class ConfigurationProvider
     /// <returns></returns>
     public CustomConfigurationData GetCustomConfiguration(string projectFullPath, string ruleId)
     {
-        return CustomConfigurationData.Null;
+        var configuration = GetConfiguration(projectFullPath, ruleId);
+
+        if (configuration is null || !configuration.Any())
+        {
+            return CustomConfigurationData.Null;
+        }
+        return new CustomConfigurationData(ruleId, configuration);
     }
 
     /// <summary>
@@ -95,6 +100,32 @@ internal class ConfigurationProvider
         return configurations;
     }
 
+    internal Dictionary<string, string> GetConfiguration(string projectFullPath, string ruleId)
+    {
+        var config = new Dictionary<string, string>();
+        try
+        {
+            config = s_editorConfigParser.Parse(projectFullPath);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
+
+        var keyTosearch = $"msbuild_analyzer.{ruleId}.";
+        var dictionaryConfig = new Dictionary<string, string>();
+
+        foreach (var kv in config)
+        {
+            if (kv.Key.StartsWith(keyTosearch, StringComparison.OrdinalIgnoreCase))
+            {
+                dictionaryConfig[kv.Key.Replace(keyTosearch.ToLower(), "")] = kv.Value;
+            }
+        }
+
+        return dictionaryConfig;
+    }
+
     /// <summary>
     /// Gets effective user specified (or default) configuration for the given analyzer rule.
     /// The configuration values CAN be null upon this operation.
@@ -114,30 +145,11 @@ internal class ConfigurationProvider
             editorConfig = BuildAnalyzerConfiguration.Null;
         }
 
-        var config = new Dictionary<string, string>();
-        try
-        {
-            config = s_editorConfigParser.Parse(projectFullPath);
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex);
-        }
-        
-        var keyTosearch = $"msbuild_analyzer.{ruleId}.";
-        var dictionaryConfig = new Dictionary<string, string>();
+        var config = GetConfiguration(projectFullPath, ruleId);
 
-        foreach (var kv in config)
+        if (config.Any())
         {
-            if (kv.Key.StartsWith(keyTosearch, StringComparison.OrdinalIgnoreCase))
-            {
-                dictionaryConfig[kv.Key.Replace(keyTosearch.ToLower(), "")] = kv.Value;
-            }
-        }
-
-        if (dictionaryConfig.Any())
-        {
-            editorConfig = BuildAnalyzerConfiguration.Create(dictionaryConfig);
+            editorConfig = BuildAnalyzerConfiguration.Create(config);
         }
 
         _editorConfig[cacheKey] = editorConfig;
