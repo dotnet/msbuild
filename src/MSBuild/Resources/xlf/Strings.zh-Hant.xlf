@@ -1652,7 +1652,7 @@
       </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">
         <source>{0}{1} test {2} ({3}s)</source>
-        <target state="new">{0}{1} test {2} ({3}s)</target>
+        <target state="translated">{0}{1} 測試 {2} ({3} 秒)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1663,7 +1663,7 @@
       </trans-unit>
       <trans-unit id="TestProjectFinished_WithTF">
         <source>{0}{1} test {2} {3} ({4}s)</source>
-        <target state="new">{0}{1} test {2} {3} ({4}s)</target>
+        <target state="translated">{0}{1} 測試 {2} {3} ({4} 秒)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1675,7 +1675,7 @@
       </trans-unit>
       <trans-unit id="TestSummary">
         <source>Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</source>
-        <target state="new">Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</target>
+        <target state="translated">測試回合 {0}。總計: {1} 失敗: {2} 傳遞: {3} 跳過: {4}, 期間: {5} 秒</target>
         <note>{0} string, localized result e.g. Failed surrounded by ANSI colors.
 {1-5} whole number</note>
       </trans-unit>
