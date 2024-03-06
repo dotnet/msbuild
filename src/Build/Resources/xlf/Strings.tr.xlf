@@ -270,7 +270,7 @@
       </trans-unit>
       <trans-unit id="ImportedProjectFromVSDistribution">
         <source>MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </source>
-        <target state="new">MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </target>
+        <target state="translated">MSB4278: İçeri aktarılan "{0}" dosyası mevcut değil ve bir Visual Studio bileşeninin parçası gibi görünüyor. Başarıyla içeri aktarılabilmesi için bu dosya MSBuild.exe dosyasını gerektirir ve bu nedenle dotnet CLI’de derleme başarısız olabilir. </target>
         <note>{StrBegin="MSB4278: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
@@ -285,7 +285,7 @@
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
         <source>EvaluationContext objects created with SharingPolicy.Isolated or SharingPolicy.SharedSDKCache do not support being passed an MSBuildFileSystemBase file system.</source>
-        <target state="needs-review-translation">SharingPolicy.Isolated ile oluşturulan EvaluationContext nesneleri bir MSBuildFileSystemBase dosya sisteminin geçirilmesini desteklemez.</target>
+        <target state="translated">SharingPolicy.Isolated veya SharingPolicy.SharedSDKCache ile oluşturulan EvaluationContext nesneleri, bir MSBuildFileSystemBase dosya sisteminin geçirilmesini desteklemez.</target>
         <note />
       </trans-unit>
       <trans-unit id="ItemReferencingSelfInTarget">

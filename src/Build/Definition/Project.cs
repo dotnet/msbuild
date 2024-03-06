@@ -45,7 +45,7 @@ namespace Microsoft.Build.Evaluation
     /// Edits to this project always update the backing XML.
     /// </summary>
     // UNDONE: (Multiple configurations.) Protect against problems when attempting to edit, after edits were made to the same ProjectRootElement either directly or through other projects evaluated from that ProjectRootElement.
-    [DebuggerDisplay("{FullPath} EffectiveToolsVersion={ToolsVersion} #GlobalProperties={implementation._data.GlobalPropertiesDictionary.Count} #Properties={implementation._data.Properties.Count} #ItemTypes={implementation._data.ItemTypes.Count} #ItemDefinitions={implementation._data.ItemDefinitions.Count} #Items={implementation._data.Items.Count} #Targets={implementation._data.Targets.Count}")]
+    [DebuggerDisplay("{FullPath} EffectiveToolsVersion={ToolsVersion} {implementation}")]
     public class Project : ILinkableObject
     {
         /// <summary>
@@ -1812,6 +1812,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Internal project evaluation implementation.
         /// </summary>
+        [DebuggerDisplay("#GlobalProperties={_data.GlobalPropertiesDictionary.Count} #Properties={_data.Properties.Count} #ItemTypes={_data.ItemTypes.Count} #ItemDefinitions={_data.ItemDefinitions.Count} #Items={_data.Items.Count} #Targets={_data.Targets.Count}")]
         private class ProjectImpl : ProjectLink, IProjectLinkInternal
         {
             /// <summary>
