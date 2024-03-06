@@ -107,13 +107,14 @@ internal class ConfigurationProvider
     /// <returns></returns>
     public BuildAnalyzerConfiguration GetUserConfiguration(string projectFullPath, string ruleId)
     {
-        if (!_editorConfig.TryGetValue(ruleId, out BuildAnalyzerConfiguration? editorConfig))
+        var cacheKey = $"{ruleId}-projectFullPath ";
+
+        if (!_editorConfig.TryGetValue(cacheKey, out BuildAnalyzerConfiguration? editorConfig))
         {
             editorConfig = BuildAnalyzerConfiguration.Null;
         }
 
         var config = new Dictionary<string, string>();
-
         try
         {
             config = s_editorConfigParser.Parse(projectFullPath);
@@ -136,8 +137,10 @@ internal class ConfigurationProvider
 
         if (dictionaryConfig.Any())
         {
-            return BuildAnalyzerConfiguration.Create(dictionaryConfig);
+            editorConfig = BuildAnalyzerConfiguration.Create(dictionaryConfig);
         }
+
+        _editorConfig[cacheKey] = editorConfig;
 
         return editorConfig;
     }

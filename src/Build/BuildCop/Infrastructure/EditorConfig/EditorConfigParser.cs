@@ -18,20 +18,21 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
     internal class EditorConfigParser : IEditorConfigParser
     {
         private const string EditorconfigFile = ".editorconfig";
-        private Dictionary<string, Dictionary<string, string>> filePathConfigCache;
+        private Dictionary<string, EditorConfigFile> editorConfigFileCache;
 
         internal EditorConfigParser()
         {
-            filePathConfigCache = new Dictionary<string, Dictionary<string, string>>();
+            editorConfigFileCache = new Dictionary<string, EditorConfigFile>();
         }
 
         public Dictionary<string, string> Parse(string filePath)
         {
-            if (filePathConfigCache.ContainsKey(filePath))
-            {
-                return filePathConfigCache[filePath];
-            }
+            var editorConfigs = EditorConfigFileDiscovery(filePath);
+            return MergeEditorConfigFiles(editorConfigs, filePath);
+        }
 
+        public IList<EditorConfigFile> EditorConfigFileDiscovery(string filePath)
+        {
             var editorConfigDataFromFilesList = new List<EditorConfigFile>();
 
             var directoryOfTheProject = Path.GetDirectoryName(filePath);
@@ -39,8 +40,19 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
 
             while (editorConfigFile != string.Empty)
             {
-                var editorConfigfileContent = File.ReadAllText(editorConfigFile);
-                var editorConfig = EditorConfigFile.Parse(editorConfigfileContent);
+                EditorConfigFile editorConfig;
+
+                if (editorConfigFileCache.ContainsKey(editorConfigFile))
+                {
+                    editorConfig = editorConfigFileCache[editorConfigFile];
+                }
+                else
+                {
+                    var editorConfigfileContent = File.ReadAllText(editorConfigFile);
+                    editorConfig = EditorConfigFile.Parse(editorConfigfileContent);
+                    editorConfigFileCache[editorConfigFile] = editorConfig;
+                }
+
                 editorConfigDataFromFilesList.Add(editorConfig);
 
                 if (editorConfig.IsRoot)
@@ -53,13 +65,18 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
                 }
             }
 
+            return editorConfigDataFromFilesList;
+        }
+
+        public Dictionary<string, string> MergeEditorConfigFiles(IEnumerable<EditorConfigFile> editorConfigFiles, string filePath)
+        {
             var resultingDictionary = new Dictionary<string, string>();
 
-            if (editorConfigDataFromFilesList.Any())
+            if (editorConfigFiles.Any())
             {
-                editorConfigDataFromFilesList.Reverse();
-                
-                foreach (var configData in editorConfigDataFromFilesList)
+                editorConfigFiles.Reverse();
+
+                foreach (var configData in editorConfigFiles)
                 {
                     foreach (var section in configData.NamedSections)
                     {
@@ -78,7 +95,6 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
                 }
             }
 
-            filePathConfigCache[filePath] = resultingDictionary;
             return resultingDictionary;
         }
 
