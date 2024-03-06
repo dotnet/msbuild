@@ -6,6 +6,7 @@
 // with slight changes like:
 //  1. Remove dependency from Source text.
 //  2. Remove support of globalconfig
+//  3. Remove the FilePath and receive only the text
 
 using System;
 using System.Collections.Generic;
@@ -48,39 +49,27 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
 
         internal Section GlobalSection { get; }
 
-        /// <summary>
-        /// The path passed to <see cref="Parse(string)"/> during construction.
-        /// </summary>
-        internal string PathToFile { get; }
-
         internal ImmutableArray<Section> NamedSections { get; }
 
         /// <summary>
         /// Gets whether this editorconfig is a topmost editorconfig.
         /// </summary>
-        internal bool IsRoot => GlobalSection.Properties.TryGetValue("root", out string? val) && val == "true";
+        internal bool IsRoot => GlobalSection.Properties.TryGetValue("root", out string? val) && val?.ToLower() == "true";
 
         private EditorConfigFile(
             Section globalSection,
-            ImmutableArray<Section> namedSections,
-            string pathToFile)
+            ImmutableArray<Section> namedSections)
         {
             GlobalSection = globalSection;
             NamedSections = namedSections;
-            PathToFile = pathToFile;
         }
 
         /// <summary>
         /// Parses an editor config file text located at the given path. No parsing
         /// errors are reported. If any line contains a parse error, it is dropped.
         /// </summary>
-        internal static EditorConfigFile Parse(string pathToFile)
+        internal static EditorConfigFile Parse(string text)
         {
-            if (pathToFile is null || !Path.IsPathRooted(pathToFile) || string.IsNullOrEmpty(Path.GetFileName(pathToFile)) || !File.Exists(pathToFile))
-            {
-                throw new ArgumentException("Must be an absolute path to an editorconfig file", nameof(pathToFile));
-            }
-
             Section? globalSection = null;
             var namedSectionBuilder = ImmutableArray.CreateBuilder<Section>();
 
@@ -90,58 +79,54 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
             //      They are lowercased when parsed.
             // To accommodate this, we use a lower case Unicode mapping when adding to the
             // dictionary, but we also use a case-insensitive key comparer when doing lookups
-            var activeSectionProperties = ImmutableDictionary.CreateBuilder<string, string>();
+            var activeSectionProperties = ImmutableDictionary.CreateBuilder<string, string>(StringComparer.OrdinalIgnoreCase);
             string activeSectionName = "";
+            var lines = string.IsNullOrEmpty(text) ? Array.Empty<string>() : text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
 
-            using (StreamReader sr = new StreamReader(pathToFile))
+            foreach(var line in lines)
             {
-                while (sr.Peek() >= 0)
+                if (string.IsNullOrWhiteSpace(line))
                 {
-                    string? line = sr.ReadLine();
+                    continue;
+                }
 
-                    if (string.IsNullOrWhiteSpace(line))
-                    {
-                        continue;
-                    }
+                if (IsComment(line))
+                {
+                    continue;
+                }
 
-                    if (IsComment(line))
-                    {
-                        continue;
-                    }
+                var sectionMatches = GetSectionMatcherRegex().Matches(line);
+                if (sectionMatches.Count > 0 && sectionMatches[0].Groups.Count > 0)
+                {
+                    addNewSection();
 
-                    var sectionMatches = GetSectionMatcherRegex().Matches(line);
-                    if (sectionMatches.Count > 0 && sectionMatches[0].Groups.Count > 0)
-                    {
-                        addNewSection();
+                    var sectionName = sectionMatches[0].Groups[1].Value;
+                    Debug.Assert(!string.IsNullOrEmpty(sectionName));
 
-                        var sectionName = sectionMatches[0].Groups[1].Value;
-                        Debug.Assert(!string.IsNullOrEmpty(sectionName));
+                    activeSectionName = sectionName;
+                    activeSectionProperties = ImmutableDictionary.CreateBuilder<string, string>();
+                    continue;
+                }
 
-                        activeSectionName = sectionName;
-                        activeSectionProperties = ImmutableDictionary.CreateBuilder<string, string>();
-                        continue;
-                    }
+                var propMatches = GetPropertyMatcherRegex().Matches(line);
+                if (propMatches.Count > 0 && propMatches[0].Groups.Count > 1)
+                {
+                    var key = propMatches[0].Groups[1].Value.ToLower();
+                    var value = propMatches[0].Groups[2].Value;
 
-                    var propMatches = GetPropertyMatcherRegex().Matches(line);
-                    if (propMatches.Count > 0 && propMatches[0].Groups.Count > 1)
-                    {
-                        var key = propMatches[0].Groups[1].Value.ToLower();
-                        var value = propMatches[0].Groups[2].Value.ToLower();
+                    Debug.Assert(!string.IsNullOrEmpty(key));
+                    Debug.Assert(key == key.Trim());
+                    Debug.Assert(value == value?.Trim());
 
-                        Debug.Assert(!string.IsNullOrEmpty(key));
-                        Debug.Assert(key == key.Trim());
-                        Debug.Assert(value == value?.Trim());
-
-                        activeSectionProperties[key] = value ?? "";
-                        continue;
-                    }
+                    activeSectionProperties[key] = value ?? "";
+                    continue;
                 }
             }
 
             // Add the last section
             addNewSection();
 
-            return new EditorConfigFile(globalSection!, namedSectionBuilder.ToImmutable(), pathToFile);
+            return new EditorConfigFile(globalSection!, namedSectionBuilder.ToImmutable());
 
             void addNewSection()
             {
@@ -192,8 +177,7 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
 
             /// <summary>
             /// Keys and values for this section. All keys are lower-cased according to the
-            /// EditorConfig specification and keys are compared case-insensitively. Otherwise,
-            /// the values are the literal values present in the source.
+            /// EditorConfig specification and keys are compared case-insensitively. 
             /// </summary>
             public ImmutableDictionary<string, string> Properties { get; }
         }

@@ -33,16 +33,17 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
             }
 
             var editorConfigDataFromFilesList = new List<EditorConfigFile>();
+
             var directoryOfTheProject = Path.GetDirectoryName(filePath);
             var editorConfigFile = FileUtilities.GetPathOfFileAbove(EditorconfigFile, directoryOfTheProject);
 
             while (editorConfigFile != string.Empty)
             {
-                // TODO: Change the API of EditorconfigFile Parse to accept the text value instead of file path. 
-                var editorConfigData = EditorConfigFile.Parse(editorConfigFile);
-                editorConfigDataFromFilesList.Add(editorConfigData);
+                var editorConfigfileContent = File.ReadAllText(editorConfigFile);
+                var editorConfig = EditorConfigFile.Parse(editorConfigfileContent);
+                editorConfigDataFromFilesList.Add(editorConfig);
 
-                if (editorConfigData.IsRoot)
+                if (editorConfig.IsRoot)
                 {
                     break;
                 }

@@ -2,10 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Build.BuildCop.Infrastructure.EditorConfig;
 using Microsoft.Build.UnitTests;
 using Xunit;
 using static Microsoft.Build.BuildCop.Infrastructure.EditorConfig.EditorConfigGlobsMatcher;
@@ -586,6 +589,502 @@ namespace Microsoft.Build.Analyzers.UnitTests
 
             Assert.Equal(@"^.*/ab\[cd$", matcher.Regex.ToString());
         }
+        #endregion
+
+        #region AssertEqualityComparer<T>
+
+        private class AssertEqualityComparer<T> : IEqualityComparer<T>
+        {
+            public static readonly IEqualityComparer<T> Instance = new AssertEqualityComparer<T>();
+
+            private static bool CanBeNull()
+            {
+                var type = typeof(T);
+                return !type.GetTypeInfo().IsValueType ||
+                    (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
+            }
+
+            public static bool IsNull(T @object)
+            {
+                if (!CanBeNull())
+                {
+                    return false;
+                }
+
+                return object.Equals(@object, default(T));
+            }
+
+            public static bool Equals(T left, T right)
+            {
+                return Instance.Equals(left, right);
+            }
+
+            bool IEqualityComparer<T>.Equals(T x, T y)
+            {
+                if (CanBeNull())
+                {
+                    if (object.Equals(x, default(T)))
+                    {
+                        return object.Equals(y, default(T));
+                    }
+
+                    if (object.Equals(y, default(T)))
+                    {
+                        return false;
+                    }
+                }
+
+                if (x.GetType() != y.GetType())
+                {
+                    return false;
+                }
+
+                if (x is IEquatable<T> equatable)
+                {
+                    return equatable.Equals(y);
+                }
+
+                if (x is IComparable<T> comparableT)
+                {
+                    return comparableT.CompareTo(y) == 0;
+                }
+
+                if (x is IComparable comparable)
+                {
+                    return comparable.CompareTo(y) == 0;
+                }
+
+                var enumerableX = x as IEnumerable;
+                var enumerableY = y as IEnumerable;
+
+                if (enumerableX != null && enumerableY != null)
+                {
+                    var enumeratorX = enumerableX.GetEnumerator();
+                    var enumeratorY = enumerableY.GetEnumerator();
+
+                    while (true)
+                    {
+                        bool hasNextX = enumeratorX.MoveNext();
+                        bool hasNextY = enumeratorY.MoveNext();
+
+                        if (!hasNextX || !hasNextY)
+                        {
+                            return hasNextX == hasNextY;
+                        }
+
+                        if (!Equals(enumeratorX.Current, enumeratorY.Current))
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+                return object.Equals(x, y);
+            }
+
+            int IEqualityComparer<T>.GetHashCode(T obj)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        #endregion
+
+
+        #region Parsing Tests
+
+        public static void SetEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual, IEqualityComparer<T> comparer = null, string message = null, string itemSeparator = "\r\n", Func<T, string> itemInspector = null)
+        {
+            var expectedSet = new HashSet<T>(expected, comparer);
+            var result = expected.Count() == actual.Count() && expectedSet.SetEquals(actual);
+            Assert.True(result, message);
+        }
+
+        public static void Equal<T>(
+            IEnumerable<T> expected,
+            IEnumerable<T> actual,
+            IEqualityComparer<T> comparer = null,
+            string message = null,
+            string itemSeparator = null,
+            Func<T, string> itemInspector = null,
+            string expectedValueSourcePath = null,
+            int expectedValueSourceLine = 0)
+        {
+            if (expected == null)
+            {
+                Assert.Null(actual);
+            }
+            else
+            {
+                Assert.NotNull(actual);
+            }
+
+            if (SequenceEqual(expected, actual, comparer))
+            {
+                return;
+            }
+
+            Assert.True(false);
+        }
+
+        private static bool SequenceEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual, IEqualityComparer<T> comparer = null)
+        {
+            if (ReferenceEquals(expected, actual))
+            {
+                return true;
+            }
+
+            var enumerator1 = expected.GetEnumerator();
+            var enumerator2 = actual.GetEnumerator();
+
+            while (true)
+            {
+                var hasNext1 = enumerator1.MoveNext();
+                var hasNext2 = enumerator2.MoveNext();
+
+                if (hasNext1 != hasNext2)
+                {
+                    return false;
+                }
+
+                if (!hasNext1)
+                {
+                    break;
+                }
+
+                var value1 = enumerator1.Current;
+                var value2 = enumerator2.Current;
+
+                if (!(comparer != null ? comparer.Equals(value1, value2) : AssertEqualityComparer<T>.Equals(value1, value2)))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static KeyValuePair<K, V> Create<K, V>(K key, V value)
+        {
+            return new KeyValuePair<K, V>(key, value);
+        }
+
+        [Fact]
+        public void SimpleCase()
+        {
+            var config = EditorConfigFile.Parse("""
+root = true
+
+# Comment1
+# Comment2
+##################################
+
+my_global_prop = my_global_val
+
+[*.cs]
+my_prop = my_val
+""");
+            Assert.Equal("", config.GlobalSection.Name);
+            var properties = config.GlobalSection.Properties;
+
+            SetEqual(
+                new[] { Create("my_global_prop", "my_global_val") ,
+                        Create("root", "true") },
+                properties);
+
+            var namedSections = config.NamedSections;
+            Assert.Equal("*.cs", namedSections[0].Name);
+            SetEqual(
+                new[] { Create("my_prop", "my_val") },
+                namedSections[0].Properties);
+            
+            Assert.True(config.IsRoot);
+        }
+
+        
+        [Fact]
+        //[WorkItem(52469, "https://github.com/dotnet/roslyn/issues/52469")]
+        public void ConfigWithEscapedValues()
+        {
+            var config = EditorConfigFile.Parse(@"is_global = true
+
+[c:/\{f\*i\?le1\}.cs]
+build_metadata.Compile.ToRetrieve = abc123
+
+[c:/f\,ile\#2.cs]
+build_metadata.Compile.ToRetrieve = def456
+
+[c:/f\;i\!le\[3\].cs]
+build_metadata.Compile.ToRetrieve = ghi789
+");
+
+            var namedSections = config.NamedSections;
+            Assert.Equal("c:/\\{f\\*i\\?le1\\}.cs", namedSections[0].Name);
+            Equal(
+                new[] { Create("build_metadata.compile.toretrieve", "abc123") },
+                namedSections[0].Properties
+            );
+
+            Assert.Equal("c:/f\\,ile\\#2.cs", namedSections[1].Name);
+            Equal(
+                new[] { Create("build_metadata.compile.toretrieve", "def456") },
+                namedSections[1].Properties
+            );
+
+            Assert.Equal("c:/f\\;i\\!le\\[3\\].cs", namedSections[2].Name);
+            Equal(
+                new[] { Create("build_metadata.compile.toretrieve", "ghi789") },
+                namedSections[2].Properties
+            );
+        }
+
+        /*
+        [Fact]
+        [WorkItem(52469, "https://github.com/dotnet/roslyn/issues/52469")]
+        public void CanGetSectionsWithSpecialCharacters()
+        {
+            var config = ParseConfigFile(@"is_global = true
+
+[/home/foo/src/\{releaseid\}.cs]
+build_metadata.Compile.ToRetrieve = abc123
+
+[/home/foo/src/Pages/\#foo/HomePage.cs]
+build_metadata.Compile.ToRetrieve = def456
+");
+
+            var set = AnalyzerConfigSet.Create(ImmutableArray.Create(config));
+
+            var sectionOptions = set.GetOptionsForSourcePath("/home/foo/src/{releaseid}.cs");
+            Assert.Equal("abc123", sectionOptions.AnalyzerOptions["build_metadata.compile.toretrieve"]);
+
+            sectionOptions = set.GetOptionsForSourcePath("/home/foo/src/Pages/#foo/HomePage.cs");
+            Assert.Equal("def456", sectionOptions.AnalyzerOptions["build_metadata.compile.toretrieve"]);
+        }*/
+
+        [Fact]
+        public void MissingClosingBracket()
+        {
+            var config = EditorConfigFile.Parse(@"
+[*.cs
+my_prop = my_val");
+            var properties = config.GlobalSection.Properties;
+            SetEqual(
+                new[] { Create("my_prop", "my_val") },
+                properties);
+
+            Assert.Equal(0, config.NamedSections.Length);
+        }
+
+        
+        [Fact]
+        public void EmptySection()
+        {
+            var config = EditorConfigFile.Parse(@"
+[]
+my_prop = my_val");
+
+            var properties = config.GlobalSection.Properties;
+            Assert.Equal(new[] { Create("my_prop", "my_val") }, properties);
+            Assert.Equal(0, config.NamedSections.Length);
+        }
+
+        
+        [Fact]
+        public void CaseInsensitivePropKey()
+        {
+            var config = EditorConfigFile.Parse(@"
+my_PROP = my_VAL");
+            var properties = config.GlobalSection.Properties;
+
+            Assert.True(properties.TryGetValue("my_PrOp", out var val));
+            Assert.Equal("my_VAL", val);
+            Assert.Equal("my_prop", properties.Keys.Single());
+        }
+
+        // there is no reversed keys support for msbuild
+        /*[Fact]
+        public void NonReservedKeyPreservedCaseVal()
+        {
+            var config = ParseConfigFile(string.Join(Environment.NewLine,
+                AnalyzerConfig.ReservedKeys.Select(k => "MY_" + k + " = MY_VAL")));
+            AssertEx.SetEqual(
+                AnalyzerConfig.ReservedKeys.Select(k => KeyValuePair.Create("my_" + k, "MY_VAL")).ToList(),
+                config.GlobalSection.Properties);
+        }*/
+
+
+        [Fact]
+        public void DuplicateKeys()
+        {
+            var config = EditorConfigFile.Parse(@"
+my_prop = my_val
+my_prop = my_other_val");
+
+            var properties = config.GlobalSection.Properties;
+            Assert.Equal(new[] { Create("my_prop", "my_other_val") }, properties);
+        }
+
+        
+        [Fact]
+        public void DuplicateKeysCasing()
+        {
+            var config = EditorConfigFile.Parse(@"
+my_prop = my_val
+my_PROP = my_other_val");
+
+            var properties = config.GlobalSection.Properties;
+            Assert.Equal(new[] { Create("my_prop", "my_other_val") }, properties);
+        }
+
+        
+        [Fact]
+        public void MissingKey()
+        {
+            var config = EditorConfigFile.Parse(@"
+= my_val1
+my_prop = my_val2");
+
+            var properties = config.GlobalSection.Properties;
+            SetEqual(
+                new[] { Create("my_prop", "my_val2") },
+                properties);
+        }
+
+        
+
+        [Fact]
+        public void MissingVal()
+        {
+            var config = EditorConfigFile.Parse(@"
+my_prop1 =
+my_prop2 = my_val");
+
+            var properties = config.GlobalSection.Properties;
+            SetEqual(
+                new[] { Create("my_prop1", ""),
+                        Create("my_prop2", "my_val") },
+                properties);
+        }
+
+        
+        [Fact]
+        public void SpacesInProperties()
+        {
+            var config = EditorConfigFile.Parse(@"
+my prop1 = my_val1
+my_prop2 = my val2");
+
+            var properties = config.GlobalSection.Properties;
+            SetEqual(
+                new[] { Create("my_prop2", "my val2") },
+                properties);
+        }
+
+        
+        [Fact]
+        public void EndOfLineComments()
+        {
+            var config = EditorConfigFile.Parse(@"
+my_prop2 = my val2 # Comment");
+
+            var properties = config.GlobalSection.Properties;
+            SetEqual(
+                new[] { Create("my_prop2", "my val2") },
+                properties);
+        }
+        
+        [Fact]
+        public void SymbolsStartKeys()
+        {
+            var config = EditorConfigFile.Parse(@"
+@!$abc = my_val1
+@!$\# = my_val2");
+
+            var properties = config.GlobalSection.Properties;
+            Assert.Equal(0, properties.Count);
+        }
+
+        
+        [Fact]
+        public void EqualsAndColon()
+        {
+            var config = EditorConfigFile.Parse(@"
+my:key1 = my_val
+my_key2 = my:val");
+
+            var properties = config.GlobalSection.Properties;
+            SetEqual(
+                new[] { Create("my", "key1 = my_val"),
+                        Create("my_key2", "my:val")},
+                properties);
+        }
+        
+        [Fact]
+        public void SymbolsInProperties()
+        {
+            var config = EditorConfigFile.Parse(@"
+my@key1 = my_val
+my_key2 = my@val");
+
+            var properties = config.GlobalSection.Properties;
+            SetEqual(
+                new[] { Create("my_key2", "my@val") },
+                properties);
+        }
+        
+        [Fact]
+        public void LongLines()
+        {
+            // This example is described in the Python ConfigParser as allowing
+            // line continuation via the RFC 822 specification, section 3.1.1
+            // LONG HEADER FIELDS. The VS parser does not accept this as a
+            // valid parse for an editorconfig file. We follow similarly.
+            var config = EditorConfigFile.Parse(@"
+long: this value continues
+   in the next line");
+
+            var properties = config.GlobalSection.Properties;
+            SetEqual(
+                new[] { Create("long", "this value continues") },
+                properties);
+        }
+
+        
+        [Fact]
+        public void CaseInsensitiveRoot()
+        {
+            var config = EditorConfigFile.Parse(@"
+RoOt = TruE");
+            Assert.True(config.IsRoot);
+        }
+
+
+        /*
+        Reserved values are not supported at the moment
+        [Fact]
+        public void ReservedValues()
+        {
+            int index = 0;
+            var config = ParseConfigFile(string.Join(Environment.NewLine,
+                AnalyzerConfig.ReservedValues.Select(v => "MY_KEY" + (index++) + " = " + v.ToUpperInvariant())));
+            index = 0;
+            AssertEx.SetEqual(
+                AnalyzerConfig.ReservedValues.Select(v => KeyValuePair.Create("my_key" + (index++), v)).ToList(),
+                config.GlobalSection.Properties);
+        }
+        */
+
+        /*
+        [Fact]
+        public void ReservedKeys()
+        {
+            var config = ParseConfigFile(string.Join(Environment.NewLine,
+                AnalyzerConfig.ReservedKeys.Select(k => k + " = MY_VAL")));
+            AssertEx.SetEqual(
+                AnalyzerConfig.ReservedKeys.Select(k => KeyValuePair.Create(k, "my_val")).ToList(),
+                config.GlobalSection.Properties);
+        }
+        */
         #endregion
     }
 }

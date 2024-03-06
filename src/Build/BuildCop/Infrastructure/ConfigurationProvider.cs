@@ -112,7 +112,21 @@ internal class ConfigurationProvider
             editorConfig = BuildAnalyzerConfiguration.Null;
         }
 
-        var config = s_editorConfigParser.Parse(projectFullPath);
+        var config = new Dictionary<string, string>();
+
+        try
+        {
+            Console.WriteLine("Config are fetching");
+            config = s_editorConfigParser.Parse(projectFullPath);
+            Console.WriteLine("Config are fetched");
+        }
+        catch (Exception ex)
+        {
+            // do not break the build  because of the failed editor config parsing
+            Console.WriteLine(ex.ToString());
+            Debug.WriteLine(ex);
+        }
+        
         var keyTosearch = $"msbuild_analyzer.{ruleId}.";
         var dictionaryConfig = new Dictionary<string, string>();
 
