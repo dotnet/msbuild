@@ -6,11 +6,18 @@ See the [MSBuild Command-Line Reference](https://learn.microsoft.com/visualstudi
  * `MSBuild.exe -nr:false`
    * Disable node reuse (`/nodeReuse:false`). Don't leave MSBuild.exe processes hanging around (and possibly locking files) after the build completes. See more details in MSBuild command line help (/?). See also `MSBUILDDISABLENODEREUSE=1` below. Note that using this when building repeatedly will cause slower builds.
  * `MSBuild.exe -bl`
-   * Records all build events to a structured binary log file. The [MSBuildStructuredLog](https://github.com/KirillOsenkov/MSBuildStructuredLog) tool can be used to analyze this file.
+   * Records all build events to a structured [binary log file](./Providing-Binary-Logs.md). The [MSBuildStructuredLog](https://github.com/KirillOsenkov/MSBuildStructuredLog) tool can be used to analyze this file.
  * `MSBuild.exe -noconlog`
    * Used to suppress the usage of the console logger, which is otherwise always attached.
  * `MSBuild.exe -flp:v=diag`
    * Passes parameters to the file logger. If you want to attach multiple file loggers, you do so by specifying additional parameters in the switches /flp1, /flp2, /flp3, and so on.
+
+
+# Building MSBuild
+
+The documentation on building MSBuild:
+- [Full Framework MSBuild](./Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md)
+- [.Net Core MSBuild](./Building-Testing-and-Debugging-on-.Net-Core-MSBuild.md)
 
 # Environment Variables
 

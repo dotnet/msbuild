@@ -1,6 +1,7 @@
 # MSBuild environment variables list
 
 This document describes the environment variables that are respected in MSBuild, its purpose and usage. 
+
 Some of the env variables listed here are unsupported, meaning there is no guarantee that variable or a specific combination of multiple variables will be respected in upcoming release, so please use at your own risk.
 
 * `MSBuildDebugEngine=1` & `MSBUILDDEBUGPATH=<DIRECTORY>`
