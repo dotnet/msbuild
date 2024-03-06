@@ -116,14 +116,10 @@ internal class ConfigurationProvider
 
         try
         {
-            Console.WriteLine("Config are fetching");
             config = s_editorConfigParser.Parse(projectFullPath);
-            Console.WriteLine("Config are fetched");
         }
         catch (Exception ex)
         {
-            // do not break the build  because of the failed editor config parsing
-            Console.WriteLine(ex.ToString());
             Debug.WriteLine(ex);
         }
         
