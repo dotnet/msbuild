@@ -19,6 +19,105 @@ namespace Microsoft.Build.Analyzers.UnitTests
 {
     public class EditorConfig_Tests
     {
+
+        #region AssertEqualityComparer<T>
+        private sealed class AssertEqualityComparer<T> : IEqualityComparer<T>
+        {
+            public static readonly IEqualityComparer<T> Instance = new AssertEqualityComparer<T>();
+
+            private static bool CanBeNull()
+            {
+                var type = typeof(T);
+                return !type.GetTypeInfo().IsValueType ||
+                    (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
+            }
+
+            public static bool IsNull(T @object)
+            {
+                if (!CanBeNull())
+                {
+                    return false;
+                }
+
+                return object.Equals(@object, default(T));
+            }
+
+            public static bool Equals(T left, T right)
+            {
+                return Instance.Equals(left, right);
+            }
+
+            bool IEqualityComparer<T>.Equals(T x, T y)
+            {
+                if (CanBeNull())
+                {
+                    if (object.Equals(x, default(T)))
+                    {
+                        return object.Equals(y, default(T));
+                    }
+
+                    if (object.Equals(y, default(T)))
+                    {
+                        return false;
+                    }
+                }
+
+                if (x.GetType() != y.GetType())
+                {
+                    return false;
+                }
+
+                if (x is IEquatable<T> equatable)
+                {
+                    return equatable.Equals(y);
+                }
+
+                if (x is IComparable<T> comparableT)
+                {
+                    return comparableT.CompareTo(y) == 0;
+                }
+
+                if (x is IComparable comparable)
+                {
+                    return comparable.CompareTo(y) == 0;
+                }
+
+                var enumerableX = x as IEnumerable;
+                var enumerableY = y as IEnumerable;
+
+                if (enumerableX != null && enumerableY != null)
+                {
+                    var enumeratorX = enumerableX.GetEnumerator();
+                    var enumeratorY = enumerableY.GetEnumerator();
+
+                    while (true)
+                    {
+                        bool hasNextX = enumeratorX.MoveNext();
+                        bool hasNextY = enumeratorY.MoveNext();
+
+                        if (!hasNextX || !hasNextY)
+                        {
+                            return hasNextX == hasNextY;
+                        }
+
+                        if (!Equals(enumeratorX.Current, enumeratorY.Current))
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+                return object.Equals(x, y);
+            }
+
+            int IEqualityComparer<T>.GetHashCode(T obj)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        #endregion
+
         // Section Matchin Test cases: https://github.com/dotnet/roslyn/blob/ba163e712b01358a217065eec8a4a82f94a7efd5/src/Compilers/Core/CodeAnalysisTest/Analyzers/AnalyzerConfigTests.cs#L337
         #region Section Matching Tests
         [Fact]
@@ -591,124 +690,20 @@ namespace Microsoft.Build.Analyzers.UnitTests
         }
         #endregion
 
-        #region AssertEqualityComparer<T>
-
-        private class AssertEqualityComparer<T> : IEqualityComparer<T>
-        {
-            public static readonly IEqualityComparer<T> Instance = new AssertEqualityComparer<T>();
-
-            private static bool CanBeNull()
-            {
-                var type = typeof(T);
-                return !type.GetTypeInfo().IsValueType ||
-                    (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
-            }
-
-            public static bool IsNull(T @object)
-            {
-                if (!CanBeNull())
-                {
-                    return false;
-                }
-
-                return object.Equals(@object, default(T));
-            }
-
-            public static bool Equals(T left, T right)
-            {
-                return Instance.Equals(left, right);
-            }
-
-            bool IEqualityComparer<T>.Equals(T x, T y)
-            {
-                if (CanBeNull())
-                {
-                    if (object.Equals(x, default(T)))
-                    {
-                        return object.Equals(y, default(T));
-                    }
-
-                    if (object.Equals(y, default(T)))
-                    {
-                        return false;
-                    }
-                }
-
-                if (x.GetType() != y.GetType())
-                {
-                    return false;
-                }
-
-                if (x is IEquatable<T> equatable)
-                {
-                    return equatable.Equals(y);
-                }
-
-                if (x is IComparable<T> comparableT)
-                {
-                    return comparableT.CompareTo(y) == 0;
-                }
-
-                if (x is IComparable comparable)
-                {
-                    return comparable.CompareTo(y) == 0;
-                }
-
-                var enumerableX = x as IEnumerable;
-                var enumerableY = y as IEnumerable;
-
-                if (enumerableX != null && enumerableY != null)
-                {
-                    var enumeratorX = enumerableX.GetEnumerator();
-                    var enumeratorY = enumerableY.GetEnumerator();
-
-                    while (true)
-                    {
-                        bool hasNextX = enumeratorX.MoveNext();
-                        bool hasNextY = enumeratorY.MoveNext();
-
-                        if (!hasNextX || !hasNextY)
-                        {
-                            return hasNextX == hasNextY;
-                        }
-
-                        if (!Equals(enumeratorX.Current, enumeratorY.Current))
-                        {
-                            return false;
-                        }
-                    }
-                }
-
-                return object.Equals(x, y);
-            }
-
-            int IEqualityComparer<T>.GetHashCode(T obj)
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        #endregion
-
-
         #region Parsing Tests
 
-        public static void SetEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual, IEqualityComparer<T> comparer = null, string message = null, string itemSeparator = "\r\n", Func<T, string> itemInspector = null)
+        private static void SetEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual, IEqualityComparer<T> comparer = null, string message = null)
         {
             var expectedSet = new HashSet<T>(expected, comparer);
             var result = expected.Count() == actual.Count() && expectedSet.SetEquals(actual);
             Assert.True(result, message);
         }
 
-        public static void Equal<T>(
+        private static void Equal<T>(
             IEnumerable<T> expected,
             IEnumerable<T> actual,
             IEqualityComparer<T> comparer = null,
-            string message = null,
-            string itemSeparator = null,
-            Func<T, string> itemInspector = null,
-            string expectedValueSourcePath = null,
-            int expectedValueSourceLine = 0)
+            string message = null)
         {
             if (expected == null)
             {
@@ -724,7 +719,7 @@ namespace Microsoft.Build.Analyzers.UnitTests
                 return;
             }
 
-            Assert.True(false);
+            Assert.True(false, message);
         }
 
         private static bool SequenceEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual, IEqualityComparer<T> comparer = null)
@@ -803,7 +798,7 @@ my_prop = my_val
 
         
         [Fact]
-        //[WorkItem(52469, "https://github.com/dotnet/roslyn/issues/52469")]
+        // [WorkItem(52469, "https://github.com/dotnet/roslyn/issues/52469")]
         public void ConfigWithEscapedValues()
         {
             var config = EditorConfigFile.Parse(@"is_global = true
@@ -822,20 +817,17 @@ build_metadata.Compile.ToRetrieve = ghi789
             Assert.Equal("c:/\\{f\\*i\\?le1\\}.cs", namedSections[0].Name);
             Equal(
                 new[] { Create("build_metadata.compile.toretrieve", "abc123") },
-                namedSections[0].Properties
-            );
+                namedSections[0].Properties);
 
             Assert.Equal("c:/f\\,ile\\#2.cs", namedSections[1].Name);
             Equal(
                 new[] { Create("build_metadata.compile.toretrieve", "def456") },
-                namedSections[1].Properties
-            );
+                namedSections[1].Properties);
 
             Assert.Equal("c:/f\\;i\\!le\\[3\\].cs", namedSections[2].Name);
             Equal(
                 new[] { Create("build_metadata.compile.toretrieve", "ghi789") },
-                namedSections[2].Properties
-            );
+                namedSections[2].Properties);
         }
 
         /*
