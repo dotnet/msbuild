@@ -2975,12 +2975,12 @@ namespace Microsoft.Build.Execution
             loggingService.WarningsNotAsErrors = warningsNotAsErrors;
             loggingService.WarningsAsMessages = warningsAsMessages;
 
-            var buildCopManagerProvider =
-                ((IBuildComponentHost)this).GetComponent(BuildComponentType.BuildCop) as BuildCopManagerProvider;
-            buildCopManagerProvider!.Instance.SetDataSource(BuildCopDataSource.EventArgs);
-
             if (((IBuildComponentHost)this).BuildParameters.IsBuildCopEnabled)
             {
+                var buildCopManagerProvider =
+                    ((IBuildComponentHost)this).GetComponent(BuildComponentType.BuildCop) as IBuildCopManagerProvider;
+                buildCopManagerProvider!.Instance.SetDataSource(BuildCopDataSource.EventArgs);
+
                 loggers = (loggers ?? Enumerable.Empty<ILogger>()).Concat(new[]
                 {
                     new BuildCopConnectorLogger(new AnalyzerLoggingContextFactory(loggingService), buildCopManagerProvider.Instance)

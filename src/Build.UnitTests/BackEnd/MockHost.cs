@@ -5,6 +5,7 @@ using System;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.BuildCop.Infrastructure;
 using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -60,6 +61,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private LegacyThreadingData _legacyThreadingData;
 
         private ISdkResolverService _sdkResolverService;
+
+        private IBuildCopManagerProvider _buildCopManagerProvider;
 
         #region SystemParameterFields
 
@@ -126,6 +129,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             _sdkResolverService = new MockSdkResolverService();
             ((IBuildComponent)_sdkResolverService).InitializeComponent(this);
+
+            _buildCopManagerProvider = new NullBuildCopManagerProvider();
+            ((IBuildComponent)_buildCopManagerProvider).InitializeComponent(this);
         }
 
         /// <summary>
@@ -194,6 +200,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildComponentType.ResultsCache => (IBuildComponent)_resultsCache,
                 BuildComponentType.RequestBuilder => (IBuildComponent)_requestBuilder,
                 BuildComponentType.SdkResolverService => (IBuildComponent)_sdkResolverService,
+                BuildComponentType.BuildCop => (IBuildComponent)_buildCopManagerProvider,
                 _ => throw new ArgumentException("Unexpected type " + type),
             };
         }

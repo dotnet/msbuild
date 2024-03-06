@@ -1120,7 +1120,7 @@ namespace Microsoft.Build.BackEnd
         {
             // We consider this the entrypoint for the project build for purposes of BuildCop processing 
 
-            var buildCopManager = (_componentHost.GetComponent(BuildComponentType.BuildCop) as BuildCopManagerProvider)!.Instance;
+            var buildCopManager = (_componentHost.GetComponent(BuildComponentType.BuildCop) as IBuildCopManagerProvider)!.Instance;
             buildCopManager.SetDataSource(BuildCopDataSource.BuildExecution);
 
             ErrorUtilities.VerifyThrow(_targetBuilder != null, "Target builder is null");

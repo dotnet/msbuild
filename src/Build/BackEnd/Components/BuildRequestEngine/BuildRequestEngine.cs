@@ -283,7 +283,7 @@ namespace Microsoft.Build.BackEnd
                         throw new AggregateException(deactivateExceptions);
                     }
 
-                    var buildCopManager = (_componentHost.GetComponent(BuildComponentType.BuildCop) as BuildCopManagerProvider)!.Instance;
+                    var buildCopManager = (_componentHost.GetComponent(BuildComponentType.BuildCop) as IBuildCopManagerProvider)!.Instance;
                     buildCopManager.FinalizeProcessing(_nodeLoggingContext);
                 },
                 isLastTask: true);

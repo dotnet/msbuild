@@ -120,6 +120,9 @@
     <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelperExtension.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\IsExternalInit.cs">
+      <Link>BuildCop\Utilities\IsExternalInit.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
     <Compile Include="..\Shared\TranslatorHelpers.cs" />
@@ -158,7 +161,9 @@
     <Compile Include="BuildCop\Analyzers\SharedOutputPathAnalyzer.cs" />
     <Compile Include="BuildCop\Infrastructure\BuildCopConfigurationException.cs" />
     <Compile Include="BuildCop\Infrastructure\BuildEventsProcessor.cs" />
+    <Compile Include="BuildCop\Infrastructure\IBuildCopManagerProvider.cs" />
     <Compile Include="BuildCop\Infrastructure\NullBuildCopManager.cs" />
+    <Compile Include="BuildCop\Infrastructure\NullBuildCopManagerProvider.cs" />
     <Compile Include="BuildCop\Infrastructure\TracingReporter.cs" />
     <Compile Include="BuildCop\OM\BuildAnalysisContext.cs" />
     <Compile Include="BuildCop\API\BuildAnalyzer.cs" />
@@ -187,7 +192,6 @@
     <Compile Include="BuildCop\OM\EvaluatedPropertiesAnalysisData.cs" />
     <Compile Include="BuildCop\OM\ParsedItemsAnalysisData.cs" />
     <Compile Include="BuildCop\Utilities\EnumerableExtensions.cs" />
-    <Compile Include="BuildCop\Utilities\IsExternalInit.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
     <Compile Include="FileAccess\DesiredAccess.cs" />
     <Compile Include="FileAccess\FileAccessData.cs" />

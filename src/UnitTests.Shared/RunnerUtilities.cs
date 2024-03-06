@@ -5,7 +5,10 @@ using System;
 using System.Diagnostics;
 using Microsoft.Build.Shared;
 using System.IO;
+using System.Reflection;
+using Microsoft.Build.Framework;
 using Xunit.Abstractions;
+using System.Linq;
 
 #nullable disable
 
@@ -46,6 +49,43 @@ namespace Microsoft.Build.UnitTests.Shared
             msbuildParameters = FileUtilities.EnsureDoubleQuotes(pathToMsBuildExe) + " " + msbuildParameters;
 #endif
 
+            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper);
+        }
+
+        public static string ExecBootstrapedMSBuild(string msbuildParameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
+        {
+            BootstrapLocationAttribute attribute = Assembly.GetExecutingAssembly().GetCustomAttribute<BootstrapLocationAttribute>()
+                                                   ?? throw new InvalidOperationException("This test assembly does not have the BootstrapLocationAttribute");
+
+            string binaryFolder = attribute.BootstrapMsbuildBinaryLocation;
+            string bindirOverride = Environment.GetEnvironmentVariable("MSBUILD_BOOTSTRAPPED_BINDIR");
+            if (!string.IsNullOrEmpty(bindirOverride))
+            {
+                // The bootstrap environment has moved to another location. Assume the same relative layout and adjust the path.
+#if NET
+                string relativePath = Path.GetRelativePath(attribute.BootstrapRoot, binaryFolder);
+                binaryFolder = Path.GetFullPath(relativePath, bindirOverride);
+#else
+                binaryFolder = Path.GetFullPath(binaryFolder);
+                if (binaryFolder.StartsWith(attribute.BootstrapRoot))
+                {
+                    binaryFolder = binaryFolder.Substring(attribute.BootstrapRoot.Length);
+                    if (binaryFolder.StartsWith(Path.DirectorySeparatorChar.ToString()))
+                    {
+                        binaryFolder = binaryFolder.Substring(1);
+                    }
+
+                    binaryFolder = Path.Combine(bindirOverride, binaryFolder);
+                }
+#endif
+            }
+#if NET
+            string pathToExecutable = EnvironmentProvider.GetDotnetExePath()!;
+            msbuildParameters = Path.Combine(binaryFolder, "MSBuild.dll") + " " + msbuildParameters;
+#else
+            string pathToExecutable =
+                Path.Combine(binaryFolder, "msbuild.exe");
+#endif
             return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper);
         }
 
@@ -109,7 +149,11 @@ namespace Microsoft.Build.UnitTests.Shared
                 p.BeginErrorReadLine();
                 p.StandardInput.Dispose();
 
-                if (!p.WaitForExit(30_000_000))
+                if (Traits.Instance.DebugUnitTests)
+                {
+                    p.WaitForExit();
+                }
+                else if (!p.WaitForExit(30_000))
                 {
                     // Let's not create a unit test for which we need more than 30 sec to execute.
                     // Please consider carefully if you would like to increase the timeout.

@@ -9,6 +9,7 @@ using System.Diagnostics.Tracing;
 using System.IO;
 using System.Linq;
 using System.Runtime.ConstrainedExecution;
+using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.Logging;
@@ -27,13 +28,16 @@ namespace Microsoft.Build.BuildCop.Infrastructure;
 internal delegate BuildAnalyzer BuildAnalyzerFactory();
 internal delegate BuildAnalyzerWrapper BuildAnalyzerWrapperFactory(ConfigurationContext configurationContext);
 
-internal sealed class BuildCopManagerProvider : IBuildComponent
+/// <summary>
+/// The central manager for the BuildCop - this is the integration point with MSBuild infrastructure.
+/// </summary>
+internal sealed class BuildCopManagerProvider : IBuildCopManagerProvider
 {
-    private static bool s_isInitialized = false;
+    private static int s_isInitialized = 0;
     private static IBuildCopManager s_globalInstance = new NullBuildCopManager();
-    internal static IBuildCopManager GlobalInstance => s_isInitialized ? s_globalInstance : throw new InvalidOperationException("BuildCopManagerProvider not initialized");
+    internal static IBuildCopManager GlobalInstance => s_isInitialized != 0 ? s_globalInstance : throw new InvalidOperationException("BuildCopManagerProvider not initialized");
 
-    internal IBuildCopManager Instance => GlobalInstance;
+    public IBuildCopManager Instance => GlobalInstance;
 
     internal static IBuildComponent CreateComponent(BuildComponentType type)
     {
@@ -45,11 +49,11 @@ internal sealed class BuildCopManagerProvider : IBuildComponent
     {
         ErrorUtilities.VerifyThrow(host != null, "BuildComponentHost was null");
 
-        if (s_isInitialized)
+        if (Interlocked.CompareExchange(ref s_isInitialized, 1, 0) == 1)
         {
-            throw new InvalidOperationException("BuildCopManagerProvider is already initialized");
+            // Already initialized
+            return;
         }
-        s_isInitialized = true;
 
         if (host!.BuildParameters.IsBuildCopEnabled)
         {
