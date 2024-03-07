@@ -4531,6 +4531,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_43_GetPropertySwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_44_GetItemSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_45_GetTargetResultSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_51_GetResultOutputFileSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_46_FeatureAvailabilitySwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_47_TerminalLoggerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_48_TerminalLoggerParametersSwitch"));
