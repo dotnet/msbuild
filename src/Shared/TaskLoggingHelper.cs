@@ -503,6 +503,11 @@ namespace Microsoft.Build.Utilities
 #endif
         }
 
+        /// <summary>
+        /// Logs a file generated from the given data.
+        /// </summary>
+        /// <param name="filePath">The file path.</param>
+        /// <param name="data">The data inside the file.</param>
         public void LogIncludeGeneratedFile(string filePath, string data)
         {
             ErrorUtilities.VerifyThrowArgumentNull(filePath, nameof(filePath));
