@@ -274,14 +274,14 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_51_GetResultOutputFileSwitch">
-        <source>  -getResultOutputFile: file
+        <source>  -getResultOutputFile:file
                      Redirect output from get* into a file.
 
                      Example:
                      -getProperty:Bar -getResultOutputFile:Biz.txt
                      This writes the value of property Bar into Biz.txt.
     </source>
-        <target state="new">  -getResultOutputFile: file
+        <target state="new">  -getResultOutputFile:file
                      Redirect output from get* into a file.
 
                      Example:
