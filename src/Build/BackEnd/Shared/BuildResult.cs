@@ -116,11 +116,6 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private ProjectInstance _projectStateAfterBuild;
 
-        /// <summary>
-        /// The flags provide additional control over the build results and may affect the cached value.
-        /// </summary>
-        private BuildRequestDataFlags _buildRequestDataFlags;
-
         private string _schedulerInducedError;
 
         private HashSet<string> _projectTargets;
@@ -209,7 +204,6 @@ namespace Microsoft.Build.Execution
             _nodeRequestId = request.NodeRequestId;
             _circularDependency = false;
             _baseOverallResult = true;
-            _buildRequestDataFlags = request.BuildRequestDataFlags;
 
             if (existingResults == null)
             {
@@ -385,12 +379,6 @@ namespace Microsoft.Build.Execution
             get => _projectStateAfterBuild;
             set => _projectStateAfterBuild = value;
         }
-
-        /// <summary>
-        /// Gets the flags that were used in the build request to which these results are associated.
-        /// See <see cref="Execution.BuildRequestDataFlags"/> for examples of the available flags.
-        /// </summary>
-        public BuildRequestDataFlags BuildRequestDataFlags => _buildRequestDataFlags;
 
         /// <summary>
         /// Returns the node packet type.
@@ -593,7 +581,6 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _savedCurrentDirectory);
             translator.Translate(ref _schedulerInducedError);
             translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
-            translator.TranslateEnum(ref _buildRequestDataFlags, (int)_buildRequestDataFlags);
         }
 
         /// <summary>

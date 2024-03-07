@@ -47,6 +47,11 @@ internal sealed class Project
     public string? TargetFramework { get; }
 
     /// <summary>
+    /// True when the project has run target with name "_TestRunStart" defined in <see cref="TerminalLogger._testStartTarget"/>.
+    /// </summary>
+    public bool IsTestProject { get; set; }
+
+    /// <summary>
     /// A lazily initialized list of build messages/warnings/errors raised during the build.
     /// </summary>
     public List<BuildMessage>? BuildMessages { get; private set; }

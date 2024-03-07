@@ -119,11 +119,6 @@ namespace Microsoft.Build.BackEnd
             _nodeRequestId = nodeRequestId;
             _buildRequestDataFlags = buildRequestDataFlags;
             _requestedProjectState = requestedProjectState;
-
-            if (_requestedProjectState != null)
-            {
-                _buildRequestDataFlags |= BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild;
-            }
         }
 
         /// <summary>

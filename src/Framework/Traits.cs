@@ -326,11 +326,6 @@ namespace Microsoft.Build.Framework
         public readonly bool DisableSdkResolutionCache = Environment.GetEnvironmentVariable("MSBUILDDISABLESDKCACHE") == "1";
 
         /// <summary>
-        /// Disable the NuGet-based SDK resolver.
-        /// </summary>
-        public readonly bool DisableNuGetSdkResolver = Environment.GetEnvironmentVariable("MSBUILDDISABLENUGETSDKRESOLVER") == "1";
-
-        /// <summary>
         /// Don't delete TargetPath metadata from associated files found by RAR.
         /// </summary>
         public readonly bool TargetPathForRelatedFiles = Environment.GetEnvironmentVariable("MSBUILDTARGETPATHFORRELATEDFILES") == "1";

@@ -268,6 +268,11 @@
         <target state="translated">MSB4259: Na pozici {1} podmínky {0} je neočekávaná mezera. Nezapomněli jste ji odebrat?</target>
         <note>{StrBegin="MSB4259: "}</note>
       </trans-unit>
+      <trans-unit id="ImportedProjectFromVSDistribution">
+        <source>MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </source>
+        <target state="translated">MSB4278: Importovaný soubor „{0}“ neexistuje a zdá se, že je součástí komponenty Visual Studia. Tento soubor může vyžadovat MSBuild.exe, aby se mohl úspěšně importovat, a proto se nemusí podařit sestavit v rozhraní příkazového řádku dotnet. </target>
+        <note>{StrBegin="MSB4278: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
+      </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
         <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
         <target state="translated">MSB4255: Následující vstupní soubory mezipaměti pro výsledky neexistují: {0}</target>
@@ -279,8 +284,8 @@
         <note />
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
-        <source>EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system.</source>
-        <target state="translated">Objekty EvaluationContext vytvořené pomocí SharingPolicy.Isolated nepodporují předávání souborového systému MSBuildFileSystemBase.</target>
+        <source>EvaluationContext objects created with SharingPolicy.Isolated or SharingPolicy.SharedSDKCache do not support being passed an MSBuildFileSystemBase file system.</source>
+        <target state="translated">Objekty EvaluationContext vytvořené pomocí SharingPolicy.Isolated nebo SharingPolicy.SharedSDKCache nepodporují předávání systému souborů MSBuildFileSystemBase.</target>
         <note />
       </trans-unit>
       <trans-unit id="ItemReferencingSelfInTarget">

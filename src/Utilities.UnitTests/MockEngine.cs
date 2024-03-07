@@ -27,7 +27,7 @@ namespace Microsoft.Build.UnitTests
      * is somewhat of a no-no for task assemblies.
      *
      **************************************************************************/
-    internal sealed class MockEngine : IBuildEngine3
+    internal sealed class MockEngine3 : IBuildEngine3
     {
         private StringBuilder _log = new StringBuilder();
 
