@@ -24,6 +24,11 @@ internal class ConfigurationProvider
     //  (disabled rules and analyzers that need to run in different node)
     private readonly Dictionary<string, BuildAnalyzerConfiguration> _editorConfig = new Dictionary<string, BuildAnalyzerConfiguration>();
 
+    private readonly List<string> _infrastructureConfigurationKeys = new List<string>() {
+        nameof(BuildAnalyzerConfiguration.EvaluationAnalysisScope).ToLower(),
+        nameof(BuildAnalyzerConfiguration.IsEnabled).ToLower(),
+        nameof(BuildAnalyzerConfiguration.Severity).ToLower()
+    };
     /// <summary>
     /// Gets the user specified unrecognized configuration for the given analyzer rule.
     /// 
@@ -42,6 +47,16 @@ internal class ConfigurationProvider
         {
             return CustomConfigurationData.Null;
         }
+
+        // remove the infrastructure owned key names
+        foreach(var infraConfigurationKey in _infrastructureConfigurationKeys)
+        {
+            if (configuration.ContainsKey(infraConfigurationKey))
+            {
+                configuration.Remove(infraConfigurationKey);
+            }
+        }
+
         return new CustomConfigurationData(ruleId, configuration);
     }
 
@@ -109,6 +124,7 @@ internal class ConfigurationProvider
         }
         catch (Exception ex)
         {
+            // Note: catch any exception, we do not want to break because of the failed operation with parsing the editorconfig.
             Debug.WriteLine(ex);
         }
 

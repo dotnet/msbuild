@@ -65,7 +65,8 @@ public class BuildAnalyzerConfiguration
     private static bool TryExtractValue<T>(string key, Dictionary<string, string> config, out T value) where T : struct
     {
         value = default;
-        if (!config.ContainsKey(key))
+
+        if (config == null || !config.ContainsKey(key))
         {
             return false;
         }
@@ -82,6 +83,7 @@ public class BuildAnalyzerConfiguration
         {
             return Enum.TryParse(config[key], true, out value);
         }
+
         return false;
     }
 }
