@@ -51,7 +51,7 @@ stages:
     # When the branch is setup for localization (the localization ticket needs to be created - https://aka.ms/ceChangeLocConfig, requesting change from one release branch to another),
     #  set 'EnableReleaseOneLocBuild' to true.
     - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/vs') }}:
-      - template: /eng/common/templates/job/onelocbuild.yml
+      - template: /eng/common/templates-official/job/onelocbuild.yml@self
         parameters:
           MirrorRepo: 'msbuild'
           LclSource: lclFilesfromPackage
@@ -61,7 +61,7 @@ stages:
           condition: ${{ variables.EnableReleaseOneLocBuild }}
     # The localization setup for main branch. Note difference in package ID. Should not be used with release/ branches.
     - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
-      - template: /eng/common/templates/job/onelocbuild.yml
+      - template: /eng/common/templates-official/job/onelocbuild.yml@self
         parameters:
           MirrorRepo: 'msbuild'
           LclSource: lclFilesfromPackage
@@ -138,7 +138,7 @@ stages:
       condition: succeeded()
 
     # Required by Microsoft policy
-    - template: eng\common\templates\steps\generate-sbom.yml
+    - template: eng\common\templates-official\steps\generate-sbom.yml@self
 
     # Publish OptProf configuration files
     - task: ms-vscs-artifact.build-tasks.artifactDropTask-1.artifactDropTask@0
@@ -257,16 +257,16 @@ stages:
       displayName: Execute cleanup tasks
       condition: succeededOrFailed()
 
-    - template: /eng/common/templates/steps/component-governance.yml
+    - template: /eng/common/templates-official/steps/component-governance.yml@self
       parameters:
         ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), or(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs'), eq(variables['Build.SourceBranch'], 'refs/heads/main'))) }}:
           disableComponentGovernance: false
         ${{ else }}:
           disableComponentGovernance: true
 
-  - template: /eng/common/templates/jobs/source-build.yml
+  - template: /eng/common/templates-official/jobs/source-build.yml@self
 
-  - template: /eng/common/templates/job/publish-build-assets.yml
+  - template: /eng/common/templates-official/job/publish-build-assets.yml@self
     parameters:
       enablePublishBuildArtifacts: true
       publishUsingPipelines: true
@@ -277,7 +277,7 @@ stages:
         vmImage: windows-latest
 
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-  - template: eng\common\templates\post-build\post-build.yml
+  - template: eng\common\templates-official\post-build\post-build.yml@self
     parameters:
       publishingInfraVersion: 3
       # Symbol validation is not entirely reliable as of yet, so should be turned off until
