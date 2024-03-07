@@ -13,6 +13,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
+#if FEATURE_CODETASKFACTORY
 
     using System.CodeDom.Compiler;
     using System.Globalization;
@@ -1379,4 +1380,37 @@ namespace Microsoft.Build.UnitTests
                 $"Binlog's embedded files didn't have the expected '{filePath}'.");
         }
     }
+#else
+    public sealed class CodeTaskFactoryTests
+    {
+        [Fact]
+        public void CodeTaskFactoryNotSupported()
+        {
+            string projectFileContents = @"
+                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
+                        <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` >
+                         <ParameterGroup>
+                             <Text/>
+                          </ParameterGroup>
+                            <Task>
+                                <Code>
+                                     Log.LogMessage(MessageImportance.High, Text);
+                                </Code>
+                            </Task>
+                        </UsingTask>
+                        <Target Name=`Build`>
+                            <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory Text=`Hello, World!` />
+                        </Target>
+                    </Project>";
+
+            MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectFailure(projectFileContents, allowTaskCrash: false);
+
+            BuildErrorEventArgs error = mockLogger.Errors.FirstOrDefault();
+
+            Assert.NotNull(error);
+            Assert.Equal("MSB4801", error.Code);
+            Assert.Contains("CodeTaskFactory", error.Message);
+        }
+    }
+#endif
 }

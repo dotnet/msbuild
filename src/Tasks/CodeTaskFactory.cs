@@ -11,6 +11,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
+#if FEATURE_CODETASKFACTORY
     using System.CodeDom;
     using System.CodeDom.Compiler;
     using System.Collections.Concurrent;
@@ -1016,4 +1017,46 @@ namespace Microsoft.Build.Tasks
             }
         }
     }
+#else
+    /// <summary>
+    /// A task factory which can take code dom supported languages and create a task out of it
+    /// </summary>
+    /// <remarks>CodeDom is not supported for .NET Core so this code task factory simply logs an error that it isn't supported.
+    /// If we don't compile this class, then the user will get an error that the class doesn't exist which is a bad experience.</remarks>
+    [Obsolete("The CodeTaskFactory is not supported on .NET Core.  This class is included so that users receive run-time errors and should not be used for any other purpose.", error: true)]
+    public sealed class CodeTaskFactory : ITaskFactory
+    {
+        public string FactoryName => "Code Task Factory";
+
+        public Type TaskType { get; } = null;
+
+        public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
+        {
+            TaskLoggingHelper log = new TaskLoggingHelper(taskFactoryLoggingHost, taskName)
+            {
+                TaskResources = AssemblyResources.PrimaryResources,
+                HelpKeywordPrefix = "MSBuild."
+            };
+
+            log.LogErrorWithCodeFromResources("TaskFactoryNotSupportedFailure", nameof(CodeTaskFactory));
+
+            return false;
+        }
+
+        public TaskPropertyInfo[] GetTaskParameters()
+        {
+            throw new NotSupportedException();
+        }
+
+        public ITask CreateTask(IBuildEngine taskFactoryLoggingHost)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void CleanupTask(ITask task)
+        {
+            throw new NotSupportedException();
+        }
+    }
+#endif
 }
