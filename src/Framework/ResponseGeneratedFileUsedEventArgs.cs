@@ -6,7 +6,7 @@ using System;
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// Arguments for the response file used event
+    /// Arguments for the response generated file used event.
     /// </summary>
     [Serializable]
     public class ResponseGeneratedFileUsedEventArgs : BuildMessageEventArgs
@@ -19,11 +19,17 @@ namespace Microsoft.Build.Framework
             : base(null, null, null, MessageImportance.Low)
         {
             ResponseFilePath = responseFilePath;
-            ResponseFileCode = responseFileCode;
+            ResponseFileContent = responseFileCode;
         }
 
+        /// <summary>
+        /// The file path.
+        /// </summary>
         public string ResponseFilePath { set; get; }
 
-        public string ResponseFileCode { set; get; }
+        /// <summary>
+        /// The file content.
+        /// </summary>
+        public string ResponseFileContent { set; get; }
     }
 }

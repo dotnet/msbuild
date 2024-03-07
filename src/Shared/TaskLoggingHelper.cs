@@ -507,13 +507,13 @@ namespace Microsoft.Build.Utilities
         /// Logs a file generated from the given data.
         /// </summary>
         /// <param name="filePath">The file path.</param>
-        /// <param name="data">The data inside the file.</param>
-        public void LogIncludeGeneratedFile(string filePath, string data)
+        /// <param name="content">The content of the file.</param>
+        public void LogIncludeGeneratedFile(string filePath, string content)
         {
             ErrorUtilities.VerifyThrowArgumentNull(filePath, nameof(filePath));
-            ErrorUtilities.VerifyThrowArgumentNull(data, nameof(data));
+            ErrorUtilities.VerifyThrowArgumentNull(content, nameof(content));
 
-            var responseGeneratedFileUsedArgs = new ResponseGeneratedFileUsedEventArgs(filePath, data);
+            var responseGeneratedFileUsedArgs = new ResponseGeneratedFileUsedEventArgs(filePath, content);
 
             BuildEngine.LogMessageEvent(responseGeneratedFileUsedArgs);
         }
