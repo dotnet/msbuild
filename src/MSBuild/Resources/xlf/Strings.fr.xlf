@@ -1348,6 +1348,15 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="MissingGetResultFileError">
+        <source>MSBUILD : error MSB1068: Must provide a file for the getResultOutputFile switch.</source>
+        <target state="new">MSBUILD : error MSB1068: Must provide a file for the getResultOutputFile switch.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1068: "}UE: This happens if the user does something like "msbuild.exe -getTargetResult". The user must pass in an actual target name
+      following the switch, as in "msbuild.exe -getTargetResult:blah".
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="MissingGetTargetResultError">
         <source>MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</source>
         <target state="new">MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</target>
