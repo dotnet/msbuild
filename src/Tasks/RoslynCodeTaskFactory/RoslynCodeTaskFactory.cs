@@ -22,7 +22,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
-    public sealed class RoslynCodeTaskFactory : ITaskFactory, IHasSourceFilePath
+    public sealed class RoslynCodeTaskFactory : ITaskFactory
     {
         /// <summary>
         /// A set of default namespaces to add so that user does not have to include them.  Make sure that these are covered
@@ -119,12 +119,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public Type TaskType { get; private set; }
 
-        public string SourceFilePath { get; private set; }
-
-        public bool IsGeneratedSourceFile { get; private set; }
-
-        public bool DeleteGeneratedSourceFile { get; private set; }
-
         /// <inheritdoc cref="ITaskFactory.CleanupTask(ITask)"/>
         public void CleanupTask(ITask task)
         {
@@ -166,9 +160,6 @@ namespace Microsoft.Build.Tasks
             {
                 return false;
             }
-
-            SourceFilePath = taskInfo.Source;
-            IsGeneratedSourceFile = taskInfo.Source != null ? false : true;
 
             // Attempt to compile an assembly (or get one from the cache)
             if (!TryCompileInMemoryAssembly(taskFactoryLoggingHost, taskInfo, out Assembly assembly))
@@ -449,7 +440,6 @@ namespace Microsoft.Build.Tasks
 
                 // Instead of using the inner text of the <Code /> element, read the specified file as source code
                 taskInfo.CodeType = RoslynCodeTaskFactoryCodeType.Class;
-                taskInfo.Source = sourceAttribute.Value;
                 taskInfo.SourceCode = File.ReadAllText(sourceAttribute.Value.Trim());
             }
 
@@ -691,17 +681,18 @@ namespace Microsoft.Build.Tasks
 
             // Delete the code file unless compilation failed or the environment variable MSBUILDLOGCODETASKFACTORYOUTPUT
             // is set (which allows for debugging problems)
-            DeleteGeneratedSourceFile = Environment.GetEnvironmentVariable("MSBUILDLOGCODETASKFACTORYOUTPUT") == null;
+            bool deleteSourceCodeFile = Environment.GetEnvironmentVariable("MSBUILDLOGCODETASKFACTORYOUTPUT") == null;
 
             try
             {
+                // Embed generated file in the binlog
+                _log.LogIncludeGeneratedFile(sourceCodePath, taskInfo.SourceCode);
+
+                // Log the location of the code file in binlog
+                _log.LogMessageFromResources(MessageImportance.Low, "CodeTaskFactory.FindSourceFileInBinlogAt", sourceCodePath);
+
                 // Create the code
                 File.WriteAllText(sourceCodePath, taskInfo.SourceCode);
-
-                if (IsGeneratedSourceFile)
-                {
-                    SourceFilePath = sourceCodePath;
-                }
 
                 // Execute the compiler.  We re-use the existing build task by hosting it and giving it our IBuildEngine instance for logging
                 RoslynCodeTaskFactoryCompilerBase managedCompiler = null;
@@ -756,21 +747,18 @@ namespace Microsoft.Build.Tasks
 
                     if (!managedCompiler.Execute())
                     {
-                        DeleteGeneratedSourceFile = false;
+                        deleteSourceCodeFile = false;
 
                         _log.LogErrorWithCodeFromResources("CodeTaskFactory.FindSourceFileAt", sourceCodePath);
 
                         return false;
                     }
 
-                    if (!DeleteGeneratedSourceFile)
+                    if (!deleteSourceCodeFile)
                     {
                         // Log the location of the code file because MSBUILDLOGCODETASKFACTORYOUTPUT was set.
                         _log.LogMessageFromResources(MessageImportance.Low, "CodeTaskFactory.FindSourceFileAt", sourceCodePath);
-                    }
-
-                    // Log the location of the code file in binlog
-                    _log.LogMessageFromResources(MessageImportance.Low, "CodeTaskFactory.FindSourceFileInBinlogAt", sourceCodePath);
+                    }   
                 }
 
                 // Return the assembly which is loaded into memory
@@ -791,6 +779,11 @@ namespace Microsoft.Build.Tasks
                 if (FileSystems.Default.FileExists(assemblyPath))
                 {
                     File.Delete(assemblyPath);
+                }
+
+                if (deleteSourceCodeFile && FileSystems.Default.FileExists(sourceCodePath))
+                {
+                    File.Delete(sourceCodePath);
                 }
             }
         }

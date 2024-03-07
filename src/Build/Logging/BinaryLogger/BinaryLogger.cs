@@ -364,6 +364,10 @@ namespace Microsoft.Build.Logging
             {
                 projectImportsCollector.AddFile(responseFileArgs.ResponseFilePath);
             }
+            else if (e is ResponseGeneratedFileUsedEventArgs responseGeneratedFileArgs)
+            {
+                projectImportsCollector.AddFileFromMemory(responseGeneratedFileArgs.ResponseFilePath, responseGeneratedFileArgs.ResponseFileCode);
+            }
         }
 
         /// <summary>

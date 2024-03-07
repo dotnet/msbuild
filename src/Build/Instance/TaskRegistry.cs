@@ -1500,19 +1500,6 @@ namespace Microsoft.Build.Execution
                                 }
                                 finally
                                 {
-                                    // Embed the source file
-                                    if (factory is IHasSourceFilePath factoryWithSourceFilePath &&
-                                        factoryWithSourceFilePath.SourceFilePath != null)
-                                    {
-                                        taskFactoryLoggingHost.LoggingContext.LogIncludeFile(factoryWithSourceFilePath.SourceFilePath);
-
-                                        if (factoryWithSourceFilePath.IsGeneratedSourceFile &&
-                                            factoryWithSourceFilePath.DeleteGeneratedSourceFile &&
-                                            FileSystems.Default.FileExists(factoryWithSourceFilePath.SourceFilePath))
-                                        {
-                                            File.Delete(factoryWithSourceFilePath.SourceFilePath);
-                                        }
-                                    }
 #if FEATURE_APPDOMAIN
                                     taskFactoryLoggingHost.MarkAsInactive();
 #endif

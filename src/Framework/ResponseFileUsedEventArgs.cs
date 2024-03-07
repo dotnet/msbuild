@@ -14,17 +14,13 @@ namespace Microsoft.Build.Framework
         public ResponseFileUsedEventArgs()
         {
         }
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResponseFileUsedEventArgs"/> class.
         /// Initialize a new instance of the ResponseFileUsedEventArgs class.
         /// </summary>
-        public ResponseFileUsedEventArgs(string? responseFilePath)
-            : base(null, null, null, MessageImportance.Low)
+        public ResponseFileUsedEventArgs(string? responseFilePath) : base()
         {
             ResponseFilePath = responseFilePath;
         }
-
         public string? ResponseFilePath { set; get; }
     }
 }

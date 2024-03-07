@@ -11,7 +11,6 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
-#if FEATURE_CODETASKFACTORY
     using System.CodeDom;
     using System.CodeDom.Compiler;
     using System.Collections.Concurrent;
@@ -27,7 +26,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// A task factory which can take code dom supported languages and create a task out of it
     /// </summary>
-    public class CodeTaskFactory : ITaskFactory, IHasSourceFilePath
+    public class CodeTaskFactory : ITaskFactory
     {
         /// <summary>
         /// This dictionary keeps track of custom references to compiled assemblies.  The in-memory assembly is loaded from a byte
@@ -161,12 +160,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public Type TaskType { get; private set; }
 
-        public string SourceFilePath { get => _sourcePath; }
-
-        public bool IsGeneratedSourceFile { get; private set; }
-
-        public bool DeleteGeneratedSourceFile { get => true; }
-
         /// <summary>
         /// Get the type information for all task parameters.
         /// </summary>
@@ -236,8 +229,6 @@ namespace Microsoft.Build.Tasks
                 {
                     _type = "Class";
                 }
-
-                IsGeneratedSourceFile = false;
             }
 
             _referencedAssemblies = ExtractReferencedAssemblies();
@@ -799,18 +790,24 @@ namespace Microsoft.Build.Tasks
                 // Our code generation is complete, grab the source from the builder ready for compilation
                 string fullCode = codeBuilder.ToString();
 
+                string tempDirectory = FileUtilities.TempFileDirectory;
+                string fileName = Guid.NewGuid().ToString() + ".txt";
+                string outputPath = Path.Combine(tempDirectory, fileName);
+
+                // Embed generated file in the binlog
+                _log.LogIncludeGeneratedFile(outputPath, fullCode);
+
+                // Log the location of the code file in binlog
+                _log.LogMessageFromResources(MessageImportance.Low, "CodeTaskFactory.FindSourceFileInBinlogAt", outputPath);
+
                 var fullSpec = new FullTaskSpecification(finalReferencedAssemblies, fullCode);
                 if (!s_compiledTaskCache.TryGetValue(fullSpec, out Assembly existingAssembly))
                 {
                     // Invokes compilation.
                     CompilerResults compilerResults = provider.CompileAssemblyFromSource(compilerParameters, fullCode);
 
-                    string outputPath = null;
                     if (compilerResults.Errors.Count > 0 || Environment.GetEnvironmentVariable("MSBUILDLOGCODETASKFACTORYOUTPUT") != null)
-                    {
-                        string tempDirectory = FileUtilities.TempFileDirectory;
-                        string fileName = Guid.NewGuid().ToString() + ".txt";
-                        outputPath = Path.Combine(tempDirectory, fileName);
+                    {                        
                         File.WriteAllText(outputPath, fullCode);
                     }
 
@@ -1019,46 +1016,4 @@ namespace Microsoft.Build.Tasks
             }
         }
     }
-#else
-    /// <summary>
-    /// A task factory which can take code dom supported languages and create a task out of it
-    /// </summary>
-    /// <remarks>CodeDom is not supported for .NET Core so this code task factory simply logs an error that it isn't supported.
-    /// If we don't compile this class, then the user will get an error that the class doesn't exist which is a bad experience.</remarks>
-    [Obsolete("The CodeTaskFactory is not supported on .NET Core.  This class is included so that users receive run-time errors and should not be used for any other purpose.", error: true)]
-    public sealed class CodeTaskFactory : ITaskFactory
-    {
-        public string FactoryName => "Code Task Factory";
-
-        public Type TaskType { get; } = null;
-
-        public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
-        {
-            TaskLoggingHelper log = new TaskLoggingHelper(taskFactoryLoggingHost, taskName)
-            {
-                TaskResources = AssemblyResources.PrimaryResources,
-                HelpKeywordPrefix = "MSBuild."
-            };
-
-            log.LogErrorWithCodeFromResources("TaskFactoryNotSupportedFailure", nameof(CodeTaskFactory));
-
-            return false;
-        }
-
-        public TaskPropertyInfo[] GetTaskParameters()
-        {
-            throw new NotSupportedException();
-        }
-
-        public ITask CreateTask(IBuildEngine taskFactoryLoggingHost)
-        {
-            throw new NotSupportedException();
-        }
-
-        public void CleanupTask(ITask task)
-        {
-            throw new NotSupportedException();
-        }
-    }
-#endif
 }

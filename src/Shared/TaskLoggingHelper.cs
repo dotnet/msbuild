@@ -503,6 +503,16 @@ namespace Microsoft.Build.Utilities
 #endif
         }
 
+        public void LogIncludeGeneratedFile(string filePath, string data)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(filePath, nameof(filePath));
+            ErrorUtilities.VerifyThrowArgumentNull(data, nameof(data));
+
+            var responseGeneratedFileUsedArgs = new ResponseGeneratedFileUsedEventArgs(filePath, data);
+
+            BuildEngine.LogMessageEvent(responseGeneratedFileUsedArgs);
+        }
+
         /// <summary>
         /// Flatten the inner exception message
         /// </summary>

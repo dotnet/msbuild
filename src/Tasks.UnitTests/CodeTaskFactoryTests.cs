@@ -13,9 +13,9 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-#if FEATURE_CODETASKFACTORY
 
     using System.CodeDom.Compiler;
+    using System.Globalization;
     using System.IO.Compression;
     using Microsoft.Build.Logging;
     using Shouldly;
@@ -1043,131 +1043,6 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        public void EmbedsSourceFileInBinlog()
-        {
-            string taskName = "HelloTask";
-
-            using var env = TestEnvironment.Create();
-            var folder = env.CreateFolder(createFolder: true);
-            var taskClass = env.CreateFile(folder, $"{taskName}.cs", $$"""
-                namespace InlineTask
-                {
-                    using Microsoft.Build.Utilities;
-
-                    public class {{taskName}} : Task
-                    {
-                        public override bool Execute()
-                        {
-                            Log.LogMessage("Hello, world!");
-                            return !Log.HasLoggedErrors;
-                        }
-                    }
-                }
-                """);
-
-            string projectFileContents = $"""
-                <Project>
-
-                  <UsingTask
-                    TaskName="{taskName}"
-                    TaskFactory="CodeTaskFactory"
-                    AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
-                    <Task>
-                      <Code Type="Class" Language="cs" Source="{taskClass.Path}">
-                      </Code>
-                    </Task>
-                  </UsingTask>
-
-                    <Target Name="SayHello">
-                        <{taskName} />
-                    </Target>
-
-                </Project>
-                """;
-
-            TransientTestFile binlog = env.ExpectFile(".binlog");
-
-            var binaryLogger = new BinaryLogger()
-            {
-                Parameters = $"LogFile={binlog.Path}",
-                CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
-            };
-
-            Helpers.BuildProjectWithNewOMAndBinaryLogger(projectFileContents, binaryLogger, out bool result);
-
-            result.ShouldBeTrue();
-            File.Exists(taskClass.Path).ShouldBeTrue();
-
-            string projectImportsZipPath = Path.ChangeExtension(binlog.Path, ".ProjectImports.zip");
-            using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
-            using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
-
-            // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
-            // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
-            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith($"{taskName}.cs"),
-                $"Binlog's embedded files didn't have the expected {taskName}.cs.");
-        }
-
-        [Fact]
-        public void EmbedsSourceFileInBinlogWhenFailsToCompile()
-        {
-            string taskName = "HelloTask";
-
-            using var env = TestEnvironment.Create();
-            var folder = env.CreateFolder(createFolder: true);
-            var classThatFailsToCompile = env.CreateFile(folder, $"{taskName}.cs", $$"""
-                namespace InlineTask
-                {
-                    using Microsoft.Build.Utilities;
-
-                    public class {{taskName}} : Task
-                    {
-                """);
-
-            string projectFileContents = $"""
-                <Project>
-
-                  <UsingTask
-                    TaskName="{taskName}"
-                    TaskFactory="CodeTaskFactory"
-                    AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
-                    <Task>
-                      <Code Type="Class" Language="cs" Source="{classThatFailsToCompile.Path}">
-                      </Code>
-                    </Task>
-                  </UsingTask>
-
-                    <Target Name="SayHello">
-                        <{taskName} />
-                    </Target>
-
-                </Project>
-                """;
-
-            TransientTestFile binlog = env.ExpectFile(".binlog");
-
-            var binaryLogger = new BinaryLogger()
-            {
-                Parameters = $"LogFile={binlog.Path}",
-                CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
-            };
-
-            Helpers.BuildProjectWithNewOMAndBinaryLogger(projectFileContents, binaryLogger, out bool result);
-
-            result.ShouldBeFalse();
-            File.Exists(classThatFailsToCompile.Path).ShouldBeTrue();
-
-            string projectImportsZipPath = Path.ChangeExtension(binlog.Path, ".ProjectImports.zip");
-            using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
-            using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
-
-            // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
-            // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
-            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith($"{taskName}.cs"),
-                $"Binlog's embedded files didn't have the expected {taskName}.cs.");
-        }
-
         /// <summary>
         /// Code factory test where the TMP directory does not exist.
         /// See https://github.com/dotnet/msbuild/issues/328 for details.
@@ -1248,38 +1123,260 @@ namespace Microsoft.Build.UnitTests
             MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
             mockLogger.AssertLogContains("Hello, World!");
         }
-    }
-#else
-    public sealed class CodeTaskFactoryTests
-    {
+
         [Fact]
-        public void CodeTaskFactoryNotSupported()
+        public void EmbedsGeneratedFromSourceFileInBinlog()
         {
-            string projectFileContents = @"
-                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` >
-                         <ParameterGroup>
-                             <Text/>
-                          </ParameterGroup>
-                            <Task>
-                                <Code>
-                                     Log.LogMessage(MessageImportance.High, Text);
-                                </Code>
-                            </Task>
-                        </UsingTask>
-                        <Target Name=`Build`>
-                            <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory Text=`Hello, World!` />
-                        </Target>
-                    </Project>";
+            string taskName = "HelloTask";
 
-            MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectFailure(projectFileContents, allowTaskCrash: false);
+            using var env = TestEnvironment.Create();
+            var folder = env.CreateFolder(createFolder: true);
+            var taskClass = env.CreateFile(folder, $"{taskName}.cs", $$"""
+                namespace InlineTask
+                {
+                    using Microsoft.Build.Utilities;
 
-            BuildErrorEventArgs error = mockLogger.Errors.FirstOrDefault();
+                    public class {{taskName}} : Task
+                    {
+                        public override bool Execute()
+                        {
+                            Log.LogMessage("Hello, world!");
+                            return !Log.HasLoggedErrors;
+                        }
+                    }
+                }
+                """);
 
-            Assert.NotNull(error);
-            Assert.Equal("MSB4801", error.Code);
-            Assert.Contains("CodeTaskFactory", error.Message);
+            string projectFileContents = $"""
+                <Project>
+
+                  <UsingTask
+                    TaskName="{taskName}"
+                    TaskFactory="CodeTaskFactory"
+                    AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+                    <Task>
+                      <Code Type="Class" Language="cs" Source="{taskClass.Path}">
+                      </Code>
+                    </Task>
+                  </UsingTask>
+
+                    <Target Name="SayHello">
+                        <{taskName} />
+                    </Target>
+
+                </Project>
+                """;
+
+            TransientTestFile binlog = env.ExpectFile(".binlog");
+
+            var binaryLogger = new BinaryLogger()
+            {
+                Parameters = $"LogFile={binlog.Path}",
+                CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
+            };
+
+            MockLogger mockLogger = Helpers.BuildProjectWithNewOMAndBinaryLogger(projectFileContents, binaryLogger, out bool result);
+
+            result.ShouldBeTrue();
+
+            // Get the file path from the logs
+            // Then check if it is in the binlog
+            mockLogger.AssertLogContainsMessageWithParameter(ResourceUtilities.GetResourceString("CodeTaskFactory.FindSourceFileInBinlogAt"), out string filePath);
+
+            string projectImportsZipPath = Path.ChangeExtension(binlog.Path, ".ProjectImports.zip");
+            using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
+            using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
+
+            // A path like "C:\path" in ZipArchive is saved as "C\path"
+            filePath = filePath.Replace(":\\", "\\");
+
+            // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
+            // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
+            zipArchive.Entries.ShouldContain(zE => zE.FullName.EndsWith(filePath),
+                $"Binlog's embedded files didn't have the expected '{filePath}'.");
+        }
+
+        [Fact]
+        public void EmbedsGeneratedFromSourceFileInBinlogWhenFailsToCompile()
+        {
+            string taskName = "HelloTask";
+
+            using var env = TestEnvironment.Create();
+            var folder = env.CreateFolder(createFolder: true);
+            var classThatFailsToCompile = env.CreateFile(folder, $"{taskName}.cs", $$"""
+                namespace InlineTask
+                {
+                    using Microsoft.Build.Utilities;
+
+                    public class {{taskName}} : Task
+                    {
+                """);
+
+            string projectFileContents = $"""
+                <Project>
+
+                  <UsingTask
+                    TaskName="{taskName}"
+                    TaskFactory="CodeTaskFactory"
+                    AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+                    <Task>
+                      <Code Type="Class" Language="cs" Source="{classThatFailsToCompile.Path}">
+                      </Code>
+                    </Task>
+                  </UsingTask>
+
+                    <Target Name="SayHello">
+                        <{taskName} />
+                    </Target>
+
+                </Project>
+                """;
+
+            TransientTestFile binlog = env.ExpectFile(".binlog");
+
+            var binaryLogger = new BinaryLogger()
+            {
+                Parameters = $"LogFile={binlog.Path}",
+                CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
+            };
+
+            MockLogger mockLogger = Helpers.BuildProjectWithNewOMAndBinaryLogger(projectFileContents, binaryLogger, out bool result);
+
+            result.ShouldBeFalse();
+
+            // Get the file path from the logs
+            // Then check if it is in the binlog
+            mockLogger.AssertLogContainsMessageWithParameter(ResourceUtilities.GetResourceString("CodeTaskFactory.FindSourceFileInBinlogAt"), out string filePath);
+
+            string projectImportsZipPath = Path.ChangeExtension(binlog.Path, ".ProjectImports.zip");
+            using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
+            using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
+
+            // A path like "C:\path" in ZipArchive is saved as "C\path"
+            filePath = filePath.Replace(":\\", "\\");
+
+            // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
+            // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
+            zipArchive.Entries.ShouldContain(zE => zE.FullName.EndsWith(filePath),
+                $"Binlog's embedded files didn't have the expected '{filePath}'.");
+        }
+
+        [Fact]
+        public void EmbedsGeneratedFileInBinlog()
+        {
+            string taskName = "HelloTask";
+
+            using var env = TestEnvironment.Create();
+
+            string projectFileContents = $"""
+                <Project>
+
+                  <UsingTask
+                    TaskName="{taskName}"
+                    TaskFactory="CodeTaskFactory"
+                    AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+                    <Task>
+                	    <Code Type="Fragment" Language="cs">
+                		    <![CDATA[
+                		      Log.LogMessage("Hello, World tttttest!");
+                		    ]]>
+                	    </Code>
+                    </Task>
+                  </UsingTask>
+
+                    <Target Name="SayHello">
+                        <{taskName} />
+                    </Target>
+
+                </Project>
+                """;
+
+            TransientTestFile binlog = env.ExpectFile(".binlog");
+
+            var binaryLogger = new BinaryLogger()
+            {
+                Parameters = $"LogFile={binlog.Path}",
+                CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
+            };
+
+            MockLogger mockLogger = Helpers.BuildProjectWithNewOMAndBinaryLogger(projectFileContents, binaryLogger, out bool result);
+
+            result.ShouldBeTrue();
+
+            // Get the file path from the logs
+            // Then check if it is in the binlog
+            mockLogger.AssertLogContainsMessageWithParameter(ResourceUtilities.GetResourceString("CodeTaskFactory.FindSourceFileInBinlogAt"), out string filePath);
+
+            string projectImportsZipPath = Path.ChangeExtension(binlog.Path, ".ProjectImports.zip");
+            using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
+            using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
+
+            // A path like "C:\path" in ZipArchive is saved as "C\path"
+            filePath = filePath.Replace(":\\", "\\");
+
+            // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
+            // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
+            zipArchive.Entries.ShouldContain(zE => zE.FullName.EndsWith(filePath),
+                $"Binlog's embedded files didn't have the expected '{filePath}'.");
+        }
+
+        [Fact]
+        public void EmbedsGeneratedFileInBinlogWhenFailsToCompile()
+        {
+            string taskName = "HelloTask";
+
+            using var env = TestEnvironment.Create();
+
+            string projectFileContents = $"""
+                <Project>
+
+                  <UsingTask
+                    TaskName="{taskName}"
+                    TaskFactory="CodeTaskFactory"
+                    AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+                    <Task>
+                	    <Code Type="Fragment" Language="cs">
+                		    <![CDATA[
+                		      Log.LogMessage("Hello, World tttttest!
+                		    ]]>
+                	    </Code>
+                    </Task>
+                  </UsingTask>
+
+                    <Target Name="SayHello">
+                        <{taskName} />
+                    </Target>
+
+                </Project>
+                """;
+
+            TransientTestFile binlog = env.ExpectFile(".binlog");
+
+            var binaryLogger = new BinaryLogger()
+            {
+                Parameters = $"LogFile={binlog.Path}",
+                CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
+            };
+
+            MockLogger mockLogger = Helpers.BuildProjectWithNewOMAndBinaryLogger(projectFileContents, binaryLogger, out bool result);
+
+            result.ShouldBeFalse();
+
+            // Get the file path from the logs
+            // Then check if it is in the binlog
+            mockLogger.AssertLogContainsMessageWithParameter(ResourceUtilities.GetResourceString("CodeTaskFactory.FindSourceFileInBinlogAt"), out string filePath);
+
+            string projectImportsZipPath = Path.ChangeExtension(binlog.Path, ".ProjectImports.zip");
+            using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
+            using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
+
+            // A path like "C:\path" in ZipArchive is saved as "C\path"
+            filePath = filePath.Replace(":\\", "\\");
+
+            // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
+            // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
+            zipArchive.Entries.ShouldContain(zE => zE.FullName.EndsWith(filePath),
+                $"Binlog's embedded files didn't have the expected '{filePath}'.");
         }
     }
-#endif
 }
