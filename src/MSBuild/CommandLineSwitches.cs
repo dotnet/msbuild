@@ -415,12 +415,17 @@ namespace Microsoft.Build.CommandLine
             {
                 Debug.Assert(i == (int)(s_parameterlessSwitchesMap[i].parameterlessSwitch),
                     "The map of parameterless switches must be ordered the same way as the ParameterlessSwitch enumeration.");
+                Debug.Assert(!string.IsNullOrEmpty(s_parameterlessSwitchesMap[i].resourceId), "All parameterless switches should be cross-checked against the help message strings");
             }
 
             for (int i = 0; i < s_parameterizedSwitchesMap.Length; i++)
             {
                 Debug.Assert(i == (int)(s_parameterizedSwitchesMap[i].parameterizedSwitch),
                     "The map of parameterized switches must be ordered the same way as the ParameterizedSwitch enumeration.");
+                if (s_parameterizedSwitchesMap[i].parameterizedSwitch != 0)
+                {
+                    Debug.Assert(!string.IsNullOrEmpty(s_parameterizedSwitchesMap[i].resourceId), "All parameterized switches should be cross-checked against the help message strings except from project switch");
+                }
             }
 #endif
             _parameterlessSwitches = new DetectedParameterlessSwitch[(int)ParameterlessSwitch.NumberOfParameterlessSwitches];
