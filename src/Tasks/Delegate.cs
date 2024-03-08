@@ -42,7 +42,7 @@ namespace Microsoft.Build.Tasks
     /// <param name="path">The path to get directories for.</param>
     /// <param name="pattern">The pattern to search for.</param>
     /// <returns>An array of directories.</returns>
-    internal delegate IEnumerable<string> GetDirectories(string path, string pattern);
+    internal delegate string[] GetDirectories(string path, string pattern);
 
     /// <summary>
     /// CopyFile delegate

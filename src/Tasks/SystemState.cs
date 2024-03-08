@@ -65,7 +65,7 @@ namespace Microsoft.Build.Tasks
         /// is only considered good for the lifetime of the task (or whatever) that owns
         /// this instance.
         /// </summary>
-        private Dictionary<string, IEnumerable<string>> instanceLocalDirectories = new Dictionary<string, IEnumerable<string>>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, string[]> instanceLocalDirectories = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Additional level of caching kept at the process level.
@@ -632,17 +632,17 @@ namespace Microsoft.Build.Tasks
         /// <param name="path"></param>
         /// <param name="pattern"></param>
         /// <returns>The list of directories from the specified path.</returns>
-        private IEnumerable<string> GetDirectories(string path, string pattern)
+        private string[] GetDirectories(string path, string pattern)
         {
             // Only cache the *. pattern. This is by far the most common pattern
             // and generalized caching would require a call to Path.Combine which
             // is a string-copy.
             if (pattern == "*")
             {
-                instanceLocalDirectories.TryGetValue(path, out IEnumerable<string> cached);
+                instanceLocalDirectories.TryGetValue(path, out string[] cached);
                 if (cached == null)
                 {
-                    IEnumerable<string> directories = getDirectories(path, pattern);
+                    string[] directories = getDirectories(path, pattern);
                     instanceLocalDirectories[path] = directories;
                     return directories;
                 }
