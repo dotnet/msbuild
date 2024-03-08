@@ -961,7 +961,7 @@ namespace Microsoft.Build.Tasks
                     return;
                 }
 
-                IEnumerable<string> subDirectories = _getDirectories(reference.DirectoryName, "*");
+                string[] subDirectories = _getDirectories(reference.DirectoryName, "*");
                 string satelliteFilename = subDirectories.Any()
                     ? reference.FileNameWithoutExtension + ".resources.dll"
                     : string.Empty;
