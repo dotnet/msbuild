@@ -10,7 +10,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.AssemblyDependency;

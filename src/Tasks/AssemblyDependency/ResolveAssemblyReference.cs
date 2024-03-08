@@ -3209,12 +3209,7 @@ namespace Microsoft.Build.Tasks
             return Execute(
                 p => FileUtilities.FileExistsNoThrow(p),
                 p => FileUtilities.DirectoryExistsNoThrow(p),
-#if NETFRAMEWORK
                 (p, searchPattern) => FileSystems.Default.EnumerateDirectories(p, searchPattern),
-#else
-                (p, searchPattern) => Directory.GetDirectories(p, searchPattern),
-#endif
-                //
                 p => AssemblyNameExtension.GetAssemblyNameEx(p),
                 (string path, ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache, out AssemblyNameExtension[] dependencies, out string[] scatterFiles, out FrameworkNameVersioning frameworkName)
                     => AssemblyInformation.GetAssemblyMetadata(path, assemblyMetadataCache, out dependencies, out scatterFiles, out frameworkName),
