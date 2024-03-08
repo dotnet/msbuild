@@ -659,37 +659,31 @@ internal sealed partial class TerminalLogger : INodeLogger
                                 urlString = uri.ToString();
                             }
 
-                            var relativeDisplayPathSpan = outputPathSpan;
-                            var workingDirectorySpan = _initialWorkingDirectory.AsSpan();
+                            var outputPathString = outputPathSpan.ToString();
+                            var relativeDisplayPath = outputPathString;
+                            var workingDirectory = _initialWorkingDirectory;
+
                             // If the output path is under the initial working directory, make the console output relative to that to save space.
-                            if (outputPathSpan.StartsWith(workingDirectorySpan, FileUtilities.PathComparison))
+                            if (outputPathString.StartsWith(workingDirectory, FileUtilities.PathComparison))
                             {
-                                if (outputPathSpan.Length > workingDirectorySpan.Length
-                                    && (outputPathSpan[workingDirectorySpan.Length] == Path.DirectorySeparatorChar
-                                        || outputPathSpan[workingDirectorySpan.Length] == Path.AltDirectorySeparatorChar))
-                                {
-                                    relativeDisplayPathSpan = outputPathSpan.Slice(workingDirectorySpan.Length + 1);
-                                }
+                                relativeDisplayPath = Path.GetRelativePath(workingDirectory, outputPathString);
                             }
+
                             // if the output path isn't under the working directory, but is under the source root, make the output relative to that to save space
-                            else if (project.SourceRoot is not null)
+                            else if (project.SourceRoot is ReadOnlyMemory<char> sourceRoot)
                             {
-                                var sourceRootSpan = project.SourceRoot.Value.Span;
-                                var relativePathFromWorkingDirToSourceRoot = Path.GetRelativePath(workingDirectorySpan.ToString(), sourceRootSpan.ToString()).AsSpan();
-                                if (outputPathSpan.StartsWith(sourceRootSpan, FileUtilities.PathComparison))
+                                var sourceRootString = sourceRoot.Span.ToString();
+                                if (outputPathString.StartsWith(sourceRootString, FileUtilities.PathComparison))
                                 {
-                                    if (outputPathSpan.Length > sourceRootSpan.Length
-                                        // offsets are -1 here compared to above for reasons
-                                        && (outputPathSpan[sourceRootSpan.Length - 1] == Path.DirectorySeparatorChar
-                                            || outputPathSpan[sourceRootSpan.Length - 1] == Path.AltDirectorySeparatorChar))
-                                    {
-                                        relativeDisplayPathSpan = Path.Combine(relativePathFromWorkingDirToSourceRoot.ToString(), outputPathSpan.Slice(sourceRootSpan.Length).ToString()).AsSpan();
-                                    }
+                                    var relativePathFromOutputToRoot = Path.GetRelativePath(sourceRootString, outputPathString);
+                                    // we have the portion from sourceRoot to outputPath, now we need to get the portion from workingDirectory to sourceRoot
+                                    var relativePathFromWorkingDirToSourceRoot = Path.GetRelativePath(workingDirectory, sourceRootString);
+                                    relativeDisplayPath = Path.Join(relativePathFromWorkingDirToSourceRoot, relativePathFromOutputToRoot);
                                 }
                             }
 
                             Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath",
-                                $"{AnsiCodes.LinkPrefix}{urlString}{AnsiCodes.LinkInfix}{relativeDisplayPathSpan.ToString()}{AnsiCodes.LinkSuffix}"));
+                                $"{AnsiCodes.LinkPrefix}{urlString}{AnsiCodes.LinkInfix}{relativeDisplayPath}{AnsiCodes.LinkSuffix}"));
                         }
                         else
                         {
@@ -845,7 +839,6 @@ internal sealed partial class TerminalLogger : INodeLogger
         string? message = e.Message;
         if (e is TaskParameterEventArgs taskArgs)
         {
-            Debug.WriteLine(taskArgs.BuildEventContext?.TaskId);
             if (taskArgs.Kind == TaskParameterMessageKind.AddItem)
             {
                 if (taskArgs.ItemType.Equals("SourceRoot", StringComparison.OrdinalIgnoreCase))
