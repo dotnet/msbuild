@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -145,7 +146,7 @@ namespace Microsoft.Build.BackEnd
         /// 3. If there are no specified targets, then all default targets in the request must have non-skipped results
         ///    in the cache.
         /// </summary>
-        /// <param name="request">The request whose results we should return</param>
+        /// <param name="request">The request whose results we should return.</param>
         /// <param name="configInitialTargets">The initial targets for the request's configuration.</param>
         /// <param name="configDefaultTargets">The default targets for the request's configuration.</param>
         /// <param name="skippedResultsDoNotCauseCacheMiss">If false, a cached skipped target will cause this method to return "NotSatisfied".
@@ -156,7 +157,7 @@ namespace Microsoft.Build.BackEnd
         public ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss)
         {
             ErrorUtilities.VerifyThrow(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
-            ResultsCacheResponse response = new ResultsCacheResponse(ResultsCacheResponseType.NotSatisfied);
+            ResultsCacheResponse response = new(ResultsCacheResponseType.NotSatisfied);
 
             lock (_resultsByConfiguration)
             {
@@ -204,11 +205,6 @@ namespace Microsoft.Build.BackEnd
 
                             response.Results = new BuildResult(request, allResults, targetsToAddResultsFor.ToArray(), null);
                         }
-                    }
-                    else
-                    {
-                        // Some targets were not satisfied.
-                        response.Type = ResultsCacheResponseType.NotSatisfied;
                     }
                 }
             }
