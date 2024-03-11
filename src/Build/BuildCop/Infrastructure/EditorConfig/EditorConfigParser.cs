@@ -31,6 +31,10 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
             return MergeEditorConfigFiles(editorConfigs, filePath);
         }
 
+        /// <summary>
+        /// Fetches the list of EditorconfigFile ordered from the nearest to the filePath.
+        /// </summary>
+        /// <param name="filePath"></param>
         internal IEnumerable<EditorConfigFile> EditorConfigFileDiscovery(string filePath)
         {
             var editorConfigDataFromFilesList = new List<EditorConfigFile>();
@@ -69,6 +73,11 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
             return editorConfigDataFromFilesList;
         }
 
+        /// <summary>
+        /// Retrieves the config dictionary from the sections that matched the filePath. 
+        /// </summary>
+        /// <param name="editorConfigFiles"></param>
+        /// <param name="filePath"></param>
         internal Dictionary<string, string> MergeEditorConfigFiles(IEnumerable<EditorConfigFile> editorConfigFiles, string filePath)
         {
             var resultingDictionary = new Dictionary<string, string>();
