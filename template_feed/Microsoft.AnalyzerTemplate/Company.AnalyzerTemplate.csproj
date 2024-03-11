@@ -10,21 +10,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-	  <None Include="Company.AnalyzerTemplate.props" Pack="true" PackagePath="build\Company.AnalyzerTemplate.props" />
+	  <None Include="Directory.Build.props" Pack="true" PackagePath="build\Directory.Build.props" />
 	  <Content Include="README.md" />
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Please add IncludeInPackage field to all third party dependencies. See an example below.-->
-    <!-- <PackageReference Include="ThirdPartyDependency" Version="1.0.0.0" PrivateAssets="all" IncludeInPackage="true" /> -->
+    <!-- Please add IncludeInPackage field to all third party dependencies. See the example below.-->
+    <PackageReference Include="Microsoft.Build" PrivateAssets="all" IncludeInPackage="true" />
   </ItemGroup>
 
   <Target Name="AddNuGetDlls" BeforeTargets="_GetPackageFiles">
 	<!-- Merge the collection of PackageReference and Assemblies using the NuGetPackageId key.
        This produces a new list containing the DLL path and the "IncludeInPackage" metadata-->
-	<JoinItems Left="@(ResolvedCompileFileDefinitions)" LeftKey="NuGetPackageId" LeftMetadata="*"
-			   Right="@(PackageReference)" RightKey="" RightMetadata="*"
-			   ItemSpecToUse="Left">
+	<JoinItems Left="@(ResolvedCompileFileDefinitions)" LeftKey="NuGetPackageId" LeftMetadata="*" Right="@(PackageReference)" RightKey="" RightMetadata="*" ItemSpecToUse="Left">
 		<Output TaskParameter="JoinResult" ItemName="_PackagesToPack" />
 	</JoinItems>
 
@@ -38,16 +36,10 @@
 
 	<ItemGroup>
 		<!-- Update the collection of items to pack with the DLLs from the NuGet packages -->
-		<None Include="@(_PackagesToPack)"
-			  Pack="true"
-			  PackagePath="lib"
-			  Visible="false" />
+		<None Include="@(_PackagesToPack)" Pack="true" PackagePath="lib" Visible="false" />
 
 		<!-- Add the DLL produced by the current project to the NuGet package -->
-		<None Include="$(OutputPath)\$(AssemblyName).dll"
-			  Pack="true"
-			  PackagePath="lib"
-			  Visible="false" />
+		<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="lib" Visible="false" />
 	</ItemGroup>
 </Target>
 </Project>

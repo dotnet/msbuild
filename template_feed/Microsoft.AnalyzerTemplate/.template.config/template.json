@@ -22,6 +22,16 @@
         "path": "Company.AnalyzerTemplate.csproj"
       }
    ],
+   "symbols": {
+    "MicrosoftBuildVersion": {
+      "type": "parameter",
+      "description": "Overrides the default Microsoft.Build version where analyzer's interfaces are placed",
+      "datatype": "text",
+      "defaultValue": "17.9.5",
+      "replaces": "1.0.0-MicrosoftBuildPackageVersion",
+      "displayName": "Microsoft.Build default package version override"
+    }
+   },
     "postActions": [
       {
         "id": "restore",
