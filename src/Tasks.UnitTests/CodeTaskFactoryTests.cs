@@ -1279,7 +1279,7 @@ namespace Microsoft.Build.UnitTests
                     <Task>
                 	    <Code Type="Fragment" Language="cs">
                 		    <![CDATA[
-                		      Log.LogMessage("Hello, World tttttest!");
+                		      Log.LogMessage("Hello, World!");
                 		    ]]>
                 	    </Code>
                     </Task>
@@ -1338,7 +1338,7 @@ namespace Microsoft.Build.UnitTests
                     <Task>
                 	    <Code Type="Fragment" Language="cs">
                 		    <![CDATA[
-                		      Log.LogMessage("Hello, World tttttest!
+                		      Log.LogMessage("Hello, World!
                 		    ]]>
                 	    </Code>
                     </Task>

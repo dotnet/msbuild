@@ -799,7 +799,7 @@ namespace InlineTask
                     <Task>
                 	    <Code Type="Fragment" Language="cs">
                 		    <![CDATA[
-                		      Log.LogMessage("Hello, World tttttest!");
+                		      Log.LogMessage("Hello, World!");
                 		    ]]>
                 	    </Code>
                     </Task>
@@ -858,7 +858,7 @@ namespace InlineTask
                     <Task>
                 	    <Code Type="Fragment" Language="cs">
                 		    <![CDATA[
-                		      Log.LogMessage("Hello, World tttttest!
+                		      Log.LogMessage("Hello, World!
                 		    ]]>
                 	    </Code>
                     </Task>
