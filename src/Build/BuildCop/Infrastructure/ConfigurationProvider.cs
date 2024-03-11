@@ -19,7 +19,7 @@ namespace Microsoft.Build.BuildCop.Infrastructure;
 // TODO: https://github.com/dotnet/msbuild/issues/9628
 internal class ConfigurationProvider
 {
-    private IEditorConfigParser s_editorConfigParser = new EditorConfigParser();
+    private EditorConfigParser s_editorConfigParser = new EditorConfigParser();
     // TODO: This module should have a mechanism for removing unneeded configurations
     //  (disabled rules and analyzers that need to run in different node)
     private readonly Dictionary<string, BuildAnalyzerConfiguration> _editorConfig = new Dictionary<string, BuildAnalyzerConfiguration>();
@@ -29,6 +29,7 @@ internal class ConfigurationProvider
         nameof(BuildAnalyzerConfiguration.IsEnabled).ToLower(),
         nameof(BuildAnalyzerConfiguration.Severity).ToLower()
     };
+
     /// <summary>
     /// Gets the user specified unrecognized configuration for the given analyzer rule.
     /// 
@@ -61,7 +62,7 @@ internal class ConfigurationProvider
     }
 
     /// <summary>
-    /// 
+    /// Verifies if previously fetched custom configurations are equal to current one. 
     /// </summary>
     /// <param name="projectFullPath"></param>
     /// <param name="ruleId"></param>
@@ -69,7 +70,9 @@ internal class ConfigurationProvider
     /// <returns></returns>
     public void CheckCustomConfigurationDataValidity(string projectFullPath, string ruleId)
     {
-        // TBD
+        // Note: requires another cache layer for custom configuration. 
+        // var prevData = GetCustomConfiguration(projectFullPath, ruleId);
+        // if prevData in cache => raise BuildCopConfigurationException;
     }
 
     public BuildAnalyzerConfigurationInternal[] GetMergedConfigurations(
@@ -126,6 +129,7 @@ internal class ConfigurationProvider
         {
             // Note: catch any exception, we do not want to break because of the failed operation with parsing the editorconfig.
             Debug.WriteLine(ex);
+            throw new BuildCopConfigurationException($"Fetchin editorConfig data failed: {ex.Message}");
         }
 
         var keyTosearch = $"msbuild_analyzer.{ruleId}.";

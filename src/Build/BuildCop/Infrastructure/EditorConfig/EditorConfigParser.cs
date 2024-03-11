@@ -15,7 +15,7 @@ using static Microsoft.Build.BuildCop.Infrastructure.EditorConfig.EditorConfigGl
 
 namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
 {
-    internal class EditorConfigParser : IEditorConfigParser
+    internal class EditorConfigParser
     {
         private const string EditorconfigFile = ".editorconfig";
         private Dictionary<string, EditorConfigFile> editorConfigFileCache;
@@ -25,32 +25,32 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
             editorConfigFileCache = new Dictionary<string, EditorConfigFile>();
         }
 
-        public Dictionary<string, string> Parse(string filePath)
+        internal Dictionary<string, string> Parse(string filePath)
         {
             var editorConfigs = EditorConfigFileDiscovery(filePath);
             return MergeEditorConfigFiles(editorConfigs, filePath);
         }
 
-        public IList<EditorConfigFile> EditorConfigFileDiscovery(string filePath)
+        internal IEnumerable<EditorConfigFile> EditorConfigFileDiscovery(string filePath)
         {
             var editorConfigDataFromFilesList = new List<EditorConfigFile>();
 
             var directoryOfTheProject = Path.GetDirectoryName(filePath);
-            var editorConfigFile = FileUtilities.GetPathOfFileAbove(EditorconfigFile, directoryOfTheProject);
+            var editorConfigFilePath = FileUtilities.GetPathOfFileAbove(EditorconfigFile, directoryOfTheProject);
 
-            while (editorConfigFile != string.Empty)
+            while (editorConfigFilePath != string.Empty)
             {
                 EditorConfigFile editorConfig;
 
-                if (editorConfigFileCache.ContainsKey(editorConfigFile))
+                if (editorConfigFileCache.ContainsKey(editorConfigFilePath))
                 {
-                    editorConfig = editorConfigFileCache[editorConfigFile];
+                    editorConfig = editorConfigFileCache[editorConfigFilePath];
                 }
                 else
                 {
-                    var editorConfigfileContent = File.ReadAllText(editorConfigFile);
+                    var editorConfigfileContent = File.ReadAllText(editorConfigFilePath);
                     editorConfig = EditorConfigFile.Parse(editorConfigfileContent);
-                    editorConfigFileCache[editorConfigFile] = editorConfig;
+                    editorConfigFileCache[editorConfigFilePath] = editorConfig;
                 }
 
                 editorConfigDataFromFilesList.Add(editorConfig);
@@ -61,22 +61,20 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
                 }
                 else
                 {
-                    editorConfigFile = FileUtilities.GetPathOfFileAbove(EditorconfigFile, Path.GetDirectoryName(Path.GetDirectoryName(editorConfigFile)));
+                    editorConfigFilePath = FileUtilities.GetPathOfFileAbove(EditorconfigFile, Path.GetDirectoryName(Path.GetDirectoryName(editorConfigFilePath)));
                 }
             }
 
             return editorConfigDataFromFilesList;
         }
 
-        public Dictionary<string, string> MergeEditorConfigFiles(IEnumerable<EditorConfigFile> editorConfigFiles, string filePath)
+        internal Dictionary<string, string> MergeEditorConfigFiles(IEnumerable<EditorConfigFile> editorConfigFiles, string filePath)
         {
             var resultingDictionary = new Dictionary<string, string>();
 
             if (editorConfigFiles.Any())
             {
-                editorConfigFiles.Reverse();
-
-                foreach (var configData in editorConfigFiles)
+                foreach (var configData in editorConfigFiles.Reverse())
                 {
                     foreach (var section in configData.NamedSections)
                     {
@@ -98,6 +96,6 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
             return resultingDictionary;
         }
 
-        private static string NormalizeWithForwardSlash(string p) => Path.DirectorySeparatorChar == '/' ? p : p.Replace(Path.DirectorySeparatorChar, '/');
+        internal static string NormalizeWithForwardSlash(string p) => Path.DirectorySeparatorChar == '/' ? p : p.Replace(Path.DirectorySeparatorChar, '/');
     }
 }
