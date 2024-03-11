@@ -519,7 +519,8 @@ namespace Microsoft.Build.Utilities
                 {
                     { "FILEPATH", filePath },
                     { "CONTENT", content },
-                }
+                },
+                Importance = MessageImportance.High,
             };
 
             BuildEngine.LogMessageEvent(e);
