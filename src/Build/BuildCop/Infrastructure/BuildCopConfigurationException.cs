@@ -15,7 +15,16 @@ internal class BuildCopConfigurationException : Exception
     /// Exception to communicate issues with user specified configuration - unsupported scenarios, malformations, etc.
     /// This exception usually leads to defuncting the particular analyzer for the rest of the build (even if issue occured with a single project).
     /// </summary>
-    public BuildCopConfigurationException(string message) : base(message)
+    ///
+    internal BuildCopConfigurationErrorScope buildCopConfigurationErrorScope;
+
+    public BuildCopConfigurationException(string message, Exception innerException, BuildCopConfigurationErrorScope buildCopConfigurationErrorScope = BuildCopConfigurationErrorScope.SingleRule) : base(message, innerException)
     {
+        this.buildCopConfigurationErrorScope = buildCopConfigurationErrorScope;
+    }
+
+    public BuildCopConfigurationException(string message, BuildCopConfigurationErrorScope buildCopConfigurationErrorScope = BuildCopConfigurationErrorScope.SingleRule) : base(message)
+    {
+        this.buildCopConfigurationErrorScope = buildCopConfigurationErrorScope;
     }
 }

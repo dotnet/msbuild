@@ -179,7 +179,10 @@ internal sealed class BuildCopManagerProvider : IBuildCopManagerProvider
         {
             // TODO: For user analyzers - it should run only on projects where referenced
             //  on others it should work similarly as disabling them.
-            // Disabled analyzer should not only post-filter results - it shouldn't even see the data 
+            // Disabled analyzer should not only post-filter results - it shouldn't even see the data
+
+
+            // TODO:catch the exception of fetching configuration 
 
             BuildAnalyzerWrapper wrapper;
             BuildAnalyzerConfigurationInternal[] configurations;

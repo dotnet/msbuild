@@ -125,11 +125,9 @@ internal class ConfigurationProvider
         {
             config = s_editorConfigParser.Parse(projectFullPath);
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            // Note: catch any exception, we do not want to break because of the failed operation with parsing the editorconfig.
-            Debug.WriteLine(ex);
-            throw new BuildCopConfigurationException($"Fetchin editorConfig data failed: {ex.Message}");
+            throw new BuildCopConfigurationException($"Parsing editorConfig data failed", exception, BuildCopConfigurationErrorScope.EditorConfigParser);
         }
 
         var keyTosearch = $"msbuild_analyzer.{ruleId}.";
@@ -139,7 +137,8 @@ internal class ConfigurationProvider
         {
             if (kv.Key.StartsWith(keyTosearch, StringComparison.OrdinalIgnoreCase))
             {
-                dictionaryConfig[kv.Key.Replace(keyTosearch.ToLower(), "")] = kv.Value;
+                var newKey = kv.Key.Replace(keyTosearch.ToLower(), "");
+                dictionaryConfig[newKey] = kv.Value;
             }
         }
 

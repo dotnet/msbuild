@@ -159,6 +159,7 @@
     <Compile Include="BuildCop\Acquisition\AnalyzerAcquisitionData.cs" />
     <Compile Include="BuildCop\Acquisition\BuildCopAcquisitionModule.cs" />
     <Compile Include="BuildCop\Analyzers\SharedOutputPathAnalyzer.cs" />
+    <Compile Include="BuildCop\Infrastructure\BuildCopConfigurationErrorScope.cs" />
     <Compile Include="BuildCop\Infrastructure\BuildCopConfigurationException.cs" />
     <Compile Include="BuildCop\Infrastructure\BuildEventsProcessor.cs" />
     <Compile Include="BuildCop\Infrastructure\IBuildCopManagerProvider.cs" />
