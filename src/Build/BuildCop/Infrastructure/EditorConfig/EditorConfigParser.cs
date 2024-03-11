@@ -61,6 +61,7 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
                 }
                 else
                 {
+                    // search in upper directory
                     editorConfigFilePath = FileUtilities.GetPathOfFileAbove(EditorconfigFile, Path.GetDirectoryName(Path.GetDirectoryName(editorConfigFilePath)));
                 }
             }

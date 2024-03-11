@@ -68,19 +68,19 @@ internal class ConfigurationProvider
     /// <param name="ruleId"></param>
     /// <throws><see cref="BuildCopConfigurationException"/> If CustomConfigurationData differs in a build for a same ruleId</throws>
     /// <returns></returns>
-    public void CheckCustomConfigurationDataValidity(string projectFullPath, string ruleId)
+    internal void CheckCustomConfigurationDataValidity(string projectFullPath, string ruleId)
     {
         // Note: requires another cache layer for custom configuration. 
         // var prevData = GetCustomConfiguration(projectFullPath, ruleId);
         // if prevData in cache => raise BuildCopConfigurationException;
     }
 
-    public BuildAnalyzerConfigurationInternal[] GetMergedConfigurations(
+    internal BuildAnalyzerConfigurationInternal[] GetMergedConfigurations(
         string projectFullPath,
         BuildAnalyzer analyzer)
         => FillConfiguration(projectFullPath, analyzer.SupportedRules, GetMergedConfiguration);
 
-    public BuildAnalyzerConfiguration[] GetUserConfigurations(
+    internal BuildAnalyzerConfiguration[] GetUserConfigurations(
         string projectFullPath,
         IReadOnlyList<string> ruleIds)
         => FillConfiguration(projectFullPath, ruleIds, GetUserConfiguration);
@@ -90,7 +90,7 @@ internal class ConfigurationProvider
         IReadOnlyList<string> ruleIds)
         => FillConfiguration(projectFullPath, ruleIds, GetCustomConfiguration);
 
-    public BuildAnalyzerConfigurationInternal[] GetMergedConfigurations(
+    internal BuildAnalyzerConfigurationInternal[] GetMergedConfigurations(
         BuildAnalyzerConfiguration[] userConfigs,
         BuildAnalyzer analyzer)
     {
@@ -156,9 +156,9 @@ internal class ConfigurationProvider
     /// <param name="projectFullPath"></param>
     /// <param name="ruleId"></param>
     /// <returns></returns>
-    public BuildAnalyzerConfiguration GetUserConfiguration(string projectFullPath, string ruleId)
+    internal BuildAnalyzerConfiguration GetUserConfiguration(string projectFullPath, string ruleId)
     {
-        var cacheKey = $"{ruleId}-projectFullPath ";
+        var cacheKey = $"{ruleId}-{projectFullPath}";
 
         if (!_editorConfig.TryGetValue(cacheKey, out BuildAnalyzerConfiguration? editorConfig))
         {
@@ -184,10 +184,10 @@ internal class ConfigurationProvider
     /// <param name="projectFullPath"></param>
     /// <param name="analyzerRule"></param>
     /// <returns></returns>
-    public BuildAnalyzerConfigurationInternal GetMergedConfiguration(string projectFullPath, BuildAnalyzerRule analyzerRule)
+    internal BuildAnalyzerConfigurationInternal GetMergedConfiguration(string projectFullPath, BuildAnalyzerRule analyzerRule)
         => GetMergedConfiguration(projectFullPath, analyzerRule.Id, analyzerRule.DefaultConfiguration);
 
-    public BuildAnalyzerConfigurationInternal MergeConfiguration(
+    internal BuildAnalyzerConfigurationInternal MergeConfiguration(
         string ruleId,
         BuildAnalyzerConfiguration defaultConfig,
         BuildAnalyzerConfiguration editorConfig)
