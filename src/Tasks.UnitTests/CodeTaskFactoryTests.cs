@@ -1189,7 +1189,8 @@ namespace Microsoft.Build.UnitTests
             using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
 
             // A path like "C:\path" in ZipArchive is saved as "C\path"
-            filePath = filePath.Replace(":\\", "\\");
+            // For unix-based systems path uses '/'
+            filePath = NativeMethodsShared.IsWindows ? filePath.Replace(":\\", "\\") : filePath.Replace("/", "\\");
 
             // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
             // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
@@ -1254,7 +1255,8 @@ namespace Microsoft.Build.UnitTests
             using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
 
             // A path like "C:\path" in ZipArchive is saved as "C\path"
-            filePath = filePath.Replace(":\\", "\\");
+            // For unix-based systems path uses '/'
+            filePath = NativeMethodsShared.IsWindows ? filePath.Replace(":\\", "\\") : filePath.Replace("/", "\\");
 
             // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
             // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
@@ -1313,7 +1315,8 @@ namespace Microsoft.Build.UnitTests
             using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
 
             // A path like "C:\path" in ZipArchive is saved as "C\path"
-            filePath = filePath.Replace(":\\", "\\");
+            // For unix-based systems path uses '/'
+            filePath = NativeMethodsShared.IsWindows ? filePath.Replace(":\\", "\\") : filePath.Replace("/", "\\");
 
             // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
             // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
@@ -1372,7 +1375,8 @@ namespace Microsoft.Build.UnitTests
             using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
 
             // A path like "C:\path" in ZipArchive is saved as "C\path"
-            filePath = filePath.Replace(":\\", "\\");
+            // For unix-based systems path uses '/'
+            filePath = NativeMethodsShared.IsWindows ? filePath.Replace(":\\", "\\") : filePath.Replace("/", "\\");
 
             // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
             // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
