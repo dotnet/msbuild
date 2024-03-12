@@ -270,7 +270,7 @@ namespace Microsoft.Build.UnitTests
 
             string log = engine.Log;
             string singleQuote = NativeMethodsShared.IsWindows ? "'" : string.Empty;
-            string displayMessage = exitCode == 0 ? content : $"MSBUILD : error : {singleQuote}{content}{singleQuote}";
+            string displayMessage = exitCode == 0 ? content : $"ERROR : {singleQuote}{content}{singleQuote}";
             string pattern = $"{commandLine}{Environment.NewLine}\\s*{displayMessage}";
             Regex regex = new Regex(pattern);
             regex.Matches(log).Count.ShouldBe(1, $"{log} doesn't contain the log matching the pattern: {pattern}");
