@@ -1404,9 +1404,12 @@ namespace Microsoft.Build.Utilities
                         }
 
                         File.AppendAllText(_temporaryBatchFile, commandLineCommands, encoding);
-                        // Keep the encoding of standard output & error consistent with the console code page.
-                        StandardOutputEncoding = encoding;
-                        StandardErrorEncoding = encoding;
+                        if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+                        {
+                            // Keep the encoding of standard output & error consistent with the console code page.
+                            StandardOutputEncoding = encoding;
+                            StandardErrorEncoding = encoding;
+                        }
 
                         string batchFileForCommandLine = _temporaryBatchFile;
 
