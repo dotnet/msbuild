@@ -19,7 +19,7 @@
     <PackageVersion Include="LargeAddressAware" Version="1.0.5" />
     <PackageVersion Update="LargeAddressAware" Condition="'$(LargeAddressAwareVersion)' != ''" Version="$(LargeAddressAwareVersion)" />
 
-    <PackageVersion Include="Microsoft.BuildXL.Processes" Version="0.1.0-20240113.1" />
+    <PackageVersion Include="Microsoft.BuildXL.Processes" Version="0.1.0-20240307.8" />
     <PackageVersion Update="Microsoft.BuildXL.Processes" Condition="'$(BuildXLProcessesVersion)' != ''" Version="$(BuildXLProcessesVersion)" />
 
     <PackageVersion Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="3.8.2112" />
