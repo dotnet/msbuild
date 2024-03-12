@@ -659,6 +659,19 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
+        /// We expect tasks to override this method if they need information about the tool process or its process events during task execution.
+        /// Implementation should make sure that the task is started in this method.
+        /// Starts the process during task execution. 
+        /// </summary>
+        /// <param name="proc">Fully populated <see cref="Process"/> instance representing the tool process to be started.</param>
+        /// <returns>A started process. This could be <paramref name="proc"/> or another <see cref="Process"/> instance.</returns>
+        protected virtual Process StartToolProcess(Process proc)
+        {
+            proc.Start();
+            return proc;
+        }
+
+        /// <summary>
         /// Writes out a temporary response file and shell-executes the tool requested.  Enables concurrent
         /// logging of the output of the tool.
         /// </summary>
@@ -714,7 +727,7 @@ namespace Microsoft.Build.Utilities
                 ExitCode = -1;
 
                 // Start the process
-                proc.Start();
+                proc = StartToolProcess(proc);
 
                 // Close the input stream. This is done to prevent commands from
                 // blocking the build waiting for input from the user.

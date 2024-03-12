@@ -68,7 +68,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private void ApplyFileLoggerParameter(string parameterName, string parameterValue)
         {
-            if (String.Equals("LOGFILE", parameterName, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals("LOGFILE", parameterName, StringComparison.OrdinalIgnoreCase))
             {
                 if (string.IsNullOrEmpty(parameterValue))
                 {
@@ -104,7 +104,7 @@ namespace Microsoft.Build.Logging
                 _nodeFileLogger = new FileLogger();
                 string extension = Path.GetExtension(_logFile);
                 // If there is no extension add a default of .log to it
-                if (String.IsNullOrEmpty(extension))
+                if (string.IsNullOrEmpty(extension))
                 {
                     _logFile += ".log";
                     extension = ".log";

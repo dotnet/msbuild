@@ -13,7 +13,7 @@ namespace Microsoft.Build.Framework
     /// </summary>
     internal class Traits
     {
-        private static readonly Traits _instance = new Traits();
+        private static Traits _instance = new Traits();
         public static Traits Instance
         {
             get
@@ -135,6 +135,15 @@ namespace Microsoft.Build.Framework
         public readonly bool DebugNodeCommunication;
 
         public readonly bool InProcNodeDisabled = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
+
+        public static void UpdateFromEnvironment()
+        {
+            // Re-create Traits instance to update values in Traits according to current environment.
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+            {
+                _instance = new Traits();
+            }
+        }
 
         private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
         {
@@ -315,11 +324,6 @@ namespace Microsoft.Build.Framework
         /// Disable the use of any caching when resolving SDKs.
         /// </summary>
         public readonly bool DisableSdkResolutionCache = Environment.GetEnvironmentVariable("MSBUILDDISABLESDKCACHE") == "1";
-
-        /// <summary>
-        /// Disable the NuGet-based SDK resolver.
-        /// </summary>
-        public readonly bool DisableNuGetSdkResolver = Environment.GetEnvironmentVariable("MSBUILDDISABLENUGETSDKRESOLVER") == "1";
 
         /// <summary>
         /// Don't delete TargetPath metadata from associated files found by RAR.

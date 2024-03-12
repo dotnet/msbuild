@@ -131,7 +131,6 @@ namespace Microsoft.Build.UnitTests
 
         private CommandLineGenerator CreateGenerator()
         {
-#if !MONO
             Rule rule = XamlReader.Parse(testXamlFile) as Rule;
 
             Dictionary<string, Object> switchValues = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
@@ -154,9 +153,6 @@ namespace Microsoft.Build.UnitTests
 
             CommandLineGenerator generator = new CommandLineGenerator(rule, switchValues);
             return generator;
-#else
-            return new CommandLineGenerator(new Rule(), new Dictionary<string, object>());
-#endif
         }
 
         private sealed class TaskItem : ITaskItem

@@ -57,6 +57,15 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             _defaultResolvers = base.GetDefaultResolvers();
         }
 
+        /// <summary>
+        /// Resets the cached state, intended for tests only.
+        /// </summary>
+        internal static void ResetStateForTests()
+        {
+            // Re-create the singleton to pick up environmental changes.
+            Instance = new CachingSdkResolverLoader();
+        }
+
         #region SdkResolverLoader overrides
 
         /// <inheritdoc />
@@ -87,5 +96,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         }
 
         #endregion
+
     }
 }

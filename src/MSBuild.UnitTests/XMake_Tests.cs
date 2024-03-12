@@ -524,6 +524,91 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void VersionSwitch()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            // Ensure Change Wave 17.10 is enabled.
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "");
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+            List<string> cmdLine = new()
+            {
+#if !FEATURE_RUN_EXE_IN_TESTS
+                EnvironmentProvider.GetDotnetExePath(),
+#endif
+                FileUtilities.EnsureDoubleQuotes(RunnerUtilities.PathToCurrentlyRunningMsBuildExe),
+                "-nologo",
+                "-version"
+            };
+
+            using Process process = new()
+            {
+                StartInfo =
+                {
+                    FileName = cmdLine[0],
+                    Arguments = string.Join(" ", cmdLine.Skip(1)),
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                },
+            };
+
+            process.Start();
+            process.WaitForExit();
+            process.ExitCode.ShouldBe(0);
+
+            string output = process.StandardOutput.ReadToEnd();
+            output.EndsWith(Environment.NewLine).ShouldBeTrue();
+
+            process.Close();
+        }
+
+        /// <summary>
+        /// PR: Change Version switch output to finish with a newline https://github.com/dotnet/msbuild/pull/9485
+        /// </summary>
+        [Fact]
+        public void VersionSwitchDisableChangeWave()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            // Disable Change Wave 17.10
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_10.ToString());
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+            List<string> cmdLine = new()
+            {
+#if !FEATURE_RUN_EXE_IN_TESTS
+                EnvironmentProvider.GetDotnetExePath(),
+#endif
+                FileUtilities.EnsureDoubleQuotes(RunnerUtilities.PathToCurrentlyRunningMsBuildExe),
+                "-nologo",
+                "-version"
+            };
+
+            using Process process = new()
+            {
+                StartInfo =
+                {
+                    FileName = cmdLine[0],
+                    Arguments = string.Join(" ", cmdLine.Skip(1)),
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                },
+            };
+
+            process.Start();
+            process.WaitForExit();
+            process.ExitCode.ShouldBe(0);
+
+            string output = process.StandardOutput.ReadToEnd();
+            output.EndsWith(Environment.NewLine).ShouldBeFalse();
+
+            process.Close();
+        }
+
+        [Fact]
         public void ErrorCommandLine()
         {
             string oldValueForMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
@@ -618,6 +703,17 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
+        [Fact]
+        public void GetPropertyWithInvalidProjectThrowsInvalidProjectFileExceptionNotInternalError()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile project = env.CreateFile("testProject.csproj", "Project");
+            string result = RunnerUtilities.ExecMSBuild($" {project.Path} -getProperty:Foo", out bool success);
+            success.ShouldBeFalse();
+            result.ShouldContain("MSB4025");
+            result.ShouldNotContain("MSB1025");
+        }
+
         [Theory]
         [InlineData("-getProperty:Foo;Bar", true, "EvalValue", false, false, false, true, false)]
         [InlineData("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false, true, false)]
@@ -695,6 +791,53 @@ namespace Microsoft.Build.UnitTests
             results.Contains("MyTarget").ShouldBe(targetResultPresent);
             results.Contains("\"Result\": \"Success\"").ShouldBe(targetResultPresent || restoreOnly);
             results.ShouldNotContain(ResourceUtilities.GetResourceString("BuildFailedWithPropertiesItemsOrTargetResultsRequested"));
+        }
+
+        [Fact]
+        public void BuildFailsWithBadPropertyName()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile project = env.CreateFile("testProject.csproj", @"
+<Project>
+  <Target Name=""Build"">
+  </Target>
+</Project>
+");
+            string results = RunnerUtilities.ExecMSBuild($" {project.Path} /p:someProperty:fdalse= ", out bool success);
+            success.ShouldBeFalse(results);
+
+            results.ShouldContain("error MSB4177");
+        }
+
+        [Theory]
+        [InlineData("-getProperty:Foo", "propertyContent")]
+        [InlineData("-getItem:Bar", "ItemContent")]
+        [InlineData("-getTargetResult:Biz", "Success")]
+        public void GetStarOutputsToFileIfRequested(string extraSwitch, string result)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile project = env.CreateFile("testProject.csproj", @"
+<Project>
+  <PropertyGroup>
+    <Foo>propertyContent</Foo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Bar Include=""ItemContent"" />
+  </ItemGroup>
+
+  <Target Name=""Biz"" />
+</Project>
+");
+            string resultFile = env.GetTempFile(".tmp").Path;
+            string results = RunnerUtilities.ExecMSBuild($" {project.Path} {extraSwitch} -getResultOutputFile:{resultFile}", out bool success);
+            success.ShouldBeTrue();
+            File.Exists(resultFile).ShouldBeTrue();
+            File.ReadAllText(resultFile).ShouldContain(result);
+
+            result = RunnerUtilities.ExecMSBuild($" {project.Path} {extraSwitch} -getResultOutputFile:", out success);
+            success.ShouldBeFalse();
+            result.ShouldContain("MSB1068");
         }
 
         [Theory]
@@ -1164,33 +1307,15 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFileInProjectDirectoryExplicit()
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, AutoResponseFileName);
+            var directory = _env.CreateFolder();
+            string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+            var projectPath = directory.CreateFile("my.proj", content).Path;
+            directory.CreateFile(AutoResponseFileName, "/p:A=1");
+            var msbuildParameters = "\"" + projectPath + "\"";
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
 
-            try
-            {
-                Directory.CreateDirectory(directory);
-
-                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
-                File.WriteAllText(projectPath, content);
-
-                string rspContent = "/p:A=1";
-                File.WriteAllText(rspPath, rspContent);
-
-                var msbuildParameters = "\"" + projectPath + "\"";
-
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
-                successfulExit.ShouldBeTrue();
-
-                output.ShouldContain("[A=1]");
-            }
-            finally
-            {
-                File.Delete(projectPath);
-                File.Delete(rspPath);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
-            }
+            output.ShouldContain("[A=1]");
         }
 
         /// <summary>
@@ -1199,33 +1324,17 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFileInProjectDirectoryRandomName()
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, "foo.rsp");
+            var directory = _env.CreateFolder();
+            string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+            var projectPath = directory.CreateFile("my.proj", content).Path;
+            directory.CreateFile("foo.rsp", "/p:A=1");
 
-            try
-            {
-                Directory.CreateDirectory(directory);
+            var msbuildParameters = "\"" + projectPath + "\"";
 
-                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
-                File.WriteAllText(projectPath, content);
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
 
-                string rspContent = "/p:A=1";
-                File.WriteAllText(rspPath, rspContent);
-
-                var msbuildParameters = "\"" + projectPath + "\"";
-
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
-                successfulExit.ShouldBeTrue();
-
-                output.ShouldContain("[A=]");
-            }
-            finally
-            {
-                File.Delete(projectPath);
-                File.Delete(rspPath);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
-            }
+            output.ShouldContain("[A=]");
         }
 
         /// <summary>
@@ -1235,33 +1344,18 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFileInProjectDirectoryCommandLineWins()
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, AutoResponseFileName);
+            var directory = _env.CreateFolder();
 
-            try
-            {
-                Directory.CreateDirectory(directory);
+            string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+            var projectPath = directory.CreateFile("my.proj", content).Path;
+            directory.CreateFile(AutoResponseFileName, "/p:A=1");
 
-                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
-                File.WriteAllText(projectPath, content);
+            var msbuildParameters = "\"" + projectPath + "\"" + " /p:A=2";
 
-                string rspContent = "/p:A=1";
-                File.WriteAllText(rspPath, rspContent);
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
 
-                var msbuildParameters = "\"" + projectPath + "\"" + " /p:A=2";
-
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
-                successfulExit.ShouldBeTrue();
-
-                output.ShouldContain("[A=2]");
-            }
-            finally
-            {
-                File.Delete(projectPath);
-                File.Delete(rspPath);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
-            }
+            output.ShouldContain("[A=2]");
         }
 
         /// <summary>
@@ -1348,33 +1442,17 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFileInProjectDirectoryItselfWithNoAutoResponseSwitch()
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, AutoResponseFileName);
+            var directory = _env.CreateFolder();
+            string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+            var projectPath = directory.CreateFile("my.proj", content).Path;
+            directory.CreateFile(AutoResponseFileName, "/p:A=1 /noautoresponse");
 
-            try
-            {
-                Directory.CreateDirectory(directory);
+            var msbuildParameters = "\"" + projectPath + "\"";
 
-                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
-                File.WriteAllText(projectPath, content);
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeFalse();
 
-                string rspContent = "/p:A=1 /noautoresponse";
-                File.WriteAllText(rspPath, rspContent);
-
-                var msbuildParameters = "\"" + projectPath + "\"";
-
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
-                successfulExit.ShouldBeFalse();
-
-                output.ShouldContain("MSB1027"); // msbuild.rsp cannot have /noautoresponse in it
-            }
-            finally
-            {
-                File.Delete(projectPath);
-                File.Delete(rspPath);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
-            }
+            output.ShouldContain("MSB1027"); // msbuild.rsp cannot have /noautoresponse in it
         }
 
         /// <summary>
@@ -1383,33 +1461,33 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFileInProjectDirectoryButCommandLineNoAutoResponseSwitch()
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, AutoResponseFileName);
+            var directory = _env.CreateFolder();
+            string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+            var projectPath = directory.CreateFile("my.proj", content).Path;
+            directory.CreateFile(AutoResponseFileName, "/p:A=1 /noautoresponse");
 
-            try
-            {
-                Directory.CreateDirectory(directory);
+            var msbuildParameters = "\"" + projectPath + "\" /noautoresponse";
 
-                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
-                File.WriteAllText(projectPath, content);
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
+            output.ShouldContain("[A=]");
+        }
 
-                string rspContent = "/p:A=1 /noautoresponse";
-                File.WriteAllText(rspPath, rspContent);
+        /// <summary>
+        /// Directory.Build.rsp in the directory of the specified project/solution should be respected when searching the files (solution/proj) to build.
+        /// </summary>
+        [Fact]
+        public void ResponseFileInProjectDirectoryWithSolutionProjectDifferentNamesShouldBeRespected()
+        {
+            var directory = _env.CreateFolder();
+            var content = ObjectModelHelpers.CleanupFileContents("<Project><Target Name='t'><Message Text='Completed'/></Target></Project>");
+            directory.CreateFile("projectFile.proj", content);
+            directory.CreateFile("solutionFile.sln", string.Empty);
+            directory.CreateFile("Directory.Build.rsp", "-ignoreProjectExtensions:.sln");
 
-                var msbuildParameters = "\"" + projectPath + "\" /noautoresponse";
-
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
-                successfulExit.ShouldBeTrue();
-
-                output.ShouldContain("[A=]");
-            }
-            finally
-            {
-                File.Delete(projectPath);
-                File.Delete(rspPath);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
-            }
+            var msbuildParameters = "\"" + directory.Path + "\"";
+            RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
         }
 
         /// <summary>
@@ -1419,28 +1497,17 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFileInProjectDirectoryNullCase()
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(directory, "my.proj");
+            var directory = _env.CreateFolder();
+            string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
 
-            try
-            {
-                Directory.CreateDirectory(directory);
+            var projectPath = directory.CreateFile("my.proj", content).Path;
 
-                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
-                File.WriteAllText(projectPath, content);
+            var msbuildParameters = "\"" + projectPath + "\"";
 
-                var msbuildParameters = "\"" + projectPath + "\"";
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
 
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
-                successfulExit.ShouldBeTrue();
-
-                output.ShouldContain("[A=]");
-            }
-            finally
-            {
-                File.Delete(projectPath);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
-            }
+            output.ShouldContain("[A=]");
         }
 
         /// <summary>
@@ -1819,7 +1886,7 @@ namespace Microsoft.Build.UnitTests
             internal IgnoreProjectExtensionsHelper(string[] filesInDirectory)
             {
                 _directoryFileNameList = new List<string>();
-                foreach (string file in filesInDirectory)
+                foreach (var file in filesInDirectory)
                 {
                     _directoryFileNameList.Add(file);
                 }
@@ -2372,13 +2439,13 @@ $@"<Project>
         }
 
         [Theory]
-        [InlineData("-logger:,\"nonExistentlogger.dll\",IsOptional;Foo")]
-        [InlineData("-logger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo")]
-        [InlineData("-logger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC")]
-        [InlineData("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional;Foo")]
-        [InlineData("-distributedlogger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo")]
-        [InlineData("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC")]
-        public void MissingOptionalLoggersAreIgnored(string logger)
+        [InlineData("-logger:,\"nonExistentlogger.dll\",IsOptional;Foo", "nonExistentLogger.dll")]
+        [InlineData("-logger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo", "ClassA")]
+        [InlineData("-logger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC", "nonExistentLogger.dll")]
+        [InlineData("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional;Foo", "nonExistentLogger.dll")]
+        [InlineData("-distributedlogger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo", "ClassA")]
+        [InlineData("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC", "nonExistentLogger.dll")]
+        public void MissingOptionalLoggersAreIgnored(string logger, string expectedLoggerName)
         {
             string projectString =
                 "<Project>" +
@@ -2392,7 +2459,7 @@ $@"<Project>
             var output = RunnerUtilities.ExecMSBuild(parametersLoggerOptional, out bool successfulExit, _output);
             successfulExit.ShouldBe(true);
             output.ShouldContain("Hello", customMessage: output);
-            output.ShouldContain("The specified logger could not be created and will not be used.", customMessage: output);
+            output.ShouldContain($"The specified logger \"{expectedLoggerName}\" could not be created and will not be used.", customMessage: output);
         }
 
         [Theory]

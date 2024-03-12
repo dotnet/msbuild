@@ -21,6 +21,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Instance;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -34,6 +35,7 @@ using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 namespace Microsoft.Build.Execution
 {
     using Utilities = Microsoft.Build.Internal.Utilities;
+
     /// <summary>
     /// Enum for controlling project instance creation
     /// </summary>
@@ -124,7 +126,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Items in the project. This is a dictionary of ordered lists of a single type of items keyed by item type.
         /// </summary>
-        private ItemDictionary<ProjectItemInstance> _items;
+        private IItemDictionary<ProjectItemInstance> _items;
 
         /// <summary>
         /// Items organized by evaluatedInclude value
@@ -151,7 +153,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The item definitions from the parent Project.
         /// </summary>
-        private RetrievableEntryHashSet<ProjectItemDefinitionInstance> _itemDefinitions;
+        private IRetrievableEntryHashSet<ProjectItemDefinitionInstance> _itemDefinitions;
 
         /// <summary>
         /// The HostServices to use during a build.
@@ -389,6 +391,82 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Creates a ProjectInstance from an immutable <see cref="Project"/>.
+        /// The resulting <see cref="ProjectInstance"/> object wraps the <see cref="Project"/>
+        /// object. Unlike the ProjectInstance(Project project, ProjectInstanceSettings settings)
+        /// constructor, the properties and items are not cloned.
+        /// </summary>
+        /// <param name="linkedProject">The immutable <see cref="Project"/>.</param>
+        /// <param name="fastItemLookupNeeded">Whether the fast item lookup cache is required.</param>
+        private ProjectInstance(Project linkedProject, bool fastItemLookupNeeded)
+        {
+            ErrorUtilities.VerifyThrowInternalNull(linkedProject, nameof(linkedProject));
+
+            var projectPath = linkedProject.FullPath;
+            _directory = Path.GetDirectoryName(projectPath);
+            _projectFileLocation = ElementLocation.Create(projectPath);
+            _hostServices = linkedProject.ProjectCollection.HostServices;
+            _isImmutable = true;
+
+            EvaluationId = linkedProject.EvaluationCounter;
+
+            // ProjectProperties
+            InitializeImmutableProjectPropertyInstances(linkedProject.Properties);
+            var projectPropertiesConverter = GetImmutableElementCollectionConverter<ProjectProperty, ProjectPropertyInstance>(linkedProject.Properties);
+            _properties = new PropertyDictionary<ProjectPropertyInstance>(projectPropertiesConverter);
+
+            // ProjectItemDefinitions
+            InitializeImmutableProjectItemDefinitionInstances(linkedProject.ItemDefinitions);
+            _itemDefinitions = GetImmutableElementCollectionConverter<ProjectItemDefinition, ProjectItemDefinitionInstance>(linkedProject.ItemDefinitions);
+
+            // ProjectItems
+            InitializeImmutableProjectItemInstances(linkedProject.Items);
+            var itemsByType = linkedProject.Items as IDictionary<string, ICollection<ProjectItem>>;
+            _items = new ImmutableItemDictionary<ProjectItem, ProjectItemInstance>(itemsByType, linkedProject.Items);
+
+            // ItemsByEvaluatedInclude
+            if (fastItemLookupNeeded)
+            {
+                _itemsByEvaluatedInclude = new MultiDictionary<string, ProjectItemInstance>(StringComparer.OrdinalIgnoreCase);
+                foreach (var item in linkedProject.Items)
+                {
+                    if (item is IImmutableInstanceProvider<ProjectItemInstance> immutableInstanceProvider)
+                    {
+                        _itemsByEvaluatedInclude.Add(item.EvaluatedInclude, immutableInstanceProvider.ImmutableInstance);
+                    }
+                }
+            }
+
+            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(linkedProject.GlobalPropertiesCount);
+            foreach (var property in linkedProject.GlobalPropertiesEnumerable)
+            {
+                _globalProperties.Set(ProjectPropertyInstance.Create(property.Key, property.Value));
+            }
+
+            CreateEnvironmentVariablePropertiesSnapshot(linkedProject.ProjectCollection.EnvironmentProperties);
+            CreateTargetsSnapshot(linkedProject.Targets, null, null, null, null);
+            CreateImportsSnapshot(linkedProject.Imports, linkedProject.ImportsIncludingDuplicates);
+
+            Toolset = linkedProject.ProjectCollection.GetToolset(linkedProject.ToolsVersion);
+            SubToolsetVersion = linkedProject.SubToolsetVersion;
+            TaskRegistry = new TaskRegistry(Toolset, linkedProject.ProjectCollection.ProjectRootElementCache);
+
+            ProjectRootElementCache = linkedProject.ProjectCollection.ProjectRootElementCache;
+
+            EvaluatedItemElements = new List<ProjectItemElement>(linkedProject.Items.Count);
+            foreach (var item in linkedProject.Items)
+            {
+                EvaluatedItemElements.Add(item.Xml);
+            }
+
+            _usingDifferentToolsVersionFromProjectFile = false;
+            _originalProjectToolsVersion = linkedProject.ToolsVersion;
+            _explicitToolsVersionSpecified = linkedProject.SubToolsetVersion != null;
+
+            _isImmutable = true;
+        }
+
+        /// <summary>
         /// Creates a ProjectInstance directly.
         /// No intermediate Project object is created.
         /// This is ideal if the project is simply going to be built, and not displayed or edited.
@@ -498,7 +576,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, ILoggingService loggingService, int visualStudioVersionFromSolution, ProjectCollection projectCollection, ISdkResolverService sdkResolverService, int submissionId)
         {
-            BuildEventContext buildEventContext = new BuildEventContext(0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+            BuildEventContext buildEventContext = new BuildEventContext(submissionId, 0, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
             Initialize(xml, globalProperties, toolsVersion, null, visualStudioVersionFromSolution, new BuildParameters(projectCollection), loggingService, buildEventContext, sdkResolverService, submissionId);
         }
 
@@ -783,6 +861,51 @@ namespace Microsoft.Build.Execution
                 options.EvaluationContext,
                 options.DirectoryCacheFactory,
                 options.Interactive);
+        }
+
+        /// <summary>
+        /// Create a ProjectInstance from an immutable project source.
+        /// </summary>
+        /// <param name="project">The immutable <see cref="Project"/> on which the ProjectInstance is based.</param>
+        /// <param name="settings">The <see cref="ProjectInstanceSettings"/> to use.</param>
+        public static ProjectInstance FromImmutableProjectSource(Project project, ProjectInstanceSettings settings)
+        {
+            bool fastItemLookupNeeded = settings.HasFlag(ProjectInstanceSettings.ImmutableWithFastItemLookup);
+            return new ProjectInstance(project, fastItemLookupNeeded);
+        }
+
+        private static ImmutableElementCollectionConverter<TCached, T> GetImmutableElementCollectionConverter<TCached, T>(
+            ICollection<TCached> elementsCollection)
+            where T : class, IKeyed
+        {
+            // The elementsCollection we receive here is implemented in CPS as a special collection
+            // that is both IDictionary<string, TCached> and also IDictionary<(string, int, int), TCached>.
+            // This allows it to represent the fundamental operations of an IRetrievableEntryHashSet.
+            // The IDictionary<(string, int, int), TCached> interface is used to handle the
+            // IRetrievableEntryHashSet's Get(string key, int index, int length) method. Here we take
+            // elementsCollection and put it into an ImmutableElementCollectionConverter, which
+            // represents the elementsCollection as an IRetrievableEntryHashSet<T>.
+            // That IRetrievableEntryHashSet is then used either directly or as a backing source for
+            // another collection wrapper (e.g. PropertyDictionary).
+            if (elementsCollection is not IDictionary<string, TCached> elementsDictionary ||
+                elementsCollection is not IDictionary<(string, int, int), TCached> constrainedElementsDictionary)
+            {
+                throw new ArgumentException(nameof(elementsCollection));
+            }
+
+            return new ImmutableElementCollectionConverter<TCached, T>(elementsDictionary, constrainedElementsDictionary);
+        }
+
+        private static ImmutableElementCollectionConverter<TCached, T> GetImmutableElementCollectionConverter<TCached, T>(
+            IDictionary<string, TCached> elementsDictionary)
+            where T : class, IKeyed
+        {
+            if (elementsDictionary is not IDictionary<(string, int, int), TCached> constrainedElementsDictionary)
+            {
+                throw new ArgumentException(nameof(elementsDictionary));
+            }
+
+            return new ImmutableElementCollectionConverter<TCached, T>(elementsDictionary, constrainedElementsDictionary);
         }
 
         /// <summary>
@@ -1101,7 +1224,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Gets the items
         /// </summary>
-        ItemDictionary<ProjectItemInstance> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Items
+        IItemDictionary<ProjectItemInstance> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Items
         {
             [DebuggerStepThrough]
             get
@@ -1283,7 +1406,7 @@ namespace Microsoft.Build.Execution
         /// Actual collection of items in this project,
         /// for the build to start with.
         /// </summary>
-        internal ItemDictionary<ProjectItemInstance> ItemsToBuildWith
+        internal IItemDictionary<ProjectItemInstance> ItemsToBuildWith
         {
             [DebuggerStepThrough]
             get
@@ -2360,7 +2483,7 @@ namespace Microsoft.Build.Execution
 
             if (loggers != null)
             {
-                parameters.Loggers = (loggers is ICollection<ILogger>) ? ((ICollection<ILogger>)loggers) : new List<ILogger>(loggers);
+                parameters.Loggers = (loggers is ICollection<ILogger> loggersCollection) ? loggersCollection : new List<ILogger>(loggers);
 
                 // Enables task parameter logging based on whether any of the loggers attached
                 // to the Project have their verbosity set to Diagnostic. If no logger has
@@ -2693,6 +2816,41 @@ namespace Microsoft.Build.Execution
             }
         }
 
+        private static void InitializeImmutableProjectItemDefinitionInstances(IDictionary<string, ProjectItemDefinition> projectItemDefinitions)
+        {
+            foreach (var projectItemDefinition in projectItemDefinitions.Values)
+            {
+                if (projectItemDefinition is IImmutableInstanceProvider<ProjectItemDefinitionInstance> immutableInstanceProvider)
+                {
+                    immutableInstanceProvider.ImmutableInstance = new ProjectItemDefinitionInstance(projectItemDefinition);
+                }
+            }
+        }
+
+        private static void InitializeImmutableProjectPropertyInstances(ICollection<ProjectProperty> projectProperties)
+        {
+            foreach (var projectProperty in projectProperties)
+            {
+                if (projectProperty is IImmutableInstanceProvider<ProjectPropertyInstance> immutableInstanceProvider)
+                {
+                    immutableInstanceProvider.ImmutableInstance = InstantiateProjectPropertyInstance(projectProperty, isImmutable: true);
+                }
+            }
+        }
+
+        private static ProjectPropertyInstance InstantiateProjectPropertyInstance(ProjectProperty property, bool isImmutable)
+        {
+            // Allow reserved property names, since this is how they are added to the project instance.
+            // The caller has prevented users setting them themselves.
+            var instance = ProjectPropertyInstance.Create(
+                                property.Name,
+                                ((IProperty)property).EvaluatedValueEscaped,
+                                true /* MAY be reserved name */,
+                                isImmutable,
+                                property.IsEnvironmentProperty);
+            return instance;
+        }
+
         /// <summary>
         /// Common code for the constructors that evaluate directly.
         /// Global properties may be null.
@@ -2934,44 +3092,60 @@ namespace Microsoft.Build.Execution
 
             foreach (ProjectItem item in items)
             {
-                List<ProjectItemDefinitionInstance> inheritedItemDefinitions = null;
-
-                if (item.InheritedItemDefinitions != null)
-                {
-                    inheritedItemDefinitions = new List<ProjectItemDefinitionInstance>(item.InheritedItemDefinitions.Count);
-
-                    foreach (ProjectItemDefinition inheritedItemDefinition in item.InheritedItemDefinitions)
-                    {
-                        // All item definitions in this list should be present in the collection of item definitions
-                        // on the project we are cloning.
-                        inheritedItemDefinitions.Add(_itemDefinitions[inheritedItemDefinition.ItemType]);
-                    }
-                }
-
-                CopyOnWritePropertyDictionary<ProjectMetadataInstance> directMetadata = null;
-
-                if (item.DirectMetadata != null)
-                {
-                    directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
-
-                    IEnumerable<ProjectMetadataInstance> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum => new ProjectMetadataInstance(directMetadatum));
-                    directMetadata.ImportProperties(projectMetadataInstances);
-                }
-
-                // For externally constructed ProjectItem, fall back to the publicly available EvaluateInclude
-                var evaluatedIncludeEscaped = ((IItem)item).EvaluatedIncludeEscaped;
-                evaluatedIncludeEscaped ??= item.EvaluatedInclude;
-                var evaluatedIncludeBeforeWildcardExpansionEscaped = item.EvaluatedIncludeBeforeWildcardExpansionEscaped;
-                evaluatedIncludeBeforeWildcardExpansionEscaped ??= item.EvaluatedInclude;
-
-                ProjectItemInstance instance = new ProjectItemInstance(this, item.ItemType, evaluatedIncludeEscaped, evaluatedIncludeBeforeWildcardExpansionEscaped, directMetadata, inheritedItemDefinitions, item.Xml.ContainingProject.EscapedFullPath);
-
+                ProjectItemInstance instance = InstantiateProjectItemInstance(item);
                 _items.Add(instance);
-
                 projectItemToInstanceMap?.Add(item, instance);
             }
 
             return projectItemToInstanceMap;
+        }
+
+        private void InitializeImmutableProjectItemInstances(ICollection<ProjectItem> projectItems)
+        {
+            foreach (var projectItem in projectItems)
+            {
+                if (projectItem is IImmutableInstanceProvider<ProjectItemInstance> immutableInstanceProvider)
+                {
+                    ProjectItemInstance instance = InstantiateProjectItemInstance(projectItem);
+                    immutableInstanceProvider.ImmutableInstance = instance;
+                }
+            }
+        }
+
+        private ProjectItemInstance InstantiateProjectItemInstance(ProjectItem item)
+        {
+            List<ProjectItemDefinitionInstance> inheritedItemDefinitions = null;
+
+            if (item.InheritedItemDefinitions != null)
+            {
+                inheritedItemDefinitions = new List<ProjectItemDefinitionInstance>(item.InheritedItemDefinitions.Count);
+
+                foreach (ProjectItemDefinition inheritedItemDefinition in item.InheritedItemDefinitions)
+                {
+                    // All item definitions in this list should be present in the collection of item definitions
+                    // on the project we are cloning.
+                    inheritedItemDefinitions.Add(_itemDefinitions[inheritedItemDefinition.ItemType]);
+                }
+            }
+
+            CopyOnWritePropertyDictionary<ProjectMetadataInstance> directMetadata = null;
+
+            if (item.DirectMetadata != null)
+            {
+                directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+
+                IEnumerable<ProjectMetadataInstance> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum => new ProjectMetadataInstance(directMetadatum));
+                directMetadata.ImportProperties(projectMetadataInstances);
+            }
+
+            // For externally constructed ProjectItem, fall back to the publicly available EvaluateInclude
+            var evaluatedIncludeEscaped = ((IItem)item).EvaluatedIncludeEscaped;
+            evaluatedIncludeEscaped ??= item.EvaluatedInclude;
+            var evaluatedIncludeBeforeWildcardExpansionEscaped = item.EvaluatedIncludeBeforeWildcardExpansionEscaped;
+            evaluatedIncludeBeforeWildcardExpansionEscaped ??= item.EvaluatedInclude;
+
+            ProjectItemInstance instance = new ProjectItemInstance(this, item.ItemType, evaluatedIncludeEscaped, evaluatedIncludeBeforeWildcardExpansionEscaped, directMetadata, inheritedItemDefinitions, item.Xml.ContainingProject.EscapedFullPath);
+            return instance;
         }
 
         /// <summary>
@@ -2979,7 +3153,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void CreateItemDefinitionsSnapshot(IDictionary<string, ProjectItemDefinition> itemDefinitions)
         {
-            _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(MSBuildNameIgnoreCaseComparer.Default);
+            _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(itemDefinitions.Count, MSBuildNameIgnoreCaseComparer.Default);
 
             foreach (ProjectItemDefinition definition in itemDefinitions.Values)
             {
@@ -2996,9 +3170,7 @@ namespace Microsoft.Build.Execution
 
             foreach (ProjectProperty property in properties)
             {
-                // Allow reserved property names, since this is how they are added to the project instance.
-                // The caller has prevented users setting them themselves.
-                ProjectPropertyInstance instance = ProjectPropertyInstance.Create(property.Name, ((IProperty)property).EvaluatedValueEscaped, true /* MAY be reserved name */, isImmutable, property.IsEnvironmentProperty);
+                ProjectPropertyInstance instance = InstantiateProjectPropertyInstance(property, isImmutable);
                 _properties.Set(instance);
             }
         }

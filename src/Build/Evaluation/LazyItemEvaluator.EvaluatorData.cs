@@ -30,7 +30,7 @@ namespace Microsoft.Build.Evaluation
                 _itemsByType = itemsByType;
             }
 
-            public ItemDictionary<I> Items
+            public IItemDictionary<I> Items
             {
                 get
                 {

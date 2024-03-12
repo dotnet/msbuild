@@ -576,8 +576,7 @@ namespace Microsoft.Build.Execution
                 LogDeferredMessages(loggingService, _deferredBuildMessages);
 
                 // Log known deferred telemetry
-                KnownTelemetry.LoggingConfigurationTelemetry.UpdateEventProperties();
-                loggingService.LogTelemetry(buildEventContext: null, KnownTelemetry.LoggingConfigurationTelemetry.EventName, KnownTelemetry.LoggingConfigurationTelemetry.Properties);
+                loggingService.LogTelemetry(buildEventContext: null, KnownTelemetry.LoggingConfigurationTelemetry.EventName, KnownTelemetry.LoggingConfigurationTelemetry.GetProperties());
 
                 InitializeCaches();
 
@@ -1090,8 +1089,7 @@ namespace Microsoft.Build.Execution
                             }
                             _buildTelemetry.Host = host;
 
-                            _buildTelemetry.UpdateEventProperties();
-                            loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.Properties);
+                            loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;
                         }
@@ -1334,6 +1332,7 @@ namespace Microsoft.Build.Execution
                             _projectCacheService.InitializePluginsForVsScenario(
                                 ProjectCacheDescriptors.Values,
                                 resolvedConfiguration,
+                                submission.BuildRequestData.TargetNames,
                                 _executionCancellationTokenSource.Token);
                         }
 
@@ -1453,13 +1452,20 @@ namespace Microsoft.Build.Execution
             }
 
             ErrorUtilities.VerifyThrow(FileUtilities.IsSolutionFilename(config.ProjectFullPath), "{0} is not a solution", config.ProjectFullPath);
+
+            var buildEventContext = request.BuildEventContext;
+            if (buildEventContext == BuildEventContext.Invalid)
+            {
+                buildEventContext = new BuildEventContext(request.SubmissionId, 0, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+            }
+
             var instances = ProjectInstance.LoadSolutionForBuild(
                 config.ProjectFullPath,
                 config.GlobalProperties,
                 config.ExplicitToolsVersionSpecified ? config.ToolsVersion : null,
                 _buildParameters,
                 ((IBuildComponentHost)this).LoggingService,
-                request.BuildEventContext,
+                buildEventContext,
                 false /* loaded by solution parser*/,
                 config.RequestedTargets,
                 SdkResolverService,
@@ -1948,13 +1954,22 @@ namespace Microsoft.Build.Execution
 
             if (submission.BuildRequestData.GraphBuildOptions.Build)
             {
-                _projectCacheService.InitializePluginsForGraph(projectGraph, _executionCancellationTokenSource.Token);
+                _projectCacheService.InitializePluginsForGraph(projectGraph, submission.BuildRequestData.TargetNames, _executionCancellationTokenSource.Token);
 
-                var targetListTask = projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames);
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode = projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames);
 
-                DumpGraph(projectGraph, targetListTask);
+                DumpGraph(projectGraph, targetsPerNode);
 
-                resultsPerNode = BuildGraph(projectGraph, targetListTask, submission.BuildRequestData);
+                // Non-graph builds verify this in RequestBuilder, but for graph builds we need to disambiguate
+                // between entry nodes and other nodes in the graph since only entry nodes should error. Just do
+                // the verification expicitly before the build even starts.
+                foreach (ProjectGraphNode entryPointNode in projectGraph.EntryPointNodes)
+                {
+                    ImmutableList<string> targetList = targetsPerNode[entryPointNode];
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(targetList.Count > 0, entryPointNode.ProjectInstance.ProjectFileLocation, "NoTargetSpecified");
+                }
+
+                resultsPerNode = BuildGraph(projectGraph, targetsPerNode, submission.BuildRequestData);
             }
             else
             {

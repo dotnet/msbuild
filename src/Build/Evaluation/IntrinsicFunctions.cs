@@ -14,7 +14,6 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
-using Microsoft.NET.StringTools;
 using Microsoft.Win32;
 
 // Needed for DoesTaskHostExistForParameters
@@ -36,7 +35,7 @@ namespace Microsoft.Build.Evaluation
 
         private static readonly Lazy<Regex> RegistrySdkRegex = new Lazy<Regex>(() => new Regex(@"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$", RegexOptions.IgnoreCase));
 
-        private static readonly Lazy<NuGetFrameworkWrapper> NuGetFramework = new Lazy<NuGetFrameworkWrapper>(() => new NuGetFrameworkWrapper());
+        private static readonly Lazy<NuGetFrameworkWrapper> NuGetFramework = new Lazy<NuGetFrameworkWrapper>(() => NuGetFrameworkWrapper.CreateInstance());
 
         /// <summary>
         /// Add two doubles
@@ -399,11 +398,11 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Hash the string independent of bitness, target framework and default codepage of the environment.
+        /// Hash the string independent of bitness and target framework.
         /// </summary>
         internal static int StableStringHash(string toHash)
         {
-            return FowlerNollVo1aHash.ComputeHash32(toHash);
+            return CommunicationsUtilities.GetHashCode(toHash);
         }
 
         /// <summary>
@@ -573,6 +572,11 @@ namespace Microsoft.Build.Evaluation
         internal static bool AreFeaturesEnabled(Version wave)
         {
             return ChangeWaves.AreFeaturesEnabled(wave);
+        }
+
+        internal static string CheckFeatureAvailability(string featureName)
+        {
+            return Features.CheckFeatureAvailability(featureName).ToString();
         }
 
         public static string GetCurrentToolsDirectory()
