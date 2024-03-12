@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -252,7 +253,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "nodemode", "nmode" },                 ParameterizedSwitch.NodeMode,                   null,                           false,          null,                                  false,  false,   "HelpMessage_50_NodeModeSwitch"),
             new ParameterizedSwitchInfo(  new string[] { "maxcpucount", "m" },                  ParameterizedSwitch.MaxCPUCount,                null,                           false,          "MissingMaxCPUCountError",             true,   false,   "HelpMessage_17_MaximumCPUSwitch"),
             new ParameterizedSwitchInfo(  new string[] { "ignoreprojectextensions", "ignore" }, ParameterizedSwitch.IgnoreProjectExtensions,    null,                           true,           "MissingIgnoreProjectExtensionsError", true,   false,   "HelpMessage_19_IgnoreProjectExtensionsSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "toolsversion","tv" },                 ParameterizedSwitch.ToolsVersion,               null,                           false,          "MissingToolsVersionError",            true,   false,   "HelpMessage_23_To  olsVersionSwitch"),
+            new ParameterizedSwitchInfo(  new string[] { "toolsversion","tv" },                 ParameterizedSwitch.ToolsVersion,               null,                           false,          "MissingToolsVersionError",            true,   false,   "HelpMessage_23_ToolsVersionSwitch"),
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters", "flp" },       ParameterizedSwitch.FileLoggerParameters,       null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters1", "flp1" },     ParameterizedSwitch.FileLoggerParameters1,      null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters2", "flp2" },     ParameterizedSwitch.FileLoggerParameters2,      null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
@@ -369,6 +370,43 @@ namespace Microsoft.Build.CommandLine
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Get the distinct parameterized switchs map resource ids.
+        /// </summary>
+        /// <returns>Parameterized switches map resource ids.</returns>
+        internal static string[] GetParameterizedSwitchResourceIds()
+        {
+            List<string> parameterizedSwitchResourceIds = new List<string>();
+            for (int i = 0; i < (int)ParameterizedSwitch.NumberOfParameterizedSwitches; i++)
+            {
+                string resourceId = s_parameterizedSwitchesMap[i].resourceId;
+                if (!parameterizedSwitchResourceIds.Contains(resourceId) && !string.IsNullOrEmpty(resourceId))
+                {
+                    parameterizedSwitchResourceIds.Add(s_parameterizedSwitchesMap[i].resourceId);
+                }
+            }
+            return[.. parameterizedSwitchResourceIds];
+        }
+
+        /// <summary>
+        /// Get the distinct parameterless switchs map resource ids.
+        /// </summary>
+        /// <returns>Parameterless switchs map resource ids</returns>
+        internal static string[] GetParameterlessSwitchResourceIds()
+        {
+            List<string> parameterlessSwitchResourceIds = new List<string>();
+            for (int i = 0; i < (int)ParameterlessSwitch.NumberOfParameterlessSwitches; i++)
+            {
+                string resourceId = s_parameterlessSwitchesMap[i].resourceId;
+                if (!parameterlessSwitchResourceIds.Contains(resourceId) && !string.IsNullOrEmpty(resourceId))
+                {
+                    parameterlessSwitchResourceIds.Add(s_parameterlessSwitchesMap[i].resourceId);
+                }
+            }
+
+            return[.. parameterlessSwitchResourceIds];
         }
 
         /// <summary>

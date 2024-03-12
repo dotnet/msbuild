@@ -125,14 +125,14 @@ Esta marca es experimental y puede que no funcione según lo previsto.
       </trans-unit>
       <trans-unit id="HelpMessage_43_GetPropertySwitch">
         <source>  -getProperty:propertyName,...
-                     Write out the value of the property or properties after
-                     evaluation, without executing the build, or if either
+                     Write out the value of one or more specified properties
+                     after evaluation, without executing the build, or if either
                      the -targets option or the -getTargetResult option is
                      used, write out the values after the build.
     </source>
         <target state="new">  -getProperty:propertyName,...
-                     Write out the value of the property or properties after
-                     evaluation, without executing the build, or if either
+                     Write out the value of one or more specified properties
+                     after evaluation, without executing the build, or if either
                      the -targets option or the -getTargetResult option is
                      used, write out the values after the build.
     </target>
@@ -143,15 +143,17 @@ Esta marca es experimental y puede que no funcione según lo previsto.
       </trans-unit>
       <trans-unit id="HelpMessage_44_GetItemSwitch">
         <source>  -getItem:itemName,...
-                     Write out the value of the item or items after evaluation
-                     without executing the build, or if either the -targets
-                     option or the -getTargetResult option is used, write out
+                     Write out the value of one or more specified items and
+                     their associated metadata after evaluation without
+                     executing the build, or if either the -targets option
+                     or the -getTargetResult option is used, write out
                      the values after the build.
     </source>
         <target state="new">  -getItem:itemName,...
-                     Write out the value of the item or items after evaluation
-                     without executing the build, or if either the -targets
-                     option or the -getTargetResult option is used, write out
+                     Write out the value of one or more specified items and
+                     their associated metadata after evaluation without
+                     executing the build, or if either the -targets option
+                     or the -getTargetResult option is used, write out
                      the values after the build.
     </target>
         <note>
@@ -161,10 +163,10 @@ Esta marca es experimental y puede que no funcione según lo previsto.
       </trans-unit>
       <trans-unit id="HelpMessage_45_GetTargetResultSwitch">
         <source>  -getTargetResult:targetName,...
-                     Write out the output values of the specified targets.
+                     Write out the output value of one or more targets.
     </source>
         <target state="new">  -getTargetResult:targetName,...
-                     Write out the output values of the specified targets.
+                     Write out the output value of one or more targets.
     </target>
         <note>
       LOCALIZATION: "-getTargetResult" should not be localized.
