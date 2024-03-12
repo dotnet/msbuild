@@ -4461,6 +4461,7 @@ namespace Microsoft.Build.CommandLine
             // Show the versioning information if the user has not disabled it or msbuild is not running in a mode
             //  where it is not appropriate to show the versioning information (information querying mode that can be plugged into CLI scripts,
             //  terminal logger mode, where we want to display only the most relevant info, while output is not meant for investigation).
+            // NOTE: response files are not reflected in this check. So enabling TL in response file will lead to version message still being shown.
             bool shouldShowLogo = !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoLogo] &&
                                   !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Preprocess) &&
                                   !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetProperty) &&
