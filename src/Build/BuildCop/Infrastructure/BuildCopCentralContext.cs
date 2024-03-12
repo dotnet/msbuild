@@ -16,8 +16,8 @@ namespace Microsoft.Build.BuildCop.Infrastructure;
 internal sealed class BuildCopCentralContext
 {
     private record CallbackRegistry(
-        List<(BuildAnalyzerWrapper, Action<BuildAnalysisContext<EvaluatedPropertiesAnalysisData>>)> EvaluatedPropertiesActions,
-        List<(BuildAnalyzerWrapper, Action<BuildAnalysisContext<ParsedItemsAnalysisData>>)> ParsedItemsActions)
+        List<(BuildAnalyzerWrapper, Action<BuildCopDataContext<EvaluatedPropertiesAnalysisData>>)> EvaluatedPropertiesActions,
+        List<(BuildAnalyzerWrapper, Action<BuildCopDataContext<ParsedItemsAnalysisData>>)> ParsedItemsActions)
     {
         public CallbackRegistry() : this([],[]) { }
     }
@@ -30,21 +30,21 @@ internal sealed class BuildCopCentralContext
     internal bool HasEvaluatedPropertiesActions => _globalCallbacks.EvaluatedPropertiesActions.Any();
     internal bool HasParsedItemsActions => _globalCallbacks.ParsedItemsActions.Any();
 
-    internal void RegisterEvaluatedPropertiesAction(BuildAnalyzerWrapper analyzer, Action<BuildAnalysisContext<EvaluatedPropertiesAnalysisData>> evaluatedPropertiesAction)
+    internal void RegisterEvaluatedPropertiesAction(BuildAnalyzerWrapper analyzer, Action<BuildCopDataContext<EvaluatedPropertiesAnalysisData>> evaluatedPropertiesAction)
         // Here we might want to communicate to node that props need to be sent.
         //  (it was being communicated via MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION)
         => RegisterAction(analyzer, evaluatedPropertiesAction, _globalCallbacks.EvaluatedPropertiesActions);
 
-    internal void RegisterParsedItemsAction(BuildAnalyzerWrapper analyzer, Action<BuildAnalysisContext<ParsedItemsAnalysisData>> parsedItemsAction)
+    internal void RegisterParsedItemsAction(BuildAnalyzerWrapper analyzer, Action<BuildCopDataContext<ParsedItemsAnalysisData>> parsedItemsAction)
         => RegisterAction(analyzer, parsedItemsAction, _globalCallbacks.ParsedItemsActions);
 
     private void RegisterAction<T>(
         BuildAnalyzerWrapper wrappedAnalyzer,
-        Action<BuildAnalysisContext<T>> handler,
-        List<(BuildAnalyzerWrapper, Action<BuildAnalysisContext<T>>)> handlersRegistry)
+        Action<BuildCopDataContext<T>> handler,
+        List<(BuildAnalyzerWrapper, Action<BuildCopDataContext<T>>)> handlersRegistry)
         where T : AnalysisData
     {
-        void WrappedHandler(BuildAnalysisContext<T> context)
+        void WrappedHandler(BuildCopDataContext<T> context)
         {
             using var _ = wrappedAnalyzer.StartSpan();
             handler(context);
@@ -79,7 +79,7 @@ internal sealed class BuildCopCentralContext
             loggingContext, resultHandler);
 
     private void RunRegisteredActions<T>(
-        List<(BuildAnalyzerWrapper, Action<BuildAnalysisContext<T>>)> registeredCallbacks,
+        List<(BuildAnalyzerWrapper, Action<BuildCopDataContext<T>>)> registeredCallbacks,
         T analysisData,
         LoggingContext loggingContext,
         Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCopResult> resultHandler)
@@ -122,7 +122,7 @@ internal sealed class BuildCopCentralContext
 
                 // TODO: if the input data supports that - check the configPerRule[0].EvaluationAnalysisScope
 
-                BuildAnalysisContext<T> context = new BuildAnalysisContext<T>(
+                BuildCopDataContext<T> context = new BuildCopDataContext<T>(
                     analyzerCallback.Item1,
                     loggingContext,
                     configPerRule,

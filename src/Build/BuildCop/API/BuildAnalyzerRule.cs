@@ -49,7 +49,7 @@ public class BuildAnalyzerRule
     public string Category { get; }
 
     /// <summary>
-    /// Message format that will be used by the actual findings (<see cref="BuildCopResult"/>) - those will just supply the actual arguments.
+    /// Message format that will be used by the actual reports (<see cref="BuildCopResult"/>) - those will just supply the actual arguments.
     /// </summary>
     public string MessageFormat { get; }
 

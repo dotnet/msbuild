@@ -42,7 +42,8 @@ namespace Microsoft.Build.Framework
     {
         private static readonly Dictionary<string, FeatureStatus> _featureStatusMap = new Dictionary<string, FeatureStatus>
         {
-            // TODO: Fill in the dictionary with the features and their status
+            // Fill in the dictionary with the features and their status
+            { "BuildCop.Beta", FeatureStatus.Preview }
         };
 
         /// <summary>

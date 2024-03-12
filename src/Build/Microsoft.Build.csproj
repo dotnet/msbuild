@@ -165,7 +165,7 @@
     <Compile Include="BuildCop\Infrastructure\NullBuildCopManager.cs" />
     <Compile Include="BuildCop\Infrastructure\NullBuildCopManagerProvider.cs" />
     <Compile Include="BuildCop\Infrastructure\TracingReporter.cs" />
-    <Compile Include="BuildCop\OM\BuildAnalysisContext.cs" />
+    <Compile Include="BuildCop\OM\BuildCopDataContext.cs" />
     <Compile Include="BuildCop\API\BuildAnalyzer.cs" />
     <Compile Include="BuildCop\API\BuildAnalyzerConfiguration.cs" />
     <Compile Include="BuildCop\API\BuildCopResult.cs" />
@@ -181,7 +181,7 @@
     <Compile Include="BuildCop\Infrastructure\BuildCopManagerProvider.cs" />
     <Compile Include="BuildCop\Infrastructure\ConfigurationProvider.cs" />
     <Compile Include="BuildCop\Infrastructure\CustomConfigurationData.cs" />
-    <Compile Include="BuildCop\Infrastructure\IBuildCopContext.cs" />
+    <Compile Include="BuildCop\API\IBuildCopRegistrationContext.cs" />
     <Compile Include="BuildCop\Infrastructure\IBuildCopManager.cs" />
     <Compile Include="BuildCop\Logging\IBuildAnalysisLoggingContext.cs" />
     <Compile Include="BuildCop\Logging\IBuildAnalysisLoggingContextFactory.cs" />

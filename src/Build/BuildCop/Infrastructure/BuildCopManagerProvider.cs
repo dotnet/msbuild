@@ -220,7 +220,7 @@ internal sealed class BuildCopManagerProvider : IBuildCopManagerProvider
 
                 // Create the wrapper and register to central context
                 wrapper.StartNewProject(projectFullPath, configurations);
-                var wrappedContext = new BuildCopContext(wrapper, _buildCopCentralContext);
+                var wrappedContext = new BuildCopRegistrationContext(wrapper, _buildCopCentralContext);
                 analyzer.RegisterActions(wrappedContext);
             }
             else
