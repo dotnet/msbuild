@@ -1351,7 +1351,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="MissingGetResultFileError">
         <source>MSBUILD : error MSB1068: Must provide a file for the getResultOutputFile switch.</source>
-        <target state="new">MSBUILD : error MSB1068: Must provide a file for the getResultOutputFile switch.</target>
+        <target state="translated">MSBUILD : error MSB1068: deve ser fornecido um arquivo para a opção getResultOutputFile.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1068: "}UE: This happens if the user does something like "msbuild.exe -getResultOutputFile". The user must pass in an actual file
       following the switch, as in "msbuild.exe -getTargetResult:blah -getResultOutputFile:blah.txt".
