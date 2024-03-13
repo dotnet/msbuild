@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Build.CommandLine;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
@@ -894,6 +895,7 @@ namespace Microsoft.Build.UnitTests
 
             // Restore the current UI culture back to the way it was at the beginning of this unit test.
             thisThread.CurrentUICulture = originalUICulture;
+            MSBuildApp.SetConsoleUI();
         }
 
 
@@ -2606,6 +2608,41 @@ EndGlobal
                     MessageImportance.Low => shouldLogHigh && shouldLogNormal && shouldLogLow,
                     _ => false
                 };
+            }
+        }
+
+        [Theory]
+        [InlineData("", true)]
+        [InlineData("/tl:true", false)]
+        [InlineData("/nologo", false)]
+        [InlineData("/getProperty:p", false)]
+        public void EndToEndVersionMessage(string arguments, bool shouldContainVersionMessage)
+        {
+            using TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create();
+
+            string projectContents = ObjectModelHelpers.CleanupFileContents("""
+                                                                            <Project>
+                                                                                <Target Name="Hello">
+                                                                                </Target>
+                                                                            </Project>
+                                                                            """);
+
+            TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents);
+
+            string output = RunnerUtilities.ExecMSBuild($"{arguments} \"{testProject.ProjectFile}\"", out bool success, _output);
+            success.ShouldBeTrue();
+
+            string expectedVersionString =
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildVersionMessage",
+                    ProjectCollection.DisplayVersion, NativeMethodsShared.FrameworkName);
+
+            if (shouldContainVersionMessage)
+            {
+                output.ShouldContain(expectedVersionString);
+            }
+            else
+            {
+                output.ShouldNotContain(expectedVersionString);
             }
         }
 
