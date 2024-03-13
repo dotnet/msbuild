@@ -7,7 +7,6 @@ The feature is meant to help customers to improve and understand quality of thei
 
 # Table of Contents
 
-- [Areas of Ownership](#areas-of-ownership)
 - [Terminology](#terminology)
 - [North Star / Longer-term vision](#north-star-longer-term-vision)
 - [Scope of initial iteration](#scope-of-initial-iteration)
@@ -62,7 +61,7 @@ Majority of following cases are included in appropriate context within the scena
 * Inbox (build-in) analyzers that run during the build execution.
 * Inbox analyzers that run when replaying binlog.
 * Custom authored analyzers, delivered via nuget.
-* Errors and warning in logger, VS error window
+* Errors and warning in logger, VS error window.
 * Codes will be distinguishable from standard build warnings/error (to prevent easy mixups and attempts to configure standard msbuild warnings/errors via editorconfig), but otherwise the outputs are very similar.
 * Default opt-ins and levels for inbox analyzers set by sdk version (via [`$SdkAnalysisLevel`]((https://github.com/dotnet/designs/blob/main/proposed/sdk-analysis-level.md)))
 * Custom analyzers opted in via `PackageReference` of a particular nuget with the analyzer.

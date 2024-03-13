@@ -45,32 +45,34 @@ BuildCheck can source this data either offline from the binlog, or as a plugged 
 
 ## Live Mode Hosting
 
-The BuildCheck infrastructure will be prepared to be available concurrently within the main node as well as in the additional execution nodes. There are 2 reasons for this:
-* BuildCheck will need to recognize custom analyzers packages during the evaluation time - so some basic code related to BuildCheck will need to be present in the execution node.
-* Presence in execution node (as part of the `RequestBuilder`), will allow inbox analyzers to agile leverage data not available within `BuildEventArgs` (while data prooved to be useful should over time be exposed to `BuildEventArgs`)
+Prerequisity: [MSBuild Nodes Orchestration](../../wiki/Nodes-Orchestration.md#orchestration)
+
+The BuildCheck infrastructure will be prepared to be available concurrently within the `entrypoint node` as well as in the additional `worker nodes`. There are 2 reasons for this:
+* BuildCheck will need to recognize custom analyzers packages during the evaluation time - so some basic code related to BuildCheck will need to be present in the worker node.
+* Presence in worker node (as part of the `RequestBuilder`), will allow inbox analyzers to agile leverage data not available within `BuildEventArgs` (while data prooved to be useful should over time be exposed to `BuildEventArgs`)
 
 ## Handling the Distributed Model
 
-We want to get some bnefits (mostly inbox analyzers agility) from hosting BuildCheck infrastructure in execution nodes, but foremost we should prevent leaking the details of this model into public API and OM, until we are sure we cannot achive all goals from just main node from `BuildEventArgs` (which will likely never happen - as the build should be fully reconstructable from the `BuildEventArgs`).
+We want to get some bnefits (mostly inbox analyzers agility) from hosting BuildCheck infrastructure in worker nodes, but foremost we should prevent leaking the details of this model into public API and OM, until we are sure we cannot achive all goals from just entrypoint node from `BuildEventArgs` (which will likely never happen - as the build should be fully reconstructable from the `BuildEventArgs`).
 
 How we'll internally handle the distributed model:
-* Each node will have just a single instance of infrastructure (`IBuildCheckManager`) available (registered via the MSBuild DI - `IBuildComponentHost`). This applies to a main node with inproc execution node as well.
-* Main node will have an MSBuild `ILogger` registered that will enable funneling data from execution nodes BuildChecks to the main node BuildCheck - namely:
-    * Acquisition module will be able to communicated to the main node that particular analyzer should be loaded and instantiated
+* Each node will have just a single instance of infrastructure (`IBuildCheckManager`) available (registered via the MSBuild DI - `IBuildComponentHost`). This applies to a entrypoint node with inproc worker node as well.
+* Entrypoint node will have an MSBuild `ILogger` registered that will enable funneling data from worker nodes BuildChecks to the entrypoint node BuildCheck - namely:
+    * Acquisition module will be able to communicated to the entrypoint node that particular analyzer should be loaded and instantiated
     * Tracing module will be able to send partitioned stats and aggregate them together
-    * Theoretical execution-data-only sourcing inbox analyzer will be able to aggregate data from the whole build context (again - we should use this only for agility purposes, but shoot for analyzer that needs presence only in main node).
+    * Theoretical execution-data-only sourcing inbox analyzer will be able to aggregate data from the whole build context (again - we should use this only for agility purposes, but shoot for analyzer that needs presence only in entrypoint node).
 * Appart from the scenarios above - the BuildCheck infrastructure modules in individual nodes should be able to function independently (namely - load the inbox analyzers that should live in nodes; send the analyzers reports via logging infrastructure; load user configuration from `.editorconfig` and decide on need to enable/disable/configure particular analyzers).
-* Communication from main to execution node between BuildCheck infra modules is not planned.
+* Communication from main to worker node between BuildCheck infra modules is not planned.
 
 ## Analyzers Lifecycle
 
 Planned model:
 * Analyzers factories get registered with the BuildCheck infrastructure (`BuildCheckManager`)
     * For inbox analyzers - this happens on startup.
-    * For custom analyzers - this happens on connecting `ILogger` instance in main node receives acquistion event (`BuildCheckAcquisitionEventArgs`).
+    * For custom analyzers - this happens on connecting `ILogger` instance in entrypoint node receives acquistion event (`BuildCheckAcquisitionEventArgs`).
 * `BuildCheckManager` receives info about new project starting to be build
-    * On main node the information is sourced from `ProjectEvaluationStartedEventArgs`
-    * On execution node this is received from `RequestBuilder.BuildProject`
+    * On entrypoint node the information is sourced from `ProjectEvaluationStartedEventArgs`
+    * On worker node this is received from `RequestBuilder.BuildProject`
 * `BuildCheckManager` calls Configuration module and gets information for all analyzers in it's registry
     * Analyzers with issues in configuration (communicated via `BuildCheckConfigurationException`) will be deregistered for the rest of the build.
     * Global configuration issue (communicated via `BuildCheckConfigurationException`) will lead to defuncting whole BuildCheck.
