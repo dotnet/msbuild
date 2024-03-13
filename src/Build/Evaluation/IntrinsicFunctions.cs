@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
@@ -424,7 +425,10 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Hash the string independent of bitness, target framework and default codepage of the environment.
+        /// We do not want this to be inlined, as then the Expander would call directly the new overload, and hence
+        ///  JIT load the functions from StringTools - so we would not be able to prevent their loading with ChangeWave as we do now.
         /// </summary>
+        [MethodImpl(MethodImplOptions.NoInlining)]
         internal static object StableStringHash(string toHash)
             => StableStringHash(toHash, StringHashingAlgorithm.Legacy);
 
