@@ -267,7 +267,9 @@ namespace Microsoft.Build.CommandLine
             // To not break existing use, keep supporting live logger switches
             new ParameterizedSwitchInfo(  new string[] { "livelogger", "ll", "terminallogger", "tl" }, ParameterizedSwitch.TerminalLogger,      null,                           true,           null,                                  true,   true,    "HelpMessage_47_TerminalLoggerSwitch"),
             new ParameterizedSwitchInfo(  new string[] { "terminalloggerparameters", "tlp" },   ParameterizedSwitch.TerminalLoggerParameters,   null,                           false,          "MissingTerminalLoggerParameterError", true,   false,   "HelpMessage_48_TerminalLoggerParametersSwitch"),
+#if FEATURE_NODE_REUSE
             new ParameterizedSwitchInfo(  new string[] { "nodereuse", "nr" },                   ParameterizedSwitch.NodeReuse,                  null,                           false,          "MissingNodeReuseParameterError",      true,   false,   "HelpMessage_24_NodeReuse"),
+#endif
             new ParameterizedSwitchInfo(  new string[] { "preprocess", "pp" },                  ParameterizedSwitch.Preprocess,                 null,                           false,          null,                                  true,   false,   "HelpMessage_25_PreprocessSwitch"),
             new ParameterizedSwitchInfo(  new string[] { "targets", "ts" },                     ParameterizedSwitch.Targets,                    null,                           false,          null,                                  true,   false,   "HelpMessage_38_TargetsSwitch"),
             new ParameterizedSwitchInfo(  new string[] { "warnaserror", "err" },                ParameterizedSwitch.WarningsAsErrors,           null,                           true,           null,                                  true,   true,    "HelpMessage_28_WarnAsErrorSwitch"),
@@ -376,37 +378,38 @@ namespace Microsoft.Build.CommandLine
         /// Get the distinct parameterized switchs map resource ids.
         /// </summary>
         /// <returns>Parameterized switches map resource ids.</returns>
-        internal static string[] GetParameterizedSwitchResourceIds()
+        internal static IEnumerable<string> GetParameterizedSwitchResourceIds()
         {
-            List<string> parameterizedSwitchResourceIds = new List<string>();
-            for (int i = 0; i < (int)ParameterizedSwitch.NumberOfParameterizedSwitches; i++)
+            HashSet<string> parameterizedSwitchResourceIds = new HashSet<string>();
+            foreach(ParameterizedSwitchInfo parameterizedSwitch in s_parameterizedSwitchesMap)
             {
-                string resourceId = s_parameterizedSwitchesMap[i].resourceId;
-                if (!parameterizedSwitchResourceIds.Contains(resourceId) && !string.IsNullOrEmpty(resourceId))
+                string resourceId = parameterizedSwitch.resourceId;
+                if (!string.IsNullOrEmpty(resourceId) && !parameterizedSwitchResourceIds.Contains(resourceId))
                 {
-                    parameterizedSwitchResourceIds.Add(s_parameterizedSwitchesMap[i].resourceId);
+                    parameterizedSwitchResourceIds.Add(resourceId);
+                    yield return resourceId;
                 }
             }
-            return[.. parameterizedSwitchResourceIds];
         }
+
+        private static void forreach(ParameterizedSwitchInfo parameterizedSwitchInfo, object parameterizedSwitch, in ParameterizedSwitchInfo[] s_parameterizedSwitchesMap) => throw new NotImplementedException();
 
         /// <summary>
         /// Get the distinct parameterless switchs map resource ids.
         /// </summary>
         /// <returns>Parameterless switchs map resource ids</returns>
-        internal static string[] GetParameterlessSwitchResourceIds()
+        internal static IEnumerable<string> GetParameterlessSwitchResourceIds()
         {
-            List<string> parameterlessSwitchResourceIds = new List<string>();
-            for (int i = 0; i < (int)ParameterlessSwitch.NumberOfParameterlessSwitches; i++)
+            HashSet<string> parameterlessSwitchResourceIds = new HashSet<string>();
+            foreach (ParameterlessSwitchInfo parameterlessSwitch in s_parameterlessSwitchesMap)
             {
-                string resourceId = s_parameterlessSwitchesMap[i].resourceId;
+                string resourceId = parameterlessSwitch.resourceId;
                 if (!parameterlessSwitchResourceIds.Contains(resourceId) && !string.IsNullOrEmpty(resourceId))
                 {
-                    parameterlessSwitchResourceIds.Add(s_parameterlessSwitchesMap[i].resourceId);
+                    parameterlessSwitchResourceIds.Add(resourceId);
+                    yield return resourceId;
                 }
             }
-
-            return[.. parameterlessSwitchResourceIds];
         }
 
         /// <summary>

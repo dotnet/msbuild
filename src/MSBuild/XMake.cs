@@ -4483,24 +4483,13 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_3_SwitchesHeader"));
             foreach (string parameterizedSwitchRsouceId in CommandLineSwitches.GetParameterizedSwitchResourceIds())
             {
-                if (parameterizedSwitchRsouceId is not "HelpMessage_15_ValidateSwitch"
-                and not "HelpMessage_24_NodeReuse"
-                and not "HelpMessage_42_ReportFileAccessesSwitch")
                 {
                     Console.WriteLine(AssemblyResources.GetString(parameterizedSwitchRsouceId));
                 }
             }
-#if FEATURE_XML_SCHEMA_VALIDATION
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_15_ValidateSwitch"));
-#endif
-
 #if FEATURE_NODE_REUSE // Do not advertise the switch when feature is off, even though we won't fail to parse it for compatibility with existing build scripts
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_24_NodeReuse"));
 #endif
-#if FEATURE_REPORTFILEACCESSES
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_42_ReportFileAccessesSwitch"));
-#endif
-
             foreach (string parameterlessSwitchRsouceId in CommandLineSwitches.GetParameterlessSwitchResourceIds())
             {
                 Console.WriteLine(AssemblyResources.GetString(parameterlessSwitchRsouceId));
