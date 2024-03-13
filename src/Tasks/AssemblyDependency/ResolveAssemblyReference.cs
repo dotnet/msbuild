@@ -3229,6 +3229,6 @@ namespace Microsoft.Build.Tasks
                 p => ReferenceTable.ReadMachineTypeFromPEHeader(p));
         }
 
-#endregion
+        #endregion
     }
 }
