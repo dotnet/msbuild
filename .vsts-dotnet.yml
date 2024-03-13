@@ -18,6 +18,7 @@ parameters:
   default: 'default'
 
 variables:
+  - group: DotNet-MSBuild-SDLValidation-Params
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
   - name: OptProfDrop
     value: ''
@@ -37,20 +38,17 @@ variables:
     value: true
   - name: Codeql.Enabled
     value: true
-  - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-    - group: DotNet-MSBuild-SDLValidation-Params
 
 stages:
 - stage: build
   displayName: Build
 
   jobs:
-  - ${{ if and( ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-    # The localization setup for release/ branches. Note difference in LclPackageId. main branch is handled separately below.
-    # Used for vs17.2, vs17.4, vs17.6 etc. branches only.
-    # When the branch is setup for localization (the localization ticket needs to be created - https://aka.ms/ceChangeLocConfig, requesting change from one release branch to another),
-    #  set 'EnableReleaseOneLocBuild' to true.
-    - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/vs') }}:
+  # The localization setup for release/ branches. Note difference in LclPackageId. main branch is handled separately below.
+  # Used for vs17.2, vs17.4, vs17.6 etc. branches only.
+  # When the branch is setup for localization (the localization ticket needs to be created - https://aka.ms/ceChangeLocConfig, requesting change from one release branch to another),
+  #  set 'EnableReleaseOneLocBuild' to true.
+  - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/vs') }}:
       - template: /eng/common/templates-official/job/onelocbuild.yml@self
         parameters:
           MirrorRepo: 'msbuild'
@@ -59,8 +57,8 @@ stages:
           MirrorBranch: ${{ replace(variables['Build.SourceBranch'], 'refs/heads/', '') }}
           JobNameSuffix: '_release'
           condition: ${{ variables.EnableReleaseOneLocBuild }}
-    # The localization setup for main branch. Note difference in package ID. Should not be used with release/ branches.
-    - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+  # The localization setup for main branch. Note difference in package ID. Should not be used with release/ branches.
+  - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
       - template: /eng/common/templates-official/job/onelocbuild.yml@self
         parameters:
           MirrorRepo: 'msbuild'
@@ -259,7 +257,7 @@ stages:
 
     - template: /eng/common/templates-official/steps/component-governance.yml@self
       parameters:
-        ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), or(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs'), eq(variables['Build.SourceBranch'], 'refs/heads/main'))) }}:
+        ${{ if or(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs'), eq(variables['Build.SourceBranch'], 'refs/heads/main')) }}:
           disableComponentGovernance: false
         ${{ else }}:
           disableComponentGovernance: true
@@ -276,7 +274,6 @@ stages:
       pool:
         vmImage: windows-latest
 
-- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - template: eng\common\templates-official\post-build\post-build.yml@self
     parameters:
       publishingInfraVersion: 3
