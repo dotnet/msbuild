@@ -415,6 +415,14 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Legacy implementation that doesn't lead to JIT pulling the new functions from StringTools (so those must not be referenced anywhere in the function body)
+        ///  - for cases where the calling code would erroneously load old version of StringTools alongside of the new version of Microsoft.Build.
+        /// Should be removed once Wave17_10 is removed.
+        /// </summary>
+        internal static object StableStringHashLegacy(string toHash)
+            => CommunicationsUtilities.GetHashCode(toHash);
+
+        /// <summary>
         /// Hash the string independent of bitness, target framework and default codepage of the environment.
         /// </summary>
         internal static object StableStringHash(string toHash)
