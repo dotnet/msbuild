@@ -2624,7 +2624,7 @@ EndGlobal
 
             TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents);
 
-            RunnerUtilities.ExecMSBuild($"{arguments} \"{testProject.ProjectFile}\"", out bool success, _output);
+            string output = RunnerUtilities.ExecMSBuild($"{arguments} \"{testProject.ProjectFile}\"", out bool success, _output);
             success.ShouldBeTrue();
 
             string expectedVersionString =
@@ -2633,11 +2633,11 @@ EndGlobal
 
             if (shouldContainVersionMessage)
             {
-                ((Xunit.Sdk.TestOutputHelper)_output).Output.ShouldContain(expectedVersionString);
+                output.ShouldContain(expectedVersionString);
             }
             else
             {
-                ((Xunit.Sdk.TestOutputHelper)_output).Output.ShouldNotContain(expectedVersionString);
+                output.ShouldNotContain(expectedVersionString);
             }
         }
 
