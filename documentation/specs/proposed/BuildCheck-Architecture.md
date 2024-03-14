@@ -1,7 +1,7 @@
 
 # BuildCheck - Architecture and Implementation Spec
 
-This is internal engineering document. For general overview and user point of view - please check the [BuildCheck - Design Spec](BuildCheck.md).
+This is an internal engineering document. For general overview and user point of view - please check the [BuildCheck - Design Spec](BuildCheck.md).
 
 # Areas of Ownership
 

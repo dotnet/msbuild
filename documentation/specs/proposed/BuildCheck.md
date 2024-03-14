@@ -88,17 +88,17 @@ Majority of following cases are included in appropriate context within the scena
 
 
 **Out of scope**
-* Custom analyzers with equal data access as built-in
-* All inbox analyzers reports have precise location(s) of issues
-* Opt-out of analysis on code-level (analogy to C# pragmas, but within msbuild xml files)
-* Simplified authoring experience via dedicated reference assembly
-* Restore phase analysis
-* Turning analysis off/on based on target (e.g. multi-targetted builds, calling MSBuild task etc.)
-* Controling/Configuring lifetime of analyzers - analyzers will currently be held alive, as single instance per analyzer, for the whole duration of the build. But future versions might prevent some of the analyzers to survive beyond scope of single project built (means for sharing data would be provided).
-* ETW for analyzers
-* Attributing `.editorconfig` configurations to .sln files
+* Custom analyzers has equal data access as the inbox analyzers.
+* All inbox analyzers reports have precise location(s) of issues.
+* Opt-out of analysis on code-level (analogy to C# pragmas, but within msbuild xml files).
+* Simplified authoring experience via dedicated reference assembly.
+* Restore phase analysis.
+* Turning analysis off/on based on target (e.g. multi-targetted builds, calling MSBuild task etc.).
+* Controling/Configuring lifetime of analyzers - analyzers will currently be held alive, as single instance per analyzer, for the whole duration of the build. But future versions might prevent some of the analyzers to survive beyond a scope of a single project built (means for sharing data would be provided).
+* ETW for analyzers.
+* Attributing `.editorconfig` configurations to .sln files.
 * Attributing `.editorconfig` configurations to lower granularity than whole projects.
-* Respecting `.editorconfig` file in msbuild import locations (unless they are in the parent folders hieararchy of particular project file)
+* Respecting `.editorconfig` file in msbuild import locations (unless they are in the parent folders hieararchy of particular project file).
  
 
 # User Experience
