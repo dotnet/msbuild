@@ -62,6 +62,11 @@ internal sealed class Project
     public bool IsCachePluginProject { get; set; }
 
     /// <summary>
+    /// This property is true when the project would prefer to have full paths in the logs and/or for processing tasks.
+    /// </summary>
+    public bool GenerateFullPaths { get; set; }
+
+    /// <summary>
     /// A lazily initialized list of build messages/warnings/errors raised during the build.
     /// </summary>
     public List<BuildMessage>? BuildMessages { get; private set; }

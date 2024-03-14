@@ -14,7 +14,7 @@ using Microsoft.Build.Framework.Logging;
 using System.Globalization;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Utilities;
-
+using DictionaryEntry = System.Collections.DictionaryEntry;
 
 
 #if NET7_0_OR_GREATER
@@ -499,7 +499,8 @@ internal sealed partial class TerminalLogger : INodeLogger
             {
                 targetFramework = null;
             }
-            _projects[c] = new(targetFramework, CreateStopwatch?.Invoke());
+            Project project = new(targetFramework, CreateStopwatch?.Invoke());
+            _projects[c] = project;
 
             // First ever restore in the build is starting.
             if (e.TargetNames == "Restore" && !_restoreFinished)
@@ -507,6 +508,30 @@ internal sealed partial class TerminalLogger : INodeLogger
                 _restoreContext = c;
                 int nodeIndex = NodeIndexForContext(buildEventContext);
                 _nodes[nodeIndex] = new NodeStatus(e.ProjectFile!, null, "Restore", _projects[c].Stopwatch);
+            }
+
+            TryDetectGenerateFullPaths(e, project);
+        }
+    }
+
+    private void TryDetectGenerateFullPaths(ProjectStartedEventArgs e, Project project)
+    {
+        if (e.GlobalProperties is not null
+            && e.GlobalProperties.TryGetValue("GenerateFullPaths", out string? generateFullPaths)
+            && bool.TryParse(generateFullPaths, out bool generateFullPathsValue))
+        {
+            project.GenerateFullPaths = generateFullPathsValue;
+        }
+        else if (e.Properties is not null)
+        {
+            foreach (DictionaryEntry property in e.Properties)
+            {
+                if (property.Key is "GenerateFullPaths" &&
+                    property.Value is string generateFullPathsString
+                    && bool.TryParse(generateFullPathsString, out bool generateFullPathsPropertyValue))
+                {
+                    project.GenerateFullPaths = generateFullPathsPropertyValue;
+                }
             }
         }
     }
@@ -659,30 +684,37 @@ internal sealed partial class TerminalLogger : INodeLogger
                                 urlString = uri.ToString();
                             }
 
-                            var outputPathString = outputPathSpan.ToString();
-                            var relativeDisplayPath = outputPathString;
-                            var workingDirectory = _initialWorkingDirectory;
-
-                            // If the output path is under the initial working directory, make the console output relative to that to save space.
-                            if (outputPathString.StartsWith(workingDirectory, FileUtilities.PathComparison))
+                            string? resolvedPathToOutput = null;
+                            if (project.GenerateFullPaths)
                             {
-                                relativeDisplayPath = Path.GetRelativePath(workingDirectory, outputPathString);
+                                resolvedPathToOutput = outputPathSpan.ToString();
                             }
-
-                            // if the output path isn't under the working directory, but is under the source root, make the output relative to that to save space
-                            else if (project.SourceRoot is string sourceRoot)
+                            else
                             {
-                                if (outputPathString.StartsWith(sourceRoot, FileUtilities.PathComparison))
+                                var outputPathString = outputPathSpan.ToString();
+                                var workingDirectory = _initialWorkingDirectory;
+
+                                // If the output path is under the initial working directory, make the console output relative to that to save space.
+                                if (outputPathString.StartsWith(workingDirectory, FileUtilities.PathComparison))
                                 {
-                                    var relativePathFromOutputToRoot = Path.GetRelativePath(sourceRoot, outputPathString);
-                                    // we have the portion from sourceRoot to outputPath, now we need to get the portion from workingDirectory to sourceRoot
-                                    var relativePathFromWorkingDirToSourceRoot = Path.GetRelativePath(workingDirectory, sourceRoot);
-                                    relativeDisplayPath = Path.Join(relativePathFromWorkingDirToSourceRoot, relativePathFromOutputToRoot);
+                                    resolvedPathToOutput = Path.GetRelativePath(workingDirectory, outputPathString);
+                                }
+
+                                // if the output path isn't under the working directory, but is under the source root, make the output relative to that to save space
+                                else if (project.SourceRoot is string sourceRoot)
+                                {
+                                    if (outputPathString.StartsWith(sourceRoot, FileUtilities.PathComparison))
+                                    {
+                                        var relativePathFromOutputToRoot = Path.GetRelativePath(sourceRoot, outputPathString);
+                                        // we have the portion from sourceRoot to outputPath, now we need to get the portion from workingDirectory to sourceRoot
+                                        var relativePathFromWorkingDirToSourceRoot = Path.GetRelativePath(workingDirectory, sourceRoot);
+                                        resolvedPathToOutput = Path.Join(relativePathFromWorkingDirToSourceRoot, relativePathFromOutputToRoot);
+                                    }
                                 }
                             }
 
                             Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath",
-                                $"{AnsiCodes.LinkPrefix}{urlString}{AnsiCodes.LinkInfix}{relativeDisplayPath}{AnsiCodes.LinkSuffix}"));
+                                $"{AnsiCodes.LinkPrefix}{urlString}{AnsiCodes.LinkInfix}{resolvedPathToOutput}{AnsiCodes.LinkSuffix}"));
                         }
                         else
                         {
