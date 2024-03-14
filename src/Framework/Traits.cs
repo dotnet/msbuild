@@ -189,6 +189,11 @@ namespace Microsoft.Build.Framework
         public readonly bool AlwaysDoImmutableFilesUpToDateCheck = Environment.GetEnvironmentVariable("MSBUILDDONOTCACHEMODIFICATIONTIME") == "1";
 
         /// <summary>
+        /// When copying over an existing file, copy directly into the existing file rather than deleting and recreating.
+        /// </summary>
+        public readonly bool CopyWithoutDelete = Environment.GetEnvironmentVariable("MSBUILDCOPYWITHOUTDELETE") == "1";
+
+        /// <summary>
         /// Emit events for project imports.
         /// </summary>
         private bool? _logProjectImports;
