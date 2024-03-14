@@ -34,6 +34,7 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 - [Load NuGet.Frameworks into secondary AppDomain (MSBuild.exe only)](https://github.com/dotnet/msbuild/pull/9446)
 - [Update Traits when environment has been changed](https://github.com/dotnet/msbuild/pull/9655)
 - [Exec task does not trim leading whitespaces for ConsoleOutput](https://github.com/dotnet/msbuild/pull/9722)
+- [Introduce [MSBuild]::StableStringHash overloads](https://github.com/dotnet/msbuild/issues/9519)
 
 
 ### 17.8
@@ -83,4 +84,3 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 - [Add Microsoft.IO.Redist for directory enumeration](https://github.com/dotnet/msbuild/pull/6771)
 - [Process-wide caching of ToolsetConfigurationSection](https://github.com/dotnet/msbuild/pull/6832)
 - [Normalize RAR output paths](https://github.com/dotnet/msbuild/pull/6533)
-- [Introduce [MSBuild]::StableStringHash overloads](https://github.com/dotnet/msbuild/issues/9519)
