@@ -243,20 +243,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         protected virtual Assembly LoadResolverAssembly(string resolverPath)
         {
 #if !FEATURE_ASSEMBLYLOADCONTEXT
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
-            {
-                string resolverFileName = Path.GetFileNameWithoutExtension(resolverPath);
-                if (resolverFileName.Equals("Microsoft.DotNet.MSBuildSdkResolver", StringComparison.OrdinalIgnoreCase))
-                {
-                    // This will load the resolver assembly into the default load context if possible, and fall back to LoadFrom context.
-                    // We very much prefer the default load context because it allows native images to be used by the CLR, improving startup perf.
-                    AssemblyName assemblyName = new AssemblyName(resolverFileName)
-                    {
-                        CodeBase = resolverPath,
-                    };
-                    return Assembly.Load(assemblyName);
-                }
-            }
             return Assembly.LoadFrom(resolverPath);
 #else
             return s_loader.LoadFromPath(resolverPath);
