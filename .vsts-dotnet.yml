@@ -48,9 +48,15 @@ resources:
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
   parameters:
+    featureFlags:
+      autoBaseline: true
     pool:
       name: VSEngSS-MicroBuild2022-1ES
       os: windows
+    sdl:
+      # We generate SBOM ourselves, so don't need steps injected by 1ES.
+      sbom:
+        enabled: false
 
     stages:
     - stage: build
@@ -152,7 +158,7 @@ extends:
         - template: eng\common\templates-official\steps\generate-sbom.yml@self
 
         # Publish OptProf configuration files
-        - task: ms-vscs-artifact.build-tasks.artifactDropTask-1.artifactDropTask@0
+        - task: 1ES.PublishArtifactsDrop@1
           inputs:
             dropServiceURI: 'https://devdiv.artifacts.visualstudio.com'
             buildNumber: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
@@ -299,9 +305,7 @@ extends:
     - template: eng\common\templates-official\post-build\post-build.yml@self
       parameters:
         publishingInfraVersion: 3
-        # Symbol validation is not entirely reliable as of yet, so should be turned off until
-        # https://github.com/dotnet/arcade/issues/2871 is resolved.
-        enableSymbolValidation: false
+        enableSymbolValidation: true
         enableSourceLinkValidation: false
         enableNugetValidation: false
         SDLValidationParameters:
