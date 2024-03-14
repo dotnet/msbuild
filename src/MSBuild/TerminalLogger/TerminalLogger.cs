@@ -670,14 +670,13 @@ internal sealed partial class TerminalLogger : INodeLogger
                             }
 
                             // if the output path isn't under the working directory, but is under the source root, make the output relative to that to save space
-                            else if (project.SourceRoot is ReadOnlyMemory<char> sourceRoot)
+                            else if (project.SourceRoot is string sourceRoot)
                             {
-                                var sourceRootString = sourceRoot.Span.ToString();
-                                if (outputPathString.StartsWith(sourceRootString, FileUtilities.PathComparison))
+                                if (outputPathString.StartsWith(sourceRoot, FileUtilities.PathComparison))
                                 {
-                                    var relativePathFromOutputToRoot = Path.GetRelativePath(sourceRootString, outputPathString);
+                                    var relativePathFromOutputToRoot = Path.GetRelativePath(sourceRoot, outputPathString);
                                     // we have the portion from sourceRoot to outputPath, now we need to get the portion from workingDirectory to sourceRoot
-                                    var relativePathFromWorkingDirToSourceRoot = Path.GetRelativePath(workingDirectory, sourceRootString);
+                                    var relativePathFromWorkingDirToSourceRoot = Path.GetRelativePath(workingDirectory, sourceRoot);
                                     relativeDisplayPath = Path.Join(relativePathFromWorkingDirToSourceRoot, relativePathFromOutputToRoot);
                                 }
                             }
@@ -802,7 +801,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                 // This seems to be the Target InitializeSourceControlInformationFromSourceControlManager.
                 // So far this has been acceptable, but if a SourceRoot would be modified by a task later on
                 // (e.g. TranslateGitHubUrlsInSourceControlInformation) we would lose that modification.
-                project.SourceRoot = sourceControlSourceRoot.ItemSpec.AsMemory();
+                project.SourceRoot = sourceControlSourceRoot.ItemSpec;
             }
         }
     }

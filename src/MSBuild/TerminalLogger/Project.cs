@@ -44,7 +44,7 @@ internal sealed class Project
     /// <summary>
     /// Full path to the 'root' of this project's source control repository, if known.
     /// </summary>
-    public ReadOnlyMemory<char>? SourceRoot { get; set; }
+    public string? SourceRoot { get; set; }
 
     /// <summary>
     /// The target framework of the project or null if not multi-targeting.
