@@ -16,6 +16,10 @@ The feature is meant to help customers to improve and understand quality of thei
       + [Live Build](#live-build)
       + [Binlog Replay mode](#binlog-replay-mode)
    * [Configuration](#configuration)
+      + [User Configurable Options](#user-configurable-options)
+         - [Enablement](#enablement)
+         - [Severity](#severity)
+         - [Scope of Analysis](#scope-of-analysis)
       + [Sample configuration](#sample-configuration)
    * [Analyzers and Rules Identification](#analyzers-and-rules-identification)
    * [Custom Analyzers Authoring](#custom-analyzers-authoring)
@@ -55,24 +59,24 @@ The analysis has small impact on build duration with ability to opt-out from ana
 
 # Scope of initial iteration
 
-Majority of following cases are included in appropriate context within the scenarios in [User Experience](#user-experience) section.
+Majority of following cases are included in appropriate context within the scenarios in [User Experience](#user-experience) section. Following is a quick overview.
 
 **In scope**
 * Inbox (build-in) analyzers that run during the build execution.
 * Inbox analyzers that run when replaying binlog.
 * Custom authored analyzers, delivered via nuget.
-* Errors and warning in logger, VS error window.
+* Analyzers reports (errors, warnings, messages) are in logger output, VS error window.
 * Codes will be distinguishable from standard build warnings/error (to prevent easy mixups and attempts to configure standard msbuild warnings/errors via editorconfig), but otherwise the outputs are very similar.
-* Default opt-ins and levels for inbox analyzers set by sdk version (via [`$SdkAnalysisLevel`]((https://github.com/dotnet/designs/blob/main/proposed/sdk-analysis-level.md)))
+* Default opt-ins and levels for inbox analyzers set by sdk version (via [`$SdkAnalysisLevel`]((https://github.com/dotnet/designs/blob/main/proposed/sdk-analysis-level.md))) or other agreed mechanism for controling increasing strictness between .NET versions.
 * Custom analyzers opted in via `PackageReference` of a particular nuget with the analyzer.
 * Explicit overrides of enablement and analysis levels via `.editorconfig` file (with up to a per project scope).
 * Standards of `.editorconfig`s will be observed. 
 * Simplified authoring experience via template and doc.
-* Single analyzer can produce reports for multiple rules. However those need to be declared upfront
+* Single analyzer can produce reports for multiple rules. However those need to be declared upfront.
 * Opt-in reporting of time spent via specific analyzers and infra overall.
 * Collect touched `.editorconfg`s into binlog embedded files.
-* Possibility to opt-out from analysis - the perf should not be impacted then
-* Team collects performance impact numbers on the OrchardCore build with the inbox analyzers enabled.
+* Possibility to opt-out from analysis - the perf should not be impacted when done so.
+* Team collects performance impact numbers on a set of benchmark builds with the inbox analyzers enabled.
 
 **Non Goals, but subject for consideration**
 * Custom anlyzer in a local project (source codes) or a binary.
@@ -152,9 +156,58 @@ Out of scope for configuration:
 * attributing configuration to a .sln file and expecting it will apply to all contained projects.
 * Support for multiple [custom configurations](#custom-configuration-declaration) within a single build for a single rule. (Not to be mixed with [standardized configuration](#standardized-configuration-declaration) - which can be configured freely per project) If a custom configuration will be used, it will need to be specified identically in each explicit configurations of the rule. This is chosen so that there are no implicit requirements on lifetime of the analyzer or analyzer instancing – each analyzer will be instantiated only once per build (this is however something that will very likely change in future versions – so authors are advised not to take hard dependency on single instance policy).
 
-### Sample configuration
-(TBD)
+### User Configurable Options
 
+Initial version of BuildCheck plans a limited set of options configurable by user (via `.editorconfig`) by which users can override default configuration of individual analyzer rules.
+
+#### Enablement
+
+Boolean option `IsEnabled` will be available to allow users to disable/enable particualr rule.
+
+Different rules of a single analyzer can have different enabledment status configured.
+
+If all the rules from a single analyzer are disabled - analyzer won't be given any data for such configured part of the build (specific project or a whoe build). If analyzer have some rules enabled and some disabled - it will be still fed with data, but the reports will be post-filtered.
+
+Same rule can have different enablement status for different projects.
+
+#### Severity
+
+Option `Severity` with following values will be available:
+
+* `Message`
+* `Warning`
+* `Error`
+
+Configuration will dictate transformation of the analyzer report to particular build output type (message, warning or error).
+
+Different rules of a single analyzer can have different severities configured. Same rule can have different severities for different projects.
+
+#### Scope of Analysis
+
+Option `EvaluationAnalysisScope` with following possible options will be avaialable:
+* `AnalyzedProjectOnly` - Only the data from currently analyzed project will be sent to the analyzer. Imports will be discarded.
+* `AnalyzedProjectWithImportsFromCurrentWorkTree` - Only the data from currently analyzed project and imports from files under the entry project or solution will be sent to the analyzer. Other imports will be discarded.
+* `AnalyzedProjectWithImportsWithoutSdks` - Imports from SDKs will not be sent to the analyzer. Other imports will be sent.
+* `AnalyzedProjectWithAllImports` - All data will be sent to the analyzer.
+
+All rules of a single analyzer must have the `EvaluationAnalysisScope` configured to a same value. If any rule from the analyzer have the value configured differently - a warning will be issued during the build and analyzer will be deregistered.
+
+Same rule can have `EvaluationAnalysisScope` configured to different values for different projects.
+
+BuildCheck might not be able to guarantee to properly filter the data with this distinction for all [registration types](#RegisterActions) - in case an explicit value is attempted to be configured (either [from the analyzer code](#BuildAnalyzerConfiguration) or from `.editorconfig` file) for an analyzer that has a subscription to unfilterable data - a warning will be issued during the build and analyzer will be deregistered.
+
+### Sample configuration
+
+```
+[*.csproj]
+msbuild_analyzer.BC0101.IsEnabled=true
+msbuild_analyzer.BC0101.Severity=warning
+
+msbuild_analyzer.COND0543.IsEnabled=false
+msbuild_analyzer.COND0543.Severity=Error
+msbuild_analyzer.COND0543.EvaluationAnalysisScope=AnalyzedProjectOnly
+msbuild_analyzer.COND0543.CustomSwitch=QWERTY
+```
 
 ## Analyzers and Rules Identification
 
@@ -210,7 +263,7 @@ public abstract class BuildAnalyzer : IDisposable
 }
 ```
 
-The context in `RegisterActions` call will enable subscriptions for data pumping from the infrastructure. 
+<a name="RegisterActions" />The context in `RegisterActions` call will enable subscriptions for data pumping from the infrastructure. 
 
 Sample of how registrations might look like:
 
@@ -248,7 +301,7 @@ public class BuildAnalyzerRule
 }
 ```
 
-Each rule will supply its default configuration (mainly enablement and report severity) – those will apply if `.editorconfig` file will not set those settings explicitly. If the rule doesn't provide (some of) its defaults, a global hardcoded defults are used (`severity: message, enabled: false`).
+<a name="BuildAnalyzerConfiguration" />Each rule will supply its default configuration (mainly enablement and report severity) – those will apply if `.editorconfig` file will not set those settings explicitly. If the rule doesn't provide (some of) its defaults, a global hardcoded defults are used (`severity: message, enabled: false`).
 
 #### Standardized configuration declaration
 
