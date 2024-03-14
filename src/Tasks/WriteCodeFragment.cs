@@ -113,9 +113,7 @@ namespace Microsoft.Build.Tasks
 
                 OutputFile ??= new TaskItem(FileUtilities.GetTemporaryFile(OutputDirectory.ItemSpec, null, extension));
 
-                // To get OutputFile's directory use its full path in case specified OutputFile path is a file name but OutputDirectory is not set
-                var fullPath = FileUtilities.PathIsInvalid(OutputFile.ItemSpec) ? OutputFile.ItemSpec : OutputFile.GetMetadata("FullPath");
-                FileUtilities.EnsureDirectoryExists(Path.GetDirectoryName(fullPath));
+                FileUtilities.EnsureDirectoryExists(Path.GetDirectoryName(OutputFile.ItemSpec));
 
                 File.WriteAllText(OutputFile.ItemSpec, code); // Overwrites file if it already exists (and can be overwritten)
             }
