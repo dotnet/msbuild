@@ -35,7 +35,7 @@ namespace Microsoft.Build.Evaluation
 
         private static readonly Lazy<Regex> RegistrySdkRegex = new Lazy<Regex>(() => new Regex(@"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$", RegexOptions.IgnoreCase));
 
-        private static readonly Lazy<NuGetFrameworkWrapper> NuGetFramework = new Lazy<NuGetFrameworkWrapper>(() => new NuGetFrameworkWrapper());
+        private static readonly Lazy<NuGetFrameworkWrapper> NuGetFramework = new Lazy<NuGetFrameworkWrapper>(() => NuGetFrameworkWrapper.CreateInstance());
 
         /// <summary>
         /// Add two doubles
@@ -572,6 +572,11 @@ namespace Microsoft.Build.Evaluation
         internal static bool AreFeaturesEnabled(Version wave)
         {
             return ChangeWaves.AreFeaturesEnabled(wave);
+        }
+
+        internal static string CheckFeatureAvailability(string featureName)
+        {
+            return Features.CheckFeatureAvailability(featureName).ToString();
         }
 
         public static string GetCurrentToolsDirectory()

@@ -15,6 +15,7 @@ using System.Xml.Linq;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
 
@@ -102,6 +103,7 @@ namespace Microsoft.Build.Tasks
             public static string ResolvedFrom;
             public static string SearchedAssemblyFoldersEx;
             public static string SearchPath;
+            public static string SearchPathAddedByParentAssembly;
             public static string TargetedProcessorArchitectureDoesNotMatch;
             public static string UnificationByAppConfig;
             public static string UnificationByAutoUnify;
@@ -152,7 +154,8 @@ namespace Microsoft.Build.Tasks
                 Resolved = GetResourceFourSpaces("ResolveAssemblyReference.Resolved");
                 ResolvedFrom = GetResourceFourSpaces("ResolveAssemblyReference.ResolvedFrom");
                 SearchedAssemblyFoldersEx = GetResourceEightSpaces("ResolveAssemblyReference.SearchedAssemblyFoldersEx");
-                SearchPath = EightSpaces + GetResource("ResolveAssemblyReference.SearchPath");
+                SearchPath = GetResourceEightSpaces("ResolveAssemblyReference.SearchPath");
+                SearchPathAddedByParentAssembly = GetResourceEightSpaces("ResolveAssemblyReference.SearchPathAddedByParentAssembly");
                 TargetedProcessorArchitectureDoesNotMatch = GetResourceEightSpaces("ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch");
                 UnificationByAppConfig = GetResourceFourSpaces("ResolveAssemblyReference.UnificationByAppConfig");
                 UnificationByAutoUnify = GetResourceFourSpaces("ResolveAssemblyReference.UnificationByAutoUnify");
@@ -1791,7 +1794,14 @@ namespace Microsoft.Build.Tasks
                     if (lastSearchPath != location.SearchPath)
                     {
                         lastSearchPath = location.SearchPath;
-                        Log.LogMessage(importance, Strings.SearchPath, lastSearchPath);
+                        if (location.ParentAssembly != null)
+                        {
+                            Log.LogMessage(importance, Strings.SearchPathAddedByParentAssembly, lastSearchPath, location.ParentAssembly);
+                        }
+                        else
+                        {
+                            Log.LogMessage(importance, Strings.SearchPath, lastSearchPath);
+                        }                 
                         if (logAssemblyFoldersMinimal)
                         {
                             Log.LogMessage(importance, Strings.SearchedAssemblyFoldersEx);
@@ -2066,12 +2076,6 @@ namespace Microsoft.Build.Tasks
             {
                 // Either the cache is dirty (we added or updated an item) or the number of items actually used is less than what
                 // we got by reading the state file prior to execution. Serialize the cache into the state file.
-                if (FailIfNotIncremental)
-                {
-                    Log.LogErrorFromResources("ResolveAssemblyReference.WritingCacheFile", _stateFile);
-                    return;
-                }
-
                 _cache.SerializeCache(_stateFile, Log);
             }
         }
@@ -3205,7 +3209,7 @@ namespace Microsoft.Build.Tasks
             return Execute(
                 p => FileUtilities.FileExistsNoThrow(p),
                 p => FileUtilities.DirectoryExistsNoThrow(p),
-                (p, searchPattern) => Directory.GetDirectories(p, searchPattern),
+                (p, searchPattern) => FileSystems.Default.EnumerateDirectories(p, searchPattern).ToArray(),
                 p => AssemblyNameExtension.GetAssemblyNameEx(p),
                 (string path, ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache, out AssemblyNameExtension[] dependencies, out string[] scatterFiles, out FrameworkNameVersioning frameworkName)
                     => AssemblyInformation.GetAssemblyMetadata(path, assemblyMetadataCache, out dependencies, out scatterFiles, out frameworkName),

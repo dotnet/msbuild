@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -103,7 +104,13 @@ namespace Microsoft.Build.UnitTests
                 string potentialVersionsPropsPath = Path.Combine(currentFolder, "build", "Versions.props");
                 if (FileSystems.Default.FileExists(potentialVersionsPropsPath))
                 {
-                    var doc = XDocument.Load(potentialVersionsPropsPath);
+                    XDocument doc = null;
+                    var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true, IgnoreWhitespace = true };
+                    using (XmlReader xr = XmlReader.Create(File.OpenRead(potentialVersionsPropsPath), xrs))
+                    {
+                        doc = XDocument.Load(xr);
+                    }
+
                     var ns = doc.Root.Name.Namespace;
                     var cliVersionElement = doc.Root.Elements(ns + "PropertyGroup").Elements(ns + "DotNetCliVersion").FirstOrDefault();
                     if (cliVersionElement != null)

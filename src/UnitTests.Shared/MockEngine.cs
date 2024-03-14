@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests
      * is somewhat of a no-no for task assemblies.
      *
      **************************************************************************/
-    internal sealed class MockEngine : IBuildEngine7
+    public sealed class MockEngine : IBuildEngine7
     {
         private readonly object _lockObj = new object();  // Protects _log, _output
         private readonly ITestOutputHelper _output;
@@ -43,15 +43,15 @@ namespace Microsoft.Build.UnitTests
         private readonly ConcurrentQueue<BuildErrorEventArgs> _errorEvents = new ConcurrentQueue<BuildErrorEventArgs>();
         private readonly ConcurrentQueue<BuildWarningEventArgs> _warningEvents = new ConcurrentQueue<BuildWarningEventArgs>();
 
-        internal MockEngine() : this(false)
+        public MockEngine() : this(false)
         {
         }
 
-        internal int Messages { get; set; }
+        public int Messages { get; set; }
 
-        internal int Warnings { get; set; }
+        public int Warnings { get; set; }
 
-        internal int Errors { get; set; }
+        public int Errors { get; set; }
 
         public bool AllowFailureWithoutError { get; set; } = false;
 
@@ -60,7 +60,7 @@ namespace Microsoft.Build.UnitTests
 
         public Dictionary<string, string> GlobalProperties { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-        internal MockLogger MockLogger { get; }
+        public MockLogger MockLogger { get; }
 
         public MockEngine(bool logToConsole)
         {
@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests
 
         public int ColumnNumberOfTaskNode => 0;
 
-        internal string Log
+        public string Log
         {
             get
             {
@@ -373,7 +373,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Assert that the mock log in the engine doesn't contain a certain message based on a resource string and some parameters
         /// </summary>
-        internal void AssertLogDoesntContainMessageFromResource(GetStringDelegate getString, string resourceName, params string[] parameters)
+        public void AssertLogDoesntContainMessageFromResource(GetStringDelegate getString, string resourceName, params string[] parameters)
         {
             string resource = getString(resourceName);
             string stringToSearchFor = String.Format(resource, parameters);
@@ -383,7 +383,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Assert that the mock log in the engine contains a certain message based on a resource string and some parameters
         /// </summary>
-        internal void AssertLogContainsMessageFromResource(GetStringDelegate getString, string resourceName, params string[] parameters)
+        public void AssertLogContainsMessageFromResource(GetStringDelegate getString, string resourceName, params string[] parameters)
         {
             string resource = getString(resourceName);
             string stringToSearchFor = String.Format(resource, parameters);
@@ -396,7 +396,7 @@ namespace Microsoft.Build.UnitTests
         /// First check if the string is in the log string. If not
         /// than make sure it is also check the MockLogger
         /// </summary>
-        internal void AssertLogContains(string contains)
+        public void AssertLogContains(string contains)
         {
             // If we do not contain this string than pass it to
             // MockLogger. Since MockLogger is also registered as
@@ -426,7 +426,7 @@ namespace Microsoft.Build.UnitTests
         /// First check if the string is in the log string. If not
         /// than make sure it is also not in the MockLogger
         /// </summary>
-        internal void AssertLogDoesntContain(string contains)
+        public void AssertLogDoesntContain(string contains)
         {
             string logText;
             lock (_lockObj)
