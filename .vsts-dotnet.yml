@@ -22,7 +22,7 @@ variables:
   - name: OptProfDrop
     value: ''
   - name: SourceBranch
-    value: $(IbcSourceBranchName)
+    value: $(IbcBranchName)
   # If we're not on a vs* branch, use main as our optprof collection branch
   - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
     - name: SourceBranch
@@ -37,266 +37,285 @@ variables:
     value: true
   - name: Codeql.Enabled
     value: true
-  - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-    - group: DotNet-MSBuild-SDLValidation-Params
+  - group: DotNet-MSBuild-SDLValidation-Params
 
-stages:
-- stage: build
-  displayName: Build
+resources:
+  repositories:
+  - repository: 1ESPipelineTemplates
+    type: git
+    name: 1ESPipelineTemplates/1ESPipelineTemplates
 
-  jobs:
-  - ${{ if and( ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-    # The localization setup for release/ branches. Note difference in LclPackageId. main branch is handled separately below.
-    # Used for vs17.2, vs17.4, vs17.6 etc. branches only.
-    # When the branch is setup for localization (the localization ticket needs to be created - https://aka.ms/ceChangeLocConfig, requesting change from one release branch to another),
-    #  set 'EnableReleaseOneLocBuild' to true.
-    - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/vs') }}:
-      - template: /eng/common/templates/job/onelocbuild.yml
-        parameters:
-          MirrorRepo: 'msbuild'
-          LclSource: lclFilesfromPackage
-          LclPackageId: 'LCL-JUNO-PROD-MSBUILDREL'
-          MirrorBranch: ${{ replace(variables['Build.SourceBranch'], 'refs/heads/', '') }}
-          JobNameSuffix: '_release'
-          condition: ${{ variables.EnableReleaseOneLocBuild }}
-    # The localization setup for main branch. Note difference in package ID. Should not be used with release/ branches.
-    - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
-      - template: /eng/common/templates/job/onelocbuild.yml
-        parameters:
-          MirrorRepo: 'msbuild'
-          LclSource: lclFilesfromPackage
-          LclPackageId: 'LCL-JUNO-PROD-MSBUILD'
-          MirrorBranch: 'main'
-          JobNameSuffix: '_main'
-          condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
-
-  - job: Windows_NT
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
     pool:
       name: VSEngSS-MicroBuild2022-1ES
-      demands:
-      - agent.os -equals Windows_NT
+      os: windows
 
-    timeoutInMinutes: 180
-
-    variables:
-    - group: Publish-Build-Assets
-    - name: TeamName
-      value: MSBuild
-    - name: VisualStudio.MajorVersion
-      value: 17
-    - name: VisualStudio.ChannelName
-      value: 'int.main'
-    - name: VisualStudio.DropName
-      value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
-
-    steps:
-    - task: NuGetToolInstaller@1
-      displayName: 'Install NuGet.exe'
-
-    - task: NuGetCommand@2
-      displayName: Restore internal tools
-      inputs:
-        command: restore
-        feedsToUse: config
-        restoreSolution: 'eng\common\internal\Tools.csproj'
-        nugetConfigPath: 'NuGet.config'
-        restoreDirectory: '$(Build.SourcesDirectory)\.packages'
-
-    - task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1
-      inputs:
-        signType: $(SignType)
-        zipSources: false
-      condition: and(succeeded(), in(variables['SignType'], 'test', 'real'))
-
-    - task: MicroBuildOptProfPlugin@6
-      inputs:
-        ProfilingInputsDropName: '$(VisualStudio.DropName)'
-        ShouldSkipOptimize: true
-        AccessToken: '$(System.AccessToken)'
-        feedSource: 'https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json'
-      displayName: 'Install OptProf Plugin'
-
-    # Required by MicroBuildBuildVSBootstrapper
-    - task: MicroBuildSwixPlugin@4
-      inputs:
-        dropName: $(VisualStudio.DropName)
-
-    - script: eng/CIBuild.cmd
-                -configuration $(BuildConfiguration)
-                -officialBuildId $(Build.BuildNumber)
-                -officialSkipApplyOptimizationData $(SkipApplyOptimizationData)
-                /p:RepositoryName=$(Build.Repository.Name)
-                /p:VisualStudioIbcSourceBranchName=$(SourceBranch)
-                /p:VisualStudioDropAccessToken=$(System.AccessToken)
-                /p:VisualStudioDropName=$(VisualStudio.DropName)
-                /p:DotNetSignType=$(SignType)
-                /p:TeamName=MSBuild
-                /p:DotNetPublishUsingPipelines=true
-                /p:VisualStudioIbcDrop=$(OptProfDrop)
-                /p:GenerateSbom=true
+    stages:
+    - stage: build
       displayName: Build
-      condition: succeeded()
 
-    # Required by Microsoft policy
-    - template: eng\common\templates\steps\generate-sbom.yml
+      jobs:
+      # The localization setup for release/ branches. Note difference in LclPackageId. main branch is handled separately below.
+      # Used for vs17.2, vs17.4, vs17.6 etc. branches only.
+      # When the branch is setup for localization (the localization ticket needs to be created - https://aka.ms/ceChangeLocConfig, requesting change from one release branch to another),
+      #  set 'EnableReleaseOneLocBuild' to true.
+      - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/vs') }}:
+        - template: /eng/common/templates-official/job/onelocbuild.yml@self
+          parameters:
+            MirrorRepo: 'msbuild'
+            LclSource: lclFilesfromPackage
+            LclPackageId: 'LCL-JUNO-PROD-MSBUILDREL'
+            MirrorBranch: ${{ replace(variables['Build.SourceBranch'], 'refs/heads/', '') }}
+            JobNameSuffix: '_release'
+            condition: ${{ variables.EnableReleaseOneLocBuild }}
+      # The localization setup for main branch. Note difference in package ID. Should not be used with release/ branches.
+      - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+        - template: /eng/common/templates-official/job/onelocbuild.yml@self
+          parameters:
+            MirrorRepo: 'msbuild'
+            LclSource: lclFilesfromPackage
+            LclPackageId: 'LCL-JUNO-PROD-MSBUILD'
+            MirrorBranch: 'main'
+            JobNameSuffix: '_main'
+            condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
 
-    # Publish OptProf configuration files
-    - task: ms-vscs-artifact.build-tasks.artifactDropTask-1.artifactDropTask@0
-      inputs:
-        dropServiceURI: 'https://devdiv.artifacts.visualstudio.com'
-        buildNumber: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
-        sourcePath: '$(Build.SourcesDirectory)\artifacts\OptProf\$(BuildConfiguration)\Data'
-        toLowerCase: false
-        usePat: true
-      displayName: 'OptProf - Publish to Artifact Services - ProfilingInputs'
-      condition: succeeded()
+      - job: Windows_NT
+        pool:
+          name: VSEngSS-MicroBuild2022-1ES
+          demands:
+          - agent.os -equals Windows_NT
 
-    # Build VS bootstrapper
-    # Generates $(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
-    - task: MicroBuildBuildVSBootstrapper@3
-      inputs:
-        vsMajorVersion: $(VisualStudio.MajorVersion)
-        channelName: $(VisualStudio.ChannelName)
-        manifests: $(VisualStudio.SetupManifestList)
-        outputFolder: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion'
-        bootstrapperCoreVersion:
-      displayName: 'OptProf - Build VS bootstrapper'
-      condition: succeeded()
+        timeoutInMinutes: 180
 
-    # Publish run settings
-    - task: PowerShell@2
-      inputs:
-        filePath: eng\common\sdk-task.ps1
-        arguments: -configuration $(BuildConfiguration)
-                  -task VisualStudio.BuildIbcTrainingSettings
-                  /p:VisualStudioDropName=$(VisualStudio.DropName)
-                  /p:BootstrapperInfoPath=$(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
-                  /p:VisualStudioIbcTrainingSettingsPath=$(Build.SourcesDirectory)\eng\config\OptProf.runsettings
-      displayName: 'OptProf - Build IBC training settings'
-      condition: succeeded()
+        variables:
+        - group: Publish-Build-Assets
+        - name: TeamName
+          value: MSBuild
+        - name: VisualStudio.MajorVersion
+          value: 17
+        - name: VisualStudio.ChannelName
+          value: 'int.main'
+        - name: VisualStudio.DropName
+          value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
-    # Publish bootstrapper info
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: $(Build.StagingDirectory)\MicroBuild\Output
-        ArtifactName: MicroBuildOutputs
-        ArtifactType: Container
-      displayName: 'OptProf - Publish Artifact: MicroBuildOutputs'
-      condition: succeeded()
+        steps:
+        - task: NuGetToolInstaller@1
+          displayName: 'Install NuGet.exe'
 
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifact: logs'
-      inputs:
-        PathtoPublish: 'artifacts\log\$(BuildConfiguration)'
-        ArtifactName: logs
-      condition: succeededOrFailed()
+        - task: NuGetCommand@2
+          displayName: Restore internal tools
+          inputs:
+            command: restore
+            feedsToUse: config
+            restoreSolution: 'eng\common\internal\Tools.csproj'
+            nugetConfigPath: 'NuGet.config'
+            restoreDirectory: '$(Build.SourcesDirectory)\.packages'
 
-    - task: PublishPipelineArtifact@1
-      displayName: 'Publish Artifact: bin'
-      inputs:
-        path: 'artifacts\bin'
-        artifactName: bin
-      condition: succeededOrFailed()
+        - task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1
+          inputs:
+            signType: $(SignType)
+            zipSources: false
+          condition: and(succeeded(), in(variables['SignType'], 'test', 'real'))
 
-    # Publishes setup VSIXes to a drop.
-    # Note: The insertion tool looks for the display name of this task in the logs.
-    - task: MicroBuildUploadVstsDropFolder@2
-      displayName: Upload VSTS Drop
-      inputs:
-        DropName: $(VisualStudio.DropName)
-        DropFolder: 'artifacts\VSSetup\$(BuildConfiguration)\Insertion'
-        DropRetentionDays: '30' # extended by insertion + VS release
-        AccessToken: '$(System.AccessToken)'
-        DropServiceUri: 'https://devdiv.artifacts.visualstudio.com'
-        VSDropServiceUri: 'https://vsdrop.corp.microsoft.com/file/v1'
-      condition: succeeded()
+        - task: MicroBuildOptProfPlugin@6
+          inputs:
+            ProfilingInputsDropName: '$(VisualStudio.DropName)'
+            ShouldSkipOptimize: true
+            AccessToken: '$(System.AccessToken)'
+            feedSource: 'https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json'
+          displayName: 'Install OptProf Plugin'
 
-    # Publish an artifact that the RoslynInsertionTool is able to find by its name.
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifact: VSSetup'
-      inputs:
-        PathtoPublish: 'artifacts\VSSetup\$(BuildConfiguration)'
-        ArtifactName: VSSetup
-      condition: succeeded()
+        # Required by MicroBuildBuildVSBootstrapper
+        - task: MicroBuildSwixPlugin@4
+          inputs:
+            dropName: $(VisualStudio.DropName)
 
-    # Archive NuGet packages to DevOps.
-    # Publish our NuPkgs as an artifact. The name of this artifact must be PackageArtifacts as the
-    # arcade templates depend on the name.
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifact: packages'
-      inputs:
-        PathtoPublish: 'artifacts\packages\$(BuildConfiguration)'
-        ArtifactName: PackageArtifacts
-      condition: succeeded()
+        - script: eng/CIBuild.cmd
+                    -configuration $(BuildConfiguration)
+                    -officialBuildId $(Build.BuildNumber)
+                    -officialSkipApplyOptimizationData $(SkipApplyOptimizationData)
+                    /p:RepositoryName=$(Build.Repository.Name)
+                    /p:VisualStudioIbcSourceBranchName=$(SourceBranch)
+                    /p:VisualStudioDropAccessToken=$(System.AccessToken)
+                    /p:VisualStudioDropName=$(VisualStudio.DropName)
+                    /p:DotNetSignType=$(SignType)
+                    /p:TeamName=MSBuild
+                    /p:DotNetPublishUsingPipelines=true
+                    /p:VisualStudioIbcDrop=$(OptProfDrop)
+                    /p:GenerateSbom=true
+          displayName: Build
+          condition: succeeded()
 
-    # Publish "IntelliSense" XSD files to their own artifact
-    # so it can be consumed by the insertion-to-VS job
-    - task: PublishPipelineArtifact@1
-      displayName: 'Publish Artifact: xsd'
-      inputs:
-        path: 'artifacts\xsd'
-        artifactName: xsd
-      condition: succeeded()
+        # Required by Microsoft policy
+        - template: eng\common\templates-official\steps\generate-sbom.yml@self
 
-    # Publish Asset Manifests for Build Asset Registry job
-    - task: PublishBuildArtifacts@1
-      displayName: Publish Asset Manifests
-      inputs:
-        PathtoPublish: '$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)/AssetManifest'
-        ArtifactName: AssetManifests
-      condition: succeeded()
+        # Publish OptProf configuration files
+        - task: ms-vscs-artifact.build-tasks.artifactDropTask-1.artifactDropTask@0
+          inputs:
+            dropServiceURI: 'https://devdiv.artifacts.visualstudio.com'
+            buildNumber: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
+            sourcePath: '$(Build.SourcesDirectory)\artifacts\OptProf\$(BuildConfiguration)\Data'
+            toLowerCase: false
+            usePat: true
+          displayName: 'OptProf - Publish to Artifact Services - ProfilingInputs'
+          condition: succeeded()
 
-    # Tag the build at the very end when we know it's been successful.
-    - task: colinsalmcorner.colinsalmcorner-buildtasks.tag-build-task.tagBuildOrRelease@0
-      displayName: Tag build as ready for optimization training
-      inputs:
-        tags: 'ready-for-training'
-      condition: succeeded()
+        # Build VS bootstrapper
+        # Generates $(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
+        - task: MicroBuildBuildVSBootstrapper@3
+          inputs:
+            vsMajorVersion: $(VisualStudio.MajorVersion)
+            channelName: $(VisualStudio.ChannelName)
+            manifests: $(VisualStudio.SetupManifestList)
+            outputFolder: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+            bootstrapperCoreVersion:
+          displayName: 'OptProf - Build VS bootstrapper'
+          condition: succeeded()
 
-    - task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
-      displayName: Execute cleanup tasks
-      condition: succeededOrFailed()
+        # Publish run settings
+        - task: PowerShell@2
+          inputs:
+            filePath: eng\common\sdk-task.ps1
+            arguments: -configuration $(BuildConfiguration)
+                      -task VisualStudio.BuildIbcTrainingSettings
+                      /p:VisualStudioDropName=$(VisualStudio.DropName)
+                      /p:BootstrapperInfoPath=$(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
+                      /p:VisualStudioIbcTrainingSettingsPath=$(Build.SourcesDirectory)\eng\config\OptProf.runsettings
+          displayName: 'OptProf - Build IBC training settings'
+          condition: succeeded()
 
-    - template: /eng/common/templates/steps/component-governance.yml
+        # Publish bootstrapper info
+        - task: 1ES.PublishBuildArtifacts@1
+          inputs:
+            PathtoPublish: $(Build.StagingDirectory)\MicroBuild\Output
+            ArtifactName: MicroBuildOutputs
+            ArtifactType: Container
+          displayName: 'OptProf - Publish Artifact: MicroBuildOutputs'
+          condition: succeeded()
+
+        - task: 1ES.PublishBuildArtifacts@1
+          displayName: 'Publish Artifact: logs'
+          inputs:
+            PathtoPublish: 'artifacts\log\$(BuildConfiguration)'
+            ArtifactName: logs
+          condition: succeededOrFailed()
+
+        - task: 1ES.PublishPipelineArtifact@1
+          displayName: 'Publish Artifact: bin'
+          inputs:
+            path: 'artifacts\bin'
+            artifactName: bin
+          condition: succeededOrFailed()
+
+        # Publishes setup VSIXes to a drop.
+        # Note: The insertion tool looks for the display name of this task in the logs.
+        - task: 1ES.MicroBuildVstsDrop@1
+          displayName: Upload VSTS Drop
+          inputs:
+            dropName: $(VisualStudio.DropName)
+            dropFolder: 'artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+            dropRetentionDays: '30' # extended by insertion + VS release
+            accessToken: '$(System.AccessToken)'
+            dropServiceUri: 'https://devdiv.artifacts.visualstudio.com'
+            vsDropServiceUri: 'https://vsdrop.corp.microsoft.com/file/v1'
+          condition: succeeded()
+
+        # Publish an artifact that the RoslynInsertionTool is able to find by its name.
+        - task: 1ES.PublishBuildArtifacts@1
+          displayName: 'Publish Artifact: VSSetup'
+          inputs:
+            PathtoPublish: 'artifacts\VSSetup\$(BuildConfiguration)'
+            ArtifactName: VSSetup
+          condition: succeeded()
+
+        # Archive NuGet packages to DevOps.
+        # Publish our NuPkgs as an artifact. The name of this artifact must be PackageArtifacts as the
+        # arcade templates depend on the name.
+        - task: 1ES.PublishBuildArtifacts@1
+          displayName: 'Publish Artifact: packages'
+          inputs:
+            PathtoPublish: 'artifacts\packages\$(BuildConfiguration)'
+            ArtifactName: PackageArtifacts
+          condition: succeeded()
+
+        # Publish "IntelliSense" XSD files to their own artifact
+        # so it can be consumed by the insertion-to-VS job
+        - task: 1ES.PublishPipelineArtifact@1
+          displayName: 'Publish Artifact: xsd'
+          inputs:
+            path: 'artifacts\xsd'
+            artifactName: xsd
+          condition: succeeded()
+
+        # Publish Asset Manifests for Build Asset Registry job
+        - task: 1ES.PublishBuildArtifacts@1
+          displayName: Publish Asset Manifests
+          inputs:
+            PathtoPublish: '$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)/AssetManifest'
+            ArtifactName: AssetManifests
+          condition: succeeded()
+
+        # Tag the build at the very end when we know it's been successful.
+        - task: colinsalmcorner.colinsalmcorner-buildtasks.tag-build-task.tagBuildOrRelease@0
+          displayName: Tag build as ready for optimization training
+          inputs:
+            tags: 'ready-for-training'
+          condition: succeeded()
+
+        - task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
+          displayName: Execute cleanup tasks
+          condition: succeededOrFailed()
+
+        - template: /eng/common/templates-official/steps/component-governance.yml@self
+          parameters:
+            ${{ if or(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs'), eq(variables['Build.SourceBranch'], 'refs/heads/main')) }}:
+              disableComponentGovernance: false
+            ${{ else }}:
+              disableComponentGovernance: true
+
+      - template: /eng/common/templates-official/jobs/source-build.yml@self
+        parameters:
+          platforms:
+            - name: Managed
+              pool:
+                name: AzurePipelines-EO
+                image: 1ESPT-Ubuntu22.04
+                os: linux
+
+      - template: /eng/common/templates-official/job/publish-build-assets.yml@self
+        parameters:
+          enablePublishBuildArtifacts: true
+          publishUsingPipelines: true
+          dependsOn:
+            - Windows_NT
+            - Source_Build_Managed
+          pool:
+            name: $(DncEngInternalBuildPool)
+            image: $(WindowsImage)
+            os: windows
+
+    - template: eng\common\templates-official\post-build\post-build.yml@self
       parameters:
-        ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), or(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs'), eq(variables['Build.SourceBranch'], 'refs/heads/main'))) }}:
-          disableComponentGovernance: false
-        ${{ else }}:
-          disableComponentGovernance: true
-
-  - template: /eng/common/templates/jobs/source-build.yml
-
-  - template: /eng/common/templates/job/publish-build-assets.yml
-    parameters:
-      enablePublishBuildArtifacts: true
-      publishUsingPipelines: true
-      dependsOn:
-        - Windows_NT
-        - Source_Build_Managed
-      pool:
-        vmImage: windows-latest
-
-- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-  - template: eng\common\templates\post-build\post-build.yml
-    parameters:
-      publishingInfraVersion: 3
-      # Symbol validation is not entirely reliable as of yet, so should be turned off until
-      # https://github.com/dotnet/arcade/issues/2871 is resolved.
-      enableSymbolValidation: false
-      enableSourceLinkValidation: false
-      enableNugetValidation: false
-      SDLValidationParameters:
-        enable: true
-        continueOnError: false
-        params: ' -SourceToolsList @("policheck","credscan")
-        -TsaInstanceURL "$(_TsaInstanceURL)"
-        -TsaProjectName "$(_TsaProjectName)"
-        -TsaNotificationEmail "$(_TsaNotificationEmail)"
-        -TsaCodebaseAdmin "$(_TsaCodebaseAdmin)"
-        -TsaBugAreaPath "$(_TsaBugAreaPath)"
-        -TsaIterationPath "$(_TsaIterationPath)"
-        -TsaRepositoryName "dotnet-msbuild"
-        -TsaCodebaseName "dotnet-msbuild"
-        -TsaPublish $True
-        -CrScanAdditionalRunConfigParams @("SuppressionsPath < $(Build.SourcesDirectory)\eng\CredScanSuppressions.json")
-        -PoliCheckAdditionalRunConfigParams @("UserExclusionPath < $(Build.SourcesDirectory)\eng\policheck_exclusions.xml")'
+        publishingInfraVersion: 3
+        # Symbol validation is not entirely reliable as of yet, so should be turned off until
+        # https://github.com/dotnet/arcade/issues/2871 is resolved.
+        enableSymbolValidation: false
+        enableSourceLinkValidation: false
+        enableNugetValidation: false
+        SDLValidationParameters:
+          enable: true
+          continueOnError: false
+          params: ' -SourceToolsList @("policheck","credscan")
+          -TsaInstanceURL "$(_TsaInstanceURL)"
+          -TsaProjectName "$(_TsaProjectName)"
+          -TsaNotificationEmail "$(_TsaNotificationEmail)"
+          -TsaCodebaseAdmin "$(_TsaCodebaseAdmin)"
+          -TsaBugAreaPath "$(_TsaBugAreaPath)"
+          -TsaIterationPath "$(_TsaIterationPath)"
+          -TsaRepositoryName "dotnet-msbuild"
+          -TsaCodebaseName "dotnet-msbuild"
+          -TsaPublish $True
+          -CrScanAdditionalRunConfigParams @("SuppressionsPath < $(Build.SourcesDirectory)\eng\CredScanSuppressions.json")
+          -PoliCheckAdditionalRunConfigParams @("UserExclusionPath < $(Build.SourcesDirectory)\eng\policheck_exclusions.xml")'
