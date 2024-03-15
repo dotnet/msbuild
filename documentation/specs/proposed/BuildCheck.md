@@ -16,11 +16,11 @@ The feature is meant to help customers to improve and understand quality of thei
       + [Live Build](#live-build)
       + [Binlog Replay mode](#binlog-replay-mode)
    * [Configuration](#configuration)
+      + [Sample configuration](#sample-configuration)
       + [User Configurable Options](#user-configurable-options)
          - [Enablement](#enablement)
          - [Severity](#severity)
          - [Scope of Analysis](#scope-of-analysis)
-      + [Sample configuration](#sample-configuration)
    * [Analyzers and Rules Identification](#analyzers-and-rules-identification)
    * [Custom Analyzers Authoring](#custom-analyzers-authoring)
       + [Implementation](#implementation)
@@ -38,7 +38,7 @@ The feature is meant to help customers to improve and understand quality of thei
 # Terminology
 
 * **Analyzer** – unit of execution (single implementing class), can host multiple rules. 
-* **Rule** – Single violation type, with single unique code (`“MSB123: Redefining built-in target”`). 
+* **Rule** – Single violation type, with single unique code (`“BC1234: Redefining built-in target”`). 
 * **Report** – Output from Analyzer informing about violating particular rule.
 * **CodeFix** – Violation remedy suggestion. Not yet applicable for MSBuild.
 * **BuildCheck** - Feature name. The infrastructure within MSBuild allowing pluggability and execution of Analyzers and their Rules
@@ -46,13 +46,13 @@ The feature is meant to help customers to improve and understand quality of thei
 
 # North Star / Longer-term vision
 
-MSBuild provides a rich OM exposing the build scripts, data and execution so that various quality checking rules can be authored. Identical OM is exposed from live build execution and via post-build log event sourcing – so that users can choose whether the build analysis will happen as part of the build or as a separate process.
+MSBuild provides a rich OM exposing the build scripts, data and execution so that various quality checking rules can be authored. This includes static analysis rules (e.g. checking validity of condition expressions) as well as build execution rules (e.g. checking of referencing nonexistent files) and composition rules (e.g. unintended outputs overwrites checking). Identical OM is exposed from live build execution and via post-build log event sourcing – so that users can choose whether the build analysis will happen as part of the build or as a separate process.
 
 Users are able to tune the behavior of the checks via `.editorconfig` which brings unified and standardized experience with other tooling (including built-in and third-party C# analyzers) leveraging `.editorconfig` files.
 
 Powerusers are able to develop, test and publish their custom analyzers easily and contribute them back to community. The local development scenario doesn’t require roundtrip through packaging.
 
-A solid set of in-the-box analyzers is provided by MSBuild and the .NET SDK, extended each release, with high quality reports (pointing exact locations of issue, offering clear and actionable explanations, not repetitive for builds with multi-execution or/and multi-importing of a same script in single build context).
+A solid set of in-the-box analyzers is provided by MSBuild and the .NET SDK, extended each release, with high quality reports (pointing exact locations of issue, offering clear and actionable explanations, not repetitive for builds with multi-execution or/and multi-importing of a same script in single build context). The existing in-the-box analyzers are gradually enabled by default and their severity increased - in waves (likely tied to sdk releases) - aiming to constantly increase quality of our customers build scripts. Full Framework (and hence Visual Studio) builds will take more conservative approach with requiring an explicit opt-in into the analyzers - in order to not introduce upgrade blockers. 
 
 The analysis has small impact on build duration with ability to opt-out from analysis altogether which will remove all the performance costs associated with the analysis.
 
@@ -88,7 +88,8 @@ Majority of following cases are included in appropriate context within the scena
 
 
 **Out of scope**
-* Custom analyzers has equal data access as the inbox analyzers.
+* Localization support (for reports message formats, identifiers, etc.).
+* Custom analyzers have equal data access as the inbox analyzers. We'll aim to ship analyzers that use public BuildCheck API/OM surface. But for extra agility we might chose to implement and ship some analyzers using unexposed data.
 * All inbox analyzers reports have precise location(s) of issues.
 * Opt-out of analysis on code-level (something like C# `#pragma warning disable`, but within msbuild xml files).
 * Simplified authoring experience via dedicated reference assembly.
@@ -96,8 +97,20 @@ Majority of following cases are included in appropriate context within the scena
 * Turning analysis off/on based on target (e.g. multi-targetted builds, calling MSBuild task etc.).
 * Controling/Configuring lifetime of analyzers - analyzers will currently be held alive, as single instance per analyzer, for the whole duration of the build. But future versions might prevent some of the analyzers to survive beyond a scope of a single project built (means for sharing data would be provided).
 * ETW for analyzers.
-* Attributing `.editorconfig` configurations to .sln files.
-* Attributing `.editorconfig` configurations to lower granularity than whole projects.
+* Attributing `.editorconfig` configurations to .sln files. E.g.:
+```ini
+# I expect this to apply to all projects within my solution, but not to projects which are not part of the solution
+[ContosoFrontEnd.sln]
+msbuild_analyzer.BC0101.IsEnabled=true
+msbuild_analyzer.BC0101.Severity=warning
+```
+* Attributing `.editorconfig` configurations to lower granularity than whole projects. E.g.:
+```ini
+# I expect this to apply only to a scope of the imported file. Or possibly I expect this to apply to all projects importing this project.
+[ContosoCommonImport.proj]
+buildcheck.BC0101.IsEnabled=true
+buildcheck.BC0101.Severity=warning
+```
 * Respecting `.editorconfig` file in msbuild import locations (unless they are in the parent folders hieararchy of particular project file).
  
 
@@ -125,7 +138,7 @@ Users will have option to explicitly opt-in to run BuildCheck during the binlog 
 
 Would there be any analyzers that are not possible to run during the replay mode (subject to internal design - this difference won't be exposed during [custom analyzers authoring](#custom-analyzers-authoring)), replay mode will inform user about those via warnings.
 
-Replay mode will by default consider `.editorconfig` files stored within the binlog and will run analyzers based on those. This may lead to double-reports – as binlog will have the runtime analysis reports stored, plus the replay-time analysis reports will be augumented.
+Replay mode will by default consider `.editorconfig` files stored within the binlog and will run analyzers based on those. This may lead to unintended double-reports – as binlog will have the runtime analysis reports stored, plus the replay-time analysis reports will be augumented.
 
 For this reason we will consider following modes (all are non-goals):
 * Ability to specify skipping all binlog stored reports
@@ -142,7 +155,7 @@ There will be 3 mechanisms of configuring the analyzers and rules:
 For the `.editorconfig` file configuration, following will apply:
 * Only `.editorconfig` files collocated with the project file or up the folder hierarchy will be considered.
 * `.editorconfig` files placed along with explicitly or implicitly imported msbuild files won’t be considered.
-* `.editorconfig` files packaged within nuget packages won’t be considered (unless the unpack action will place them alongside the referencing project).
+* `.editorconfig` files packaged within nuget packages within local nuget cache won’t be considered.
 
 Non-Goals (but might be considered):
 * bulk configuration of multiple rules - based on analyzers/rules prefixes or/and categories.
@@ -155,6 +168,19 @@ Out of scope for configuration:
 * lower granularity of `.editorconfig` settings other than whole projects.
 * attributing configuration to a .sln file and expecting it will apply to all contained projects.
 * Support for multiple [custom configurations](#custom-configuration-declaration) within a single build for a single rule. (Not to be mixed with [standardized configuration](#standardized-configuration-declaration) - which can be configured freely per project) If a custom configuration will be used, it will need to be specified identically in each explicit configurations of the rule. This is chosen so that there are no implicit requirements on lifetime of the analyzer or analyzer instancing – each analyzer will be instantiated only once per build (this is however something that will very likely change in future versions – so authors are advised not to take hard dependency on single instance policy).
+
+### Sample configuration
+
+```
+[*.csproj]
+msbuild_analyzer.BC0101.IsEnabled=true
+msbuild_analyzer.BC0101.Severity=warning
+
+msbuild_analyzer.COND0543.IsEnabled=false
+msbuild_analyzer.COND0543.Severity=Error
+msbuild_analyzer.COND0543.EvaluationAnalysisScope=AnalyzedProjectOnly
+msbuild_analyzer.COND0543.CustomSwitch=QWERTY
+```
 
 ### User Configurable Options
 
@@ -196,18 +222,6 @@ Same rule can have `EvaluationAnalysisScope` configured to different values for 
 
 BuildCheck might not be able to guarantee to properly filter the data with this distinction for all [registration types](#RegisterActions) - in case an explicit value is attempted to be configured (either [from the analyzer code](#BuildAnalyzerConfiguration) or from `.editorconfig` file) for an analyzer that has a subscription to unfilterable data - a warning will be issued during the build and analyzer will be deregistered.
 
-### Sample configuration
-
-```
-[*.csproj]
-msbuild_analyzer.BC0101.IsEnabled=true
-msbuild_analyzer.BC0101.Severity=warning
-
-msbuild_analyzer.COND0543.IsEnabled=false
-msbuild_analyzer.COND0543.Severity=Error
-msbuild_analyzer.COND0543.EvaluationAnalysisScope=AnalyzedProjectOnly
-msbuild_analyzer.COND0543.CustomSwitch=QWERTY
-```
 
 ## Analyzers and Rules Identification
 
@@ -263,7 +277,7 @@ public abstract class BuildAnalyzer : IDisposable
 }
 ```
 
-<a name="RegisterActions" />The context in `RegisterActions` call will enable subscriptions for data pumping from the infrastructure. 
+<a name="RegisterActions"></a>The context in `RegisterActions` call will enable subscriptions for data pumping from the infrastructure. 
 
 Sample of how registrations might look like:
 
@@ -292,6 +306,7 @@ Simplified proposal of definition of a single rule:
 public class BuildAnalyzerRule
 {
     // Identification/Description fields
+    // (To be defined more precisely by https://github.com/dotnet/msbuild/issues/9823)
 
     /// <summary>
     /// The default configuration - overridable by the user via .editorconfig.
@@ -301,7 +316,7 @@ public class BuildAnalyzerRule
 }
 ```
 
-<a name="BuildAnalyzerConfiguration" />Each rule will supply its default configuration (mainly enablement and report severity) – those will apply if `.editorconfig` file will not set those settings explicitly. If the rule doesn't provide (some of) its defaults, a global hardcoded default is used (`severity: message, enabled: false`).
+<a name="BuildAnalyzerConfiguration"></a>Each rule will supply its default configuration (mainly enablement and report severity) – those will apply if `.editorconfig` file will not set those settings explicitly. If the rule doesn't provide (some of) its defaults, a global hardcoded default is used (`severity: message, enabled: false`).
 
 #### Standardized configuration declaration
 
@@ -365,7 +380,7 @@ More details on configuration are in [Configuration](#configuration) section.
 
 #### Compatibility
 
-All the publicly exposed contracts will be available within `Microsoft.Build.Experimental.BuildCheck` interface. The interface is expressing that contracts are not guaranteed to be forward compatible (however breakage will be limited to necessary cases). The availability of particular set of BuildCheck API will be queryable via [Feature Query API](https://github.com/dotnet/msbuild/pull/9665):
+All the publicly exposed contracts will be available within `Microsoft.Build.Experimental.BuildCheck` interface. The interface is expressing that contracts are not guaranteed to be backward compatible (however breakage will be limited to necessary cases). The availability of particular set of BuildCheck API will be queryable via [Feature Query API](https://github.com/dotnet/msbuild/pull/9665):
 
 ```csharp
 var availability = Features.CheckFeatureAvailability("BuildCheck.Beta");
@@ -384,9 +399,9 @@ At the same time we aim to provide mocks providing the BuildCheck context data �
 
 ### Packaging
 
-Several requirements are mandated for analyzer packages to be properly recognized (Netstandard only, A call to designated property function will need to be part of the packaged build assets, dependencies will need to be packaged, binaries structure flattened).
+Several requirements are mandated for analyzer packages to be properly recognized (Netstandard only, A call to designated property function will need to be part of the packaged build assets, dependencies will need to be packaged, binaries structure flattened). There might as well be couple of optional practices making the analyzer package more resources savvy (E.g. defining the rule ids and enablement status within the mentioned property function - so that such information doesn't require loading and calling of the analyzer type).
 
-Also such a dependency is a purely development time harness - so it should be marked as [`DevelopmentDependency`](https://learn.microsoft.com/en-us/nuget/reference/nuspec#developmentdependency).
+Also custom analyzer package is a dependency is a purely development time harness - so it should be marked as [`DevelopmentDependency`](https://learn.microsoft.com/en-us/nuget/reference/nuspec#developmentdependency).
 
 In order to simplify the packaging process (and meeting above mentioned requiements) a dotnet template will be provided producing proper package on pack action.
 
