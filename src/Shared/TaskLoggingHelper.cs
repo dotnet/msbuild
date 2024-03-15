@@ -513,14 +513,7 @@ namespace Microsoft.Build.Utilities
             ErrorUtilities.VerifyThrowArgumentNull(filePath, nameof(filePath));
             ErrorUtilities.VerifyThrowArgumentNull(content, nameof(content));
 
-            var e = new ExtendedBuildMessageEventArgs("RESPONSEGENERATEDFILE", "", null, null, MessageImportance.Low)
-            {
-                ExtendedMetadata = new Dictionary<string, string>
-                {
-                    { "FILEPATH", filePath },
-                    { "CONTENT", content },
-                }
-            };
+            var e = new ResponseGeneratedFileUsedEventArgs(filePath, content);
 
             BuildEngine.LogMessageEvent(e);
         }

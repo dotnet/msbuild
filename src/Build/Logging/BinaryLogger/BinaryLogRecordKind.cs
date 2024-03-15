@@ -39,6 +39,7 @@ namespace Microsoft.Build.Logging
         String,
         TaskParameter,
         ResponseFileUsed,
+        ResponseGeneratedFileUsed,
         AssemblyLoad,
     }
 }

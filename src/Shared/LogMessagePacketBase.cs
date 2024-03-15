@@ -205,6 +205,11 @@ namespace Microsoft.Build.Shared
         /// Event is <see cref="ExtendedCriticalBuildMessageEventArgs"/>
         /// </summary>
         ExtendedCriticalBuildMessageEvent = 33,
+
+        /// <summary>
+        /// Event is a ResponseGeneratedFileUsedEventArgs
+        /// </summary>
+        ResponseGeneratedFileUsedEvent = 34,
     }
     #endregion
 
@@ -590,6 +595,8 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.TaskCommandLineEvent => new TaskCommandLineEventArgs(null, null, MessageImportance.Normal),
                 LoggingEventType.EnvironmentVariableReadEvent => new EnvironmentVariableReadEventArgs(),
                 LoggingEventType.ResponseFileUsedEvent => new ResponseFileUsedEventArgs(null),
+                LoggingEventType.ResponseGeneratedFileUsedEvent => new ResponseGeneratedFileUsedEventArgs(),
+
 #if !TASKHOST // MSBuildTaskHost is targeting Microsoft.Build.Framework.dll 3.5
                 LoggingEventType.AssemblyLoadEvent => new AssemblyLoadBuildEventArgs(),
                 LoggingEventType.TaskParameterEvent => new TaskParameterEventArgs(0, null, null, true, default),
@@ -762,6 +769,10 @@ namespace Microsoft.Build.Shared
             {
                 return LoggingEventType.ResponseFileUsedEvent;
             }
+            else if (eventType == typeof(ResponseGeneratedFileUsedEventArgs))
+            {
+                return LoggingEventType.ResponseGeneratedFileUsedEvent;
+            }
             else
             {
                 return LoggingEventType.CustomEvent;
@@ -803,6 +814,9 @@ namespace Microsoft.Build.Shared
                     break;
                 case LoggingEventType.ResponseFileUsedEvent:
                     WriteResponseFileUsedEventToStream((ResponseFileUsedEventArgs)buildEvent, translator);
+                    break;
+                case LoggingEventType.ResponseGeneratedFileUsedEvent:
+                    WriteResponseGeneratedFileUsedEventToStream((ResponseGeneratedFileUsedEventArgs)buildEvent, translator);
                     break;
                 case LoggingEventType.TaskCommandLineEvent:
                     WriteTaskCommandLineEventToStream((TaskCommandLineEventArgs)buildEvent, translator);
@@ -934,6 +948,23 @@ namespace Microsoft.Build.Shared
 
 #if !CLR2COMPATIBILITY
             DateTime timestamp = responseFileUsedEventArgs.RawTimestamp;
+            translator.Translate(ref timestamp);
+#endif
+        }
+
+        /// <summary>
+        /// Write a response generated file used log message into the translator
+        /// </summary>
+        private void WriteResponseGeneratedFileUsedEventToStream(ResponseGeneratedFileUsedEventArgs responseGeneratedFileUsedEventArgs, ITranslator translator)
+        {
+            string filePath = responseGeneratedFileUsedEventArgs.ResponseFilePath;
+            string content = responseGeneratedFileUsedEventArgs.ResponseFileContent;
+
+            translator.Translate(ref filePath);
+            translator.Translate(ref content);
+
+#if !CLR2COMPATIBILITY
+            DateTime timestamp = responseGeneratedFileUsedEventArgs.RawTimestamp;
             translator.Translate(ref timestamp);
 #endif
         }
@@ -1174,6 +1205,7 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.BuildErrorEvent => ReadTaskBuildErrorEventFromStream(translator, message, helpKeyword, senderName),
                 LoggingEventType.BuildMessageEvent => ReadBuildMessageEventFromStream(translator, message, helpKeyword, senderName),
                 LoggingEventType.ResponseFileUsedEvent => ReadResponseFileUsedEventFromStream(translator, message, helpKeyword, senderName),
+                LoggingEventType.ResponseGeneratedFileUsedEvent => ReadResponseGeneratedFileUsedEventFromStream(translator, message, helpKeyword, senderName),
                 LoggingEventType.BuildWarningEvent => ReadBuildWarningEventFromStream(translator, message, helpKeyword, senderName),
                 LoggingEventType.EnvironmentVariableReadEvent => ReadEnvironmentVariableReadEventFromStream(translator, message, helpKeyword, senderName),
                 _ => null,
@@ -1331,6 +1363,23 @@ namespace Microsoft.Build.Shared
             buildEvent.RawTimestamp = timestamp;
 #endif
 
+
+            return buildEvent;
+        }
+
+        private ResponseGeneratedFileUsedEventArgs ReadResponseGeneratedFileUsedEventFromStream(ITranslator translator, string message, string helpKeyword, string senderName)
+        {
+            string responseFilePath = String.Empty;
+            string responseFileContent = String.Empty;
+            translator.Translate(ref responseFilePath);
+            translator.Translate(ref responseFileContent);
+            ResponseGeneratedFileUsedEventArgs buildEvent = new ResponseGeneratedFileUsedEventArgs(responseFilePath, responseFileContent);
+
+#if !CLR2COMPATIBILITY
+            DateTime timestamp = default;
+            translator.Translate(ref timestamp);
+            buildEvent.RawTimestamp = timestamp;
+#endif
 
             return buildEvent;
         }

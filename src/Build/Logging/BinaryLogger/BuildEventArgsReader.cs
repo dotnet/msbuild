@@ -315,6 +315,7 @@ namespace Microsoft.Build.Logging
                 BinaryLogRecordKind.TargetSkipped => ReadTargetSkippedEventArgs(),
                 BinaryLogRecordKind.EnvironmentVariableRead => ReadEnvironmentVariableReadEventArgs(),
                 BinaryLogRecordKind.ResponseFileUsed => ReadResponseFileUsedEventArgs(),
+                BinaryLogRecordKind.ResponseGeneratedFileUsed => ReadResponseGeneratedFileUsedEventArgs(),
                 BinaryLogRecordKind.PropertyReassignment => ReadPropertyReassignmentEventArgs(),
                 BinaryLogRecordKind.UninitializedPropertyRead => ReadUninitializedPropertyReadEventArgs(),
                 BinaryLogRecordKind.PropertyInitialValueSet => ReadPropertyInitialValueSetEventArgs(),
@@ -1110,6 +1111,23 @@ namespace Microsoft.Build.Logging
             SetCommonFields(e, fields);
 
             return e;
+        }
+
+        private BuildEventArgs ReadResponseGeneratedFileUsedEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+
+            string? responseFilePath = ReadDeduplicatedString();
+            string? responseFileContent = ReadDeduplicatedString();
+
+            if (responseFilePath != null && responseFileContent != null)
+            {
+                var e = new ResponseGeneratedFileUsedEventArgs(responseFilePath, responseFileContent);
+                SetCommonFields(e, fields);
+                return e;
+            }
+
+            return new ResponseGeneratedFileUsedEventArgs();
         }
 
         private BuildEventArgs ReadPropertyReassignmentEventArgs()
