@@ -48,11 +48,11 @@ The feature is meant to help customers to improve and understand quality of thei
 
 MSBuild provides a rich OM exposing the build scripts, data and execution so that various quality checking rules can be authored. Identical OM is exposed from live build execution and via post-build log event sourcing – so that users can choose whether the build analysis will happen as part of the build or as a separate process.
 
-Users are able to tune the behavior of the checks via `.editorconfig` which brings unified and standardized experience with other tooling leveraging `.editorconfig` files.
+Users are able to tune the behavior of the checks via `.editorconfig` which brings unified and standardized experience with other tooling (including built-in and third-party C# analyzers) leveraging `.editorconfig` files.
 
 Powerusers are able to develop, test and publish their custom analyzers easily and contribute them back to community. The local development scenario doesn’t require roundtrip through packaging.
 
-Solid set of in-the-box analyzers is provided by the dotnet team, extended each release, with high quality reports (pointing exact locations of issue, offering clear and actionable explanations, not repetitive for builds with multi-execution or/and multi-importing of a same script in single build context).
+A solid set of in-the-box analyzers is provided by MSBuild and the .NET SDK, extended each release, with high quality reports (pointing exact locations of issue, offering clear and actionable explanations, not repetitive for builds with multi-execution or/and multi-importing of a same script in single build context).
 
 The analysis has small impact on build duration with ability to opt-out from analysis altogether which will remove all the performance costs associated with the analysis.
 
@@ -90,7 +90,7 @@ Majority of following cases are included in appropriate context within the scena
 **Out of scope**
 * Custom analyzers has equal data access as the inbox analyzers.
 * All inbox analyzers reports have precise location(s) of issues.
-* Opt-out of analysis on code-level (analogy to C# pragmas, but within msbuild xml files).
+* Opt-out of analysis on code-level (something like C# `#pragma warning disable`, but within msbuild xml files).
 * Simplified authoring experience via dedicated reference assembly.
 * Restore phase analysis.
 * Turning analysis off/on based on target (e.g. multi-targetted builds, calling MSBuild task etc.).
@@ -113,7 +113,7 @@ Majority of following cases are included in appropriate context within the scena
 
 BuildCheck will run as part of the build and execute [inbox analyzers](#inbox-analyzers) and [custom analyzers](#acquisition-of-custom-analyzers) based on the [configuration](#configuration). Users will have an option to completely opt-out from BuildCheck to run via commandline switch.
 
-Findings - reports - of analyzers will be otput as build messages/warnings/errors, while the code should help distinguish BuildCheck produced reports from regular build errors/warnings.
+Findings - reports - of analyzers will be output as build messages/warnings/errors, and the message/warnings/error code should help distinguish BuildCheck produced reports from regular build errors/warnings.
 
 ### Binlog Replay mode
 
@@ -164,7 +164,7 @@ Initial version of BuildCheck plans a limited set of options configurable by use
 
 Boolean option `IsEnabled` will be available to allow users to disable/enable particualr rule.
 
-Different rules of a single analyzer can have different enabledment status configured.
+Different rules of a single analyzer can have different enablement status configured.
 
 If all the rules from a single analyzer are disabled - analyzer won't be given any data for such configured part of the build (specific project or a whoe build). If analyzer have some rules enabled and some disabled - it will be still fed with data, but the reports will be post-filtered.
 
@@ -180,7 +180,7 @@ Option `Severity` with following values will be available:
 
 Configuration will dictate transformation of the analyzer report to particular build output type (message, warning or error).
 
-Different rules of a single analyzer can have different severities configured. Same rule can have different severities for different projects.
+Each rule has a severity, even if multiple rules are defined in a single analyzer. The rule can have different severities for different projects within a single build session.
 
 #### Scope of Analysis
 
@@ -223,7 +223,7 @@ msbuild_analyzer.COND0543.CustomSwitch=QWERTY
 
 ### Implementation
 
-To author custom analyzer, user will need to implement given contract (delivered in Microsoft.Build package). The contract will provide access to the exposed Build OM focused on build analysis.
+To author custom analyzer, user will need to implement given contract (delivered in Microsoft.Build package). The contract will provide access to the exposed BuildCheck OM focused on build analysis.
 
 #### Analyzer declaration
 
@@ -278,13 +278,13 @@ public interface IBuildCheckRegistrationContext
 }
 ```
 
-The data provide in callbacks will allow analyzer to submit reports for its rules. Single callback can lead to multiple reports being generated.
+The data provided in callbacks for registered actions will allow the analyzer to submit reports for its rules. A single callback can lead to multiple reports being generated.
 
 Any analyzer will be allowed to produce reports only for Rules that it declared in it’s `SupportedRules` definition.
 
 #### Rules declaration
 
-Single analyzer can declare support of multiple rules – since it might produce reports for those on top of same input data – and for efficiency reasons a single processing of data might be needed.
+A single analyzer can declare support of multiple rules – since it might produce reports for those on top of same input data – and for efficiency reasons a single processing of data might be needed.
 
 Simplified proposal of definition of a single rule:
 
@@ -301,7 +301,7 @@ public class BuildAnalyzerRule
 }
 ```
 
-<a name="BuildAnalyzerConfiguration" />Each rule will supply its default configuration (mainly enablement and report severity) – those will apply if `.editorconfig` file will not set those settings explicitly. If the rule doesn't provide (some of) its defaults, a global hardcoded defults are used (`severity: message, enabled: false`).
+<a name="BuildAnalyzerConfiguration" />Each rule will supply its default configuration (mainly enablement and report severity) – those will apply if `.editorconfig` file will not set those settings explicitly. If the rule doesn't provide (some of) its defaults, a global hardcoded default is used (`severity: message, enabled: false`).
 
 #### Standardized configuration declaration
 
@@ -326,13 +326,13 @@ public class BuildAnalyzerConfiguration
     public EvaluationAnalysisScope? EvaluationAnalysisScope { get; internal init; }
 
     /// <summary>
-    /// The severity of the result for the rule.
+    /// The default severity of the result for the rule. May be overridden by user configuration.
     /// </summary>
     public BuildAnalyzerResultSeverity? Severity { get; internal init; }
 
     /// <summary>
     /// Whether the analyzer rule is enabled.
-    /// If all rules within the analyzer are not enabled, it will not be run.
+    /// If no rule within the analyzer is enabled, the whole analyzer will not be run.
     /// If some rules are enabled and some are not, the analyzer will be run and reports will be post-filtered.
     /// </summary>
     public bool? IsEnabled { get; internal init; }
