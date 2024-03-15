@@ -220,14 +220,8 @@ internal sealed partial class TerminalLogger : INodeLogger
 
     #region INodeLogger implementation
 
-    private LoggerVerbosity _verbosity = LoggerVerbosity.Minimal;
-
     /// <inheritdoc/>
-    public LoggerVerbosity Verbosity
-    {
-        get { return _verbosity; }
-        set { _verbosity = value; }
-    }
+    public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Minimal;
 
     /// <inheritdoc/>
     public string Parameters
@@ -417,170 +411,172 @@ internal sealed partial class TerminalLogger : INodeLogger
             UpdateNodeStatus(buildEventContext, null);
         }
 
-        // Add project summary to the static part of the Console only if verbosity is higher than Quiet.
-        if (Verbosity > LoggerVerbosity.Quiet)
+        // Continue execution and add project summary to the static part of the Console only if verbosity is higher than Quiet.
+        if (Verbosity <= LoggerVerbosity.Quiet)
         {
-            ProjectContext c = new(buildEventContext);
+            return;
+        }
 
-            if (_projects.TryGetValue(c, out Project? project))
+        ProjectContext c = new(buildEventContext);
+
+        if (_projects.TryGetValue(c, out Project? project))
+        {
+            lock (_lock)
             {
-                lock (_lock)
+                Terminal.BeginUpdate();
+                try
                 {
-                    Terminal.BeginUpdate();
-                    try
+                    EraseNodes();
+
+                    string duration = project.Stopwatch.ElapsedSeconds.ToString("F1");
+                    ReadOnlyMemory<char>? outputPath = project.OutputPath;
+
+                    string projectFile = e.ProjectFile is not null ?
+                        Path.GetFileNameWithoutExtension(e.ProjectFile) :
+                        string.Empty;
+
+                    // Build result. One of 'failed', 'succeeded with warnings', or 'succeeded' depending on the build result and diagnostic messages
+                    // reported during build.
+                    bool haveErrors = project.BuildMessages?.Exists(m => m.Severity == MessageSeverity.Error) == true;
+                    bool haveWarnings = project.BuildMessages?.Exists(m => m.Severity == MessageSeverity.Warning) == true;
+
+                    string buildResult = RenderBuildResult(e.Succeeded, haveErrors, haveWarnings);
+
+                    // Check if we're done restoring.
+                    if (c == _restoreContext)
                     {
-                        EraseNodes();
-
-                        string duration = project.Stopwatch.ElapsedSeconds.ToString("F1");
-                        ReadOnlyMemory<char>? outputPath = project.OutputPath;
-
-                        string projectFile = e.ProjectFile is not null ?
-                            Path.GetFileNameWithoutExtension(e.ProjectFile) :
-                            string.Empty;
-
-                        // Build result. One of 'failed', 'succeeded with warnings', or 'succeeded' depending on the build result and diagnostic messages
-                        // reported during build.
-                        bool haveErrors = project.BuildMessages?.Exists(m => m.Severity == MessageSeverity.Error) == true;
-                        bool haveWarnings = project.BuildMessages?.Exists(m => m.Severity == MessageSeverity.Warning) == true;
-
-                        string buildResult = RenderBuildResult(e.Succeeded, haveErrors, haveWarnings);
-
-                        // Check if we're done restoring.
-                        if (c == _restoreContext)
+                        if (e.Succeeded)
                         {
-                            if (e.Succeeded)
+                            if (haveErrors || haveWarnings)
                             {
-                                if (haveErrors || haveWarnings)
-                                {
-                                    Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
-                                        buildResult,
-                                        duration));
-                                }
-                                else
-                                {
-                                    Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreComplete",
-                                        duration));
-                                }
+                                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
+                                    buildResult,
+                                    duration));
                             }
                             else
                             {
-                                // It will be reported after build finishes.
-                                _restoreFailed = true;
+                                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreComplete",
+                                    duration));
                             }
-
-                            _restoreContext = null;
-                            _restoreFinished = true;
                         }
-                        // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
-                        // If this is a test project, print it always, so user can see either a success or failure, otherwise success is hidden
-                        // and it is hard to see if project finished, or did not run at all.
-                        else if (project.OutputPath is not null || project.BuildMessages is not null || project.IsTestProject)
+                        else
                         {
-                            // Show project build complete and its output
-                            if (project.IsTestProject)
-                            {
-                                if (string.IsNullOrEmpty(project.TargetFramework))
-                                {
-                                    Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_NoTF",
-                                        Indentation,
-                                        projectFile,
-                                        buildResult,
-                                        duration));
-                                }
-                                else
-                                {
-                                    Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_WithTF",
-                                        Indentation,
-                                        projectFile,
-                                        AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
-                                        buildResult,
-                                        duration));
-                                }
-                            }
-                            else
-                            {
-                                if (string.IsNullOrEmpty(project.TargetFramework))
-                                {
-                                    Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_NoTF",
-                                        Indentation,
-                                        projectFile,
-                                        buildResult,
-                                        duration));
-                                }
-                                else
-                                {
-                                    Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTF",
-                                        Indentation,
-                                        projectFile,
-                                        AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
-                                        buildResult,
-                                        duration));
-                                }
-                            }
-
-                            // Print the output path as a link if we have it.
-                            if (outputPath is not null)
-                            {
-                                ReadOnlySpan<char> outputPathSpan = outputPath.Value.Span;
-                                ReadOnlySpan<char> url = outputPathSpan;
-                                try
-                                {
-                                    // If possible, make the link point to the containing directory of the output.
-                                    url = Path.GetDirectoryName(url);
-                                }
-                                catch
-                                {
-                                    // Ignore any GetDirectoryName exceptions.
-                                }
-
-                                // Generates file:// schema url string which is better handled by various Terminal clients than raw folder name.
-                                string urlString = url.ToString();
-                                if (Uri.TryCreate(urlString, UriKind.Absolute, out Uri? uri))
-                                {
-                                    urlString = uri.AbsoluteUri;
-                                }
-
-                                // If the output path is under the initial working directory, make the console output relative to that to save space.
-                                if (outputPathSpan.StartsWith(_initialWorkingDirectory.AsSpan(), FileUtilities.PathComparison))
-                                {
-                                    if (outputPathSpan.Length > _initialWorkingDirectory.Length
-                                        && (outputPathSpan[_initialWorkingDirectory.Length] == Path.DirectorySeparatorChar
-                                            || outputPathSpan[_initialWorkingDirectory.Length] == Path.AltDirectorySeparatorChar))
-                                    {
-                                        outputPathSpan = outputPathSpan.Slice(_initialWorkingDirectory.Length + 1);
-                                    }
-                                }
-
-                                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath",
-                                    $"{AnsiCodes.LinkPrefix}{urlString}{AnsiCodes.LinkInfix}{outputPathSpan.ToString()}{AnsiCodes.LinkSuffix}"));
-                            }
-                            else
-                            {
-                                Terminal.WriteLine(string.Empty);
-                            }
+                            // It will be reported after build finishes.
+                            _restoreFailed = true;
                         }
 
-                        // Print diagnostic output under the Project -> Output line.
-                        if (project.BuildMessages is not null)
-                        {
-                            foreach (BuildMessage buildMessage in project.BuildMessages)
-                            {
-                                Terminal.WriteLine($"{Indentation}{Indentation}{buildMessage.Message}");
-                            }
-                        }
-
-                        _buildHasErrors |= haveErrors;
-                        _buildHasWarnings |= haveWarnings;
-
-                        DisplayNodes();
+                        _restoreContext = null;
+                        _restoreFinished = true;
                     }
-                    finally
+                    // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
+                    // If this is a test project, print it always, so user can see either a success or failure, otherwise success is hidden
+                    // and it is hard to see if project finished, or did not run at all.
+                    else if (project.OutputPath is not null || project.BuildMessages is not null || project.IsTestProject)
                     {
-                        Terminal.EndUpdate();
+                        // Show project build complete and its output
+                        if (project.IsTestProject)
+                        {
+                            if (string.IsNullOrEmpty(project.TargetFramework))
+                            {
+                                Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_NoTF",
+                                    Indentation,
+                                    projectFile,
+                                    buildResult,
+                                    duration));
+                            }
+                            else
+                            {
+                                Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_WithTF",
+                                    Indentation,
+                                    projectFile,
+                                    AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
+                                    buildResult,
+                                    duration));
+                            }
+                        }
+                        else
+                        {
+                            if (string.IsNullOrEmpty(project.TargetFramework))
+                            {
+                                Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_NoTF",
+                                    Indentation,
+                                    projectFile,
+                                    buildResult,
+                                    duration));
+                            }
+                            else
+                            {
+                                Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTF",
+                                    Indentation,
+                                    projectFile,
+                                    AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
+                                    buildResult,
+                                    duration));
+                            }
+                        }
+
+                        // Print the output path as a link if we have it.
+                        if (outputPath is not null)
+                        {
+                            ReadOnlySpan<char> outputPathSpan = outputPath.Value.Span;
+                            ReadOnlySpan<char> url = outputPathSpan;
+                            try
+                            {
+                                // If possible, make the link point to the containing directory of the output.
+                                url = Path.GetDirectoryName(url);
+                            }
+                            catch
+                            {
+                                // Ignore any GetDirectoryName exceptions.
+                            }
+
+                            // Generates file:// schema url string which is better handled by various Terminal clients than raw folder name.
+                            string urlString = url.ToString();
+                            if (Uri.TryCreate(urlString, UriKind.Absolute, out Uri? uri))
+                            {
+                                urlString = uri.AbsoluteUri;
+                            }
+
+                            // If the output path is under the initial working directory, make the console output relative to that to save space.
+                            if (outputPathSpan.StartsWith(_initialWorkingDirectory.AsSpan(), FileUtilities.PathComparison))
+                            {
+                                if (outputPathSpan.Length > _initialWorkingDirectory.Length
+                                    && (outputPathSpan[_initialWorkingDirectory.Length] == Path.DirectorySeparatorChar
+                                        || outputPathSpan[_initialWorkingDirectory.Length] == Path.AltDirectorySeparatorChar))
+                                {
+                                    outputPathSpan = outputPathSpan.Slice(_initialWorkingDirectory.Length + 1);
+                                }
+                            }
+
+                            Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath",
+                                $"{AnsiCodes.LinkPrefix}{urlString}{AnsiCodes.LinkInfix}{outputPathSpan.ToString()}{AnsiCodes.LinkSuffix}"));
+                        }
+                        else
+                        {
+                            Terminal.WriteLine(string.Empty);
+                        }
                     }
+
+                    // Print diagnostic output under the Project -> Output line.
+                    if (project.BuildMessages is not null)
+                    {
+                        foreach (BuildMessage buildMessage in project.BuildMessages)
+                        {
+                            Terminal.WriteLine($"{Indentation}{Indentation}{buildMessage.Message}");
+                        }
+                    }
+
+                    _buildHasErrors |= haveErrors;
+                    _buildHasWarnings |= haveWarnings;
+
+                    DisplayNodes();
+                }
+                finally
+                {
+                    Terminal.EndUpdate();
                 }
             }
-        }  
+        }
     }
 
     /// <summary>
