@@ -113,6 +113,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                     BuildEventContext.InvalidProjectContextId,
                     BuildEventContext.InvalidTargetId,
                     BuildEventContext.InvalidTaskId);
+
+                _loggingService.LogBuildEvent(eventArgs);
             }
         }
 
