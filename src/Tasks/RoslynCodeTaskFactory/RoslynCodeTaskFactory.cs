@@ -111,6 +111,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private string _taskName;
 
+        private string _projectDirectory;
+
         /// <inheritdoc cref="ITaskFactory.FactoryName"/>
         public string FactoryName => "Roslyn Code Task Factory";
 
@@ -150,6 +152,11 @@ namespace Microsoft.Build.Tasks
                 TaskResources = AssemblyResources.PrimaryResources,
                 HelpKeywordPrefix = "MSBuild."
             };
+
+            if (taskFactoryLoggingHost is IHasProjectFullPath logThatHasProjectFullPath)
+            {
+                _projectDirectory = Path.GetDirectoryName(logThatHasProjectFullPath.ProjectFullPath);
+            }
 
             _taskName = taskName;
 
@@ -686,11 +693,14 @@ namespace Microsoft.Build.Tasks
             try
             {
                 // Embed generated file in the binlog
-                _log.LogIncludeGeneratedFile(sourceCodePath, taskInfo.SourceCode);
-
-                // Log the location of the code file in binlog
-                _log.LogMessageFromResources(MessageImportance.Low, "CodeTaskFactory.FindSourceFileInBinlogAt", sourceCodePath);
-
+                if (_projectDirectory != null)
+                {
+                    string fileNameInBinlog = $"{Guid.NewGuid()}-{_taskName}-compilation-file.tmp";
+                    string outputPathInBinlog = Path.Combine(_projectDirectory, fileNameInBinlog);
+                    
+                    _log.LogIncludeGeneratedFile(outputPathInBinlog, taskInfo.SourceCode);
+                }
+                
                 // Create the code
                 File.WriteAllText(sourceCodePath, taskInfo.SourceCode);
 

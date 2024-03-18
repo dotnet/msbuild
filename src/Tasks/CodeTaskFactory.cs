@@ -127,6 +127,11 @@ namespace Microsoft.Build.Tasks
         private string _nameOfTask;
 
         /// <summary>
+        /// The directory of the current project
+        /// </summary>
+        private string _projectDirectory;
+
+        /// <summary>
         /// Path to source that is outside the project file
         /// </summary>
         private string _sourcePath;
@@ -182,6 +187,11 @@ namespace Microsoft.Build.Tasks
                 TaskResources = AssemblyResources.PrimaryResources,
                 HelpKeywordPrefix = "MSBuild."
             };
+
+            if (taskFactoryLoggingHost is IHasProjectFullPath logThatHasProjectFullPath)
+            {
+                _projectDirectory = Path.GetDirectoryName(logThatHasProjectFullPath.ProjectFullPath);
+            }
 
             XmlNode taskContent = ExtractTaskContent(taskElementContents);
             if (taskContent == null)
@@ -791,15 +801,14 @@ namespace Microsoft.Build.Tasks
                 // Our code generation is complete, grab the source from the builder ready for compilation
                 string fullCode = codeBuilder.ToString();
 
-                string tempDirectory = FileUtilities.TempFileDirectory;
-                string fileName = Guid.NewGuid().ToString() + ".txt";
-                string outputPath = Path.Combine(tempDirectory, fileName);
-
                 // Embed generated file in the binlog
-                _log.LogIncludeGeneratedFile(outputPath, fullCode);
+                if (_projectDirectory != null)
+                {
+                    string fileNameInBinlog = $"{Guid.NewGuid()}-{_nameOfTask}-compilation-file.tmp";
+                    string outputPathInBinlog = Path.Combine(_projectDirectory, fileNameInBinlog);
 
-                // Log the location of the code file in binlog
-                _log.LogMessageFromResources(MessageImportance.Low, "CodeTaskFactory.FindSourceFileInBinlogAt", outputPath);
+                    _log.LogIncludeGeneratedFile(outputPathInBinlog, fullCode);
+                }
 
                 var fullSpec = new FullTaskSpecification(finalReferencedAssemblies, fullCode);
                 if (!s_compiledTaskCache.TryGetValue(fullSpec, out Assembly existingAssembly))
@@ -807,8 +816,12 @@ namespace Microsoft.Build.Tasks
                     // Invokes compilation.
                     CompilerResults compilerResults = provider.CompileAssemblyFromSource(compilerParameters, fullCode);
 
+                    string outputPath = null;
                     if (compilerResults.Errors.Count > 0 || Environment.GetEnvironmentVariable("MSBUILDLOGCODETASKFACTORYOUTPUT") != null)
-                    {                        
+                    {
+                        string tempDirectory = FileUtilities.TempFileDirectory;
+                        string fileName = Guid.NewGuid().ToString() + ".txt";
+                        outputPath = Path.Combine(tempDirectory, fileName);
                         File.WriteAllText(outputPath, fullCode);
                     }
 

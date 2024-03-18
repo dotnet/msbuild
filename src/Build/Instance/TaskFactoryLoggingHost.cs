@@ -24,7 +24,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IBuildEngine
+        IBuildEngine, IHasProjectFullPath
     {
         /// <summary>
         /// Location of the task node in the original file
@@ -55,6 +55,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool _activeProxy;
 
+        private string _projectFullPath;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -67,6 +69,11 @@ namespace Microsoft.Build.BackEnd
             _isRunningWithMultipleNodes = isRunningWithMultipleNodes;
             _loggingContext = loggingContext;
             _elementLocation = elementLocation;
+
+            if (_loggingContext is IHasProjectFullPath logThatHasProjectFullPath)
+            {
+                _projectFullPath = logThatHasProjectFullPath.ProjectFullPath;
+            }
         }
 
         /// <summary>
@@ -145,6 +152,8 @@ namespace Microsoft.Build.BackEnd
             get
             { return _loggingContext; }
         }
+
+        public string ProjectFullPath => _projectFullPath;
 
         #region IBuildEngine Members
 

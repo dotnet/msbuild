@@ -1359,20 +1359,18 @@ namespace Microsoft.Build.UnitTests
             result = project.Build(loggers);
         }
 
-        public static MockLogger BuildProjectWithNewOMAndBinaryLogger(string content, BinaryLogger binaryLogger, out bool result)
+        public static void BuildProjectWithNewOMAndBinaryLogger(string content, BinaryLogger binaryLogger, out bool result, out string projectDirectory)
         {
             // Replace the nonstandard quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
 
             Project project = new Project(XmlReader.Create(new StringReader(content)), null, toolsVersion: null);
 
-            var mockLogger = new MockLogger();
-
-            List<ILogger> loggers = new List<ILogger>() { binaryLogger, mockLogger };
+            List<ILogger> loggers = new List<ILogger>() { binaryLogger };
 
             result = project.Build(loggers);
 
-            return mockLogger;
+            projectDirectory = project.DirectoryPath;
         }
 
         public static MockLogger BuildProjectContentUsingBuildManagerExpectResult(string content, BuildResultCode expectedResult)

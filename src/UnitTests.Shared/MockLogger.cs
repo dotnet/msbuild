@@ -505,52 +505,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Asserts that log file contains a message with a single parameter.
-        /// </summary>
-        /// <param name="message">The message that contains '{0}' substring.</param>
-        /// <param name="parameter">The parameter.</param>
-        public void AssertLogContainsMessageWithParameter(string message, out string parameter)
-        {
-            parameter = "";
-            string placeholder = "{0}";
-
-            string regexPattern = "";
-            if (message.Contains(placeholder))
-            {
-                regexPattern = message.Replace(placeholder, "(.*)");
-            }
-            else
-            {
-                Assert.True(
-                        false,
-                        $"'{message}' was expected to contain a substring '{{0}}'.");
-            }
-
-            lock (_lockObj)
-            {
-                var reader = new StringReader(FullLog);
-                string currentLine = reader.ReadLine();
-
-                while (currentLine != null)
-                {
-                    var match = Regex.Match(currentLine, regexPattern);
-
-                    if (match.Success && match.Groups.Count > 1)
-                    {
-                        parameter = match.Groups[1].Value;
-                        return;
-                    }
-
-                    currentLine = reader.ReadLine();
-                }
-
-                Assert.True(
-                        false,
-                        $"Log was expected to contain '{message}', but did not. Full log:\n=======\n{FullLog}\n=======");
-            }
-        }
-
-        /// <summary>
         /// Assert that the log file does not contain the given string.
         /// </summary>
         /// <param name="contains"></param>
