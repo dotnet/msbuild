@@ -34,7 +34,7 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 - [Update Traits when environment has been changed](https://github.com/dotnet/msbuild/pull/9655)
 - [Exec task does not trim leading whitespaces for ConsoleOutput](https://github.com/dotnet/msbuild/pull/9722)
 - [Keep the encoding of standard output & error consistent with the console code page for ToolTask](https://github.com/dotnet/msbuild/pull/9539)
-- [Convert.ToString during a property evaluation uses the InvariantCulture for numeric types](https://github.com/dotnet/msbuild/pull/9874)
+- [Convert.ToString during a property evaluation uses the InvariantCulture for numeric types (double, long, int)](https://github.com/dotnet/msbuild/pull/9874)
 
 
 ### 17.8
