@@ -12,11 +12,16 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.BuildCheck.Infrastructure;
-internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFactory loggingContextFactory, IBuildCheckManager buildCheckManager)
+internal sealed class BuildCheckConnectorLogger(
+    IBuildAnalysisLoggingContextFactory loggingContextFactory, 
+    IBuildCheckManager buildCheckManager,
+    bool isStatsEnabled)
     : ILogger
 {
     public LoggerVerbosity Verbosity { get; set; }
     public string? Parameters { get; set; }
+
+    private bool _areStatsEnabled = isStatsEnabled;
 
     public void Initialize(IEventSource eventSource)
     {
@@ -70,7 +75,14 @@ internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFact
         {
             if (buildCheckBuildEventArgs is BuildCheckTracingEventArgs tracingEventArgs)
             {
-                _stats.Merge(tracingEventArgs.TracingData, (span1, span2) => span1 + span2);
+                if (tracingEventArgs.isInfraTracing)
+                {
+                    _statsInfra.Merge(tracingEventArgs.TracingData, (span1, span2) => span1 + span2);
+                }
+                else
+                {
+                    _statsAnalyzers.Merge(tracingEventArgs.TracingData, (span1, span2) => span1 + span2);
+                }
             }
             else if (buildCheckBuildEventArgs is BuildCheckAcquisitionEventArgs acquisitionEventArgs)
             {
@@ -79,13 +91,11 @@ internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFact
         }
     }
 
-    private readonly Dictionary<string, TimeSpan> _stats = new Dictionary<string, TimeSpan>();
+    private readonly Dictionary<string, TimeSpan> _statsInfra = new Dictionary<string, TimeSpan>();
+    private readonly Dictionary<string, TimeSpan> _statsAnalyzers = new Dictionary<string, TimeSpan>();
 
     private void EventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
     {
-        _stats.Merge(buildCheckManager.CreateTracingStats(), (span1, span2) => span1 + span2);
-        string msg = string.Join(Environment.NewLine, _stats.Select(a => a.Key + ": " + a.Value));
-
 
         BuildEventContext buildEventContext = e.BuildEventContext ?? new BuildEventContext(
             BuildEventContext.InvalidNodeId, BuildEventContext.InvalidTargetId,
@@ -93,8 +103,28 @@ internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFact
 
         LoggingContext loggingContext = loggingContextFactory.CreateLoggingContext(buildEventContext).ToLoggingContext();
 
-        // TODO: tracing: https://github.com/dotnet/msbuild/issues/9629
+        if (_areStatsEnabled)
+        {
+            _statsAnalyzers.Merge(buildCopManager.CreateAnalyzerTracingStats(), (span1, span2) => span1 + span2);
+            _statsInfra.Merge(buildCopManager.CreateBuildCopInfraTracingStats(), (span1, span2) => span1 + span2);
+
+            LogAnalyzerStats(loggingContext);
+        }
+    }
+    
+    // TODO: tracing: https://github.com/dotnet/msbuild/issues/9629
+    private void LogAnalyzerStats(LoggingContext loggingContext)
+    {
+        string openingLine = "BuildCop infra stats";
+        loggingContext.LogCommentFromText(MessageImportance.High, openingLine);
+
+        string msg = string.Join(Environment.NewLine, _statsInfra.Select(a => $"{a.Key}: {a.Value}"));
         loggingContext.LogCommentFromText(MessageImportance.High, msg);
+
+        loggingContext.LogCommentFromText(MessageImportance.High, "Build Cop Analyzer stats");
+
+        string msg2 = string.Join(Environment.NewLine, _statsAnalyzers.Select(a => $"{a.Key}: {a.Value}"));
+        loggingContext.LogCommentFromText(MessageImportance.High, msg2);
     }
 
     public void Shutdown()

@@ -210,6 +210,7 @@ namespace Microsoft.Build.Execution
         private bool _question;
 
         private bool _isBuildCheckEnabled;
+        private bool _isBuildCheckEnabled;
 
         /// <summary>
         /// The settings used to load the project under build
@@ -313,6 +314,7 @@ namespace Microsoft.Build.Execution
             DiscardBuildResults = other.DiscardBuildResults;
             LowPriority = other.LowPriority;
             Question = other.Question;
+            IsBuildCheckEnabled = other.IsBuildCopEnabled;
             IsBuildCheckEnabled = other.IsBuildCheckEnabled;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
         }
@@ -846,6 +848,15 @@ namespace Microsoft.Build.Execution
         {
             get => _isBuildCheckEnabled;
             set => _isBuildCheckEnabled = value;
+        }
+        
+        /// <summary>
+        /// Gets or sets an indication of build analysis statistics enablement.
+        /// </summary>
+        public bool AreBuildCopStatsEnabled
+        {
+            get => _areBuildCopStatsEnabled;
+            set => _areBuildCopStatsEnabled = value;
         }
 
         /// <summary>

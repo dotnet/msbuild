@@ -45,6 +45,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         return new BuildCheckManagerProvider();
     }
 
+    internal static Stopwatch _stopwatch = new Stopwatch();
+
     public void InitializeComponent(IBuildComponentHost host)
     {
         ErrorUtilities.VerifyThrow(host != null, "BuildComponentHost was null");
@@ -280,15 +282,14 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             }
         }
 
-
         public void ProcessEvaluationFinishedEventArgs(
             IBuildAnalysisLoggingContext buildAnalysisContext,
             ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
             => _buildEventsProcessor
                 .ProcessEvaluationFinishedEventArgs(buildAnalysisContext, evaluationFinishedEventArgs);
 
-        // TODO: tracing: https://github.com/dotnet/msbuild/issues/9629
-        public Dictionary<string, TimeSpan> CreateTracingStats()
+        // tHIS IS BASICALLY ONLY CALLED IN PROC NODE
+        public Dictionary<string, TimeSpan> CreateAnalyzerTracingStats()
         {
             foreach (BuildAnalyzerFactoryContext analyzerFactoryContext in _analyzersRegistry)
             {
@@ -303,6 +304,18 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             return _tracingReporter.TracingStats;
         }
 
+        public Dictionary<string, TimeSpan> CreateBuildCopInfraTracingStats()
+        {
+            Dictionary<string, TimeSpan> infraTime = new Dictionary<string, TimeSpan>
+            {
+                { "analyzerAcquisitionTime", _tracingReporter.analyzerAcquisitionTime },
+                { "analyzerSetDataSourceTime", new TimeSpan(_tracingReporter.analyzerSetDataSourceTime) },
+                { "newProjectAnalyzersTime", new TimeSpan(_tracingReporter.newProjectAnalyzersTime) }
+            };
+
+            return infraTime;
+        }
+
         public void FinalizeProcessing(LoggingContext loggingContext)
         {
             if (IsInProcNode)
@@ -311,9 +324,13 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 return;
             }
 
-            BuildCheckTracingEventArgs eventArgs =
-                new(CreateTracingStats()) { BuildEventContext = loggingContext.BuildEventContext };
-            loggingContext.LogBuildEvent(eventArgs);
+            BuildCopTracingEventArgs analyzerEventArg =
+                new(CreateAnalyzerTracingStats()) { BuildEventContext = loggingContext.BuildEventContext };
+            loggingContext.LogBuildEvent(analyzerEventArg);
+
+            BuildCopTracingEventArgs infraEventStats =
+                new(CreateBuildCopInfraTracingStats()) { BuildEventContext = loggingContext.BuildEventContext };
+            loggingContext.LogBuildEvent(infraEventStats);
         }
 
         public void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext,
