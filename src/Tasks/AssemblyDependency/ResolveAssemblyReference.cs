@@ -15,6 +15,7 @@ using System.Xml.Linq;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
 
@@ -3208,7 +3209,7 @@ namespace Microsoft.Build.Tasks
             return Execute(
                 p => FileUtilities.FileExistsNoThrow(p),
                 p => FileUtilities.DirectoryExistsNoThrow(p),
-                (p, searchPattern) => Directory.GetDirectories(p, searchPattern),
+                (p, searchPattern) => FileSystems.Default.EnumerateDirectories(p, searchPattern).ToArray(),
                 p => AssemblyNameExtension.GetAssemblyNameEx(p),
                 (string path, ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache, out AssemblyNameExtension[] dependencies, out string[] scatterFiles, out FrameworkNameVersioning frameworkName)
                     => AssemblyInformation.GetAssemblyMetadata(path, assemblyMetadataCache, out dependencies, out scatterFiles, out frameworkName),
