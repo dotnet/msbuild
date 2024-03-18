@@ -631,7 +631,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="path"></param>
         /// <param name="pattern"></param>
-        /// <returns></returns>
+        /// <returns>The list of directories from the specified path.</returns>
         private string[] GetDirectories(string path, string pattern)
         {
             // Only cache the *. pattern. This is by far the most common pattern

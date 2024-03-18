@@ -1347,6 +1347,15 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="MissingGetResultFileError">
+        <source>MSBUILD : error MSB1068: Must provide a file for the getResultOutputFile switch.</source>
+        <target state="translated">MSBUILD : error MSB1068: необходимо указать файл для параметра getResultOutputFile.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1068: "}UE: This happens if the user does something like "msbuild.exe -getResultOutputFile". The user must pass in an actual file
+      following the switch, as in "msbuild.exe -getTargetResult:blah -getResultOutputFile:blah.txt".
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="MissingGetTargetResultError">
         <source>MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</source>
         <target state="translated">MSBUILD : error MSB1017: необходимо указать целевое имя для переключателя getTargetResult.</target>
@@ -1651,7 +1660,7 @@
       </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">
         <source>{0}{1} test {2} ({3}s)</source>
-        <target state="new">{0}{1} test {2} ({3}s)</target>
+        <target state="translated">{0}{1} (тест) {2} ({3} с)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1662,7 +1671,7 @@
       </trans-unit>
       <trans-unit id="TestProjectFinished_WithTF">
         <source>{0}{1} test {2} {3} ({4}s)</source>
-        <target state="new">{0}{1} test {2} {3} ({4}s)</target>
+        <target state="translated">{0}{1} (тест) {2} {3} ({4} с)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1674,7 +1683,7 @@
       </trans-unit>
       <trans-unit id="TestSummary">
         <source>Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</source>
-        <target state="new">Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</target>
+        <target state="translated">Тестовый запуск {0}. Всего: {1}, не пройдено: {2}, пройдено: {3}, пропущено: {4}, длительность: {5} с</target>
         <note>{0} string, localized result e.g. Failed surrounded by ANSI colors.
 {1-5} whole number</note>
       </trans-unit>
