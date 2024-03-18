@@ -152,5 +152,18 @@ configuration:
       - addReply:
           reply: Hello! I noticed that you're targeting one of our servicing branches. Please consider updating the version.
       description: Comment on vs* branches
+    - if:
+      - payloadType: Pull_Request
+      - or:
+        - isAction:
+            action: Opened
+        - isAction:
+            action: Reopened
+      - filesMatchPattern:
+          pattern: ^.+\.swr$
+      then:
+      - addReply:
+          reply: Hello @${issueAuthor}, I noticed that you’re changing *.swr file. Please make sure to run VS Perf DDRITs using exp/* insertion before merging the change.
+      description: Remind to run VS Perf DDRITs when deployed assemblies change
 onFailure: 
 onSuccess: 
