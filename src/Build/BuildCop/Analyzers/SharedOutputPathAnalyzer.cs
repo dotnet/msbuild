@@ -30,15 +30,15 @@ internal sealed class SharedOutputPathAnalyzer : BuildAnalyzer
         /* This is it - no custom configuration */
     }
 
-    public override void RegisterActions(IBuildCopContext context)
+    public override void RegisterActions(IBuildCopRegistrationContext registrationContext)
     {
-        context.RegisterEvaluatedPropertiesAction(EvaluatedPropertiesAction);
+        registrationContext.RegisterEvaluatedPropertiesAction(EvaluatedPropertiesAction);
     }
 
     private readonly Dictionary<string, string> _projectsPerOutputPath = new(StringComparer.CurrentCultureIgnoreCase);
     private readonly HashSet<string> _projects = new(StringComparer.CurrentCultureIgnoreCase);
 
-    private void EvaluatedPropertiesAction(BuildAnalysisContext<EvaluatedPropertiesAnalysisData> context)
+    private void EvaluatedPropertiesAction(BuildCopDataContext<EvaluatedPropertiesAnalysisData> context)
     {
         if (!_projects.Add(context.Data.ProjectFilePath))
         {
@@ -61,7 +61,7 @@ internal sealed class SharedOutputPathAnalyzer : BuildAnalyzer
         }
     }
 
-    private string? CheckAndAddFullOutputPath(string? path, BuildAnalysisContext<EvaluatedPropertiesAnalysisData> context)
+    private string? CheckAndAddFullOutputPath(string? path, BuildCopDataContext<EvaluatedPropertiesAnalysisData> context)
     {
         if (string.IsNullOrEmpty(path))
         {

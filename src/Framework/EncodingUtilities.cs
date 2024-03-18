@@ -274,10 +274,17 @@ namespace Microsoft.Build.Shared
             {
                 if (CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
                 {
-                    // Setting both encodings causes a change in the CHCP, making it so we don't need to P-Invoke CHCP ourselves.
-                    Console.OutputEncoding = Encoding.UTF8;
-                    // If the InputEncoding is not set, the encoding will work in CMD but not in PowerShell, as the raw CHCP page won't be changed.
-                    Console.InputEncoding = Encoding.UTF8;
+                    try
+                    {
+                        // Setting both encodings causes a change in the CHCP, making it so we don't need to P-Invoke CHCP ourselves.
+                        Console.OutputEncoding = Encoding.UTF8;
+                        // If the InputEncoding is not set, the encoding will work in CMD but not in PowerShell, as the raw CHCP page won't be changed.
+                        Console.InputEncoding = Encoding.UTF8;
+                    }
+                    catch (Exception ex) when (ex is IOException || ex is SecurityException)
+                    {
+                        // The encoding is unavailable. Do nothing.
+                    }
                     return externalLanguageSetting;
                 }
                 else if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

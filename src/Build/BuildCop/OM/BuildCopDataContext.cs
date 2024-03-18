@@ -25,14 +25,14 @@ public abstract class AnalysisData(string projectFilePath)
     public string ProjectFilePath { get; } = projectFilePath;
 }
 
-public class BuildAnalysisContext<T> where T : AnalysisData
+public class BuildCopDataContext<T> where T : AnalysisData
 {
     private readonly BuildAnalyzerWrapper _analyzerWrapper;
     private readonly LoggingContext _loggingContext;
     private readonly BuildAnalyzerConfigurationInternal[] _configPerRule;
     private readonly Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCopResult> _resultHandler;
 
-    internal BuildAnalysisContext(
+    internal BuildCopDataContext(
         BuildAnalyzerWrapper analyzerWrapper,
         LoggingContext loggingContext,
         BuildAnalyzerConfigurationInternal[] configPerRule,

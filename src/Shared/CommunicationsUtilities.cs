@@ -240,23 +240,48 @@ namespace Microsoft.Build.Internal
             get { return GetIntegerVariableOrDefault("MSBUILDNODECONNECTIONTIMEOUT", DefaultNodeConnectionTimeout); }
         }
 
+#if NETFRAMEWORK
         /// <summary>
-        /// Get environment block
+        /// Get environment block.
         /// </summary>
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern unsafe char* GetEnvironmentStrings();
 
         /// <summary>
-        /// Free environment block
+        /// Free environment block.
         /// </summary>
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern unsafe bool FreeEnvironmentStrings(char* pStrings);
 
         /// <summary>
-        /// Copied from the BCL implementation to eliminate some expensive security asserts.
+        /// Set environment variable P/Invoke.
+        /// </summary>
+        [DllImport("kernel32.dll", EntryPoint = "SetEnvironmentVariable", SetLastError = true, CharSet = CharSet.Unicode)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetEnvironmentVariableNative(string name, string value);
+
+        /// <summary>
+        /// Sets an environment variable using P/Invoke to workaround the .NET Framework BCL implementation.
+        /// </summary>
+        /// <remarks>
+        /// .NET Framework implementation of SetEnvironmentVariable checks the length of the value and throws an exception if
+        /// it's greater than or equal to 32,767 characters. This limitation does not exist on modern Windows or .NET.
+        /// </remarks>
+        internal static void SetEnvironmentVariable(string name, string value)
+        {
+            if (!SetEnvironmentVariableNative(name, value))
+            {
+                throw Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error());
+            }
+        }
+
+        /// <summary>
         /// Returns key value pairs of environment variables in a new dictionary
         /// with a case-insensitive key comparer.
         /// </summary>
+        /// <remarks>
+        /// Copied from the BCL implementation to eliminate some expensive security asserts on .NET Framework.
+        /// </remarks>
         internal static Dictionary<string, string> GetEnvironmentVariables()
         {
 #if !CLR2COMPATIBILITY
@@ -268,107 +293,121 @@ namespace Microsoft.Build.Internal
 
             Dictionary<string, string> table = new Dictionary<string, string>(200, StringComparer.OrdinalIgnoreCase); // Razzle has 150 environment variables
 
-            if (NativeMethodsShared.IsWindows)
+            unsafe
             {
-                unsafe
+                char* pEnvironmentBlock = null;
+
+                try
                 {
-                    char* pEnvironmentBlock = null;
-
-                    try
+                    pEnvironmentBlock = GetEnvironmentStrings();
+                    if (pEnvironmentBlock == null)
                     {
-                        pEnvironmentBlock = GetEnvironmentStrings();
-                        if (pEnvironmentBlock == null)
+                        throw new OutOfMemoryException();
+                    }
+
+                    // Search for terminating \0\0 (two unicode \0's).
+                    char* pEnvironmentBlockEnd = pEnvironmentBlock;
+                    while (!(*pEnvironmentBlockEnd == '\0' && *(pEnvironmentBlockEnd + 1) == '\0'))
+                    {
+                        pEnvironmentBlockEnd++;
+                    }
+                    long stringBlockLength = pEnvironmentBlockEnd - pEnvironmentBlock;
+
+                    // Copy strings out, parsing into pairs and inserting into the table.
+                    // The first few environment variable entries start with an '='!
+                    // The current working directory of every drive (except for those drives
+                    // you haven't cd'ed into in your DOS window) are stored in the
+                    // environment block (as =C:=pwd) and the program's exit code is
+                    // as well (=ExitCode=00000000)  Skip all that start with =.
+                    // Read docs about Environment Blocks on MSDN's CreateProcess page.
+
+                    // Format for GetEnvironmentStrings is:
+                    // (=HiddenVar=value\0 | Variable=value\0)* \0
+                    // See the description of Environment Blocks in MSDN's
+                    // CreateProcess page (null-terminated array of null-terminated strings).
+                    // Note the =HiddenVar's aren't always at the beginning.
+                    for (int i = 0; i < stringBlockLength; i++)
+                    {
+                        int startKey = i;
+
+                        // Skip to key
+                        // On some old OS, the environment block can be corrupted.
+                        // Some lines will not have '=', so we need to check for '\0'.
+                        while (*(pEnvironmentBlock + i) != '=' && *(pEnvironmentBlock + i) != '\0')
                         {
-                            throw new OutOfMemoryException();
-                        }
-
-                        // Search for terminating \0\0 (two unicode \0's).
-                        char* pEnvironmentBlockEnd = pEnvironmentBlock;
-                        while (!(*pEnvironmentBlockEnd == '\0' && *(pEnvironmentBlockEnd + 1) == '\0'))
-                        {
-                            pEnvironmentBlockEnd++;
-                        }
-                        long stringBlockLength = pEnvironmentBlockEnd - pEnvironmentBlock;
-
-                        // Copy strings out, parsing into pairs and inserting into the table.
-                        // The first few environment variable entries start with an '='!
-                        // The current working directory of every drive (except for those drives
-                        // you haven't cd'ed into in your DOS window) are stored in the
-                        // environment block (as =C:=pwd) and the program's exit code is
-                        // as well (=ExitCode=00000000)  Skip all that start with =.
-                        // Read docs about Environment Blocks on MSDN's CreateProcess page.
-
-                        // Format for GetEnvironmentStrings is:
-                        // (=HiddenVar=value\0 | Variable=value\0)* \0
-                        // See the description of Environment Blocks in MSDN's
-                        // CreateProcess page (null-terminated array of null-terminated strings).
-                        // Note the =HiddenVar's aren't always at the beginning.
-                        for (int i = 0; i < stringBlockLength; i++)
-                        {
-                            int startKey = i;
-
-                            // Skip to key
-                            // On some old OS, the environment block can be corrupted.
-                            // Some lines will not have '=', so we need to check for '\0'.
-                            while (*(pEnvironmentBlock + i) != '=' && *(pEnvironmentBlock + i) != '\0')
-                            {
-                                i++;
-                            }
-
-                            if (*(pEnvironmentBlock + i) == '\0')
-                            {
-                                continue;
-                            }
-
-                            // Skip over environment variables starting with '='
-                            if (i - startKey == 0)
-                            {
-                                while (*(pEnvironmentBlock + i) != 0)
-                                {
-                                    i++;
-                                }
-
-                                continue;
-                            }
-
-                            string key = new string(pEnvironmentBlock, startKey, i - startKey);
                             i++;
+                        }
 
-                            // skip over '='
-                            int startValue = i;
+                        if (*(pEnvironmentBlock + i) == '\0')
+                        {
+                            continue;
+                        }
 
+                        // Skip over environment variables starting with '='
+                        if (i - startKey == 0)
+                        {
                             while (*(pEnvironmentBlock + i) != 0)
                             {
-                                // Read to end of this entry
                                 i++;
                             }
 
-                            string value = new string(pEnvironmentBlock, startValue, i - startValue);
+                            continue;
+                        }
 
-                            // skip over 0 handled by for loop's i++
-                            table[key] = value;
-                        }
-                    }
-                    finally
-                    {
-                        if (pEnvironmentBlock != null)
+                        string key = new string(pEnvironmentBlock, startKey, i - startKey);
+                        i++;
+
+                        // skip over '='
+                        int startValue = i;
+
+                        while (*(pEnvironmentBlock + i) != 0)
                         {
-                            FreeEnvironmentStrings(pEnvironmentBlock);
+                            // Read to end of this entry
+                            i++;
                         }
+
+                        string value = new string(pEnvironmentBlock, startValue, i - startValue);
+
+                        // skip over 0 handled by for loop's i++
+                        table[key] = value;
                     }
                 }
-            }
-            else
-            {
-                var vars = Environment.GetEnvironmentVariables();
-                foreach (var key in vars.Keys)
+                finally
                 {
-                    table[(string)key] = (string)vars[key];
+                    if (pEnvironmentBlock != null)
+                    {
+                        FreeEnvironmentStrings(pEnvironmentBlock);
+                    }
                 }
             }
 
             return table;
         }
+
+#else // NETFRAMEWORK
+
+        /// <summary>
+        /// Sets an environment variable using <see cref="Environment.SetEnvironmentVariable(string,string)" />.
+        /// </summary>
+        internal static void SetEnvironmentVariable(string name, string value)
+            => Environment.SetEnvironmentVariable(name, value);
+
+        /// <summary>
+        /// Returns key value pairs of environment variables in a new dictionary
+        /// with a case-insensitive key comparer.
+        /// </summary>
+        internal static Dictionary<string, string> GetEnvironmentVariables()
+        {
+            var vars = Environment.GetEnvironmentVariables();
+
+            Dictionary<string, string> table = new Dictionary<string, string>(vars.Count, StringComparer.OrdinalIgnoreCase);
+            foreach (var key in vars.Keys)
+            {
+                table[(string)key] = (string)vars[key];
+            }
+            return table;
+        }
+#endif // NETFRAMEWORK
 
         /// <summary>
         /// Updates the environment to match the provided dictionary.
@@ -378,18 +417,22 @@ namespace Microsoft.Build.Internal
             if (newEnvironment != null)
             {
                 // First, delete all no longer set variables
-                foreach (KeyValuePair<string, string> entry in CommunicationsUtilities.GetEnvironmentVariables())
+                Dictionary<string, string> currentEnvironment = GetEnvironmentVariables();
+                foreach (KeyValuePair<string, string> entry in currentEnvironment)
                 {
                     if (!newEnvironment.ContainsKey(entry.Key))
                     {
-                        Environment.SetEnvironmentVariable(entry.Key, null);
+                        SetEnvironmentVariable(entry.Key, null);
                     }
                 }
 
                 // Then, make sure the new ones have their new values.
                 foreach (KeyValuePair<string, string> entry in newEnvironment)
                 {
-                    Environment.SetEnvironmentVariable(entry.Key, entry.Value);
+                    if (!currentEnvironment.TryGetValue(entry.Key, out string currentValue) || currentValue != entry.Value)
+                    {
+                        SetEnvironmentVariable(entry.Key, entry.Value);
+                    }
                 }
             }
         }

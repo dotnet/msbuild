@@ -18,7 +18,7 @@ public class ConfigurationContext
         CustomConfigurationData = customConfigurationData;
     }
 
-    public static ConfigurationContext FromDataEnumeration(CustomConfigurationData[] customConfigurationData)
+    internal static ConfigurationContext FromDataEnumeration(CustomConfigurationData[] customConfigurationData)
     {
         if (!customConfigurationData.Any(BuildCop.CustomConfigurationData.NotNull))
         {
@@ -31,7 +31,7 @@ public class ConfigurationContext
                 .ToArray());
     }
 
-    public static ConfigurationContext Null { get; } = new(Array.Empty<CustomConfigurationData>());
+    internal static ConfigurationContext Null { get; } = new(Array.Empty<CustomConfigurationData>());
 
     /// <summary>
     /// Custom configuration data - per each rule that has some specified.

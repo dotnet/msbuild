@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
@@ -242,6 +243,37 @@ namespace Microsoft.Build.UnitTests
             t.Execute();
             engine.AssertLogContains("echo hello world {");
             engine.Errors.ShouldBe(0);
+        }
+
+        /// <summary>
+        /// Process notification encoding should be consistent with console code page.
+        /// not meant to be formatted.
+        /// </summary>
+        [InlineData(0, "")]
+        [InlineData(-1, "1>&2")]
+        [Theory]
+        public void ProcessNotificationEncodingConsistentWithConsoleCodePage(int exitCode, string errorPart)
+        {
+            MyTool t = new MyTool();
+            MockEngine engine = new MockEngine();
+            t.BuildEngine = engine;
+            t.UseCommandProcessor = true;
+            t.LogStandardErrorAsError = true;
+            t.EchoOff = true;
+            t.UseUtf8Encoding = EncodingUtilities.UseUtf8Always;
+            string content = "Building Custom Rule プロジェクト";
+            string outputMessage = exitCode == 0 ? content : $"'{content}' {errorPart}";
+            string commandLine = $"echo {outputMessage}";
+            t.MockCommandLineCommands = commandLine;
+            t.Execute();
+            t.ExitCode.ShouldBe(exitCode);
+
+            string log = engine.Log;
+            string singleQuote = NativeMethodsShared.IsWindows ? "'" : string.Empty;
+            string displayMessage = exitCode == 0 ? content : $"ERROR : {singleQuote}{content}{singleQuote}";
+            string pattern = $"{commandLine}{Environment.NewLine}\\s*{displayMessage}";
+            Regex regex = new Regex(pattern);
+            regex.Matches(log).Count.ShouldBe(1, $"{log} doesn't contain the log matching the pattern: {pattern}");
         }
 
         /// <summary>

@@ -4346,5 +4346,29 @@ $@"<Project InitialTargets=`Sleep`>
 
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
         }
+
+        [Fact]
+        public void ProjectWithNoTargets()
+        {
+            string contents = @"<Project />";
+
+            BuildRequestData data = GetBuildRequestData(contents);
+            BuildResult result = _buildManager.Build(_parameters, data);
+            Assert.Equal(BuildResultCode.Failure, result.OverallResult);
+
+            _logger.AssertLogContains("MSB4040");
+        }
+
+        [Fact]
+        public void ProjectWithNoTargetsGraph()
+        {
+            string contents = @"<Project />";
+
+            GraphBuildRequestData data = GetGraphBuildRequestData(contents);
+            GraphBuildResult result = _buildManager.Build(_parameters, data);
+            Assert.Equal(BuildResultCode.Failure, result.OverallResult);
+
+            _logger.AssertLogContains("MSB4040");
+        }
     }
 }

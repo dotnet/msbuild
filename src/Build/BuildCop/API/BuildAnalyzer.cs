@@ -38,8 +38,8 @@ public abstract class BuildAnalyzer : IDisposable
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="context"></param>
-    public abstract void RegisterActions(IBuildCopContext context);
+    /// <param name="registrationContext"></param>
+    public abstract void RegisterActions(IBuildCopRegistrationContext registrationContext);
 
     public virtual void Dispose()
     { }

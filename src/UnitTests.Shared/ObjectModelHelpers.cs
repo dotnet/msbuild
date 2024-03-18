@@ -1699,6 +1699,8 @@ namespace Microsoft.Build.UnitTests
 
             sb.Append("</ItemGroup>");
 
+            // Ensure there is at least one valid target in the project
+            sb.Append("<Target Name='Build'/>");
 
             foreach (var defaultTarget in (defaultTargets ?? string.Empty).Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
             {

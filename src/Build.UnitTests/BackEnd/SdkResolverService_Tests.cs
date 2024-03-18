@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -201,6 +202,20 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SDKResolverReturnedNull", nameof(MockResolverReturnsNull))));
             // Second resolver succeeded.
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SucceededToResolveSDK", sdk.ToString(), nameof(MockSdkResolver1), result.Path, result.Version));
+        }
+
+        [Fact]
+        public void AssertSdkResolutionMessagesAreLoggedInEventSource()
+        {
+            using var eventSourceTestListener = new EventSourceTestHelper();
+            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy(false, false, true));
+            var sdkName = Guid.NewGuid().ToString();
+            SdkReference sdk = new SdkReference(sdkName, "referencedVersion", "minimumVersion");
+
+            SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false, failOnUnresolvedSdk: true);
+            var eventsLogged = eventSourceTestListener.GetEvents();
+            eventsLogged.ShouldContain(x => x.EventId == 64); // Start of the sdk resolve
+            eventsLogged.ShouldContain(x => x.EventId == 65 && x.Payload[1].ToString() == sdkName);
         }
 
         [Fact]

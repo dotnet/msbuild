@@ -4162,11 +4162,6 @@ namespace Microsoft.Build.Evaluation
                                 returnVal = IntrinsicFunctions.StableStringHash(arg0);
                                 return true;
                             }
-                            else if (TryGetArgs(args, out string arg1, out string arg2) && Enum.TryParse<IntrinsicFunctions.StringHashingAlgorithm>(arg2, true, out var hashAlgorithm))
-                            {
-                                returnVal = IntrinsicFunctions.StableStringHash(arg1, hashAlgorithm);
-                                return true;
-                            }
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.AreFeaturesEnabled), StringComparison.OrdinalIgnoreCase))
                         {
