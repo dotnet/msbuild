@@ -86,7 +86,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
         }
 
-        public string ProjectFullPath => _projectLoggingContext.ProjectFullPath;
+        public string ProjectFullPath => _projectLoggingContext?.ProjectFullPath;
 
         /// <summary>
         /// Log that a target has finished
