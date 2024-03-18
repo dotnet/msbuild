@@ -42,7 +42,7 @@ The BuildCheck infrastructure will be prepared to be available concurrently with
 
 ## Handling the Distributed Model
 
-We want to get some bnefits (mostly inbox analyzers agility) from hosting BuildCheck infrastructure in worker nodes, but foremost we should prevent leaking the details of this model into public API and OM, until we are sure we cannot achive all goals from just entrypoint node from `BuildEventArgs` (which will likely never happen - as the build should be fully reconstructable from the `BuildEventArgs`).
+We want to get some benefits (mostly inbox analyzers agility) from hosting BuildCheck infrastructure in worker nodes, but foremost we should prevent leaking the details of this model into public API and OM, until we are sure we cannot achive all goals from just entrypoint node from `BuildEventArgs` (which will likely never happen - as the build should be fully reconstructable from the `BuildEventArgs`).
 
 How we'll internally handle the distributed model:
 * Each node will have just a single instance of infrastructure (`IBuildCheckManager`) available (registered via the MSBuild DI - `IBuildComponentHost`). This applies to a entrypoint node with inproc worker node as well.
@@ -50,7 +50,7 @@ How we'll internally handle the distributed model:
     * Acquisition module will be able to communicated to the entrypoint node that particular analyzer should be loaded and instantiated
     * Tracing module will be able to send partitioned stats and aggregate them together
     * Theoretical execution-data-only sourcing inbox analyzer will be able to aggregate data from the whole build context (again - we should use this only for agility purposes, but shoot for analyzer that needs presence only in entrypoint node).
-* Appart from the scenarios above - the BuildCheck infrastructure modules in individual nodes should be able to function independently (namely - load the inbox analyzers that should live in nodes; send the analyzers reports via logging infrastructure; load user configuration from `.editorconfig` and decide on need to enable/disable/configure particular analyzers).
+* Apart from the scenarios above - the BuildCheck infrastructure modules in individual nodes should be able to function independently (namely - load the inbox analyzers that should live in nodes; send the analyzers reports via logging infrastructure; load user configuration from `.editorconfig` and decide on need to enable/disable/configure particular analyzers).
 * Communication from main to worker node between BuildCheck infra modules is not planned.
 
 ## Analyzers Lifecycle
@@ -63,8 +63,8 @@ Planned model:
     * On entrypoint node the information is sourced from `ProjectEvaluationStartedEventArgs`
     * On worker node this is received from `RequestBuilder.BuildProject`
 * `BuildCheckManager` calls Configuration module and gets information for all analyzers in it's registry
-    * Analyzers with issues in configuration (communicated via `BuildCheckConfigurationException`) will be deregistered for the rest of the build.
-    * Global configuration issue (communicated via `BuildCheckConfigurationException`) will lead to defuncting whole BuildCheck.
+    * Analyzers with issues in configuration (communicated via `BuildCheckConfigurationException`) will issue an error and then be deregistered for the rest of the build.
+    * Global configuration issue (communicated via `BuildCheckConfigurationException`) will issue an error and then entirely disable BuildCheck.
 * `BuildCheckManager` instantiates all newly enabled analyzers and updates configuration for all allready instantiated analyzers.
 * At that point of time analyzers are prepared for receiving data and performing their work. MSBuild will start calling `BuildCheckManager` callbacks (mostly pumping `BuildEventArgs`), passed data will be transalted into BuildCheck OM and passed to analyzers.
 * Analyzers may decide to report results of their findings (via `BuildCopDataContext.ReportResult`), the infrastructure will then perform post-processing (filter out reports for `Rule`s that are disabled, set the severity based on configuration) and send the result via the standard MSBuild logging infrastructure.

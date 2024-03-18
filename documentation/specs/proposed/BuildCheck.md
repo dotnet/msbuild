@@ -1,7 +1,7 @@
 
 # BuildCheck - Design Spec
 
-AKA MSBuild Analyzers
+Previously known as "warning waves" and "MSBuild Analyzers"
 
 The feature is meant to help customers to improve and understand quality of their MSBuild scripts via rules violations reporting. It will allow MSBuild to gradually roll out additional rules, as users will be capable to configure their opt-in and severity of reports – preventing unwanted build breakages. And to equip powerusers to roll out their own quality checks – whether for general community or internal enterprise usage.
 
