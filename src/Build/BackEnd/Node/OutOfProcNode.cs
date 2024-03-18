@@ -472,11 +472,18 @@ namespace Microsoft.Build.Execution
             // so reset it away from a user-requested folder that may get deleted.
             NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
 
-            // Restore the original environment.
+            // Restore the original environment, best effort.
             // If the node was never configured, this will be null.
             if (_savedEnvironment != null)
             {
-                CommunicationsUtilities.SetEnvironment(_savedEnvironment);
+                try
+                {
+                    CommunicationsUtilities.SetEnvironment(_savedEnvironment);
+                }
+                catch (Exception ex)
+                {
+                    CommunicationsUtilities.Trace("Failed to restore the original environment: {0}.", ex);
+                }
                 Traits.UpdateFromEnvironment();
             }
             try
