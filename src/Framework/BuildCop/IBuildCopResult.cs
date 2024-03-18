@@ -7,12 +7,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Build.Experimental.BuildCop;
+namespace Microsoft.Build.Experimental.BuildCheck;
 
 /// <summary>
 /// Holder for the reported result of a build cop rule.
 /// </summary>
-public interface IBuildCopResult
+public interface IBuildCheckResult
 {
     /// <summary>
     /// Optional location of the finding (in near future we might need to support multiple locations).

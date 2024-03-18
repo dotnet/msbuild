@@ -43,7 +43,7 @@ namespace Microsoft.Build.Framework
         private static readonly Dictionary<string, FeatureStatus> _featureStatusMap = new Dictionary<string, FeatureStatus>
         {
             // Fill in the dictionary with the features and their status
-            { "BuildCop.Beta", FeatureStatus.Preview }
+            { "BuildCheck.Beta", FeatureStatus.Preview }
         };
 
         /// <summary>

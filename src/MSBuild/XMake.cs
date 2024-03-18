@@ -717,7 +717,7 @@ namespace Microsoft.Build.CommandLine
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
                 bool question = false;
-                bool isBuildCopEnabled = false;
+                bool isBuildCheckEnabled = false;
                 string[] getProperty = Array.Empty<string>();
                 string[] getItem = Array.Empty<string>();
                 string[] getTargetResult = Array.Empty<string>();
@@ -764,7 +764,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                             ref lowPriority,
                                             ref question,
-                                            ref isBuildCopEnabled,
+                                            ref isBuildCheckEnabled,
                                             ref getProperty,
                                             ref getItem,
                                             ref getTargetResult,
@@ -865,7 +865,7 @@ namespace Microsoft.Build.CommandLine
                                     graphBuildOptions,
                                     lowPriority,
                                     question,
-                                    isBuildCopEnabled,
+                                    isBuildCheckEnabled,
                                     inputResultsCaches,
                                     outputResultsCache,
                                     saveProjectResult: outputPropertiesItemsOrTargetResults,
@@ -1247,7 +1247,7 @@ namespace Microsoft.Build.CommandLine
             GraphBuildOptions graphBuildOptions,
             bool lowPriority,
             bool question,
-            bool isBuildCopEnabled,
+            bool isBuildCheckEnabled,
             string[] inputResultsCaches,
             string outputResultsCache,
             bool saveProjectResult,
@@ -1449,7 +1449,7 @@ namespace Microsoft.Build.CommandLine
                     parameters.InputResultsCacheFiles = inputResultsCaches;
                     parameters.OutputResultsCacheFile = outputResultsCache;
                     parameters.Question = question;
-                    parameters.IsBuildCopEnabled = isBuildCopEnabled;
+                    parameters.IsBuildCheckEnabled = isBuildCheckEnabled;
 #if FEATURE_REPORTFILEACCESSES
                     parameters.ReportFileAccesses = reportFileAccesses;
 #endif
@@ -2421,7 +2421,7 @@ namespace Microsoft.Build.CommandLine
 #endif
             ref bool lowPriority,
             ref bool question,
-            ref bool isBuildCopEnabled,
+            ref bool isBuildCheckEnabled,
             ref string[] getProperty,
             ref string[] getItem,
             ref string[] getTargetResult,
@@ -2563,7 +2563,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                                            ref lowPriority,
                                                            ref question,
-                                                           ref isBuildCopEnabled,
+                                                           ref isBuildCheckEnabled,
                                                            ref getProperty,
                                                            ref getItem,
                                                            ref getTargetResult,
@@ -2645,7 +2645,7 @@ namespace Microsoft.Build.CommandLine
 
                     question = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Question);
 
-                    isBuildCopEnabled = IsBuildCopEnabled(commandLineSwitches);
+                    isBuildCheckEnabled = IsBuildCheckEnabled(commandLineSwitches);
 
                     inputResultsCaches = ProcessInputResultsCaches(commandLineSwitches);
 
@@ -2721,7 +2721,7 @@ namespace Microsoft.Build.CommandLine
             return invokeBuild;
         }
 
-        private static bool IsBuildCopEnabled(CommandLineSwitches commandLineSwitches)
+        private static bool IsBuildCheckEnabled(CommandLineSwitches commandLineSwitches)
         {
             // todo: opt-in behavior: https://github.com/dotnet/msbuild/issues/9723
             bool isAnalysisEnabled = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Analyze);

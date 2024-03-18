@@ -10,13 +10,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BuildCop.Infrastructure;
+using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Experimental.BuildCop;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -1118,10 +1118,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private async Task<BuildResult> BuildProject()
         {
-            // We consider this the entrypoint for the project build for purposes of BuildCop processing 
+            // We consider this the entrypoint for the project build for purposes of BuildCheck processing 
 
-            var buildCopManager = (_componentHost.GetComponent(BuildComponentType.BuildCop) as IBuildCopManagerProvider)!.Instance;
-            buildCopManager.SetDataSource(BuildCopDataSource.BuildExecution);
+            var buildCheckManager = (_componentHost.GetComponent(BuildComponentType.BuildCheck) as IBuildCheckManagerProvider)!.Instance;
+            buildCheckManager.SetDataSource(BuildCheckDataSource.BuildExecution);
 
             ErrorUtilities.VerifyThrow(_targetBuilder != null, "Target builder is null");
 
@@ -1137,8 +1137,8 @@ namespace Microsoft.Build.BackEnd
                 // Load the project
                 if (!_requestEntry.RequestConfiguration.IsLoaded)
                 {
-                    buildCopManager.StartProjectEvaluation(
-                        BuildCopDataSource.BuildExecution,
+                    buildCheckManager.StartProjectEvaluation(
+                        BuildCheckDataSource.BuildExecution,
                         _requestEntry.Request.ParentBuildEventContext,
                         _requestEntry.RequestConfiguration.ProjectFullPath);
 
@@ -1162,14 +1162,14 @@ namespace Microsoft.Build.BackEnd
             }
             finally
             {
-                buildCopManager.EndProjectEvaluation(
-                    BuildCopDataSource.BuildExecution,
+                buildCheckManager.EndProjectEvaluation(
+                    BuildCheckDataSource.BuildExecution,
                     _requestEntry.Request.ParentBuildEventContext);
             }
 
             _projectLoggingContext = _nodeLoggingContext.LogProjectStarted(_requestEntry);
-            buildCopManager.StartProjectRequest(
-                BuildCopDataSource.BuildExecution,
+            buildCheckManager.StartProjectRequest(
+                BuildCheckDataSource.BuildExecution,
                 _requestEntry.Request.ParentBuildEventContext);
 
             // Now that the project has started, parse a few known properties which indicate warning codes to treat as errors or messages
@@ -1223,8 +1223,8 @@ namespace Microsoft.Build.BackEnd
                 MSBuildEventSource.Log.BuildProjectStop(_requestEntry.RequestConfiguration.ProjectFullPath, string.Join(", ", allTargets));
             }
 
-            buildCopManager.EndProjectRequest(
-                BuildCopDataSource.BuildExecution,
+            buildCheckManager.EndProjectRequest(
+                BuildCheckDataSource.BuildExecution,
                 _requestEntry.Request.ParentBuildEventContext);
 
             return result;
