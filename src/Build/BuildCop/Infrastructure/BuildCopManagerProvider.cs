@@ -113,6 +113,8 @@ internal sealed class BuildCopManagerProvider : IBuildCopManagerProvider
                     BuildEventContext.InvalidProjectContextId,
                     BuildEventContext.InvalidTargetId,
                     BuildEventContext.InvalidTaskId);
+
+                _loggingService.LogBuildEvent(eventArgs);
             }
         }
 
