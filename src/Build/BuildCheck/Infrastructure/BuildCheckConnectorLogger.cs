@@ -115,16 +115,24 @@ internal sealed class BuildCheckConnectorLogger(
     // TODO: tracing: https://github.com/dotnet/msbuild/issues/9629
     private void LogAnalyzerStats(LoggingContext loggingContext)
     {
-        string openingLine = "BuildCop infra stats";
-        loggingContext.LogCommentFromText(MessageImportance.High, openingLine);
+        loggingContext.LogCommentFromText(MessageImportance.High, $"BuildCop run times{Environment.NewLine}");
+        string infraData = buildStatsTable("Infrastructure run times", _statsInfra);
+        loggingContext.LogCommentFromText(MessageImportance.High, infraData);
 
-        string msg = string.Join(Environment.NewLine, _statsInfra.Select(a => $"{a.Key}: {a.Value}"));
-        loggingContext.LogCommentFromText(MessageImportance.High, msg);
+        string analyzerData = buildStatsTable("Analyzer run times", _statsAnalyzers);
+        loggingContext.LogCommentFromText(MessageImportance.High, analyzerData);
+    }
 
-        loggingContext.LogCommentFromText(MessageImportance.High, "Build Cop Analyzer stats");
+    private string buildStatsTable(string title, Dictionary<string, TimeSpan> rowData)
+    {
+        string headerSeparator = $"=============";
+        string rowSeparator = $"{Environment.NewLine}----------{Environment.NewLine}";
 
-        string msg2 = string.Join(Environment.NewLine, _statsAnalyzers.Select(a => $"{a.Key}: {a.Value}"));
-        loggingContext.LogCommentFromText(MessageImportance.High, msg2);
+        string header = $"{headerSeparator}{Environment.NewLine}{title}{Environment.NewLine}{headerSeparator}{Environment.NewLine}";
+
+        string rows = string.Join(rowSeparator, rowData.Select(a => $"{a.Key} | {a.Value}"));
+
+        return $"{header}{rows}{Environment.NewLine}";
     }
 
     public void Shutdown()
