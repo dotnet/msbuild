@@ -17,8 +17,6 @@ using Shouldly;
 using Xunit;
 using static Microsoft.Build.BuildCop.Infrastructure.EditorConfig.EditorConfigGlobsMatcher;
 
-#nullable disable
-
 namespace Microsoft.Build.Analyzers.UnitTests
 {
     public class ConfigurationProvider_Tests
@@ -96,7 +94,7 @@ namespace Microsoft.Build.Analyzers.UnitTests
             var customConfiguration = configurationProvider.GetCustomConfiguration(Path.Combine(workFolder1.Path, "test.csproj"), "rule_id");
             var configs = customConfiguration.ConfigurationData;
 
-            configs.Keys.Count().ShouldBe(3);
+            configs!.Keys.Count().ShouldBe(3);
 
             configs.ContainsKey("property1").ShouldBeTrue();
             configs.ContainsKey("property2").ShouldBeTrue();

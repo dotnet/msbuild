@@ -15,7 +15,6 @@ using Shouldly;
 using Xunit;
 using static Microsoft.Build.BuildCop.Infrastructure.EditorConfig.EditorConfigGlobsMatcher;
 
-#nullable disable
 
 namespace Microsoft.Build.Analyzers.UnitTests
 {

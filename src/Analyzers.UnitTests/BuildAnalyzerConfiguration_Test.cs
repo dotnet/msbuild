@@ -4,13 +4,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Build.BuildCop.Infrastructure;
 using Microsoft.Build.Experimental.BuildCop;
 using Shouldly;
 using Xunit;
-
-#nullable disable
 
 namespace Microsoft.Build.Analyzers.UnitTests
 {
@@ -19,7 +19,7 @@ namespace Microsoft.Build.Analyzers.UnitTests
         [Fact]
         public void CreateWithNull_ReturnsObjectWithNullValues()
         {
-            var buildConfig = BuildAnalyzerConfiguration.Create(null);
+            var buildConfig = BuildAnalyzerConfiguration.Create(null!);
             buildConfig.ShouldNotBeNull();
             buildConfig.Severity.ShouldBeNull();
             buildConfig.IsEnabled.ShouldBeNull();
@@ -41,7 +41,6 @@ namespace Microsoft.Build.Analyzers.UnitTests
         [InlineData("info", BuildAnalyzerResultSeverity.Info)]
         [InlineData("warning", BuildAnalyzerResultSeverity.Warning)]
         [InlineData("WARNING", BuildAnalyzerResultSeverity.Warning)]
-        [InlineData("non-existing-option", null)]
         public void CreateBuildAnalyzerConfiguration_Severity(string parameter, BuildAnalyzerResultSeverity? expected)
         {
             var config = new Dictionary<string, string>()
@@ -62,7 +61,6 @@ namespace Microsoft.Build.Analyzers.UnitTests
         [InlineData("TRUE", true)]
         [InlineData("false", false)]
         [InlineData("FALSE", false)]
-        [InlineData("", null)]
         public void CreateBuildAnalyzerConfiguration_IsEnabled(string parameter, bool? expected)
         {
             var config = new Dictionary<string, string>()
@@ -85,7 +83,6 @@ namespace Microsoft.Build.Analyzers.UnitTests
         [InlineData("AnalyzedProjectWithImportsWithoutSdks", EvaluationAnalysisScope.AnalyzedProjectWithImportsWithoutSdks)]
         [InlineData("AnalyzedProjectWithAllImports", EvaluationAnalysisScope.AnalyzedProjectWithAllImports)]
         [InlineData("analyzedprojectwithallimports", EvaluationAnalysisScope.AnalyzedProjectWithAllImports)]
-        [InlineData("non existing value", null)]
         public void CreateBuildAnalyzerConfiguration_EvaluationAnalysisScope(string parameter, EvaluationAnalysisScope? expected)
         {
             var config = new Dictionary<string, string>()
@@ -100,6 +97,23 @@ namespace Microsoft.Build.Analyzers.UnitTests
 
             buildConfig.IsEnabled.ShouldBeNull();
             buildConfig.Severity.ShouldBeNull();
+        }
+
+        [Theory]
+        [InlineData("evaluationanalysisscope", "incorrec-value")]
+        [InlineData("isenabled", "incorrec-value")]
+        [InlineData("severity", "incorrec-value")]
+        public void CreateBuildAnalyzerConfiguration_ExceptionOnInvalidInputValue(string key, string value)
+        {
+            var config = new Dictionary<string, string>()
+            {
+                { key , value},
+            };
+
+            var exception = Should.Throw<BuildCopConfigurationException>(() => {
+                BuildAnalyzerConfiguration.Create(config);
+            });
+            exception.Message.ShouldContain($"Incorrect value provided in config for key {key}");
         }
     }
 }

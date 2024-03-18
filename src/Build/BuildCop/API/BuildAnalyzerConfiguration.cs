@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System;
+using Microsoft.Build.BuildCop.Infrastructure;
 
 namespace Microsoft.Build.Experimental.BuildCop;
 
@@ -71,19 +72,29 @@ public class BuildAnalyzerConfiguration
             return false;
         }
 
+        bool isParsed = false;
+
         if (typeof(T) == typeof(bool))
         {
             if (bool.TryParse(config[key], out bool boolValue))
             {
                 value = (T)(object)boolValue;
-                return true;
+                isParsed = true;
             }
         }
         else if(typeof(T).IsEnum)
         {
-            return Enum.TryParse(config[key], true, out value);
+            
+            isParsed = Enum.TryParse(config[key], true, out value);
         }
 
-        return false;
+        if (!isParsed)
+        {
+            throw new BuildCopConfigurationException(
+                $"Incorrect value provided in config for key {key}",
+                buildCopConfigurationErrorScope: BuildCopConfigurationErrorScope.EditorConfigParser);
+        }
+
+        return isParsed;
     }
 }

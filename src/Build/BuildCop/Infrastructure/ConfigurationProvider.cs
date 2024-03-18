@@ -20,9 +20,12 @@ namespace Microsoft.Build.BuildCop.Infrastructure;
 internal class ConfigurationProvider
 {
     private EditorConfigParser s_editorConfigParser = new EditorConfigParser();
+
     // TODO: This module should have a mechanism for removing unneeded configurations
     //  (disabled rules and analyzers that need to run in different node)
     private readonly Dictionary<string, BuildAnalyzerConfiguration> _editorConfig = new Dictionary<string, BuildAnalyzerConfiguration>();
+
+    // private readonly Dictionary<string, CustomConfigurationData> _customConfigurationData = new Dictionary<string, CustomConfigurationData>();
 
     private readonly List<string> _infrastructureConfigurationKeys = new List<string>() {
         nameof(BuildAnalyzerConfiguration.EvaluationAnalysisScope).ToLower(),
@@ -71,7 +74,7 @@ internal class ConfigurationProvider
     internal void CheckCustomConfigurationDataValidity(string projectFullPath, string ruleId)
     {
         // Note: requires another cache layer for custom configuration. 
-        // var prevData = GetCustomConfiguration(projectFullPath, ruleId);
+        // var customConfiguration = GetCustomConfiguration(projectFullPath, ruleId);
         // if prevData in cache => raise BuildCopConfigurationException;
     }
 
