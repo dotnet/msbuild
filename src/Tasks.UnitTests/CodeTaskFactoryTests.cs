@@ -16,11 +16,7 @@ namespace Microsoft.Build.UnitTests
 #if FEATURE_CODETASKFACTORY
 
     using System.CodeDom.Compiler;
-    using System.Globalization;
-    using System.IO.Compression;
-    using Microsoft.Build.Logging;
     using Microsoft.Build.Tasks.UnitTests;
-    using Shouldly;
 
     public sealed class CodeTaskFactoryTests
     {

@@ -7,7 +7,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
@@ -23,7 +22,6 @@ using VerifyXunit;
 using Xunit;
 
 using static VerifyXunit.Verifier;
-using System.IO.Compression;
 
 #nullable disable
 
