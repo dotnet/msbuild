@@ -1481,7 +1481,7 @@ namespace Microsoft.Build.Evaluation
                     // Issue: https://github.com/dotnet/msbuild/issues/9757
                     if (IsNumberType(valueToConvert) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
                     {
-                        convertedString = Convert.ToString(valueToConvert, CultureInfo.InvariantCulture);
+                        convertedString = Convert.ToString(valueToConvert, CultureInfo.InvariantCulture.NumberFormat);
                     }
                     else
                     {
