@@ -265,6 +265,17 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        ///     Create a temp file name that is expected to exist under specified folder when the test completes.
+        /// </summary>
+        /// <param name="folderPath">Folder path of the file.</param>
+        /// <param name="extension">Extension of the file (defaults to '.tmp')</param>
+        /// <returns></returns>
+        public TransientTestFile ExpectFile(string folderPath, string extension = ".tmp")
+        {
+            return WithTransientTestState(new TransientTestFile(folderPath, extension, createFile: false, expectedAsOutput: true));
+        }
+
+        /// <summary>
         ///     Creates a test variant used to add a unique temporary folder during a test. Will be deleted when the test
         ///     completes.
         /// </summary>

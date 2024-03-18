@@ -20,8 +20,8 @@ configuration:
           milestone: Backlog
       - isNotPartOfMilestone:
           milestone: Discussion
-      - isNotLabeledWith:
-          label: needs-triage
+      - hasLabel:
+          label: triaged
       - isIssue
       - isNotLabeledWith:
           label: stale
@@ -50,8 +50,8 @@ configuration:
           milestone: Backlog
       - isNotPartOfMilestone:
           milestone: Discussion
-      - isNotLabeledWith:
-          label: needs-triage
+      - hasLabel:
+          label: triaged
       actions:
       - closeIssue
       - addReply:
@@ -64,46 +64,53 @@ configuration:
       - isOpen
       - hasLabel:
           label: stale
+      - hasLabel:
+          label: triaged
       - not:
           hasLabel:
             label: bot-exclude
       then:
       - removeLabel:
           label: stale
-      - addLabel:
-          label: needs-triage
+      - removeLabel:
+          label: triaged
       description: Unstale Open Issues that get comments
     - if:
       - payloadType: Issue_Comment
       - not: isOpen
       - hasLabel:
           label: stale
+      - hasLabel:
+          label: triaged
       - not:
           hasLabel:
             label: bot-exclude
       then:
-      - addLabel:
-          label: needs-triage
-      description: Apply needs-triage to closed stale issues that get comments
+      - removeLabel:
+          label: triaged
+      description: Remove label triaged from closed stale issues that get comments
     - if:
       - payloadType: Issues
       - labelAdded:
           label: needs-more-info
-      - hasLabel:
-          label: needs-triage
+      - not:
+          hasLabel:
+            label: triaged
       then:
-      - removeLabel:
-          label: needs-triage
-      description: remove needs-triage when needs-more-info is applied
+      - addLabel:
+          label: triaged
+      description: Add label triaged to issue when needs-more-info is applied
     - if:
       - payloadType: Issue_Comment
       - isActivitySender:
           issueAuthor: True
       - hasLabel:
           label: needs-more-info
+      - hasLabel:
+          label: triaged
       then:
-      - addLabel:
-          label: needs-triage
+      - removeLabel:
+          label: triaged
       - addLabel:
           label: author-responded
       - removeLabel:

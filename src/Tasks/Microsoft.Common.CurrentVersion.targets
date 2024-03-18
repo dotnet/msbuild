@@ -3800,6 +3800,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <CoreCompileCache Include="@(ReferencePath)" />
       <CoreCompileCache Include="$(DefineConstants)" />
       <CoreCompileCache Include="$(LangVersion)" />
+      <CoreCompileCache Include="$(Deterministic)" />
+      <CoreCompileCache Include="$(PathMap)" />
     </ItemGroup>
 
     <Hash
