@@ -111,6 +111,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private string _taskName;
 
+        /// <summary>
+        /// The directory of the current project
+        /// </summary>
         private string _projectDirectory;
 
         /// <inheritdoc cref="ITaskFactory.FactoryName"/>
@@ -768,7 +771,7 @@ namespace Microsoft.Build.Tasks
                     {
                         // Log the location of the code file because MSBUILDLOGCODETASKFACTORYOUTPUT was set.
                         _log.LogMessageFromResources(MessageImportance.Low, "CodeTaskFactory.FindSourceFileAt", sourceCodePath);
-                    }   
+                    }
                 }
 
                 // Return the assembly which is loaded into memory
