@@ -9,6 +9,7 @@ using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
