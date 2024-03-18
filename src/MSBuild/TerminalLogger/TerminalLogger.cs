@@ -5,11 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.NET.StringTools;
+using System.Text.RegularExpressions;
 
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
