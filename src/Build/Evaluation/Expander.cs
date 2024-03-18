@@ -1479,7 +1479,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     // The fall back is always to just convert to a string directly.
                     // Issue: https://github.com/dotnet/msbuild/issues/9757
-                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+                    if (IsNumberType(valueToConvert) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
                     {
                         convertedString = Convert.ToString(valueToConvert, CultureInfo.InvariantCulture);
                     }
@@ -1490,6 +1490,11 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 return convertedString;
+            }
+
+            private static bool IsNumberType(object obj)
+            {
+                return obj is double || obj is long || obj is int;
             }
 
             /// <summary>
