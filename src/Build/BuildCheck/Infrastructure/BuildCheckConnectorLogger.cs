@@ -112,7 +112,6 @@ internal sealed class BuildCheckConnectorLogger(
         }
     }
     
-    // TODO: tracing: https://github.com/dotnet/msbuild/issues/9629
     private void LogAnalyzerStats(LoggingContext loggingContext)
     {
         loggingContext.LogCommentFromText(MessageImportance.High, $"BuildCop run times{Environment.NewLine}");

@@ -288,7 +288,6 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             => _buildEventsProcessor
                 .ProcessEvaluationFinishedEventArgs(buildAnalysisContext, evaluationFinishedEventArgs);
 
-        // tHIS IS BASICALLY ONLY CALLED IN PROC NODE
         public Dictionary<string, TimeSpan> CreateAnalyzerTracingStats()
         {
             foreach (BuildAnalyzerFactoryContext analyzerFactoryContext in _analyzersRegistry)
