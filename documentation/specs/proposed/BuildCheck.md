@@ -5,36 +5,6 @@ AKA MSBuild Analyzers
 
 The feature is meant to help customers to improve and understand quality of their MSBuild scripts via rules violations reporting. It will allow MSBuild to gradually roll out additional rules, as users will be capable to configure their opt-in and severity of reports – preventing unwanted build breakages. And to equip powerusers to roll out their own quality checks – whether for general community or internal enterprise usage.
 
-# Table of Contents
-
-- [Terminology](#terminology)
-- [North Star / Longer-term vision](#north-star-longer-term-vision)
-- [Scope of initial iteration](#scope-of-initial-iteration)
-- [User Experience](#user-experience)
-   * [Running / UX](#running-ux)
-      + [Inbox Analyzers](#inbox-analyzers)
-      + [Live Build](#live-build)
-      + [Binlog Replay mode](#binlog-replay-mode)
-   * [Configuration](#configuration)
-      + [Sample configuration](#sample-configuration)
-      + [User Configurable Options](#user-configurable-options)
-         - [Enablement](#enablement)
-         - [Severity](#severity)
-         - [Scope of Analysis](#scope-of-analysis)
-   * [Analyzers and Rules Identification](#analyzers-and-rules-identification)
-   * [Custom Analyzers Authoring](#custom-analyzers-authoring)
-      + [Implementation](#implementation)
-         - [Analyzer declaration](#analyzer-declaration)
-         - [Rules declaration](#rules-declaration)
-         - [Standardized configuration declaration](#standardized-configuration-declaration)
-         - [Custom configuration declaration](#custom-configuration-declaration)
-         - [Compatibility](#compatibility)
-      + [Testing and Debugging](#testing-and-debugging)
-      + [Packaging](#packaging)
-   * [Acquisition of custom analyzers](#acquisition-of-custom-analyzers)
-
-
-
 # Terminology
 
 * **Analyzer** – unit of execution (single implementing class), can host multiple rules. 
@@ -88,9 +58,10 @@ Majority of following cases are included in appropriate context within the scena
 
 
 **Out of scope**
+* Design time build analysis.
 * Localization support (for reports message formats, identifiers, etc.).
 * Custom analyzers have equal data access as the inbox analyzers. We'll aim to ship analyzers that use public BuildCheck API/OM surface. But for extra agility we might chose to implement and ship some analyzers using unexposed data.
-* All inbox analyzers reports have precise location(s) of issues.
+* All inbox analyzers reports have precise location(s) of issues (however for each individual analyzer not providing precise location we should have a very strong reason, why location cannot be provided and why it still brings value even without precise location).
 * Opt-out of analysis on code-level (something like C# `#pragma warning disable`, but within msbuild xml files).
 * Simplified authoring experience via dedicated reference assembly.
 * Restore phase analysis.
@@ -112,6 +83,7 @@ buildcheck.BC0101.IsEnabled=true
 buildcheck.BC0101.Severity=warning
 ```
 * Respecting `.editorconfig` file in msbuild import locations (unless they are in the parent folders hieararchy of particular project file).
+* CodeFixes are not supported in V1
  
 
 # User Experience

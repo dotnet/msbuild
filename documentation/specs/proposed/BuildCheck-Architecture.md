@@ -17,17 +17,6 @@ This is an internal engineering document. For general overview and user point of
 | Tracing             | @maridematte |
 | Perf Advisory       | @AR-May |
 
-# Table of Contents
-
-- [Infrastructure and Execution](#infrastructure-and-execution)
-   * [Data Source](#data-source)
-   * [Execution Modes](#execution-modes)
-   * [Live Mode Hosting](#live-mode-hosting)
-   * [Handling the Distributed Model](#handling-the-distributed-model)
-   * [Analyzers Lifecycle](#analyzers-lifecycle)
-- [Configuration](#configuration)
-- [Acquisition](#acquisition)
-- [Build OM for Analyzers Authoring](#build-om-for-analyzers-authoring)
 
 # Infrastructure and Execution
 
