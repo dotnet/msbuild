@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.BuildCop.Infrastructure;
 using Microsoft.Build.BuildCop.Infrastructure.EditorConfig;
-using Microsoft.Build.Experimental.BuildCop;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;

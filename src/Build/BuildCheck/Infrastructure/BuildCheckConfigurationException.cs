@@ -16,15 +16,15 @@ internal class BuildCheckConfigurationException : Exception
     /// This exception usually leads to defuncting the particular analyzer for the rest of the build (even if issue occured with a single project).
     /// </summary>
     ///
-    internal BuildCopConfigurationErrorScope buildCopConfigurationErrorScope;
+    internal BuildCheckConfigurationErrorScope buildCheckConfigurationErrorScope;
 
-    public BuildCheckConfigurationException(string message, Exception innerException, BuildCopConfigurationErrorScope buildCopConfigurationErrorScope = BuildCopConfigurationErrorScope.SingleRule) : base(message, innerException)
+    public BuildCheckConfigurationException(string message, Exception innerException, BuildCheckConfigurationErrorScope buildCopConfigurationErrorScope = BuildCheckConfigurationErrorScope.SingleRule) : base(message, innerException)
     {
-        this.buildCopConfigurationErrorScope = buildCopConfigurationErrorScope;
+        this.buildCheckConfigurationErrorScope = buildCopConfigurationErrorScope;
     }
 
-    public BuildCopConfigurationException(string message, BuildCopConfigurationErrorScope buildCopConfigurationErrorScope = BuildCopConfigurationErrorScope.SingleRule) : base(message)
+    public BuildCheckConfigurationException(string message, BuildCheckConfigurationErrorScope buildCopConfigurationErrorScope = BuildCheckConfigurationErrorScope.SingleRule) : base(message)
     {
-        this.buildCopConfigurationErrorScope = buildCopConfigurationErrorScope;
+        this.buildCheckConfigurationErrorScope = buildCopConfigurationErrorScope;
     }
 }

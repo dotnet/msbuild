@@ -72,7 +72,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
     {
         private readonly TracingReporter _tracingReporter = new TracingReporter();
         private readonly ConfigurationProvider _configurationProvider = new ConfigurationProvider();
-        private readonly BuildCopCentralContext _buildCopCentralContext;
+        private readonly BuildCheckCentralContext _buildCheckCentralContext;
         private readonly ILoggingService _loggingService;
         private readonly List<BuildAnalyzerFactoryContext> _analyzersRegistry =[];
         private readonly bool[] _enabledDataSources = new bool[(int)BuildCheckDataSource.ValuesCount];

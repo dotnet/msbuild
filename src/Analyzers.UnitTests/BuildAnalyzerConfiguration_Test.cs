@@ -7,8 +7,8 @@ using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Build.BuildCop.Infrastructure;
-using Microsoft.Build.Experimental.BuildCop;
+using Microsoft.Build.BuildCheck.Infrastructure;
+using Microsoft.Build.Experimental.BuildCheck;
 using Shouldly;
 using Xunit;
 
@@ -110,7 +110,7 @@ namespace Microsoft.Build.Analyzers.UnitTests
                 { key , value},
             };
 
-            var exception = Should.Throw<BuildCopConfigurationException>(() => {
+            var exception = Should.Throw<BuildCheckConfigurationException>(() => {
                 BuildAnalyzerConfiguration.Create(config);
             });
             exception.Message.ShouldContain($"Incorrect value provided in config for key {key}");

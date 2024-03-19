@@ -19,7 +19,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
+namespace Microsoft.Build.BuildCheck.Infrastructure.EditorConfig
 {
     internal class EditorConfigGlobsMatcher
     {
@@ -146,7 +146,7 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
                 {
                     // We only call this on strings that were already passed through IsAbsoluteEditorConfigPath, so
                     // we shouldn't have any other token kinds here.
-                    throw new BuildCopConfigurationException($"UnexpectedToken: {tokenKind}", BuildCopConfigurationErrorScope.EditorConfigParser);
+                    throw new BuildCheckConfigurationException($"UnexpectedToken: {tokenKind}", BuildCheckConfigurationErrorScope.EditorConfigParser);
                 }
             }
             return sb.ToString();
@@ -310,7 +310,7 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
                         }
                         break;
                     default:
-                        throw new BuildCopConfigurationException($"UnexpectedToken: {tokenKind}", BuildCopConfigurationErrorScope.EditorConfigParser);
+                        throw new BuildCheckConfigurationException($"UnexpectedToken: {tokenKind}", BuildCheckConfigurationErrorScope.EditorConfigParser);
                 }
             }
             // If we're parsing a choice we should not exit without a closing '}'
@@ -408,7 +408,7 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
                 }
                 else
                 {
-                    throw new BuildCopConfigurationException($"UnexpectedValue: {lastChar}", BuildCopConfigurationErrorScope.EditorConfigParser);
+                    throw new BuildCheckConfigurationException($"UnexpectedValue: {lastChar}", BuildCheckConfigurationErrorScope.EditorConfigParser);
                 }
             }
 

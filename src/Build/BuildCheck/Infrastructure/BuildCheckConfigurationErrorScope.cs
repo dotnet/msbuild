@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Build.BuildCop.Infrastructure
+namespace Microsoft.Build.BuildCheck.Infrastructure
 {
-    internal enum BuildCopConfigurationErrorScope
+    internal enum BuildCheckConfigurationErrorScope
     {
         SingleRule,
         EditorConfigParser

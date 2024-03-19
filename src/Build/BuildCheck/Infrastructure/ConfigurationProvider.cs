@@ -11,7 +11,7 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using Microsoft.Build.Experimental.BuildCheck;
 using System.Configuration;
-using Microsoft.Build.BuildCop.Infrastructure.EditorConfig;
+using Microsoft.Build.BuildCheck.Infrastructure.EditorConfig;
 
 namespace Microsoft.Build.BuildCheck.Infrastructure;
 
@@ -130,7 +130,7 @@ internal class ConfigurationProvider
         }
         catch (Exception exception)
         {
-            throw new BuildCopConfigurationException($"Parsing editorConfig data failed", exception, BuildCopConfigurationErrorScope.EditorConfigParser);
+            throw new BuildCheckConfigurationException($"Parsing editorConfig data failed", exception, BuildCheckConfigurationErrorScope.EditorConfigParser);
         }
 
         var keyTosearch = $"msbuild_analyzer.{ruleId}.";

@@ -11,9 +11,9 @@ using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.Shared;
-using static Microsoft.Build.BuildCop.Infrastructure.EditorConfig.EditorConfigGlobsMatcher;
+using static Microsoft.Build.BuildCheck.Infrastructure.EditorConfig.EditorConfigGlobsMatcher;
 
-namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
+namespace Microsoft.Build.BuildCheck.Infrastructure.EditorConfig
 {
     internal class EditorConfigParser
     {

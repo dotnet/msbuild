@@ -1,6 +1,10 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
+using Microsoft.Build.BuildCheck.Infrastructure;
+
 namespace Microsoft.Build.Experimental.BuildCheck;
 
 /// <summary>
@@ -86,9 +90,9 @@ public class BuildAnalyzerConfiguration
 
         if (!isParsed)
         {
-            throw new BuildCopConfigurationException(
+            throw new BuildCheckConfigurationException(
                 $"Incorrect value provided in config for key {key}",
-                buildCopConfigurationErrorScope: BuildCopConfigurationErrorScope.EditorConfigParser);
+                buildCopConfigurationErrorScope: BuildCheckConfigurationErrorScope.EditorConfigParser);
         }
 
         return isParsed;

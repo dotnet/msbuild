@@ -18,7 +18,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
+namespace Microsoft.Build.BuildCheck.Infrastructure.EditorConfig
 {
     internal partial class EditorConfigFile
     {
