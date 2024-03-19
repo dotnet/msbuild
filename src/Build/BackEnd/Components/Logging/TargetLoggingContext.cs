@@ -16,7 +16,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// <summary>
     /// A logging context for building a specific target within a project.
     /// </summary>
-    internal class TargetLoggingContext : BuildLoggingContext, IHasProjectFullPath
+    internal class TargetLoggingContext : BuildLoggingContext
     {
         /// <summary>
         /// Should target outputs be logged also.
@@ -85,8 +85,6 @@ namespace Microsoft.Build.BackEnd.Logging
                 return _target;
             }
         }
-
-        public string ProjectFullPath => _projectLoggingContext?.ProjectFullPath;
 
         /// <summary>
         /// Log that a target has finished

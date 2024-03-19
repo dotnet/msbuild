@@ -368,7 +368,8 @@ namespace Microsoft.Build.Logging
             }
             else if (e is GeneratedFileUsedEventArgs generatedFileUsedEventArgs)
             {
-                projectImportsCollector.AddFileFromMemory(generatedFileUsedEventArgs.ResponseFilePath, generatedFileUsedEventArgs.ResponseFileContent);
+                string fullPath = Path.GetFullPath(generatedFileUsedEventArgs.ResponseFilePath);
+                projectImportsCollector.AddFileFromMemory(fullPath, generatedFileUsedEventArgs.ResponseFileContent);
             }
         }
 

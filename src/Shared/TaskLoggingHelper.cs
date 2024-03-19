@@ -506,7 +506,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Logs a file generated from the given data.
         /// </summary>
-        /// <param name="filePath">The file path.</param>
+        /// <param name="filePath">The file path relative to the currecnt project.</param>
         /// <param name="content">The content of the file.</param>
         public void LogIncludeGeneratedFile(string filePath, string content)
         {

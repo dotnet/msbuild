@@ -127,11 +127,6 @@ namespace Microsoft.Build.Tasks
         private string _nameOfTask;
 
         /// <summary>
-        /// The directory of the current project
-        /// </summary>
-        private string _projectDirectory;
-
-        /// <summary>
         /// Path to source that is outside the project file
         /// </summary>
         private string _sourcePath;
@@ -187,11 +182,6 @@ namespace Microsoft.Build.Tasks
                 TaskResources = AssemblyResources.PrimaryResources,
                 HelpKeywordPrefix = "MSBuild."
             };
-
-            if (taskFactoryLoggingHost is IHasProjectFullPath logThatHasProjectFullPath)
-            {
-                _projectDirectory = Path.GetDirectoryName(logThatHasProjectFullPath.ProjectFullPath);
-            }
 
             XmlNode taskContent = ExtractTaskContent(taskElementContents);
             if (taskContent == null)
@@ -802,13 +792,8 @@ namespace Microsoft.Build.Tasks
                 string fullCode = codeBuilder.ToString();
 
                 // Embed generated file in the binlog
-                if (_projectDirectory != null)
-                {
-                    string fileNameInBinlog = $"{Guid.NewGuid()}-{_nameOfTask}-compilation-file.tmp";
-                    string outputPathInBinlog = Path.Combine(_projectDirectory, fileNameInBinlog);
-
-                    _log.LogIncludeGeneratedFile(outputPathInBinlog, fullCode);
-                }
+                string fileNameInBinlog = $"{Guid.NewGuid()}-{_nameOfTask}-compilation-file.tmp";
+                _log.LogIncludeGeneratedFile(fileNameInBinlog, fullCode);
 
                 var fullSpec = new FullTaskSpecification(finalReferencedAssemblies, fullCode);
                 if (!s_compiledTaskCache.TryGetValue(fullSpec, out Assembly existingAssembly))

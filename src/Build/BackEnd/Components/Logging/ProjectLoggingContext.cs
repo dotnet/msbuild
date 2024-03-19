@@ -70,8 +70,6 @@ namespace Microsoft.Build.BackEnd.Logging
         {
         }
 
-        internal string ProjectFullPath { get => _projectFullPath; }
-
         /// <summary>
         /// Constructs a project logging contexts.
         /// </summary>
