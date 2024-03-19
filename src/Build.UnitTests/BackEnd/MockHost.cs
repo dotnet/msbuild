@@ -5,7 +5,7 @@ using System;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
-using Microsoft.Build.BuildCop.Infrastructure;
+using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -62,7 +62,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         private ISdkResolverService _sdkResolverService;
 
-        private IBuildCopManagerProvider _buildCopManagerProvider;
+        private IBuildCheckManagerProvider _buildCheckManagerProvider;
 
         #region SystemParameterFields
 
@@ -130,8 +130,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _sdkResolverService = new MockSdkResolverService();
             ((IBuildComponent)_sdkResolverService).InitializeComponent(this);
 
-            _buildCopManagerProvider = new NullBuildCopManagerProvider();
-            ((IBuildComponent)_buildCopManagerProvider).InitializeComponent(this);
+            _buildCheckManagerProvider = new NullBuildCheckManagerProvider();
+            ((IBuildComponent)_buildCheckManagerProvider).InitializeComponent(this);
         }
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildComponentType.ResultsCache => (IBuildComponent)_resultsCache,
                 BuildComponentType.RequestBuilder => (IBuildComponent)_requestBuilder,
                 BuildComponentType.SdkResolverService => (IBuildComponent)_sdkResolverService,
-                BuildComponentType.BuildCop => (IBuildComponent)_buildCopManagerProvider,
+                BuildComponentType.BuildCheck => (IBuildComponent)_buildCheckManagerProvider,
                 _ => throw new ArgumentException("Unexpected type " + type),
             };
         }

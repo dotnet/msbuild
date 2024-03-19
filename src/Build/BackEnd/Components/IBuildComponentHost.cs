@@ -146,7 +146,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The Build Analyzer Manager.
         /// </summary>
-        BuildCop,
+        BuildCheck,
     }
 
     /// <summary>

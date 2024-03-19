@@ -10,14 +10,14 @@ using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Experimental.BuildCop;
+namespace Microsoft.Build.Experimental.BuildCheck;
 
-public abstract class BuildCopEventArgs : BuildEventArgs
+public abstract class BuildCheckEventArgs : BuildEventArgs
 { }
 
-public sealed class BuildCopTracingEventArgs(Dictionary<string, TimeSpan> tracingData) : BuildCopEventArgs
+public sealed class BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> tracingData) : BuildCheckEventArgs
 {
-    internal BuildCopTracingEventArgs() : this(new Dictionary<string, TimeSpan>())
+    internal BuildCheckTracingEventArgs() : this(new Dictionary<string, TimeSpan>())
     { }
 
     public Dictionary<string, TimeSpan> TracingData { get; private set; } = tracingData;
@@ -50,9 +50,9 @@ public sealed class BuildCopTracingEventArgs(Dictionary<string, TimeSpan> tracin
     }
 }
 
-public sealed class BuildCopAcquisitionEventArgs(string acquisitionData) : BuildCopEventArgs
+public sealed class BuildCheckAcquisitionEventArgs(string acquisitionData) : BuildCheckEventArgs
 {
-    internal BuildCopAcquisitionEventArgs() : this(string.Empty)
+    internal BuildCheckAcquisitionEventArgs() : this(string.Empty)
     { }
 
     public string AcquisitionData { get; private set; } = acquisitionData;
@@ -71,14 +71,14 @@ public sealed class BuildCopAcquisitionEventArgs(string acquisitionData) : Build
         AcquisitionData = reader.ReadString();
     }
 }
-public sealed class BuildCopResultWarning : BuildWarningEventArgs
+public sealed class BuildCheckResultWarning : BuildWarningEventArgs
 {
-    public BuildCopResultWarning(IBuildCopResult result)
+    public BuildCheckResultWarning(IBuildCheckResult result)
     {
         this.Message = result.FormatMessage();
     }
 
-    internal BuildCopResultWarning() { }
+    internal BuildCheckResultWarning() { }
 
     internal override void WriteToStream(BinaryWriter writer)
     {
@@ -97,14 +97,14 @@ public sealed class BuildCopResultWarning : BuildWarningEventArgs
     public override string? Message { get; protected set; }
 }
 
-public sealed class BuildCopResultError : BuildErrorEventArgs
+public sealed class BuildCheckResultError : BuildErrorEventArgs
 {
-    public BuildCopResultError(IBuildCopResult result)
+    public BuildCheckResultError(IBuildCheckResult result)
     {
         this.Message = result.FormatMessage();
     }
 
-    internal BuildCopResultError() { }
+    internal BuildCheckResultError() { }
 
     internal override void WriteToStream(BinaryWriter writer)
     {
@@ -123,14 +123,14 @@ public sealed class BuildCopResultError : BuildErrorEventArgs
     public override string? Message { get; protected set; }
 }
 
-public sealed class BuildCopResultMessage : BuildMessageEventArgs
+public sealed class BuildCheckResultMessage : BuildMessageEventArgs
 {
-    public BuildCopResultMessage(IBuildCopResult result)
+    public BuildCheckResultMessage(IBuildCheckResult result)
     {
         this.Message = result.FormatMessage();
     }
 
-    internal BuildCopResultMessage() { }
+    internal BuildCheckResultMessage() { }
 
     internal override void WriteToStream(BinaryWriter writer)
     {

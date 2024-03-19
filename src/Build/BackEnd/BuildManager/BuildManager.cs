@@ -21,13 +21,13 @@ using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
-using Microsoft.Build.BuildCop.Infrastructure;
-using Microsoft.Build.BuildCop.Logging;
+using Microsoft.Build.BuildCheck.Infrastructure;
+using Microsoft.Build.BuildCheck.Logging;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Experimental;
-using Microsoft.Build.Experimental.BuildCop;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
@@ -2984,15 +2984,15 @@ namespace Microsoft.Build.Execution
             loggingService.WarningsNotAsErrors = warningsNotAsErrors;
             loggingService.WarningsAsMessages = warningsAsMessages;
 
-            if (((IBuildComponentHost)this).BuildParameters.IsBuildCopEnabled)
+            if (((IBuildComponentHost)this).BuildParameters.IsBuildCheckEnabled)
             {
-                var buildCopManagerProvider =
-                    ((IBuildComponentHost)this).GetComponent(BuildComponentType.BuildCop) as IBuildCopManagerProvider;
-                buildCopManagerProvider!.Instance.SetDataSource(BuildCopDataSource.EventArgs);
+                var buildCheckManagerProvider =
+                    ((IBuildComponentHost)this).GetComponent(BuildComponentType.BuildCheck) as IBuildCheckManagerProvider;
+                buildCheckManagerProvider!.Instance.SetDataSource(BuildCheckDataSource.EventArgs);
 
                 loggers = (loggers ?? Enumerable.Empty<ILogger>()).Concat(new[]
                 {
-                    new BuildCopConnectorLogger(new AnalyzerLoggingContextFactory(loggingService), buildCopManagerProvider.Instance)
+                    new BuildCheckConnectorLogger(new AnalyzerLoggingContextFactory(loggingService), buildCheckManagerProvider.Instance)
                 });
             }
 

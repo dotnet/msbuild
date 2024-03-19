@@ -3,7 +3,7 @@
 
 #nullable disable
 
-using Microsoft.Build.Experimental.BuildCop;
+using Microsoft.Build.Experimental.BuildCheck;
 
 namespace Microsoft.Build.Framework
 {
@@ -78,9 +78,9 @@ namespace Microsoft.Build.Framework
     public delegate void AnyEventHandler(object sender, BuildEventArgs e);
 
     /// <summary>
-    /// Type of handler for BuildCopEventRaised events
+    /// Type of handler for BuildCheckEventRaised events
     /// </summary>
-    public delegate void BuildCopEventHandler(object sender, BuildCopEventArgs e);
+    public delegate void BuildCheckEventHandler(object sender, BuildCheckEventArgs e);
 
     /// <summary>
     /// This interface defines the events raised by the build engine.

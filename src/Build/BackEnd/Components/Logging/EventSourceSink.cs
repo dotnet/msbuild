@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.BuildCop.Infrastructure;
-using Microsoft.Build.Experimental.BuildCop;
+using Microsoft.Build.BuildCheck.Infrastructure;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -104,7 +104,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// This event is raised to log build cop events.
         /// </summary>
-        public event BuildCopEventHandler BuildCopEventRaised;
+        public event BuildCheckEventHandler BuildCheckEventRaised;
         #endregion
 
         #region Properties
@@ -270,8 +270,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 case TelemetryEventArgs telemetryEvent:
                     RaiseTelemetryEvent(null, telemetryEvent);
                     break;
-                case BuildCopEventArgs buildCopEvent:
-                    RaiseBuildCopEvent(null, buildCopEvent);
+                case BuildCheckEventArgs buildCheckEvent:
+                    RaiseBuildCheckEvent(null, buildCheckEvent);
                     break;
 
                 default:
@@ -859,13 +859,13 @@ namespace Microsoft.Build.BackEnd.Logging
             RaiseAnyEvent(sender, buildEvent);
         }
 
-        private void RaiseBuildCopEvent(object sender, BuildCopEventArgs buildEvent)
+        private void RaiseBuildCheckEvent(object sender, BuildCheckEventArgs buildEvent)
         {
-            if (BuildCopEventRaised != null)
+            if (BuildCheckEventRaised != null)
             {
                 try
                 {
-                    BuildCopEventRaised(sender, buildEvent);
+                    BuildCheckEventRaised(sender, buildEvent);
                 }
                 catch (LoggerException)
                 {

@@ -10,8 +10,8 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 
 #if !TASKHOST
-using Microsoft.Build.Experimental.BuildCop;
-using Microsoft.Build.BuildCop.Infrastructure;
+using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.BuildCheck.Infrastructure;
 #endif
 
 #if !TASKHOST && !MSBUILDENTRYPOINTEXE
@@ -212,29 +212,29 @@ namespace Microsoft.Build.Shared
         ExtendedCriticalBuildMessageEvent = 33,
 
         /// <summary>
-        /// Event is <see cref="BuildCopResultMessage"/>
+        /// Event is <see cref="BuildCheckResultMessage"/>
         /// </summary>
-        BuildCopMessageEvent = 34,
+        BuildCheckMessageEvent = 34,
 
         /// <summary>
-        /// Event is <see cref="BuildCopResultWarning"/>
+        /// Event is <see cref="BuildCheckResultWarning"/>
         /// </summary>
-        BuildCopWarningEvent = 35,
+        BuildCheckWarningEvent = 35,
 
         /// <summary>
-        /// Event is <see cref="BuildCopResultError"/>
+        /// Event is <see cref="BuildCheckResultError"/>
         /// </summary>
-        BuildCopErrorEvent = 36,
+        BuildCheckErrorEvent = 36,
 
         /// <summary>
-        /// Event is <see cref="BuildCopTracingEventArgs"/>
+        /// Event is <see cref="BuildCheckTracingEventArgs"/>
         /// </summary>
-        BuildCopTracingEvent = 37,
+        BuildCheckTracingEvent = 37,
 
         /// <summary>
-        /// Event is <see cref="BuildCopAcquisitionEventArgs"/>
+        /// Event is <see cref="BuildCheckAcquisitionEventArgs"/>
         /// </summary>
-        BuildCopAcquisitionEvent = 38,
+        BuildCheckAcquisitionEvent = 38,
     }
     #endregion
 
@@ -640,11 +640,11 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.PropertyInitialValueSet => new PropertyInitialValueSetEventArgs(),
                 LoggingEventType.PropertyReassignment => new PropertyReassignmentEventArgs(),
                 LoggingEventType.UninitializedPropertyRead => new UninitializedPropertyReadEventArgs(),
-                LoggingEventType.BuildCopMessageEvent => new BuildCopResultMessage(),
-                LoggingEventType.BuildCopWarningEvent => new BuildCopResultWarning(),
-                LoggingEventType.BuildCopErrorEvent => new BuildCopResultError(),
-                LoggingEventType.BuildCopAcquisitionEvent => new BuildCopAcquisitionEventArgs(),
-                LoggingEventType.BuildCopTracingEvent => new BuildCopTracingEventArgs(),
+                LoggingEventType.BuildCheckMessageEvent => new BuildCheckResultMessage(),
+                LoggingEventType.BuildCheckWarningEvent => new BuildCheckResultWarning(),
+                LoggingEventType.BuildCheckErrorEvent => new BuildCheckResultError(),
+                LoggingEventType.BuildCheckAcquisitionEvent => new BuildCheckAcquisitionEventArgs(),
+                LoggingEventType.BuildCheckTracingEvent => new BuildCheckTracingEventArgs(),
 #endif
                 _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
             };
@@ -756,25 +756,25 @@ namespace Microsoft.Build.Shared
             {
                 return LoggingEventType.UninitializedPropertyRead;
             }
-            else if (eventType == typeof(BuildCopResultMessage))
+            else if (eventType == typeof(BuildCheckResultMessage))
             {
-                return LoggingEventType.BuildCopMessageEvent;
+                return LoggingEventType.BuildCheckMessageEvent;
             }
-            else if (eventType == typeof(BuildCopResultWarning))
+            else if (eventType == typeof(BuildCheckResultWarning))
             {
-                return LoggingEventType.BuildCopWarningEvent;
+                return LoggingEventType.BuildCheckWarningEvent;
             }
-            else if (eventType == typeof(BuildCopResultError))
+            else if (eventType == typeof(BuildCheckResultError))
             {
-                return LoggingEventType.BuildCopErrorEvent;
+                return LoggingEventType.BuildCheckErrorEvent;
             }
-            else if (eventType == typeof(BuildCopAcquisitionEventArgs))
+            else if (eventType == typeof(BuildCheckAcquisitionEventArgs))
             {
-                return LoggingEventType.BuildCopAcquisitionEvent;
+                return LoggingEventType.BuildCheckAcquisitionEvent;
             }
-            else if (eventType == typeof(BuildCopTracingEventArgs))
+            else if (eventType == typeof(BuildCheckTracingEventArgs))
             {
-                return LoggingEventType.BuildCopTracingEvent;
+                return LoggingEventType.BuildCheckTracingEvent;
             }
 #endif
             else if (eventType == typeof(TargetStartedEventArgs))
