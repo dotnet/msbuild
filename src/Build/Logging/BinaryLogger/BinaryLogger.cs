@@ -366,7 +366,7 @@ namespace Microsoft.Build.Logging
             {
                 projectImportsCollector.AddFile(responseFileArgs.ResponseFilePath);
             }
-            else if (e is GeneratedFileUsedEventArgs generatedFileUsedEventArgs)
+            else if (e is GeneratedFileUsedEventArgs generatedFileUsedEventArgs && generatedFileUsedEventArgs.FilePath != null)
             {
                 string fullPath = Path.GetFullPath(generatedFileUsedEventArgs.FilePath);
                 projectImportsCollector.AddFileFromMemory(fullPath, generatedFileUsedEventArgs.Content);
