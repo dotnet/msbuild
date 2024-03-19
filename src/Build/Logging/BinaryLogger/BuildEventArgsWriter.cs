@@ -559,7 +559,7 @@ namespace Microsoft.Build.Logging
         {
             WriteMessageFields(e);
             WriteDeduplicatedString(e.FilePath);
-            WriteDeduplicatedString(e.FileContent);
+            WriteDeduplicatedString(e.Content);
             return BinaryLogRecordKind.GeneratedFileUsed;
         }
         private BinaryLogRecordKind Write(TaskCommandLineEventArgs e)

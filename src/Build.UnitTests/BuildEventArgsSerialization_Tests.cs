@@ -553,7 +553,7 @@ namespace Microsoft.Build.UnitTests
             var args = new GeneratedFileUsedEventArgs("MSBuild.rsp", "");
             Roundtrip(args,
                 e => e.FilePath,
-                e => e.FileContent);
+                e => e.Content);
         }
 
         [Fact]

@@ -23,11 +23,11 @@ namespace Microsoft.Build.Framework
             : base("", null, null, MessageImportance.Low)
         {
             FilePath = filePath;
-            FileContent = content;
+            Content = content;
         }
 
         public string? FilePath { set; get; }
 
-        public string? FileContent { set; get; }
+        public string? Content { set; get; }
     }
 }

@@ -958,7 +958,7 @@ namespace Microsoft.Build.Shared
         private void WriteGeneratedFileUsedEventToStream(GeneratedFileUsedEventArgs generatedFileUsedEventArgs, ITranslator translator)
         {
             string filePath = generatedFileUsedEventArgs.FilePath;
-            string content = generatedFileUsedEventArgs.FileContent;
+            string content = generatedFileUsedEventArgs.Content;
 
             translator.Translate(ref filePath);
             translator.Translate(ref content);
