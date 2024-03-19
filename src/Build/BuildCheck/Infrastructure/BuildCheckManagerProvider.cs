@@ -122,6 +122,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         internal BuildCheckManager(ILoggingService loggingService)
         {
             _loggingService = loggingService;
+            _buildCheckCentralContext = new(_configurationProvider);
             _buildEventsProcessor = new(_buildCheckCentralContext);
         }
 

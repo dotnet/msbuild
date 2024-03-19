@@ -9,13 +9,13 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Build.BuildCop.Infrastructure;
-using Microsoft.Build.BuildCop.Infrastructure.EditorConfig;
+using Microsoft.Build.BuildCheck.Infrastructure;
+using Microsoft.Build.BuildCheck.Infrastructure.EditorConfig;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
-using static Microsoft.Build.BuildCop.Infrastructure.EditorConfig.EditorConfigGlobsMatcher;
+using static Microsoft.Build.BuildCheck.Infrastructure.EditorConfig.EditorConfigGlobsMatcher;
 
 namespace Microsoft.Build.Analyzers.UnitTests
 {
