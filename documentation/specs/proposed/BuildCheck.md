@@ -92,7 +92,9 @@ buildcheck.BC0101.Severity=warning
 
 ### Inbox Analyzers
 
-**TBD** - suggested list of analyzers to be shipped with V1 (along with proposed configuration)
+Suggested list of analyzers to be shipped with V1: https://github.com/dotnet/msbuild/issues/9630#issuecomment-2007440323
+
+The proposed initial configuration for those is TBD (as well based on initial test runs of the analyzers of choosen public repositories).
 
 ### Live Build
 
