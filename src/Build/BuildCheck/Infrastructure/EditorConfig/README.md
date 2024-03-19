@@ -47,3 +47,14 @@ The implementation differs depending on category:
 Two levels of cache introduced: 
 - When retrieving and parsing the editor config -> Parsed results are saved into dictionary: editorconfigPath = ParsedEditorConfig
 - When retrieving Infra related config: ruleId-projectPath = BuildconfigInstance
+
+Usage examples (API)
+
+```
+var editorConfigParser = new EditorConfigParser();
+editorConfigParser.Parse("path/to/the/file")
+```
+
+The snippet above will return all applied key-value Dictionary<string, string> pairs collected from .editorconfig files
+
+Currently EditorConfigParser is used by [ConfigurationProvider](https://github.com/dotnet/msbuild/blob/e0dfb8d1ce5fc1de5153e65ea04c66a6dcac6279/src/Build/BuildCheck/Infrastructure/ConfigurationProvider.cs#L129). 
