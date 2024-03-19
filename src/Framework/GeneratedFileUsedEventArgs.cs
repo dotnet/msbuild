@@ -22,12 +22,12 @@ namespace Microsoft.Build.Framework
         public GeneratedFileUsedEventArgs(string filePath, string content)
             : base("", null, null, MessageImportance.Low)
         {
-            ResponseFilePath = filePath;
-            ResponseFileContent = content;
+            FilePath = filePath;
+            FileContent = content;
         }
 
-        public string? ResponseFilePath { set; get; }
+        public string? FilePath { set; get; }
 
-        public string? ResponseFileContent { set; get; }
+        public string? FileContent { set; get; }
     }
 }

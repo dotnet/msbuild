@@ -558,8 +558,8 @@ namespace Microsoft.Build.Logging
         private BinaryLogRecordKind Write(GeneratedFileUsedEventArgs e)
         {
             WriteMessageFields(e);
-            WriteDeduplicatedString(e.ResponseFilePath);
-            WriteDeduplicatedString(e.ResponseFileContent);
+            WriteDeduplicatedString(e.FilePath);
+            WriteDeduplicatedString(e.FileContent);
             return BinaryLogRecordKind.GeneratedFileUsed;
         }
         private BinaryLogRecordKind Write(TaskCommandLineEventArgs e)
