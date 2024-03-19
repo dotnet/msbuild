@@ -68,7 +68,11 @@ public class CustomConfigurationData
         return Equals((CustomConfigurationData)obj);
     }
 
-    protected bool Equals(CustomConfigurationData other) => Equals(ConfigurationData, other.ConfigurationData);
+    protected bool Equals(CustomConfigurationData other) {
+        // TODO: update the comparison. For different instances with the same data it returns false, we will need to compare the exact match
+        
+        return Equals(ConfigurationData, other.ConfigurationData);
+    }
 
     public override int GetHashCode() => (ConfigurationData != null ? ConfigurationData.GetHashCode() : 0);
 }

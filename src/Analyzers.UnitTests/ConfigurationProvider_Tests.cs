@@ -53,8 +53,8 @@ namespace Microsoft.Build.Analyzers.UnitTests
             root=true
 
             [*.csproj]
-            msbuild_analyzer.rule_id.property1=value1
-            msbuild_analyzer.rule_id.property2=value2
+            build_check.rule_id.property1=value1
+            build_check.rule_id.property2=value2
             """);
 
             var configurationProvider = new ConfigurationProvider();
@@ -80,10 +80,10 @@ namespace Microsoft.Build.Analyzers.UnitTests
             root=true
 
             [*.csproj]
-            msbuild_analyzer.rule_id.property1=value1
-            msbuild_analyzer.rule_id.property2=value2
-            msbuild_analyzer.rule_id.isEnabled=true
-            msbuild_analyzer.rule_id.isEnabled2=true
+            build_check.rule_id.property1=value1
+            build_check.rule_id.property2=value2
+            build_check.rule_id.isEnabled=true
+            build_check.rule_id.isEnabled2=true
             any_other_key1=any_other_value1
             any_other_key2=any_other_value2
             any_other_key3=any_other_value3
@@ -112,9 +112,9 @@ namespace Microsoft.Build.Analyzers.UnitTests
             root=true
 
             [*.csproj]
-            msbuild_analyzer.rule_id.isEnabled=true
-            msbuild_analyzer.rule_id.Severity=Error
-            msbuild_analyzer.rule_id.EvaluationAnalysisScope=AnalyzedProjectOnly
+            build_check.rule_id.isEnabled=true
+            build_check.rule_id.Severity=Error
+            build_check.rule_id.EvaluationAnalysisScope=AnalyzedProjectOnly
             """);
 
             var configurationProvider = new ConfigurationProvider();
@@ -126,5 +126,47 @@ namespace Microsoft.Build.Analyzers.UnitTests
             buildConfig.Severity?.ShouldBe(BuildAnalyzerResultSeverity.Error);
             buildConfig.EvaluationAnalysisScope?.ShouldBe(EvaluationAnalysisScope.AnalyzedProjectOnly);
         }
+
+        /*
+        [Fact]
+        public void GetRuleIdConfiguration_CustomConfigurationValidity_Valid()
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+
+            TransientTestFolder workFolder1 = testEnvironment.CreateFolder(createFolder: true);
+            TransientTestFile config1 = testEnvironment.CreateFile(workFolder1, ".editorconfig",
+            """
+            root=true
+
+            [*.csproj]
+            build_check.rule_id.property1=value1
+            build_check.rule_id.property2=value2
+            build_check.rule_id.isEnabled=true
+            build_check.rule_id.isEnabled2=true
+            any_other_key1=any_other_value1
+            any_other_key2=any_other_value2
+            any_other_key3=any_other_value3
+            any_other_key3=any_other_value3
+
+            [test123.csproj]
+            build_check.rule_id.property1=value2
+            build_check.rule_id.property2=value3
+            build_check.rule_id.isEnabled=true
+            build_check.rule_id.isEnabled2=tru1
+            any_other_key1=any_other_value1
+            any_other_key2=any_other_value2
+            any_other_key3=any_other_value3
+            any_other_key3=any_other_value3
+            """);
+
+            var configurationProvider = new ConfigurationProvider();
+            configurationProvider.GetCustomConfiguration(Path.Combine(workFolder1.Path, "test.csproj"), "rule_id");
+
+            // should fail, because the configs are the different
+            Should.Throw<BuildCheckConfigurationException>(() =>
+            {
+                configurationProvider.CheckCustomConfigurationDataValidity(Path.Combine(workFolder1.Path, "test123.csproj"), "rule_id");
+            });
+        }*/
     }
 }

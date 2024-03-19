@@ -90,15 +90,15 @@ namespace Microsoft.Build.Analyzers.UnitTests
             root=true
 
             [*.csproj]
-            msbuild_analyzer.BC0101.IsEnabled=true
-            msbuild_analyzer.BC0101.Severity=warning
+            build_check.BC0101.IsEnabled=true
+            build_check.BC0101.Severity=warning
 
-            msbuild_analyzer.COND0543.IsEnabled=false
-            msbuild_analyzer.COND0543.Severity=Error
-            msbuild_analyzer.COND0543.EvaluationAnalysisScope=AnalyzedProjectOnly
-            msbuild_analyzer.COND0543.CustomSwitch=QWERTY
+            build_check.COND0543.IsEnabled=false
+            build_check.COND0543.Severity=Error
+            build_check.COND0543.EvaluationAnalysisScope=AnalyzedProjectOnly
+            build_check.COND0543.CustomSwitch=QWERTY
 
-            msbuild_analyzer.BLA.IsEnabled=false
+            build_check.BLA.IsEnabled=false
             """);
 
             // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".

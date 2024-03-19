@@ -25,7 +25,7 @@ internal class ConfigurationProvider
     //  (disabled rules and analyzers that need to run in different node)
     private readonly Dictionary<string, BuildAnalyzerConfiguration> _editorConfig = new Dictionary<string, BuildAnalyzerConfiguration>();
 
-    // private readonly Dictionary<string, CustomConfigurationData> _customConfigurationData = new Dictionary<string, CustomConfigurationData>();
+    private readonly Dictionary<string, CustomConfigurationData> _customConfigurationData = new Dictionary<string, CustomConfigurationData>();
 
     private readonly List<string> _infrastructureConfigurationKeys = new List<string>() {
         nameof(BuildAnalyzerConfiguration.EvaluationAnalysisScope).ToLower(),
@@ -61,7 +61,14 @@ internal class ConfigurationProvider
             }
         }
 
-        return new CustomConfigurationData(ruleId, configuration);
+        var data = new CustomConfigurationData(ruleId, configuration);
+
+        if (!_customConfigurationData.ContainsKey(ruleId))
+        {
+            _customConfigurationData[ruleId] = data;
+        }
+
+        return data;
     }
 
     /// <summary>
@@ -73,9 +80,7 @@ internal class ConfigurationProvider
     /// <returns></returns>
     internal void CheckCustomConfigurationDataValidity(string projectFullPath, string ruleId)
     {
-        // Note: requires another cache layer for custom configuration. 
-        // var customConfiguration = GetCustomConfiguration(projectFullPath, ruleId);
-        // if prevData in cache => raise BuildCopConfigurationException;
+        // TODO: repair the comparer of the objects, to compare actual data
     }
 
     internal BuildAnalyzerConfigurationInternal[] GetMergedConfigurations(
@@ -133,7 +138,7 @@ internal class ConfigurationProvider
             throw new BuildCheckConfigurationException($"Parsing editorConfig data failed", exception, BuildCheckConfigurationErrorScope.EditorConfigParser);
         }
 
-        var keyTosearch = $"msbuild_analyzer.{ruleId}.";
+        var keyTosearch = $"build_check.{ruleId}.";
         var dictionaryConfig = new Dictionary<string, string>();
 
         foreach (var kv in config)

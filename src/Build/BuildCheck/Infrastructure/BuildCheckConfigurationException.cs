@@ -18,13 +18,13 @@ internal class BuildCheckConfigurationException : Exception
     ///
     internal BuildCheckConfigurationErrorScope buildCheckConfigurationErrorScope;
 
-    public BuildCheckConfigurationException(string message, Exception innerException, BuildCheckConfigurationErrorScope buildCopConfigurationErrorScope = BuildCheckConfigurationErrorScope.SingleRule) : base(message, innerException)
+    public BuildCheckConfigurationException(string message, Exception innerException, BuildCheckConfigurationErrorScope buildCheckConfigurationErrorScope = BuildCheckConfigurationErrorScope.SingleRule) : base(message, innerException)
     {
-        this.buildCheckConfigurationErrorScope = buildCopConfigurationErrorScope;
+        this.buildCheckConfigurationErrorScope = buildCheckConfigurationErrorScope;
     }
 
-    public BuildCheckConfigurationException(string message, BuildCheckConfigurationErrorScope buildCopConfigurationErrorScope = BuildCheckConfigurationErrorScope.SingleRule) : base(message)
+    public BuildCheckConfigurationException(string message, BuildCheckConfigurationErrorScope buildCheckConfigurationErrorScope = BuildCheckConfigurationErrorScope.SingleRule) : base(message)
     {
-        this.buildCheckConfigurationErrorScope = buildCopConfigurationErrorScope;
+        this.buildCheckConfigurationErrorScope = buildCheckConfigurationErrorScope;
     }
 }
