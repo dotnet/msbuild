@@ -92,7 +92,7 @@ public class BuildAnalyzerConfiguration
         {
             throw new BuildCheckConfigurationException(
                 $"Incorrect value provided in config for key {key}",
-                buildCopConfigurationErrorScope: BuildCheckConfigurationErrorScope.EditorConfigParser);
+                buildCheckConfigurationErrorScope: BuildCheckConfigurationErrorScope.EditorConfigParser);
         }
 
         return isParsed;

@@ -80,7 +80,7 @@ internal class ConfigurationProvider
     /// <returns></returns>
     internal void CheckCustomConfigurationDataValidity(string projectFullPath, string ruleId)
     {
-        // TODO: repair the comparer of the objects, to compare actual data
+        // TODO: repair the comparer of the objects
     }
 
     internal BuildAnalyzerConfigurationInternal[] GetMergedConfigurations(
