@@ -31,15 +31,15 @@ The analysis has small impact on build duration with ability to opt-out from ana
 
 Majority of following cases are included in appropriate context within the scenarios in [User Experience](#user-experience) section. Following is a quick overview.
 
-**In scope**
-* Inbox (build-in) analyzers that run during the build execution.
+## In scope
+* Inbox (built-in) analyzers that run during the build execution.
 * Inbox analyzers that run when replaying binlog.
 * Custom authored analyzers, delivered via nuget.
 * Analyzers reports (errors, warnings, messages) are in logger output, VS error window.
 * Codes will be distinguishable from standard build warnings/error (to prevent easy mixups and attempts to configure standard msbuild warnings/errors via editorconfig), but otherwise the outputs are very similar.
-* Default opt-ins and levels for inbox analyzers set by sdk version (via [`$SdkAnalysisLevel`]((https://github.com/dotnet/designs/blob/main/proposed/sdk-analysis-level.md))) or other agreed mechanism for controling increasing strictness between .NET versions.
+* Default opt-ins and levels for inbox analyzers set by sdk version (via [`$SdkAnalysisLevel`]((https://github.com/dotnet/designs/blob/main/proposed/sdk-analysis-level.md))) or other agreed mechanism for controlling increasing strictness between .NET versions.
 * Custom analyzers opted in via `PackageReference` of a particular nuget with the analyzer.
-* Explicit overrides of enablement and analysis levels via `.editorconfig` file (with up to a per project scope).
+* Explicit overrides of enablement and analysis levels via `.editorconfig` file (with up to a per-project scope).
 * Standards of `.editorconfig`s will be observed. 
 * Simplified authoring experience via template and doc.
 * Single analyzer can produce reports for multiple rules. However those need to be declared upfront.
@@ -48,7 +48,7 @@ Majority of following cases are included in appropriate context within the scena
 * Possibility to opt-out from analysis - the perf should not be impacted when done so.
 * Team collects performance impact numbers on a set of benchmark builds with the inbox analyzers enabled.
 
-**Non Goals, but subject for consideration**
+## Non Goals, but subject for consideration
 * Custom anlyzer in a local project (source codes) or a binary.
 * Bulk configuration of multiple rules (based on prefixes).
 * Specifying scope of MSBuild imports that will be considered for analysis (so that e.g. data from sdk won't even be passed to anlyzer, if not requested).
@@ -57,7 +57,7 @@ Majority of following cases are included in appropriate context within the scena
 * Rich information in VS error window.
 
 
-**Out of scope**
+## Out of scope
 * Design time build analysis.
 * Localization support (for reports message formats, identifiers, etc.).
 * Custom analyzers have equal data access as the inbox analyzers. We'll aim to ship analyzers that use public BuildCheck API/OM surface. But for extra agility we might chose to implement and ship some analyzers using unexposed data.
@@ -66,7 +66,7 @@ Majority of following cases are included in appropriate context within the scena
 * Simplified authoring experience via dedicated reference assembly.
 * Restore phase analysis.
 * Turning analysis off/on based on target (e.g. multi-targetted builds, calling MSBuild task etc.).
-* Controling/Configuring lifetime of analyzers - analyzers will currently be held alive, as single instance per analyzer, for the whole duration of the build. But future versions might prevent some of the analyzers to survive beyond a scope of a single project built (means for sharing data would be provided).
+* Controlling/Configuring lifetime of analyzers - analyzers will currently be held alive, as single instance per analyzer, for the whole duration of the build. But future versions might prevent some of the analyzers to survive beyond a scope of a single project built (means for sharing data would be provided).
 * ETW for analyzers.
 * Attributing `.editorconfig` configurations to .sln files. E.g.:
 ```ini

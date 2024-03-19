@@ -26,7 +26,7 @@ The major source of data for BuildCheck will be the `BuildEventArgs` data - as i
 
 BuildCheck can source this data either offline from the binlog, or as a plugged logger during the live build execution. Choice was made to support both modes.
 
-The actuall OM exposed to users will be translating/mapping/proxying the underlying MSBuild OM snd hence the implementation details and actual extent of the data (whether internal or public) will be hidden.
+The actual OM exposed to users will be translating/mapping/proxying the underlying MSBuild OM and hence the implementation details and actual extent of the data (whether internal or public) will be hidden.
 
 ## Execution Modes
 
@@ -36,7 +36,7 @@ The actuall OM exposed to users will be translating/mapping/proxying the underly
 
 ## Live Mode Hosting
 
-Prerequisity: [MSBuild Nodes Orchestration](../../wiki/Nodes-Orchestration.md#orchestration)
+Prerequisites: [MSBuild Nodes Orchestration](../../wiki/Nodes-Orchestration.md#orchestration)
 
 The BuildCheck infrastructure will be prepared to be available concurrently within the `entrypoint node` as well as in the additional `worker nodes`. There are 2 reasons for this:
 * BuildCheck will need to recognize custom analyzers packages during the evaluation time - so some basic code related to BuildCheck will need to be present in the worker node.
