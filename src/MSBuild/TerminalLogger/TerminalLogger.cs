@@ -847,7 +847,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                     if (endLineNumber == 0)
                     {
                         builder.Append(endColumnNumber == 0 ?
-                            $"({lineNumber},{endColumnNumber}): " :
+                            $"({lineNumber},{columnNumber}): " :
                             $"({lineNumber},{columnNumber}-{endColumnNumber}): ");
                     }
                     else
