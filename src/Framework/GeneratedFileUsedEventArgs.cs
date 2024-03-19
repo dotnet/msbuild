@@ -6,20 +6,20 @@ using System;
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// Arguments for the response file used event
+    /// Arguments for the generated file used event
     /// </summary>
     [Serializable]
-    public class ResponseGeneratedFileUsedEventArgs : BuildMessageEventArgs
+    public class GeneratedFileUsedEventArgs : BuildMessageEventArgs
     {
-        public ResponseGeneratedFileUsedEventArgs()
+        public GeneratedFileUsedEventArgs()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResponseGeneratedFileUsedEventArgs"/> class.
+        /// Initializes a new instance of the <see cref="GeneratedFileUsedEventArgs"/> class.
         /// </summary>
         /// 
-        public ResponseGeneratedFileUsedEventArgs(string filePath, string content)
+        public GeneratedFileUsedEventArgs(string filePath, string content)
             : base("", null, null, MessageImportance.Low)
         {
             ResponseFilePath = filePath;

@@ -548,9 +548,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void RoundtripResponseGeneratedFileUsedEventArgs()
+        public void RoundtripGeneratedFileUsedEventArgs()
         {
-            var args = new ResponseGeneratedFileUsedEventArgs("MSBuild.rsp", "");
+            var args = new GeneratedFileUsedEventArgs("MSBuild.rsp", "");
             Roundtrip(args,
                 e => e.ResponseFilePath,
                 e => e.ResponseFileContent);

@@ -458,7 +458,7 @@ namespace Microsoft.Build.Logging
             switch (e)
             {
                 case ResponseFileUsedEventArgs responseFileUsed: return Write(responseFileUsed);
-                case ResponseGeneratedFileUsedEventArgs responseGeneratedFileUsed: return Write(responseGeneratedFileUsed);
+                case GeneratedFileUsedEventArgs generatedFileUsed: return Write(generatedFileUsed);
                 case TaskParameterEventArgs taskParameter: return Write(taskParameter);
                 case ProjectImportedEventArgs projectImported: return Write(projectImported);
                 case TargetSkippedEventArgs targetSkipped: return Write(targetSkipped);
@@ -555,12 +555,12 @@ namespace Microsoft.Build.Logging
             WriteDeduplicatedString(e.ResponseFilePath);
             return BinaryLogRecordKind.ResponseFileUsed;
         }
-        private BinaryLogRecordKind Write(ResponseGeneratedFileUsedEventArgs e)
+        private BinaryLogRecordKind Write(GeneratedFileUsedEventArgs e)
         {
             WriteMessageFields(e);
             WriteDeduplicatedString(e.ResponseFilePath);
             WriteDeduplicatedString(e.ResponseFileContent);
-            return BinaryLogRecordKind.ResponseGeneratedFileUsed;
+            return BinaryLogRecordKind.GeneratedFileUsed;
         }
         private BinaryLogRecordKind Write(TaskCommandLineEventArgs e)
         {

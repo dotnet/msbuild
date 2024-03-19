@@ -513,7 +513,7 @@ namespace Microsoft.Build.Utilities
             ErrorUtilities.VerifyThrowArgumentNull(filePath, nameof(filePath));
             ErrorUtilities.VerifyThrowArgumentNull(content, nameof(content));
 
-            var e = new ResponseGeneratedFileUsedEventArgs(filePath, content);
+            var e = new GeneratedFileUsedEventArgs(filePath, content);
 
             BuildEngine.LogMessageEvent(e);
         }
