@@ -6,7 +6,7 @@
 // with some changes to make it quicker to integrate into the MSBuild.
 // Changes:
 //  1. ArrayBuilder was replaced with List.
-//  2. Exceptions. TODO: Wrap in try/catch blocks for proper reporting
+//  2. Exceptions. Wrap in try/catch blocks for proper reporting
 
 
 using System;
@@ -146,7 +146,7 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
                 {
                     // We only call this on strings that were already passed through IsAbsoluteEditorConfigPath, so
                     // we shouldn't have any other token kinds here.
-                    throw new Exception("my new exception");
+                    throw new BuildCopConfigurationException($"UnexpectedToken: {tokenKind}", BuildCopConfigurationErrorScope.EditorConfigParser);
                 }
             }
             return sb.ToString();
@@ -310,7 +310,7 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
                         }
                         break;
                     default:
-                        throw new Exception("Exception from Matcher");
+                        throw new BuildCopConfigurationException($"UnexpectedToken: {tokenKind}", BuildCopConfigurationErrorScope.EditorConfigParser);
                 }
             }
             // If we're parsing a choice we should not exit without a closing '}'
@@ -408,7 +408,7 @@ namespace Microsoft.Build.BuildCop.Infrastructure.EditorConfig
                 }
                 else
                 {
-                    throw new Exception("Exception another one");
+                    throw new BuildCopConfigurationException($"UnexpectedValue: {lastChar}", BuildCopConfigurationErrorScope.EditorConfigParser);
                 }
             }
 

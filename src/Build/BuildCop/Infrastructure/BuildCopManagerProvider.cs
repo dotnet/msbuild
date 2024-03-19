@@ -181,9 +181,6 @@ internal sealed class BuildCopManagerProvider : IBuildCopManagerProvider
             //  on others it should work similarly as disabling them.
             // Disabled analyzer should not only post-filter results - it shouldn't even see the data
 
-
-            // TODO:catch the exception of fetching configuration 
-
             BuildAnalyzerWrapper wrapper;
             BuildAnalyzerConfigurationInternal[] configurations;
             if (analyzerFactoryContext.MaterializedAnalyzer == null)
