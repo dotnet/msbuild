@@ -10,7 +10,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BuildCop.Infrastructure;
+using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -283,8 +283,8 @@ namespace Microsoft.Build.BackEnd
                         throw new AggregateException(deactivateExceptions);
                     }
 
-                    var buildCopManager = (_componentHost.GetComponent(BuildComponentType.BuildCop) as IBuildCopManagerProvider)!.Instance;
-                    buildCopManager.FinalizeProcessing(_nodeLoggingContext);
+                    var buildCheckManager = (_componentHost.GetComponent(BuildComponentType.BuildCheck) as IBuildCheckManagerProvider)!.Instance;
+                    buildCheckManager.FinalizeProcessing(_nodeLoggingContext);
                 },
                 isLastTask: true);
 

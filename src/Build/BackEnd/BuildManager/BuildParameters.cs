@@ -11,7 +11,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Experimental;
-using Microsoft.Build.Experimental.BuildCop;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
@@ -209,7 +209,7 @@ namespace Microsoft.Build.Execution
 
         private bool _question;
 
-        private bool _isBuildCopEnabled;
+        private bool _isBuildCheckEnabled;
 
         /// <summary>
         /// The settings used to load the project under build
@@ -313,7 +313,7 @@ namespace Microsoft.Build.Execution
             DiscardBuildResults = other.DiscardBuildResults;
             LowPriority = other.LowPriority;
             Question = other.Question;
-            IsBuildCopEnabled = other.IsBuildCopEnabled;
+            IsBuildCheckEnabled = other.IsBuildCheckEnabled;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
         }
 
@@ -842,10 +842,10 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Gets or sets an indication of build analysis enablement.
         /// </summary>
-        public bool IsBuildCopEnabled
+        public bool IsBuildCheckEnabled
         {
-            get => _isBuildCopEnabled;
-            set => _isBuildCopEnabled = value;
+            get => _isBuildCheckEnabled;
+            set => _isBuildCheckEnabled = value;
         }
 
         /// <summary>
@@ -912,7 +912,7 @@ namespace Microsoft.Build.Execution
             translator.TranslateEnum(ref _projectLoadSettings, (int)_projectLoadSettings);
             translator.Translate(ref _interactive);
             translator.Translate(ref _question);
-            translator.Translate(ref _isBuildCopEnabled);
+            translator.Translate(ref _isBuildCheckEnabled);
             translator.TranslateEnum(ref _projectIsolationMode, (int)_projectIsolationMode);
             translator.Translate(ref _reportFileAccesses);
 

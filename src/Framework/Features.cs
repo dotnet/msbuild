@@ -42,7 +42,7 @@ namespace Microsoft.Build.Framework
     {
         private static readonly Dictionary<string, FeatureStatus> _featureStatusMap = new Dictionary<string, FeatureStatus>
         {
-            { "BuildCop.Beta", FeatureStatus.Preview },
+            { "BuildCheck.Beta", FeatureStatus.Preview },
             { "EvaluationContext_SharedSDKCachePolicy", FeatureStatus.Available }, // EvaluationContext supports the SharingPolicy.SharedSDKCache flag.
             // Add more features here.
         };
