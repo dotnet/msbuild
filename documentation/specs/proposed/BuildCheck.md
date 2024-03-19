@@ -110,12 +110,14 @@ Users will have option to explicitly opt-in to run BuildCheck during the binlog 
 
 Would there be any analyzers that are not possible to run during the replay mode (subject to internal design - this difference won't be exposed during [custom analyzers authoring](#custom-analyzers-authoring)), replay mode will inform user about those via warnings.
 
-Replay mode will by default consider `.editorconfig` files stored within the binlog and will run analyzers based on those. This may lead to unintended double-reports – as binlog will have the runtime analysis reports stored, plus the replay-time analysis reports will be augumented.
+Replay mode will by default consider `.editorconfig` files stored within the binlog and will run analyzers based on those. This may lead to unintended double-reports – as binlog will have the runtime analysis reports stored, plus the replay-time analysis reports will be augumented. At the same time we might want to run some additional checks in the replay mode, that have not been enabled (or not even available) during the build time.
 
 For this reason we will consider following modes (all are non-goals):
 * Ability to specify skipping all binlog stored reports
 * Ability to specify skipping of the stored .editorconfig files
 * Ability to specify single replay-time .editorconfig file and it’s precedence (only the specified, specified as most significant, specified as least significant)
+
+We might as well consider specifying custom analyzers on a command line (as a non-goal) - so that unreferenced custom analyzers can be run against the binlog.
 
 ## Configuration
 
@@ -129,13 +131,13 @@ For the `.editorconfig` file configuration, following will apply:
 * `.editorconfig` files placed along with explicitly or implicitly imported msbuild files won’t be considered.
 * `.editorconfig` files packaged within nuget packages within local nuget cache won’t be considered.
 
-Non-Goals (but might be considered):
+### Non-Goals (but might be considered):
 * bulk configuration of multiple rules - based on analyzers/rules prefixes or/and categories.
 * attempts to try to configure standard msbuild warnings/errors via `.editorconfig` should lead to fail fast errors.
 * configuring analysis levels when analysing from binlog - beyond the collected editorconfigs.
 * Aliasing the analyzers/rules, allowing to create multiple instances with different custom configuration (e.g. single analyzer checking configurable list of forbidden properties prefixes can have 2 instance, each initialized with different list to check, each of the instance configurable for individual projects separately).
 
-Out of scope for configuration:
+### Out of scope for configuration:
 * opt-out of analysis on code-level (analogy to C# pragmas, but within msbuild xml files).
 * lower granularity of `.editorconfig` settings other than whole projects.
 * attributing configuration to a .sln file and expecting it will apply to all contained projects.
