@@ -59,7 +59,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
             };
 
-            Helpers.BuildProjectWithNewOMAndBinaryLogger(projectFileContents, binaryLogger, out bool result, out string projecDirectoryPath);
+            Helpers.BuildProjectWithNewOMAndBinaryLogger(projectFileContents, binaryLogger, out bool result, out string projectDirectoryPath);
 
             Assert.Equal(buildShouldSucceed, result);
 
@@ -69,13 +69,13 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             // A path like "C:\path" in ZipArchive is saved as "C\path"
             // For unix-based systems path uses '/'
-            projecDirectoryPath = NativeMethodsShared.IsWindows ? projecDirectoryPath.Replace(":\\", "\\") : projecDirectoryPath.Replace("/", "\\");
+            projectDirectoryPath = NativeMethodsShared.IsWindows ? projectDirectoryPath.Replace(":\\", "\\") : projectDirectoryPath.Replace("/", "\\");
 
             // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
             // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
             zipArchive.Entries.ShouldContain(
-                zE => zE.FullName.StartsWith(projecDirectoryPath) && zE.Name.EndsWith($"{taskName}-compilation-file.tmp"),
-                $"Binlog's embedded files didn't have the expected '{projecDirectoryPath}/{{guid}}-{taskName}-compilation-file.tmp'.");
+                zE => zE.FullName.StartsWith(projectDirectoryPath) && zE.Name.EndsWith($"{taskName}-compilation-file.tmp"),
+                $"Binlog's embedded files didn't have the expected '{projectDirectoryPath}/{{guid}}-{taskName}-compilation-file.tmp'.");
         }
 
         internal static void BuildAndCheckForEmbeddedFileInBinlog(
