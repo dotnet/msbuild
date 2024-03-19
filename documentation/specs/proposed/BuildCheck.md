@@ -147,7 +147,7 @@ For the `.editorconfig` file configuration, following will apply:
 
 ### Sample configuration
 
-```
+```ini
 [*.csproj]
 msbuild_analyzer.BC0101.IsEnabled=true
 msbuild_analyzer.BC0101.Severity=warning
