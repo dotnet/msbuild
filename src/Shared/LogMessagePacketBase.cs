@@ -1369,11 +1369,11 @@ namespace Microsoft.Build.Shared
 
         private GeneratedFileUsedEventArgs ReadGeneratedFileUsedEventFromStream(ITranslator translator, string message, string helpKeyword, string senderName)
         {
-            string responseFilePath = String.Empty;
-            string responseFileContent = String.Empty;
-            translator.Translate(ref responseFilePath);
-            translator.Translate(ref responseFileContent);
-            GeneratedFileUsedEventArgs buildEvent = new GeneratedFileUsedEventArgs(responseFilePath, responseFileContent);
+            string filePath = String.Empty;
+            string content = String.Empty;
+            translator.Translate(ref filePath);
+            translator.Translate(ref content);
+            GeneratedFileUsedEventArgs buildEvent = new GeneratedFileUsedEventArgs(filePath, content);
 
 #if !CLR2COMPATIBILITY
             DateTime timestamp = default;

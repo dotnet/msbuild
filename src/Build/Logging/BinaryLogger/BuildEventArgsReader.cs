@@ -1117,12 +1117,12 @@ namespace Microsoft.Build.Logging
         {
             var fields = ReadBuildEventArgsFields();
 
-            string? responseFilePath = ReadDeduplicatedString();
-            string? responseFileContent = ReadDeduplicatedString();
+            string? filePath = ReadDeduplicatedString();
+            string? content = ReadDeduplicatedString();
 
-            if (responseFilePath != null && responseFileContent != null)
+            if (filePath != null && content != null)
             {
-                var e = new GeneratedFileUsedEventArgs(responseFilePath, responseFileContent);
+                var e = new GeneratedFileUsedEventArgs(filePath, content);
                 SetCommonFields(e, fields);
                 return e;
             }
