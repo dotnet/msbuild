@@ -26,8 +26,14 @@ namespace Microsoft.Build.Framework
             Content = content;
         }
 
+        /// <summary>
+        /// The file path relative to the current project.
+        /// </summary>
         public string? FilePath { set; get; }
 
+        /// <summary>
+        /// The content of the file.
+        /// </summary>
         public string? Content { set; get; }
     }
 }
