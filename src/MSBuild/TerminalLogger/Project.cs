@@ -1,6 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if NETFRAMEWORK
+using Microsoft.IO;
+#else
+using System.IO;
+#endif
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -39,12 +44,12 @@ internal sealed class Project
     /// <summary>
     /// Full path to the primary output of the project, if known.
     /// </summary>
-    public ReadOnlyMemory<char>? OutputPath { get; set; }
+    public FileInfo? OutputPath { get; set; }
 
     /// <summary>
     /// Full path to the 'root' of this project's source control repository, if known.
     /// </summary>
-    public string? SourceRoot { get; set; }
+    public DirectoryInfo? SourceRoot { get; set; }
 
     /// <summary>
     /// The target framework of the project or null if not multi-targeting.

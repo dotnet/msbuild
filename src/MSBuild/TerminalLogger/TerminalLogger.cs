@@ -114,7 +114,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// The working directory when the build starts, to trim relative output paths.
     /// </summary>
-    private readonly string _initialWorkingDirectory = Environment.CurrentDirectory;
+    private readonly DirectoryInfo _initialWorkingDirectory = new(Environment.CurrentDirectory);
 
     /// <summary>
     /// Number of build errors.
@@ -571,7 +571,6 @@ internal sealed partial class TerminalLogger : INodeLogger
                     EraseNodes();
 
                     string duration = project.Stopwatch.ElapsedSeconds.ToString("F1");
-                    ReadOnlyMemory<char>? outputPath = project.OutputPath;
 
                     string projectFile = e.ProjectFile is not null ?
                         Path.GetFileNameWithoutExtension(e.ProjectFile) :
@@ -661,14 +660,14 @@ internal sealed partial class TerminalLogger : INodeLogger
                         }
 
                         // Print the output path as a link if we have it.
-                        if (outputPath is not null)
+                        if (project.OutputPath is FileInfo outputFile)
                         {
-                            ReadOnlySpan<char> outputPathSpan = outputPath.Value.Span;
+                            ReadOnlySpan<char> outputPathSpan = outputFile.FullName.AsSpan();
                             ReadOnlySpan<char> url = outputPathSpan;
                             try
                             {
                                 // If possible, make the link point to the containing directory of the output.
-                                url = Path.GetDirectoryName(url);
+                                url = outputFile.DirectoryName.AsSpan();
                             }
                             catch
                             {
@@ -695,21 +694,30 @@ internal sealed partial class TerminalLogger : INodeLogger
                                 var workingDirectory = _initialWorkingDirectory;
 
                                 // If the output path is under the initial working directory, make the console output relative to that to save space.
-                                if (outputPathString.StartsWith(workingDirectory, FileUtilities.PathComparison))
+                                if (IsChildOf(outputFile, workingDirectory))
                                 {
-                                    resolvedPathToOutput = Path.GetRelativePath(workingDirectory, outputPathString);
+                                    resolvedPathToOutput = Path.GetRelativePath(workingDirectory.FullName, outputPathString);
                                 }
 
                                 // if the output path isn't under the working directory, but is under the source root, make the output relative to that to save space
-                                else if (project.SourceRoot is string sourceRoot)
+                                else if (project.SourceRoot is DirectoryInfo sourceRoot
+                                            && project.OutputPath is FileInfo outputFileInfo
+                                            && IsChildOf(outputFileInfo, sourceRoot))
                                 {
-                                    if (outputPathString.StartsWith(sourceRoot, FileUtilities.PathComparison))
-                                    {
-                                        var relativePathFromOutputToRoot = Path.GetRelativePath(sourceRoot, outputPathString);
-                                        // we have the portion from sourceRoot to outputPath, now we need to get the portion from workingDirectory to sourceRoot
-                                        var relativePathFromWorkingDirToSourceRoot = Path.GetRelativePath(workingDirectory, sourceRoot);
-                                        resolvedPathToOutput = Path.Join(relativePathFromWorkingDirToSourceRoot, relativePathFromOutputToRoot);
-                                    }
+                                    resolvedPathToOutput = Path.GetRelativePath(sourceRoot.FullName, outputPathString);
+                                }
+                                else if (project.SourceRoot is DirectoryInfo sourceRootDir)
+                                {
+                                    var relativePathFromOutputToRoot = Path.GetRelativePath(sourceRootDir.FullName, outputPathString);
+                                    // we have the portion from sourceRoot to outputPath, now we need to get the portion from workingDirectory to sourceRoot
+                                    var relativePathFromWorkingDirToSourceRoot = Path.GetRelativePath(workingDirectory.FullName, sourceRootDir.FullName);
+                                    resolvedPathToOutput = Path.Join(relativePathFromWorkingDirToSourceRoot, relativePathFromOutputToRoot);
+                                }
+                                else
+                                {
+                                    // in this case, with no reasonable working directory and no reasonable sourceroot,
+                                    // we just emit the full path.
+                                    resolvedPathToOutput = outputPathString;
                                 }
                             }
 
@@ -742,6 +750,29 @@ internal sealed partial class TerminalLogger : INodeLogger
                 }
             }
         }
+    }
+
+    private static bool IsChildOf(FileInfo file, DirectoryInfo parent)
+    {
+        DirectoryInfo? current = file.Directory;
+        if (current is null)
+        {
+            return false;
+        }
+        if (current == parent)
+        {
+            return true;
+        }
+
+        while (current?.Parent is not null)
+        {
+            if (current == parent)
+            {
+                return true;
+            }
+            current = current.Parent;
+        }
+        return false;
     }
 
     /// <summary>
@@ -833,7 +864,11 @@ internal sealed partial class TerminalLogger : INodeLogger
                 // This seems to be the Target InitializeSourceControlInformationFromSourceControlManager.
                 // So far this has been acceptable, but if a SourceRoot would be modified by a task later on
                 // (e.g. TranslateGitHubUrlsInSourceControlInformation) we would lose that modification.
-                project.SourceRoot = sourceControlSourceRoot.ItemSpec;
+                try
+                {
+                    project.SourceRoot = new(sourceControlSourceRoot.ItemSpec);
+                }
+                catch { } // ignore exceptions from trying to make the SourceRoot a DirectoryInfo, if this is invalid then we just won't use it.
             }
         }
     }
@@ -892,8 +927,11 @@ internal sealed partial class TerminalLogger : INodeLogger
                     message.AsSpan().StartsWith(Path.GetFileNameWithoutExtension(projectFileName)) && hasProject)
                 {
                     ReadOnlyMemory<char> outputPath = e.Message.AsMemory().Slice(index + 4);
-                    project!.OutputPath = outputPath;
-                    return;
+                    try
+                    {
+                        project!.OutputPath = new(outputPath.ToString());
+                    }
+                    catch { } // ignore exceptions from trying to make the OutputPath a FileInfo, if this is invalid then we just won't use it.
                 }
             }
 
