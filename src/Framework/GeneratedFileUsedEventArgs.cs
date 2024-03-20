@@ -6,9 +6,8 @@ using System;
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// Arguments for the generated file used event
+    /// Arguments for the generated file used event.
     /// </summary>
-    [Serializable]
     public class GeneratedFileUsedEventArgs : BuildMessageEventArgs
     {
         public GeneratedFileUsedEventArgs()
