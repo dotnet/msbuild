@@ -159,11 +159,14 @@ configuration:
             action: Opened
         - isAction:
             action: Reopened
-      - filesMatchPattern:
-          pattern: ^.+\.swr$
+      - or:
+        - filesMatchPattern:
+            pattern: ^.+\.swr$
+        - filesMatchPattern:
+            pattern: src/Package/MSBuild.VSSetup.*/.*
       then:
       - addReply:
-          reply: Hello @${issueAuthor}, I noticed that you’re changing *.swr file. Please make sure to run VS Perf DDRITs using exp/* insertion before merging the change.
+          reply: Hello @${issueAuthor}, I noticed that you’re changing an *.swr file. Please make sure to validate this change by an experimental VS insertion. This is accomplished by pushing to an exp/* branch, which requires write permissions to this repo.
       description: Remind to run VS Perf DDRITs when deployed assemblies change
 onFailure: 
 onSuccess: 
