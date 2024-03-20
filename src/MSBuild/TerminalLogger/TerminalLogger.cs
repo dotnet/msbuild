@@ -904,7 +904,7 @@ internal sealed partial class TerminalLogger : INodeLogger
             int length = Math.Min(maxLength - indent.Length, text.Length - start);
             sb.AppendLine();
             sb.Append(indent);
-            sb.Append(text.Substring(start, length));
+            sb.Append(text.AsSpan().Slice(start, length));
 
             start += length;
         }
