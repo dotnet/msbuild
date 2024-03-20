@@ -62,6 +62,16 @@ internal sealed partial class TerminalLogger : INodeLogger
     }
 
     /// <summary>
+    /// A wrapper over the eval context ID passed to us in <see cref="IEventSource"/> logger events.
+    /// </summary>
+    internal record struct EvalContext(int Id)
+    {
+        public EvalContext(BuildEventContext context)
+            : this(context.EvaluationId)
+        { }
+    }
+
+    /// <summary>
     /// The indentation to use for all build output.
     /// </summary>
     internal const string Indentation = "  ";
@@ -96,6 +106,14 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// Keyed by an ID that gets passed to logger callbacks, this allows us to quickly look up the corresponding project.
     /// </remarks>
     private readonly Dictionary<ProjectContext, Project> _projects = new();
+
+    /// <summary>
+    /// Tracks the status of all relevant projects seen so far.
+    /// </summary>
+    /// <remarks>
+    /// Keyed by an ID that gets passed to logger callbacks, this allows us to quickly look up the corresponding project.
+    /// </remarks>
+    private readonly Dictionary<EvalContext, EvaluationData> _evaluations = new();
 
     /// <summary>
     /// Tracks the work currently being done by build nodes. Null means the node is not doing any work worth reporting.
@@ -402,15 +420,30 @@ internal sealed partial class TerminalLogger : INodeLogger
         return null;
     }
 
-    private Project? CreateProject(BuildEventContext? context, System.Collections.IEnumerable? globalProperties, System.Collections.IEnumerable? properties)
+    private EvaluationData? CreateEvaluationData(BuildEventContext? context, System.Collections.IEnumerable? globalProperties, System.Collections.IEnumerable? properties)
+    {
+        if (context is not null)
+        {
+            var evalContext = new EvalContext(context);
+            if (!_evaluations.TryGetValue(evalContext, out EvaluationData? evalData))
+            {
+                string? tfm = DetectTFM(globalProperties, properties);
+                evalData = new(tfm);
+                _evaluations.Add(evalContext, evalData);
+            }
+            return evalData;
+        }
+        return null;
+    }
+
+    private Project? CreateProject(BuildEventContext? context)
     {
         if (context is not null)
         {
             var projectContext = new ProjectContext(context);
             if (!_projects.TryGetValue(projectContext, out Project? project))
             {
-                string? tfm = DetectTFM(globalProperties, properties);
-                project = new(tfm, CreateStopwatch?.Invoke());
+                project = new(CreateStopwatch?.Invoke());
                 _projects.Add(projectContext, project);
             }
             return project;
@@ -459,6 +492,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         _refresher?.Join();
 
         _projects.Clear();
+        _evaluations.Clear();
 
         Terminal.BeginUpdate();
         try
@@ -535,10 +569,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         else if (e is ProjectEvaluationFinishedEventArgs evalFinished
             && evalFinished.BuildEventContext is not null)
         {
-            if (CreateProject(evalFinished.BuildEventContext, evalFinished.GlobalProperties, evalFinished.Properties) is Project project)
-            {
-                TryDetectGenerateFullPaths(evalFinished, project);
-            }
+            CreateEvaluationData(evalFinished.BuildEventContext, evalFinished.GlobalProperties, evalFinished.Properties);
         }
     }
 
@@ -553,31 +584,17 @@ internal sealed partial class TerminalLogger : INodeLogger
             return;
         }
 
-        CreateProject(e.BuildEventContext, e.Properties, e.GlobalProperties);
+        CreateProject(e.BuildEventContext);
         ProjectContext c = new ProjectContext(buildEventContext);
-        if (_restoreContext is null)
+        if (_restoreContext is null && _projects.TryGetValue(c, out var project))
         {
             // First ever restore in the build is starting.
             if (e.TargetNames == "Restore" && !_restoreFinished)
             {
                 _restoreContext = c;
                 int nodeIndex = NodeIndexForContext(buildEventContext);
-                _nodes[nodeIndex] = new NodeStatus(e.ProjectFile!, null, "Restore", _projects[c].Stopwatch);
+                _nodes[nodeIndex] = new NodeStatus(e.ProjectFile!, null, "Restore", project.Stopwatch);
             }
-        }
-    }
-
-    private void TryDetectGenerateFullPaths(ProjectEvaluationFinishedEventArgs e, Project project)
-    {
-        if (TryGetValue(e.GlobalProperties, "GenerateFullPaths") is string generateFullPathsGPString
-            && bool.TryParse(generateFullPathsGPString, out bool generateFullPathsValue))
-        {
-            project.GenerateFullPaths = generateFullPathsValue;
-        }
-        else if (TryGetValue(e.Properties, "GenerateFullPaths") is string generateFullPathsPString
-            && bool.TryParse(generateFullPathsPString, out bool generateFullPathsPropertyValue))
-        {
-            project.GenerateFullPaths = generateFullPathsPropertyValue;
         }
     }
 
@@ -605,8 +622,9 @@ internal sealed partial class TerminalLogger : INodeLogger
         }
 
         ProjectContext c = new(buildEventContext);
+        EvalContext evalContext = new(buildEventContext);
 
-        if (_projects.TryGetValue(c, out Project? project))
+        if (_projects.TryGetValue(c, out Project? project) && _evaluations.TryGetValue(evalContext, out EvaluationData? evaluation))
         {
             lock (_lock)
             {
@@ -665,7 +683,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                         // Show project build complete and its output
                         if (project.IsTestProject)
                         {
-                            if (string.IsNullOrEmpty(project.TargetFramework))
+                            if (string.IsNullOrEmpty(evaluation.TargetFramework))
                             {
                                 Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_NoTF",
                                     Indentation,
@@ -678,14 +696,14 @@ internal sealed partial class TerminalLogger : INodeLogger
                                 Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_WithTF",
                                     Indentation,
                                     projectFile,
-                                    AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
+                                    AnsiCodes.Colorize(evaluation.TargetFramework, TargetFrameworkColor),
                                     buildResult,
                                     duration));
                             }
                         }
                         else
                         {
-                            if (string.IsNullOrEmpty(project.TargetFramework))
+                            if (string.IsNullOrEmpty(evaluation.TargetFramework))
                             {
                                 Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_NoTF",
                                     Indentation,
@@ -698,7 +716,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                                 Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTF",
                                     Indentation,
                                     projectFile,
-                                    AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
+                                    AnsiCodes.Colorize(evaluation.TargetFramework, TargetFrameworkColor),
                                     buildResult,
                                     duration));
                             }
@@ -729,7 +747,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                             }
 
                             string? resolvedPathToOutput = null;
-                            if (project.GenerateFullPaths)
+                            if (evaluation.GenerateFullPaths)
                             {
                                 resolvedPathToOutput = outputPathSpan.ToString();
                             }
@@ -826,7 +844,9 @@ internal sealed partial class TerminalLogger : INodeLogger
     private void TargetStarted(object sender, TargetStartedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
-        if (_restoreContext is null && buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+        if (_restoreContext is null && buildEventContext is not null
+            && _projects.TryGetValue(new(buildEventContext), out Project? project)
+            && _evaluations.TryGetValue(new(buildEventContext), out EvaluationData? evaluation))
         {
             project.Stopwatch.Start();
 
@@ -852,7 +872,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                 project.IsTestProject = true;
             }
 
-            NodeStatus nodeStatus = new(projectFile, project.TargetFramework, targetName, project.Stopwatch);
+            NodeStatus nodeStatus = new(projectFile, evaluation.TargetFramework, targetName, project.Stopwatch);
             UpdateNodeStatus(buildEventContext, nodeStatus);
         }
     }

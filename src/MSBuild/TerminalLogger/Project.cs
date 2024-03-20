@@ -22,10 +22,8 @@ internal sealed class Project
     /// Initialized a new <see cref="Project"/> with the given <paramref name="targetFramework"/>.
     /// </summary>
     /// <param name="targetFramework">The target framework of the project or null if not multi-targeting.</param>
-    public Project(string? targetFramework, StopwatchAbstraction? stopwatch)
+    public Project(StopwatchAbstraction? stopwatch)
     {
-        TargetFramework = targetFramework;
-
         if (stopwatch is not null)
         {
             stopwatch.Start();
@@ -51,11 +49,6 @@ internal sealed class Project
     /// Full path to the 'root' of this project's source control repository, if known.
     /// </summary>
     public DirectoryInfo? SourceRoot { get; set; }
-
-    /// <summary>
-    /// The target framework of the project or null if not multi-targeting.
-    /// </summary>
-    public string? TargetFramework { get; }
 
     /// <summary>
     /// True when the project has run target with name "_TestRunStart" defined in <see cref="TerminalLogger._testStartTarget"/>.
