@@ -215,54 +215,6 @@ namespace Microsoft.Build.Internal
                 var filespecUnescaped = EscapingUtilities.UnescapeAll(filespecEscaped);
                 var excludeSpecsUnescaped = excludeSpecsEscaped?.Where(IsValidExclude).Select(i => EscapingUtilities.UnescapeAll(i)).ToList();
 
-                // Log the warning when file spec is a drive enumerating wildcard.
-                FileMatcher.Default.GetFileSpecInfo(filespecUnescaped, out string directoryPart, out string wildcardPart, out string filenamePart, out bool needsRecursion, out bool isLegalFileSpec);
-                bool logDriveEnumeratingWildcard = FileMatcher.IsDriveEnumeratingWildcardPattern(directoryPart, wildcardPart);
-                if (logDriveEnumeratingWildcard)
-                {
-                    switch (loggingMechanism)
-                    {
-                        // Logging mechanism received from ItemGroupIntrinsicTask.
-                        case TargetLoggingContext targetLoggingContext:
-                            LogDriveEnumerationWarningWithTargetLoggingContext(
-                                targetLoggingContext,
-                                includeLocation,
-                                excludeLocation,
-                                excludeSpecsAreEmpty,
-                                disableExcludeDriveEnumerationWarning,
-                                filespecUnescaped);
-
-                            break;
-
-                        // Logging mechanism received from Evaluator.
-                        case ILoggingService loggingService:
-                            LogDriveEnumerationWarningWithLoggingService(
-                                loggingService,
-                                includeLocation,
-                                buildEventContext,
-                                buildEventFileInfoFullPath,
-                                filespecUnescaped);
-
-                            break;
-
-                        // Logging mechanism received from Evaluator and LazyItemEvaluator.IncludeOperation.
-                        case EvaluationLoggingContext evaluationLoggingContext:
-                            LogDriveEnumerationWarningWithEvaluationLoggingContext(
-                                evaluationLoggingContext,
-                                importLocation,
-                                includeLocation,
-                                excludeLocation,
-                                excludeSpecsAreEmpty,
-                                filespecUnescaped,
-                                filespecUnescaped);
-
-                            break;
-
-                        default:
-                            throw new InternalErrorException($"Logging type {loggingMechanism.GetType()} is not understood by {nameof(GetFileList)}.");
-                    }
-                }
-
                 // Get the list of actual files which match the filespec.  Put
                 // the list into a string array.  If the filespec started out
                 // as a relative path, we will get back a bunch of relative paths.
@@ -278,6 +230,51 @@ namespace Microsoft.Build.Internal
 
                 switch (action)
                 {
+                    case (FileMatcher.SearchAction.LogDriveEnumeratingWildcard):
+                        switch (loggingMechanism)
+                        {
+                            // Logging mechanism received from ItemGroupIntrinsicTask.
+                            case TargetLoggingContext targetLoggingContext:
+                                LogDriveEnumerationWarningWithTargetLoggingContext(
+                                    targetLoggingContext,
+                                    includeLocation,
+                                    excludeLocation,
+                                    excludeFileSpecIsEmpty,
+                                    disableExcludeDriveEnumerationWarning,
+                                    fileSpec);
+
+                                break;
+
+                            // Logging mechanism received from Evaluator.
+                            case ILoggingService loggingService:
+                                LogDriveEnumerationWarningWithLoggingService(
+                                    loggingService,
+                                    includeLocation,
+                                    buildEventContext,
+                                    buildEventFileInfoFullPath,
+                                    filespecUnescaped);
+
+                                break;
+
+                            // Logging mechanism received from Evaluator and LazyItemEvaluator.IncludeOperation.
+                            case EvaluationLoggingContext evaluationLoggingContext:
+                                LogDriveEnumerationWarningWithEvaluationLoggingContext(
+                                    evaluationLoggingContext,
+                                    importLocation,
+                                    includeLocation,
+                                    excludeLocation,
+                                    excludeFileSpecIsEmpty,
+                                    filespecUnescaped,
+                                    fileSpec);
+
+                                break;
+
+                            default:
+                                throw new InternalErrorException($"Logging type {loggingMechanism.GetType()} is not understood by {nameof(GetFileList)}.");
+                        }
+
+                        break;
+
                     case (FileMatcher.SearchAction.FailOnDriveEnumeratingWildcard):
                         switch (loggingMechanism)
                         {
