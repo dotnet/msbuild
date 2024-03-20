@@ -67,6 +67,8 @@ namespace Microsoft.Build.Logging
         //   - Making ProjectStartedEventArgs, ProjectEvaluationFinishedEventArgs, AssemblyLoadBuildEventArgs equal
         //     between de/serialization roundtrips.
         //   - Adding serialized events lengths - to support forward compatible reading
+        // version 19:
+        //   - new record kind: GeneratedFileUsedEventArgs
 
         // This should be never changed.
         // The minimum version of the binary log reader that can read log of above version.
@@ -74,7 +76,7 @@ namespace Microsoft.Build.Logging
 
         // The current version of the binary log representation.
         // Changes with each update of the binary log format.
-        internal const int FileFormatVersion = 18;
+        internal const int FileFormatVersion = 19;
 
         // The minimum version of the binary log reader that can read log of above version.
         // This should be changed only when the binary log format is changed in a way that would prevent it from being
@@ -363,6 +365,11 @@ namespace Microsoft.Build.Logging
             else if (e is ResponseFileUsedEventArgs responseFileArgs && responseFileArgs.ResponseFilePath != null)
             {
                 projectImportsCollector.AddFile(responseFileArgs.ResponseFilePath);
+            }
+            else if (e is GeneratedFileUsedEventArgs generatedFileUsedEventArgs && generatedFileUsedEventArgs.FilePath != null)
+            {
+                string fullPath = Path.GetFullPath(generatedFileUsedEventArgs.FilePath);
+                projectImportsCollector.AddFileFromMemory(fullPath, generatedFileUsedEventArgs.Content);
             }
         }
 
