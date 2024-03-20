@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "BuilderApp": {
-      "commandName": "Executable",
-      "executablePath": "C:\\msbuild\\locator\\ykovalova\\MSBuildLocator\\samples\\BuilderApp\\bin\\Debug\\net472\\BuilderApp.exe",
-      "commandLineArgs": "SET MSBUILDDEBUGONSTART=1"
-    }
-  }
-}
