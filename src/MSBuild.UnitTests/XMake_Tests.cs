@@ -834,6 +834,10 @@ namespace Microsoft.Build.UnitTests
             success.ShouldBeTrue();
             File.Exists(resultFile).ShouldBeTrue();
             File.ReadAllText(resultFile).ShouldContain(result);
+
+            result = RunnerUtilities.ExecMSBuild($" {project.Path} {extraSwitch} -getResultOutputFile:", out success);
+            success.ShouldBeFalse();
+            result.ShouldContain("MSB1068");
         }
 
         [Theory]
