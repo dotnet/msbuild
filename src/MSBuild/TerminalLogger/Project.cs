@@ -15,6 +15,7 @@ namespace Microsoft.Build.Logging.TerminalLogger;
 /// <summary>
 /// Represents a project being built.
 /// </summary>
+[DebuggerDisplay("{OutputPath}({TargetFramework})")]
 internal sealed class Project
 {
     /// <summary>

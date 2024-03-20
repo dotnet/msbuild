@@ -187,7 +187,8 @@ internal sealed partial class TerminalLogger : INodeLogger
             "TASKSTARTEDEVENT",
             "HIGHMESSAGEEVENT",
             "WARNINGEVENT",
-            "ERROREVENT"
+            "ERROREVENT",
+            "PROJECTEVALUATIONFINISHEDEVENT"
     };
 
     /// <summary>
@@ -363,6 +364,59 @@ internal sealed partial class TerminalLogger : INodeLogger
         return true;
     }
 
+    private string? TryGetValue(System.Collections.IEnumerable? source, string key)
+    {
+        if (source is null)
+        {
+            return null;
+        }
+        if (source is IEnumerable<ProjectPropertyInstance> properties)
+        {
+            return properties.FirstOrDefault(p => p.Name.Equals(key, StringComparison.OrdinalIgnoreCase))?.EvaluatedValue;
+        }
+        else if (source is IEnumerable<DictionaryEntry> dictionaryEntries)
+        {
+            var v = dictionaryEntries.FirstOrDefault(p => (string)p.Key == key);
+            return v.Value as string;
+        }
+        else if (source is IEnumerable<KeyValuePair<string, string>> kvps)
+        {
+            return kvps.FirstOrDefault(p => p.Key.Equals(key, StringComparison.OrdinalIgnoreCase)).Value;
+        }
+        else
+        {
+            throw new InvalidOperationException($"Unexpected type {source.GetType()} in properties");
+        }
+    }
+
+    private string? DetectTFM(System.Collections.IEnumerable? globalProperties, System.Collections.IEnumerable? properties)
+    {
+        if (TryGetValue(globalProperties, "TargetFramework") is string targetFramework)
+        {
+            return targetFramework;
+        }
+        else if (TryGetValue(properties, "TargetFramework") is string targetFrameworkString)
+        {
+            return targetFrameworkString;
+        }
+        return null;
+    }
+
+    private Project? CreateProject(BuildEventContext? context, System.Collections.IEnumerable? globalProperties, System.Collections.IEnumerable? properties)
+    {
+        if (context is not null)
+        {
+            var projectContext = new ProjectContext(context);
+            if (!_projects.TryGetValue(projectContext, out Project? project))
+            {
+                string? tfm = DetectTFM(globalProperties, properties);
+                project = new(tfm, CreateStopwatch?.Invoke());
+                _projects.Add(projectContext, project);
+            }
+            return project;
+        }
+        return null;
+    }
 
     /// <inheritdoc/>
     public void Shutdown()
@@ -478,6 +532,14 @@ internal sealed partial class TerminalLogger : INodeLogger
         {
             RenderImmediateMessage(e.Message!);
         }
+        else if (e is ProjectEvaluationFinishedEventArgs evalFinished
+            && evalFinished.BuildEventContext is not null)
+        {
+            if (CreateProject(evalFinished.BuildEventContext, evalFinished.GlobalProperties, evalFinished.Properties) is Project project)
+            {
+                TryDetectGenerateFullPaths(evalFinished, project);
+            }
+        }
     }
 
     /// <summary>
@@ -491,17 +553,10 @@ internal sealed partial class TerminalLogger : INodeLogger
             return;
         }
 
+        CreateProject(e.BuildEventContext, e.Properties, e.GlobalProperties);
         ProjectContext c = new ProjectContext(buildEventContext);
-
         if (_restoreContext is null)
         {
-            if (e.GlobalProperties?.TryGetValue("TargetFramework", out string? targetFramework) != true)
-            {
-                targetFramework = null;
-            }
-            Project project = new(targetFramework, CreateStopwatch?.Invoke());
-            _projects[c] = project;
-
             // First ever restore in the build is starting.
             if (e.TargetNames == "Restore" && !_restoreFinished)
             {
@@ -509,30 +564,20 @@ internal sealed partial class TerminalLogger : INodeLogger
                 int nodeIndex = NodeIndexForContext(buildEventContext);
                 _nodes[nodeIndex] = new NodeStatus(e.ProjectFile!, null, "Restore", _projects[c].Stopwatch);
             }
-
-            TryDetectGenerateFullPaths(e, project);
         }
     }
 
-    private void TryDetectGenerateFullPaths(ProjectStartedEventArgs e, Project project)
+    private void TryDetectGenerateFullPaths(ProjectEvaluationFinishedEventArgs e, Project project)
     {
-        if (e.GlobalProperties is not null
-            && e.GlobalProperties.TryGetValue("GenerateFullPaths", out string? generateFullPaths)
-            && bool.TryParse(generateFullPaths, out bool generateFullPathsValue))
+        if (TryGetValue(e.GlobalProperties, "GenerateFullPaths") is string generateFullPathsGPString
+            && bool.TryParse(generateFullPathsGPString, out bool generateFullPathsValue))
         {
             project.GenerateFullPaths = generateFullPathsValue;
         }
-        else if (e.Properties is not null)
+        else if (TryGetValue(e.Properties, "GenerateFullPaths") is string generateFullPathsPString
+            && bool.TryParse(generateFullPathsPString, out bool generateFullPathsPropertyValue))
         {
-            foreach (DictionaryEntry property in e.Properties)
-            {
-                if (property.Key is "GenerateFullPaths" &&
-                    property.Value is string generateFullPathsString
-                    && bool.TryParse(generateFullPathsString, out bool generateFullPathsPropertyValue))
-                {
-                    project.GenerateFullPaths = generateFullPathsPropertyValue;
-                }
-            }
+            project.GenerateFullPaths = generateFullPathsPropertyValue;
         }
     }
 
