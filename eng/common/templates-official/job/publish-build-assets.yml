@@ -84,7 +84,7 @@ jobs:
           Add-Content -Path "$(Build.StagingDirectory)/ReleaseConfigs.txt" -Value "$(DefaultChannels)"
           Add-Content -Path "$(Build.StagingDirectory)/ReleaseConfigs.txt" -Value $(IsStableBuild)
 
-    - task: PublishBuildArtifacts@1
+    - task: 1ES.PublishBuildArtifacts@1
       displayName: Publish ReleaseConfigs Artifact
       inputs:
         PathtoPublish: '$(Build.StagingDirectory)/ReleaseConfigs.txt'
@@ -107,7 +107,7 @@ jobs:
            Write-Host "##vso[task.setvariable variable=SymbolExclusionFile]false"
           }
 
-    - task: PublishBuildArtifacts@1
+    - task: 1ES.PublishBuildArtifacts@1
       displayName: Publish SymbolPublishingExclusionsFile Artifact
       condition: eq(variables['SymbolExclusionFile'], 'true')
       inputs:
@@ -116,6 +116,6 @@ jobs:
         ArtifactName: ReleaseConfigs
         
     - ${{ if eq(parameters.enablePublishBuildArtifacts, 'true') }}:
-      - template: /eng/common/templates/steps/publish-logs.yml
+      - template: /eng/common/templates-official/steps/publish-logs.yml
         parameters:
           JobLabel: 'Publish_Artifacts_Logs'
