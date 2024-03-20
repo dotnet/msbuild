@@ -193,6 +193,14 @@ namespace Microsoft.Build.UnitTests
             };
         }
 
+        private BuildMessageEventArgs MakeTaskCommandLineEventArgs(string message, MessageImportance importance)
+        {
+            return new TaskCommandLineEventArgs(message, "Task", importance)
+            {
+                BuildEventContext = MakeBuildEventContext(),
+            };
+        }
+
         private BuildMessageEventArgs MakeExtendedMessageEventArgs(string message, MessageImportance importance, string extendedType, Dictionary<string, string?>? extendedMetadata)
         {
             return new ExtendedBuildMessageEventArgs(extendedType, message, "keyword", null, importance, _messageTime)
@@ -443,6 +451,36 @@ namespace Microsoft.Build.UnitTests
         {
             _terminallogger.Verbosity = LoggerVerbosity.Quiet;
             InvokeLoggerCallbacksForTestProject(succeeded: true, CallAllTypesOfTestMessages);
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintSummaryWithTaskCommandLineEventArgs_Succeded()
+        {
+            _terminallogger.Verbosity = LoggerVerbosity.Detailed;
+            _terminallogger.Parameters = "SHOWCOMMANDLINE=on";
+            _terminallogger.ParseParameters();
+
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                MessageRaised?.Invoke(_eventSender, MakeTaskCommandLineEventArgs("Task Command Line.", MessageImportance.High));
+            });
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintSummaryWithoutTaskCommandLineEventArgs_Succeded()
+        {
+            _terminallogger.Verbosity = LoggerVerbosity.Detailed;
+            _terminallogger.Parameters = "SHOWCOMMANDLINE=off";
+            _terminallogger.ParseParameters();
+
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                MessageRaised?.Invoke(_eventSender, MakeTaskCommandLineEventArgs("Task Command Line.", MessageImportance.High));
+            });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }

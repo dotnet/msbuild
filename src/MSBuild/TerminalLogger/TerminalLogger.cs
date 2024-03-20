@@ -10,11 +10,12 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
-
+using Microsoft.Build.Framework.Logging;
 
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+
 
 #endif
 #if NETFRAMEWORK
@@ -200,6 +201,11 @@ internal sealed partial class TerminalLogger : INodeLogger
     private DateTime? _testEndTime;
 
     /// <summary>
+    /// Whether to show TaskCommandLineEventArgs high-priority messages. 
+    /// </summary>
+    private bool _showCommandLine = false;
+
+    /// <summary>
     /// Default constructor, used by the MSBuild logger infra.
     /// </summary>
     public TerminalLogger()
@@ -228,10 +234,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Minimal;
 
     /// <inheritdoc/>
-    public string Parameters
-    {
-        get => ""; set { }
-    }
+    public string? Parameters { get; set; } = null;
 
     /// <inheritdoc/>
     public void Initialize(IEventSource eventSource, int nodeCount)
@@ -245,6 +248,8 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <inheritdoc/>
     public void Initialize(IEventSource eventSource)
     {
+        ParseParameters();
+
         eventSource.BuildStarted += BuildStarted;
         eventSource.BuildFinished += BuildFinished;
         eventSource.ProjectStarted += ProjectStarted;
@@ -262,6 +267,83 @@ internal sealed partial class TerminalLogger : INodeLogger
             eventSource4.IncludeEvaluationPropertiesAndItems();
         }
     }
+
+    /// <summary>
+    /// Parses out the logger parameters from the Parameters string.
+    /// </summary>
+    public void ParseParameters()
+    {
+        var parameters = LoggerParametersHelper.ParseParameters(Parameters);
+
+        foreach (var parameter in parameters)
+        {
+            ApplyParameter(parameter.Key, parameter.Value);
+        }
+    }
+
+    /// <summary>
+    /// Apply a terminal logger parameter.
+    /// parameterValue may be null, if there is no parameter value.
+    /// </summary>
+    private bool ApplyParameter(string parameterName, string? parameterValue)
+    {
+        ErrorUtilities.VerifyThrowArgumentNull(parameterName, nameof(parameterName));
+
+        switch (parameterName.ToUpperInvariant())
+        {
+            case "V":
+            case "VERBOSITY":
+                return ApplyVerbosityParameter(parameterValue);
+            case "SHOWCOMMANDLINE":
+                return ApplyShowCommandLineParameter(parameterValue);
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Apply the verbosity value
+    /// </summary>
+    private bool ApplyVerbosityParameter(string? parameterValue)
+    {
+        if (parameterValue is not null && LoggerParametersHelper.TryParseVerbosityParameter(parameterValue, out LoggerVerbosity? verbosity))
+        {
+            Verbosity = (LoggerVerbosity)verbosity!;
+            return true;
+        }
+        else
+        {
+            string errorCode;
+            string helpKeyword;
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, "InvalidVerbosity", parameterValue);
+            throw new LoggerException(message, null, errorCode, helpKeyword);
+        }
+    }
+
+    /// <summary>
+    /// Apply the show command Line value
+    /// </summary>
+    private bool ApplyShowCommandLineParameter(string? parameterValue)
+    {
+        if (String.IsNullOrEmpty(parameterValue))
+        {
+            _showCommandLine = true;
+        }
+        else
+        {
+            try
+            {
+                _showCommandLine = ConversionUtilities.ConvertStringToBool(parameterValue);
+            }
+            catch (ArgumentException)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 
     /// <inheritdoc/>
     public void Shutdown()
@@ -756,6 +838,11 @@ internal sealed partial class TerminalLogger : INodeLogger
 
             if (Verbosity > LoggerVerbosity.Normal)
             {
+                if (e is TaskCommandLineEventArgs && !_showCommandLine)
+                {
+                    return;
+                }
+
                 if (hasProject)
                 {
                     project!.AddBuildMessage(MessageSeverity.Message, message);
