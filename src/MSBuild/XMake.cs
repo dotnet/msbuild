@@ -2726,7 +2726,7 @@ namespace Microsoft.Build.CommandLine
         private static bool IsBuildCopEnabled(CommandLineSwitches commandLineSwitches)
         {
             // todo: opt-in behavior: https://github.com/dotnet/msbuild/issues/9723
-            bool isAnalysisEnabled = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Analyze);
+            bool isAnalysisEnabled = true;
             return isAnalysisEnabled;
         }
 
