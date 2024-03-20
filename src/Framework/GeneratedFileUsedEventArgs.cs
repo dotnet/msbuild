@@ -2,13 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
 
 namespace Microsoft.Build.Framework
 {
     /// <summary>
     /// Arguments for the generated file used event
     /// </summary>
-    [Serializable]
     public class GeneratedFileUsedEventArgs : BuildMessageEventArgs
     {
         public GeneratedFileUsedEventArgs()
@@ -35,5 +35,24 @@ namespace Microsoft.Build.Framework
         /// The content of the file.
         /// </summary>
         public string? Content { set; get; }
+
+        internal override void WriteToStream(BinaryWriter writer)
+        {
+            base.WriteToStream(writer);
+
+            if (FilePath != null && Content != null)
+            {
+                writer.Write(FilePath);
+                writer.Write(Content);
+            }
+        }
+
+        internal override void CreateFromStream(BinaryReader reader, int version)
+        {
+            base.CreateFromStream(reader, version);
+
+            FilePath = reader.ReadString();
+            Content = reader.ReadString();
+        }
     }
 }

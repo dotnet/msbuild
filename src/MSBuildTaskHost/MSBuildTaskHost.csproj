@@ -67,7 +67,6 @@
     </Compile>
     <Compile Include="..\Framework\AssemblyUtilities.cs" />
     <Compile Include="..\Framework\ResponseFileUsedEventArgs.cs" />
-    <Compile Include="..\Framework\GeneratedFileUsedEventArgs.cs" />
     <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\CollectionHelpers.cs" />
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs">
