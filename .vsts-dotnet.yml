@@ -33,6 +33,10 @@ variables:
       value: ${{parameters.OptProfDropName}}
     - name: SourceBranch
       value: ''
+  - name: _DotNetArtifactsCategory
+    value: .NETCore
+  - name: _DotNetValidationArtifactsCategory
+    value: .NETCoreValidation
   - name: EnableReleaseOneLocBuild
     value: true
   - name: Codeql.Enabled
@@ -96,6 +100,8 @@ extends:
         timeoutInMinutes: 180
 
         variables:
+        - group: DotNet-Blob-Feed
+        - group: DotNet-Symbol-Publish
         - group: Publish-Build-Assets
         - name: TeamName
           value: MSBuild
