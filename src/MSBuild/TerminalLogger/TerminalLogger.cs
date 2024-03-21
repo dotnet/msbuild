@@ -463,12 +463,23 @@ internal sealed partial class TerminalLogger : INodeLogger
                         // Show project build complete and its output
                         if (project.IsTestProject)
                         {
-                            Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_WithTF",
+                            if (string.IsNullOrEmpty(project.TargetFramework))
+                            {
+                                Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_NoTF",
                                     Indentation,
                                     projectFile,
-                                    AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
                                     buildResult,
                                     duration));
+                            }
+                            else
+                            {
+                                Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_WithTF",
+                                    Indentation, Indentation,
+                                    projectFile, projectFile,
+                                    AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor), AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
+                                    buildResult, buildResult,
+                                    duration)); duration));
+                            }
                         }
                     }
                     else
