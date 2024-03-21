@@ -1118,10 +1118,21 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private async Task<BuildResult> BuildProject()
         {
-            // We consider this the entrypoint for the project build for purposes of BuildCheck processing 
+            bool isRestore = false;
+            var propertyEntry = _requestEntry.RequestConfiguration.GlobalProperties[MSBuildConstants.MSBuildIsRestoring];
+            if (propertyEntry != null)
+            {
+                isRestore = Convert.ToBoolean(propertyEntry.EvaluatedValue);
+            }
 
-            var buildCheckManager = (_componentHost.GetComponent(BuildComponentType.BuildCheck) as IBuildCheckManagerProvider)!.Instance;
-            buildCheckManager.SetDataSource(BuildCheckDataSource.BuildExecution);
+            // We consider this the entrypoint for the project build for purposes of BuildCheck processing 
+            IBuildCheckManager buildCheckManager = null;
+
+            if (!isRestore)
+            {
+                buildCheckManager = (_componentHost.GetComponent(BuildComponentType.BuildCheck) as IBuildCheckManagerProvider)!.Instance;
+                buildCheckManager.SetDataSource(BuildCheckDataSource.BuildExecution);
+            }
 
             ErrorUtilities.VerifyThrow(_targetBuilder != null, "Target builder is null");
 
@@ -1137,10 +1148,13 @@ namespace Microsoft.Build.BackEnd
                 // Load the project
                 if (!_requestEntry.RequestConfiguration.IsLoaded)
                 {
-                    buildCheckManager.StartProjectEvaluation(
-                        BuildCheckDataSource.BuildExecution,
-                        _requestEntry.Request.ParentBuildEventContext,
-                        _requestEntry.RequestConfiguration.ProjectFullPath);
+                    if (!isRestore)
+                    {
+                        buildCheckManager.StartProjectEvaluation(
+                            BuildCheckDataSource.BuildExecution,
+                            _requestEntry.Request.ParentBuildEventContext,
+                            _requestEntry.RequestConfiguration.ProjectFullPath);
+                    }
 
                     _requestEntry.RequestConfiguration.LoadProjectIntoConfiguration(
                         _componentHost,
@@ -1162,15 +1176,22 @@ namespace Microsoft.Build.BackEnd
             }
             finally
             {
-                buildCheckManager.EndProjectEvaluation(
-                    BuildCheckDataSource.BuildExecution,
-                    _requestEntry.Request.ParentBuildEventContext);
+                if (!isRestore)
+                {
+                    buildCheckManager.EndProjectEvaluation(
+                        BuildCheckDataSource.BuildExecution,
+                        _requestEntry.Request.ParentBuildEventContext);
+                }
             }
 
             _projectLoggingContext = _nodeLoggingContext.LogProjectStarted(_requestEntry);
-            buildCheckManager.StartProjectRequest(
-                BuildCheckDataSource.BuildExecution,
-                _requestEntry.Request.ParentBuildEventContext);
+
+            if (!isRestore)
+            {
+                buildCheckManager.StartProjectRequest(
+                    BuildCheckDataSource.BuildExecution,
+                    _requestEntry.Request.ParentBuildEventContext);
+            }
 
             // Now that the project has started, parse a few known properties which indicate warning codes to treat as errors or messages
             //
@@ -1223,9 +1244,12 @@ namespace Microsoft.Build.BackEnd
                 MSBuildEventSource.Log.BuildProjectStop(_requestEntry.RequestConfiguration.ProjectFullPath, string.Join(", ", allTargets));
             }
 
-            buildCheckManager.EndProjectRequest(
-                BuildCheckDataSource.BuildExecution,
-                _requestEntry.Request.ParentBuildEventContext);
+            if (!isRestore)
+            {
+                buildCheckManager.EndProjectRequest(
+                    BuildCheckDataSource.BuildExecution,
+                    _requestEntry.Request.ParentBuildEventContext);
+            }
 
             return result;
 
