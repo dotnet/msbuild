@@ -217,16 +217,19 @@ namespace Microsoft.Build.Internal
                 // Get to know
                 FileMatcher.Default.GetFileSpecInfo(filespecUnescaped, out string directoryPart, out string wildcardPart, out string filenamePart, out bool needsRecursion, out bool isLegalFileSpec);
                 bool logDriveEnumeratingWildcard = FileMatcher.IsDriveEnumeratingWildcardPattern(directoryPart, wildcardPart);
-                foreach (string excludeSpec in excludeSpecsUnescaped)
+                if (excludeSpecsUnescaped != null)
                 {
-                    FileMatcher.Default.GetFileSpecInfo(excludeSpec, out directoryPart, out wildcardPart, out filenamePart, out needsRecursion, out isLegalFileSpec);
-                    bool logDriveEnumeratingWildcardFromExludeSpec = FileMatcher.IsDriveEnumeratingWildcardPattern(directoryPart, wildcardPart);
-                    if (logDriveEnumeratingWildcardFromExludeSpec)
+                    foreach (string excludeSpec in excludeSpecsUnescaped)
                     {
-                        excludeFileSpec = excludeSpec;
-                    }
+                        FileMatcher.Default.GetFileSpecInfo(excludeSpec, out directoryPart, out wildcardPart, out filenamePart, out needsRecursion, out isLegalFileSpec);
+                        bool logDriveEnumeratingWildcardFromExludeSpec = FileMatcher.IsDriveEnumeratingWildcardPattern(directoryPart, wildcardPart);
+                        if (logDriveEnumeratingWildcardFromExludeSpec)
+                        {
+                            excludeFileSpec = excludeSpec;
+                        }
 
-                    logDriveEnumeratingWildcard |= logDriveEnumeratingWildcardFromExludeSpec;
+                        logDriveEnumeratingWildcard |= logDriveEnumeratingWildcardFromExludeSpec;
+                    }
                 }
 
                 // Determines whether Exclude filespec or passed in file spec should be
