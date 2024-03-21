@@ -214,9 +214,13 @@ namespace Microsoft.Build.Internal
                 var filespecUnescaped = EscapingUtilities.UnescapeAll(filespecEscaped);
                 var excludeSpecsUnescaped = excludeSpecsEscaped?.Where(IsValidExclude).Select(i => EscapingUtilities.UnescapeAll(i)).ToList();
 
-                // Get to know
+                // Extract file spec information
                 FileMatcher.Default.GetFileSpecInfo(filespecUnescaped, out string directoryPart, out string wildcardPart, out string filenamePart, out bool needsRecursion, out bool isLegalFileSpec);
+
+                // Check if the file spec contains a drive-enumerating wildcard
                 bool logDriveEnumeratingWildcard = FileMatcher.IsDriveEnumeratingWildcardPattern(directoryPart, wildcardPart);
+
+                // Process exclude specs (if provided) and check if any of them contain a drive-enumerating wildcard
                 if (excludeSpecsUnescaped != null)
                 {
                     foreach (string excludeSpec in excludeSpecsUnescaped)
