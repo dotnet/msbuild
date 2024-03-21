@@ -9,7 +9,7 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// Arguments for the generated file used event
     /// </summary>
-    public class GeneratedFileUsedEventArgs : BuildMessageEventArgs
+    internal class GeneratedFileUsedEventArgs : BuildMessageEventArgs
     {
         public GeneratedFileUsedEventArgs()
         {
@@ -20,7 +20,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// 
         public GeneratedFileUsedEventArgs(string filePath, string content)
-            : base("", null, null, MessageImportance.Low)
+            : base(nameof(GeneratedFileUsedEventArgs) + ": " + filePath, null, null, MessageImportance.Low)
         {
             FilePath = filePath;
             Content = content;
