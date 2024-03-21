@@ -463,34 +463,32 @@ internal sealed partial class TerminalLogger : INodeLogger
                         // Show project build complete and its output
                         if (project.IsTestProject)
                         {
-                            if (string.IsNullOrEmpty(project.TargetFramework))
-                            {
-                                Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_NoTF",
+                            Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_WithTF",
                                     Indentation,
                                     projectFile,
+                                    AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
                                     buildResult,
                                     duration));
-                            }
-                            else
-                            {
-                                if (string.IsNullOrEmpty(project.TargetFramework))
-                                {
-                                    Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_NoTF",
-                                        Indentation,
-                                        projectFile,
-                                        buildResult,
-                                        duration));
-                                }
-                                else
-                                {
-                                    Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTF",
-                                        Indentation,
-                                        projectFile,
-                                        AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
-                                        buildResult,
-                                        duration));
-                                }
-                            }
+                        }
+                    }
+                    else
+                    {
+                        if (string.IsNullOrEmpty(project.TargetFramework))
+                        {
+                            Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_NoTF",
+                                Indentation,
+                                projectFile,
+                                buildResult,
+                                duration));
+                        }
+                        else
+                        {
+                            Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTF",
+                                Indentation,
+                                projectFile,
+                                AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
+                                buildResult,
+                                duration));
                         }
 
                         // Print the output path as a link if we have it.
