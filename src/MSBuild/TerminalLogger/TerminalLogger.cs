@@ -474,11 +474,11 @@ internal sealed partial class TerminalLogger : INodeLogger
                             else
                             {
                                 Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_WithTF",
-                                    Indentation, Indentation,
-                                    projectFile, projectFile,
+                                    Indentation,
+                                    projectFile,
                                     AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor), AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
-                                    buildResult, buildResult,
-                                    duration)); duration));
+                                    buildResult,
+                                    duration));
                             }
                         }
                     }
