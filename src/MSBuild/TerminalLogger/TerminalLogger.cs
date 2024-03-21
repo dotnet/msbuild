@@ -840,8 +840,6 @@ internal sealed partial class TerminalLogger : INodeLogger
         Terminal.Write(AnsiCodes.HideCursor);
         try
         {
-            // Move cursor back to 1st line of nodes.
-            Terminal.WriteLine($"{AnsiCodes.CSI}{_currentFrame.NodesCount + 1}{AnsiCodes.MoveUpToLineStart}");
             Terminal.Write(rendered);
         }
         finally
