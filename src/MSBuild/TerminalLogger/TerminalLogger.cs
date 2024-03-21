@@ -481,25 +481,25 @@ internal sealed partial class TerminalLogger : INodeLogger
                                     duration));
                             }
                         }
-                    }
-                    else
-                    {
-                        if (string.IsNullOrEmpty(project.TargetFramework))
-                        {
-                            Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_NoTF",
-                                Indentation,
-                                projectFile,
-                                buildResult,
-                                duration));
-                        }
                         else
                         {
-                            Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTF",
-                                Indentation,
-                                projectFile,
-                                AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
-                                buildResult,
-                                duration));
+                            if (string.IsNullOrEmpty(project.TargetFramework))
+                            {
+                                Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_NoTF",
+                                    Indentation,
+                                    projectFile,
+                                    buildResult,
+                                    duration));
+                            }
+                            else
+                            {
+                                Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTF",
+                                    Indentation,
+                                    projectFile,
+                                    AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
+                                    buildResult,
+                                    duration));
+                            }
                         }
 
                         // Print the output path as a link if we have it.
