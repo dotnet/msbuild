@@ -22,7 +22,7 @@ variables:
   - name: OptProfDrop
     value: ''
   - name: SourceBranch
-    value: $(IbcBranchName)
+    value: $(IbcSourceBranchName)
   # If we're not on a vs* branch, use main as our optprof collection branch
   - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
     - name: SourceBranch
