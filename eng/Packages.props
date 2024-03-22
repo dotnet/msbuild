@@ -31,7 +31,7 @@
     <PackageReference Update="System.Reflection.Metadata" Version="1.6.0" />
     <PackageReference Update="System.Resources.Extensions" Version="$(SystemResourcesExtensionsPackageVersion)" />
     <PackageReference Update="System.Runtime.CompilerServices.Unsafe" Version="5.0.0"/>
-    <PackageReference Update="System.Security.Cryptography.Pkcs" Version="6.0.1" />
+    <PackageReference Update="System.Security.Cryptography.Pkcs" Version="6.0.4" />
     <PackageReference Update="System.Security.Cryptography.Xml" Version="6.0.1" />
     <PackageReference Update="System.Security.Permissions" Version="4.7.0" />
     <PackageReference Update="System.Security.Principal.Windows" Version="4.7.0" />
