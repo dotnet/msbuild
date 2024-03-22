@@ -68,7 +68,7 @@ namespace Microsoft.Build.Logging
         //     between de/serialization roundtrips.
         //   - Adding serialized events lengths - to support forward compatible reading
         // version 19:
-        //   - new record kind: GeneratedFileUsedEventArgs
+        //   - GeneratedFileUsedEventArgs exposed for brief period of time (so let's continue with 20)
 
         // This should be never changed.
         // The minimum version of the binary log reader that can read log of above version.
@@ -76,7 +76,7 @@ namespace Microsoft.Build.Logging
 
         // The current version of the binary log representation.
         // Changes with each update of the binary log format.
-        internal const int FileFormatVersion = 19;
+        internal const int FileFormatVersion = 18;
 
         // The minimum version of the binary log reader that can read log of above version.
         // This should be changed only when the binary log format is changed in a way that would prevent it from being
@@ -335,17 +335,27 @@ namespace Microsoft.Build.Logging
         {
             if (stream != null)
             {
+                if (projectImportsCollector != null)
+                {
+                    CollectImports(e);
+                }
+
+                if (DoNotWriteToBinlog(e))
+                {
+                    return;
+                }
+
                 // TODO: think about queuing to avoid contention
                 lock (eventArgsWriter)
                 {
                     eventArgsWriter.Write(e);
                 }
-
-                if (projectImportsCollector != null)
-                {
-                    CollectImports(e);
-                }
             }
+        }
+
+        private static bool DoNotWriteToBinlog(BuildEventArgs e)
+        {
+            return e is GeneratedFileUsedEventArgs;
         }
 
         private void CollectImports(BuildEventArgs e)
