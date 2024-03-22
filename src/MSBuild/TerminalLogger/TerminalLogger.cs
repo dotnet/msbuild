@@ -14,11 +14,8 @@ using System.Diagnostics;
 
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
-<<<<<<< HEAD
-
-=======
 using System.Globalization;
->>>>>>> main
+
 #endif
 #if NETFRAMEWORK
 using Microsoft.IO;
