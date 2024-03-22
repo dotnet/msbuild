@@ -20,7 +20,9 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// 
         public GeneratedFileUsedEventArgs(string filePath, string content)
-            : base(nameof(GeneratedFileUsedEventArgs) + ": " + filePath, null, null, MessageImportance.Low)
+        // We are not sending the event to binlog (just the file), so we do not want it
+        // to have any stringified representation for other logs either.
+            : base(string.Empty, null, null, MessageImportance.Low)
         {
             FilePath = filePath;
             Content = content;
