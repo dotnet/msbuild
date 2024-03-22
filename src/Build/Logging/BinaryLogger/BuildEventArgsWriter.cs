@@ -15,6 +15,8 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
+using Microsoft.NET.StringTools;
 
 #nullable disable
 
@@ -458,6 +460,7 @@ namespace Microsoft.Build.Logging
             switch (e)
             {
                 case ResponseFileUsedEventArgs responseFileUsed: return Write(responseFileUsed);
+                case GeneratedFileUsedEventArgs generatedFileUsed: return Write(generatedFileUsed);
                 case TaskParameterEventArgs taskParameter: return Write(taskParameter);
                 case ProjectImportedEventArgs projectImported: return Write(projectImported);
                 case TargetSkippedEventArgs targetSkipped: return Write(targetSkipped);
@@ -553,6 +556,13 @@ namespace Microsoft.Build.Logging
             WriteMessageFields(e);
             WriteDeduplicatedString(e.ResponseFilePath);
             return BinaryLogRecordKind.ResponseFileUsed;
+        }
+        private BinaryLogRecordKind Write(GeneratedFileUsedEventArgs e)
+        {
+            WriteMessageFields(e);
+            WriteDeduplicatedString(e.FilePath);
+            WriteDeduplicatedString(e.Content);
+            return BinaryLogRecordKind.GeneratedFileUsed;
         }
         private BinaryLogRecordKind Write(TaskCommandLineEventArgs e)
         {
@@ -1260,9 +1270,9 @@ namespace Microsoft.Build.Logging
 
         internal readonly struct HashKey : IEquatable<HashKey>
         {
-            private readonly ulong value;
+            private readonly long value;
 
-            private HashKey(ulong i)
+            private HashKey(long i)
             {
                 value = i;
             }
@@ -1275,13 +1285,13 @@ namespace Microsoft.Build.Logging
                 }
                 else
                 {
-                    value = FnvHash64.GetHashCode(text);
+                    value = FowlerNollVo1aHash.ComputeHash64Fast(text);
                 }
             }
 
             public static HashKey Combine(HashKey left, HashKey right)
             {
-                return new HashKey(FnvHash64.Combine(left.value, right.value));
+                return new HashKey(FowlerNollVo1aHash.Combine64(left.value, right.value));
             }
 
             public HashKey Add(HashKey other) => Combine(this, other);
@@ -1309,36 +1319,6 @@ namespace Microsoft.Build.Logging
             public override string ToString()
             {
                 return value.ToString();
-            }
-        }
-
-        internal static class FnvHash64
-        {
-            public const ulong Offset = 14695981039346656037;
-            public const ulong Prime = 1099511628211;
-
-            public static ulong GetHashCode(string text)
-            {
-                ulong hash = Offset;
-
-                unchecked
-                {
-                    for (int i = 0; i < text.Length; i++)
-                    {
-                        char ch = text[i];
-                        hash = (hash ^ ch) * Prime;
-                    }
-                }
-
-                return hash;
-            }
-
-            public static ulong Combine(ulong left, ulong right)
-            {
-                unchecked
-                {
-                    return (left ^ right) * Prime;
-                }
             }
         }
     }

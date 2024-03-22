@@ -3,6 +3,7 @@
 configuration="Debug"
 host_type="core"
 build_stage1=true
+onlyDocChanged=0
 properties=
 extra_properties=
 
@@ -27,6 +28,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --host_type)
       host_type=$2
+      shift 2
+      ;;
+    --onlydocchanged)
+      onlyDocChanged=$2
       shift 2
       ;;
     *)
@@ -77,4 +82,10 @@ export DOTNET_HOST_PATH="$_InitializeDotNetCli/dotnet"
 # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
 # - Do run tests
 # - Don't try to create a bootstrap deployment
-. "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties
+if [ $onlyDocChanged = 0 ]
+then
+    . "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties
+
+else
+    . "$ScriptRoot/common/build.sh" --restore --build --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties
+fi

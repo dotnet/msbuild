@@ -1359,6 +1359,20 @@ namespace Microsoft.Build.UnitTests
             result = project.Build(loggers);
         }
 
+        public static void BuildProjectWithNewOMAndBinaryLogger(string content, BinaryLogger binaryLogger, out bool result, out string projectDirectory)
+        {
+            // Replace the nonstandard quotes with real ones
+            content = ObjectModelHelpers.CleanupFileContents(content);
+
+            Project project = new Project(XmlReader.Create(new StringReader(content)), null, toolsVersion: null);
+
+            List<ILogger> loggers = new List<ILogger>() { binaryLogger };
+
+            result = project.Build(loggers);
+
+            projectDirectory = project.DirectoryPath;
+        }
+
         public static MockLogger BuildProjectContentUsingBuildManagerExpectResult(string content, BuildResultCode expectedResult)
         {
             var logger = new MockLogger();
@@ -1699,6 +1713,8 @@ namespace Microsoft.Build.UnitTests
 
             sb.Append("</ItemGroup>");
 
+            // Ensure there is at least one valid target in the project
+            sb.Append("<Target Name='Build'/>");
 
             foreach (var defaultTarget in (defaultTargets ?? string.Empty).Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
             {
