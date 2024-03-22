@@ -81,6 +81,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         private bool IsInProcNode => _enabledDataSources[(int)BuildCheckDataSource.EventArgs] &&
                                      _enabledDataSources[(int)BuildCheckDataSource.BuildExecution];
 
+        bool IBuildCheckManager.isRestore { get; set; } = true;
+
         /// <summary>
         /// Notifies the manager that the data source will be used -
         ///   so it should register the built-in analyzers for the source if it hasn't been done yet.

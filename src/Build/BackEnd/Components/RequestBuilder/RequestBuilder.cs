@@ -1131,6 +1131,7 @@ namespace Microsoft.Build.BackEnd
             if (!isRestore)
             {
                 buildCheckManager = (_componentHost.GetComponent(BuildComponentType.BuildCheck) as IBuildCheckManagerProvider)!.Instance;
+                buildCheckManager.isRestore = false;
                 buildCheckManager.SetDataSource(BuildCheckDataSource.BuildExecution);
             }
 

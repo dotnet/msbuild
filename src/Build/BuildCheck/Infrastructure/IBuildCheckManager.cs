@@ -27,6 +27,8 @@ internal enum BuildCheckDataSource
 /// </summary>
 internal interface IBuildCheckManager
 {
+    bool isRestore { get; set; }
+
     void ProcessEvaluationFinishedEventArgs(
         IBuildAnalysisLoggingContext buildAnalysisContext,
         ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs);
