@@ -438,7 +438,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public Task PrintTestSummaryNormalVerbosity_Succeded()
+        public Task PrintTestSummaryNormalVerbosity_Succeeded()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Normal;
             InvokeLoggerCallbacksForTestProject(succeeded: true, CallAllTypesOfTestMessages);
@@ -447,7 +447,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public Task PrintTestSummaryQuietVerbosity_Succeded()
+        public Task PrintTestSummaryQuietVerbosity_Succeeded()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Quiet;
             InvokeLoggerCallbacksForTestProject(succeeded: true, CallAllTypesOfTestMessages);
@@ -456,7 +456,19 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public Task PrintSummaryWithTaskCommandLineEventArgs_Succeded()
+        public Task PrintSummaryWithOverwrittenVerbosity_FailedWithErrors()
+        {
+            _terminallogger.Verbosity = LoggerVerbosity.Minimal;
+            _terminallogger.Parameters = "v=diag";
+            _terminallogger.ParseParameters();
+
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, CallAllTypesOfMessagesWarningAndError);
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintSummaryWithTaskCommandLineEventArgs_Succeeded()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Detailed;
             _terminallogger.Parameters = "SHOWCOMMANDLINE=on";
@@ -471,7 +483,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public Task PrintSummaryWithoutTaskCommandLineEventArgs_Succeded()
+        public Task PrintSummaryWithoutTaskCommandLineEventArgs_Succeeded()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Detailed;
             _terminallogger.Parameters = "SHOWCOMMANDLINE=off";
