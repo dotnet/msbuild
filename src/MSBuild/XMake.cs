@@ -2571,7 +2571,7 @@ namespace Microsoft.Build.CommandLine
                                                            ref lowPriority,
                                                            ref question,
                                                            ref isBuildCheckEnabled,
-                                                           ref areBuildCheckStatsEnabled
+                                                           ref areBuildCheckStatsEnabled,
                                                            ref getProperty,
                                                            ref getItem,
                                                            ref getTargetResult,
@@ -2658,7 +2658,7 @@ namespace Microsoft.Build.CommandLine
                     question = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Question);
 
                     isBuildCheckEnabled = IsBuildCheckEnabled(commandLineSwitches);
-                    areBuildCopStatsEnabled = AreBuildCheckStatsEnabled(commandLineSwitches);
+                    areBuildCheckStatsEnabled = AreBuildCheckStatsEnabled(commandLineSwitches);
 
                     inputResultsCaches = ProcessInputResultsCaches(commandLineSwitches);
 
@@ -2739,7 +2739,7 @@ namespace Microsoft.Build.CommandLine
             return isAnalysisEnabled;
         }
 
-        private static bool AreBuildCopStatsEnabled(CommandLineSwitches commandLineSwitches)
+        private static bool AreBuildCheckStatsEnabled(CommandLineSwitches commandLineSwitches)
         {
             return commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Analyze) &&
                 commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.AnalyzeStats);

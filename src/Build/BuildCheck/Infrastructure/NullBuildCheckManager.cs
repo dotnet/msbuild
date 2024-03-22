@@ -47,5 +47,5 @@ internal class NullBuildCheckManager : IBuildCheckManager
     { }
 
     public Dictionary<string, TimeSpan> CreateAnalyzerTracingStats() => throw new NotImplementedException();
-    public Dictionary<string, TimeSpan> CreateBuildCopInfraTracingStats() => throw new NotImplementedException();
+    public Dictionary<string, TimeSpan> CreateBuildCheckInfraTracingStats() => throw new NotImplementedException();
 }

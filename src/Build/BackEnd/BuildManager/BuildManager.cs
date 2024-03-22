@@ -2992,7 +2992,7 @@ namespace Microsoft.Build.Execution
 
                 loggers = (loggers ?? Enumerable.Empty<ILogger>()).Concat(new[]
                 {
-                    new BuildCheckConnectorLogger(new AnalyzerLoggingContextFactory(loggingService), buildCheckManagerProvider.Instance)
+                    new BuildCheckConnectorLogger(new AnalyzerLoggingContextFactory(loggingService), buildCheckManagerProvider.Instance, ((IBuildComponentHost)this).BuildParameters.AreBuildCheckStatsEnabled)
                 });
             }
 

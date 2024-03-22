@@ -105,8 +105,8 @@ internal sealed class BuildCheckConnectorLogger(
 
         if (_areStatsEnabled)
         {
-            _statsAnalyzers.Merge(buildCopManager.CreateAnalyzerTracingStats(), (span1, span2) => span1 + span2);
-            _statsInfra.Merge(buildCopManager.CreateBuildCopInfraTracingStats(), (span1, span2) => span1 + span2);
+            _statsAnalyzers.Merge(buildCheckManager.CreateAnalyzerTracingStats(), (span1, span2) => span1 + span2);
+            _statsInfra.Merge(buildCheckManager.CreateBuildCheckInfraTracingStats(), (span1, span2) => span1 + span2);
 
             LogAnalyzerStats(loggingContext);
         }
@@ -114,7 +114,7 @@ internal sealed class BuildCheckConnectorLogger(
     
     private void LogAnalyzerStats(LoggingContext loggingContext)
     {
-        loggingContext.LogCommentFromText(MessageImportance.High, $"BuildCop run times{Environment.NewLine}");
+        loggingContext.LogCommentFromText(MessageImportance.High, $"BuildCheck run times{Environment.NewLine}");
         string infraData = buildStatsTable("Infrastructure run times", _statsInfra);
         loggingContext.LogCommentFromText(MessageImportance.High, infraData);
 

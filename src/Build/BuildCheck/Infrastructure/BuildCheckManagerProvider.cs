@@ -303,7 +303,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             return _tracingReporter.TracingStats;
         }
 
-        public Dictionary<string, TimeSpan> CreateBuildCopInfraTracingStats()
+        public Dictionary<string, TimeSpan> CreateBuildCheckInfraTracingStats()
         {
             Dictionary<string, TimeSpan> infraTime = new Dictionary<string, TimeSpan>
             {
@@ -323,12 +323,12 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 return;
             }
 
-            BuildCopTracingEventArgs analyzerEventArg =
+            BuildCheckTracingEventArgs analyzerEventArg =
                 new(CreateAnalyzerTracingStats()) { BuildEventContext = loggingContext.BuildEventContext };
             loggingContext.LogBuildEvent(analyzerEventArg);
 
-            BuildCopTracingEventArgs infraEventStats =
-                new(CreateBuildCopInfraTracingStats()) { BuildEventContext = loggingContext.BuildEventContext };
+            BuildCheckTracingEventArgs infraEventStats =
+                new(CreateBuildCheckInfraTracingStats()) { BuildEventContext = loggingContext.BuildEventContext };
             loggingContext.LogBuildEvent(infraEventStats);
         }
 
