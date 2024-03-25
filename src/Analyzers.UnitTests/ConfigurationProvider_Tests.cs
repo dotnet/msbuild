@@ -127,7 +127,73 @@ namespace Microsoft.Build.Analyzers.UnitTests
             buildConfig.EvaluationAnalysisScope?.ShouldBe(EvaluationAnalysisScope.AnalyzedProjectOnly);
         }
 
-        /*
+        
+        [Fact]
+        public void GetRuleIdConfiguration_CustomConfigurationValidity_NotValid_DifferentValues()
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+
+            TransientTestFolder workFolder1 = testEnvironment.CreateFolder(createFolder: true);
+            TransientTestFile config1 = testEnvironment.CreateFile(workFolder1, ".editorconfig",
+            """
+            root=true
+
+            [*.csproj]
+            build_check.rule_id.property1=value1
+            build_check.rule_id.property2=value2
+            build_check.rule_id.isEnabled=true
+            build_check.rule_id.isEnabled2=true
+
+            [test123.csproj]
+            build_check.rule_id.property1=value2
+            build_check.rule_id.property2=value3
+            build_check.rule_id.isEnabled=true
+            build_check.rule_id.isEnabled2=tru1
+            """);
+
+            var configurationProvider = new ConfigurationProvider();
+            configurationProvider.GetCustomConfiguration(Path.Combine(workFolder1.Path, "test.csproj"), "rule_id");
+
+            // should not fail => configurations are the same
+            Should.Throw<BuildCheckConfigurationException>(() =>
+            {
+                configurationProvider.CheckCustomConfigurationDataValidity(Path.Combine(workFolder1.Path, "test123.csproj"), "rule_id");
+            });
+        }
+
+        [Fact]
+        public void GetRuleIdConfiguration_CustomConfigurationValidity_NotValid_DifferentKeys()
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+
+            TransientTestFolder workFolder1 = testEnvironment.CreateFolder(createFolder: true);
+            TransientTestFile config1 = testEnvironment.CreateFile(workFolder1, ".editorconfig",
+            """
+            root=true
+
+            [*.csproj]
+            build_check.rule_id.property1=value1
+            build_check.rule_id.property2=value2
+            build_check.rule_id.isEnabled2=true
+
+            [test123.csproj]
+            build_check.rule_id.property1=value1
+            build_check.rule_id.property2=value2
+            build_check.rule_id.isEnabled2=true
+            build_check.rule_id.isEnabled3=true
+            """);
+
+            var configurationProvider = new ConfigurationProvider();
+            configurationProvider.GetCustomConfiguration(Path.Combine(workFolder1.Path, "test.csproj"), "rule_id");
+
+            // should not fail => configurations are the same
+            Should.Throw<BuildCheckConfigurationException>(() =>
+            {
+                configurationProvider.CheckCustomConfigurationDataValidity(Path.Combine(workFolder1.Path, "test123.csproj"), "rule_id");
+            });
+        }
+
+
         [Fact]
         public void GetRuleIdConfiguration_CustomConfigurationValidity_Valid()
         {
@@ -143,30 +209,22 @@ namespace Microsoft.Build.Analyzers.UnitTests
             build_check.rule_id.property2=value2
             build_check.rule_id.isEnabled=true
             build_check.rule_id.isEnabled2=true
-            any_other_key1=any_other_value1
-            any_other_key2=any_other_value2
-            any_other_key3=any_other_value3
-            any_other_key3=any_other_value3
 
             [test123.csproj]
-            build_check.rule_id.property1=value2
-            build_check.rule_id.property2=value3
+            build_check.rule_id.property1=value1
+            build_check.rule_id.property2=value2
             build_check.rule_id.isEnabled=true
-            build_check.rule_id.isEnabled2=tru1
-            any_other_key1=any_other_value1
-            any_other_key2=any_other_value2
-            any_other_key3=any_other_value3
-            any_other_key3=any_other_value3
+            build_check.rule_id.isEnabled2=true
             """);
 
             var configurationProvider = new ConfigurationProvider();
             configurationProvider.GetCustomConfiguration(Path.Combine(workFolder1.Path, "test.csproj"), "rule_id");
 
             // should fail, because the configs are the different
-            Should.Throw<BuildCheckConfigurationException>(() =>
+            Should.NotThrow(() =>
             {
                 configurationProvider.CheckCustomConfigurationDataValidity(Path.Combine(workFolder1.Path, "test123.csproj"), "rule_id");
             });
-        }*/
+        }
     }
 }

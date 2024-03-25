@@ -80,7 +80,17 @@ internal class ConfigurationProvider
     /// <returns></returns>
     internal void CheckCustomConfigurationDataValidity(string projectFullPath, string ruleId)
     {
-        // TODO: repair the comparer of the objects
+        var configuration = GetCustomConfiguration(projectFullPath, ruleId);
+
+        if (_customConfigurationData.ContainsKey(ruleId))
+        {
+            var storedConfiguration = _customConfigurationData[ruleId];
+
+            if (!storedConfiguration.Equals(configuration))
+            {
+                throw new BuildCheckConfigurationException("Custom configuration should be equal between projects");
+            }
+        }
     }
 
     internal BuildAnalyzerConfigurationInternal[] GetMergedConfigurations(

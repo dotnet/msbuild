@@ -65,13 +65,39 @@ public class CustomConfigurationData
             return false;
         }
 
-        return Equals((CustomConfigurationData)obj);
-    }
+        var customConfigObj = (CustomConfigurationData) obj;
 
-    protected bool Equals(CustomConfigurationData other) {
-        // TODO: update the comparison: Compare ruleID, and exact match of the configuration data
-        
-        return Equals(ConfigurationData, other.ConfigurationData);
+        if(customConfigObj.RuleId != RuleId)
+        {
+            return false;
+        }
+
+        // validate keys and values
+        if (customConfigObj.ConfigurationData != null && ConfigurationData != null)
+        {
+            if (!customConfigObj.ConfigurationData.Keys.SequenceEqual(ConfigurationData.Keys))
+            {
+                return false;
+            }
+
+            var keys = customConfigObj.ConfigurationData.Keys;
+            foreach (var key in keys)
+            {
+                if (customConfigObj.ConfigurationData[key] != ConfigurationData[key])
+                {
+                    return false;
+                }
+            }
+        }else if (customConfigObj.ConfigurationData == null && ConfigurationData == null)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+        return true;
     }
 
     public override int GetHashCode() => (ConfigurationData != null ? ConfigurationData.GetHashCode() : 0);

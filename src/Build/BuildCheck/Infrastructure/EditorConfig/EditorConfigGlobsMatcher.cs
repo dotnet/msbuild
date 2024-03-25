@@ -26,10 +26,10 @@ namespace Microsoft.Build.BuildCheck.Infrastructure.EditorConfig
         internal readonly struct SectionNameMatcher
         {
             private readonly ImmutableArray<(int minValue, int maxValue)> _numberRangePairs;
-            // public for testing
-            public Regex Regex { get; }
 
-            public SectionNameMatcher(
+            internal Regex Regex { get; }
+
+            internal SectionNameMatcher(
                 Regex regex,
                 ImmutableArray<(int minValue, int maxValue)> numberRangePairs)
             {
@@ -466,17 +466,17 @@ namespace Microsoft.Build.BuildCheck.Infrastructure.EditorConfig
         {
             private readonly string _sectionName;
 
-            public int Position { get; set; }
+            internal int Position { get; set; }
 
-            public SectionNameLexer(string sectionName)
+            internal SectionNameLexer(string sectionName)
             {
                 _sectionName = sectionName;
                 Position = 0;
             }
 
-            public bool IsDone => Position >= _sectionName.Length;
+            internal bool IsDone => Position >= _sectionName.Length;
 
-            public TokenKind Lex()
+            internal TokenKind Lex()
             {
                 int lexemeStart = Position;
                 switch (_sectionName[Position])
@@ -535,18 +535,18 @@ namespace Microsoft.Build.BuildCheck.Infrastructure.EditorConfig
                 }
             }
 
-            public char CurrentCharacter => _sectionName[Position];
+            internal char CurrentCharacter => _sectionName[Position];
 
             /// <summary>
             /// Call after getting <see cref="TokenKind.SimpleCharacter" /> from <see cref="Lex()" />
             /// </summary>
-            public char EatCurrentCharacter() => _sectionName[Position++];
+            internal char EatCurrentCharacter() => _sectionName[Position++];
 
             /// <summary>
             /// Returns false if there are no more characters in the lex stream.
             /// Otherwise, produces the next character in the stream and returns true.
             /// </summary>
-            public bool TryEatCurrentCharacter(out char nextChar)
+            internal bool TryEatCurrentCharacter(out char nextChar)
             {
                 if (IsDone)
                 {
@@ -560,13 +560,13 @@ namespace Microsoft.Build.BuildCheck.Infrastructure.EditorConfig
                 }
             }
 
-            public char this[int position] => _sectionName[position];
+            internal char this[int position] => _sectionName[position];
 
             /// <summary>
             /// Returns the string representation of a decimal integer, or null if
             /// the current lexeme is not an integer.
             /// </summary>
-            public string? TryLexNumber()
+            internal string? TryLexNumber()
             {
                 bool start = true;
                 var sb = new StringBuilder();
