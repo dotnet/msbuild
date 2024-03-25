@@ -15,17 +15,27 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 ///  that were attribute to a particular rule, but were not recognized by the infrastructure.
 /// The configuration data that is recognized by the infrastructure is passed as <see cref="BuildAnalyzerConfiguration"/>.
 /// </summary>
-/// <param name="ruleId"></param>
-public class CustomConfigurationData(string ruleId)
+public class CustomConfigurationData
 {
     public static CustomConfigurationData Null { get; } = new(string.Empty);
 
     public static bool NotNull(CustomConfigurationData data) => !Null.Equals(data);
 
+    public CustomConfigurationData(string ruleId)
+    {
+        RuleId = ruleId;
+    }
+
+    public CustomConfigurationData(string ruleId, Dictionary<string, string> properties)
+    {
+        RuleId = ruleId;
+        ConfigurationData = properties;
+    }
+
     /// <summary>
     /// Identifier of the rule that the configuration data is for.
     /// </summary>
-    public string RuleId { get; init; } = ruleId;
+    public string RuleId { get; init; }
 
     /// <summary>
     /// Key-value pairs of unstructured data from .editorconfig file.
@@ -55,10 +65,40 @@ public class CustomConfigurationData(string ruleId)
             return false;
         }
 
-        return Equals((CustomConfigurationData)obj);
-    }
+        var customConfigObj = (CustomConfigurationData) obj;
 
-    protected bool Equals(CustomConfigurationData other) => Equals(ConfigurationData, other.ConfigurationData);
+        if(customConfigObj.RuleId != RuleId)
+        {
+            return false;
+        }
+
+        // validate keys and values
+        if (customConfigObj.ConfigurationData != null && ConfigurationData != null)
+        {
+            if (!customConfigObj.ConfigurationData.Keys.SequenceEqual(ConfigurationData.Keys))
+            {
+                return false;
+            }
+
+            var keys = customConfigObj.ConfigurationData.Keys;
+            foreach (var key in keys)
+            {
+                if (customConfigObj.ConfigurationData[key] != ConfigurationData[key])
+                {
+                    return false;
+                }
+            }
+        }else if (customConfigObj.ConfigurationData == null && ConfigurationData == null)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+        return true;
+    }
 
     public override int GetHashCode() => (ConfigurationData != null ? ConfigurationData.GetHashCode() : 0);
 }

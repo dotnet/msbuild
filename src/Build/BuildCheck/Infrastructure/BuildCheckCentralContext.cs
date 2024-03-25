@@ -15,6 +15,12 @@ namespace Microsoft.Build.BuildCheck.Infrastructure;
 /// </summary>
 internal sealed class BuildCheckCentralContext
 {
+    private readonly ConfigurationProvider _configurationProvider;
+    internal BuildCheckCentralContext(ConfigurationProvider configurationProvider)
+    {
+        _configurationProvider = configurationProvider;
+    }
+
     private record CallbackRegistry(
         List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<EvaluatedPropertiesAnalysisData>>)> EvaluatedPropertiesActions,
         List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<ParsedItemsAnalysisData>>)> ParsedItemsActions)
@@ -112,7 +118,7 @@ internal sealed class BuildCheckCentralContext
                 else
                 {
                     configPerRule =
-                        ConfigurationProvider.GetMergedConfigurations(projectFullPath,
+                        _configurationProvider.GetMergedConfigurations(projectFullPath,
                             analyzerCallback.Item1.BuildAnalyzer);
                     if (configPerRule.All(c => !c.IsEnabled))
                     {
