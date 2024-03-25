@@ -152,5 +152,21 @@ configuration:
       - addReply:
           reply: Hello! I noticed that you're targeting one of our servicing branches. Please consider updating the version.
       description: Comment on vs* branches
+    - if:
+      - payloadType: Pull_Request
+      - or:
+        - isAction:
+            action: Opened
+        - isAction:
+            action: Reopened
+      - or:
+        - filesMatchPattern:
+            pattern: ^.+\.swr$
+        - filesMatchPattern:
+            pattern: src/Package/MSBuild.VSSetup.*/.*
+      then:
+      - addReply:
+          reply: Hello @${issueAuthor}, I noticed that you’re changing an *.swr file or any file under src/Package/MSBuild.VSSetup.*. Please make sure to validate this change by an experimental VS insertion. This is accomplished by pushing to an exp/* branch, which requires write permissions to this repo.
+      description: Remind to run VS Perf DDRITs when deployed assemblies change
 onFailure: 
 onSuccess: 
