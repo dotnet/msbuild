@@ -42,6 +42,8 @@ namespace Microsoft.Build.UnitTests
 
         private VerifySettings _settings = new();
 
+        private readonly CultureInfo _originalCulture = Thread.CurrentThread.CurrentCulture;
+
         public TerminalLogger_Tests()
         {
             _mockTerminal = new Terminal(_outputWriter);
@@ -52,6 +54,9 @@ namespace Microsoft.Build.UnitTests
             _terminallogger.CreateStopwatch = () => new MockStopwatch();
 
             UseProjectRelativeDirectory("Snapshots");
+
+            // Avoids issues with different cultures on different machines
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
         }
 
         #region IEventSource implementation
@@ -93,6 +98,7 @@ namespace Microsoft.Build.UnitTests
         public void Dispose()
         {
             _terminallogger.Shutdown();
+            Thread.CurrentThread.CurrentCulture = _originalCulture;
         }
 
         #endregion
@@ -220,7 +226,7 @@ namespace Microsoft.Build.UnitTests
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
-                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning!"));
+                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("A\nMulti\r\nLine\nWarning!"));
             });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();

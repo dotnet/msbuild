@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
@@ -14,6 +15,7 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+using Microsoft.NET.StringTools;
 using Microsoft.Win32;
 
 // Needed for DoesTaskHostExistForParameters
@@ -397,12 +399,60 @@ namespace Microsoft.Build.Evaluation
             return Encoding.UTF8.GetString(Convert.FromBase64String(toDecode));
         }
 
-        /// <summary>
-        /// Hash the string independent of bitness and target framework.
-        /// </summary>
-        internal static int StableStringHash(string toHash)
+        internal enum StringHashingAlgorithm
         {
-            return CommunicationsUtilities.GetHashCode(toHash);
+            // Legacy way of calculating StableStringHash - which was derived from string GetHashCode
+            Legacy,
+            // FNV-1a 32bit hash
+            Fnv1a32bit,
+            // Custom FNV-1a 32bit hash - optimized for speed by hashing by the whole chars (not individual bytes)
+            Fnv1a32bitFast,
+            // FNV-1a 64bit hash
+            Fnv1a64bit,
+            // Custom FNV-1a 64bit hash - optimized for speed by hashing by the whole chars (not individual bytes)
+            Fnv1a64bitFast,
+            // SHA256 hash - gets the hex string of the hash (with no prefix)
+            Sha256
+        }
+
+        /// <summary>
+        /// Legacy implementation that doesn't lead to JIT pulling the new functions from StringTools (so those must not be referenced anywhere in the function body)
+        ///  - for cases where the calling code would erroneously load old version of StringTools alongside of the new version of Microsoft.Build.
+        /// Should be removed once Wave17_10 is removed.
+        /// </summary>
+        internal static object StableStringHashLegacy(string toHash)
+            => CommunicationsUtilities.GetHashCode(toHash);
+
+        /// <summary>
+        /// Hash the string independent of bitness, target framework and default codepage of the environment.
+        /// We do not want this to be inlined, as then the Expander would call directly the new overload, and hence
+        ///  JIT load the functions from StringTools - so we would not be able to prevent their loading with ChangeWave as we do now.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static object StableStringHash(string toHash)
+            => StableStringHash(toHash, StringHashingAlgorithm.Legacy);
+
+        internal static object StableStringHash(string toHash, StringHashingAlgorithm algo) =>
+            algo switch
+            {
+                StringHashingAlgorithm.Legacy => CommunicationsUtilities.GetHashCode(toHash),
+                StringHashingAlgorithm.Fnv1a32bit => FowlerNollVo1aHash.ComputeHash32(toHash),
+                StringHashingAlgorithm.Fnv1a32bitFast => FowlerNollVo1aHash.ComputeHash32Fast(toHash),
+                StringHashingAlgorithm.Fnv1a64bit => FowlerNollVo1aHash.ComputeHash64(toHash),
+                StringHashingAlgorithm.Fnv1a64bitFast => FowlerNollVo1aHash.ComputeHash64Fast(toHash),
+                StringHashingAlgorithm.Sha256 => CalculateSha256(toHash),
+                _ => throw new ArgumentOutOfRangeException(nameof(algo), algo, null)
+            };
+
+        private static string CalculateSha256(string toHash)
+        {
+            var sha = System.Security.Cryptography.SHA256.Create();
+            var hashResult = new StringBuilder();
+            foreach (byte theByte in sha.ComputeHash(Encoding.UTF8.GetBytes(toHash)))
+            {
+                hashResult.Append(theByte.ToString("x2"));
+            }
+            return hashResult.ToString();
         }
 
         /// <summary>

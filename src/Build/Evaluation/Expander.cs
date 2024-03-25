@@ -4159,7 +4159,15 @@ namespace Microsoft.Build.Evaluation
                         {
                             if (TryGetArg(args, out string arg0))
                             {
-                                returnVal = IntrinsicFunctions.StableStringHash(arg0);
+                                // Prevent loading methods refs from StringTools if ChangeWave opted out.
+                                returnVal = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10)
+                                    ? IntrinsicFunctions.StableStringHash(arg0)
+                                    : IntrinsicFunctions.StableStringHashLegacy(arg0);
+                                return true;
+                            }
+                            else if (TryGetArgs(args, out string arg1, out string arg2) && Enum.TryParse<IntrinsicFunctions.StringHashingAlgorithm>(arg2, true, out var hashAlgorithm))
+                            {
+                                returnVal = IntrinsicFunctions.StableStringHash(arg1, hashAlgorithm);
                                 return true;
                             }
                         }

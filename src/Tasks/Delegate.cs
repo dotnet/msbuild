@@ -14,13 +14,13 @@ using Microsoft.Build.Tasks.AssemblyDependency;
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// File.GetAttributes delegate
+    /// File.GetAttributes delegate.
     /// </summary>
     /// <param name="path">The path get attributes for.</param>
     internal delegate FileAttributes GetAttributes(string path);
 
     /// <summary>
-    /// File SetAttributes delegate
+    /// File SetAttributes delegate.
     /// </summary>
     /// <param name="path">The path to set attributes for.</param>
     /// <param name="attributes">The actual file attributes.</param>
@@ -37,7 +37,7 @@ namespace Microsoft.Build.Tasks
     internal delegate void SetLastWriteTime(string path, DateTime timestamp);
 
     /// <summary>
-    /// GetDirectories delegate
+    /// GetDirectories delegate.
     /// </summary>
     /// <param name="path">The path to get directories for.</param>
     /// <param name="pattern">The pattern to search for.</param>

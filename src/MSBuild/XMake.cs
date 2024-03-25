@@ -1844,6 +1844,26 @@ namespace Microsoft.Build.CommandLine
             CultureInfo.CurrentUICulture = desiredCulture;
             CultureInfo.DefaultThreadCurrentUICulture = desiredCulture;
 
+#if RUNTIME_TYPE_NETCORE
+            if (EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
+#else
+            if (EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding()
+                && !CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("en", StringComparison.InvariantCultureIgnoreCase))
+#endif
+            {
+                try
+                {
+                    // Setting both encodings causes a change in the CHCP, making it so we don't need to P-Invoke CHCP ourselves.
+                    Console.OutputEncoding = Encoding.UTF8;
+                    // If the InputEncoding is not set, the encoding will work in CMD but not in PowerShell, as the raw CHCP page won't be changed.
+                    Console.InputEncoding = Encoding.UTF8;
+                }
+                catch (Exception ex) when (ex is IOException || ex is SecurityException)
+                {
+                    // The encoding is unavailable. Do nothing.
+                }
+            }
+
             // Determine if the language can be displayed in the current console codepage, otherwise set to US English
             int codepage;
 
@@ -2455,20 +2475,8 @@ namespace Microsoft.Build.CommandLine
             }
 #endif
 
-            bool shouldShowLogo = !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoLogo] &&
-                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Preprocess) &&
-                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetProperty) &&
-                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetItem) &&
-                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetTargetResult) &&
-                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.FeatureAvailability);
-
-            // show copyright message if nologo switch is not set
-            // NOTE: we heed the nologo switch even if there are switch errors
-            if (!recursing && shouldShowLogo)
-            {
-                DisplayVersionMessage();
-            }
-
+            bool useTerminalLogger = ProcessTerminalLoggerConfiguration(commandLineSwitches, out string aggregatedTerminalLoggerParameters);
+            DisplayVersionMessageIfNeeded(recursing, useTerminalLogger, commandLineSwitches);
 
             // Idle priority would prevent the build from proceeding as the user does normal actions.
             // This switch is processed early to capture both the command line case (main node should
@@ -2657,8 +2665,6 @@ namespace Microsoft.Build.CommandLine
                     inputResultsCaches = ProcessInputResultsCaches(commandLineSwitches);
 
                     outputResultsCache = ProcessOutputResultsCache(commandLineSwitches);
-
-                    bool useTerminalLogger = ProcessTerminalLoggerConfiguration(commandLineSwitches, out string aggregatedTerminalLoggerParameters);
 
                     // figure out which loggers are going to listen to build events
                     string[][] groupedFileLoggerParameters = commandLineSwitches.GetFileLoggerParameters();
@@ -4465,9 +4471,29 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Displays the application version message/logo.
         /// </summary>
-        private static void DisplayVersionMessage()
+        private static void DisplayVersionMessageIfNeeded(bool recursing, bool useTerminalLogger, CommandLineSwitches commandLineSwitches)
         {
-            Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildVersionMessage", ProjectCollection.DisplayVersion, NativeMethods.FrameworkName));
+            if (recursing)
+            {
+                return;
+            }
+
+            // Show the versioning information if the user has not disabled it or msbuild is not running in a mode
+            //  where it is not appropriate to show the versioning information (information querying mode that can be plugged into CLI scripts,
+            //  terminal logger mode, where we want to display only the most relevant info, while output is not meant for investigation).
+            // NOTE: response files are not reflected in this check. So enabling TL in response file will lead to version message still being shown.
+            bool shouldShowLogo = !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoLogo] &&
+                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Preprocess) &&
+                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetProperty) &&
+                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetItem) &&
+                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetTargetResult) &&
+                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.FeatureAvailability) &&
+                                  !useTerminalLogger;
+
+            if (shouldShowLogo)
+            {
+                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildVersionMessage", ProjectCollection.DisplayVersion, NativeMethods.FrameworkName));
+            }
         }
 
         /// <summary>

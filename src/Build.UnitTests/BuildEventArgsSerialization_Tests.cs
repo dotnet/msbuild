@@ -547,6 +547,7 @@ namespace Microsoft.Build.UnitTests
                 e => e.ResponseFilePath);
         }
 
+
         [Fact]
         public void RoundtripCriticalBuildMessageEventArgs()
         {
