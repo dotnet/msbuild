@@ -1280,7 +1280,7 @@ namespace Microsoft.Build.BackEnd
             if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents)
             {
                 IList parameterValueAsList = parameterValue as IList;
-                bool legacyBehavior = !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10);
+                bool legacyBehavior = !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12);
 
                 // Legacy textual logging for parameters that are not lists.
                 if (legacyBehavior && parameterValueAsList == null)
