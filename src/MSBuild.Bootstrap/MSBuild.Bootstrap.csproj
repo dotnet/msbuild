@@ -1,5 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="$(RepoRoot)eng\BootStrapMSBuild.props" />
+
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
 
@@ -43,8 +45,8 @@
     <Copy SourceFiles="$(PublishDir)$(AssemblyName).deps.json" DestinationFiles="$(PublishDir)MSBuild.deps.json" SkipUnchangedFiles="true" />
   </Target>
 
-  <Import Project="..\Package\GetBinPaths.targets" Condition="$(TargetFramework.StartsWith('net4'))"/>
-  <Import Project="..\Package\GetBinPaths.Arm64.targets" Condition="$(TargetFramework.StartsWith('net4'))"/>
+  <Import Project="..\Package\GetBinPaths.targets" Condition="$(TargetFramework.StartsWith('net4'))" />
+  <Import Project="..\Package\GetBinPaths.Arm64.targets" Condition="$(TargetFramework.StartsWith('net4'))" />
 
   <Import Project="$(RepoRoot)eng\BootStrapMSBuild.targets" />
 

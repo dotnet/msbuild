@@ -80,7 +80,7 @@ namespace Microsoft.Build.Construction
         /// It is to be used for the project location when the project has not been given a name.
         /// In that case, it exists, but can't have a specific location.
         /// </summary>
-        internal static ElementLocation EmptyLocation
+        public static ElementLocation EmptyLocation
         {
             get { return s_emptyElementLocation; }
         }

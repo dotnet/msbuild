@@ -7,15 +7,14 @@
    -->
 
   <PropertyGroup>
-    <BootstrapDestination>$(ArtifactsBinDir)bootstrap\</BootstrapDestination>
-    <BootstrapDestination Condition="'$(Platform)' == 'x64' or '$(Platform)' == 'arm64'">$(BootstrapDestination)$(Platform)\</BootstrapDestination>
-    <BootstrapDestination>$(BootstrapDestination)$(TargetFramework.ToLowerInvariant())\MSBuild\</BootstrapDestination>
-
     <BootstrapDependsOn Condition="$(TargetFramework.StartsWith('net4'))">BootstrapFull</BootstrapDependsOn>
     <BootstrapDependsOn Condition="!$(TargetFramework.StartsWith('net4'))">BootstrapNetCore</BootstrapDependsOn>
 
     <!-- Needed to ensure that RuntimeTargetsCopyLocalItems is populated for full framework -->
     <DisableRuntimeTargets>false</DisableRuntimeTargets>
+
+    <!-- Disable build acceleration for this non-standard project. The Bootstrap target must run after any of the dependencies changes.  -->
+    <AccelerateBuildsInVisualStudio>false</AccelerateBuildsInVisualStudio>
   </PropertyGroup>
 
   <Target Name="Bootstrap" DependsOnTargets="$(BootstrapDependsOn)"
