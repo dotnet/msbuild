@@ -12,11 +12,16 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.BuildCheck.Infrastructure;
-internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFactory loggingContextFactory, IBuildCheckManager buildCheckManager)
+internal sealed class BuildCheckConnectorLogger(
+    IBuildAnalysisLoggingContextFactory loggingContextFactory, 
+    IBuildCheckManager buildCheckManager,
+    bool isStatsEnabled)
     : ILogger
 {
     public LoggerVerbosity Verbosity { get; set; }
     public string? Parameters { get; set; }
+
+    private bool _areStatsEnabled = isStatsEnabled;
 
     public void Initialize(IEventSource eventSource)
     {
@@ -70,7 +75,14 @@ internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFact
         {
             if (buildCheckBuildEventArgs is BuildCheckTracingEventArgs tracingEventArgs)
             {
-                _stats.Merge(tracingEventArgs.TracingData, (span1, span2) => span1 + span2);
+                if (tracingEventArgs.isInfraTracing)
+                {
+                    _statsInfra.Merge(tracingEventArgs.TracingData, (span1, span2) => span1 + span2);
+                }
+                else
+                {
+                    _statsAnalyzers.Merge(tracingEventArgs.TracingData, (span1, span2) => span1 + span2);
+                }
             }
             else if (buildCheckBuildEventArgs is BuildCheckAcquisitionEventArgs acquisitionEventArgs)
             {
@@ -79,13 +91,11 @@ internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFact
         }
     }
 
-    private readonly Dictionary<string, TimeSpan> _stats = new Dictionary<string, TimeSpan>();
+    private readonly Dictionary<string, TimeSpan> _statsInfra = new Dictionary<string, TimeSpan>();
+    private readonly Dictionary<string, TimeSpan> _statsAnalyzers = new Dictionary<string, TimeSpan>();
 
     private void EventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
     {
-        _stats.Merge(buildCheckManager.CreateTracingStats(), (span1, span2) => span1 + span2);
-        string msg = string.Join(Environment.NewLine, _stats.Select(a => a.Key + ": " + a.Value));
-
 
         BuildEventContext buildEventContext = e.BuildEventContext ?? new BuildEventContext(
             BuildEventContext.InvalidNodeId, BuildEventContext.InvalidTargetId,
@@ -93,8 +103,35 @@ internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFact
 
         LoggingContext loggingContext = loggingContextFactory.CreateLoggingContext(buildEventContext).ToLoggingContext();
 
-        // TODO: tracing: https://github.com/dotnet/msbuild/issues/9629
-        loggingContext.LogCommentFromText(MessageImportance.High, msg);
+        if (_areStatsEnabled)
+        {
+            _statsAnalyzers.Merge(buildCheckManager.CreateAnalyzerTracingStats(), (span1, span2) => span1 + span2);
+            _statsInfra.Merge(buildCheckManager.CreateBuildCheckInfraTracingStats(), (span1, span2) => span1 + span2);
+
+            LogAnalyzerStats(loggingContext);
+        }
+    }
+    
+    private void LogAnalyzerStats(LoggingContext loggingContext)
+    {
+        loggingContext.LogCommentFromText(MessageImportance.High, $"BuildCheck run times{Environment.NewLine}");
+        string infraData = buildStatsTable("Infrastructure run times", _statsInfra);
+        loggingContext.LogCommentFromText(MessageImportance.High, infraData);
+
+        string analyzerData = buildStatsTable("Analyzer run times", _statsAnalyzers);
+        loggingContext.LogCommentFromText(MessageImportance.High, analyzerData);
+    }
+
+    private string buildStatsTable(string title, Dictionary<string, TimeSpan> rowData)
+    {
+        string headerSeparator = $"=============";
+        string rowSeparator = $"{Environment.NewLine}----------{Environment.NewLine}";
+
+        string header = $"{headerSeparator}{Environment.NewLine}{title}{Environment.NewLine}{headerSeparator}{Environment.NewLine}";
+
+        string rows = string.Join(rowSeparator, rowData.Select(a => $"{a.Key} | {a.Value}"));
+
+        return $"{header}{rows}{Environment.NewLine}";
     }
 
     public void Shutdown()

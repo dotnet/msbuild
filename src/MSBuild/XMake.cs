@@ -718,6 +718,7 @@ namespace Microsoft.Build.CommandLine
                 string outputResultsCache = null;
                 bool question = false;
                 bool isBuildCheckEnabled = false;
+                bool areBuildCheckStatsEnabled = false;
                 string[] getProperty = Array.Empty<string>();
                 string[] getItem = Array.Empty<string>();
                 string[] getTargetResult = Array.Empty<string>();
@@ -766,6 +767,7 @@ namespace Microsoft.Build.CommandLine
                                             ref lowPriority,
                                             ref question,
                                             ref isBuildCheckEnabled,
+                                            ref areBuildCheckStatsEnabled,
                                             ref getProperty,
                                             ref getItem,
                                             ref getTargetResult,
@@ -869,6 +871,7 @@ namespace Microsoft.Build.CommandLine
                                     lowPriority,
                                     question,
                                     isBuildCheckEnabled,
+                                    areBuildCheckStatsEnabled,
                                     inputResultsCaches,
                                     outputResultsCache,
                                     saveProjectResult: outputPropertiesItemsOrTargetResults,
@@ -1256,6 +1259,7 @@ namespace Microsoft.Build.CommandLine
             bool lowPriority,
             bool question,
             bool isBuildCheckEnabled,
+            bool areBuildCheckStatsEnabled,
             string[] inputResultsCaches,
             string outputResultsCache,
             bool saveProjectResult,
@@ -1457,7 +1461,9 @@ namespace Microsoft.Build.CommandLine
                     parameters.InputResultsCacheFiles = inputResultsCaches;
                     parameters.OutputResultsCacheFile = outputResultsCache;
                     parameters.Question = question;
+
                     parameters.IsBuildCheckEnabled = isBuildCheckEnabled;
+                    parameters.AreBuildCheckStatsEnabled = areBuildCheckStatsEnabled;
 #if FEATURE_REPORTFILEACCESSES
                     parameters.ReportFileAccesses = reportFileAccesses;
 #endif
@@ -2453,6 +2459,7 @@ namespace Microsoft.Build.CommandLine
             ref bool lowPriority,
             ref bool question,
             ref bool isBuildCheckEnabled,
+            ref bool areBuildCheckStatsEnabled,
             ref string[] getProperty,
             ref string[] getItem,
             ref string[] getTargetResult,
@@ -2584,6 +2591,7 @@ namespace Microsoft.Build.CommandLine
                                                            ref lowPriority,
                                                            ref question,
                                                            ref isBuildCheckEnabled,
+                                                           ref areBuildCheckStatsEnabled,
                                                            ref getProperty,
                                                            ref getItem,
                                                            ref getTargetResult,
@@ -2670,6 +2678,7 @@ namespace Microsoft.Build.CommandLine
                     question = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Question);
 
                     isBuildCheckEnabled = IsBuildCheckEnabled(commandLineSwitches);
+                    areBuildCheckStatsEnabled = AreBuildCheckStatsEnabled(commandLineSwitches);
 
                     inputResultsCaches = ProcessInputResultsCaches(commandLineSwitches);
 
@@ -2748,6 +2757,12 @@ namespace Microsoft.Build.CommandLine
             // todo: opt-in behavior: https://github.com/dotnet/msbuild/issues/9723
             bool isAnalysisEnabled = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Analyze);
             return isAnalysisEnabled;
+        }
+
+        private static bool AreBuildCheckStatsEnabled(CommandLineSwitches commandLineSwitches)
+        {
+            return commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Analyze) &&
+                commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.AnalyzeStats);
         }
 
         private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)

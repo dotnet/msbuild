@@ -14,6 +14,11 @@ internal class TracingReporter
     internal const string INFRA_STAT_NAME = "Infrastructure";
     internal Dictionary<string, TimeSpan> TracingStats { get; } = new();
 
+    // Infrastructure time keepers, examples for now
+    internal TimeSpan analyzerAcquisitionTime;
+    internal long analyzerSetDataSourceTime;
+    internal long newProjectAnalyzersTime;
+
     public void AddStats(string name, TimeSpan subtotal)
     {
         if (TracingStats.TryGetValue(name, out TimeSpan existing))
