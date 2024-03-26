@@ -12,14 +12,14 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.BackEnd.Components.Logging
 {
     /// <summary>
-    ///     Logging context and helpers for evaluation logging
+    ///     Logging context and helpers for evaluation logging.
     /// </summary>
     internal class EvaluationLoggingContext : LoggingContext
     {
         private readonly string _projectFile;
 
-        public EvaluationLoggingContext(ILoggingService loggingService, BuildEventContext buildEventContext, string projectFile) :
-            base(
+        public EvaluationLoggingContext(ILoggingService loggingService, BuildEventContext buildEventContext, string projectFile)
+            : base(
                 loggingService,
                 loggingService.CreateEvaluationBuildEventContext(buildEventContext.NodeId, buildEventContext.SubmissionId))
         {

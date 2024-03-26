@@ -6,6 +6,7 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.BuildCheck.Logging;
+
 internal class AnalyzerLoggingContextFactory(ILoggingService loggingService) : IBuildAnalysisLoggingContextFactory
 {
     public IBuildAnalysisLoggingContext CreateLoggingContext(BuildEventContext eventContext) =>

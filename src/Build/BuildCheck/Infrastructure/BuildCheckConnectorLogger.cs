@@ -12,10 +12,12 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.BuildCheck.Infrastructure;
+
 internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFactory loggingContextFactory, IBuildCheckManager buildCheckManager)
     : ILogger
 {
     public LoggerVerbosity Verbosity { get; set; }
+
     public string? Parameters { get; set; }
 
     public void Initialize(IEventSource eventSource)
@@ -55,8 +57,7 @@ internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFact
                 return;
             }
 
-            buildCheckManager.StartProjectEvaluation(BuildCheckDataSource.EventArgs, e.BuildEventContext!,
-                projectEvaluationStartedEventArgs.ProjectFile!);
+            buildCheckManager.StartProjectEvaluation(BuildCheckDataSource.EventArgs, e.BuildEventContext!, projectEvaluationStartedEventArgs.ProjectFile!);
         }
         else if (e is ProjectStartedEventArgs projectStartedEvent)
         {

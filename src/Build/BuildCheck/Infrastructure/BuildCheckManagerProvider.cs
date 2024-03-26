@@ -160,7 +160,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         /// <summary>
         /// To be used by acquisition module
-        /// Registeres the custom analyzer, the construction of analyzer is needed during registration
+        /// Registeres the custom analyzer, the construction of analyzer is needed during registration.
         /// </summary>
         internal void RegisterCustomAnalyzer(
             BuildCheckDataSource buildCheckDataSource,
@@ -169,7 +169,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             if (_enabledDataSources[(int)buildCheckDataSource])
             {
                 var instance = factory();
-                _analyzersRegistry.Add(new BuildAnalyzerFactoryContext(factory,
+                _analyzersRegistry.Add(new BuildAnalyzerFactoryContext(
+                    factory,
                     instance.SupportedRules.Select(r => r.Id).ToArray(),
                     instance.SupportedRules.Any(r => r.DefaultConfiguration.IsEnabled == true)));
             }
