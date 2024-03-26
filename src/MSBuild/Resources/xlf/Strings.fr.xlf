@@ -1683,10 +1683,9 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
     </note>
       </trans-unit>
       <trans-unit id="TestSummary">
-        <source>Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</source>
-        <target state="translated">Série de tests : {0}. Total : {1} Échec : {2}, Réussi : {3}, Ignoré : {4}, Durée : {5} s</target>
-        <note>{0} string, localized result e.g. Failed surrounded by ANSI colors.
-{1-5} whole number</note>
+        <source>Test summary: Total: {0} Failed: {1} Passed: {2} Skipped: {3}, Duration: {4}s</source>
+        <target state="new">Test summary: Total: {0} Failed: {1} Passed: {2} Skipped: {3}, Duration: {4}s</target>
+        <note>{0-4} whole number</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>

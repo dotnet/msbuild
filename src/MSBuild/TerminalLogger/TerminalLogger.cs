@@ -325,16 +325,19 @@ internal sealed partial class TerminalLogger : INodeLogger
                 var skipped = _testRunSummaries.Sum(t => t.Skipped);
                 var testDuration = (_testStartTime != null && _testEndTime != null ? (_testEndTime - _testStartTime).Value.TotalSeconds : 0).ToString("F1");
 
-                var colorizedResult = _testRunSummaries.Any(t => t.Failed > 0) || _buildHasErrors
-                    ? AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Failed"), TerminalColor.Red)
-                    : AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Succeeded"), TerminalColor.Green);
+                var colorizeFailed = failed > 0;
+                var colorizePassed = passed > 0 && !_buildHasErrors && failed == 0;
+                var colorizeSkipped = skipped > 0 && skipped == total && !_buildHasErrors && failed == 0;
+
+                string failedText = colorizeFailed ? AnsiCodes.Colorize(failed.ToString(), TerminalColor.Red) : failed.ToString();
+                string passedText = colorizePassed ? AnsiCodes.Colorize(passed.ToString(), TerminalColor.Green) : passed.ToString();
+                string skippedTest = colorizeSkipped ? AnsiCodes.Colorize(skipped.ToString(), TerminalColor.Yellow) : skipped.ToString();
 
                 Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary",
-                    colorizedResult,
                     total,
-                    failed,
-                    passed,
-                    skipped,
+                    failedText,
+                    passedText,
+                    skippedTest,
                     testDuration));
             }
         }
@@ -700,6 +703,8 @@ internal sealed partial class TerminalLogger : INodeLogger
                                 _ = int.TryParse(extendedMessage.ExtendedMetadata!["passed"]!, out int passed);
                                 _ = int.TryParse(extendedMessage.ExtendedMetadata!["skipped"]!, out int skipped);
                                 _ = int.TryParse(extendedMessage.ExtendedMetadata!["failed"]!, out int failed);
+
+                                var attachments = extendedMessage.ExtendedMetadata.Where(m => m.Key.StartsWith("attachment")).Select(p => p.Value);
 
                                 _testRunSummaries.Add(new TestSummary(total, passed, skipped, failed));
 
