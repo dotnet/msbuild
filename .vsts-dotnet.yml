@@ -309,8 +309,8 @@ extends:
             - Windows_NT
             - Source_Build_Managed
           pool:
-            name: $(DncEngInternalBuildPool)
-            image: $(WindowsImage)
+            name: AzurePipelines-EO
+            demands: ImageOverride -equals windows.vs2022.amd64
             os: windows
 
     - template: eng\common\templates-official\post-build\post-build.yml@self
