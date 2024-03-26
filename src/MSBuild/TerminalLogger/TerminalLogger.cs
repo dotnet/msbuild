@@ -705,8 +705,6 @@ internal sealed partial class TerminalLogger : INodeLogger
                                 _ = int.TryParse(extendedMessage.ExtendedMetadata!["skipped"]!, out int skipped);
                                 _ = int.TryParse(extendedMessage.ExtendedMetadata!["failed"]!, out int failed);
 
-                                var attachments = extendedMessage.ExtendedMetadata.Where(m => m.Key.StartsWith("attachment")).Select(p => p.Value);
-
                                 _testRunSummaries.Add(new TestSummary(total, passed, skipped, failed));
 
                                 _testEndTime = _testEndTime == null
