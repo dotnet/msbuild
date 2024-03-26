@@ -1635,8 +1635,24 @@
       {4}: duration in seconds with 1 decimal point
     </comment>
   </data>
-  <data name="TestSummary" xml:space="preserve">
-    <value>Test summary: Total: {0} Failed: {1} Passed: {2} Skipped: {3}, Duration: {4}s</value>
-    <comment>{0-4} whole number</comment>
+  <data name="TestSummary_BannerAndTotal" xml:space="preserve">
+    <value>Test summary: total: {0}</value>
+    <comment>{0} whole number</comment>
+  </data>
+  <data name="TestSummary_Duration" xml:space="preserve">
+    <value>duration: {0}s</value>
+    <comment>{0} whole number</comment>
+  </data>
+  <data name="TestSummary_Failed" xml:space="preserve">
+    <value>failed: {0}</value>
+    <comment>{0} whole number</comment>
+  </data>
+  <data name="TestSummary_Skipped" xml:space="preserve">
+    <value>skipped: {0}</value>
+    <comment>{0} whole number</comment>
+  </data>
+  <data name="TestSummary_Succeeded" xml:space="preserve">
+    <value>succeeded: {0}</value>
+    <comment>{0} whole number</comment>
   </data>
 </root>

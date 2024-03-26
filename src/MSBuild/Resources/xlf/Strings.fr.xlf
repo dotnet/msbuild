@@ -1682,10 +1682,30 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       {4}: duration in seconds with 1 decimal point
     </note>
       </trans-unit>
-      <trans-unit id="TestSummary">
-        <source>Test summary: Total: {0} Failed: {1} Passed: {2} Skipped: {3}, Duration: {4}s</source>
-        <target state="new">Test summary: Total: {0} Failed: {1} Passed: {2} Skipped: {3}, Duration: {4}s</target>
-        <note>{0-4} whole number</note>
+      <trans-unit id="TestSummary_BannerAndTotal">
+        <source>Test summary: total: {0}</source>
+        <target state="new">Test summary: total: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Duration">
+        <source>duration: {0}s</source>
+        <target state="new">duration: {0}s</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Failed">
+        <source>failed: {0}</source>
+        <target state="new">failed: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Skipped">
+        <source>skipped: {0}</source>
+        <target state="new">skipped: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Succeeded">
+        <source>succeeded: {0}</source>
+        <target state="new">succeeded: {0}</target>
+        <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>

@@ -329,16 +329,17 @@ internal sealed partial class TerminalLogger : INodeLogger
                 var colorizePassed = passed > 0 && !_buildHasErrors && failed == 0;
                 var colorizeSkipped = skipped > 0 && skipped == total && !_buildHasErrors && failed == 0;
 
-                string failedText = colorizeFailed ? AnsiCodes.Colorize(failed.ToString(), TerminalColor.Red) : failed.ToString();
-                string passedText = colorizePassed ? AnsiCodes.Colorize(passed.ToString(), TerminalColor.Green) : passed.ToString();
-                string skippedTest = colorizeSkipped ? AnsiCodes.Colorize(skipped.ToString(), TerminalColor.Yellow) : skipped.ToString();
+                string summaryAndTotalText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_BannerAndTotal", total);
+                string failedText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Failed", failed);
+                string passedText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Succeeded", passed);
+                string skippedText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Skipped", skipped);
+                string durationText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Duration", testDuration);
 
-                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary",
-                    total,
-                    failedText,
-                    passedText,
-                    skippedTest,
-                    testDuration));
+                failedText = colorizeFailed ? AnsiCodes.Colorize(failedText.ToString(), TerminalColor.Red) : failedText;
+                passedText = colorizePassed ? AnsiCodes.Colorize(passedText.ToString(), TerminalColor.Green) : passedText;
+                skippedText = colorizeSkipped ? AnsiCodes.Colorize(skippedText.ToString(), TerminalColor.Yellow) : skippedText;
+
+                Terminal.WriteLine(string.Join(" ", summaryAndTotalText, failedText, passedText, skippedText, durationText));
             }
         }
         finally
