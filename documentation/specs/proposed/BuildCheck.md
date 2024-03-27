@@ -149,11 +149,9 @@ For the `.editorconfig` file configuration, following will apply:
 
 ```ini
 [*.csproj]
-build_check.BC0101.IsEnabled=true
 build_check.BC0101.Severity=warning
 
-build_check.COND0543.IsEnabled=false
-build_check.COND0543.Severity=Error
+build_check.COND0543.Severity=none
 build_check.COND0543.EvaluationAnalysisScope=AnalyzedProjectOnly
 build_check.COND0543.CustomSwitch=QWERTY
 ```
@@ -185,10 +183,10 @@ If all the rules from a single analyzer have severity `None` - analyzer won't be
 #### Scope of Analysis
 
 Option `EvaluationAnalysisScope` with following possible options will be available:
-* `AnalyzedProjectOnly` - Only the data from currently analyzed project will be sent to the analyzer. Imports will be discarded.
-* `AnalyzedProjectWithImportsFromCurrentWorkTree` - Only the data from currently analyzed project and imports from files under the entry project or solution will be sent to the analyzer. Other imports will be discarded.
-* `AnalyzedProjectWithImportsWithoutSdks` - Imports from SDKs will not be sent to the analyzer. Other imports will be sent.
-* `AnalyzedProjectWithAllImports` - All data will be sent to the analyzer.
+* `ProjectOnly` - Only the data from currently analyzed project will be sent to the analyzer. Imports will be discarded.
+* `ProjectWithImportsFromCurrentWorkTree` - Only the data from currently analyzed project and imports from files under the entry project or solution will be sent to the analyzer. Other imports will be discarded.
+* `ProjectWithImportsWithoutSdks` - Imports from SDKs will not be sent to the analyzer. Other imports will be sent.
+* `ProjectWithAllImports` - All data will be sent to the analyzer.
 
 All rules of a single analyzer must have the `EvaluationAnalysisScope` configured to a same value. If any rule from the analyzer have the value configured differently - a warning will be issued during the build and analyzer will be deregistered.
 
