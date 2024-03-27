@@ -130,7 +130,7 @@ extends:
             zipSources: false
           condition: and(succeeded(), in(variables['SignType'], 'test', 'real'))
 
-        # OptProf is not needed because this packaged will not be serviced in VS.
+        # OptProf is not needed because 17.3 will not be serviced in VS.
         # - task: MicroBuildOptProfPlugin@6
         #   inputs:
         #     ProfilingInputsDropName: '$(VisualStudio.DropName)'
