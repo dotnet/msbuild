@@ -417,7 +417,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                     var skipped = _testRunSummaries.Sum(t => t.Skipped);
                     var testDuration = (_testStartTime != null && _testEndTime != null ? (_testEndTime - _testStartTime).Value.TotalSeconds : 0).ToString("F1");
 
-                    var colorizedResult = _testRunSummaries.Any(t => t.Failed > 0) || || (_buildErrorsCount > 0)
+                    var colorizedResult = _testRunSummaries.Any(t => t.Failed > 0) || (_buildErrorsCount > 0)
                         ? AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Failed"), TerminalColor.Red)
                         : AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Succeeded"), TerminalColor.Green);
 
