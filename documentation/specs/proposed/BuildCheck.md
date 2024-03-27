@@ -53,7 +53,7 @@ Majority of following cases are included in appropriate context within the scena
 * Bulk configuration of multiple rules (based on prefixes).
 * Specifying scope of MSBuild imports that will be considered for analysis (so that e.g. data from sdk won't even be passed to analyzer, if not requested).
 * Attempts to try to configure standard msbuild warnings/errors via `.editorconfig` should lead to fail fast errors.
-* Configuring analysis levels when analysing from binlog - beyond the collected editorconfigs
+* Configuring analysis levels when analyzing from binlog - beyond the collected editorconfigs
 * Rich information in VS error window.
 
 
@@ -65,7 +65,7 @@ Majority of following cases are included in appropriate context within the scena
 * Opt-out of analysis on code-level (something like C# `#pragma warning disable`, but within msbuild xml files).
 * Simplified authoring experience via dedicated reference assembly.
 * Restore phase analysis.
-* Turning analysis off/on based on target (e.g. multi-targetted builds, calling MSBuild task etc.).
+* Turning analysis off/on based on target (e.g. multi-targeted builds, calling MSBuild task etc.).
 * Controlling/Configuring lifetime of analyzers - analyzers will currently be held alive, as single instance per analyzer, for the whole duration of the build. But future versions might prevent some of the analyzers to survive beyond a scope of a single project built (means for sharing data would be provided).
 * ETW for analyzers.
 * Attributing `.editorconfig` configurations to .sln files. E.g.:
@@ -82,7 +82,7 @@ build_check.BC0101.Severity=warning
 buildcheck.BC0101.IsEnabled=true
 buildcheck.BC0101.Severity=warning
 ```
-* Respecting `.editorconfig` file in msbuild import locations (unless they are in the parent folders hieararchy of particular project file).
+* Respecting `.editorconfig` file in msbuild import locations (unless they are in the parent folders hierarchy of particular project file).
 * CodeFixes are not supported in V1
  
 
@@ -112,7 +112,7 @@ Users will have option to explicitly opt-in to run BuildCheck during the binlog 
 
 Would there be any analyzers that are not possible to run during the replay mode (subject to internal design - this difference won't be exposed during [custom analyzers authoring](#custom-analyzers-authoring)), replay mode will inform user about those via warnings.
 
-Replay mode will by default consider `.editorconfig` files stored within the binlog and will run analyzers based on those. This would possibly lead to unintended double-reports – as binlog will have the runtime analysis reports stored, plus the replay-time analysis reports will be augumented. At the same time we might want to run some additional checks in the replay mode, that have not been enabled (or not even available) during the build time.
+Replay mode will by default consider `.editorconfig` files stored within the binlog and will run analyzers based on those. This would possibly lead to unintended double-reports – as binlog will have the runtime analysis reports stored, plus the replay-time analysis reports will be augmented. At the same time we might want to run some additional checks in the replay mode, that have not been enabled (or not even available) during the build time.
 
 For this reason we will consider following modes (all are non-goals):
 * All binlog stored reports are skipped by default. We add option to request not skipping them (but they might need to be prefixed or otherwise distinguished from the 'fresh' reports).
@@ -136,7 +136,7 @@ For the `.editorconfig` file configuration, following will apply:
 ### Non-Goals (but might be considered):
 * bulk configuration of multiple rules - based on analyzers/rules prefixes or/and categories.
 * attempts to try to configure standard msbuild warnings/errors via `.editorconfig` should lead to fail fast errors.
-* configuring analysis levels when analysing from binlog - beyond the collected editorconfigs.
+* configuring analysis levels when analyzing from binlog - beyond the collected editorconfigs.
 * Aliasing the analyzers/rules, allowing to create multiple instances with different custom configuration (e.g. single analyzer checking configurable list of forbidden properties prefixes can have 2 instance, each initialized with different list to check, each of the instance configurable for individual projects separately).
 
 ### Out of scope for configuration:
@@ -180,7 +180,7 @@ Configuration will dictate transformation of the analyzer report to particular b
 
 Each rule has a severity, even if multiple rules are defined in a single analyzer. The rule can have different severities for different projects within a single build session.
 
-If all the rules from a single analyzer have severity `None` - analyzer won't be given any data for such configured part of the build (specific project or a whoe build). If analyzer have some rules enabled and some disabled - it will be still fed with data, but the reports will be post-filtered.
+If all the rules from a single analyzer have severity `None` - analyzer won't be given any data for such configured part of the build (specific project or a whole build). If analyzer have some rules enabled and some disabled - it will be still fed with data, but the reports will be post-filtered.
 
 #### Scope of Analysis
 
@@ -373,7 +373,7 @@ Several requirements are mandated for analyzer packages to be properly recognize
 
 Also custom analyzer package is a dependency is a purely development time harness - so it should be marked as [`DevelopmentDependency`](https://learn.microsoft.com/en-us/nuget/reference/nuspec#developmentdependency).
 
-In order to simplify the packaging process (and meeting above mentioned requiements) a dotnet template will be provided producing proper package on pack action.
+In order to simplify the packaging process (and meeting above mentioned requirements) a dotnet template will be provided producing proper package on pack action.
 
 **TBD** - dotnet new sample on initiating the development.
 
