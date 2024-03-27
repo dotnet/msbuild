@@ -298,7 +298,7 @@ extends:
             - name: Managed
               pool:
                 name: AzurePipelines-EO
-                image: 1ESPT-Ubuntu22.04
+                image: AzurePipelinesUbuntu22.04compliantGPT
                 os: linux
 
       - template: /eng/common/templates-official/job/publish-build-assets.yml@self
@@ -310,7 +310,7 @@ extends:
             - Source_Build_Managed
           pool:
             name: AzurePipelines-EO
-            demands: ImageOverride -equals windows.vs2022.amd64
+            demands: 1ESPT-Windows2022
             os: windows
 
     - template: eng\common\templates-official\post-build\post-build.yml@self
