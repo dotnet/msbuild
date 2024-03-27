@@ -120,8 +120,9 @@
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
-                     Faz com que o MSBuild relate acessos a arquivos para qualquer plug-in
-                     de cache de projeto configurado.
+                     Faz com que o MSBuild relate acessos a arquivos a qualquer
+ configurado
+                     plug-ins de cache do projeto.
 
                      Este sinalizador é experimental e pode não funcionar conforme o esperado.
     </target>
@@ -1331,7 +1332,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureavailability switch.</source>
-        <target state="translated">MSBUILD : error MSB1067: deve ser fornecido um nome de recurso para a opção de disponibilidade de recursos.</target>
+        <target state="new">MSBUILD : error MSB1067: Must provide a feature name for the featureavailability switch.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureavailability". The user must pass in an actual feature name
       following the switch, as in "msbuild.exe -featureavailability:blah".
@@ -1358,7 +1359,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="MissingGetResultFileError">
         <source>MSBUILD : error MSB1068: Must provide a file for the getResultOutputFile switch.</source>
-        <target state="translated">MSBUILD : error MSB1068: deve ser fornecido um arquivo para a opção getResultOutputFile.</target>
+        <target state="new">MSBUILD : error MSB1068: Must provide a file for the getResultOutputFile switch.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1068: "}UE: This happens if the user does something like "msbuild.exe -getResultOutputFile". The user must pass in an actual file
       following the switch, as in "msbuild.exe -getTargetResult:blah -getResultOutputFile:blah.txt".
@@ -1487,7 +1488,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
         <source>The specified logger "{0}" could not be created and will not be used. {1}</source>
-        <target state="translated">O agente especificado "{0}" não pôde ser criado e não será usado. {1}</target>
+        <target state="new">The specified logger "{0}" could not be created and will not be used. {1}</target>
         <note>
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: {0} contains the logger description passed on the command line or in a
@@ -1669,7 +1670,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">
         <source>{0}{1} test {2} ({3}s)</source>
-        <target state="translated">{0}{1} teste {2} ({3}s)</target>
+        <target state="new">{0}{1} test {2} ({3}s)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1680,7 +1681,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="TestProjectFinished_WithTF">
         <source>{0}{1} test {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} teste {2} {3} ({4}s)</target>
+        <target state="new">{0}{1} test {2} {3} ({4}s)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1692,7 +1693,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="TestSummary">
         <source>Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</source>
-        <target state="translated">Execução de teste {0}. Total: {1} Falha: {2} Aprovado: {3} Ignorado: {4}, Duração: {5}s</target>
+        <target state="new">Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</target>
         <note>{0} string, localized result e.g. Failed surrounded by ANSI colors.
 {1-5} whole number</note>
       </trans-unit>
