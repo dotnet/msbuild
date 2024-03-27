@@ -162,31 +162,29 @@ msbuild_analyzer.COND0543.CustomSwitch=QWERTY
 
 Initial version of BuildCheck plans a limited set of options configurable by user (via `.editorconfig`) by which users can override default configuration of individual analyzer rules.
 
-#### Enablement
-
-Boolean option `IsEnabled` will be available to allow users to disable/enable particualr rule.
-
-Different rules of a single analyzer can have different enablement status configured.
-
-If all the rules from a single analyzer are disabled - analyzer won't be given any data for such configured part of the build (specific project or a whoe build). If analyzer have some rules enabled and some disabled - it will be still fed with data, but the reports will be post-filtered.
-
-Same rule can have different enablement status for different projects.
+NOTE: The actual naming of the configuration options is yet to be determined.
 
 #### Severity
 
 Option `Severity` with following values will be available:
 
-* `Message`
+* `Default`
+* `None`
+* `Suggestion`
 * `Warning`
 * `Error`
+
+Severity levels are in line with [roslyn analyzers severity levels](https://learn.microsoft.com/en-us/visualstudio/code-quality/use-roslyn-analyzers).
 
 Configuration will dictate transformation of the analyzer report to particular build output type (message, warning or error).
 
 Each rule has a severity, even if multiple rules are defined in a single analyzer. The rule can have different severities for different projects within a single build session.
 
+If all the rules from a single analyzer have severity `None` - analyzer won't be given any data for such configured part of the build (specific project or a whoe build). If analyzer have some rules enabled and some disabled - it will be still fed with data, but the reports will be post-filtered.
+
 #### Scope of Analysis
 
-Option `EvaluationAnalysisScope` with following possible options will be avaialable:
+Option `EvaluationAnalysisScope` with following possible options will be available:
 * `AnalyzedProjectOnly` - Only the data from currently analyzed project will be sent to the analyzer. Imports will be discarded.
 * `AnalyzedProjectWithImportsFromCurrentWorkTree` - Only the data from currently analyzed project and imports from files under the entry project or solution will be sent to the analyzer. Other imports will be discarded.
 * `AnalyzedProjectWithImportsWithoutSdks` - Imports from SDKs will not be sent to the analyzer. Other imports will be sent.
@@ -318,19 +316,15 @@ public class BuildAnalyzerConfiguration
 
     /// <summary>
     /// The default severity of the result for the rule. May be overridden by user configuration.
+    ///
+    /// If all rules within the analyzer are `none`, the whole analyzer will not be run.
+    /// If some rules are `none` and some are not, the analyzer will be run and reports will be post-filtered.
     /// </summary>
     public BuildAnalyzerResultSeverity? Severity { get; internal init; }
-
-    /// <summary>
-    /// Whether the analyzer rule is enabled.
-    /// If no rule within the analyzer is enabled, the whole analyzer will not be run.
-    /// If some rules are enabled and some are not, the analyzer will be run and reports will be post-filtered.
-    /// </summary>
-    public bool? IsEnabled { get; internal init; }
 }
 ```
 
-Values for this recognized contract, that are explicitly specified via .editorconfig files are passed only to the BuildCheck infrastructure – they are invisible to the actual analyzers.
+Values for this recognized contract, that are explicitly specified via .editorconfig files are passed only to the BuildCheck infrastructure – they are invisible to the actual analyzers (NOTE: this is a subject to likely revision).
 
 #### Custom configuration declaration
 
@@ -356,7 +350,7 @@ More details on configuration are in [Configuration](#configuration) section.
 
 #### Compatibility
 
-All the publicly exposed contracts will be available within `Microsoft.Build.Experimental.BuildCheck` interface. The interface is expressing that contracts are not guaranteed to be backward compatible (however breakage will be limited to necessary cases). The availability of particular set of BuildCheck API will be queryable via [Feature Query API](https://github.com/dotnet/msbuild/pull/9665):
+All the publicly exposed contracts will be available within `Microsoft.Build.Experimental.BuildCheck` namespace. The namespace is expressing that contracts are not guaranteed to be backward compatible (however breakage will be limited to necessary cases). The availability of particular set of BuildCheck API will be queryable via [Feature Query API](https://github.com/dotnet/msbuild/pull/9665):
 
 ```csharp
 var availability = Features.CheckFeatureAvailability("BuildCheck.Beta");
