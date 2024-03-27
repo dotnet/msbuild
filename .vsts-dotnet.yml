@@ -148,7 +148,7 @@ extends:
         # Required by Microsoft policy
         - template: eng\common\templates-official\steps\generate-sbom.yml@self
 
-        # OptProf is not needed because this packaged will not be serviced in VS.
+        # OptProf is not needed because the 17.0 branch will not be serviced in VS.
         # Publish OptProf configuration files
         # - task: 1ES.PublishArtifactsDrop@1
         #   inputs:
