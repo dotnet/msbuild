@@ -301,7 +301,7 @@ extends:
             - name: Managed
               pool:
                 name: AzurePipelines-EO
-                image: 1ESPT-Ubuntu22.04
+                image: AzurePipelinesUbuntu22.04compliantGPT
                 os: linux
 
       - template: /eng/common/templates-official/job/publish-build-assets.yml@self
