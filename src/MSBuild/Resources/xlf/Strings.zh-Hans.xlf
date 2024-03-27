@@ -1503,7 +1503,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3})</target>
+        <target state="translated">{0}{1} {2} ({3} 秒)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
