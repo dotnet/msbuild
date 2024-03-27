@@ -67,14 +67,14 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="8.0.0-beta.24165.4">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="8.0.0-beta.24172.5">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>f311667e0587f19c3fa9553a909975662107a351</Sha>
+      <Sha>ceb071c1060b8e6de404c065b4045442570caa18</Sha>
     </Dependency>
     <!-- Intermediate is necessary for source build. -->
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.arcade" Version="8.0.0-beta.24165.4">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.arcade" Version="8.0.0-beta.24172.5">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>f311667e0587f19c3fa9553a909975662107a351</Sha>
+      <Sha>ceb071c1060b8e6de404c065b4045442570caa18</Sha>
       <SourceBuild RepoName="arcade" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.DotNet.XliffTasks" Version="1.0.0-beta.23475.1" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
@@ -91,14 +91,14 @@
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>1845d6bd450a7453d573035371c9fec43683d1ef</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.10.0-3.24168.1">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.10.0-3.24175.2">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>2348a50bb566b39305c474793b43edb5635db6f4</Sha>
+      <Sha>919d4dbfb0dffb35a702417e28ceea652d248bc6</Sha>
       <SourceBuild RepoName="roslyn" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="8.0.0-beta.24165.4">
+    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="8.0.0-beta.24172.5">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>f311667e0587f19c3fa9553a909975662107a351</Sha>
+      <Sha>ceb071c1060b8e6de404c065b4045442570caa18</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

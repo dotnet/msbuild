@@ -102,14 +102,14 @@ internal sealed partial class TerminalLogger : INodeLogger
     private readonly string _initialWorkingDirectory = Environment.CurrentDirectory;
 
     /// <summary>
-    /// True if the build has encountered at least one error.
+    /// Number of build errors.
     /// </summary>
-    private bool _buildHasErrors;
+    private int _buildErrorsCount;
 
     /// <summary>
-    /// True if the build has encountered at least one warning.
+    /// Number of build warnings.
     /// </summary>
-    private bool _buildHasWarnings;
+    private int _buildWarningsCount;
 
     /// <summary>
     /// True if restore failed and this failure has already been reported.
@@ -393,7 +393,7 @@ internal sealed partial class TerminalLogger : INodeLogger
             if (Verbosity > LoggerVerbosity.Quiet)
             {
                 string duration = (e.Timestamp - _buildStartTime).TotalSeconds.ToString("F1");
-                string buildResult = RenderBuildResult(e.Succeeded, _buildHasErrors, _buildHasWarnings);
+                string buildResult = RenderBuildResult(e.Succeeded, _buildErrorsCount, _buildWarningsCount);
 
                 Terminal.WriteLine("");
                 if (_restoreFailed)
@@ -417,7 +417,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                     var skipped = _testRunSummaries.Sum(t => t.Skipped);
                     var testDuration = (_testStartTime != null && _testEndTime != null ? (_testEndTime - _testStartTime).Value.TotalSeconds : 0).ToString("F1");
 
-                    var colorizedResult = _testRunSummaries.Any(t => t.Failed > 0) || _buildHasErrors
+                    var colorizedResult = _testRunSummaries.Any(t => t.Failed > 0) || || (_buildErrorsCount > 0)
                         ? AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Failed"), TerminalColor.Red)
                         : AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Succeeded"), TerminalColor.Green);
 
@@ -442,8 +442,8 @@ internal sealed partial class TerminalLogger : INodeLogger
         }
 
         _testRunSummaries.Clear();
-        _buildHasErrors = false;
-        _buildHasWarnings = false;
+        _buildErrorsCount = 0;
+        _buildWarningsCount = 0;
         _restoreFailed = false;
         _testStartTime = null;
         _testEndTime = null;
@@ -523,10 +523,13 @@ internal sealed partial class TerminalLogger : INodeLogger
 
                     // Build result. One of 'failed', 'succeeded with warnings', or 'succeeded' depending on the build result and diagnostic messages
                     // reported during build.
-                    bool haveErrors = project.BuildMessages?.Exists(m => m.Severity == MessageSeverity.Error) == true;
-                    bool haveWarnings = project.BuildMessages?.Exists(m => m.Severity == MessageSeverity.Warning) == true;
+                    int countErrors = project.BuildMessages?.Count(m => m.Severity == MessageSeverity.Error) ?? 0;
+                    int countWarnings = project.BuildMessages?.Count(m => m.Severity == MessageSeverity.Warning) ?? 0;
 
-                    string buildResult = RenderBuildResult(e.Succeeded, haveErrors, haveWarnings);
+                    string buildResult = RenderBuildResult(e.Succeeded, countErrors, countWarnings);
+
+                    bool haveErrors = countErrors > 0;
+                    bool haveWarnings = countWarnings > 0;
 
                     // Check if we're done restoring.
                     if (c == _restoreContext)
@@ -652,8 +655,8 @@ internal sealed partial class TerminalLogger : INodeLogger
                         }
                     }
 
-                    _buildHasErrors |= haveErrors;
-                    _buildHasWarnings |= haveWarnings;
+                    _buildErrorsCount += countErrors;
+                    _buildWarningsCount += countWarnings;
 
                     DisplayNodes();
                 }
@@ -888,7 +891,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         {
             // It is necessary to display warning messages reported by MSBuild, even if it's not tracked in _projects collection or the verbosity is Quiet.
             RenderImmediateMessage(message);
-            _buildHasWarnings = true;
+            _buildWarningsCount++;
         }
     }
 
@@ -931,7 +934,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         {
             // It is necessary to display error messages reported by MSBuild, even if it's not tracked in _projects collection or the verbosity is Quiet.
             RenderImmediateMessage(message);
-            _buildHasErrors = true;
+            _buildErrorsCount++;
         }
     }
 
@@ -1010,22 +1013,23 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <param name="succeeded">True if the build completed with success.</param>
     /// <param name="hasError">True if the build has logged at least one error.</param>
     /// <param name="hasWarning">True if the build has logged at least one warning.</param>
-    private string RenderBuildResult(bool succeeded, bool hasError, bool hasWarning)
+    private string RenderBuildResult(bool succeeded, int countErrors, int countWarnings)
     {
         if (!succeeded)
         {
             // If the build failed, we print one of three red strings.
-            string text = (hasError, hasWarning) switch
+            string text = (countErrors > 0, countWarnings > 0) switch
             {
-                (true, _) => ResourceUtilities.GetResourceString("BuildResult_FailedWithErrors"),
-                (false, true) => ResourceUtilities.GetResourceString("BuildResult_FailedWithWarnings"),
+                (true, true) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildResult_FailedWithErrorsAndWarnings", countErrors, countWarnings),
+                (true, _) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildResult_FailedWithErrors", countErrors),
+                (false, true) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildResult_FailedWithWarnings", countWarnings),
                 _ => ResourceUtilities.GetResourceString("BuildResult_Failed"),
             };
             return AnsiCodes.Colorize(text, TerminalColor.Red);
         }
-        else if (hasWarning)
+        else if (countWarnings > 0)
         {
-            return AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_SucceededWithWarnings"), TerminalColor.Yellow);
+            return AnsiCodes.Colorize(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildResult_SucceededWithWarnings", countWarnings), TerminalColor.Yellow);
         }
         else
         {
