@@ -17,6 +17,8 @@ public sealed class TaskThatReturnsDictionaryTaskItem : Utilities.Task
     public string Key { get; set; }
     public string Value { get; set; }
 
+    public ITaskItem[] AdditionalParameters { get; set; }
+
     public override bool Execute()
     {
         var metaValue = new MinimalDictionary<string, string>
