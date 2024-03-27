@@ -64,7 +64,7 @@ try {
 
   if ($buildStage1)
   {
-    # Run tests on Full Framework instead of the commented code below. 
+    # Run tests on the first-stage build instead of the normal bootstrapped build since the VS environment in hosted machines is too new to work for this old branch. 
     if ($msbuildEngine -eq 'vs')
     {
         & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci -msbuildEngine $msbuildEngine /p:CreateBootstrap=true @properties
