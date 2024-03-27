@@ -37,9 +37,10 @@
         you don't get those defaults.
         NU5125: Arcade uses licenseUrl when doing pack, which now causes NU5125 warning. This disables that warning until arcade can switch over.
         SYSLIB0011: Removing binary formatter will happen as part of a larger .NET-wide effort.
+        NETSDK1182: For 17.0 servicing, continue using what was the LKG toolset at the time to build
     -->
 
-    <NoWarn>$(NoWarn);NU1603;NU5105;NU5125;1701;1702;SYSLIB0011</NoWarn>
+    <NoWarn>$(NoWarn);NU1603;NU5105;NU5125;1701;1702;SYSLIB0011;NETSDK1182</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-MONO'">
@@ -72,11 +73,11 @@
 
     <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
   </PropertyGroup>
-  
+
   <Import Project="$(RepositoryEngineeringDir)Analyzers.props" />
 
   <PropertyGroup>
     <EnableAnalyzers>true</EnableAnalyzers>
   </PropertyGroup>
-  
+
 </Project>
