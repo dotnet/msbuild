@@ -220,7 +220,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     public LoggerVerbosity Verbosity { get => LoggerVerbosity.Minimal; set { } }
 
     /// <inheritdoc/>
-    public string Parameters
+    public string? Parameters
     {
         get => ""; set { }
     }
