@@ -22,7 +22,7 @@ variables:
     value: ''
   - name: SourceBranch
     value: $(IbcSourceBranchName)
-  # If we're not on a vs* branch, use main as our optprof collection branch
+  # If we're not on a vs* branch, use  as our optprof collection branch
   - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
     - name: SourceBranch
       value: main
@@ -37,7 +37,7 @@ variables:
   - name: _DotNetValidationArtifactsCategory
     value: .NETCoreValidation
   - name: EnableReleaseOneLocBuild
-    value: true
+    value: false
   - name: Codeql.Enabled
     value: true
   - group: DotNet-MSBuild-SDLValidation-Params
@@ -107,7 +107,7 @@ extends:
         - name: VisualStudio.MajorVersion
           value: 17
         - name: VisualStudio.ChannelName
-          value: 'int.main'
+          value: 'int.d17.3'
         - name: VisualStudio.DropName
           value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
