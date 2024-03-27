@@ -44,14 +44,14 @@ Majority of following cases are included in appropriate context within the scena
 * Simplified authoring experience via template and doc.
 * Single analyzer can produce reports for multiple rules. However those need to be declared upfront.
 * Opt-in reporting of time spent via specific analyzers and infra overall.
-* Collect touched `.editorconfg`s into binlog embedded files.
+* Collect touched `.editorconfig`s into binlog embedded files.
 * Possibility to opt-out from analysis - the perf should not be impacted when done so.
 * Team collects performance impact numbers on a set of benchmark builds with the inbox analyzers enabled.
 
 ## Non Goals, but subject for consideration
-* Custom anlyzer in a local project (source codes) or a binary.
+* Custom analyzer in a local project (source codes) or a binary.
 * Bulk configuration of multiple rules (based on prefixes).
-* Specifying scope of MSBuild imports that will be considered for analysis (so that e.g. data from sdk won't even be passed to anlyzer, if not requested).
+* Specifying scope of MSBuild imports that will be considered for analysis (so that e.g. data from sdk won't even be passed to analyzer, if not requested).
 * Attempts to try to configure standard msbuild warnings/errors via `.editorconfig` should lead to fail fast errors.
 * Configuring analysis levels when analysing from binlog - beyond the collected editorconfigs
 * Rich information in VS error window.
@@ -72,8 +72,8 @@ Majority of following cases are included in appropriate context within the scena
 ```ini
 # I expect this to apply to all projects within my solution, but not to projects which are not part of the solution
 [ContosoFrontEnd.sln]
-msbuild_analyzer.BC0101.IsEnabled=true
-msbuild_analyzer.BC0101.Severity=warning
+build_check.BC0101.IsEnabled=true
+build_check.BC0101.Severity=warning
 ```
 * Attributing `.editorconfig` configurations to lower granularity than whole projects. E.g.:
 ```ini
@@ -94,7 +94,7 @@ buildcheck.BC0101.Severity=warning
 
 Suggested list of analyzers to be shipped with V1: https://github.com/dotnet/msbuild/issues/9630#issuecomment-2007440323
 
-The proposed initial configuration for those is TBD (as well based on initial test runs of the analyzers of choosen public repositories).
+The proposed initial configuration for those is TBD (as well based on initial test runs of the analyzers of chosen public repositories).
 
 ### Live Build
 
@@ -112,10 +112,10 @@ Users will have option to explicitly opt-in to run BuildCheck during the binlog 
 
 Would there be any analyzers that are not possible to run during the replay mode (subject to internal design - this difference won't be exposed during [custom analyzers authoring](#custom-analyzers-authoring)), replay mode will inform user about those via warnings.
 
-Replay mode will by default consider `.editorconfig` files stored within the binlog and will run analyzers based on those. This may lead to unintended double-reports – as binlog will have the runtime analysis reports stored, plus the replay-time analysis reports will be augumented. At the same time we might want to run some additional checks in the replay mode, that have not been enabled (or not even available) during the build time.
+Replay mode will by default consider `.editorconfig` files stored within the binlog and will run analyzers based on those. This would possibly lead to unintended double-reports – as binlog will have the runtime analysis reports stored, plus the replay-time analysis reports will be augumented. At the same time we might want to run some additional checks in the replay mode, that have not been enabled (or not even available) during the build time.
 
 For this reason we will consider following modes (all are non-goals):
-* Ability to specify skipping all binlog stored reports
+* All binlog stored reports are skipped by default. We add option to request not skipping them (but they might need to be prefixed or otherwise distinguished from the 'fresh' reports).
 * Ability to specify skipping of the stored .editorconfig files
 * Ability to specify single replay-time .editorconfig file and it’s precedence (only the specified, specified as most significant, specified as least significant)
 
@@ -149,20 +149,20 @@ For the `.editorconfig` file configuration, following will apply:
 
 ```ini
 [*.csproj]
-msbuild_analyzer.BC0101.IsEnabled=true
-msbuild_analyzer.BC0101.Severity=warning
+build_check.BC0101.IsEnabled=true
+build_check.BC0101.Severity=warning
 
-msbuild_analyzer.COND0543.IsEnabled=false
-msbuild_analyzer.COND0543.Severity=Error
-msbuild_analyzer.COND0543.EvaluationAnalysisScope=AnalyzedProjectOnly
-msbuild_analyzer.COND0543.CustomSwitch=QWERTY
+build_check.COND0543.IsEnabled=false
+build_check.COND0543.Severity=Error
+build_check.COND0543.EvaluationAnalysisScope=AnalyzedProjectOnly
+build_check.COND0543.CustomSwitch=QWERTY
 ```
 
 ### User Configurable Options
 
 Initial version of BuildCheck plans a limited set of options configurable by user (via `.editorconfig`) by which users can override default configuration of individual analyzer rules.
 
-NOTE: The actual naming of the configuration options is yet to be determined.
+**NOTE:** The actual naming of the configuration options is yet to be determined.
 
 #### Severity
 
