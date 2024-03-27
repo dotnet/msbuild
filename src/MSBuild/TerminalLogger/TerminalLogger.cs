@@ -10,10 +10,10 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using System.Globalization;
 
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 #endif
 #if NETFRAMEWORK
 using Microsoft.IO;
@@ -300,23 +300,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         Terminal.BeginUpdate();
         try
         {
-            string duration = (e.Timestamp - _buildStartTime).TotalSeconds.ToString("F1");
-            string buildResult = RenderBuildResult(e.Succeeded, _buildHasErrors, _buildHasWarnings);
-
             Terminal.WriteLine("");
-            if (_restoreFailed)
-            {
-                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
-                    buildResult,
-                    duration));
-            }
-            else
-            {
-                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildFinished",
-                    buildResult,
-                    duration));
-            }
-
             if (_testRunSummaries.Any())
             {
                 var total = _testRunSummaries.Sum(t => t.Total);
@@ -339,7 +323,23 @@ internal sealed partial class TerminalLogger : INodeLogger
                 passedText = colorizePassed ? AnsiCodes.Colorize(passedText.ToString(), TerminalColor.Green) : passedText;
                 skippedText = colorizeSkipped ? AnsiCodes.Colorize(skippedText.ToString(), TerminalColor.Yellow) : skippedText;
 
-                Terminal.WriteLine(string.Join(" ", summaryAndTotalText, failedText, passedText, skippedText, durationText));
+                Terminal.WriteLine(string.Join(CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ", summaryAndTotalText, failedText, passedText, skippedText, durationText));
+            }
+
+            string duration = (e.Timestamp - _buildStartTime).TotalSeconds.ToString("F1");
+            string buildResult = RenderBuildResult(e.Succeeded, _buildHasErrors, _buildHasWarnings);
+
+            if (_restoreFailed)
+            {
+                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
+                    buildResult,
+                    duration));
+            }
+            else
+            {
+                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildFinished",
+                    buildResult,
+                    duration));
             }
         }
         finally
