@@ -1539,13 +1539,19 @@
     </comment>
   </data>
   <data name="BuildResult_FailedWithErrors" xml:space="preserve">
-    <value>failed with errors</value>
+    <value>failed with {0} error(s)</value>
+    <comment>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="BuildResult_FailedWithErrorsAndWarnings" xml:space="preserve">
+    <value>failed with {0} error(s) and {1} warning(s)</value>
     <comment>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </comment>
   </data>
   <data name="BuildResult_FailedWithWarnings" xml:space="preserve">
-    <value>failed with warnings</value>
+    <value>failed with {0} warning(s)</value>
     <comment>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </comment>
@@ -1563,7 +1569,7 @@
     </comment>
   </data>
   <data name="BuildResult_SucceededWithWarnings" xml:space="preserve">
-    <value>succeeded with warnings</value>
+    <value>succeeded with {0} warning(s)</value>
     <comment>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </comment>

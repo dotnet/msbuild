@@ -1,0 +1,15 @@
+﻿]9;4;3;\  project [31;1mfailed with 2 error(s) and 2 warning(s)[m (0.2s)
+    directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mAA0000[m: Warning1!
+    directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mAA0000[m: Warning2!
+    directory/[1mfile[m(1,2,3,4): [31;1merror[m [31;1mAA0000[m: Error1!
+    directory/[1mfile[m(1,2,3,4): [31;1merror[m [31;1mAA0000[m: Error2!
+[?25l[1F
+[?25h  project2 [31;1mfailed with 2 error(s) and 2 warning(s)[m (0.2s)
+    directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mAA0000[m: Warning3!
+    directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mAA0000[m: Warning4!
+    directory/[1mfile[m(1,2,3,4): [31;1merror[m [31;1mAA0000[m: Error3!
+    directory/[1mfile[m(1,2,3,4): [31;1merror[m [31;1mAA0000[m: Error4!
+[?25l[1F
+[?25h
+Build [31;1mfailed with 4 error(s) and 4 warning(s)[m in 5.0s
+]9;4;0;\
