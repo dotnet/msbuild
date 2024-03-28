@@ -28,102 +28,102 @@
       </trans-unit>
       <trans-unit id="Binlog_ArchiveFile_AcquiredAsStream">
         <source>Content already acquired as StreamReader via GetContentReader.</source>
-        <target state="translated">已通过 GetContentReader 以 StreamReader 形式获取的内容。</target>
+        <target state="new">Content already acquired as StreamReader via GetContentReader.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_ArchiveFile_AcquiredAsString">
         <source>Content already acquired as string via GetContent or initialized as string only.</source>
-        <target state="translated">已通过 GetContent 以字符串形式获取或仅初始化为字符串的内容。</target>
+        <target state="new">Content already acquired as string via GetContent or initialized as string only.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_ArchiveFile_NotSetAfterAcquire">
         <source>ArchiveFile was obtained, but the final edited version was not set.</source>
-        <target state="translated">已获取 ArchiveFile，但未设置最终编辑的版本。</target>
+        <target state="new">ArchiveFile was obtained, but the final edited version was not set.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_FwdCompatUnsupported">
         <source>Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</source>
-        <target state="translated">文件格式版本 {0} 不支持向前兼容读取(需要 &gt;= 18)。</target>
+        <target state="new">Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</target>
         <note>
       LOCALIZATION: {0} is an integer number denoting version.
     </note>
       </trans-unit>
       <trans-unit id="Binlog_ImportFileSizeError">
         <source>Imported files archive exceeded 2GB limit and it's not embedded.</source>
-        <target state="translated">导入的文件存档超出了 2GB 的限制，并且未嵌入。</target>
+        <target state="new">Imported files archive exceeded 2GB limit and it's not embedded.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_MissingRecoverableErrorSubscribeError">
         <source>Subscription to RecoverableReadError is mandatory during forward compatible reading.</source>
-        <target state="translated">在向前兼容读取期间，必须订阅 RecoverableReadError。</target>
+        <target state="new">Subscription to RecoverableReadError is mandatory during forward compatible reading.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_ReaderMismatchedRead">
         <source>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</source>
-        <target state="translated">BuildEvent 记录号 {0} (序列化大小: {1}%1)尝试执行不允许的读取(详细信息: {2}: {3})。</target>
+        <target state="new">BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</target>
         <note>
       LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an exception type and {3} the exception message string.
     </note>
       </trans-unit>
       <trans-unit id="Binlog_ReaderSkippingRecord">
         <source>Skipping the record.</source>
-        <target state="translated">正在跳过记录。</target>
+        <target state="new">Skipping the record.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_ReaderUnderRead">
         <source>BuildEvent record number {0} was expected to read exactly {1} bytes from the stream, but read {2} instead.</source>
-        <target state="translated">BuildEvent 记录号 {0} 应从流中读取恰好 {1} 字节，但读取了 {2} 字节。</target>
+        <target state="new">BuildEvent record number {0} was expected to read exactly {1} bytes from the stream, but read {2} instead.</target>
         <note>
       LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an integer value indicating number of bytes.
     </note>
       </trans-unit>
       <trans-unit id="Binlog_ReaderUnknownType">
         <source>BuildEvent record number {0} (serialized size: {1}) is of unsupported type: {2}.</source>
-        <target state="translated">BuildEvent 记录号 {0} (序列化大小: {1})是不受支持的类型: {2}。</target>
+        <target state="new">BuildEvent record number {0} (serialized size: {1}) is of unsupported type: {2}.</target>
         <note>
       LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is a string or integer value indicating type.
     </note>
       </trans-unit>
       <trans-unit id="Binlog_Source_MissingSubscribeError">
         <source>No subscribers for any events.</source>
-        <target state="translated">任何事件都没有订阅者。</target>
+        <target state="new">No subscribers for any events.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_Source_MultiSubscribeError">
         <source>Structured events and raw events cannot be replayed at the same time.</source>
-        <target state="translated">无法同时重播结构化事件和原始事件。</target>
+        <target state="new">Structured events and raw events cannot be replayed at the same time.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_Source_VersionUninitialized">
         <source>Version info not yet initialized. Replay must be called first.</source>
-        <target state="translated">尚未初始化版本信息。必须首先调用重播。</target>
+        <target state="new">Version info not yet initialized. Replay must be called first.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_StreamUtils_MustBeReadable">
         <source>Stream must be readable.</source>
-        <target state="translated">流必须为可读。</target>
+        <target state="new">Stream must be readable.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_StreamUtils_SeekNonOrigin">
         <source>Only seeking from SeekOrigin.Current is supported.</source>
-        <target state="translated">仅支持从 SeekOrigin.Current 进行查找。</target>
+        <target state="new">Only seeking from SeekOrigin.Current is supported.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_StreamUtils_SetLengthUnsupported">
         <source>Changing the stream length is not supported.</source>
-        <target state="translated">不支持更改流长度。</target>
+        <target state="new">Changing the stream length is not supported.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_StreamUtils_UnsupportedSkipOffset">
         <source>Attempt to skip {0} bytes, only non-negative offset up to int.MaxValue is allowed.</source>
-        <target state="translated">尝试跳过 {0} 字节，仅允许最高 int.MaxValue 的非负偏移量。</target>
+        <target state="new">Attempt to skip {0} bytes, only non-negative offset up to int.MaxValue is allowed.</target>
         <note>
       LOCALIZATION: {0} is integer number denoting number of bytes. 'int.MaxValue' should not be translated.
     </note>
       </trans-unit>
       <trans-unit id="Binlog_StreamUtils_WriteUnsupported">
         <source>Writing is not supported.</source>
-        <target state="translated">不支持写入。</target>
+        <target state="new">Writing is not supported.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
@@ -252,8 +252,8 @@
       <trans-unit id="FatalErrorWhileLoggingWithInnerException">
         <source>MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
     {0}</source>
-        <target state="translated">MSB4017: 生成已意外停止，因为记录器发生故障。
-   {0}</target>
+        <target state="new">MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
+    {0}</target>
         <note>{StrBegin="MSB4017: "}UE: This message is used for a special exception that is thrown when a logger fails while logging an event (most
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
     special exception to abort the build.</note>
@@ -270,7 +270,7 @@
       </trans-unit>
       <trans-unit id="ImportedProjectFromVSDistribution">
         <source>MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </source>
-        <target state="translated">MSB4278: 导入的文件“{0}”不存在，并且似乎是 Visual Studio 组件的一部分。此文件可能需要 MSBuild.exe 才能成功导入，因此可能无法在 dotnet CLI 中生成。 </target>
+        <target state="new">MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </target>
         <note>{StrBegin="MSB4278: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
@@ -285,7 +285,7 @@
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
         <source>EvaluationContext objects created with SharingPolicy.Isolated or SharingPolicy.SharedSDKCache do not support being passed an MSBuildFileSystemBase file system.</source>
-        <target state="translated">使用 SharingPolicy.Isolated 创建的 EvaluationContext 对象。SharingPolicy.SharedSDKCache 不支持被传递 MSBuildFileSystemBase 文件系统。</target>
+        <target state="new">EvaluationContext objects created with SharingPolicy.Isolated or SharingPolicy.SharedSDKCache do not support being passed an MSBuildFileSystemBase file system.</target>
         <note />
       </trans-unit>
       <trans-unit id="ItemReferencingSelfInTarget">
@@ -337,7 +337,7 @@
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
         <source>A required NuGet assembly '{0}' could not be loaded.</source>
-        <target state="translated">无法加载所需的 NuGet 程序集“{0}”。</target>
+        <target state="new">A required NuGet assembly '{0}' could not be loaded.</target>
         <note />
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
@@ -508,9 +508,9 @@
         <source>The "{0}" resolver attempted to resolve the SDK "{1}".
 Warnings: {2}
 Errors: {3}</source>
-        <target state="translated">“{0}”解析程序已尝试解析 SDK“{1}”。
-警告: {2}
-错误: {3}</target>
+        <target state="new">The "{0}" resolver attempted to resolve the SDK "{1}".
+Warnings: {2}
+Errors: {3}</target>
         <note>
       LOCALIZATION: Do not localize the word SDK. "{2}" is new line separated warnings or "null". "{3}" is new line separated errors or "null".
     </note>
@@ -578,7 +578,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="SucceededToResolveSDK">
         <source>The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</source>
-        <target state="translated">SDK“{0}”已由“{1}”解析程序成功解析为位置“{2}”和版本“{3}”。</target>
+        <target state="new">The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskAcquiredCores">
@@ -2551,7 +2551,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="InvalidSdkFormat">
         <source>MSB4229: The value "{0}" is not valid for an Sdk specification. The attribute should be a semicolon-delimited list of Sdk-name/minimum-version pairs, separated by a forward slash.</source>
-        <target state="translated">MSB4229: 值“{0}”对 Sdk 规范无效。此属性应该是以分号分隔的Sdk-name/minimum-version 对（用正斜杠分隔）的列表。</target>
+        <target state="translated">MSB4229: 值“{0}”对 Sdk 规范无效。此属性应该是以分号分隔的Sdk-name/minimum-version 对 (用正斜杠分隔) 的列表。</target>
         <note>{StrBegin="MSB4229: "}</note>
       </trans-unit>
       <trans-unit id="TaskInstantiationFailureNotSupported">
@@ -2621,7 +2621,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="UnsupportedLogFileFormat">
         <source>MSB4235: The log file format version is {0} with minimum required reader version {1}, whereas this version of MSBuild only supports versions up to {2}.</source>
-        <target state="translated">MSB4235: 日志文件格式版本为 {0}，其所需的最低读取器版本为 {1}，而此版本的 MSBuild 最高仅支持 {2} 版本。</target>
+        <target state="new">MSB4235: The log file format version is {0} with minimum required reader version {1}, whereas this version of MSBuild only supports versions up to {2}.</target>
         <note>{StrBegin="MSB4235: "}</note>
       </trans-unit>
       <trans-unit id="ProjectEvaluationPerformanceSummary">

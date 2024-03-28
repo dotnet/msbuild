@@ -28,102 +28,102 @@
       </trans-unit>
       <trans-unit id="Binlog_ArchiveFile_AcquiredAsStream">
         <source>Content already acquired as StreamReader via GetContentReader.</source>
-        <target state="translated">Contenido ya adquirido como StreamReader a través de GetContentReader.</target>
+        <target state="new">Content already acquired as StreamReader via GetContentReader.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_ArchiveFile_AcquiredAsString">
         <source>Content already acquired as string via GetContent or initialized as string only.</source>
-        <target state="translated">Contenido ya adquirido como cadena a través de GetContent o inicializado solo como cadena.</target>
+        <target state="new">Content already acquired as string via GetContent or initialized as string only.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_ArchiveFile_NotSetAfterAcquire">
         <source>ArchiveFile was obtained, but the final edited version was not set.</source>
-        <target state="translated">Se obtuvo ArchiveFile, pero no se estableció la versión editada final.</target>
+        <target state="new">ArchiveFile was obtained, but the final edited version was not set.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_FwdCompatUnsupported">
         <source>Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</source>
-        <target state="translated">No se admite la lectura compatible con reenvíos para la versión {0} de formato de archivo (necesita &gt;= 18).</target>
+        <target state="new">Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</target>
         <note>
       LOCALIZATION: {0} is an integer number denoting version.
     </note>
       </trans-unit>
       <trans-unit id="Binlog_ImportFileSizeError">
         <source>Imported files archive exceeded 2GB limit and it's not embedded.</source>
-        <target state="translated">El archivo de archivos importados superó el límite de 2 GB y no está incrustado.</target>
+        <target state="new">Imported files archive exceeded 2GB limit and it's not embedded.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_MissingRecoverableErrorSubscribeError">
         <source>Subscription to RecoverableReadError is mandatory during forward compatible reading.</source>
-        <target state="translated">La suscripción a RecoverableReadError es obligatoria durante la lectura compatible con versiones posteriores.</target>
+        <target state="new">Subscription to RecoverableReadError is mandatory during forward compatible reading.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_ReaderMismatchedRead">
         <source>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</source>
-        <target state="translated">El registro BuildEvent número {0} (tamaño serializado: {1}) intentó realizar lecturas no permitidas (detalles: {2}: {3}).</target>
+        <target state="new">BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</target>
         <note>
       LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an exception type and {3} the exception message string.
     </note>
       </trans-unit>
       <trans-unit id="Binlog_ReaderSkippingRecord">
         <source>Skipping the record.</source>
-        <target state="translated">Omitiendo el registro.</target>
+        <target state="new">Skipping the record.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_ReaderUnderRead">
         <source>BuildEvent record number {0} was expected to read exactly {1} bytes from the stream, but read {2} instead.</source>
-        <target state="translated">Se esperaba que el registro BuildEvent número {0} leyera exactamente {1} bytes del flujo, pero en su lugar leyó {2}.</target>
+        <target state="new">BuildEvent record number {0} was expected to read exactly {1} bytes from the stream, but read {2} instead.</target>
         <note>
       LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an integer value indicating number of bytes.
     </note>
       </trans-unit>
       <trans-unit id="Binlog_ReaderUnknownType">
         <source>BuildEvent record number {0} (serialized size: {1}) is of unsupported type: {2}.</source>
-        <target state="translated">El registro BuildEvent número {0} (tamaño serializado: {1}) es de tipo no compatible: {2}.</target>
+        <target state="new">BuildEvent record number {0} (serialized size: {1}) is of unsupported type: {2}.</target>
         <note>
       LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is a string or integer value indicating type.
     </note>
       </trans-unit>
       <trans-unit id="Binlog_Source_MissingSubscribeError">
         <source>No subscribers for any events.</source>
-        <target state="translated">No hay suscriptores para ningún evento.</target>
+        <target state="new">No subscribers for any events.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_Source_MultiSubscribeError">
         <source>Structured events and raw events cannot be replayed at the same time.</source>
-        <target state="translated">Los eventos estructurados y los eventos sin procesar no se pueden reproducir al mismo tiempo.</target>
+        <target state="new">Structured events and raw events cannot be replayed at the same time.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_Source_VersionUninitialized">
         <source>Version info not yet initialized. Replay must be called first.</source>
-        <target state="translated">La información de versión aún no se ha inicializado. La reproducción debe llamarse primero.</target>
+        <target state="new">Version info not yet initialized. Replay must be called first.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_StreamUtils_MustBeReadable">
         <source>Stream must be readable.</source>
-        <target state="translated">La secuencia debe ser legible.</target>
+        <target state="new">Stream must be readable.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_StreamUtils_SeekNonOrigin">
         <source>Only seeking from SeekOrigin.Current is supported.</source>
-        <target state="translated">Solo se admite la búsqueda desde SeekOrigin.Current.</target>
+        <target state="new">Only seeking from SeekOrigin.Current is supported.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_StreamUtils_SetLengthUnsupported">
         <source>Changing the stream length is not supported.</source>
-        <target state="translated">No se admite cambiar la longitud de la secuencia.</target>
+        <target state="new">Changing the stream length is not supported.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_StreamUtils_UnsupportedSkipOffset">
         <source>Attempt to skip {0} bytes, only non-negative offset up to int.MaxValue is allowed.</source>
-        <target state="translated">Intento de omisión de {0} bytes, solo se permite un desplazamiento no negativo hasta int.MaxValue.</target>
+        <target state="new">Attempt to skip {0} bytes, only non-negative offset up to int.MaxValue is allowed.</target>
         <note>
       LOCALIZATION: {0} is integer number denoting number of bytes. 'int.MaxValue' should not be translated.
     </note>
       </trans-unit>
       <trans-unit id="Binlog_StreamUtils_WriteUnsupported">
         <source>Writing is not supported.</source>
-        <target state="translated">No se admite la escritura.</target>
+        <target state="new">Writing is not supported.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
@@ -252,7 +252,7 @@
       <trans-unit id="FatalErrorWhileLoggingWithInnerException">
         <source>MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
     {0}</source>
-        <target state="translated">MSB4017: La compilación se detuvo de manera inesperada por un error inesperado en el registrador.
+        <target state="new">MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
     {0}</target>
         <note>{StrBegin="MSB4017: "}UE: This message is used for a special exception that is thrown when a logger fails while logging an event (most
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
@@ -270,7 +270,7 @@
       </trans-unit>
       <trans-unit id="ImportedProjectFromVSDistribution">
         <source>MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </source>
-        <target state="translated">MSB4278: El archivo importado "{0}" no existe y parece formar parte de un componente de Visual Studio. Este archivo puede requerir MSBuild.exe para poder importarse correctamente, por lo que es posible que no se pueda compilar en la CLI de dotnet. </target>
+        <target state="new">MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </target>
         <note>{StrBegin="MSB4278: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
@@ -285,7 +285,7 @@
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
         <source>EvaluationContext objects created with SharingPolicy.Isolated or SharingPolicy.SharedSDKCache do not support being passed an MSBuildFileSystemBase file system.</source>
-        <target state="translated">Los objetos EvaluationContext creados con SharingPolicy.Isolated o SharingPolicy.SharedSDKCache no admiten que se pase un sistema de archivos MSBuildFileSystemBase.</target>
+        <target state="new">EvaluationContext objects created with SharingPolicy.Isolated or SharingPolicy.SharedSDKCache do not support being passed an MSBuildFileSystemBase file system.</target>
         <note />
       </trans-unit>
       <trans-unit id="ItemReferencingSelfInTarget">
@@ -337,7 +337,7 @@
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
         <source>A required NuGet assembly '{0}' could not be loaded.</source>
-        <target state="translated">No se pudo cargar un ensamblado NuGet necesario "{0}".</target>
+        <target state="new">A required NuGet assembly '{0}' could not be loaded.</target>
         <note />
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
@@ -508,9 +508,9 @@
         <source>The "{0}" resolver attempted to resolve the SDK "{1}".
 Warnings: {2}
 Errors: {3}</source>
-        <target state="translated">El resolvedor "{0}" intentó resolver el SDK "{1}".
-Advertencias: {2}
-Errores: {3}</target>
+        <target state="new">The "{0}" resolver attempted to resolve the SDK "{1}".
+Warnings: {2}
+Errors: {3}</target>
         <note>
       LOCALIZATION: Do not localize the word SDK. "{2}" is new line separated warnings or "null". "{3}" is new line separated errors or "null".
     </note>
@@ -578,7 +578,7 @@ Errores: {3}</target>
       </trans-unit>
       <trans-unit id="SucceededToResolveSDK">
         <source>The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</source>
-        <target state="translated">El SDK "{0}" se resolvió correctamente mediante el resolvedor "{1}" a la ubicación "{2}" y la versión "{3}".</target>
+        <target state="new">The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskAcquiredCores">
@@ -2621,7 +2621,7 @@ Utilización:          Utilización media de {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="UnsupportedLogFileFormat">
         <source>MSB4235: The log file format version is {0} with minimum required reader version {1}, whereas this version of MSBuild only supports versions up to {2}.</source>
-        <target state="translated">MSB4235: la versión del formato del archivo de registro es {0} con la versión mínima necesaria del lector {1}, mientras que esta versión de MSBuild solo admite versiones de hasta {2}.</target>
+        <target state="new">MSB4235: The log file format version is {0} with minimum required reader version {1}, whereas this version of MSBuild only supports versions up to {2}.</target>
         <note>{StrBegin="MSB4235: "}</note>
       </trans-unit>
       <trans-unit id="ProjectEvaluationPerformanceSummary">
