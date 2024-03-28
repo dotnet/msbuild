@@ -385,7 +385,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <_GenerateBindingRedirectsIntermediateAppConfig>$(IntermediateOutputPath)$(TargetFileName).config</_GenerateBindingRedirectsIntermediateAppConfig>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="'$(MSBuildCopyMarkerName)' == ''">
     <MSBuildCopyMarkerName>$(MSBuildProjectFile)</MSBuildCopyMarkerName>
     <!-- For a long MSBuildProjectFile let's shorten this to 17 chars - using the first 8 chars of the filename and a filename hash. -->
@@ -3669,7 +3669,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           DependsOnTargets="PrepareForBuild;GetReferenceAssemblyPaths"
           Inputs="$(MSBuildToolsPath)\Microsoft.Common.targets"
           Outputs="$(TargetFrameworkMonikerAssemblyAttributesPath)"
-          Condition="'@(Compile)' != '' and '$(GenerateTargetFrameworkAttribute)' == 'true'">
+          Condition="'@(Compile)' != '' and '$(GenerateTargetFrameworkAttribute)' == 'true' and '$(TargetFrameworkMonikerAssemblyAttributeText)' != ''">
 
     <!-- This is a file shared between projects so we have to take care to handle simultaneous writes (by ContinueOnError)
              and a race between clean from one project and build from another (by not adding to FilesWritten so it doesn't clean) -->
@@ -3677,11 +3677,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         File="$(TargetFrameworkMonikerAssemblyAttributesPath)"
         Lines="$(TargetFrameworkMonikerAssemblyAttributeText)"
         Overwrite="true"
-        ContinueOnError="true"
-        Condition="'@(Compile)' != '' and '$(TargetFrameworkMonikerAssemblyAttributeText)' != ''"
-        />
+        ContinueOnError="true"/>
 
-    <ItemGroup Condition="'@(Compile)' != '' and '$(TargetFrameworkMonikerAssemblyAttributeText)' != ''">
+    <ItemGroup>
       <Compile Include="$(TargetFrameworkMonikerAssemblyAttributesPath)"/>
       <!-- Do not put in FileWrites: this is a file shared between projects in %temp%, and cleaning it would create a race between projects during rebuild -->
     </ItemGroup>
@@ -4500,7 +4498,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </_ClickOnceTransitiveContentItemsTemp>
       <_ClickOnceTransitiveContentItems Include="@(_ClickOnceTransitiveContentItemsTemp->'%(SavedIdentity)')" Condition="'%(Identity)'=='@(PublishFile)' Or '%(Extension)'=='.exe' Or '%(Extension)'=='.dll'" />
 
-      <!-- 
+      <!--
         ClickOnce content items is union of transitive content items and content items from this project.
         We also exclude content items from this project that have set CopyToPublishDirectory to Never.
       -->
@@ -6819,7 +6817,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <Import Project="$(MsTestToolsTargets)" Condition="Exists('$(MsTestToolsTargets)')" />
-  
+
   <PropertyGroup>
     <UseMSBuildTestInfrastructure Condition="'$(UseMSBuildTestInfrastructure)' == ''">false</UseMSBuildTestInfrastructure>
   </PropertyGroup>
