@@ -304,9 +304,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // It was agreed not to return cache results if ProvideSubsetOfStateAfterBuild is passed,
             // because RequestedProjectState may have different user filters defined.
-            // It is more reliable to ignore the cached value. 
+            // It is more reliable to ignore the cached value.
             Assert.Equal(ResultsCacheResponseType.NotSatisfied, cachedResponseWithSubsetFlag1.Type);
-            Assert.Equal(ResultsCacheResponseType.NotSatisfied, cachedResponseWithSubsetFlag2.Type);    
+            Assert.Equal(ResultsCacheResponseType.NotSatisfied, cachedResponseWithSubsetFlag2.Type);
         }
 
         [Fact]

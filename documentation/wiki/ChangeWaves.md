@@ -26,6 +26,7 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 ### 17.12
 - [Log TaskParameterEvent for scalar parameters](https://github.com/dotnet/msbuild/pull/9908)
 - [Convert.ToString during a property evaluation uses the InvariantCulture for all types](https://github.com/dotnet/msbuild/pull/9874)
+- [ResultsCache ignores some of the BuildRequest data, may return incorrect results](https://github.com/dotnet/msbuild/pull/9987)
 
 ### 17.10
 - [AppDomain configuration is serialized without using BinFmt](https://github.com/dotnet/msbuild/pull/9320) - feature can be opted out only if [BinaryFormatter](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.serialization.formatters.binary.binaryformatter) is allowed at runtime by editing `MSBuild.runtimeconfig.json`
@@ -35,7 +36,6 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 - [Add Link metadata to Resources in AssignLinkMetadata target](https://github.com/dotnet/msbuild/pull/9464)
 - [Change Version switch output to finish with a newline](https://github.com/dotnet/msbuild/pull/9485)
 - [Load NuGet.Frameworks into secondary AppDomain (MSBuild.exe only)](https://github.com/dotnet/msbuild/pull/9446)
-- [ResultsCache ignores some of the BuildRequest data, may return incorrect results](https://github.com/dotnet/msbuild/pull/9565)
 - [Update Traits when environment has been changed](https://github.com/dotnet/msbuild/pull/9655)
 - [Exec task does not trim leading whitespaces for ConsoleOutput](https://github.com/dotnet/msbuild/pull/9722)
 - [Introduce [MSBuild]::StableStringHash overloads](https://github.com/dotnet/msbuild/issues/9519)

@@ -173,7 +173,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_resultsByConfiguration.TryGetValue(request.ConfigurationId, out BuildResult allResults))
                 {
-                    bool buildDataFlagsSatisfied = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10)
+                    bool buildDataFlagsSatisfied = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12)
                         ? CheckBuildDataFlagsResults(request.BuildRequestDataFlags, allResults.BuildRequestDataFlags) : true;
 
                     if (buildDataFlagsSatisfied)
@@ -354,7 +354,7 @@ namespace Microsoft.Build.BackEnd
 
             // Even if both buildRequestDataFlags and buildResultDataFlags have ProvideSubsetOfStateAfterBuild flag,
             // the underlying RequestedProjectState may have different user filters defined.
-            // It is more reliable to ignore the cached value. 
+            // It is more reliable to ignore the cached value.
             !buildRequestDataFlags.HasFlag(BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild)
             && (buildRequestDataFlags & FlagsAffectingBuildResults) == (buildResultDataFlags & FlagsAffectingBuildResults);
 
