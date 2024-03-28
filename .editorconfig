@@ -409,3 +409,6 @@ dotnet_diagnostic.IDE0290.severity = suggestion
 dotnet_diagnostic.IDE0300.severity = suggestion
 dotnet_diagnostic.IDE0301.severity = suggestion
 dotnet_diagnostic.IDE0305.severity = suggestion
+
+# new collection expression syntax negates this rule.
+dotnet_diagnostic.SA1010.severity = none

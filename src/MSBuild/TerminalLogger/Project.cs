@@ -1,6 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if NETFRAMEWORK
+using Microsoft.IO;
+#else
+using System.IO;
+#endif
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,16 +15,15 @@ namespace Microsoft.Build.Logging.TerminalLogger;
 /// <summary>
 /// Represents a project being built.
 /// </summary>
+[DebuggerDisplay("{OutputPath}({TargetFramework})")]
 internal sealed class Project
 {
     /// <summary>
     /// Initialized a new <see cref="Project"/> with the given <paramref name="targetFramework"/>.
     /// </summary>
     /// <param name="targetFramework">The target framework of the project or null if not multi-targeting.</param>
-    public Project(string? targetFramework, StopwatchAbstraction? stopwatch)
+    public Project(StopwatchAbstraction? stopwatch)
     {
-        TargetFramework = targetFramework;
-
         if (stopwatch is not null)
         {
             stopwatch.Start();
@@ -39,12 +43,12 @@ internal sealed class Project
     /// <summary>
     /// Full path to the primary output of the project, if known.
     /// </summary>
-    public ReadOnlyMemory<char>? OutputPath { get; set; }
+    public FileInfo? OutputPath { get; set; }
 
     /// <summary>
-    /// The target framework of the project or null if not multi-targeting.
+    /// Full path to the 'root' of this project's source control repository, if known.
     /// </summary>
-    public string? TargetFramework { get; }
+    public DirectoryInfo? SourceRoot { get; set; }
 
     /// <summary>
     /// True when the project has run target with name "_TestRunStart" defined in <see cref="TerminalLogger._testStartTarget"/>.
