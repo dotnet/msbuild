@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
 using BaseConsoleLogger = Microsoft.Build.BackEnd.Logging.BaseConsoleLogger;
@@ -113,7 +114,7 @@ namespace Microsoft.Build.Logging
             bool preferConsoleColor = false;
             if (!string.IsNullOrEmpty(_parameters))
             {
-                string[] parameterComponents = _parameters.Split(BaseConsoleLogger.parameterDelimiters);
+                string[] parameterComponents = _parameters.Split(LoggerParametersHelper.s_parameterDelimiters);
                 foreach (string param in parameterComponents)
                 {
                     if (param.Length <= 0)
