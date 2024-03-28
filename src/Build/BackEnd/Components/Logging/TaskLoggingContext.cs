@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -34,7 +35,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Constructs a task logging context from a parent target context and a task node.
         /// </summary>
-        internal TaskLoggingContext(TargetLoggingContext targetLoggingContext, string projectFullPath, ProjectTargetInstanceChild task)
+        internal TaskLoggingContext(TargetLoggingContext targetLoggingContext, string projectFullPath, ProjectTargetInstanceChild task, AssemblyName taskAssemblyName)
             : base(targetLoggingContext)
         {
             _targetLoggingContext = targetLoggingContext;
@@ -72,7 +73,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 projectFullPath,
                 task.Location.File,
                 task.Location.Line,
-                task.Location.Column);
+                task.Location.Column,
+                taskAssemblyName);
             this.IsValid = true;
         }
 

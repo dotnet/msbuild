@@ -243,15 +243,12 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Ask the task host to find its task in the registry and get it ready for initializing the batch
         /// </summary>
-        /// <returns>True if the task is found in the task registry false if otherwise.</returns>
+        /// <returns>The task requirements if the task is found, null otherwise.</returns>
         TaskRequirements? ITaskExecutionHost.FindTask(IDictionary<string, string> taskIdentityParameters)
         {
-            if (_taskFactoryWrapper == null)
-            {
-                _taskFactoryWrapper = FindTaskInRegistry(taskIdentityParameters);
-            }
+            _taskFactoryWrapper ??= FindTaskInRegistry(taskIdentityParameters);
 
-            if (_taskFactoryWrapper == null)
+            if (_taskFactoryWrapper is null)
             {
                 return null;
             }
@@ -273,6 +270,17 @@ namespace Microsoft.Build.BackEnd
             }
 
             return requirements;
+        }
+
+        /// <summary>
+        /// Ask the task host to find task assembly name
+        /// </summary>
+        /// <returns>The task assembly name if the task is found, null otherwise.</returns>
+        AssemblyName ITaskExecutionHost.FindTaskAssemblyName(IDictionary<string, string> taskIdentityParameters)
+        {
+            _taskFactoryWrapper ??= FindTaskInRegistry(taskIdentityParameters);
+
+            return _taskFactoryWrapper?.TaskFactoryLoadedType.LoadedAssemblyName;
         }
 
         /// <summary>

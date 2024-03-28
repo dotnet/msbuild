@@ -1190,7 +1190,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 CancellationToken.None);
 
             ProjectTaskInstance taskInstance = project.Targets["foo"].Tasks.First();
-            TaskLoggingContext talc = tlc.LogTaskBatchStarted(".", taskInstance);
+            TaskLoggingContext talc = tlc.LogTaskBatchStarted(".", taskInstance, typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).GetTypeInfo().Assembly.GetName());
 
             ItemDictionary<ProjectItemInstance> itemsByName = new ItemDictionary<ProjectItemInstance>();
 
