@@ -35,7 +35,7 @@ namespace Microsoft.Build.Logging.SimpleErrorLogger
             set { }
         }
 
-        public string Parameters
+        public string? Parameters
         {
             get => string.Empty;
             set { }
