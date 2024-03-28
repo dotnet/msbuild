@@ -198,7 +198,7 @@
       </trans-unit>
       <trans-unit id="Copy.IncompatibleParameters">
         <source>MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</source>
-        <target state="translated">MSB3896: "{0}" 和 "{1}" 都指定為專案檔中的參數，但不能一起使用。請選擇其中一個。</target>
+        <target state="new">MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</target>
         <note>{StrBegin="MSB3896: "}</note>
       </trans-unit>
       <trans-unit id="Copy.LinkFailed">
@@ -1061,7 +1061,7 @@
       </trans-unit>
       <trans-unit id="GenerateManifest.WriteOutputManifestFailed">
         <source>MSB3173: Unable to write manifest '{0}'. {1} {2}</source>
-        <target state="translated">MSB3173: 無法寫入資訊清單 '{0}'。{1} {2}</target>
+        <target state="new">MSB3173: Unable to write manifest '{0}'. {1} {2}</target>
         <note>{StrBegin="MSB3173: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.InvalidRequestedExecutionLevel">
@@ -1688,7 +1688,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.SearchPathAddedByParentAssembly">
         <source>For SearchPath "{0}" (added by referencing assembly "{1}").</source>
-        <target state="translated">針對 SearchPath "{0}" (由參考組件 "{1}" 新增)。</target>
+        <target state="new">For SearchPath "{0}" (added by referencing assembly "{1}").</target>
         <note> {1} is the name of the parent assembly for which SearchPath was used.</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.SearchedAssemblyFoldersEx">
@@ -2521,7 +2521,7 @@
       </trans-unit>
       <trans-unit id="Task.FileLocked">
         <source>The file is locked by: "{0}"</source>
-        <target state="translated">檔案鎖定者: "{0}"</target>
+        <target state="new">The file is locked by: "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
