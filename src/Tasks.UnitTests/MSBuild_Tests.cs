@@ -39,7 +39,6 @@ namespace Microsoft.Build.UnitTests
         /// throw a path too long exception
         /// </summary>
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/4247")]
         public void ProjectItemSpecTooLong()
         {
             string currentDirectory = Directory.GetCurrentDirectory();
@@ -71,9 +70,9 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 int rootLength = Path.GetPathRoot(tempPath).Length;
-                string tempPathNoRoot = tempPath.Substring(rootLength);
+                string tempPathNoRoot = tempProject.Substring(rootLength);
 
-                projectFile1 += Path.Combine(tempPathNoRoot, fileName);
+                projectFile1 += tempPathNoRoot;
                 try
                 {
                     MSBuild msbuildTask = new MSBuild
