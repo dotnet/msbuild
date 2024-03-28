@@ -35,6 +35,7 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 - [Add Link metadata to Resources in AssignLinkMetadata target](https://github.com/dotnet/msbuild/pull/9464)
 - [Change Version switch output to finish with a newline](https://github.com/dotnet/msbuild/pull/9485)
 - [Load NuGet.Frameworks into secondary AppDomain (MSBuild.exe only)](https://github.com/dotnet/msbuild/pull/9446)
+- [ResultsCache ignores some of the BuildRequest data, may return incorrect results](https://github.com/dotnet/msbuild/pull/9565)
 - [Update Traits when environment has been changed](https://github.com/dotnet/msbuild/pull/9655)
 - [Exec task does not trim leading whitespaces for ConsoleOutput](https://github.com/dotnet/msbuild/pull/9722)
 - [Introduce [MSBuild]::StableStringHash overloads](https://github.com/dotnet/msbuild/issues/9519)
