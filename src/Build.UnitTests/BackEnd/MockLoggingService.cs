@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
@@ -573,7 +574,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="taskName">The name of the task</param>
         /// <param name="projectFile">The project file</param>
         /// <param name="projectFileOfTaskNode">The project file containing the task node.</param>
-        public void LogTaskStarted(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode)
+        /// <param name="taskAssemblyName">An assembly's unique identity where the task is implemented.</param>
+        public void LogTaskStarted(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, AssemblyName taskAssemblyName)
         {
         }
 
@@ -584,8 +586,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="taskName">The name of the task</param>
         /// <param name="projectFile">The project file</param>
         /// <param name="projectFileOfTaskNode">The project file containing the task node.</param>
+        /// <param name="taskAssemblyName">An assembly's unique identity where the task is implemented.</param>
         /// <returns>The task logging context</returns>
-        public BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column)
+        public BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column, AssemblyName taskAssemblyName)
         {
             return new BuildEventContext(0, 0, 0, 0);
         }

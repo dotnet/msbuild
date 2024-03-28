@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -15,7 +16,7 @@ using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// Flags requrned by ITaskExecutionHost.FindTask().
+    /// Flags returned by ITaskExecutionHost.FindTask().
     /// </summary>
     [Flags]
     internal enum TaskRequirements
@@ -73,6 +74,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <returns>The task requirements if the task is found, null otherwise.</returns>
         TaskRequirements? FindTask(IDictionary<string, string> taskIdentityParameters);
+
+        /// <summary>
+        /// Ask the task host to find task assembly name
+        /// </summary>
+        /// <returns>The task assembly name if the task is found, null otherwise.</returns>
+        AssemblyName FindTaskAssemblyName(IDictionary<string, string> taskIdentityParameters);
 
         /// <summary>
         /// Initializes for running a particular batch

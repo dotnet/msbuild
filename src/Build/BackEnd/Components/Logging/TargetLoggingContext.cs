@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -108,11 +109,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Log that a task is about to start
         /// </summary>
-        internal TaskLoggingContext LogTaskBatchStarted(string projectFullPath, ProjectTargetInstanceChild task)
+        internal TaskLoggingContext LogTaskBatchStarted(string projectFullPath, ProjectTargetInstanceChild task, AssemblyName taskAssemblyName)
         {
             ErrorUtilities.VerifyThrow(IsValid, "Should be valid");
 
-            return new TaskLoggingContext(this, projectFullPath, task);
+            return new TaskLoggingContext(this, projectFullPath, task, taskAssemblyName);
         }
 
         /// <summary>

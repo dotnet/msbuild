@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Reflection;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -58,6 +59,27 @@ namespace Microsoft.Build.Framework
         /// <param name="projectFile">project file</param>
         /// <param name="taskFile">file in which the task is defined</param>
         /// <param name="taskName">task name</param>
+        /// <param name="taskAssemblyName">An assembly's unique identity where the task is implemented</param>
+        public TaskStartedEventArgs(
+            string message,
+            string helpKeyword,
+            string projectFile,
+            string taskFile,
+            string taskName,
+            AssemblyName taskAssemblyName)
+            : this(message, helpKeyword, projectFile, taskFile, taskName, DateTime.UtcNow, taskAssemblyName)
+        {
+        }
+
+        /// <summary>
+        /// This constructor allows event data to be initialized.
+        /// Sender is assumed to be "MSBuild".
+        /// </summary>
+        /// <param name="message">text message</param>
+        /// <param name="helpKeyword">help keyword </param>
+        /// <param name="projectFile">project file</param>
+        /// <param name="taskFile">file in which the task is defined</param>
+        /// <param name="taskName">task name</param>
         /// <param name="eventTimestamp">Timestamp when event was created</param>
         public TaskStartedEventArgs(
             string message,
@@ -73,6 +95,33 @@ namespace Microsoft.Build.Framework
             this.taskFile = taskFile;
         }
 
+        /// <summary>
+        /// This constructor allows event data to be initialized.
+        /// Sender is assumed to be "MSBuild".
+        /// </summary>
+        /// <param name="message">text message</param>
+        /// <param name="helpKeyword">help keyword </param>
+        /// <param name="projectFile">project file</param>
+        /// <param name="taskFile">file in which the task is defined</param>
+        /// <param name="taskName">task name</param>
+        /// <param name="eventTimestamp">Timestamp when event was created</param>
+        /// <param name="taskAssemblyName">An assembly's unique identity where the task is implemented</param>
+        public TaskStartedEventArgs(
+            string message,
+            string helpKeyword,
+            string projectFile,
+            string taskFile,
+            string taskName,
+            DateTime eventTimestamp,
+            AssemblyName taskAssemblyName)
+            : base(message, helpKeyword, "MSBuild", eventTimestamp)
+        {
+            this.taskName = taskName;
+            this.projectFile = projectFile;
+            this.taskFile = taskFile;
+            TaskAssemblyName = taskAssemblyName;
+        }
+        
         private string taskName;
         private string projectFile;
         private string taskFile;
@@ -91,6 +140,7 @@ namespace Microsoft.Build.Framework
             writer.WriteOptionalString(taskFile);
             writer.Write7BitEncodedInt(LineNumber);
             writer.Write7BitEncodedInt(ColumnNumber);
+            writer.WriteOptionalString(TaskAssemblyName?.FullName);
         }
 
         /// <summary>
@@ -107,6 +157,7 @@ namespace Microsoft.Build.Framework
             taskFile = reader.ReadByte() == 0 ? null : reader.ReadString();
             LineNumber = reader.Read7BitEncodedInt();
             ColumnNumber = reader.Read7BitEncodedInt();
+            TaskAssemblyName = reader.ReadByte() == 0 ? null : new AssemblyName(reader.ReadString());
         }
         #endregion
 
@@ -134,6 +185,11 @@ namespace Microsoft.Build.Framework
         /// Column number of the task invocation in the project file
         /// </summary>
         public int ColumnNumber { get; internal set; }
+
+        /// <summary>
+        /// Full name of the assembly that implements the task
+        /// </summary>
+        public AssemblyName TaskAssemblyName { get; private set; }
 
         public override string Message
         {

@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
@@ -570,7 +571,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="taskName">The name of the task</param>
         /// <param name="projectFile">The project file which is being built</param>
         /// <param name="projectFileOfTaskNode">The file in which the task is defined - typically a .targets file</param>
-        void LogTaskStarted(BuildEventContext taskBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode);
+        /// <param name="taskAssemblyName">An assembly's unique identity where the task is implemented</param>
+        void LogTaskStarted(BuildEventContext taskBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, AssemblyName taskAssemblyName);
 
         /// <summary>
         /// Log that a task is about to start
@@ -581,8 +583,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="projectFileOfTaskNode">The file in which the task is defined - typically a .targets file</param>
         /// <param name="line">The line number in the file where the task invocation is located.</param>
         /// <param name="column">The column number in the file where the task invocation is located.</param>
+        /// <param name="taskAssemblyName">An assembly's unique identity where the task is implemented.</param>
         /// <returns>The task build event context</returns>
-        BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column);
+        BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column, AssemblyName taskAssemblyName);
 
         /// <summary>
         /// Log that a task has just completed

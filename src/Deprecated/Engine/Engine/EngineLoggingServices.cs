@@ -12,6 +12,7 @@ using System.Threading;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
+using System.Reflection;
 
 namespace Microsoft.Build.BuildEngine
 {
@@ -863,7 +864,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="taskName"></param>
         /// <param name="projectFile"></param>
         /// <param name="projectFileOfTaskNode">project file actually containing the task</param>
-        internal virtual void LogTaskStarted(BuildEventContext buildEventContext, string taskName, string projectFile, string projectFileOfTaskNode)
+        internal virtual void LogTaskStarted(BuildEventContext buildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, AssemblyName taskAssemblyName)
         {
             if (!OnlyLogCriticalEvents)
             {
@@ -873,7 +874,8 @@ namespace Microsoft.Build.BuildEngine
                         null,             // no help keyword
                         projectFile,
                         projectFileOfTaskNode,
-                        taskName
+                        taskName,
+                        taskAssemblyName
                     );
                 e.BuildEventContext = buildEventContext;
                 PostLoggingEvent(e);

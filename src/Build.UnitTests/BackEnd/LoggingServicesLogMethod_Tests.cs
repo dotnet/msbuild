@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
@@ -1089,7 +1090,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Throws<InternalErrorException>(() =>
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-                service.LogTaskStarted(null, "MyTask", "ProjectFile", "ProjectFileOfTask");
+                service.LogTaskStarted(null, "MyTask", "ProjectFile", "ProjectFileOfTask", null);
             });
         }
 
@@ -1445,12 +1446,12 @@ namespace Microsoft.Build.UnitTests.Logging
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskStarted", taskName);
 
             ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogTaskStarted(s_buildEventContext, taskName, projectFile, projectFileOfTask);
+            service.LogTaskStarted(s_buildEventContext, taskName, projectFile, projectFileOfTask, Assembly.GetExecutingAssembly().GetName());
             VerifyTaskStartedEvent(taskName, projectFile, projectFileOfTask, message, service);
 
             service.ResetProcessedBuildEvent();
             service.OnlyLogCriticalEvents = true;
-            service.LogTaskStarted(s_buildEventContext, taskName, projectFile, projectFileOfTask);
+            service.LogTaskStarted(s_buildEventContext, taskName, projectFile, projectFileOfTask, Assembly.GetExecutingAssembly().GetName());
             Assert.Null(service.ProcessedBuildEvent);
         }
 
