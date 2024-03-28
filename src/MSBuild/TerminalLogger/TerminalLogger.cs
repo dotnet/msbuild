@@ -331,14 +331,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         }
         else
         {
-            try
-            {
-                _showCommandLine = ConversionUtilities.ConvertStringToBool(parameterValue);
-            }
-            catch (ArgumentException)
-            {
-                return false;
-            }
+            return ConversionUtilities.TryConvertStringToBool(parameterValue, out _showCommandLine);
         }
 
         return true;
