@@ -1478,7 +1478,15 @@ namespace Microsoft.Build.Evaluation
                 else
                 {
                     // The fall back is always to just convert to a string directly.
-                    convertedString = valueToConvert.ToString();
+                    // Issue: https://github.com/dotnet/msbuild/issues/9757
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+                    {
+                        convertedString = Convert.ToString(valueToConvert, CultureInfo.InvariantCulture);
+                    }
+                    else
+                    {
+                        convertedString = valueToConvert.ToString();
+                    }
                 }
 
                 return convertedString;

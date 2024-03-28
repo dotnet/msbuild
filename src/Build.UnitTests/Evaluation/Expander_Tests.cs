@@ -9,6 +9,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
+using System.Threading;
 using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
@@ -4892,6 +4893,101 @@ $(
                 var alphaDeltaPath = Path.Combine("alpha", "delta");
                 squiggleItems.Select(i => i.EvaluatedInclude).ShouldBe(new[] { alphaBetaPath, alphaDeltaPath }, Case.Insensitive);
             }
+        }
+
+        [Fact]
+        public void ExpandItem_ConvertToStringUsingInvariantCultureForNumberData()
+        {
+            var currentThread = Thread.CurrentThread;
+            var originalCulture = currentThread.CurrentCulture;
+            var originalUICulture = currentThread.CurrentUICulture;
+
+            try
+            {
+                var svSECultureInfo = new CultureInfo("sv-SE");
+                using (var env = TestEnvironment.Create())
+                {
+                    currentThread.CurrentCulture = svSECultureInfo;
+                    currentThread.CurrentUICulture = svSECultureInfo;
+                    var root = env.CreateFolder();
+
+                    var projectFile = env.CreateFile(root, ".proj",
+                        @"<Project>
+
+  <PropertyGroup>
+    <_value>$([MSBuild]::Subtract(0, 1))</_value>
+    <_otherValue Condition=""'$(_value)' &gt;= -1"">test-value</_otherValue>
+  </PropertyGroup>
+  <Target Name=""Build"" />
+</Project>");
+                    ProjectInstance projectInstance = new ProjectInstance(projectFile.Path);
+                    projectInstance.GetPropertyValue("_value").ShouldBe("-1");
+                    projectInstance.GetPropertyValue("_otherValue").ShouldBe("test-value");
+                }
+            }
+            finally
+            {
+                currentThread.CurrentCulture = originalCulture;
+                currentThread.CurrentUICulture = originalUICulture;
+            }
+        }
+
+        [Fact]
+        public void ExpandItem_ConvertToStringUsingInvariantCultureForNumberData_RespectingChangeWave()
+        {
+            // Note: Skipping the test since it is not a valid scenario when ICU mode is not used.
+            if (!ICUModeAvailable())
+            {
+                return;
+            }
+
+            var currentThread = Thread.CurrentThread;
+            var originalCulture = currentThread.CurrentCulture;
+            var originalUICulture = currentThread.CurrentUICulture;
+
+            try
+            {
+                var svSECultureInfo = new CultureInfo("sv-SE");
+                using (var env = TestEnvironment.Create())
+                {
+                    env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_10.ToString());
+                    currentThread.CurrentCulture = svSECultureInfo;
+                    currentThread.CurrentUICulture = svSECultureInfo;
+                    var root = env.CreateFolder();
+
+                    var projectFile = env.CreateFile(root, ".proj",
+                        @"<Project>
+
+  <PropertyGroup>
+    <_value>$([MSBuild]::Subtract(0, 1))</_value>
+    <_otherValue Condition=""'$(_value)' &gt;= -1"">test-value</_otherValue>
+  </PropertyGroup>
+  <Target Name=""Build"" />
+</Project>");
+                    var exception = Should.Throw<InvalidProjectFileException>(() =>
+                    {
+                        new ProjectInstance(projectFile.Path);
+                    });
+                    exception.BaseMessage.ShouldContain("A numeric comparison was attempted on \"$(_value)\"");
+                }
+            }
+            finally
+            {
+                currentThread.CurrentCulture = originalCulture;
+                currentThread.CurrentUICulture = originalUICulture;
+            }
+        }
+
+        /// <summary>
+        /// Determines if ICU mode is enabled.
+        /// Copied from: https://learn.microsoft.com/en-us/dotnet/core/extensions/globalization-icu#determine-if-your-app-is-using-icu
+        /// </summary>
+        private static bool ICUModeAvailable()
+        {
+            SortVersion sortVersion = CultureInfo.InvariantCulture.CompareInfo.Version;
+            byte[] bytes = sortVersion.SortId.ToByteArray();
+            int version = bytes[3] << 24 | bytes[2] << 16 | bytes[1] << 8 | bytes[0];
+            return version != 0 && version == sortVersion.FullVersion;
         }
     }
 }
