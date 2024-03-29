@@ -956,7 +956,8 @@
   </data>
   <data name="HelpMessage_45_GetTargetResultSwitch" Visibility="Public">
     <value>  -getTargetResult:targetName,...
-                     Write out the output value of one or more targets.
+                     Write out the output value of one or more targets and
+                     the specified targets will be executed.
     </value>
     <comment>
       LOCALIZATION: "-getTargetResult" should not be localized.
@@ -1001,7 +1002,7 @@
     </comment>
   </data>
   <data name="HelpMessage_48_TerminalLoggerParametersSwitch" Visibility="Public">
-    <value>  -termionalLoggerParameters:default=[auto|false|true]
+    <value>  -termialLoggerParameters:default=[auto|false|true]
                       Users are able to opt-in and use the TerminalLogger.
                       - `true` forces TerminalLogger to be used even wwhen it
                       would be disabled.
@@ -1011,10 +1012,10 @@
                       it and the session doesn't have redirected stdout/stderr
                       (Short form: -tlp)
                       Example:
-                        -termionalLoggerParameters:default=auto
+                        -termialLoggerParameters:default=auto
     </value>
     <comment>
-      LOCALIZATION: "-termionalLoggerParameters"  and "-tlp" should not be localized.
+      LOCALIZATION: "-termialLoggerParameters"  and "-tlp" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>

@@ -163,10 +163,12 @@
       </trans-unit>
       <trans-unit id="HelpMessage_45_GetTargetResultSwitch">
         <source>  -getTargetResult:targetName,...
-                     Write out the output value of one or more targets.
+                     Write out the output value of one or more targets and
+                     the specified targets will be executed.
     </source>
         <target state="new">  -getTargetResult:targetName,...
-                     Write out the output value of one or more targets.
+                     Write out the output value of one or more targets and
+                     the specified targets will be executed.
     </target>
         <note>
       LOCALIZATION: "-getTargetResult" should not be localized.
@@ -210,7 +212,7 @@
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_48_TerminalLoggerParametersSwitch">
-        <source>  -termionalLoggerParameters:default=[auto|false|true]
+        <source>  -termialLoggerParameters:default=[auto|false|true]
                       Users are able to opt-in and use the TerminalLogger.
                       - `true` forces TerminalLogger to be used even wwhen it
                       would be disabled.
@@ -220,9 +222,9 @@
                       it and the session doesn't have redirected stdout/stderr
                       (Short form: -tlp)
                       Example:
-                        -termionalLoggerParameters:default=auto
+                        -termialLoggerParameters:default=auto
     </source>
-        <target state="new">  -termionalLoggerParameters:default=[auto|false|true]
+        <target state="new">  -termialLoggerParameters:default=[auto|false|true]
                       Users are able to opt-in and use the TerminalLogger.
                       - `true` forces TerminalLogger to be used even wwhen it
                       would be disabled.
@@ -232,10 +234,10 @@
                       it and the session doesn't have redirected stdout/stderr
                       (Short form: -tlp)
                       Example:
-                        -termionalLoggerParameters:default=auto
+                        -termialLoggerParameters:default=auto
     </target>
         <note>
-      LOCALIZATION: "-termionalLoggerParameters"  and "-tlp" should not be localized.
+      LOCALIZATION: "-termialLoggerParameters"  and "-tlp" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
