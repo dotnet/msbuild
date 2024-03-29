@@ -198,7 +198,7 @@
       </trans-unit>
       <trans-unit id="Copy.IncompatibleParameters">
         <source>MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</source>
-        <target state="new">MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</target>
+        <target state="translated">MSB3896: Sowohl "{0}" als auch "{1}" wurden als Parameter in der Projektdatei angegeben, können aber nicht zusammen verwendet werden. Wählen Sie eins oder das andere aus.</target>
         <note>{StrBegin="MSB3896: "}</note>
       </trans-unit>
       <trans-unit id="Copy.LinkFailed">
@@ -1060,8 +1060,8 @@
         <note>{StrBegin="MSB3183: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.WriteOutputManifestFailed">
-        <source>MSB3173: Unable to write manifest '{0}'. {1}</source>
-        <target state="translated">MSB3173: Das Manifest "{0}" kann nicht geschrieben werden. {1}</target>
+        <source>MSB3173: Unable to write manifest '{0}'. {1} {2}</source>
+        <target state="translated">MSB3173: Das Manifest „{0}“ kann nicht geschrieben werden. {1} {2}</target>
         <note>{StrBegin="MSB3173: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.InvalidRequestedExecutionLevel">
@@ -1686,6 +1686,11 @@
       LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
     </note>
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.SearchPathAddedByParentAssembly">
+        <source>For SearchPath "{0}" (added by referencing assembly "{1}").</source>
+        <target state="translated">Für SearchPath "{0}" (hinzugefügt durch Verweis auf Assembly "{1}").</target>
+        <note> {1} is the name of the parent assembly for which SearchPath was used.</note>
+      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.SearchedAssemblyFoldersEx">
         <source>Considered AssemblyFoldersEx locations.</source>
         <target state="translated">Berücksichtigte Speicherorte von AssemblyFoldersEx.</target>
@@ -2180,11 +2185,6 @@
         <target state="translated">Der Redist-Name im FileList-Element der Redistributable-Listendatei "{0}" ist NULL oder leer. Vergewissern Sie sich, dass der Redist-Name nicht NULL oder leer ist.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
-        <source>Updating assembly cache file "{0}".</source>
-        <target state="translated">Aktualisiert Assemblycachedatei "{0}"</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
         <source>COM Reference '{0}' is the interop assembly for ActiveX control '{1}' but was marked to be linked by the compiler with the /link flag. This COM reference will be treated as a reference and will not be linked.</source>
         <target state="translated">Der COM-Verweis "{0}" ist die Interopassembly für das ActiveX-Steuerelement "{1}". Entsprechend der Markierung ist der Verweis jedoch durch den Compiler mit dem /link-Flag verknüpft. Der COM-Verweis wird als Verweis behandelt und nicht verknüpft.</target>
@@ -2518,6 +2518,11 @@
         <source>MSB3353: Public key necessary for delay signing was not specified.</source>
         <target state="translated">MSB3353: Der für die verzögerte Signierung erforderliche öffentliche Schlüssel wurde nicht angegeben.</target>
         <note>{StrBegin="MSB3353: "}</note>
+      </trans-unit>
+      <trans-unit id="Task.FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="translated">Die Datei wird durch "{0}" gesperrt.</target>
+        <note />
       </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
         <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
@@ -3403,11 +3408,6 @@
         <source>MSB4801: The task factory "{0}" is not supported on the .NET Core version of MSBuild.</source>
         <target state="translated">MSB4801: Die Aufgabenfactory "{0}" wird für die .NET Core-Version von MSBuild nicht unterstützt.</target>
         <note>{StrBegin="MSB4801: "}</note>
-      </trans-unit>
-      <trans-unit id="Copy.FileLocked">
-        <source>The file is locked by: "{0}"</source>
-        <target state="translated">Die Datei wird durch "{0}" gesperrt.</target>
-        <note />
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeType">
         <source>MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</source>

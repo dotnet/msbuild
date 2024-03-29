@@ -32,8 +32,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 new FileAccessData(
                     ReportedFileOperation.CreateFile,
                     RequestedAccess.Read,
-                    0,
-                    0,
+                    processId: 123,
+                    id: 1,
+                    correlationId: 0,
+                    error: 0,
                     DesiredAccess.GENERIC_READ,
                     FlagsAndAttributes.FILE_ATTRIBUTE_NORMAL,
                     "foo",

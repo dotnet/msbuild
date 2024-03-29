@@ -205,6 +205,11 @@ namespace Microsoft.Build.Shared
         /// Event is <see cref="ExtendedCriticalBuildMessageEventArgs"/>
         /// </summary>
         ExtendedCriticalBuildMessageEvent = 33,
+
+        /// <summary>
+        /// Event is a <see cref="GeneratedFileUsedEventArgs"/>
+        /// </summary>
+        GeneratedFileUsedEvent = 34,
     }
     #endregion
 
@@ -589,7 +594,8 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.TaskFinishedEvent => new TaskFinishedEventArgs(null, null, null, null, null, false),
                 LoggingEventType.TaskCommandLineEvent => new TaskCommandLineEventArgs(null, null, MessageImportance.Normal),
                 LoggingEventType.EnvironmentVariableReadEvent => new EnvironmentVariableReadEventArgs(),
-                LoggingEventType.ResponseFileUsedEvent => new ResponseFileUsedEventArgs(null),
+                LoggingEventType.ResponseFileUsedEvent => new ResponseFileUsedEventArgs(null),               
+
 #if !TASKHOST // MSBuildTaskHost is targeting Microsoft.Build.Framework.dll 3.5
                 LoggingEventType.AssemblyLoadEvent => new AssemblyLoadBuildEventArgs(),
                 LoggingEventType.TaskParameterEvent => new TaskParameterEventArgs(0, null, null, true, default),
@@ -610,6 +616,7 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.PropertyInitialValueSet => new PropertyInitialValueSetEventArgs(),
                 LoggingEventType.PropertyReassignment => new PropertyReassignmentEventArgs(),
                 LoggingEventType.UninitializedPropertyRead => new UninitializedPropertyReadEventArgs(),
+                LoggingEventType.GeneratedFileUsedEvent => new GeneratedFileUsedEventArgs(),
 #endif
                 _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
             };
@@ -720,6 +727,10 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(UninitializedPropertyReadEventArgs))
             {
                 return LoggingEventType.UninitializedPropertyRead;
+            }
+            else if (eventType == typeof(GeneratedFileUsedEventArgs))
+            {
+                return LoggingEventType.GeneratedFileUsedEvent;
             }
 #endif
             else if (eventType == typeof(TargetStartedEventArgs))

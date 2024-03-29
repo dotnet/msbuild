@@ -17,6 +17,11 @@
         <target state="translated">Oluşturma başlatıldı.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CollectionCopyToFailureProvidedArrayIsTooSmall">
+        <source>The number of elements in the collection is greater than the available space in the destination array (when starting at the specified index).</source>
+        <target state="translated">Koleksiyondaki öğe sayısı hedef dizideki kullanılabilir boşluğun boyutundan (belirtilen dizinden başlayarak) daha büyük.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ConflictingTaskAssembly">
         <source>MSB4008: A conflicting assembly for the task assembly "{0}" has been found at "{1}".</source>
         <target state="translated">MSB4008: "{0}" görev derlemesi için "{1}" konumunda çakışan derleme bulundu.</target>
@@ -319,8 +324,8 @@
         <note />
       </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">
-        <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined.</source>
-        <target state="translated">MSB5029: "{3}" dosyasındaki &lt;{2}&gt; öğesinde "{1}" özniteliğinin "{0}" değeri, sürücüdeki tüm dosyaların numaralandırılmasıyla sonuçlanan (büyük olasılıkla bunun olması amaçlanmıyordu) bir joker karakterdir. Başvurulan özelliklerin her zaman tanımlı olduğundan emin olun.</target>
+        <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</source>
+        <target state="new">MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</target>
         <note>{StrBegin="MSB5029: "}UE: This is a generic message that is displayed when we find a project element that has a drive enumerating wildcard value for one of its
       attributes e.g. &lt;Compile Include="$(NotAlwaysDefined)\**\*.cs"&gt; -- if the property is undefined, the value of Include should not result in enumerating all files on drive.</note>
       </trans-unit>

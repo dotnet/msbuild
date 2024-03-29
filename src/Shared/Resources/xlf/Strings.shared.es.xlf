@@ -17,6 +17,11 @@
         <target state="translated">Compilación iniciada.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CollectionCopyToFailureProvidedArrayIsTooSmall">
+        <source>The number of elements in the collection is greater than the available space in the destination array (when starting at the specified index).</source>
+        <target state="translated">El número de elementos de la colección es mayor que el espacio disponible en la matriz de destino (a partir del índice especificado).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ConflictingTaskAssembly">
         <source>MSB4008: A conflicting assembly for the task assembly "{0}" has been found at "{1}".</source>
         <target state="translated">MSB4008: Se detectó un ensamblado conflictivo para el ensamblado de tarea "{0}" en "{1}".</target>
@@ -319,8 +324,8 @@
         <note />
       </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">
-        <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined.</source>
-        <target state="translated">MSB5029: El valor “{0}” del atributo “{1}” en el elemento &lt;{2}&gt; en el archivo "{3}" es un carácter comodín que da como resultado la enumeración de todos los archivos de la unidad, lo que probablemente no estaba previsto. Compruebe que siempre se definan las propiedades a las que se hace referencia.</target>
+        <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</source>
+        <target state="new">MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</target>
         <note>{StrBegin="MSB5029: "}UE: This is a generic message that is displayed when we find a project element that has a drive enumerating wildcard value for one of its
       attributes e.g. &lt;Compile Include="$(NotAlwaysDefined)\**\*.cs"&gt; -- if the property is undefined, the value of Include should not result in enumerating all files on drive.</note>
       </trans-unit>

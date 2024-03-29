@@ -198,7 +198,7 @@
       </trans-unit>
       <trans-unit id="Copy.IncompatibleParameters">
         <source>MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</source>
-        <target state="new">MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</target>
+        <target state="translated">MSB3896: "{0}" 및 "{1}" 모두 프로젝트 파일에서 매개 변수로 지정되었지만 함께 사용할 수는 없습니다. 하나 또는 다른 항목을 선택하세요.</target>
         <note>{StrBegin="MSB3896: "}</note>
       </trans-unit>
       <trans-unit id="Copy.LinkFailed">
@@ -1060,8 +1060,8 @@
         <note>{StrBegin="MSB3183: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.WriteOutputManifestFailed">
-        <source>MSB3173: Unable to write manifest '{0}'. {1}</source>
-        <target state="translated">MSB3173: '{0}' 매니페스트를 쓸 수 없습니다. {1}</target>
+        <source>MSB3173: Unable to write manifest '{0}'. {1} {2}</source>
+        <target state="translated">MSB3173: '{0}' 매니페스트를 쓸 수 없습니다. {1} {2}</target>
         <note>{StrBegin="MSB3173: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.InvalidRequestedExecutionLevel">
@@ -1686,6 +1686,11 @@
       LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
     </note>
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.SearchPathAddedByParentAssembly">
+        <source>For SearchPath "{0}" (added by referencing assembly "{1}").</source>
+        <target state="translated">SearchPath "{0}"의 경우(어셈블리 "{1}"을(를) 참조하여 추가됨).</target>
+        <note> {1} is the name of the parent assembly for which SearchPath was used.</note>
+      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.SearchedAssemblyFoldersEx">
         <source>Considered AssemblyFoldersEx locations.</source>
         <target state="translated">AssemblyFoldersEx 위치로 간주했습니다.</target>
@@ -2180,11 +2185,6 @@
         <target state="translated">재배포 가능 패키지 목록 파일 "{0}"의 FileList 요소에 null이거나 비어 있는 재배포 가능 패키지 이름이 있습니다. 재배포 가능 패키지 이름이 null이거나 비어 있지 않도록 하세요.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
-        <source>Updating assembly cache file "{0}".</source>
-        <target state="translated">어셈블리 캐시 파일 "{0}"을(를) 업데이트하는 중입니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
         <source>COM Reference '{0}' is the interop assembly for ActiveX control '{1}' but was marked to be linked by the compiler with the /link flag. This COM reference will be treated as a reference and will not be linked.</source>
         <target state="translated">COM 참조 '{0}'은(는) ActiveX 컨트롤 '{1}'에 대한 interop 어셈블리이지만 /link 플래그로 컴파일러에 의해 링크되도록 표시되어 있습니다. 이 COM 참조는 참조로 간주되지만 링크되지 않습니다.</target>
@@ -2518,6 +2518,11 @@
         <source>MSB3353: Public key necessary for delay signing was not specified.</source>
         <target state="translated">MSB3353: 서명 연기에 필요한 공개 키를 지정하지 않았습니다.</target>
         <note>{StrBegin="MSB3353: "}</note>
+      </trans-unit>
+      <trans-unit id="Task.FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="translated">파일이 "{0}"에 의해 잠겨 있습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
         <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
@@ -3403,11 +3408,6 @@
         <source>MSB4801: The task factory "{0}" is not supported on the .NET Core version of MSBuild.</source>
         <target state="translated">MSB4801: MSBuild의 .NET Core 버전에서는 "{0}" 작업 팩터리가 지원되지 않습니다.</target>
         <note>{StrBegin="MSB4801: "}</note>
-      </trans-unit>
-      <trans-unit id="Copy.FileLocked">
-        <source>The file is locked by: "{0}"</source>
-        <target state="translated">파일이 "{0}"에 의해 잠겨 있습니다.</target>
-        <note />
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeType">
         <source>MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</source>

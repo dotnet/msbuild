@@ -4,7 +4,9 @@
     <NoWarn>$(NoWarn);618</NoWarn>
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <CreateTlb>true</CreateTlb>
+    <!-- Do not create Tlbs when building in .NET product mode. The packages are not shipped to VS,
+         only their contents redisted within the SDK. -->
+    <CreateTlb Condition="'$(DotNetBuild)' != 'true'">true</CreateTlb>
     <AdditionalTlbExpAsmPaths>$(XMakeRefPath)</AdditionalTlbExpAsmPaths>
     <PublishTlbPath>$(XMakeRefPath)</PublishTlbPath>
     <GenerateAssemblyRefs>true</GenerateAssemblyRefs>

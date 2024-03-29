@@ -23,7 +23,7 @@
     <PackageVersion Include="System.Net.Http" Version="$(SystemNetHttpVersion)" />
     <PackageVersion Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
     <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextVersion)" />
-    <PackageVersion Include="System.Resources.Extensions" Version="$(SystemResourcesExtensionsPackageVersion)" />
+    <PackageVersion Include="System.Resources.Extensions" Version="$(SystemResourcesExtensionsVersion)" />
     <PackageVersion Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafeVersion)" />
     <PackageVersion Include="System.Security.Principal.Windows" Version="$(SystemSecurityPrincipalWindowsVersion)" />
     <PackageVersion Include="System.Text.Encoding.CodePages" Version="$(SystemTextEncodingCodePagesVersion)" />

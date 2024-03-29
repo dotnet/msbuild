@@ -26,6 +26,106 @@
         <note>{StrBegin="MSB4003: "}UE: Tasks are not allowed to use incorrect case for reserved attributes on the task nodes e.g. "continueonerror"
     instead of the "ContinueOnError".</note>
       </trans-unit>
+      <trans-unit id="Binlog_ArchiveFile_AcquiredAsStream">
+        <source>Content already acquired as StreamReader via GetContentReader.</source>
+        <target state="translated">內容已透過 GetContentReader 取得為 StreamReader。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_ArchiveFile_AcquiredAsString">
+        <source>Content already acquired as string via GetContent or initialized as string only.</source>
+        <target state="translated">內容已透過 GetContent 取得為字串，或初始化為僅字串。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_ArchiveFile_NotSetAfterAcquire">
+        <source>ArchiveFile was obtained, but the final edited version was not set.</source>
+        <target state="translated">已取得 ArchiveFile，但未設定最終編輯的版本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_FwdCompatUnsupported">
+        <source>Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</source>
+        <target state="translated">檔案格式版本 {0} 不支援正向相容讀取 (需要 &gt;= 18)。</target>
+        <note>
+      LOCALIZATION: {0} is an integer number denoting version.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_ImportFileSizeError">
+        <source>Imported files archive exceeded 2GB limit and it's not embedded.</source>
+        <target state="translated">匯入的檔案封存超過 2 GB 限制，且未內嵌。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_MissingRecoverableErrorSubscribeError">
+        <source>Subscription to RecoverableReadError is mandatory during forward compatible reading.</source>
+        <target state="translated">在正向相容讀取期間，必須訂閱 RecoverableReadError。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_ReaderMismatchedRead">
+        <source>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</source>
+        <target state="translated">BuildEvent 記錄編號 {0} (序列化大小: {1}) 嘗試執行禁止的讀取 (詳細資料: {2}: {3})。</target>
+        <note>
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an exception type and {3} the exception message string.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_ReaderSkippingRecord">
+        <source>Skipping the record.</source>
+        <target state="translated">正在略過記錄。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_ReaderUnderRead">
+        <source>BuildEvent record number {0} was expected to read exactly {1} bytes from the stream, but read {2} instead.</source>
+        <target state="translated">BuildEvent 記錄編號 {0} 預期會從資料流讀取確切 {1} 個位元組，但改為讀取 {2}。</target>
+        <note>
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an integer value indicating number of bytes.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_ReaderUnknownType">
+        <source>BuildEvent record number {0} (serialized size: {1}) is of unsupported type: {2}.</source>
+        <target state="translated">BuildEvent 記錄編號 {0} (序列化大小: {1}) 的類型不受支援: {2}。</target>
+        <note>
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is a string or integer value indicating type.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_Source_MissingSubscribeError">
+        <source>No subscribers for any events.</source>
+        <target state="translated">沒有任何事件的訂閱者。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_Source_MultiSubscribeError">
+        <source>Structured events and raw events cannot be replayed at the same time.</source>
+        <target state="translated">結構化事件和原始事件不能同時重新執從。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_Source_VersionUninitialized">
+        <source>Version info not yet initialized. Replay must be called first.</source>
+        <target state="translated">版本資訊尚未初始化。必須先叫用重新執行。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_MustBeReadable">
+        <source>Stream must be readable.</source>
+        <target state="translated">資料流必須可讀取。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_SeekNonOrigin">
+        <source>Only seeking from SeekOrigin.Current is supported.</source>
+        <target state="translated">僅支援從 SeekOrigin.Current 尋找。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_SetLengthUnsupported">
+        <source>Changing the stream length is not supported.</source>
+        <target state="translated">不支援變更資料流長度。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_UnsupportedSkipOffset">
+        <source>Attempt to skip {0} bytes, only non-negative offset up to int.MaxValue is allowed.</source>
+        <target state="translated">嘗試略過 {0} 個位元組，僅允許最多為 int.MaxValue 的非負數位移。</target>
+        <note>
+      LOCALIZATION: {0} is integer number denoting number of bytes. 'int.MaxValue' should not be translated.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_WriteUnsupported">
+        <source>Writing is not supported.</source>
+        <target state="translated">不支援寫入。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
         <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
         <target state="translated">問題建立失敗。建置提早結束，因為它遇到不是最新的目標或工作。</target>
@@ -149,6 +249,15 @@
   {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="FatalErrorWhileLoggingWithInnerException">
+        <source>MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
+    {0}</source>
+        <target state="translated">MSB4017: 因為未預期的記錄器失敗，建置未預期停止。
+   {0}</target>
+        <note>{StrBegin="MSB4017: "}UE: This message is used for a special exception that is thrown when a logger fails while logging an event (most
+    likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
+    special exception to abort the build.</note>
+      </trans-unit>
       <trans-unit id="General.TwoVectorsMustHaveSameLength">
         <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
         <target state="translated">MSB3094: "{2}" 參考 {0} 個項目，"{3}" 則參考 {1} 個項目。兩者參考的項目數目必須相同。</target>
@@ -158,6 +267,11 @@
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: 條件 "{0}" 的位置 "{1}" 出現非預期的空格。忘記移除空格了嗎?</target>
         <note>{StrBegin="MSB4259: "}</note>
+      </trans-unit>
+      <trans-unit id="ImportedProjectFromVSDistribution">
+        <source>MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </source>
+        <target state="translated">MSB4278: 匯入的檔案 "{0}" 不存在，而且似乎是 Visual Studio 元件的一部分。此檔案可能需要 MSBuild.exe 才能成功匯入，因此可能無法在 dotnet CLI 中建置。 </target>
+        <note>{StrBegin="MSB4278: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
         <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
@@ -170,8 +284,8 @@
         <note />
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
-        <source>EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system.</source>
-        <target state="translated">使用 SharingPolicy.Isolated 建立的 EvaluationContext 物件不支援以 MSBuildFileSystemBase 檔案系統傳遞。</target>
+        <source>EvaluationContext objects created with SharingPolicy.Isolated or SharingPolicy.SharedSDKCache do not support being passed an MSBuildFileSystemBase file system.</source>
+        <target state="translated">使用 SharingPolicy.Isolated 或 SharingPolicy.SharedSDKCache 建立的 EvaluationContext 物件不支援以 MSBuildFileSystemBase 檔案系統傳遞。</target>
         <note />
       </trans-unit>
       <trans-unit id="ItemReferencingSelfInTarget">
@@ -223,7 +337,7 @@
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
         <source>A required NuGet assembly '{0}' could not be loaded.</source>
-        <target state="needs-review-translation">找不到必要的 NuGet 元件。預期的路徑: {0}</target>
+        <target state="translated">無法載入必要的 NuGet 組件 '{0}'。</target>
         <note />
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
@@ -390,6 +504,17 @@
         <target state="translated">目前只支援使用 MSBuild 的 x64 變體來報告檔案存取。</target>
         <note />
       </trans-unit>
+      <trans-unit id="SDKResolverAttempt">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}".
+Warnings: {2}
+Errors: {3}</source>
+        <target state="translated">"{0}" 解析程式已嘗試解析 SDK "{1}"。
+警告: {2}
+錯誤: {3}</target>
+        <note>
+      LOCALIZATION: Do not localize the word SDK. "{2}" is new line separated warnings or "null". "{3}" is new line separated errors or "null".
+    </note>
+      </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
         <source>MSB4242: SDK Resolver Failure: "{0}"</source>
         <target state="translated">MSB4242: SDK 解析程式失敗: "{0}"</target>
@@ -450,6 +575,11 @@
         <note>
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
     </note>
+      </trans-unit>
+      <trans-unit id="SucceededToResolveSDK">
+        <source>The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</source>
+        <target state="translated">SDK "{0}" 已由 "{1}" 解析程式成功解析為位置 "{2}" 和版本 "{3}"。</target>
+        <note />
       </trans-unit>
       <trans-unit id="TaskAcquiredCores">
         <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
@@ -2490,8 +2620,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <note>{StrBegin="MSB4238: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedLogFileFormat">
-        <source>MSB4235: The log file format version is {0}, whereas this version of MSBuild only supports versions up to {1}.</source>
-        <target state="translated">MSB4235: 記錄檔格式版本為 {0}，但此版 MSBuild 僅支援 {1} (含) 之前的版本。</target>
+        <source>MSB4235: The log file format version is {0} with minimum required reader version {1}, whereas this version of MSBuild only supports versions up to {2}.</source>
+        <target state="translated">MSB4235: 記錄檔格式版本為 {0}，其具有最低讀取器版本 {1}，而此版本的 MSBuild 只支援最多為 {2} 的版本。</target>
         <note>{StrBegin="MSB4235: "}</note>
       </trans-unit>
       <trans-unit id="ProjectEvaluationPerformanceSummary">
@@ -2580,13 +2710,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
         <target state="translated">MSB4241: SDK 參考 "{0}" 版本 "{1}" 已改為解析成版本 "{2}"。若您未將參考的版本更新為符合的版本，您可能使用了與預期不同的版本。</target>
         <note>{StrBegin="MSB4241: "}
-      LOCALIZATION:  Do not localize the word SDK.
-    </note>
-      </trans-unit>
-      <trans-unit id="SdkResolving">
-        <source>Resolving SDK '{0}'...</source>
-        <target state="translated">正在解析 SDK '{0}'...</target>
-        <note>
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>

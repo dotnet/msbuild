@@ -914,6 +914,31 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
+        [DotNetOnlyFact("Tests .NET SDK-only error")]
+        public void ImportWithVSPathThrowsCorrectError()
+        {
+            string importPath = null;
+
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                // Does not matter that the file or folder does not exist, we are checking for the VS pathing here
+                importPath = "path\\that\\does\\not\\exist\\Microsoft\\VisualStudio\\FileName.txt";
+
+                var content = env.CreateTestProjectWithFiles(@"
+                    <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
+                        <Import Project='" + importPath + @"'/>
+                    </Project>
+                ");
+
+                InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>(() =>
+                {
+                        Project project = new Project(content.ProjectFile, null, null);
+                });
+
+                Assert.Contains("MSB4278", ex.ErrorCode);
+            }
+        }
+
         /// <summary>
         /// RecordDuplicateButNotCircularImports should not record circular imports (which do come under the category of "duplicate imports".
         /// </summary>

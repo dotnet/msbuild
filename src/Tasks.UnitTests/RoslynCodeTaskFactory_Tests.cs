@@ -644,6 +644,81 @@ namespace InlineTask
             }
         }
 
+        [Fact]
+        public void EmbedsGeneratedFromSourceFileInBinlog()
+        {
+            string taskName = "HelloTask";
+
+            string sourceContent = $$"""
+                namespace InlineTask
+                {
+                    using Microsoft.Build.Utilities;
+
+                    public class {{taskName}} : Task
+                    {
+                        public override bool Execute()
+                        {
+                            Log.LogMessage("Hello, world!");
+                            return !Log.HasLoggedErrors;
+                        }
+                    }
+                }
+                """;
+
+            CodeTaskFactoryEmbeddedFileInBinlogTestHelper.BuildFromSourceAndCheckForEmbeddedFileInBinlog(
+                FactoryType.RoslynCodeTaskFactory, taskName, sourceContent, true);
+        }
+
+        [Fact]
+        public void EmbedsGeneratedFromSourceFileInBinlogWhenFailsToCompile()
+        {
+            string taskName = "HelloTask";
+
+            string sourceContent =  $$"""
+                namespace InlineTask
+                {
+                    using Microsoft.Build.Utilities;
+
+                    public class {{taskName}} : Task
+                    {
+                """;
+
+            CodeTaskFactoryEmbeddedFileInBinlogTestHelper.BuildFromSourceAndCheckForEmbeddedFileInBinlog(
+                FactoryType.RoslynCodeTaskFactory, taskName, sourceContent, false);
+        }
+
+        [Fact]
+        public void EmbedsGeneratedFileInBinlog()
+        {
+            string taskXml = @"
+                <Task>
+                    <Code Type=""Fragment"" Language=""cs"">
+                        <![CDATA[
+                              Log.LogMessage(""Hello, World!"");
+                		   ]]>
+                    </Code>
+                </Task>";
+
+            CodeTaskFactoryEmbeddedFileInBinlogTestHelper.BuildAndCheckForEmbeddedFileInBinlog(
+                FactoryType.RoslynCodeTaskFactory, "HelloTask", taskXml, true);
+        }
+
+        [Fact]
+        public void EmbedsGeneratedFileInBinlogWhenFailsToCompile()
+        {
+            string taskXml = @"
+                <Task>
+                    <Code Type=""Fragment"" Language=""cs"">
+                        <![CDATA[
+                              Log.LogMessage(""Hello, World!
+                		   ]]>
+                    </Code>
+                </Task>";
+
+            CodeTaskFactoryEmbeddedFileInBinlogTestHelper.BuildAndCheckForEmbeddedFileInBinlog(
+                FactoryType.RoslynCodeTaskFactory, "HelloTask", taskXml, false);
+        }
+
 #if !FEATURE_RUN_EXE_IN_TESTS
         [Fact]
         public void RoslynCodeTaskFactory_UsingAPI()

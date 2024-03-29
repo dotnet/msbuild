@@ -318,7 +318,7 @@ namespace ConsoleApplication4
                 codeFile = FileUtilities.GetTemporaryFileName();
                 File.WriteAllText(codeFile, codeContent);
                 Csc csc = new Csc();
-                csc.BuildEngine = new MockEngine();
+                csc.BuildEngine = new MockEngine3();
                 csc.Sources = new ITaskItem[] { new TaskItem(codeFile) };
                 csc.OutputAssembly = new TaskItem(outputFile);
                 csc.Execute();
@@ -423,7 +423,7 @@ namespace ConsoleApplication4
                 string codeContent = @"using System.IO; class X { static void Main() { File.ReadAllText(@""" + inputPath + @"""); File.ReadAllText(@""" + inputPath + @"""); }}";
                 File.WriteAllText(codeFile, codeContent);
                 Csc csc = new Csc();
-                csc.BuildEngine = new MockEngine();
+                csc.BuildEngine = new MockEngine3();
                 csc.Sources = new[] { new TaskItem(codeFile) };
                 csc.OutputAssembly = new TaskItem(outputFile);
                 csc.Execute();
@@ -484,7 +484,7 @@ class X
 
                 File.WriteAllText(codeFile, codeContent);
                 Csc csc = new Csc();
-                csc.BuildEngine = new MockEngine();
+                csc.BuildEngine = new MockEngine3();
                 csc.Sources = new[] { new TaskItem(codeFile) };
                 csc.OutputAssembly = new TaskItem(outputFile);
                 bool success = csc.Execute();
@@ -2272,7 +2272,7 @@ namespace ConsoleApplication4
                 string codeFile = Path.Combine(testDir, "Program.cs");
                 File.WriteAllText(codeFile, codeContent);
                 Csc csc = new Csc();
-                csc.BuildEngine = new MockEngine();
+                csc.BuildEngine = new MockEngine3();
                 csc.Sources = new ITaskItem[] { new TaskItem(codeFile) };
                 csc.OutputAssembly = new TaskItem(outputFile);
                 csc.Platform = "x86";

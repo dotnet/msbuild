@@ -1332,6 +1332,7 @@ namespace Microsoft.Build.Execution
                             _projectCacheService.InitializePluginsForVsScenario(
                                 ProjectCacheDescriptors.Values,
                                 resolvedConfiguration,
+                                submission.BuildRequestData.TargetNames,
                                 _executionCancellationTokenSource.Token);
                         }
 
@@ -1953,13 +1954,22 @@ namespace Microsoft.Build.Execution
 
             if (submission.BuildRequestData.GraphBuildOptions.Build)
             {
-                _projectCacheService.InitializePluginsForGraph(projectGraph, _executionCancellationTokenSource.Token);
+                _projectCacheService.InitializePluginsForGraph(projectGraph, submission.BuildRequestData.TargetNames, _executionCancellationTokenSource.Token);
 
-                var targetListTask = projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames);
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode = projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames);
 
-                DumpGraph(projectGraph, targetListTask);
+                DumpGraph(projectGraph, targetsPerNode);
 
-                resultsPerNode = BuildGraph(projectGraph, targetListTask, submission.BuildRequestData);
+                // Non-graph builds verify this in RequestBuilder, but for graph builds we need to disambiguate
+                // between entry nodes and other nodes in the graph since only entry nodes should error. Just do
+                // the verification expicitly before the build even starts.
+                foreach (ProjectGraphNode entryPointNode in projectGraph.EntryPointNodes)
+                {
+                    ImmutableList<string> targetList = targetsPerNode[entryPointNode];
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(targetList.Count > 0, entryPointNode.ProjectInstance.ProjectFileLocation, "NoTargetSpecified");
+                }
+
+                resultsPerNode = BuildGraph(projectGraph, targetsPerNode, submission.BuildRequestData);
             }
             else
             {

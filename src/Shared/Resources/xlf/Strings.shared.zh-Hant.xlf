@@ -17,6 +17,11 @@
         <target state="translated">已經開始建置。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CollectionCopyToFailureProvidedArrayIsTooSmall">
+        <source>The number of elements in the collection is greater than the available space in the destination array (when starting at the specified index).</source>
+        <target state="translated">集合中的元素數大於目標陣列中的可用空間 (從指定索引開始時)。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ConflictingTaskAssembly">
         <source>MSB4008: A conflicting assembly for the task assembly "{0}" has been found at "{1}".</source>
         <target state="translated">MSB4008: 已在 "{1}" 中發現工作組件 "{0}" 的衝突組件。</target>
@@ -319,8 +324,8 @@
         <note />
       </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">
-        <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined.</source>
-        <target state="translated">MSB5029: 檔案「{3}」元素 &lt;{2}&gt; 中屬性「{1}」的值「{0}」是萬用字元，導致列舉磁碟機上的所有檔案，這很可能不是預期的結果。檢查是否一直定義參考屬性。</target>
+        <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</source>
+        <target state="new">MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</target>
         <note>{StrBegin="MSB5029: "}UE: This is a generic message that is displayed when we find a project element that has a drive enumerating wildcard value for one of its
       attributes e.g. &lt;Compile Include="$(NotAlwaysDefined)\**\*.cs"&gt; -- if the property is undefined, the value of Include should not result in enumerating all files on drive.</note>
       </trans-unit>

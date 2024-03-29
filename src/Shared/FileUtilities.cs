@@ -1485,7 +1485,7 @@ namespace Microsoft.Build.Shared
 
         internal static void EnsureDirectoryExists(string directoryPath)
         {
-            if (directoryPath != null && !DefaultFileSystem.DirectoryExists(directoryPath))
+            if (!string.IsNullOrEmpty(directoryPath) && !DefaultFileSystem.DirectoryExists(directoryPath))
             {
                 Directory.CreateDirectory(directoryPath);
             }

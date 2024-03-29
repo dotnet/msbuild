@@ -2133,7 +2133,7 @@ $@"
 
             graph.ProjectNodes.Count.ShouldBe(4);
 
-            var outerBuild = graph.GraphRoots.First(IsOuterBuild);
+            var outerBuild = graph.GraphRoots.First(i => i.ProjectType == ProjectInterpretation.ProjectType.OuterBuild);
 
             AssertOuterBuild(outerBuild, graph, additionalGlobalProperties);
             AssertNonMultitargetingNode(GetFirstNodeWithProjectNumber(graph, 2), additionalGlobalProperties);
@@ -2215,7 +2215,7 @@ $@"
 
             AssertOuterBuild(outerBuild1, graph, additionalGlobalProperties);
 
-            var innerBuild1WithReferenceToInnerBuild2 = outerBuild1.ProjectReferences.FirstOrDefault(n => IsInnerBuild(n) && n.ProjectInstance.GlobalProperties[InnerBuildPropertyName] == "a");
+            var innerBuild1WithReferenceToInnerBuild2 = outerBuild1.ProjectReferences.FirstOrDefault(n => n.ProjectType == ProjectInterpretation.ProjectType.InnerBuild && n.ProjectInstance.GlobalProperties[InnerBuildPropertyName] == "a");
             innerBuild1WithReferenceToInnerBuild2.ShouldNotBeNull();
 
             var outerBuild2 = GetOuterBuild(graph, 2);

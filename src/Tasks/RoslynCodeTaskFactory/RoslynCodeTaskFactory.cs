@@ -80,12 +80,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private const string ReferenceAssemblyDirectoryName = "ref";
 
-
-        /// <summary>
-        /// Array of mono lib directories used to resolve references
-        /// </summary>
-        private static readonly string[] MonoLibDirs = GetMonoLibDirs();
-
         /// <summary>
         /// A cache of <see cref="RoslynCodeTaskFactoryTaskInfo"/> objects and their corresponding compiled assembly.  This cache ensures that two of the exact same code task
         /// declarations are not compiled multiple times.
@@ -573,7 +567,6 @@ namespace Microsoft.Build.Tasks
                     Path.Combine(ThisAssemblyDirectoryLazy.Value, ReferenceAssemblyDirectoryName),
                     ThisAssemblyDirectoryLazy.Value,
                 }
-                .Concat(MonoLibDirs)
                 .FirstOrDefault(p => File.Exists(Path.Combine(p, assemblyFileName)));
 
                 if (resolvedDir != null)
@@ -692,6 +685,10 @@ namespace Microsoft.Build.Tasks
 
             try
             {
+                // Embed generated file in the binlog
+                string fileNameInBinlog = $"{Guid.NewGuid()}-{_taskName}-compilation-file.tmp";
+                _log.LogIncludeGeneratedFile(fileNameInBinlog, taskInfo.SourceCode);
+
                 // Create the code
                 File.WriteAllText(sourceCodePath, taskInfo.SourceCode);
 
@@ -786,21 +783,6 @@ namespace Microsoft.Build.Tasks
                 {
                     File.Delete(sourceCodePath);
                 }
-            }
-        }
-
-        private static string[] GetMonoLibDirs()
-        {
-            if (NativeMethodsShared.IsMono)
-            {
-                string monoLibDir = Path.GetDirectoryName(typeof(object).Assembly.Location);
-                string monoLibFacadesDir = Path.Combine(monoLibDir, "Facades");
-
-                return new[] { monoLibDir, monoLibFacadesDir };
-            }
-            else
-            {
-                return Array.Empty<string>();
             }
         }
     }
