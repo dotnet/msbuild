@@ -3,9 +3,9 @@
 ## At any time
 
 - [ ] Create a new issue to track the release checklist, with this checklist copied into the issue.
-  - [ ] Replace `{{PREVIOUS_RELEASE_VERSION}}` with the previous release version
-  - [ ] Replace `{{THIS_RELEASE_VERSION}}` with the current release version
-  - [ ] Replace `{{NEXT_VERSION}}` with the next release version
+  - [ ] Replace `{{PREVIOUS_RELEASE_VERSION}}` with the previous release version, for example `17.9`
+  - [ ] Replace `{{THIS_RELEASE_VERSION}}` with the current release version, for example `17.10`
+  - [ ] Replace `{{NEXT_VERSION}}` with the next release version, for example `17.11`
 - [ ]  Create `vs{{THIS_RELEASE_VERSION}}` branch
 - [ ]  Create darc channel for `VS {{NEXT_VERSION}}` if it doesn't already exist \
 `darc add-channel --name "VS {{NEXT_VERSION}}"`
