@@ -32,10 +32,10 @@ if it is not, `darc add-default-channel  --channel "VS {{THIS_RELEASE_VERSION}}"
 e.g.: `git push upstream 2e6f2ff7ea311214255b6b2ca5cc0554fba1b345:refs/heads/vs17.10` \
 _(This is for the case where we create the branch too early and want it to be based actually on a different commit. If you waited until a good point in time with `main` in a clean state, just branch off and you are done. The branch should point to a good, recent spot, so the final-branding PR goes in on top of the right set of commits.)_
 - [ ]  Fix OptProf data flow for the new vs{{THIS_RELEASE_VERSION}} branch
-   - Run manually [OptProf](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=17389) pipeline for vs{{THIS_RELEASE_VERSION}} ('Run pipeline' in upper right)
-   - Run the [MSBuild pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434) for vs{{THIS_RELEASE_VERSION}} without OptProf (set `SkipApplyOptimizationData` variable in 'Advanced options' section of the 'Run pipeline' menu to `true`)
-   - Run the [MSBuild pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434) for vs{{THIS_RELEASE_VERSION}} with no extra customization - OptProf should succeed now
-- [ ]  Create {{NEXT_VERSION}} branding PR (in main)
+  - [ ] Manually run [OptProf data collection](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=17389) pipeline for vs{{THIS_RELEASE_VERSION}} ('Run pipeline' in upper right)
+  - [ ] Run the [official build](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434) for vs{{THIS_RELEASE_VERSION}} without OptProf (set `SkipApplyOptimizationData` variable in 'Advanced options' section of the 'Run pipeline' menu to `true`)
+  - [ ] Run the [official build](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434) for vs{{THIS_RELEASE_VERSION}} with no extra customization - OptProf should succeed now
+- [ ]  Create {{NEXT_VERSION}} branding PR (in main): {{URL_OF_NEXT_VERSION_BRANDING_PR}}
 - [ ]  Create {{THIS_RELEASE_VERSION}} localization ticket: https://aka.ms/ceChangeLocConfig (requesting to add localization for {{THIS_RELEASE_VERSION}})
 https://ceapex.visualstudio.com/CEINTL/_workitems/edit/957875 (DONE)
 - [ ]  Enable {{THIS_RELEASE_VERSION}} localization - by setting [`EnableReleaseOneLocBuild`](https://github.com/dotnet/msbuild/blob/vs{{THIS_RELEASE_VERSION}}/.vsts-dotnet.yml) to `true`
