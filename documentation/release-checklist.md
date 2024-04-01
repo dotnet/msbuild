@@ -1,6 +1,6 @@
-(adapted from #9484)
+# MSBuild Release Checklist {{THIS_RELEASE_VERSION}}
 
-Preparation for the release:
+## At any time
 
 - [ ]  Create `vs17.10` branch
 - [ ]  Modify the VS insertion so that it flows from MSBuild vs17.10 to VS main [here](https://dev.azure.com/devdiv/DevDiv/_release?definitionId=1319&view=mine&_a=releases) Edit -> Schedule set under Artifacts -> disable toggle
@@ -10,6 +10,9 @@ AND
 `darc add-channel --name "VS 17.11"`
 - [ ]  Ping internal "First Responders" Teams channel to get the new channel made available as a promotion target (e.g. https://github.com/dotnet/arcade/issues/12150): https://github.com/dotnet/arcade/pull/12989
 IT SEEMS TO BE DONE https://github.com/dotnet/arcade/pull/14260
+
+## At release time
+
 - [ ]  Remove the `main` to old release channel default channel \
 `darc delete-default-channel --repo https://github.com/dotnet/msbuild --branch main --channel "VS 17.9"`
 - [ ]  Associate the `main` branch with the next release channel \
@@ -52,7 +55,7 @@ https://ceapex.visualstudio.com/CEINTL/_workitems/edit/936778
 - [ ]  Merge to VS (babysit the automatically generated VS insertion PR https://devdiv.visualstudio.com/DevDiv/_git/VS/pullrequests for the MSBuild commit noted in above step): https://devdiv.visualstudio.com/DevDiv/_git/VS/pullrequest/518456 (RAINER)
 - [ ] ~Update the PackageValidationBaselineVersion to the latest released version (17.10.0) - this might require temporary addition of [build artifacts feed](https://github.com/dotnet/msbuild/blob/29397b577e3ec0fe0c7650c3ab0400909655dc88/NuGet.config#L9) as the new version is not yet added to the official feeds (this is post release). This can trigger a high severity CG error (https://eng.ms/docs/cloud-ai-platform/devdiv/one-engineering-system-1es/1es-docs/secure-supply-chain/how-to-securely-configure-package-source-files) - however it should be fine to keep this temporary feed untill the release.~
 
-ASAP On/After GA (based on release schedule (internal) https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/10097/Dev17-Release):
+## ASAP On/After GA (based on [(Microsoft-internal) release schedule](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/10097/Dev17-Release)):
 
 - [ ]  Push packages to nuget.org (not currently automated, contact dnceng - search "Publish MSBuild 17.6 to NuGet.org" email subject for template).
 - [ ]  Publish docs: submit reference request at https://aka.ms/publishondocs
