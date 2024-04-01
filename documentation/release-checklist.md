@@ -2,25 +2,26 @@
 
 ## At any time
 
+- [ ] Create a new issue to track the release checklist, with this checklist copied into the issue.
 - [ ]  Create `vs{{THIS_RELEASE_VERSION}}` branch
-- [ ]  Modify the VS insertion so that it flows from MSBuild vs{{THIS_RELEASE_VERSION}} to VS main [here](https://dev.azure.com/devdiv/DevDiv/_release?definitionId=1319&view=mine&_a=releases) Edit -> Schedule set under Artifacts -> disable toggle
-AND
-- [ ]  Disable automated run of https://dev.azure.com/devdiv/DevDiv/_release?definitionId=2153&view=mine&_a=releases (because our {{NEXT_VERSION}} builds don't have a place to go in VS yet)
 - [ ]  Create darc channel for `VS {{NEXT_VERSION}}` if it doesn't already exist \
 `darc add-channel --name "VS {{NEXT_VERSION}}"`
-- [ ]  Ping internal "First Responders" Teams channel to get the new channel made available as a promotion target (e.g. https://github.com/dotnet/arcade/issues/12150): https://github.com/dotnet/arcade/pull/12989
-IT SEEMS TO BE DONE https://github.com/dotnet/arcade/pull/14260
+- [ ]  Ping internal "First Responders" Teams channel to get the new channel made available as a promotion target (e.g. dotnet/arcade#12150): {{URL_OF_CHANNEL_PROMOTION_PR}}
 
 ## At release time
 
-- [ ]  Remove the `main` to old release channel default channel \
-`darc delete-default-channel --repo https://github.com/dotnet/msbuild --branch main --channel "VS 17.9"`
+- [ ] If the release is being cut more than a few days before the VS-side snap, do these two steps. Otherwise check them off.
+  - [ ]  Modify the VS insertion so that it flows from MSBuild `vs{{THIS_RELEASE_VERSION}}` to VS `main` [in the MSBuild-release-branch release definition](https://dev.azure.com/devdiv/DevDiv/_release?definitionId=1319&view=mine&_a=releases) Edit -> Schedule set under Artifacts -> disable toggle
+AND
+  - [ ]  Disable automated run of [the MSBuild-main-branch release definition](https://dev.azure.com/devdiv/DevDiv/_release?definitionId=2153&view=mine&_a=releases) (because our {{NEXT_VERSION}} builds don't have a place to go in VS yet)
+- [ ]  Remove the `main` to old release channel ({{THIS_RELEASE_VERSION}}) default channel \
+`darc delete-default-channel --repo https://github.com/dotnet/msbuild --branch main --channel "VS {{THIS_RELEASE_VERSION}}"`
 - [ ]  Associate the `main` branch with the next release channel \
 `darc add-default-channel  --channel "VS {{THIS_RELEASE_VERSION}}" --branch main --repo https://github.com/dotnet/msbuild`
-- [ ]  Check subscriptions for the current channel `VS {{NEXT_VERSION}}` and update as necessary (for instance, SDK's `main` branch should usually be updated, whereas release branches often should not be \
-`darc get-subscriptions --exact --source-repo https://github.com/dotnet/msbuild --channel "VS {{NEXT_VERSION}}"`
-- [ ]  Update channel VS 17.9 to VS {{THIS_RELEASE_VERSION}} for the sdk main subscription
-`darc update-subscription --id sdk_main_branch_id
+- [ ]  Check subscriptions for the forward-looking channel `VS {{NEXT_VERSION}}` and update as necessary (for instance, SDK's `main` branch should usually be updated, whereas release branches often should not be \
+`darc get-subscriptions --exact --source-repo https://github.com/dotnet/msbuild --channel "VS {{THIS_RELEASE_VERSION}}"`
+- [ ]  Update channel VS {{THIS_RELEASE_VERSION}} to VS {{NEXT_VERSION}} for the sdk main subscription and any others from the previous step
+`darc update-subscription --id sdk_main_branch_id`
 - [ ]  Ensure that the current release channel `VS {{THIS_RELEASE_VERSION}}` is associated with the correct release branch\
 `darc get-default-channels --source-repo https://github.com/dotnet/msbuild --branch vs{{THIS_RELEASE_VERSION}}` \
 if it is not, `darc add-default-channel  --channel "VS {{THIS_RELEASE_VERSION}}" --branch vs{{THIS_RELEASE_VERSION}} --repo https://github.com/dotnet/msbuild`
@@ -38,11 +39,11 @@ The branch should point to a good, recent spot, so the final-branding PR goes in
 - [ ]  Create {{THIS_RELEASE_VERSION}} localization ticket: https://aka.ms/ceChangeLocConfig (requesting to add localization for {{THIS_RELEASE_VERSION}})
 https://ceapex.visualstudio.com/CEINTL/_workitems/edit/957875 (DONE)
 - [ ]  Enable {{THIS_RELEASE_VERSION}} localization - by setting [`EnableReleaseOneLocBuild`](https://github.com/dotnet/msbuild/blob/vs{{THIS_RELEASE_VERSION}}/.vsts-dotnet.yml) to `true`
-- [ ]  Disable 17.9 localization -  by setting [`EnableReleaseOneLocBuild`] (https://github.com/dotnet/msbuild/blob/vs17.9/.vsts-dotnet.yml) to `false` clarify with @JanKrivanek
+- [ ]  Disable {{PREVIOUS_RELEASE_VERSION}} localization -  by setting [`EnableReleaseOneLocBuild`](https://github.com/dotnet/msbuild/blob/vs{{PREVIOUS_RELEASE_VERSION}}/.vsts-dotnet.yml) to `false` clarify with @JanKrivanek
 - [ ]  Merge {{NEXT_VERSION}} branding PR
 - [ ]  Create and merge PR including public API baseline package version change (see https://github.com/dotnet/msbuild/pull/8116#discussion_r1049386978): #8949
 - [ ]  When VS main snaps to {{THIS_RELEASE_VERSION}} and updates its version to {{NEXT_VERSION}}, modify the VS insertion so that it flows from MSBuild main to VS main.
-- [ ]  Create 17.9 localization ticket: https://aka.ms/ceChangeLocConfig (requesting to remove localization for 17.9)
+- [ ]  Create {{PREVIOUS_RELEASE_VERSION}} localization ticket: https://aka.ms/ceChangeLocConfig (requesting to remove localization for {{PREVIOUS_RELEASE_VERSION}})
 https://ceapex.visualstudio.com/CEINTL/_workitems/edit/936778
 - [ ]  Remove MSBuild main from the experimental VS insertion flow.
 - [ ]  Update the [release-branch insertion release definition](https://dev.azure.com/devdiv/DevDiv/_releaseDefinition?definitionId=2153&_a=definition-variables) to have `InsertTargetBranch` `rel/d{{THIS_RELEASE_VERSION}}`.
