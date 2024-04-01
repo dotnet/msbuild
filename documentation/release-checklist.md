@@ -28,12 +28,9 @@ AND
 - [ ]  Ensure that the current release channel `VS {{THIS_RELEASE_VERSION}}` is associated with the correct release branch\
 `darc get-default-channels --source-repo https://github.com/dotnet/msbuild --branch vs{{THIS_RELEASE_VERSION}}` \
 if it is not, `darc add-default-channel  --channel "VS {{THIS_RELEASE_VERSION}}" --branch vs{{THIS_RELEASE_VERSION}} --repo https://github.com/dotnet/msbuild`
-- [ ]  Fast-forward merge the correct commit (the one that is currently inserted to VS main) to the `vs{{THIS_RELEASE_VERSION}}` branch \
-e.g.: `git push upstream 2e6f2ff7ea311214255b6b2ca5cc0554fba1b345:refs/heads/vs{{THIS_RELEASE_VERSION}}` _Note the commit for future steps_
-_This is for the case where we create the branch too early and want it to be based actually on a different commit
-If you waited till good point in time with main in a clean state - you just branch off and you are done
-The branch should point to a good, recent spot, so the final-branding PR goes in on top of the right set of commits._
-- [ ]  Update the branch merge flow in `dotnet/versions` to have the currently-in-servicing branches (pending review https://github.com/dotnet/versions/pull/951)
+- [ ]  If the branch was created before the fork: fast-forward merge the correct commit (the one that is currently inserted to VS main) to the `vs{{THIS_RELEASE_VERSION}}` branch \
+e.g.: `git push upstream 2e6f2ff7ea311214255b6b2ca5cc0554fba1b345:refs/heads/vs17.10` \
+_(This is for the case where we create the branch too early and want it to be based actually on a different commit. If you waited until a good point in time with `main` in a clean state, just branch off and you are done. The branch should point to a good, recent spot, so the final-branding PR goes in on top of the right set of commits.)_
 - [ ]  Fix OptProf data flow for the new vs{{THIS_RELEASE_VERSION}} branch
    - Run manually [OptProf](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=17389) pipeline for vs{{THIS_RELEASE_VERSION}} ('Run pipeline' in upper right)
    - Run the [MSBuild pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434) for vs{{THIS_RELEASE_VERSION}} without OptProf (set `SkipApplyOptimizationData` variable in 'Advanced options' section of the 'Run pipeline' menu to `true`)
