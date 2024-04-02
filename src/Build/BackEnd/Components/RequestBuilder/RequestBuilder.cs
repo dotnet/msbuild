@@ -853,7 +853,7 @@ namespace Microsoft.Build.BackEnd
 
                     loggingContext.LogCommentFromText(MessageImportance.Low, ex.ToString());
                 }
-                else
+                else if (ex is not CriticalTaskException)
                 {
                     (((LoggingContext)_projectLoggingContext) ?? _nodeLoggingContext).LogError(BuildEventFileInfo.Empty, "UnhandledMSBuildError", ex.ToString());
                 }

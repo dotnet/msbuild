@@ -18,6 +18,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -1048,6 +1049,47 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 """);
             ml.AssertLogContains("a=b");
         }
+
+        [Fact]
+        public void TaskExceptionHandlingTest()
+        {
+            // Unfortunately we cannot run those via TheoryAttribute and InlineDataAttribute because
+            //  the MSBuildTestEnvironmentFixture injects the cleanup logic for each testcase and when those
+            //  are run in parallel, within the same process, the two process will conflict with each other (on the error file).
+            TaskExceptionHandlingTestInternal(typeof(OutOfMemoryException), true);
+            TaskExceptionHandlingTestInternal(typeof(ArgumentException), false);
+        }
+
+        private void TaskExceptionHandlingTestInternal(Type exceptionType, bool isCritical)
+        {
+            string testExceptionMessage = "Test Message";
+            string customTaskPath = Assembly.GetExecutingAssembly().Location;
+            MockLogger ml = new MockLogger() { AllowTaskCrashes = true };
+            ObjectModelHelpers.BuildProjectExpectFailure($"""
+                     <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                         <UsingTask TaskName=`TaskThatThrows` AssemblyFile=`{customTaskPath}`/>
+                         <Target Name=`Build`>
+                            <TaskThatThrows ExceptionType="{exceptionType.ToString()}" ExceptionMessage="{testExceptionMessage}">
+                             </TaskThatThrows>
+                         </Target>
+                     </Project>
+                  """,
+                ml);
+            // 'This is an unhandled exception from a task'
+            ml.AssertLogContains("MSB4018");
+            // 'An internal failure occurred while running MSBuild'
+            ml.AssertLogDoesntContain("MSB1025");
+            // 'This is an unhandled error in MSBuild'
+            ml.AssertLogDoesntContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("UnhandledMSBuildError", string.Empty));
+            ml.AssertLogContains(testExceptionMessage);
+
+            File.Exists(ExceptionHandling.DumpFilePath).ShouldBe(isCritical);
+            if (isCritical)
+            {
+                FileUtilities.DeleteNoThrow(ExceptionHandling.DumpFilePath);
+            }
+        }
+
         #endregion
 
         #region ITestTaskHost Members

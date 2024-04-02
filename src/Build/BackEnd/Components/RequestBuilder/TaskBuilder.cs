@@ -814,8 +814,18 @@ namespace Microsoft.Build.BackEnd
                         }
                     }
                 }
-                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex) && Environment.GetEnvironmentVariable("MSBUILDDONOTCATCHTASKEXCEPTIONS") != "1")
+                catch (Exception ex)
                 {
+                    if (ExceptionHandling.IsCriticalException(ex) || Environment.GetEnvironmentVariable("MSBUILDDONOTCATCHTASKEXCEPTIONS") == "1")
+                    {
+                        taskLoggingContext.LogFatalTaskError(
+                            ex,
+                            new BuildEventFileInfo(_targetChildInstance.Location),
+                            _taskNode.Name);
+
+                        throw new CriticalTaskException(ex);
+                    }
+
                     taskException = ex;
                 }
 
