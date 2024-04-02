@@ -15,11 +15,10 @@ using Microsoft.Build.BuildCheck.Infrastructure.EditorConfig;
 
 namespace Microsoft.Build.BuildCheck.Infrastructure;
 
-
 // TODO: https://github.com/dotnet/msbuild/issues/9628
-internal class ConfigurationProvider
+internal sealed class ConfigurationProvider
 {
-    private EditorConfigParser s_editorConfigParser = new EditorConfigParser();
+    private readonly EditorConfigParser s_editorConfigParser = new EditorConfigParser();
 
     // TODO: This module should have a mechanism for removing unneeded configurations
     //  (disabled rules and analyzers that need to run in different node)
@@ -27,7 +26,7 @@ internal class ConfigurationProvider
 
     private readonly Dictionary<string, CustomConfigurationData> _customConfigurationData = new Dictionary<string, CustomConfigurationData>();
 
-    private readonly List<string> _infrastructureConfigurationKeys = new List<string>() {
+    private readonly string[] _infrastructureConfigurationKeys = new string[] {
         nameof(BuildAnalyzerConfiguration.EvaluationAnalysisScope).ToLower(),
         nameof(BuildAnalyzerConfiguration.IsEnabled).ToLower(),
         nameof(BuildAnalyzerConfiguration.Severity).ToLower()
@@ -53,12 +52,9 @@ internal class ConfigurationProvider
         }
 
         // remove the infrastructure owned key names
-        foreach(var infraConfigurationKey in _infrastructureConfigurationKeys)
+        foreach (var infraConfigurationKey in _infrastructureConfigurationKeys)
         {
-            if (configuration.ContainsKey(infraConfigurationKey))
-            {
-                configuration.Remove(infraConfigurationKey);
-            }
+            configuration.Remove(infraConfigurationKey);
         }
 
         var data = new CustomConfigurationData(ruleId, configuration);
@@ -82,10 +78,8 @@ internal class ConfigurationProvider
     {
         var configuration = GetCustomConfiguration(projectFullPath, ruleId);
 
-        if (_customConfigurationData.ContainsKey(ruleId))
+        if (_customConfigurationData.TryGetValue(ruleId, out var storedConfiguration))
         {
-            var storedConfiguration = _customConfigurationData[ruleId];
-
             if (!storedConfiguration.Equals(configuration))
             {
                 throw new BuildCheckConfigurationException("Custom configuration should be equal between projects");
@@ -138,7 +132,7 @@ internal class ConfigurationProvider
 
     internal Dictionary<string, string> GetConfiguration(string projectFullPath, string ruleId)
     {
-        var config = new Dictionary<string, string>();
+        Dictionary<string, string> config;
         try
         {
             config = s_editorConfigParser.Parse(projectFullPath);
@@ -148,14 +142,14 @@ internal class ConfigurationProvider
             throw new BuildCheckConfigurationException($"Parsing editorConfig data failed", exception, BuildCheckConfigurationErrorScope.EditorConfigParser);
         }
 
-        var keyTosearch = $"build_check.{ruleId}.";
+        var keyToSearch = $"build_check.{ruleId}.";
         var dictionaryConfig = new Dictionary<string, string>();
 
         foreach (var kv in config)
         {
-            if (kv.Key.StartsWith(keyTosearch, StringComparison.OrdinalIgnoreCase))
+            if (kv.Key.StartsWith(keyToSearch, StringComparison.OrdinalIgnoreCase))
             {
-                var newKey = kv.Key.Replace(keyTosearch.ToLower(), "");
+                var newKey = kv.Key.Substring(keyToSearch.Length);
                 dictionaryConfig[newKey] = kv.Value;
             }
         }

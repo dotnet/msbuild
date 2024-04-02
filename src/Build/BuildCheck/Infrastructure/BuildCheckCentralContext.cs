@@ -16,6 +16,7 @@ namespace Microsoft.Build.BuildCheck.Infrastructure;
 internal sealed class BuildCheckCentralContext
 {
     private readonly ConfigurationProvider _configurationProvider;
+
     internal BuildCheckCentralContext(ConfigurationProvider configurationProvider)
     {
         _configurationProvider = configurationProvider;

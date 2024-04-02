@@ -67,7 +67,7 @@ public class CustomConfigurationData
 
         var customConfigObj = (CustomConfigurationData) obj;
 
-        if(customConfigObj.RuleId != RuleId)
+        if (customConfigObj.RuleId != RuleId)
         {
             return false;
         }
@@ -88,7 +88,8 @@ public class CustomConfigurationData
                     return false;
                 }
             }
-        }else if (customConfigObj.ConfigurationData == null && ConfigurationData == null)
+        }
+        else if (customConfigObj.ConfigurationData == null && ConfigurationData == null)
         {
             return true;
         }

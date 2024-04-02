@@ -67,7 +67,7 @@ public class BuildAnalyzerConfiguration
     {
         value = default;
 
-        if (config == null || !config.ContainsKey(key))
+        if (config == null || !config.TryGetValue(key, out string stringValue))
         {
             return false;
         }
@@ -76,7 +76,7 @@ public class BuildAnalyzerConfiguration
 
         if (typeof(T) == typeof(bool))
         {
-            if (bool.TryParse(config[key], out bool boolValue))
+            if (bool.TryParse(stringValue, out bool boolValue))
             {
                 value = (T)(object)boolValue;
                 isParsed = true;
@@ -84,8 +84,7 @@ public class BuildAnalyzerConfiguration
         }
         else if(typeof(T).IsEnum)
         {
-            
-            isParsed = Enum.TryParse(config[key], true, out value);
+            isParsed = Enum.TryParse(stringValue, true, out value);
         }
 
         if (!isParsed)
