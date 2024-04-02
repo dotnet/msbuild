@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,7 +19,7 @@ namespace Microsoft.Build.Framework.Logging
         // Logger parameter value split character.
         public static readonly char[] s_parameterValueSplitCharacter = MSBuildConstants.EqualsChar;
 
-        public static bool TryParseVerbosityParameter(string parameterValue, out LoggerVerbosity? verbosity)
+        public static bool TryParseVerbosityParameter(string parameterValue, [NotNullWhen(true)] out LoggerVerbosity? verbosity)
         {
             switch (parameterValue.ToUpperInvariant())
             {
@@ -48,26 +49,21 @@ namespace Microsoft.Build.Framework.Logging
             }
         }
 
-        public static IEnumerable<KeyValuePair<string, string?>> ParseParameters(string? parametersString)
+        public static IEnumerable<Tuple<string, string?>> ParseParameters(string? parametersString)
         {
-            List<KeyValuePair<string, string?>> parameters = new();
-            if (parametersString == null)
+            if (parametersString is not null)
             {
-                return parameters;
-            }
-
-            foreach (string parameter in parametersString.Split(s_parameterDelimiters))
-            {
-                if (string.IsNullOrWhiteSpace(parameter))
+                foreach (string parameter in parametersString.Split(s_parameterDelimiters))
                 {
-                    continue;
+                    if (string.IsNullOrWhiteSpace(parameter))
+                    {
+                        continue;
+                    }
+
+                    string[] parameterAndValue = parameter.Split(s_parameterValueSplitCharacter);
+                    yield return new Tuple<string, string?>(parameterAndValue[0], parameterAndValue.Length > 1 ? parameterAndValue[1] : null);
                 }
-
-                string[] parameterAndValue = parameter.Split(s_parameterValueSplitCharacter);
-                parameters.Add(new KeyValuePair<string, string?>(parameterAndValue[0], parameterAndValue.Length > 1 ? parameterAndValue[1] : null ));
             }
-
-            return parameters;
         }
     }
 }

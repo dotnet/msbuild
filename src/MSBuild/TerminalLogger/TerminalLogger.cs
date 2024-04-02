@@ -273,11 +273,9 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     public void ParseParameters()
     {
-        var parameters = LoggerParametersHelper.ParseParameters(Parameters);
-
-        foreach (var parameter in parameters)
+        foreach (var parameter in LoggerParametersHelper.ParseParameters(Parameters))
         {
-            ApplyParameter(parameter.Key, parameter.Value);
+            ApplyParameter(parameter.Item1, parameter.Item2);
         }
     }
 
@@ -285,7 +283,10 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// Apply a terminal logger parameter.
     /// parameterValue may be null, if there is no parameter value.
     /// </summary>
-    private bool ApplyParameter(string parameterName, string? parameterValue)
+    /// <remark>
+    /// If verbosity parameter value is not correct, throws an exception. Other incorrect parameter values are disregarded.
+    /// </remark>
+    private void ApplyParameter(string parameterName, string? parameterValue)
     {
         ErrorUtilities.VerifyThrowArgumentNull(parameterName, nameof(parameterName));
 
@@ -293,23 +294,22 @@ internal sealed partial class TerminalLogger : INodeLogger
         {
             case "V":
             case "VERBOSITY":
-                return ApplyVerbosityParameter(parameterValue);
+                ApplyVerbosityParameter(parameterValue);
+                break;
             case "SHOWCOMMANDLINE":
-                return ApplyShowCommandLineParameter(parameterValue);
+                TryApplyShowCommandLineParameter(parameterValue);
+                break;
         }
-
-        return false;
     }
 
     /// <summary>
     /// Apply the verbosity value
     /// </summary>
-    private bool ApplyVerbosityParameter(string? parameterValue)
+    private void ApplyVerbosityParameter(string? parameterValue)
     {
         if (parameterValue is not null && LoggerParametersHelper.TryParseVerbosityParameter(parameterValue, out LoggerVerbosity? verbosity))
         {
-            Verbosity = (LoggerVerbosity)verbosity!;
-            return true;
+            Verbosity = (LoggerVerbosity)verbosity;
         }
         else
         {
@@ -323,7 +323,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Apply the show command Line value
     /// </summary>
-    private bool ApplyShowCommandLineParameter(string? parameterValue)
+    private bool TryApplyShowCommandLineParameter(string? parameterValue)
     {
         if (String.IsNullOrEmpty(parameterValue))
         {

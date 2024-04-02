@@ -76,11 +76,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public void ParseParameters()
         {
-            var parameters = LoggerParametersHelper.ParseParameters(Parameters);
-
-            foreach (var parameter in parameters)
+            foreach (var parameter in LoggerParametersHelper.ParseParameters(Parameters))
             {
-                ApplyParameter(parameter.Key, parameter.Value);
+                ApplyParameter(parameter.Item1, parameter.Item2);
             }
         }
 
