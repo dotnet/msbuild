@@ -504,6 +504,21 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
+        /// Logs a file generated from the given data.
+        /// </summary>
+        /// <param name="filePath">The file path relative to the currecnt project.</param>
+        /// <param name="content">The content of the file.</param>
+        public void LogIncludeGeneratedFile(string filePath, string content)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(filePath, nameof(filePath));
+            ErrorUtilities.VerifyThrowArgumentNull(content, nameof(content));
+
+            var e = new GeneratedFileUsedEventArgs(filePath, content);
+
+            BuildEngine.LogMessageEvent(e);
+        }
+
+        /// <summary>
         /// Flatten the inner exception message
         /// </summary>
         /// <param name="e">Exception to flatten.</param>

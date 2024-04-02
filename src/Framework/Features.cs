@@ -44,6 +44,7 @@ namespace Microsoft.Build.Framework
         {
             { "BuildCheck.Beta", FeatureStatus.Preview },
             { "EvaluationContext_SharedSDKCachePolicy", FeatureStatus.Available }, // EvaluationContext supports the SharingPolicy.SharedSDKCache flag.
+            { "TerminalLogger_MultiLineHandler", FeatureStatus.Available }, // TerminalLogger has better explicit support for rendering multi-line messages
             // Add more features here.
         };
 

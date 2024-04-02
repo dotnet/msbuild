@@ -685,6 +685,10 @@ namespace Microsoft.Build.Tasks
 
             try
             {
+                // Embed generated file in the binlog
+                string fileNameInBinlog = $"{Guid.NewGuid()}-{_taskName}-compilation-file.tmp";
+                _log.LogIncludeGeneratedFile(fileNameInBinlog, taskInfo.SourceCode);
+
                 // Create the code
                 File.WriteAllText(sourceCodePath, taskInfo.SourceCode);
 

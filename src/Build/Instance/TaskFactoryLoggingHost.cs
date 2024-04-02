@@ -340,7 +340,9 @@ namespace Microsoft.Build.BackEnd
 #pragma warning disable SYSLIB0050
             // Types which are not serializable and are not IExtendedBuildEventArgs as
             // those always implement custom serialization by WriteToStream and CreateFromStream.
-            if (!e.GetType().GetTypeInfo().IsSerializable && e is not IExtendedBuildEventArgs)
+            if (!e.GetType().GetTypeInfo().IsSerializable &&
+                e is not IExtendedBuildEventArgs &&
+                e is not GeneratedFileUsedEventArgs)
 #pragma warning restore SYSLIB0050
             {
                 _loggingContext.LogWarning(null, new BuildEventFileInfo(string.Empty), "ExpectedEventToBeSerializable", e.GetType().Name);
