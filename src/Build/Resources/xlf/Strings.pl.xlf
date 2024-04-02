@@ -38,7 +38,7 @@
       </trans-unit>
       <trans-unit id="Binlog_ArchiveFile_NotSetAfterAcquire">
         <source>ArchiveFile was obtained, but the final edited version was not set.</source>
-        <target state="translated">Uzyskano plik ArchiveFile, ale nie ustawiono ostatecznej edycji wersji.</target>
+        <target state="translated">Uzyskano plik ArchiveFile, ale nie ustawiono ostatecznej edytowanej wersji.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_FwdCompatUnsupported">
@@ -72,7 +72,7 @@
       </trans-unit>
       <trans-unit id="Binlog_ReaderUnderRead">
         <source>BuildEvent record number {0} was expected to read exactly {1} bytes from the stream, but read {2} instead.</source>
-        <target state="translated">Oczekiwano, że numer rekordu BuildEvent {0} odczyta ze strumienia liczbę bajtów równą dokładnie {1}, ale zamiast tego odczyta {2}.</target>
+        <target state="translated">Oczekiwano, że numer rekordu BuildEvent {0} odczyta ze strumienia liczbę bajtów równą dokładnie {1}, ale zamiast tego odczytał {2}.</target>
         <note>
       LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an integer value indicating number of bytes.
     </note>
@@ -91,7 +91,7 @@
       </trans-unit>
       <trans-unit id="Binlog_Source_MultiSubscribeError">
         <source>Structured events and raw events cannot be replayed at the same time.</source>
-        <target state="translated">Nie można jednocześnie odtwarzać zdarzeń strukturalnych i nieprzetworzonych.</target>
+        <target state="translated">Nie można ponownie odtwarzać jednocześnie zdarzeń strukturalnych i zdarzeń pierwotnych.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_Source_VersionUninitialized">
@@ -116,7 +116,7 @@
       </trans-unit>
       <trans-unit id="Binlog_StreamUtils_UnsupportedSkipOffset">
         <source>Attempt to skip {0} bytes, only non-negative offset up to int.MaxValue is allowed.</source>
-        <target state="translated">Próba pominięcia {0} bajtów, tylko przesunięcie nieujemne do liczby całkowitej. Wartość MaxValue jest dozwolona.</target>
+        <target state="translated">Próba pominięcia {0} bajtów, tylko przesunięcie nieujemne do wartości int.MaxValue jest dozwolone.</target>
         <note>
       LOCALIZATION: {0} is integer number denoting number of bytes. 'int.MaxValue' should not be translated.
     </note>
@@ -252,7 +252,7 @@
       <trans-unit id="FatalErrorWhileLoggingWithInnerException">
         <source>MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
     {0}</source>
-        <target state="translated">MSB4017: Kompilacja została nieoczekiwanie zatrzymana z powodu nieoczekiwanego błędu rejestratora.
+        <target state="translated">MSB4017: kompilacja została nieoczekiwanie zatrzymana z powodu nieoczekiwanego błędu rejestratora.
     {0}</target>
         <note>{StrBegin="MSB4017: "}UE: This message is used for a special exception that is thrown when a logger fails while logging an event (most
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
@@ -578,7 +578,7 @@ Błędy: {3}</target>
       </trans-unit>
       <trans-unit id="SucceededToResolveSDK">
         <source>The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</source>
-        <target state="translated">Zestaw SDK „{0}” został pomyślnie rozpoznany przez narzędzie Resolver „{1}” do lokalizacji „{2}” i wersji „{3}”.</target>
+        <target state="translated">Zestaw SDK „{0}” został pomyślnie rozpoznany przez narzędzie Resolver „{1}” w lokalizacji „{2}” i w wersji „{3}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskAcquiredCores">
@@ -622,7 +622,7 @@ Błędy: {3}</target>
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Jest to nieobsługiwany wyjątek w aplikacji MSBuild -- ZAGŁOSUJ NA ISTNIEJĄCY PROBLEM LUB ZAGŁOSUJ NA NOWY NA https://aka.ms/msbuild/unhandled.
+        <target state="translated">Jest to nieobsługiwany wyjątek na platformie MSBuild -- ZAGŁOSUJ NA ISTNIEJĄCY PROBLEM LUB ZAREJESTRUJ NOWY W WITRYNIE https://aka.ms/msbuild/unhandled.
     {0}</target>
         <note />
       </trans-unit>

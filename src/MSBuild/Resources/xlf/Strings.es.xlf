@@ -33,21 +33,21 @@
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
         <source>failed with {0} error(s)</source>
-        <target state="new">failed with {0} error(s)</target>
+        <target state="translated">error con {0} errores</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
         <source>failed with {0} error(s) and {1} warning(s)</source>
-        <target state="new">failed with {0} error(s) and {1} warning(s)</target>
+        <target state="translated">error con {0} errores y {1} advertencias</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
         <source>failed with {0} warning(s)</source>
-        <target state="new">failed with {0} warning(s)</target>
+        <target state="translated">error con {0} advertencias</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -61,7 +61,7 @@
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with {0} warning(s)</source>
-        <target state="new">succeeded with {0} warning(s)</target>
+        <target state="translated">correcto con {0} advertencias</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -123,7 +123,7 @@
                      Hace que MSBuild informe de los accesos a los archivos a cualquier
                      complemento de caché de proyectos.
 
-Esta marca es experimental y puede que no funcione según lo previsto.
+                     Esta marca es experimental y puede que no funcione según lo previsto.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -578,18 +578,14 @@ Esta marca es experimental y puede que no funcione según lo previsto.
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
         <target state="translated">  -logger:&lt;registrador&gt;   Use este registrador para registrar eventos
-                     de MSBuild. Para especificar varios registradores, especifique
-                     cada uno de ellos por separado.
+                     de MSBuild. Para especificar varios registradores, especifique cada uno de ellos por separado.
                      La sintaxis de &lt;registrador&gt; es:
-                       [&lt;clase&gt;,]&lt;ensamblado&gt;[,&lt;opciones&gt;][;&lt;parámetros&gt;]
+                       [&lt;clase&gt;,]&lt;assembly&gt;[,&lt;opciones&gt;][;&lt;parámetros&gt;]
                      La sintaxis de &lt;clase del registrador&gt; es:
-                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre de
-                       clase del registrador&gt;
-                     La sintaxis de &lt;ensamblado del registrador&gt; es:
-                       {&lt;nombre del ensamblado&gt;[,&lt;strong name&gt;] | &lt;archivo
-                       de ensamblado&gt;}
-                     Las opciones del registrador especifican cómo crea MSBuild
-                     el registrador.
+                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre de clase del registrador&gt;
+                       La sintaxis de &lt;ensamblado del registrador&gt; es:
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                     Las opciones del registrador especifican cómo crea MSBuild el registrador.
                      Los &lt;parámetros del registrador&gt; son opcionales y se pasan
                      al registrador tal como se escriben. (Forma corta: -l)
                      Ejemplos:
@@ -866,15 +862,12 @@ Esta marca es experimental y puede que no funcione según lo previsto.
                      Para especificar varios registradores, especifique cada uno
                      de ellos por separado. (Forma corta: -dl)
                      La sintaxis de &lt;registrador&gt; es:
-                       [&lt;clase&gt;,]&lt;ensamblado&gt;[,&lt;opciones&gt;][;&lt;parámetros&gt;]
+                       [&lt;clase&gt;,]&lt;assembly&gt;[,&lt;opciones&gt;][;&lt;parámetros&gt;]
                      La sintaxis de &lt;clase del registrador&gt; es:
-                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre
-                       de la clase del registrador&gt;
+                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre de la clase del registrador&gt;
                      La sintaxis de &lt;ensamblado del registrador&gt; es:
-                       {&lt;nombre del ensamblado&gt;[,&lt;strong name&gt;] | &lt;archivo
-                      de ensamblado&gt;}
-                     Las opciones del registrador especifican cómo crea MSBuild
-                     el registrador.
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                     Las opciones del registrador especifican cómo crea MSBuild el registrador.
                      Los &lt;parámetros del registrador&gt; son opcionales y se pasan
                      al registrador tal como se escriben. (Forma corta: -l)
                      Ejemplos:
