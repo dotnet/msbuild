@@ -15,22 +15,18 @@ namespace Microsoft.Build.Engine.UnitTests;
 /// </summary>
 public sealed class TaskThatThrows : Utilities.Task
 {
-    public string ExceptionType { get; set; }
+    public string? ExceptionType { get; set; }
 
-    public string ExceptionMessage { get; set; }
+    public string? ExceptionMessage { get; set; }
 
     public override bool Execute()
     {
-        if (string.IsNullOrWhiteSpace(ExceptionMessage))
-        {
-            ExceptionMessage = "Default exception message";
-        }
+        string exceptionMessage = string.IsNullOrWhiteSpace(ExceptionMessage) ? "Default exception message" : ExceptionMessage!;
 
-        Type exceptionType = string.IsNullOrWhiteSpace(ExceptionType) ? typeof(Exception) : Type.GetType(ExceptionType);
+        Type exceptionType = string.IsNullOrWhiteSpace(ExceptionType) ? typeof(Exception) : Type.GetType(ExceptionType) ?? typeof(Exception);
 
-        ConstructorInfo ctor = exceptionType.GetConstructor(new[] { typeof(string) });
-        Exception exceptionInstance = (Exception)ctor.Invoke(new object[] { ExceptionMessage });
-
+        ConstructorInfo? ctor = exceptionType.GetConstructor([typeof(string)]);
+        Exception exceptionInstance = (Exception)(ctor?.Invoke([exceptionMessage]) ?? new Exception(exceptionMessage));
 
         throw exceptionInstance;
     }
