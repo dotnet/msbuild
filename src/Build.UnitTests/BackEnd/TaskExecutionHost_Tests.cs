@@ -1091,6 +1091,35 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
+        [Fact]
+        public void TestTaskParameterLogging()
+        {
+            string customTaskPath = Assembly.GetExecutingAssembly().Location;
+            MockLogger ml = ObjectModelHelpers.BuildProjectExpectSuccess($"""
+                    <Project>
+                        <UsingTask TaskName=`TaskThatReturnsDictionaryTaskItem` AssemblyFile=`{customTaskPath}`/>
+                        <ItemGroup>
+                            <MyItem Include="item1"/>
+                            <MyItem Include="item2"/>
+                        </ItemGroup>
+                        <Target Name=`Build`>
+                           <TaskThatReturnsDictionaryTaskItem Key="a" Value="b" AdditionalParameters="@(MyItem)" />
+                        </Target>
+                    </Project>
+                """);
+
+            // Each parameter should be logged as TaskParameterEvent.
+            ml.TaskParameterEvents.Count.ShouldBe(3);
+            IList<string> messages = ml.TaskParameterEvents.Select(e => e.Message).ToList();
+            messages.ShouldContain($"{ItemGroupLoggingHelper.TaskParameterPrefix}Key=a");
+            messages.ShouldContain($"{ItemGroupLoggingHelper.TaskParameterPrefix}Value=b");
+            messages.ShouldContain($"{ItemGroupLoggingHelper.TaskParameterPrefix}\n    AdditionalParameters=\n        item1\n        item2");
+
+            // Parameters should not be logged as messages.
+            messages = ml.BuildMessageEvents.Select(e => e.Message).ToList();
+            messages.ShouldNotContain(m => m.StartsWith(ItemGroupLoggingHelper.TaskParameterPrefix));
+        }
+
         #endregion
 
         #region ITestTaskHost Members
