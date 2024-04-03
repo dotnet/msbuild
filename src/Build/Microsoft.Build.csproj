@@ -354,7 +354,6 @@
     <Compile Include="BackEnd\Components\Scheduler\ScheduleResponse.cs" />
     <Compile Include="BackEnd\Node\INode.cs" />
     <!-- ########################## -->
-    <Compile Include="BackEnd\TaskExecutionHost\AddInParts\ITaskExecutionHost.cs" />
     <Compile Include="BackEnd\TaskExecutionHost\TaskExecutionHost.cs" />
     <!-- #### COLLECTIONS ### -->
     <Compile Include="..\Shared\CollectionHelpers.cs" />
@@ -682,11 +681,7 @@
   <!-- Extract binding redirects for MSBuild and dependencies from MSBuild.exe.config into a source file.
        This allows us to create secondary AppDomains with the same redirects at run-time, see
        https://github.com/dotnet/msbuild/blob/main/documentation/NETFramework-NGEN.md#nugetframeworks -->
-  <Target Name="GenerateAppDomainConfig"
-          Inputs="..\MSBuild\app.config;..\MSBuild\app.amd64.config;$(MSBuildThisFileFullPath)"
-          Outputs="$(NuGetFrameworkWrapperRedirects_FilePath)"
-          BeforeTargets="CoreCompile"
-          Condition="'$(FeatureAppDomain)' == 'true'">
+  <Target Name="GenerateAppDomainConfig" Inputs="..\MSBuild\app.config;..\MSBuild\app.amd64.config;$(MSBuildThisFileFullPath)" Outputs="$(NuGetFrameworkWrapperRedirects_FilePath)" BeforeTargets="CoreCompile" Condition="'$(FeatureAppDomain)' == 'true'">
     <PropertyGroup>
       <BindingRedirectNamespace>&lt;Namespace Prefix='ns' Uri='urn:schemas-microsoft-com:asm.v1' /&gt;</BindingRedirectNamespace>
       <BindingRedirectXPath>/configuration/runtime/ns:assemblyBinding/*</BindingRedirectXPath>

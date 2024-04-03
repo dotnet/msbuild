@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// The task execution host
         /// </summary>
-        private ITaskExecutionHost _host;
+        private TaskExecutionHost _host;
 
         /// <summary>
         /// The mock logging service

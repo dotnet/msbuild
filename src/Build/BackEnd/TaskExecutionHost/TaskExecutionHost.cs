@@ -30,11 +30,33 @@ using Task = System.Threading.Tasks.Task;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
+    /// Flags returned by TaskExecutionHost.FindTask().
+    /// </summary>
+    [Flags]
+    internal enum TaskRequirements
+    {
+        /// <summary>
+        /// The task was not found.
+        /// </summary>
+        None = 0,
+
+        /// <summary>
+        /// The task must be executed on an STA thread.
+        /// </summary>
+        RequireSTAThread = 0x01,
+
+        /// <summary>
+        /// The task must be executed in a separate AppDomain.
+        /// </summary>
+        RequireSeparateAppDomain = 0x02
+    }
+
+    /// <summary>
     /// The TaskExecutionHost is responsible for instantiating tasks, setting their parameters and gathering outputs using
     /// reflection, and executing the task in the appropriate context.The TaskExecutionHost does not deal with any part of the task declaration or
     /// XML.
     /// </summary>
-    internal class TaskExecutionHost : ITaskExecutionHost, IDisposable
+    internal class TaskExecutionHost : IDisposable
     {
         /// <summary>
         /// Time interval in miliseconds to wait between receiving a cancelation signal and emitting the first warning that a non-cancelable task has not finished
@@ -178,7 +200,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The associated project.
         /// </summary>
-        ProjectInstance ITaskExecutionHost.ProjectInstance => _projectInstance;
+        public ProjectInstance ProjectInstance => _projectInstance;
 
         /// <summary>
         /// Gets the task instance
@@ -220,7 +242,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Initialize to run a specific task.
         /// </summary>
-        void ITaskExecutionHost.InitializeForTask(IBuildEngine2 buildEngine, TargetLoggingContext loggingContext, ProjectInstance projectInstance, string taskName, ElementLocation taskLocation, ITaskHost taskHost, bool continueOnError,
+        public void InitializeForTask(IBuildEngine2 buildEngine, TargetLoggingContext loggingContext, ProjectInstance projectInstance, string taskName, ElementLocation taskLocation, ITaskHost taskHost, bool continueOnError,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
@@ -244,7 +266,7 @@ namespace Microsoft.Build.BackEnd
         /// Ask the task host to find its task in the registry and get it ready for initializing the batch
         /// </summary>
         /// <returns>The task requirements if the task is found, null otherwise.</returns>
-        TaskRequirements? ITaskExecutionHost.FindTask(IDictionary<string, string> taskIdentityParameters)
+        public TaskRequirements? FindTask(IDictionary<string, string> taskIdentityParameters)
         {
             _taskFactoryWrapper ??= FindTaskInRegistry(taskIdentityParameters);
 
@@ -276,7 +298,7 @@ namespace Microsoft.Build.BackEnd
         /// Ask the task host to find task assembly name
         /// </summary>
         /// <returns>The task assembly name if the task is found, null otherwise.</returns>
-        AssemblyName ITaskExecutionHost.FindTaskAssemblyName(IDictionary<string, string> taskIdentityParameters)
+        public AssemblyName FindTaskAssemblyName(IDictionary<string, string> taskIdentityParameters)
         {
             _taskFactoryWrapper ??= FindTaskInRegistry(taskIdentityParameters);
 
@@ -286,7 +308,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Initialize to run a specific batch of the current task.
         /// </summary>
-        bool ITaskExecutionHost.InitializeForBatch(TaskLoggingContext loggingContext, ItemBucket batchBucket, IDictionary<string, string> taskIdentityParameters)
+        public bool InitializeForBatch(TaskLoggingContext loggingContext, ItemBucket batchBucket, IDictionary<string, string> taskIdentityParameters)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingContext, nameof(loggingContext));
             ErrorUtilities.VerifyThrowArgumentNull(batchBucket, nameof(batchBucket));
@@ -332,7 +354,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="parameters">The name/value pairs for the parameters.</param>
         /// <returns>True if the parameters were set correctly, false otherwise.</returns>
-        bool ITaskExecutionHost.SetTaskParameters(IDictionary<string, (string, ElementLocation)> parameters)
+        public bool SetTaskParameters(IDictionary<string, (string, ElementLocation)> parameters)
         {
             ErrorUtilities.VerifyThrowArgumentNull(parameters, nameof(parameters));
 
@@ -403,7 +425,7 @@ namespace Microsoft.Build.BackEnd
         /// Retrieve the outputs from the task.
         /// </summary>
         /// <returns>True of the outputs were gathered successfully, false otherwise.</returns>
-        bool ITaskExecutionHost.GatherTaskOutputs(string parameterName, ElementLocation parameterLocation, bool outputTargetIsItem, string outputTargetName)
+        public bool GatherTaskOutputs(string parameterName, ElementLocation parameterLocation, bool outputTargetIsItem, string outputTargetName)
         {
             ErrorUtilities.VerifyThrow(_taskFactoryWrapper != null, "Need a taskFactoryWrapper to retrieve outputs from.");
 
@@ -508,7 +530,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Cleans up after running a batch.
         /// </summary>
-        void ITaskExecutionHost.CleanupForBatch()
+        public void CleanupForBatch()
         {
             try
             {
@@ -526,7 +548,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Cleans up after running the task.
         /// </summary>
-        void ITaskExecutionHost.CleanupForTask()
+        public void CleanupForTask()
         {
 #if FEATURE_APPDOMAIN
             if (_resolver != null)
@@ -549,7 +571,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Executes the task.
         /// </summary>
-        bool ITaskExecutionHost.Execute()
+        public bool Execute()
         {
             // If cancel is called before we get here, we simply don't execute and return failure.  If cancel is called after this check
             // the task needs to be able to handle the possibility that Cancel has been called before the task has done anything meaningful,

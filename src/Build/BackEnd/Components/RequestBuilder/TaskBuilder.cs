@@ -115,7 +115,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The task execution host for in-proc tasks.
         /// </summary>
-        private ITaskExecutionHost _taskExecutionHost;
+        private TaskExecutionHost _taskExecutionHost;
 
         /// <summary>
         /// The object used to synchronize access to the task execution host.
@@ -736,7 +736,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="bucket">The batching bucket</param>
         /// <param name="howToExecuteTask">The task execution mode</param>
         /// <returns>The result of running the task.</returns>
-        private async Task<WorkUnitResult> ExecuteInstantiatedTask(ITaskExecutionHost taskExecutionHost, TaskLoggingContext taskLoggingContext, TaskHost taskHost, ItemBucket bucket, TaskExecutionMode howToExecuteTask)
+        private async Task<WorkUnitResult> ExecuteInstantiatedTask(TaskExecutionHost taskExecutionHost, TaskLoggingContext taskLoggingContext, TaskHost taskHost, ItemBucket bucket, TaskExecutionMode howToExecuteTask)
         {
             UpdateContinueOnError(bucket, taskHost);
 
@@ -1064,7 +1064,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="howToExecuteTask">The task execution mode</param>
         /// <param name="bucket">The bucket to which the task execution belongs.</param>
         /// <returns>true, if successful</returns>
-        private bool GatherTaskOutputs(ITaskExecutionHost taskExecutionHost, TaskExecutionMode howToExecuteTask, ItemBucket bucket)
+        private bool GatherTaskOutputs(TaskExecutionHost taskExecutionHost, TaskExecutionMode howToExecuteTask, ItemBucket bucket)
         {
             bool gatheredTaskOutputsSuccessfully = true;
 
