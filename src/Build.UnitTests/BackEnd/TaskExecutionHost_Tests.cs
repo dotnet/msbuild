@@ -18,6 +18,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using Shouldly;
 using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -1060,9 +1061,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             MockLogger ml = new MockLogger() { AllowTaskCrashes = true };
 
             using TestEnvironment env = TestEnvironment.Create();
-            var debugFolder = env.CreateFolder(true);
+            var debugFolder = env.CreateFolder();
             // inject the location for failure logs - not to interact with other tests
             env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugFolder.Path);
+            // Force initing the DebugPath from the env var - as we need it to be unique for those tests.
+            // The ProjectCacheTests DataMemberAttribute usages (specifically SuccessfulGraphsWithBuildParameters) lead
+            //  to the DebugPath being set before this test runs - and hence the env var is ignored.
+            DebugUtils.SetDebugPath();
 
             ObjectModelHelpers.BuildProjectExpectFailure($"""
                      <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
