@@ -1050,21 +1050,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ml.AssertLogContains("a=b");
         }
 
-        [Fact]
-        public void TaskExceptionHandlingTest()
-        {
-            // Unfortunately we cannot run those via TheoryAttribute and InlineDataAttribute because
-            //  the MSBuildTestEnvironmentFixture injects the cleanup logic for each testcase and when those
-            //  are run in parallel, within the same process, the two process will conflict with each other (on the error file).
-            TaskExceptionHandlingTestInternal(typeof(OutOfMemoryException), true);
-            TaskExceptionHandlingTestInternal(typeof(ArgumentException), false);
-        }
-
-        private void TaskExceptionHandlingTestInternal(Type exceptionType, bool isCritical)
+        [Theory]
+        [InlineData(typeof(OutOfMemoryException), true)]
+        [InlineData(typeof(ArgumentException), false)]
+        public void TaskExceptionHandlingTest(Type exceptionType, bool isCritical)
         {
             string testExceptionMessage = "Test Message";
             string customTaskPath = Assembly.GetExecutingAssembly().Location;
             MockLogger ml = new MockLogger() { AllowTaskCrashes = true };
+
+            using TestEnvironment env = TestEnvironment.Create();
+            var debugFolder = env.CreateFolder(true);
+            // inject the location for failure logs - not to interact with other tests
+            env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugFolder.Path);
+
             ObjectModelHelpers.BuildProjectExpectFailure($"""
                      <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                          <UsingTask TaskName=`TaskThatThrows` AssemblyFile=`{customTaskPath}`/>
