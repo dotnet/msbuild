@@ -575,7 +575,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="projectFile">The project file</param>
         /// <param name="projectFileOfTaskNode">The project file containing the task node.</param>
         /// <param name="taskAssemblyName">An assembly's unique identity where the task is implemented.</param>
-        public void LogTaskStarted(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, AssemblyName taskAssemblyName)
+        public void LogTaskStarted(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, string taskAssemblyName)
         {
         }
 
@@ -588,7 +588,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="projectFileOfTaskNode">The project file containing the task node.</param>
         /// <param name="taskAssemblyName">An assembly's unique identity where the task is implemented.</param>
         /// <returns>The task logging context</returns>
-        public BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column, AssemblyName taskAssemblyName)
+        public BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column, string taskAssemblyName)
         {
             return new BuildEventContext(0, 0, 0, 0);
         }

@@ -572,7 +572,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="projectFile">The project file which is being built</param>
         /// <param name="projectFileOfTaskNode">The file in which the task is defined - typically a .targets file</param>
         /// <param name="taskAssemblyName">An assembly's unique identity where the task is implemented</param>
-        void LogTaskStarted(BuildEventContext taskBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, AssemblyName taskAssemblyName);
+        void LogTaskStarted(BuildEventContext taskBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, string taskAssemblyName);
 
         /// <summary>
         /// Log that a task is about to start
@@ -585,7 +585,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="column">The column number in the file where the task invocation is located.</param>
         /// <param name="taskAssemblyName">An assembly's unique identity where the task is implemented.</param>
         /// <returns>The task build event context</returns>
-        BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column, AssemblyName taskAssemblyName);
+        BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column, string taskAssemblyName);
 
         /// <summary>
         /// Log that a task has just completed

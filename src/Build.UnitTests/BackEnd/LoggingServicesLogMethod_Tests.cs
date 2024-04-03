@@ -1446,12 +1446,12 @@ namespace Microsoft.Build.UnitTests.Logging
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskStarted", taskName);
 
             ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogTaskStarted(s_buildEventContext, taskName, projectFile, projectFileOfTask, Assembly.GetExecutingAssembly().GetName());
+            service.LogTaskStarted(s_buildEventContext, taskName, projectFile, projectFileOfTask, Assembly.GetExecutingAssembly().GetName().FullName);
             VerifyTaskStartedEvent(taskName, projectFile, projectFileOfTask, message, service);
 
             service.ResetProcessedBuildEvent();
             service.OnlyLogCriticalEvents = true;
-            service.LogTaskStarted(s_buildEventContext, taskName, projectFile, projectFileOfTask, Assembly.GetExecutingAssembly().GetName());
+            service.LogTaskStarted(s_buildEventContext, taskName, projectFile, projectFileOfTask, Assembly.GetExecutingAssembly().GetName().FullName);
             Assert.Null(service.ProcessedBuildEvent);
         }
 

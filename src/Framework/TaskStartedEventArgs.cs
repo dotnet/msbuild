@@ -66,7 +66,7 @@ namespace Microsoft.Build.Framework
             string projectFile,
             string taskFile,
             string taskName,
-            AssemblyName taskAssemblyName)
+            string taskAssemblyName)
             : this(message, helpKeyword, projectFile, taskFile, taskName, DateTime.UtcNow, taskAssemblyName)
         {
         }
@@ -113,7 +113,7 @@ namespace Microsoft.Build.Framework
             string taskFile,
             string taskName,
             DateTime eventTimestamp,
-            AssemblyName taskAssemblyName)
+            string taskAssemblyName)
             : base(message, helpKeyword, "MSBuild", eventTimestamp)
         {
             this.taskName = taskName;
@@ -140,7 +140,7 @@ namespace Microsoft.Build.Framework
             writer.WriteOptionalString(taskFile);
             writer.Write7BitEncodedInt(LineNumber);
             writer.Write7BitEncodedInt(ColumnNumber);
-            writer.WriteOptionalString(TaskAssemblyName?.FullName);
+            writer.WriteOptionalString(TaskAssemblyName);
         }
 
         /// <summary>
@@ -157,7 +157,7 @@ namespace Microsoft.Build.Framework
             taskFile = reader.ReadByte() == 0 ? null : reader.ReadString();
             LineNumber = reader.Read7BitEncodedInt();
             ColumnNumber = reader.Read7BitEncodedInt();
-            TaskAssemblyName = reader.ReadByte() == 0 ? null : new AssemblyName(reader.ReadString());
+            TaskAssemblyName = reader.ReadByte() == 0 ? null : reader.ReadString();
         }
         #endregion
 
@@ -189,7 +189,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Full name of the assembly that implements the task
         /// </summary>
-        public AssemblyName TaskAssemblyName { get; private set; }
+        public string TaskAssemblyName { get; private set; }
 
         public override string Message
         {

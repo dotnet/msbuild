@@ -691,7 +691,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="projectFileOfTaskNode">Project file which contains the task</param>
         /// <param name="taskAssemblyName">An assembly's unique identity where the task is implemented</param>
         /// <exception cref="InternalErrorException">BuildEventContext is null</exception>
-        public void LogTaskStarted(BuildEventContext taskBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, AssemblyName taskAssemblyName)
+        public void LogTaskStarted(BuildEventContext taskBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, string taskAssemblyName)
         {
             ErrorUtilities.VerifyThrow(taskBuildEventContext != null, "targetBuildEventContext is null");
             if (!OnlyLogCriticalEvents)
@@ -720,7 +720,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="taskAssemblyName">An assembly's unique identity where the task is implemented</param>
         /// <returns>The build event context for the task.</returns>
         /// <exception cref="InternalErrorException">BuildEventContext is null</exception>
-        public BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column, AssemblyName taskAssemblyName)
+        public BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column, string taskAssemblyName)
         {
             ErrorUtilities.VerifyThrow(targetBuildEventContext != null, "targetBuildEventContext is null");
             BuildEventContext taskBuildEventContext = new BuildEventContext(
