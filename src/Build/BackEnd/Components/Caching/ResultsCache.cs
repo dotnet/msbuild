@@ -19,11 +19,11 @@ namespace Microsoft.Build.BackEnd
     internal class ResultsCache : IResultsCache
     {
         /// <summary>
-        /// The presence of any of these flags affects build result for the specified request.
+        /// The presence of any of these flags affects build result for the specified request. Not included are ProvideProjectStateAfterBuild
+        /// and ProvideSubsetOfStateAfterBuild which require additional checks.
         /// </summary>
         private const BuildRequestDataFlags FlagsAffectingBuildResults =
-            BuildRequestDataFlags.ProvideProjectStateAfterBuild
-            | BuildRequestDataFlags.SkipNonexistentTargets
+            BuildRequestDataFlags.SkipNonexistentTargets
             | BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports
             | BuildRequestDataFlags.FailOnUnresolvedSdk;
 
@@ -174,7 +174,7 @@ namespace Microsoft.Build.BackEnd
                 if (_resultsByConfiguration.TryGetValue(request.ConfigurationId, out BuildResult allResults))
                 {
                     bool buildDataFlagsSatisfied = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12)
-                        ? CheckBuildDataFlagsResults(request.BuildRequestDataFlags, allResults.BuildRequestDataFlags) : true;
+                        ? AreBuildResultFlagsCompatible(request, allResults) : true;
 
                     if (buildDataFlagsSatisfied)
                     {
@@ -345,18 +345,45 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Checks results for the specified build flags.
+        /// Returns true if the giveChecks results for the specified build flags.
         /// </summary>
-        /// <param name="buildRequestDataFlags">The current request build flags.</param>
-        /// <param name="buildResultDataFlags">The existing build result data flags.</param>
-        /// <returns>False if there is any difference in the data flags that can cause missed build data, true otherwise.</returns>
-        private static bool CheckBuildDataFlagsResults(BuildRequestDataFlags buildRequestDataFlags, BuildRequestDataFlags buildResultDataFlags) =>
+        /// <param name="buildRequest">The current build request.</param>
+        /// <param name="buildResult">The candidate build result.</param>
+        /// <returns>False if there is any difference in the flags that can cause missed build data, true otherwise.</returns>
+        private static bool AreBuildResultFlagsCompatible(BuildRequest buildRequest, BuildResult buildResult)
+        {
+            BuildRequestDataFlags buildRequestDataFlags = buildRequest.BuildRequestDataFlags;
+            BuildRequestDataFlags buildResultDataFlags = buildResult.BuildRequestDataFlags;
 
-            // Even if both buildRequestDataFlags and buildResultDataFlags have ProvideSubsetOfStateAfterBuild flag,
-            // the underlying RequestedProjectState may have different user filters defined.
-            // It is more reliable to ignore the cached value.
-            !buildRequestDataFlags.HasFlag(BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild)
-            && (buildRequestDataFlags & FlagsAffectingBuildResults) == (buildResultDataFlags & FlagsAffectingBuildResults);
+            if ((buildRequestDataFlags & FlagsAffectingBuildResults) != (buildResultDataFlags & FlagsAffectingBuildResults))
+            {
+                // Mismatch in flags that can affect build results -> not compatible.
+                return false;
+            }
+
+            if (buildRequestDataFlags.HasFlag(BuildRequestDataFlags.ProvideProjectStateAfterBuild))
+            {
+                // If full state is requested, we must have full state in the result.
+                return buildResultDataFlags.HasFlag(BuildRequestDataFlags.ProvideProjectStateAfterBuild);
+            }
+
+            if (buildRequestDataFlags.HasFlag(BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild))
+            {
+                // If partial state is requested, we must have full or partial-and-compatible state in the result.
+                if (buildResultDataFlags.HasFlag(BuildRequestDataFlags.ProvideProjectStateAfterBuild))
+                {
+                    return true;
+                }
+                if (!buildResultDataFlags.HasFlag(BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild))
+                {
+                    return false;
+                }
+
+                // Verify that the requested subset is compatible with the result.
+            }
+
+            return true;
+        }
 
         public IEnumerator<BuildResult> GetEnumerator()
         {
