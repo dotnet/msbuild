@@ -10,6 +10,9 @@ using Microsoft.Build.Framework.BuildException;
 
 namespace Microsoft.Build.Framework
 {
+    /// <summary>
+    /// A wrapper exception for exceptions thrown by tasks (in TaskBuilder) that are critical to the build process.
+    /// </summary>
     internal sealed class CriticalTaskException : BuildExceptionBase
     {
         public CriticalTaskException(
