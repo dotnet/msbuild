@@ -73,17 +73,11 @@ public class CustomConfigurationData
         }
 
         // validate keys and values
-        if (customConfigObj.ConfigurationData != null && ConfigurationData != null)
+        if (customConfigObj.ConfigurationData != null && ConfigurationData != null && ConfigurationData.Count == customConfigObj.ConfigurationData.Count)
         {
-            if (!customConfigObj.ConfigurationData.Keys.SequenceEqual(ConfigurationData.Keys))
+            foreach (var keyVal in customConfigObj.ConfigurationData)
             {
-                return false;
-            }
-
-            var keys = customConfigObj.ConfigurationData.Keys;
-            foreach (var key in keys)
-            {
-                if (customConfigObj.ConfigurationData[key] != ConfigurationData[key])
+                if(!ConfigurationData.TryGetValue(keyVal.Key, out string value) || value != keyVal.Value)
                 {
                     return false;
                 }
@@ -101,5 +95,22 @@ public class CustomConfigurationData
         return true;
     }
 
-    public override int GetHashCode() => (ConfigurationData != null ? ConfigurationData.GetHashCode() : 0);
+    public override int GetHashCode()
+    {
+        if (!NotNull(this))
+        {
+            return 0;
+        }
+
+        var hashCode = RuleId.GetHashCode();
+        if (ConfigurationData != null)
+        {
+            foreach (var keyVal in ConfigurationData)
+            {
+                hashCode = hashCode + keyVal.Key.GetHashCode() + keyVal.Value.GetHashCode();
+            }
+        }
+
+        return hashCode;
+    }
 }

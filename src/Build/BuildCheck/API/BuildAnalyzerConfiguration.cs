@@ -63,7 +63,26 @@ public class BuildAnalyzerConfiguration
         };
     }
 
-    private static bool TryExtractValue<T>(string key, Dictionary<string, string> config, out T value) where T : struct
+    private static bool TryExtractValue<T>(string key, Dictionary<string, string> config, out T value) where T : struct, Enum
+    {
+        value = default;
+
+        if (config == null || !config.TryGetValue(key, out string stringValue))
+        {
+            return false;
+        }
+
+        var isParsed = Enum.TryParse(stringValue, true, out value);
+
+        if (!isParsed)
+        {
+            ThrowIncorectValueEception(key, stringValue);
+        }
+
+        return isParsed;
+    }
+
+    private static bool TryExtractValue(string key, Dictionary<string, string> config, out bool value)
     {
         value = default;
 
@@ -73,27 +92,25 @@ public class BuildAnalyzerConfiguration
         }
 
         bool isParsed = false;
-
-        if (typeof(T) == typeof(bool))
+        
+        if (bool.TryParse(stringValue, out bool boolValue))
         {
-            if (bool.TryParse(stringValue, out bool boolValue))
-            {
-                value = (T)(object)boolValue;
-                isParsed = true;
-            }
+            value = boolValue;
+            isParsed = true;
         }
-        else if(typeof(T).IsEnum)
-        {
-            isParsed = Enum.TryParse(stringValue, true, out value);
-        }
-
+        
         if (!isParsed)
         {
-            throw new BuildCheckConfigurationException(
-                $"Incorrect value provided in config for key {key}",
-                buildCheckConfigurationErrorScope: BuildCheckConfigurationErrorScope.EditorConfigParser);
+            ThrowIncorectValueEception(key, stringValue);
         }
 
         return isParsed;
+    }
+
+    private static void ThrowIncorectValueEception(string key, string value)
+    {
+        throw new BuildCheckConfigurationException(
+                $"Incorrect value provided in config for key {key}: '{value}'",
+                buildCheckConfigurationErrorScope: BuildCheckConfigurationErrorScope.EditorConfigParser);
     }
 }

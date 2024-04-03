@@ -127,5 +127,26 @@ namespace Microsoft.Build.Analyzers.UnitTests
 
             customConfigurationData1.Equals(customConfigurationData2).ShouldBeFalse();
         }
+
+        [Fact]
+        public void TestCustomConfigurationData_Equals_ShouldBeTrue_CustomConfigDataKeysOrderDiffers()
+        {
+            var config1 = new Dictionary<string, string>()
+            {
+                { "key1", "val1" },
+                { "key2", "val2" }
+            };
+
+            var config2 = new Dictionary<string, string>()
+            {
+                { "key2", "val2" },
+                { "key1", "val1" }
+            };
+
+            var customConfigurationData1 = new CustomConfigurationData("testRuleId", config1);
+            var customConfigurationData2 = new CustomConfigurationData("testRuleId", config2);
+
+            customConfigurationData1.Equals(customConfigurationData2).ShouldBeTrue();
+        }
     }
 }
