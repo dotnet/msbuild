@@ -1266,30 +1266,6 @@ namespace Microsoft.Build.BackEnd
             return success;
         }
 
-        /// <summary>
-        /// Variation to handle arrays, to help with logging the parameters.
-        /// </summary>
-        /// <remarks>
-        /// Logging currently enabled only by an env var.
-        /// </remarks>
-        private bool InternalSetTaskParameter(TaskPropertyInfo parameter, IList parameterValue)
-        {
-            if (LogTaskInputs &&
-                !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents &&
-                parameterValue.Count > 0 &&
-                parameter.Log)
-            {
-                ItemGroupLoggingHelper.LogTaskParameter(
-                    _taskLoggingContext,
-                    TaskParameterMessageKind.TaskInput,
-                    parameter.Name,
-                    parameterValue,
-                    parameter.LogItemMetadata);
-            }
-
-            return InternalSetTaskParameter(parameter, (object)parameterValue);
-        }
-
         private static readonly string TaskParameterFormatString = ItemGroupLoggingHelper.TaskParameterPrefix + "{0}={1}";
 
         /// <summary>
@@ -1303,14 +1279,31 @@ namespace Microsoft.Build.BackEnd
 
             if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents)
             {
-                // If the type is a list, we already logged the parameters
-                if (!(parameterValue is IList))
+                IList parameterValueAsList = parameterValue as IList;
+                bool legacyBehavior = !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12);
+
+                // Legacy textual logging for parameters that are not lists.
+                if (legacyBehavior && parameterValueAsList == null)
                 {
                     _taskLoggingContext.LogCommentFromText(
-                        MessageImportance.Low,
-                        TaskParameterFormatString,
-                        parameter.Name,
-                        ItemGroupLoggingHelper.GetStringFromParameterValue(parameterValue));
+                       MessageImportance.Low,
+                       TaskParameterFormatString,
+                       parameter.Name,
+                       ItemGroupLoggingHelper.GetStringFromParameterValue(parameterValue));
+                }
+
+                if (parameter.Log)
+                {
+                    // Structured logging for all parameters that have logging enabled and are not empty lists.
+                    if (parameterValueAsList?.Count > 0 || (parameterValueAsList == null && !legacyBehavior))
+                    {
+                        ItemGroupLoggingHelper.LogTaskParameter(
+                            _taskLoggingContext,
+                            TaskParameterMessageKind.TaskInput,
+                            parameter.Name,
+                            parameterValueAsList ?? new object[] { parameterValue },
+                            parameter.LogItemMetadata);
+                    }
                 }
             }
 
