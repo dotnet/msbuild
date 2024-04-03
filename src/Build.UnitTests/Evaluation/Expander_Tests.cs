@@ -4950,7 +4950,7 @@ $(
                 var svSECultureInfo = new CultureInfo("sv-SE");
                 using (var env = TestEnvironment.Create())
                 {
-                    env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_10.ToString());
+                    env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_12.ToString());
                     currentThread.CurrentCulture = svSECultureInfo;
                     currentThread.CurrentUICulture = svSECultureInfo;
                     var root = env.CreateFolder();
