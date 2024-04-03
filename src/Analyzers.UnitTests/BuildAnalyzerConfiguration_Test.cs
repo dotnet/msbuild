@@ -19,7 +19,7 @@ namespace Microsoft.Build.Analyzers.UnitTests
         [Fact]
         public void CreateWithNull_ReturnsObjectWithNullValues()
         {
-            var buildConfig = BuildAnalyzerConfiguration.Create(null!);
+            var buildConfig = BuildAnalyzerConfiguration.Create(null);
             buildConfig.ShouldNotBeNull();
             buildConfig.Severity.ShouldBeNull();
             buildConfig.IsEnabled.ShouldBeNull();

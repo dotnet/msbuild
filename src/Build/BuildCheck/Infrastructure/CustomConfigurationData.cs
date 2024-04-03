@@ -77,7 +77,7 @@ public class CustomConfigurationData
         {
             foreach (var keyVal in customConfigObj.ConfigurationData)
             {
-                if(!ConfigurationData.TryGetValue(keyVal.Key, out string value) || value != keyVal.Value)
+                if(!ConfigurationData.TryGetValue(keyVal.Key, out var value) || value != keyVal.Value)
                 {
                     return false;
                 }

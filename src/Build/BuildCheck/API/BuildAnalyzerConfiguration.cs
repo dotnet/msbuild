@@ -53,7 +53,7 @@ public class BuildAnalyzerConfiguration
     /// </summary>
     /// <param name="configDictionary">The configuration dictionary containing the settings for the build analyzer.</param>
     /// <returns>A new instance of <see cref="BuildAnalyzerConfiguration"/> with the specified settings.</returns>
-    public static BuildAnalyzerConfiguration Create(Dictionary<string, string> configDictionary)
+    public static BuildAnalyzerConfiguration Create(Dictionary<string, string>? configDictionary)
     {
         return new()
         {
@@ -63,11 +63,11 @@ public class BuildAnalyzerConfiguration
         };
     }
 
-    private static bool TryExtractValue<T>(string key, Dictionary<string, string> config, out T value) where T : struct, Enum
+    private static bool TryExtractValue<T>(string key, Dictionary<string, string>? config, out T value) where T : struct, Enum
     {
         value = default;
 
-        if (config == null || !config.TryGetValue(key, out string stringValue))
+        if (config == null || !config.TryGetValue(key, out var stringValue) || stringValue is null)
         {
             return false;
         }
@@ -82,11 +82,11 @@ public class BuildAnalyzerConfiguration
         return isParsed;
     }
 
-    private static bool TryExtractValue(string key, Dictionary<string, string> config, out bool value)
+    private static bool TryExtractValue(string key, Dictionary<string, string>? config, out bool value)
     {
         value = default;
 
-        if (config == null || !config.TryGetValue(key, out string stringValue))
+        if (config == null || !config.TryGetValue(key, out var stringValue) || stringValue is null)
         {
             return false;
         }
