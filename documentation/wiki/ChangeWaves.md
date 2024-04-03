@@ -25,6 +25,7 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 
 ### 17.12
 - [Log TaskParameterEvent for scalar parameters](https://github.com/dotnet/msbuild/pull/9908)
+- [Convert.ToString during a property evaluation uses the InvariantCulture for all types](https://github.com/dotnet/msbuild/pull/9874)
 
 ### 17.10
 - [AppDomain configuration is serialized without using BinFmt](https://github.com/dotnet/msbuild/pull/9320) - feature can be opted out only if [BinaryFormatter](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.serialization.formatters.binary.binaryformatter) is allowed at runtime by editing `MSBuild.runtimeconfig.json`
@@ -38,7 +39,6 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 - [Exec task does not trim leading whitespaces for ConsoleOutput](https://github.com/dotnet/msbuild/pull/9722)
 - [Introduce [MSBuild]::StableStringHash overloads](https://github.com/dotnet/msbuild/issues/9519)
 - [Keep the encoding of standard output & error consistent with the console code page for ToolTask](https://github.com/dotnet/msbuild/pull/9539)
-- [Convert.ToString during a property evaluation uses the InvariantCulture for all types](https://github.com/dotnet/msbuild/pull/9874)
 
 ### 17.8
 - [[RAR] Don't do I/O on SDK-provided references](https://github.com/dotnet/msbuild/pull/8688)
