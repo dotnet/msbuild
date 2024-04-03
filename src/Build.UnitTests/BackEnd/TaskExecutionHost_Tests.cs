@@ -1083,7 +1083,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ml.AssertLogDoesntContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("UnhandledMSBuildError", string.Empty));
             ml.AssertLogContains(testExceptionMessage);
 
-            File.Exists(ExceptionHandling.DumpFilePath).ShouldBe(isCritical);
+            File.Exists(ExceptionHandling.DumpFilePath).ShouldBe(isCritical,
+                $"{ExceptionHandling.DumpFilePath} expected to exist: {isCritical}");
             if (isCritical)
             {
                 FileUtilities.DeleteNoThrow(ExceptionHandling.DumpFilePath);

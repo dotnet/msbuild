@@ -18,7 +18,7 @@ namespace Microsoft.Build.Framework
         { }
 
         // Do not remove - used by BuildExceptionSerializationHelper
-        internal CriticalTaskException(string message, Exception inner)
+        internal CriticalTaskException(string message, Exception? inner)
             : base(message, inner)
         { }
     }
