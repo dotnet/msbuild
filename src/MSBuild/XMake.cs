@@ -4483,13 +4483,8 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_3_SwitchesHeader"));
             foreach (string parameterizedSwitchRsouceId in CommandLineSwitches.GetParameterizedSwitchResourceIds())
             {
-                {
-                    Console.WriteLine(AssemblyResources.GetString(parameterizedSwitchRsouceId));
-                }
+                Console.WriteLine(AssemblyResources.GetString(parameterizedSwitchRsouceId));
             }
-#if FEATURE_NODE_REUSE // Do not advertise the switch when feature is off, even though we won't fail to parse it for compatibility with existing build scripts
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_24_NodeReuse"));
-#endif
             foreach (string parameterlessSwitchRsouceId in CommandLineSwitches.GetParameterlessSwitchResourceIds())
             {
                 Console.WriteLine(AssemblyResources.GetString(parameterlessSwitchRsouceId));

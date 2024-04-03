@@ -381,18 +381,15 @@ namespace Microsoft.Build.CommandLine
         internal static IEnumerable<string> GetParameterizedSwitchResourceIds()
         {
             HashSet<string> parameterizedSwitchResourceIds = new HashSet<string>();
-            foreach(ParameterizedSwitchInfo parameterizedSwitch in s_parameterizedSwitchesMap)
+            foreach (ParameterizedSwitchInfo parameterizedSwitch in s_parameterizedSwitchesMap)
             {
                 string resourceId = parameterizedSwitch.resourceId;
-                if (!string.IsNullOrEmpty(resourceId) && !parameterizedSwitchResourceIds.Contains(resourceId))
+                if (!string.IsNullOrEmpty(resourceId) && parameterizedSwitchResourceIds.Add(resourceId))
                 {
-                    parameterizedSwitchResourceIds.Add(resourceId);
                     yield return resourceId;
                 }
             }
         }
-
-        private static void forreach(ParameterizedSwitchInfo parameterizedSwitchInfo, object parameterizedSwitch, in ParameterizedSwitchInfo[] s_parameterizedSwitchesMap) => throw new NotImplementedException();
 
         /// <summary>
         /// Get the distinct parameterless switchs map resource ids.
@@ -404,9 +401,8 @@ namespace Microsoft.Build.CommandLine
             foreach (ParameterlessSwitchInfo parameterlessSwitch in s_parameterlessSwitchesMap)
             {
                 string resourceId = parameterlessSwitch.resourceId;
-                if (!parameterlessSwitchResourceIds.Contains(resourceId) && !string.IsNullOrEmpty(resourceId))
+                if (parameterlessSwitchResourceIds.Add(resourceId) && !string.IsNullOrEmpty(resourceId))
                 {
-                    parameterlessSwitchResourceIds.Add(resourceId);
                     yield return resourceId;
                 }
             }
