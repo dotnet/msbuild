@@ -756,20 +756,13 @@ namespace Microsoft.Build.BackEnd
                 Exception taskException = null;
 
                 // If this is the MSBuild task, we need to execute it's special internal method.
-                TaskExecutionHost host = taskExecutionHost as TaskExecutionHost;
-                Type taskType = host.TaskInstance.GetType();
-
                 try
                 {
-                    if (taskType == typeof(MSBuild))
+                    if (taskExecutionHost.TaskInstance is MSBuild msbuildTask)
                     {
-                        MSBuild msbuildTask = host.TaskInstance as MSBuild;
-
-                        ErrorUtilities.VerifyThrow(msbuildTask != null, "Unexpected MSBuild internal task.");
-
                         var undeclaredProjects = GetUndeclaredProjects(msbuildTask);
 
-                        if (undeclaredProjects != null && undeclaredProjects.Count != 0)
+                        if (undeclaredProjects?.Count > 0)
                         {
                             _continueOnError = ContinueOnError.ErrorAndStop;
 
@@ -801,9 +794,8 @@ namespace Microsoft.Build.BackEnd
                             }
                         }
                     }
-                    else if (taskType == typeof(CallTarget))
+                    else if (taskExecutionHost.TaskInstance is CallTarget callTargetTask)
                     {
-                        CallTarget callTargetTask = host.TaskInstance as CallTarget;
                         taskResult = await callTargetTask.ExecuteInternal();
                     }
                     else
@@ -943,7 +935,7 @@ namespace Microsoft.Build.BackEnd
                 // When a task fails it must log an error. If a task fails to do so,
                 // that is logged as an error. MSBuild tasks are an exception because
                 // errors are not logged directly from them, but the tasks spawned by them.
-                IBuildEngine be = host.TaskInstance.BuildEngine;
+                IBuildEngine be = taskExecutionHost.TaskInstance.BuildEngine;
                 if (taskReturned // if the task returned
                     && !taskResult // and it returned false
                     && !taskLoggingContext.HasLoggedErrors // and it didn't log any errors
