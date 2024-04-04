@@ -1444,14 +1444,15 @@ namespace Microsoft.Build.UnitTests.Logging
         private void TestTaskStartedEvent(string taskName, string projectFile, string projectFileOfTask)
         {
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskStarted", taskName);
+            string taskAssemblyName = Assembly.GetExecutingAssembly().GetName().FullName;
 
             ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogTaskStarted(s_buildEventContext, taskName, projectFile, projectFileOfTask, Assembly.GetExecutingAssembly().GetName().FullName);
-            VerifyTaskStartedEvent(taskName, projectFile, projectFileOfTask, message, service);
+            service.LogTaskStarted(s_buildEventContext, taskName, projectFile, projectFileOfTask, taskAssemblyName);
+            VerifyTaskStartedEvent(taskName, projectFile, projectFileOfTask, message, service, taskAssemblyName);
 
             service.ResetProcessedBuildEvent();
             service.OnlyLogCriticalEvents = true;
-            service.LogTaskStarted(s_buildEventContext, taskName, projectFile, projectFileOfTask, Assembly.GetExecutingAssembly().GetName().FullName);
+            service.LogTaskStarted(s_buildEventContext, taskName, projectFile, projectFileOfTask, taskAssemblyName);
             Assert.Null(service.ProcessedBuildEvent);
         }
 
@@ -1632,7 +1633,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <param name="projectFileOfTask">ProjectFileOfTask to create the comparison event with.</param>
         /// <param name="message">Message to create the comparison event with.</param>
         /// <param name="service">LoggingService mock object which overrides ProcessBuildEvent and can provide a ProcessedBuildEvent (the event which would have been sent to the loggers)</param>
-        private void VerifyTaskStartedEvent(string taskName, string projectFile, string projectFileOfTask, string message, ProcessBuildEventHelper service)
+        private void VerifyTaskStartedEvent(string taskName, string projectFile, string projectFileOfTask, string message, ProcessBuildEventHelper service, string taskAssemblyName)
         {
             TaskStartedEventArgs taskEvent = new TaskStartedEventArgs(
                  message,
@@ -1640,7 +1641,8 @@ namespace Microsoft.Build.UnitTests.Logging
                   projectFile,
                   projectFileOfTask,
                   taskName,
-                  service.ProcessedBuildEvent.Timestamp);
+                  service.ProcessedBuildEvent.Timestamp,
+                  taskAssemblyName);
             taskEvent.BuildEventContext = s_buildEventContext;
             Assert.True(((TaskStartedEventArgs)service.ProcessedBuildEvent).IsEquivalent(taskEvent));
         }
