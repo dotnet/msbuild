@@ -14,7 +14,7 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.Build.Analyzers.UnitTests
+namespace Microsoft.Build.BuildCheck.UnitTests
 {
     public class EndToEndTests : IDisposable
     {
