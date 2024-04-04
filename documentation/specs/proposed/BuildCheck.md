@@ -16,7 +16,7 @@ The feature is meant to help customers to improve and understand quality of thei
 
 # North Star / Longer-term vision
 
-MSBuild provides a rich OM exposing the build scripts, data and execution so that various quality checking rules can be authored. This includes static analysis rules (e.g. checking validity of condition expressions) as well as build execution rules (e.g. checking of referencing nonexistent files) and composition rules (e.g. unintended outputs overwrites checking). Identical OM is exposed from live build execution and via post-build log event sourcing – so that users can choose whether the build analysis will happen as part of the build or as a separate process.
+MSBuild provides a rich object model (further just OM) exposing representation of the build scripts (unstructured and structured model of documents contributing to the build), build data (the definition and evaluated values of MSBuild primitives) and build execution (the eventing model of inputs, processing and outputs of the orchestrated execution) so that various quality checking rules can be authored. This includes static analysis rules (e.g. checking validity of condition expressions) as well as build execution rules (e.g. checking of referencing nonexistent files) and composition rules (e.g. unintended outputs overwrites checking). Identical OM is exposed from live build execution and via post-build log event sourcing – so that users can choose whether the build analysis will happen as part of the build or as a separate process.
 
 Users are able to tune the behavior of the checks via `.editorconfig` which brings unified and standardized experience with other tooling (including built-in and third-party C# analyzers) leveraging `.editorconfig` files.
 
@@ -24,7 +24,7 @@ Powerusers are able to develop, test and publish their custom analyzers easily a
 
 A solid set of in-the-box analyzers is provided by MSBuild and the .NET SDK, extended each release, with high quality reports (pointing exact locations of issue, offering clear and actionable explanations, not repetitive for builds with multi-execution or/and multi-importing of a same script in single build context). The existing in-the-box analyzers are gradually enabled by default and their severity increased - in waves (likely tied to sdk releases) - aiming to constantly increase quality of our customers build scripts. MSBuild.exe (and hence Visual Studio) builds will take more conservative approach with requiring an explicit opt-in into the analyzers - in order to not introduce upgrade blockers. 
 
-The analysis has small impact on build duration with ability to opt-out from analysis altogether which will remove all the performance costs associated with the analysis.
+The analysis has small impact on build duration with ability to opt-out from analysis altogether which will remove all the performance costs associated with the analysis. The perf impact on representative projects is continuously monitored and documented by the MsBuild team.
 
 
 # Scope of initial iteration
@@ -40,7 +40,7 @@ Majority of following cases are included in appropriate context within the scena
 * Default opt-ins and levels for inbox analyzers set by sdk version (via [`$SdkAnalysisLevel`]((https://github.com/dotnet/designs/blob/main/proposed/sdk-analysis-level.md))) or other agreed mechanism for controlling increasing strictness between .NET versions.
 * Custom analyzers opted in via `PackageReference` of a particular nuget with the analyzer.
 * Explicit overrides of enablement and analysis levels via `.editorconfig` file (with up to a per-project scope).
-* Standards of `.editorconfig`s will be observed. 
+* [Specification of `.editorconfig`](https://spec.editorconfig.org/) will be observed. 
 * Simplified authoring experience via template and doc.
 * Single analyzer can produce reports for multiple rules. However those need to be declared upfront.
 * Opt-in reporting of time spent via specific analyzers and infra overall.
@@ -54,10 +54,11 @@ Majority of following cases are included in appropriate context within the scena
 * Specifying scope of MSBuild imports that will be considered for analysis (so that e.g. data from sdk won't even be passed to analyzer, if not requested).
 * Attempts to try to configure standard msbuild warnings/errors via `.editorconfig` should lead to fail fast errors.
 * Configuring analysis levels when analyzing from binlog - beyond the collected editorconfigs
-* Rich information in VS error window.
+* Structured information in VS error window (similarly to the Roslyn analyzer reports - reports have titles, details, locations, searchable codes and exposed links leading to detailed documentation).
 
 
 ## Out of scope
+* Instrumentation for telemetry.
 * Design time build analysis.
 * Localization support (for reports message formats, identifiers, etc.).
 * Custom analyzers have equal data access as the inbox analyzers. We'll aim to ship analyzers that use public BuildCheck API/OM surface. But for extra agility we might chose to implement and ship some analyzers using unexposed data.
