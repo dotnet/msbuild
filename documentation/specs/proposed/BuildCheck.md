@@ -103,6 +103,8 @@ BuildCheck will run as part of the build and execute [inbox analyzers](#inbox-an
 
 Findings - reports - of analyzers will be output as build messages/warnings/errors, and the message/warnings/error code should help distinguish BuildCheck produced reports from regular build errors/warnings.
 
+BuildCheck reports will have power to fail the build (via errors or warnings), that would otherwise succeed without the BuildCheck. This is actually the main benefit of the feature - as it helps enforcing new rules, that are easily user configurable individually or as a whole feature - to prevent unwanted breakages of legacy builds not ready for improvements.
+
 ### Binlog Replay mode
 
 Users will have option to explicitly opt-in to run BuildCheck during the binlog replay mode:
