@@ -7,20 +7,29 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 
+/// <summary>
+/// Extension methods for <see cref="ProjectItemElement"/>.
+/// </summary>
 public static class ItemTypeExtensions
 {
     public static IEnumerable<ProjectItemElement> GetItemsOfType(this IEnumerable<ProjectItemElement> items,
         string itemType)
     {
         return items.Where(i =>
-            i.ItemType.Equals(itemType, StringComparison.CurrentCultureIgnoreCase));
+            MSBuildNameIgnoreCaseComparer.Default.Equals(i.ItemType, itemType));
     }
 }
 
+/// <summary>
+/// Holder for evaluated items and item groups.
+/// </summary>
+/// <param name="items"></param>
+/// <param name="itemGroups"></param>
 public class ItemsHolder(IEnumerable<ProjectItemElement> items, IEnumerable<ProjectItemGroupElement> itemGroups)
 {
     public IEnumerable<ProjectItemElement> Items { get; } = items;
@@ -32,6 +41,9 @@ public class ItemsHolder(IEnumerable<ProjectItemElement> items, IEnumerable<Proj
     }
 }
 
+/// <summary>
+/// BuildCheck OM data representing the evaluated items of a project.
+/// </summary>
 public class ParsedItemsAnalysisData : AnalysisData
 {
     internal ParsedItemsAnalysisData(

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.BuildCheck.Infrastructure;
 
-internal class BuildCheckConfigurationException : Exception
+internal sealed class BuildCheckConfigurationException : Exception
 {
     /// <summary>
     /// Exception to communicate issues with user specified configuration - unsupported scenarios, malformations, etc.

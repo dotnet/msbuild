@@ -27,7 +27,7 @@
       "type": "parameter",
       "description": "Overrides the default Microsoft.Build version where analyzer's interfaces are placed",
       "datatype": "text",
-      "defaultValue": "17.9.5",
+      "defaultValue": "17.11.0",
       "replaces": "1.0.0-MicrosoftBuildPackageVersion",
       "displayName": "Microsoft.Build default package version override"
     }

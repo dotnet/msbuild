@@ -14,7 +14,7 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.Build.Analyzers.UnitTests
+namespace Microsoft.Build.BuildCheck.UnitTests
 {
     public class EndToEndTests : IDisposable
     {
@@ -30,9 +30,10 @@ namespace Microsoft.Build.Analyzers.UnitTests
         public void Dispose() => _env.Dispose();
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void SampleAnalyzerIntegrationTest(bool buildInOutOfProcessNode)
+        [InlineData(true, true)]
+        [InlineData(false, true)]
+        [InlineData(false, false)]
+        public void SampleAnalyzerIntegrationTest(bool buildInOutOfProcessNode, bool analysisRequested)
         {
             string contents = $"""
                 <Project Sdk="Microsoft.NET.Sdk" DefaultTargets="Hello">
@@ -113,16 +114,25 @@ namespace Microsoft.Build.Analyzers.UnitTests
 
             // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".
             // This discrepancy breaks path equality checks in analyzers if we pass to MSBuild full path to the initial project.
-            // TODO: See if there is a way of fixing it in the engine.
+            // See if there is a way of fixing it in the engine - tracked: https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=55702688.
             _env.SetCurrentDirectory(Path.GetDirectoryName(projectFile.Path));
 
             _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", buildInOutOfProcessNode ? "1" : "0");
             _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
-            string output = RunnerUtilities.ExecBootstrapedMSBuild($"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -analyze", out bool success);
+            string output = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore" +
+                (analysisRequested ? " -analyze" : string.Empty), out bool success);
             _env.Output.WriteLine(output);
             success.ShouldBeTrue();
-            // The conflicting outputs warning appears
-            output.ShouldContain("BC0101");
+            // The conflicting outputs warning appears - but only if analysis was requested
+            if (analysisRequested)
+            {
+                output.ShouldContain("BC0101");
+            }
+            else
+            {
+                output.ShouldNotContain("BC0101");
+            }
         }
     }
 }

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -12,6 +13,7 @@ using System.Diagnostics;
 
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 #endif
 #if NETFRAMEWORK
 using Microsoft.IO;
@@ -41,6 +43,8 @@ internal sealed partial class TerminalLogger : INodeLogger
 #else
     private static readonly string[] _immediateMessageKeywords = { "[CredentialProvider]", "--interactive" };
 #endif
+
+    private static readonly string[] newLineStrings = { "\r\n", "\n" };
 
     /// <summary>
     /// A wrapper over the project context ID passed to us in <see cref="IEventSource"/> logger events.
@@ -574,6 +578,7 @@ internal sealed partial class TerminalLogger : INodeLogger
 
             string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
 
+
             var isTestTarget = e.TargetName == _testStartTarget;
 
             var targetName = isTestTarget ? "Testing" : e.TargetName;
@@ -725,19 +730,16 @@ internal sealed partial class TerminalLogger : INodeLogger
     private void WarningRaised(object sender, BuildWarningEventArgs e)
     {
         BuildEventContext? buildEventContext = e.BuildEventContext;
-        string message = EventArgsFormatting.FormatEventMessage(
+        string message = FormatEventMessage(
                 category: AnsiCodes.Colorize("warning", TerminalColor.Yellow),
                 subcategory: e.Subcategory,
                 message: e.Message,
                 code: AnsiCodes.Colorize(e.Code, TerminalColor.Yellow),
                 file: HighlightFileName(e.File),
-                projectFile: e.ProjectFile ?? null,
                 lineNumber: e.LineNumber,
                 endLineNumber: e.EndLineNumber,
                 columnNumber: e.ColumnNumber,
-                endColumnNumber: e.EndColumnNumber,
-                threadId: e.ThreadId,
-                logOutputProperties: null);
+                endColumnNumber: e.EndColumnNumber);
 
         if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
@@ -774,19 +776,16 @@ internal sealed partial class TerminalLogger : INodeLogger
     private void ErrorRaised(object sender, BuildErrorEventArgs e)
     {
         BuildEventContext? buildEventContext = e.BuildEventContext;
-        string message = EventArgsFormatting.FormatEventMessage(
+        string message = FormatEventMessage(
                 category: AnsiCodes.Colorize("error", TerminalColor.Red),
                 subcategory: e.Subcategory,
                 message: e.Message,
                 code: AnsiCodes.Colorize(e.Code, TerminalColor.Red),
                 file: HighlightFileName(e.File),
-                projectFile: e.ProjectFile ?? null,
                 lineNumber: e.LineNumber,
                 endLineNumber: e.EndLineNumber,
                 columnNumber: e.ColumnNumber,
-                endColumnNumber: e.EndColumnNumber,
-                threadId: e.ThreadId,
-                logOutputProperties: null);
+                endColumnNumber: e.EndColumnNumber);
 
         if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
@@ -936,6 +935,108 @@ internal sealed partial class TerminalLogger : INodeLogger
         return index >= 0
             ? $"{path.Substring(0, index + 1)}{AnsiCodes.MakeBold(path.Substring(index + 1))}"
             : path;
+    }
+
+    private string FormatEventMessage(
+            string category,
+            string subcategory,
+            string? message,
+            string code,
+            string? file,
+            int lineNumber,
+            int endLineNumber,
+            int columnNumber,
+            int endColumnNumber)
+    {
+        message ??= string.Empty;
+        StringBuilder builder = new(128);
+
+        if (string.IsNullOrEmpty(file))
+        {
+            builder.Append("MSBUILD : ");    // Should not be localized.
+        }
+        else
+        {
+            builder.Append(file);
+
+            if (lineNumber == 0)
+            {
+                builder.Append(" : ");
+            }
+            else
+            {
+                if (columnNumber == 0)
+                {
+                    builder.Append(endLineNumber == 0 ?
+                        $"({lineNumber}): " :
+                        $"({lineNumber}-{endLineNumber}): ");
+                }
+                else
+                {
+                    if (endLineNumber == 0)
+                    {
+                        builder.Append(endColumnNumber == 0 ?
+                            $"({lineNumber},{columnNumber}): " :
+                            $"({lineNumber},{columnNumber}-{endColumnNumber}): ");
+                    }
+                    else
+                    {
+                        builder.Append(endColumnNumber == 0 ?
+                            $"({lineNumber}-{endLineNumber},{columnNumber}): " :
+                            $"({lineNumber},{columnNumber},{endLineNumber},{endColumnNumber}): ");
+                    }
+                }
+            }
+        }
+
+        if (!string.IsNullOrEmpty(subcategory))
+        {
+            builder.Append(subcategory);
+            builder.Append(' ');
+        }
+
+        builder.Append($"{category} {code}: ");
+
+        // render multi-line message in a special way
+        if (message.IndexOf('\n') >= 0)
+        {
+            const string indent = $"{Indentation}{Indentation}{Indentation}";
+            string[] lines = message.Split(newLineStrings, StringSplitOptions.None);
+
+            foreach (string line in lines)
+            {
+                if (indent.Length + line.Length > Terminal.Width) // custom wrapping with indentation
+                {
+                    WrapText(builder, line, Terminal.Width, indent);
+                }
+                else
+                {
+                    builder.AppendLine();
+                    builder.Append(indent);
+                    builder.Append(line);
+                }
+            }
+        }
+        else
+        {
+            builder.Append(message);
+        }
+
+        return builder.ToString();
+    }
+
+    private static void WrapText(StringBuilder sb, string text, int maxLength, string indent)
+    {
+        int start = 0;
+        while (start < text.Length)
+        {
+            int length = Math.Min(maxLength - indent.Length, text.Length - start);
+            sb.AppendLine();
+            sb.Append(indent);
+            sb.Append(text.AsSpan().Slice(start, length));
+
+            start += length;
+        }
     }
 
     #endregion

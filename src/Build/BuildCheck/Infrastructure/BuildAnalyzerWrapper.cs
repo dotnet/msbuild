@@ -43,7 +43,7 @@ internal sealed class BuildAnalyzerWrapper
             }
         }
 
-        if (CommonConfig == null || !userConfigs.All(t => t.IsEqual(CommonConfig)))
+        if (CommonConfig == null || !userConfigs.All(t => t.IsSameConfigurationAs(CommonConfig)))
         {
             CommonConfig = null;
         }
@@ -59,7 +59,7 @@ internal sealed class BuildAnalyzerWrapper
 
     internal void ClearStats() => _stopwatch.Reset();
 
-    internal IDisposable StartSpan()
+    internal CleanupScope StartSpan()
     {
         _stopwatch.Start();
         return new CleanupScope(_stopwatch.Stop);

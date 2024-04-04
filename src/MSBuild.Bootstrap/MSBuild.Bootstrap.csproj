@@ -1,6 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="$(RepoRoot)eng\BootStrapMSBuild.props" />
+  <Import Project="$(RepoRoot)eng\BootStrapMsBuild.props" />
 
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
@@ -48,6 +48,6 @@
   <Import Project="..\Package\GetBinPaths.targets" Condition="$(TargetFramework.StartsWith('net4'))" />
   <Import Project="..\Package\GetBinPaths.Arm64.targets" Condition="$(TargetFramework.StartsWith('net4'))" />
 
-  <Import Project="$(RepoRoot)eng\BootStrapMSBuild.targets" />
+  <Import Project="$(RepoRoot)eng\BootStrapMsBuild.targets" />
 
 </Project>

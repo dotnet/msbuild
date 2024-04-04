@@ -80,7 +80,7 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// Type of handler for BuildCheckEventRaised events
     /// </summary>
-    public delegate void BuildCheckEventHandler(object sender, BuildCheckEventArgs e);
+    internal delegate void BuildCheckEventHandler(object sender, BuildCheckEventArgs e);
 
     /// <summary>
     /// This interface defines the events raised by the build engine.

@@ -38,6 +38,10 @@ public sealed class BuildCheckResult : IBuildCheckResult
         };
 
     public BuildAnalyzerRule BuildAnalyzerRule { get; }
+
+    /// <summary>
+    /// Optional location of the finding (in near future we might need to support multiple locations).
+    /// </summary>
     public ElementLocation Location { get; }
 
     public string LocationString => Location.LocationString;
