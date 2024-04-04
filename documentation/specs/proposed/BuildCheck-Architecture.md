@@ -28,6 +28,11 @@ BuildCheck can source this data either offline from the binlog, or as a plugged 
 
 The actual OM exposed to users will be translating/mapping/proxying the underlying MSBuild OM and hence the implementation details and actual extent of the data (whether internal or public) will be hidden.
 
+### Sourcing unexposed data from within execution
+
+For agility we'll be able to source interanl data during the evaluation and/or execution directly from the build engine, without the `BuildEventArgs` exposure.
+One example of rich data that might be helpful for internal analyses is [`Project`](https://github.com/dotnet/msbuild/blob/28f488a74ed75bf5f21ca93ac2463a8cb1586d79/src/Build/Definition/Project.cs#L49). This OM is not currently being used during the standard build execution (`ProjectInstance` is used instead) - but we can conditionaly create and expose `Project` and satisfy the current internal consumers of `ProjectInstance` - spike of that is available [in experimental branch](https://github.com/dotnet/msbuild/compare/main...JanKrivanek:msbuild:research/analyzers-evaluation-hooking#diff-08a12a2fa138c3bfcabc7639bb75dda8534f3b662db4aca4f2b5595dbf9ba197).
+
 ## Execution Modes
 
 **Replay Mode** - so that users can choose to perform analyses post build, without impacting the performance of the build. And so that some level of analysis can be run on artifacts from builds produced by older versions of MSBuild.
