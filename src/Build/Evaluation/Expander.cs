@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -12,6 +13,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation.Context;
@@ -311,10 +313,13 @@ namespace Microsoft.Build.Evaluation
 
         private readonly IFileSystem _fileSystem;
 
+        private readonly LoggingContext _loggingContext;
+
         /// <summary>
         /// Non-null if the expander was constructed for evaluation.
         /// </summary>
         internal EvaluationContext EvaluationContext { get; }
+
 
         /// <summary>
         /// Creates an expander passing it some properties to use.
@@ -350,6 +355,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="Expander{P, I}"/> class.
         /// Creates an expander passing it some properties and items to use, and the evaluation context.
         /// Either or both may be null.
         /// </summary>
@@ -357,6 +363,21 @@ namespace Microsoft.Build.Evaluation
             : this(properties, evaluationContext)
         {
             _items = items;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Expander{P, I}"/> class with the specified property provider, item provider, evaluation context, and logging context.
+        /// </summary>
+        /// <param name="properties">The property provider supplying properties for expansion.</param>
+        /// <param name="items">The item provider supplying items for expansion.</param>
+        /// <param name="evaluationContext">The evaluation context used during expansion.</param>
+        /// <param name="loggingContext">The logging context used for logging or emmitting events during expansion.</param>
+        /// <exception cref="ArgumentNullException">Thrown when either <paramref name="properties"/> or <paramref name="evaluationContext"/> is null.</exception>
+        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, EvaluationContext evaluationContext, LoggingContext loggingContext)
+            : this(properties, evaluationContext)
+        {
+            _items = items;
+            _loggingContext = loggingContext;
         }
 
         /// <summary>
@@ -1253,7 +1274,8 @@ namespace Microsoft.Build.Evaluation
                                 options,
                                 elementLocation,
                                 usedUninitializedProperties,
-                                fileSystem);
+                                fileSystem,
+                                loggingContext);
                         }
                         else // This is a regular property
                         {
@@ -1301,7 +1323,8 @@ namespace Microsoft.Build.Evaluation
                 ExpanderOptions options,
                 IElementLocation elementLocation,
                 UsedUninitializedProperties usedUninitializedProperties,
-                IFileSystem fileSystem)
+                IFileSystem fileSystem,
+                LoggingContext loggingContext)
             {
                 Function<T> function = null;
                 string propertyName = propertyBody;
@@ -1332,7 +1355,8 @@ namespace Microsoft.Build.Evaluation
                             elementLocation,
                             propertyValue,
                             usedUninitializedProperties,
-                            fileSystem);
+                            fileSystem,
+                            loggingContext);
 
                         // We may not have been able to parse out a function
                         if (function != null)
@@ -1371,7 +1395,8 @@ namespace Microsoft.Build.Evaluation
                                 options,
                                 elementLocation,
                                 usedUninitializedProperties,
-                                fileSystem);
+                                fileSystem,
+                                loggingContext);
                         }
                     }
                     else
@@ -2726,7 +2751,8 @@ namespace Microsoft.Build.Evaluation
                             BindingFlags.Public | BindingFlags.InvokeMethod,
                             string.Empty,
                             expander.UsedUninitializedProperties,
-                            expander._fileSystem);
+                            expander._fileSystem,
+                            expander._loggingContext);
 
                         object result = function.Execute(item.Key, expander._properties, ExpanderOptions.ExpandAll, elementLocation);
 
@@ -3151,6 +3177,8 @@ namespace Microsoft.Build.Evaluation
 
             public IFileSystem FileSystem { get; set; }
 
+            public LoggingContext LoggingContext { get; set; }
+
             /// <summary>
             /// List of properties which have been used but have not been initialized yet.
             /// </summary>
@@ -3167,7 +3195,8 @@ namespace Microsoft.Build.Evaluation
                     BindingFlags,
                     Remainder,
                     UsedUninitializedProperties,
-                    FileSystem);
+                    FileSystem,
+                    LoggingContext);
             }
         }
 
@@ -3187,22 +3216,22 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// The name of the function.
             /// </summary>
-            private string _methodMethodName;
+            private readonly string _methodMethodName;
 
             /// <summary>
             /// The arguments for the function.
             /// </summary>
-            private string[] _arguments;
+            private readonly string[] _arguments;
 
             /// <summary>
             /// The expression that this function is part of.
             /// </summary>
-            private string _expression;
+            private readonly string _expression;
 
             /// <summary>
             /// The property name that this function is applied on.
             /// </summary>
-            private string _receiver;
+            private readonly string _receiver;
 
             /// <summary>
             /// The binding flags that will be used during invocation of this function.
@@ -3212,14 +3241,16 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// The remainder of the body once the function and arguments have been extracted.
             /// </summary>
-            private string _remainder;
+            private readonly string _remainder;
 
             /// <summary>
             /// List of properties which have been used but have not been initialized yet.
             /// </summary>
-            private UsedUninitializedProperties _usedUninitializedProperties;
+            private readonly UsedUninitializedProperties _usedUninitializedProperties;
 
-            private IFileSystem _fileSystem;
+            private readonly IFileSystem _fileSystem;
+
+            private readonly LoggingContext _loggingContext;
 
             /// <summary>
             /// Construct a function that will be executed during property evaluation.
@@ -3233,7 +3264,8 @@ namespace Microsoft.Build.Evaluation
                 BindingFlags bindingFlags,
                 string remainder,
                 UsedUninitializedProperties usedUninitializedProperties,
-                IFileSystem fileSystem)
+                IFileSystem fileSystem,
+                LoggingContext loggingContext)
             {
                 _methodMethodName = methodName;
                 if (arguments == null)
@@ -3252,6 +3284,7 @@ namespace Microsoft.Build.Evaluation
                 _remainder = remainder;
                 _usedUninitializedProperties = usedUninitializedProperties;
                 _fileSystem = fileSystem;
+                _loggingContext = loggingContext;
             }
 
             /// <summary>
@@ -3274,10 +3307,11 @@ namespace Microsoft.Build.Evaluation
                 IElementLocation elementLocation,
                 object propertyValue,
                 UsedUninitializedProperties usedUnInitializedProperties,
-                IFileSystem fileSystem)
+                IFileSystem fileSystem,
+                LoggingContext loggingContext)
             {
                 // Used to aggregate all the components needed for a Function
-                FunctionBuilder<T> functionBuilder = new FunctionBuilder<T> { FileSystem = fileSystem };
+                FunctionBuilder<T> functionBuilder = new FunctionBuilder<T> { FileSystem = fileSystem, LoggingContext = loggingContext };
 
                 // By default the expression root is the whole function expression
                 ReadOnlySpan<char> expressionRoot = expressionFunction == null ? ReadOnlySpan<char>.Empty : expressionFunction.AsSpan();
@@ -3583,7 +3617,8 @@ namespace Microsoft.Build.Evaluation
                         options,
                         elementLocation,
                         _usedUninitializedProperties,
-                        _fileSystem);
+                        _fileSystem,
+                        _loggingContext);
                 }
 
                 // Exceptions coming from the actual function called are wrapped in a TargetInvocationException
@@ -3877,6 +3912,15 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (_receiverType == typeof(IntrinsicFunctions))
                     {
+                        if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.RegisterAnalyzer), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0) && _loggingContext != null)
+                            {
+                                returnVal = IntrinsicFunctions.RegisterAnalyzer(arg0, _loggingContext);
+                                return true;
+                            }
+                        }
+
                         if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.EnsureTrailingSlash), StringComparison.OrdinalIgnoreCase))
                         {
                             if (TryGetArg(args, out string arg0))

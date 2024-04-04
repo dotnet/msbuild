@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -10,6 +11,8 @@ using System.Runtime.Versioning;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.BackEnd.Components.Logging;
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -621,47 +624,14 @@ namespace Microsoft.Build.Evaluation
             return BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio;
         }
 
-        public static bool RegisterAnalyzer(string pathToAssembly)
+        public static bool RegisterAnalyzer(string pathToAssembly, LoggingContext loggingContext)
         {
             pathToAssembly = FileUtilities.GetFullPathNoThrow(pathToAssembly);
-
-            try
+            if (File.Exists(pathToAssembly))
             {
-                if (File.Exists(pathToAssembly))
-                {
-                    Assembly assembly = null;
-#if FEATURE_ASSEMBLYLOADCONTEXT
-                    Console.WriteLine($"Hi from FEATURE_ASSEMBLYLOADCONTEXT.");
-                    assembly = s_coreClrAssemblyLoader.LoadFromPath(pathToAssembly);
-#else
-                    assembly = Assembly.LoadFrom(pathToAssembly);
-#endif
-                    Console.WriteLine($"Loaded assembly: {assembly.FullName}");
+                loggingContext.LogBuildEvent(new BuildCheckAcquisitionEventArgs(pathToAssembly));
 
-                    Type type = assembly.GetTypes()[0];
-                    object instance = Activator.CreateInstance(type);
-
-                    PropertyInfo property = type.GetProperty("Name");
-                    var value = property.GetValue(instance);
-                    Console.WriteLine($"Loaded property analyzer name: {value}");
-
-                    // need to have a logging context here.
-                    new BuildCheckAcquisitionEventArgs(pathToAssembly);
-
-                    return true;
-                }
-            }
-            catch (ReflectionTypeLoadException ex)
-            {
-                Console.WriteLine("Failed to load one or more types from the assembly:");
-                foreach (Exception loaderException in ex.LoaderExceptions)
-                {
-                    Console.WriteLine(loaderException.Message);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to load assembly '{pathToAssembly}': {ex.Message}");
+                return true;
             }
 
             return false;

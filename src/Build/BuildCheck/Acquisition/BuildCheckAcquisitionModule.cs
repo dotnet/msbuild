@@ -11,48 +11,53 @@ using System.Threading.Tasks;
 using Microsoft.Build.BuildCheck.Analyzers;
 using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.BuildCheck.Acquisition;
-
-internal class BuildCheckAcquisitionModule
+namespace Microsoft.Build.BuildCheck.Acquisition
 {
-    private static T Construct<T>() where T : new() => new();
-
-    public BuildAnalyzerFactory CreateBuildAnalyzerFactory(AnalyzerAcquisitionData analyzerAcquisitionData)
+    internal class BuildCheckAcquisitionModule
     {
-        try
-        {
-            Assembly? assembly = null;
 #if FEATURE_ASSEMBLYLOADCONTEXT
-            assembly = s_coreClrAssemblyLoader.LoadFromPath(assemblyPath);
+        /// <summary>
+        /// AssemblyContextLoader used to load DLLs outside of msbuild.exe directory
+        /// </summary>
+        private static readonly CoreClrAssemblyLoader s_coreClrAssemblyLoader = new CoreClrAssemblyLoader();
+#endif
+        public BuildAnalyzerFactory? CreateBuildAnalyzerFactory(AnalyzerAcquisitionData analyzerAcquisitionData)
+        {
+            try
+            {
+                Assembly? assembly = null;
+#if FEATURE_ASSEMBLYLOADCONTEXT
+                assembly = s_coreClrAssemblyLoader.LoadFromPath(analyzerAcquisitionData.AssemblyPath);
 #else
-            assembly = Assembly.LoadFrom(analyzerAcquisitionData.AssemblyPath);
+                assembly = Assembly.LoadFrom(analyzerAcquisitionData.AssemblyPath);
 #endif
 
-            Type type = assembly.GetTypes().FirstOrDefault();
+                Type? analyzerType = assembly.GetTypes().FirstOrDefault(t => typeof(BuildAnalyzer).IsAssignableFrom(t));
 
-            if (type != null)
-            {
-                // Check if the type is assignable to T
-                if (!typeof(BuildAnalyzer).IsAssignableFrom(type))
+                if (analyzerType != null)
                 {
-                    throw new ArgumentException($"The type is not assignable to {typeof(BuildAnalyzer).FullName}");
-                }
-                else
-                {
-                    // ??? how to instantiate
+                    return () =>
+                    {
+                        return Activator.CreateInstance(analyzerType) is not BuildAnalyzer instance
+                            ? throw new InvalidOperationException($"Failed to create an instance of type {analyzerType.FullName} as BuildAnalyzer.")
+                            : instance;
+                    };
                 }
             }
-        }
-        catch (ReflectionTypeLoadException ex)
-        {
-            Console.WriteLine("Failed to load one or more types from the assembly:");
-            foreach (Exception loaderException in ex.LoaderExceptions)
+            catch (ReflectionTypeLoadException ex)
             {
-                Console.WriteLine(loaderException.Message);
+                if (ex.LoaderExceptions.Length != 0)
+                {
+                    foreach (Exception? loaderException in ex.LoaderExceptions)
+                    {
+                        Console.WriteLine(loaderException?.Message ?? "Unknown error occurred.");
+                    }
+                }
             }
-        }
 
-        return null;
+            return null;
+        }
     }
 }
