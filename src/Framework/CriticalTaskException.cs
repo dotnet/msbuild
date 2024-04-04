@@ -11,7 +11,9 @@ using Microsoft.Build.Framework.BuildException;
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// A wrapper exception for exceptions thrown by tasks (in TaskBuilder) that are critical to the build process.
+    /// A wrapper exception for exceptions thrown by MsBuild Tasks (in TaskBuilder) that are critical to the task run and overall to the build process.
+    /// However such exception desn't indicate problem within the MsBuild engine, but rather in the Task itself - for this reason we wrap the exception,
+    ///  so that we can properly log it up the stack (and not assume it is a bug within the build engine)
     /// </summary>
     internal sealed class CriticalTaskException : BuildExceptionBase
     {
