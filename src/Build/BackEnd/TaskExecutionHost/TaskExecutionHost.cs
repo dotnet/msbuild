@@ -266,13 +266,13 @@ namespace Microsoft.Build.BackEnd
         /// Ask the task host to find its task in the registry and get it ready for initializing the batch
         /// </summary>
         /// <returns>The task requirements if the task is found, null otherwise.</returns>
-        public TaskRequirements? FindTask(IDictionary<string, string> taskIdentityParameters)
+        public (TaskRequirements? requirements, TaskFactoryWrapper taskFactoryWrapper) FindTask(IDictionary<string, string> taskIdentityParameters)
         {
             _taskFactoryWrapper ??= FindTaskInRegistry(taskIdentityParameters);
 
             if (_taskFactoryWrapper is null)
             {
-                return null;
+                return (null, null);
             }
 
             TaskRequirements requirements = TaskRequirements.None;
@@ -291,18 +291,7 @@ namespace Microsoft.Build.BackEnd
                 _remotedTaskItems = new List<TaskItem>();
             }
 
-            return requirements;
-        }
-
-        /// <summary>
-        /// Ask the task host to find task assembly name
-        /// </summary>
-        /// <returns>The task assembly name if the task is found, null otherwise.</returns>
-        public AssemblyName FindTaskAssemblyName(IDictionary<string, string> taskIdentityParameters)
-        {
-            _taskFactoryWrapper ??= FindTaskInRegistry(taskIdentityParameters);
-
-            return _taskFactoryWrapper?.TaskFactoryLoadedType.LoadedAssemblyName;
+            return (requirements, _taskFactoryWrapper);
         }
 
         /// <summary>

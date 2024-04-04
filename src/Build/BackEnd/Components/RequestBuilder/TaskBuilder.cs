@@ -423,8 +423,8 @@ namespace Microsoft.Build.BackEnd
                 {
                     // We need to find the task before logging the task started event so that the using task statement comes before the task started event
                     IDictionary<string, string> taskIdentityParameters = GatherTaskIdentityParameters(bucket.Expander);
-                    TaskRequirements? requirements = _taskExecutionHost.FindTask(taskIdentityParameters);
-                    string taskAssemblyName = _taskExecutionHost.FindTaskAssemblyName(taskIdentityParameters)?.FullName;
+                    (TaskRequirements? requirements, TaskFactoryWrapper taskFactoryWrapper) = _taskExecutionHost.FindTask(taskIdentityParameters);
+                    string taskAssemblyName = taskFactoryWrapper?.TaskFactoryLoadedType?.LoadedAssemblyName?.Name;
 
                     if (requirements != null)
                     {
