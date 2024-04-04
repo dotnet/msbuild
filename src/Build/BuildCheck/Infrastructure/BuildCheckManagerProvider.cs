@@ -41,7 +41,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
     internal static IBuildComponent CreateComponent(BuildComponentType type)
     {
-        ErrorUtilities.VerifyThrow(type == BuildComponentType.BuildCheck, "Cannot create components of type {0}", type);
+        ErrorUtilities.VerifyThrow(type == BuildComponentType.BuildCheckManagerProvider, "Cannot create components of type {0}", type);
         return new BuildCheckManagerProvider();
     }
 
@@ -51,7 +51,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         if (Interlocked.CompareExchange(ref s_isInitialized, 1, 0) == 1)
         {
-            // Already initialized
+            // Initialization code already run(ing)
             return;
         }
 
@@ -106,7 +106,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             {
                 BuildCheckAcquisitionEventArgs eventArgs = acquisitionData.ToBuildEventArgs();
 
-                // TODO: We may want to pass the real context here (from evaluation)
+                // We may want to pass the real context here (from evaluation)
                 eventArgs.BuildEventContext = new BuildEventContext(
                     BuildEventContext.InvalidNodeId,
                     BuildEventContext.InvalidProjectInstanceId,
@@ -177,7 +177,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         private void SetupSingleAnalyzer(BuildAnalyzerFactoryContext analyzerFactoryContext, string projectFullPath, BuildEventContext buildEventContext)
         {
-            // TODO: For user analyzers - it should run only on projects where referenced
+            // For custom analyzers - it should run only on projects where referenced
+            //  (otherwise error out - https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=57849480)
             //  on others it should work similarly as disabling them.
             // Disabled analyzer should not only post-filter results - it shouldn't even see the data 
 
@@ -282,12 +283,12 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
 
         public void ProcessEvaluationFinishedEventArgs(
-            IBuildAnalysisLoggingContext buildAnalysisContext,
+            AnalyzerLoggingContext buildAnalysisContext,
             ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
             => _buildEventsProcessor
                 .ProcessEvaluationFinishedEventArgs(buildAnalysisContext, evaluationFinishedEventArgs);
 
-        // TODO: tracing: https://github.com/dotnet/msbuild/issues/9629
+        // Tracing: https://github.com/dotnet/msbuild/issues/9629
         public Dictionary<string, TimeSpan> CreateTracingStats()
         {
             foreach (BuildAnalyzerFactoryContext analyzerFactoryContext in _analyzersRegistry)

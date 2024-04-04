@@ -113,7 +113,7 @@ namespace Microsoft.Build.Analyzers.UnitTests
 
             // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".
             // This discrepancy breaks path equality checks in analyzers if we pass to MSBuild full path to the initial project.
-            // TODO: See if there is a way of fixing it in the engine.
+            // See if there is a way of fixing it in the engine - tracked: https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=55702688.
             _env.SetCurrentDirectory(Path.GetDirectoryName(projectFile.Path));
 
             _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", buildInOutOfProcessNode ? "1" : "0");

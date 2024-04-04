@@ -102,9 +102,9 @@ namespace Microsoft.Build.BackEnd.Logging
         public event TelemetryEventHandler TelemetryLogged;
 
         /// <summary>
-        /// This event is raised to log build cop events.
+        /// This event is raised to log BuildCheck events.
         /// </summary>
-        public event BuildCheckEventHandler BuildCheckEventRaised;
+        internal event BuildCheckEventHandler BuildCheckEventRaised;
         #endregion
 
         #region Properties

@@ -29,12 +29,10 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     private readonly BuildCheckCentralContext _buildCheckCentralContext = buildCheckCentralContext;
 
     // This requires MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION set to 1
-    public void ProcessEvaluationFinishedEventArgs(
-        IBuildAnalysisLoggingContext buildAnalysisContext,
+    internal void ProcessEvaluationFinishedEventArgs(
+        AnalyzerLoggingContext buildAnalysisContext,
         ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
     {
-        LoggingContext loggingContext = buildAnalysisContext.ToLoggingContext();
-
         Dictionary<string, string> propertiesLookup = new Dictionary<string, string>();
         Internal.Utilities.EnumerateProperties(evaluationFinishedEventArgs.Properties, propertiesLookup,
             static (dict, kvp) => dict.Add(kvp.Key, kvp.Value));
@@ -42,7 +40,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         EvaluatedPropertiesAnalysisData analysisData =
             new(evaluationFinishedEventArgs.ProjectFile!, propertiesLookup);
 
-        _buildCheckCentralContext.RunEvaluatedPropertiesActions(analysisData, loggingContext, ReportResult);
+        _buildCheckCentralContext.RunEvaluatedPropertiesActions(analysisData, buildAnalysisContext, ReportResult);
 
         if (_buildCheckCentralContext.HasParsedItemsActions)
         {
@@ -53,7 +51,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
             ParsedItemsAnalysisData itemsAnalysisData = new(evaluationFinishedEventArgs.ProjectFile!,
                 new ItemsHolder(xml.Items, xml.ItemGroups));
 
-            _buildCheckCentralContext.RunParsedItemsActions(itemsAnalysisData, loggingContext, ReportResult);
+            _buildCheckCentralContext.RunParsedItemsActions(itemsAnalysisData, buildAnalysisContext, ReportResult);
         }
     }
 

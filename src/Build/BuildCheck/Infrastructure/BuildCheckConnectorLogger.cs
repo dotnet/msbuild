@@ -91,9 +91,9 @@ internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFact
             BuildEventContext.InvalidNodeId, BuildEventContext.InvalidTargetId,
             BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
 
-        LoggingContext loggingContext = loggingContextFactory.CreateLoggingContext(buildEventContext).ToLoggingContext();
+        LoggingContext loggingContext = loggingContextFactory.CreateLoggingContext(buildEventContext);
 
-        // TODO: tracing: https://github.com/dotnet/msbuild/issues/9629
+        // Tracing: https://github.com/dotnet/msbuild/issues/9629
         loggingContext.LogCommentFromText(MessageImportance.High, msg);
     }
 

@@ -10,13 +10,12 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// </summary>
 public class BuildAnalyzerRule
 {
-    public BuildAnalyzerRule(string id, string title, string description, string category, string messageFormat,
+    public BuildAnalyzerRule(string id, string title, string description, string messageFormat,
         BuildAnalyzerConfiguration defaultConfiguration)
     {
         Id = id;
         Title = title;
         Description = description;
-        Category = category;
         MessageFormat = messageFormat;
         DefaultConfiguration = defaultConfiguration;
     }
@@ -42,11 +41,6 @@ public class BuildAnalyzerRule
     /// More detailed description of the violation the rule can be reporting (with possible suggestions).
     /// </summary>
     public string Description { get; }
-
-    /// <summary>
-    /// TODO: We might turn this into enum, or just remove this.
-    /// </summary>
-    public string Category { get; }
 
     /// <summary>
     /// Message format that will be used by the actual reports (<see cref="BuildCheckResult"/>) - those will just supply the actual arguments.

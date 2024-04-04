@@ -36,5 +36,5 @@ public class ConfigurationContext
     /// <summary>
     /// Custom configuration data - per each rule that has some specified.
     /// </summary>
-    public CustomConfigurationData[] CustomConfigurationData { get; init; }
+    public IReadOnlyList<CustomConfigurationData> CustomConfigurationData { get; init; }
 }
