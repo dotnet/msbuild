@@ -38,7 +38,7 @@ internal static class EnumerableExtensions
     {
         foreach (var pair in another)
         {
-            if (!dict.TryGetValue(pair.Key, out TValue value))
+            if (!dict.TryGetValue(pair.Key, out TValue? value))
             {
                 dict[pair.Key] = pair.Value;
             }
