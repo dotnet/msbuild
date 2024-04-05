@@ -16,7 +16,7 @@ internal class BuildCheckAcquisitionModule
     private static T Construct<T>() where T : new() => new();
     public BuildAnalyzerFactory CreateBuildAnalyzerFactory(AnalyzerAcquisitionData analyzerAcquisitionData)
     {
-        // Acquisition module - https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=52643036
+        // Acquisition module - https://github.com/dotnet/msbuild/issues/9633
         return Construct<SharedOutputPathAnalyzer>;
     }
 }
