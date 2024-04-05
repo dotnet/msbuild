@@ -1169,7 +1169,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #else
             AssemblyLoadInfo loadInfo = AssemblyLoadInfo.Create(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).GetTypeInfo().FullName, null);
 #endif
-            LoadedType loadedType = new LoadedType(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory), loadInfo, typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).GetTypeInfo().Assembly, typeof(ITaskItem));
+            LoadedType loadedType = new LoadedType(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory), loadInfo, typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).Assembly, typeof(ITaskItem));
 
             TaskBuilderTestTask.TaskBuilderTestTaskFactory taskFactory = new TaskBuilderTestTask.TaskBuilderTestTaskFactory();
             taskFactory.ThrowOnExecute = throwOnExecute;
@@ -1190,7 +1190,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 CancellationToken.None);
 
             ProjectTaskInstance taskInstance = project.Targets["foo"].Tasks.First();
-            TaskLoggingContext talc = tlc.LogTaskBatchStarted(".", taskInstance, typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).GetTypeInfo().Assembly.GetName().FullName);
+            TaskLoggingContext talc = tlc.LogTaskBatchStarted(".", taskInstance, typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).Assembly.GetName().FullName);
 
             ItemDictionary<ProjectItemInstance> itemsByName = new ItemDictionary<ProjectItemInstance>();
 

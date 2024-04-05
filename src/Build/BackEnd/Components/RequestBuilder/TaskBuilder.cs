@@ -654,7 +654,7 @@ namespace Microsoft.Build.BackEnd
                 ProjectErrorUtilities.ThrowInvalidProject(_targetChildInstance.Location, "TaskDeclarationOrUsageError", _taskNode.Name);
             }
 
-            using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, (_taskExecutionHost as TaskExecutionHost)?.TaskInstance?.GetType());
+            using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, _taskExecutionHost?.TaskInstance?.GetType());
 
             try
             {
