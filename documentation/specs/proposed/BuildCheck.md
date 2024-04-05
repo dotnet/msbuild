@@ -24,7 +24,7 @@ Powerusers are able to develop, test and publish their custom analyzers easily a
 
 A solid set of in-the-box analyzers is provided by MSBuild and the .NET SDK, extended each release, with high quality reports (pointing exact locations of issue, offering clear and actionable explanations, not repetitive for builds with multi-execution or/and multi-importing of a same script in single build context). The existing in-the-box analyzers are gradually enabled by default and their severity increased - in waves (likely tied to sdk releases) - aiming to constantly increase quality of our customers build scripts. MSBuild.exe (and hence Visual Studio) builds will take more conservative approach with requiring an explicit opt-in into the analyzers - in order to not introduce upgrade blockers. 
 
-The analysis has small impact on build duration with ability to opt-out from analysis altogether which will remove all the performance costs associated with the analysis. The perf impact on representative projects is continuously monitored and documented by the MsBuild team.
+The analysis has small impact on build duration with ability to disable analysis altogether which will remove all the performance costs associated with the analysis. The perf impact on representative projects is continuously monitored and documented by the MsBuild team.
 
 
 # Scope of initial iteration
@@ -68,7 +68,7 @@ Majority of following cases are included in appropriate context within the scena
 * Restore phase analysis.
 * Turning analysis off/on based on target (e.g. multi-targeted builds, calling MSBuild task etc.).
 * Controlling/Configuring lifetime of analyzers - analyzers will currently be held alive, as single instance per analyzer, for the whole duration of the build. But future versions might prevent some of the analyzers to survive beyond a scope of a single project built (means for sharing data would be provided).
-* ETW for analyzers.
+* Event Tracing for Windows (ETW) for analyzers.
 * Attributing `.editorconfig` configurations to .sln files. E.g.:
 ```ini
 # I expect this to apply to all projects within my solution, but not to projects which are not part of the solution
