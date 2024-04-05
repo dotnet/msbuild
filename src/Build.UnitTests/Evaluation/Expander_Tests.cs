@@ -4984,22 +4984,38 @@ $(
         [InlineData("gettype")]
         public void GetTypeMethod_ShouldNotBeAllowed(string methodName)
         {
-            using (var env = TestEnvironment.Create())
-            {
-                var root = env.CreateFolder();
+            var currentThread = Thread.CurrentThread;
+            var originalCulture = currentThread.CurrentCulture;
+            var originalUICulture = currentThread.CurrentUICulture;
+            var enCultureInfo = new CultureInfo("en");
 
-                var projectFile = env.CreateFile(root, ".proj",
-                    @$"<Project>
-    <PropertyGroup>
-        <foo>aa</foo>
-        <typeval>$(foo.{methodName}().FullName)</typeval>
-    </PropertyGroup>
-</Project>");
-                var exception = Should.Throw<InvalidProjectFileException>(() =>
+            try
+            {
+                currentThread.CurrentCulture = enCultureInfo;
+                currentThread.CurrentUICulture = enCultureInfo;
+
+                using (var env = TestEnvironment.Create())
                 {
-                    new ProjectInstance(projectFile.Path);
-                });
-                exception.BaseMessage.ShouldContain($"The function \"{methodName}\" on type \"System.String\" is not available for execution as an MSBuild property function.");
+                    var root = env.CreateFolder();
+
+                    var projectFile = env.CreateFile(root, ".proj",
+                        @$"<Project>
+            <PropertyGroup>
+                <foo>aa</foo>
+                <typeval>$(foo.{methodName}().FullName)</typeval>
+            </PropertyGroup>
+        </Project>");
+                    var exception = Should.Throw<InvalidProjectFileException>(() =>
+                    {
+                        new ProjectInstance(projectFile.Path);
+                    });
+                    exception.BaseMessage.ShouldContain($"The function \"{methodName}\" on type \"System.String\" is not available for execution as an MSBuild property function.");
+                }
+            }
+            finally
+            {
+                currentThread.CurrentCulture = originalCulture;
+                currentThread.CurrentUICulture = originalUICulture;
             }
         }
 
