@@ -33,9 +33,8 @@ internal delegate BuildAnalyzerWrapper BuildAnalyzerWrapperFactory(Configuration
 /// </summary>
 internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 {
-    private static int s_isInitialized = 0;
-    private static IBuildCheckManager s_globalInstance = new NullBuildCheckManager();
-    internal static IBuildCheckManager GlobalInstance => s_isInitialized != 0 ? s_globalInstance : throw new InvalidOperationException("BuildCheckManagerProvider not initialized");
+    private static IBuildCheckManager? s_globalInstance;
+    internal static IBuildCheckManager GlobalInstance => s_globalInstance ?? throw new InvalidOperationException("BuildCheckManagerProvider not initialized");
 
     public IBuildCheckManager Instance => GlobalInstance;
 
@@ -49,19 +48,21 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
     {
         ErrorUtilities.VerifyThrow(host != null, "BuildComponentHost was null");
 
-        if (Interlocked.CompareExchange(ref s_isInitialized, 1, 0) == 1)
+        if (s_globalInstance == null)
         {
-            // Initialization code already run(ing)
-            return;
-        }
+            IBuildCheckManager instance;
+            if (host!.BuildParameters.IsBuildCheckEnabled)
+            {
+                instance = new BuildCheckManager(host.LoggingService);
+            }
+            else
+            {
+                instance = new NullBuildCheckManager();
+            }
 
-        if (host!.BuildParameters.IsBuildCheckEnabled)
-        {
-            s_globalInstance = new BuildCheckManager(host.LoggingService);
-        }
-        else
-        {
-            s_globalInstance = new NullBuildCheckManager();
+            // We are fine with the possibility of double creation here - as the construction is cheap
+            //  and without side effects and the actual backing field is effectively immutable after the first assignment.
+            Interlocked.CompareExchange(ref s_globalInstance, instance, null);
         }
     }
 
