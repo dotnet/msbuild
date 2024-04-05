@@ -5308,7 +5308,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 // This could be expanded to an allow / deny list.
-                return methodName != "GetType";
+                return !string.Equals("GetType", methodName, StringComparison.OrdinalIgnoreCase);
             }
 
             /// <summary>
