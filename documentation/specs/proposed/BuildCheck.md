@@ -175,7 +175,7 @@ Option `Severity` with following values will be available:
 * `Warning`
 * `Error`
 
-Severity levels are in line with [roslyn analyzers severity levels](https://learn.microsoft.com/en-us/visualstudio/code-quality/use-roslyn-analyzers).
+Severity levels are in line with [roslyn analyzers severity levels](https://learn.microsoft.com/en-us/visualstudio/code-quality/use-roslyn-analyzers). `Default` severity in `.editorconfig` will lead to using build-in severity from the analyzer (so this can be used for clearing custom severity setting from higher level `.editorconfig` file). `Default` severity in the build-in code has same effect as if the code doesn't specify severity at all - an infrastruture default of `None` is considered.
 
 Configuration will dictate transformation of the analyzer report to particular build output type (message, warning or error).
 
