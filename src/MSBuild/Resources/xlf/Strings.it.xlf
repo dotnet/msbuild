@@ -176,45 +176,51 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_46_FeatureAvailabilitySwitch">
-        <source>  -featureavailability:featureName,...
-                     Check feature availability, The result is one of
-                     "Undefined", "Available", "NotAvailable" strings.
+        <source>  -featureAvailability:featureName,...
+                     Check feature availability. The result is one of the strings
+                     "Undefined", "Available", "NotAvailable".
                      (Short form: -fa)
     </source>
-        <target state="new">  -featureavailability:featureName,...
-                     Check feature availability, The result is one of
-                     "Undefined", "Available", "NotAvailable" strings.
+        <target state="new">  -featureAvailability:featureName,...
+                     Check feature availability. The result is one of the strings
+                     "Undefined", "Available", "NotAvailable".
                      (Short form: -fa)
     </target>
         <note>
-      LOCALIZATION: "-featureavailability" and "-fa" should not be localized.
+      LOCALIZATION: "-featureAvailability", "-fa", "Undefined", "Available" and "NotAvailable"should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_47_TerminalLoggerSwitch">
-        <source>  -terminallogger
-                      Users are able to opt-in and use the TerminalLogger,
+        <source>  ‑terminalLogger[:auto,on,off]
+                      Users are able to opt-in and use the TerminalLogger.
+                      Specify auto (or use the option without arguments) to use
+                      the terminal logger only if the standard output is not
+                      redirected.
                       EXCEPT when:
                       - The terminal does not support ANSI codes or color
                       - Output is redirected to a file or pipe
                       (Short form: -tl)
     </source>
-        <target state="new">  -terminallogger
-                      Users are able to opt-in and use the TerminalLogger,
+        <target state="new">  ‑terminalLogger[:auto,on,off]
+                      Users are able to opt-in and use the TerminalLogger.
+                      Specify auto (or use the option without arguments) to use
+                      the terminal logger only if the standard output is not
+                      redirected.
                       EXCEPT when:
                       - The terminal does not support ANSI codes or color
                       - Output is redirected to a file or pipe
                       (Short form: -tl)
     </target>
         <note>
-      LOCALIZATION: "-terminallogger" and "-tl" should not be localized.
+      LOCALIZATION: "-terminalLogger" and "-tl" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_48_TerminalLoggerParametersSwitch">
-        <source>  -termialLoggerParameters:default=[auto|false|true]
+        <source>  -terminalLoggerParameters:default=[auto|false|true]
                       Users are able to opt-in and use the TerminalLogger.
-                      - `true` forces TerminalLogger to be used even wwhen it
+                      - `true` forces TerminalLogger to be used even when it
                       would be disabled.
                       - `false` forces TerminalLogger to not be used even when
                       it would be enabled.
@@ -222,11 +228,11 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
                       it and the session doesn't have redirected stdout/stderr
                       (Short form: -tlp)
                       Example:
-                        -termialLoggerParameters:default=auto
+                        -terminalLoggerParameters:default=auto
     </source>
-        <target state="new">  -termialLoggerParameters:default=[auto|false|true]
+        <target state="new">  -terminalLoggerParameters:default=[auto|false|true]
                       Users are able to opt-in and use the TerminalLogger.
-                      - `true` forces TerminalLogger to be used even wwhen it
+                      - `true` forces TerminalLogger to be used even when it
                       would be disabled.
                       - `false` forces TerminalLogger to not be used even when
                       it would be enabled.
@@ -234,46 +240,24 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
                       it and the session doesn't have redirected stdout/stderr
                       (Short form: -tlp)
                       Example:
-                        -termialLoggerParameters:default=auto
+                        -terminalLoggerParameters:default=auto
     </target>
         <note>
-      LOCALIZATION: "-termialLoggerParameters"  and "-tlp" should not be localized.
+      LOCALIZATION: "-terminalLoggerParameters"  and "-tlp" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_49_WaitForDebuggerSwitch">
-        <source>  -waitfordebugger
+        <source>  -waitForDebugger
                       Wait for debugger command line switch in Debug build.
                       (Short form: -wfd)
     </source>
-        <target state="new">  -waitfordebugger
+        <target state="new">  -waitForDebugger
                       Wait for debugger command line switch in Debug build.
                       (Short form: -wfd)
     </target>
         <note>
-      LOCALIZATION: "-waitfordebugger" and "-wfd" should not be localized.
-      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
-    </note>
-      </trans-unit>
-      <trans-unit id="HelpMessage_50_NodeModeSwitch">
-        <source>  -nodemode:number
-                      It's used when MSBuild spawns a process, indicating that
-                      MSBuild should start up in "Out of process worker node"
-                      mode.
-                      (Short form: -nmode)
-                      Example:
-                        -nodemode:1
-    </source>
-        <target state="new">  -nodemode:number
-                      It's used when MSBuild spawns a process, indicating that
-                      MSBuild should start up in "Out of process worker node"
-                      mode.
-                      (Short form: -nmode)
-                      Example:
-                        -nodemode:1
-    </target>
-        <note>
-      LOCALIZATION: "-nodemode" and "-nmode" should not be localized.
+      LOCALIZATION: "-waitForDebugger" and "-wfd" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
@@ -1507,11 +1491,11 @@ Nota: livello di dettaglio dei logger di file
         <note />
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
-        <source>MSBUILD : error MSB1067: Must provide a feature name for the featureavailability switch.</source>
-        <target state="translated">MSBUILD : error MSB1067: È necessario fornire un nome funzionalità per il passaggio a disponibilità funzionalità.</target>
+        <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
+        <target state="needs-review-translation">MSBUILD : error MSB1067: È necessario fornire un nome funzionalità per il passaggio a disponibilità funzionalità.</target>
         <note>
-      {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureavailability". The user must pass in an actual feature name
-      following the switch, as in "msbuild.exe -featureavailability:blah".
+      {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureAvailability". The user must pass in an actual feature name
+      following the switch, as in "msbuild.exe -featureAvailability:blah".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -1600,7 +1584,7 @@ Nota: livello di dettaglio dei logger di file
         <target state="needs-review-translation">MSBUILD : error MSB1066: specificare uno o più parametri per il logger del terminale se si usa l'opzione -terminalLoggerParameters</target>
         <note>
       {StrBegin="MSBUILD : error MSB1066: "}
-      UE: This happens if the user does something like "msbuild.exe -termialLoggerParameters:". The user must pass in one or more parameters
+      UE: This happens if the user does something like "msbuild.exe -terminalLoggerParameters:". The user must pass in one or more parameters
       after the switch e.g. "msbuild.exe -terminalLoggerParameters:default=auto".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>

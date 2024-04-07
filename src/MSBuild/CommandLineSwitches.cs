@@ -250,7 +250,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "validate", "val" },                   ParameterizedSwitch.Validate,                   null,                           false,          null,                                  true,   false,   "HelpMessage_15_ValidateSwitch"),
 #endif
             new ParameterizedSwitchInfo(  new string[] { "consoleloggerparameters", "clp" },    ParameterizedSwitch.ConsoleLoggerParameters,    null,                           false,          "MissingConsoleLoggerParameterError",  true,   false,   "HelpMessage_13_ConsoleLoggerParametersSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "nodemode", "nmode" },                 ParameterizedSwitch.NodeMode,                   null,                           false,          null,                                  false,  false,   "HelpMessage_50_NodeModeSwitch"),
+            new ParameterizedSwitchInfo(  new string[] { "nodemode", "nmode" },                 ParameterizedSwitch.NodeMode,                   null,                           false,          null,                                  false,  false,   null),
             new ParameterizedSwitchInfo(  new string[] { "maxcpucount", "m" },                  ParameterizedSwitch.MaxCPUCount,                null,                           false,          "MissingMaxCPUCountError",             true,   false,   "HelpMessage_17_MaximumCPUSwitch"),
             new ParameterizedSwitchInfo(  new string[] { "ignoreprojectextensions", "ignore" }, ParameterizedSwitch.IgnoreProjectExtensions,    null,                           true,           "MissingIgnoreProjectExtensionsError", true,   false,   "HelpMessage_19_IgnoreProjectExtensionsSwitch"),
             new ParameterizedSwitchInfo(  new string[] { "toolsversion","tv" },                 ParameterizedSwitch.ToolsVersion,               null,                           false,          "MissingToolsVersionError",            true,   false,   "HelpMessage_23_ToolsVersionSwitch"),
@@ -294,7 +294,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "getItem" },                           ParameterizedSwitch.GetItem,                    null,                           true,           "MissingGetItemError",                 true,   false,   "HelpMessage_44_GetItemSwitch"),
             new ParameterizedSwitchInfo(  new string[] { "getTargetResult" },                   ParameterizedSwitch.GetTargetResult,            null,                           true,           "MissingGetTargetResultError",         true,   false,   "HelpMessage_45_GetTargetResultSwitch"),
             new ParameterizedSwitchInfo(  new string[] { "getResultOutputFile" },               ParameterizedSwitch.GetResultOutputFile,        null,                           true,           "MissingGetResultFileError",           true,   false,   "HelpMessage_51_GetResultOutputFileSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "featureavailability", "fa" },         ParameterizedSwitch.FeatureAvailability,        null,                           true,           "MissingFeatureAvailabilityError",     true,   false,   "HelpMessage_46_FeatureAvailabilitySwitch")
+            new ParameterizedSwitchInfo(  new string[] { "featureAvailability", "fa" },         ParameterizedSwitch.FeatureAvailability,        null,                           true,           "MissingFeatureAvailabilityError",     true,   false,   "HelpMessage_46_FeatureAvailabilitySwitch")
         };
 
         /// <summary>
@@ -454,14 +454,18 @@ namespace Microsoft.Build.CommandLine
             {
                 Debug.Assert(i == (int)(s_parameterlessSwitchesMap[i].parameterlessSwitch),
                     "The map of parameterless switches must be ordered the same way as the ParameterlessSwitch enumeration.");
-                Debug.Assert(!string.IsNullOrEmpty(s_parameterlessSwitchesMap[i].resourceId), "All parameterless switches should be cross-checked against the help message strings");
+                if (s_parameterlessSwitchesMap[i].parameterlessSwitch is not ParameterlessSwitch.WaitForDebugger)
+                {
+                    Debug.Assert(!string.IsNullOrEmpty(s_parameterlessSwitchesMap[i].resourceId), "All parameterless switches should be cross-checked against the help message strings");
+                }
             }
 
             for (int i = 0; i < s_parameterizedSwitchesMap.Length; i++)
             {
                 Debug.Assert(i == (int)(s_parameterizedSwitchesMap[i].parameterizedSwitch),
                     "The map of parameterized switches must be ordered the same way as the ParameterizedSwitch enumeration.");
-                if (s_parameterizedSwitchesMap[i].parameterizedSwitch != 0)
+                if (s_parameterizedSwitchesMap[i].parameterizedSwitch is not ParameterizedSwitch.Project and
+                    not ParameterizedSwitch.NodeMode)
                 {
                     Debug.Assert(!string.IsNullOrEmpty(s_parameterizedSwitchesMap[i].resourceId), "All parameterized switches should be cross-checked against the help message strings except from project switch");
                 }
