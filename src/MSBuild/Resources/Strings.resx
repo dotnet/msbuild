@@ -966,8 +966,8 @@
   </data>
   <data name="HelpMessage_46_FeatureAvailabilitySwitch" Visibility="Public">
     <value>  -featureAvailability:featureName,...
-                     Check feature availability. The result is one of the strings
-                     "Undefined", "Available", "NotAvailable".
+                     Check feature availability. The result is one of the
+                     strings "Undefined", "Available", "NotAvailable".
                      (Short form: -fa)
     </value>
     <comment>
@@ -976,15 +976,15 @@
     </comment>
   </data>
   <data name="HelpMessage_47_TerminalLoggerSwitch" Visibility="Public">
-    <value>  ‑terminalLogger[:auto,on,off]
-                      Users are able to opt-in and use the TerminalLogger.
-                      Specify auto (or use the option without arguments) to use
-                      the terminal logger only if the standard output is not
-                      redirected.
-                      EXCEPT when:
-                      - The terminal does not support ANSI codes or color
-                      - Output is redirected to a file or pipe
-                      (Short form: -tl)
+    <value>  -terminalLogger[:auto,on,off]
+                     Users are able to opt-in and use the TerminalLogger.
+                     Specify auto (or use the option without arguments) to
+                     use the terminal logger only if the standard output
+                     is not redirected.
+                     EXCEPT when:
+                     - The terminal does not support ANSI codes or color
+                     - Output is redirected to a file or pipe
+                     (Short form: -tl)
     </value>
     <comment>
       LOCALIZATION: "-terminalLogger" and "-tl" should not be localized.
@@ -1007,10 +1007,10 @@
   <data name="HelpMessage_48_TerminalLoggerParametersSwitch" Visibility="Public">
     <value>  -terminalLoggerParameters:default=[true|false|on|off|auto]
                       Users are able to opt-in and use the TerminalLogger.
-                      - `on`, `true`  forces TerminalLogger to be used even when it
-                      would be disabled.
-                      - `off`, `false` forces TerminalLogger to not be used even when
-                      it would be enabled.
+                      - `on`, `true`  forces TerminalLogger to be used even when
+                      it would be disabled.
+                      - `off`, `false` forces TerminalLogger to not be used even
+                      when it would be enabled.
                       - `auto` enables TerminalLogger when the terminal supports
                       it and the session doesn't have redirected stdout/stderr
                       (Short form: -tlp)
