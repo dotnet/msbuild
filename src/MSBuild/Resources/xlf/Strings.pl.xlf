@@ -218,11 +218,11 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_48_TerminalLoggerParametersSwitch">
-        <source>  -terminalLoggerParameters:default=[auto|false|true]
+        <source>  -terminalLoggerParameters:default=[true|false|on|off|auto]
                       Users are able to opt-in and use the TerminalLogger.
-                      - `true` forces TerminalLogger to be used even when it
+                      - `on`, `true`  forces TerminalLogger to be used even when it
                       would be disabled.
-                      - `false` forces TerminalLogger to not be used even when
+                      - `off`, `false` forces TerminalLogger to not be used even when
                       it would be enabled.
                       - `auto` enables TerminalLogger when the terminal supports
                       it and the session doesn't have redirected stdout/stderr
@@ -230,11 +230,11 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                       Example:
                         -terminalLoggerParameters:default=auto
     </source>
-        <target state="new">  -terminalLoggerParameters:default=[auto|false|true]
+        <target state="new">  -terminalLoggerParameters:default=[true|false|on|off|auto]
                       Users are able to opt-in and use the TerminalLogger.
-                      - `true` forces TerminalLogger to be used even when it
+                      - `on`, `true`  forces TerminalLogger to be used even when it
                       would be disabled.
-                      - `false` forces TerminalLogger to not be used even when
+                      - `off`, `false` forces TerminalLogger to not be used even when
                       it would be enabled.
                       - `auto` enables TerminalLogger when the terminal supports
                       it and the session doesn't have redirected stdout/stderr
@@ -244,20 +244,6 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
     </target>
         <note>
       LOCALIZATION: "-terminalLoggerParameters"  and "-tlp" should not be localized.
-      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
-    </note>
-      </trans-unit>
-      <trans-unit id="HelpMessage_49_WaitForDebuggerSwitch">
-        <source>  -waitForDebugger
-                      Wait for debugger command line switch in Debug build.
-                      (Short form: -wfd)
-    </source>
-        <target state="new">  -waitForDebugger
-                      Wait for debugger command line switch in Debug build.
-                      (Short form: -wfd)
-    </target>
-        <note>
-      LOCALIZATION: "-waitForDebugger" and "-wfd" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
