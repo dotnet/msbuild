@@ -265,7 +265,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Ask the task host to find its task in the registry and get it ready for initializing the batch
         /// </summary>
-        /// <returns>The task requirements if the task is found, null otherwise.</returns>
+        /// <returns>The task requirements and task factory wrapper if the task is found, (null, null) otherwise.</returns>
         public (TaskRequirements? requirements, TaskFactoryWrapper taskFactoryWrapper) FindTask(IDictionary<string, string> taskIdentityParameters)
         {
             _taskFactoryWrapper ??= FindTaskInRegistry(taskIdentityParameters);
@@ -917,7 +917,7 @@ namespace Microsoft.Build.BackEnd
                     returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(CallTarget)), new LoadedType(typeof(CallTarget), AssemblyLoadInfo.Create(taskExecutionHostAssembly.FullName, null), taskExecutionHostAssembly, typeof(ITaskItem)), _taskName, null);
                     _intrinsicTasks[_taskName] = returnClass;
                 }
-            } 
+            }
 
             return returnClass;
         }
@@ -942,17 +942,11 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     TaskFactoryLoggingHost loggingHost = new TaskFactoryLoggingHost(_buildEngine.IsRunningMultipleNodes, _taskLocation, _taskLoggingContext);
-                    ITaskFactory2 taskFactory2 = _taskFactoryWrapper.TaskFactory as ITaskFactory2;
                     try
                     {
-                        if (taskFactory2 == null)
-                        {
-                            task = _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
-                        }
-                        else
-                        {
-                            task = taskFactory2.CreateTask(loggingHost, taskIdentityParameters);
-                        }
+                        task = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
+                            taskFactory2.CreateTask(loggingHost, taskIdentityParameters) :
+                            _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
                     }
                     finally
                     {
