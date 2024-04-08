@@ -70,6 +70,13 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         private readonly BuildEventsProcessor _buildEventsProcessor;
         private readonly BuildCheckAcquisitionModule _acquisitionModule = new();
 
+        internal BuildCheckManager(ILoggingService loggingService)
+        {
+            _analyzersRegistry = new List<BuildAnalyzerFactoryContext>();
+            _loggingService = loggingService;
+            _buildEventsProcessor = new(_buildCheckCentralContext);
+        }
+
         private bool IsInProcNode => _enabledDataSources[(int)BuildCheckDataSource.EventArgs] &&
                                      _enabledDataSources[(int)BuildCheckDataSource.BuildExecution];
 
@@ -91,7 +98,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         {
             if (IsInProcNode)
             {
-                var factory = _acquisitionModule.CreateBuildAnalyzerFactory(acquisitionData);
+                BuildAnalyzerFactory? factory = _acquisitionModule.CreateBuildAnalyzerFactory(acquisitionData);
                 if (factory != null)
                 {
                     RegisterCustomAnalyzer(BuildCheckDataSource.EventArgs, factory);
@@ -113,13 +120,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             }
         }
 
-        internal BuildCheckManager(ILoggingService loggingService)
-        {
-            _loggingService = loggingService;
-            _buildEventsProcessor = new(_buildCheckCentralContext);
-        }
-
         private static T Construct<T>() where T : new() => new();
+
         private static readonly (string[] ruleIds, bool defaultEnablement, BuildAnalyzerFactory factory)[][] s_builtInFactoriesPerDataSource =
         [
             // BuildCheckDataSource.EventArgs
@@ -164,7 +166,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             if (_enabledDataSources[(int)buildCheckDataSource])
             {
                 var instance = factory();
-                _analyzersRegistry.Add(new BuildAnalyzerFactoryContext(factory,
+                _analyzersRegistry.Add(new BuildAnalyzerFactoryContext(
+                    factory,
                     instance.SupportedRules.Select(r => r.Id).ToArray(),
                     instance.SupportedRules.Any(r => r.DefaultConfiguration.IsEnabled == true)));
             }
