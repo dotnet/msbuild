@@ -3,22 +3,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Diagnostics.Tracing;
-using System.IO;
 using System.Linq;
-using System.Runtime.ConstrainedExecution;
 using System.Threading;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BuildCheck.Acquisition;
 using Microsoft.Build.BuildCheck.Analyzers;
 using Microsoft.Build.BuildCheck.Logging;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -33,9 +24,9 @@ internal delegate BuildAnalyzerWrapper BuildAnalyzerWrapperFactory(Configuration
 /// </summary>
 internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 {
-    private static int s_isInitialized = 0;
-    private static IBuildCheckManager s_globalInstance = new NullBuildCheckManager();
-    internal static IBuildCheckManager GlobalInstance => s_isInitialized != 0 ? s_globalInstance : throw new InvalidOperationException("BuildCheckManagerProvider not initialized");
+    private static IBuildCheckManager? s_globalInstance;
+
+    internal static IBuildCheckManager GlobalInstance => s_globalInstance ?? throw new InvalidOperationException("BuildCheckManagerProvider not initialized");
 
     public IBuildCheckManager Instance => GlobalInstance;
 
@@ -49,31 +40,32 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
     {
         ErrorUtilities.VerifyThrow(host != null, "BuildComponentHost was null");
 
-        if (Interlocked.CompareExchange(ref s_isInitialized, 1, 0) == 1)
+        if (s_globalInstance == null)
         {
-            // Initialization code already run(ing)
-            return;
-        }
+            IBuildCheckManager instance;
+            if (host!.BuildParameters.IsBuildCheckEnabled)
+            {
+                instance = new BuildCheckManager(host.LoggingService);
+            }
+            else
+            {
+                instance = new NullBuildCheckManager();
+            }
 
-        if (host!.BuildParameters.IsBuildCheckEnabled)
-        {
-            s_globalInstance = new BuildCheckManager(host.LoggingService);
-        }
-        else
-        {
-            s_globalInstance = new NullBuildCheckManager();
+            // We are fine with the possibility of double creation here - as the construction is cheap
+            //  and without side effects and the actual backing field is effectively immutable after the first assignment.
+            Interlocked.CompareExchange(ref s_globalInstance, instance, null);
         }
     }
 
     public void ShutdownComponent() => GlobalInstance.Shutdown();
-
 
     private sealed class BuildCheckManager : IBuildCheckManager
     {
         private readonly TracingReporter _tracingReporter = new TracingReporter();
         private readonly BuildCheckCentralContext _buildCheckCentralContext = new();
         private readonly ILoggingService _loggingService;
-        private readonly List<BuildAnalyzerFactoryContext> _analyzersRegistry =[];
+        private readonly List<BuildAnalyzerFactoryContext> _analyzersRegistry;
         private readonly bool[] _enabledDataSources = new bool[(int)BuildCheckDataSource.ValuesCount];
         private readonly BuildEventsProcessor _buildEventsProcessor;
         private readonly BuildCheckAcquisitionModule _acquisitionModule = new();
@@ -100,7 +92,10 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             if (IsInProcNode)
             {
                 var factory = _acquisitionModule.CreateBuildAnalyzerFactory(acquisitionData);
-                RegisterCustomAnalyzer(BuildCheckDataSource.EventArgs, factory);
+                if (factory != null)
+                {
+                    RegisterCustomAnalyzer(BuildCheckDataSource.EventArgs, factory);
+                }
             }
             else
             {

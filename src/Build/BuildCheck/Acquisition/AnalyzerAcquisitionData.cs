@@ -10,7 +10,7 @@ using Microsoft.Build.Experimental.BuildCheck;
 
 namespace Microsoft.Build.BuildCheck.Acquisition;
 
-// https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=52643036
+// https://github.com/dotnet/msbuild/issues/9633
 // Acquisition
 //  define the data that will be passed to the acquisition module (and remoted if needed)
 internal class AnalyzerAcquisitionData(string assemblyPath)

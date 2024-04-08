@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -13,7 +12,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation.Context;
@@ -319,7 +317,6 @@ namespace Microsoft.Build.Evaluation
         /// Non-null if the expander was constructed for evaluation.
         /// </summary>
         internal EvaluationContext EvaluationContext { get; }
-
 
         /// <summary>
         /// Creates an expander passing it some properties to use.

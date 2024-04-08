@@ -3,101 +3,107 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BuildCheck.Acquisition;
-using Microsoft.Build.BuildCheck.Logging;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.BuildCheck.Infrastructure;
-
-internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFactory loggingContextFactory, IBuildCheckManager buildCheckManager)
-    : ILogger
+namespace Microsoft.Build.BuildCheck.Infrastructure
 {
-    public LoggerVerbosity Verbosity { get; set; }
-
-    public string? Parameters { get; set; }
-
-    public void Initialize(IEventSource eventSource)
+    internal sealed class BuildCheckConnectorLogger : ILogger
     {
-        eventSource.AnyEventRaised += EventSource_AnyEventRaised;
-        eventSource.BuildFinished += EventSource_BuildFinished;
+        private readonly Dictionary<Type, Action<BuildEventArgs>> _eventHandlers;
+        private readonly IBuildCheckManager _buildCheckManager;
+        private readonly IBuildAnalysisLoggingContextFactory _loggingContextFactory;
+
+        internal BuildCheckConnectorLogger(
+            IBuildAnalysisLoggingContextFactory loggingContextFactory,
+            IBuildCheckManager buildCheckManager)
+        {
+            _buildCheckManager = buildCheckManager;
+            _loggingContextFactory = loggingContextFactory;
+            _eventHandlers = GetBuildEventHandlers();
+        }
+
+        public LoggerVerbosity Verbosity { get; set; }
+
+        public string? Parameters { get; set; }
+
+        public void Initialize(IEventSource eventSource)
+        {
+            eventSource.AnyEventRaised += EventSource_AnyEventRaised;
+            eventSource.BuildFinished += EventSource_BuildFinished;
+        }
+
+        public void Shutdown()
+        {
+        }
+
+        private void HandleProjectEvaluationEvent(ProjectEvaluationFinishedEventArgs eventArgs)
+        {
+            if (!IsMetaProjFile(eventArgs.ProjectFile))
+            {
+                try
+                {
+                    _buildCheckManager.ProcessEvaluationFinishedEventArgs(_loggingContextFactory.CreateLoggingContext(eventArgs.BuildEventContext!), eventArgs);
+                }
+                catch (Exception exception)
+                {
+                    Console.WriteLine(exception);
+                    throw;
+                }
+
+                _buildCheckManager.EndProjectEvaluation(BuildCheckDataSource.EventArgs, eventArgs.BuildEventContext!);
+            }
+        }
+
+        private void HandleProjectEvaluationStartedEvent(ProjectEvaluationStartedEventArgs eventArgs)
+        {
+            if (!IsMetaProjFile(eventArgs.ProjectFile))
+            {
+                _buildCheckManager.StartProjectEvaluation(BuildCheckDataSource.EventArgs, eventArgs.BuildEventContext!, eventArgs.ProjectFile!);
+            }
+        }
+
+        private bool IsMetaProjFile(string? projectFile) => !string.IsNullOrEmpty(projectFile) && projectFile!.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
+
+        private void EventSource_AnyEventRaised(object sender, BuildEventArgs e)
+        {
+            if (_eventHandlers.TryGetValue(e.GetType(), out Action<BuildEventArgs>? handler))
+            {
+                handler(e);
+            }
+        }
+
+        private readonly Dictionary<string, TimeSpan> _stats = new Dictionary<string, TimeSpan>();
+
+        private void EventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
+        {
+            _stats.Merge(_buildCheckManager.CreateTracingStats(), (span1, span2) => span1 + span2);
+            string msg = string.Join(Environment.NewLine, _stats.Select(a => a.Key + ": " + a.Value));
+
+            BuildEventContext buildEventContext = e.BuildEventContext
+                ?? new BuildEventContext(
+                    BuildEventContext.InvalidNodeId,
+                    BuildEventContext.InvalidTargetId,
+                    BuildEventContext.InvalidProjectContextId,
+                    BuildEventContext.InvalidTaskId);
+
+            LoggingContext loggingContext = _loggingContextFactory.CreateLoggingContext(buildEventContext);
+
+            // Tracing: https://github.com/dotnet/msbuild/issues/9629
+            loggingContext.LogCommentFromText(MessageImportance.High, msg);
+        }
+
+        private Dictionary<Type, Action<BuildEventArgs>> GetBuildEventHandlers() => new()
+        {
+            { typeof(ProjectEvaluationFinishedEventArgs), (BuildEventArgs e) => HandleProjectEvaluationEvent((ProjectEvaluationFinishedEventArgs) e) },
+            { typeof(ProjectEvaluationStartedEventArgs), (BuildEventArgs e) => HandleProjectEvaluationStartedEvent((ProjectEvaluationStartedEventArgs) e) },
+            { typeof(ProjectStartedEventArgs), (BuildEventArgs e) => _buildCheckManager.StartProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!) },
+            { typeof(ProjectFinishedEventArgs), (BuildEventArgs e) => _buildCheckManager.EndProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!) },
+            { typeof(BuildCheckTracingEventArgs), (BuildEventArgs e) => _stats.Merge(((BuildCheckTracingEventArgs)e).TracingData, (span1, span2) => span1 + span2) },
+            { typeof(BuildCheckAcquisitionEventArgs), (BuildEventArgs e) => _buildCheckManager.ProcessAnalyzerAcquisition(((BuildCheckAcquisitionEventArgs)e).ToAnalyzerAcquisitionData()) },
+        };
     }
-
-    private void EventSource_AnyEventRaised(object sender, BuildEventArgs e)
-    {
-        if (e is ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs)
-        {
-            if (projectEvaluationFinishedEventArgs.ProjectFile?.EndsWith(".metaproj") ?? false)
-            {
-                return;
-            }
-
-            try
-            {
-                buildCheckManager.ProcessEvaluationFinishedEventArgs(
-                    loggingContextFactory.CreateLoggingContext(e.BuildEventContext!),
-                    projectEvaluationFinishedEventArgs);
-            }
-            catch (Exception exception)
-            {
-                Debugger.Launch();
-                Console.WriteLine(exception);
-                throw;
-            }
-
-            buildCheckManager.EndProjectEvaluation(BuildCheckDataSource.EventArgs, e.BuildEventContext!);
-        }
-        else if (e is ProjectEvaluationStartedEventArgs projectEvaluationStartedEventArgs)
-        {
-            if (projectEvaluationStartedEventArgs.ProjectFile?.EndsWith(".metaproj") ?? false)
-            {
-                return;
-            }
-
-            buildCheckManager.StartProjectEvaluation(BuildCheckDataSource.EventArgs, e.BuildEventContext!, projectEvaluationStartedEventArgs.ProjectFile!);
-        }
-        else if (e is ProjectStartedEventArgs projectStartedEvent)
-        {
-            buildCheckManager.StartProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!);
-        }
-        else if (e is ProjectFinishedEventArgs projectFinishedEventArgs)
-        {
-            buildCheckManager.EndProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!);
-        }
-        else if (e is BuildCheckEventArgs buildCheckBuildEventArgs)
-        {
-            if (buildCheckBuildEventArgs is BuildCheckTracingEventArgs tracingEventArgs)
-            {
-                _stats.Merge(tracingEventArgs.TracingData, (span1, span2) => span1 + span2);
-            }
-            else if (buildCheckBuildEventArgs is BuildCheckAcquisitionEventArgs acquisitionEventArgs)
-            {
-                buildCheckManager.ProcessAnalyzerAcquisition(acquisitionEventArgs.ToAnalyzerAcquisitionData());
-            }
-        }
-    }
-
-    private readonly Dictionary<string, TimeSpan> _stats = new Dictionary<string, TimeSpan>();
-
-    private void EventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
-    {
-        _stats.Merge(buildCheckManager.CreateTracingStats(), (span1, span2) => span1 + span2);
-        string msg = string.Join(Environment.NewLine, _stats.Select(a => a.Key + ": " + a.Value));
-
-
-        BuildEventContext buildEventContext = e.BuildEventContext ?? new BuildEventContext(
-            BuildEventContext.InvalidNodeId, BuildEventContext.InvalidTargetId,
-            BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
-
-        LoggingContext loggingContext = loggingContextFactory.CreateLoggingContext(buildEventContext);
-
-        // Tracing: https://github.com/dotnet/msbuild/issues/9629
-        loggingContext.LogCommentFromText(MessageImportance.High, msg);
-    }
-
-    public void Shutdown()
-    { }
 }

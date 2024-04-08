@@ -311,6 +311,7 @@ namespace Microsoft.Build.BackEnd.Logging
             StatusEventRaised = null;
             AnyEventRaised = null;
             TelemetryLogged = null;
+            BuildCheckEventRaised = null;
         }
 
         #endregion

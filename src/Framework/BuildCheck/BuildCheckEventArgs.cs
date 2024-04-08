@@ -60,7 +60,7 @@ internal sealed class BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> tr
     }
 }
 
-public sealed class BuildCheckAcquisitionEventArgs(string acquisitionPath) : BuildCheckEventArgs
+internal sealed class BuildCheckAcquisitionEventArgs(string acquisitionPath) : BuildCheckEventArgs
 {
     internal BuildCheckAcquisitionEventArgs()
         : this(string.Empty)

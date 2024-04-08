@@ -2,13 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
-using System.Configuration.Assemblies;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Build.BuildCheck.Analyzers;
 using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Shared;
@@ -21,7 +16,7 @@ namespace Microsoft.Build.BuildCheck.Acquisition
         /// <summary>
         /// AssemblyContextLoader used to load DLLs outside of msbuild.exe directory
         /// </summary>
-        private static readonly CoreClrAssemblyLoader s_coreClrAssemblyLoader = new CoreClrAssemblyLoader();
+        private static readonly CoreClrAssemblyLoader s_coreClrAssemblyLoader = new();
 #endif
         public BuildAnalyzerFactory? CreateBuildAnalyzerFactory(AnalyzerAcquisitionData analyzerAcquisitionData)
         {
@@ -38,12 +33,9 @@ namespace Microsoft.Build.BuildCheck.Acquisition
 
                 if (analyzerType != null)
                 {
-                    return () =>
-                    {
-                        return Activator.CreateInstance(analyzerType) is not BuildAnalyzer instance
+                    return () => Activator.CreateInstance(analyzerType) is not BuildAnalyzer instance
                             ? throw new InvalidOperationException($"Failed to create an instance of type {analyzerType.FullName} as BuildAnalyzer.")
                             : instance;
-                    };
                 }
             }
             catch (ReflectionTypeLoadException ex)
@@ -52,6 +44,7 @@ namespace Microsoft.Build.BuildCheck.Acquisition
                 {
                     foreach (Exception? loaderException in ex.LoaderExceptions)
                     {
+                        // How do we plan to handle these errors?
                         Console.WriteLine(loaderException?.Message ?? "Unknown error occurred.");
                     }
                 }

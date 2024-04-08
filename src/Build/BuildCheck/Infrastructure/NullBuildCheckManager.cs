@@ -3,9 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BuildCheck.Acquisition;
 using Microsoft.Build.BuildCheck.Logging;
@@ -20,11 +17,15 @@ internal class NullBuildCheckManager : IBuildCheckManager
     {
     }
 
-    public void ProcessEvaluationFinishedEventArgs(IBuildAnalysisLoggingContext buildAnalysisContext, ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs)
+    public void ProcessEvaluationFinishedEventArgs(
+        AnalyzerLoggingContext buildAnalysisContext,
+        ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs)
     {
     }
 
-    public void SetDataSource(BuildCheckDataSource buildCheckDataSource) { }
+    public void SetDataSource(BuildCheckDataSource buildCheckDataSource)
+    {
+    }
 
     public void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData) { }
 

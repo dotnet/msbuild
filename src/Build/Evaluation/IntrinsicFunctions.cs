@@ -3,17 +3,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Text.RegularExpressions;
-using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -32,7 +28,7 @@ namespace Microsoft.Build.Evaluation
 {
     /// <summary>
     /// The Intrinsic class provides static methods that can be accessed from MSBuild's
-    /// property functions using $([MSBuild]::Function(x,y))
+    /// property functions using $([MSBuild]::Function(x,y)).
     /// </summary>
     internal static class IntrinsicFunctions
     {

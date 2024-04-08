@@ -33,8 +33,12 @@ namespace Microsoft.Build.BackEnd.Components.Logging
         }
 
         /// <summary>
-        /// Log that the project has finished
+        /// Logs that the project evaluation has finished.
         /// </summary>
+        /// <param name="globalProperties">Global properties used in the project evaluation.</param>
+        /// <param name="properties">Properties used in the project evaluation.</param>
+        /// <param name="items">Items used in the project evaluation.</param>
+        /// <param name="profilerResult">Parameter contains the profiler result of the project evaluation.</param>
         internal void LogProjectEvaluationFinished(IEnumerable globalProperties, IEnumerable properties, IEnumerable items, ProfilerResult? profilerResult)
         {
             ErrorUtilities.VerifyThrow(IsValid, "invalid");
