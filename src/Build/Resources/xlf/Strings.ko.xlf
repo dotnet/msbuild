@@ -596,6 +596,11 @@ Errors: {3}</source>
         <target state="translated">{0}{1} 동안 로드된 어셈블리: {2}(위치: {3}, MVID: {4}, AssemblyLoadContext: {5})</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskAssemblyLocationMismatch">
+        <source>Assembly mismatch detected. The loaded assembly location '{0}' does not match the expected assembly location '{1}'.</source>
+        <target state="new">Assembly mismatch detected. The loaded assembly location '{0}' does not match the expected assembly location '{1}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">"{0}" 작업에서 코어 {1}개를 해제했고 지금 총 {2}개의 코어를 보유하고 있습니다.</target>
