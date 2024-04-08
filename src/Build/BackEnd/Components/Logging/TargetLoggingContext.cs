@@ -109,11 +109,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Log that a task is about to start
         /// </summary>
-        internal TaskLoggingContext LogTaskBatchStarted(string projectFullPath, ProjectTargetInstanceChild task, string taskAssemblyName)
+        internal TaskLoggingContext LogTaskBatchStarted(string projectFullPath, ProjectTargetInstanceChild task, string taskAssemblyLocation)
         {
             ErrorUtilities.VerifyThrow(IsValid, "Should be valid");
 
-            return new TaskLoggingContext(this, projectFullPath, task, taskAssemblyName);
+            return new TaskLoggingContext(this, projectFullPath, task, taskAssemblyLocation);
         }
 
         /// <summary>

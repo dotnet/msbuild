@@ -58,15 +58,15 @@ namespace Microsoft.Build.Framework
         /// <param name="projectFile">project file</param>
         /// <param name="taskFile">file in which the task is defined</param>
         /// <param name="taskName">task name</param>
-        /// <param name="taskAssemblyName">An assembly's unique identity where the task is implemented</param>
+        /// <param name="taskAssemblyLocation">The location of the assembly containing the implementation of the task.</param>
         public TaskStartedEventArgs(
             string message,
             string helpKeyword,
             string projectFile,
             string taskFile,
             string taskName,
-            string taskAssemblyName)
-            : this(message, helpKeyword, projectFile, taskFile, taskName, DateTime.UtcNow, taskAssemblyName)
+            string taskAssemblyLocation)
+            : this(message, helpKeyword, projectFile, taskFile, taskName, DateTime.UtcNow, taskAssemblyLocation)
         {
         }
 
@@ -104,7 +104,7 @@ namespace Microsoft.Build.Framework
         /// <param name="taskFile">file in which the task is defined</param>
         /// <param name="taskName">task name</param>
         /// <param name="eventTimestamp">Timestamp when event was created</param>
-        /// <param name="taskAssemblyName">An assembly's unique identity where the task is implemented</param>
+        /// <param name="taskAssemblyLocation">The location of the assembly containing the implementation of the task.</param>
         public TaskStartedEventArgs(
             string message,
             string helpKeyword,
@@ -112,13 +112,13 @@ namespace Microsoft.Build.Framework
             string taskFile,
             string taskName,
             DateTime eventTimestamp,
-            string taskAssemblyName)
+            string taskAssemblyLocation)
             : base(message, helpKeyword, "MSBuild", eventTimestamp)
         {
             this.taskName = taskName;
             this.projectFile = projectFile;
             this.taskFile = taskFile;
-            TaskAssemblyName = taskAssemblyName;
+            TaskAssemblyLocation = taskAssemblyLocation;
         }
         
         private string taskName;
@@ -139,7 +139,7 @@ namespace Microsoft.Build.Framework
             writer.WriteOptionalString(taskFile);
             writer.Write7BitEncodedInt(LineNumber);
             writer.Write7BitEncodedInt(ColumnNumber);
-            writer.WriteOptionalString(TaskAssemblyName);
+            writer.WriteOptionalString(TaskAssemblyLocation);
         }
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace Microsoft.Build.Framework
             taskFile = reader.ReadOptionalString();
             LineNumber = reader.Read7BitEncodedInt();
             ColumnNumber = reader.Read7BitEncodedInt();
-            TaskAssemblyName = reader.ReadOptionalString();
+            TaskAssemblyLocation = reader.ReadOptionalString();
         }
         #endregion
 
@@ -186,9 +186,9 @@ namespace Microsoft.Build.Framework
         public int ColumnNumber { get; internal set; }
 
         /// <summary>
-        /// Full name of the assembly that implements the task
+        /// The location of the assembly containing the implementation of the task
         /// </summary>
-        public string TaskAssemblyName { get; private set; }
+        public string TaskAssemblyLocation { get; private set; }
 
         public override string Message
         {

@@ -688,9 +688,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="taskName">Task Name</param>
         /// <param name="projectFile">Project file being built</param>
         /// <param name="projectFileOfTaskNode">Project file which contains the task</param>
-        /// <param name="taskAssemblyName">An assembly's unique identity where the task is implemented</param>
+        /// <param name="taskAssemblyLocation">>The location of the assembly containing the implementation of the task.</param>
         /// <exception cref="InternalErrorException">BuildEventContext is null</exception>
-        public void LogTaskStarted(BuildEventContext taskBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, string taskAssemblyName)
+        public void LogTaskStarted(BuildEventContext taskBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, string taskAssemblyLocation)
         {
             ErrorUtilities.VerifyThrow(taskBuildEventContext != null, "targetBuildEventContext is null");
             if (!OnlyLogCriticalEvents)
@@ -701,7 +701,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         projectFile,
                         projectFileOfTaskNode,
                         taskName,
-                        taskAssemblyName);
+                        taskAssemblyLocation);
                 buildEvent.BuildEventContext = taskBuildEventContext;
                 ProcessLoggingEvent(buildEvent);
             }
@@ -716,10 +716,10 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="projectFileOfTaskNode">Project file which contains the task</param>
         /// <param name="line">The line number in the file where the task invocation is located.</param>
         /// <param name="column">The column number in the file where the task invocation is located.</param>
-        /// <param name="taskAssemblyName">An assembly's unique identity where the task is implemented</param>
+        /// <param name="taskAssemblyLocation">>The location of the assembly containing the implementation of the task.</param>
         /// <returns>The build event context for the task.</returns>
         /// <exception cref="InternalErrorException">BuildEventContext is null</exception>
-        public BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column, string taskAssemblyName)
+        public BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column, string taskAssemblyLocation)
         {
             ErrorUtilities.VerifyThrow(targetBuildEventContext != null, "targetBuildEventContext is null");
             BuildEventContext taskBuildEventContext = new BuildEventContext(
@@ -738,7 +738,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         projectFile,
                         projectFileOfTaskNode,
                         taskName,
-                        taskAssemblyName);
+                        taskAssemblyLocation);
                 buildEvent.BuildEventContext = taskBuildEventContext;
                 buildEvent.LineNumber = line;
                 buildEvent.ColumnNumber = column;

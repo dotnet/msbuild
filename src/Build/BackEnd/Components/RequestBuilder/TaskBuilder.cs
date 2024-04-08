@@ -424,11 +424,11 @@ namespace Microsoft.Build.BackEnd
                     // We need to find the task before logging the task started event so that the using task statement comes before the task started event
                     IDictionary<string, string> taskIdentityParameters = GatherTaskIdentityParameters(bucket.Expander);
                     (TaskRequirements? requirements, TaskFactoryWrapper taskFactoryWrapper) = _taskExecutionHost.FindTask(taskIdentityParameters);
-                    string taskAssemblyName = taskFactoryWrapper?.TaskFactoryLoadedType?.LoadedAssemblyName?.FullName;
+                    string taskAssemblyLocation = taskFactoryWrapper?.TaskFactoryLoadedType?.Assembly.AssemblyLocation;
 
                     if (requirements != null)
                     {
-                        TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance, taskAssemblyName);
+                        TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance, taskAssemblyLocation);
                         MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
                         _buildRequestEntry.Request.CurrentTaskContext = taskLoggingContext.BuildEventContext;
 

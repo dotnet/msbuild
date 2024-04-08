@@ -408,7 +408,7 @@ namespace Microsoft.Build.Logging
             WriteDeduplicatedString(e.TaskName);
             WriteDeduplicatedString(e.ProjectFile);
             WriteDeduplicatedString(e.TaskFile);
-            WriteDeduplicatedString(e.TaskAssemblyName);
+            WriteDeduplicatedString(e.TaskAssemblyLocation);
 
             return BinaryLogRecordKind.TaskStarted;
         }

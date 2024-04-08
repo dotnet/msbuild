@@ -193,7 +193,7 @@ namespace Microsoft.Build.UnitTests
                 taskFile: "C:\\common.targets",
                 taskName: "Csc",
                 DateTime.Now,
-                "TaskAssemblyName");
+                "TaskAssemblyLocation");
             args.LineNumber = 42;
             args.ColumnNumber = 999;
 
@@ -203,7 +203,7 @@ namespace Microsoft.Build.UnitTests
                 e => e.TaskName,
                 e => e.LineNumber.ToString(),
                 e => e.ColumnNumber.ToString(),
-                e => e.TaskAssemblyName);
+                e => e.TaskAssemblyLocation);
         }
 
         [Fact]

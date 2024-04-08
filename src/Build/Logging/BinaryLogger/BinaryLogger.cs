@@ -70,7 +70,7 @@ namespace Microsoft.Build.Logging
         // version 19:
         //   - GeneratedFileUsedEventArgs exposed for brief period of time (so let's continue with 20)
         // version 20:
-        //   - TaskStartedEventArgs: Added TaskAssemblyName property
+        //   - TaskStartedEventArgs: Added TaskAssemblyLocation property
 
         // This should be never changed.
         // The minimum version of the binary log reader that can read log of above version.
