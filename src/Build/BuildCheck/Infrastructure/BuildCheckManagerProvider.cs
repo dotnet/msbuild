@@ -25,7 +25,7 @@ internal delegate BuildAnalyzerWrapper BuildAnalyzerWrapperFactory(Configuration
 internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 {
     private static IBuildCheckManager? s_globalInstance;
-
+  
     internal static IBuildCheckManager GlobalInstance => s_globalInstance ?? throw new InvalidOperationException("BuildCheckManagerProvider not initialized");
 
     public IBuildCheckManager Instance => GlobalInstance;
