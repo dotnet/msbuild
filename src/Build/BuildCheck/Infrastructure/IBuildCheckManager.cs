@@ -36,7 +36,6 @@ internal interface IBuildCheckManager
     void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData);
 
     Dictionary<string, TimeSpan> CreateAnalyzerTracingStats();
-    Dictionary<string, TimeSpan> CreateBuildCheckInfraTracingStats();
 
     void FinalizeProcessing(LoggingContext loggingContext);
 

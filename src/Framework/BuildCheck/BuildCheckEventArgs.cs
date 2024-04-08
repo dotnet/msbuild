@@ -20,8 +20,6 @@ public sealed class BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> trac
     internal BuildCheckTracingEventArgs() : this(new Dictionary<string, TimeSpan>())
     { }
 
-    internal bool isInfraTracing = false;
-
     public Dictionary<string, TimeSpan> TracingData { get; private set; } = tracingData;
 
     internal override void WriteToStream(BinaryWriter writer)

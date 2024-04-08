@@ -303,17 +303,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             return _tracingReporter.TracingStats;
         }
 
-        public Dictionary<string, TimeSpan> CreateBuildCheckInfraTracingStats()
-        {
-            Dictionary<string, TimeSpan> infraTime = new Dictionary<string, TimeSpan>
-            {
-                { "analyzerAcquisitionTime", _tracingReporter.analyzerAcquisitionTime },
-                { "analyzerSetDataSourceTime", new TimeSpan(_tracingReporter.analyzerSetDataSourceTime) },
-                { "newProjectAnalyzersTime", new TimeSpan(_tracingReporter.newProjectAnalyzersTime) }
-            };
-
-            return infraTime;
-        }
+        
 
         public void FinalizeProcessing(LoggingContext loggingContext)
         {
@@ -322,14 +312,19 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 // We do not want to send tracing stats from in-proc node
                 return;
             }
+            string infraStatPrefix = "infrastructureStat_";
+
+            var analyzerEventStats = CreateAnalyzerTracingStats();
+            var infraStats = new Dictionary<string, TimeSpan>() {
+                { $"{infraStatPrefix}analyzerAcquisitionTime", _tracingReporter.analyzerAcquisitionTime },
+                { $"{infraStatPrefix}analyzerSetDataSourceTime", new TimeSpan(_tracingReporter.analyzerSetDataSourceTime) },
+                { $"{infraStatPrefix}newProjectAnalyzersTime", new TimeSpan(_tracingReporter.newProjectAnalyzersTime) }
+            };
+            analyzerEventStats.Merge(infraStats, (span1, span2) => span1 + span2);
 
             BuildCheckTracingEventArgs analyzerEventArg =
-                new(CreateAnalyzerTracingStats()) { BuildEventContext = loggingContext.BuildEventContext };
+                new(analyzerEventStats) { BuildEventContext = loggingContext.BuildEventContext };
             loggingContext.LogBuildEvent(analyzerEventArg);
-
-            BuildCheckTracingEventArgs infraEventStats =
-                new(CreateBuildCheckInfraTracingStats()) { BuildEventContext = loggingContext.BuildEventContext };
-            loggingContext.LogBuildEvent(infraEventStats);
         }
 
         public void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext,

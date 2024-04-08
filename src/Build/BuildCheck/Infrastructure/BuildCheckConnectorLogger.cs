@@ -75,14 +75,7 @@ internal sealed class BuildCheckConnectorLogger(
         {
             if (buildCheckBuildEventArgs is BuildCheckTracingEventArgs tracingEventArgs)
             {
-                if (tracingEventArgs.isInfraTracing)
-                {
-                    _statsInfra.Merge(tracingEventArgs.TracingData, (span1, span2) => span1 + span2);
-                }
-                else
-                {
-                    _statsAnalyzers.Merge(tracingEventArgs.TracingData, (span1, span2) => span1 + span2);
-                }
+                _statsAnalyzers.Merge(tracingEventArgs.TracingData, (span1, span2) => span1 + span2);
             }
             else if (buildCheckBuildEventArgs is BuildCheckAcquisitionEventArgs acquisitionEventArgs)
             {
@@ -91,7 +84,6 @@ internal sealed class BuildCheckConnectorLogger(
         }
     }
 
-    private readonly Dictionary<string, TimeSpan> _statsInfra = new Dictionary<string, TimeSpan>();
     private readonly Dictionary<string, TimeSpan> _statsAnalyzers = new Dictionary<string, TimeSpan>();
 
     private void EventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
@@ -106,19 +98,35 @@ internal sealed class BuildCheckConnectorLogger(
         if (_areStatsEnabled)
         {
             _statsAnalyzers.Merge(buildCheckManager.CreateAnalyzerTracingStats(), (span1, span2) => span1 + span2);
-            _statsInfra.Merge(buildCheckManager.CreateBuildCheckInfraTracingStats(), (span1, span2) => span1 + span2);
-
             LogAnalyzerStats(loggingContext);
         }
     }
     
     private void LogAnalyzerStats(LoggingContext loggingContext)
     {
+        string infraStatPrefix = "infrastructureStat_";
+
+        Dictionary<string, TimeSpan> infraStats = new Dictionary<string, TimeSpan>();
+        Dictionary<string, TimeSpan> analyzerStats = new Dictionary<string, TimeSpan>();
+
+        foreach (var stat in _statsAnalyzers)
+        {
+            if (stat.Key.StartsWith(infraStatPrefix))
+            {
+                string newKey = stat.Key.Replace(infraStatPrefix, string.Empty);
+                infraStats[newKey] = stat.Value;
+            }
+            else
+            {
+                analyzerStats[stat.Key] = stat.Value;
+            }
+        }
+
         loggingContext.LogCommentFromText(MessageImportance.High, $"BuildCheck run times{Environment.NewLine}");
-        string infraData = buildStatsTable("Infrastructure run times", _statsInfra);
+        string infraData = buildStatsTable("Infrastructure run times", infraStats);
         loggingContext.LogCommentFromText(MessageImportance.High, infraData);
 
-        string analyzerData = buildStatsTable("Analyzer run times", _statsAnalyzers);
+        string analyzerData = buildStatsTable("Analyzer run times", analyzerStats);
         loggingContext.LogCommentFromText(MessageImportance.High, analyzerData);
     }
 
