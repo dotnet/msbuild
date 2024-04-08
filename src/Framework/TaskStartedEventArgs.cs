@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Reflection;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -152,12 +151,12 @@ namespace Microsoft.Build.Framework
         {
             base.CreateFromStream(reader, version);
 
-            taskName = reader.ReadByte() == 0 ? null : reader.ReadString();
-            projectFile = reader.ReadByte() == 0 ? null : reader.ReadString();
-            taskFile = reader.ReadByte() == 0 ? null : reader.ReadString();
+            taskName = reader.ReadOptionalString();
+            projectFile = reader.ReadOptionalString();
+            taskFile = reader.ReadOptionalString();
             LineNumber = reader.Read7BitEncodedInt();
             ColumnNumber = reader.Read7BitEncodedInt();
-            TaskAssemblyName = reader.ReadByte() == 0 ? null : reader.ReadString();
+            TaskAssemblyName = reader.ReadOptionalString();
         }
         #endregion
 

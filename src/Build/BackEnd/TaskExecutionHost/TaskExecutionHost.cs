@@ -917,7 +917,7 @@ namespace Microsoft.Build.BackEnd
                     returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(CallTarget)), new LoadedType(typeof(CallTarget), AssemblyLoadInfo.Create(taskExecutionHostAssembly.FullName, null), taskExecutionHostAssembly, typeof(ITaskItem)), _taskName, null);
                     _intrinsicTasks[_taskName] = returnClass;
                 }
-            }
+            } 
 
             return returnClass;
         }

@@ -806,7 +806,7 @@ namespace Microsoft.Build.Logging
             var taskName = ReadOptionalString();
             var projectFile = ReadOptionalString();
             var taskFile = ReadOptionalString();
-            var taskAssemblyNameString = ReadOptionalString();
+            var taskAssemblyNameString = _fileFormatVersion > 19 ? ReadOptionalString() : null;
 
             var e = new TaskStartedEventArgs(
                 fields.Message,
