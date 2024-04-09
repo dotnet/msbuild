@@ -15,13 +15,13 @@ namespace Microsoft.Build.BuildCheck.Infrastructure;
 internal sealed class BuildCheckConnectorLogger(
     IBuildAnalysisLoggingContextFactory loggingContextFactory, 
     IBuildCheckManager buildCheckManager,
-    bool isStatsEnabled)
+    bool areStatsEnabled)
     : ILogger
 {
     public LoggerVerbosity Verbosity { get; set; }
     public string? Parameters { get; set; }
 
-    private bool _areStatsEnabled = isStatsEnabled;
+    private bool _areStatsEnabled = areStatsEnabled;
 
     public void Initialize(IEventSource eventSource)
     {
@@ -97,7 +97,7 @@ internal sealed class BuildCheckConnectorLogger(
 
         if (_areStatsEnabled)
         {
-            _statsAnalyzers.Merge(buildCheckManager.CreateAnalyzerTracingStats(), (span1, span2) => span1 + span2);
+            _statsAnalyzers.Merge(buildCheckManager.CreateAnalyzerTracingStats()!, (span1, span2) => span1 + span2);
             LogAnalyzerStats(loggingContext);
         }
     }
@@ -123,14 +123,14 @@ internal sealed class BuildCheckConnectorLogger(
         }
 
         loggingContext.LogCommentFromText(MessageImportance.High, $"BuildCheck run times{Environment.NewLine}");
-        string infraData = buildStatsTable("Infrastructure run times", infraStats);
+        string infraData = BuildStatsTable("Infrastructure run times", infraStats);
         loggingContext.LogCommentFromText(MessageImportance.High, infraData);
 
-        string analyzerData = buildStatsTable("Analyzer run times", analyzerStats);
+        string analyzerData = BuildStatsTable("Analyzer run times", analyzerStats);
         loggingContext.LogCommentFromText(MessageImportance.High, analyzerData);
     }
 
-    private string buildStatsTable(string title, Dictionary<string, TimeSpan> rowData)
+    private string BuildStatsTable(string title, Dictionary<string, TimeSpan> rowData)
     {
         string headerSeparator = $"=============";
         string rowSeparator = $"{Environment.NewLine}----------{Environment.NewLine}";

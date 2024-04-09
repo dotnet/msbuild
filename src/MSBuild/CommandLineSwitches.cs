@@ -47,6 +47,7 @@ namespace Microsoft.Build.CommandLine
             FileLogger8,
             FileLogger9,
             DistributedFileLogger,
+            AnalyzeStats,
 #if DEBUG
             WaitForDebugger,
 #endif
@@ -100,7 +101,6 @@ namespace Microsoft.Build.CommandLine
             WarningsAsMessages,
             BinaryLogger,
             Analyze,
-            AnalyzeStats,
             Restore,
             ProfileEvaluation,
             RestoreProperty,
@@ -223,6 +223,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterlessSwitchInfo(  new string[] { "filelogger8", "fl8" },                     ParameterlessSwitch.FileLogger8,           null),
             new ParameterlessSwitchInfo(  new string[] { "filelogger9", "fl9" },                     ParameterlessSwitch.FileLogger9,           null),
             new ParameterlessSwitchInfo(  new string[] { "distributedfilelogger", "dfl" },           ParameterlessSwitch.DistributedFileLogger, null),
+            new ParameterlessSwitchInfo(  new string[] { "analyzeStats", "as" },                     ParameterlessSwitch.AnalyzeStats,          null),
 #if DEBUG
             new ParameterlessSwitchInfo(  new string[] { "waitfordebugger", "wfd" },                 ParameterlessSwitch.WaitForDebugger,       null),
 #endif
@@ -270,7 +271,6 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "warnasmessage", "nowarn" },           ParameterizedSwitch.WarningsAsMessages,         null,                           true,           "MissingWarnAsMessageParameterError",  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "binarylogger", "bl" },                ParameterizedSwitch.BinaryLogger,               null,                           false,          null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "analyze", "al" },                     ParameterizedSwitch.Analyze,                    null,                           false,          null,                                  true,   false),
-            new ParameterizedSwitchInfo(  new string[] { "analyzeStats", "as" },                ParameterizedSwitch.AnalyzeStats,               null,                           false,          null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "restore", "r" },                      ParameterizedSwitch.Restore,                    null,                           false,          null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "profileevaluation", "prof" },         ParameterizedSwitch.ProfileEvaluation,          null,                           false,          "MissingProfileParameterError",        true,   false),
             new ParameterizedSwitchInfo(  new string[] { "restoreproperty", "rp" },             ParameterizedSwitch.RestoreProperty,            null,                           true,           "MissingPropertyError",                true,   false),

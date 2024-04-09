@@ -46,6 +46,5 @@ internal class NullBuildCheckManager : IBuildCheckManager
     public void ResumeProject(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
     { }
 
-    public Dictionary<string, TimeSpan> CreateAnalyzerTracingStats() => throw new NotImplementedException();
-    public Dictionary<string, TimeSpan> CreateBuildCheckInfraTracingStats() => throw new NotImplementedException();
+    public Dictionary<string, TimeSpan> CreateAnalyzerTracingStats() => new Dictionary<string, TimeSpan>();
 }

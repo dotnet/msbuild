@@ -2742,7 +2742,7 @@ namespace Microsoft.Build.CommandLine
         private static bool AreBuildCheckStatsEnabled(CommandLineSwitches commandLineSwitches)
         {
             return commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Analyze) &&
-                commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.AnalyzeStats);
+                commandLineSwitches.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.AnalyzeStats);
         }
 
         private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)
