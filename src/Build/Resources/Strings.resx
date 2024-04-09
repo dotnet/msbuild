@@ -2098,4 +2098,11 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="TaskAssemblyLocationMismatch" xml:space="preserve">
     <value>Assembly mismatch detected. The loaded assembly location '{0}' does not match the expected assembly location '{1}'.</value>
   </data>
+  <!--
+        The Build message bucket is: MSB4000 - MSB4999
+
+        Next message code should be MSB4279
+
+        Don't forget to update this comment after using a new code.
+  -->
 </root>

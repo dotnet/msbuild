@@ -1090,7 +1090,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Throws<InternalErrorException>(() =>
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-                service.LogTaskStarted(null, "MyTask", "ProjectFile", "ProjectFileOfTask", null);
+                service.LogTaskStarted(taskBuildEventContext: null, "MyTask", "ProjectFile", "ProjectFileOfTask", taskAssemblyLocation: null);
             });
         }
 
