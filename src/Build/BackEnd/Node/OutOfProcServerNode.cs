@@ -430,6 +430,7 @@ namespace Microsoft.Build.Experimental
             _shutdownReason = _cancelRequested ? NodeEngineShutdownReason.BuildComplete : NodeEngineShutdownReason.BuildCompleteReuse;
             _shutdownEvent.Set();
         }
+
         internal sealed class RedirectConsoleWriter : StringWriter
         {
             private readonly Action<string> _writeCallback;
@@ -446,6 +447,7 @@ namespace Microsoft.Build.Experimental
             public static TextWriter Create(Action<string> writeCallback)
             {
                 RedirectConsoleWriter writer = new(writeCallback);
+
                 return writer._syncWriter;
             }
 

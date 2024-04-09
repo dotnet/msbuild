@@ -698,7 +698,11 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (IsCacheable)
                     {
-                        using ITranslator translator = GetConfigurationTranslator(TranslationDirection.WriteToStream);
+                        string cacheFile = GetCacheFile();
+                        Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
+
+                        using Stream stream = File.Create(cacheFile);
+                        using ITranslator translator = GetConfigurationTranslator(TranslationDirection.WriteToStream, stream, cacheFile);
 
                         _project.Cache(translator);
                         _baseLookup = null;
@@ -726,7 +730,9 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                using ITranslator translator = GetConfigurationTranslator(TranslationDirection.ReadFromStream);
+                string cacheFile = GetCacheFile();
+                using Stream stream = File.OpenRead(cacheFile);
+                using ITranslator translator = GetConfigurationTranslator(TranslationDirection.ReadFromStream, stream, cacheFile);
 
                 _project.RetrieveFromCache(translator);
 
@@ -1024,23 +1030,17 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets the translator for this configuration.
         /// </summary>
-        private ITranslator GetConfigurationTranslator(TranslationDirection direction)
+        private ITranslator GetConfigurationTranslator(TranslationDirection direction, Stream stream, string cacheFile)
         {
-            string cacheFile = GetCacheFile();
             try
             {
-                if (direction == TranslationDirection.WriteToStream)
-                {
-                    Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
-                    return BinaryTranslator.GetWriteTranslator(File.Create(cacheFile));
-                }
-                else
-                {
+                return direction == TranslationDirection.WriteToStream
+                    ? BinaryTranslator.GetWriteTranslator(stream)
+
                     // Not using sharedReadBuffer because this is not a memory stream and so the buffer won't be used anyway.
-                    return BinaryTranslator.GetReadTranslator(File.OpenRead(cacheFile), InterningBinaryReader.PoolingBuffer);
-                }
+                    : BinaryTranslator.GetReadTranslator(stream, InterningBinaryReader.PoolingBuffer);
             }
-            catch (Exception e) when (e is DirectoryNotFoundException || e is UnauthorizedAccessException)
+            catch (Exception e) when (e is DirectoryNotFoundException or UnauthorizedAccessException)
             {
                 ErrorUtilities.ThrowInvalidOperation("CacheFileInaccessible", cacheFile, e);
                 throw;

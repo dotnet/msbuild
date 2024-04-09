@@ -1201,48 +1201,50 @@ internal static class NativeMethods
 
             // Grab the process handle.  We want to keep this open for the duration of the function so that
             // it cannot be reused while we are running.
-            SafeProcessHandle hProcess = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, processIdToKill);
-            if (hProcess.IsInvalid)
+            using (SafeProcessHandle hProcess = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, processIdToKill))
             {
-                return;
-            }
-
-            try
-            {
-                try
+                if (hProcess.IsInvalid)
                 {
-                    // Kill this process, so that no further children can be created.
-                    thisProcess.Kill();
+                    return;
                 }
-                catch (Win32Exception e) when (e.NativeErrorCode == ERROR_ACCESS_DENIED)
-                {
-                    // Access denied is potentially expected -- it happens when the process that
-                    // we're attempting to kill is already dead.  So just ignore in that case.
-                }
-
-                // Now enumerate our children.  Children of this process are any process which has this process id as its parent
-                // and which also started after this process did.
-                List<KeyValuePair<int, SafeProcessHandle>> children = GetChildProcessIds(processIdToKill, myStartTime);
 
                 try
                 {
-                    foreach (KeyValuePair<int, SafeProcessHandle> childProcessInfo in children)
+                    try
                     {
-                        KillTree(childProcessInfo.Key);
+                        // Kill this process, so that no further children can be created.
+                        thisProcess.Kill();
+                    }
+                    catch (Win32Exception e) when (e.NativeErrorCode == ERROR_ACCESS_DENIED)
+                    {
+                        // Access denied is potentially expected -- it happens when the process that
+                        // we're attempting to kill is already dead.  So just ignore in that case.
+                    }
+
+                    // Now enumerate our children.  Children of this process are any process which has this process id as its parent
+                    // and which also started after this process did.
+                    List<KeyValuePair<int, SafeProcessHandle>> children = GetChildProcessIds(processIdToKill, myStartTime);
+
+                    try
+                    {
+                        foreach (KeyValuePair<int, SafeProcessHandle> childProcessInfo in children)
+                        {
+                            KillTree(childProcessInfo.Key);
+                        }
+                    }
+                    finally
+                    {
+                        foreach (KeyValuePair<int, SafeProcessHandle> childProcessInfo in children)
+                        {
+                            childProcessInfo.Value.Dispose();
+                        }
                     }
                 }
                 finally
                 {
-                    foreach (KeyValuePair<int, SafeProcessHandle> childProcessInfo in children)
-                    {
-                        childProcessInfo.Value.Dispose();
-                    }
+                    // Release the handle.  After this point no more children of this process exist and this process has also exited.
+                    hProcess.Dispose();
                 }
-            }
-            finally
-            {
-                // Release the handle.  After this point no more children of this process exist and this process has also exited.
-                hProcess.Dispose();
             }
         }
         finally
@@ -1296,25 +1298,26 @@ internal static class NativeMethods
         else
 #endif
         {
-            SafeProcessHandle hProcess = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, processId);
-
-            if (!hProcess.IsInvalid)
+            using SafeProcessHandle hProcess = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, processId);
             {
-                try
+                if (!hProcess.IsInvalid)
                 {
-                    // UNDONE: NtQueryInformationProcess will fail if we are not elevated and other process is. Advice is to change to use ToolHelp32 API's
-                    // For now just return zero and worst case we will not kill some children.
-                    PROCESS_BASIC_INFORMATION pbi = new PROCESS_BASIC_INFORMATION();
-                    int pSize = 0;
-
-                    if (0 == NtQueryInformationProcess(hProcess, PROCESSINFOCLASS.ProcessBasicInformation, ref pbi, pbi.Size, ref pSize))
+                    try
                     {
-                        ParentID = (int)pbi.InheritedFromUniqueProcessId;
+                        // UNDONE: NtQueryInformationProcess will fail if we are not elevated and other process is. Advice is to change to use ToolHelp32 API's
+                        // For now just return zero and worst case we will not kill some children.
+                        PROCESS_BASIC_INFORMATION pbi = new PROCESS_BASIC_INFORMATION();
+                        int pSize = 0;
+
+                        if (0 == NtQueryInformationProcess(hProcess, PROCESSINFOCLASS.ProcessBasicInformation, ref pbi, pbi.Size, ref pSize))
+                        {
+                            ParentID = (int)pbi.InheritedFromUniqueProcessId;
+                        }
                     }
-                }
-                finally
-                {
-                    hProcess.Dispose();
+                    finally
+                    {
+                        hProcess.Dispose();
+                    }
                 }
             }
         }
@@ -1337,34 +1340,36 @@ internal static class NativeMethods
             {
                 // Hold the child process handle open so that children cannot die and restart with a different parent after we've started looking at it.
                 // This way, any handle we pass back is guaranteed to be one of our actual children.
-                SafeProcessHandle childHandle = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, possibleChildProcess.Id);
-                if (childHandle.IsInvalid)
+                using (SafeProcessHandle childHandle = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, possibleChildProcess.Id))
                 {
-                    continue;
-                }
-
-                bool keepHandle = false;
-                try
-                {
-                    if (possibleChildProcess.StartTime > parentStartTime)
+                    if (childHandle.IsInvalid)
                     {
-                        int childParentProcessId = GetParentProcessId(possibleChildProcess.Id);
-                        if (childParentProcessId != 0)
+                        continue;
+                    }
+
+                    bool keepHandle = false;
+                    try
+                    {
+                        if (possibleChildProcess.StartTime > parentStartTime)
                         {
-                            if (parentProcessId == childParentProcessId)
+                            int childParentProcessId = GetParentProcessId(possibleChildProcess.Id);
+                            if (childParentProcessId != 0)
                             {
-                                // Add this one
-                                myChildren.Add(new KeyValuePair<int, SafeProcessHandle>(possibleChildProcess.Id, childHandle));
-                                keepHandle = true;
+                                if (parentProcessId == childParentProcessId)
+                                {
+                                    // Add this one
+                                    myChildren.Add(new KeyValuePair<int, SafeProcessHandle>(possibleChildProcess.Id, childHandle));
+                                    keepHandle = true;
+                                }
                             }
                         }
                     }
-                }
-                finally
-                {
-                    if (!keepHandle)
+                    finally
                     {
-                        childHandle.Dispose();
+                        if (!keepHandle)
+                        {
+                            childHandle.Dispose();
+                        }
                     }
                 }
             }

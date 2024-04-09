@@ -662,6 +662,9 @@ namespace Microsoft.Build.CommandLine
             ExitType exitType = ExitType.Success;
 
             ConsoleCancelEventHandler cancelHandler = Console_CancelKeyPress;
+
+            TextWriter preprocessWriter = null;
+            TextWriter targetsWriter = null;
             try
             {
 #if FEATURE_GET_COMMANDLINE
@@ -701,8 +704,6 @@ namespace Microsoft.Build.CommandLine
 #else
                 bool enableNodeReuse = false;
 #endif
-                TextWriter preprocessWriter = null;
-                TextWriter targetsWriter = null;
                 bool detailedSummary = false;
                 ISet<string> warningsAsErrors = null;
                 ISet<string> warningsNotAsErrors = null;
@@ -819,12 +820,15 @@ namespace Microsoft.Build.CommandLine
                     }
                     else if ((getProperty.Length > 0 || getItem.Length > 0) && (targets is null || targets.Length == 0))
                     {
+                        TextWriter output = null;
                         try
                         {
                             using (ProjectCollection collection = new(globalProperties, loggers, ToolsetDefinitionLocations.Default))
                             {
                                 Project project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
-                                TextWriter output = getResultOutputFile.Length > 0 ? new StreamWriter(getResultOutputFile) : Console.Out;
+                                output = getResultOutputFile.Length > 0
+                                    ? new StreamWriter(getResultOutputFile)
+                                    : Console.Out;
                                 exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project, output);
                                 collection.LogBuildFinishedEvent(exitType == ExitType.Success);
                             }
@@ -832,6 +836,10 @@ namespace Microsoft.Build.CommandLine
                         catch (InvalidProjectFileException)
                         {
                             exitType = ExitType.BuildError;
+                        }
+                        finally
+                        {
+                            output?.Dispose();
                         }
                     }
                     else // regular build
@@ -885,10 +893,18 @@ namespace Microsoft.Build.CommandLine
 
                     string timerOutputFilename = Environment.GetEnvironmentVariable("MSBUILDTIMEROUTPUTS");
 
-                    if (outputPropertiesItemsOrTargetResults && targets?.Length > 0 && result is not null)
+                    TextWriter outputStream = null;
+                    try
                     {
-                        TextWriter outputStream = getResultOutputFile.Length > 0 ? new StreamWriter(getResultOutputFile) : Console.Out;
-                        exitType = OutputBuildInformationInJson(result, getProperty, getItem, getTargetResult, loggers, exitType, outputStream);
+                        if (outputPropertiesItemsOrTargetResults && targets?.Length > 0 && result is not null)
+                        {
+                            outputStream = getResultOutputFile.Length > 0 ? new StreamWriter(getResultOutputFile) : Console.Out;
+                            exitType = OutputBuildInformationInJson(result, getProperty, getItem, getTargetResult, loggers, exitType, outputStream);
+                        }
+                    }
+                    finally
+                    {
+                        outputStream?.Dispose();
                     }
 
                     if (!string.IsNullOrEmpty(timerOutputFilename))
@@ -1031,6 +1047,9 @@ namespace Microsoft.Build.CommandLine
                 s_cancelComplete.WaitOne();
 
                 NativeMethodsShared.RestoreConsoleMode(s_originalConsoleMode);
+
+                preprocessWriter?.Dispose();
+                targetsWriter?.Dispose();
 
 #if FEATURE_GET_COMMANDLINE
                 MSBuildEventSource.Log.MSBuildExeStop(commandLine);
@@ -3764,9 +3783,9 @@ namespace Microsoft.Build.CommandLine
                 ProcessConsoleLoggerSwitch(noConsoleLogger, consoleLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
             }
 
-            ProcessDistributedFileLogger(distributedFileLogger, fileLoggerParameters, distributedLoggerRecords, loggers, cpuCount);
+            ProcessDistributedFileLogger(distributedFileLogger, fileLoggerParameters, distributedLoggerRecords);
 
-            ProcessFileLoggers(groupedFileLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
+            ProcessFileLoggers(groupedFileLoggerParameters, distributedLoggerRecords, cpuCount, loggers);
 
             verbosity = outVerbosity;
 
@@ -3808,7 +3827,7 @@ namespace Microsoft.Build.CommandLine
         /// Add a file logger with the appropriate parameters to the loggers list for each
         /// non-empty set of file logger parameters provided.
         /// </summary>
-        private static void ProcessFileLoggers(string[][] groupedFileLoggerParameters, List<DistributedLoggerRecord> distributedLoggerRecords, LoggerVerbosity verbosity, int cpuCount, List<ILogger> loggers)
+        private static void ProcessFileLoggers(string[][] groupedFileLoggerParameters, List<DistributedLoggerRecord> distributedLoggerRecords, int cpuCount, List<ILogger> loggers)
         {
             for (int i = 0; i < groupedFileLoggerParameters.Length; i++)
             {
@@ -4001,9 +4020,7 @@ namespace Microsoft.Build.CommandLine
         internal static void ProcessDistributedFileLogger(
             bool distributedFileLogger,
             string[] fileLoggerParameters,
-            List<DistributedLoggerRecord> distributedLoggerRecords,
-            List<ILogger> loggers,
-            int cpuCount)
+            List<DistributedLoggerRecord> distributedLoggerRecords)
         {
             if (distributedFileLogger)
             {

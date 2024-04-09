@@ -10,6 +10,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using static BuildXL.Processes.SandboxConnectionKext;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
@@ -245,7 +246,11 @@ namespace Microsoft.Build.Execution
                     return;
                 }
 
-                using ITranslator translator = GetResultsCacheTranslator(configId, targetName, TranslationDirection.WriteToStream);
+                string cacheFile = GetCacheFile(configId, targetName);
+                Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
+
+                using Stream stream = File.Create(cacheFile);
+                using ITranslator translator = GetResultsCacheTranslator(TranslationDirection.WriteToStream, stream, cacheFile);
 
                 // If the translator is null, it means these results were cached once before.  Since target results are immutable once they
                 // have been created, there is no point in writing them again.
@@ -279,7 +284,9 @@ namespace Microsoft.Build.Execution
             {
                 if (_items == null)
                 {
-                    using ITranslator translator = GetResultsCacheTranslator(_cacheInfo.ConfigId, _cacheInfo.TargetName, TranslationDirection.ReadFromStream);
+                    string cacheFile = GetCacheFile(_cacheInfo.ConfigId, _cacheInfo.TargetName);
+                    using Stream stream = File.OpenRead(cacheFile);
+                    using ITranslator translator = GetResultsCacheTranslator(TranslationDirection.ReadFromStream, stream, cacheFile);
 
                     TranslateItems(translator);
                     _cacheInfo = new CacheInfo();
@@ -339,23 +346,24 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Gets the translator for this configuration.
         /// </summary>
-        private static ITranslator GetResultsCacheTranslator(int configId, string targetToCache, TranslationDirection direction)
+        private static ITranslator GetResultsCacheTranslator(
+            TranslationDirection direction,
+            Stream stream,
+            string cacheFile)
         {
-            string cacheFile = GetCacheFile(configId, targetToCache);
             if (direction == TranslationDirection.WriteToStream)
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
                 if (FileSystems.Default.FileExists(cacheFile))
                 {
                     // If the file already exists, then we have cached this once before.  No need to cache it again since it cannot have changed.
                     return null;
                 }
 
-                return BinaryTranslator.GetWriteTranslator(File.Create(cacheFile));
+                return BinaryTranslator.GetWriteTranslator(stream);
             }
             else
             {
-                return BinaryTranslator.GetReadTranslator(File.OpenRead(cacheFile), InterningBinaryReader.PoolingBuffer);
+                return BinaryTranslator.GetReadTranslator(stream, InterningBinaryReader.PoolingBuffer);
             }
         }
 

@@ -2004,82 +2004,84 @@ namespace Microsoft.Build.Execution
             IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode,
             GraphBuildRequestData graphBuildRequestData)
         {
-            var waitHandle = new AutoResetEvent(true);
-            var graphBuildStateLock = new object();
-
-            var blockedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes);
-            var finishedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes.Count);
-            var buildingNodes = new Dictionary<BuildSubmission, ProjectGraphNode>();
             var resultsPerNode = new Dictionary<ProjectGraphNode, BuildResult>(projectGraph.ProjectNodes.Count);
-            ExceptionDispatchInfo submissionException = null;
-
-            while (blockedNodes.Count > 0 || buildingNodes.Count > 0)
+            using (var waitHandle = new AutoResetEvent(true))
             {
-                waitHandle.WaitOne();
+                var graphBuildStateLock = new object();
 
-                // When a cache plugin is present, ExecuteSubmission(BuildSubmission) executes on a separate thread whose exceptions do not get observed.
-                // Observe them here to keep the same exception flow with the case when there's no plugins and ExecuteSubmission(BuildSubmission) does not run on a separate thread.
-                if (submissionException != null)
-                {
-                    submissionException.Throw();
-                }
+                var blockedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes);
+                var finishedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes.Count);
+                var buildingNodes = new Dictionary<BuildSubmission, ProjectGraphNode>();
+                ExceptionDispatchInfo submissionException = null;
 
-                lock (graphBuildStateLock)
+                while (blockedNodes.Count > 0 || buildingNodes.Count > 0)
                 {
-                    var unblockedNodes = blockedNodes
-                        .Where(node => node.ProjectReferences.All(projectReference => finishedNodes.Contains(projectReference)))
-                        .ToList();
-                    foreach (var node in unblockedNodes)
+                    waitHandle.WaitOne();
+
+                    // When a cache plugin is present, ExecuteSubmission(BuildSubmission) executes on a separate thread whose exceptions do not get observed.
+                    // Observe them here to keep the same exception flow with the case when there's no plugins and ExecuteSubmission(BuildSubmission) does not run on a separate thread.
+                    if (submissionException != null)
                     {
-                        var targetList = targetsPerNode[node];
-                        if (targetList.Count == 0)
+                        submissionException.Throw();
+                    }
+
+                    lock (graphBuildStateLock)
+                    {
+                        var unblockedNodes = blockedNodes
+                            .Where(node => node.ProjectReferences.All(projectReference => finishedNodes.Contains(projectReference)))
+                            .ToList();
+                        foreach (var node in unblockedNodes)
                         {
-                            // An empty target list here means "no targets" instead of "default targets", so don't even build it.
-                            finishedNodes.Add(node);
-                            blockedNodes.Remove(node);
-
-                            waitHandle.Set();
-
-                            continue;
-                        }
-
-                        var request = new BuildRequestData(
-                            node.ProjectInstance,
-                            targetList.ToArray(),
-                            graphBuildRequestData.HostServices,
-                            graphBuildRequestData.Flags);
-
-                        // TODO Tack onto the existing submission instead of pending a whole new submission for every node
-                        // Among other things, this makes BuildParameters.DetailedSummary produce a summary for each node, which is not desirable.
-                        // We basically want to submit all requests to the scheduler all at once and describe dependencies by requests being blocked by other requests.
-                        // However today the scheduler only keeps track of MSBuild nodes being blocked by other MSBuild nodes, and MSBuild nodes haven't been assigned to the graph nodes yet.
-                        var innerBuildSubmission = PendBuildRequest(request);
-                        buildingNodes.Add(innerBuildSubmission, node);
-                        blockedNodes.Remove(node);
-                        innerBuildSubmission.ExecuteAsync(finishedBuildSubmission =>
-                        {
-                            lock (graphBuildStateLock)
+                            var targetList = targetsPerNode[node];
+                            if (targetList.Count == 0)
                             {
-                                if (submissionException == null && finishedBuildSubmission.BuildResult.Exception != null)
-                                {
-                                    // Preserve the original stack.
-                                    submissionException = ExceptionDispatchInfo.Capture(finishedBuildSubmission.BuildResult.Exception);
-                                }
+                                // An empty target list here means "no targets" instead of "default targets", so don't even build it.
+                                finishedNodes.Add(node);
+                                blockedNodes.Remove(node);
 
-                                ProjectGraphNode finishedNode = buildingNodes[finishedBuildSubmission];
+                                waitHandle.Set();
 
-                                finishedNodes.Add(finishedNode);
-                                buildingNodes.Remove(finishedBuildSubmission);
-
-                                resultsPerNode.Add(finishedNode, finishedBuildSubmission.BuildResult);
+                                continue;
                             }
 
-                            waitHandle.Set();
-                        }, null);
+                            var request = new BuildRequestData(
+                                node.ProjectInstance,
+                                targetList.ToArray(),
+                                graphBuildRequestData.HostServices,
+                                graphBuildRequestData.Flags);
+
+                            // TODO Tack onto the existing submission instead of pending a whole new submission for every node
+                            // Among other things, this makes BuildParameters.DetailedSummary produce a summary for each node, which is not desirable.
+                            // We basically want to submit all requests to the scheduler all at once and describe dependencies by requests being blocked by other requests.
+                            // However today the scheduler only keeps track of MSBuild nodes being blocked by other MSBuild nodes, and MSBuild nodes haven't been assigned to the graph nodes yet.
+                            var innerBuildSubmission = PendBuildRequest(request);
+                            buildingNodes.Add(innerBuildSubmission, node);
+                            blockedNodes.Remove(node);
+                            innerBuildSubmission.ExecuteAsync(finishedBuildSubmission =>
+                            {
+                                lock (graphBuildStateLock)
+                                {
+                                    if (submissionException == null && finishedBuildSubmission.BuildResult.Exception != null)
+                                    {
+                                        // Preserve the original stack.
+                                        submissionException = ExceptionDispatchInfo.Capture(finishedBuildSubmission.BuildResult.Exception);
+                                    }
+
+                                    ProjectGraphNode finishedNode = buildingNodes[finishedBuildSubmission];
+
+                                    finishedNodes.Add(finishedNode);
+                                    buildingNodes.Remove(finishedBuildSubmission);
+
+                                    resultsPerNode.Add(finishedNode, finishedBuildSubmission.BuildResult);
+                                }
+
+                                waitHandle.Set();
+                            }, null);
+                        }
                     }
                 }
             }
-
+          
             return resultsPerNode;
         }
 
