@@ -1032,12 +1032,16 @@ namespace Microsoft.Build.BackEnd
                 if (direction == TranslationDirection.WriteToStream)
                 {
                     Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
-                    return BinaryTranslator.GetWriteTranslator(File.Create(cacheFile));
+                    using FileStream file = File.Create(cacheFile);
+
+                    return BinaryTranslator.GetWriteTranslator(file);
                 }
                 else
                 {
+                    using FileStream file = File.OpenRead(cacheFile);
+
                     // Not using sharedReadBuffer because this is not a memory stream and so the buffer won't be used anyway.
-                    return BinaryTranslator.GetReadTranslator(File.OpenRead(cacheFile), InterningBinaryReader.PoolingBuffer);
+                    return BinaryTranslator.GetReadTranslator(file, InterningBinaryReader.PoolingBuffer);
                 }
             }
             catch (Exception e) when (e is DirectoryNotFoundException || e is UnauthorizedAccessException)

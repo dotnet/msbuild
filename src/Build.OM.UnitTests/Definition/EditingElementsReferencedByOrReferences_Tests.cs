@@ -340,7 +340,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <returns>The project contents.</returns>
         private Project GetProject(string contents)
         {
-            return new Project(XmlReader.Create(new StringReader(contents)));
+            using var stringReader = new StringReader(contents);
+            using var xmlReader = XmlReader.Create(stringReader);
+            return new Project(xmlReader);
         }
     }
 }

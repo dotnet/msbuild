@@ -88,9 +88,9 @@ namespace Microsoft.Build.Execution
             {
                 ErrorUtilities.VerifyThrow(!_legacyThreadingEventsById.ContainsKey(submissionId), "Submission {0} should not already be registered with LegacyThreadingData", submissionId);
 
-                _legacyThreadingEventsById[submissionId] = new Tuple<AutoResetEvent, ManualResetEvent>(
-                                new AutoResetEvent(false),
-                                new ManualResetEvent(false));
+                using var autoResetEvent = new AutoResetEvent(false);
+                using var manualResetEvent = new ManualResetEvent(false);
+                _legacyThreadingEventsById[submissionId] = new Tuple<AutoResetEvent, ManualResetEvent>(autoResetEvent, manualResetEvent);
             }
         }
 

@@ -22,9 +22,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private static Stream Serialize(Manifest manifest)
         {
             manifest.OnBeforeSave();
-            var m = new MemoryStream();
+            using var m = new MemoryStream();
             var s = new XmlSerializer(manifest.GetType());
-            var w = new StreamWriter(m);
+            using var w = new StreamWriter(m);
 
             int t1 = Environment.TickCount;
             s.Serialize(w, manifest);

@@ -22,11 +22,9 @@ using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
 
@@ -662,9 +660,13 @@ namespace Microsoft.Build.UnitTests
         {
             var cleanedProject = CleanupFileContents(projectContents);
 
+            using var stringReader = new StringReader(cleanedProject);
+            using var xmlReader = XmlReader.Create(stringReader);
+            using var projectCollection = new ProjectCollection();
+
             return ProjectRootElement.Create(
-                XmlReader.Create(new StringReader(cleanedProject)),
-                collection ?? new ProjectCollection(),
+                xmlReader,
+                collection ?? projectCollection,
                 preserveFormatting);
         }
 
@@ -686,7 +688,8 @@ namespace Microsoft.Build.UnitTests
         /// <returns>Returns created <see cref="Project"/>.</returns>
         public static Project CreateInMemoryProject(string xml, params ILogger[] loggers)
         {
-            return CreateInMemoryProject(new ProjectCollection(), xml, loggers);
+            using var projectCollection = new ProjectCollection();
+            return CreateInMemoryProject(projectCollection, xml, loggers);
         }
 
         /// <summary>
@@ -724,8 +727,10 @@ namespace Microsoft.Build.UnitTests
                 }
             }
 
+            using var stringReader = new StringReader(CleanupFileContents(xml));
+            using var xmlReader = XmlReader.Create(stringReader, readerSettings);
             Project project = new Project(
-                XmlReader.Create(new StringReader(CleanupFileContents(xml)), readerSettings),
+                xmlReader,
                 globalProperties: null,
                 toolsVersion,
                 projectCollection);
@@ -976,7 +981,7 @@ namespace Microsoft.Build.UnitTests
         {
             string projectFileFullPath = Path.Combine(TempProjectDir, projectFileRelativePath);
 
-            ProjectCollection projectCollection = new ProjectCollection();
+            using ProjectCollection projectCollection = new ProjectCollection();
 
             Project project = new Project(projectFileFullPath, null, null, projectCollection);
 
@@ -1091,7 +1096,9 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public static IList<ProjectItem> GetItems(string content, bool allItems = false, bool ignoreCondition = false)
         {
-            var projectXml = ProjectRootElement.Create(XmlReader.Create(new StringReader(CleanupFileContents(content))));
+            using var stringReader = new StringReader(content);
+            using var xmlReader = XmlReader.Create(stringReader);
+            var projectXml = ProjectRootElement.Create(xmlReader);
             Project project = new Project(projectXml);
             IList<ProjectItem> item = Helpers.MakeList(
                 ignoreCondition ?
@@ -1349,7 +1356,9 @@ namespace Microsoft.Build.UnitTests
             // Replace the nonstandard quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, toolsVersion: null);
+            using var stringReader = new StringReader(content);
+            using var xmlReader = XmlReader.Create(stringReader);
+            Project project = new Project(xmlReader, globalProperties, toolsVersion: null);
             logger ??= new MockLogger
             {
                 AllowTaskCrashes = allowTaskCrash
@@ -1364,7 +1373,9 @@ namespace Microsoft.Build.UnitTests
             // Replace the nonstandard quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)), null, toolsVersion: null);
+            using var stringReader = new StringReader(content);
+            using var xmlReader = XmlReader.Create(stringReader);
+            Project project = new Project(xmlReader, null, toolsVersion: null);
 
             List<ILogger> loggers = new List<ILogger>() { binaryLogger };
 
@@ -1971,7 +1982,8 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public static void ClearDirtyFlag(ProjectRootElement project)
         {
-            project.Save(new StringWriter());
+            using var stringWriter = new StringWriter();
+            project.Save(stringWriter);
             Assert.False(project.HasUnsavedChanges);
         }
 

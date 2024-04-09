@@ -481,8 +481,9 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+            using var stream = new BufferedReadStream(_pipeServer);
             RunReadLoop(
-                new BufferedReadStream(_pipeServer),
+                stream,
                 _pipeServer,
                 localPacketQueue, localPacketAvailable, localTerminatePacketPump);
 
@@ -592,7 +593,8 @@ namespace Microsoft.Build.BackEnd
 
                             try
                             {
-                                _packetFactory.DeserializeAndRoutePacket(0, packetType, BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer));
+                                using ITranslator readTranslator = BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer);
+                                _packetFactory.DeserializeAndRoutePacket(0, packetType, readTranslator);
                             }
                             catch (Exception e)
                             {
@@ -624,7 +626,7 @@ namespace Microsoft.Build.BackEnd
                                 var packetStream = _packetStream;
                                 packetStream.SetLength(0);
 
-                                ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(packetStream);
+                                using ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(packetStream);
 
                                 packetStream.WriteByte((byte)packet.Type);
 

@@ -351,11 +351,15 @@ namespace Microsoft.Build.Execution
                     return null;
                 }
 
-                return BinaryTranslator.GetWriteTranslator(File.Create(cacheFile));
+                using FileStream file = File.Create(cacheFile);
+
+                return BinaryTranslator.GetWriteTranslator(file);
             }
             else
             {
-                return BinaryTranslator.GetReadTranslator(File.OpenRead(cacheFile), InterningBinaryReader.PoolingBuffer);
+                using FileStream file = File.OpenRead(cacheFile);
+
+                return BinaryTranslator.GetReadTranslator(file, InterningBinaryReader.PoolingBuffer);
             }
         }
 

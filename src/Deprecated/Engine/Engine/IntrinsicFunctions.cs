@@ -196,26 +196,33 @@ namespace Microsoft.Build.BuildEngine
                     // This may throw - and that's fine as the user will receive a controlled version
                     // of that error.
                     RegistryView view = (RegistryView)Enum.Parse(typeof(RegistryView), viewAsString, true);
-
-                    using (RegistryKey key = GetBaseKeyFromKeyName(keyName, view, out subKeyName))
+                    RegistryKey key = null;
+                    try
                     {
-                        if (key != null)
+                        using (key = GetBaseKeyFromKeyName(keyName, view, out subKeyName))
                         {
-                            using (RegistryKey subKey = key.OpenSubKey(subKeyName, false))
+                            if (key != null)
                             {
-                                // If we managed to retrieve the subkey, then move onto locating the value
-                                if (subKey != null)
+                                using (RegistryKey subKey = key.OpenSubKey(subKeyName, false))
                                 {
-                                    result = subKey.GetValue(valueName);
-                                }
+                                    // If we managed to retrieve the subkey, then move onto locating the value
+                                    if (subKey != null)
+                                    {
+                                        result = subKey.GetValue(valueName);
+                                    }
 
-                                // We've found a value, so stop looking
-                                if (result != null)
-                                {
-                                    break;
+                                    // We've found a value, so stop looking
+                                    if (result != null)
+                                    {
+                                        break;
+                                    }
                                 }
                             }
                         }
+                    }
+                    finally
+                    {
+                        key?.Dispose();
                     }
                 }
             }

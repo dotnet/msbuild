@@ -157,8 +157,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                         </ItemGroup>
                     </Project>
                 ";
-
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using var stringReader = new StringReader(content);
+            using var xmlReader = XmlReader.Create(stringReader);
+            Project project = new Project(xmlReader);
 
             ProjectItem item = Helpers.GetFirst(project.GetItems("i"));
             ProjectMetadata m0 = item.GetMetadata("m0");

@@ -205,7 +205,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         {
                             try
                             {
-                                var sr = new StreamReader(fs);
+                                using var sr = new StreamReader(fs);
                                 string data = sr.ReadToEnd();
                                 if (!string.IsNullOrEmpty(data))
                                 {
@@ -610,7 +610,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [SupportedOSPlatform("windows")]
         public static void SignFile(string certPath, SecureString certPassword, Uri timestampUrl, string path)
         {
-            X509Certificate2 cert = new X509Certificate2(certPath, certPassword, X509KeyStorageFlags.PersistKeySet);
+            using X509Certificate2 cert = new X509Certificate2(certPath, certPassword, X509KeyStorageFlags.PersistKeySet);
             SignFile(cert, timestampUrl, path);
         }
 
@@ -705,7 +705,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         CmiManifestSigner2 signer;
                         if (useSha256 && rsa is RSACryptoServiceProvider rsacsp)
                         {
-                            RSACryptoServiceProvider csp = SignedCmiManifest2.GetFixedRSACryptoServiceProvider(rsacsp, useSha256);
+                            using RSACryptoServiceProvider csp = SignedCmiManifest2.GetFixedRSACryptoServiceProvider(rsacsp, useSha256);
                             signer = new CmiManifestSigner2(csp, cert, useSha256);
                         }
                         else

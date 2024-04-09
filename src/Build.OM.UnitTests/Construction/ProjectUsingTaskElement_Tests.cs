@@ -417,7 +417,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using var stringReader = new StringReader(content);
+            using var xmlReader = XmlReader.Create(stringReader);
+            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
             ProjectUsingTaskElement usingTask = (ProjectUsingTaskElement)Helpers.GetFirst(project.Children);
             Assert.NotNull(usingTask);
             Assert.Equal(2, usingTask.Count);

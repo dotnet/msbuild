@@ -291,25 +291,33 @@ namespace Microsoft.Build.Evaluation
                         return string.Empty;
                     }
 
-                    using (RegistryKey key = GetBaseKeyFromKeyName(keyName, view, out string subKeyName))
+                    RegistryKey key = null;
+                    try
                     {
-                        if (key != null)
+                        using (key = GetBaseKeyFromKeyName(keyName, view, out string subKeyName))
                         {
-                            using (RegistryKey subKey = key.OpenSubKey(subKeyName, false))
+                            if (key != null)
                             {
-                                // If we managed to retrieve the subkey, then move onto locating the value
-                                if (subKey != null)
+                                using (RegistryKey subKey = key.OpenSubKey(subKeyName, false))
                                 {
-                                    result = subKey.GetValue(valueName);
-                                }
+                                    // If we managed to retrieve the subkey, then move onto locating the value
+                                    if (subKey != null)
+                                    {
+                                        result = subKey.GetValue(valueName);
+                                    }
 
-                                // We've found a value, so stop looking
-                                if (result != null)
-                                {
-                                    break;
+                                    // We've found a value, so stop looking
+                                    if (result != null)
+                                    {
+                                        break;
+                                    }
                                 }
                             }
                         }
+                    }
+                    finally
+                    {
+                        key?.Dispose();
                     }
                 }
             }
@@ -446,12 +454,13 @@ namespace Microsoft.Build.Evaluation
 
         private static string CalculateSha256(string toHash)
         {
-            var sha = System.Security.Cryptography.SHA256.Create();
+            using var sha = System.Security.Cryptography.SHA256.Create();
             var hashResult = new StringBuilder();
             foreach (byte theByte in sha.ComputeHash(Encoding.UTF8.GetBytes(toHash)))
             {
                 hashResult.Append(theByte.ToString("x2"));
             }
+
             return hashResult.ToString();
         }
 

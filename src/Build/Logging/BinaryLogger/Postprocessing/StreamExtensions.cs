@@ -60,12 +60,14 @@ namespace Microsoft.Build.Logging
         {
             if (stream.TryGetLength(out long length))
             {
-                BinaryReader reader = new(stream);
+                using BinaryReader reader = new(stream);
+
                 return reader.ReadBytes((int)length);
             }
 
             using var ms = new MemoryStream();
             stream.CopyTo(ms);
+
             return ms.ToArray();
         }
 

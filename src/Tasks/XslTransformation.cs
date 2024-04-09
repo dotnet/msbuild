@@ -451,8 +451,12 @@ namespace Microsoft.Build.Tasks
                 switch (_xslMode)
                 {
                     case XslModes.Xslt:
-                        xslct.Load(XmlReader.Create(new StringReader(_data)), settings, new XmlUrlResolver());
-                        break;
+                        {
+                            using var xmlReader = XmlReader.Create(new StringReader(_data));
+                            xslct.Load(xmlReader, settings, new XmlUrlResolver());
+                            break;
+                        }
+
                     case XslModes.XsltFile:
                         if (useTrustedSettings)
                         {

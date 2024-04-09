@@ -18,9 +18,9 @@ namespace Microsoft.Build.UnitTests
         {
             MemoryStream m = new MemoryStream();
 #if FEATURE_ENCODING_DEFAULT
-            TextWriter w = new StreamWriter(m, System.Text.Encoding.Default);
+            using TextWriter w = new StreamWriter(m, System.Text.Encoding.Default);
 #else
-            TextWriter w = new StreamWriter(m, System.Text.Encoding.UTF8);
+            using TextWriter w = new StreamWriter(m, System.Text.Encoding.UTF8);
 #endif
 
             w.Write(value);
@@ -53,12 +53,13 @@ namespace Microsoft.Build.UnitTests
          */
         public static Stream StringToStream(string value, System.Text.Encoding encoding)
         {
-            MemoryStream m = new MemoryStream();
-            TextWriter w = new StreamWriter(m, encoding); // HIGHCHAR: StringToStream helper accepts encoding from caller.
+            using MemoryStream m = new MemoryStream();
+            using TextWriter w = new StreamWriter(m, encoding); // HIGHCHAR: StringToStream helper accepts encoding from caller.
 
             w.Write(value);
             w.Flush();
             m.Seek(0, SeekOrigin.Begin);
+
             return m;
         }
     }

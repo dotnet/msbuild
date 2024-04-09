@@ -49,8 +49,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                         </ItemGroup>
                     </Project>
                 ");
-
-            ProjectRootElement projectXml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using var stringReader = new StringReader(content);
+            using var xmlReader = XmlReader.Create(stringReader);
+            ProjectRootElement projectXml = ProjectRootElement.Create(xmlReader);
             Project project = new Project(projectXml);
 
             Assert.False(project.IsDirty);

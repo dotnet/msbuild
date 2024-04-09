@@ -145,8 +145,9 @@ namespace Microsoft.Build.Tasks
         /// <param name="cancellationToken">The cancellation token for the task.</param>
         private async Task DownloadAsync(Uri uri, CancellationToken cancellationToken)
         {
+            using var httpHandler = new HttpClientHandler();
             // The main reason to use HttpClient vs WebClient is because we can pass a message handler for unit tests to mock
-            using (var client = new HttpClient(HttpMessageHandler ?? new HttpClientHandler(), disposeHandler: true) { Timeout = TimeSpan.FromMilliseconds(Timeout) })
+            using (var client = new HttpClient(HttpMessageHandler ?? httpHandler, disposeHandler: true) { Timeout = TimeSpan.FromMilliseconds(Timeout) })
             {
                 // Only get the response without downloading the file so we can determine if the file is already up-to-date
                 using (HttpResponseMessage response = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))

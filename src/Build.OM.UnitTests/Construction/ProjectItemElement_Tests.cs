@@ -159,7 +159,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
+                using var stringReader = new StringReader(project);
+                using var xmlReader = XmlReader.Create(stringReader);
+                ProjectRootElement.Create(xmlReader);
             });
         }
 
@@ -187,7 +189,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
+                using var stringReader = new StringReader(project);
+                using var xmlReader = XmlReader.Create(stringReader);
+                ProjectRootElement.Create(xmlReader);
             });
         }
 
@@ -215,7 +219,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
+                using var stringReader = new StringReader(project);
+                using var xmlReader = XmlReader.Create(stringReader);
+                ProjectRootElement.Create(xmlReader);
             });
         }
 
@@ -258,7 +264,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var exception =
                 Assert.Throws<InvalidProjectFileException>(
-                    () => { ProjectRootElement.Create(XmlReader.Create(new StringReader(project))); });
+                    () =>
+                    {
+                        using var stringReader = new StringReader(project);
+                        using var xmlReader = XmlReader.Create(stringReader);
+                        ProjectRootElement.Create(xmlReader);
+                    });
 
             Assert.Contains("The attribute \"Exclude\" in element <i> is unrecognized.", exception.Message);
         }
@@ -300,7 +311,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
+                using var stringReader = new StringReader(project);
+                using var xmlReader = XmlReader.Create(stringReader);
+                ProjectRootElement.Create(xmlReader);
             });
         }
 
@@ -354,7 +367,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         public void ReadBasic(string project)
         {
-            ProjectRootElement projectElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
+            using var stringReader = new StringReader(project);
+            using var xmlReader = XmlReader.Create(stringReader);
+            ProjectRootElement projectElement = ProjectRootElement.Create(xmlReader);
             ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
 
             var items = Helpers.MakeList(itemGroup.Items);
@@ -406,7 +421,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         public void ReadMetadata(string project)
         {
-            ProjectRootElement projectElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
+            using var stringReader = new StringReader(project);
+            using var xmlReader = XmlReader.Create(stringReader);
+            ProjectRootElement projectElement = ProjectRootElement.Create(xmlReader);
             ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
             ProjectItemElement item = Helpers.GetFirst(itemGroup.Items);
 
@@ -580,7 +597,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
+                using var stringReader = new StringReader(project);
+                using var xmlReader = XmlReader.Create(stringReader);
+                ProjectRootElement.Create(xmlReader);
             });
         }
 
@@ -1036,7 +1055,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         private static ProjectItemElement GetItemFromContent(string content)
         {
-            var project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using var stringReader = new StringReader(content);
+            using var xmlReader = XmlReader.Create(stringReader);
+            var project = ProjectRootElement.Create(xmlReader);
             return Helpers.GetFirst(project.Items);
         }
     }

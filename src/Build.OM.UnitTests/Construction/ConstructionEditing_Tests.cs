@@ -2307,18 +2307,20 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             Assert.Throws<InvalidProjectFileException>(infiniteChooseLoop);
         }
+
         /// <summary>
-        /// Setting item condition should dirty project
+        /// Setting item condition should dirty project.
         /// </summary>
         [Fact]
         public void Dirtying_ItemCondition()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            using var stringReader = new StringReader(ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <i Include=""i1"" />
   </ItemGroup>
-</Project>")));
+</Project>"));
+            using XmlReader content = XmlReader.Create(stringReader);
 
             Project project = new Project(content);
             ProjectItem item = Helpers.GetFirst(project.Items);

@@ -45,20 +45,22 @@ namespace Microsoft.NET.StringTools.Tests
         }
 
         public static IEnumerable<object[]> TestData => InterningTestData.TestData;
+
         public static IEnumerable<object[]> TestDataForTrim => InterningTestData.TestDataForTrim;
 
         [Theory]
         [MemberData(nameof(TestData))]
         public void LengthReturnsLength(InterningTestData.TestDatum datum)
         {
-            MakeSpanBasedStringBuilder(datum).Length.ShouldBe(datum.Length);
+            using SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum);
+            stringBuilder.Length.ShouldBe(datum.Length);
         }
 
         [Theory]
         [MemberData(nameof(TestData))]
         public void EnumeratorEnumeratesCharacters(InterningTestData.TestDatum datum)
         {
-            SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum);
+            using SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum);
             int index = 0;
             foreach (char ch in stringBuilder)
             {
@@ -71,7 +73,8 @@ namespace Microsoft.NET.StringTools.Tests
         [MemberData(nameof(TestData))]
         public void EqualsReturnsExpectedValue(InterningTestData.TestDatum datum)
         {
-            InternableString internableString = new InternableString(MakeSpanBasedStringBuilder(datum));
+            using SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum);
+            InternableString internableString = new InternableString(stringBuilder);
             internableString.Equals(string.Empty).ShouldBe(internableString.Length == 0);
 
             string substr = datum.Fragments[0] ?? string.Empty;
@@ -110,7 +113,7 @@ namespace Microsoft.NET.StringTools.Tests
             {
                 for (int j = i + 1; j < testString.Length; j++)
                 {
-                    SpanBasedStringBuilder stringBuilder = new SpanBasedStringBuilder();
+                    using SpanBasedStringBuilder stringBuilder = new SpanBasedStringBuilder();
                     stringBuilder.Append(testString.Substring(0, i));
                     stringBuilder.Append(testString.Substring(i, j - i));
                     stringBuilder.Append(testString.Substring(j));
@@ -124,7 +127,7 @@ namespace Microsoft.NET.StringTools.Tests
         [MemberData(nameof(TestData))]
         public void AppendAppendsString(InterningTestData.TestDatum datum)
         {
-            SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum, false);
+            using SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum, false);
             new InternableString(stringBuilder).ExpensiveConvertToString().ShouldBe(datum.ToString());
         }
 
@@ -132,7 +135,7 @@ namespace Microsoft.NET.StringTools.Tests
         [MemberData(nameof(TestData))]
         public void AppendAppendsSubstring(InterningTestData.TestDatum datum)
         {
-            SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum, true);
+            using SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum, true);
             new InternableString(stringBuilder).ExpensiveConvertToString().ShouldBe(datum.ToString());
         }
 
@@ -141,7 +144,7 @@ namespace Microsoft.NET.StringTools.Tests
         [MemberData(nameof(TestDataForTrim))]
         public void TrimStartRemovesLeadingWhiteSpace(InterningTestData.TestDatum datum)
         {
-            SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum);
+            using SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum);
             stringBuilder.TrimStart();
             new InternableString(stringBuilder).ExpensiveConvertToString().ShouldBe(datum.ToString().TrimStart());
         }
@@ -150,7 +153,7 @@ namespace Microsoft.NET.StringTools.Tests
         [MemberData(nameof(TestDataForTrim))]
         public void TrimEndRemovesTrailingWhiteSpace(InterningTestData.TestDatum datum)
         {
-            SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum);
+            using SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum);
             stringBuilder.TrimEnd();
             new InternableString(stringBuilder).ExpensiveConvertToString().ShouldBe(datum.ToString().TrimEnd());
         }
@@ -159,7 +162,7 @@ namespace Microsoft.NET.StringTools.Tests
         [MemberData(nameof(TestDataForTrim))]
         public void TrimRemovesLeadingAndTrailingWhiteSpace(InterningTestData.TestDatum datum)
         {
-            SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum);
+            using SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum);
             stringBuilder.Trim();
             new InternableString(stringBuilder).ExpensiveConvertToString().ShouldBe(datum.ToString().Trim());
         }
@@ -169,7 +172,7 @@ namespace Microsoft.NET.StringTools.Tests
         [MemberData(nameof(TestData))]
         public void ClearRemovesAllCharacters(InterningTestData.TestDatum datum)
         {
-            SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum);
+            using SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum);
             stringBuilder.Clear();
             stringBuilder.Length.ShouldBe(0);
             stringBuilder.GetEnumerator().MoveNext().ShouldBeFalse();

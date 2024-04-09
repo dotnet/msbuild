@@ -1201,7 +1201,7 @@ internal static class NativeMethods
 
             // Grab the process handle.  We want to keep this open for the duration of the function so that
             // it cannot be reused while we are running.
-            SafeProcessHandle hProcess = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, processIdToKill);
+            using SafeProcessHandle hProcess = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, processIdToKill);
             if (hProcess.IsInvalid)
             {
                 return;
@@ -1235,19 +1235,19 @@ internal static class NativeMethods
                 {
                     foreach (KeyValuePair<int, SafeProcessHandle> childProcessInfo in children)
                     {
-                        childProcessInfo.Value.Dispose();
+                        childProcessInfo.Value?.Dispose();
                     }
                 }
             }
             finally
             {
                 // Release the handle.  After this point no more children of this process exist and this process has also exited.
-                hProcess.Dispose();
+                hProcess?.Dispose();
             }
         }
         finally
         {
-            thisProcess.Dispose();
+            thisProcess?.Dispose();
         }
     }
 
@@ -1296,7 +1296,7 @@ internal static class NativeMethods
         else
 #endif
         {
-            SafeProcessHandle hProcess = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, processId);
+            using SafeProcessHandle hProcess = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, processId);
 
             if (!hProcess.IsInvalid)
             {
@@ -1314,7 +1314,7 @@ internal static class NativeMethods
                 }
                 finally
                 {
-                    hProcess.Dispose();
+                    hProcess?.Dispose();
                 }
             }
         }
@@ -1337,7 +1337,7 @@ internal static class NativeMethods
             {
                 // Hold the child process handle open so that children cannot die and restart with a different parent after we've started looking at it.
                 // This way, any handle we pass back is guaranteed to be one of our actual children.
-                SafeProcessHandle childHandle = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, possibleChildProcess.Id);
+                using SafeProcessHandle childHandle = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, possibleChildProcess.Id);
                 if (childHandle.IsInvalid)
                 {
                     continue;
@@ -1364,7 +1364,7 @@ internal static class NativeMethods
                 {
                     if (!keepHandle)
                     {
-                        childHandle.Dispose();
+                        childHandle?.Dispose();
                     }
                 }
             }

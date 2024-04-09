@@ -445,7 +445,8 @@ namespace Microsoft.Build.Experimental
 
             public static TextWriter Create(Action<string> writeCallback)
             {
-                RedirectConsoleWriter writer = new(writeCallback);
+                using RedirectConsoleWriter writer = new(writeCallback);
+
                 return writer._syncWriter;
             }
 

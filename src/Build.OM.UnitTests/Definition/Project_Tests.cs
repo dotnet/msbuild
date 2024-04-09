@@ -104,8 +104,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                           <Message Text=""$(Message3)"" Importance=""High""/>
                        </Target>
                     </Project>");
-
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)));
+            using var stringReader = new StringReader(projectFileContent);
+            using var xmlReader = XmlReader.Create(stringReader);
+            ProjectRootElement xml = ProjectRootElement.Create(xmlReader);
             Project project = new Project(xml);
             bool result = project.Build(new ILogger[] { mockLogger });
             result.ShouldBeTrue();

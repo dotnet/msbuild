@@ -95,7 +95,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using var stringReader = new StringReader(content);
+            using var xmlReader = XmlReader.Create(stringReader);
+            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
 
             List<ProjectImportElement> imports = Helpers.MakeList(project.Imports);
 
@@ -251,9 +253,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             try
             {
                 Directory.CreateDirectory(testTempPath);
-                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectfileContent)));
+                using var stringReader = new StringReader(projectfileContent);
+                using var xmlReader = XmlReader.Create(stringReader);
+                ProjectRootElement project = ProjectRootElement.Create(xmlReader);
                 project.Save(projectfile);
-                project = ProjectRootElement.Create(XmlReader.Create(new StringReader(targetsfileContent)));
+
+                using var stringReader2 = new StringReader(targetsfileContent);
+                using var xmlReader2 = XmlReader.Create(stringReader);
+                project = ProjectRootElement.Create(xmlReader2);
                 project.Save(targetsFile);
                 Project msbuildProject = new Project(projectfile);
             }

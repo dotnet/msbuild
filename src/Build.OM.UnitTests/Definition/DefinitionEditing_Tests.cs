@@ -707,7 +707,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void SetMetadata_ItemOriginatingWithItemList()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            using var stringReader = new StringReader(ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <h Include=""h1;h2"">
@@ -715,7 +715,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     </h>
     <i Include=""@(h)"" />
   </ItemGroup>
-</Project>")));
+</Project>"));
+            using var content = XmlReader.Create(stringReader);
 
             Project project = new Project(content);
 

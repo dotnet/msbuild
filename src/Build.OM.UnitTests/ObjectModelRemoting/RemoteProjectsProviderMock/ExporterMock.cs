@@ -167,7 +167,9 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public Project LoadInMemoryWithSettings(string content, ProjectLoadSettings settings = ProjectLoadSettings.Default)
         {
             content = ObjectModelHelpers.CleanupFileContents(content);
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using var stringReader = new StringReader(content);
+            using var xmlReader = XmlReader.Create(stringReader);
+            ProjectRootElement xml = ProjectRootElement.Create(xmlReader);
             Project project = new Project(xml, null, null, this.Collection, settings);
             return project;
         }

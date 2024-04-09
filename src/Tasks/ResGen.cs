@@ -289,7 +289,7 @@ namespace Microsoft.Build.Tasks
                     // Default the filename if we need to - regardless of whether the STR was successfully generated
                     if (StronglyTypedFileName == null)
                     {
-                        CodeDomProvider provider;
+                        CodeDomProvider provider = null;
                         try
                         {
                             provider = CodeDomProvider.CreateProvider(StronglyTypedLanguage);
@@ -305,6 +305,10 @@ namespace Microsoft.Build.Tasks
                             // If the language can't be found, then ResGen.exe will already have
                             // logged an appropriate error.
                             return false;
+                        }
+                        finally
+                        {
+                            provider?.Dispose();
                         }
 
                         StronglyTypedFileName = ProcessResourceFiles.GenerateDefaultStronglyTypedFilename(provider, outputFile.ItemSpec);

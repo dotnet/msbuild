@@ -220,7 +220,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             string content = "<Project ToolsVersion=\"4.0\">\r\n</Project>";
 
-            ProjectRootElement projectXml1 = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using var stringReader = new StringReader(content);
+            using var xmlReader = XmlReader.Create(stringReader);
+            ProjectRootElement projectXml1 = ProjectRootElement.Create(xmlReader);
 
             projectXml1.FullPath = @"xyz\abc";
 
@@ -366,7 +368,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             bool exceptionThrown = false;
             try
             {
-                Project project = new Project(XmlReader.Create(new StringReader(content)));
+                using var stringReader = new StringReader(content);
+                using var xmlReader = XmlReader.Create(stringReader);
+                Project project = new Project(xmlReader);
             }
             catch (InvalidProjectFileException ex)
             {

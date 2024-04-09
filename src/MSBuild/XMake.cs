@@ -34,8 +34,6 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
-using static Microsoft.Build.CommandLine.MSBuildApp;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
 using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using FileLogger = Microsoft.Build.Logging.FileLogger;
@@ -824,7 +822,8 @@ namespace Microsoft.Build.CommandLine
                             using (ProjectCollection collection = new(globalProperties, loggers, ToolsetDefinitionLocations.Default))
                             {
                                 Project project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
-                                TextWriter output = getResultOutputFile.Length > 0 ? new StreamWriter(getResultOutputFile) : Console.Out;
+                                using var streamWriter = new StreamWriter(getResultOutputFile);
+                                TextWriter output = getResultOutputFile.Length > 0 ? streamWriter : Console.Out;
                                 exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project, output);
                                 collection.LogBuildFinishedEvent(exitType == ExitType.Success);
                             }
@@ -887,7 +886,8 @@ namespace Microsoft.Build.CommandLine
 
                     if (outputPropertiesItemsOrTargetResults && targets?.Length > 0 && result is not null)
                     {
-                        TextWriter outputStream = getResultOutputFile.Length > 0 ? new StreamWriter(getResultOutputFile) : Console.Out;
+                        using var streamWriter = new StreamWriter(getResultOutputFile);
+                        TextWriter outputStream = getResultOutputFile.Length > 0 ? streamWriter : Console.Out;
                         exitType = OutputBuildInformationInJson(result, getProperty, getItem, getTargetResult, loggers, exitType, outputStream);
                     }
 

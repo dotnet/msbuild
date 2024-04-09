@@ -210,8 +210,9 @@ ObjectModelHelpers.CleanupFileContents(
     <Message Text='@(i)/%(m)'/>
   </Target>
 </Project>");
-
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using var stringReader = new StringReader(content);
+            using var xmlReader = XmlReader.Create(stringReader);
+            Project project = new Project(xmlReader);
 
             MockLogger logger = new MockLogger();
             List<ILogger> loggers = new List<ILogger>() { logger };

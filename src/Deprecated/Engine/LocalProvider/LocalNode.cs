@@ -9,9 +9,9 @@ using System;
 using System.Collections;
 using System.Diagnostics;
 using System.IO;
+using System.Security.AccessControl;
 using System.Threading;
 using Microsoft.Build.BuildEngine.Shared;
-using System.Security.AccessControl;
 
 namespace Microsoft.Build.BuildEngine
 {
@@ -237,9 +237,14 @@ namespace Microsoft.Build.BuildEngine
             if (!Engine.debugMode)
             {
                 // Create null streams for the current input/output/error streams
-                Console.SetOut(new StreamWriter(Stream.Null));
-                Console.SetError(new StreamWriter(Stream.Null));
-                Console.SetIn(new StreamReader(Stream.Null));
+                using var outStream = new StreamWriter(Stream.Null);
+                Console.SetOut(outStream);
+
+                using var errorStream = new StreamWriter(Stream.Null);
+                Console.SetError(errorStream);
+
+                using var inStream = new StreamReader(Stream.Null);
+                Console.SetIn(inStream);
             }
 
             bool continueRunning = true;

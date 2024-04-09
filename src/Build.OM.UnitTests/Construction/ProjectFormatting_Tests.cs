@@ -108,12 +108,15 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
   </ItemGroup>
 </Project>");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)),
+            using var stringReader = new StringReader(content);
+            using var xmlReader = XmlReader.Create(stringReader);
+            ProjectRootElement xml = ProjectRootElement.Create(
+                xmlReader,
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
             Project project = new Project(xml);
             project.AddItem("Compile", "Class1.cs");
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
             project.Save(writer);
 
             string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-16""?>
