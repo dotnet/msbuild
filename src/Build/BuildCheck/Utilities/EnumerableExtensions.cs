@@ -16,25 +16,11 @@ internal static class EnumerableExtensions
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="source">Sequence to be turned into csv string.</param>
-    /// <param name="useSpace">Indicates whether space should be inserted between comas and following items.</param>
+    /// <param name="useSpace">Indicates whether space should be inserted between commas and following items.</param>
     /// <returns>Csv string.</returns>
     public static string ToCsvString<T>(this IEnumerable<T>? source, bool useSpace = true)
     {
-        return source == null ? "<NULL>" : string.Join("," + (useSpace ? " " : string.Empty), source);
-    }
-
-    /// <summary>
-    /// Performs an action for each element in given sequence.
-    /// </summary>
-    /// <param name="sequence"></param>
-    /// <param name="action"></param>
-    /// <typeparam name="T"></typeparam>
-    public static void ForEach<T>(this IEnumerable<T> sequence, Action<T> action)
-    {
-        foreach (T element in sequence)
-        {
-            action(element);
-        }
+        return source == null ? "<NULL>" : string.Join(useSpace ? ", " : ",", source);
     }
 
     /// <summary>
@@ -52,13 +38,13 @@ internal static class EnumerableExtensions
     {
         foreach (var pair in another)
         {
-            if (!dict.ContainsKey(pair.Key))
+            if (!dict.TryGetValue(pair.Key, out TValue? value))
             {
                 dict[pair.Key] = pair.Value;
             }
             else
             {
-                dict[pair.Key] = mergeValues(dict[pair.Key], pair.Value);
+                dict[pair.Key] = mergeValues(value, pair.Value);
             }
         }
     }

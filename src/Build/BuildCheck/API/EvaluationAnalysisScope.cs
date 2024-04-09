@@ -14,20 +14,20 @@ public enum EvaluationAnalysisScope
     /// <summary>
     /// Only the data from currently analyzed project will be sent to the analyzer. Imports will be discarded.
     /// </summary>
-    AnalyzedProjectOnly,
+    ProjectOnly,
 
     /// <summary>
     /// Only the data from currently analyzed project and imports from files under the entry project or solution will be sent to the analyzer. Other imports will be discarded.
     /// </summary>
-    AnalyzedProjectWithImportsFromCurrentWorkTree,
+    ProjectWithImportsFromCurrentWorkTree,
 
     /// <summary>
     /// Imports from SDKs will not be sent to the analyzer. Other imports will be sent.
     /// </summary>
-    AnalyzedProjectWithImportsWithoutSdks,
+    ProjectWithImportsWithoutSdks,
 
     /// <summary>
     /// All data will be sent to the analyzer.
     /// </summary>
-    AnalyzedProjectWithAllImports,
+    ProjectWithAllImports,
 }

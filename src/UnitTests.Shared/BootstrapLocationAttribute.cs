@@ -6,9 +6,8 @@ global using NativeMethodsShared = Microsoft.Build.Framework.NativeMethods;
 namespace Microsoft.Build.UnitTests.Shared;
 
 [System.AttributeUsage(System.AttributeTargets.Assembly)]
-internal sealed class BootstrapLocationAttribute(string bootstrapRoot, string bootstrapMsbuildBinaryLocation)
+internal sealed class BootstrapLocationAttribute(string bootstrapMsbuildBinaryLocation)
     : System.Attribute
 {
-    public string BootstrapRoot { get; } = bootstrapRoot;
     public string BootstrapMsbuildBinaryLocation { get; } = bootstrapMsbuildBinaryLocation;
 }

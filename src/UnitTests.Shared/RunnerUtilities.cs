@@ -58,33 +58,11 @@ namespace Microsoft.Build.UnitTests.Shared
                                                    ?? throw new InvalidOperationException("This test assembly does not have the BootstrapLocationAttribute");
 
             string binaryFolder = attribute.BootstrapMsbuildBinaryLocation;
-            string bindirOverride = Environment.GetEnvironmentVariable("MSBUILD_BOOTSTRAPPED_BINDIR");
-            if (!string.IsNullOrEmpty(bindirOverride))
-            {
-                // The bootstrap environment has moved to another location. Assume the same relative layout and adjust the path.
-#if NET
-                string relativePath = Path.GetRelativePath(attribute.BootstrapRoot, binaryFolder);
-                binaryFolder = Path.GetFullPath(relativePath, bindirOverride);
-#else
-                binaryFolder = Path.GetFullPath(binaryFolder);
-                if (binaryFolder.StartsWith(attribute.BootstrapRoot))
-                {
-                    binaryFolder = binaryFolder.Substring(attribute.BootstrapRoot.Length);
-                    if (binaryFolder.StartsWith(Path.DirectorySeparatorChar.ToString()))
-                    {
-                        binaryFolder = binaryFolder.Substring(1);
-                    }
-
-                    binaryFolder = Path.Combine(bindirOverride, binaryFolder);
-                }
-#endif
-            }
 #if NET
             string pathToExecutable = EnvironmentProvider.GetDotnetExePath()!;
             msbuildParameters = Path.Combine(binaryFolder, "MSBuild.dll") + " " + msbuildParameters;
 #else
-            string pathToExecutable =
-                Path.Combine(binaryFolder, "msbuild.exe");
+            string pathToExecutable = Path.Combine(binaryFolder, "MSBuild.exe");
 #endif
             return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper);
         }

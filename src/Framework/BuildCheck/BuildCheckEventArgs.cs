@@ -12,10 +12,18 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 
-public abstract class BuildCheckEventArgs : BuildEventArgs
+/// <summary>
+/// Base class for all build check event args.
+/// Not intended to be extended by external code.
+/// </summary>
+internal abstract class BuildCheckEventArgs : BuildEventArgs
 { }
 
-public sealed class BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> tracingData) : BuildCheckEventArgs
+/// <summary>
+/// Transport mean for the BuildCheck tracing data from additional nodes.
+/// </summary>
+/// <param name="tracingData"></param>
+internal sealed class BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> tracingData) : BuildCheckEventArgs
 {
     internal BuildCheckTracingEventArgs() : this(new Dictionary<string, TimeSpan>())
     { }
@@ -50,7 +58,7 @@ public sealed class BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> trac
     }
 }
 
-public sealed class BuildCheckAcquisitionEventArgs(string acquisitionData) : BuildCheckEventArgs
+internal sealed class BuildCheckAcquisitionEventArgs(string acquisitionData) : BuildCheckEventArgs
 {
     internal BuildCheckAcquisitionEventArgs() : this(string.Empty)
     { }
@@ -71,7 +79,7 @@ public sealed class BuildCheckAcquisitionEventArgs(string acquisitionData) : Bui
         AcquisitionData = reader.ReadString();
     }
 }
-public sealed class BuildCheckResultWarning : BuildWarningEventArgs
+internal sealed class BuildCheckResultWarning : BuildWarningEventArgs
 {
     public BuildCheckResultWarning(IBuildCheckResult result)
     {
@@ -97,7 +105,7 @@ public sealed class BuildCheckResultWarning : BuildWarningEventArgs
     public override string? Message { get; protected set; }
 }
 
-public sealed class BuildCheckResultError : BuildErrorEventArgs
+internal sealed class BuildCheckResultError : BuildErrorEventArgs
 {
     public BuildCheckResultError(IBuildCheckResult result)
     {
@@ -123,7 +131,7 @@ public sealed class BuildCheckResultError : BuildErrorEventArgs
     public override string? Message { get; protected set; }
 }
 
-public sealed class BuildCheckResultMessage : BuildMessageEventArgs
+internal sealed class BuildCheckResultMessage : BuildMessageEventArgs
 {
     public BuildCheckResultMessage(IBuildCheckResult result)
     {

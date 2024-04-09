@@ -12,7 +12,7 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// <summary>
 /// Holder for the reported result of a build cop rule.
 /// </summary>
-public interface IBuildCheckResult
+internal interface IBuildCheckResult
 {
     /// <summary>
     /// Optional location of the finding (in near future we might need to support multiple locations).

@@ -74,6 +74,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ResponseFileUsedEventArgs responseFileUsed = new("path");
             UninitializedPropertyReadEventArgs uninitializedPropertyRead = new("prop", "message", "help", "sender", MessageImportance.Normal);
             EnvironmentVariableReadEventArgs environmentVariableRead = new("env", "message", "help", "sender", MessageImportance.Normal);
+            GeneratedFileUsedEventArgs generatedFileUsed = new GeneratedFileUsedEventArgs("path", "some content");
 
             VerifyLoggingPacket(buildFinished, LoggingEventType.BuildFinishedEvent);
             VerifyLoggingPacket(buildStarted, LoggingEventType.BuildStartedEvent);
@@ -106,6 +107,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyLoggingPacket(responseFileUsed, LoggingEventType.ResponseFileUsedEvent);
             VerifyLoggingPacket(uninitializedPropertyRead, LoggingEventType.UninitializedPropertyRead);
             VerifyLoggingPacket(environmentVariableRead, LoggingEventType.EnvironmentVariableReadEvent);
+            VerifyLoggingPacket(generatedFileUsed, LoggingEventType.GeneratedFileUsedEvent);
         }
 
         private static BuildEventContext CreateBuildEventContext()
@@ -307,6 +309,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },
+                    new GeneratedFileUsedEventArgs("path", "some content"),
                 };
                 foreach (BuildEventArgs arg in testArgs)
                 {

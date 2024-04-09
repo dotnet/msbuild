@@ -16,7 +16,7 @@ public class BuildAnalyzerConfiguration
     //  nor in the editorconfig configuration file.
     public static BuildAnalyzerConfiguration Default { get; } = new()
     {
-        EvaluationAnalysisScope = BuildCheck.EvaluationAnalysisScope.AnalyzedProjectOnly,
+        EvaluationAnalysisScope = BuildCheck.EvaluationAnalysisScope.ProjectOnly,
         Severity = BuildAnalyzerResultSeverity.Info,
         IsEnabled = false,
     };

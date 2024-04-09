@@ -2984,10 +2984,10 @@ namespace Microsoft.Build.Execution
             loggingService.WarningsNotAsErrors = warningsNotAsErrors;
             loggingService.WarningsAsMessages = warningsAsMessages;
 
-            if (((IBuildComponentHost)this).BuildParameters.IsBuildCheckEnabled)
+            if (_buildParameters.IsBuildCheckEnabled)
             {
                 var buildCheckManagerProvider =
-                    ((IBuildComponentHost)this).GetComponent(BuildComponentType.BuildCheck) as IBuildCheckManagerProvider;
+                    ((IBuildComponentHost)this).GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider;
                 buildCheckManagerProvider!.Instance.SetDataSource(BuildCheckDataSource.EventArgs);
 
                 loggers = (loggers ?? Enumerable.Empty<ILogger>()).Concat(new[]

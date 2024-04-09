@@ -10,7 +10,8 @@ using Microsoft.Build.Experimental.BuildCheck;
 
 namespace Microsoft.Build.BuildCheck.Acquisition;
 
-// TODO: Acquisition
+// https://github.com/dotnet/msbuild/issues/9633
+// Acquisition
 //  define the data that will be passed to the acquisition module (and remoted if needed)
 internal class AnalyzerAcquisitionData(string data)
 {

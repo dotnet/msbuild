@@ -11,7 +11,6 @@ namespace Microsoft.Build.BuildCheck.Infrastructure;
 
 internal class TracingReporter
 {
-    internal const string INFRA_STAT_NAME = "Infrastructure";
     internal Dictionary<string, TimeSpan> TracingStats { get; } = new();
 
     // Infrastructure time keepers, examples for now

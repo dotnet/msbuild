@@ -26,7 +26,7 @@ internal sealed class BuildAnalyzerConfigurationInternal
     // Intentionally not checking the RuleId
     //  as for analyzers with multiple rules, we can squash config to a single one,
     //  if the ruleId is the only thing differing.
-    public bool IsEqual(BuildAnalyzerConfigurationInternal? other) =>
+    public bool IsSameConfigurationAs(BuildAnalyzerConfigurationInternal? other) =>
         other != null &&
         Severity == other.Severity &&
         IsEnabled == other.IsEnabled &&

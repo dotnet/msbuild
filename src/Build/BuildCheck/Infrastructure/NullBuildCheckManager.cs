@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BuildCheck.Acquisition;
+using Microsoft.Build.BuildCheck.Logging;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 
@@ -17,7 +18,7 @@ internal class NullBuildCheckManager : IBuildCheckManager
 {
     public void Shutdown() { }
 
-    public void ProcessEvaluationFinishedEventArgs(IBuildAnalysisLoggingContext buildAnalysisContext,
+    public void ProcessEvaluationFinishedEventArgs(AnalyzerLoggingContext buildAnalysisContext,
         ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs)
     { }
 

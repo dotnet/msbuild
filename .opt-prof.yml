@@ -21,8 +21,6 @@ resources:
     project: DevDiv
     source: DartLab
     branch: main
-    tags:
-    - production
   - pipeline: DartLab.OptProf
     source: DartLab.OptProf
     branch: main
@@ -32,7 +30,6 @@ resources:
   - repository: DartLabTemplates
     type: git
     name: DartLab.Templates
-    ref: refs/tags/Production
   - repository: DartLabOptProfTemplates
     type: git
     name: DartLab.OptProf
