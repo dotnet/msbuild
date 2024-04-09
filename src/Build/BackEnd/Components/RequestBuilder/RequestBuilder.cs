@@ -1126,14 +1126,8 @@ namespace Microsoft.Build.BackEnd
             }
 
             // We consider this the entrypoint for the project build for purposes of BuildCheck processing 
-            IBuildCheckManager buildCheckManager = null;
-
-            if (!isRestore)
-            {
-                buildCheckManager = (_componentHost.GetComponent(BuildComponentType.BuildCheck) as IBuildCheckManagerProvider)!.Instance;
-                buildCheckManager.isRestore = false;
-                buildCheckManager.SetDataSource(BuildCheckDataSource.BuildExecution);
-            }
+            IBuildCheckManager buildCheckManager = isRestore ? null : (_componentHost.GetComponent(BuildComponentType.BuildCheck) as IBuildCheckManagerProvider)!.Instance;
+            buildCheckManager?.SetDataSource(BuildCheckDataSource.BuildExecution);
 
             ErrorUtilities.VerifyThrow(_targetBuilder != null, "Target builder is null");
 
@@ -1183,6 +1177,7 @@ namespace Microsoft.Build.BackEnd
                         BuildCheckDataSource.BuildExecution,
                         _requestEntry.Request.ParentBuildEventContext);
                 }
+
             }
 
             _projectLoggingContext = _nodeLoggingContext.LogProjectStarted(_requestEntry);

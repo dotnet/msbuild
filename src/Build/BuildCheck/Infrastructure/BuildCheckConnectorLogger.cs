@@ -26,58 +26,60 @@ internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFact
 
     private void EventSource_AnyEventRaised(object sender, BuildEventArgs e)
     {
-        if (!buildCheckManager.isRestore)
+        if (buildCheckManager.isRestore)
         {
-            if (e is ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs)
-            {
-                if (projectEvaluationFinishedEventArgs.ProjectFile?.EndsWith(".metaproj") ?? false)
-                {
-                    return;
-                }
+            return;
+        }
 
-                try
-                {
-                    buildCheckManager.ProcessEvaluationFinishedEventArgs(
-                        loggingContextFactory.CreateLoggingContext(e.BuildEventContext!),
-                        projectEvaluationFinishedEventArgs);
-                }
-                catch (Exception exception)
-                {
-                    Debugger.Launch();
-                    Console.WriteLine(exception);
-                    throw;
-                }
+        if (e is ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs)
+        {
+            if (projectEvaluationFinishedEventArgs.ProjectFile?.EndsWith(".metaproj") ?? false)
+            {
+                return;
+            }
 
-                buildCheckManager.EndProjectEvaluation(BuildCheckDataSource.EventArgs, e.BuildEventContext!);
-            }
-            else if (e is ProjectEvaluationStartedEventArgs projectEvaluationStartedEventArgs)
+            try
             {
-                if (projectEvaluationStartedEventArgs.ProjectFile?.EndsWith(".metaproj") ?? false)
-                {
-                    return;
-                }
+                buildCheckManager.ProcessEvaluationFinishedEventArgs(
+                    loggingContextFactory.CreateLoggingContext(e.BuildEventContext!),
+                    projectEvaluationFinishedEventArgs);
+            }
+            catch (Exception exception)
+            {
+                Debugger.Launch();
+                Console.WriteLine(exception);
+                throw;
+            }
 
-                buildCheckManager.StartProjectEvaluation(BuildCheckDataSource.EventArgs, e.BuildEventContext!,
-                    projectEvaluationStartedEventArgs.ProjectFile!);
-            }
-            else if (e is ProjectStartedEventArgs projectStartedEvent)
+            buildCheckManager.EndProjectEvaluation(BuildCheckDataSource.EventArgs, e.BuildEventContext!);
+        }
+        else if (e is ProjectEvaluationStartedEventArgs projectEvaluationStartedEventArgs)
+        {
+            if (projectEvaluationStartedEventArgs.ProjectFile?.EndsWith(".metaproj") ?? false)
             {
-                buildCheckManager.StartProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!);
+                return;
             }
-            else if (e is ProjectFinishedEventArgs projectFinishedEventArgs)
+
+            buildCheckManager.StartProjectEvaluation(BuildCheckDataSource.EventArgs, e.BuildEventContext!,
+                projectEvaluationStartedEventArgs.ProjectFile!);
+        }
+        else if (e is ProjectStartedEventArgs projectStartedEvent)
+        {
+            buildCheckManager.StartProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!);
+        }
+        else if (e is ProjectFinishedEventArgs projectFinishedEventArgs)
+        {
+            buildCheckManager.EndProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!);
+        }
+        else if (e is BuildCheckEventArgs buildCheckBuildEventArgs)
+        {
+            if (buildCheckBuildEventArgs is BuildCheckTracingEventArgs tracingEventArgs)
             {
-                buildCheckManager.EndProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!);
+                _stats.Merge(tracingEventArgs.TracingData, (span1, span2) => span1 + span2);
             }
-            else if (e is BuildCheckEventArgs buildCheckBuildEventArgs)
+            else if (buildCheckBuildEventArgs is BuildCheckAcquisitionEventArgs acquisitionEventArgs)
             {
-                if (buildCheckBuildEventArgs is BuildCheckTracingEventArgs tracingEventArgs)
-                {
-                    _stats.Merge(tracingEventArgs.TracingData, (span1, span2) => span1 + span2);
-                }
-                else if (buildCheckBuildEventArgs is BuildCheckAcquisitionEventArgs acquisitionEventArgs)
-                {
-                    buildCheckManager.ProcessAnalyzerAcquisition(acquisitionEventArgs.ToAnalyzerAcquisitionData());
-                }
+                buildCheckManager.ProcessAnalyzerAcquisition(acquisitionEventArgs.ToAnalyzerAcquisitionData());
             }
         }
     }
