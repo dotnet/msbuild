@@ -163,7 +163,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 path = CreateProjectFile();
 
-                using var collection = new ProjectCollection();
+                var collection = new ProjectCollection();
                 collection.SetGlobalProperty("p", "v");
                 Project project = collection.LoadProject(path);
 
@@ -248,7 +248,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             using XmlReader reader = CreateProjectXmlReader();
 
-            using var collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             collection.SetGlobalProperty("p", "v");
 
             Project project = collection.LoadProject(reader);
@@ -264,7 +264,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             using XmlReader reader = CreateProjectXmlReader();
 
-            using var collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             collection.SetGlobalProperty("p", "v");
 
             Project project = collection.LoadProject(reader, ObjectModelHelpers.MSBuildDefaultToolsVersion);
@@ -278,7 +278,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void GlobalPropertyInheritProjectConstructor()
         {
-            using var collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             collection.SetGlobalProperty("p", "v");
 
             var project = new Project(collection);
@@ -322,7 +322,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             var project1 = new Project { FullPath = "c:\\1" };
 
-            using var collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             var project2 = new Project(collection) { FullPath = "c:\\1" };
 
             Assert.True(ReferenceEquals(project2, collection.LoadProject("c:\\1")));
@@ -582,7 +582,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void SettingGlobalPropertiesOnCollectionUpdatesProjects()
         {
-            using var collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             var project1 = new Project(collection) { FullPath = "c:\\y" };
             Assert.Empty(project1.GlobalProperties);
 
@@ -609,7 +609,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void SettingGlobalPropertiesOnCollectionUpdatesProjects2()
         {
-            using var collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             var project1 = new Project(collection) { FullPath = "c:\\y" };
             // load into collection
             project1.SetGlobalProperty("g1", "v0");
@@ -631,7 +631,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RemovingGlobalPropertiesOnCollectionUpdatesProjects()
         {
-            using var collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             var project1 = new Project(collection) { FullPath = "c:\\y" };
             Assert.Empty(project1.GlobalProperties);
 
@@ -676,7 +676,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RemovingGlobalPropertiesOnCollectionUpdatesProjects2()
         {
-            using var collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             collection.SetGlobalProperty("g1", "v1");
 
             var project1 = new Project(collection) { FullPath = "c:\\y" };
@@ -875,7 +875,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 project.Save(file1);
                 project.ProjectCollection.UnloadProject(project);
 
-                using var collection = new ProjectCollection();
+                var collection = new ProjectCollection();
 
                 Project project2 = collection.LoadProject(file1);
                 collection.UnloadProject(project2);
@@ -918,7 +918,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 project.Save(file1);
                 project.ProjectCollection.UnloadProject(project);
 
-                using var collection = new ProjectCollection();
+                var collection = new ProjectCollection();
 
                 collection.LoadProject(file1);
                 collection.UnloadAllProjects();
@@ -948,7 +948,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void AddToolset()
         {
-            using var collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             collection.RemoveAllToolsets();
 
             var toolset = new Toolset("x", "c:\\y", collection, null);
@@ -968,7 +968,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void AddTwoToolsets()
         {
-            using var collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             collection.RemoveAllToolsets();
 
             var toolset1 = new Toolset("x", "c:\\y", collection, null);
@@ -992,7 +992,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ReplaceToolset()
         {
-            using var collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             collection.RemoveAllToolsets();
 
             var toolset1 = new Toolset("x", "c:\\y", collection, null);
@@ -1026,7 +1026,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RemoveToolset()
         {
-            using var collection = new ProjectCollection();
+            var collection = new ProjectCollection();
 
             var toolset1 = new Toolset("x", "c:\\y", collection, null);
             var toolset2 = new Toolset("y", "c:\\z", collection, null);
@@ -1048,7 +1048,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RemoveNonexistentToolset()
         {
-            using var collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             Assert.False(collection.RemoveToolset("nonexistent"));
         }
 
@@ -1088,7 +1088,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 return;
             }
 
-            using var collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, collection.DefaultToolsVersion);
         }
 
@@ -1108,7 +1108,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 return;
             }
 
-            using var collection = new ProjectCollection(null, null, ToolsetDefinitionLocations.Registry);
+            var collection = new ProjectCollection(null, null, ToolsetDefinitionLocations.Registry);
             Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, collection.DefaultToolsVersion);
         }
 
@@ -1142,7 +1142,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void SetDefaultToolsVersion()
         {
-            using var collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             collection.AddToolset(new Toolset("x", @"c:\y", collection, null));
 
             collection.DefaultToolsVersion = "x";
@@ -1172,7 +1172,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ProjectCollectionChangedEvent()
         {
-            using var collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             bool dirtyRaised = false;
             ProjectCollectionChangedState expectedChange = ProjectCollectionChangedState.Loggers;
             collection.ProjectCollectionChanged +=
@@ -1338,7 +1338,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ProjectXmlChangedEvent()
         {
-            using var collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             ProjectRootElement pre = null;
             bool dirtyRaised = false;
             collection.ProjectXmlChanged +=
@@ -1397,7 +1397,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ProjectChangedEvent()
         {
-            using var collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             Project project = null;
             bool dirtyRaised = false;
             collection.ProjectChanged +=

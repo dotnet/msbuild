@@ -662,7 +662,7 @@ namespace Microsoft.Build.UnitTests
 
             using var stringReader = new StringReader(cleanedProject);
             using var xmlReader = XmlReader.Create(stringReader);
-            using var projectCollection = new ProjectCollection();
+            var projectCollection = new ProjectCollection();
 
             return ProjectRootElement.Create(
                 xmlReader,
@@ -688,7 +688,7 @@ namespace Microsoft.Build.UnitTests
         /// <returns>Returns created <see cref="Project"/>.</returns>
         public static Project CreateInMemoryProject(string xml, params ILogger[] loggers)
         {
-            using var projectCollection = new ProjectCollection();
+            var projectCollection = new ProjectCollection();
             return CreateInMemoryProject(projectCollection, xml, loggers);
         }
 

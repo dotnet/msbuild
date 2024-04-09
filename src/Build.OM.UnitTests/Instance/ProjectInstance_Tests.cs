@@ -415,7 +415,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         public void CreateProjectInstanceWithItemsContainingProjects()
         {
             const string CapturedMetadataName = "DefiningProjectFullPath";
-            using var pc = new ProjectCollection();
+            var pc = new ProjectCollection();
             var projA = ProjectRootElement.Create(pc);
             var projB = ProjectRootElement.Create(pc);
             projA.FullPath = Path.Combine(Path.GetTempPath(), "a.proj");
