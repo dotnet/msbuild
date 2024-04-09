@@ -54,11 +54,14 @@ namespace Microsoft.Build.BuildCheck.UnitTests
         private void MockField(string fieldName, object mockedValue)
         {
             var mockedField = _testedInstance.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
-            mockedField.SetValue(_testedInstance, mockedValue);
+            if (mockedField != null)
+            {
+                mockedField.SetValue(_testedInstance, mockedValue);
+            }
         }
     }
 
-    internal class BuildCheckAcquisitionModuleMock : IBuildCheckAcquisitionModule
+    internal sealed class BuildCheckAcquisitionModuleMock : IBuildCheckAcquisitionModule
     {
         private readonly bool _isAnalyzerRuleExistForTest = true;
 
@@ -70,7 +73,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             : null;
     }
 
-    internal class BuildAnalyzerRuleMock : BuildAnalyzer
+    internal sealed class BuildAnalyzerRuleMock : BuildAnalyzer
     {
         public static BuildAnalyzerRule SupportedRule = new BuildAnalyzerRule(
             "X01234",
