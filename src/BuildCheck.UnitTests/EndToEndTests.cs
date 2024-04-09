@@ -2,12 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
@@ -19,6 +14,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
     public class EndToEndTests : IDisposable
     {
         private readonly TestEnvironment _env;
+
         public EndToEndTests(ITestOutputHelper output)
         {
             _env = TestEnvironment.Create(output);
@@ -90,7 +86,6 @@ namespace Microsoft.Build.BuildCheck.UnitTests
 
             // var cache = new SimpleProjectRootElementCache();
             // ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile.Path, /*unused*/null, /*unused*/null, cache, false /*Not explicitly loaded - unused*/);
-
 
             TransientTestFile config = _env.CreateFile(workFolder, "editorconfig.json",
                 /*lang=json,strict*/

@@ -10,7 +10,7 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BuildCheck.Acquisition
 {
-    internal class BuildCheckAcquisitionModule
+    internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
     {
 #if FEATURE_ASSEMBLYLOADCONTEXT
         /// <summary>
@@ -18,6 +18,7 @@ namespace Microsoft.Build.BuildCheck.Acquisition
         /// </summary>
         private static readonly CoreClrAssemblyLoader s_coreClrAssemblyLoader = new();
 #endif
+
         public BuildAnalyzerFactory? CreateBuildAnalyzerFactory(AnalyzerAcquisitionData analyzerAcquisitionData)
         {
             try

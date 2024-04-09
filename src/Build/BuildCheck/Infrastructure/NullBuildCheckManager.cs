@@ -27,7 +27,9 @@ internal class NullBuildCheckManager : IBuildCheckManager
     {
     }
 
-    public void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData) { }
+    public void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, BuildEventContext buildEventContext) 
+    {
+    }
 
     public Dictionary<string, TimeSpan> CreateTracingStats() => throw new NotImplementedException();
 

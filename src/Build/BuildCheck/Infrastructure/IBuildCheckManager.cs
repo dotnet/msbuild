@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,8 +20,7 @@ internal enum BuildCheckDataSource
 {
     EventArgs,
     BuildExecution,
-
-    ValuesCount = BuildExecution + 1
+    ValuesCount = BuildExecution + 1,
 }
 
 /// <summary>
@@ -34,7 +34,7 @@ internal interface IBuildCheckManager
 
     void SetDataSource(BuildCheckDataSource buildCheckDataSource);
 
-    void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData);
+    void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, BuildEventContext buildEventContext);
 
     Dictionary<string, TimeSpan> CreateTracingStats();
 
@@ -44,10 +44,12 @@ internal interface IBuildCheckManager
     //  but as well from the ConnectorLogger - as even if interleaved, it gives the info
     //  to manager about what analyzers need to be materialized and configuration fetched.
     // No unloading of analyzers is yet considered - once loaded it stays for whole build.
-
     void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext, string fullPath);
+
     void EndProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext);
+
     void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext);
+
     void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext);
 
     void Shutdown();

@@ -25,7 +25,7 @@ internal delegate BuildAnalyzerWrapper BuildAnalyzerWrapperFactory(Configuration
 internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 {
     private static IBuildCheckManager? s_globalInstance;
-  
+
     internal static IBuildCheckManager GlobalInstance => s_globalInstance ?? throw new InvalidOperationException("BuildCheckManagerProvider not initialized");
 
     public IBuildCheckManager Instance => GlobalInstance;
@@ -60,7 +60,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
     public void ShutdownComponent() => GlobalInstance.Shutdown();
 
-    private sealed class BuildCheckManager : IBuildCheckManager
+    internal sealed class BuildCheckManager : IBuildCheckManager
     {
         private readonly TracingReporter _tracingReporter = new TracingReporter();
         private readonly BuildCheckCentralContext _buildCheckCentralContext = new();
@@ -68,11 +68,12 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         private readonly List<BuildAnalyzerFactoryContext> _analyzersRegistry;
         private readonly bool[] _enabledDataSources = new bool[(int)BuildCheckDataSource.ValuesCount];
         private readonly BuildEventsProcessor _buildEventsProcessor;
-        private readonly BuildCheckAcquisitionModule _acquisitionModule = new();
+        private readonly IBuildCheckAcquisitionModule _acquisitionModule;
 
         internal BuildCheckManager(ILoggingService loggingService)
         {
             _analyzersRegistry = new List<BuildAnalyzerFactoryContext>();
+            _acquisitionModule = new BuildCheckAcquisitionModule();
             _loggingService = loggingService;
             _buildEventsProcessor = new(_buildCheckCentralContext);
         }
@@ -94,14 +95,18 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             }
         }
 
-        public void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData)
+        public void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, BuildEventContext buildEventContext)
         {
             if (IsInProcNode)
             {
                 BuildAnalyzerFactory? factory = _acquisitionModule.CreateBuildAnalyzerFactory(acquisitionData);
                 if (factory != null)
                 {
-                    RegisterCustomAnalyzer(BuildCheckDataSource.EventArgs, factory);
+                    RegisterCustomAnalyzer(BuildCheckDataSource.EventArgs, factory, buildEventContext);
+                }
+                else
+                {
+                    _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerFailedAcquisition", acquisitionData.AssemblyPath);
                 }
             }
             else
@@ -161,7 +166,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         /// </summary>
         internal void RegisterCustomAnalyzer(
             BuildCheckDataSource buildCheckDataSource,
-            BuildAnalyzerFactory factory)
+            BuildAnalyzerFactory factory,
+            BuildEventContext buildEventContext)
         {
             if (_enabledDataSources[(int)buildCheckDataSource])
             {
@@ -170,6 +176,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                     factory,
                     instance.SupportedRules.Select(r => r.Id).ToArray(),
                     instance.SupportedRules.Any(r => r.DefaultConfiguration.IsEnabled == true)));
+                _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerSuccessfulAcquisition", instance.GetType().Name);
             }
         }
 
@@ -279,7 +286,6 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             }
         }
 
-
         public void ProcessEvaluationFinishedEventArgs(
             AnalyzerLoggingContext buildAnalysisContext,
             ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
@@ -362,9 +368,13 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 ba.Initialize(configContext);
                 return new BuildAnalyzerWrapper(ba);
             };
+
             public BuildAnalyzerWrapper? MaterializedAnalyzer { get; set; }
+
             public string[] RuleIds { get; init; } = ruleIds;
+
             public bool IsEnabledByDefault { get; init; } = isEnabledByDefault;
+
             public string FriendlyName => MaterializedAnalyzer?.BuildAnalyzer.FriendlyName ?? factory().FriendlyName;
         }
     }

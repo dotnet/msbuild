@@ -30,12 +30,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\FileUtilities.cs">
-      <Link>Shared\FileUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\TempFileUtilities.cs">
-      <Link>Shared\TempFileUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\ErrorUtilities.cs">
       <Link>Shared\ErrorUtilities.cs</Link>
     </Compile>
