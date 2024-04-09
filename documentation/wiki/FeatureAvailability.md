@@ -6,7 +6,7 @@ Feature Availablity is an API that can tell you a specific feature's availabilit
 In `Microsoft.Build.Framework` use `FeatureStatus Features.CheckFeatureAvailability(string featureName)` to get the feature availability.
 
 ## Command line switch
-Use `/featureavailability`(`-featureavailability`) or `/fa`()`-fa` switches.
+Use `/featureavailability`(`-featureavailability`) or `/fa` (`-fa`) switches.
 
 ## Property function `CheckFeatureAvailability`
 Use `string CheckFeatureAvailability(string featureName)` property function.
