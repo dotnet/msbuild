@@ -46,9 +46,6 @@ namespace Microsoft.Build.UnitTests
         public static TestEnvironment Create(ITestOutputHelper output = null, bool ignoreBuildErrorFiles = false)
         {
             var env = new TestEnvironment(output ?? new DefaultOutput());
-            // Clear these two envrironment variables first in case pre-setting affects the test.
-            env.SetEnvironmentVariable("MSBUILDLIVELOGGER", string.Empty);
-            env.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", string.Empty);
 
             // In most cases, if MSBuild wrote an MSBuild_*.txt to the temp path something went wrong.
             if (!ignoreBuildErrorFiles)
