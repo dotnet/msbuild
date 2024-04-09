@@ -141,7 +141,6 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
     [InlineData("MSBUILDTERMINALLOGGER")]
     public void TerminalLoggerOnByEnv(string envVarSource)
     {
-        _env.SetEnvironmentVariable("MSBUILDDEBUGENGINE", null);
         _env.SetEnvironmentVariable(envVarSource, bool.TrueString);
         string output = RunnerUtilities.ExecMSBuild($"{_cmd}", out bool success);
         success.ShouldBeTrue();

@@ -470,9 +470,6 @@ namespace Microsoft.Build.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                // Clear these two envrironment variables first in case pre-setting affects the test.
-                env.SetEnvironmentVariable("MSBUILDLIVELOGGER", string.Empty);
-                env.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", string.Empty);
                 string contents = @"
 <Project>
     <ItemGroup>

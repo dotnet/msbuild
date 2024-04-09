@@ -1,5 +1,6 @@
 #! /bin/bash
 
+export MSBUILDLIVELOGGER="auto"
 configuration="Debug"
 host_type="core"
 build_stage1=true
