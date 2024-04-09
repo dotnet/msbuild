@@ -70,6 +70,17 @@ namespace Microsoft.Build.Shared
         internal const string MSBuildDummyGlobalPropertyHeader = "MSBuildProjectInstance";
 
         /// <summary>
+        /// A property set during an implicit restore (/restore) or explicit restore (/t:restore) to ensure that the evaluations are not re-used during build
+        /// </summary>
+        internal const string MSBuildRestoreSessionId = nameof(MSBuildRestoreSessionId);
+
+        /// <summary>
+        /// A property set during an implicit restore (/restore) or explicit restore (/t:restore) to indicate that a restore is executing.
+        /// </summary>
+        internal const string MSBuildIsRestoring = nameof(MSBuildIsRestoring);
+
+
+        /// <summary>
         /// The most current VSGeneralAssemblyVersion known to this version of MSBuild.
         /// </summary>
         internal const string CurrentAssemblyVersion = "15.1.0.0";

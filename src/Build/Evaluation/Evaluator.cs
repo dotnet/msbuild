@@ -1150,9 +1150,6 @@ namespace Microsoft.Build.Evaluation
 #if RUNTIME_TYPE_NETCORE
             SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType,
                 Traits.Instance.ForceEvaluateAsFullFramework ? "Full" : "Core");
-#elif MONO
-            SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType,
-                                                        NativeMethodsShared.IsMono ? "Mono" : "Full");
 #else
             SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType, "Full");
 #endif

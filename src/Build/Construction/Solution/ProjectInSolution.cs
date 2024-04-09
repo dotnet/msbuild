@@ -8,7 +8,7 @@ using System.IO;
 using System.Security;
 using System.Text;
 using System.Xml;
-#if !NETFRAMEWORK || MONO
+#if !NETFRAMEWORK
 using Microsoft.Build.Shared;
 #endif
 
@@ -157,7 +157,7 @@ namespace Microsoft.Build.Construction
 
             internal set
             {
-#if NETFRAMEWORK && !MONO
+#if NETFRAMEWORK
                 // Avoid loading System.Runtime.InteropServices.RuntimeInformation in full-framework
                 // cases. It caused https://github.com/NuGet/Home/issues/6918.
                 _relativePath = value;
@@ -184,7 +184,7 @@ namespace Microsoft.Build.Construction
                     {
                         try
                         {
-#if NETFRAMEWORK && !MONO
+#if NETFRAMEWORK
                             _absolutePath = Path.GetFullPath(_absolutePath);
 #else
                             _absolutePath = FileUtilities.NormalizePath(_absolutePath);

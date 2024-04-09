@@ -762,9 +762,13 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// The entry point for the request builder thread.
+        /// Launch the project and gather the results, reporting them back to the BuildRequestEngine.
         /// </summary>
         private async Task RequestThreadProc(bool setThreadParameters)
         {
+            Exception thrownException = null;
+            BuildResult result = null;
+
             try
             {
                 if (setThreadParameters)
@@ -772,42 +776,9 @@ namespace Microsoft.Build.BackEnd
                     SetCommonWorkerThreadParameters();
                 }
                 MSBuildEventSource.Log.RequestThreadProcStart();
-                await BuildAndReport();
-                MSBuildEventSource.Log.RequestThreadProcStop();
-            }
-            catch (ThreadAbortException)
-            {
-                // Do nothing.  This will happen when the thread is forcibly terminated because we are shutting down, for example
-                // when the unit test framework terminates.
-                throw;
-            }
-            catch (Exception e)
-            {
-                // Dump all engine exceptions to a temp file
-                // so that we have something to go on in the
-                // event of a failure
-                ExceptionHandling.DumpExceptionToFile(e);
-
-                // This is fatal: process will terminate: make sure the
-                // debugger launches
-                ErrorUtilities.ThrowInternalError(e.Message, e);
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Launch the project and gather the results, reporting them back to the BuildRequestEngine.
-        /// </summary>
-        private async Task BuildAndReport()
-        {
-            Exception thrownException = null;
-            BuildResult result = null;
-            VerifyEntryInActiveState();
-
-            // Start the build request
-            try
-            {
+                VerifyEntryInActiveState();
                 result = await BuildProject();
+                MSBuildEventSource.Log.RequestThreadProcStop();
             }
             catch (InvalidProjectFileException ex)
             {
@@ -853,17 +824,32 @@ namespace Microsoft.Build.BackEnd
 
                     loggingContext.LogCommentFromText(MessageImportance.Low, ex.ToString());
                 }
-                else
+                else if (ex is ThreadAbortException)
+                {
+                    // Do nothing.  This will happen when the thread is forcibly terminated because we are shutting down, for example
+                    // when the unit test framework terminates.
+                    throw;
+                }
+                else if (ex is not CriticalTaskException)
                 {
                     (((LoggingContext)_projectLoggingContext) ?? _nodeLoggingContext).LogError(BuildEventFileInfo.Empty, "UnhandledMSBuildError", ex.ToString());
                 }
 
                 if (ExceptionHandling.IsCriticalException(ex))
                 {
+                    // Dump all engine exceptions to a temp file
+                    // so that we have something to go on in the
+                    // event of a failure
+                    ExceptionHandling.DumpExceptionToFile(ex);
+
                     // This includes InternalErrorException, which we definitely want a callstack for.
                     // Fortunately the default console UnhandledExceptionHandler will log the callstack even
                     // for unhandled exceptions thrown from threads other than the main thread, like here.
                     // Less fortunately NUnit doesn't.
+
+                    // This is fatal: process will terminate: make sure the
+                    // debugger launches
+                    ErrorUtilities.ThrowInternalError(ex.Message, ex);
                     throw;
                 }
             }
@@ -879,8 +865,6 @@ namespace Microsoft.Build.BackEnd
 
                 ReportResultAndCleanUp(result);
             }
-
-            return;
         }
 
         /// <summary>

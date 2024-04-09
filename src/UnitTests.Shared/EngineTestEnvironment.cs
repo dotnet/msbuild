@@ -30,7 +30,7 @@ namespace Microsoft.Build.UnitTests
 
         private sealed class ResetDefaultBuildManager
         {
-            internal static FieldInfo SingletonField;
+            public static FieldInfo SingletonField;
 
             public ResetDefaultBuildManager()
             {
@@ -132,13 +132,13 @@ namespace Microsoft.Build.UnitTests
             CreatedFiles = Helpers.CreateFilesInDirectory(TestRoot, files);
         }
 
-        internal MockLogger BuildProjectExpectFailure(IDictionary<string, string> globalProperties = null, string toolsVersion = null, bool validateLoggerRoundtrip = true)
+        public MockLogger BuildProjectExpectFailure(IDictionary<string, string> globalProperties = null, string toolsVersion = null, bool validateLoggerRoundtrip = true)
         {
             BuildProject(globalProperties, toolsVersion, out MockLogger logger, validateLoggerRoundtrip).ShouldBeFalse();
             return logger;
         }
 
-        internal MockLogger BuildProjectExpectSuccess(IDictionary<string, string> globalProperties = null, string toolsVersion = null, bool validateLoggerRoundtrip = true)
+        public MockLogger BuildProjectExpectSuccess(IDictionary<string, string> globalProperties = null, string toolsVersion = null, bool validateLoggerRoundtrip = true)
         {
             BuildProject(globalProperties, toolsVersion, out MockLogger logger, validateLoggerRoundtrip).ShouldBeTrue();
             return logger;

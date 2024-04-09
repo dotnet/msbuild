@@ -962,7 +962,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 string[] subDirectories = _getDirectories(reference.DirectoryName, "*");
-                string sateliteFilename = subDirectories.Length > 0
+                string satelliteFilename = subDirectories.Length > 0
                     ? reference.FileNameWithoutExtension + ".resources.dll"
                     : string.Empty;
 
@@ -973,11 +973,11 @@ namespace Microsoft.Build.Tasks
 
                     if (CultureInfoCache.IsValidCultureString(cultureName))
                     {
-                        string satelliteAssembly = Path.Combine(subDirectory, sateliteFilename);
+                        string satelliteAssembly = Path.Combine(subDirectory, satelliteFilename);
                         if (_fileExists(satelliteAssembly))
                         {
                             // This is valid satellite assembly.
-                            reference.AddSatelliteFile(Path.Combine(cultureName, sateliteFilename));
+                            reference.AddSatelliteFile(Path.Combine(cultureName, satelliteFilename));
                         }
                     }
                 }

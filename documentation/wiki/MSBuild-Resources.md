@@ -12,7 +12,10 @@
    * find targets [referencesource.microsoft.com/#MSBuildTarget=ResolveAssemblyReferences](https://referencesource.microsoft.com/#MSBuildTarget=ResolveAssemblyReferences)
 
 # Tools
-**Note:** These are third party tools
+ * [PowerShell](https://learn.microsoft.com/powershell/scripting/overview)
+   * Allows to execute powershell scripts in Windows, Linux, and macOS.
+
+Third-party tools:
  * [MSBuildStructuredLog](https://msbuildlog.com/)
    * A log viewer that displays a structured representation of executed targets, tasks, property and item values.
  * [MSBuildExtensionPack](https://github.com/mikefourie-zz/MSBuildExtensionPack) (also via [NuGet](https://www.nuget.org/packages/MSBuild.Extension.Pack))

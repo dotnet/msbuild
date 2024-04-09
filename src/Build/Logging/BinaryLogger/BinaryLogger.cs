@@ -68,6 +68,8 @@ namespace Microsoft.Build.Logging
         //   - Making ProjectStartedEventArgs, ProjectEvaluationFinishedEventArgs, AssemblyLoadBuildEventArgs equal
         //     between de/serialization roundtrips.
         //   - Adding serialized events lengths - to support forward compatible reading
+        // version 19:
+        //   - GeneratedFileUsedEventArgs exposed for brief period of time (so let's continue with 20)
 
         // This should be never changed.
         // The minimum version of the binary log reader that can read log of above version.
@@ -366,17 +368,27 @@ namespace Microsoft.Build.Logging
         {
             if (stream != null)
             {
+                if (projectImportsCollector != null)
+                {
+                    CollectImports(e);
+                }
+
+                if (DoNotWriteToBinlog(e))
+                {
+                    return;
+                }
+
                 // TODO: think about queuing to avoid contention
                 lock (eventArgsWriter)
                 {
                     eventArgsWriter.Write(e);
                 }
-
-                if (projectImportsCollector != null)
-                {
-                    CollectImports(e);
-                }
             }
+        }
+
+        private static bool DoNotWriteToBinlog(BuildEventArgs e)
+        {
+            return e is GeneratedFileUsedEventArgs;
         }
 
         private void CollectImports(BuildEventArgs e)
@@ -396,6 +408,11 @@ namespace Microsoft.Build.Logging
             else if (e is ResponseFileUsedEventArgs responseFileArgs && responseFileArgs.ResponseFilePath != null)
             {
                 projectImportsCollector.AddFile(responseFileArgs.ResponseFilePath);
+            }
+            else if (e is GeneratedFileUsedEventArgs generatedFileUsedEventArgs && generatedFileUsedEventArgs.FilePath != null)
+            {
+                string fullPath = Path.GetFullPath(generatedFileUsedEventArgs.FilePath);
+                projectImportsCollector.AddFileFromMemory(fullPath, generatedFileUsedEventArgs.Content);
             }
         }
 

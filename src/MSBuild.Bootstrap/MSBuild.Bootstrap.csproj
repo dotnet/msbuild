@@ -35,20 +35,8 @@
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(MonoBuild)' == 'true'">
-    <!-- This is for the second build. Copy over the resolvers from the bootstrap directory, which will include the
-         nuget resolver also -->
-    <Content
-            Condition="'$(CreateBootstrap)' != 'true'"
-            Include="$(MSBuildBinPath)\SdkResolvers\**\*" LinkBase="SdkResolvers" CopyToOutputDirectory="PreserveNewest" />
-
-    <Content Include="$(MSBuildExtensionsPath)\**\*" LinkBase="Extensions" CopyToOutputDirectory="PreserveNewest" />
-
-    <Content Include="$(DotNetRoot)sdk\$(DotNetCliVersion)\RuntimeIdentifierGraph.json" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
-
   <!-- Use deps file from this project with additional dependencies listed instead of the one generated in the MSBuild project -->
-  <Target Name="UpdateMSBuildDepsFile" AfterTargets="Build" Condition="'$(MonoBuild)' != 'true' and ($([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1')) or '$(TargetFramework)' == 'netstandard2.0')">
+  <Target Name="UpdateMSBuildDepsFile" AfterTargets="Build" Condition="($([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1')) or '$(TargetFramework)' == 'netstandard2.0')">
     <Copy SourceFiles="$(OutputPath)$(AssemblyName).deps.json" DestinationFiles="$(OutputPath)MSBuild.deps.json" SkipUnchangedFiles="true" />
   </Target>
   <Target Name="UpdatePublishedMSBuildDepsFile" AfterTargets="Publish" Condition="'$(TargetFramework)' == '$(LatestDotNetCoreForMSBuild)'">
