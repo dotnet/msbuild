@@ -697,7 +697,6 @@
       <Link>SharedUtilities\XmlUtilities.cs</Link>
     </Compile>
     <Compile Include="Evaluation\LazyItemEvaluator.EvaluatorData.cs" />
-    <Content Include="stylecop.json" />
 
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />

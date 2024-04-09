@@ -19,21 +19,14 @@ using static Microsoft.Build.BuildCheck.Infrastructure.BuildCheckManagerProvider
 
 namespace Microsoft.Build.BuildCheck.UnitTests
 {
-    public class BuildCheckManagerTests : IDisposable
+    public class BuildCheckManagerTests
     {
-        private readonly TestEnvironment _env;
-
         private readonly IBuildCheckManager _testedInstance;
         private readonly ILoggingService _loggingService;
         private readonly MockLogger _logger;
 
         public BuildCheckManagerTests(ITestOutputHelper output)
         {
-            _env = TestEnvironment.Create(output);
-
-            // this is needed to ensure the binary logger does not pollute the environment
-            _env.WithEnvironmentInvariant();
-
             _loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             _logger = new MockLogger();
             _loggingService.RegisterLogger(_logger);
@@ -53,8 +46,6 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             _logger.AllBuildEvents.Where(be => be.GetType() == typeof(BuildMessageEventArgs))
                 .ShouldContain(be => be.Message == expectedMessage);
         }
-
-        public void Dispose() => _env.Dispose();
 
         private void MockBuildCheckAcquisition(bool isAnalyzerRuleExist) => MockField("_acquisitionModule", new BuildCheckAcquisitionModuleMock(isAnalyzerRuleExist));
 
