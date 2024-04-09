@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
@@ -59,6 +60,8 @@ namespace Microsoft.Build.Graph
         private GraphBuilder.GraphEdges Edges { get; }
 
         internal GraphBuilder.GraphEdges TestOnly_Edges => Edges;
+
+        internal SolutionFile Solution { get; }
 
         public GraphConstructionMetrics ConstructionMetrics { get; private set; }
 
@@ -433,6 +436,7 @@ namespace Microsoft.Build.Graph
             GraphRoots = graphBuilder.RootNodes;
             ProjectNodes = graphBuilder.ProjectNodes;
             Edges = graphBuilder.Edges;
+            Solution = graphBuilder.Solution;
 
             _projectNodesTopologicallySorted = new Lazy<IReadOnlyCollection<ProjectGraphNode>>(() => TopologicalSort(GraphRoots, ProjectNodes));
 
@@ -604,14 +608,92 @@ namespace Microsoft.Build.Graph
             var encounteredEdges = new HashSet<ProjectGraphBuildRequest>();
             var edgesToVisit = new Queue<ProjectGraphBuildRequest>();
 
-            foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
+            if (entryProjectTargets == null || entryProjectTargets.Count == 0)
             {
-                var entryTargets = entryProjectTargets == null || entryProjectTargets.Count == 0
-                    ? ImmutableList.CreateRange(entryPointNode.ProjectInstance.DefaultTargets)
-                    : ImmutableList.CreateRange(entryProjectTargets);
-                var entryEdge = new ProjectGraphBuildRequest(entryPointNode, entryTargets);
-                encounteredEdges.Add(entryEdge);
-                edgesToVisit.Enqueue(entryEdge);
+                // If no targets were specified, use every project's default targets.
+                foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
+                {
+                    var entryTargets = ImmutableList.CreateRange(entryPointNode.ProjectInstance.DefaultTargets);
+                    var entryEdge = new ProjectGraphBuildRequest(entryPointNode, entryTargets);
+                    encounteredEdges.Add(entryEdge);
+                    edgesToVisit.Enqueue(entryEdge);
+                }
+            }
+            else
+            {
+                foreach (string targetName in entryProjectTargets)
+                {
+                    // Special-case the "Build" target. The solution's metaproj invokes each project's default targets
+                    if (targetName.Equals("Build", StringComparison.OrdinalIgnoreCase))
+                    {
+                        foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
+                        {
+                            var entryTargets = ImmutableList.CreateRange(entryPointNode.ProjectInstance.DefaultTargets);
+                            var entryEdge = new ProjectGraphBuildRequest(entryPointNode, entryTargets);
+                            encounteredEdges.Add(entryEdge);
+                            edgesToVisit.Enqueue(entryEdge);
+                        }
+
+                        continue;
+                    }
+
+                    bool isSolutionTraversalTarget = false;
+                    if (Solution != null)
+                    {
+                        foreach (ProjectInSolution project in Solution.ProjectsInOrder)
+                        {
+                            if (!SolutionFile.IsBuildableProject(project))
+                            {
+                                continue;
+                            }
+
+                            string baseProjectName = ProjectInSolution.DisambiguateProjectTargetName(project.GetUniqueProjectName());
+
+                            // Solutions generate target names to build individual projects. Map these to "real" targets on the relevant projects.
+                            // This logic should match SolutionProjectGenerator's behavior
+                            if (targetName.Equals(baseProjectName, StringComparison.OrdinalIgnoreCase))
+                            {
+                                // Build a specific project with its default targets.
+                                ProjectGraphNode node = GetNodeForProject(project);
+                                ProjectGraphBuildRequest entryEdge = new(node, ImmutableList.CreateRange(node.ProjectInstance.DefaultTargets));
+                                encounteredEdges.Add(entryEdge);
+                                edgesToVisit.Enqueue(entryEdge);
+                                isSolutionTraversalTarget = true;
+                            }
+                            else if (targetName.StartsWith($"{baseProjectName}:", StringComparison.OrdinalIgnoreCase))
+                            {
+                                // Build a specific project with the specified target
+                                string projectTargetName = targetName.Substring(baseProjectName.Length + 1);
+
+                                // Special-case "Project:" and "Project:Build". SolutionProjectGenerator does not generate a target for those, so should error with MSB4057
+                                ProjectErrorUtilities.VerifyThrowInvalidProject(
+                                    projectTargetName.Length > 0 && !projectTargetName.Equals("Build", StringComparison.OrdinalIgnoreCase),
+                                    ElementLocation.Create(Solution.FullPath),
+                                    "TargetDoesNotExist",
+                                    targetName);
+
+                                ProjectGraphNode node = GetNodeForProject(project);
+                                ProjectGraphBuildRequest entryEdge = new(node,[projectTargetName]);
+                                encounteredEdges.Add(entryEdge);
+                                edgesToVisit.Enqueue(entryEdge);
+                                isSolutionTraversalTarget = true;
+                            }
+
+                            // For solutions, there should only be exactly one entry node per project file
+                            ProjectGraphNode GetNodeForProject(ProjectInSolution project) => EntryPointNodes.First(node => string.Equals(node.ProjectInstance.FullPath, project.AbsolutePath));
+                        }
+                    }
+
+                    if (!isSolutionTraversalTarget)
+                    {
+                        foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
+                        {
+                            ProjectGraphBuildRequest entryEdge = new(entryPointNode,[targetName]);
+                            encounteredEdges.Add(entryEdge);
+                            edgesToVisit.Enqueue(entryEdge);
+                        }
+                    }
+                }
             }
 
             // Traverse the entire graph, visiting each edge once.
