@@ -157,6 +157,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                         </ItemGroup>
                     </Project>
                 ";
+
             using var stringReader = new StringReader(content);
             using var xmlReader = XmlReader.Create(stringReader);
             Project project = new Project(xmlReader);
@@ -3759,10 +3760,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
     public class ProjectItemWithOptimizations_Tests : ProjectItem_Tests
     {
-       public ProjectItemWithOptimizations_Tests()
-       {
-           // Make sure we always use the dictionary-based Remove logic.
-           _env.SetEnvironmentVariable("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", "0");
-       }
+        public ProjectItemWithOptimizations_Tests()
+        {
+            // Make sure we always use the dictionary-based Remove logic.
+            _env.SetEnvironmentVariable("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", "0");
+        }
     }
 }

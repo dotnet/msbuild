@@ -259,7 +259,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 project.Save(projectfile);
 
                 using var stringReader2 = new StringReader(targetsfileContent);
-                using var xmlReader2 = XmlReader.Create(stringReader);
+                using var xmlReader2 = XmlReader.Create(stringReader2);
                 project = ProjectRootElement.Create(xmlReader2);
                 project.Save(targetsFile);
                 Project msbuildProject = new Project(projectfile);

@@ -121,7 +121,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                using ProjectCollection collection = new ProjectCollection();
+                ProjectCollection collection = new ProjectCollection();
                 Project project = new Project(collection);
 
                 path = FileUtilities.GetTemporaryFileName();
@@ -194,7 +194,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 path = CreateProjectFile();
 
-                using ProjectCollection collection = new ProjectCollection();
+                ProjectCollection collection = new ProjectCollection();
                 collection.SetGlobalProperty("p", "v");
                 Project project = collection.LoadProject(path, "4.0");
 
@@ -225,7 +225,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 path = CreateProjectFile();
 
-                using ProjectCollection collection = new ProjectCollection();
+                ProjectCollection collection = new ProjectCollection();
                 collection.SetGlobalProperty("p", "v");
                 Project project = collection.LoadProject(path, null, "4.0");
 
@@ -343,13 +343,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 path = FileUtilities.GetTemporaryFileName();
                 ProjectRootElement.Create(path).Save();
 
-                using ProjectCollection collection1 = new ProjectCollection();
+                ProjectCollection collection1 = new ProjectCollection();
                 Project project1 = collection1.LoadProject(path);
                 Project project1b = collection1.LoadProject(path);
 
                 Assert.True(ReferenceEquals(project1.Xml, project1b.Xml));
 
-                using ProjectCollection collection2 = new ProjectCollection();
+                ProjectCollection collection2 = new ProjectCollection();
                 Project project2 = collection2.LoadProject(path);
 
                 Assert.False(ReferenceEquals(project1.Xml, project2.Xml));
@@ -565,7 +565,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ChangingGlobalPropertiesUpdatesCollection()
         {
-            using ProjectCollection collection = new ProjectCollection();
+            ProjectCollection collection = new ProjectCollection();
             var project = new Project(collection) { FullPath = "c:\\x" };
             project.SetGlobalProperty("p", "v1"); // should update collection
 
@@ -835,7 +835,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project = new Project();
                 project.Save(file1);
 
-                using ProjectCollection collection = new ProjectCollection();
+                ProjectCollection collection = new ProjectCollection();
 
                 Project project2 = collection.LoadProject(file1);
                 project2.Save(file2);
