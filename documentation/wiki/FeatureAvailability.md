@@ -1,5 +1,5 @@
 # What is Feature Availablity?
-Feature Availablity is an API that can tell you the availability status of the specific feature of the MSBuild engine. Feature is saved as a string and availability is an enum `FeatureStatus`: `Undefined`, `Available`, `NotAvailable`, `Preview`.
+Feature Availability is an API that can tell you the availability status of the specific feature of the MSBuild engine. Feature names are represented by strings and availability is an enum `FeatureStatus` with the following values: `Undefined`, `Available`, `NotAvailable`, `Preview`.
 
 # How to use?
 ## API
