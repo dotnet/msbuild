@@ -33,21 +33,21 @@
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
         <source>failed with {0} error(s)</source>
-        <target state="new">failed with {0} error(s)</target>
+        <target state="translated">{0} 오류와 함께 실패</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
         <source>failed with {0} error(s) and {1} warning(s)</source>
-        <target state="new">failed with {0} error(s) and {1} warning(s)</target>
+        <target state="translated">{0} 오류와 {1} 경고와 함께 실패</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
         <source>failed with {0} warning(s)</source>
-        <target state="new">failed with {0} warning(s)</target>
+        <target state="translated">{0} 경고와 함께 실패</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -61,7 +61,7 @@
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with {0} warning(s)</source>
-        <target state="new">succeeded with {0} warning(s)</target>
+        <target state="translated">{0} 경고와 함께 성공</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -580,11 +580,11 @@
         <target state="translated">  -logger:&lt;로거&gt;   이 로거를 사용하여 MSBuild의 이벤트를 기록합니다. 여러
                      로거를 지정하려면 각 로거를 개별적으로 지정합니다.
                      &lt;로거&gt; 구문은 다음과 같습니다.
-                       [&lt;클래스&gt;,]&lt;어셈블리&gt;[,&lt;옵션&gt;][;&lt;매개 변수&gt;]
+                       [&lt;클래스&gt;,]&lt;assembly&gt;[,&lt;옵션&gt;][;&lt;매개 변수&gt;]
                      &lt;로거 클래스&gt; 구문은 다음과 같습니다.
                        [&lt;부분 또는 전체 네임스페이스&gt;.]&lt;로거 클래스 이름&gt;
                      &lt;로거 어셈블리&gt; 구문은 다음과 같습니다.
-                       {&lt;어셈블리 이름&gt;[,&lt;strong name&gt;] | &lt;어셈블리 파일&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      로거 옵션은 MSBuild가 로거를 만드는 방법을 지정합니다.
                      &lt;로거 매개 변수&gt;는 선택 사항이고 입력한 대로 정확히
                      로거에 전달됩니다. (약식: -l)
@@ -862,11 +862,11 @@
                      로거를 지정하려면 각 로거를 개별적으로 지정합니다.
                      (약식 -dl)
                      &lt;로거&gt; 구문은 다음과 같습니다.
-                       [&lt;클래스&gt;,]&lt;어셈블리&gt;[,&lt;옵션&gt;][;&lt;매개 변수&gt;]
+                       [&lt;클래스&gt;,]&lt;assembly&gt;[,&lt;옵션&gt;][;&lt;매개 변수&gt;]
                      &lt;로거 클래스&gt; 구문은 다음과 같습니다.
                        [&lt;부분 또는 전체 네임스페이스&gt;.]&lt;로거 클래스 이름&gt;
                      &lt;로거 어셈블리&gt; 구문은 다음과 같습니다.
-                       {&lt;어셈블리 이름&gt;[,&lt;strong name&gt;] | &lt;어셈블리 파일&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      로거 옵션은 MSBuild가 로거를 만드는 방법을 지정합니다.
                       &lt;로거 매개 변수&gt;는 선택 사항이고
                      입력한 대로 정확히 로거에 전달됩니다. (약식: -l)

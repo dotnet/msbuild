@@ -33,21 +33,21 @@
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
         <source>failed with {0} error(s)</source>
-        <target state="new">failed with {0} error(s)</target>
+        <target state="translated">{0} 件のエラーで失敗しました</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
         <source>failed with {0} error(s) and {1} warning(s)</source>
-        <target state="new">failed with {0} error(s) and {1} warning(s)</target>
+        <target state="translated">{0} 件のエラーと {1} 件の警告で失敗しました</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
         <source>failed with {0} warning(s)</source>
-        <target state="new">failed with {0} warning(s)</target>
+        <target state="translated">{0} 件の警告付きで失敗しました</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -61,7 +61,7 @@
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with {0} warning(s)</source>
-        <target state="new">succeeded with {0} warning(s)</target>
+        <target state="translated">{0} 件の警告付きで成功しました</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -121,7 +121,7 @@
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
                      MSBuild が、構成されているプロジェクト キャッシュ プラグインへの
-                     ファイル アクセスを報告します。
+                     ファイル アクセスを報告するようにします。
 
                      このフラグは実験的なものであり、意図したとおりに動作しない可能性があります。
     </target>
@@ -142,7 +142,7 @@
       </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
-        <target state="translated">MSBUILD : error MSB1065: ターミナル ロガーの値が無効です。'auto'、'true'、または 'false' のいずれかである必要があります。 {0}</target>
+        <target state="translated">MSBUILD : error MSB1065: ターミナル ロガーの値が無効です。'auto'、'true'、または 'false' のいずれかである必要があります。{0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.

@@ -325,7 +325,7 @@
       </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">
         <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</source>
-        <target state="new">MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</target>
+        <target state="translated">MSB5029: el valor "{0}" del atributo "{1}" en el elemento &lt;{2}&gt; en el archivo "{3}" es un carácter comodín que da como resultado enumerar todos los archivos de la unidad, lo que probablemente no estaba previsto. Compruebe que las propiedades a las que se hace referencia siempre están definidas y que el proyecto y el directorio de trabajo actual no están en la raíz de la unidad.</target>
         <note>{StrBegin="MSB5029: "}UE: This is a generic message that is displayed when we find a project element that has a drive enumerating wildcard value for one of its
       attributes e.g. &lt;Compile Include="$(NotAlwaysDefined)\**\*.cs"&gt; -- if the property is undefined, the value of Include should not result in enumerating all files on drive.</note>
       </trans-unit>

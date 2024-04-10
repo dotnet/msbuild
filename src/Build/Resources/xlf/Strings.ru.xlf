@@ -622,7 +622,7 @@ Errors: {3}</source>
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Это необработанное исключение в MSBuild. Проголосуйте за существующую проблему или сообщите о новой по адресу https://aka.ms/msbuild/unhandled
+        <target state="translated">Это необработанное исключение в MSBuild. ПРОГОЛОСУЙТЕ ЗА СУЩЕСТВУЮЩУЮ ПРОБЛЕМУ ИЛИ СООБЩИТЕ О НОВУЙ НА https://aka.ms/msbuild/unhandled
     {0}</target>
         <note />
       </trans-unit>

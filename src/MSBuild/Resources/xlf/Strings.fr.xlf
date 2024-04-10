@@ -33,21 +33,21 @@
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
         <source>failed with {0} error(s)</source>
-        <target state="new">failed with {0} error(s)</target>
+        <target state="translated">a échoué avec {0} erreur(s)</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
         <source>failed with {0} error(s) and {1} warning(s)</source>
-        <target state="new">failed with {0} error(s) and {1} warning(s)</target>
+        <target state="translated">a échoué avec {0} erreur(s) et {1} avertissement(s)</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
         <source>failed with {0} warning(s)</source>
-        <target state="new">failed with {0} warning(s)</target>
+        <target state="translated">a échoué avec {0} avertissement(s)</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -61,7 +61,7 @@
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with {0} warning(s)</source>
-        <target state="new">succeeded with {0} warning(s)</target>
+        <target state="translated">a réussi avec {0} avertissement(s)</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -121,7 +121,7 @@
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
                      Entraîne le signalement par MSBuild des accès par fichiers aux plug-ins
-                     cache de projet configurés.
+                     de cache de projet configurés.
 
                      Cet indicateur est expérimental et peut ne pas fonctionner comme prévu.
     </target>
@@ -584,7 +584,7 @@ Cet indicateur est expérimental et peut ne pas fonctionner comme prévu.
                      Syntaxe de &lt;classe de journalisation&gt; :
                        [&lt;espace de noms partiels ou complets&gt;.]&lt;nom de la classe de journalisation&gt;
                      Syntaxe de &lt;assembly de journalisation&gt; :
-                       {&lt;nom d'assembly&gt;[,&lt;strong name&gt;] | &lt;fichier d'assembly&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Les options de journalisation spécifient la façon dont MSBuild crée le journaliseur.
                      Les &lt;paramètres de journalisation&gt; sont facultatifs. Ils sont passés
                      au journaliseur tels que vous les avez tapés. (Forme abrégée : -l)
@@ -866,7 +866,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
                      Syntaxe de &lt;classe de journalisation&gt; :
                        [&lt;espace de noms partiels ou complets&gt;.]&lt;nom de la classe de journalisation&gt;
                      Syntaxe de &lt;assembly de journalisation&gt; :
-                       {&lt;nom d'assembly&gt;[,&lt;strong name&gt;] | &lt;fichier d'assembly&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Les options de journalisation spécifient la façon dont MSBuild crée le journaliseur.
                      Les &lt;paramètres de journalisation&gt; sont facultatifs. Ils sont passés
                      au journaliseur tels que vous les avez tapés. (Forme abrégée : -l)
@@ -1339,7 +1339,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       </trans-unit>
       <trans-unit id="MissingGetItemError">
         <source>MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</source>
-        <target state="new">MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</target>
+        <target state="translated">MSBUILD : error MSB1014: Doit fournir un nom d'élément pour le commutateur getItem.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1014: "}UE: This happens if the user does something like "msbuild.exe -getItem". The user must pass in an actual item name
       following the switch, as in "msbuild.exe -getItem:blah".
@@ -1348,7 +1348,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       </trans-unit>
       <trans-unit id="MissingGetPropertyError">
         <source>MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</source>
-        <target state="new">MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</target>
+        <target state="translated">MSBUILD : error MSB1010: Doit fournir un nom de propriété pour le commutateur getProperty.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1010: "}UE: This happens if the user does something like "msbuild.exe -getProperty". The user must pass in an actual property name
       following the switch, as in "msbuild.exe -getProperty:blah".
@@ -1366,7 +1366,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       </trans-unit>
       <trans-unit id="MissingGetTargetResultError">
         <source>MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</source>
-        <target state="new">MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</target>
+        <target state="translated">MSBUILD : error MSB1017: Doit fournir un nom de cible pour le commutateur getTargetResult.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1017: "}UE: This happens if the user does something like "msbuild.exe -getTargetResult". The user must pass in an actual target name
       following the switch, as in "msbuild.exe -getTargetResult:blah".
@@ -1631,7 +1631,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       </trans-unit>
       <trans-unit id="SolutionBuildInvalidForCommandLineEvaluation">
         <source>MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</source>
-        <target state="new">MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</target>
+        <target state="translated">MSBUILD : error MSB1063: Impossible d'accéder aux propriétés ou aux éléments lors de la création de fichiers de solution ou de fichiers de filtre de solution. Cette fonctionnalité est disponible uniquement lors de la génération de projets individuels.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1063: "}UE: This happens if the user passes in a solution file when trying to access individual properties or items. The user must pass in a project file.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.

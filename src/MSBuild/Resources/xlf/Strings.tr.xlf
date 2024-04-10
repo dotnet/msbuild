@@ -33,21 +33,21 @@
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
         <source>failed with {0} error(s)</source>
-        <target state="new">failed with {0} error(s)</target>
+        <target state="translated">{0} hata ile başarısız oldu</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
         <source>failed with {0} error(s) and {1} warning(s)</source>
-        <target state="new">failed with {0} error(s) and {1} warning(s)</target>
+        <target state="translated">{0} hata ve {1} uyarıyla başarısız oldu</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
         <source>failed with {0} warning(s)</source>
-        <target state="new">failed with {0} warning(s)</target>
+        <target state="translated">{0} uyarıyla başarısız oldu</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -61,7 +61,7 @@
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with {0} warning(s)</source>
-        <target state="new">succeeded with {0} warning(s)</target>
+        <target state="translated">{0} uyarıyla başarılı oldu</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -86,7 +86,7 @@
       </trans-unit>
       <trans-unit id="DurationDisplay">
         <source>({0:F1}s)</source>
-        <target state="translated">({0:F1}s)</target>
+        <target state="translated">({0:F1} sn)</target>
         <note>
         {0}: duration in seconds with 1 decimal point
       </note>
@@ -580,13 +580,13 @@
         <target state="translated">  -logger:&lt;günlükçü&gt;   MSBuild'deki olayları günlüğe almak için bu günlükçüyü kullanın. Birden fazla
                      günlükçü belirtmek için her günlükçüyü ayrı ayrı belirtin.
                      &lt;günlükçü&gt; söz dizimi şöyledir:
-                       [&lt;sınıf&gt;,]&lt;derleme&gt;[,&lt;seçenekler&gt;][;&lt;parametreler&gt;]
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
                      &lt;günlükçü sınıfı &gt; söz dizimi şöyledir:
                        [&lt;kısmi veya tam ad alanı &gt;.]&lt;günlükçü sınıfı adı&gt;
                      &lt;günlükçü derlemesi&gt; söz dizimi şöyledir:
-                       {&lt;derleme adı&gt;[,&lt;strong name&gt;] | &lt;derleme dosyası&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Günlükçü seçenekleri, MSBuild'in günlükçüyü oluşturma biçimini belirtir.
-                     &lt;günlükçü parametreleri &gt; isteğe bağlıdır ve tam olarak 
+                     &lt;günlükçü parametreleri &gt; isteğe bağlıdır ve tam olarak
                      yazdığınız şekliyle günlükçüye geçirilir. (Kısa biçim: -l)
                      Örnekler:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
@@ -862,11 +862,11 @@
                      günlükçü belirtmek için her günlükçüyü ayrı ayrı belirtin.
                      (Kısa biçim -dl)
                      &lt;günlükçü&gt; söz dizimi şöyledir:
-                       [&lt;sınıf&gt;,]&lt;derleme&gt;[,&lt;seçenekler&gt;][;&lt;parametreler&gt;]
+                       [&lt;sınıf&gt;,]&lt;assembly&gt;[,&lt;seçenekler&gt;][;&lt;parametreler&gt;]
                      &lt;günlükçü sınıfı&gt; söz dizimi şöyledir:
                        [&lt;kısmi veya tam ad alanı&gt;.]&lt;günlükçü sınıfı adı&gt;
                      &lt;günlükçü derlemesi&gt; söz dizimi şöyledir:
-                       {&lt;derleme adı&gt;[,&lt;strong name&gt;] | &lt;derleme dosyası&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Günlükçü seçenekleri, MSBuild'in günlükçüyü oluşturma biçimini belirtir.
                      &lt;günlükçü parametreleri&gt; isteğe bağlıdır ve tam olarak
                      yazdığınız şekliyle günlükçüye geçirilir. (Kısa biçim: -l)
@@ -893,10 +893,9 @@
                        -ignoreProjectExtensions:.sln
     </source>
         <target state="translated">  -ignoreProjectExtensions:&lt;uzantılar&gt;
-                     Hangi proje dosyasının oluşturulacağı belirlenirken 
-                     yoksayılacak uzantıların listesi. Birden çok uzantıyı 
-                     birbirinden ayırmak için noktalı virgül veya 
-                     virgül kullanın.
+                     Hangi proje dosyasının oluşturulacağı belirlenirken
+                     yoksayılacak uzantıların listesi. Birden çok uzantıyı
+                     birbirinden ayırmak için noktalı virgül veya virgül kullanın.
                      (Kısa biçim: -ignore)
                      Örnek:
                        -ignoreProjectExtensions:.sln
@@ -986,7 +985,6 @@
                      Dosyaların konumu ve fileLogger'ın diğer parametreleri 
                      "/fileLoggerParameters" anahtarının eklenmesi yoluyla
                      belirtilebilir.
-
                      Günlük dosyası adı fileLoggerParameters anahtarı
                      aracılığıyla ayarlanırsa dağıtılmış günlükçü fileName 
                      değerini şablon olarak kullanıp her düğümün günlük dosyasını
@@ -1033,32 +1031,31 @@
     </source>
         <target state="translated">  -fileLoggerParameters[n]:&lt;parametreler&gt;
                      Dosya günlükçüleri için ek parametreler sağlar.
-                     Bu anahtarın olması karşılık gelen -fileLogger[n] 
+                     Bu anahtarın olması karşılık gelen -fileLogger[n]
                      anahtarının olduğu anlamına gelir.
                      "n" varsa, 1-9 arasında bir rakam olabilir.
-                     Dağıtılmış dosya günlükçüleri varsa -fileLoggerParameters 
-                     bunlar tarafından da kullanılır; -distributedFileLogger 
-                     açıklamasına bakın.
+                     Dağıtılmış dosya günlükçüleri varsa -fileLoggerParameters
+                     bunlar tarafından da kullanılır; -distributedFileLogger açıklamasına bakın.
                      (Kısa biçim: -flp[n])
-                     Konsol günlükçüsü için listelenenlerle aynı parametreler 
+                     Konsol günlükçüsü için listelenenlerle aynı parametreler
                      kullanılabilir. Kullanılabilecek bazı ek parametreler:
-                        LogFile--Oluşturma günlüğünün yazılacağı günlük 
+                        LogFile--Oluşturma günlüğünün yazılacağı günlük
                             dosyasının yolu.
-                        Append--Derleme günlüğünün gün dosyasının sonuna mı 
-                            ekleneceğini yoksa üzerine mi yazılacağını 
-                            belirler. Anahtar ayarlandığında oluşturma günlüğü 
-                            dosyanın sonuna eklenir. Anahtar ayarlanmadığında 
-                            varolan günlük dosyasının üzerine yazılır. 
+                        Append--Derleme günlüğünün gün dosyasının sonuna mı
+                            ekleneceğini yoksa üzerine mi yazılacağını
+                            belirler. Anahtar ayarlandığında oluşturma günlüğü
+                            dosyanın sonuna eklenir. Anahtar ayarlanmadığında
+                            varolan günlük dosyasının üzerine yazılır.
                             Varsayılan: günlük dosyasının sonuna eklenmez.
-                        Encoding--Dosyanın kodlamasını belirtir; örneğin, 
+                        Encoding--Dosyanın kodlamasını belirtir; örneğin,
                             UTF-8, Unicode veya ASCII
                      Varsayılan ayrıntı düzeyi ayarı Detailed'dır.
                      Örnekler:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
-                       -flp1:warningsonly;logfile=msbuild.wrn 
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+                       -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1082,8 +1079,7 @@
                        -nr:true
     </source>
         <target state="translated">  -nodeReuse:&lt;parametreler&gt;
-                     MSBuild düğümlerinin yeniden kullanımını etkinleştirir
-                     veya devre dışı bırakır.
+                     MSBuild düğümlerinin yeniden kullanımını etkinleştirir veya devre dışı bırakır.
                      Parametreler:
                      True --Derleme tamamlandıktan sonra düğümler kalır ve
                             izleyen derlemelerde yeniden kullanılır (varsayılan)
@@ -1432,7 +1428,7 @@
       </trans-unit>
       <trans-unit id="MissingTerminalLoggerParameterError">
         <source>MSBUILD : error MSB1066: Specify one or more parameters for the terminal logger if using the -terminalLoggerParameters switch</source>
-        <target state="translated">MSBUILD : error MSB1066: -terminalLoggerParameters anahtarı kullanılıyorsa terminal günlükçüsü için bir veya birden çok parametre belirtin</target>
+        <target state="translated">MSBUILD : error MSB1066: terminalLoggerParameters anahtarı kullanılıyorsa terminal günlükçüsü için bir veya birden çok parametre belirtin</target>
         <note>
       {StrBegin="MSBUILD : error MSB1066: "}
       UE: This happens if the user does something like "msbuild.exe -termionalLoggerParameters:". The user must pass in one or more parameters

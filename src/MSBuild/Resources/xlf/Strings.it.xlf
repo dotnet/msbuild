@@ -33,21 +33,21 @@
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
         <source>failed with {0} error(s)</source>
-        <target state="new">failed with {0} error(s)</target>
+        <target state="translated">non riuscito con {0} errori</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
         <source>failed with {0} error(s) and {1} warning(s)</source>
-        <target state="new">failed with {0} error(s) and {1} warning(s)</target>
+        <target state="translated">non riuscito con {0} errori e {1} avvisi</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
         <source>failed with {0} warning(s)</source>
-        <target state="new">failed with {0} warning(s)</target>
+        <target state="translated">non riuscito con {0} avvisi</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -61,7 +61,7 @@
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with {0} warning(s)</source>
-        <target state="new">succeeded with {0} warning(s)</target>
+        <target state="translated">completato con {0} avvisi</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -120,10 +120,10 @@
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
-                     Fa in modo che MSBuild segnali gli accessi ai file a qualsiasi file configurato
+                     Fa in modo che MSBuild segnali gli accessi ai file a qualsiasi
                      plug-in della cache del progetto.
 
-Questo flag è sperimentale e potrebbe non funzionare come previsto.
+                     Questo flag è sperimentale e potrebbe non funzionare come previsto.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -590,8 +590,8 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
                        [&lt;classe&gt;,]&lt;assembly&gt;[,&lt;opzioni&gt;][;&lt;parametri&gt;]
                      La sintassi di &lt;classe logger&gt; è la seguente:
                        [&lt;spazio dei nomi parziale o completo&gt;.]&lt;nome classe logger&gt;
-                     La sintassi di &lt;assembly logger&gt; è la seguente:
-                       {&lt;nome assembly&gt;[,&lt;strong name&gt;] | &lt;file di assembly&gt;}
+                     La sintassi di &lt;logger assembly&gt; è la seguente:
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Le opzioni di logger consentono di specificare in che modo MSBuild crea il logger.
                      I &lt;parametri logger&gt; sono facoltativi e vengono passati al
                      logger così come vengono digitati. Forma breve: -l.
@@ -872,8 +872,8 @@ Nota: livello di dettaglio dei logger di file
                        [&lt;classe&gt;,]&lt;assembly&gt;[,&lt;opzioni&gt;][;&lt;parametri&gt;]
                      La sintassi di &lt;classe logger&gt; è la seguente:
                        [&lt;spazio dei nomi parziale o completo&gt;.]&lt;nome classe logger&gt;
-                     La sintassi di &lt;assembly logger&gt; è la seguente:
-                       {&lt;nome assembly&gt;[,&lt;strong name&gt;] | &lt;file di assembly&gt;}
+                     La sintassi di &lt;logger assembly&gt; è la seguente:
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Le opzioni di logger consentono di specificare in che modo MSBuild crea il logger.
                      I &lt;parametri logger&gt; sono facoltativi e vengono passati al
                      logger così come vengono digitati. Forma breve: -l
@@ -992,9 +992,8 @@ Nota: livello di dettaglio dei logger di file
                      è la directory corrente. Per impostazione predefinita, ai
                      file viene assegnato il nome "MSBuild&lt;idnodo&gt;.log". Il
                      percorso dei file e altri parametri di fileLogger possono
-                     essere specificati aggiungendo l'opzione
+                     essere specificati aggiungendo l'opzione "-fileLoggerParameters".
 
-                     "-fileLoggerParameters".
                      Se il nome di un file di log viene impostato con l'opzione
                      fileLoggerParameters, il logger distribuito userà il nome
                      file come modello e aggiungerà l'ID del nodo per creare un
@@ -1341,7 +1340,7 @@ Nota: livello di dettaglio dei logger di file
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureavailability switch.</source>
-        <target state="translated">MSBUILD : error MSB1067: È necessario fornire un nome funzionalità per il passaggio a disponibilità funzionalità.</target>
+        <target state="translated">MSBUILD : error MSB1067: è necessario fornire un nome funzionalità per il passaggio a disponibilità di funzionalità.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureavailability". The user must pass in an actual feature name
       following the switch, as in "msbuild.exe -featureavailability:blah".
@@ -2089,16 +2088,15 @@ Esegue la profilatura della valutazione di MSBuild e scrive
                        -restoreProperty:IsRestore=true;MyProperty=value
     </source>
         <target state="translated">  -restoreProperty:&lt;n&gt;=&lt;v&gt;
-                      Imposta queste proprietà a livello di progetto o ne esegue
-                      l'override solo durante il ripristino e non usa le
-                      proprietà specificate con l'argomento -property.
-                      &lt;v&gt; rappresenta il nome della proprietà e &lt;v&gt; il
-                      valore della proprietà. Usare il punto e virgola o la
-                      virgola per delimitare più proprietà o specificare ogni
-                      proprietà separatamente.
-                      Forma breve: -rp.
-                      Esempio:
-                        -restoreProperty:IsRestore=true;MyProperty=value
+                     Imposta queste proprietà a livello di progetto o ne esegue
+                     l'override solo durante il ripristino e non usa le
+                     proprietà specificate con l'argomento -property.
+                     &lt;v&gt; rappresenta il nome della proprietà e &lt;v&gt; il
+                     valore della proprietà. Usare il punto e virgola o la
+                     virgola per delimitare più proprietà o specificare ogni proprietà separatamente.
+                     (Forma breve: -rp)
+                     Esempio:
+                       -restoreProperty:IsRestore=true;MyProperty=value
     </target>
         <note>
       LOCALIZATION: "-restoreProperty" and "-rp" should not be localized.

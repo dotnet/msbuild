@@ -33,21 +33,21 @@
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
         <source>failed with {0} error(s)</source>
-        <target state="new">failed with {0} error(s)</target>
+        <target state="translated">失敗，有 {0} 個錯誤</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
         <source>failed with {0} error(s) and {1} warning(s)</source>
-        <target state="new">failed with {0} error(s) and {1} warning(s)</target>
+        <target state="translated">失敗，有 {0} 個錯誤和 {1} 個警告</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
         <source>failed with {0} warning(s)</source>
-        <target state="new">failed with {0} warning(s)</target>
+        <target state="translated">失敗，有 {0} 個警告</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -61,7 +61,7 @@
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with {0} warning(s)</source>
-        <target state="new">succeeded with {0} warning(s)</target>
+        <target state="translated">成功但有 {0} 個警告</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -580,11 +580,11 @@
         <target state="translated">  -logger:&lt;記錄器&gt;   使用此記錄器可記錄 MSBuild 的事件。
                      若要指定多個記錄器，請各別指定每個記錄器。
                      &lt;記錄器&gt; 語法為:
-                       [&lt;類別&gt;,]&lt;組件&gt;[,&lt;選項&gt;][;&lt;參數&gt;]
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
                      &lt;記錄器類別&gt; 語法為:
                        [&lt;一部分或完整的命名空間&gt;.]&lt;記錄器類別名稱&gt;
                      &lt;記錄器組件&gt; 語法為:
-                       {&lt;組件名稱&gt;[,&lt;strong name&gt;] | &lt;組件檔案&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      記錄器選項會指定 MSBuild 建立記錄器的方式。
                      &lt;記錄器參數&gt; 是選擇性參數，其會依您輸入的內容，
                      完全一樣地傳遞到記錄器。(簡短形式: -l)
@@ -862,11 +862,11 @@
                      若要指定多個記錄器，請各別指定每個記錄器。
                      (簡短形式 -dl)
                      &lt;記錄器&gt; 語法為:
-                       [&lt;類別&gt;,]&lt;組件&gt;[,&lt;選項&gt;][;&lt;參數&gt;]
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
                      &lt;記錄器類別&gt; 語法為:
                        [&lt;一部分或完整的命名空間&gt;.]&lt;記錄器類別名稱&gt;
                      &lt;記錄器組件&gt; 語法為:
-                       {&lt;組件名稱&gt;[,&lt;strong name&gt;] | &lt;組件檔案&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      記錄器選項會指定 MSBuild 建立記錄器的方式。
                      &lt;記錄器參數&gt; 是選擇性參數，其會依您輸入的內容，
                      完全一樣地傳遞到記錄器。(簡短形式: -l)

@@ -33,21 +33,21 @@
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
         <source>failed with {0} error(s)</source>
-        <target state="new">failed with {0} error(s)</target>
+        <target state="translated">сбой с ошибками ({0})</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
         <source>failed with {0} error(s) and {1} warning(s)</source>
-        <target state="new">failed with {0} error(s) and {1} warning(s)</target>
+        <target state="translated">сбой с ошибками ({0}) и предупреждениями ({1})</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
         <source>failed with {0} warning(s)</source>
-        <target state="new">failed with {0} warning(s)</target>
+        <target state="translated">сбой с предупреждениями ({0})</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -61,7 +61,7 @@
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with {0} warning(s)</source>
-        <target state="new">succeeded with {0} warning(s)</target>
+        <target state="translated">успешно выполнено с предупреждениями ({0})</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -86,7 +86,7 @@
       </trans-unit>
       <trans-unit id="DurationDisplay">
         <source>({0:F1}s)</source>
-        <target state="translated">({0:F1}s)</target>
+        <target state="translated">({0:F1}с)</target>
         <note>
         {0}: duration in seconds with 1 decimal point
       </note>
@@ -142,7 +142,7 @@
       </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
-        <target state="new">MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</target>
+        <target state="translated">MSBUILD : error MSB1065: Недопустимое значение средства ведения журнала терминала. Это должно быть одно из следующих значений: "auto", "ИСТИНА" или "ЛОЖЬ". {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1356,7 +1356,7 @@
       </trans-unit>
       <trans-unit id="MissingGetResultFileError">
         <source>MSBUILD : error MSB1068: Must provide a file for the getResultOutputFile switch.</source>
-        <target state="translated">MSBUILD : error MSB1068: необходимо указать файл для параметра getResultOutputFile.</target>
+        <target state="translated">MSBUILD : error MSB1068: необходимо предоставить файл для переключателя getResultOutputFile.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1068: "}UE: This happens if the user does something like "msbuild.exe -getResultOutputFile". The user must pass in an actual file
       following the switch, as in "msbuild.exe -getTargetResult:blah -getResultOutputFile:blah.txt".

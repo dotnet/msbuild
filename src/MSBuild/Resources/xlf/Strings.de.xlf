@@ -33,21 +33,21 @@
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
         <source>failed with {0} error(s)</source>
-        <target state="new">failed with {0} error(s)</target>
+        <target state="translated">fehlerhaft mit {0} Fehler(n)</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
         <source>failed with {0} error(s) and {1} warning(s)</source>
-        <target state="new">failed with {0} error(s) and {1} warning(s)</target>
+        <target state="translated">fehlerhaft mit {0} Fehler(n) und {1} Warnung(en)</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
         <source>failed with {0} warning(s)</source>
-        <target state="new">failed with {0} warning(s)</target>
+        <target state="translated">fehlerhaft mit {0} Warnung(en)</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -61,7 +61,7 @@
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with {0} warning(s)</source>
-        <target state="new">succeeded with {0} warning(s)</target>
+        <target state="translated">erfolgreich mit {0} Warnung(en)</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -119,12 +119,11 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="translated">  -reportFileAccesses[:True|Falsch]
-                     Führt dazu, dass MSBuild Dateizugriffe an alle konfigurierten
- meldet
-                     Projektcache-Plug-Ins.
+        <target state="translated">  -reportFileAccesses[:True|False]
+                     Führt dazu, dass MSBuild Dateizugriffe auf ein beliebiges konfiguriertes
+                     Projektcache-Plug-In meldet.
 
-                     Dieses Kennzeichen ist experimentell und funktioniert möglicherweise nicht wie vorgesehen.
+                     Dieses Flag ist experimentell und funktioniert möglicherweise nicht wie vorgesehen.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -581,11 +580,11 @@ Dies ist ein restriktiverer Modus von MSBuild, da er erfordert,
         <target state="translated">  -logger:&lt;Protokollierung&gt;   Mithilfe dieser Protokollierung werden Ereignisse von MSBuild protokolliert. Um mehrere Protokollierungen anzugeben, 
                      wird jede Protokollierung gesondert angegeben.
                      Die Syntax für die &lt;Protokollierung&gt; lautet:
-                       [&lt;Klasse&gt;,]&lt;Assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
+                       [&lt;Klasse&gt;,]&lt;assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
                      Die Syntax für die &lt;Protokollierungsklasse&gt; lautet:
                         [&lt;Teilweiser oder vollständiger Namespace&gt;.]&lt;Name der Protokollierungsklasse&gt;
                      Die Syntax für die &lt;Protokollierungsassembly&gt; lautet:
-                       {&lt;Assemblyname&gt;[,&lt;strong name&gt;] | &lt;Assemblydatei&gt;}
+                        {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Die Protokollierungsoptionen geben an, wie MSBuild die Protokollierung erstellt.
                      Die &lt;Protokollierungsparameter&gt; sind optional und werden genau 
                      so an die Protokollierung übergeben, wie sie eingegeben wurden. (Kurzform: -l)
@@ -863,11 +862,11 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
                      gesondert angegeben.
                      (Kurzform -dl)
                      Die Syntax für die &lt;Protokollierung&gt; lautet:
-                       [&lt;Klasse&gt;,]&lt;Assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
+                       [&lt;Klasse&gt;,]&lt;assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
                      Die Syntax für die &lt;Protokollierungsklasse&gt; lautet:
                         [&lt;Teilweiser oder vollständiger Namespace&gt;.]&lt;Name der Protokollierungsklasse&gt;
                      Die Syntax für die &lt;Protokollierungsassembly&gt; lautet:
-                       {&lt;Assemblyname&gt;[,&lt;strong name&gt;] | &lt;Assemblydatei&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Die Protokollierungsoptionen geben an, wie MSBuild die Protokollierung erstellt.
                      Die &lt;Protokollierungsparameter&gt; sind optional und werden genau 
                      so an die Protokollierung übergeben, wie sie eingegeben wurden. (Kurzform: -l)
