@@ -1688,7 +1688,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.SearchPathAddedByParentAssembly">
         <source>For SearchPath "{0}" (added by referencing assembly "{1}").</source>
-        <target state="translated">Per il "{0}" SearchPath (aggiunto facendo riferimento all'assembly "{1}").</target>
+        <target state="translated">Per SearchPath "{0}" (aggiunto facendo riferimento all'assembly "{1}").</target>
         <note> {1} is the name of the parent assembly for which SearchPath was used.</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.SearchedAssemblyFoldersEx">
