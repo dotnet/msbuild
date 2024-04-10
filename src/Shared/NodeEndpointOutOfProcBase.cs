@@ -481,10 +481,15 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            RunReadLoop(
-                new BufferedReadStream(_pipeServer),
-                _pipeServer,
-                localPacketQueue, localPacketAvailable, localTerminatePacketPump);
+            using (var localReadPipe = new BufferedReadStream(_pipeServer))
+            {
+                RunReadLoop(
+                    localReadPipe,
+                    _pipeServer,
+                    localPacketQueue,
+                    localPacketAvailable,
+                    localTerminatePacketPump);
+            }
 
             CommunicationsUtilities.Trace("Ending read loop");
 
@@ -508,8 +513,12 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private void RunReadLoop(Stream localReadPipe, Stream localWritePipe,
-            ConcurrentQueue<INodePacket> localPacketQueue, AutoResetEvent localPacketAvailable, AutoResetEvent localTerminatePacketPump)
+        private void RunReadLoop(
+            Stream localReadPipe,
+            Stream localWritePipe,
+            ConcurrentQueue<INodePacket> localPacketQueue,
+            AutoResetEvent localPacketAvailable,
+            AutoResetEvent localTerminatePacketPump)
         {
             // Ordering of the wait handles is important.  The first signalled wait handle in the array
             // will be returned by WaitAny if multiple wait handles are signalled.  We prefer to have the

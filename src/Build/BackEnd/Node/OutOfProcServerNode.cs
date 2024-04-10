@@ -406,8 +406,10 @@ namespace Microsoft.Build.Experimental
             (int exitCode, string exitType) buildResult;
 
             // Dispose must be called before the server sends ServerNodeBuildResult packet
-            using (var outWriter = RedirectConsoleWriter.Create(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Standard))))
-            using (var errWriter = RedirectConsoleWriter.Create(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Error))))
+            using (var outRedirectWriter = new RedirectConsoleWriter(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Standard))))
+            using (var errRedirectWriter = new RedirectConsoleWriter(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Error))))
+            using (var outWriter = outRedirectWriter.SyncWriter)
+            using (var errWriter = errRedirectWriter.SyncWriter)
             {
                 Console.SetOut(outWriter);
                 Console.SetError(errWriter);
@@ -437,19 +439,14 @@ namespace Microsoft.Build.Experimental
             private readonly Timer _timer;
             private readonly TextWriter _syncWriter;
 
-            private RedirectConsoleWriter(Action<string> writeCallback)
+            internal RedirectConsoleWriter(Action<string> writeCallback)
             {
                 _writeCallback = writeCallback;
                 _syncWriter = Synchronized(this);
                 _timer = new Timer(TimerCallback, null, 0, 40);
             }
 
-            public static TextWriter Create(Action<string> writeCallback)
-            {
-                RedirectConsoleWriter writer = new(writeCallback);
-
-                return writer._syncWriter;
-            }
+            internal TextWriter SyncWriter => _syncWriter;
 
             private void TimerCallback(object? state)
             {

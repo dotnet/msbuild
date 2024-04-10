@@ -185,9 +185,10 @@ namespace Microsoft.Build.Logging
             int serializedEventLength = ReadInt32();
             Stream stream = _binaryReader.BaseStream.Slice(serializedEventLength);
 
-            _lastSubStream = stream as SubStream;
-
-            _recordNumber += 1;
+            using (_lastSubStream = stream as SubStream)
+            {
+                _recordNumber += 1;
+            }
 
             return new(recordKind, stream);
         }
