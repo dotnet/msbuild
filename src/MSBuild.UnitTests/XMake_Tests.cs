@@ -1989,9 +1989,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
@@ -2010,9 +2008,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected one distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
@@ -2031,9 +2027,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected a central loggers to be attached"
 
@@ -2045,9 +2039,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
 
@@ -2058,9 +2050,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
@@ -2079,9 +2069,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"logFile={Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -2094,9 +2082,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"{fileLoggerParameters[0]};logFile={Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -2109,9 +2095,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"{fileLoggerParameters[0]};logFile={Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -2124,9 +2108,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($";Parameter1;logFile={Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -2139,9 +2121,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe(fileLoggerParameters[0] + ";" + fileLoggerParameters[1], StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -2152,9 +2132,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"Parameter1;verbosity=Normal;logFile={Path.Combine(Directory.GetCurrentDirectory(), "..", "cat.log")};Parameter1", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -2165,9 +2143,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"Parameter1;Parameter;;;Parameter;Parameter;logFile={Path.Combine(Directory.GetCurrentDirectory(), "msbuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
         }
 
@@ -2185,9 +2161,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           1);
+                           distributedLoggerRecords);
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
