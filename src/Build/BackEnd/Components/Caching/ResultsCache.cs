@@ -345,7 +345,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Returns true if the giveChecks results for the specified build flags.
+        /// Returns true if the flags of the given build request are compatible with the given build result.
         /// </summary>
         /// <param name="buildRequest">The current build request.</param>
         /// <param name="buildResult">The candidate build result.</param>
@@ -380,6 +380,9 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // Verify that the requested subset is compatible with the result.
+                return buildRequest.RequestedProjectState is not null &&
+                    buildResult.ProjectStateAfterBuild?.RequestedProjectStateFilter is not null &&
+                    buildRequest.RequestedProjectState.IsSubsetOf(buildResult.ProjectStateAfterBuild.RequestedProjectStateFilter);
             }
 
             return true;

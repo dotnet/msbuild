@@ -220,6 +220,10 @@ namespace Microsoft.Build.Execution
             {
                 _requestException = exception ?? existingResults._requestException;
                 _resultsByTarget = targetNames == null ? existingResults._resultsByTarget : CreateTargetResultDictionaryWithContents(existingResults, targetNames);
+                if (request.RequestedProjectState != null)
+                {
+                    _projectStateAfterBuild = existingResults._projectStateAfterBuild?.FilteredCopy(request.RequestedProjectState);
+                }
             }
         }
 
