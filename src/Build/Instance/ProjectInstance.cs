@@ -186,6 +186,12 @@ namespace Microsoft.Build.Execution
         private int _evaluationId = BuildEventContext.InvalidEvaluationId;
 
         /// <summary>
+        /// The property and item filter used when creating this instance, or null if this is not a filtered copy
+        /// of another ProjectInstance. <seealso cref="ProjectInstance(ProjectInstance, bool, RequestedProjectState)"/>
+        /// </summary>
+        private RequestedProjectState _requestedProjectStateFilter;
+
+        /// <summary>
         /// Creates a ProjectInstance directly.
         /// No intermediate Project object is created.
         /// This is ideal if the project is simply going to be built, and not displayed or edited.
@@ -679,6 +685,7 @@ namespace Microsoft.Build.Execution
             _isImmutable = isImmutable;
             _evaluationId = that.EvaluationId;
             _translateEntireState = that._translateEntireState;
+            _requestedProjectStateFilter = filter?.DeepClone();
 
             if (filter == null)
             {
@@ -1114,6 +1121,12 @@ namespace Microsoft.Build.Execution
         {
             get { return _isImmutable; }
         }
+
+        /// <summary>
+        /// The property and item filter used when creating this instance, or null if this is not a filtered copy
+        /// of another ProjectInstance. <seealso cref="ProjectInstance(ProjectInstance, bool, RequestedProjectState)"/>
+        /// </summary>
+        internal RequestedProjectState RequestedProjectStateFilter => _requestedProjectStateFilter;
 
         /// <summary>
         /// Task classes and locations known to this project.
@@ -2228,6 +2241,7 @@ namespace Microsoft.Build.Execution
         {
             translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
             translator.TranslateDictionary(ref _properties, ProjectPropertyInstance.FactoryForDeserialization);
+            translator.Translate(ref _requestedProjectStateFilter);
             translator.Translate(ref _isImmutable);
             TranslateItems(translator);
         }
