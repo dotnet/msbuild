@@ -3,8 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Xml;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -265,6 +269,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             int nodeRequestId = 0;
             int configurationId = 1;
 
+            RequestedProjectState requestedProjectState1 = new()
+            {
+                PropertyFilters = ["property1", "property2"],
+            };
             BuildRequest requestWithSubsetFlag1 = new BuildRequest(
                 submissionId,
                 nodeRequestId,
@@ -273,8 +281,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 null /* hostServices */,
                 BuildEventContext.Invalid /* parentBuildEventContext */,
                 null /* parentRequest */,
-                BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild);
+                BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild,
+                requestedProjectState1);
 
+            RequestedProjectState requestedProjectState2 = new()
+            {
+                PropertyFilters = ["property1"],
+            };
             BuildRequest requestWithSubsetFlag2 = new BuildRequest(
                 submissionId,
                 nodeRequestId,
@@ -283,18 +296,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 null /* hostServices */,
                 BuildEventContext.Invalid /* parentBuildEventContext */,
                 null /* parentRequest */,
-                BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild);
+                BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild,
+                requestedProjectState2);
 
             BuildResult resultForRequestWithSubsetFlag1 = new(requestWithSubsetFlag1);
             resultForRequestWithSubsetFlag1.AddResultsForTarget(targetName, BuildResultUtilities.GetEmptySucceedingTargetResult());
+
+            using TextReader textReader = new StringReader(@"
+              <Project>
+                <PropertyGroup>
+                  <property1>Value1</property1>
+                  <property2>Value2</property2>
+                </PropertyGroup>
+              </Project>
+            ");
+            using XmlReader xmlReader = XmlReader.Create(textReader);
+            resultForRequestWithSubsetFlag1.ProjectStateAfterBuild = new ProjectInstance(ProjectRootElement.Create(xmlReader)).FilteredCopy(requestedProjectState1);
+
             ResultsCache cache = new();
             cache.AddResult(resultForRequestWithSubsetFlag1);
 
             ResultsCacheResponse cachedResponseWithSubsetFlag1 = cache.SatisfyRequest(
-            requestWithSubsetFlag1,
-            new List<string>(),
-            new List<string>(new string[] { targetName }),
-            skippedResultsDoNotCauseCacheMiss: false);
+                requestWithSubsetFlag1,
+                new List<string>(),
+                new List<string>(new string[] { targetName }),
+                skippedResultsDoNotCauseCacheMiss: false);
 
             ResultsCacheResponse cachedResponseWithSubsetFlag2 = cache.SatisfyRequest(
                 requestWithSubsetFlag2,
@@ -302,11 +328,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 new List<string>(new string[] { targetName }),
                 skippedResultsDoNotCauseCacheMiss: false);
 
-            // It was agreed not to return cache results if ProvideSubsetOfStateAfterBuild is passed,
-            // because RequestedProjectState may have different user filters defined.
-            // It is more reliable to ignore the cached value.
-            Assert.Equal(ResultsCacheResponseType.NotSatisfied, cachedResponseWithSubsetFlag1.Type);
-            Assert.Equal(ResultsCacheResponseType.NotSatisfied, cachedResponseWithSubsetFlag2.Type);
+            Assert.Equal(ResultsCacheResponseType.Satisfied, cachedResponseWithSubsetFlag1.Type);
+            Assert.Equal("Value1", cachedResponseWithSubsetFlag1.Results.ProjectStateAfterBuild.GetPropertyValue("property1"));
+            Assert.Equal("Value2", cachedResponseWithSubsetFlag1.Results.ProjectStateAfterBuild.GetPropertyValue("property2"));
+
+            Assert.Equal(ResultsCacheResponseType.Satisfied, cachedResponseWithSubsetFlag2.Type);
+            Assert.Equal("Value1", cachedResponseWithSubsetFlag2.Results.ProjectStateAfterBuild.GetPropertyValue("property1"));
+            Assert.Equal("", cachedResponseWithSubsetFlag2.Results.ProjectStateAfterBuild.GetPropertyValue("property2"));
         }
 
         [Fact]
