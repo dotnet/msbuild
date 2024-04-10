@@ -33,18 +33,9 @@ internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFact
                 return;
             }
 
-            try
-            {
-                buildCheckManager.ProcessEvaluationFinishedEventArgs(
-                    loggingContextFactory.CreateLoggingContext(e.BuildEventContext!),
-                    projectEvaluationFinishedEventArgs);
-            }
-            catch (Exception exception)
-            {
-                Debugger.Launch();
-                Console.WriteLine(exception);
-                throw;
-            }
+            buildCheckManager.ProcessEvaluationFinishedEventArgs(
+                loggingContextFactory.CreateLoggingContext(e.BuildEventContext!),
+                projectEvaluationFinishedEventArgs);
 
             buildCheckManager.EndProjectEvaluation(BuildCheckDataSource.EventArgs, e.BuildEventContext!);
         }
@@ -86,7 +77,6 @@ internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFact
     {
         _stats.Merge(buildCheckManager.CreateTracingStats(), (span1, span2) => span1 + span2);
         string msg = string.Join(Environment.NewLine, _stats.Select(a => a.Key + ": " + a.Value));
-
 
         BuildEventContext buildEventContext = e.BuildEventContext ?? new BuildEventContext(
             BuildEventContext.InvalidNodeId, BuildEventContext.InvalidTargetId,

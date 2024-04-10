@@ -11,7 +11,7 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// <summary>
 /// Base class for build analyzers.
 /// Same base will be used for custom and built-in analyzers.
-/// <see cref="BuildAnalyzer"/> is a unit of build analysis execution. But it can contain multiple rules - each representing a distinct violation.
+/// <see cref="BuildAnalyzer"/> is a unit of build analysis execution, but it can contain multiple rules - each representing a distinct violation.
 /// </summary>
 public abstract class BuildAnalyzer : IDisposable
 {
@@ -36,9 +36,11 @@ public abstract class BuildAnalyzer : IDisposable
     public abstract void Initialize(ConfigurationContext configurationContext);
 
     /// <summary>
-    /// 
+    /// Used by the implementors to subscribe to data and events they are interested in.
     /// </summary>
-    /// <param name="registrationContext"></param>
+    /// <param name="registrationContext">
+    /// The context that enables subscriptions for data pumping from the infrastructure.
+    /// </param>
     public abstract void RegisterActions(IBuildCheckRegistrationContext registrationContext);
 
     public virtual void Dispose()
