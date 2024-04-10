@@ -252,7 +252,7 @@
       <trans-unit id="FatalErrorWhileLoggingWithInnerException">
         <source>MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
     {0}</source>
-        <target state="new">MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
+        <target state="translated">MSB4017: la compilazione è stata arrestata in modo imprevisto a causa di un errore del logger.
     {0}</target>
         <note>{StrBegin="MSB4017: "}UE: This message is used for a special exception that is thrown when a logger fails while logging an event (most
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
@@ -270,7 +270,7 @@
       </trans-unit>
       <trans-unit id="ImportedProjectFromVSDistribution">
         <source>MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </source>
-        <target state="translated">MSB4278: il file importato "{0}" non esiste e sembra far parte di un componente Visual Studio. Questo file potrebbe richiedere MSBuild.exe per essere importato correttamente, quindi potrebbe non riuscire a eseguire la compilazione nell'interfaccia della riga di comando di dotnet. </target>
+        <target state="translated">MSB4278: il file importato "{0}" non esiste e sembra far parte di un componente di Visual Studio. Per l'importazione corretta di questo file potrebbe essere richiesto MSBuild.exe ed è quindi possibile che la compilazione abbia esito negativo nell'interfaccia della riga di comando di dotnet. </target>
         <note>{StrBegin="MSB4278: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
@@ -508,9 +508,9 @@
         <source>The "{0}" resolver attempted to resolve the SDK "{1}".
 Warnings: {2}
 Errors: {3}</source>
-        <target state="new">The "{0}" resolver attempted to resolve the SDK "{1}".
-Warnings: {2}
-Errors: {3}</target>
+        <target state="translated">Il resolver "{0}" ha tentato di risolvere l'SDK "{1}".
+Avvisi: {2}
+Errori: {3}</target>
         <note>
       LOCALIZATION: Do not localize the word SDK. "{2}" is new line separated warnings or "null". "{3}" is new line separated errors or "null".
     </note>
