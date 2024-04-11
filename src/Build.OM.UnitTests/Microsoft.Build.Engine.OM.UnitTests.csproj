@@ -12,7 +12,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
     <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_ENGINE_OM_UNITTESTS;NO_FRAMEWORK_IVT</DefineConstants>
-	<NoWarn>$(NoWarn);CA2000</NoWarn>
+	  <NoWarn>$(NoWarn);CA2000</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>

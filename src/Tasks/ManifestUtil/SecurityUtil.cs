@@ -705,8 +705,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         CmiManifestSigner2 signer;
                         if (useSha256 && rsa is RSACryptoServiceProvider rsacsp)
                         {
-                            using RSACryptoServiceProvider csp = SignedCmiManifest2.GetFixedRSACryptoServiceProvider(rsacsp, useSha256);
-                            signer = new CmiManifestSigner2(csp, cert, useSha256);
+#pragma warning disable CA2000 // Dispose objects before losing scope because CmiManifestSigner2 will dispose the RSACryptoServiceProvider
+                            signer = new CmiManifestSigner2(SignedCmiManifest2.GetFixedRSACryptoServiceProvider(rsacsp, useSha256), cert, useSha256);
+#pragma warning restore CA2000 // Dispose objects before losing scope
                         }
                         else
                         {

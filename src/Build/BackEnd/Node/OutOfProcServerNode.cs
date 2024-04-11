@@ -406,10 +406,8 @@ namespace Microsoft.Build.Experimental
             (int exitCode, string exitType) buildResult;
 
             // Dispose must be called before the server sends ServerNodeBuildResult packet
-            using (var outRedirectWriter = new RedirectConsoleWriter(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Standard))))
-            using (var errRedirectWriter = new RedirectConsoleWriter(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Error))))
-            using (var outWriter = outRedirectWriter.SyncWriter)
-            using (var errWriter = errRedirectWriter.SyncWriter)
+            using (var outWriter = RedirectConsoleWriter.Create(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Standard))))
+            using (var errWriter = RedirectConsoleWriter.Create(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Error))))
             {
                 Console.SetOut(outWriter);
                 Console.SetError(errWriter);
@@ -439,14 +437,20 @@ namespace Microsoft.Build.Experimental
             private readonly Timer _timer;
             private readonly TextWriter _syncWriter;
 
-            internal RedirectConsoleWriter(Action<string> writeCallback)
+            private RedirectConsoleWriter(Action<string> writeCallback)
             {
                 _writeCallback = writeCallback;
                 _syncWriter = Synchronized(this);
                 _timer = new Timer(TimerCallback, null, 0, 40);
             }
 
-            internal TextWriter SyncWriter => _syncWriter;
+            public static TextWriter Create(Action<string> writeCallback)
+            {
+#pragma warning disable CA2000 // Dispose objects before losing scope
+                RedirectConsoleWriter writer = new(writeCallback);
+#pragma warning restore CA2000 // Dispose objects before losing scope
+                return writer._syncWriter;
+            }
 
             private void TimerCallback(object? state)
             {
@@ -462,6 +466,8 @@ namespace Microsoft.Build.Experimental
                 {
                     _timer.Dispose();
                     Flush();
+
+                    _syncWriter?.Dispose();
                 }
 
                 base.Dispose(disposing);

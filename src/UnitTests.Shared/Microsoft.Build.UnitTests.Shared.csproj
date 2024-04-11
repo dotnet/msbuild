@@ -6,7 +6,7 @@
     <IsShipping>false</IsShipping>
     <IsTestProject>false</IsTestProject>
     <IsTestLibrary>true</IsTestLibrary>
-	<NoWarn>$(NoWarn);CA2000</NoWarn>
+	  <NoWarn>$(NoWarn);CA2000</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <!-- Implicit references to xunit.core and xunit.assert in test projects by Arcade

@@ -210,7 +210,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             Stream s = GetEmbeddedResourceStream(name);
             using StreamReader r = new StreamReader(s);
-
             return r.ReadToEnd();
         }
 
@@ -239,44 +238,38 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             length = fi.Length;
 
             Stream s = null;
+            HashAlgorithm hashAlg = null;
             try
             {
                 s = fi.OpenRead();
-                HashAlgorithm hashAlg = null;
 
-                try
+                if (string.IsNullOrEmpty(targetFrameWorkVersion) || CompareFrameworkVersions(targetFrameWorkVersion, Constants.TargetFrameworkVersion40) <= 0)
                 {
-                    if (string.IsNullOrEmpty(targetFrameWorkVersion) || CompareFrameworkVersions(targetFrameWorkVersion, Constants.TargetFrameworkVersion40) <= 0)
-                    {
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-                        hashAlg = SHA1.Create(
+                    hashAlg = SHA1.Create(
 #if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
-                            "System.Security.Cryptography.SHA1CryptoServiceProvider"
+                        "System.Security.Cryptography.SHA1CryptoServiceProvider"
 #endif
-                            );
+                        );
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-                    }
-                    else
-                    {
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-                        hashAlg = SHA256.Create(
-#if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
-                            "System.Security.Cryptography.SHA256CryptoServiceProvider"
-#endif
-                            );
-#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-                    }
-                    byte[] hashBytes = hashAlg.ComputeHash(s);
-                    hash = Convert.ToBase64String(hashBytes);
                 }
-                finally
+                else
                 {
-                    hashAlg?.Dispose();
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                    hashAlg = SHA256.Create(
+#if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
+                        "System.Security.Cryptography.SHA256CryptoServiceProvider"
+#endif
+                        );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                 }
+                byte[] hashBytes = hashAlg.ComputeHash(s);
+                hash = Convert.ToBase64String(hashBytes);
             }
             finally
             {
                 s?.Close();
+                hashAlg?.Dispose();
             }
         }
 
