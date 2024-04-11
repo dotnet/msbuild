@@ -53,6 +53,10 @@ namespace Microsoft.Build.UnitTests
                 env.WithInvariant(new BuildFailureLogInvariant());
             }
 
+            // Clear these two environment variables first in case pre-setting affects the test.
+            env.SetEnvironmentVariable("MSBUILDLIVELOGGER", null);
+            env.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", null);
+
             return env;
         }
 
