@@ -332,7 +332,8 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            if (TaskInstance.GetType().Assembly.Location != _taskFactoryWrapper.TaskFactoryLoadedType.Path)
+            if (!string.IsNullOrWhiteSpace(TaskInstance.GetType().Assembly.Location) &&
+                TaskInstance.GetType().Assembly.Location != _taskFactoryWrapper.TaskFactoryLoadedType.Path)
             {
                 _taskLoggingContext.LogComment(MessageImportance.Normal, "TaskAssemblyLocationMismatch", TaskInstance.GetType().Assembly.Location, _taskFactoryWrapper.TaskFactoryLoadedType.Path);
             }
