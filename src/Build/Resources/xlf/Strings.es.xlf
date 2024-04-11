@@ -218,9 +218,9 @@
         <note>The message is emmited on failed loading of the custom analyzer rule in app domain.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
-        <source>Custom analyzer {0} has been registered successfully.</source>
-        <target state="new">Custom analyzer {0} has been registered successfully.</target>
-        <note>The message is emmited on successful loading of the custom analyzer in app domain.</note>
+        <source>Custom analyzer rule: {0} has been registered successfully.</source>
+        <target state="new">Custom analyzer rule: {0} has been registered successfully.</target>
+        <note>The message is emmited on successful loading of the custom analyzer rule in app domain.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>

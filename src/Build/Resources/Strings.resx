@@ -2096,8 +2096,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     </comment>
   </data>
   <data name="CustomAnalyzerSuccessfulAcquisition" xml:space="preserve">
-    <value>Custom analyzer {0} has been registered successfully.</value>
-    <comment>The message is emmited on successful loading of the custom analyzer in app domain.</comment>
+    <value>Custom analyzer rule: {0} has been registered successfully.</value>
+    <comment>The message is emmited on successful loading of the custom analyzer rule in app domain.</comment>
   </data>
   <data name="CustomAnalyzerFailedAcquisition" xml:space="preserve">
     <value>Failed to register the custom analyzer: {0}.</value>

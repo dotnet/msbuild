@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -34,17 +33,17 @@ public class BuildCheckManagerTests
     }
 
     [Theory]
-    [InlineData(true, "Custom analyzer BuildAnalyzerRuleMock has been registered successfully.")]
-    [InlineData(false, "Failed to ragister the custom analyzer: DummyPath.")]
-    public void ProcessAnalyzerAcquisitionTest(bool isAnalyzerRuleExist, string expectedMessage)
+    [InlineData(true, new[] { "Custom analyzer rule: Rule1 has been registered successfully.", "Custom analyzer rule: Rule2 has been registered successfully." })]
+    [InlineData(false, new[] { "Failed to register the custom analyzer: DummyPath." })]
+    public void ProcessAnalyzerAcquisitionTest(bool isAnalyzerRuleExist, string[] expectedMessages)
     {
         MockBuildCheckAcquisition(isAnalyzerRuleExist);
         MockEnabledDataSourcesDefinition();
 
         _testedInstance.ProcessAnalyzerAcquisition(new AnalyzerAcquisitionData("DummyPath"), new BuildEventContext(1, 2, 3, 4, 5, 6, 7));
 
-        _logger.AllBuildEvents.Where(be => be.GetType() == typeof(BuildMessageEventArgs))
-            .ShouldContain(be => be.Message == expectedMessage);
+        _logger.AllBuildEvents.Where(be => be.GetType() == typeof(BuildMessageEventArgs)).Select(be => be.Message).ToArray()
+            .ShouldBeEquivalentTo(expectedMessages);
     }
 
     private void MockBuildCheckAcquisition(bool isAnalyzerRuleExist) => MockField("_acquisitionModule", new BuildCheckAcquisitionModuleMock(isAnalyzerRuleExist));
@@ -69,7 +68,7 @@ internal sealed class BuildCheckAcquisitionModuleMock : IBuildCheckAcquisitionMo
 
     public IEnumerable<BuildAnalyzerFactory> CreateBuildAnalyzerFactories(AnalyzerAcquisitionData analyzerAcquisitionData, BuildEventContext buildEventContext)
         => _isAnalyzerRuleExistForTest
-        ? new List<BuildAnalyzerFactory>() { () => new BuildAnalyzerRuleMock() }
+        ? new List<BuildAnalyzerFactory>() { () => new BuildAnalyzerRuleMock("Rule1"), () => new BuildAnalyzerRuleMock("Rule2") }
         : new List<BuildAnalyzerFactory>();
 }
 
@@ -82,7 +81,12 @@ internal sealed class BuildAnalyzerRuleMock : BuildAnalyzer
         "Message format: {0}",
         new BuildAnalyzerConfiguration());
 
-    public override string FriendlyName => "BuildAnalyzerRuleMock";
+    internal BuildAnalyzerRuleMock(string friendlyName)
+    {
+        FriendlyName = friendlyName;
+    }
+
+    public override string FriendlyName { get; }
 
     public override IReadOnlyList<BuildAnalyzerRule> SupportedRules { get; } = new List<BuildAnalyzerRule>() { SupportedRule };
 

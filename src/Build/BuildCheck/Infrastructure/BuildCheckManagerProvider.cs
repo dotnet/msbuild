@@ -181,8 +181,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                         factory,
                         instance.SupportedRules.Select(r => r.Id).ToArray(),
                         instance.SupportedRules.Any(r => r.DefaultConfiguration.IsEnabled == true)));
-                    _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerSuccessfulAcquisition", instance.GetType().Name);
-                }         
+                    _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerSuccessfulAcquisition", instance.FriendlyName);
+                }        
             }
         }
 
