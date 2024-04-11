@@ -87,6 +87,8 @@ namespace Microsoft.Build.UnitTests
             {
                 _disposed = true;
 
+                // It should be in reverse order revert to get back to original state.
+                _variants.Reverse();
                 // Reset test variants
                 foreach (var variant in _variants)
                 {
