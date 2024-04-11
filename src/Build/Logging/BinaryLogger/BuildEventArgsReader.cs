@@ -20,7 +20,7 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Logging
 {
     /// <summary>
-    /// Deserializes and returns BuildEventArgs-derived objects from a BinaryReader
+    /// Deserializes and returns BuildEventArgs-derived objects from a BinaryReader.
     /// </summary>
     public class BuildEventArgsReader : IBuildEventArgsReaderNotifications, IDisposable
     {
@@ -185,10 +185,8 @@ namespace Microsoft.Build.Logging
             int serializedEventLength = ReadInt32();
             Stream stream = _binaryReader.BaseStream.Slice(serializedEventLength);
 
-            using (_lastSubStream = stream as SubStream)
-            {
-                _recordNumber += 1;
-            }
+            _lastSubStream = stream as SubStream;
+            _recordNumber += 1;
 
             return new(recordKind, stream);
         }

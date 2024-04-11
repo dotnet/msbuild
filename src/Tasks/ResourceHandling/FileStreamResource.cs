@@ -40,7 +40,9 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         {
             if (writer is PreserializedResourceWriter preserializedResourceWriter)
             {
+#pragma warning disable CA2000 // Dispose objects before losing scope the stream is expected to be disposed by the PreserializedResourceWriter.ResourceDataRecord
                 FileStream fileStream = new FileStream(FileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+#pragma warning restore CA2000 // Dispose objects before losing scope
 
                 preserializedResourceWriter.AddActivatorResource(Name, fileStream, TypeAssemblyQualifiedName, closeAfterWrite: true);
             }

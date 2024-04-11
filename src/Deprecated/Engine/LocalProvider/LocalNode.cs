@@ -217,6 +217,7 @@ namespace Microsoft.Build.BuildEngine
         /// This function starts local node when process is launched and shuts it down on time out
         /// Called by msbuild.exe.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "Agreed not to touch entries from Deprecated folder")]
         public static void StartLocalNodeServer(int nodeNumber)
         {
             // Create global events necessary for handshaking with the parent

@@ -114,7 +114,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     }
                 }
 
-                var m = new MemoryStream();
+                using var m = new MemoryStream();
                 using var w = new XmlTextWriter(m, Encoding.UTF8);
                 w.WriteStartDocument();
 

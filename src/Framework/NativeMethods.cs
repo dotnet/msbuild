@@ -1340,7 +1340,9 @@ internal static class NativeMethods
             {
                 // Hold the child process handle open so that children cannot die and restart with a different parent after we've started looking at it.
                 // This way, any handle we pass back is guaranteed to be one of our actual children.
-                using (SafeProcessHandle childHandle = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, possibleChildProcess.Id))
+#pragma warning disable CA2000 // Dispose objects before losing scope by design
+                SafeProcessHandle childHandle = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, possibleChildProcess.Id);
+#pragma warning restore CA2000 // Dispose objects before losing scope
                 {
                     if (childHandle.IsInvalid)
                     {
