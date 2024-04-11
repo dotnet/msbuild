@@ -252,7 +252,7 @@
       <trans-unit id="FatalErrorWhileLoggingWithInnerException">
         <source>MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
     {0}</source>
-        <target state="translated">MSB4017: A compilação parou inesperadamente devido a uma falha do agente de log.
+        <target state="translated">MSB4017: a compilação parou inesperadamente devido a uma falha do agente.
     {0}</target>
         <note>{StrBegin="MSB4017: "}UE: This message is used for a special exception that is thrown when a logger fails while logging an event (most
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
@@ -622,7 +622,7 @@ Erros: {3}</target>
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Esta é uma exceção não tratada no MSBuild -- POR FAVOR, APOIE UM PROBLEMA EXISTENTE OU ARQUIVE UM NOVO EM https://aka.ms/msbuild/unhandled
+        <target state="translated">Essa é uma exceção não tratada no MSBuild -- POR FAVOR, ATUALIZE UMA QUESTÃO EXISTENTE OU ENCAMINHE UMA NOVA EM https://aka.ms/msbuild/unhandled
     {0}</target>
         <note />
       </trans-unit>
