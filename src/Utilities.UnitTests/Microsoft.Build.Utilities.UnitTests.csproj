@@ -6,6 +6,7 @@
     <AssemblyName>Microsoft.Build.Utilities.UnitTests</AssemblyName>
     <IsTestProject>true</IsTestProject>
     <RootNamespace>Microsoft.Build.Utilities.UnitTests</RootNamespace>
+    <NoWarn>$(NoWarn);CA2000</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

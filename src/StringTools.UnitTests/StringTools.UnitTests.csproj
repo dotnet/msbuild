@@ -8,6 +8,7 @@
     <AssemblyName>Microsoft.NET.StringTools.UnitTests</AssemblyName>
     <IsTestProject>true</IsTestProject>
     <IsLibraryTestProject>true</IsLibraryTestProject>
+	<NoWarn>$(NoWarn);CA2000</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

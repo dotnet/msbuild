@@ -5,6 +5,7 @@
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <AssemblyName>Microsoft.Build.Framework.UnitTests</AssemblyName>
+    <NoWarn>$(NoWarn);CA2000</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

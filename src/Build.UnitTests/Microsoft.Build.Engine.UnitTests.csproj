@@ -12,6 +12,7 @@
     <DefineConstants Condition="'$(MSBuildRuntimeType)' == 'Core'">$(DefineConstants);NO_MSBUILDTASKHOST</DefineConstants>
 
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <NoWarn>$(NoWarn);CA2000</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
