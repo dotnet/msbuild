@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
@@ -431,30 +432,59 @@ namespace Microsoft.Build.Experimental
             _shutdownEvent.Set();
         }
 
-        internal sealed class RedirectConsoleWriter : StringWriter
+        internal sealed class RedirectConsoleWriter : TextWriter
         {
             private readonly Action<string> _writeCallback;
             private readonly Timer _timer;
             private readonly TextWriter _syncWriter;
 
+            private readonly StringWriter _internalWriter;
+
             private RedirectConsoleWriter(Action<string> writeCallback)
             {
                 _writeCallback = writeCallback;
-                _syncWriter = Synchronized(this);
+                _internalWriter = new StringWriter();
+                _syncWriter = Synchronized(_internalWriter);
                 _timer = new Timer(TimerCallback, null, 0, 40);
             }
 
+            public override Encoding Encoding => _internalWriter.Encoding;
+
             public static TextWriter Create(Action<string> writeCallback)
             {
-#pragma warning disable CA2000 // Dispose objects before losing scope
-                RedirectConsoleWriter writer = new(writeCallback);
-#pragma warning restore CA2000 // Dispose objects before losing scope
-                return writer._syncWriter;
+                RedirectConsoleWriter writer = new RedirectConsoleWriter(writeCallback);
+
+                return writer;
+            }
+
+            public override void Flush()
+            {
+                var sb = _internalWriter.GetStringBuilder();
+                string captured = sb.ToString();
+                sb.Clear();
+
+                _writeCallback(captured);
+                _internalWriter.Flush();
+            }
+
+            public override void Write(char value)
+            {
+                _syncWriter.Write(value);
+            }
+
+            public override void Write(char[] buffer, int index, int count)
+            {
+                _syncWriter.Write(buffer, index, count);
+            }
+
+            public override void Write(string? value)
+            {
+                _syncWriter.Write(value);
             }
 
             private void TimerCallback(object? state)
             {
-                if (GetStringBuilder().Length > 0)
+                if (_internalWriter.GetStringBuilder().Length > 0)
                 {
                     _syncWriter.Flush();
                 }
@@ -466,19 +496,10 @@ namespace Microsoft.Build.Experimental
                 {
                     _timer.Dispose();
                     Flush();
+                    _internalWriter?.Dispose();
                 }
 
                 base.Dispose(disposing);
-            }
-
-            public override void Flush()
-            {
-                var sb = GetStringBuilder();
-                var captured = sb.ToString();
-                sb.Clear();
-                _writeCallback(captured);
-
-                base.Flush();
             }
         }
     }
