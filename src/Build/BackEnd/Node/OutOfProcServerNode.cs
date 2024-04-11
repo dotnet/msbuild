@@ -466,8 +466,6 @@ namespace Microsoft.Build.Experimental
                 {
                     _timer.Dispose();
                     Flush();
-
-                    _syncWriter?.Dispose();
                 }
 
                 base.Dispose(disposing);
