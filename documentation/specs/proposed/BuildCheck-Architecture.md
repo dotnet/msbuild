@@ -76,7 +76,7 @@ Planned model:
     * Global configuration issue (communicated via `BuildCheckConfigurationException`) will issue an error and then entirely disable BuildCheck.
 * `BuildCheckManager` instantiates all newly enabled analyzers and updates configuration for all already instantiated analyzers.
 * At that point of time analyzers are prepared for receiving data and performing their work. MSBuild will start calling `BuildCheckManager` callbacks (mostly pumping `BuildEventArgs`), passed data will be translated into BuildCheck OM and passed to analyzers.
-* Analyzers may decide to report results of their findings (via `BuildCopDataContext.ReportResult`), the infrastructure will then perform post-processing (filter out reports for `Rule`s that are disabled, set the severity based on configuration) and send the result via the standard MSBuild logging infrastructure.
+* Analyzers may decide to report results of their findings (via `BuildCheckDataContext.ReportResult`), the infrastructure will then perform post-processing (filter out reports for `Rule`s that are disabled, set the severity based on configuration) and send the result via the standard MSBuild logging infrastructure.
 * Analysis result might hence be reported after project's final `ProjectFinishedEventArgs`
 * Final status of the build should not be reported (and `BuildFinishedEventArgs` logged) until all analyzers are done processing and their results are accounted for.
 
