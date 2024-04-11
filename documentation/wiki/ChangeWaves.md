@@ -26,7 +26,7 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 ### 17.12
 - [Log TaskParameterEvent for scalar parameters](https://github.com/dotnet/msbuild/pull/9908)
 - [Convert.ToString during a property evaluation uses the InvariantCulture for all types](https://github.com/dotnet/msbuild/pull/9874)
-- [ResultsCache ignores some of the BuildRequest data, may return incorrect results](https://github.com/dotnet/msbuild/pull/9987)
+- [Fix oversharing of build results in ResultsCache](https://github.com/dotnet/msbuild/pull/9987)
 
 ### 17.10
 - [AppDomain configuration is serialized without using BinFmt](https://github.com/dotnet/msbuild/pull/9320) - feature can be opted out only if [BinaryFormatter](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.serialization.formatters.binary.binaryformatter) is allowed at runtime by editing `MSBuild.runtimeconfig.json`
