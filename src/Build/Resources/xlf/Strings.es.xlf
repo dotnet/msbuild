@@ -508,7 +508,7 @@
         <source>The "{0}" resolver attempted to resolve the SDK "{1}".
 Warnings: {2}
 Errors: {3}</source>
-        <target state="translated">El resolvedor "{0}" intentó resolver el SDK "{1}".
+        <target state="translated">El solucionador "{0}" intentó resolver el SDK "{1}".
 Advertencias: {2}
 Errores: {3}</target>
         <note>

@@ -118,7 +118,7 @@
       </trans-unit>
       <trans-unit id="AxTlbBaseTask.StrongNameUtils.NoPublicKeySpecified">
         <source>MSB3654: Delay signing requires that at least a public key be specified.  Please either supply a public key using the KeyFile or KeyContainer properties, or disable delay signing.</source>
-        <target state="translated">MSB3654: La firma retardada requiere que se especifique al menos una clave pública.  Proporcione una clave pública mediante las propiedades KeyFile o KeyContainer, o deshabilite la firma retardada.</target>
+        <target state="translated">MSB3654: La firma retrasada requiere que se especifique al menos una clave pública.  Proporcione una clave pública mediante las propiedades KeyFile o KeyContainer, o deshabilite la firma retrasada.</target>
         <note>{StrBegin="MSB3654: "}</note>
       </trans-unit>
       <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
@@ -2307,7 +2307,7 @@
       </trans-unit>
       <trans-unit id="ResolveComReference.LoadingDelaySignedAssemblyWithStrongNameVerificationEnabled">
         <source>MSB3295: Failed to load an assembly. Please make sure you have disabled strong name verification for your public key if you want to generate delay signed wrappers. {0}</source>
-        <target state="translated">MSB3295: No se pudo cargar un ensamblado. Asegúrese de que deshabilitó la comprobación de nombres seguros para su clave pública si desea generar contenedores de firma retardada. {0}</target>
+        <target state="translated">MSB3295: No se pudo cargar un ensamblado. Asegúrese de que deshabilitó la comprobación de nombres seguros para su clave pública si desea generar contenedores de firma con retraso. {0}</target>
         <note>{StrBegin="MSB3295: "}</note>
       </trans-unit>
       <trans-unit id="ResolveComReference.MissingOrUnknownComReferenceAttribute">
@@ -2516,7 +2516,7 @@
       </trans-unit>
       <trans-unit id="StrongNameUtils.NoPublicKeySpecified">
         <source>MSB3353: Public key necessary for delay signing was not specified.</source>
-        <target state="translated">MSB3353: No se especificó la clave pública necesaria para la firma retardada.</target>
+        <target state="translated">MSB3353: No se especificó la clave pública necesaria para la firma con retraso.</target>
         <note>{StrBegin="MSB3353: "}</note>
       </trans-unit>
       <trans-unit id="Task.FileLocked">

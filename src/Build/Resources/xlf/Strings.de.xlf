@@ -508,7 +508,7 @@
         <source>The "{0}" resolver attempted to resolve the SDK "{1}".
 Warnings: {2}
 Errors: {3}</source>
-        <target state="translated">Der Konfliktlöser „{0}“ hat versucht, das SDK „{1}“ aufzulösen.
+        <target state="translated">Der Konfliktlöser "{0}" hat versucht, das SDK "{1}" aufzulösen.
 Warnungen: {2}
 Fehler: {3}</target>
         <note>
@@ -622,7 +622,7 @@ Fehler: {3}</target>
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Dies ist eine nicht behandelte Ausnahme in MSBuild. RUFEN SIE EIN VORHANDENES PROBLEM AUF, ODER ERSTELLEN SIE EIN NEUES UNTER https://aka.ms/msbuild/unhandled
+        <target state="translated">Dies ist ein Ausnahmefehler in MSBuild. STIMMEN SIE EINEM VORHANDENEN ISSUE ZU, ODER ERSTELLEN SIE EIN NEUES ISSUE UNTER https://aka.ms/msbuild/unhandled
     {0}</target>
         <note />
       </trans-unit>
