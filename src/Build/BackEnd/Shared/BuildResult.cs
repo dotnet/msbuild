@@ -177,6 +177,8 @@ namespace Microsoft.Build.Execution
             _requestException = existingResults._requestException;
             _resultsByTarget = CreateTargetResultDictionaryWithContents(existingResults, targetNames);
             _baseOverallResult = existingResults.OverallResult == BuildResultCode.Success;
+            _buildRequestDataFlags = existingResults._buildRequestDataFlags;
+            _projectStateAfterBuild = existingResults._projectStateAfterBuild;
 
             _circularDependency = existingResults._circularDependency;
         }
