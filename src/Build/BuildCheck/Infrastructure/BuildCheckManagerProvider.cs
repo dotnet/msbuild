@@ -73,7 +73,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         internal BuildCheckManager(ILoggingService loggingService)
         {
             _analyzersRegistry = new List<BuildAnalyzerFactoryContext>();
-            _acquisitionModule = new BuildCheckAcquisitionModule();
+            _acquisitionModule = new BuildCheckAcquisitionModule(loggingService);
             _loggingService = loggingService;
             _buildEventsProcessor = new(_buildCheckCentralContext);
         }
@@ -99,10 +99,10 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         {
             if (IsInProcNode)
             {
-                BuildAnalyzerFactory? factory = _acquisitionModule.CreateBuildAnalyzerFactory(acquisitionData);
-                if (factory != null)
+                var analyzersFactories = _acquisitionModule.CreateBuildAnalyzerFactories(acquisitionData, buildEventContext);
+                if (analyzersFactories.Any())
                 {
-                    RegisterCustomAnalyzer(BuildCheckDataSource.EventArgs, factory, buildEventContext);
+                    RegisterCustomAnalyzer(BuildCheckDataSource.EventArgs, analyzersFactories, buildEventContext);
                 }
                 else
                 {
@@ -145,18 +145,21 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         }
 
         /// <summary>
-        /// To be used by acquisition module
-        /// Registeres the custom analyzer, the construction of analyzer is deferred until the first using project is encountered
+        /// To be used by acquisition module.
+        /// Registeres the custom analyzers, the construction of analyzers is deferred until the first using project is encountered.
         /// </summary>
-        internal void RegisterCustomAnalyzer(
+        internal void RegisterCustomAnalyzers(
             BuildCheckDataSource buildCheckDataSource,
-            BuildAnalyzerFactory factory,
+            IEnumerable<BuildAnalyzerFactory> factories,
             string[] ruleIds,
             bool defaultEnablement)
         {
             if (_enabledDataSources[(int)buildCheckDataSource])
             {
-                _analyzersRegistry.Add(new BuildAnalyzerFactoryContext(factory, ruleIds, defaultEnablement));
+                foreach (BuildAnalyzerFactory factory in factories)
+                {
+                    _analyzersRegistry.Add(new BuildAnalyzerFactoryContext(factory, ruleIds, defaultEnablement));
+                }
             }
         }
 
@@ -166,17 +169,20 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         /// </summary>
         internal void RegisterCustomAnalyzer(
             BuildCheckDataSource buildCheckDataSource,
-            BuildAnalyzerFactory factory,
+            IEnumerable<BuildAnalyzerFactory> factories,
             BuildEventContext buildEventContext)
         {
             if (_enabledDataSources[(int)buildCheckDataSource])
             {
-                var instance = factory();
-                _analyzersRegistry.Add(new BuildAnalyzerFactoryContext(
-                    factory,
-                    instance.SupportedRules.Select(r => r.Id).ToArray(),
-                    instance.SupportedRules.Any(r => r.DefaultConfiguration.IsEnabled == true)));
-                _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerSuccessfulAcquisition", instance.GetType().Name);
+                foreach (var factory in factories)
+                {
+                    var instance = factory();
+                    _analyzersRegistry.Add(new BuildAnalyzerFactoryContext(
+                        factory,
+                        instance.SupportedRules.Select(r => r.Id).ToArray(),
+                        instance.SupportedRules.Any(r => r.DefaultConfiguration.IsEnabled == true)));
+                    _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerSuccessfulAcquisition", instance.GetType().Name);
+                }         
             }
         }
 
@@ -209,6 +215,11 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 analyzerFactoryContext.MaterializedAnalyzer = wrapper;
                 BuildAnalyzer analyzer = wrapper.BuildAnalyzer;
 
+                // This is to facilitate possible perf improvement for custom analyzers - as we might want to
+                //  avoid loading the assembly and type just to check if it's supported.
+                // If we expose a way to declare the enablement status and rule ids during registration (e.g. via
+                //  optional arguments of the intrinsic property function) - we can then avoid loading it.
+                // But once loaded - we should verify that the declared enablement status and rule ids match the actual ones.
                 if (
                     analyzer.SupportedRules.Count != analyzerFactoryContext.RuleIds.Length
                     ||
@@ -272,12 +283,15 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                     _loggingService.LogErrorFromText(buildEventContext, null, null, null,
                         new BuildEventFileInfo(projectFullPath),
                         e.Message);
-                    _loggingService.LogCommentFromText(buildEventContext, MessageImportance.High, $"Dismounting analyzer '{analyzerFactoryContext.FriendlyName}'");
                     analyzersToRemove.Add(analyzerFactoryContext);
                 }
             }
 
-            analyzersToRemove.ForEach(c => _analyzersRegistry.Remove(c));
+            analyzersToRemove.ForEach(c =>
+            {
+                _analyzersRegistry.Remove(c);
+                _loggingService.LogCommentFromText(buildEventContext, MessageImportance.High, $"Dismounting analyzer '{c.FriendlyName}'");
+            });
             foreach (var analyzerToRemove in analyzersToRemove.Select(a => a.MaterializedAnalyzer).Where(a => a != null))
             {
                 _buildCheckCentralContext.DeregisterAnalyzer(analyzerToRemove!);

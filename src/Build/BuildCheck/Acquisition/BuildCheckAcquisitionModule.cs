@@ -2,16 +2,26 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BuildCheck.Acquisition
 {
     internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
     {
+        private readonly ILoggingService _loggingService;
+
+        internal BuildCheckAcquisitionModule(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
+
 #if FEATURE_ASSEMBLYLOADCONTEXT
         /// <summary>
         /// AssemblyContextLoader used to load DLLs outside of msbuild.exe directory
@@ -19,7 +29,7 @@ namespace Microsoft.Build.BuildCheck.Acquisition
         private static readonly CoreClrAssemblyLoader s_coreClrAssemblyLoader = new();
 #endif
 
-        public BuildAnalyzerFactory? CreateBuildAnalyzerFactory(AnalyzerAcquisitionData analyzerAcquisitionData)
+        public IEnumerable<BuildAnalyzerFactory> CreateBuildAnalyzerFactories(AnalyzerAcquisitionData analyzerAcquisitionData, BuildEventContext buildEventContext)
         {
             try
             {
@@ -30,13 +40,24 @@ namespace Microsoft.Build.BuildCheck.Acquisition
                 assembly = Assembly.LoadFrom(analyzerAcquisitionData.AssemblyPath);
 #endif
 
-                Type? analyzerType = assembly.GetTypes().FirstOrDefault(t => typeof(BuildAnalyzer).IsAssignableFrom(t));
+                IEnumerable<Type> analyzerTypes = assembly.GetTypes().Where(t => typeof(BuildAnalyzer).IsAssignableFrom(t));
 
-                if (analyzerType != null)
+                if (analyzerTypes.Any())
                 {
-                    return () => Activator.CreateInstance(analyzerType) is not BuildAnalyzer instance
-                            ? throw new InvalidOperationException($"Failed to create an instance of type {analyzerType.FullName} as BuildAnalyzer.")
-                            : instance;
+                    var analyzersFactory = new List<BuildAnalyzerFactory>();
+                    foreach (Type analyzerType in analyzerTypes)
+                    {
+                        if (Activator.CreateInstance(analyzerType) is BuildAnalyzer instance)
+                        {
+                            analyzersFactory.Add(() => instance);
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException($"Failed to create an instance of type {analyzerType.FullName} as BuildAnalyzer.");
+                        }
+                    }
+
+                    return analyzersFactory;
                 }
             }
             catch (ReflectionTypeLoadException ex)
@@ -45,13 +66,12 @@ namespace Microsoft.Build.BuildCheck.Acquisition
                 {
                     foreach (Exception? loaderException in ex.LoaderExceptions)
                     {
-                        // How do we plan to handle these errors?
-                        Console.WriteLine(loaderException?.Message ?? "Unknown error occurred.");
+                        _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerFailedRuleLoading", loaderException?.Message);
                     }
                 }
             }
 
-            return null;
+            return Enumerable.Empty<BuildAnalyzerFactory>();
         }
     }
 }

@@ -3911,7 +3911,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.RegisterAnalyzer), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryGetArg(args, out string arg0) && _loggingContext != null)
+                            if (_loggingContext != null && TryGetArg(args, out string arg0))
                             {
                                 returnVal = IntrinsicFunctions.RegisterAnalyzer(arg0, _loggingContext);
                                 return true;

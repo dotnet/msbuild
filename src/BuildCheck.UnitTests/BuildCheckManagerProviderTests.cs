@@ -17,91 +17,90 @@ using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.Build.BuildCheck.Infrastructure.BuildCheckManagerProvider;
 
-namespace Microsoft.Build.BuildCheck.UnitTests
+namespace Microsoft.Build.BuildCheck.UnitTests;
+
+public class BuildCheckManagerTests
 {
-    public class BuildCheckManagerTests
+    private readonly IBuildCheckManager _testedInstance;
+    private readonly ILoggingService _loggingService;
+    private readonly MockLogger _logger;
+
+    public BuildCheckManagerTests(ITestOutputHelper output)
     {
-        private readonly IBuildCheckManager _testedInstance;
-        private readonly ILoggingService _loggingService;
-        private readonly MockLogger _logger;
-
-        public BuildCheckManagerTests(ITestOutputHelper output)
-        {
-            _loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
-            _logger = new MockLogger();
-            _loggingService.RegisterLogger(_logger);
-            _testedInstance = new BuildCheckManager(_loggingService);
-        }
-
-        [Theory]
-        [InlineData(true, "Custom analyzer BuildAnalyzerRuleMock has been registered successfully.")]
-        [InlineData(false, "Failed to ragister the custom analyzer: DummyPath.")]
-        public void ProcessAnalyzerAcquisitionTest(bool isAnalyzerRuleExist, string expectedMessage)
-        {
-            MockBuildCheckAcquisition(isAnalyzerRuleExist);
-            MockEnabledDataSourcesDefinition();
-
-            _testedInstance.ProcessAnalyzerAcquisition(new AnalyzerAcquisitionData("DummyPath"), new BuildEventContext(1, 2, 3, 4, 5, 6, 7));
-
-            _logger.AllBuildEvents.Where(be => be.GetType() == typeof(BuildMessageEventArgs))
-                .ShouldContain(be => be.Message == expectedMessage);
-        }
-
-        private void MockBuildCheckAcquisition(bool isAnalyzerRuleExist) => MockField("_acquisitionModule", new BuildCheckAcquisitionModuleMock(isAnalyzerRuleExist));
-
-        private void MockEnabledDataSourcesDefinition() => MockField("_enabledDataSources", new[] { true, true });
-
-        private void MockField(string fieldName, object mockedValue)
-        {
-            var mockedField = _testedInstance.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
-            if (mockedField != null)
-            {
-                mockedField.SetValue(_testedInstance, mockedValue);
-            }
-        }
+        _loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+        _logger = new MockLogger();
+        _loggingService.RegisterLogger(_logger);
+        _testedInstance = new BuildCheckManager(_loggingService);
     }
 
-    internal sealed class BuildCheckAcquisitionModuleMock : IBuildCheckAcquisitionModule
+    [Theory]
+    [InlineData(true, "Custom analyzer BuildAnalyzerRuleMock has been registered successfully.")]
+    [InlineData(false, "Failed to ragister the custom analyzer: DummyPath.")]
+    public void ProcessAnalyzerAcquisitionTest(bool isAnalyzerRuleExist, string expectedMessage)
     {
-        private readonly bool _isAnalyzerRuleExistForTest = true;
+        MockBuildCheckAcquisition(isAnalyzerRuleExist);
+        MockEnabledDataSourcesDefinition();
 
-        internal BuildCheckAcquisitionModuleMock(bool isAnalyzerRuleExistForTest) => _isAnalyzerRuleExistForTest = isAnalyzerRuleExistForTest;
+        _testedInstance.ProcessAnalyzerAcquisition(new AnalyzerAcquisitionData("DummyPath"), new BuildEventContext(1, 2, 3, 4, 5, 6, 7));
 
-        public BuildAnalyzerFactory? CreateBuildAnalyzerFactory(AnalyzerAcquisitionData analyzerAcquisitionData) =>
-            _isAnalyzerRuleExistForTest
-            ? () => new BuildAnalyzerRuleMock()
-            : null;
+        _logger.AllBuildEvents.Where(be => be.GetType() == typeof(BuildMessageEventArgs))
+            .ShouldContain(be => be.Message == expectedMessage);
     }
 
-    internal sealed class BuildAnalyzerRuleMock : BuildAnalyzer
+    private void MockBuildCheckAcquisition(bool isAnalyzerRuleExist) => MockField("_acquisitionModule", new BuildCheckAcquisitionModuleMock(isAnalyzerRuleExist));
+
+    private void MockEnabledDataSourcesDefinition() => MockField("_enabledDataSources", new[] { true, true });
+
+    private void MockField(string fieldName, object mockedValue)
     {
-        public static BuildAnalyzerRule SupportedRule = new BuildAnalyzerRule(
-            "X01234",
-            "Title",
-            "Description",
-            "Message format: {0}",
-            new BuildAnalyzerConfiguration());
-
-        public override string FriendlyName => "BuildAnalyzerRuleMock";
-
-        public override IReadOnlyList<BuildAnalyzerRule> SupportedRules { get; } = new List<BuildAnalyzerRule>() { SupportedRule };
-
-        public override void Initialize(ConfigurationContext configurationContext)
+        var mockedField = _testedInstance.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
+        if (mockedField != null)
         {
-            // configurationContext to be used only if analyzer needs external configuration data.
+            mockedField.SetValue(_testedInstance, mockedValue);
         }
+    }
+}
 
-        public override void RegisterActions(IBuildCheckRegistrationContext registrationContext)
-        {
-            registrationContext.RegisterEvaluatedPropertiesAction(EvaluatedPropertiesAction);
-        }
+internal sealed class BuildCheckAcquisitionModuleMock : IBuildCheckAcquisitionModule
+{
+    private readonly bool _isAnalyzerRuleExistForTest = true;
 
-        private void EvaluatedPropertiesAction(BuildCheckDataContext<EvaluatedPropertiesAnalysisData> context)
-        {
-            context.ReportResult(BuildCheckResult.Create(
-                SupportedRule,
-                ElementLocation.EmptyLocation,
-                "Argument for the message format"));
-        }
+    internal BuildCheckAcquisitionModuleMock(bool isAnalyzerRuleExistForTest) => _isAnalyzerRuleExistForTest = isAnalyzerRuleExistForTest;
+
+    public IEnumerable<BuildAnalyzerFactory> CreateBuildAnalyzerFactories(AnalyzerAcquisitionData analyzerAcquisitionData, BuildEventContext buildEventContext)
+        => _isAnalyzerRuleExistForTest
+        ? new List<BuildAnalyzerFactory>() { () => new BuildAnalyzerRuleMock() }
+        : new List<BuildAnalyzerFactory>();
+}
+
+internal sealed class BuildAnalyzerRuleMock : BuildAnalyzer
+{
+    public static BuildAnalyzerRule SupportedRule = new BuildAnalyzerRule(
+        "X01234",
+        "Title",
+        "Description",
+        "Message format: {0}",
+        new BuildAnalyzerConfiguration());
+
+    public override string FriendlyName => "BuildAnalyzerRuleMock";
+
+    public override IReadOnlyList<BuildAnalyzerRule> SupportedRules { get; } = new List<BuildAnalyzerRule>() { SupportedRule };
+
+    public override void Initialize(ConfigurationContext configurationContext)
+    {
+        // configurationContext to be used only if analyzer needs external configuration data.
+    }
+
+    public override void RegisterActions(IBuildCheckRegistrationContext registrationContext)
+    {
+        registrationContext.RegisterEvaluatedPropertiesAction(EvaluatedPropertiesAction);
+    }
+
+    private void EvaluatedPropertiesAction(BuildCheckDataContext<EvaluatedPropertiesAnalysisData> context)
+    {
+        context.ReportResult(BuildCheckResult.Create(
+            SupportedRule,
+            ElementLocation.EmptyLocation,
+            "Argument for the message format"));
     }
 }

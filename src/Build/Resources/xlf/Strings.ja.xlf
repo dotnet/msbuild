@@ -208,9 +208,14 @@
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedAcquisition">
-        <source>Failed to ragister the custom analyzer: {0}.</source>
-        <target state="new">Failed to ragister the custom analyzer: {0}.</target>
+        <source>Failed to register the custom analyzer: {0}.</source>
+        <target state="new">Failed to register the custom analyzer: {0}.</target>
         <note>The message is emmited on failed loading of the custom analyzer in app domain.</note>
+      </trans-unit>
+      <trans-unit id="CustomAnalyzerFailedRuleLoading">
+        <source>Failed to instantiate the custom analyzer rule with the next exception: {0}.</source>
+        <target state="new">Failed to instantiate the custom analyzer rule with the next exception: {0}.</target>
+        <note>The message is emmited on failed loading of the custom analyzer rule in app domain.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
         <source>Custom analyzer {0} has been registered successfully.</source>
