@@ -80,8 +80,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             clone.ItemFilters.Should().BeEquivalentTo(items);
 
             // Mutating the original instance is not reflected in the clone.
-            items.Add("item3", ["metadatum4"]);
-            clone.ItemFilters.Count.Should().NotBe(items.Count);
+            items["item2"].Add("metadatum4");
+            clone.ItemFilters["item2"].Count.Should().NotBe(items["item2"].Count);
         }
 
         [Fact]
