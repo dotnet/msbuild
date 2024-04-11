@@ -24,7 +24,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             manifest.OnBeforeSave();
             var m = new MemoryStream();
             var s = new XmlSerializer(manifest.GetType());
-            var w = new StreamWriter(m);
+            using var w = new StreamWriter(m);
 
             int t1 = Environment.TickCount;
             s.Serialize(w, manifest);

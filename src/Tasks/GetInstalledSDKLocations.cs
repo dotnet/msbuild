@@ -194,7 +194,7 @@ namespace Microsoft.Build.Tasks
                 object staticCacheDisposer = buildEngine4.GetRegisteredTaskObject(StaticSDKCacheKey, RegisteredTaskObjectLifetime.Build);
                 if (staticCacheDisposer == null)
                 {
-                    BuildCacheDisposeWrapper staticDisposer = new BuildCacheDisposeWrapper(ToolLocationHelper.ClearSDKStaticCache);
+                    using BuildCacheDisposeWrapper staticDisposer = new BuildCacheDisposeWrapper(ToolLocationHelper.ClearSDKStaticCache);
                     buildEngine4.RegisterTaskObject(StaticSDKCacheKey, staticDisposer, RegisteredTaskObjectLifetime.Build, allowEarlyCollection: false);
                 }
             }

@@ -50,7 +50,7 @@ namespace Microsoft.Build.Tasks
                 // During DTB the referenced project may not has been built yet, so we need to check if the assembly already exists.
                 if (File.Exists(assemblyPath))
                 {
-                    AssemblyInformation assemblyInformation = new(assemblyPath);
+                    using AssemblyInformation assemblyInformation = new(assemblyPath);
                     AssemblyAttributes attributes = assemblyInformation.GetAssemblyMetadata();
 
                     if (attributes != null)

@@ -224,7 +224,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private static Manifest Deserialize(Stream s)
         {
             s.Position = 0;
-            var r = new XmlTextReader(s) { DtdProcessing = DtdProcessing.Ignore };
+            using var r = new XmlTextReader(s) { DtdProcessing = DtdProcessing.Ignore };
 
             do
             {

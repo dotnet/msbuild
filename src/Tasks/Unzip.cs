@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 
 using Microsoft.Build.Framework;
@@ -98,6 +99,8 @@ namespace Microsoft.Build.Tasks
 
             BuildEngine3.Yield();
 
+            FileStream stream = null;
+            ZipArchive zipArchive = null;
             try
             {
                 ParseIncludeExclude();
@@ -114,9 +117,9 @@ namespace Microsoft.Build.Tasks
 
                         try
                         {
-                            using (FileStream stream = new FileStream(sourceFile.ItemSpec, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 0x1000, useAsync: false))
+                            using (stream = new FileStream(sourceFile.ItemSpec, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 0x1000, useAsync: false))
                             {
-                                using (ZipArchive zipArchive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: false))
+                                using (zipArchive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: false))
                                 {
                                     try
                                     {
@@ -146,6 +149,8 @@ namespace Microsoft.Build.Tasks
             finally
             {
                 BuildEngine3.Reacquire();
+                stream?.Dispose();
+                zipArchive?.Dispose();
             }
 
             return !_cancellationToken.IsCancellationRequested && !Log.HasLoggedErrors;

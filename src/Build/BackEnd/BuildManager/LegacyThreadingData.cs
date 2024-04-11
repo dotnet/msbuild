@@ -83,7 +83,7 @@ namespace Microsoft.Build.Execution
         /// Given a submission ID, assign it "start" and "finish" events to track its use of
         /// the legacy thread.
         /// </summary>
-        [SuppressMessage("Microsoft.Naming", "CA2000:Dispose objects before losing scope", Justification = "The events are disposed in UnregisterSubmissionForLegacyThread")]
+        [SuppressMessage("Microsoft.Dispose", "CA2000:Dispose objects before losing scope", Justification = "The events are disposed in UnregisterSubmissionForLegacyThread")]
         internal void RegisterSubmissionForLegacyThread(int submissionId)
         {
             lock (_legacyThreadingEventsLock)

@@ -12,8 +12,11 @@ namespace Microsoft.Build.Tasks.ResourceHandling
     internal class FileStreamResource : IResource
     {
         public string Name { get; }
+
         public string TypeAssemblyQualifiedName { get; }
+
         public string OriginatingFile { get; }
+
         public string FileName { get; }
 
         public string TypeFullName => NameUtilities.FullNameFromAssemblyQualifiedName(TypeAssemblyQualifiedName);

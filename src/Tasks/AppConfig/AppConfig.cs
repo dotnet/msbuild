@@ -34,8 +34,10 @@ namespace Microsoft.Build.Tasks
                 // Need a filestream as the XmlReader doesn't support nonstandard unicode characters in path.
                 // No need to dispose - as 'CloseInput' was passed to XmlReaderSettings
                 FileStream fs = File.OpenRead(appConfigFilePath);
-                reader = XmlReader.Create(fs, readerSettings);
-                Read(reader);
+                using (reader = XmlReader.Create(fs, readerSettings))
+                {
+                    Read(reader);
+                }
             }
             catch (XmlException e)
             {

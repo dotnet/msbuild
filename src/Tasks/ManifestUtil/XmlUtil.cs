@@ -115,7 +115,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 }
 
                 var m = new MemoryStream();
-                var w = new XmlTextWriter(m, Encoding.UTF8);
+                using var w = new XmlTextWriter(m, Encoding.UTF8);
                 w.WriteStartDocument();
 
                 int t5 = Environment.TickCount;

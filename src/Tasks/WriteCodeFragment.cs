@@ -140,7 +140,7 @@ namespace Microsoft.Build.Tasks
             extension = null;
             bool haveGeneratedContent = false;
 
-            CodeDomProvider provider;
+            CodeDomProvider provider = null;
 
             try
             {
@@ -155,6 +155,10 @@ namespace Microsoft.Build.Tasks
             {
                 Log.LogErrorWithCodeFromResources("WriteCodeFragment.CouldNotCreateProvider", Language, e.Message);
                 return null;
+            }
+            finally
+            {
+                provider?.Dispose();
             }
 
             extension = provider.FileExtension;
