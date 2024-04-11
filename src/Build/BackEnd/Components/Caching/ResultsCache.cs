@@ -149,7 +149,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Attempts to satisfy the request from the cache.  The request can be satisfied only if:
-        /// 1. The passed BuildRequestDataFlags can not affect the result data.
+        /// 1. The passed BuildRequestDataFlags and RequestedProjectStateFilter are compatible with the result data.
         /// 2. All specified targets in the request have successful results in the cache or if the sequence of target results
         ///    includes 0 or more successful targets followed by at least one failed target.
         /// 3. All initial targets in the configuration for the request have non-skipped results in the cache.
@@ -345,11 +345,11 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Returns true if the flags of the given build request are compatible with the given build result.
+        /// Returns true if the flags and project state filter of the given build request are compatible with the given build result.
         /// </summary>
         /// <param name="buildRequest">The current build request.</param>
         /// <param name="buildResult">The candidate build result.</param>
-        /// <returns>False if there is any difference in the flags that can cause missed build data, true otherwise.</returns>
+        /// <returns>True if the flags and project state filter of the build request is compatible with the build result.</returns>
         private static bool AreBuildResultFlagsCompatible(BuildRequest buildRequest, BuildResult buildResult)
         {
             BuildRequestDataFlags buildRequestDataFlags = buildRequest.BuildRequestDataFlags;

@@ -328,10 +328,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 new List<string>(new string[] { targetName }),
                 skippedResultsDoNotCauseCacheMiss: false);
 
+            // We used the same filter that was used for the ProjectInstance in the cache -> cache hit.
             Assert.Equal(ResultsCacheResponseType.Satisfied, cachedResponseWithSubsetFlag1.Type);
             Assert.Equal("Value1", cachedResponseWithSubsetFlag1.Results.ProjectStateAfterBuild.GetPropertyValue("property1"));
             Assert.Equal("Value2", cachedResponseWithSubsetFlag1.Results.ProjectStateAfterBuild.GetPropertyValue("property2"));
 
+            // We used a filter that's a subset of the one used for the ProjectInstance in the cache -> cache hit.
             Assert.Equal(ResultsCacheResponseType.Satisfied, cachedResponseWithSubsetFlag2.Type);
             Assert.Equal("Value1", cachedResponseWithSubsetFlag2.Results.ProjectStateAfterBuild.GetPropertyValue("property1"));
             Assert.Equal("", cachedResponseWithSubsetFlag2.Results.ProjectStateAfterBuild.GetPropertyValue("property2"));
