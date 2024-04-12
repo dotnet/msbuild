@@ -38,7 +38,7 @@
     <SystemResourcesExtensionsVersion>8.0.0</SystemResourcesExtensionsVersion>
     <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
     <SystemTextEncodingCodePagesVersion>7.0.0</SystemTextEncodingCodePagesVersion>
-    <SystemTextJsonVersion>8.0.3</SystemTextJsonVersion>
+    <SystemTextJsonVersion>8.0.0</SystemTextJsonVersion>
     <SystemThreadingChannelsVersion>8.0.0</SystemThreadingChannelsVersion>
     <SystemThreadingTasksDataflowVersion>8.0.0</SystemThreadingTasksDataflowVersion>
   </PropertyGroup>
