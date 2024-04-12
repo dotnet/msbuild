@@ -201,6 +201,16 @@ internal sealed partial class TerminalLogger : INodeLogger
     private DateTime? _testEndTime;
 
     /// <summary>
+    /// Name of target that identifies the project cache plugin run has just started.
+    /// </summary>
+    private static string _cachePluginStartTarget = "_CachePluginRunStart";
+
+    /// <summary>
+    /// Demonstrates whether there exists at least one project which is a cache plugin project.
+    /// </summary>
+    private bool _hasUsedCache = false;
+
+    /// <summary>
     /// Whether to show TaskCommandLineEventArgs high-priority messages. 
     /// </summary>
     private bool _showCommandLine = false;
@@ -673,12 +683,17 @@ internal sealed partial class TerminalLogger : INodeLogger
 
             string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
 
-
-            var isTestTarget = e.TargetName == _testStartTarget;
-
-            var targetName = isTestTarget ? "Testing" : e.TargetName;
-            if (isTestTarget)
+            string targetName = e.TargetName;
+            if (targetName == _cachePluginStartTarget)
             {
+                project.IsCachePluginProject = true;
+                _hasUsedCache = true;
+            }
+
+            if (targetName == _testStartTarget)
+            {
+                targetName = "Testing";
+
                 // Use the minimal start time, so if we run tests in parallel, we can calculate duration
                 // as this start time, minus time when tests finished.
                 _testStartTime = _testStartTime == null
@@ -707,6 +722,24 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private void TargetFinished(object sender, TargetFinishedEventArgs e)
     {
+        // For cache plugin projects which result in a cache hit, ensure the output path is set
+        // to the item spec corresponding to the GetTargetPath target upon completion.
+        var buildEventContext = e.BuildEventContext;
+        if (_restoreContext is null
+            && buildEventContext is not null
+            && _hasUsedCache
+            && e.TargetName == "GetTargetPath"
+            && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+        {
+            if (project.IsCachePluginProject)
+            {
+                foreach (ITaskItem output in e.TargetOutputs)
+                {
+                    project.OutputPath = output.ItemSpec.AsMemory();
+                    break;
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -931,7 +964,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         }
     }
 
-    #endregion
+#endregion
 
     #region Refresher thread implementation
 
