@@ -96,11 +96,8 @@ internal sealed class BuildCheckConnectorLogger(
 
         LoggingContext loggingContext = loggingContextFactory.CreateLoggingContext(buildEventContext);
 
-        if (_areStatsEnabled)
-        {
-            _statsAnalyzers.Merge(buildCheckManager.CreateAnalyzerTracingStats()!, (span1, span2) => span1 + span2);
-            LogAnalyzerStats(loggingContext);
-        }
+        _statsAnalyzers.Merge(buildCheckManager.CreateAnalyzerTracingStats()!, (span1, span2) => span1 + span2);
+        LogAnalyzerStats(loggingContext);
     }
     
     private void LogAnalyzerStats(LoggingContext loggingContext)
@@ -123,12 +120,24 @@ internal sealed class BuildCheckConnectorLogger(
             }
         }
 
-        loggingContext.LogCommentFromText(MessageImportance.High, $"BuildCheck run times{Environment.NewLine}");
-        string infraData = BuildStatsTable("Infrastructure run times", infraStats);
-        loggingContext.LogCommentFromText(MessageImportance.High, infraData);
+        if (_areStatsEnabled)
+        {
+            loggingContext.LogCommentFromText(MessageImportance.High, $"BuildCheck run times{Environment.NewLine}");
+            string infraData = BuildStatsTable("Infrastructure run times", infraStats);
+            loggingContext.LogCommentFromText(MessageImportance.High, infraData);
 
-        string analyzerData = BuildStatsTable("Analyzer run times", analyzerStats);
-        loggingContext.LogCommentFromText(MessageImportance.High, analyzerData);
+            string analyzerData = BuildStatsTable("Analyzer run times", analyzerStats);
+            loggingContext.LogCommentFromText(MessageImportance.High, analyzerData);
+        }
+        else
+        {
+            loggingContext.LogCommentFromText(MessageImportance.Low, $"BuildCheck run times{Environment.NewLine}");
+            string infraData = BuildStatsTable("Infrastructure run times", infraStats);
+            loggingContext.LogCommentFromText(MessageImportance.Low, infraData);
+
+            string analyzerData = BuildStatsTable("Analyzer run times", analyzerStats);
+            loggingContext.LogCommentFromText(MessageImportance.Low, analyzerData);
+        }
     }
 
     private string BuildStatsTable(string title, Dictionary<string, TimeSpan> rowData)

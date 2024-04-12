@@ -317,8 +317,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             var analyzerEventStats = CreateAnalyzerTracingStats();
             var infraStats = new Dictionary<string, TimeSpan>() {
                 { $"{infraStatPrefix}analyzerAcquisitionTime", _tracingReporter.analyzerAcquisitionTime },
-                { $"{infraStatPrefix}analyzerSetDataSourceTime", new TimeSpan(_tracingReporter.analyzerSetDataSourceTime) },
-                { $"{infraStatPrefix}newProjectAnalyzersTime", new TimeSpan(_tracingReporter.newProjectAnalyzersTime) }
+                { $"{infraStatPrefix}analyzerSetDataSourceTime", _tracingReporter.analyzerSetDataSourceTime },
+                { $"{infraStatPrefix}newProjectAnalyzersTime", _tracingReporter.newProjectAnalyzersTime }
             };
             analyzerEventStats.Merge(infraStats, (span1, span2) => span1 + span2);
 

@@ -15,8 +15,8 @@ internal class TracingReporter
 
     // Infrastructure time keepers, examples for now
     internal TimeSpan analyzerAcquisitionTime;
-    internal long analyzerSetDataSourceTime;
-    internal long newProjectAnalyzersTime;
+    internal TimeSpan analyzerSetDataSourceTime;
+    internal TimeSpan newProjectAnalyzersTime;
 
     public void AddStats(string name, TimeSpan subtotal)
     {
