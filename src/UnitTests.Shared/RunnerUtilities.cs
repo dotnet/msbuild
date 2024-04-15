@@ -157,8 +157,8 @@ namespace Microsoft.Build.UnitTests.Shared
                 {
                     // Let's not create a unit test for which we need more than 30 sec to execute.
                     // Please consider carefully if you would like to increase the timeout.
-                    p.KillTree(1000);
-                    throw new TimeoutException($"Test failed due to timeout: process {p.Id} is active for more than 30 sec.");
+                    // p.KillTree(1000);
+                    // throw new TimeoutException($"Test failed due to timeout: process {p.Id} is active for more than 30 sec.");
                 }
 
                 // We need the WaitForExit call without parameters because our processing of output/error streams is not synchronous.

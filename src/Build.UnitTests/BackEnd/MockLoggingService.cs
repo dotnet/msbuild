@@ -496,7 +496,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             => new BuildEventContext(0, 0, 0, 0, 0, 0, 0);
 
         /// <inheritdoc />
-        public void LogProjectEvaluationStarted(BuildEventContext eventContext, string projectFile)
+        public void LogProjectEvaluationStarted(BuildEventContext eventContext, string projectFile, bool isRestore)
         {
         }
 

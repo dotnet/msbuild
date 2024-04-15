@@ -1118,15 +1118,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private async Task<BuildResult> BuildProject()
         {
-            bool isRestore = false;
-            var propertyEntry = _requestEntry.RequestConfiguration.GlobalProperties[MSBuildConstants.MSBuildIsRestoring];
-            if (propertyEntry != null)
-            {
-                isRestore = Convert.ToBoolean(propertyEntry.EvaluatedValue);
-            }
-
             // We consider this the entrypoint for the project build for purposes of BuildCheck processing 
-            IBuildCheckManager buildCheckManager = isRestore ? null : (_componentHost.GetComponent(BuildComponentType.BuildCheck) as IBuildCheckManagerProvider)!.Instance;
+            var propertyEntry = _requestEntry.RequestConfiguration.GlobalProperties[MSBuildConstants.MSBuildIsRestoring];
+            IBuildCheckManager buildCheckManager = propertyEntry is not null ? null : (_componentHost.GetComponent(BuildComponentType.BuildCheck) as IBuildCheckManagerProvider)!.Instance;
             buildCheckManager?.SetDataSource(BuildCheckDataSource.BuildExecution);
 
             ErrorUtilities.VerifyThrow(_targetBuilder != null, "Target builder is null");
@@ -1143,13 +1137,12 @@ namespace Microsoft.Build.BackEnd
                 // Load the project
                 if (!_requestEntry.RequestConfiguration.IsLoaded)
                 {
-                    if (!isRestore)
-                    {
-                        buildCheckManager.StartProjectEvaluation(
-                            BuildCheckDataSource.BuildExecution,
-                            _requestEntry.Request.ParentBuildEventContext,
-                            _requestEntry.RequestConfiguration.ProjectFullPath);
-                    }
+
+                    buildCheckManager?.StartProjectEvaluation(
+                        BuildCheckDataSource.BuildExecution,
+                        _requestEntry.Request.ParentBuildEventContext,
+                        _requestEntry.RequestConfiguration.ProjectFullPath);
+                    
 
                     _requestEntry.RequestConfiguration.LoadProjectIntoConfiguration(
                         _componentHost,
@@ -1171,23 +1164,16 @@ namespace Microsoft.Build.BackEnd
             }
             finally
             {
-                if (!isRestore)
-                {
-                    buildCheckManager.EndProjectEvaluation(
-                        BuildCheckDataSource.BuildExecution,
-                        _requestEntry.Request.ParentBuildEventContext);
-                }
-
+                buildCheckManager?.EndProjectEvaluation(
+                    BuildCheckDataSource.BuildExecution,
+                    _requestEntry.Request.ParentBuildEventContext);
             }
 
             _projectLoggingContext = _nodeLoggingContext.LogProjectStarted(_requestEntry);
 
-            if (!isRestore)
-            {
-                buildCheckManager.StartProjectRequest(
-                    BuildCheckDataSource.BuildExecution,
-                    _requestEntry.Request.ParentBuildEventContext);
-            }
+            buildCheckManager?.StartProjectRequest(
+                BuildCheckDataSource.BuildExecution,
+                _requestEntry.Request.ParentBuildEventContext);
 
             // Now that the project has started, parse a few known properties which indicate warning codes to treat as errors or messages
             //
@@ -1240,12 +1226,9 @@ namespace Microsoft.Build.BackEnd
                 MSBuildEventSource.Log.BuildProjectStop(_requestEntry.RequestConfiguration.ProjectFullPath, string.Join(", ", allTargets));
             }
 
-            if (!isRestore)
-            {
-                buildCheckManager.EndProjectRequest(
-                    BuildCheckDataSource.BuildExecution,
-                    _requestEntry.Request.ParentBuildEventContext);
-            }
+            buildCheckManager?.EndProjectRequest(
+                BuildCheckDataSource.BuildExecution,
+                _requestEntry.Request.ParentBuildEventContext);
 
             return result;
 

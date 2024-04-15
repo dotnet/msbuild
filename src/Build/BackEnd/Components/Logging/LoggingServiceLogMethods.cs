@@ -444,14 +444,15 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <inheritdoc />
-        public void LogProjectEvaluationStarted(BuildEventContext projectEvaluationEventContext, string projectFile)
+        public void LogProjectEvaluationStarted(BuildEventContext projectEvaluationEventContext, string projectFile, bool isRestore)
         {
             ProjectEvaluationStartedEventArgs evaluationEvent =
                 new ProjectEvaluationStartedEventArgs(ResourceUtilities.GetResourceString("EvaluationStarted"),
                     projectFile)
                 {
                     BuildEventContext = projectEvaluationEventContext,
-                    ProjectFile = projectFile
+                    ProjectFile = projectFile,
+                    IsRestore = isRestore
                 };
 
             ProcessLoggingEvent(evaluationEvent);

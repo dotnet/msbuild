@@ -10,6 +10,7 @@ using Microsoft.Build.BuildCheck.Acquisition;
 using Microsoft.Build.BuildCheck.Logging;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BuildCheck.Infrastructure;
 internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFactory loggingContextFactory, IBuildCheckManager buildCheckManager)
@@ -17,6 +18,8 @@ internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFact
 {
     public LoggerVerbosity Verbosity { get; set; }
     public string? Parameters { get; set; }
+
+    private bool isRestore = false;
 
     public void Initialize(IEventSource eventSource)
     {
@@ -26,12 +29,23 @@ internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFact
 
     private void EventSource_AnyEventRaised(object sender, BuildEventArgs e)
     {
-        if (buildCheckManager.isRestore)
+        // NOTE: this event is fired more than one time per project build
+        if (e is ProjectFinishedEventArgs projectFinishedEventArgs)
+        {
+            if (isRestore)
+            {
+                isRestore = false;
+            }
+            else
+            {
+                buildCheckManager.EndProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!);
+            }
+        }
+        else if (isRestore)
         {
             return;
         }
-
-        if (e is ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs)
+        else if (e is ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs)
         {
             if (projectEvaluationFinishedEventArgs.ProjectFile?.EndsWith(".metaproj") ?? false)
             {
@@ -60,16 +74,19 @@ internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFact
                 return;
             }
 
-            buildCheckManager.StartProjectEvaluation(BuildCheckDataSource.EventArgs, e.BuildEventContext!,
-                projectEvaluationStartedEventArgs.ProjectFile!);
+            if (!projectEvaluationStartedEventArgs.IsRestore)
+            {
+                buildCheckManager.StartProjectEvaluation(BuildCheckDataSource.EventArgs, e.BuildEventContext!,
+                    projectEvaluationStartedEventArgs.ProjectFile!);
+            }
+            else
+            {
+                isRestore = true;
+            }
         }
         else if (e is ProjectStartedEventArgs projectStartedEvent)
         {
             buildCheckManager.StartProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!);
-        }
-        else if (e is ProjectFinishedEventArgs projectFinishedEventArgs)
-        {
-            buildCheckManager.EndProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!);
         }
         else if (e is BuildCheckEventArgs buildCheckBuildEventArgs)
         {

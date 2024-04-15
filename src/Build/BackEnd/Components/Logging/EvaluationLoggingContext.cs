@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections;
+using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
@@ -27,9 +28,9 @@ namespace Microsoft.Build.BackEnd.Components.Logging
             IsValid = true;
         }
 
-        public void LogProjectEvaluationStarted()
+        public void LogProjectEvaluationStarted(bool isRestore)
         {
-            LoggingService.LogProjectEvaluationStarted(BuildEventContext, _projectFile);
+            LoggingService.LogProjectEvaluationStarted(BuildEventContext, _projectFile, isRestore);
         }
 
         /// <summary>

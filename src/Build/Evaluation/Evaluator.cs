@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -626,7 +627,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                _evaluationLoggingContext.LogProjectEvaluationStarted();
+                _evaluationLoggingContext.LogProjectEvaluationStarted(_data.GlobalPropertiesDictionary[MSBuildConstants.MSBuildIsRestoring] is not null);
 
                 ErrorUtilities.VerifyThrow(_data.EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
