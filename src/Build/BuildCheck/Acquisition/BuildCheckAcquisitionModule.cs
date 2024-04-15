@@ -11,67 +11,65 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.BuildCheck.Acquisition
+namespace Microsoft.Build.BuildCheck.Acquisition;
+
+internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
 {
-    internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
+    private readonly ILoggingService _loggingService;
+
+    internal BuildCheckAcquisitionModule(ILoggingService loggingService)
     {
-        private readonly ILoggingService _loggingService;
-
-        internal BuildCheckAcquisitionModule(ILoggingService loggingService)
-        {
-            _loggingService = loggingService;
-        }
+        _loggingService = loggingService;
+    }
 
 #if FEATURE_ASSEMBLYLOADCONTEXT
-        /// <summary>
-        /// AssemblyContextLoader used to load DLLs outside of msbuild.exe directory
-        /// </summary>
-        private static readonly CoreClrAssemblyLoader s_coreClrAssemblyLoader = new();
+    /// <summary>
+    /// AssemblyContextLoader used to load DLLs outside of msbuild.exe directory
+    /// </summary>
+    private static readonly CoreClrAssemblyLoader s_coreClrAssemblyLoader = new();
 #endif
 
-        public IEnumerable<BuildAnalyzerFactory> CreateBuildAnalyzerFactories(AnalyzerAcquisitionData analyzerAcquisitionData, BuildEventContext buildEventContext)
+    /// <summary>
+    /// Creates a list of factory delegates for building analyzer rules instances from a given assembly path.
+    /// </summary>
+    public List<BuildAnalyzerFactory> CreateBuildAnalyzerFactories(AnalyzerAcquisitionData analyzerAcquisitionData, BuildEventContext buildEventContext)
+    {
+        var analyzersFactories = new List<BuildAnalyzerFactory>();
+
+        try
         {
-            try
-            {
-                Assembly? assembly = null;
+            Assembly? assembly = null;
 #if FEATURE_ASSEMBLYLOADCONTEXT
-                assembly = s_coreClrAssemblyLoader.LoadFromPath(analyzerAcquisitionData.AssemblyPath);
+            assembly = s_coreClrAssemblyLoader.LoadFromPath(analyzerAcquisitionData.AssemblyPath);
 #else
-                assembly = Assembly.LoadFrom(analyzerAcquisitionData.AssemblyPath);
+            assembly = Assembly.LoadFrom(analyzerAcquisitionData.AssemblyPath);
 #endif
 
-                IEnumerable<Type> analyzerTypes = assembly.GetTypes().Where(t => typeof(BuildAnalyzer).IsAssignableFrom(t));
+            IEnumerable<Type> analyzerTypes = assembly.GetTypes().Where(t => typeof(BuildAnalyzer).IsAssignableFrom(t));
 
-                if (analyzerTypes.Any())
-                {
-                    var analyzersFactory = new List<BuildAnalyzerFactory>();
-                    foreach (Type analyzerType in analyzerTypes)
-                    {
-                        if (Activator.CreateInstance(analyzerType) is BuildAnalyzer instance)
-                        {
-                            analyzersFactory.Add(() => instance);
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException($"Failed to create an instance of type {analyzerType.FullName} as BuildAnalyzer.");
-                        }
-                    }
-
-                    return analyzersFactory;
-                }
-            }
-            catch (ReflectionTypeLoadException ex)
+            foreach (Type analyzerType in analyzerTypes)
             {
-                if (ex.LoaderExceptions.Length != 0)
+                if (Activator.CreateInstance(analyzerType) is BuildAnalyzer instance)
                 {
-                    foreach (Exception? loaderException in ex.LoaderExceptions)
-                    {
-                        _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerFailedRuleLoading", loaderException?.Message);
-                    }
+                    analyzersFactories.Add(() => instance);
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Failed to create an instance of type {analyzerType.FullName} as BuildAnalyzer.");
                 }
             }
-
-            return Enumerable.Empty<BuildAnalyzerFactory>();
         }
+        catch (ReflectionTypeLoadException ex)
+        {
+            if (ex.LoaderExceptions.Length != 0)
+            {
+                foreach (Exception? loaderException in ex.LoaderExceptions)
+                {
+                    _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerFailedRuleLoading", loaderException?.Message);
+                }
+            }
+        }
+
+        return analyzersFactories;
     }
 }

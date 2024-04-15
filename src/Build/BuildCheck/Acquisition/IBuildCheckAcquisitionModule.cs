@@ -9,6 +9,9 @@ namespace Microsoft.Build.BuildCheck.Acquisition
 {
     internal interface IBuildCheckAcquisitionModule
     {
-        IEnumerable<BuildAnalyzerFactory> CreateBuildAnalyzerFactories(AnalyzerAcquisitionData analyzerAcquisitionData, BuildEventContext buildEventContext);
+        /// <summary>
+        /// Creates a list of factory delegates for building analyzer rules instances from a given assembly path.
+        /// </summary>
+        List<BuildAnalyzerFactory> CreateBuildAnalyzerFactories(AnalyzerAcquisitionData analyzerAcquisitionData, BuildEventContext buildEventContext);
     }
 }

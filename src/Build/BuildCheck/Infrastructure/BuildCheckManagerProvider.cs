@@ -100,7 +100,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             if (IsInProcNode)
             {
                 var analyzersFactories = _acquisitionModule.CreateBuildAnalyzerFactories(acquisitionData, buildEventContext);
-                if (analyzersFactories.Any())
+                if (analyzersFactories.Count != 0)
                 {
                     RegisterCustomAnalyzer(BuildCheckDataSource.EventArgs, analyzersFactories, buildEventContext);
                 }
@@ -146,7 +146,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         /// <summary>
         /// To be used by acquisition module.
-        /// Registeres the custom analyzers, the construction of analyzers is deferred until the first using project is encountered.
+        /// Registers the custom analyzers, the construction of analyzers is deferred until the first using project is encountered.
         /// </summary>
         internal void RegisterCustomAnalyzers(
             BuildCheckDataSource buildCheckDataSource,
@@ -165,8 +165,11 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         /// <summary>
         /// To be used by acquisition module
-        /// Registeres the custom analyzer, the construction of analyzer is needed during registration
+        /// Registers the custom analyzer, the construction of analyzer is needed during registration.
         /// </summary>
+        /// <param name="buildCheckDataSource">Represents different data sources used in build check operations.</param>
+        /// <param name="factories">A collection of build analyzer factories for rules instantiation.</param>
+        /// <param name="buildEventContext">The context of the build event.</param>
         internal void RegisterCustomAnalyzer(
             BuildCheckDataSource buildCheckDataSource,
             IEnumerable<BuildAnalyzerFactory> factories,
@@ -182,7 +185,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                         instance.SupportedRules.Select(r => r.Id).ToArray(),
                         instance.SupportedRules.Any(r => r.DefaultConfiguration.IsEnabled == true)));
                     _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerSuccessfulAcquisition", instance.FriendlyName);
-                }        
+                }     
             }
         }
 
