@@ -378,7 +378,7 @@ namespace Microsoft.Build.BuildEngine
                     engineProxy.BuildEventContext = buildEventContext;
                 }
 
-                loggingServices.LogTaskStarted(buildEventContext, TaskName, parentProjectFullFileName, projectFileOfTaskNode, TaskClass?.Assembly?.AssemblyFile);
+                loggingServices.LogTaskStarted(buildEventContext, TaskName, parentProjectFullFileName, projectFileOfTaskNode);
 
                 AppDomain taskAppDomain = PrepareAppDomain();
 

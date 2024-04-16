@@ -863,7 +863,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="taskName"></param>
         /// <param name="projectFile"></param>
         /// <param name="projectFileOfTaskNode">project file actually containing the task</param>
-        internal virtual void LogTaskStarted(BuildEventContext buildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, string taskAssemblyLocation)
+        internal virtual void LogTaskStarted(BuildEventContext buildEventContext, string taskName, string projectFile, string projectFileOfTaskNode)
         {
             if (!OnlyLogCriticalEvents)
             {
@@ -873,8 +873,7 @@ namespace Microsoft.Build.BuildEngine
                         null,             // no help keyword
                         projectFile,
                         projectFileOfTaskNode,
-                        taskName,
-                        taskAssemblyLocation
+                        taskName
                     );
                 e.BuildEventContext = buildEventContext;
                 PostLoggingEvent(e);
