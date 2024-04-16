@@ -23,8 +23,7 @@ namespace Microsoft.Build.BackEnd
         /// and ProvideSubsetOfStateAfterBuild which require additional checks.
         /// </summary>
         private const BuildRequestDataFlags FlagsAffectingBuildResults =
-            BuildRequestDataFlags.SkipNonexistentTargets
-            | BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports
+            BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports
             | BuildRequestDataFlags.FailOnUnresolvedSdk;
 
         /// <summary>
