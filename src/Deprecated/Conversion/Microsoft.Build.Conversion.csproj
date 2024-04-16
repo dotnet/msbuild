@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+  
     <AssemblyName>Microsoft.Build.Conversion.Core</AssemblyName>
     <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
