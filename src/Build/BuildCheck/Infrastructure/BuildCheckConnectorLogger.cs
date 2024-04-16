@@ -41,9 +41,9 @@ internal sealed class BuildCheckConnectorLogger(
 
             try
             {
-                buildCheckManager.ProcessEvaluationFinishedEventArgs(
-                    loggingContextFactory.CreateLoggingContext(e.BuildEventContext!),
-                    projectEvaluationFinishedEventArgs);
+            buildCheckManager.ProcessEvaluationFinishedEventArgs(
+                loggingContextFactory.CreateLoggingContext(e.BuildEventContext!),
+                projectEvaluationFinishedEventArgs);
             }
             catch (Exception exception)
             {
@@ -77,7 +77,7 @@ internal sealed class BuildCheckConnectorLogger(
         {
             if (buildCheckBuildEventArgs is BuildCheckTracingEventArgs tracingEventArgs)
             {
-                _statsAnalyzers.Merge(tracingEventArgs.TracingData, (span1, span2) => span1 + span2);
+                _stats.Merge(tracingEventArgs.TracingData, (span1, span2) => span1 + span2);
             }
             else if (buildCheckBuildEventArgs is BuildCheckAcquisitionEventArgs acquisitionEventArgs)
             {
@@ -86,10 +86,12 @@ internal sealed class BuildCheckConnectorLogger(
         }
     }
 
-    private readonly Dictionary<string, TimeSpan> _statsAnalyzers = new Dictionary<string, TimeSpan>();
+    private readonly Dictionary<string, TimeSpan> _stats = new Dictionary<string, TimeSpan>();
 
     private void EventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
     {
+        _stats.Merge(buildCheckManager.CreateTracingStats(), (span1, span2) => span1 + span2);
+        string msg = string.Join(Environment.NewLine, _stats.Select(a => a.Key + ": " + a.Value));
 
         BuildEventContext buildEventContext = e.BuildEventContext ?? new BuildEventContext(
             BuildEventContext.InvalidNodeId, BuildEventContext.InvalidTargetId,
@@ -97,7 +99,7 @@ internal sealed class BuildCheckConnectorLogger(
 
         LoggingContext loggingContext = loggingContextFactory.CreateLoggingContext(buildEventContext);
 
-        _statsAnalyzers.Merge(buildCheckManager.CreateAnalyzerTracingStats()!, (span1, span2) => span1 + span2);
+        _stats.Merge(buildCheckManager.CreateAnalyzerTracingStats()!, (span1, span2) => span1 + span2);
         LogAnalyzerStats(loggingContext);
     }
     
@@ -106,7 +108,7 @@ internal sealed class BuildCheckConnectorLogger(
         Dictionary<string, TimeSpan> infraStats = new Dictionary<string, TimeSpan>();
         Dictionary<string, TimeSpan> analyzerStats = new Dictionary<string, TimeSpan>();
 
-        foreach (var stat in _statsAnalyzers)
+        foreach (var stat in _stats)
         {
             if (stat.Key.StartsWith(BuildCheckConstants.infraStatPrefix))
             {

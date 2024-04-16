@@ -15,7 +15,7 @@
     <UsagePattern IdentityGlob="System.Security.Cryptography.Pkcs/*8.0.0*" />
     <UsagePattern IdentityGlob="System.Security.Cryptography.ProtectedData/*8.0.0*" />
     <UsagePattern IdentityGlob="System.Security.Cryptography.Xml/*8.0.0*" />
-    <UsagePattern IdentityGlob="System.Text.Json/*8.0.0*" />
+    <UsagePattern IdentityGlob="System.Text.Json/*8.0.3*" />
     <UsagePattern IdentityGlob="System.Threading.Tasks.Dataflow/*8.0.0*" />
   </IgnorePatterns>
   <Usages>

@@ -128,6 +128,7 @@
     <Compile Include="..\Shared\AssemblyNameExtension.cs" />
     <Compile Include="..\Shared\ThreadPoolExtensions.cs" />
     <Compile Include="..\Shared\StringExtensions.cs" />
+    <Compile Include="..\Shared\ConversionUtilities.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblyResources.cs" />
     <Compile Include="AutomaticEncodingRestorer.cs" />

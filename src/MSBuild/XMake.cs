@@ -3788,7 +3788,7 @@ namespace Microsoft.Build.CommandLine
             }
             else if (terminalloggerOptIn)
             {
-                ProcessTerminalLogger(noConsoleLogger, aggregatedTerminalLoggerParameters, distributedLoggerRecords, cpuCount, loggers);
+                ProcessTerminalLogger(noConsoleLogger, aggregatedTerminalLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
             }
             else
             {
@@ -3967,13 +3967,14 @@ namespace Microsoft.Build.CommandLine
         private static void ProcessTerminalLogger(bool noConsoleLogger,
             string aggregatedLoggerParameters,
             List<DistributedLoggerRecord> distributedLoggerRecords,
+            LoggerVerbosity verbosity,
             int cpuCount,
             List<ILogger> loggers)
         {
             if (!noConsoleLogger)
             {
                 // A central logger will be created for both single proc and multiproc.
-                TerminalLogger logger = new TerminalLogger()
+                TerminalLogger logger = new TerminalLogger(verbosity)
                 {
                     Parameters = aggregatedLoggerParameters
                 };

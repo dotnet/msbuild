@@ -209,6 +209,11 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 analyzerFactoryContext.MaterializedAnalyzer = wrapper;
                 BuildAnalyzer analyzer = wrapper.BuildAnalyzer;
 
+                // This is to facilitate possible perf improvement for custom analyzers - as we might want to
+                //  avoid loading the assembly and type just to check if it's supported.
+                // If we expose a way to declare the enablement status and rule ids during registration (e.g. via
+                //  optional arguments of the intrinsic property function) - we can then avoid loading it.
+                // But once loaded - we should verify that the declared enablement status and rule ids match the actual ones.
                 if (
                     analyzer.SupportedRules.Count != analyzerFactoryContext.RuleIds.Length
                     ||
@@ -277,7 +282,11 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 }
             }
 
-            analyzersToRemove.ForEach(c => _analyzersRegistry.Remove(c));
+            analyzersToRemove.ForEach(c =>
+            {
+                _analyzersRegistry.Remove(c);
+                _loggingService.LogCommentFromText(buildEventContext, MessageImportance.High, $"Dismounting analyzer '{c.FriendlyName}'");
+            });
             foreach (var analyzerToRemove in analyzersToRemove.Select(a => a.MaterializedAnalyzer).Where(a => a != null))
             {
                 _buildCheckCentralContext.DeregisterAnalyzer(analyzerToRemove!);
@@ -285,6 +294,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 analyzerToRemove.BuildAnalyzer.Dispose();
             }
         }
+
 
         public void ProcessEvaluationFinishedEventArgs(
             AnalyzerLoggingContext buildAnalysisContext,
