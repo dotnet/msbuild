@@ -34,7 +34,7 @@
     <PropertyGroup>
       <FrameworkBinPath>@(FrameworkResolvedProjectReferencePath->'%(RootDir)%(Directory)')</FrameworkBinPath>
       <Arm64BinPath>@(MSBuildArm64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</Arm64BinPath>
-      <MSBuildTaskHostX64BinPath>@(MSBuildTaskHostArm64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</MSBuildTaskHostX64BinPath>
+      <MSBuildTaskHostArm64BinPath>@(MSBuildTaskHostArm64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</MSBuildTaskHostArm64BinPath>
 
     </PropertyGroup>
   </Target>
