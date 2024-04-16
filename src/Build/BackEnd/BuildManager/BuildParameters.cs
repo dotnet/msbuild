@@ -227,7 +227,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public BuildParameters()
         {
-            Initialize(Utilities.GetEnvironmentProperties(), new ProjectRootElementCache(false), null);
+            Initialize(Utilities.GetEnvironmentProperties(makeReadOnly: false), new ProjectRootElementCache(false), null);
         }
 
         /// <summary>

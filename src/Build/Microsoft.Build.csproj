@@ -153,6 +153,11 @@
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverException.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\TranslationHelpers.cs" />
     <Compile Include="FileSystem\*.cs" />
+    <Compile Include="Collections\ICopyOnWritePropertyDictionary.cs" />
+    <Compile Include="Collections\IMultiDictionary.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableStringValuedListConverter.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\IRetrievableValuedEntryHashSet.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\RetrievableValuedEntryHashSet.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
     <Compile Include="FileAccess\DesiredAccess.cs" />
     <Compile Include="FileAccess\FileAccessData.cs" />
@@ -160,6 +165,11 @@
     <Compile Include="FileAccess\ProcessData.cs" />
     <Compile Include="FileAccess\ReportedFileOperation.cs" />
     <Compile Include="FileAccess\RequestedAccess.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableGlobalPropertiesCollectionConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableItemDefinitionsListConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableMultiDictionaryConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutablePropertyCollectionConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableValuedElementCollectionConverter.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />
@@ -243,7 +253,7 @@
     <Compile Include="Collections\ConcurrentQueueExtensions.cs" />
     <Compile Include="Collections\ConcurrentStackExtensions.cs" />
     <Compile Include="Collections\LookasideStringInterner.cs" />
-    <Compile Include="Collections\RetrievableEntryHashSet\HashSet.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\RetrievableEntryHashSet.cs" />
     <Compile Include="Collections\RetrievableEntryHashSet\BitHelper.cs" />
     <Compile Include="Collections\RetrievableEntryHashSet\HashSetDebugView.cs" />
     <Compile Include="Collections\RetrievableEntryHashSet\HashHelpers.cs" />
@@ -682,11 +692,7 @@
   <!-- Extract binding redirects for MSBuild and dependencies from MSBuild.exe.config into a source file.
        This allows us to create secondary AppDomains with the same redirects at run-time, see
        https://github.com/dotnet/msbuild/blob/main/documentation/NETFramework-NGEN.md#nugetframeworks -->
-  <Target Name="GenerateAppDomainConfig"
-          Inputs="..\MSBuild\app.config;..\MSBuild\app.amd64.config;$(MSBuildThisFileFullPath)"
-          Outputs="$(NuGetFrameworkWrapperRedirects_FilePath)"
-          BeforeTargets="CoreCompile"
-          Condition="'$(FeatureAppDomain)' == 'true'">
+  <Target Name="GenerateAppDomainConfig" Inputs="..\MSBuild\app.config;..\MSBuild\app.amd64.config;$(MSBuildThisFileFullPath)" Outputs="$(NuGetFrameworkWrapperRedirects_FilePath)" BeforeTargets="CoreCompile" Condition="'$(FeatureAppDomain)' == 'true'">
     <PropertyGroup>
       <BindingRedirectNamespace>&lt;Namespace Prefix='ns' Uri='urn:schemas-microsoft-com:asm.v1' /&gt;</BindingRedirectNamespace>
       <BindingRedirectXPath>/configuration/runtime/ns:assemblyBinding/*</BindingRedirectXPath>
