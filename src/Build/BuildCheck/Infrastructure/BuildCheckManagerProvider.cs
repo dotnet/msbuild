@@ -314,6 +314,14 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 }
             }
 
+            var infraStats = new Dictionary<string, TimeSpan>() {
+                { $"{BuildCheckConstants.infraStatPrefix}analyzerAcquisitionTime", _tracingReporter.analyzerAcquisitionTime },
+                { $"{BuildCheckConstants.infraStatPrefix}analyzerSetDataSourceTime", _tracingReporter.analyzerSetDataSourceTime },
+                { $"{BuildCheckConstants.infraStatPrefix}newProjectAnalyzersTime", _tracingReporter.newProjectAnalyzersTime }
+            };
+
+            _tracingReporter.TracingStats.Merge(infraStats, (span1, span2) => span1 + span2);
+
             return _tracingReporter.TracingStats;
         }
 
@@ -326,12 +334,6 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             }
 
             var analyzerEventStats = CreateAnalyzerTracingStats();
-            var infraStats = new Dictionary<string, TimeSpan>() {
-                { $"{BuildCheckConstants.infraStatPrefix}analyzerAcquisitionTime", _tracingReporter.analyzerAcquisitionTime },
-                { $"{BuildCheckConstants.infraStatPrefix}analyzerSetDataSourceTime", _tracingReporter.analyzerSetDataSourceTime },
-                { $"{BuildCheckConstants.infraStatPrefix}newProjectAnalyzersTime", _tracingReporter.newProjectAnalyzersTime }
-            };
-            analyzerEventStats.Merge(infraStats, (span1, span2) => span1 + span2);
 
             BuildCheckTracingEventArgs analyzerEventArg =
                 new(analyzerEventStats) { BuildEventContext = loggingContext.BuildEventContext };

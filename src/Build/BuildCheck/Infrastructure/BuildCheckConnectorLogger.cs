@@ -90,9 +90,6 @@ internal sealed class BuildCheckConnectorLogger(
 
     private void EventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
     {
-        _stats.Merge(buildCheckManager.CreateTracingStats(), (span1, span2) => span1 + span2);
-        string msg = string.Join(Environment.NewLine, _stats.Select(a => a.Key + ": " + a.Value));
-
         BuildEventContext buildEventContext = e.BuildEventContext ?? new BuildEventContext(
             BuildEventContext.InvalidNodeId, BuildEventContext.InvalidTargetId,
             BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
@@ -124,19 +121,19 @@ internal sealed class BuildCheckConnectorLogger(
         if (_areStatsEnabled)
         {
             loggingContext.LogCommentFromText(MessageImportance.High, $"BuildCheck run times{Environment.NewLine}");
-            string infraData = BuildStatsTable("Infrastructure run times", infraStats);
+            string infraData = BuildCsvString("Infrastructure run times", infraStats);
             loggingContext.LogCommentFromText(MessageImportance.High, infraData);
 
-            string analyzerData = BuildStatsTable("Analyzer run times", analyzerStats);
+            string analyzerData = BuildCsvString("Analyzer run times", analyzerStats);
             loggingContext.LogCommentFromText(MessageImportance.High, analyzerData);
         }
         else
         {
             loggingContext.LogCommentFromText(MessageImportance.Low, $"BuildCheck run times{Environment.NewLine}");
-            string infraData = BuildStatsTable("Infrastructure run times", infraStats);
+            string infraData = BuildCsvString("Infrastructure run times", infraStats);
             loggingContext.LogCommentFromText(MessageImportance.Low, infraData);
 
-            string analyzerData = BuildStatsTable("Analyzer run times", analyzerStats);
+            string analyzerData = BuildCsvString("Analyzer run times", analyzerStats);
             loggingContext.LogCommentFromText(MessageImportance.Low, analyzerData);
         }
     }
@@ -151,6 +148,11 @@ internal sealed class BuildCheckConnectorLogger(
         string rows = string.Join(rowSeparator, rowData.Select(a => $"{a.Key} | {a.Value}"));
 
         return $"{header}{rows}{Environment.NewLine}";
+    }
+
+    private string BuildCsvString(string title, Dictionary<string, TimeSpan> rowData)
+    {
+        return title + Environment.NewLine + String.Join(Environment.NewLine, rowData.Select(a => $"{a.Key},{a.Value}")) + Environment.NewLine;
     }
 
     public void Shutdown()
