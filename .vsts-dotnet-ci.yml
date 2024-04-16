@@ -4,7 +4,39 @@ trigger:
 - vs*
 
 jobs:
+- job: CheckVersionBumpOnReleaseBranches
+  displayName: "Check Version Bump On Release Branches"
+  steps:
+  - powershell: |
+      if ($(System.PullRequest.TargetBranch) -like "vs*") {
+        $versionsFile = "eng/Versions.props"
+        $changedFiles = git diff --name-only HEAD HEAD~1
+        $changedVersionsFile = $changedFiles | Where-Object { $_ -eq $versionsFile }
+        $isVersionBumped = $false
+        if ($changedVersionsFile -ne $null) {
+          $difference = git diff HEAD~1 $versionsFile
+          $changedContent = $difference -join " "
+          $pattern = '-\s*<VersionPrefix>\d+\.\d+\.(?<previous>\d+)<\/VersionPrefix> \+\s*<VersionPrefix>\d+\.\d+\.(?<current>\d+)<\/VersionPrefix>'
+          if ($changedContent -match $pattern) {
+            try {
+              $previousPatch = [Convert]::ToInt32($Matches.previous)
+              $currentPatch = [Convert]::ToInt32($Matches.current)
+              if ($currentPatch -gt $previousPatch) {
+                $isVersionBumped = $true
+              }
+            } catch {
+              Write-Output "An error occurred during conversion: $_"
+            }
+          }
+        }
+        if (-not $isVersionBumped) {
+          throw "Hello! I noticed that you're targeting one of our servicing branches. Please consider updating the version."
+        }
+      }
+    displayName: "Check if patch version is bumped up"
+
 - job: IfOnlyDocumentionChanged
+  dependsOn: CheckVersionBumpOnReleaseBranches
   displayName: "Check whether Test Results need to be executed"
   steps:
   - powershell: |
