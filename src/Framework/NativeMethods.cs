@@ -1302,21 +1302,14 @@ internal static class NativeMethods
             {
                 if (!hProcess.IsInvalid)
                 {
-                    try
-                    {
-                        // UNDONE: NtQueryInformationProcess will fail if we are not elevated and other process is. Advice is to change to use ToolHelp32 API's
-                        // For now just return zero and worst case we will not kill some children.
-                        PROCESS_BASIC_INFORMATION pbi = new PROCESS_BASIC_INFORMATION();
-                        int pSize = 0;
+                    // UNDONE: NtQueryInformationProcess will fail if we are not elevated and other process is. Advice is to change to use ToolHelp32 API's
+                    // For now just return zero and worst case we will not kill some children.
+                    PROCESS_BASIC_INFORMATION pbi = new PROCESS_BASIC_INFORMATION();
+                    int pSize = 0;
 
-                        if (0 == NtQueryInformationProcess(hProcess, PROCESSINFOCLASS.ProcessBasicInformation, ref pbi, pbi.Size, ref pSize))
-                        {
-                            ParentID = (int)pbi.InheritedFromUniqueProcessId;
-                        }
-                    }
-                    finally
+                    if (0 == NtQueryInformationProcess(hProcess, PROCESSINFOCLASS.ProcessBasicInformation, ref pbi, pbi.Size, ref pSize))
                     {
-                        hProcess.Dispose();
+                        ParentID = (int)pbi.InheritedFromUniqueProcessId;
                     }
                 }
             }

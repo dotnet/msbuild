@@ -521,7 +521,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
 
             string path = Path.Combine(logPath, filename);
-            using StreamReader r = new StreamReader(s);
+#pragma warning disable CA2000 // Dispose objects before losing scope is suppressed because the stream is returned to the caller and will be handled there.
+            StreamReader r = new StreamReader(s);
+#pragma warning restore CA2000 // Dispose objects before losing scope
             string text = r.ReadToEnd();
             try
             {
@@ -539,6 +541,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             catch (SecurityException)
             {
             }
+
             s.Position = 0;
         }
 

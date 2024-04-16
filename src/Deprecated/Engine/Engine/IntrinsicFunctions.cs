@@ -197,34 +197,28 @@ namespace Microsoft.Build.BuildEngine
                     // of that error.
                     RegistryView view = (RegistryView)Enum.Parse(typeof(RegistryView), viewAsString, true);
 
-                    RegistryKey key = null;
-                    try
+#pragma warning disable CA2000 // Dispose objects before losing scope is suppressed as a false positive.
+                    using (RegistryKey key = GetBaseKeyFromKeyName(keyName, view, out subKeyName))
                     {
-                        using (key = GetBaseKeyFromKeyName(keyName, view, out subKeyName))
+                        if (key != null)
                         {
-                            if (key != null)
+                            using (RegistryKey subKey = key.OpenSubKey(subKeyName, false))
                             {
-                                using (RegistryKey subKey = key.OpenSubKey(subKeyName, false))
+                                // If we managed to retrieve the subkey, then move onto locating the value
+                                if (subKey != null)
                                 {
-                                    // If we managed to retrieve the subkey, then move onto locating the value
-                                    if (subKey != null)
-                                    {
-                                        result = subKey.GetValue(valueName);
-                                    }
+                                    result = subKey.GetValue(valueName);
+                                }
 
-                                    // We've found a value, so stop looking
-                                    if (result != null)
-                                    {
-                                        break;
-                                    }
+                                // We've found a value, so stop looking
+                                if (result != null)
+                                {
+                                    break;
                                 }
                             }
                         }
                     }
-                    finally
-                    {
-                        key?.Dispose();
-                    }
+#pragma warning restore CA2000 // Dispose objects before losing scope
                 }
             }
 

@@ -24,7 +24,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             manifest.OnBeforeSave();
             var m = new MemoryStream();
             var s = new XmlSerializer(manifest.GetType());
-            using var w = new StreamWriter(m);
+#pragma warning disable CA2000 // Dispose objects before losing scope is suppressed because the stream is returned to the caller and will be handled there.
+            var w = new StreamWriter(m);
+#pragma warning restore CA2000 // Dispose objects before losing scope
 
             int t1 = Environment.TickCount;
             s.Serialize(w, manifest);
@@ -32,6 +34,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             w.Flush();
             m.Position = 0;
+
             return m;
         }
 

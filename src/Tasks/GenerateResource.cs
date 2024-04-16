@@ -974,7 +974,7 @@ namespace Microsoft.Build.Tasks
                 // XML files are only dangerous if there are unrecognized objects in them
                 dangerous = false;
 
-                FileStream stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using FileStream stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
                 using XmlTextReader reader = new XmlTextReader(stream);
                 reader.DtdProcessing = DtdProcessing.Ignore;
                 reader.XmlResolver = null;
@@ -2163,8 +2163,6 @@ namespace Microsoft.Build.Tasks
                         {
                             StronglyTypedFileName = ProcessResourceFiles.GenerateDefaultStronglyTypedFilename(
                                 provider, OutputResources[0].ItemSpec);
-
-                            provider.Dispose();
                         }
                     }
                     finally
@@ -3432,60 +3430,61 @@ namespace Microsoft.Build.Tasks
                     sourceFile = null;
                     return;
                 }
+
+
+                // Default the class name if we need to
+                if (_stronglyTypedClassName == null)
+                {
+                    _stronglyTypedClassName = Path.GetFileNameWithoutExtension(outFile);
+                }
+
+                // Default the filename if we need to
+                if (_stronglyTypedFilename == null)
+                {
+                    _stronglyTypedFilename = GenerateDefaultStronglyTypedFilename(provider, outFile);
+                }
+                sourceFile = this.StronglyTypedFilename;
+
+                _logger.LogMessageFromResources("GenerateResource.CreatingSTR", _stronglyTypedFilename);
+
+                // Generate the STR class
+                String[] errors;
+                bool generateInternalClass = !_stronglyTypedClassIsPublic;
+                // StronglyTypedResourcesNamespace can be null and this is ok.
+                // If it is null then the default namespace (=stronglyTypedNamespace) is used.
+                CodeCompileUnit ccu = StronglyTypedResourceBuilder.Create(
+                        reader.resourcesHashTable,
+                        _stronglyTypedClassName,
+                        _stronglyTypedNamespace,
+                        _stronglyTypedResourcesNamespace,
+                        provider,
+                        generateInternalClass,
+                        out errors);
+
+                CodeGeneratorOptions codeGenOptions = new CodeGeneratorOptions();
+                using (TextWriter output = new StreamWriter(_stronglyTypedFilename))
+                {
+                    provider.GenerateCodeFromCompileUnit(ccu, output, codeGenOptions);
+                }
+
+                if (errors.Length > 0)
+                {
+                    _logger.LogErrorWithCodeFromResources("GenerateResource.ErrorFromCodeDom", inputFileName);
+                    foreach (String error in errors)
+                    {
+                        _logger.LogErrorWithCodeFromResources("GenerateResource.CodeDomError", error);
+                    }
+                }
+                else
+                {
+                    // No errors, and no exceptions - we presumably did create the STR class file
+                    // and it should get added to FilesWritten. So set a flag to indicate this.
+                    _stronglyTypedResourceSuccessfullyCreated = true;
+                }
             }
             finally
             {
                 provider?.Dispose();
-            }
-
-            // Default the class name if we need to
-            if (_stronglyTypedClassName == null)
-            {
-                _stronglyTypedClassName = Path.GetFileNameWithoutExtension(outFile);
-            }
-
-            // Default the filename if we need to
-            if (_stronglyTypedFilename == null)
-            {
-                _stronglyTypedFilename = GenerateDefaultStronglyTypedFilename(provider, outFile);
-            }
-            sourceFile = this.StronglyTypedFilename;
-
-            _logger.LogMessageFromResources("GenerateResource.CreatingSTR", _stronglyTypedFilename);
-
-            // Generate the STR class
-            String[] errors;
-            bool generateInternalClass = !_stronglyTypedClassIsPublic;
-            // StronglyTypedResourcesNamespace can be null and this is ok.
-            // If it is null then the default namespace (=stronglyTypedNamespace) is used.
-            CodeCompileUnit ccu = StronglyTypedResourceBuilder.Create(
-                    reader.resourcesHashTable,
-                    _stronglyTypedClassName,
-                    _stronglyTypedNamespace,
-                    _stronglyTypedResourcesNamespace,
-                    provider,
-                    generateInternalClass,
-                    out errors);
-
-            CodeGeneratorOptions codeGenOptions = new CodeGeneratorOptions();
-            using (TextWriter output = new StreamWriter(_stronglyTypedFilename))
-            {
-                provider.GenerateCodeFromCompileUnit(ccu, output, codeGenOptions);
-            }
-
-            if (errors.Length > 0)
-            {
-                _logger.LogErrorWithCodeFromResources("GenerateResource.ErrorFromCodeDom", inputFileName);
-                foreach (String error in errors)
-                {
-                    _logger.LogErrorWithCodeFromResources("GenerateResource.CodeDomError", error);
-                }
-            }
-            else
-            {
-                // No errors, and no exceptions - we presumably did create the STR class file
-                // and it should get added to FilesWritten. So set a flag to indicate this.
-                _stronglyTypedResourceSuccessfullyCreated = true;
             }
         }
 

@@ -140,12 +140,24 @@ namespace Microsoft.Build.Tasks
             extension = null;
             bool haveGeneratedContent = false;
 
-            string code = string.Empty;
             CodeDomProvider provider = null;
-
             try
             {
-                provider = CodeDomProvider.CreateProvider(Language);
+                try
+                {
+                    provider = CodeDomProvider.CreateProvider(Language);
+                }
+                catch (SystemException e) when
+#if FEATURE_SYSTEM_CONFIGURATION
+                (e is ConfigurationException || e is SecurityException)
+#else
+            (e.GetType().Name == "ConfigurationErrorsException") // TODO: catch specific exception type once it is public https://github.com/dotnet/corefx/issues/40456
+#endif
+                {
+                    Log.LogErrorWithCodeFromResources("WriteCodeFragment.CouldNotCreateProvider", Language, e.Message);
+                    return null;
+                }
+
                 extension = provider.FileExtension;
 
                 var unit = new CodeCompileUnit();
@@ -263,26 +275,19 @@ namespace Microsoft.Build.Tasks
                     provider.GenerateCodeFromCompileUnit(unit, writer, new CodeGeneratorOptions());
                 }
 
-                code = generatedCode.ToString();
-            }
-            catch (SystemException e) when
-#if FEATURE_SYSTEM_CONFIGURATION
-            (e is ConfigurationException || e is SecurityException)
-#else
-            (e.GetType().Name == "ConfigurationErrorsException") // TODO: catch specific exception type once it is public https://github.com/dotnet/corefx/issues/40456
-#endif
-            {
-                Log.LogErrorWithCodeFromResources("WriteCodeFragment.CouldNotCreateProvider", Language, e.Message);
-                return null;
+                string code = generatedCode.ToString();
+
+                // If we just generated infrastructure, don't bother returning anything
+                // as there's no point writing the file
+                return haveGeneratedContent ? code : String.Empty;
             }
             finally
             {
-                provider?.Dispose();
+                if (provider != null)
+                {
+                    provider.Dispose();
+                }
             }
-
-            // If we just generated infrastructure, don't bother returning anything
-            // as there's no point writing the file
-            return haveGeneratedContent ? code : String.Empty;
         }
 
         /// <summary>

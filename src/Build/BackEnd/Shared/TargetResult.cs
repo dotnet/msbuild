@@ -248,16 +248,20 @@ namespace Microsoft.Build.Execution
                 string cacheFile = GetCacheFile(configId, targetName);
                 Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
 
-                using Stream stream = File.Create(cacheFile);
-                using ITranslator translator = GetResultsCacheTranslator(TranslationDirection.WriteToStream, stream, cacheFile);
-
-                // If the translator is null, it means these results were cached once before.  Since target results are immutable once they
-                // have been created, there is no point in writing them again.
-                if (translator != null)
+                // If the file doesn't already exists, then we haven't cached this once before. We need to cache it again since it could have changed.
+                if (!FileSystems.Default.FileExists(cacheFile))
                 {
-                    TranslateItems(translator);
-                    _items = null;
-                    _cacheInfo = new CacheInfo(configId, targetName);
+                    using Stream stream = File.Create(cacheFile);
+                    using ITranslator translator = GetResultsCacheTranslator(TranslationDirection.WriteToStream, stream, cacheFile);
+
+                    // If the translator is null, it means these results were cached once before.  Since target results are immutable once they
+                    // have been created, there is no point in writing them again.
+                    if (translator != null)
+                    {
+                        TranslateItems(translator);
+                        _items = null;
+                        _cacheInfo = new CacheInfo(configId, targetName);
+                    }
                 }
             }
         }

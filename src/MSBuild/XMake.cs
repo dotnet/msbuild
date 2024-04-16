@@ -826,9 +826,11 @@ namespace Microsoft.Build.CommandLine
                             using (ProjectCollection collection = new(globalProperties, loggers, ToolsetDefinitionLocations.Default))
                             {
                                 Project project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
+#pragma warning disable CA2000 // Dispose objects before losing scope is suppressed because the StreamWriter is disposed in the finally block
                                 output = getResultOutputFile.Length > 0
                                     ? new StreamWriter(getResultOutputFile)
                                     : Console.Out;
+#pragma warning restore CA2000 // Dispose objects before losing scope
                                 exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project, output);
                                 collection.LogBuildFinishedEvent(exitType == ExitType.Success);
                             }
@@ -839,7 +841,11 @@ namespace Microsoft.Build.CommandLine
                         }
                         finally
                         {
-                            output?.Dispose();
+                            if (output is StreamWriter)
+                            {
+                                // dispose only if StreamWriter to avoid closing Console.Out
+                                output?.Dispose();
+                            }
                         }
                     }
                     else // regular build
@@ -898,13 +904,19 @@ namespace Microsoft.Build.CommandLine
                     {
                         if (outputPropertiesItemsOrTargetResults && targets?.Length > 0 && result is not null)
                         {
+#pragma warning disable CA2000 // Dispose objects before losing scope is suppressed because the StreamWriter is disposed in the finally block
                             outputStream = getResultOutputFile.Length > 0 ? new StreamWriter(getResultOutputFile) : Console.Out;
+#pragma warning restore CA2000 // Dispose objects before losing scope
                             exitType = OutputBuildInformationInJson(result, getProperty, getItem, getTargetResult, loggers, exitType, outputStream);
                         }
                     }
                     finally
                     {
-                        outputStream?.Dispose();
+                        if (outputStream is StreamWriter)
+                        {
+                            // dispose only if StreamWriter to avoid closing Console.Out
+                            outputStream?.Dispose();
+                        }
                     }
 
                     if (!string.IsNullOrEmpty(timerOutputFilename))

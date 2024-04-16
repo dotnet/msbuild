@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 
 using Microsoft.Build.Framework;
@@ -99,8 +98,6 @@ namespace Microsoft.Build.Tasks
 
             BuildEngine3.Yield();
 
-            FileStream stream = null;
-            ZipArchive zipArchive = null;
             try
             {
                 ParseIncludeExclude();
@@ -117,9 +114,10 @@ namespace Microsoft.Build.Tasks
 
                         try
                         {
-                            using (stream = new FileStream(sourceFile.ItemSpec, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 0x1000, useAsync: false))
+                            using (FileStream stream = new FileStream(sourceFile.ItemSpec, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 0x1000, useAsync: false))
                             {
-                                using (zipArchive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: false))
+#pragma warning disable CA2000 // Dispose objects before losing scope because ZipArchive will dispose the stream when it is disposed.
+                                using (ZipArchive zipArchive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: false))
                                 {
                                     try
                                     {
@@ -132,6 +130,7 @@ namespace Microsoft.Build.Tasks
                                         return false;
                                     }
                                 }
+#pragma warning restore CA2000 // Dispose objects before losing scope
                             }
                         }
                         catch (OperationCanceledException)
@@ -149,8 +148,6 @@ namespace Microsoft.Build.Tasks
             finally
             {
                 BuildEngine3.Reacquire();
-                stream?.Dispose();
-                zipArchive?.Dispose();
             }
 
             return !_cancellationToken.IsCancellationRequested && !Log.HasLoggedErrors;
