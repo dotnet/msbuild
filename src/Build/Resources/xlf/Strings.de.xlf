@@ -597,8 +597,8 @@ Fehler: {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskAssemblyLocationMismatch">
-        <source>Assembly mismatch detected. The loaded assembly location '{0}' does not match the expected assembly location '{1}'.</source>
-        <target state="new">Assembly mismatch detected. The loaded assembly location '{0}' does not match the expected assembly location '{1}'.</target>
+        <source>Task assembly was loaded from '{0}' while the desired location was '{1}'.</source>
+        <target state="new">Task assembly was loaded from '{0}' while the desired location was '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
