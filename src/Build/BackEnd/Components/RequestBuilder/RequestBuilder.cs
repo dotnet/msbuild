@@ -1104,15 +1104,10 @@ namespace Microsoft.Build.BackEnd
         {
             // We consider this the entrypoint for the project build for purposes of BuildCheck processing 
             var propertyEntry = _requestEntry.RequestConfiguration.GlobalProperties[MSBuildConstants.MSBuildIsRestoring];
-            IBuildCheckManager buildCheckManager = propertyEntry is not null ? null : (_componentHost.GetComponent(BuildComponentType.BuildCheck) as IBuildCheckManagerProvider)!.Instance;
+            IBuildCheckManager buildCheckManager = propertyEntry is not null ? null : (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider)!.Instance;
             buildCheckManager?.SetDataSource(BuildCheckDataSource.BuildExecution);
 
             ErrorUtilities.VerifyThrow(_targetBuilder != null, "Target builder is null");
-
-            // We consider this the entrypoint for the project build for purposes of BuildCheck processing 
-
-            var buildCheckManager = (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider)!.Instance;
-            buildCheckManager.SetDataSource(BuildCheckDataSource.BuildExecution);
 
             // Make sure it is null before loading the configuration into the request, because if there is a problem
             // we do not wand to have an invalid projectLoggingContext floating around. Also if this is null the error will be

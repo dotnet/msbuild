@@ -16,8 +16,6 @@ namespace Microsoft.Build.BuildCheck.Infrastructure;
 
 internal class NullBuildCheckManager : IBuildCheckManager
 {
-    public bool isRestore { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
     public void Shutdown() { }
 
     public void ProcessEvaluationFinishedEventArgs(AnalyzerLoggingContext buildAnalysisContext,

@@ -2,8 +2,6 @@
 
   <Import Project="$(RepoRoot)eng\BootStrapMsBuild.props" />
 
-  <Import Project="$(RepoRoot)eng\BootStrapMSBuild.props" />
-
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
 

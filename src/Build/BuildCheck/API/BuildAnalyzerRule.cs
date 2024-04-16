@@ -43,11 +43,6 @@ public class BuildAnalyzerRule
     public string Description { get; }
 
     /// <summary>
-    /// TODO: We might turn this into enum, or just remove this.
-    /// </summary>
-    public string Category { get; }
-
-    /// <summary>
     /// Message format that will be used by the actual reports (<see cref="BuildCheckResult"/>) - those will just supply the actual arguments.
     /// </summary>
     public string MessageFormat { get; }

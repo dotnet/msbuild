@@ -71,9 +71,6 @@ mv $ArtifactsDir $Stage1Dir
 # Ensure that debug bits fail fast, rather than hanging waiting for a debugger attach.
 export MSBUILDDONOTLAUNCHDEBUGGER=true
 
-# Expose stage 1 path so unit tests can find the bootstrapped MSBuild.
-export MSBUILD_BOOTSTRAPPED_BINDIR="$Stage1Dir/bin"
-
 # Opt into performance logging.
 export DOTNET_PERFLOG_DIR=$PerfLogDir
 

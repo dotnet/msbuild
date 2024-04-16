@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
-using System.Net.NetworkInformation;
 
 namespace Microsoft.Build.Framework
 {
@@ -28,20 +26,12 @@ namespace Microsoft.Build.Framework
         {
         }
 
-        public ProjectEvaluationStartedEventArgs(bool isRestore, string? message, params object[]? messageArgs)
-            : base(message, helpKeyword: null, senderName: null, DateTime.UtcNow, messageArgs)
-        {
-            IsRestore = isRestore;
-        }
-
         /// <summary>
         /// Gets or sets the full path of the project that started evaluation.
         /// </summary>
         public string? ProjectFile { get; set; }
 
-        /// <summary>
-        /// Gets the set of global properties to be used to evaluate this project.
-        /// </summary>
+
         public bool IsRestore { get; internal set; }
     }
 }
