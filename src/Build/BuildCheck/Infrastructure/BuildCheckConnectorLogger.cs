@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BuildCheck.Acquisition;
 using Microsoft.Build.BuildCheck.Logging;
+using Microsoft.Build.BuildCheck.Utilities;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 
@@ -102,16 +103,14 @@ internal sealed class BuildCheckConnectorLogger(
     
     private void LogAnalyzerStats(LoggingContext loggingContext)
     {
-        string infraStatPrefix = "infrastructureStat_";
-
         Dictionary<string, TimeSpan> infraStats = new Dictionary<string, TimeSpan>();
         Dictionary<string, TimeSpan> analyzerStats = new Dictionary<string, TimeSpan>();
 
         foreach (var stat in _statsAnalyzers)
         {
-            if (stat.Key.StartsWith(infraStatPrefix))
+            if (stat.Key.StartsWith(BuildCheckConstants.infraStatPrefix))
             {
-                string newKey = stat.Key.Replace(infraStatPrefix, string.Empty);
+                string newKey = stat.Key.Replace(BuildCheckConstants.infraStatPrefix, string.Empty);
                 infraStats[newKey] = stat.Value;
             }
             else

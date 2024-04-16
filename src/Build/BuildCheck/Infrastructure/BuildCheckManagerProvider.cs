@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -16,6 +17,7 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BuildCheck.Acquisition;
 using Microsoft.Build.BuildCheck.Analyzers;
 using Microsoft.Build.BuildCheck.Logging;
+using Microsoft.Build.BuildCheck.Utilities;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
@@ -312,13 +314,12 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 // We do not want to send tracing stats from in-proc node
                 return;
             }
-            string infraStatPrefix = "infrastructureStat_";
 
             var analyzerEventStats = CreateAnalyzerTracingStats();
             var infraStats = new Dictionary<string, TimeSpan>() {
-                { $"{infraStatPrefix}analyzerAcquisitionTime", _tracingReporter.analyzerAcquisitionTime },
-                { $"{infraStatPrefix}analyzerSetDataSourceTime", _tracingReporter.analyzerSetDataSourceTime },
-                { $"{infraStatPrefix}newProjectAnalyzersTime", _tracingReporter.newProjectAnalyzersTime }
+                { $"{BuildCheckConstants.infraStatPrefix}analyzerAcquisitionTime", _tracingReporter.analyzerAcquisitionTime },
+                { $"{BuildCheckConstants.infraStatPrefix}analyzerSetDataSourceTime", _tracingReporter.analyzerSetDataSourceTime },
+                { $"{BuildCheckConstants.infraStatPrefix}newProjectAnalyzersTime", _tracingReporter.newProjectAnalyzersTime }
             };
             analyzerEventStats.Merge(infraStats, (span1, span2) => span1 + span2);
 
