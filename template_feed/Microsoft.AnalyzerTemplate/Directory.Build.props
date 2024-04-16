@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+	  <MSBuildAnalyzer>$([MSBuild]::RegisterAnalyzer($(MSBuildThisFileDirectory)..\lib\Company.AnalyzerTemplate.dll))</MSBuildAnalyzer>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Build" Version="1.0.0-MicrosoftBuildPackageVersion" />
+  </ItemGroup>
+</Project>
