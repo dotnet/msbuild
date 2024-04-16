@@ -361,20 +361,20 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            if (buildRequestDataFlags.HasFlag(BuildRequestDataFlags.ProvideProjectStateAfterBuild))
+            if (HasProvideProjectStateAfterBuild(buildRequestDataFlags))
             {
                 // If full state is requested, we must have full state in the result.
-                return buildResultDataFlags.HasFlag(BuildRequestDataFlags.ProvideProjectStateAfterBuild);
+                return HasProvideProjectStateAfterBuild(buildResultDataFlags);
             }
 
-            if (buildRequestDataFlags.HasFlag(BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild))
+            if (HasProvideSubsetOfStateAfterBuild(buildRequestDataFlags))
             {
                 // If partial state is requested, we must have full or partial-and-compatible state in the result.
-                if (buildResultDataFlags.HasFlag(BuildRequestDataFlags.ProvideProjectStateAfterBuild))
+                if (HasProvideProjectStateAfterBuild(buildResultDataFlags))
                 {
                     return true;
                 }
-                if (!buildResultDataFlags.HasFlag(BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild))
+                if (!HasProvideSubsetOfStateAfterBuild(buildResultDataFlags))
                 {
                     return false;
                 }
@@ -386,6 +386,12 @@ namespace Microsoft.Build.BackEnd
             }
 
             return true;
+
+            static bool HasProvideProjectStateAfterBuild(BuildRequestDataFlags flags)
+                => (flags & BuildRequestDataFlags.ProvideProjectStateAfterBuild) == BuildRequestDataFlags.ProvideProjectStateAfterBuild;
+
+            static bool HasProvideSubsetOfStateAfterBuild(BuildRequestDataFlags flags)
+                => (flags & BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild) == BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild;
         }
 
         public IEnumerator<BuildResult> GetEnumerator()
