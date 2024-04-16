@@ -25,6 +25,8 @@ internal sealed class BuildAnalyzerWrapper
     internal BuildAnalyzer BuildAnalyzer { get; }
     private bool _isInitialized = false;
 
+    // Let's optimize for the scenario where users have a single .editorconfig file that applies to the whole solution.
+    // In such case - configuration will be same for all projects. So we do not need to store it per project in a collection.
     internal BuildAnalyzerConfigurationInternal? CommonConfig { get; private set; }
 
     // start new project
@@ -43,7 +45,8 @@ internal sealed class BuildAnalyzerWrapper
             }
         }
 
-        if (CommonConfig == null || !userConfigs.All(t => t.IsEqual(CommonConfig)))
+        // The Common configuration is not common anymore - let's nullify it and we will need to fetch configuration per project.
+        if (CommonConfig == null || !userConfigs.All(t => t.IsSameConfigurationAs(CommonConfig)))
         {
             CommonConfig = null;
         }
@@ -59,7 +62,7 @@ internal sealed class BuildAnalyzerWrapper
 
     internal void ClearStats() => _stopwatch.Reset();
 
-    internal IDisposable StartSpan()
+    internal CleanupScope StartSpan()
     {
         _stopwatch.Start();
         return new CleanupScope(_stopwatch.Stop);

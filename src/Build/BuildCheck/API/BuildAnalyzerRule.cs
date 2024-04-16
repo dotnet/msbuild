@@ -5,12 +5,12 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 
 /// <summary>
 /// Represents a rule that is a unit of build analysis.
-/// <see cref="BuildAnalyzer"/> is a unit of executing the analysis, but it can be discovering multiple distinct violation types.
-///  for this reason a single <see cref="BuildAnalyzer"/> can expose <see cref="BuildAnalyzerRule"/>s.
+/// <see cref="BuildAnalyzer"/> is a unit of executing the analysis, but it can be discovering multiple distinct violation types,
+///  for this reason a single <see cref="BuildAnalyzer"/> can expose multiple <see cref="BuildAnalyzerRule"/>s.
 /// </summary>
 public class BuildAnalyzerRule
 {
-    public BuildAnalyzerRule(string id, string title, string description, string category, string messageFormat,
+    public BuildAnalyzerRule(string id, string title, string description, string messageFormat,
         BuildAnalyzerConfiguration defaultConfiguration)
     {
         Id = id;

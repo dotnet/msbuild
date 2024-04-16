@@ -54,6 +54,7 @@ stages:
     name: OptProfProfilingWorkflow
     displayName: OptProf Profiling Workflow
     optOptimizationInputsDropName: $(OptimizationInputsDropName)
+    cloudBuildResourceName: ComponentBuildUnderTest
     testLabPoolName: VS-Platform # The test lab pool to run your tests in
     testMachineCleanUpStrategy: ${{parameters.testMachineCleanUpStrategy}}
     testMachineImageName: Windows-10-Enterprise-20H2

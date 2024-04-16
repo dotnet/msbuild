@@ -17,9 +17,9 @@ namespace Microsoft.Build.BuildCheck.Analyzers;
 internal sealed class SharedOutputPathAnalyzer : BuildAnalyzer
 {
     public static BuildAnalyzerRule SupportedRule = new BuildAnalyzerRule("BC0101", "ConflictingOutputPath",
-        "Two projects should not share their OutputPath nor IntermediateOutputPath locations", "Configuration",
+        "Two projects should not share their OutputPath nor IntermediateOutputPath locations",
         "Projects {0} and {1} have conflicting output paths: {2}.",
-        new BuildAnalyzerConfiguration() { Severity = BuildAnalyzerResultSeverity.Info, IsEnabled = true });
+        new BuildAnalyzerConfiguration() { Severity = BuildAnalyzerResultSeverity.Warning, IsEnabled = true });
 
     public override string FriendlyName => "MSBuild.SharedOutputPathAnalyzer";
 
@@ -79,7 +79,7 @@ internal sealed class SharedOutputPathAnalyzer : BuildAnalyzer
         {
             context.ReportResult(BuildCheckResult.Create(
                 SupportedRule,
-                // TODO: let's support transmitting locations of specific properties
+                // Populating precise location tracked via https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=58661732
                 ElementLocation.EmptyLocation,
                 Path.GetFileName(projectPath),
                 Path.GetFileName(conflictingProject),

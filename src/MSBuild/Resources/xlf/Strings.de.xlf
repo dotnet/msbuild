@@ -32,15 +32,22 @@
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
-        <source>failed with errors</source>
-        <target state="translated">Fehlgeschlagen mit Fehlern</target>
+        <source>failed with {0} error(s)</source>
+        <target state="translated">fehlerhaft mit {0} Fehler(n)</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
+        <source>failed with {0} error(s) and {1} warning(s)</source>
+        <target state="translated">fehlerhaft mit {0} Fehler(n) und {1} Warnung(en)</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
-        <source>failed with warnings</source>
-        <target state="translated">Fehlgeschlagen mit Warnungen</target>
+        <source>failed with {0} warning(s)</source>
+        <target state="translated">fehlerhaft mit {0} Warnung(en)</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -53,8 +60,8 @@
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
-        <source>succeeded with warnings</source>
-        <target state="translated">Erfolgreich mit Warnungen</target>
+        <source>succeeded with {0} warning(s)</source>
+        <target state="translated">erfolgreich mit {0} Warnung(en)</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>

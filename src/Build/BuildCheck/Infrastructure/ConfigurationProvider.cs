@@ -47,9 +47,9 @@ internal sealed class ConfigurationProvider
         var configuration = GetConfiguration(projectFullPath, ruleId);
 
         if (configuration is null || !configuration.Any())
-        {
-            return CustomConfigurationData.Null;
-        }
+    {
+        return CustomConfigurationData.Null;
+    }
 
         // remove the infrastructure owned key names
         foreach (var infraConfigurationKey in _infrastructureConfigurationKeys)
@@ -83,7 +83,7 @@ internal sealed class ConfigurationProvider
             if (!storedConfiguration.Equals(configuration))
             {
                 throw new BuildCheckConfigurationException("Custom configuration should be equal between projects");
-            }
+    }
         }
     }
 

@@ -9,12 +9,13 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.BuildCheck.Infrastructure;
 
-internal class BuildCheckConfigurationException : Exception
+internal sealed class BuildCheckConfigurationException : Exception
 {
     /// <summary>
     /// Exception to communicate issues with user specified configuration - unsupported scenarios, malformations, etc.
     /// This exception usually leads to defuncting the particular analyzer for the rest of the build (even if issue occured with a single project).
     /// </summary>
+    public BuildCheckConfigurationException(string message) : base(message)
     ///
     internal BuildCheckConfigurationErrorScope buildCheckConfigurationErrorScope;
 

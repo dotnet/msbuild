@@ -32,15 +32,22 @@
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
-        <source>failed with errors</source>
-        <target state="translated">non riuscito con errori</target>
+        <source>failed with {0} error(s)</source>
+        <target state="translated">non riuscito con {0} errori</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
+        <source>failed with {0} error(s) and {1} warning(s)</source>
+        <target state="translated">non riuscito con {0} errori e {1} avvisi</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
-        <source>failed with warnings</source>
-        <target state="translated">non riuscito con avvisi</target>
+        <source>failed with {0} warning(s)</source>
+        <target state="translated">non riuscito con {0} avvisi</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -53,8 +60,8 @@
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
-        <source>succeeded with warnings</source>
-        <target state="translated">completato con avvisi</target>
+        <source>succeeded with {0} warning(s)</source>
+        <target state="translated">completato con {0} avvisi</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>

@@ -100,7 +100,7 @@ public class CustomConfigurationData
         if (!NotNull(this))
         {
             return 0;
-        }
+    }
 
         var hashCode = RuleId.GetHashCode();
         if (ConfigurationData != null)

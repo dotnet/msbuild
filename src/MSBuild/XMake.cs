@@ -2745,7 +2745,7 @@ namespace Microsoft.Build.CommandLine
 
         private static bool IsBuildCheckEnabled(CommandLineSwitches commandLineSwitches)
         {
-            // todo: opt-in behavior: https://github.com/dotnet/msbuild/issues/9723
+            // Opt-in behavior to be determined by: https://github.com/dotnet/msbuild/issues/9723
             bool isAnalysisEnabled = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Analyze);
             return isAnalysisEnabled;
         }
@@ -3773,7 +3773,7 @@ namespace Microsoft.Build.CommandLine
             }
             else if (terminalloggerOptIn)
             {
-                ProcessTerminalLogger(noConsoleLogger, aggregatedTerminalLoggerParameters, distributedLoggerRecords, cpuCount, loggers);
+                ProcessTerminalLogger(noConsoleLogger, aggregatedTerminalLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
             }
             else
             {
@@ -3952,13 +3952,14 @@ namespace Microsoft.Build.CommandLine
         private static void ProcessTerminalLogger(bool noConsoleLogger,
             string aggregatedLoggerParameters,
             List<DistributedLoggerRecord> distributedLoggerRecords,
+            LoggerVerbosity verbosity,
             int cpuCount,
             List<ILogger> loggers)
         {
             if (!noConsoleLogger)
             {
                 // A central logger will be created for both single proc and multiproc.
-                TerminalLogger logger = new TerminalLogger()
+                TerminalLogger logger = new TerminalLogger(verbosity)
                 {
                     Parameters = aggregatedLoggerParameters
                 };

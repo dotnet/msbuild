@@ -33,15 +33,14 @@ internal delegate BuildAnalyzerWrapper BuildAnalyzerWrapperFactory(Configuration
 /// </summary>
 internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 {
-    private static int s_isInitialized = 0;
-    private static IBuildCheckManager s_globalInstance = new NullBuildCheckManager();
-    internal static IBuildCheckManager GlobalInstance => s_isInitialized != 0 ? s_globalInstance : throw new InvalidOperationException("BuildCheckManagerProvider not initialized");
+    private static IBuildCheckManager? s_globalInstance;
+    internal static IBuildCheckManager GlobalInstance => s_globalInstance ?? throw new InvalidOperationException("BuildCheckManagerProvider not initialized");
 
     public IBuildCheckManager Instance => GlobalInstance;
 
     internal static IBuildComponent CreateComponent(BuildComponentType type)
     {
-        ErrorUtilities.VerifyThrow(type == BuildComponentType.BuildCheck, "Cannot create components of type {0}", type);
+        ErrorUtilities.VerifyThrow(type == BuildComponentType.BuildCheckManagerProvider, "Cannot create components of type {0}", type);
         return new BuildCheckManagerProvider();
     }
 
@@ -49,19 +48,21 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
     {
         ErrorUtilities.VerifyThrow(host != null, "BuildComponentHost was null");
 
-        if (Interlocked.CompareExchange(ref s_isInitialized, 1, 0) == 1)
+        if (s_globalInstance == null)
         {
-            // Already initialized
-            return;
-        }
+            IBuildCheckManager instance;
+            if (host!.BuildParameters.IsBuildCheckEnabled)
+            {
+                instance = new BuildCheckManager(host.LoggingService);
+            }
+            else
+            {
+                instance = new NullBuildCheckManager();
+            }
 
-        if (host!.BuildParameters.IsBuildCheckEnabled)
-        {
-            s_globalInstance = new BuildCheckManager(host.LoggingService);
-        }
-        else
-        {
-            s_globalInstance = new NullBuildCheckManager();
+            // We are fine with the possibility of double creation here - as the construction is cheap
+            //  and without side effects and the actual backing field is effectively immutable after the first assignment.
+            Interlocked.CompareExchange(ref s_globalInstance, instance, null);
         }
     }
 
@@ -107,7 +108,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             {
                 BuildCheckAcquisitionEventArgs eventArgs = acquisitionData.ToBuildEventArgs();
 
-                // TODO: We may want to pass the real context here (from evaluation)
+                // We may want to pass the real context here (from evaluation)
                 eventArgs.BuildEventContext = new BuildEventContext(
                     BuildEventContext.InvalidNodeId,
                     BuildEventContext.InvalidProjectInstanceId,
@@ -179,9 +180,10 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         private void SetupSingleAnalyzer(BuildAnalyzerFactoryContext analyzerFactoryContext, string projectFullPath, BuildEventContext buildEventContext)
         {
-            // TODO: For user analyzers - it should run only on projects where referenced
+            // For custom analyzers - it should run only on projects where referenced
+            //  (otherwise error out - https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=57849480)
             //  on others it should work similarly as disabling them.
-            // Disabled analyzer should not only post-filter results - it shouldn't even see the data
+            // Disabled analyzer should not only post-filter results - it shouldn't even see the data 
 
             BuildAnalyzerWrapper wrapper;
             BuildAnalyzerConfigurationInternal[] configurations;
@@ -205,6 +207,11 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 analyzerFactoryContext.MaterializedAnalyzer = wrapper;
                 BuildAnalyzer analyzer = wrapper.BuildAnalyzer;
 
+                // This is to facilitate possible perf improvement for custom analyzers - as we might want to
+                //  avoid loading the assembly and type just to check if it's supported.
+                // If we expose a way to declare the enablement status and rule ids during registration (e.g. via
+                //  optional arguments of the intrinsic property function) - we can then avoid loading it.
+                // But once loaded - we should verify that the declared enablement status and rule ids match the actual ones.
                 if (
                     analyzer.SupportedRules.Count != analyzerFactoryContext.RuleIds.Length
                     ||
@@ -273,7 +280,11 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 }
             }
 
-            analyzersToRemove.ForEach(c => _analyzersRegistry.Remove(c));
+            analyzersToRemove.ForEach(c =>
+            {
+                _analyzersRegistry.Remove(c);
+                _loggingService.LogCommentFromText(buildEventContext, MessageImportance.High, $"Dismounting analyzer '{c.FriendlyName}'");
+            });
             foreach (var analyzerToRemove in analyzersToRemove.Select(a => a.MaterializedAnalyzer).Where(a => a != null))
             {
                 _buildCheckCentralContext.DeregisterAnalyzer(analyzerToRemove!);
@@ -284,12 +295,12 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
 
         public void ProcessEvaluationFinishedEventArgs(
-            IBuildAnalysisLoggingContext buildAnalysisContext,
+            AnalyzerLoggingContext buildAnalysisContext,
             ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
             => _buildEventsProcessor
                 .ProcessEvaluationFinishedEventArgs(buildAnalysisContext, evaluationFinishedEventArgs);
 
-        // TODO: tracing: https://github.com/dotnet/msbuild/issues/9629
+        // Tracing: https://github.com/dotnet/msbuild/issues/9629
         public Dictionary<string, TimeSpan> CreateTracingStats()
         {
             foreach (BuildAnalyzerFactoryContext analyzerFactoryContext in _analyzersRegistry)

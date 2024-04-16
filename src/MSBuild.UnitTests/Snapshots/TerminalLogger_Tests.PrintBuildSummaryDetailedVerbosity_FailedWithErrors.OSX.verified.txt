@@ -1,0 +1,8 @@
+﻿The plugin credential provider could not acquire credentials.Authentication may require manual action. Consider re-running the command with --interactive for `dotnet`, /p:NuGetInteractive="true" for MSBuild or removing the -NonInteractive switch for `NuGet`
+  project [31;1mfailed with 1 error(s) and 1 warning(s)[m (0.2s)
+    High importance message!
+    directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mAA0000[m: Warning!
+    directory/[1mfile[m(1,2,3,4): [31;1merror[m [31;1mAA0000[m: Error!
+[?25l[1F
+[?25h
+Build [31;1mfailed with 1 error(s) and 1 warning(s)[m in 5.0s
