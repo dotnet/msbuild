@@ -64,6 +64,10 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     internal const string Indentation = "  ";
 
+    internal const string DoubleIndentation = $"{Indentation}{Indentation}";
+
+    internal const string TripleIndentation = $"{Indentation}{Indentation}{Indentation}";
+
     internal const TerminalColor TargetFrameworkColor = TerminalColor.Cyan;
 
     internal Func<StopwatchAbstraction>? CreateStopwatch = null;
@@ -644,7 +648,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                     {
                         foreach (BuildMessage buildMessage in project.BuildMessages)
                         {
-                            Terminal.WriteLine($"{Indentation}{Indentation}{buildMessage.Message}");
+                            Terminal.WriteLine($"{DoubleIndentation}{buildMessage.Message}");
                         }
                     }
 
@@ -863,12 +867,12 @@ internal sealed partial class TerminalLogger : INodeLogger
             && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project)
             && Verbosity > LoggerVerbosity.Quiet)
         {
-            if (!String.IsNullOrEmpty(e.Message) && IsImmediateMessage(e.Message))
+            if (!String.IsNullOrEmpty(e.Message) && IsImmediateMessage(e.Message!))
             {
                 RenderImmediateMessage(FormatWarningMessage(e, Indentation));
             }
 
-            project.AddBuildMessage(MessageSeverity.Warning, FormatWarningMessage(e, $"{Indentation}{Indentation}{Indentation}"));
+            project.AddBuildMessage(MessageSeverity.Warning, FormatWarningMessage(e, TripleIndentation));
         }
         else
         {
@@ -901,7 +905,7 @@ internal sealed partial class TerminalLogger : INodeLogger
             && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project)
             && Verbosity > LoggerVerbosity.Quiet)
         {
-            project.AddBuildMessage(MessageSeverity.Error, FormatErrorMessage(e, $"{Indentation}{Indentation}{Indentation}"));
+            project.AddBuildMessage(MessageSeverity.Error, FormatErrorMessage(e, TripleIndentation));
         }
         else
         {
