@@ -32,15 +32,22 @@
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
-        <source>failed with errors</source>
-        <target state="translated">falhou com erros</target>
+        <source>failed with {0} error(s)</source>
+        <target state="translated">falhou com {0} erro(s)</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
+        <source>failed with {0} error(s) and {1} warning(s)</source>
+        <target state="translated">falhou com{0} erros e {1} avisos</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
-        <source>failed with warnings</source>
-        <target state="translated">falhou com avisos</target>
+        <source>failed with {0} warning(s)</source>
+        <target state="translated">falhou com {0} aviso(s)</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -53,8 +60,8 @@
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
-        <source>succeeded with warnings</source>
-        <target state="translated">êxito com avisos</target>
+        <source>succeeded with {0} warning(s)</source>
+        <target state="translated">êxito(s) com {0} aviso(s)</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
