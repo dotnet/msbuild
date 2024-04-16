@@ -94,7 +94,7 @@ internal sealed class BuildCheckCentralContext
             /* (BuildAnalyzerWrapper2, Action<BuildAnalysisContext<T>>) */
             analyzerCallback =>
             {
-                // TODO: tracing - we might want tp account this entire block
+                // Tracing - https://github.com/dotnet/msbuild/issues/9629 - we might want to account this entire block
                 //  to the relevant analyzer (with only the currently accounted part as being the 'core-execution' subspan)
 
                 BuildAnalyzerConfigurationInternal? commonConfig = analyzerCallback.Item1.CommonConfig;
@@ -120,7 +120,9 @@ internal sealed class BuildCheckCentralContext
                     }
                 }
 
-                // TODO: if the input data supports that - check the configPerRule[0].EvaluationAnalysisScope
+                // Here we might want to check the configPerRule[0].EvaluationAnalysisScope - if the input data supports that
+                // The decision and implementation depends on the outcome of the investigation tracked in:
+                // https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=57851137
 
                 BuildCheckDataContext<T> context = new BuildCheckDataContext<T>(
                     analyzerCallback.Item1,

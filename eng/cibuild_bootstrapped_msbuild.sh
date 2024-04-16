@@ -83,11 +83,10 @@ export DOTNET_HOST_PATH="$_InitializeDotNetCli/dotnet"
 
 # When using bootstrapped MSBuild:
 # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
-# - Do run tests
-# - Don't try to create a bootstrap deployment
+# - Create bootstrap environment as it's required when also running tests
 if [ $onlyDocChanged = 0 ]
 then
-    . "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties
+    . "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=true $properties $extra_properties
 
 else
     . "$ScriptRoot/common/build.sh" --restore --build --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties

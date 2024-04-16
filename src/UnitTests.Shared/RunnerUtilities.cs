@@ -58,33 +58,11 @@ namespace Microsoft.Build.UnitTests.Shared
                                                    ?? throw new InvalidOperationException("This test assembly does not have the BootstrapLocationAttribute");
 
             string binaryFolder = attribute.BootstrapMsbuildBinaryLocation;
-            string bindirOverride = Environment.GetEnvironmentVariable("MSBUILD_BOOTSTRAPPED_BINDIR");
-            if (!string.IsNullOrEmpty(bindirOverride))
-            {
-                // The bootstrap environment has moved to another location. Assume the same relative layout and adjust the path.
-#if NET
-                string relativePath = Path.GetRelativePath(attribute.BootstrapRoot, binaryFolder);
-                binaryFolder = Path.GetFullPath(relativePath, bindirOverride);
-#else
-                binaryFolder = Path.GetFullPath(binaryFolder);
-                if (binaryFolder.StartsWith(attribute.BootstrapRoot))
-                {
-                    binaryFolder = binaryFolder.Substring(attribute.BootstrapRoot.Length);
-                    if (binaryFolder.StartsWith(Path.DirectorySeparatorChar.ToString()))
-                    {
-                        binaryFolder = binaryFolder.Substring(1);
-                    }
-
-                    binaryFolder = Path.Combine(bindirOverride, binaryFolder);
-                }
-#endif
-            }
 #if NET
             string pathToExecutable = EnvironmentProvider.GetDotnetExePath()!;
             msbuildParameters = Path.Combine(binaryFolder, "MSBuild.dll") + " " + msbuildParameters;
 #else
-            string pathToExecutable =
-                Path.Combine(binaryFolder, "msbuild.exe");
+            string pathToExecutable = Path.Combine(binaryFolder, "MSBuild.exe");
 #endif
             return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper);
         }
@@ -157,8 +135,8 @@ namespace Microsoft.Build.UnitTests.Shared
                 {
                     // Let's not create a unit test for which we need more than 30 sec to execute.
                     // Please consider carefully if you would like to increase the timeout.
-                    // p.KillTree(1000);
-                    // throw new TimeoutException($"Test failed due to timeout: process {p.Id} is active for more than 30 sec.");
+                    p.KillTree(1000);
+                    throw new TimeoutException($"Test failed due to timeout: process {p.Id} is active for more than 30 sec.");
                 }
 
                 // We need the WaitForExit call without parameters because our processing of output/error streams is not synchronous.

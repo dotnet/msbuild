@@ -15,11 +15,11 @@ using System.Configuration;
 namespace Microsoft.Build.BuildCheck.Infrastructure;
 
 
-// TODO: https://github.com/dotnet/msbuild/issues/9628
-//  Let's flip form statics to instance, with exposed interface (so that we can easily swap implementations)
+// Let's flip form statics to instance, with exposed interface (so that we can easily swap implementations)
+// Tracked via: https://github.com/dotnet/msbuild/issues/9828
 internal static class ConfigurationProvider
 {
-    // TODO: This module should have a mechanism for removing unneeded configurations
+    // We might want to have a mechanism for removing unneeded configurations
     //  (disabled rules and analyzers that need to run in different node)
     private static readonly Dictionary<string, BuildAnalyzerConfiguration> _editorConfig = LoadConfiguration();
 
@@ -54,7 +54,7 @@ internal static class ConfigurationProvider
 
         if (!File.Exists(configPath))
         {
-            // TODO: pass the current project path
+            // This is just a dummy implementation for testing purposes
             var dir = Environment.CurrentDirectory;
             configPath = Path.Combine(dir, configFileName);
 

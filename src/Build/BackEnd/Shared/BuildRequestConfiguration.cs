@@ -476,9 +476,6 @@ namespace Microsoft.Build.BackEnd
                     projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
                 }
 
-                // Here - if we'll have in-execution analysis and it'll need DOM from Project,
-                //  this is the place for Project creation.
-
                 return new ProjectInstance(
                     ProjectFullPath,
                     globalProperties,

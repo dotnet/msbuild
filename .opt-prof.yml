@@ -21,8 +21,6 @@ resources:
     project: DevDiv
     source: DartLab
     branch: main
-    tags:
-    - production
   - pipeline: DartLab.OptProf
     source: DartLab.OptProf
     branch: main
@@ -32,7 +30,6 @@ resources:
   - repository: DartLabTemplates
     type: git
     name: DartLab.Templates
-    ref: refs/tags/Production
   - repository: DartLabOptProfTemplates
     type: git
     name: DartLab.OptProf
@@ -57,6 +54,7 @@ stages:
     name: OptProfProfilingWorkflow
     displayName: OptProf Profiling Workflow
     optOptimizationInputsDropName: $(OptimizationInputsDropName)
+    cloudBuildResourceName: ComponentBuildUnderTest
     testLabPoolName: VS-Platform # The test lab pool to run your tests in
     testMachineCleanUpStrategy: ${{parameters.testMachineCleanUpStrategy}}
     testMachineImageName: Windows-10-Enterprise-20H2

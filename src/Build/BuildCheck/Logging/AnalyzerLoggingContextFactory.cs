@@ -8,6 +8,6 @@ using Microsoft.Build.Framework;
 namespace Microsoft.Build.BuildCheck.Logging;
 internal class AnalyzerLoggingContextFactory(ILoggingService loggingService) : IBuildAnalysisLoggingContextFactory
 {
-    public IBuildAnalysisLoggingContext CreateLoggingContext(BuildEventContext eventContext) =>
+    public AnalyzerLoggingContext CreateLoggingContext(BuildEventContext eventContext) =>
         new AnalyzerLoggingContext(loggingService, eventContext);
 }

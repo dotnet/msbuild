@@ -10,6 +10,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BuildCheck.Acquisition;
 using Microsoft.Build.BuildCheck.Infrastructure;
+using Microsoft.Build.BuildCheck.Logging;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
@@ -27,10 +28,8 @@ internal enum BuildCheckDataSource
 /// </summary>
 internal interface IBuildCheckManager
 {
-    bool isRestore { get; set; }
-
     void ProcessEvaluationFinishedEventArgs(
-        IBuildAnalysisLoggingContext buildAnalysisContext,
+        AnalyzerLoggingContext buildAnalysisContext,
         ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs);
 
     void SetDataSource(BuildCheckDataSource buildCheckDataSource);

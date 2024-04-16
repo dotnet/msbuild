@@ -25,6 +25,10 @@ public abstract class AnalysisData(string projectFilePath)
     public string ProjectFilePath { get; } = projectFilePath;
 }
 
+/// <summary>
+/// Data passed from infrastructure to build analyzers.
+/// </summary>
+/// <typeparam name="T">The type of the actual data for analysis.</typeparam>
 public class BuildCheckDataContext<T> where T : AnalysisData
 {
     private readonly BuildAnalyzerWrapper _analyzerWrapper;

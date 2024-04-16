@@ -28,12 +28,11 @@
     <Compile Include="..\Shared\IsExternalInit.cs" />
   </ItemGroup>
 
-  <Import Project="..\..\eng\BootStrapMSBuild.props" />
+  <Import Project="..\..\eng\BootStrapMsBuild.props" />
 
   <ItemGroup>
     <AssemblyAttribute Include="Microsoft.Build.UnitTests.Shared.BootstrapLocationAttribute">
-      <_Parameter1>$(ArtifactsBinDir)</_Parameter1>
-      <_Parameter2>$(BootstrapBinaryDestination)</_Parameter2>
+      <_Parameter1>$(BootstrapBinaryDestination)</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
 </Project>

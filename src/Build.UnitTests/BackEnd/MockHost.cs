@@ -200,7 +200,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildComponentType.ResultsCache => (IBuildComponent)_resultsCache,
                 BuildComponentType.RequestBuilder => (IBuildComponent)_requestBuilder,
                 BuildComponentType.SdkResolverService => (IBuildComponent)_sdkResolverService,
-                BuildComponentType.BuildCheck => (IBuildComponent)_buildCheckManagerProvider,
+                BuildComponentType.BuildCheckManagerProvider => (IBuildComponent)_buildCheckManagerProvider,
                 _ => throw new ArgumentException("Unexpected type " + type),
             };
         }

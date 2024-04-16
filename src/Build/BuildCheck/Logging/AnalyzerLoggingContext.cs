@@ -7,7 +7,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.BuildCheck.Logging;
 
-internal class AnalyzerLoggingContext : LoggingContext, IBuildAnalysisLoggingContext
+internal class AnalyzerLoggingContext : LoggingContext
 {
     public AnalyzerLoggingContext(ILoggingService loggingService, BuildEventContext eventContext)
         : base(loggingService, eventContext)
