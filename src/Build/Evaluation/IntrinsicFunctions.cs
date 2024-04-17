@@ -665,10 +665,7 @@ namespace Microsoft.Build.Evaluation
             return BuildEnvironmentHelper.Instance.MSBuildExtensionsPath;
         }
 
-        public static bool IsRunningFromVisualStudio()
-        {
-            return BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio;
-        }
+        public static bool IsRunningFromVisualStudio() => BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio;
 
         public static bool RegisterAnalyzer(string pathToAssembly, LoggingContext loggingContext)
         {
@@ -679,6 +676,8 @@ namespace Microsoft.Build.Evaluation
 
                 return true;
             }
+
+            loggingContext.LogComment(MessageImportance.Low, "CustomAnalyzerAssemblyNotExist", pathToAssembly);
 
             return false;
         }

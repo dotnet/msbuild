@@ -112,14 +112,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             else
             {
                 BuildCheckAcquisitionEventArgs eventArgs = acquisitionData.ToBuildEventArgs();
-
-                // We may want to pass the real context here (from evaluation)
-                eventArgs.BuildEventContext = new BuildEventContext(
-                    BuildEventContext.InvalidNodeId,
-                    BuildEventContext.InvalidProjectInstanceId,
-                    BuildEventContext.InvalidProjectContextId,
-                    BuildEventContext.InvalidTargetId,
-                    BuildEventContext.InvalidTaskId);
+                eventArgs.BuildEventContext = buildEventContext;
 
                 _loggingService.LogBuildEvent(eventArgs);
             }
