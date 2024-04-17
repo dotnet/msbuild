@@ -143,18 +143,18 @@ Example project:
   msbuild.exe filename.proj /p:propertyValue="Hello, \"World!\""
   ```
 
-  For more details about parsing in CMD and usage of special characters, please visit [this page](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/cmd)
+  For more details about parsing in CMD and usage of special characters, please visit [this page](https://learn.microsoft.com/windows-server/administration/windows-commands/cmd)
 
 - Windows PowerShell:
   ```
   msbuild.exe filename.proj /p:propertyValue="Hello, \`"World!\`""
   ```
 
-  For more details about parsing in PowerShell (5.1) and usage of special characters, please visit [this page](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing?view=powershell-5.1)
+  For more details about parsing in Windows PowerShell 5.1 and usage of special characters, please visit [this page](https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_parsing?view=powershell-5.1)
 
 - PowerShell Core:
   ```
   msbuild.exe filename.proj /p:propertyValue="Hello, `"World!`""
   ```
 
-  For more details about parsing in PowerShell Core (7.4) and usage of special characters, please visit [this page](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing?view=powershell-7.4)
+  For more details about parsing in PowerShell (7.4 and higher) and usage of special characters, please visit [this page](https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_parsing?view=powershell-7.4)
