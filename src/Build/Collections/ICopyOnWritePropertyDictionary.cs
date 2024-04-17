@@ -54,5 +54,12 @@ namespace Microsoft.Build.Collections
         /// Clone. As we're copy on write, this should be cheap.
         /// </summary>
         ICopyOnWritePropertyDictionary<T> DeepClone();
+
+        /// <summary>
+        /// <typeparamref name="T"/> must implement <see cref="IKeyed"/>, which means it contains an
+        /// EscapedValue. This method allows retrieving the EscapedValue of an object in the dictionary
+        /// directly.
+        /// </summary>
+        string GetEscapedValue(string name);
     }
 }

@@ -9,7 +9,7 @@ namespace Microsoft.Build.Instance
 {
     internal class ImmutablePropertyCollectionConverter<TCached, T> : ImmutableElementCollectionConverter<TCached, T>, ICopyOnWritePropertyDictionary<T>
         where T : class, IKeyed, IValued, IEquatable<T>, IImmutable
-        where TCached : class, IEquatable<TCached>
+        where TCached : class, IValued, IEquatable<TCached>
     {
         public ImmutablePropertyCollectionConverter(IDictionary<string, TCached> properties, Func<TCached, T> convertProperty)
             : base(properties, constrainedProjectElements: null, convertProperty)
@@ -17,6 +17,16 @@ namespace Microsoft.Build.Instance
         }
 
         public bool Contains(string name) => ContainsKey(name);
+
+        public string? GetEscapedValue(string name)
+        {
+            if (_projectElements.TryGetValue(name, out TCached? value))
+            {
+                return value?.EscapedValue;
+            }
+
+            return null;
+        }
 
         public ICopyOnWritePropertyDictionary<T> DeepClone() => this;
 

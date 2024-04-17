@@ -1315,16 +1315,16 @@ namespace Microsoft.Build.Execution
                     ErrorUtilities.VerifyThrowArgumentLength(metadataName, nameof(metadataName));
                 }
 
-                ProjectMetadataInstance metadatum;
                 if (_directMetadata != null)
                 {
-                    metadatum = _directMetadata[metadataName];
-                    if (metadatum != null)
+                    string escapedValue = _directMetadata.GetEscapedValue(metadataName);
+                    if (escapedValue != null)
                     {
-                        return metadatum.EvaluatedValueEscaped;
+                        return escapedValue;
                     }
                 }
 
+                ProjectMetadataInstance metadatum;
                 metadatum = GetItemDefinitionMetadata(metadataName);
 
                 if (metadatum != null && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))

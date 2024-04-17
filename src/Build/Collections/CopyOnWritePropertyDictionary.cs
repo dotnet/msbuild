@@ -115,6 +115,16 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Contains(string name) => _backing.ContainsKey(name);
 
+        public string GetEscapedValue(string name)
+        {
+            if (_backing.TryGetValue(name, out T value))
+            {
+                return value?.EscapedValue;
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Empties the collection
         /// </summary>
