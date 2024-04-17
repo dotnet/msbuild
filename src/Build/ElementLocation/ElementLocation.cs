@@ -130,13 +130,13 @@ namespace Microsoft.Build.Construction
 
         /// <summary>
         /// Writes the packet to the serializer.
-        /// Always send as ints, even if ushorts are being used: otherwise it'd
-        /// need a byte to discriminate and the savings would be microscopic.
         /// </summary>
         void ITranslatable.Translate(ITranslator translator)
         {
             ErrorUtilities.VerifyThrow(translator.Mode == TranslationDirection.WriteToStream, "write only");
 
+            // Translate int, even if ushort is being used.
+            // Internally, the translator uses a variable length (prefix) encoding.
             string file = File;
             int line = Line;
             int column = Column;
