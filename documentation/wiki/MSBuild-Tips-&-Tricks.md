@@ -132,7 +132,7 @@ Let's explore the ways to pass property values that contain special symbols like
 Example project: 
 ```
 <Project>
-  <Target Name="PringProperty">
+  <Target Name="PrintPropertyValue">
       <Message Text="Property value = ($(propertyValue))" Importance="high" />
   </Target>
 </Project>
