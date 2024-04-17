@@ -42,6 +42,12 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] Files { get; set; } = Array.Empty<ITaskItem>();
 
         /// <summary>
+        /// If the flag set to 'true' the incoming list with existing Culture metadata will not be ammended and CultureNeutralAssignedFiles filename will be equal to the original.
+        /// In case the Cutlture metadata was not provided, the logic of RespectAlreadyAssignedItemCulture will not take any effect.
+        /// </summary>
+        public bool RespectAlreadyAssignedItemCulture { get; set; } = false;
+
+        /// <summary>
         /// This outgoing list of files is exactly the same as the incoming Files
         /// list except that an attribute name "Culture" will have been added if
         /// the particular file name is in the form:
@@ -134,32 +140,44 @@ namespace Microsoft.Build.Tasks
                     AssignedFiles[i] = new TaskItem(Files[i]);
 
                     string dependentUpon = AssignedFiles[i].GetMetadata(ItemMetadataNames.dependentUpon);
-                    Culture.ItemCultureInfo info = Culture.GetItemCultureInfo(
+                    string existingCulture = AssignedFiles[i].GetMetadata(ItemMetadataNames.culture);
+                    
+                    if (RespectAlreadyAssignedItemCulture && !string.IsNullOrEmpty(existingCulture))
+                    {
+                        AssignedFiles[i].SetMetadata(ItemMetadataNames.withCulture, "true");
+                        cultureList.Add(AssignedFiles[i]);
+
+                        CultureNeutralAssignedFiles[i] = new TaskItem(AssignedFiles[i]);
+                    }
+                    else
+                    {
+                        Culture.ItemCultureInfo info = Culture.GetItemCultureInfo(
                             AssignedFiles[i].ItemSpec,
                             dependentUpon,
                             // If 'WithCulture' is explicitly set to false, treat as 'culture-neutral' and keep the original name of the resource.
                             // https://github.com/dotnet/msbuild/issues/3064
-                            ConversionUtilities.ValidBooleanFalse(AssignedFiles[i].GetMetadata("WithCulture")));
+                            ConversionUtilities.ValidBooleanFalse(AssignedFiles[i].GetMetadata(ItemMetadataNames.withCulture)));
 
-                    if (!string.IsNullOrEmpty(info.culture))
-                    {
-                        AssignedFiles[i].SetMetadata("Culture", info.culture);
-                        AssignedFiles[i].SetMetadata("WithCulture", "true");
-                        cultureList.Add(AssignedFiles[i]);
-                    }
-                    else
-                    {
-                        noCultureList.Add(AssignedFiles[i]);
-                        AssignedFiles[i].SetMetadata("WithCulture", "false");
-                    }
+                        if (!string.IsNullOrEmpty(info.culture))
+                        {
+                            AssignedFiles[i].SetMetadata(ItemMetadataNames.culture, info.culture);
+                            AssignedFiles[i].SetMetadata(ItemMetadataNames.withCulture, "true");
+                            cultureList.Add(AssignedFiles[i]);
+                        }
+                        else
+                        {
+                            noCultureList.Add(AssignedFiles[i]);
+                            AssignedFiles[i].SetMetadata(ItemMetadataNames.withCulture, "false");
+                        }
 
-                    CultureNeutralAssignedFiles[i] =
+                        CultureNeutralAssignedFiles[i] =
                         new TaskItem(AssignedFiles[i]) { ItemSpec = info.cultureNeutralFilename };
+                    }
 
                     Log.LogMessageFromResources(
                         MessageImportance.Low,
                         "AssignCulture.Comment",
-                        AssignedFiles[i].GetMetadata("Culture"),
+                        AssignedFiles[i].GetMetadata(ItemMetadataNames.culture),
                         AssignedFiles[i].ItemSpec);
                 }
                 catch (ArgumentException e)
