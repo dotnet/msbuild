@@ -91,7 +91,7 @@ namespace Microsoft.Build.Construction
         public override int GetHashCode()
         {
             // Line and column are good enough
-            return Line.GetHashCode() ^ Column.GetHashCode();
+            return Line ^ Column;
         }
 
         /// <summary>
