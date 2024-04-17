@@ -123,7 +123,7 @@ The above explanations are only half the truth, though.
 
 
 ## Using quotes in MSBuild properties
-There are times when MSBuild needs to be invoked with property arguments using the `/p:propertyName=propertyValue` syntax. However, the behavior of this command can vary depending on the application used to run MSBuild (PowerShell, PowerShell Core, Command Prompt). 
+There are times when MSBuild needs to be invoked with property arguments using the `/p:propertyName=propertyValue` syntax. However, the way of achieving the proper result can vary depending on the shell used to run the MSBuild (PowerShell, PowerShell Core, Command Prompt, etc.). 
 
 When the property value contains quotes (`"`), it may be handled differently depending on the interpreting shell.
 
