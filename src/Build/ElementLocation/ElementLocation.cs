@@ -100,11 +100,6 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public override bool Equals(object obj)
         {
-            if (obj == null)
-            {
-                return false;
-            }
-
             IElementLocation that = obj as IElementLocation;
 
             if (that == null)
