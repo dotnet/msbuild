@@ -15,7 +15,7 @@
                       ReferenceOutputAssembly="false"
                       OutputItemType="FrameworkResolvedProjectReferencePath" />
 
-    <X64ProjectReference Include="$(MSBuildThisFileDirectory)\..\MSBuildTaskHost\MSBuildTaskHost.csproj"
+    <Arm64ProjectReference Include="$(MSBuildThisFileDirectory)\..\MSBuildTaskHost\MSBuildTaskHost.csproj"
                       SetPlatform="Platform=arm64"
                       OutputItemType="MSBuildTaskHostArm64ResolvedProjectReferencePath"
                       GlobalPropertiesToRemove="TargetFramework" />
