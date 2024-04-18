@@ -1210,40 +1210,32 @@ internal static class NativeMethods
 
                 try
                 {
-                    try
-                    {
-                        // Kill this process, so that no further children can be created.
-                        thisProcess.Kill();
-                    }
-                    catch (Win32Exception e) when (e.NativeErrorCode == ERROR_ACCESS_DENIED)
-                    {
-                        // Access denied is potentially expected -- it happens when the process that
-                        // we're attempting to kill is already dead.  So just ignore in that case.
-                    }
+                    // Kill this process, so that no further children can be created.
+                    thisProcess.Kill();
+                }
+                catch (Win32Exception e) when (e.NativeErrorCode == ERROR_ACCESS_DENIED)
+                {
+                    // Access denied is potentially expected -- it happens when the process that
+                    // we're attempting to kill is already dead.  So just ignore in that case.
+                }
 
-                    // Now enumerate our children.  Children of this process are any process which has this process id as its parent
-                    // and which also started after this process did.
-                    List<KeyValuePair<int, SafeProcessHandle>> children = GetChildProcessIds(processIdToKill, myStartTime);
+                // Now enumerate our children.  Children of this process are any process which has this process id as its parent
+                // and which also started after this process did.
+                List<KeyValuePair<int, SafeProcessHandle>> children = GetChildProcessIds(processIdToKill, myStartTime);
 
-                    try
+                try
+                {
+                    foreach (KeyValuePair<int, SafeProcessHandle> childProcessInfo in children)
                     {
-                        foreach (KeyValuePair<int, SafeProcessHandle> childProcessInfo in children)
-                        {
-                            KillTree(childProcessInfo.Key);
-                        }
-                    }
-                    finally
-                    {
-                        foreach (KeyValuePair<int, SafeProcessHandle> childProcessInfo in children)
-                        {
-                            childProcessInfo.Value.Dispose();
-                        }
+                        KillTree(childProcessInfo.Key);
                     }
                 }
                 finally
                 {
-                    // Release the handle.  After this point no more children of this process exist and this process has also exited.
-                    hProcess.Dispose();
+                    foreach (KeyValuePair<int, SafeProcessHandle> childProcessInfo in children)
+                    {
+                        childProcessInfo.Value.Dispose();
+                    }
                 }
             }
         }

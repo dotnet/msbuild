@@ -34,8 +34,6 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
-using static Microsoft.Build.CommandLine.MSBuildApp;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
 using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using FileLogger = Microsoft.Build.Logging.FileLogger;
@@ -820,32 +818,32 @@ namespace Microsoft.Build.CommandLine
                     }
                     else if ((getProperty.Length > 0 || getItem.Length > 0) && (targets is null || targets.Length == 0))
                     {
-                        TextWriter output = null;
                         try
                         {
                             using (ProjectCollection collection = new(globalProperties, loggers, ToolsetDefinitionLocations.Default))
                             {
                                 Project project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
-#pragma warning disable CA2000 // Dispose objects before losing scope is suppressed because the StreamWriter is disposed in the finally block
-                                output = getResultOutputFile.Length > 0
-                                    ? new StreamWriter(getResultOutputFile)
-                                    : Console.Out;
-#pragma warning restore CA2000 // Dispose objects before losing scope
-                                exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project, output);
+
+                                if (outputPropertiesItemsOrTargetResults && targets?.Length > 0 && result is not null)
+                                {
+                                    if (getResultOutputFile.Length == 0)
+                                    {
+                                        exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project, Console.Out);
+                                    }
+                                    else
+                                    {
+                                        using (var streamWriter = new StreamWriter(getResultOutputFile))
+                                        {
+                                            exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project, streamWriter);
+                                        }
+                                    }
+                                }
                                 collection.LogBuildFinishedEvent(exitType == ExitType.Success);
                             }
                         }
                         catch (InvalidProjectFileException)
                         {
                             exitType = ExitType.BuildError;
-                        }
-                        finally
-                        {
-                            if (output is StreamWriter)
-                            {
-                                // dispose only if StreamWriter to avoid closing Console.Out
-                                output?.Dispose();
-                            }
                         }
                     }
                     else // regular build
@@ -899,23 +897,18 @@ namespace Microsoft.Build.CommandLine
 
                     string timerOutputFilename = Environment.GetEnvironmentVariable("MSBUILDTIMEROUTPUTS");
 
-                    TextWriter outputStream = null;
-                    try
+                    if (outputPropertiesItemsOrTargetResults && targets?.Length > 0 && result is not null)
                     {
-                        if (outputPropertiesItemsOrTargetResults && targets?.Length > 0 && result is not null)
+                        if (getResultOutputFile.Length == 0)
                         {
-#pragma warning disable CA2000 // Dispose objects before losing scope is suppressed because the StreamWriter is disposed in the finally block
-                            outputStream = getResultOutputFile.Length > 0 ? new StreamWriter(getResultOutputFile) : Console.Out;
-#pragma warning restore CA2000 // Dispose objects before losing scope
-                            exitType = OutputBuildInformationInJson(result, getProperty, getItem, getTargetResult, loggers, exitType, outputStream);
+                            exitType = OutputBuildInformationInJson(result, getProperty, getItem, getTargetResult, loggers, exitType, Console.Out);
                         }
-                    }
-                    finally
-                    {
-                        if (outputStream is StreamWriter)
+                        else
                         {
-                            // dispose only if StreamWriter to avoid closing Console.Out
-                            outputStream?.Dispose();
+                            using (var streamWriter = new StreamWriter(getResultOutputFile))
+                            {
+                                exitType = OutputBuildInformationInJson(result, getProperty, getItem, getTargetResult, loggers, exitType, streamWriter);
+                            }
                         }
                     }
 

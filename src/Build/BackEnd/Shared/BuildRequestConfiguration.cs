@@ -699,9 +699,9 @@ namespace Microsoft.Build.BackEnd
                     if (IsCacheable)
                     {
                         string cacheFile = GetCacheFile();
-                        Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
                         try
                         {
+                            Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
                             using Stream stream = File.Create(cacheFile);
                             using ITranslator translator = GetConfigurationTranslator(TranslationDirection.WriteToStream, stream);
 

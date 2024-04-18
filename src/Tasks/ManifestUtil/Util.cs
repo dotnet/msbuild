@@ -521,9 +521,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
 
             string path = Path.Combine(logPath, filename);
-#pragma warning disable CA2000 // Dispose objects before losing scope is suppressed because the stream is returned to the caller and will be handled there.
-            StreamReader r = new StreamReader(s);
-#pragma warning restore CA2000 // Dispose objects before losing scope
+            using var r = new StreamReader(s, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, 1024, leaveOpen: true);
             string text = r.ReadToEnd();
             try
             {

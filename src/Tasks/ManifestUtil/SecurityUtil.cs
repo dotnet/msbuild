@@ -205,9 +205,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         {
                             try
                             {
-#pragma warning disable CA2000 // Dispose objects before losing scope is suppressed because it is managed by FileStream above.
-                                var sr = new StreamReader(fs);
-#pragma warning restore CA2000 // Dispose objects before losing scope
+                                using var sr = new StreamReader(fs, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, 1024, leaveOpen: true);
                                 string data = sr.ReadToEnd();
                                 if (!string.IsNullOrEmpty(data))
                                 {
