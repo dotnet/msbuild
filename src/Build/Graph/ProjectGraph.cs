@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
@@ -650,8 +651,8 @@ namespace Microsoft.Build.Graph
                             string baseProjectName = ProjectInSolution.DisambiguateProjectTargetName(project.GetUniqueProjectName());
 
                             // Solutions generate target names to build individual projects. Map these to "real" targets on the relevant projects.
-                            // This logic should match SolutionProjectGenerator's behavior
-                            if (targetName.Equals(baseProjectName, StringComparison.OrdinalIgnoreCase))
+                            // This logic should match SolutionProjectGenerator's behavior, particularly EvaluateAndAddProjects's calls to AddTraversalTargetForProject.
+                            if (MSBuildNameIgnoreCaseComparer.Default.Equals(targetName, baseProjectName))
                             {
                                 // Build a specific project with its default targets.
                                 ProjectGraphNode node = GetNodeForProject(project);
