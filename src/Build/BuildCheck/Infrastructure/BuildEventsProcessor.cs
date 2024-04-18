@@ -33,8 +33,6 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         AnalyzerLoggingContext buildAnalysisContext,
         ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
     {
-        LoggingContext loggingContext = buildAnalysisContext.ToLoggingContext();
-
         Dictionary<string, string> propertiesLookup = new Dictionary<string, string>();
         Internal.Utilities.EnumerateProperties(evaluationFinishedEventArgs.Properties, propertiesLookup,
             static (dict, kvp) => dict.Add(kvp.Key, kvp.Value));

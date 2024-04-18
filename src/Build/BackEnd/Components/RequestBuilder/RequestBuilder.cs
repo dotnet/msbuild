@@ -1102,11 +1102,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private async Task<BuildResult> BuildProject()
         {
-            // We consider this the entrypoint for the project build for purposes of BuildCheck processing 
-
-            var buildCheckManager = (_componentHost.GetComponent(BuildComponentType.BuildCheck) as IBuildCheckManagerProvider)!.Instance;
-            buildCheckManager.SetDataSource(BuildCheckDataSource.BuildExecution);
-
             ErrorUtilities.VerifyThrow(_targetBuilder != null, "Target builder is null");
 
             // We consider this the entrypoint for the project build for purposes of BuildCheck processing 

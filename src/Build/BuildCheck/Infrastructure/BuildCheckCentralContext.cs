@@ -119,7 +119,7 @@ internal sealed class BuildCheckCentralContext
                 else
                 {
                     configPerRule =
-                        ConfigurationProvider.GetMergedConfigurations(projectFullPath,
+                        _configurationProvider.GetMergedConfigurations(projectFullPath,
                             analyzerCallback.Item1.BuildAnalyzer);
                     if (configPerRule.All(c => !c.IsEnabled))
                     {
