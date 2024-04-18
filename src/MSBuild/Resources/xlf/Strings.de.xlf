@@ -1692,27 +1692,27 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
       </trans-unit>
       <trans-unit id="TestSummary_BannerAndTotal">
         <source>Test summary: total: {0}</source>
-        <target state="new">Test summary: total: {0}</target>
+        <target state="translated">Testzusammenfassung: insgesamt: {0}</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="TestSummary_Duration">
         <source>duration: {0}s</source>
-        <target state="new">duration: {0}s</target>
+        <target state="translated">Dauer: {0} Sek.</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="TestSummary_Failed">
         <source>failed: {0}</source>
-        <target state="new">failed: {0}</target>
+        <target state="translated">fehlgeschlagen: {0}</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="TestSummary_Skipped">
         <source>skipped: {0}</source>
-        <target state="new">skipped: {0}</target>
+        <target state="translated">übersprungen: {0}</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="TestSummary_Succeeded">
         <source>succeeded: {0}</source>
-        <target state="new">succeeded: {0}</target>
+        <target state="translated">erfolgreich: {0}</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
