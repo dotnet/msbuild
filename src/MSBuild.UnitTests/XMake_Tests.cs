@@ -2657,6 +2657,11 @@ EndGlobal
         [InlineData("/v:normal /bl", MessageImportance.Low)] // v:normal but with binary logger so everything must be logged
         [InlineData("/v:minimal /bl", MessageImportance.Low)] // v:minimal but with binary logger so everything must be logged
         [InlineData("/v:quiet /bl", MessageImportance.Low)] // v:quiet but with binary logger so everything must be logged
+        [InlineData("/v:diagnostic /analyze", MessageImportance.Low)]
+        [InlineData("/v:detailed /analyze", MessageImportance.Low)]
+        [InlineData("/v:normal /analyze", MessageImportance.Low)] // v:normal but with analyzers so everything must be logged
+        [InlineData("/v:minimal /analyze", MessageImportance.Low)] // v:minimal but with analyzers so everything must be logged
+        [InlineData("/v:quiet /analyze", MessageImportance.Low)] // v:quiet but with analyzers so everything must be logged
         public void EndToEndMinimumMessageImportance(string arguments, MessageImportance expectedMinimumMessageImportance)
         {
             using TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create();
