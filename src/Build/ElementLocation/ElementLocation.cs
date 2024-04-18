@@ -23,7 +23,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// The singleton empty element location.
         /// </summary>
-        private static ElementLocation s_emptyElementLocation = new SmallElementLocation(null, 0, 0);
+        private static ElementLocation s_emptyElementLocation = new SmallElementLocation("", 0, 0);
 
         /// <summary>
         /// The file from which this particular element originated.  It may
@@ -195,6 +195,10 @@ namespace Microsoft.Build.Construction
                 return EmptyLocation;
             }
 
+            ErrorUtilities.VerifyThrow(line > -1 && column > -1, "Use zero for unknown");
+
+            file ??= "";
+
             if (line <= 65535 && column <= 65535)
             {
                 return new ElementLocation.SmallElementLocation(file, line, column);
@@ -226,14 +230,11 @@ namespace Microsoft.Build.Construction
             /// <summary>
             /// Constructor for the case where we have most or all information.
             /// Numerical values must be 1-based, non-negative; 0 indicates unknown
-            /// File may be null, indicating the file was not loaded from disk.
+            /// File may be empty, indicating the file was not loaded from disk.
             /// </summary>
-            internal RegularElementLocation(string? file, int line, int column)
+            internal RegularElementLocation(string file, int line, int column)
             {
-                ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(file, nameof(file));
-                ErrorUtilities.VerifyThrow(line > -1 && column > -1, "Use zero for unknown");
-
-                this.file = file ?? String.Empty;
+                this.file = file;
                 this.line = line;
                 this.column = column;
             }
@@ -303,13 +304,11 @@ namespace Microsoft.Build.Construction
             /// <summary>
             /// Constructor for the case where we have most or all information.
             /// Numerical values must be 1-based, non-negative; 0 indicates unknown
-            /// File may be null or empty, indicating the file was not loaded from disk.
+            /// File may empty, indicating the file was not loaded from disk.
             /// </summary>
-            internal SmallElementLocation(string? file, int line, int column)
+            internal SmallElementLocation(string file, int line, int column)
             {
-                ErrorUtilities.VerifyThrow(line > -1 && column > -1, "Use zero for unknown");
-
-                this.file = file ?? String.Empty;
+                this.file = file;
                 packedData = (line << 16) | column;
             }
 
