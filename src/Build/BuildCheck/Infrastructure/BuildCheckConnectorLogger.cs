@@ -25,11 +25,16 @@ internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFact
     {
         eventSource.AnyEventRaised += EventSource_AnyEventRaised;
         eventSource.BuildFinished += EventSource_BuildFinished;
+
+
+        if (eventSource is IEventSource4 eventSource4)
+        {
+            eventSource4.IncludeEvaluationPropertiesAndItems();
+        }
     }
 
     private void EventSource_AnyEventRaised(object sender, BuildEventArgs e)
     {
-        // NOTE: this event is fired more than one time per project build
         if (e is ProjectFinishedEventArgs projectFinishedEventArgs)
         {
             if (isRestore)
@@ -44,28 +49,6 @@ internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFact
         else if (isRestore)
         {
             return;
-        }
-        else if (e is ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs)
-        {
-            if (projectEvaluationFinishedEventArgs.ProjectFile?.EndsWith(".metaproj") ?? false)
-            {
-                return;
-            }
-
-            try
-            {
-            buildCheckManager.ProcessEvaluationFinishedEventArgs(
-                loggingContextFactory.CreateLoggingContext(e.BuildEventContext!),
-                projectEvaluationFinishedEventArgs);
-            }
-            catch (Exception exception)
-            {
-                Debugger.Launch();
-                Console.WriteLine(exception);
-                throw;
-            }
-
-            buildCheckManager.EndProjectEvaluation(BuildCheckDataSource.EventArgs, e.BuildEventContext!);
         }
         else if (e is ProjectEvaluationStartedEventArgs projectEvaluationStartedEventArgs)
         {
@@ -84,6 +67,28 @@ internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFact
             {
                 isRestore = true;
             }
+        }
+        else if (e is ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs)
+        {
+            if (projectEvaluationFinishedEventArgs.ProjectFile?.EndsWith(".metaproj") ?? false)
+            {
+                return;
+            }
+
+            try
+            {
+                buildCheckManager.ProcessEvaluationFinishedEventArgs(
+                    loggingContextFactory.CreateLoggingContext(e.BuildEventContext!),
+                    projectEvaluationFinishedEventArgs);
+            }
+            catch (Exception exception)
+            {
+                Debugger.Launch();
+                Console.WriteLine(exception);
+                throw;
+            }
+
+            buildCheckManager.EndProjectEvaluation(BuildCheckDataSource.EventArgs, e.BuildEventContext!);
         }
         else if (e is ProjectStartedEventArgs projectStartedEvent)
         {
