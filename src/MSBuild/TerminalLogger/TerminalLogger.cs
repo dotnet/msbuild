@@ -11,12 +11,10 @@ using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
 using Microsoft.Build.Framework.Logging;
+using System.Globalization;
 
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-
-
 #endif
 #if NETFRAMEWORK
 using Microsoft.IO;
@@ -389,6 +387,31 @@ internal sealed partial class TerminalLogger : INodeLogger
                 string buildResult = RenderBuildResult(e.Succeeded, _buildErrorsCount, _buildWarningsCount);
 
                 Terminal.WriteLine("");
+                if(_testRunSummaries.Any())
+                {
+                    var total = _testRunSummaries.Sum(t => t.Total);
+                    var failed = _testRunSummaries.Sum(t => t.Failed);
+                    var passed = _testRunSummaries.Sum(t => t.Passed);
+                    var skipped = _testRunSummaries.Sum(t => t.Skipped);
+                    var testDuration = (_testStartTime != null && _testEndTime != null ? (_testEndTime - _testStartTime).Value.TotalSeconds : 0).ToString("F1");
+
+                    var colorizeFailed = failed > 0;
+                    var colorizePassed = passed > 0 && _buildErrorsCount == 0 && failed == 0;
+                    var colorizeSkipped = skipped > 0 && skipped == total && _buildErrorsCount == 0 && failed == 0;
+
+                    string summaryAndTotalText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_BannerAndTotal", total);
+                    string failedText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Failed", failed);
+                    string passedText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Succeeded", passed);
+                    string skippedText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Skipped", skipped);
+                    string durationText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Duration", testDuration);
+
+                    failedText = colorizeFailed ? AnsiCodes.Colorize(failedText.ToString(), TerminalColor.Red) : failedText;
+                    passedText = colorizePassed ? AnsiCodes.Colorize(passedText.ToString(), TerminalColor.Green) : passedText;
+                    skippedText = colorizeSkipped ? AnsiCodes.Colorize(skippedText.ToString(), TerminalColor.Yellow) : skippedText;
+
+                    Terminal.WriteLine(string.Join(CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ", summaryAndTotalText, failedText, passedText, skippedText, durationText));
+                }
+
                 if (_restoreFailed)
                 {
                     Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
@@ -400,27 +423,6 @@ internal sealed partial class TerminalLogger : INodeLogger
                     Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildFinished",
                         buildResult,
                         duration));
-                }
-
-                if (_testRunSummaries.Any())
-                {
-                    var total = _testRunSummaries.Sum(t => t.Total);
-                    var failed = _testRunSummaries.Sum(t => t.Failed);
-                    var passed = _testRunSummaries.Sum(t => t.Passed);
-                    var skipped = _testRunSummaries.Sum(t => t.Skipped);
-                    var testDuration = (_testStartTime != null && _testEndTime != null ? (_testEndTime - _testStartTime).Value.TotalSeconds : 0).ToString("F1");
-
-                    var colorizedResult = _testRunSummaries.Any(t => t.Failed > 0) || (_buildErrorsCount > 0)
-                        ? AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Failed"), TerminalColor.Red)
-                        : AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Succeeded"), TerminalColor.Green);
-
-                    Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary",
-                        colorizedResult,
-                        total,
-                        failed,
-                        passed,
-                        skipped,
-                        testDuration));
                 }
             }
         }
