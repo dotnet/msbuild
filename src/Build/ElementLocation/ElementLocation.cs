@@ -307,14 +307,15 @@ namespace Microsoft.Build.Construction
             private string file;
 
             /// <summary>
-            /// The source line.
+            /// Packs both the line and column values into a single four-byte element.
+            /// The high two bytes are the line, and low two bytes are the column.
             /// </summary>
-            private ushort line;
-
-            /// <summary>
-            /// The source column.
-            /// </summary>
-            private ushort column;
+            /// <remarks>
+            /// If we had two <see cref="ushort"/> fields, the CLR would pad them each to
+            /// four-byte boundaries, meaning no space would actually be saved here.
+            /// So instead, we pack them manually.
+            /// </remarks>
+            private int packedData;
 
             /// <summary>
             /// Constructor for the case where we have most or all information.
@@ -327,8 +328,7 @@ namespace Microsoft.Build.Construction
                 ErrorUtilities.VerifyThrow(line <= 65535 && column <= 65535, "Use ElementLocation instead");
 
                 this.file = file ?? String.Empty;
-                this.line = Convert.ToUInt16(line);
-                this.column = Convert.ToUInt16(column);
+                packedData = (line << 16) | column;
             }
 
             /// <summary>
@@ -351,7 +351,7 @@ namespace Microsoft.Build.Construction
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             public override int Line
             {
-                get { return (int)line; }
+                get { return (packedData >> 16) & 0xFFFF; }
             }
 
             /// <summary>
@@ -362,7 +362,7 @@ namespace Microsoft.Build.Construction
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             public override int Column
             {
-                get { return (int)column; }
+                get { return packedData & ushort.MaxValue; }
             }
         }
     }
