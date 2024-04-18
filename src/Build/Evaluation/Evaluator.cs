@@ -12,6 +12,7 @@ using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -209,6 +210,7 @@ namespace Microsoft.Build.Evaluation
             EvaluationContext evaluationContext,
             bool profileEvaluation,
             bool interactive,
+            bool buildCheckEnabled,
             ILoggingService loggingService,
             BuildEventContext buildEventContext)
         {
@@ -224,7 +226,7 @@ namespace Microsoft.Build.Evaluation
                 string.IsNullOrEmpty(projectRootElement.ProjectFileLocation.File) ? "(null)" : projectRootElement.ProjectFileLocation.File);
 
             // If someone sets the 'MsBuildLogPropertyTracking' environment variable to a non-zero value, wrap property accesses for event reporting.
-            if (Traits.Instance.LogPropertyTracking > 0)
+            if (buildCheckEnabled || Traits.Instance.LogPropertyTracking > 0)
             {
                 // Wrap the IEvaluatorData<> object passed in.
                 data = new PropertyTrackingEvaluatorDataWrapper<P, I, M, D>(data, _evaluationLoggingContext, Traits.Instance.LogPropertyTracking);
@@ -244,8 +246,6 @@ namespace Microsoft.Build.Evaluation
 
             _expander = new Expander<P, I>(data, data, _evaluationContext, _evaluationLoggingContext);
 
-            // This setting may change after the build has started, therefore if the user has not set the property to true on the build parameters we need to check to see if it is set to true on the environment variable.
-            _expander.WarnForUninitializedProperties = BuildParameters.WarnOnUninitializedProperty || Traits.Instance.EscapeHatches.WarnOnUninitializedProperty;
             _data = data;
             _itemGroupElements = new List<ProjectItemGroupElement>();
             _itemDefinitionGroupElements = new List<ProjectItemDefinitionGroupElement>();
@@ -315,7 +315,8 @@ namespace Microsoft.Build.Evaluation
             ISdkResolverService sdkResolverService,
             int submissionId,
             EvaluationContext evaluationContext,
-            bool interactive = false)
+            bool interactive = false,
+            bool buildCheckEnabled = false)
         {
             MSBuildEventSource.Log.EvaluateStart(root.ProjectFileLocation.File);
             var profileEvaluation = (loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0 || loggingService.IncludeEvaluationProfile;
@@ -335,6 +336,7 @@ namespace Microsoft.Build.Evaluation
                 evaluationContext,
                 profileEvaluation,
                 interactive,
+                buildCheckEnabled,
                 loggingService,
                 buildEventContext);
 
@@ -946,7 +948,7 @@ namespace Microsoft.Build.Evaluation
         {
             if (_data.DefaultTargets == null)
             {
-                string expanded = _expander.ExpandIntoStringLeaveEscaped(currentProjectOrImport.DefaultTargets, ExpanderOptions.ExpandProperties, currentProjectOrImport.DefaultTargetsLocation);
+                string expanded = _expander.ExpandIntoStringLeaveEscaped(currentProjectOrImport.DefaultTargets, ExpanderOptions.ExpandProperties, currentProjectOrImport.DefaultTargetsLocation, _evaluationLoggingContext);
 
                 if (expanded.Length > 0)
                 {
@@ -1285,90 +1287,23 @@ namespace Microsoft.Build.Evaluation
                     return;
                 }
 
+                _expander.PropertiesUsageTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
                 if (!EvaluateConditionCollectingConditionedProperties(propertyElement, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties))
                 {
                     return;
                 }
 
+                _expander.PropertiesUsageTracker.PropertyReadContext = PropertyReadContext.PropertyEvaluation;
+
                 // Set the name of the property we are currently evaluating so when we are checking to see if we want to add the property to the list of usedUninitialized properties we can not add the property if
                 // it is the same as what we are setting the value on. Note: This needs to be set before we expand the property we are currently setting.
-                _expander.UsedUninitializedProperties.CurrentlyEvaluatingPropertyElementName = propertyElement.Name;
+                _expander.PropertiesUsageTracker.CurrentlyEvaluatingPropertyElementName = propertyElement.Name;
 
                 string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(propertyElement.Value, ExpanderOptions.ExpandProperties, propertyElement.Location, _evaluationLoggingContext);
 
-                // If we are going to set a property to a value other than null or empty we need to check to see if it has been used
-                // during evaluation.
-                if (evaluatedValue.Length > 0 && _expander.WarnForUninitializedProperties)
-                {
-                    // Is the property we are currently setting in the list of properties which have been used but not initialized
-                    IElementLocation elementWhichUsedProperty;
-                    bool isPropertyInList = _expander.UsedUninitializedProperties.TryGetPropertyElementLocation(propertyElement.Name, out elementWhichUsedProperty);
+                _expander.PropertiesUsageTracker.CheckPreexistingUndefinedUsage(propertyElement, evaluatedValue, _evaluationLoggingContext);
 
-                    if (isPropertyInList)
-                    {
-                        // Once we are going to warn for a property once, remove it from the list so we do not add it again.
-                        _expander.UsedUninitializedProperties.RemoveProperty(propertyElement.Name);
-                        _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(propertyElement.Location), "UsedUninitializedProperty", propertyElement.Name, elementWhichUsedProperty.LocationString);
-                    }
-                }
-
-                _expander.UsedUninitializedProperties.CurrentlyEvaluatingPropertyElementName = null;
-
-                if (Traits.Instance.LogPropertyTracking == 0)
-                {
-                    P predecessor = _data.GetProperty(propertyElement.Name);
-                    P property = _data.SetProperty(propertyElement, evaluatedValue);
-
-                    if (predecessor != null)
-                    {
-                        LogPropertyReassignment(predecessor, property, propertyElement.Location.LocationString);
-                    }
-                }
-                else
-                {
-                    _data.SetProperty(propertyElement, evaluatedValue);
-                }
-            }
-        }
-
-        private void LogPropertyReassignment(P predecessor, P property, string location)
-        {
-            string newValue = property.EvaluatedValue;
-            string oldValue = predecessor?.EvaluatedValue;
-
-            if (string.Equals(property.Name, "MSBuildAllProjects", StringComparison.OrdinalIgnoreCase))
-            {
-                // There's a huge perf cost to logging this and it increases the binlog size significantly.
-                // Meanwhile the usefulness of logging this is very low.
-                return;
-            }
-
-            if (newValue != oldValue)
-            {
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
-                {
-                    var args = new PropertyReassignmentEventArgs(
-                        property.Name,
-                        oldValue,
-                        newValue,
-                        location,
-                        message: null)
-                    {
-                        BuildEventContext = _evaluationLoggingContext.BuildEventContext,
-                    };
-
-                    _evaluationLoggingContext.LogBuildEvent(args);
-                }
-                else
-                {
-                    _evaluationLoggingContext.LogComment(
-                        MessageImportance.Low,
-                        "PropertyReassignment",
-                        property.Name,
-                        newValue,
-                        oldValue,
-                        location);
-                }
+                _data.SetProperty(propertyElement, evaluatedValue, _evaluationLoggingContext);
             }
         }
 
@@ -1422,7 +1357,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     if (EvaluateCondition(metadataElement, ExpanderOptions.ExpandPropertiesAndMetadata, ParserOptions.AllowPropertiesAndCustomMetadata))
                     {
-                        string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, ExpanderOptions.ExpandPropertiesAndCustomMetadata, itemDefinitionElement.Location);
+                        string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, ExpanderOptions.ExpandPropertiesAndCustomMetadata, itemDefinitionElement.Location, _evaluationLoggingContext);
 
                         M predecessor = itemDefinition.GetMetadata(metadataElement.Name);
 
@@ -1816,7 +1751,7 @@ namespace Microsoft.Build.Evaluation
                         }
 
                         static string EvaluateProperty(string value, IElementLocation location,
-                            Expander<P, I> expander, SdkReferencePropertyExpansionMode mode)
+                            Expander<P, I> expander, SdkReferencePropertyExpansionMode mode, LoggingContext loggingContext)
                         {
                             if (value == null)
                             {
@@ -1830,7 +1765,7 @@ namespace Microsoft.Build.Evaluation
                                 case SdkReferencePropertyExpansionMode.ExpandUnescape:
                                     return expander.ExpandIntoStringAndUnescape(value, Options, location);
                                 case SdkReferencePropertyExpansionMode.ExpandLeaveEscaped:
-                                    return expander.ExpandIntoStringLeaveEscaped(value, Options, location);
+                                    return expander.ExpandIntoStringLeaveEscaped(value, Options, location, loggingContext);
                                 case SdkReferencePropertyExpansionMode.NoExpansion:
                                 case SdkReferencePropertyExpansionMode.DefaultExpand:
                                 default:
@@ -1842,9 +1777,9 @@ namespace Microsoft.Build.Evaluation
                         IElementLocation sdkReferenceOrigin = importElement.SdkLocation;
 
                         sdkReference = new SdkReference(
-                            EvaluateProperty(sdkReference.Name, sdkReferenceOrigin, _expander, mode),
-                            EvaluateProperty(sdkReference.Version, sdkReferenceOrigin, _expander, mode),
-                            EvaluateProperty(sdkReference.MinimumVersion, sdkReferenceOrigin, _expander, mode));
+                            EvaluateProperty(sdkReference.Name, sdkReferenceOrigin, _expander, mode, _evaluationLoggingContext),
+                            EvaluateProperty(sdkReference.Version, sdkReferenceOrigin, _expander, mode, _evaluationLoggingContext),
+                            EvaluateProperty(sdkReference.MinimumVersion, sdkReferenceOrigin, _expander, mode, _evaluationLoggingContext));
                     }
                 }
 
@@ -2550,7 +2485,7 @@ namespace Microsoft.Build.Evaluation
                 importExpandedWithDefaultPath =
                     _expander.ExpandIntoStringLeaveEscaped(
                         importElement.Project.Replace(searchPathMatch.MsBuildPropertyFormat, extensionsPathPropValue),
-                        ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
+                        ExpanderOptions.ExpandProperties, importElement.ProjectLocation, _evaluationLoggingContext);
 
                 try
                 {

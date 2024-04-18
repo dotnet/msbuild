@@ -13,7 +13,9 @@ namespace Microsoft.Build.BuildCheck.Infrastructure;
 
 internal class NullBuildCheckManagerProvider : IBuildCheckManagerProvider
 {
-    public IBuildCheckManager Instance { get; } = new NullBuildCheckManager();
+    private readonly NullBuildCheckManager _instance = new NullBuildCheckManager();
+    public IBuildCheckManager Instance => _instance;
+    public IBuildEngineDataConsumer? BuildEngineDataConsumer => _instance;
 
     public void InitializeComponent(IBuildComponentHost host) { }
     public void ShutdownComponent() { }

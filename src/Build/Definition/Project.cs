@@ -3732,7 +3732,8 @@ namespace Microsoft.Build.Evaluation
                     evaluationContext.SdkResolverService,
                     BuildEventContext.InvalidSubmissionId,
                     evaluationContext,
-                    _interactive);
+                    _interactive,
+                    buildCheckEnabled: false);
 
                 ErrorUtilities.VerifyThrow(LastEvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
@@ -4445,9 +4446,13 @@ namespace Microsoft.Build.Evaluation
                 Properties.Set(property);
 
                 AddToAllEvaluatedPropertiesList(property);
-
                 return property;
             }
+
+            ProjectProperty IEvaluatorData<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.
+                SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped,
+                    LoggingContext loggingContext) =>
+                SetProperty(propertyElement, evaluatedValueEscaped);
 
             /// <summary>
             /// Sets a property derived from Xml.

@@ -46,7 +46,7 @@ namespace Microsoft.Build.Evaluation
                     // STEP 4: Evaluate, split, expand and subtract any Exclude
                     foreach (string exclude in _excludes)
                     {
-                        string excludeExpanded = _expander.ExpandIntoStringLeaveEscaped(exclude, ExpanderOptions.ExpandPropertiesAndItems, _itemElement.ExcludeLocation);
+                        string excludeExpanded = _expander.ExpandIntoStringLeaveEscaped(exclude, ExpanderOptions.ExpandPropertiesAndItems, _itemElement.ExcludeLocation, _lazyEvaluator?._loggingContext);
                         var excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(excludeExpanded);
                         excludePatterns.AddRange(excludeSplits);
                     }
@@ -109,14 +109,14 @@ namespace Microsoft.Build.Evaluation
                                 MSBuildEventSource.Log.ExpandGlobStart(_rootDirectory ?? string.Empty, glob, string.Join(", ", excludePatternsForGlobs));
                             }
 
-                            using (_lazyEvaluator._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
+                            using (_lazyEvaluator?._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
                             {
                                 includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
                                     _rootDirectory,
                                     glob,
                                     excludePatternsForGlobs,
                                     fileMatcher: FileMatcher,
-                                    loggingMechanism: _lazyEvaluator._loggingContext,
+                                    loggingMechanism: _lazyEvaluator?._loggingContext,
                                     includeLocation: _itemElement.IncludeLocation,
                                     excludeLocation: _itemElement.ExcludeLocation);
                             }

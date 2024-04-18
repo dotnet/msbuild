@@ -282,6 +282,7 @@ namespace Microsoft.Build.Evaluation
                 fileSystem,
                 projectRootElementCache);
 
+            expander.PropertiesUsageTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
             // We are evaluating this expression now and it can cache some state for the duration,
             // so we don't want multiple threads working on the same expression
             lock (parsedExpression)
@@ -300,6 +301,8 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
             }
+
+            expander.PropertiesUsageTracker.ResetPropertyReadContext();
 
             return result;
         }
@@ -349,6 +352,8 @@ namespace Microsoft.Build.Evaluation
             string EvaluationDirectory { get; }
 
             ElementLocation ElementLocation { get; }
+
+            PropertiesUsageTracker PropertiesUsageTracker { get; }
 
             /// <summary>
             ///     Table of conditioned properties and their values.
@@ -403,6 +408,8 @@ namespace Microsoft.Build.Evaluation
 
             public ElementLocation ElementLocation { get; }
 
+            public PropertiesUsageTracker PropertiesUsageTracker => _expander.PropertiesUsageTracker;
+
             public IFileSystem FileSystem { get; }
 
             /// <summary>
@@ -449,11 +456,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public string ExpandIntoStringBreakEarly(string expression, LoggingContext? loggingContext = null)
             {
-                var originalValue = _expander.WarnForUninitializedProperties;
-
                 expression = _expander.ExpandIntoStringAndUnescape(expression, _expanderOptions | ExpanderOptions.BreakOnNotEmpty, ElementLocation, loggingContext);
-
-                _expander.WarnForUninitializedProperties = originalValue;
 
                 return expression;
             }
@@ -465,11 +468,7 @@ namespace Microsoft.Build.Evaluation
             /// <returns>A list of items.</returns>
             public IList<TaskItem> ExpandIntoTaskItems(string expression)
             {
-                var originalValue = _expander.WarnForUninitializedProperties;
-
                 var items = _expander.ExpandIntoTaskItemsLeaveEscaped(expression, _expanderOptions, ElementLocation);
-
-                _expander.WarnForUninitializedProperties = originalValue;
 
                 return items;
             }
@@ -482,11 +481,7 @@ namespace Microsoft.Build.Evaluation
             /// <returns>The expanded string.</returns>
             public string ExpandIntoString(string expression, LoggingContext? loggingContext = null)
             {
-                var originalValue = _expander.WarnForUninitializedProperties;
-
                 expression = _expander.ExpandIntoStringAndUnescape(expression, _expanderOptions, ElementLocation, loggingContext);
-
-                _expander.WarnForUninitializedProperties = originalValue;
 
                 return expression;
             }

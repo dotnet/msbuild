@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -1225,7 +1226,8 @@ namespace Microsoft.Build.BackEnd
             {
                 buildCheckManager.EndProjectRequest(
                     BuildCheckDataSource.BuildExecution,
-                    _requestEntry.Request.ParentBuildEventContext);
+                    _requestEntry.Request.ParentBuildEventContext,
+                    _requestEntry.RequestConfiguration.ProjectFullPath);
             }
 
             BuildResult CopyTargetResultsFromProxyTargetsToRealTargets(BuildResult resultFromTargetBuilder)

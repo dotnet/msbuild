@@ -51,6 +51,14 @@ namespace Microsoft.Build.Evaluation
             // and we know which do, then we already have enough information to evaluate this expression.
             // That means we don't have to fully expand a condition like " '@(X)' == '' "
             // which is a performance advantage if @(X) is a huge item list.
+
+            // this is the possible case of '$(a)' == ''
+            if (string.IsNullOrEmpty(LeftChild.GetUnexpandedValue(state)) ||
+                string.IsNullOrEmpty(RightChild.GetUnexpandedValue(state)))
+            {
+                state.PropertiesUsageTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluationWithOneSideEmpty;
+            }
+
             bool leftEmpty = LeftChild.EvaluatesToEmpty(state, loggingContext);
             bool rightEmpty = RightChild.EvaluatesToEmpty(state, loggingContext);
             if (leftEmpty || rightEmpty)
@@ -84,6 +92,9 @@ namespace Microsoft.Build.Evaluation
                     state.Condition);
 
             UpdateConditionedProperties(state);
+
+            // reset back the property read context (it's no longer a condition with one side empty)
+            state.PropertiesUsageTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
 
             return Compare(leftExpandedValue, rightExpandedValue);
         }

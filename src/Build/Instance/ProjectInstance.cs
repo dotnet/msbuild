@@ -1677,7 +1677,7 @@ namespace Microsoft.Build.Execution
         /// Predecessor is discarded as it is a design time only artefact.
         /// Only called during evaluation, so does not check for immutability.
         /// </summary>
-        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped)
+        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped, LoggingContext loggingContext)
         {
             // Mutability not verified as this is being populated during evaluation
             ProjectPropertyInstance property = ProjectPropertyInstance.Create(propertyElement.Name, evaluatedValueEscaped, false /* may not be reserved */, _isImmutable);
@@ -3018,7 +3018,8 @@ namespace Microsoft.Build.Execution
                 sdkResolverService ?? evaluationContext.SdkResolverService, /* Use override ISdkResolverService if specified */
                 submissionId,
                 evaluationContext,
-                interactive: buildParameters.Interactive);
+                interactive: buildParameters.Interactive,
+                buildCheckEnabled: buildParameters.IsBuildCheckEnabled);
 
             ErrorUtilities.VerifyThrow(EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
         }

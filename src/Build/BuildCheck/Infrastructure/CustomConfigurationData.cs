@@ -30,7 +30,7 @@ public class CustomConfigurationData(string ruleId)
     /// <summary>
     /// Key-value pairs of unstructured data from .editorconfig file.
     /// E.g. if in editorconfig file we'd have:
-    /// [*.csrpoj]
+    /// [*.csproj]
     /// build_analyzer.microsoft.BC0101.name_of_targets_to_restrict = "Build,CoreCompile,ResolveAssemblyReferences"
     ///
     /// the ConfigurationData would be:

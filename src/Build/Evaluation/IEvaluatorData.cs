@@ -272,7 +272,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Sets a property which comes from the Xml.
         /// </summary>
-        P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped);
+        P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped, BackEnd.Logging.LoggingContext loggingContext = null);
 
         /// <summary>
         /// Retrieves an existing target, if any.

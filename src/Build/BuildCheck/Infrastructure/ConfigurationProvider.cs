@@ -14,7 +14,6 @@ using System.Configuration;
 
 namespace Microsoft.Build.BuildCheck.Infrastructure;
 
-
 // Let's flip form statics to instance, with exposed interface (so that we can easily swap implementations)
 // Tracked via: https://github.com/dotnet/msbuild/issues/9828
 internal static class ConfigurationProvider

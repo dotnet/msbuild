@@ -14,4 +14,6 @@ namespace Microsoft.Build.BuildCheck.Infrastructure;
 internal interface IBuildCheckManagerProvider : IBuildComponent
 {
     IBuildCheckManager Instance { get; }
+	
+    IBuildEngineDataConsumer? BuildEngineDataConsumer { get; }
 }

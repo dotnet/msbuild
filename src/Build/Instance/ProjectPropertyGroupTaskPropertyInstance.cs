@@ -10,12 +10,20 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Execution
 {
+
+    internal interface IElementWithLocation
+    {
+        string Name { get; }
+        string Value { get; }
+        ElementLocation Location { get; }
+    }
+
     /// <summary>
     /// Wraps an unevaluated property under an propertygroup in a target.
     /// Immutable.
     /// </summary>
     [DebuggerDisplay("{_name}={Value} Condition={_condition}")]
-    public class ProjectPropertyGroupTaskPropertyInstance : ITranslatable
+    public class ProjectPropertyGroupTaskPropertyInstance : ITranslatable, IElementWithLocation
     {
         /// <summary>
         /// Name of the property

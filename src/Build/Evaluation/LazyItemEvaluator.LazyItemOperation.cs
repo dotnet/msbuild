@@ -210,7 +210,7 @@ namespace Microsoft.Build.Evaluation
                                     continue;
                                 }
 
-                                string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, metadataExpansionOptions, metadataElement.Location);
+                                string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, metadataExpansionOptions, metadataElement.Location, _lazyEvaluator?._loggingContext);
 
                                 itemContext.OperationItem.SetMetadata(metadataElement, FileUtilities.MaybeAdjustFilePath(evaluatedValue, metadataElement.ContainingProject.DirectoryPath));
                             }

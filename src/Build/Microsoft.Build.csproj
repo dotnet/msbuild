@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -159,7 +159,14 @@
     <Compile Include="BuildCheck\Acquisition\AnalyzerAcquisitionData.cs" />
     <Compile Include="BuildCheck\Acquisition\BuildCheckAcquisitionModule.cs" />
     <Compile Include="BuildCheck\Acquisition\IBuildCheckAcquisitionModule.cs" />
+    <Compile Include="BuildCheck\API\IInternalBuildCheckRegistrationContext.cs" />
+    <Compile Include="BuildCheck\API\InternalBuildAnalyzer.cs" />
+    <Compile Include="BuildCheck\Infrastructure\IBuildEngineDataConsumer.cs" />
+    <Compile Include="BuildCheck\OM\ProjectProcessingDoneData.cs" />
+    <Compile Include="BuildCheck\OM\PropertyReadData.cs" />
+    <Compile Include="BuildCheck\OM\PropertyWriteData.cs" />
     <Compile Include="BuildCheck\Analyzers\SharedOutputPathAnalyzer.cs" />
+    <Compile Include="BuildCheck\Analyzers\PropertiesUsageAnalyzer.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildCheckConfigurationException.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildCheckForwardingLogger.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildEventsProcessor.cs" />
@@ -185,6 +192,7 @@
     <Compile Include="BuildCheck\Infrastructure\CustomConfigurationData.cs" />
     <Compile Include="BuildCheck\API\IBuildCheckRegistrationContext.cs" />
     <Compile Include="BuildCheck\Infrastructure\IBuildCheckManager.cs" />
+    <Compile Include="BuildCheck\Logging\IBuildAnalysisLoggingContext.cs" />
     <Compile Include="BuildCheck\Logging\IBuildAnalysisLoggingContextFactory.cs" />
     <Compile Include="BuildCheck\OM\EvaluatedPropertiesAnalysisData.cs" />
     <Compile Include="BuildCheck\OM\ParsedItemsAnalysisData.cs" />
@@ -199,6 +207,7 @@
     <Compile Include="FileAccess\RequestedAccess.cs" />
     <Compile Include="BuildCheck\Logging\AnalyzerLoggingContext.cs" />
     <Compile Include="BuildCheck\Logging\AnalyzerLoggingContextFactory.cs" />
+    <Compile Include="BuildCheck\Logging\BuildAnalysisLoggingContextExtensions.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />

@@ -18,4 +18,8 @@ internal sealed class BuildCheckConfigurationException : Exception
     public BuildCheckConfigurationException(string message) : base(message)
     {
     }
+
+    public BuildCheckConfigurationException(string message, Exception innerException) : base(message, innerException)
+    {
+    }
 }

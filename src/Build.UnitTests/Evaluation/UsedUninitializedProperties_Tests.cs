@@ -13,7 +13,7 @@ public sealed class UsedUninitializedProperties_Tests
     [Fact]
     public void Basics()
     {
-        UsedUninitializedProperties props = new();
+        PropertiesUsageTracker props = new();
 
         Assert.False(props.TryGetPropertyElementLocation("Hello", out IElementLocation? elementLocation));
         Assert.Null(elementLocation);

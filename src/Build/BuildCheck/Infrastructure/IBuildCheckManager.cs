@@ -6,9 +6,10 @@ using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BuildCheck.Acquisition;
 using Microsoft.Build.BuildCheck.Logging;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.Experimental.BuildCheck;
+namespace Microsoft.Build.BuildCheck.Infrastructure;
 
 /// <summary>
 /// Enumerates the different data sources used in build check operations.
@@ -58,7 +59,7 @@ internal interface IBuildCheckManager
 
     void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext);
 
-    void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext);
+    void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext, string fullPath);
 
     void Shutdown();
 }

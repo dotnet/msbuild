@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Components.Logging;
+using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation.Context;
@@ -12,8 +13,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
-
-#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -79,16 +78,17 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Sets a property which does not come from the Xml.
         /// </summary>
-        public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false, BackEnd.Logging.LoggingContext loggingContext = null)
+        public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false, BackEnd.Logging.LoggingContext? loggingContext = null)
         {
-            P originalProperty = _wrapped.GetProperty(name);
+            P? originalProperty = _wrapped.GetProperty(name);
             P newProperty = _wrapped.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, isEnvironmentVariable, loggingContext);
 
             this.TrackPropertyWrite(
                 originalProperty,
                 newProperty,
-                string.Empty,
-                this.DeterminePropertySource(isGlobalProperty, mayBeReserved, isEnvironmentVariable));
+                null,
+                this.DeterminePropertySource(isGlobalProperty, mayBeReserved, isEnvironmentVariable),
+                loggingContext);
 
             return newProperty;
         }
@@ -100,19 +100,21 @@ namespace Microsoft.Build.Evaluation
         /// project file, and whose conditions evaluated to true.
         /// If there are none above this is null.
         /// </summary>
-        public P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped)
+        public P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped, BackEnd.Logging.LoggingContext? loggingContext = null)
         {
-            P originalProperty = _wrapped.GetProperty(propertyElement.Name);
-            P newProperty = _wrapped.SetProperty(propertyElement, evaluatedValueEscaped);
+            P? originalProperty = _wrapped.GetProperty(propertyElement.Name);
+            P newProperty = _wrapped.SetProperty(propertyElement, evaluatedValueEscaped, loggingContext);
 
             this.TrackPropertyWrite(
                 originalProperty,
                 newProperty,
-                propertyElement.Location.LocationString,
-                PropertySource.Xml);
+                propertyElement.Location,
+                PropertySource.Xml,
+                loggingContext);
 
             return newProperty;
         }
+
         #endregion
 
         #region IEvaluatorData<> members that are forwarded directly to wrapped object.
@@ -220,9 +222,11 @@ namespace Microsoft.Build.Evaluation
             _evaluationLoggingContext.LogBuildEvent(args);
         }
 
-        private void TrackPropertyWrite(P predecessor, P property, string location, PropertySource source)
+        private void TrackPropertyWrite(P? predecessor, P property, IElementLocation? location, PropertySource source, BackEnd.Logging.LoggingContext? loggingContext = null)
         {
             string name = property.Name;
+
+            BuildCheckManagerProvider.GlobalBuildEngineDataConsumer?.ProcessPropertyWrite(property.Name, string.IsNullOrEmpty(property.EscapedValue), location, loggingContext?.BuildEventContext);
 
             // If this property was an environment variable but no longer is, track it.
             if (_wrapped.EnvironmentVariablePropertiesDictionary.Contains(name) && source != PropertySource.EnvironmentVariable)
@@ -238,7 +242,7 @@ namespace Microsoft.Build.Evaluation
             else
             {
                 // There was a previous value, and it might have been changed. Track that.
-                TrackPropertyReassignment(predecessor, property, location);
+                TrackPropertyReassignment(predecessor, property, location?.LocationString);
             }
         }
 
@@ -270,10 +274,12 @@ namespace Microsoft.Build.Evaluation
         /// <param name="predecessor">The property's preceding state. Null if none.</param>
         /// <param name="property">The property's current state.</param>
         /// <param name="location">The location of this property's reassignment.</param>
-        private void TrackPropertyReassignment(P predecessor, P property, string location)
+        private void TrackPropertyReassignment(P? predecessor, P property, string? location)
         {
             if ((_settings & PropertyTrackingSetting.PropertyReassignment) != PropertyTrackingSetting.PropertyReassignment)
             {
+                LogPropertyReassignment(predecessor, property, location);
+
                 return;
             }
 
@@ -285,7 +291,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             string newValue = property.EvaluatedValue;
-            string oldValue = predecessor.EvaluatedValue;
+            string? oldValue = predecessor?.EvaluatedValue;
             if (newValue == oldValue)
             {
                 return;
@@ -300,6 +306,47 @@ namespace Microsoft.Build.Evaluation
             args.BuildEventContext = _evaluationLoggingContext.BuildEventContext;
 
             _evaluationLoggingContext.LogBuildEvent(args);
+        }
+
+        private void LogPropertyReassignment(P? predecessor, P property, string? location)
+        {
+            string newValue = property.EvaluatedValue;
+            string? oldValue = predecessor?.EvaluatedValue;
+
+            if (string.Equals(property.Name, "MSBuildAllProjects", StringComparison.OrdinalIgnoreCase))
+            {
+                // There's a huge perf cost to logging this and it increases the binlog size significantly.
+                // Meanwhile the usefulness of logging this is very low.
+                return;
+            }
+
+            if (newValue != oldValue)
+            {
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+                {
+                    var args = new PropertyReassignmentEventArgs(
+                        property.Name,
+                        oldValue,
+                        newValue,
+                        location,
+                        message: null)
+                    {
+                        BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                    };
+
+                    _evaluationLoggingContext.LogBuildEvent(args);
+                }
+                else
+                {
+                    _evaluationLoggingContext.LogComment(
+                        MessageImportance.Low,
+                        "PropertyReassignment",
+                        property.Name,
+                        newValue,
+                        oldValue,
+                        location);
+                }
+            }
         }
 
         /// <summary>

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -78,7 +79,13 @@ namespace Microsoft.Build.BackEnd
                                 "CannotModifyReservedProperty",
                                 property.Name);
 
-                            string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(property.Value, ExpanderOptions.ExpandAll, property.Location);
+                            bucket.Expander.PropertiesUsageTracker.CurrentlyEvaluatingPropertyElementName = property.Name;
+                            bucket.Expander.PropertiesUsageTracker.PropertyReadContext =
+                                PropertyReadContext.PropertyEvaluation;
+
+
+                            string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(property.Value, ExpanderOptions.ExpandAll, property.Location, LoggingContext);
+                            bucket.Expander.PropertiesUsageTracker.CheckPreexistingUndefinedUsage(property, evaluatedValue, LoggingContext);
 
                             if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents)
                             {
@@ -86,6 +93,8 @@ namespace Microsoft.Build.BackEnd
                             }
 
                             bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(property.Name, evaluatedValue, property.Location, Project.IsImmutable));
+                            BuildCheckManagerProvider.GlobalBuildEngineDataConsumer.ProcessPropertyWrite(property.Name, string.IsNullOrEmpty(evaluatedValue), property.Location, LoggingContext?.BuildEventContext);
+                            bucket.Expander.PropertiesUsageTracker.ResetPropertyReadContext(false);
                         }
                     }
                 }

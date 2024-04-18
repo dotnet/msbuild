@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 
@@ -16,12 +17,12 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// </summary>
 public sealed class BuildCheckResult : IBuildCheckResult
 {
-    public static BuildCheckResult Create(BuildAnalyzerRule rule, ElementLocation location, params string[] messageArgs)
+    public static BuildCheckResult Create(BuildAnalyzerRule rule, IMsBuildElementLocation location, params string[] messageArgs)
     {
         return new BuildCheckResult(rule, location, messageArgs);
     }
 
-    public BuildCheckResult(BuildAnalyzerRule buildAnalyzerRule, ElementLocation location, string[] messageArgs)
+    public BuildCheckResult(BuildAnalyzerRule buildAnalyzerRule, IMsBuildElementLocation location, string[] messageArgs)
     {
         BuildAnalyzerRule = buildAnalyzerRule;
         Location = location;
@@ -42,7 +43,7 @@ public sealed class BuildCheckResult : IBuildCheckResult
     /// <summary>
     /// Optional location of the finding (in near future we might need to support multiple locations).
     /// </summary>
-    public ElementLocation Location { get; }
+    public IMsBuildElementLocation Location { get; }
 
     public string LocationString => Location.LocationString;
 

@@ -83,4 +83,31 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         eventArgs.BuildEventContext = loggingContext.BuildEventContext;
         loggingContext.LogBuildEvent(eventArgs);
     }
+
+    public void ProcessPropertyRead(string projectFullPath, string propertyName, int startIndex, int endIndex,
+        IMsBuildElementLocation elementLocation,
+        bool isUninitialized, PropertyReadContext propertyReadContext,
+        AnalyzerLoggingContext buildAnalysisContext)
+    {
+        PropertyReadData propertyReadData = new(projectFullPath,
+            propertyName.Substring(startIndex, endIndex - startIndex + 1), elementLocation, isUninitialized,
+            propertyReadContext);
+        _buildCheckCentralContext.RunPropertyReadActions(propertyReadData, buildAnalysisContext,
+            ReportResult);
+    }
+
+    public void ProcessPropertyWrite(string projectFullPath, string propertyName, bool isEmpty,
+        IMsBuildElementLocation? elementLocation,
+        AnalyzerLoggingContext buildAnalysisContext)
+    {
+        PropertyWriteData propertyWriteData = new(projectFullPath, propertyName, elementLocation, isEmpty);
+        _buildCheckCentralContext.RunPropertyWriteActions(propertyWriteData, buildAnalysisContext,
+            ReportResult);
+    }
+
+    public void ProcessProjectDone(AnalyzerLoggingContext buildAnalysisContext, string projectFullPath)
+    {
+        _buildCheckCentralContext.RunProjectProcessingDoneActions(new ProjectProcessingDoneData(projectFullPath),
+            buildAnalysisContext, ReportResult);
+    }
 }
