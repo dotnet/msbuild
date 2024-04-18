@@ -69,7 +69,17 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string LocationString
         {
-            get { return GetLocationString(File, Line, Column); }
+            get
+            {
+                int line = Line;
+                int column = Column;
+                return (line, column) switch
+                {
+                    (not 0, not 0) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("FileLocation", File, line, column),
+                    (not 0, 0) => $"{File} ({line})",
+                    _ => File,
+                };
+            }
         }
 
         /// <summary>
@@ -191,33 +201,6 @@ namespace Microsoft.Build.Construction
             }
 
             return new ElementLocation.RegularElementLocation(file, line, column);
-        }
-
-        /// <summary>
-        /// The location in a form suitable for replacement
-        /// into a message.
-        /// Example: "c:\foo\bar.csproj (12,34)"
-        /// Calling this creates and formats a new string.
-        /// PREFER TO PUT THE LOCATION INFORMATION AT THE START OF THE MESSAGE INSTEAD.
-        /// Only in rare cases should the location go within the message itself.
-        /// </summary>
-        private static string GetLocationString(string file, int line, int column)
-        {
-            string locationString;
-            if (line != 0 && column != 0)
-            {
-                locationString = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("FileLocation", file, line, column);
-            }
-            else if (line != 0)
-            {
-                locationString = file + " (" + line + ")";
-            }
-            else
-            {
-                locationString = file;
-            }
-
-            return locationString;
         }
 
         /// <summary>
