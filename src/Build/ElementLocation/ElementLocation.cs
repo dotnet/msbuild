@@ -96,8 +96,8 @@ namespace Microsoft.Build.Construction
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            // Line and column are good enough
-            return Line ^ Column;
+            // We don't include the file path in the hash
+            return (Line * 397) ^ Column;
         }
 
         /// <inheritdoc />
