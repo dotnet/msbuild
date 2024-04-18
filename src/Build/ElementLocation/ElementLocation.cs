@@ -23,7 +23,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// The singleton empty element location.
         /// </summary>
-        private static ElementLocation s_emptyElementLocation = new SmallElementLocation("", 0, 0);
+        private static readonly ElementLocation s_emptyElementLocation = new SmallElementLocation("", 0, 0);
 
         /// <summary>
         /// The file from which this particular element originated.  It may
