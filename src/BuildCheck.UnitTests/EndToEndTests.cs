@@ -2,12 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
@@ -19,6 +16,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests;
 public class EndToEndTests : IDisposable
 {
     private readonly TestEnvironment _env;
+
     public EndToEndTests(ITestOutputHelper output)
     {
         _env = TestEnvironment.Create(output);
@@ -26,6 +24,8 @@ public class EndToEndTests : IDisposable
         // this is needed to ensure the binary logger does not pollute the environment
         _env.WithEnvironmentInvariant();
     }
+
+    private static string TestAssetsRootPath { get; } = Path.Combine(AppContext.BaseDirectory, "TestAssets");
 
     public void Dispose() => _env.Dispose();
 
@@ -91,7 +91,6 @@ public class EndToEndTests : IDisposable
         // var cache = new SimpleProjectRootElementCache();
         // ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile.Path, /*unused*/null, /*unused*/null, cache, false /*Not explicitly loaded - unused*/);
 
-
         TransientTestFile config = _env.CreateFile(workFolder, "editorconfig.json",
             /*lang=json,strict*/
             """
@@ -133,5 +132,37 @@ public class EndToEndTests : IDisposable
         {
             output.ShouldNotContain("BC0101");
         }
+    }
+
+    [Theory]
+    [InlineData("CustomAnalyzer", "AnalysisCandidate", new[] { "CustomRule1" })]
+    public void CustomAnalyzerTest(string caName, string acName, string[] expectedRegistedRulesNames)
+    {
+        using (var env = TestEnvironment.Create())
+        {
+            var caProjectPath = Path.Combine(TestAssetsRootPath, caName, $"{caName}.csproj");
+            string caBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                 $"{caProjectPath} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path}", out bool success);
+
+            if (success)
+            {
+                var caNugetPackageFullPath = Regex.Match(caBuildLog, @"Successfully created package '(.*?)'").Groups[1].Value;
+                var analysisCandidateSolutionPath = Path.Combine(TestAssetsRootPath, acName);
+                AddCutomDataSourceToNugetConfig(analysisCandidateSolutionPath, Path.GetDirectoryName(caNugetPackageFullPath));
+
+                string acBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                 $"{Path.Combine(analysisCandidateSolutionPath, $"{acName}.csproj")} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path} -verbosity:d", out _);
+
+            }
+        }
+    }
+
+    private void AddCutomDataSourceToNugetConfig(string filePath, string pathToCustomDataSource)
+    {
+        var nugetTemplatePath = Path.Combine(filePath, "nugetTemplate.config");
+        string existingContent = File.ReadAllText(nugetTemplatePath);
+
+        string modifiedContent = existingContent.Replace("LocalPackageSourcePlaceholder", pathToCustomDataSource);
+        File.WriteAllText(Path.Combine(filePath, "nuget.config"), modifiedContent);
     }
 }
