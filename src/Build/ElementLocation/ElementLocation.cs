@@ -103,9 +103,7 @@ namespace Microsoft.Build.Construction
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            IElementLocation? that = obj as IElementLocation;
-
-            if (that == null)
+            if (obj is not IElementLocation that)
             {
                 return false;
             }
