@@ -78,7 +78,6 @@ internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFact
         _stats.Merge(buildCheckManager.CreateTracingStats(), (span1, span2) => span1 + span2);
         string msg = string.Join(Environment.NewLine, _stats.Select(a => a.Key + ": " + a.Value));
 
-
         BuildEventContext buildEventContext = e.BuildEventContext ?? new BuildEventContext(
             BuildEventContext.InvalidNodeId, BuildEventContext.InvalidTargetId,
             BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);

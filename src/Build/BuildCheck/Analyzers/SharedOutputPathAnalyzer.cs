@@ -12,8 +12,6 @@ using Microsoft.Build.Experimental.BuildCheck;
 
 namespace Microsoft.Build.BuildCheck.Analyzers;
 
-
-
 internal sealed class SharedOutputPathAnalyzer : BuildAnalyzer
 {
     public static BuildAnalyzerRule SupportedRule = new BuildAnalyzerRule("BC0101", "ConflictingOutputPath",
