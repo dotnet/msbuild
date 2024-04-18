@@ -824,18 +824,15 @@ namespace Microsoft.Build.CommandLine
                             {
                                 Project project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
 
-                                if (outputPropertiesItemsOrTargetResults && targets?.Length > 0 && result is not null)
+                                if (getResultOutputFile.Length == 0)
                                 {
-                                    if (getResultOutputFile.Length == 0)
+                                    exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project, Console.Out);
+                                }
+                                else
+                                {
+                                    using (var streamWriter = new StreamWriter(getResultOutputFile))
                                     {
-                                        exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project, Console.Out);
-                                    }
-                                    else
-                                    {
-                                        using (var streamWriter = new StreamWriter(getResultOutputFile))
-                                        {
-                                            exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project, streamWriter);
-                                        }
+                                        exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project, streamWriter);
                                     }
                                 }
                                 collection.LogBuildFinishedEvent(exitType == ExitType.Success);
