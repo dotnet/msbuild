@@ -190,7 +190,7 @@ namespace Microsoft.Build.Construction
 
             file ??= "";
 
-            if (line <= 65535 && column <= 65535)
+            if (line <= ushort.MaxValue && column <= ushort.MaxValue)
             {
                 return new SmallElementLocation(file, line, column);
             }
