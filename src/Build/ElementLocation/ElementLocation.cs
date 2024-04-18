@@ -325,7 +325,6 @@ namespace Microsoft.Build.Construction
             internal SmallElementLocation(string? file, int line, int column)
             {
                 ErrorUtilities.VerifyThrow(line > -1 && column > -1, "Use zero for unknown");
-                ErrorUtilities.VerifyThrow(line <= 65535 && column <= 65535, "Use ElementLocation instead");
 
                 this.file = file ?? String.Empty;
                 packedData = (line << 16) | column;
