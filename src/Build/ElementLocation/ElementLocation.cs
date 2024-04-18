@@ -208,7 +208,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Rarer variation for when the line and column won't each fit in a ushort.
         /// </summary>
-        private class RegularElementLocation(string file, int line, int column) : ElementLocation
+        private sealed class RegularElementLocation(string file, int line, int column) : ElementLocation
         {
             /// <inheritdoc />
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -232,7 +232,7 @@ namespace Microsoft.Build.Construction
         /// A "very small" variation that used two bytes (or halves of a short) would fit about half of them
         /// and save 4 more bytes each, but the CLR packs each field to 4 bytes, so it isn't actually any smaller.
         /// </summary>
-        private class SmallElementLocation : ElementLocation
+        private sealed class SmallElementLocation : ElementLocation
         {
             /// <summary>
             /// Packs both the line and column values into a single four-byte element.
