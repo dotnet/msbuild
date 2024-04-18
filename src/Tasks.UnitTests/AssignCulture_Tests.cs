@@ -100,7 +100,7 @@ namespace Microsoft.Build.UnitTests
 
 
         /// <summary>
-        /// Test the case where an item has no embedded culture.For example,
+        /// Test the case where an item has no embedded culture. For example:
         /// "MyResource.resx"
         /// </summary>
         [Fact]
@@ -263,7 +263,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Any pre-existing Culture attribute on the item is to be repected
+        /// Any pre-existing Culture attribute on the item is to be respected
         /// </summary>
         [Fact]
         public void CultureMetaDataShouldBeRespected()

@@ -43,7 +43,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// If the flag set to 'true' the incoming list with existing Culture metadata will not be ammended and CultureNeutralAssignedFiles filename will be equal to the original.
-        /// In case the Cutlture metadata was not provided, the logic of RespectAlreadyAssignedItemCulture will not take any effect.
+        /// In case the Culture metadata was not provided, the logic of RespectAlreadyAssignedItemCulture will not take any effect.
         /// </summary>
         public bool RespectAlreadyAssignedItemCulture { get; set; } = false;
 
