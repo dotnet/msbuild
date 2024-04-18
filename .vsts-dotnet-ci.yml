@@ -11,12 +11,15 @@ jobs:
       $versionsFile = "eng/Versions.props"
       $changedFiles = git diff --name-only HEAD HEAD~1
       $changedVersionsFile = $changedFiles | Where-Object { $_ -eq $versionsFile }
+      $isInitialCommit = $false
       $isVersionBumped = $false
       if ($changedVersionsFile -ne $null) {
         $difference = git diff HEAD~1 $versionsFile
         $changedContent = $difference -join " "
+        $initialCommitPattern = '-\s*<VersionPrefix>\d+\.\d+\.\d+<\/VersionPrefix> \+\s*<VersionPrefix>\d+\.\d+\.\d+<\/VersionPrefix>.*<DotNetFinalVersionKind>release<\/DotNetFinalVersionKind>'
+        $isInitialCommit = $changedContent -match $initialCommitPattern
         $pattern = '-\s*<VersionPrefix>\d+\.\d+\.(?<previous>\d+)<\/VersionPrefix>.* \+\s*<VersionPrefix>\d+\.\d+\.(?<current>\d+)<\/VersionPrefix>'
-        if ($changedContent -match $pattern) {
+        if (!($isInitialCommit) -and ($changedContent -match $pattern)) {
           try {
             $previousPatch = [Convert]::ToInt32($Matches.previous)
             $currentPatch = [Convert]::ToInt32($Matches.current)
@@ -24,11 +27,17 @@ jobs:
               $isVersionBumped = $true
             }
           } catch {
-            Write-Output "An error occurred during conversion: $_"
+            Write-Host "An error occurred during conversion: $_"
           }
         }
       }
-      if (-not $isVersionBumped) {
+
+      $url = "https://api.github.com/repos/dotnet/msbuild/pulls/$(System.PullRequest.PullRequestNumber)"
+      Write-Host "Get PR information from $url"
+      $response = Invoke-RestMethod -Uri $url -Method Get
+      $isDotnetBot = $response.user.login -eq "dotnet-maestro[bot]"
+
+      if (!($isInitialCommit -or $isDotnetBot -or $isVersionBumped)) {
         throw "Hello! I noticed that you're targeting one of our servicing branches. Please consider updating the version."
       }
     condition: startsWith(variables['System.PullRequest.TargetBranch'], 'vs')
