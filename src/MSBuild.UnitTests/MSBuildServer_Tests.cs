@@ -68,7 +68,7 @@ namespace Microsoft.Build.Engine.UnitTests
         <ProcessIdTask>
             <Output PropertyName=""PID"" TaskParameter=""Pid"" />
         </ProcessIdTask>
-        <Message Text=""Server ID is $(PID)"" Importance=""High"" />
+        <Message Text=""[Work around Github issue #9667 with --interactive]Server ID is $(PID)"" Importance=""High"" />
     </Target>
 </Project>";
         private static string sleepingTaskContentsFormat = @$"
@@ -313,8 +313,8 @@ namespace Microsoft.Build.Engine.UnitTests
         <ProcessIdTask>
             <Output PropertyName=""PID"" TaskParameter=""Pid"" />
         </ProcessIdTask>
-        <Message Text=""Server ID is $(PID)"" Importance=""High"" />
-		<Message Text="":MSBuildStartupDirectory:$(MSBuildStartupDirectory):"" Importance=""high"" />
+        <Message Text=""[Work around Github issue #9667 with --interactive]Server ID is $(PID)"" Importance=""High"" />
+		<Message Text=""[Work around Github issue #9667 with --interactive]:MSBuildStartupDirectory:$(MSBuildStartupDirectory):"" Importance=""high"" />
 	</Target>
 </Project>";
 

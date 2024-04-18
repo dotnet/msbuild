@@ -436,6 +436,7 @@ namespace Microsoft.Build.UnitTests
             MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs("Normal importance message!", MessageImportance.Normal));
             MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs("Low importance message!", MessageImportance.Low));
             WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning!"));
+            WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("A\nMulti\r\nLine\nWarning!"));
             ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error!"));
         }
 

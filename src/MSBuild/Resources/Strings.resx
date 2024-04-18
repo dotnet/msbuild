@@ -1641,10 +1641,25 @@
       {4}: duration in seconds with 1 decimal point
     </comment>
   </data>
-  <data name="TestSummary" xml:space="preserve">
-    <value>Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</value>
-    <comment>{0} string, localized result e.g. Failed surrounded by ANSI colors.
-{1-5} whole number</comment>
+  <data name="TestSummary_BannerAndTotal" xml:space="preserve">
+    <value>Test summary: total: {0}</value>
+    <comment>{0} whole number</comment>
+  </data>
+  <data name="TestSummary_Duration" xml:space="preserve">
+    <value>duration: {0}s</value>
+    <comment>{0} whole number</comment>
+  </data>
+  <data name="TestSummary_Failed" xml:space="preserve">
+    <value>failed: {0}</value>
+    <comment>{0} whole number</comment>
+  </data>
+  <data name="TestSummary_Skipped" xml:space="preserve">
+    <value>skipped: {0}</value>
+    <comment>{0} whole number</comment>
+  </data>
+  <data name="TestSummary_Succeeded" xml:space="preserve">
+    <value>succeeded: {0}</value>
+    <comment>{0} whole number</comment>
   </data>
   <!-- **** TerminalLogger strings end **** -->
     <!--
