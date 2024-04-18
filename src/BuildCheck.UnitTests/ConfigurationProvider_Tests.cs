@@ -127,7 +127,6 @@ public class ConfigurationProvider_Tests
         buildConfig.EvaluationAnalysisScope?.ShouldBe(EvaluationAnalysisScope.ProjectOnly);
     }
 
-        
     [Fact]
     public void GetRuleIdConfiguration_CustomConfigurationValidity_NotValid_DifferentValues()
     {
@@ -192,7 +191,6 @@ public class ConfigurationProvider_Tests
             configurationProvider.CheckCustomConfigurationDataValidity(Path.Combine(workFolder1.Path, "test123.csproj"), "rule_id");
         });
     }
-
 
     [Fact]
     public void GetRuleIdConfiguration_CustomConfigurationValidity_Valid()

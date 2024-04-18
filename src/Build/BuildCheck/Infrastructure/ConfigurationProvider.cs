@@ -15,15 +15,26 @@ using Microsoft.Build.BuildCheck.Infrastructure.EditorConfig;
 
 namespace Microsoft.Build.BuildCheck.Infrastructure;
 
-// TODO: https://github.com/dotnet/msbuild/issues/9628
 internal sealed class ConfigurationProvider
 {
     private readonly EditorConfigParser s_editorConfigParser = new EditorConfigParser();
 
     // TODO: This module should have a mechanism for removing unneeded configurations
     //  (disabled rules and analyzers that need to run in different node)
-    private readonly Dictionary<string, BuildAnalyzerConfiguration> _editorConfig = new Dictionary<string, BuildAnalyzerConfiguration>();
 
+    /// <summary>
+    /// The dictionary used for storing the BuildAnalyzerConfiguration per projectfile and rule id. The key is equal to {projectFullPath}-{ruleId}
+    /// </summary>
+    private readonly Dictionary<string, BuildAnalyzerConfiguration> _buildAnalyzerConfiguration = new Dictionary<string, BuildAnalyzerConfiguration>();
+
+    /// <summary>
+    /// The dictionary used for storing the key-value pairs retrieved from the .editorconfigs for specific projectfile. The key is equal to projectFullPath
+    /// </summary>
+    private readonly Dictionary<string, Dictionary<string, string>> _editorConfigData = new Dictionary<string, Dictionary<string, string>>();
+
+    /// <summary>
+    /// The dictionary used for storing the CustomConfigurationData per ruleId. The key is equal to ruleId.
+    /// </summary>
     private readonly Dictionary<string, CustomConfigurationData> _customConfigurationData = new Dictionary<string, CustomConfigurationData>();
 
     private readonly string[] _infrastructureConfigurationKeys = new string[] {
@@ -47,9 +58,9 @@ internal sealed class ConfigurationProvider
         var configuration = GetConfiguration(projectFullPath, ruleId);
 
         if (configuration is null || !configuration.Any())
-    {
-        return CustomConfigurationData.Null;
-    }
+        {
+            return CustomConfigurationData.Null;
+        }
 
         // remove the infrastructure owned key names
         foreach (var infraConfigurationKey in _infrastructureConfigurationKeys)
@@ -83,7 +94,7 @@ internal sealed class ConfigurationProvider
             if (!storedConfiguration.Equals(configuration))
             {
                 throw new BuildCheckConfigurationException("Custom configuration should be equal between projects");
-    }
+            }
         }
     }
 
@@ -97,6 +108,12 @@ internal sealed class ConfigurationProvider
         IReadOnlyList<string> ruleIds)
         => FillConfiguration(projectFullPath, ruleIds, GetUserConfiguration);
 
+    /// <summary>
+    /// Retrieve array of CustomConfigurationData for a given projectPath and ruleIds
+    /// </summary>
+    /// <param name="projectFullPath"></param>
+    /// <param name="ruleIds"></param>
+    /// <returns></returns>
     public  CustomConfigurationData[] GetCustomConfigurations(
         string projectFullPath,
         IReadOnlyList<string> ruleIds)
@@ -130,8 +147,51 @@ internal sealed class ConfigurationProvider
         return configurations;
     }
 
-    internal Dictionary<string, string> GetConfiguration(string projectFullPath, string ruleId)
+
+    /// <summary>
+    /// Generates a new dictionary that contains the key-value pairs from the original dictionary if the key starts with 'keyFilter'.
+    /// If updateKey is set to 'true', the keys of the new dictionary will not include keyFilter.
+    /// </summary>
+    /// <param name="keyFilter"></param>
+    /// <param name="originalConfiguration"></param>
+    /// <param name="updateKey"></param>
+    /// <returns></returns>
+    private Dictionary<string, string> FilterDictionaryByKeys(string keyFilter, Dictionary<string, string> originalConfiguration, bool updateKey = false)
     {
+        var filteredConfig = new Dictionary<string, string>();
+
+        foreach (var kv in originalConfiguration)
+        {
+            if (kv.Key.StartsWith(keyFilter, StringComparison.OrdinalIgnoreCase))
+            {
+                var newKey = kv.Key;
+                if (updateKey)
+                {
+                    newKey = kv.Key.Substring(keyFilter.Length);
+                }
+                
+                filteredConfig[newKey] = kv.Value;
+            }
+        }
+
+        return filteredConfig;
+    }
+
+    /// <summary>
+    /// Fetches the .editorconfig data in form of Key-Value pair.
+    /// Resulted dictionary will contain only BuildCheck related rules.
+    /// </summary>
+    /// <param name="projectFullPath"></param>
+    /// <returns></returns>
+    /// <exception cref="BuildCheckConfigurationException"></exception>
+    private Dictionary<string, string> FetchEditorConfigRules(string projectFullPath)
+    {
+        // check if we have the data already
+        if (_editorConfigData.TryGetValue(projectFullPath, out var cachedConfig))
+        {
+            return cachedConfig;
+        }
+
         Dictionary<string, string> config;
         try
         {
@@ -142,19 +202,17 @@ internal sealed class ConfigurationProvider
             throw new BuildCheckConfigurationException($"Parsing editorConfig data failed", exception, BuildCheckConfigurationErrorScope.EditorConfigParser);
         }
 
-        var keyToSearch = $"build_check.{ruleId}.";
-        var dictionaryConfig = new Dictionary<string, string>();
+        // clear the dictionary from the key-value pairs not BuildCheck related and
+        // store the data so there is no need to parse the .editorconfigs all over again
+        _editorConfigData[projectFullPath] = FilterDictionaryByKeys("build_check.",  config);
 
-        foreach (var kv in config)
-        {
-            if (kv.Key.StartsWith(keyToSearch, StringComparison.OrdinalIgnoreCase))
-            {
-                var newKey = kv.Key.Substring(keyToSearch.Length);
-                dictionaryConfig[newKey] = kv.Value;
-            }
-        }
+        return _editorConfigData[projectFullPath];
+    }
 
-        return dictionaryConfig;
+    internal Dictionary<string, string> GetConfiguration(string projectFullPath, string ruleId)
+    {
+        var config = FetchEditorConfigRules(projectFullPath);
+        return FilterDictionaryByKeys($"build_check.{ruleId}.", config, updateKey: true);
     }
 
     /// <summary>
@@ -171,11 +229,12 @@ internal sealed class ConfigurationProvider
     {
         var cacheKey = $"{ruleId}-{projectFullPath}";
 
-        if (!_editorConfig.TryGetValue(cacheKey, out BuildAnalyzerConfiguration? editorConfig))
+        if (_buildAnalyzerConfiguration.TryGetValue(cacheKey, out BuildAnalyzerConfiguration? cachedEditorConfig))
         {
-            editorConfig = BuildAnalyzerConfiguration.Null;
+            return cachedEditorConfig;
         }
 
+        BuildAnalyzerConfiguration? editorConfig = BuildAnalyzerConfiguration.Null;
         var config = GetConfiguration(projectFullPath, ruleId);
 
         if (config.Any())
@@ -183,7 +242,7 @@ internal sealed class ConfigurationProvider
             editorConfig = BuildAnalyzerConfiguration.Create(config);
         }
 
-        _editorConfig[cacheKey] = editorConfig;
+        _buildAnalyzerConfiguration[cacheKey] = editorConfig;
 
         return editorConfig;
     }
