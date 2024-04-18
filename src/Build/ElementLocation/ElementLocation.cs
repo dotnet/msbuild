@@ -93,19 +93,14 @@ namespace Microsoft.Build.Construction
             get { return s_emptyElementLocation; }
         }
 
-        /// <summary>
-        /// Get reasonable hash code.
-        /// </summary>
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             // Line and column are good enough
             return Line ^ Column;
         }
 
-        /// <summary>
-        /// Override Equals so that identical
-        /// fields imply equal objects.
-        /// </summary>
+        /// <inheritdoc />
         public override bool Equals(object? obj)
         {
             IElementLocation? that = obj as IElementLocation;
@@ -128,17 +123,13 @@ namespace Microsoft.Build.Construction
             return true;
         }
 
-        /// <summary>
-        /// Location of element.
-        /// </summary>
+        /// <inheritdoc />
         public override string ToString()
         {
             return LocationString;
         }
 
-        /// <summary>
-        /// Writes the packet to the serializer.
-        /// </summary>
+        /// <inheritdoc />
         void ITranslatable.Translate(ITranslator translator)
         {
             ErrorUtilities.VerifyThrow(translator.Mode == TranslationDirection.WriteToStream, "write only");
@@ -224,28 +215,15 @@ namespace Microsoft.Build.Construction
                 Column = column;
             }
 
-            /// <summary>
-            /// The file from which this particular element originated.  It may
-            /// differ from the ProjectFile if, for instance, it was part of
-            /// an import or originated in a targets file.
-            /// If not known, returns empty string.
-            /// </summary>
+            /// <inheritdoc />
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             public override string File { get; }
 
-            /// <summary>
-            /// The line number where this element exists in its file.
-            /// The first line is numbered 1.
-            /// Zero indicates "unknown location".
-            /// </summary>
+            /// <inheritdoc />
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             public override int Line { get; }
 
-            /// <summary>
-            /// The column number where this element exists in its file.
-            /// The first column is numbered 1.
-            /// Zero indicates "unknown location".
-            /// </summary>
+            /// <inheritdoc />
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             public override int Column { get; }
         }
@@ -283,31 +261,18 @@ namespace Microsoft.Build.Construction
                 packedData = (line << 16) | column;
             }
 
-            /// <summary>
-            /// The file from which this particular element originated.  It may
-            /// differ from the ProjectFile if, for instance, it was part of
-            /// an import or originated in a targets file.
-            /// If not known, returns empty string.
-            /// </summary>
+            /// <inheritdoc />
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             public override string File { get; }
 
-            /// <summary>
-            /// The line number where this element exists in its file.
-            /// The first line is numbered 1.
-            /// Zero indicates "unknown location".
-            /// </summary>
+            /// <inheritdoc />
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             public override int Line
             {
                 get { return (packedData >> 16) & 0xFFFF; }
             }
 
-            /// <summary>
-            /// The column number where this element exists in its file.
-            /// The first column is numbered 1.
-            /// Zero indicates "unknown location".
-            /// </summary>
+            /// <inheritdoc />
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             public override int Column
             {
