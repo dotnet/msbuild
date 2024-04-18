@@ -7,8 +7,6 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 
-#nullable disable
-
 namespace Microsoft.Build.Construction
 {
     /// <summary>
@@ -98,9 +96,9 @@ namespace Microsoft.Build.Construction
         /// Override Equals so that identical
         /// fields imply equal objects.
         /// </summary>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            IElementLocation that = obj as IElementLocation;
+            IElementLocation? that = obj as IElementLocation;
 
             if (that == null)
             {
@@ -151,7 +149,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal static ElementLocation FactoryForDeserialization(ITranslator translator)
         {
-            string file = null;
+            string? file = null;
             int line = 0;
             int column = 0;
             translator.Translate(ref file);
@@ -180,7 +178,7 @@ namespace Microsoft.Build.Construction
         /// In AG there are 600 locations that have a file but zero line and column.
         /// In theory yet another derived class could be made for these to save 4 bytes each.
         /// </remarks>
-        internal static ElementLocation Create(string file, int line, int column)
+        internal static ElementLocation Create(string? file, int line, int column)
         {
             if (string.IsNullOrEmpty(file) && line == 0 && column == 0)
             {
@@ -247,7 +245,7 @@ namespace Microsoft.Build.Construction
             /// Numerical values must be 1-based, non-negative; 0 indicates unknown
             /// File may be null, indicating the file was not loaded from disk.
             /// </summary>
-            internal RegularElementLocation(string file, int line, int column)
+            internal RegularElementLocation(string? file, int line, int column)
             {
                 ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(file, nameof(file));
                 ErrorUtilities.VerifyThrow(line > -1 && column > -1, "Use zero for unknown");
@@ -323,7 +321,7 @@ namespace Microsoft.Build.Construction
             /// Numerical values must be 1-based, non-negative; 0 indicates unknown
             /// File may be null or empty, indicating the file was not loaded from disk.
             /// </summary>
-            internal SmallElementLocation(string file, int line, int column)
+            internal SmallElementLocation(string? file, int line, int column)
             {
                 ErrorUtilities.VerifyThrow(line > -1 && column > -1, "Use zero for unknown");
                 ErrorUtilities.VerifyThrow(line <= 65535 && column <= 65535, "Use ElementLocation instead");
