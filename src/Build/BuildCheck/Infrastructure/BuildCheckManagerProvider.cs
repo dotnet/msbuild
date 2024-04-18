@@ -253,14 +253,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 // Create the wrapper and register to central context
                 wrapper.StartNewProject(projectFullPath, configurations);
                 var wrappedContext = new BuildCheckRegistrationContext(wrapper, _buildCheckCentralContext);
-                if (analyzer is InternalBuildAnalyzer internalAnalyzer)
-                {
-                    internalAnalyzer.RegisterInternalActions(wrappedContext);
-                }
-                else
-                {
-                    analyzer.RegisterActions(wrappedContext);
-                }
+                analyzer.RegisterActions(wrappedContext);
             }
             else
             {
