@@ -475,6 +475,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
                 }
+
                 return new ProjectInstance(
                     ProjectFullPath,
                     globalProperties,

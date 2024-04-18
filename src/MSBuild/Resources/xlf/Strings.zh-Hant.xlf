@@ -580,11 +580,11 @@
         <target state="translated">  -logger:&lt;記錄器&gt;   使用此記錄器可記錄 MSBuild 的事件。
                      若要指定多個記錄器，請各別指定每個記錄器。
                      &lt;記錄器&gt; 語法為:
-                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
+                       [&lt;類別&gt;,]&lt;組件&gt;[,&lt;選項&gt;][;&lt;參數&gt;]
                      &lt;記錄器類別&gt; 語法為:
                        [&lt;一部分或完整的命名空間&gt;.]&lt;記錄器類別名稱&gt;
                      &lt;記錄器組件&gt; 語法為:
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                       {&lt;組件名稱&gt;[,&lt;strong name&gt;] | &lt;組件檔案&gt;}
                      記錄器選項會指定 MSBuild 建立記錄器的方式。
                      &lt;記錄器參數&gt; 是選擇性參數，其會依您輸入的內容，
                      完全一樣地傳遞到記錄器。(簡短形式: -l)
@@ -862,11 +862,11 @@
                      若要指定多個記錄器，請各別指定每個記錄器。
                      (簡短形式 -dl)
                      &lt;記錄器&gt; 語法為:
-                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
+                       [&lt;類別&gt;,]&lt;組件&gt;[,&lt;選項&gt;][;&lt;參數&gt;]
                      &lt;記錄器類別&gt; 語法為:
                        [&lt;一部分或完整的命名空間&gt;.]&lt;記錄器類別名稱&gt;
                      &lt;記錄器組件&gt; 語法為:
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                       {&lt;組件名稱&gt;[,&lt;strong name&gt;] | &lt;組件檔案&gt;}
                      記錄器選項會指定 MSBuild 建立記錄器的方式。
                      &lt;記錄器參數&gt; 是選擇性參數，其會依您輸入的內容，
                      完全一樣地傳遞到記錄器。(簡短形式: -l)
@@ -1689,11 +1689,30 @@
       {4}: duration in seconds with 1 decimal point
     </note>
       </trans-unit>
-      <trans-unit id="TestSummary">
-        <source>Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</source>
-        <target state="translated">測試回合 {0}。總計: {1} 失敗: {2} 傳遞: {3} 跳過: {4}, 期間: {5} 秒</target>
-        <note>{0} string, localized result e.g. Failed surrounded by ANSI colors.
-{1-5} whole number</note>
+      <trans-unit id="TestSummary_BannerAndTotal">
+        <source>Test summary: total: {0}</source>
+        <target state="new">Test summary: total: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Duration">
+        <source>duration: {0}s</source>
+        <target state="new">duration: {0}s</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Failed">
+        <source>failed: {0}</source>
+        <target state="new">failed: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Skipped">
+        <source>skipped: {0}</source>
+        <target state="new">skipped: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Succeeded">
+        <source>succeeded: {0}</source>
+        <target state="new">succeeded: {0}</target>
+        <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>
