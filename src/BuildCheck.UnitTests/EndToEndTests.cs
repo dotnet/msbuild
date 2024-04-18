@@ -35,7 +35,40 @@ public class EndToEndTests : IDisposable
     [InlineData(false, false)]
     public void SampleAnalyzerIntegrationTest(bool buildInOutOfProcessNode, bool analysisRequested)
     {
-        string contents = $"""
+        TransientTestFile projectFile = SetupTestFiles();
+        _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", buildInOutOfProcessNode ? "1" : "0");
+        _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore" +
+            (analysisRequested ? " -analyze" : string.Empty), out bool success);
+        _env.Output.WriteLine(output);
+        success.ShouldBeTrue();
+        // The conflicting outputs warning appears - but only if analysis was requested
+        if (analysisRequested)
+        {
+            output.ShouldContain("BC0101");
+        }
+        else
+        {
+            output.ShouldNotContain("BC0101");
+        }
+    }
+
+    [Fact]
+    public void NoRunOnRestore()
+    {
+        TransientTestFile projectFile = SetupTestFiles();
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -analyze -t:restore", out bool success);
+        _env.Output.WriteLine(output);
+        success.ShouldBeTrue();
+        output.ShouldNotContain("BC0101");
+    }
+
+    private TransientTestFile SetupTestFiles()
+    {
+        {
+            string contents = $"""
             <Project Sdk="Microsoft.NET.Sdk">
                 
                 <PropertyGroup>
@@ -56,7 +89,7 @@ public class EndToEndTests : IDisposable
             </Project>
             """;
 
-        string contents2 = $"""
+            string contents2 = $"""
             <Project Sdk="Microsoft.NET.Sdk">
                                
                 <PropertyGroup>
@@ -81,19 +114,19 @@ public class EndToEndTests : IDisposable
             </Project>
             """;
 
-        string content3 = "Console.WriteLine(\"Hello, World!\");\r\n";
-        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
-        TransientTestFile projectFile = _env.CreateFile(workFolder, "FooBar.csproj", contents);
-        TransientTestFile projectFile2 = _env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
-        TransientTestFile projectFile3 = _env.CreateFile(workFolder, "Program.cs", content3);
+            string content3 = "Console.WriteLine(\"Hello, World!\");\r\n";
+            TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
+            TransientTestFile projectFile = _env.CreateFile(workFolder, "FooBar.csproj", contents);
+            TransientTestFile projectFile2 = _env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
+            TransientTestFile projectFile3 = _env.CreateFile(workFolder, "Program.cs", content3);
 
-        // var cache = new SimpleProjectRootElementCache();
-        // ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile.Path, /*unused*/null, /*unused*/null, cache, false /*Not explicitly loaded - unused*/);
+            // var cache = new SimpleProjectRootElementCache();
+            // ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile.Path, /*unused*/null, /*unused*/null, cache, false /*Not explicitly loaded - unused*/);
 
 
-        TransientTestFile config = _env.CreateFile(workFolder, "editorconfig.json",
-            /*lang=json,strict*/
-            """
+            TransientTestFile config = _env.CreateFile(workFolder, "editorconfig.json",
+                /*lang=json,strict*/
+                """
             {
                 "BC0101": {
                     "IsEnabled": true,
@@ -111,26 +144,11 @@ public class EndToEndTests : IDisposable
             }
             """);
 
-        // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".
-        // This discrepancy breaks path equality checks in analyzers if we pass to MSBuild full path to the initial project.
-        // See if there is a way of fixing it in the engine - tracked: https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=55702688.
-        _env.SetCurrentDirectory(Path.GetDirectoryName(projectFile.Path));
-
-        _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", buildInOutOfProcessNode ? "1" : "0");
-        _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
-        string output = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore" +
-            (analysisRequested ? " -analyze" : string.Empty), out bool success);
-        _env.Output.WriteLine(output);
-        success.ShouldBeTrue();
-        // The conflicting outputs warning appears - but only if analysis was requested
-        if (analysisRequested)
-        {
-            output.ShouldContain("BC0101");
-        }
-        else
-        {
-            output.ShouldNotContain("BC0101");
+            // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".
+            // This discrepancy breaks path equality checks in analyzers if we pass to MSBuild full path to the initial project.
+            // See if there is a way of fixing it in the engine - tracked: https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=55702688.
+            _env.SetCurrentDirectory(Path.GetDirectoryName(projectFile.Path));
+            return (projectFile);
         }
     }
 }
