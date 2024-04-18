@@ -84,6 +84,16 @@ Planned model:
 
 **TBD** - implementation details to be amended by @f-alizada 
 
+## High-level logic
+
+MSBuild engine always finds and parses relevant `.editorconfig` files to see which analyzers should be enabled, if any. In typical builds this operation will not be expensive compared to everything else happening as part of building a project. It's a new cost to all builds though, and in the unlikely case that it starts showing as a perf bottleneck, we can cache the data relevant to MSBuild in a separate intermediate file, in a process-wide in-memory cache invalidated by timestamp checks, and so on.
+
+The rest of the configuration comes directly or indirectly from project files in the form of properties, which creates an interesting ordering issue. For the engine to know the final values of properties such as `TargetFramework`, it needs to evaluate the project. However, if it turns out that an analyzer should be enabled that is interested in _tracing_ the evaluation, it is already too late. It's important to note that this issue exists only for a subset of analyzers. Analyzers interested in the _result_ of evaluation, for example, are fine. The best way of handling this would be to simply evaluate again. Technically, we only need to finish Pass 1 of evaluation to know the value of properties and have the relevant property functions called, so the extra work can be limited to pass 0 and 1. Measurements show that 75% of evaluation is spent in passes 0 and 1. In the very worst case when an extra pass 0/1 runs for each project and lacks any kind of further optimization, single-process incremental build of OrchardCore has been measured to take about 5% longer. There are opportunities for optimizing this, for example by adding a marker to SDK targets files notifying MSBuild of the point after which `TargetFramework` is expected to be fixed so the engine can bail early.
+
+Once `TargetFramework` is known, we can combine the default analyzer config with what came from `.editorconfig`, restart evaluation if an evaluation-tracing analyzer just got enabled, and continue with the rest of the build. Unlike `TargetFramework` which has an additive effect on the enabled analyzers, a master switch like `RunAnalyzers` may instruct the engine to not run anything. It would be unfortunate if the user had to pay any extra cost when `RunAnalyzers` evaluates to false. So preferrably we don't do anything perf sensitive until we hit the point in evaluation when `TargetFramework`, `RunAnalyzers`, `SdkAnalysisLevel`, ... are all known and the set of analyzers to use is finalized.
+
+Since we are unlikely to enable any analyzers by default in .NET 9, the focus in this release should be on optimizing the `.editorconfig` handling.
+
 # Acquisition
 
 **TBD** - implementation details to be amended by @YuliiaKovalova
