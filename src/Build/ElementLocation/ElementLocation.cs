@@ -26,7 +26,7 @@ namespace Microsoft.Build.Construction
         private static readonly ElementLocation s_emptyElementLocation = new SmallElementLocation("", 0, 0);
 
         /// <summary>
-        /// The file from which this particular element originated.  It may
+        /// Gets the file from which this particular element originated.  It may
         /// differ from the ProjectFile if, for instance, it was part of
         /// an import or originated in a targets file.
         /// If not known, returns empty string.
@@ -38,7 +38,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// The line number where this element exists in its file.
+        /// Gets the line number where this element exists in its file.
         /// The first line is numbered 1.
         /// Zero indicates "unknown location".
         /// </summary>
@@ -49,7 +49,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// The column number where this element exists in its file.
+        /// Gets the column number where this element exists in its file.
         /// The first column is numbered 1.
         /// Zero indicates "unknown location".
         /// </summary>
@@ -60,7 +60,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// The location in a form suitable for replacement
+        /// Gets the location in a form suitable for replacement
         /// into a message.
         /// Example: "c:\foo\bar.csproj (12,34)"
         /// Calling this creates and formats a new string.
