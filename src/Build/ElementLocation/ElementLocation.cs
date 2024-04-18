@@ -199,7 +199,7 @@ namespace Microsoft.Build.Construction
             // than that threshold.
             if (combinedValue <= ushort.MaxValue)
             {
-                return new SmallElementLocation(file, line, column);
+                return new SmallElementLocation(file, (ushort)line, (ushort)column);
             }
 
             return new RegularElementLocation(file, line, column);
@@ -232,47 +232,19 @@ namespace Microsoft.Build.Construction
         /// A "very small" variation that used two bytes (or halves of a short) would fit about half of them
         /// and save 4 more bytes each, but the CLR packs each field to 4 bytes, so it isn't actually any smaller.
         /// </summary>
-        private sealed class SmallElementLocation : ElementLocation
+        private sealed class SmallElementLocation(string file, ushort line, ushort column) : ElementLocation
         {
-            /// <summary>
-            /// Packs both the line and column values into a single four-byte element.
-            /// The high two bytes are the line, and low two bytes are the column.
-            /// </summary>
-            /// <remarks>
-            /// If we had two <see cref="ushort"/> fields, the CLR would pad them each to
-            /// four-byte boundaries, meaning no space would actually be saved here.
-            /// So instead, we pack them manually.
-            /// </remarks>
-            private int packedData;
-
-            /// <summary>
-            /// Constructor for the case where we have most or all information.
-            /// Numerical values must be 1-based, non-negative; 0 indicates unknown
-            /// File may empty, indicating the file was not loaded from disk.
-            /// </summary>
-            internal SmallElementLocation(string file, int line, int column)
-            {
-                File = file;
-                packedData = (line << 16) | column;
-            }
+            /// <inheritdoc />
+            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+            public override string File => file;
 
             /// <inheritdoc />
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            public override string File { get; }
+            public override int Line => line;
 
             /// <inheritdoc />
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            public override int Line
-            {
-                get { return (packedData >> 16) & 0xFFFF; }
-            }
-
-            /// <inheritdoc />
-            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            public override int Column
-            {
-                get { return packedData & ushort.MaxValue; }
-            }
+            public override int Column => column;
         }
     }
 }
