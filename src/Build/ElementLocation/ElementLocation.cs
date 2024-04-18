@@ -201,10 +201,10 @@ namespace Microsoft.Build.Construction
 
             if (line <= 65535 && column <= 65535)
             {
-                return new ElementLocation.SmallElementLocation(file, line, column);
+                return new SmallElementLocation(file, line, column);
             }
 
-            return new ElementLocation.RegularElementLocation(file, line, column);
+            return new RegularElementLocation(file, line, column);
         }
 
         /// <summary>
