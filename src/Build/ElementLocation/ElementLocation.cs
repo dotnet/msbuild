@@ -213,30 +213,15 @@ namespace Microsoft.Build.Construction
         private class RegularElementLocation : ElementLocation
         {
             /// <summary>
-            /// The source file.
-            /// </summary>
-            private string file;
-
-            /// <summary>
-            /// The source line.
-            /// </summary>
-            private int line;
-
-            /// <summary>
-            /// The source column.
-            /// </summary>
-            private int column;
-
-            /// <summary>
             /// Constructor for the case where we have most or all information.
             /// Numerical values must be 1-based, non-negative; 0 indicates unknown
             /// File may be empty, indicating the file was not loaded from disk.
             /// </summary>
             internal RegularElementLocation(string file, int line, int column)
             {
-                this.file = file;
-                this.line = line;
-                this.column = column;
+                File = file;
+                Line = line;
+                Column = column;
             }
 
             /// <summary>
@@ -246,10 +231,7 @@ namespace Microsoft.Build.Construction
             /// If not known, returns empty string.
             /// </summary>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            public override string File
-            {
-                get { return file; }
-            }
+            public override string File { get; }
 
             /// <summary>
             /// The line number where this element exists in its file.
@@ -257,10 +239,7 @@ namespace Microsoft.Build.Construction
             /// Zero indicates "unknown location".
             /// </summary>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            public override int Line
-            {
-                get { return line; }
-            }
+            public override int Line { get; }
 
             /// <summary>
             /// The column number where this element exists in its file.
@@ -268,10 +247,7 @@ namespace Microsoft.Build.Construction
             /// Zero indicates "unknown location".
             /// </summary>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            public override int Column
-            {
-                get { return column; }
-            }
+            public override int Column { get; }
         }
 
         /// <summary>
@@ -285,11 +261,6 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private class SmallElementLocation : ElementLocation
         {
-            /// <summary>
-            /// The source file.
-            /// </summary>
-            private string file;
-
             /// <summary>
             /// Packs both the line and column values into a single four-byte element.
             /// The high two bytes are the line, and low two bytes are the column.
@@ -308,7 +279,7 @@ namespace Microsoft.Build.Construction
             /// </summary>
             internal SmallElementLocation(string file, int line, int column)
             {
-                this.file = file;
+                File = file;
                 packedData = (line << 16) | column;
             }
 
@@ -319,10 +290,7 @@ namespace Microsoft.Build.Construction
             /// If not known, returns empty string.
             /// </summary>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            public override string File
-            {
-                get { return file; }
-            }
+            public override string File { get; }
 
             /// <summary>
             /// The line number where this element exists in its file.
