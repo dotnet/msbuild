@@ -181,16 +181,25 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal static ElementLocation Create(string? file, int line, int column)
         {
-            if (string.IsNullOrEmpty(file) && line == 0 && column == 0)
+            // Combine line and column values with bitwise OR so we can perform various
+            // checks on both values in a single comparison, reducing the amount of branching
+            // in the code.
+            int combinedValue = line | column;
+
+            if (string.IsNullOrEmpty(file) && combinedValue == 0)
             {
+                // When combinedValue is zero, it implies that both line and column are zero.
                 return EmptyLocation;
             }
 
-            ErrorUtilities.VerifyThrow(line > -1 && column > -1, "Use zero for unknown");
+            // When combinedValue is negative, it implies that either line or column were negative
+            ErrorUtilities.VerifyThrow(combinedValue > -1, "Use zero for unknown");
 
             file ??= "";
 
-            if (line <= ushort.MaxValue && column <= ushort.MaxValue)
+            // When combinedValue is less than a threshold, it implies that both line and column are less
+            // than that threshold.
+            if (combinedValue <= ushort.MaxValue)
             {
                 return new SmallElementLocation(file, line, column);
             }
