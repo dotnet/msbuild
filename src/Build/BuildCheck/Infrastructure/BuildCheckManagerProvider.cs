@@ -275,7 +275,6 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                     _loggingService.LogErrorFromText(buildEventContext, null, null, null,
                         new BuildEventFileInfo(projectFullPath),
                         e.Message);
-                    _loggingService.LogCommentFromText(buildEventContext, MessageImportance.High, $"Dismounting analyzer '{analyzerFactoryContext.FriendlyName}'");
                     analyzersToRemove.Add(analyzerFactoryContext);
                 }
             }

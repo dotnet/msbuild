@@ -33,18 +33,9 @@ internal sealed class BuildCheckConnectorLogger(IBuildAnalysisLoggingContextFact
                 return;
             }
 
-            try
-            {
             buildCheckManager.ProcessEvaluationFinishedEventArgs(
                 loggingContextFactory.CreateLoggingContext(e.BuildEventContext!),
                 projectEvaluationFinishedEventArgs);
-            }
-            catch (Exception exception)
-            {
-                Debugger.Launch();
-                Console.WriteLine(exception);
-                throw;
-            }
 
             buildCheckManager.EndProjectEvaluation(BuildCheckDataSource.EventArgs, e.BuildEventContext!);
         }
