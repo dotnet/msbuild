@@ -208,31 +208,19 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Rarer variation for when the line and column won't each fit in a ushort.
         /// </summary>
-        private class RegularElementLocation : ElementLocation
+        private class RegularElementLocation(string file, int line, int column) : ElementLocation
         {
-            /// <summary>
-            /// Constructor for the case where we have most or all information.
-            /// Numerical values must be 1-based, non-negative; 0 indicates unknown
-            /// File may be empty, indicating the file was not loaded from disk.
-            /// </summary>
-            internal RegularElementLocation(string file, int line, int column)
-            {
-                File = file;
-                Line = line;
-                Column = column;
-            }
+            /// <inheritdoc />
+            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+            public override string File { get; } = file;
 
             /// <inheritdoc />
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            public override string File { get; }
+            public override int Line { get; } = line;
 
             /// <inheritdoc />
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            public override int Line { get; }
-
-            /// <inheritdoc />
-            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            public override int Column { get; }
+            public override int Column { get; } = column;
         }
 
         /// <summary>
