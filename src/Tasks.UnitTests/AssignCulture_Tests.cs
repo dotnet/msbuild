@@ -284,7 +284,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Any pre-existing Culture attribute on the item is not to be repected, because culture is not set
+        /// Any pre-existing Culture attribute on the item is not to be respected, because culture is not set
         /// </summary>
         [Fact]
         public void CultureMetaDataShouldNoBeRespected()
