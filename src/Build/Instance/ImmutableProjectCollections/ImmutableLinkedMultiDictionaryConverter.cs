@@ -7,20 +7,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.Instance.ImmutableProjectCollections
 {
-    internal class ImmutableMultiDictionaryConverter<K, VCached, V> : IMultiDictionary<K, V>
+    internal class ImmutableLinkedMultiDictionaryConverter<K, VCached, V> : IMultiDictionary<K, V>
         where K : class
         where V : class
         where VCached : class
     {
-        private readonly IMultiDictionary<K, VCached> _multiDictionary;
+        private readonly Func<K, IEnumerable<VCached>> _getCachedValues;
         private readonly Func<VCached, V> _getInstance;
 
-        public ImmutableMultiDictionaryConverter(IMultiDictionary<K, VCached> multiDictionary, Func<VCached, V> getInstance)
+        public ImmutableLinkedMultiDictionaryConverter(Func<K, IEnumerable<VCached>> getCachedValues, Func<VCached, V> getInstance)
         {
-            _multiDictionary = multiDictionary;
+            _getCachedValues = getCachedValues;
             _getInstance = getInstance;
         }
 
@@ -28,10 +29,13 @@ namespace Microsoft.Build.Instance.ImmutableProjectCollections
         {
             get
             {
-                IEnumerable<VCached> cachedValues = _multiDictionary[key];
-                foreach (var cachedValue in cachedValues)
+                IEnumerable<VCached> cachedValues = _getCachedValues(key);
+                if (cachedValues != null)
                 {
-                    yield return _getInstance(cachedValue);
+                    foreach (var cachedValue in cachedValues)
+                    {
+                        yield return _getInstance(cachedValue);
+                    }
                 }
             }
         }

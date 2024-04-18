@@ -424,14 +424,8 @@ namespace Microsoft.Build.Execution
             // ItemsByEvaluatedInclude
             if (fastItemLookupNeeded)
             {
-                var multiDictionary = new MultiDictionary<string, ProjectItem>(StringComparer.OrdinalIgnoreCase);
-                foreach (var item in linkedProject.Items)
-                {
-                    multiDictionary.Add(item.EvaluatedInclude, item);
-                }
-
-                _itemsByEvaluatedInclude = new ImmutableMultiDictionaryConverter<string, ProjectItem, ProjectItemInstance>(
-                                                multiDictionary,
+                _itemsByEvaluatedInclude = new ImmutableLinkedMultiDictionaryConverter<string, ProjectItem, ProjectItemInstance>(
+                                                linkedProject.GetItemsByEvaluatedInclude,
                                                 item => ConvertCachedProjectItemToInstance(linkedProject, this, item));
             }
 

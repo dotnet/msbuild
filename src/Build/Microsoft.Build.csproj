@@ -167,7 +167,7 @@
     <Compile Include="FileAccess\RequestedAccess.cs" />
     <Compile Include="Instance\ImmutableProjectCollections\ImmutableGlobalPropertiesCollectionConverter.cs" />
     <Compile Include="Instance\ImmutableProjectCollections\ImmutableItemDefinitionsListConverter.cs" />
-    <Compile Include="Instance\ImmutableProjectCollections\ImmutableMultiDictionaryConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableLinkedMultiDictionaryConverter.cs" />
     <Compile Include="Instance\ImmutableProjectCollections\ImmutablePropertyCollectionConverter.cs" />
     <Compile Include="Instance\ImmutableProjectCollections\ImmutableValuedElementCollectionConverter.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
