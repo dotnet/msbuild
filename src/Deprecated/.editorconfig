@@ -1,3 +1,0 @@
-
-# Dispose objects before losing scope
-dotnet_diagnostic.CA2000.severity = none
