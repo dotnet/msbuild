@@ -192,7 +192,6 @@
     <Compile Include="BuildCheck\Infrastructure\CustomConfigurationData.cs" />
     <Compile Include="BuildCheck\API\IBuildCheckRegistrationContext.cs" />
     <Compile Include="BuildCheck\Infrastructure\IBuildCheckManager.cs" />
-    <Compile Include="BuildCheck\Logging\IBuildAnalysisLoggingContext.cs" />
     <Compile Include="BuildCheck\Logging\IBuildAnalysisLoggingContextFactory.cs" />
     <Compile Include="BuildCheck\OM\EvaluatedPropertiesAnalysisData.cs" />
     <Compile Include="BuildCheck\OM\ParsedItemsAnalysisData.cs" />
@@ -207,7 +206,6 @@
     <Compile Include="FileAccess\RequestedAccess.cs" />
     <Compile Include="BuildCheck\Logging\AnalyzerLoggingContext.cs" />
     <Compile Include="BuildCheck\Logging\AnalyzerLoggingContextFactory.cs" />
-    <Compile Include="BuildCheck\Logging\BuildAnalysisLoggingContextExtensions.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />

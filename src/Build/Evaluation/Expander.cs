@@ -5497,6 +5497,9 @@ namespace Microsoft.Build.Evaluation
 
             // TODO: This might get executed even before the logging service and BuildComponentCollections
             //  are initialized (for the toolset initialization)
+
+            // We are collecting the read data here - instead of in the PropertyTrackingEvaluatorDataWrapper
+            //  because that one is used only during evaluation, however already not from within Targets
             BuildCheckManagerProvider.GlobalBuildEngineDataConsumer?.ProcessPropertyRead(
                 propertyName, startIndex, endIndex,
                 elementLocation, isUninitialized, GetPropertyReadContext(propertyName, startIndex, endIndex),
