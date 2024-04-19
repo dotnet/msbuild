@@ -112,6 +112,7 @@ namespace Microsoft.Build.UnitTests.Shared
                 {
                     if (args != null)
                     {
+                        WriteOutput(args.Data);
                         output += args.Data + "\r\n";
                     }
                 };
@@ -119,9 +120,8 @@ namespace Microsoft.Build.UnitTests.Shared
                 p.OutputDataReceived += handler;
                 p.ErrorDataReceived += handler;
 
-                outputHelper?.WriteLine("Executing [{0} {1}]", process, parameters);
-                Console.WriteLine("Executing [{0} {1}]", process, parameters);
-
+                WriteOutput( $"Executing [{process} {parameters}]");
+                WriteOutput("==== OUTPUT ====");
                 p.Start();
                 p.BeginOutputReadLine();
                 p.BeginErrorReadLine();
@@ -148,18 +148,17 @@ namespace Microsoft.Build.UnitTests.Shared
                 successfulExit = p.ExitCode == 0;
             }
 
-            outputHelper?.WriteLine("==== OUTPUT ====");
-            outputHelper?.WriteLine(output);
-            outputHelper?.WriteLine("Process ID is " + pid + "\r\n");
-            outputHelper?.WriteLine("==============");
-
-            Console.WriteLine("==== OUTPUT ====");
-            Console.WriteLine(output);
-            Console.WriteLine("Process ID is " + pid + "\r\n");
-            Console.WriteLine("==============");
+            WriteOutput("Process ID is " + pid + "\r\n");
+            WriteOutput("==============");
 
             output += "Process ID is " + pid + "\r\n";
             return output;
+
+            void WriteOutput(string data)
+            {
+                outputHelper?.WriteLine(data);
+                Console.WriteLine(data);
+            }
         }
     }
 }
