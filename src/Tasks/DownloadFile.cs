@@ -146,7 +146,7 @@ namespace Microsoft.Build.Tasks
         private async Task DownloadAsync(Uri uri, CancellationToken cancellationToken)
         {
             // The main reason to use HttpClient vs WebClient is because we can pass a message handler for unit tests to mock
-#pragma warning disable CA2000 // Dispose objects before losing scope because the HttpClient is disposed by HTTPClient.Dispose()
+#pragma warning disable CA2000 // Dispose objects before losing scope because HttpClientHandler is disposed by HTTPClient.Dispose()
             using (var client = new HttpClient(HttpMessageHandler ?? new HttpClientHandler(), disposeHandler: true) { Timeout = TimeSpan.FromMilliseconds(Timeout) })
             {
                 // Only get the response without downloading the file so we can determine if the file is already up-to-date

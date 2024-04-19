@@ -283,10 +283,7 @@ namespace Microsoft.Build.Tasks
             }
             finally
             {
-                if (provider != null)
-                {
-                    provider.Dispose();
-                }
+                provider?.Dispose();
             }
         }
 
