@@ -16,6 +16,7 @@ jobs:
       if ($changedVersionsFile -ne $null) {
         $difference = git diff HEAD~1 $versionsFile
         $changedContent = $difference -join " "
+        # 'DotNetFinalVersionKind' is expected to be added only during the initial setup of the release branch
         $initialCommitPattern = '-\s*<VersionPrefix>\d+\.\d+\.\d+<\/VersionPrefix> \+\s*<VersionPrefix>\d+\.\d+\.\d+<\/VersionPrefix>.*<DotNetFinalVersionKind>release<\/DotNetFinalVersionKind>'
         $isInitialCommit = $changedContent -match $initialCommitPattern
         $pattern = '-\s*<VersionPrefix>\d+\.\d+\.(?<previous>\d+)<\/VersionPrefix>.* \+\s*<VersionPrefix>\d+\.\d+\.(?<current>\d+)<\/VersionPrefix>'
@@ -32,13 +33,8 @@ jobs:
         }
       }
 
-      $url = "https://api.github.com/repos/dotnet/msbuild/pulls/$(System.PullRequest.PullRequestNumber)"
-      Write-Host "Get PR information from $url"
-      $response = Invoke-RestMethod -Uri $url -Method Get
-      $isDotnetBot = $response.user.login -eq "dotnet-maestro[bot]"
-
-      if (!($isInitialCommit -or $isDotnetBot -or $isVersionBumped)) {
-        throw "Hello! I noticed that you're targeting one of our servicing branches. Please consider updating the version."
+      if (!($isInitialCommit -or $isVersionBumped)) {
+        throw "Hello! I noticed that you're targeting one of our servicing branches. You need to increase the revision version number (the last part) of 'VersionPrefix' in eng/Versions.props."
       }
     condition: startsWith(variables['System.PullRequest.TargetBranch'], 'vs')
     displayName: "Check if patch version is bumped up"
