@@ -701,11 +701,8 @@ internal sealed partial class TerminalLogger : INodeLogger
 
     private void UpdateNodeStatus(BuildEventContext buildEventContext, NodeStatus? nodeStatus)
     {
-        lock (_lock)
-        {
-            int nodeIndex = NodeIndexForContext(buildEventContext);
-            _nodes[nodeIndex] = nodeStatus;
-        }
+        int nodeIndex = NodeIndexForContext(buildEventContext);
+        _nodes[nodeIndex] = nodeStatus;
     }
 
     /// <summary>
