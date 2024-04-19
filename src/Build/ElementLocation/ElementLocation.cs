@@ -21,9 +21,12 @@ namespace Microsoft.Build.Construction
     public abstract class ElementLocation : IElementLocation, ITranslatable, IImmutable
     {
         /// <summary>
-        /// The singleton empty element location.
+        /// Gets the empty element location.
+        /// This is not to be used when something is "missing": that should have a null location.
+        /// It is to be used for the project location when the project has not been given a name.
+        /// In that case, it exists, but can't have a specific location.
         /// </summary>
-        private static readonly ElementLocation s_emptyElementLocation = new SmallElementLocation("", 0, 0);
+        public static ElementLocation EmptyLocation { get; } = new SmallElementLocation("", 0, 0);
 
         /// <summary>
         /// Gets the file from which this particular element originated.  It may
@@ -80,17 +83,6 @@ namespace Microsoft.Build.Construction
                     _ => File,
                 };
             }
-        }
-
-        /// <summary>
-        /// Gets the empty element location.
-        /// This is not to be used when something is "missing": that should have a null location.
-        /// It is to be used for the project location when the project has not been given a name.
-        /// In that case, it exists, but can't have a specific location.
-        /// </summary>
-        public static ElementLocation EmptyLocation
-        {
-            get { return s_emptyElementLocation; }
         }
 
         /// <inheritdoc />
