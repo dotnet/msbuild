@@ -806,6 +806,7 @@ namespace Microsoft.Build.Logging
             var taskName = ReadOptionalString();
             var projectFile = ReadOptionalString();
             var taskFile = ReadOptionalString();
+            var taskAssemblyLocation = _fileFormatVersion > 19 ? ReadOptionalString() : null;
 
             var e = new TaskStartedEventArgs(
                 fields.Message,
@@ -813,7 +814,8 @@ namespace Microsoft.Build.Logging
                 projectFile,
                 taskFile,
                 taskName,
-                fields.Timestamp);
+                fields.Timestamp,
+                taskAssemblyLocation);
             e.LineNumber = fields.LineNumber;
             e.ColumnNumber = fields.ColumnNumber;
             SetCommonFields(e, fields);
