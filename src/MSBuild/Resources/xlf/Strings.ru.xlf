@@ -1690,27 +1690,27 @@
       </trans-unit>
       <trans-unit id="TestSummary_BannerAndTotal">
         <source>Test summary: total: {0}</source>
-        <target state="new">Test summary: total: {0}</target>
+        <target state="translated">Сводка теста: всего: {0}</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="TestSummary_Duration">
         <source>duration: {0}s</source>
-        <target state="new">duration: {0}s</target>
+        <target state="translated">длительность: {0} с</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="TestSummary_Failed">
         <source>failed: {0}</source>
-        <target state="new">failed: {0}</target>
+        <target state="translated">сбой: {0}</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="TestSummary_Skipped">
         <source>skipped: {0}</source>
-        <target state="new">skipped: {0}</target>
+        <target state="translated">пропущено: {0}</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="TestSummary_Succeeded">
         <source>succeeded: {0}</source>
-        <target state="new">succeeded: {0}</target>
+        <target state="translated">успешно: {0}</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
