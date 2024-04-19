@@ -285,7 +285,7 @@
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
         <source>EvaluationContext objects created with SharingPolicy.Isolated or SharingPolicy.SharedSDKCache do not support being passed an MSBuildFileSystemBase file system.</source>
-        <target state="translated">使用 SharingPolicy.Isolated 创建的 EvaluationContext 对象。SharingPolicy.SharedSDKCache 不支持被传递 MSBuildFileSystemBase 文件系统。</target>
+        <target state="translated">使用 SharingPolicy.Isolated 或 SharingPolicy.SharedSDKCache 创建的 EvaluationContext 对象不支持被传递 MSBuildFileSystemBase 文件系统。</target>
         <note />
       </trans-unit>
       <trans-unit id="ItemReferencingSelfInTarget">

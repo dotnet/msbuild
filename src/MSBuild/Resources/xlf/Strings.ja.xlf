@@ -1691,27 +1691,27 @@
       </trans-unit>
       <trans-unit id="TestSummary_BannerAndTotal">
         <source>Test summary: total: {0}</source>
-        <target state="new">Test summary: total: {0}</target>
+        <target state="translated">テスト概要: 合計: {0}</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="TestSummary_Duration">
         <source>duration: {0}s</source>
-        <target state="new">duration: {0}s</target>
+        <target state="translated">期間: {0} 秒</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="TestSummary_Failed">
         <source>failed: {0}</source>
-        <target state="new">failed: {0}</target>
+        <target state="translated">失敗数: {0}</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="TestSummary_Skipped">
         <source>skipped: {0}</source>
-        <target state="new">skipped: {0}</target>
+        <target state="translated">スキップ済み数: {0}</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="TestSummary_Succeeded">
         <source>succeeded: {0}</source>
-        <target state="new">succeeded: {0}</target>
+        <target state="translated">成功数: {0}</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
