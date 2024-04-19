@@ -39,7 +39,7 @@ public class EndToEndTests : IDisposable
         _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", buildInOutOfProcessNode ? "1" : "0");
         _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore" +
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -p:BuildProjectReferences=false" +
             (analysisRequested ? " -analyze" : string.Empty), out bool success);
         _env.Output.WriteLine(output);
         success.ShouldBeTrue();
@@ -69,23 +69,22 @@ public class EndToEndTests : IDisposable
     {
         {
             string contents = $"""
-            <Project Sdk="Microsoft.NET.Sdk">
-                
+            <Project Sdk="Microsoft.NET.Sdk" DefaultTargets="ResolveProjectReferences">
                 <PropertyGroup>
-                <OutputType>Exe</OutputType>
-                <TargetFramework>net8.0</TargetFramework>
-                <ImplicitUsings>enable</ImplicitUsings>
-                <Nullable>enable</Nullable>
+                    <OutputType>Exe</OutputType>
+                    <TargetFramework>net8.0</TargetFramework>
+                    <ImplicitUsings>enable</ImplicitUsings>
+                    <Nullable>enable</Nullable>
                 </PropertyGroup>
-                  
+
                 <PropertyGroup Condition="$(Test) == true">
-                <TestProperty>Test</TestProperty>
+                    <TestProperty>Test</TestProperty>
                 </PropertyGroup>
-                 
+
                 <ItemGroup>
-                <ProjectReference Include=".\FooBar-Copy.csproj" />
+                    <ProjectReference Include=".\FooBar-copy.csproj" />
                 </ItemGroup>
-                
+
             </Project>
             """;
 
@@ -106,10 +105,6 @@ public class EndToEndTests : IDisposable
                 <ItemGroup>
                 <Reference Include="bin/foo.dll" />
                 </ItemGroup>
-                                
-                <Target Name="Hello">
-                <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
-                </Target>
                                
             </Project>
             """;
