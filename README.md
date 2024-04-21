@@ -2,7 +2,7 @@
 
 The Microsoft Build Engine is a platform for building applications. This engine, also known as MSBuild, provides an XML schema for a project file that controls how the build platform processes and builds software. Visual Studio uses MSBuild, but MSBuild can run without Visual Studio. By invoking msbuild.exe on your project or solution file, you can orchestrate and build products in environments where Visual Studio isn't installed.
 
-For more information on MSBuild, see the [MSBuild documentation](https://docs.microsoft.com/visualstudio/msbuild/msbuild) on docs.microsoft.com.
+For more information on MSBuild, see the [MSBuild documentation](https://learn.microsoft.com/visualstudio/msbuild/msbuild) on learn.microsoft.com.
 
 The [changelog](documentation/Changelog.md) has detailed information about changes made in different releases.
 
