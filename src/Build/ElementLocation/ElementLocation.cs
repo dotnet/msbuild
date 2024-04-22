@@ -192,7 +192,9 @@ namespace Microsoft.Build.Construction
 
 #if DEBUG
             string lookedUpFilePath = LookupFileByIndex(fileIndex);
-            Debug.Assert(Equals(filePath, lookedUpFilePath), $"File index {fileIndex} returned for path '{filePath}', but lookup for that index returns '{lookedUpFilePath}'");
+            Debug.Assert(
+                StringComparer.OrdinalIgnoreCase.Equals(filePath ?? "", lookedUpFilePath),
+                $"File index {fileIndex} returned for path '{filePath}', but lookup for that index returns '{lookedUpFilePath}'.");
 #endif
 
             // We use multiple packing schemes for this data. TypeSize below excludes the CLR's per-object overhead.
