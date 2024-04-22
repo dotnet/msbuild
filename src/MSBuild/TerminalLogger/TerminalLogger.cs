@@ -207,16 +207,21 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private bool _showCommandLine = false;
 
+    private CancellationToken _buildCancellationToken;
+
+    private bool _cancellationMessageRendered;
+
     /// <summary>
     /// Default constructor, used by the MSBuild logger infra.
     /// </summary>
-    public TerminalLogger()
+    public TerminalLogger(CancellationToken buildCancellationToken)
     {
+        _buildCancellationToken = buildCancellationToken;
         Terminal = new Terminal();
     }
 
-    public TerminalLogger(LoggerVerbosity verbosity)
-        : this()
+    public TerminalLogger(LoggerVerbosity verbosity, CancellationToken buildCancellationToken)
+        : this(buildCancellationToken)
     {
         Verbosity = verbosity;
     }
@@ -944,6 +949,17 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     internal void DisplayNodes()
     {
+        if (_buildCancellationToken.IsCancellationRequested)
+        {
+            if (!_cancellationMessageRendered)
+            {
+                Terminal.WriteLine(ResourceUtilities.GetResourceString("AbortingBuild"));
+                _cancellationMessageRendered = true;
+            }
+
+            return;
+        }
+
         NodesFrame newFrame = new NodesFrame(_nodes, width: Terminal.Width, height: Terminal.Height);
 
         // Do not render delta but clear everything if Terminal width or height have changed.

@@ -3980,7 +3980,7 @@ namespace Microsoft.Build.CommandLine
             if (!noConsoleLogger)
             {
                 // A central logger will be created for both single proc and multiproc.
-                TerminalLogger logger = new TerminalLogger(verbosity)
+                TerminalLogger logger = new TerminalLogger(verbosity, s_buildCancellationSource.Token)
                 {
                     Parameters = aggregatedLoggerParameters
                 };
