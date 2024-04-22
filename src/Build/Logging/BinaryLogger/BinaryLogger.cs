@@ -509,8 +509,8 @@ namespace Microsoft.Build.Logging
 
                 byte[] randomBytes = new byte[randomBytesNeeded];
                 random.NextBytes(randomBytes);
-                //Base64: A-Z a-z 0-9 +, /, =
-                //We are replacing '/' to get valid path
+                // Base64: [A-Z], [a-z], [0-9], +, /, =
+                // We are replacing '/' to get a valid path
                 string randomBase64String = Convert.ToBase64String(randomBytes).Replace('/', '_');
                 return randomBase64String.Substring(0, length);
             }
