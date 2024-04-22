@@ -12,7 +12,7 @@
     </Dependency>
     <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.7.0-3.23315.4">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>4cbfec964e59687cd9cc8601df42b936c9c06f63</Sha>
+      <Sha>fcfb85983ac231b870ed737d4be669b50d627b64</Sha>
       <SourceBuild RepoName="roslyn" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="6.0.0-beta.24218.1">
