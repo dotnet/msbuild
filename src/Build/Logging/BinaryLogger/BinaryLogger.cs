@@ -121,7 +121,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public ProjectImportsCollectionMode CollectProjectImports { get; set; } = ProjectImportsCollectionMode.Embed;
 
-        private string FilePath { get; set; }
+        internal string FilePath { get; private set; }
 
         /// <summary> Gets or sets the verbosity level.</summary>
         /// <remarks>
@@ -134,6 +134,12 @@ namespace Microsoft.Build.Logging
         /// Gets or sets the parameters. The only supported parameter is the output log file path (for example, "msbuild.binlog").
         /// </summary>
         public string Parameters { get; set; }
+
+        /// <summary>
+        /// Optional expander of wildcard(s) within the path parameter of a binlog <see cref="Parameters"/>.
+        /// See <see cref="IBinlogPathParameterExpander"/> for more details.
+        /// </summary>
+        public IBinlogPathParameterExpander PathParameterExpander { private get; set; } = new BinlogPathParameterExpander();
 
         /// <summary>
         /// Initializes the logger by subscribing to events of the specified event source and embedded content source.
@@ -417,15 +423,9 @@ namespace Microsoft.Build.Logging
                 {
                     omitInitialInfo = true;
                 }
-                else if (parameter.EndsWith(".binlog", StringComparison.OrdinalIgnoreCase))
+                else if (TryInterpretPathParameter(parameter, out string filePath))
                 {
-                    FilePath = parameter;
-                    if (FilePath.StartsWith("LogFile=", StringComparison.OrdinalIgnoreCase))
-                    {
-                        FilePath = FilePath.Substring("LogFile=".Length);
-                    }
-
-                    FilePath = FilePath.Trim('"');
+                    FilePath = filePath;
                 }
                 else
                 {
@@ -449,6 +449,70 @@ namespace Microsoft.Build.Logging
                 string helpKeyword;
                 string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, "InvalidFileLoggerFile", FilePath, e.Message);
                 throw new LoggerException(message, e, errorCode, helpKeyword);
+            }
+        }
+
+        private bool TryInterpretPathParameter(string parameter, out string filePath)
+        {
+            bool hasPathPrefix = parameter.StartsWith("LogFile=", StringComparison.OrdinalIgnoreCase);
+
+            bool isFileParam = hasPathPrefix || parameter.IndexOf('=') < 0;
+
+            if (!isFileParam)
+            {
+                filePath = null;
+                return false;
+            }
+
+            if (hasPathPrefix)
+            {
+                parameter = parameter.Substring("LogFile=".Length);
+            }
+
+            parameter = parameter.Trim('"');
+
+            bool isWildcard = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12) && parameter.Contains("{}");
+            bool hasProperExtension = parameter.EndsWith(".binlog", StringComparison.OrdinalIgnoreCase);
+            filePath = parameter;
+
+            if (!isWildcard)
+            {
+                return hasProperExtension;
+            }
+
+            filePath = parameter.Replace("{}", GetUniqueStamp(), StringComparison.Ordinal);
+
+            if (!hasProperExtension)
+            {
+                filePath += ".binlog";
+            }
+            return true;
+        }
+
+        private string GetUniqueStamp()
+            => PathParameterExpander.ExpandParameter(string.Empty);
+
+        private class BinlogPathParameterExpander : IBinlogPathParameterExpander
+        {
+            public string ExpandParameter(string parameters)
+                => $"{DateTime.UtcNow.ToString("yyyyMMddHHmmss")}-{GenerateRandomString(6)}";
+
+            private string GenerateRandomString(int length)
+            {
+                // Base64, 2^6 = 64
+                const int eachStringCharEncodesBites = 6;
+                const int eachByteHasBits = 8;
+                const double bytesNumNeededForSingleStringChar = eachStringCharEncodesBites / (double)eachByteHasBits;
+
+                int randomBytesNeeded = (int)Math.Ceiling(length * bytesNumNeededForSingleStringChar);
+                Random random = new Random();
+
+                byte[] randomBytes = new byte[randomBytesNeeded];
+                random.NextBytes(randomBytes);
+                //Base64: A-Z a-z 0-9 +, /, =
+                //We are replacing '/' to get valid path
+                string randomBase64String = Convert.ToBase64String(randomBytes).Replace('/', '_');
+                return randomBase64String.Substring(0, length);
             }
         }
     }
