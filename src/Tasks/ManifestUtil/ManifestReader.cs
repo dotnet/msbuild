@@ -224,7 +224,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private static Manifest Deserialize(Stream s)
         {
             s.Position = 0;
-            using var r = new XmlTextReader(s) { DtdProcessing = DtdProcessing.Ignore };
+#pragma warning disable CA2000 // Dispose objects before losing scope is suppressed because the stream will be handled in the caller
+            var r = new XmlTextReader(s) { DtdProcessing = DtdProcessing.Ignore };
+#pragma warning restore CA2000 // Dispose objects before losing scope
 
             do
             {
