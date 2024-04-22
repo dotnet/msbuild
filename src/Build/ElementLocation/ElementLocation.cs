@@ -190,7 +190,10 @@ namespace Microsoft.Build.Construction
             // TODO store the last run's value and check if this is for the same file. If so, skip the dictionary lookup (tree walk).
             int fileIndex = GetOrAddFileIndex(filePath);
 
-            Debug.Assert(Equals(filePath, LookupFileByIndex(fileIndex)));
+#if DEBUG
+            string lookedUpFilePath = LookupFileByIndex(fileIndex);
+            Debug.Assert(Equals(filePath, lookedUpFilePath), $"File index {fileIndex} returned for path '{filePath}', but lookup for that index returns '{lookedUpFilePath}'");
+#endif
 
             // We use multiple packing schemes for this data. TypeSize below excludes the CLR's per-object overhead.
             //
