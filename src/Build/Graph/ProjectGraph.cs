@@ -59,7 +59,7 @@ namespace Microsoft.Build.Graph
 
         private readonly Lazy<IReadOnlyCollection<ProjectGraphNode>> _projectNodesTopologicallySorted;
 
-        private readonly EvaluationContext _evaluationContext = EvaluationContext.Create(EvaluationContext.SharingPolicy.Shared);
+        private readonly EvaluationContext _evaluationContext = null;
 
         private GraphBuilder.GraphEdges Edges { get; }
 
@@ -425,7 +425,11 @@ namespace Microsoft.Build.Graph
 
             var measurementInfo = BeginMeasurement();
 
-            projectInstanceFactory ??= DefaultProjectInstanceFactory;
+            if (projectInstanceFactory is null)
+            {
+                _evaluationContext = EvaluationContext.Create(EvaluationContext.SharingPolicy.Shared);
+                projectInstanceFactory = DefaultProjectInstanceFactory;
+            }
 
             var graphBuilder = new GraphBuilder(
                 entryPoints,
@@ -833,6 +837,8 @@ namespace Microsoft.Build.Graph
             Dictionary<string, string> globalProperties,
             ProjectCollection projectCollection)
         {
+            Debug.Assert(_evaluationContext is not null);
+
             return StaticProjectInstanceFactory(
                                 projectPath,
                                 globalProperties,
