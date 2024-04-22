@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml;
@@ -62,6 +63,22 @@ namespace Microsoft.Build.UnitTests.Construction
         {
             _ = Assert.Throws<InternalErrorException>(
                 () => ElementLocation.Create(file, line, column));
+        }
+
+        [Fact]
+        public void Create_FileIndexPacking()
+        {
+            int i = 0;
+
+            for (int j = 0; j < ushort.MaxValue; j++)
+            {
+                Assert.Contains("SmallFileElementLocation", Next());
+            }
+
+            // If the file index exceed 65,535 items, we use a larger storage type.
+            Assert.Contains("LargeFileElementLocation", Next());
+
+            string? Next() => ElementLocation.Create("file" + i++, 0, 0).GetType().FullName;
         }
 
         [Fact]
