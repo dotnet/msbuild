@@ -534,6 +534,10 @@
     <value>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</value>
     <comment>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</comment>
   </data>
+  <data name="ImportedProjectFromVSDistribution" xml:space="preserve">
+    <value>MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </value>
+    <comment>{StrBegin="MSB4278: "}LOCALIZATION: &lt;Import&gt; should not be localized.</comment>
+  </data>
   <data name="ImportedProjectFromExtensionsPathNotFoundFromAppConfig" xml:space="preserve">
     <value>MSB4226: The imported project "{0}" was not found. Also, tried to find "{1}" in the fallback search path(s) for {2} - {3} . These search paths are defined in "{4}". Confirm that the path in the &lt;Import&gt; declaration is correct, and that the file exists on disk in one of the search paths.</value>
     <comment>{StrBegin="MSB4226: "}LOCALIZATION: &lt;Import&gt; should not be localized.</comment>
@@ -1907,7 +1911,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Static graph loaded in {0} seconds: {1} nodes, {2} edges</value>
   </data>
   <data name="IsolatedContextDoesNotSupportFileSystem" xml:space="preserve">
-    <value>EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system.</value>
+    <value>EvaluationContext objects created with SharingPolicy.Isolated or SharingPolicy.SharedSDKCache do not support being passed an MSBuildFileSystemBase file system.</value>
   </data>
   <data name="LoadingProjectCachePlugin" xml:space="preserve">
     <value>Loading the following project cache plugin: {0}</value>
@@ -1996,7 +2000,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
     </comment>
   </data>
-   <data name="DefaultSDKResolverError" xml:space="preserve">
+  <data name="DefaultSDKResolverError" xml:space="preserve">
     <value>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</value>
   </data>
   <data name="SDKResolverReturnedNull" xml:space="preserve">
@@ -2091,10 +2095,13 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION: {0} is integer number denoting number of bytes. 'int.MaxValue' should not be translated.
     </comment>
   </data>
+  <data name="TaskAssemblyLocationMismatch" xml:space="preserve">
+    <value>Task assembly was loaded from '{0}' while the desired location was '{1}'.</value>
+  </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999
 
-        Next message code should be MSB4278
+        Next message code should be MSB4279
 
         Don't forget to update this comment after using a new code.
   -->

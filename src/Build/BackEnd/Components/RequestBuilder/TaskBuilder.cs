@@ -115,7 +115,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The task execution host for in-proc tasks.
         /// </summary>
-        private ITaskExecutionHost _taskExecutionHost;
+        private TaskExecutionHost _taskExecutionHost;
 
         /// <summary>
         /// The object used to synchronize access to the task execution host.
@@ -423,10 +423,12 @@ namespace Microsoft.Build.BackEnd
                 {
                     // We need to find the task before logging the task started event so that the using task statement comes before the task started event
                     IDictionary<string, string> taskIdentityParameters = GatherTaskIdentityParameters(bucket.Expander);
-                    TaskRequirements? requirements = _taskExecutionHost.FindTask(taskIdentityParameters);
+                    (TaskRequirements? requirements, TaskFactoryWrapper taskFactoryWrapper) = _taskExecutionHost.FindTask(taskIdentityParameters);
+                    string taskAssemblyLocation = taskFactoryWrapper?.TaskFactoryLoadedType?.Path;
+
                     if (requirements != null)
                     {
-                        TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
+                        TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance, taskAssemblyLocation);
                         MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
                         _buildRequestEntry.Request.CurrentTaskContext = taskLoggingContext.BuildEventContext;
 
@@ -652,7 +654,7 @@ namespace Microsoft.Build.BackEnd
                 ProjectErrorUtilities.ThrowInvalidProject(_targetChildInstance.Location, "TaskDeclarationOrUsageError", _taskNode.Name);
             }
 
-            using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, (_taskExecutionHost as TaskExecutionHost)?.TaskInstance?.GetType());
+            using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, _taskExecutionHost?.TaskInstance?.GetType());
 
             try
             {
@@ -734,7 +736,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="bucket">The batching bucket</param>
         /// <param name="howToExecuteTask">The task execution mode</param>
         /// <returns>The result of running the task.</returns>
-        private async Task<WorkUnitResult> ExecuteInstantiatedTask(ITaskExecutionHost taskExecutionHost, TaskLoggingContext taskLoggingContext, TaskHost taskHost, ItemBucket bucket, TaskExecutionMode howToExecuteTask)
+        private async Task<WorkUnitResult> ExecuteInstantiatedTask(TaskExecutionHost taskExecutionHost, TaskLoggingContext taskLoggingContext, TaskHost taskHost, ItemBucket bucket, TaskExecutionMode howToExecuteTask)
         {
             UpdateContinueOnError(bucket, taskHost);
 
@@ -754,20 +756,13 @@ namespace Microsoft.Build.BackEnd
                 Exception taskException = null;
 
                 // If this is the MSBuild task, we need to execute it's special internal method.
-                TaskExecutionHost host = taskExecutionHost as TaskExecutionHost;
-                Type taskType = host.TaskInstance.GetType();
-
                 try
                 {
-                    if (taskType == typeof(MSBuild))
+                    if (taskExecutionHost.TaskInstance is MSBuild msbuildTask)
                     {
-                        MSBuild msbuildTask = host.TaskInstance as MSBuild;
-
-                        ErrorUtilities.VerifyThrow(msbuildTask != null, "Unexpected MSBuild internal task.");
-
                         var undeclaredProjects = GetUndeclaredProjects(msbuildTask);
 
-                        if (undeclaredProjects != null && undeclaredProjects.Count != 0)
+                        if (undeclaredProjects?.Count > 0)
                         {
                             _continueOnError = ContinueOnError.ErrorAndStop;
 
@@ -799,9 +794,8 @@ namespace Microsoft.Build.BackEnd
                             }
                         }
                     }
-                    else if (taskType == typeof(CallTarget))
+                    else if (taskExecutionHost.TaskInstance is CallTarget callTargetTask)
                     {
-                        CallTarget callTargetTask = host.TaskInstance as CallTarget;
                         taskResult = await callTargetTask.ExecuteInternal();
                     }
                     else
@@ -814,8 +808,18 @@ namespace Microsoft.Build.BackEnd
                         }
                     }
                 }
-                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex) && Environment.GetEnvironmentVariable("MSBUILDDONOTCATCHTASKEXCEPTIONS") != "1")
+                catch (Exception ex)
                 {
+                    if (ExceptionHandling.IsCriticalException(ex) || Environment.GetEnvironmentVariable("MSBUILDDONOTCATCHTASKEXCEPTIONS") == "1")
+                    {
+                        taskLoggingContext.LogFatalTaskError(
+                            ex,
+                            new BuildEventFileInfo(_targetChildInstance.Location),
+                            _taskNode.Name);
+
+                        throw new CriticalTaskException(ex);
+                    }
+
                     taskException = ex;
                 }
 
@@ -941,7 +945,7 @@ namespace Microsoft.Build.BackEnd
                 // When a task fails it must log an error. If a task fails to do so,
                 // that is logged as an error. MSBuild tasks are an exception because
                 // errors are not logged directly from them, but the tasks spawned by them.
-                IBuildEngine be = host.TaskInstance.BuildEngine;
+                IBuildEngine be = taskExecutionHost.TaskInstance.BuildEngine;
                 if (taskReturned // if the task returned
                     && !taskResult // and it returned false
                     && !taskLoggingContext.HasLoggedErrors // and it didn't log any errors
@@ -1062,7 +1066,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="howToExecuteTask">The task execution mode</param>
         /// <param name="bucket">The bucket to which the task execution belongs.</param>
         /// <returns>true, if successful</returns>
-        private bool GatherTaskOutputs(ITaskExecutionHost taskExecutionHost, TaskExecutionMode howToExecuteTask, ItemBucket bucket)
+        private bool GatherTaskOutputs(TaskExecutionHost taskExecutionHost, TaskExecutionMode howToExecuteTask, ItemBucket bucket)
         {
             bool gatheredTaskOutputsSuccessfully = true;
 

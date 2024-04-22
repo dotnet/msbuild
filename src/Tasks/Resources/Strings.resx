@@ -1713,6 +1713,10 @@
   <data name="ResolveAssemblyReference.SearchPath">
     <value>For SearchPath "{0}".</value>
   </data>
+  <data name="ResolveAssemblyReference.SearchPathAddedByParentAssembly">
+    <value>For SearchPath "{0}" (added by referencing assembly "{1}").</value>
+    <comment> {1} is the name of the parent assembly for which SearchPath was used.</comment>
+  </data>
   <data name="ResolveAssemblyReference.UnificationByAppConfig">
     <value>Using this version instead of original version "{0}" in "{2}" because of a binding redirect entry in the file "{1}".</value>
   </data>

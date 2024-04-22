@@ -191,7 +191,9 @@ namespace Microsoft.Build.UnitTests
                 null,
                 projectFile: "C:\\project.proj",
                 taskFile: "C:\\common.targets",
-                taskName: "Csc");
+                taskName: "Csc",
+                DateTime.Now,
+                "TaskAssemblyLocation");
             args.LineNumber = 42;
             args.ColumnNumber = 999;
 
@@ -200,7 +202,8 @@ namespace Microsoft.Build.UnitTests
                 e => e.TaskFile,
                 e => e.TaskName,
                 e => e.LineNumber.ToString(),
-                e => e.ColumnNumber.ToString());
+                e => e.ColumnNumber.ToString(),
+                e => e.TaskAssemblyLocation);
         }
 
         [Fact]
@@ -546,6 +549,7 @@ namespace Microsoft.Build.UnitTests
             Roundtrip(args,
                 e => e.ResponseFilePath);
         }
+
 
         [Fact]
         public void RoundtripCriticalBuildMessageEventArgs()

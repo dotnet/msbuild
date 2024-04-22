@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using Microsoft.Build.Evaluation;
@@ -169,7 +170,10 @@ namespace Microsoft.Build.UnitTests
             Assert.False(result);
             Assert.Equal(expectedExitCode, exec.ExitCode);
             ((MockEngine)exec.BuildEngine).AssertLogContains("MSB5002");
-            Assert.Equal(1, ((MockEngine)exec.BuildEngine).Warnings);
+            int warningsCount = ((MockEngine)exec.BuildEngine).Warnings;
+            warningsCount.ShouldBe(1,
+                $"Expected 1 warning, encountered {warningsCount}: " + string.Join(",",
+                    ((MockEngine)exec.BuildEngine).WarningEvents.Select(w => w.Message)));
 
             // ToolTask does not log an error on timeout.
             Assert.Equal(0, ((MockEngine)exec.BuildEngine).Errors);
@@ -191,16 +195,8 @@ namespace Microsoft.Build.UnitTests
             // ToolTask does not log an error on timeout.
             mockEngine.Errors.ShouldBe(0);
 
-            if (NativeMethodsShared.IsMono)
-            {
-                const int STILL_ACTIVE = 259; // When Process.WaitForExit times out.
-                exec.ExitCode.ShouldBeOneOf(137, STILL_ACTIVE);
-            }
-            else
-            {
-                // On non-Windows the exit code of a killed process is 128 + SIGKILL = 137
-                exec.ExitCode.ShouldBe(NativeMethodsShared.IsWindows ? -1 : 137);
-            }
+            // On non-Windows the exit code of a killed process is 128 + SIGKILL = 137
+            exec.ExitCode.ShouldBe(NativeMethodsShared.IsWindows ? -1 : 137);
         }
 
         [UnixOnlyFact]
@@ -1031,6 +1027,25 @@ echo line 3"" />
 
                     result.OverallResult.ShouldBe(BuildResultCode.Success);
                 }
+            }
+        }
+
+        [Fact]
+        public void ConsoleOutputDoesNotTrimLeadingWhitespace()
+        {
+            string lineWithLeadingWhitespace = "    line with some leading whitespace";
+
+            using (var env = TestEnvironment.Create(_output))
+            {
+                var textFilePath = env.CreateFile("leading-whitespace.txt", lineWithLeadingWhitespace).Path;
+                Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? $"type {textFilePath}" : $"cat {textFilePath}");
+                exec.ConsoleToMSBuild = true;
+
+                bool result = exec.Execute();
+
+                result.ShouldBeTrue();
+                exec.ConsoleOutput.Length.ShouldBe(1);
+                exec.ConsoleOutput[0].ItemSpec.ShouldBe(lineWithLeadingWhitespace);
             }
         }
     }

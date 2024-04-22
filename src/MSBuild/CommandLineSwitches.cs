@@ -50,6 +50,7 @@ namespace Microsoft.Build.CommandLine
 #if DEBUG
             WaitForDebugger,
 #endif
+            // This has to be kept as last enum value
             NumberOfParameterlessSwitches
         }
 
@@ -98,6 +99,7 @@ namespace Microsoft.Build.CommandLine
             WarningsNotAsErrors,
             WarningsAsMessages,
             BinaryLogger,
+            Analyze,
             Restore,
             ProfileEvaluation,
             RestoreProperty,
@@ -115,6 +117,9 @@ namespace Microsoft.Build.CommandLine
             GetProperty,
             GetItem,
             GetTargetResult,
+            GetResultOutputFile,
+            FeatureAvailability,
+            // This has to be kept as last enum value
             NumberOfParameterizedSwitches,
         }
 
@@ -263,6 +268,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "warnnotaserror", "noerr" },           ParameterizedSwitch.WarningsNotAsErrors,        null,                           true,           "MissingWarnNotAsErrorParameterError", true,   false),
             new ParameterizedSwitchInfo(  new string[] { "warnasmessage", "nowarn" },           ParameterizedSwitch.WarningsAsMessages,         null,                           true,           "MissingWarnAsMessageParameterError",  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "binarylogger", "bl" },                ParameterizedSwitch.BinaryLogger,               null,                           false,          null,                                  true,   false),
+            new ParameterizedSwitchInfo(  new string[] { "analyze", },                     ParameterizedSwitch.Analyze,                    null,                           false,          null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "restore", "r" },                      ParameterizedSwitch.Restore,                    null,                           false,          null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "profileevaluation", "prof" },         ParameterizedSwitch.ProfileEvaluation,          null,                           false,          "MissingProfileParameterError",        true,   false),
             new ParameterizedSwitchInfo(  new string[] { "restoreproperty", "rp" },             ParameterizedSwitch.RestoreProperty,            null,                           true,           "MissingPropertyError",                true,   false),
@@ -280,6 +286,8 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "getProperty" },                       ParameterizedSwitch.GetProperty,                null,                           true,           "MissingGetPropertyError",             true,   false),
             new ParameterizedSwitchInfo(  new string[] { "getItem" },                           ParameterizedSwitch.GetItem,                    null,                           true,           "MissingGetItemError",                 true,   false),
             new ParameterizedSwitchInfo(  new string[] { "getTargetResult" },                   ParameterizedSwitch.GetTargetResult,            null,                           true,           "MissingGetTargetResultError",         true,   false),
+            new ParameterizedSwitchInfo(  new string[] { "getResultOutputFile" },               ParameterizedSwitch.GetResultOutputFile,        null,                           true,           "MissingGetResultFileError",           true,   false),
+            new ParameterizedSwitchInfo(  new string[] { "featureavailability", "fa" },         ParameterizedSwitch.FeatureAvailability,        null,                           true,           "MissingFeatureAvailabilityError",     true,   false),
         };
 
         /// <summary>

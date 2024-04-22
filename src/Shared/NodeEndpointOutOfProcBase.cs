@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 #if CLR2COMPATIBILITY
 using Microsoft.Build.Shared.Concurrent;
 #else
@@ -14,6 +15,7 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 #if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
 using System.Security.AccessControl;
+
 #endif
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
 using System.Security.Principal;
@@ -29,16 +31,17 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// This is an implementation of INodeEndpoint for the out-of-proc nodes.  It acts only as a client.
     /// </summary>
+    [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "It is expected to keep the stream open for the process lifetime")]
     internal abstract class NodeEndpointOutOfProcBase : INodeEndpoint
     {
         #region Private Data
 
-#if NETCOREAPP2_1_OR_GREATER || MONO
+#if NETCOREAPP2_1_OR_GREATER
         /// <summary>
         /// The amount of time to wait for the client to connect to the host.
         /// </summary>
         private const int ClientConnectTimeout = 60000;
-#endif // NETCOREAPP2_1 || MONO
+#endif // NETCOREAPP2_1
 
         /// <summary>
         /// The size of the buffers to use for named pipes
@@ -212,51 +215,46 @@ namespace Microsoft.Build.BackEnd
             pipeName ??= NamedPipeUtil.GetPlatformSpecificPipeName();
 
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
-            if (!NativeMethodsShared.IsMono)
-            {
-                SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
-                PipeSecurity security = new PipeSecurity();
+            SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
+            PipeSecurity security = new PipeSecurity();
 
-                // Restrict access to just this account.  We set the owner specifically here, and on the
-                // pipe client side they will check the owner against this one - they must have identical
-                // SIDs or the client will reject this server.  This is used to avoid attacks where a
-                // hacked server creates a less restricted pipe in an attempt to lure us into using it and
-                // then sending build requests to the real pipe client (which is the MSBuild Build Manager.)
-                PipeAccessRule rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite, AccessControlType.Allow);
-                security.AddAccessRule(rule);
-                security.SetOwner(identifier);
+            // Restrict access to just this account.  We set the owner specifically here, and on the
+            // pipe client side they will check the owner against this one - they must have identical
+            // SIDs or the client will reject this server.  This is used to avoid attacks where a
+            // hacked server creates a less restricted pipe in an attempt to lure us into using it and
+            // then sending build requests to the real pipe client (which is the MSBuild Build Manager.)
+            PipeAccessRule rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite, AccessControlType.Allow);
+            security.AddAccessRule(rule);
+            security.SetOwner(identifier);
 
-                _pipeServer = new NamedPipeServerStream(
-                    pipeName,
-                    PipeDirection.InOut,
-                    1, // Only allow one connection at a time.
-                    PipeTransmissionMode.Byte,
-                    PipeOptions.Asynchronous | PipeOptions.WriteThrough
+            _pipeServer = new NamedPipeServerStream(
+                pipeName,
+                PipeDirection.InOut,
+                1, // Only allow one connection at a time.
+                PipeTransmissionMode.Byte,
+                PipeOptions.Asynchronous | PipeOptions.WriteThrough
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                    | PipeOptions.CurrentUserOnly
+                | PipeOptions.CurrentUserOnly
 #endif
-                    ,
-                    PipeBufferSize, // Default input buffer
-                    PipeBufferSize,  // Default output buffer
-                    security,
-                    HandleInheritability.None);
-            }
-            else
-#endif
-            {
-                _pipeServer = new NamedPipeServerStream(
-                    pipeName,
-                    PipeDirection.InOut,
-                    1, // Only allow one connection at a time.
-                    PipeTransmissionMode.Byte,
-                    PipeOptions.Asynchronous | PipeOptions.WriteThrough
+                ,
+                PipeBufferSize, // Default input buffer
+                PipeBufferSize,  // Default output buffer
+                security,
+                HandleInheritability.None);
+#else
+            _pipeServer = new NamedPipeServerStream(
+                pipeName,
+                PipeDirection.InOut,
+                1, // Only allow one connection at a time.
+                PipeTransmissionMode.Byte,
+                PipeOptions.Asynchronous | PipeOptions.WriteThrough
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                    | PipeOptions.CurrentUserOnly
+                | PipeOptions.CurrentUserOnly
 #endif
-                    ,
-                    PipeBufferSize, // Default input buffer
-                    PipeBufferSize);  // Default output buffer
-            }
+                ,
+                PipeBufferSize, // Default input buffer
+                PipeBufferSize);  // Default output buffer
+#endif
         }
 
         #endregion
@@ -402,7 +400,7 @@ namespace Microsoft.Build.BackEnd
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                             int handshakePart = _pipeServer.ReadIntForHandshake(
                                 byteToAccept: i == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
-#if NETCOREAPP2_1_OR_GREATER || MONO
+#if NETCOREAPP2_1_OR_GREATER
                             , ClientConnectTimeout /* wait a long time for the handshake from this side */
 #endif
                             );
@@ -420,7 +418,7 @@ namespace Microsoft.Build.BackEnd
                         if (gotValidConnection)
                         {
                             // To ensure that our handshake and theirs have the same number of bytes, receive and send a magic number indicating EOS.
-#if NETCOREAPP2_1_OR_GREATER || MONO
+#if NETCOREAPP2_1_OR_GREATER
                             _pipeServer.ReadEndOfHandshakeSignal(false, ClientConnectTimeout); /* wait a long time for the handshake from this side */
 #else
                             _pipeServer.ReadEndOfHandshakeSignal(false);

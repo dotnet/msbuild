@@ -34,7 +34,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Constructs a task logging context from a parent target context and a task node.
         /// </summary>
-        internal TaskLoggingContext(TargetLoggingContext targetLoggingContext, string projectFullPath, ProjectTargetInstanceChild task)
+        internal TaskLoggingContext(TargetLoggingContext targetLoggingContext, string projectFullPath, ProjectTargetInstanceChild task, string taskAssemblyLocation)
             : base(targetLoggingContext)
         {
             _targetLoggingContext = targetLoggingContext;
@@ -72,7 +72,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 projectFullPath,
                 task.Location.File,
                 task.Location.Line,
-                task.Location.Column);
+                task.Location.Column,
+                taskAssemblyLocation);
             this.IsValid = true;
         }
 

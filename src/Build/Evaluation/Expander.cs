@@ -1478,7 +1478,15 @@ namespace Microsoft.Build.Evaluation
                 else
                 {
                     // The fall back is always to just convert to a string directly.
-                    convertedString = valueToConvert.ToString();
+                    // Issue: https://github.com/dotnet/msbuild/issues/9757
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
+                    {
+                        convertedString = Convert.ToString(valueToConvert, CultureInfo.InvariantCulture);
+                    }
+                    else
+                    {
+                        convertedString = valueToConvert.ToString();
+                    }
                 }
 
                 return convertedString;
@@ -4159,7 +4167,15 @@ namespace Microsoft.Build.Evaluation
                         {
                             if (TryGetArg(args, out string arg0))
                             {
-                                returnVal = IntrinsicFunctions.StableStringHash(arg0);
+                                // Prevent loading methods refs from StringTools if ChangeWave opted out.
+                                returnVal = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10)
+                                    ? IntrinsicFunctions.StableStringHash(arg0)
+                                    : IntrinsicFunctions.StableStringHashLegacy(arg0);
+                                return true;
+                            }
+                            else if (TryGetArgs(args, out string arg1, out string arg2) && Enum.TryParse<IntrinsicFunctions.StringHashingAlgorithm>(arg2, true, out var hashAlgorithm))
+                            {
+                                returnVal = IntrinsicFunctions.StableStringHash(arg1, hashAlgorithm);
                                 return true;
                             }
                         }
@@ -4168,6 +4184,14 @@ namespace Microsoft.Build.Evaluation
                             if (TryGetArg(args, out Version arg0))
                             {
                                 returnVal = IntrinsicFunctions.AreFeaturesEnabled(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.CheckFeatureAvailability), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.CheckFeatureAvailability(arg0);
                                 return true;
                             }
                         }
@@ -5284,7 +5308,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 // This could be expanded to an allow / deny list.
-                return methodName != "GetType";
+                return !string.Equals("GetType", methodName, StringComparison.OrdinalIgnoreCase);
             }
 
             /// <summary>

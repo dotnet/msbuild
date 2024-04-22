@@ -19,12 +19,11 @@ namespace Microsoft.Build.BackEnd
     internal class ResultsCache : IResultsCache
     {
         /// <summary>
-        /// The presence of any of these flags affects build result for the specified request.
+        /// The presence of any of these flags affects build result for the specified request. Not included are ProvideProjectStateAfterBuild
+        /// and ProvideSubsetOfStateAfterBuild which require additional checks.
         /// </summary>
         private const BuildRequestDataFlags FlagsAffectingBuildResults =
-            BuildRequestDataFlags.ProvideProjectStateAfterBuild
-            | BuildRequestDataFlags.SkipNonexistentTargets
-            | BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports
+            BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports
             | BuildRequestDataFlags.FailOnUnresolvedSdk;
 
         /// <summary>
@@ -149,7 +148,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Attempts to satisfy the request from the cache.  The request can be satisfied only if:
-        /// 1. The passed BuildRequestDataFlags can not affect the result data.
+        /// 1. The passed BuildRequestDataFlags and RequestedProjectStateFilter are compatible with the result data.
         /// 2. All specified targets in the request have successful results in the cache or if the sequence of target results
         ///    includes 0 or more successful targets followed by at least one failed target.
         /// 3. All initial targets in the configuration for the request have non-skipped results in the cache.
@@ -173,8 +172,8 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_resultsByConfiguration.TryGetValue(request.ConfigurationId, out BuildResult allResults))
                 {
-                    bool buildDataFlagsSatisfied = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10)
-                        ? CheckBuildDataFlagsResults(request.BuildRequestDataFlags, allResults.BuildRequestDataFlags) : true;
+                    bool buildDataFlagsSatisfied = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12)
+                        ? AreBuildResultFlagsCompatible(request, allResults) : true;
 
                     if (buildDataFlagsSatisfied)
                     {
@@ -345,18 +344,54 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Checks results for the specified build flags.
+        /// Returns true if the flags and project state filter of the given build request are compatible with the given build result.
         /// </summary>
-        /// <param name="buildRequestDataFlags">The current request build flags.</param>
-        /// <param name="buildResultDataFlags">The existing build result data flags.</param>
-        /// <returns>False if there is any difference in the data flags that can cause missed build data, true otherwise.</returns>
-        private static bool CheckBuildDataFlagsResults(BuildRequestDataFlags buildRequestDataFlags, BuildRequestDataFlags buildResultDataFlags) =>
+        /// <param name="buildRequest">The current build request.</param>
+        /// <param name="buildResult">The candidate build result.</param>
+        /// <returns>True if the flags and project state filter of the build request is compatible with the build result.</returns>
+        private static bool AreBuildResultFlagsCompatible(BuildRequest buildRequest, BuildResult buildResult)
+        {
+            BuildRequestDataFlags buildRequestDataFlags = buildRequest.BuildRequestDataFlags;
+            BuildRequestDataFlags buildResultDataFlags = buildResult.BuildRequestDataFlags;
 
-            // Even if both buildRequestDataFlags and buildResultDataFlags have ProvideSubsetOfStateAfterBuild flag,
-            // the underlying RequestedProjectState may have different user filters defined.
-            // It is more reliable to ignore the cached value. 
-            !buildRequestDataFlags.HasFlag(BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild)
-            && (buildRequestDataFlags & FlagsAffectingBuildResults) == (buildResultDataFlags & FlagsAffectingBuildResults);
+            if ((buildRequestDataFlags & FlagsAffectingBuildResults) != (buildResultDataFlags & FlagsAffectingBuildResults))
+            {
+                // Mismatch in flags that can affect build results -> not compatible.
+                return false;
+            }
+
+            if (HasProvideProjectStateAfterBuild(buildRequestDataFlags))
+            {
+                // If full state is requested, we must have full state in the result.
+                return HasProvideProjectStateAfterBuild(buildResultDataFlags);
+            }
+
+            if (HasProvideSubsetOfStateAfterBuild(buildRequestDataFlags))
+            {
+                // If partial state is requested, we must have full or partial-and-compatible state in the result.
+                if (HasProvideProjectStateAfterBuild(buildResultDataFlags))
+                {
+                    return true;
+                }
+                if (!HasProvideSubsetOfStateAfterBuild(buildResultDataFlags))
+                {
+                    return false;
+                }
+
+                // Verify that the requested subset is compatible with the result.
+                return buildRequest.RequestedProjectState is not null &&
+                    buildResult.ProjectStateAfterBuild?.RequestedProjectStateFilter is not null &&
+                    buildRequest.RequestedProjectState.IsSubsetOf(buildResult.ProjectStateAfterBuild.RequestedProjectStateFilter);
+            }
+
+            return true;
+
+            static bool HasProvideProjectStateAfterBuild(BuildRequestDataFlags flags)
+                => (flags & BuildRequestDataFlags.ProvideProjectStateAfterBuild) == BuildRequestDataFlags.ProvideProjectStateAfterBuild;
+
+            static bool HasProvideSubsetOfStateAfterBuild(BuildRequestDataFlags flags)
+                => (flags & BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild) == BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild;
+        }
 
         public IEnumerator<BuildResult> GetEnumerator()
         {

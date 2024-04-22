@@ -131,7 +131,7 @@ namespace Microsoft.Build.Tasks
             };
 
             // create the code provider
-            var codegenerator = CodeDomProvider.CreateProvider("cs");
+            using var codegenerator = CodeDomProvider.CreateProvider("cs");
             CompilerResults results;
             bool debugXamlTask = Environment.GetEnvironmentVariable("MSBUILDWRITEXAMLTASK") == "1";
             if (debugXamlTask)

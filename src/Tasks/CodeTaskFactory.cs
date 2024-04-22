@@ -658,23 +658,6 @@ namespace Microsoft.Build.Tasks
                 {
                     candidateAssemblyLocation = candidateAssembly.Location;
                 }
-                else if (NativeMethodsShared.IsMono)
-                {
-                    string path = Path.Combine(
-                        NativeMethodsShared.FrameworkCurrentPath,
-                        "Facades",
-                        Path.GetFileName(partialName));
-                    if (!FileSystems.Default.FileExists(path))
-                    {
-                        var newPath = path + ".dll";
-                        path = !FileSystems.Default.FileExists(newPath) ? path + ".exe" : newPath;
-                    }
-                    candidateAssembly = Assembly.UnsafeLoadFrom(path);
-                    if (candidateAssembly != null)
-                    {
-                        candidateAssemblyLocation = candidateAssembly.Location;
-                    }
-                }
 #pragma warning restore 618, 612
                 return candidateAssemblyLocation;
             }
@@ -755,7 +738,7 @@ namespace Microsoft.Build.Tasks
 
                 // Horrible code dom / compilation declarations
                 var codeBuilder = new StringBuilder();
-                var writer = new StringWriter(codeBuilder, CultureInfo.CurrentCulture);
+                using var writer = new StringWriter(codeBuilder, CultureInfo.CurrentCulture);
                 var codeGeneratorOptions = new CodeGeneratorOptions
                 {
                     BlankLinesBetweenMembers = true,
@@ -807,6 +790,10 @@ namespace Microsoft.Build.Tasks
 
                 // Our code generation is complete, grab the source from the builder ready for compilation
                 string fullCode = codeBuilder.ToString();
+
+                // Embed generated file in the binlog
+                string fileNameInBinlog = $"{Guid.NewGuid()}-{_nameOfTask}-compilation-file.tmp";
+                _log.LogIncludeGeneratedFile(fileNameInBinlog, fullCode);
 
                 var fullSpec = new FullTaskSpecification(finalReferencedAssemblies, fullCode);
                 if (!s_compiledTaskCache.TryGetValue(fullSpec, out Assembly existingAssembly))

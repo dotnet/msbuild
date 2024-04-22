@@ -38,6 +38,8 @@ namespace Microsoft.Build.Graph
 
         public GraphEdges Edges { get; private set; }
 
+        public SolutionFile Solution { get; private set; }
+
         private readonly List<ConfigurationMetadata> _entryPointConfigurationMetadata;
 
         private readonly ParallelWorkSet<ConfigurationMetadata, ParsedProject> _graphWorkSet;
@@ -137,7 +139,7 @@ namespace Microsoft.Build.Graph
             {
                 var currentNode = parsedProject.Value.GraphNode;
 
-                var requiresTransitiveProjectReferences = _projectInterpretation.RequiresTransitiveProjectReferences(currentNode.ProjectInstance);
+                var requiresTransitiveProjectReferences = _projectInterpretation.RequiresTransitiveProjectReferences(currentNode);
 
                 foreach (var referenceInfo in parsedProject.Value.ReferenceInfos)
                 {
@@ -269,43 +271,43 @@ namespace Microsoft.Build.Graph
                 solutionGlobalPropertiesBuilder.AddRange(solutionEntryPoint.GlobalProperties);
             }
 
-            var solution = SolutionFile.Parse(solutionEntryPoint.ProjectFile);
+            Solution = SolutionFile.Parse(solutionEntryPoint.ProjectFile);
 
-            if (solution.SolutionParserWarnings.Count != 0 || solution.SolutionParserErrorCodes.Count != 0)
+            if (Solution.SolutionParserWarnings.Count != 0 || Solution.SolutionParserErrorCodes.Count != 0)
             {
                 throw new InvalidProjectFileException(
                     ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                         "StaticGraphSolutionLoaderEncounteredSolutionWarningsAndErrors",
                         solutionEntryPoint.ProjectFile,
-                        string.Join(";", solution.SolutionParserWarnings),
-                        string.Join(";", solution.SolutionParserErrorCodes)));
+                        string.Join(";", Solution.SolutionParserWarnings),
+                        string.Join(";", Solution.SolutionParserErrorCodes)));
             }
 
             // Mimic behavior of SolutionProjectGenerator
-            SolutionConfigurationInSolution currentSolutionConfiguration = SelectSolutionConfiguration(solution, solutionEntryPoint.GlobalProperties);
+            SolutionConfigurationInSolution currentSolutionConfiguration = SelectSolutionConfiguration(Solution, solutionEntryPoint.GlobalProperties);
             solutionGlobalPropertiesBuilder["Configuration"] = currentSolutionConfiguration.ConfigurationName;
             solutionGlobalPropertiesBuilder["Platform"] = currentSolutionConfiguration.PlatformName;
 
-            string solutionConfigurationXml = SolutionProjectGenerator.GetSolutionConfiguration(solution, currentSolutionConfiguration);
+            string solutionConfigurationXml = SolutionProjectGenerator.GetSolutionConfiguration(Solution, currentSolutionConfiguration);
             solutionGlobalPropertiesBuilder["CurrentSolutionConfigurationContents"] = solutionConfigurationXml;
             solutionGlobalPropertiesBuilder["BuildingSolutionFile"] = "true";
 
-            string solutionDirectoryName = solution.SolutionFileDirectory;
+            string solutionDirectoryName = Solution.SolutionFileDirectory;
             if (!solutionDirectoryName.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
             {
                 solutionDirectoryName += Path.DirectorySeparatorChar;
             }
 
             solutionGlobalPropertiesBuilder["SolutionDir"] = EscapingUtilities.Escape(solutionDirectoryName);
-            solutionGlobalPropertiesBuilder["SolutionExt"] = EscapingUtilities.Escape(Path.GetExtension(solution.FullPath));
-            solutionGlobalPropertiesBuilder["SolutionFileName"] = EscapingUtilities.Escape(Path.GetFileName(solution.FullPath));
-            solutionGlobalPropertiesBuilder["SolutionName"] = EscapingUtilities.Escape(Path.GetFileNameWithoutExtension(solution.FullPath));
-            solutionGlobalPropertiesBuilder[SolutionProjectGenerator.SolutionPathPropertyName] = EscapingUtilities.Escape(Path.Combine(solution.SolutionFileDirectory, Path.GetFileName(solution.FullPath)));
+            solutionGlobalPropertiesBuilder["SolutionExt"] = EscapingUtilities.Escape(Path.GetExtension(Solution.FullPath));
+            solutionGlobalPropertiesBuilder["SolutionFileName"] = EscapingUtilities.Escape(Path.GetFileName(Solution.FullPath));
+            solutionGlobalPropertiesBuilder["SolutionName"] = EscapingUtilities.Escape(Path.GetFileNameWithoutExtension(Solution.FullPath));
+            solutionGlobalPropertiesBuilder[SolutionProjectGenerator.SolutionPathPropertyName] = EscapingUtilities.Escape(Path.Combine(Solution.SolutionFileDirectory, Path.GetFileName(Solution.FullPath)));
 
             // Project configurations are reused heavily, so cache the global properties for each
             Dictionary<string, ImmutableDictionary<string, string>> globalPropertiesForProjectConfiguration = new(StringComparer.OrdinalIgnoreCase);
 
-            IReadOnlyList<ProjectInSolution> projectsInSolution = solution.ProjectsInOrder;
+            IReadOnlyList<ProjectInSolution> projectsInSolution = Solution.ProjectsInOrder;
             List<ProjectGraphEntryPoint> newEntryPoints = new(projectsInSolution.Count);
             Dictionary<string, IReadOnlyCollection<string>> solutionDependencies = new();
 
@@ -318,7 +320,7 @@ namespace Microsoft.Build.Graph
 
                 ProjectConfigurationInSolution projectConfiguration = SelectProjectConfiguration(currentSolutionConfiguration, project.ProjectConfigurations);
 
-                if (!SolutionProjectGenerator.WouldProjectBuild(solution, currentSolutionConfiguration.FullName, project, projectConfiguration))
+                if (!SolutionProjectGenerator.WouldProjectBuild(Solution, currentSolutionConfiguration.FullName, project, projectConfiguration))
                 {
                     continue;
                 }
@@ -341,11 +343,11 @@ namespace Microsoft.Build.Graph
                     List<string> solutionDependenciesForProject = new(project.Dependencies.Count);
                     foreach (string dependencyProjectGuid in project.Dependencies)
                     {
-                        if (!solution.ProjectsByGuid.TryGetValue(dependencyProjectGuid, out ProjectInSolution dependencyProject))
+                        if (!Solution.ProjectsByGuid.TryGetValue(dependencyProjectGuid, out ProjectInSolution dependencyProject))
                         {
                             ProjectFileErrorUtilities.ThrowInvalidProjectFile(
                                 "SubCategoryForSolutionParsingErrors",
-                                new BuildEventFileInfo(solution.FullPath),
+                                new BuildEventFileInfo(Solution.FullPath),
                                 "SolutionParseProjectDepNotFoundError",
                                 project.ProjectGuid,
                                 dependencyProjectGuid);
@@ -572,7 +574,7 @@ namespace Microsoft.Build.Graph
         {
             var referenceInfos = new List<ProjectInterpretation.ReferenceInfo>();
 
-            foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject.ProjectInstance, _projectCollection, GetInstanceForPlatformNegotiationWithCaching))
+            foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject, _projectCollection, GetInstanceForPlatformNegotiationWithCaching))
             {
                 if (FileUtilities.IsSolutionFilename(referenceInfo.ReferenceConfiguration.ProjectFullPath))
                 {

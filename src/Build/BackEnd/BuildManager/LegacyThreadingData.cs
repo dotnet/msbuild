@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
@@ -82,6 +83,7 @@ namespace Microsoft.Build.Execution
         /// Given a submission ID, assign it "start" and "finish" events to track its use of
         /// the legacy thread.
         /// </summary>
+        [SuppressMessage("Microsoft.Dispose", "CA2000:Dispose objects before losing scope", Justification = "The events are disposed in UnregisterSubmissionForLegacyThread")]
         internal void RegisterSubmissionForLegacyThread(int submissionId)
         {
             lock (_legacyThreadingEventsLock)
@@ -103,6 +105,10 @@ namespace Microsoft.Build.Execution
             lock (_legacyThreadingEventsLock)
             {
                 ErrorUtilities.VerifyThrow(_legacyThreadingEventsById.ContainsKey(submissionId), "Submission {0} should have been previously registered with LegacyThreadingData", submissionId);
+
+                // Dispose the events
+                _legacyThreadingEventsById[submissionId].Item1?.Dispose();
+                _legacyThreadingEventsById[submissionId].Item2?.Dispose();
 
                 _legacyThreadingEventsById.Remove(submissionId);
             }
