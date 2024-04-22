@@ -110,7 +110,7 @@ namespace Microsoft.Build.UnitTests.Shared
             {
                 DataReceivedEventHandler handler = delegate (object sender, DataReceivedEventArgs args)
                 {
-                    if (args != null)
+                    if (args != null && args.Data != null)
                     {
                         WriteOutput(args.Data);
                         output += args.Data + "\r\n";
