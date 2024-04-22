@@ -252,7 +252,9 @@ namespace Microsoft.Build.Construction
                 }
                 else
                 {
-                    // 
+                    // All three values need ushort. Choose an implementation that gives the file
+                    // index an easily-read value (i.e. within 4 bytes) to simplify reads. The
+                    // assumption is that if you need line, you probably also need column.
                     return new LargeFileElementLocation(fileIndex, (ushort)line, (ushort)column);
                 }
             }
