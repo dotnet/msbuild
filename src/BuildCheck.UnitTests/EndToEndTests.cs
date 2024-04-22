@@ -82,7 +82,7 @@ public class EndToEndTests : IDisposable
                 </PropertyGroup>
 
                 <ItemGroup>
-                    <ProjectReference Include=".\FooBar-copy.csproj" />
+                    <ProjectReference Include=".\FooBar-Copy.csproj" />
                 </ItemGroup>
 
             </Project>
@@ -109,11 +109,9 @@ public class EndToEndTests : IDisposable
             </Project>
             """;
 
-            string content3 = "Console.WriteLine(\"Hello, World!\");\r\n";
             TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
             TransientTestFile projectFile = _env.CreateFile(workFolder, "FooBar.csproj", contents);
             TransientTestFile projectFile2 = _env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
-            TransientTestFile projectFile3 = _env.CreateFile(workFolder, "Program.cs", content3);
 
             // var cache = new SimpleProjectRootElementCache();
             // ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile.Path, /*unused*/null, /*unused*/null, cache, false /*Not explicitly loaded - unused*/);
