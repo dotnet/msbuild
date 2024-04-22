@@ -93,15 +93,20 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         /// <param name="buildCheckDataSource"></param>
         public void SetDataSource(BuildCheckDataSource buildCheckDataSource)
         {
+            _stopwatch.Start();
             if (!_enabledDataSources[(int)buildCheckDataSource])
             {
                 _enabledDataSources[(int)buildCheckDataSource] = true;
                 RegisterBuiltInAnalyzers(buildCheckDataSource);
             }
+            _stopwatch.Stop();
+            _tracingReporter.analyzerSetDataSourceTime = _stopwatch.Elapsed;
+            _stopwatch.Reset();
         }
 
         public void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData)
         {
+            _stopwatch.Start();
             if (IsInProcNode)
             {
                 var factory = _acquisitionModule.CreateBuildAnalyzerFactory(acquisitionData);
@@ -121,6 +126,9 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
                 _loggingService.LogBuildEvent(eventArgs);
             }
+            _stopwatch.Stop();
+            _tracingReporter.analyzerAcquisitionTime = _stopwatch.Elapsed;
+            _stopwatch.Reset();
         }
 
         internal BuildCheckManager(ILoggingService loggingService)
@@ -264,7 +272,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             // On an execution node - we might remove and dispose the analyzers once project is done
 
             // If it's already constructed - just control the custom settings do not differ
-
+            _stopwatch.Start();
             List<BuildAnalyzerFactoryContext> analyzersToRemove = new();
             foreach (BuildAnalyzerFactoryContext analyzerFactoryContext in _analyzersRegistry)
             {
@@ -277,7 +285,6 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                     _loggingService.LogErrorFromText(buildEventContext, null, null, null,
                         new BuildEventFileInfo(projectFullPath),
                         e.Message);
-                    _loggingService.LogCommentFromText(buildEventContext, MessageImportance.High, $"Dismounting analyzer '{analyzerFactoryContext.FriendlyName}'");
                     analyzersToRemove.Add(analyzerFactoryContext);
                 }
             }
@@ -293,6 +300,10 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 _tracingReporter.AddStats(analyzerToRemove!.BuildAnalyzer.FriendlyName, analyzerToRemove.Elapsed);
                 analyzerToRemove.BuildAnalyzer.Dispose();
             }
+
+            _stopwatch.Stop();
+            _tracingReporter.newProjectAnalyzersTime = _stopwatch.Elapsed;
+            _stopwatch.Reset();
         }
 
 

@@ -39,18 +39,9 @@ internal sealed class BuildCheckConnectorLogger(
                 return;
             }
 
-            try
-            {
             buildCheckManager.ProcessEvaluationFinishedEventArgs(
                 loggingContextFactory.CreateLoggingContext(e.BuildEventContext!),
                 projectEvaluationFinishedEventArgs);
-            }
-            catch (Exception exception)
-            {
-                Debugger.Launch();
-                Console.WriteLine(exception);
-                throw;
-            }
 
             buildCheckManager.EndProjectEvaluation(BuildCheckDataSource.EventArgs, e.BuildEventContext!);
         }
@@ -77,7 +68,10 @@ internal sealed class BuildCheckConnectorLogger(
         {
             if (buildCheckBuildEventArgs is BuildCheckTracingEventArgs tracingEventArgs)
             {
-                _stats.Merge(tracingEventArgs.TracingData, (span1, span2) => span1 + span2);
+                if (!tracingEventArgs.IsLogReport)
+                {
+                    _stats.Merge(tracingEventArgs.TracingData, (span1, span2) => span1 + span2);
+                }
             }
             else if (buildCheckBuildEventArgs is BuildCheckAcquisitionEventArgs acquisitionEventArgs)
             {
@@ -118,6 +112,11 @@ internal sealed class BuildCheckConnectorLogger(
             }
         }
 
+        BuildCheckTracingEventArgs statEvent = new BuildCheckTracingEventArgs(_stats, true)
+        { BuildEventContext = loggingContext.BuildEventContext };
+
+        loggingContext.LogBuildEvent(statEvent);
+
         if (_areStatsEnabled)
         {
             loggingContext.LogCommentFromText(MessageImportance.High, $"BuildCheck run times{Environment.NewLine}");
@@ -136,18 +135,6 @@ internal sealed class BuildCheckConnectorLogger(
             string analyzerData = BuildCsvString("Analyzer run times", analyzerStats);
             loggingContext.LogCommentFromText(MessageImportance.Low, analyzerData);
         }
-    }
-
-    private string BuildStatsTable(string title, Dictionary<string, TimeSpan> rowData)
-    {
-        string headerSeparator = $"=============";
-        string rowSeparator = $"{Environment.NewLine}----------{Environment.NewLine}";
-
-        string header = $"{headerSeparator}{Environment.NewLine}{title}{Environment.NewLine}{headerSeparator}{Environment.NewLine}";
-
-        string rows = string.Join(rowSeparator, rowData.Select(a => $"{a.Key} | {a.Value}"));
-
-        return $"{header}{rows}{Environment.NewLine}";
     }
 
     private string BuildCsvString(string title, Dictionary<string, TimeSpan> rowData)

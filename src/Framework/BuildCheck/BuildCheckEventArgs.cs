@@ -28,6 +28,12 @@ internal sealed class BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> tr
     internal BuildCheckTracingEventArgs() : this(new Dictionary<string, TimeSpan>())
     { }
 
+    internal BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> data, bool isLogReport) : this(data)
+    {
+        IsLogReport = isLogReport;
+    }
+
+    public bool IsLogReport { get; private set; } = false;
     public Dictionary<string, TimeSpan> TracingData { get; private set; } = tracingData;
 
     internal override void WriteToStream(BinaryWriter writer)
