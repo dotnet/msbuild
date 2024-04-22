@@ -160,6 +160,8 @@ namespace Microsoft.Build.Construction
         private static int s_nextFileIndex;
         private static ImmutableDictionary<string, int> s_indexByFile = ImmutableDictionary<string, int>.Empty.WithComparers(StringComparer.OrdinalIgnoreCase);
 
+        internal static void DangerousInternalResetFileIndex() => s_nextFileIndex = 0;
+
         /// <summary>
         /// Constructor for the case where we have most or all information.
         /// Numerical values must be 1-based, non-negative; 0 indicates unknown
