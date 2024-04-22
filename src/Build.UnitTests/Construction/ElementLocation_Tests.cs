@@ -27,19 +27,14 @@ namespace Microsoft.Build.UnitTests.Construction
     /// Unit tests for <see cref="ElementLocation"/>.
     /// </summary>
     [Collection("ElementLocation")]
-    public class ElementLocation_Tests : IClassFixture<ElementLocation_Tests.Fixture>
+    public class ElementLocation_Tests
     {
         /// <summary>
         /// Reset the file path cache index to zero. We have tests which validate that
         /// <see cref="ElementLocation.Create"/> returns a specific storage type, and
         /// that requires the index to be within certain ranges.
         /// </summary>
-        public class Fixture : IDisposable
-        {
-            public Fixture() => ElementLocation.DangerousInternalResetFileIndex();
-
-            void IDisposable.Dispose() { }
-        }
+        public ElementLocation_Tests() => ElementLocation.DangerousInternalResetFileIndex();
 
         [Theory]
         [MemberData(nameof(GetCreateTestCases))]
