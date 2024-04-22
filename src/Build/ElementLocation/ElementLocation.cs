@@ -160,7 +160,12 @@ namespace Microsoft.Build.Construction
         private static int s_nextFileIndex;
         private static ImmutableDictionary<string, int> s_indexByFile = ImmutableDictionary<string, int>.Empty.WithComparers(StringComparer.OrdinalIgnoreCase);
 
-        internal static void DangerousInternalResetFileIndex() => s_nextFileIndex = 0;
+        internal static void DangerousInternalResetFileIndex()
+        {
+            s_nextFileIndex = 0;
+            s_fileByIndex = new string[32];
+            s_indexByFile = ImmutableDictionary<string, int>.Empty.WithComparers(StringComparer.OrdinalIgnoreCase);
+        }
 
         /// <summary>
         /// Constructor for the case where we have most or all information.
@@ -192,9 +197,10 @@ namespace Microsoft.Build.Construction
 
 #if DEBUG
             string lookedUpFilePath = LookupFileByIndex(fileIndex);
-            Debug.Assert(
-                StringComparer.OrdinalIgnoreCase.Equals(filePath ?? "", lookedUpFilePath),
-                $"File index {fileIndex} returned for path '{filePath}', but lookup for that index returns '{lookedUpFilePath}'.");
+            if (!StringComparer.OrdinalIgnoreCase.Equals(filePath ?? "", lookedUpFilePath))
+            {
+                Debug.Fail($"File index {fileIndex} returned for path '{filePath}', but lookup for that index returns '{lookedUpFilePath}'.");
+            }
 #endif
 
             // We use multiple packing schemes for this data. TypeSize below excludes the CLR's per-object overhead.
