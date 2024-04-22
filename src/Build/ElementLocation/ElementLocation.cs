@@ -2,7 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
@@ -16,6 +19,8 @@ namespace Microsoft.Build.Construction
     /// <remarks>
     /// This object is IMMUTABLE, so that it can be passed around arbitrarily.
     /// DO NOT make these objects any larger. There are huge numbers of them and they are transmitted between nodes.
+    /// 
+    /// Although this class is called "element" location, it is also used for other XML node types, such as in <see cref="XmlAttributeWithLocation"/>.
     /// </remarks>
     [Serializable]
     public abstract class ElementLocation : IElementLocation, ITranslatable, IImmutable
@@ -26,7 +31,7 @@ namespace Microsoft.Build.Construction
         /// It is to be used for the project location when the project has not been given a name.
         /// In that case, it exists, but can't have a specific location.
         /// </summary>
-        public static ElementLocation EmptyLocation { get; } = new SmallElementLocation("", 0, 0);
+        public static ElementLocation EmptyLocation { get; } = new EmptyElementLocation();
 
         /// <summary>
         /// Gets the file from which this particular element originated.  It may
@@ -35,10 +40,7 @@ namespace Microsoft.Build.Construction
         /// If not known, returns empty string.
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public abstract string File
-        {
-            get;
-        }
+        public abstract string File { get; }
 
         /// <summary>
         /// Gets the line number where this element exists in its file.
@@ -46,10 +48,7 @@ namespace Microsoft.Build.Construction
         /// Zero indicates "unknown location".
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public abstract int Line
-        {
-            get;
-        }
+        public abstract int Line { get; }
 
         /// <summary>
         /// Gets the column number where this element exists in its file.
@@ -57,10 +56,7 @@ namespace Microsoft.Build.Construction
         /// Zero indicates "unknown location".
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public abstract int Column
-        {
-            get;
-        }
+        public abstract int Column { get; }
 
         /// <summary>
         /// Gets the location in a form suitable for replacement
@@ -155,10 +151,14 @@ namespace Microsoft.Build.Construction
         /// This is the case when we are creating a new item, for example, and it has
         /// not been evaluated from some XML.
         /// </summary>
-        internal static ElementLocation Create(string file)
+        internal static ElementLocation Create(string? file)
         {
             return Create(file, 0, 0);
         }
+
+        private static string[] s_fileByIndex = new string[32];
+        private static int s_nextFileIndex;
+        private static ImmutableDictionary<string, int> s_indexByFile = ImmutableDictionary<string, int>.Empty.WithComparers(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Constructor for the case where we have most or all information.
@@ -169,74 +169,280 @@ namespace Microsoft.Build.Construction
         /// In AG there are 600 locations that have a file but zero line and column.
         /// In theory yet another derived class could be made for these to save 4 bytes each.
         /// </remarks>
-        internal static ElementLocation Create(string? file, int line, int column)
+        internal static ElementLocation Create(string? filePath, int line, int column)
         {
             // Combine line and column values with bitwise OR so we can perform various
             // checks on both values in a single comparison, reducing the amount of branching
             // in the code.
             int combinedValue = line | column;
 
-            if (string.IsNullOrEmpty(file) && combinedValue == 0)
+            if (string.IsNullOrEmpty(filePath) && combinedValue == 0)
             {
                 // When combinedValue is zero, it implies that both line and column are zero.
-                return EmptyLocation;
+                return EmptyElementLocation.Instance;
             }
 
-            // When combinedValue is negative, it implies that either line or column were negative
+            // When combinedValue is negative, it implies that either line or column were negative.
             ErrorUtilities.VerifyThrow(combinedValue > -1, "Use zero for unknown");
 
-            file ??= "";
+            // TODO store the last run's value and check if this is for the same file. If so, skip the dictionary lookup (tree walk).
+            int fileIndex = GetOrAddFileIndex(filePath);
 
-            // When combinedValue is less than a threshold, it implies that both line and column are less
-            // than that threshold.
-            if (combinedValue <= ushort.MaxValue)
+            Debug.Assert(Equals(filePath, LookupFileByIndex(fileIndex)));
+
+            // We use multiple packing schemes for this data. TypeSize below excludes the CLR's per-object overhead.
+            //
+            // Name                         TypeSize  FileIndex      Line           Column
+            //
+            // EmptyElementLocation         0         0 (max 0)       0 (max 0)       0 (max 0)
+            //
+            // SmallFileElementLocation     8         4 (max 65,535)  2 (max 256)     2 (max 256)
+            // SmallLineElementLocation     8         2 (max 256)     4 (max 65,535)  2 (max 256)
+            // SmallColumnElementLocation   8         2 (max 256)     2 (max 256)     4 (max 65,535)
+            //
+            // LargeFileElementLocation     16        8 (max 2b)      4 (max 65,535)  4 (max 65,535)
+            // LargeLineElementLocation     16        4 (max 65,535)  8 (max 2b)      4 (max 65,535)
+            // LargeColumnElementLocation   16        4 (max 65,535)  4 (max 65,535)  8 (max 2b)
+            //
+            // FullElementLocation          24        8 (max 2b)      8 (max 2b)      8 (max 2b)
+
+            // Check for empty first
+            if (fileIndex is 0 && line is 0 && column is 0)
             {
-                return new SmallElementLocation(file, (ushort)line, (ushort)column);
+                return EmptyElementLocation.Instance;
             }
 
-            return new RegularElementLocation(file, line, column);
+            combinedValue |= fileIndex;
+
+            // We want class sizes as multiples of 8 on 64-bit architectures, for alignment reasons.
+            // Any space used between these multiples leads to unused bytes in padding. We want to
+            // take advantage of these sizes effectively, so we check for various requirements and
+            // choose.
+            //
+            // Search in popularity order to reduce the number of branches taken through this code.
+            //
+            // When combinedValue is less than a threshold, it implies that both line and column are less
+            // than that threshold.
+
+            // Handle cases that fit in 0xFF and 0XFFFF.
+            if (combinedValue <= byte.MaxValue)
+            {
+                // All values fit within a byte. Pick one of the 8-byte types.
+                return new SmallFileElementLocation((ushort)fileIndex, (byte)line, (byte)column);
+            }
+            else if (combinedValue <= ushort.MaxValue)
+            {
+                // At least one value needs ushort. Try to use an 8-byte type all the same.
+                if (line <= byte.MaxValue && column <= byte.MaxValue)
+                {
+                    // Only fileIndex needs 4 bytes
+                    return new SmallFileElementLocation((ushort)fileIndex, (byte)line, (byte)column);
+                }
+                else if (fileIndex <= byte.MaxValue && column <= byte.MaxValue)
+                {
+                    // Only line needs 4 bytes
+                    return new SmallLineElementLocation((byte)fileIndex, (ushort)line, (byte)column);
+                }
+                else if (fileIndex <= byte.MaxValue && line <= byte.MaxValue)
+                {
+                    // Only column needs 4 bytes
+                    return new SmallColumnElementLocation((byte)fileIndex, (byte)line, (ushort)column);
+                }
+                else
+                {
+                    // 
+                    return new LargeFileElementLocation(fileIndex, (ushort)line, (ushort)column);
+                }
+            }
+            else
+            {
+                // At least one value needs int.
+                if (fileIndex <= short.MaxValue && column <= short.MaxValue)
+                {
+                    // Only line needs 8 bytes
+                    return new LargeLineElementLocation((ushort)fileIndex, line, (ushort)column);
+                }
+                else if (line <= short.MaxValue && column <= short.MaxValue)
+                {
+                    // Only fileIndex needs 8 bytes
+                    return new LargeFileElementLocation(fileIndex, (ushort)line, (ushort)column);
+                }
+                else if (fileIndex <= short.MaxValue && line <= short.MaxValue)
+                {
+                    // Only column needs 8 bytes
+                    return new LargeColumnElementLocation((ushort)fileIndex, (ushort)line, column);
+                }
+                else
+                {
+                    return new FullElementLocation(fileIndex, line, column);
+                }
+            }
+
+            static int GetOrAddFileIndex(string? file)
+            {
+                if (file is null)
+                {
+                    return 0;
+                }
+
+                if (s_indexByFile.TryGetValue(file, out int index))
+                {
+                    return index + 1;
+                }
+
+                return AddFile();
+
+                int AddFile()
+                {
+                    int index = Interlocked.Increment(ref s_nextFileIndex) - 1;
+
+                    SetValue(index);
+
+                    _ = ImmutableInterlocked.TryAdd(ref s_indexByFile, file, index);
+
+                    return index + 1;
+                }
+
+                void SetValue(int index)
+                {
+                    while (true)
+                    {
+                        string[] array = Volatile.Read(ref s_fileByIndex);
+
+                        if (index < array.Length)
+                        {
+                            array[index] = file;
+                            return;
+                        }
+
+                        // Need to grow the array
+
+                        // Wait for the last value to be non-null, so that we have all values to copy
+                        while (array[array.Length - 1] is null)
+                        {
+                            Thread.SpinWait(100);
+                        }
+
+                        int newArrayLength = array.Length * 2;
+
+                        while (index >= newArrayLength)
+                        {
+                            newArrayLength *= 2;
+                        }
+
+                        string[] newArray = new string[newArrayLength];
+                        array.AsSpan().CopyTo(newArray);
+                        newArray[index] = file;
+
+                        string[] exchanged = Interlocked.CompareExchange(ref s_fileByIndex, newArray, array);
+
+                        if (ReferenceEquals(exchanged, array))
+                        {
+                            // We replaced it
+                            return;
+                        }
+
+                        // Otherwise, loop around again. We can't just return exchanged here,
+                        // as theoretically the array might have been grown more than once.
+                    }
+                }
+            }
         }
 
-        /// <summary>
-        /// Rarer variation for when the line and column won't each fit in a ushort.
-        /// </summary>
-        private sealed class RegularElementLocation(string file, int line, int column) : ElementLocation
+        internal static string LookupFileByIndex(int index)
         {
-            /// <inheritdoc />
-            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            public override string File { get; } = file;
+            if (index is 0)
+            {
+                return "";
+            }
 
-            /// <inheritdoc />
-            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            public override int Line { get; } = line;
+            index -= 1;
 
-            /// <inheritdoc />
-            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            public override int Column { get; } = column;
+            Thread.MemoryBarrier();
+
+            string[] array = Volatile.Read(ref s_fileByIndex);
+
+            while (index >= array.Length)
+            {
+                // Data race! Spin.
+                array = Volatile.Read(ref s_fileByIndex);
+            }
+
+            return array[index];
         }
 
-        /// <summary>
-        /// For when the line and column each fit in a short - under 65536
-        /// (almost always will: microsoft.common.targets is less than 5000 lines long)
-        /// When loading Australian Government, for example, there are over 31,000 ElementLocation
-        /// objects so this saves 4 bytes each = 123KB
-        ///
-        /// A "very small" variation that used two bytes (or halves of a short) would fit about half of them
-        /// and save 4 more bytes each, but the CLR packs each field to 4 bytes, so it isn't actually any smaller.
-        /// </summary>
-        private sealed class SmallElementLocation(string file, ushort line, ushort column) : ElementLocation
-        {
-            /// <inheritdoc />
-            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            public override string File => file;
+        #region Element implementations
 
-            /// <inheritdoc />
-            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+#pragma warning disable SA1516 // Elements should be separated by blank line
+
+        private sealed class EmptyElementLocation() : ElementLocation
+        {
+            /// <summary>
+            /// Gets the singleton, immutable empty element location.
+            /// </summary>
+            /// <remarks>
+            /// Not to be be used when something is "missing". Use a <see langword="null"/> location for that.
+            /// Use only for the project location when the project has not been given a name.
+            /// In that case, it exists, but can't have a specific location.
+            /// </remarks>
+            public static EmptyElementLocation Instance { get; } = new();
+
+            public override string File => "";
+            public override int Line => 0;
+            public override int Column => 0;
+        }
+
+        private sealed class SmallFileElementLocation(ushort file, byte line, byte column) : ElementLocation
+        {
+            public override string File => LookupFileByIndex(file);
             public override int Line => line;
-
-            /// <inheritdoc />
-            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             public override int Column => column;
         }
+        
+        private sealed class SmallLineElementLocation(byte file, ushort line, byte column) : ElementLocation
+        {
+            public override string File => LookupFileByIndex(file);
+            public override int Line => line;
+            public override int Column => column;
+        }
+        
+        private sealed class SmallColumnElementLocation(byte file, byte line, ushort column) : ElementLocation
+        {
+            public override string File => LookupFileByIndex(file);
+            public override int Line => line;
+            public override int Column => column;
+        }
+
+        private sealed class LargeFileElementLocation(int file, ushort line, ushort column) : ElementLocation
+        {
+            public override string File => LookupFileByIndex(file);
+            public override int Line => line;
+            public override int Column => column;
+        }
+
+        private sealed class LargeLineElementLocation(ushort file, int line, ushort column) : ElementLocation
+        {
+            public override string File => LookupFileByIndex(file);
+            public override int Line => line;
+            public override int Column => column;
+        }
+
+        private sealed class LargeColumnElementLocation(ushort file, ushort line, int column) : ElementLocation
+        {
+            public override string File => LookupFileByIndex(file);
+            public override int Line => line;
+            public override int Column => column;
+        }
+
+        private sealed class FullElementLocation(int file, int line, int column) : ElementLocation
+        {
+            public override string File => LookupFileByIndex(file);
+            public override int Line => line;
+            public override int Column => column;
+        }
+
+#pragma warning restore SA1516 // Elements should be separated by blank line
+
+        #endregion
     }
 }
