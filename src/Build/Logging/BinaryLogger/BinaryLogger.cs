@@ -456,14 +456,6 @@ namespace Microsoft.Build.Logging
         {
             bool hasPathPrefix = parameter.StartsWith("LogFile=", StringComparison.OrdinalIgnoreCase);
 
-            bool isFileParam = hasPathPrefix || parameter.IndexOf('=') < 0;
-
-            if (!isFileParam)
-            {
-                filePath = null;
-                return false;
-            }
-
             if (hasPathPrefix)
             {
                 parameter = parameter.Substring("LogFile=".Length);
@@ -505,7 +497,7 @@ namespace Microsoft.Build.Logging
                 const double bytesNumNeededForSingleStringChar = eachStringCharEncodesBites / (double)eachByteHasBits;
 
                 int randomBytesNeeded = (int)Math.Ceiling(length * bytesNumNeededForSingleStringChar);
-                Random random = new Random();
+                Random random = new();
 
                 byte[] randomBytes = new byte[randomBytesNeeded];
                 random.NextBytes(randomBytes);
