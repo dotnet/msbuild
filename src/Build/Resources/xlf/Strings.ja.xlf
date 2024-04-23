@@ -616,6 +616,11 @@ Errors: {3}</source>
         <target state="translated">{0}{1} 中にアセンブリが読み込まれました: {2} (場所: {3}、MVID: {4}、AssemblyLoadContext: {5})</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskAssemblyLocationMismatch">
+        <source>Task assembly was loaded from '{0}' while the desired location was '{1}'.</source>
+        <target state="new">Task assembly was loaded from '{0}' while the desired location was '{1}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">タスク "{0}" では、{1} 個のコアを解放したため、現在合計 {2} 個のコアを保持しています。</target>

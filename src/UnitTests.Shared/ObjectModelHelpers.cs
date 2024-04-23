@@ -1971,7 +1971,8 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public static void ClearDirtyFlag(ProjectRootElement project)
         {
-            project.Save(new StringWriter());
+            using var sw = new StringWriter();
+            project.Save(sw);
             Assert.False(project.HasUnsavedChanges);
         }
 

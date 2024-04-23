@@ -17,7 +17,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             int t1 = Environment.TickCount;
 
-            var r = new XmlTextReader(input)
+            using var r = new XmlTextReader(input)
             {
                 DtdProcessing = DtdProcessing.Ignore,
                 WhitespaceHandling = WhitespaceHandling.None
@@ -25,7 +25,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             XmlNamespaceManager nsmgr = XmlNamespaces.GetNamespaceManager(r.NameTable);
 
             var m = new MemoryStream();
-            var w = new XmlTextWriter(m, Encoding.UTF8)
+            using var w = new XmlTextWriter(m, Encoding.UTF8)
             {
                 Formatting = Formatting.Indented,
                 Indentation = 2
