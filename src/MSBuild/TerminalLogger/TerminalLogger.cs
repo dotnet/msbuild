@@ -91,6 +91,10 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Tracks the work currently being done by build nodes. Null means the node is not doing any work worth reporting.
     /// </summary>
+    /// <remarks>
+    /// There is no locking around access to this data structure despite it being accessed concurrently by multiple threads.
+    /// However, reads and writes to locations in an array is atomic, so locking is not required.
+    /// </remarks>
     private NodeStatus?[] _nodes = Array.Empty<NodeStatus>();
 
     /// <summary>
