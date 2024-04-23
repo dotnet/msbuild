@@ -15,18 +15,18 @@ using static Microsoft.Build.BuildCheck.Infrastructure.EditorConfig.EditorConfig
 
 namespace Microsoft.Build.BuildCheck.Infrastructure.EditorConfig
 {
-    internal class EditorConfigParser
+    internal sealed class EditorConfigParser
     {
         private const string EditorconfigFile = ".editorconfig";
 
         /// <summary>
         /// Cache layer of the parsed editor configs the key is the path to the .editorconfig file.
         /// </summary>
-        private Dictionary<string, EditorConfigFile> _editorConfigFileCache = new Dictionary<string, EditorConfigFile>(StringComparer.InvariantCultureIgnoreCase);
+        private readonly Dictionary<string, EditorConfigFile> _editorConfigFileCache = new Dictionary<string, EditorConfigFile>(StringComparer.InvariantCultureIgnoreCase);
 
         internal Dictionary<string, string> Parse(string filePath)
         {
-            var editorConfigs = EditorConfigFileDiscovery(filePath);
+            var editorConfigs = DiscoverEditorConfigFiles(filePath);
             return MergeEditorConfigFiles(editorConfigs, filePath);
         }
 
@@ -34,7 +34,7 @@ namespace Microsoft.Build.BuildCheck.Infrastructure.EditorConfig
         /// Fetches the list of EditorconfigFile ordered from the nearest to the filePath.
         /// </summary>
         /// <param name="filePath"></param>
-        internal IEnumerable<EditorConfigFile> EditorConfigFileDiscovery(string filePath)
+        internal List<EditorConfigFile> DiscoverEditorConfigFiles(string filePath)
         {
             var editorConfigDataFromFilesList = new List<EditorConfigFile>();
 
@@ -43,17 +43,15 @@ namespace Microsoft.Build.BuildCheck.Infrastructure.EditorConfig
 
             while (editorConfigFilePath != string.Empty)
             {
-                EditorConfigFile editorConfig;
-
-                if (_editorConfigFileCache.ContainsKey(editorConfigFilePath))
+                if (!_editorConfigFileCache.TryGetValue(editorConfigFilePath, out var editorConfig))
                 {
-                    editorConfig = _editorConfigFileCache[editorConfigFilePath];
-                }
-                else
-                {
-                    var editorConfigfileContent = File.ReadAllText(editorConfigFilePath);
-                    editorConfig = EditorConfigFile.Parse(editorConfigfileContent);
-                    _editorConfigFileCache[editorConfigFilePath] = editorConfig;
+                    using (FileStream stream = new FileStream(editorConfigFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        using StreamReader sr = new StreamReader(editorConfigFilePath);
+                        var editorConfigfileContent = sr.ReadToEnd();
+                        editorConfig = EditorConfigFile.Parse(editorConfigfileContent);
+                        _editorConfigFileCache[editorConfigFilePath] = editorConfig;
+                    }
                 }
 
                 editorConfigDataFromFilesList.Add(editorConfig);
@@ -77,31 +75,29 @@ namespace Microsoft.Build.BuildCheck.Infrastructure.EditorConfig
         /// </summary>
         /// <param name="editorConfigFiles"></param>
         /// <param name="filePath"></param>
-        internal Dictionary<string, string> MergeEditorConfigFiles(IEnumerable<EditorConfigFile> editorConfigFiles, string filePath)
+        internal Dictionary<string, string> MergeEditorConfigFiles(List<EditorConfigFile> editorConfigFiles, string filePath)
         {
             var resultingDictionary = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+            editorConfigFiles.Reverse();
 
-            if (editorConfigFiles.Any())
+            foreach (var configData in editorConfigFiles)
             {
-                foreach (var configData in editorConfigFiles.Reverse())
+                foreach (var section in configData.NamedSections)
                 {
-                    foreach (var section in configData.NamedSections)
+                    SectionNameMatcher? sectionNameMatcher = TryCreateSectionNameMatcher(section.Name);
+                    if (sectionNameMatcher != null)
                     {
-                        SectionNameMatcher? sectionNameMatcher = TryCreateSectionNameMatcher(section.Name);
-                        if (sectionNameMatcher != null)
+                        if (sectionNameMatcher.Value.IsMatch(NormalizeWithForwardSlash(filePath)))
                         {
-                            if (sectionNameMatcher.Value.IsMatch(NormalizeWithForwardSlash(filePath)))
+                            foreach (var property in section.Properties)
                             {
-                                foreach (var property in section.Properties)
-                                {
-                                    resultingDictionary[property.Key] = property.Value;
-                                }
+                                resultingDictionary[property.Key] = property.Value;
                             }
                         }
                     }
                 }
             }
-
+            
             return resultingDictionary;
         }
 

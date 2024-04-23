@@ -87,7 +87,7 @@ public class EditorConfigParser_Tests
         """);
 
         var parser = new EditorConfigParser();
-        var listOfEditorConfigFile = parser.EditorConfigFileDiscovery(Path.Combine(workFolder1.Path, "subfolder", "projectfile.proj") ).ToList();
+        var listOfEditorConfigFile = parser.DiscoverEditorConfigFiles(Path.Combine(workFolder1.Path, "subfolder", "projectfile.proj") ).ToList();
         // should be one because root=true so we do not need to go further
         listOfEditorConfigFile.Count.ShouldBe(1);
         listOfEditorConfigFile[0].IsRoot.ShouldBeTrue();
@@ -116,7 +116,7 @@ public class EditorConfigParser_Tests
         """);
 
         var parser = new EditorConfigParser();
-        var listOfEditorConfigFile = parser.EditorConfigFileDiscovery(Path.Combine(workFolder1.Path, "subfolder", "projectfile.proj")).ToList();
+        var listOfEditorConfigFile = parser.DiscoverEditorConfigFiles(Path.Combine(workFolder1.Path, "subfolder", "projectfile.proj")).ToList();
 
         listOfEditorConfigFile.Count.ShouldBe(2);
         listOfEditorConfigFile[0].IsRoot.ShouldBeFalse();

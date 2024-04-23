@@ -77,7 +77,7 @@ public class BuildAnalyzerConfiguration
 
         if (!isParsed)
         {
-            ThrowIncorectValueException(key, stringValue);
+            ThrowIncorrectValueException(key, stringValue);
         }
 
         return isParsed;
@@ -102,13 +102,13 @@ public class BuildAnalyzerConfiguration
         
         if (!isParsed)
         {
-            ThrowIncorectValueException(key, stringValue);
+            ThrowIncorrectValueException(key, stringValue);
         }
 
         return isParsed;
     }
 
-    private static void ThrowIncorectValueException(string key, string value)
+    private static void ThrowIncorrectValueException(string key, string value)
     {
         throw new BuildCheckConfigurationException(
                 $"Incorrect value provided in config for key {key}: '{value}'",

@@ -125,7 +125,7 @@ internal sealed class ConfigurationProvider
     /// <param name="projectFullPath"></param>
     /// <param name="ruleIds"></param>
     /// <returns></returns>
-    public  CustomConfigurationData[] GetCustomConfigurations(
+    public CustomConfigurationData[] GetCustomConfigurations(
         string projectFullPath,
         IReadOnlyList<string> ruleIds)
         => FillConfiguration(projectFullPath, ruleIds, GetCustomConfiguration);
@@ -215,9 +215,9 @@ internal sealed class ConfigurationProvider
 
         // clear the dictionary from the key-value pairs not BuildCheck related and
         // store the data so there is no need to parse the .editorconfigs all over again
-        _editorConfigData[projectFullPath] = FilterDictionaryByKeys($"{BuildCheck_ConfigurationKey}.", config);
-
-        return _editorConfigData[projectFullPath];
+        Dictionary<string, string> result = FilterDictionaryByKeys($"{BuildCheck_ConfigurationKey}.", config);
+        _editorConfigData[projectFullPath] = result;
+        return result;
     }
 
     internal Dictionary<string, string> GetConfiguration(string projectFullPath, string ruleId)
