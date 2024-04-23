@@ -110,6 +110,7 @@ public class BuildAnalyzerConfiguration
 
     private static void ThrowIncorrectValueException(string key, string value)
     {
+        // TODO: It will be nice to have the filename where the incorrect configuration was placed. 
         throw new BuildCheckConfigurationException(
                 $"Incorrect value provided in config for key {key}: '{value}'",
                 buildCheckConfigurationErrorScope: BuildCheckConfigurationErrorScope.EditorConfigParser);
