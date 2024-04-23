@@ -107,7 +107,10 @@ public class CustomConfigurationData
         {
             foreach (var keyVal in ConfigurationData)
             {
-                hashCode = hashCode + keyVal.Key.GetHashCode() + keyVal.Value.GetHashCode();
+                unchecked
+                {
+                    hashCode = hashCode + keyVal.Key.GetHashCode() + keyVal.Value.GetHashCode();
+                }
             }
         }
 

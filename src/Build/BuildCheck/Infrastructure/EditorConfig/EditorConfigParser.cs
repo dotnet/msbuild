@@ -78,11 +78,10 @@ namespace Microsoft.Build.BuildCheck.Infrastructure.EditorConfig
         internal Dictionary<string, string> MergeEditorConfigFiles(List<EditorConfigFile> editorConfigFiles, string filePath)
         {
             var resultingDictionary = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
-            editorConfigFiles.Reverse();
 
-            foreach (var configData in editorConfigFiles)
+            for (int i = editorConfigFiles.Count - 1; i >= 0; i--)
             {
-                foreach (var section in configData.NamedSections)
+                foreach (var section in editorConfigFiles[i].NamedSections)
                 {
                     SectionNameMatcher? sectionNameMatcher = TryCreateSectionNameMatcher(section.Name);
                     if (sectionNameMatcher != null)
