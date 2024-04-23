@@ -28,6 +28,10 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// The target was part of the parent's AfterTargets list.
         /// </summary>
-        AfterTargets
+        AfterTargets,
+
+        InitialTarget,
+
+        DefaultTarget
     }
 }

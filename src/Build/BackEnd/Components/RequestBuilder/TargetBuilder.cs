@@ -124,6 +124,9 @@ namespace Microsoft.Build.BackEnd
             // Get the actual target objects from the names
             BuildRequestConfiguration configuration = _requestEntry.RequestConfiguration;
 
+            var initialTargets = configuration.ProjectInitialTargets;
+            var defaultTargets = configuration.ProjectDefaultTargets;
+
             bool previousCacheableStatus = configuration.IsCacheable;
             configuration.IsCacheable = false;
             configuration.RetrieveFromCache();
@@ -153,6 +156,19 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
+                    if (initialTargets.Contains(targetName))
+                    {
+                        targets.Add(new TargetSpecification(
+                            targetName,
+                            targetExists ? targetInstance.Location : _projectInstance.ProjectFileLocation,
+                            TargetBuiltReason.InitialTarget));
+                    } else if (defaultTargets.Contains(targetName))
+                    {
+                        targets.Add(new TargetSpecification(
+                            targetName,
+                            targetExists ? targetInstance.Location : _projectInstance.ProjectFileLocation,
+                            TargetBuiltReason.DefaultTarget));
+                    }
                     targets.Add(new TargetSpecification(targetName, targetExists ? targetInstance.Location : _projectInstance.ProjectFileLocation));
                 }
             }
@@ -737,7 +753,15 @@ namespace Microsoft.Build.BackEnd
 
                 // Add to the list of targets to push.  We don't actually put it on the stack here because we could run into a circular dependency
                 // during this loop, in which case the target stack would be out of whack.
-                TargetEntry newEntry = new TargetEntry(_requestEntry, this as ITargetBuilderCallback, targetSpecification, baseLookup, parentTargetEntry, buildReason, _componentHost, stopProcessingOnCompletion);
+                TargetEntry newEntry;
+                if (buildReason == TargetBuiltReason.None)
+                {
+                    newEntry = new TargetEntry(_requestEntry, this as ITargetBuilderCallback, targetSpecification, baseLookup, parentTargetEntry, targetSpecification._targetBuiltReason, _componentHost, stopProcessingOnCompletion);
+                }
+                else
+                {
+                    newEntry = new TargetEntry(_requestEntry, this as ITargetBuilderCallback, targetSpecification, baseLookup, parentTargetEntry, buildReason, _componentHost, stopProcessingOnCompletion);
+                }
                 newEntry.ErrorTarget = addAsErrorTarget;
                 targetsToPush.Add(newEntry);
                 stopProcessingOnCompletion = false; // The first target on the stack (the last one to be run) always inherits the stopProcessing flag.
