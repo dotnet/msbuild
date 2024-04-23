@@ -18,12 +18,7 @@ namespace Microsoft.Build.BuildCheck.Infrastructure.EditorConfig
     internal class EditorConfigParser
     {
         private const string EditorconfigFile = ".editorconfig";
-        private Dictionary<string, EditorConfigFile> editorConfigFileCache;
-
-        internal EditorConfigParser()
-        {
-            editorConfigFileCache = new Dictionary<string, EditorConfigFile>();
-        }
+        private Dictionary<string, EditorConfigFile> editorConfigFileCache = new Dictionary<string, EditorConfigFile>();
 
         internal Dictionary<string, string> Parse(string filePath)
         {

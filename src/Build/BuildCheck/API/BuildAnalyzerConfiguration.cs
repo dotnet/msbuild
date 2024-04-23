@@ -49,7 +49,8 @@ public class BuildAnalyzerConfiguration
 
     /// <summary>
     /// Creates a <see cref="BuildAnalyzerConfiguration"/> object based on the provided configuration dictionary.
-    /// If key, equals to the name of the property in lowercase, exists in the dictionary => the value is parsed and assigned to the instance property value.
+    /// If the BuildAnalyzerConfiguration's property name presented in the dictionary, the value of this key-value pair is parsed and assigned to the instance's field.
+    /// If parsing failed the value will be equal to null.
     /// </summary>
     /// <param name="configDictionary">The configuration dictionary containing the settings for the build analyzer.</param>
     /// <returns>A new instance of <see cref="BuildAnalyzerConfiguration"/> with the specified settings.</returns>

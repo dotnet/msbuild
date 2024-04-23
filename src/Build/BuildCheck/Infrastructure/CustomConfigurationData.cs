@@ -77,7 +77,7 @@ public class CustomConfigurationData
         {
             foreach (var keyVal in customConfigObj.ConfigurationData)
             {
-                if(!ConfigurationData.TryGetValue(keyVal.Key, out var value) || value != keyVal.Value)
+                if (!ConfigurationData.TryGetValue(keyVal.Key, out var value) || value != keyVal.Value)
                 {
                     return false;
                 }
@@ -100,7 +100,7 @@ public class CustomConfigurationData
         if (!NotNull(this))
         {
             return 0;
-    }
+        }
 
         var hashCode = RuleId.GetHashCode();
         if (ConfigurationData != null)

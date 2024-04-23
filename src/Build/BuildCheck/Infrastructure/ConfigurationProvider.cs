@@ -19,6 +19,8 @@ internal sealed class ConfigurationProvider
 {
     private readonly EditorConfigParser s_editorConfigParser = new EditorConfigParser();
 
+    private const string BuildCheck_ConfigurationKey = "build_check";
+
     // TODO: This module should have a mechanism for removing unneeded configurations
     //  (disabled rules and analyzers that need to run in different node)
 
@@ -88,10 +90,14 @@ internal sealed class ConfigurationProvider
     internal void CheckCustomConfigurationDataValidity(string projectFullPath, string ruleId)
     {
         var configuration = GetCustomConfiguration(projectFullPath, ruleId);
+        VerifyCustomConfigurationEquality(ruleId, configuration);
+    }
 
+    internal void VerifyCustomConfigurationEquality(string ruleId, CustomConfigurationData configurationData)
+    {
         if (_customConfigurationData.TryGetValue(ruleId, out var storedConfiguration))
         {
-            if (!storedConfiguration.Equals(configuration))
+            if (!storedConfiguration.Equals(configurationData))
             {
                 throw new BuildCheckConfigurationException("Custom configuration should be equal between projects");
             }
@@ -204,7 +210,7 @@ internal sealed class ConfigurationProvider
 
         // clear the dictionary from the key-value pairs not BuildCheck related and
         // store the data so there is no need to parse the .editorconfigs all over again
-        _editorConfigData[projectFullPath] = FilterDictionaryByKeys("build_check.",  config);
+        _editorConfigData[projectFullPath] = FilterDictionaryByKeys($"{BuildCheck_ConfigurationKey}.",  config);
 
         return _editorConfigData[projectFullPath];
     }
@@ -212,7 +218,7 @@ internal sealed class ConfigurationProvider
     internal Dictionary<string, string> GetConfiguration(string projectFullPath, string ruleId)
     {
         var config = FetchEditorConfigRules(projectFullPath);
-        return FilterDictionaryByKeys($"build_check.{ruleId}.", config, updateKey: true);
+        return FilterDictionaryByKeys($"{BuildCheck_ConfigurationKey}.{ruleId}.", config, updateKey: true);
     }
 
     /// <summary>
