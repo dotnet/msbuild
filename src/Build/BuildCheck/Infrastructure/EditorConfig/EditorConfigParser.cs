@@ -3,11 +3,11 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing.Design;
 using System.IO;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.Shared;
@@ -22,7 +22,7 @@ namespace Microsoft.Build.BuildCheck.Infrastructure.EditorConfig
         /// <summary>
         /// Cache layer of the parsed editor configs the key is the path to the .editorconfig file.
         /// </summary>
-        private readonly Dictionary<string, EditorConfigFile> _editorConfigFileCache = new Dictionary<string, EditorConfigFile>(StringComparer.InvariantCultureIgnoreCase);
+        private readonly ConcurrentDictionary<string, EditorConfigFile> _editorConfigFileCache = new ConcurrentDictionary<string, EditorConfigFile>(StringComparer.InvariantCultureIgnoreCase);
 
         internal Dictionary<string, string> Parse(string filePath)
         {
