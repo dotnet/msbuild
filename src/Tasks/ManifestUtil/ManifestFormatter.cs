@@ -16,8 +16,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static Stream Format(Stream input)
         {
             int t1 = Environment.TickCount;
-
-            using var r = new XmlTextReader(input)
+#pragma warning disable CA2000 // Dispose objects before losing scope - caller needs underlying stream
+            var r = new XmlTextReader(input)
             {
                 DtdProcessing = DtdProcessing.Ignore,
                 WhitespaceHandling = WhitespaceHandling.None
@@ -25,12 +25,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             XmlNamespaceManager nsmgr = XmlNamespaces.GetNamespaceManager(r.NameTable);
 
             var m = new MemoryStream();
-            using var w = new XmlTextWriter(m, Encoding.UTF8)
+            var w = new XmlTextWriter(m, Encoding.UTF8)
             {
                 Formatting = Formatting.Indented,
                 Indentation = 2
             };
             w.WriteStartDocument();
+#pragma warning restore CA2000 // Dispose objects before losing scope
 
             while (r.Read())
             {
