@@ -3919,7 +3919,8 @@ namespace Microsoft.Build.Evaluation
                     {
                         if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.RegisterAnalyzer), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (_loggingContext != null && TryGetArg(args, out string arg0))
+                            ErrorUtilities.VerifyThrow(_loggingContext != null, $"The logging context is missed. {nameof(IntrinsicFunctions.RegisterAnalyzer)} can not be invoked.");
+                            if (TryGetArg(args, out string arg0))
                             {
                                 returnVal = IntrinsicFunctions.RegisterAnalyzer(arg0, _loggingContext);
                                 return true;
