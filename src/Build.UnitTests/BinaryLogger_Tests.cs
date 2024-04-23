@@ -657,10 +657,8 @@ namespace Microsoft.Build.UnitTests
             {
                 Parameters = parameters
             };
-            var stampProvider = A.Fake<IBinlogPathParameterExpander>();
             string random = "xxxxx";
-            A.CallTo(() => stampProvider.ExpandParameter(A<string>.Ignored)).Returns(random);
-            binaryLogger.PathParameterExpander = stampProvider;
+            binaryLogger.PathParameterExpander = _ => random;
 
             var eventSource = A.Fake<IEventSource>();
 
@@ -671,6 +669,7 @@ namespace Microsoft.Build.UnitTests
             File.Exists(binaryLogger.FilePath).ShouldBeTrue();
             FileUtilities.DeleteNoThrow(binaryLogger.FilePath);
 
+            // We need to create the file to satisfy the invariant set by the ctor of this testclass
             File.Create(_logFile);
         }
 
@@ -691,6 +690,7 @@ namespace Microsoft.Build.UnitTests
             File.Exists(binaryLogger.FilePath).ShouldBeTrue();
             FileUtilities.DeleteNoThrow(binaryLogger.FilePath);
 
+            // We need to create the file to satisfy the invariant set by the ctor of this testclass
             File.Create(_logFile);
         }
 

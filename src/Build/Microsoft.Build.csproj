@@ -196,7 +196,6 @@
     <Compile Include="FileAccess\RequestedAccess.cs" />
     <Compile Include="BuildCheck\Logging\AnalyzerLoggingContext.cs" />
     <Compile Include="BuildCheck\Logging\AnalyzerLoggingContextFactory.cs" />
-    <Compile Include="Logging\BinaryLogger\IBinlogPathParameterExpander.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />

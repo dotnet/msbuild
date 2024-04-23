@@ -136,10 +136,13 @@ namespace Microsoft.Build.Logging
         public string Parameters { get; set; }
 
         /// <summary>
-        /// Optional expander of wildcard(s) within the path parameter of a binlog <see cref="Parameters"/>.
-        /// See <see cref="IBinlogPathParameterExpander"/> for more details.
+        /// Optional expander of wildcard(s) within the LogFile path parameter of a binlog <see cref="Parameters"/>.
+        /// Wildcards can be used in the LogFile parameter in a form for curly brackets ('{}', '{[param]}').
+        /// Currently, the only supported wildcard is '{}', the optional parameters within the curly brackets
+        ///  are not currently supported, however the string parameter to the <see cref="PathParameterExpander"/> func
+        /// is reserved for this purpose.
         /// </summary>
-        public IBinlogPathParameterExpander PathParameterExpander { private get; set; } = new BinlogPathParameterExpander();
+        internal Func<string, string> PathParameterExpander { private get; set; } = ExpandPathParameter;
 
         /// <summary>
         /// Initializes the logger by subscribing to events of the specified event source and embedded content source.
@@ -482,30 +485,16 @@ namespace Microsoft.Build.Logging
         }
 
         private string GetUniqueStamp()
-            => PathParameterExpander.ExpandParameter(string.Empty);
+            => (PathParameterExpander ?? ExpandPathParameter)(string.Empty);
 
-        private class BinlogPathParameterExpander : IBinlogPathParameterExpander
-        {
-            public string ExpandParameter(string parameters)
-                => $"{DateTime.UtcNow.ToString("yyyyMMddHHmmss")}-{GenerateRandomString(6)}";
+        private static string ExpandPathParameter(string parameters)
+            => $"{DateTime.UtcNow.ToString("yyyyMMdd-HHmmss")}--{ProcessId}--{StringUtils.GenerateRandomString(6)}";
 
-            private string GenerateRandomString(int length)
-            {
-                // Base64, 2^6 = 64
-                const int eachStringCharEncodesBites = 6;
-                const int eachByteHasBits = 8;
-                const double bytesNumNeededForSingleStringChar = eachStringCharEncodesBites / (double)eachByteHasBits;
-
-                int randomBytesNeeded = (int)Math.Ceiling(length * bytesNumNeededForSingleStringChar);
-                Random random = new();
-
-                byte[] randomBytes = new byte[randomBytesNeeded];
-                random.NextBytes(randomBytes);
-                // Base64: [A-Z], [a-z], [0-9], +, /, =
-                // We are replacing '/' to get a valid path
-                string randomBase64String = Convert.ToBase64String(randomBytes).Replace('/', '_');
-                return randomBase64String.Substring(0, length);
-            }
-        }
+        private static int ProcessId
+#if NET
+            => Environment.ProcessId;
+#else
+            => System.Diagnostics.Process.GetCurrentProcess().Id;
+#endif
     }
 }
