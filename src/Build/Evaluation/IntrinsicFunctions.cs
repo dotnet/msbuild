@@ -291,6 +291,7 @@ namespace Microsoft.Build.Evaluation
                         return string.Empty;
                     }
 
+#pragma warning disable CA2000 // Dispose objects before losing scope is false positive here.
                     using (RegistryKey key = GetBaseKeyFromKeyName(keyName, view, out string subKeyName))
                     {
                         if (key != null)
@@ -311,6 +312,7 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                     }
+#pragma warning restore CA2000 // Dispose objects before losing scope
                 }
             }
 
@@ -446,12 +448,13 @@ namespace Microsoft.Build.Evaluation
 
         private static string CalculateSha256(string toHash)
         {
-            var sha = System.Security.Cryptography.SHA256.Create();
+            using var sha = System.Security.Cryptography.SHA256.Create();
             var hashResult = new StringBuilder();
             foreach (byte theByte in sha.ComputeHash(Encoding.UTF8.GetBytes(toHash)))
             {
                 hashResult.Append(theByte.ToString("x2"));
             }
+
             return hashResult.ToString();
         }
 

@@ -2300,6 +2300,50 @@ EndGlobal
         }
 
         /// <summary>
+        /// Verifies that disambiguated target names are used when a project name matches a standard solution entry point.
+        /// </summary>
+        [Fact]
+        public void DisambiguatedTargetNamesAreInInMetaproj()
+        {
+            foreach(string projectName in ProjectInSolution.projectNamesToDisambiguate)
+            {
+                SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(
+                $$"""
+                    Microsoft Visual Studio Solution File, Format Version 14.00
+                    # Visual Studio 2015
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "{{projectName}}", "{{projectName}}.csproj", "{6185CC21-BE89-448A-B3C0-D1C27112E595}"
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Release|Any CPU = Release|Any CPU
+                        EndGlobalSection
+                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                            {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                            {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                            {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                            {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+                        EndGlobalSection
+                    EndGlobal
+                """);
+
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), null);
+
+                foreach (string targetName in ProjectInSolution.projectNamesToDisambiguate)
+                {
+                    // The entry point still exists normally.
+                    Assert.True(instances[0].Targets.ContainsKey(targetName));
+
+                    // The traversal target should be disambiguated with a "Solution:" prefix.
+                    // Note: The default targets are used instead of "Build".
+                    string traversalTargetName = targetName.Equals("Build", StringComparison.OrdinalIgnoreCase)
+                        ? $"Solution:{projectName}"
+                        : $"Solution:{projectName}:{targetName}";
+                    Assert.True(instances[0].Targets.ContainsKey(traversalTargetName));
+                }
+            }
+        }
+
+        /// <summary>
         /// Verifies that illegal user target names (the ones already used internally) don't crash the SolutionProjectGenerator
         /// </summary>
         [Theory]
