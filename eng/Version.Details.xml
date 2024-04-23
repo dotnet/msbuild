@@ -91,9 +91,9 @@
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>fb50d1a45ed10b39b5f335bc3a4bdcaea9b951cf</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.10.0-3.24212.1">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.10.0-3.24216.12">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>0b1fefc344701f2669b2190fbfda5ca588083605</Sha>
+      <Sha>3af0081a6e811b78d37c62e479914f7f4cfb0d1a</Sha>
       <SourceBuild RepoName="roslyn" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="8.0.0-beta.24204.3">
