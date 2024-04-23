@@ -59,7 +59,7 @@ internal sealed class ConfigurationProvider
     {
         var configuration = GetConfiguration(projectFullPath, ruleId);
 
-        if (configuration is null || !configuration.Any())
+        if (configuration is null)
         {
             return CustomConfigurationData.Null;
         }
@@ -68,6 +68,11 @@ internal sealed class ConfigurationProvider
         foreach (var infraConfigurationKey in _infrastructureConfigurationKeys)
         {
             configuration.Remove(infraConfigurationKey);
+        }
+
+        if (!configuration.Any())
+        {
+            return CustomConfigurationData.Null;
         }
 
         var data = new CustomConfigurationData(ruleId, configuration);
@@ -210,7 +215,7 @@ internal sealed class ConfigurationProvider
 
         // clear the dictionary from the key-value pairs not BuildCheck related and
         // store the data so there is no need to parse the .editorconfigs all over again
-        _editorConfigData[projectFullPath] = FilterDictionaryByKeys($"{BuildCheck_ConfigurationKey}.",  config);
+        _editorConfigData[projectFullPath] = FilterDictionaryByKeys($"{BuildCheck_ConfigurationKey}.", config);
 
         return _editorConfigData[projectFullPath];
     }
