@@ -52,7 +52,7 @@ public class BuildAnalyzerConfiguration
     /// If the BuildAnalyzerConfiguration's property name presented in the dictionary, the value of this key-value pair is parsed and assigned to the instance's field.
     /// If parsing failed the value will be equal to null.
     /// </summary>
-    /// <param name="configDictionary">The configuration dictionary containing the settings for the build analyzer.</param>
+    /// <param name="configDictionary">The configuration dictionary containing the settings for the build analyzer. The configuration's keys are expected to be in lower case or the EqualityComparer to ignore case.</param>
     /// <returns>A new instance of <see cref="BuildAnalyzerConfiguration"/> with the specified settings.</returns>
     public static BuildAnalyzerConfiguration Create(Dictionary<string, string>? configDictionary)
     {
