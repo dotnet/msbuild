@@ -27,17 +27,17 @@ internal sealed class ConfigurationProvider
     /// <summary>
     /// The dictionary used for storing the BuildAnalyzerConfiguration per projectfile and rule id. The key is equal to {projectFullPath}-{ruleId}
     /// </summary>
-    private readonly Dictionary<string, BuildAnalyzerConfiguration> _buildAnalyzerConfiguration = new Dictionary<string, BuildAnalyzerConfiguration>();
+    private readonly Dictionary<string, BuildAnalyzerConfiguration> _buildAnalyzerConfiguration = new Dictionary<string, BuildAnalyzerConfiguration>(StringComparer.InvariantCultureIgnoreCase);
 
     /// <summary>
     /// The dictionary used for storing the key-value pairs retrieved from the .editorconfigs for specific projectfile. The key is equal to projectFullPath
     /// </summary>
-    private readonly Dictionary<string, Dictionary<string, string>> _editorConfigData = new Dictionary<string, Dictionary<string, string>>();
+    private readonly Dictionary<string, Dictionary<string, string>> _editorConfigData = new Dictionary<string, Dictionary<string, string>>(StringComparer.InvariantCultureIgnoreCase);
 
     /// <summary>
     /// The dictionary used for storing the CustomConfigurationData per ruleId. The key is equal to ruleId.
     /// </summary>
-    private readonly Dictionary<string, CustomConfigurationData> _customConfigurationData = new Dictionary<string, CustomConfigurationData>();
+    private readonly Dictionary<string, CustomConfigurationData> _customConfigurationData = new Dictionary<string, CustomConfigurationData>(StringComparer.InvariantCultureIgnoreCase);
 
     private readonly string[] _infrastructureConfigurationKeys = new string[] {
         nameof(BuildAnalyzerConfiguration.EvaluationAnalysisScope).ToLower(),

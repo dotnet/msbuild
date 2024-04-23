@@ -18,7 +18,11 @@ namespace Microsoft.Build.BuildCheck.Infrastructure.EditorConfig
     internal class EditorConfigParser
     {
         private const string EditorconfigFile = ".editorconfig";
-        private Dictionary<string, EditorConfigFile> editorConfigFileCache = new Dictionary<string, EditorConfigFile>();
+
+        /// <summary>
+        /// Cache layer of the parsed editor configs the key is the path to the .editorconfig file.
+        /// </summary>
+        private Dictionary<string, EditorConfigFile> _editorConfigFileCache = new Dictionary<string, EditorConfigFile>(StringComparer.InvariantCultureIgnoreCase);
 
         internal Dictionary<string, string> Parse(string filePath)
         {
@@ -41,15 +45,15 @@ namespace Microsoft.Build.BuildCheck.Infrastructure.EditorConfig
             {
                 EditorConfigFile editorConfig;
 
-                if (editorConfigFileCache.ContainsKey(editorConfigFilePath))
+                if (_editorConfigFileCache.ContainsKey(editorConfigFilePath))
                 {
-                    editorConfig = editorConfigFileCache[editorConfigFilePath];
+                    editorConfig = _editorConfigFileCache[editorConfigFilePath];
                 }
                 else
                 {
                     var editorConfigfileContent = File.ReadAllText(editorConfigFilePath);
                     editorConfig = EditorConfigFile.Parse(editorConfigfileContent);
-                    editorConfigFileCache[editorConfigFilePath] = editorConfig;
+                    _editorConfigFileCache[editorConfigFilePath] = editorConfig;
                 }
 
                 editorConfigDataFromFilesList.Add(editorConfig);
@@ -75,7 +79,7 @@ namespace Microsoft.Build.BuildCheck.Infrastructure.EditorConfig
         /// <param name="filePath"></param>
         internal Dictionary<string, string> MergeEditorConfigFiles(IEnumerable<EditorConfigFile> editorConfigFiles, string filePath)
         {
-            var resultingDictionary = new Dictionary<string, string>();
+            var resultingDictionary = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
             if (editorConfigFiles.Any())
             {
