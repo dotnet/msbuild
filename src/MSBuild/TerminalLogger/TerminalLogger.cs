@@ -11,12 +11,10 @@ using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
 using Microsoft.Build.Framework.Logging;
+using System.Globalization;
 
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-
-
 #endif
 #if NETFRAMEWORK
 using Microsoft.IO;
@@ -63,6 +61,10 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// The indentation to use for all build output.
     /// </summary>
     internal const string Indentation = "  ";
+
+    internal const string DoubleIndentation = $"{Indentation}{Indentation}";
+
+    internal const string TripleIndentation = $"{Indentation}{Indentation}{Indentation}";
 
     internal const TerminalColor TargetFrameworkColor = TerminalColor.Cyan;
 
@@ -389,6 +391,31 @@ internal sealed partial class TerminalLogger : INodeLogger
                 string buildResult = RenderBuildResult(e.Succeeded, _buildErrorsCount, _buildWarningsCount);
 
                 Terminal.WriteLine("");
+                if(_testRunSummaries.Any())
+                {
+                    var total = _testRunSummaries.Sum(t => t.Total);
+                    var failed = _testRunSummaries.Sum(t => t.Failed);
+                    var passed = _testRunSummaries.Sum(t => t.Passed);
+                    var skipped = _testRunSummaries.Sum(t => t.Skipped);
+                    var testDuration = (_testStartTime != null && _testEndTime != null ? (_testEndTime - _testStartTime).Value.TotalSeconds : 0).ToString("F1");
+
+                    var colorizeFailed = failed > 0;
+                    var colorizePassed = passed > 0 && _buildErrorsCount == 0 && failed == 0;
+                    var colorizeSkipped = skipped > 0 && skipped == total && _buildErrorsCount == 0 && failed == 0;
+
+                    string summaryAndTotalText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_BannerAndTotal", total);
+                    string failedText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Failed", failed);
+                    string passedText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Succeeded", passed);
+                    string skippedText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Skipped", skipped);
+                    string durationText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Duration", testDuration);
+
+                    failedText = colorizeFailed ? AnsiCodes.Colorize(failedText.ToString(), TerminalColor.Red) : failedText;
+                    passedText = colorizePassed ? AnsiCodes.Colorize(passedText.ToString(), TerminalColor.Green) : passedText;
+                    skippedText = colorizeSkipped ? AnsiCodes.Colorize(skippedText.ToString(), TerminalColor.Yellow) : skippedText;
+
+                    Terminal.WriteLine(string.Join(CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ", summaryAndTotalText, failedText, passedText, skippedText, durationText));
+                }
+
                 if (_restoreFailed)
                 {
                     Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
@@ -400,27 +427,6 @@ internal sealed partial class TerminalLogger : INodeLogger
                     Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildFinished",
                         buildResult,
                         duration));
-                }
-
-                if (_testRunSummaries.Any())
-                {
-                    var total = _testRunSummaries.Sum(t => t.Total);
-                    var failed = _testRunSummaries.Sum(t => t.Failed);
-                    var passed = _testRunSummaries.Sum(t => t.Passed);
-                    var skipped = _testRunSummaries.Sum(t => t.Skipped);
-                    var testDuration = (_testStartTime != null && _testEndTime != null ? (_testEndTime - _testStartTime).Value.TotalSeconds : 0).ToString("F1");
-
-                    var colorizedResult = _testRunSummaries.Any(t => t.Failed > 0) || (_buildErrorsCount > 0)
-                        ? AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Failed"), TerminalColor.Red)
-                        : AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Succeeded"), TerminalColor.Green);
-
-                    Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary",
-                        colorizedResult,
-                        total,
-                        failed,
-                        passed,
-                        skipped,
-                        testDuration));
                 }
             }
         }
@@ -644,7 +650,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                     {
                         foreach (BuildMessage buildMessage in project.BuildMessages)
                         {
-                            Terminal.WriteLine($"{Indentation}{Indentation}{buildMessage.Message}");
+                            Terminal.WriteLine($"{DoubleIndentation}{buildMessage.Message}");
                         }
                     }
 
@@ -858,32 +864,22 @@ internal sealed partial class TerminalLogger : INodeLogger
     private void WarningRaised(object sender, BuildWarningEventArgs e)
     {
         BuildEventContext? buildEventContext = e.BuildEventContext;
-        string message = FormatEventMessage(
-                category: AnsiCodes.Colorize("warning", TerminalColor.Yellow),
-                subcategory: e.Subcategory,
-                message: e.Message,
-                code: AnsiCodes.Colorize(e.Code, TerminalColor.Yellow),
-                file: HighlightFileName(e.File),
-                lineNumber: e.LineNumber,
-                endLineNumber: e.EndLineNumber,
-                columnNumber: e.ColumnNumber,
-                endColumnNumber: e.EndColumnNumber);
 
         if (buildEventContext is not null
             && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project)
             && Verbosity > LoggerVerbosity.Quiet)
         {
-            if (IsImmediateMessage(message))
+            if (!String.IsNullOrEmpty(e.Message) && IsImmediateMessage(e.Message!))
             {
-                RenderImmediateMessage(message);
+                RenderImmediateMessage(FormatWarningMessage(e, Indentation));
             }
 
-            project.AddBuildMessage(MessageSeverity.Warning, message);
+            project.AddBuildMessage(MessageSeverity.Warning, FormatWarningMessage(e, TripleIndentation));
         }
         else
         {
             // It is necessary to display warning messages reported by MSBuild, even if it's not tracked in _projects collection or the verbosity is Quiet.
-            RenderImmediateMessage(message);
+            RenderImmediateMessage(FormatWarningMessage(e, Indentation));
             _buildWarningsCount++;
         }
     }
@@ -906,27 +902,17 @@ internal sealed partial class TerminalLogger : INodeLogger
     private void ErrorRaised(object sender, BuildErrorEventArgs e)
     {
         BuildEventContext? buildEventContext = e.BuildEventContext;
-        string message = FormatEventMessage(
-                category: AnsiCodes.Colorize("error", TerminalColor.Red),
-                subcategory: e.Subcategory,
-                message: e.Message,
-                code: AnsiCodes.Colorize(e.Code, TerminalColor.Red),
-                file: HighlightFileName(e.File),
-                lineNumber: e.LineNumber,
-                endLineNumber: e.EndLineNumber,
-                columnNumber: e.ColumnNumber,
-                endColumnNumber: e.EndColumnNumber);
-
+        
         if (buildEventContext is not null
             && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project)
             && Verbosity > LoggerVerbosity.Quiet)
         {
-            project.AddBuildMessage(MessageSeverity.Error, message);
+            project.AddBuildMessage(MessageSeverity.Error, FormatErrorMessage(e, TripleIndentation));
         }
         else
         {
             // It is necessary to display error messages reported by MSBuild, even if it's not tracked in _projects collection or the verbosity is Quiet.
-            RenderImmediateMessage(message);
+            RenderImmediateMessage(FormatErrorMessage(e, Indentation));
             _buildErrorsCount++;
         }
     }
@@ -1070,6 +1056,36 @@ internal sealed partial class TerminalLogger : INodeLogger
             : path;
     }
 
+    private string FormatWarningMessage(BuildWarningEventArgs e, string indent)
+    {
+        return FormatEventMessage(
+                category: AnsiCodes.Colorize("warning", TerminalColor.Yellow),
+                subcategory: e.Subcategory,
+                message: e.Message,
+                code: AnsiCodes.Colorize(e.Code, TerminalColor.Yellow),
+                file: HighlightFileName(e.File),
+                lineNumber: e.LineNumber,
+                endLineNumber: e.EndLineNumber,
+                columnNumber: e.ColumnNumber,
+                endColumnNumber: e.EndColumnNumber,
+                indent);
+    }
+
+    private string FormatErrorMessage(BuildErrorEventArgs e, string indent)
+    {
+        return FormatEventMessage(
+                category: AnsiCodes.Colorize("error", TerminalColor.Red),
+                subcategory: e.Subcategory,
+                message: e.Message,
+                code: AnsiCodes.Colorize(e.Code, TerminalColor.Red),
+                file: HighlightFileName(e.File),
+                lineNumber: e.LineNumber,
+                endLineNumber: e.EndLineNumber,
+                columnNumber: e.ColumnNumber,
+                endColumnNumber: e.EndColumnNumber,
+                indent);
+    }
+
     private string FormatEventMessage(
             string category,
             string subcategory,
@@ -1079,7 +1095,8 @@ internal sealed partial class TerminalLogger : INodeLogger
             int lineNumber,
             int endLineNumber,
             int columnNumber,
-            int endColumnNumber)
+            int endColumnNumber,
+            string indent)
     {
         message ??= string.Empty;
         StringBuilder builder = new(128);
@@ -1133,7 +1150,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         // render multi-line message in a special way
         if (message.IndexOf('\n') >= 0)
         {
-            const string indent = $"{Indentation}{Indentation}{Indentation}";
+            // Place the multiline message under the project in case of minimal and higher verbosity.
             string[] lines = message.Split(newLineStrings, StringSplitOptions.None);
 
             foreach (string line in lines)
