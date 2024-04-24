@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -45,8 +44,6 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         ErrorUtilities.VerifyThrow(type == BuildComponentType.BuildCheckManagerProvider, "Cannot create components of type {0}", type);
         return new BuildCheckManagerProvider();
     }
-
-    internal static Stopwatch _stopwatch = new Stopwatch();
 
     public void InitializeComponent(IBuildComponentHost host)
     {
@@ -93,20 +90,21 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         /// <param name="buildCheckDataSource"></param>
         public void SetDataSource(BuildCheckDataSource buildCheckDataSource)
         {
-            _stopwatch.Start();
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             if (!_enabledDataSources[(int)buildCheckDataSource])
             {
                 _enabledDataSources[(int)buildCheckDataSource] = true;
                 RegisterBuiltInAnalyzers(buildCheckDataSource);
             }
-            _stopwatch.Stop();
-            _tracingReporter.analyzerSetDataSourceTime = _stopwatch.Elapsed;
-            _stopwatch.Reset();
+            stopwatch.Stop();
+            _tracingReporter.analyzerSetDataSourceTime = stopwatch.Elapsed;
         }
 
         public void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData)
         {
-            _stopwatch.Start();
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             if (IsInProcNode)
             {
                 var factory = _acquisitionModule.CreateBuildAnalyzerFactory(acquisitionData);
@@ -126,9 +124,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
                 _loggingService.LogBuildEvent(eventArgs);
             }
-            _stopwatch.Stop();
-            _tracingReporter.analyzerAcquisitionTime = _stopwatch.Elapsed;
-            _stopwatch.Reset();
+            stopwatch.Stop();
+            _tracingReporter.analyzerAcquisitionTime = stopwatch.Elapsed;
         }
 
         internal BuildCheckManager(ILoggingService loggingService)
@@ -272,7 +269,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             // On an execution node - we might remove and dispose the analyzers once project is done
 
             // If it's already constructed - just control the custom settings do not differ
-            _stopwatch.Start();
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             List<BuildAnalyzerFactoryContext> analyzersToRemove = new();
             foreach (BuildAnalyzerFactoryContext analyzerFactoryContext in _analyzersRegistry)
             {
@@ -301,9 +299,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 analyzerToRemove.BuildAnalyzer.Dispose();
             }
 
-            _stopwatch.Stop();
-            _tracingReporter.newProjectAnalyzersTime = _stopwatch.Elapsed;
-            _stopwatch.Reset();
+            stopwatch.Stop();
+            _tracingReporter.newProjectAnalyzersTime = stopwatch.Elapsed;
         }
 
 
@@ -325,14 +322,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 }
             }
 
-            var infraStats = new Dictionary<string, TimeSpan>() {
-                { $"{BuildCheckConstants.infraStatPrefix}analyzerAcquisitionTime", _tracingReporter.analyzerAcquisitionTime },
-                { $"{BuildCheckConstants.infraStatPrefix}analyzerSetDataSourceTime", _tracingReporter.analyzerSetDataSourceTime },
-                { $"{BuildCheckConstants.infraStatPrefix}newProjectAnalyzersTime", _tracingReporter.newProjectAnalyzersTime }
-            };
-
-            _tracingReporter.TracingStats.Merge(infraStats, (span1, span2) => span1 + span2);
-
+            _tracingReporter.AddAnalyzerInfraStats();
             return _tracingReporter.TracingStats;
         }
 

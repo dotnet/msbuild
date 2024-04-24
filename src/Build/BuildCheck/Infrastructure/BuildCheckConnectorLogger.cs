@@ -68,7 +68,7 @@ internal sealed class BuildCheckConnectorLogger(
         {
             if (buildCheckBuildEventArgs is BuildCheckTracingEventArgs tracingEventArgs)
             {
-                if (!tracingEventArgs.IsLogReport)
+                if (!tracingEventArgs.IsAggregatedGlobalReport)
                 {
                     _stats.Merge(tracingEventArgs.TracingData, (span1, span2) => span1 + span2);
                 }
@@ -117,24 +117,12 @@ internal sealed class BuildCheckConnectorLogger(
 
         loggingContext.LogBuildEvent(statEvent);
 
-        if (_areStatsEnabled)
-        {
-            loggingContext.LogCommentFromText(MessageImportance.High, $"BuildCheck run times{Environment.NewLine}");
-            string infraData = BuildCsvString("Infrastructure run times", infraStats);
-            loggingContext.LogCommentFromText(MessageImportance.High, infraData);
-
-            string analyzerData = BuildCsvString("Analyzer run times", analyzerStats);
-            loggingContext.LogCommentFromText(MessageImportance.High, analyzerData);
-        }
-        else
-        {
-            loggingContext.LogCommentFromText(MessageImportance.Low, $"BuildCheck run times{Environment.NewLine}");
-            string infraData = BuildCsvString("Infrastructure run times", infraStats);
-            loggingContext.LogCommentFromText(MessageImportance.Low, infraData);
-
-            string analyzerData = BuildCsvString("Analyzer run times", analyzerStats);
-            loggingContext.LogCommentFromText(MessageImportance.Low, analyzerData);
-        }
+        MessageImportance importance = _areStatsEnabled ? MessageImportance.High : MessageImportance.Low;
+        loggingContext.LogCommentFromText(importance, $"BuildCheck run times{Environment.NewLine}");
+        string infraData = BuildCsvString("Infrastructure run times", infraStats);
+        loggingContext.LogCommentFromText(importance, infraData);
+        string analyzerData = BuildCsvString("Analyzer run times", analyzerStats);
+        loggingContext.LogCommentFromText(importance, analyzerData);
     }
 
     private string BuildCsvString(string title, Dictionary<string, TimeSpan> rowData)

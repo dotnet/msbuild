@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Build.BuildCheck.Utilities;
+using Microsoft.Build.Experimental.BuildCheck;
 
 namespace Microsoft.Build.BuildCheck.Infrastructure;
 
@@ -28,5 +30,16 @@ internal class TracingReporter
         {
             TracingStats[name] = subtotal;
         }
+    }
+
+    public void AddAnalyzerInfraStats()
+    {
+        var infraStats = new Dictionary<string, TimeSpan>() {
+                { $"{BuildCheckConstants.infraStatPrefix}analyzerAcquisitionTime", analyzerAcquisitionTime },
+                { $"{BuildCheckConstants.infraStatPrefix}analyzerSetDataSourceTime", analyzerSetDataSourceTime },
+                { $"{BuildCheckConstants.infraStatPrefix}newProjectAnalyzersTime", newProjectAnalyzersTime }
+            };
+
+        TracingStats.Merge(infraStats, (span1, span2) => span1 + span2);
     }
 }

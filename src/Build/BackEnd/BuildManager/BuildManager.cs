@@ -1965,11 +1965,10 @@ namespace Microsoft.Build.Execution
 
                 // Non-graph builds verify this in RequestBuilder, but for graph builds we need to disambiguate
                 // between entry nodes and other nodes in the graph since only entry nodes should error. Just do
-                // the verification expicitly before the build even starts.
+                // the verification explicitly before the build even starts.
                 foreach (ProjectGraphNode entryPointNode in projectGraph.EntryPointNodes)
                 {
-                    ImmutableList<string> targetList = targetsPerNode[entryPointNode];
-                    ProjectErrorUtilities.VerifyThrowInvalidProject(targetList.Count > 0, entryPointNode.ProjectInstance.ProjectFileLocation, "NoTargetSpecified");
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(entryPointNode.ProjectInstance.Targets.Count > 0, entryPointNode.ProjectInstance.ProjectFileLocation, "NoTargetSpecified");
                 }
 
                 resultsPerNode = BuildGraph(projectGraph, targetsPerNode, submission.BuildRequestData);
@@ -2007,7 +2006,7 @@ namespace Microsoft.Build.Execution
             IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode,
             GraphBuildRequestData graphBuildRequestData)
         {
-            var waitHandle = new AutoResetEvent(true);
+            using var waitHandle = new AutoResetEvent(true);
             var graphBuildStateLock = new object();
 
             var blockedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes);
@@ -2992,7 +2991,7 @@ namespace Microsoft.Build.Execution
 
                 loggers = (loggers ?? Enumerable.Empty<ILogger>()).Concat(new[]
                 {
-                    new BuildCheckConnectorLogger(new AnalyzerLoggingContextFactory(loggingService), buildCheckManagerProvider.Instance, ((IBuildComponentHost)this).BuildParameters.AreBuildCheckStatsEnabled)
+                    new BuildCheckConnectorLogger(new AnalyzerLoggingContextFactory(loggingService), buildCheckManagerProvider.Instance)
                 });
             }
 
