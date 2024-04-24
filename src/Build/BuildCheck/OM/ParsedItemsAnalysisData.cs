@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -52,4 +53,48 @@ public class ParsedItemsAnalysisData : AnalysisData
         base(projectFilePath) => ItemsHolder = itemsHolder;
 
     public ItemsHolder ItemsHolder { get; }
+}
+
+/// <summary>
+/// BuildCheck OM data representing a task executed by a project.
+/// </summary>
+public sealed class TaskInvocationAnalysisData : AnalysisDataWithLocation
+{
+    public record class TaskParameter(object? Value, bool IsOutput);
+
+    internal TaskInvocationAnalysisData(
+        string projectFilePath,
+        int lineNumber,
+        int columnNumber,
+        string taskName,
+        string taskFile,
+        string taskAssemblyLocation,
+        IReadOnlyDictionary<string, TaskParameter> parameters) :
+        base(projectFilePath, lineNumber, columnNumber)
+    {
+        TaskName = taskName;
+        TaskFile = taskFile;
+        TaskAssemblyLocation = taskAssemblyLocation;
+        Parameters = parameters;
+    }
+
+    /// <summary>
+    /// MSBuild file where this task was defined.
+    /// </summary>
+    public string TaskFile { get; }
+
+    /// <summary>
+    /// Name of the task.
+    /// </summary>
+    public string TaskName { get; }
+
+    /// <summary>
+    /// The location of the assembly containing the implementation of the task.
+    /// </summary>
+    public string TaskAssemblyLocation { get; }
+
+    /// <summary>
+    /// The parameters of the task, keyed by parameter name.
+    /// </summary>
+    public IReadOnlyDictionary<string, TaskParameter> Parameters { get; }
 }

@@ -16,13 +16,33 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// <summary>
 /// Base for a data passed from infrastructure to build analyzers.
 /// </summary>
-/// <param name="projectFilePath">Currently build project.</param>
+/// <param name="projectFilePath">Currently built project.</param>
 public abstract class AnalysisData(string projectFilePath)
 {
     /// <summary>
     /// Full path to the project file being built.
     /// </summary>
     public string ProjectFilePath { get; } = projectFilePath;
+}
+
+/// <summary>
+/// Base for a data with line/column location passed from infrastructure to build analyzers.
+/// </summary>
+/// <param name="projectFilePath">Currently built project.</param>
+/// <param name="lineNumber">The relevant line number in <paramref name="projectFilePath"/> where the event happened.</param>
+/// <param name="columnNumber">The relevant column number in <paramref name="projectFilePath"/> where the event happened.</param>
+public abstract class AnalysisDataWithLocation(string projectFilePath, int lineNumber, int columnNumber)
+    : AnalysisData(projectFilePath)
+{
+    /// <summary>
+    /// Line number of the relevant location.
+    /// </summary>
+    public int LineNumber { get; } = lineNumber;
+
+    /// <summary>
+    /// Column number of the relevant location.
+    /// </summary>
+    public int ColumnNumber { get; } = columnNumber;
 }
 
 /// <summary>

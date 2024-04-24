@@ -25,8 +25,26 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralContext)
 {
+    /// <summary>
+    /// Represents a task currently being executed.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="TaskParameters"/> is stored in its own field typed as a mutable dictionary because <see cref="AnalysisData"/>
+    /// is immutable.
+    /// </remarks>
+    private struct ExecutingTaskData
+    {
+        public TaskInvocationAnalysisData AnalysisData;
+        public Dictionary<string, TaskInvocationAnalysisData.TaskParameter> TaskParameters;
+    }
+
     private readonly SimpleProjectRootElementCache _cache = new SimpleProjectRootElementCache();
     private readonly BuildCheckCentralContext _buildCheckCentralContext = buildCheckCentralContext;
+
+    /// <summary>
+    /// Keeps track of in-flight tasks. Keyed by task ID as passed in <see cref="BuildEventContext.TaskId"/>.
+    /// </summary>
+    private readonly Dictionary<int, ExecutingTaskData> _tasksBeingExecuted = [];
 
     // This requires MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION set to 1
     internal void ProcessEvaluationFinishedEventArgs(
@@ -52,6 +70,74 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
                 new ItemsHolder(xml.Items, xml.ItemGroups));
 
             _buildCheckCentralContext.RunParsedItemsActions(itemsAnalysisData, buildAnalysisContext, ReportResult);
+        }
+    }
+
+    internal void ProcessTaskStartedEventArgs(
+        AnalyzerLoggingContext buildAnalysisContext,
+        TaskStartedEventArgs taskStartedEventArgs)
+    {
+        if (taskStartedEventArgs.BuildEventContext is not null)
+        {
+            // Add a new entry to _tasksBeingExecuted. TaskParameters are initialized empty and will be recorded
+            // based on TaskParameterEventArgs we receive later.
+            Dictionary<string, TaskInvocationAnalysisData.TaskParameter> taskParameters = new();
+
+            ExecutingTaskData taskData = new()
+            {
+                TaskParameters = taskParameters,
+                AnalysisData = new(
+                    projectFilePath: taskStartedEventArgs.ProjectFile!,
+                    lineNumber: taskStartedEventArgs.LineNumber,
+                    columnNumber: taskStartedEventArgs.ColumnNumber,
+                    taskName: taskStartedEventArgs.TaskName,
+                    taskFile: taskStartedEventArgs.TaskFile,
+                    taskAssemblyLocation: taskStartedEventArgs.TaskAssemblyLocation,
+                    parameters: taskParameters),
+            };
+
+            _tasksBeingExecuted.Add(taskStartedEventArgs.BuildEventContext.TaskId, taskData);
+        }
+    }
+
+    internal void ProcessTaskFinishedEventArgs(
+        AnalyzerLoggingContext buildAnalysisContext,
+        TaskFinishedEventArgs taskFinishedEventArgs)
+    {
+        if (taskFinishedEventArgs.BuildEventContext is not null &&
+            _tasksBeingExecuted.TryGetValue(taskFinishedEventArgs.BuildEventContext.TaskId, out ExecutingTaskData taskData))
+        {
+            // All task parameters have been recorded by now so remove the task from the dictionary and fire the registered build check actions.
+            _tasksBeingExecuted.Remove(taskFinishedEventArgs.BuildEventContext.TaskId);
+            _buildCheckCentralContext.RunTaskInvocationActions(taskData.AnalysisData, buildAnalysisContext, ReportResult);
+        }
+    }
+
+    internal void ProcessTaskParameterEventArgs(
+        AnalyzerLoggingContext buildAnalysisContext,
+        TaskParameterEventArgs taskParameterEventArgs)
+    {
+        bool isOutput;
+        switch (taskParameterEventArgs.Kind)
+        {
+            case TaskParameterMessageKind.TaskInput: isOutput = false; break;
+            case TaskParameterMessageKind.TaskOutput: isOutput = true; break;
+            default: return;
+        }
+
+        if (taskParameterEventArgs.BuildEventContext is not null &&
+            _tasksBeingExecuted.TryGetValue(taskParameterEventArgs.BuildEventContext.TaskId, out ExecutingTaskData taskData))
+        {
+            // Add the parameter name and value to the matching entry in _tasksBeingExecuted. Parameters come typed as IList
+            // but it's more natural to pass them as scalar values so we unwrap one-element lists.
+            string parameterName = taskParameterEventArgs.ItemType;
+            object? parameterValue = taskParameterEventArgs.Items?.Count switch
+            {
+                1 => taskParameterEventArgs.Items[0],
+                _ => taskParameterEventArgs.Items,
+            };
+
+            taskData.TaskParameters[parameterName] = new TaskInvocationAnalysisData.TaskParameter(parameterValue, isOutput);
         }
     }
 
