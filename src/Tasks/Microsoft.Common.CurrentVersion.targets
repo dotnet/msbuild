@@ -5579,6 +5579,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         File="$(IntermediateOutputPath)$(CleanFile)"
         Lines="@(_CleanUniqueRemainingFileWritesAfterIncrementalClean)"
         Condition="'@(_CleanUnfilteredPriorFileWrites)'!='@(_CleanUniqueRemainingFileWritesAfterIncrementalClean)'"
+        Encoding="Unicode"
         Overwrite="true"/>
 
   </Target>
