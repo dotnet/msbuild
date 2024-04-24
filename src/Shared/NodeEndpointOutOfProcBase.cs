@@ -101,7 +101,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Per-node shared read buffer.
         /// </summary>
-        private SharedReadBuffer _sharedReadBuffer;
+        private BinaryReaderFactory _sharedReadBuffer;
 
         /// <summary>
         /// A way to cache a byte array when writing out packets

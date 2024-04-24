@@ -19,7 +19,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Display as string.
         /// </summary>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return assemblyName + ", " + reference;
         }
@@ -27,7 +27,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Compare by assembly name.
         /// </summary>
-        public int CompareTo(AssemblyNameReference other)
+        public readonly int CompareTo(AssemblyNameReference other)
         {
             return assemblyName.CompareTo(other.assemblyName);
         }

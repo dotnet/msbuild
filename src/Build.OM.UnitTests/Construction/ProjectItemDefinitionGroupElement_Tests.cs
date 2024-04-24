@@ -24,7 +24,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             ProjectRootElement project = ProjectRootElement.Create();
             Assert.Equal(0, Helpers.Count(project.Children));
-            Assert.Null(project.ItemDefinitionGroups.GetEnumerator().Current);
+            Assert.Empty(project.ItemDefinitionGroups);
         }
 
         /// <summary>

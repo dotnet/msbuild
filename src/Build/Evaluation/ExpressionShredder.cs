@@ -156,10 +156,7 @@ namespace Microsoft.Build.Evaluation
 
                     // Grab the name, but continue to verify it's a well-formed expression
                     // before we store it.
-                    string name = expression.Substring(startOfName, i - startOfName);
-
-                    // return the item that we're working with
-                    string itemName = name;
+                    string itemName = Microsoft.NET.StringTools.Strings.WeakIntern(expression.AsSpan(startOfName, i - startOfName));
 
                     SinkWhitespace(expression, ref i);
                     bool transformOrFunctionFound = true;
@@ -251,10 +248,10 @@ namespace Microsoft.Build.Evaluation
                         subExpressions = new List<ItemExpressionCapture>();
                     }
 
-                    // Create an expression capture that encompases the entire expression between the @( and the )
+                    // Create an expression capture that encompasses the entire expression between the @( and the )
                     // with the item name and any separator contained within it
                     // and each transform expression contained within it (i.e. each ->XYZ)
-                    ItemExpressionCapture expressionCapture = new ItemExpressionCapture(startPoint, endPoint - startPoint, expression.Substring(startPoint, endPoint - startPoint), itemName, separator, separatorStart, transformExpressions);
+                    ItemExpressionCapture expressionCapture = new ItemExpressionCapture(startPoint, endPoint - startPoint, Microsoft.NET.StringTools.Strings.WeakIntern(expression.AsSpan(startPoint, endPoint - startPoint)), itemName, separator, separatorStart, transformExpressions);
                     subExpressions.Add(expressionCapture);
 
                     continue;
@@ -601,7 +598,7 @@ namespace Microsoft.Build.Evaluation
 
                     if (endFunctionArguments > startFunctionArguments)
                     {
-                        capture.FunctionArguments = expression.Substring(startFunctionArguments, endFunctionArguments - startFunctionArguments);
+                        capture.FunctionArguments = Microsoft.NET.StringTools.Strings.WeakIntern(expression.AsSpan(startFunctionArguments, endFunctionArguments - startFunctionArguments));
                     }
 
                     return capture;

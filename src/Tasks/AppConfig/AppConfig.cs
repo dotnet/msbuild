@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
 using System.Xml;
 
 using Microsoft.Build.Shared;
@@ -18,19 +19,22 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Read the .config from a file.
         /// </summary>
-        /// <param name="appConfigFile"></param>
-        internal void Load(string appConfigFile)
+        /// <param name="appConfigFilePath"></param>
+        internal void Load(string appConfigFilePath)
         {
             XmlReader reader = null;
             try
             {
-                var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+                var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true};
 
                 // it's important to normalize the path as it may contain two slashes
                 // see https://github.com/dotnet/msbuild/issues/4335 for details.
-                appConfigFile = FileUtilities.NormalizePath(appConfigFile);
+                appConfigFilePath = FileUtilities.NormalizePath(appConfigFilePath);
 
-                reader = XmlReader.Create(appConfigFile, readerSettings);
+                // Need a filestream as the XmlReader doesn't support nonstandard unicode characters in path.
+                // No need to dispose - as 'CloseInput' was passed to XmlReaderSettings
+                FileStream fs = File.OpenRead(appConfigFilePath);
+                reader = XmlReader.Create(fs, readerSettings);
                 Read(reader);
             }
             catch (XmlException e)
@@ -44,7 +48,7 @@ namespace Microsoft.Build.Tasks
                     linePosition = info.LinePosition;
                 }
 
-                throw new AppConfigException(e.Message, appConfigFile, lineNumber, linePosition, e);
+                throw new AppConfigException(e.Message, appConfigFilePath, lineNumber, linePosition, e);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
@@ -57,7 +61,7 @@ namespace Microsoft.Build.Tasks
                     linePosition = info.LinePosition;
                 }
 
-                throw new AppConfigException(e.Message, appConfigFile, lineNumber, linePosition, e);
+                throw new AppConfigException(e.Message, appConfigFilePath, lineNumber, linePosition, e);
             }
             finally
             {

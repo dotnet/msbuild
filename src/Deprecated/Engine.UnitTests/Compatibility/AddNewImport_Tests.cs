@@ -332,7 +332,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                 InvokeAddNewImportMethod(p, projectPath, "true");
                 Assertion.AssertEquals(0, p.Imports.Count);
                 object o = p.EvaluatedItems;  // force evaluation of imported projects.
-                Assertion.AssertEquals(0, p.Imports.Count); // This is bonkers, should be 1 because the XML DOES contain the import node.
+                Assertion.AssertEquals(0, p.Imports.Count); // Should be 1 because the XML DOES contain the import node.
             }
             finally
             {

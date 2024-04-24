@@ -524,18 +524,37 @@ namespace Microsoft.Build.Graph.UnitTests
 
             var graphFromSolutionEdges = graphFromSolution.TestOnly_Edges.TestOnly_AsConfigurationMetadata();
 
-            // Solutions add the CurrentSolutionConfigurationContents global property for platform resolution
-            foreach ((ConfigurationMetadata, ConfigurationMetadata) graphFromSolutionEdge in graphFromSolutionEdges.Keys)
+            // These are global properties added by GraphBuilder when building a solution
+            HashSet<string> propertiesToIgnore = new(StringComparer.OrdinalIgnoreCase)
             {
-                graphFromSolutionEdge.Item1.GlobalProperties.ShouldContainKey("CurrentSolutionConfigurationContents");
-                graphFromSolutionEdge.Item2.GlobalProperties.ShouldContainKey("CurrentSolutionConfigurationContents");
+                "CurrentSolutionConfigurationContents",
+                "BuildingSolutionFile",
+                "SolutionDir",
+                "SolutionExt",
+                "SolutionFileName",
+                "SolutionName",
+                SolutionProjectGenerator.SolutionPathPropertyName
+            };
+
+            // Solutions add these global properties
+            foreach (string propertyToIgnore in propertiesToIgnore)
+            {
+                foreach ((ConfigurationMetadata, ConfigurationMetadata) graphFromSolutionEdge in graphFromSolutionEdges.Keys)
+                {
+                    graphFromSolutionEdge.Item1.GlobalProperties.ShouldContainKey(propertyToIgnore);
+                    graphFromSolutionEdge.Item2.GlobalProperties.ShouldContainKey(propertyToIgnore);
+                }
             }
 
-            // Remove CurrentSolutionConfigurationContents for comparison purposes. This is done as a separate pass since some edges may be sharing an instance.
-            foreach ((ConfigurationMetadata, ConfigurationMetadata) graphFromSolutionEdge in graphFromSolutionEdges.Keys)
+            // Remove some properties for comparison purposes as we are comparing a graph created from a solution against the graph (without solution properties) used to make the solution.
+            // This is done as a separate pass since some edges may be sharing an instance.
+            foreach (string propertyToIgnore in propertiesToIgnore)
             {
-                graphFromSolutionEdge.Item1.GlobalProperties.Remove("CurrentSolutionConfigurationContents");
-                graphFromSolutionEdge.Item2.GlobalProperties.Remove("CurrentSolutionConfigurationContents");
+                foreach ((ConfigurationMetadata, ConfigurationMetadata) graphFromSolutionEdge in graphFromSolutionEdges.Keys)
+                {
+                    graphFromSolutionEdge.Item1.GlobalProperties.Remove(propertyToIgnore);
+                    graphFromSolutionEdge.Item2.GlobalProperties.Remove(propertyToIgnore);
+                }
             }
 
             // Original edges get preserved.
@@ -676,8 +695,9 @@ namespace Microsoft.Build.Graph.UnitTests
             var globalProperties = currentSolutionConfiguration != null
                 ? new Dictionary<string, string>
                 {
-                    ["Configuration"] = currentSolutionConfiguration.ConfigurationName,
-                    ["Platform"] = currentSolutionConfiguration.PlatformName
+                    // Intentionally use mismatched casing to ensure it's properly normalized.
+                    ["Configuration"] = currentSolutionConfiguration.ConfigurationName.ToUpperInvariant(),
+                    ["Platform"] = currentSolutionConfiguration.PlatformName.ToUpperInvariant()
                 }
                 : new Dictionary<string, string>();
 
@@ -686,6 +706,9 @@ namespace Microsoft.Build.Graph.UnitTests
                     solutionPath,
                     globalProperties),
                 _env.CreateProjectCollection().Collection);
+
+            // Exactly 1 node per project
+            graph.ProjectNodes.Count.ShouldBe(graph.ProjectNodes.Select(GetProjectPath).Distinct().Count());
 
             // in the solution, all nodes are entry points
             graphFromSolution.EntryPointNodes.Select(GetProjectPath)
@@ -705,19 +728,9 @@ namespace Microsoft.Build.Graph.UnitTests
 
             foreach (var node in graphFromSolution.ProjectNodes)
             {
-                // Project references get duplicated, once as entry points from the solution (handled in the if block) and once as nodes
-                // produced by ProjectReference items (handled in the else block).
-                if (node.ReferencingProjects.Count == 0)
-                {
-                    var expectedProjectConfiguration = actualProjectConfigurations[GetProjectNumber(node).ToString()][expectedCurrentConfiguration];
-                    GetConfiguration(node).ShouldBe(expectedProjectConfiguration.ConfigurationName);
-                    GetPlatform(node).ShouldBe(expectedProjectConfiguration.PlatformName);
-                }
-                else
-                {
-                    GetConfiguration(node).ShouldBe(GetConfiguration(node.ReferencingProjects.First()));
-                    GetPlatform(node).ShouldBe(GetPlatform(node.ReferencingProjects.First()));
-                }
+                var expectedProjectConfiguration = actualProjectConfigurations[GetProjectNumber(node).ToString()][expectedCurrentConfiguration];
+                GetConfiguration(node).ShouldBe(expectedProjectConfiguration.ConfigurationName);
+                GetPlatform(node).ShouldBe(expectedProjectConfiguration.PlatformName);
             }
         }
 

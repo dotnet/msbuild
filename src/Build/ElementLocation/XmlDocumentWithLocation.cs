@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Threading;
 using System.Xml;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -58,6 +59,13 @@ namespace Microsoft.Build.Construction
         /// In such a case, we can discard as much as possible on load, like comments and whitespace.
         /// </summary>
         private bool? _loadAsReadOnly;
+
+        /// <summary>
+        /// Location of the element to be created via 'CreateElement' call. So that we can
+        ///  receive and use location from the caller up the stack even if we are being called via
+        /// <see cref="XmlDocument"/> internal methods.
+        /// </summary>
+        private readonly AsyncLocal<ElementLocation> _elementLocation = new AsyncLocal<ElementLocation>();
 
         /// <summary>
         /// Constructor
@@ -181,6 +189,31 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// Called during parse, to add an element.
+        /// </summary>
+        /// <remarks>
+        /// We create our own kind of element, that we can give location information to.
+        /// In order to pass the location through the callchain, that contains XmlDocument function
+        ///  that then calls back to our XmlDocumentWithLocation (so we cannot use call stack via passing via parameters),
+        ///  we use async local field, that simulates variable on call stack.
+        /// </remarks>
+        internal XmlElement CreateElement(string localName, string namespaceURI, ElementLocation location)
+        {
+            if (location != null)
+            {
+                this._elementLocation.Value = location;
+            }
+            try
+            {
+                return CreateElement(localName, namespaceURI);
+            }
+            finally
+            {
+                this._elementLocation.Value = null;
+            }
+        }
+
+        /// <summary>
         /// Called during load, to add an element.
         /// </summary>
         /// <remarks>
@@ -191,6 +224,10 @@ namespace Microsoft.Build.Construction
             if (_reader != null)
             {
                 return new XmlElementWithLocation(prefix, localName, namespaceURI, this, _reader.LineNumber, _reader.LinePosition);
+            }
+            else if (_elementLocation?.Value != null)
+            {
+                return new XmlElementWithLocation(prefix, localName, namespaceURI, this, _elementLocation.Value.Line, _elementLocation.Value.Column);
             }
 
             // Must be a subsequent edit; we can't provide location information

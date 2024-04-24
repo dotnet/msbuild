@@ -1,0 +1,23 @@
+<Project>
+  <!-- The CoreCLR flavor of NuGet.Build.Tasks.Console.exe looks for dotnet under "..\..\dotnet", so we need to redirect it for the bootstrap to the currently executing dotnet.exe.
+       See: https://github.com/NuGet/NuGet.Client/blob/91f6fdb26b09e16c4520b1d13ee30bb38172a7bd/src/NuGet.Core/NuGet.Build.Tasks/StaticGraphRestoreTaskBase.cs#L240-L252 -->
+  <UsingTask
+    TaskName="GetCurrentProcessFileName"
+    TaskFactory="RoslynCodeTaskFactory"
+    AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
+    <ParameterGroup>
+      <CurrentProcessFileName ParameterType="System.String" Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System.Diagnostics" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+      CurrentProcessFileName = Process.GetCurrentProcess().MainModule.FileName;
+      ]]></Code>
+    </Task>
+  </UsingTask>
+  <Target Name="RedirectNuGetConsoleProcess" BeforeTargets="Restore">
+    <GetCurrentProcessFileName>
+      <Output TaskParameter="CurrentProcessFileName" PropertyName="NuGetConsoleProcessFileName" />
+    </GetCurrentProcessFileName>
+  </Target>
+</Project>

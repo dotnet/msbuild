@@ -27,7 +27,7 @@ namespace Microsoft.Build.Graph.UnitTests
     /// <summary>
     /// Performs SetPlatform negotiation for all project references when opted
     /// in via the EnableDynamicPlatformResolution property.
-    /// 
+    ///
     /// The static graph mirrors the negotiation during build to determine plartform for each node.
     /// These tests mirror GetCompatiblePlatform_Tests.cs in order to make sure they both are in sync.
     /// </summary>
@@ -349,6 +349,103 @@ namespace Microsoft.Build.Graph.UnitTests
 
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
                 GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GetPropertyValue("Platform").ShouldBe(GetFirstNodeWithProjectNumber(graph, 1).ProjectInstance.GetPropertyValue("Platform"));
+            }
+        }
+
+        // Validate configurations are defined in project reference protocol
+        [Fact]
+        public void SolutionWithoutAllConfigurations()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                var firstProjectName = "1";
+                var secondProjectName = "2";
+                var thirdProjectName = "3";
+                TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
+                TransientTestFolder project1Folder = testEnvironment.CreateFolder(Path.Combine(folder.Path, firstProjectName), createFolder: true);
+                TransientTestFolder project1SubFolder = testEnvironment.CreateFolder(Path.Combine(project1Folder.Path, firstProjectName), createFolder: true);
+                TransientTestFile project1 = testEnvironment.CreateFile(project1SubFolder, $"{firstProjectName}.csproj",
+                    @"<Project>
+                        <PropertyGroup>
+                             <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
+                             <Platform>x64</Platform>
+                         </PropertyGroup>
+                         <ItemGroup>
+                             <ProjectReference Include=""$(MSBuildThisFileDirectory)\..\..\2\2\2.proj"" />
+                             <ProjectReference Include=""$(MSBuildThisFileDirectory)\..\..\3\3\3.proj"" />
+                         </ItemGroup>
+                  </Project>
+                    ");
+
+                TransientTestFolder project2Folder = testEnvironment.CreateFolder(Path.Combine(folder.Path, secondProjectName), createFolder: true);
+                TransientTestFolder project2SubFolder = testEnvironment.CreateFolder(Path.Combine(project2Folder.Path, secondProjectName), createFolder: true);
+                TransientTestFile project2 = testEnvironment.CreateFile(project2SubFolder, $"{secondProjectName}.proj",
+                    @"<Project>
+                        <PropertyGroup>
+                            <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
+                            <Platforms>AnyCPU;x64</Platforms>
+                        </PropertyGroup>
+                    </Project>
+                    ");
+
+                TransientTestFolder project3Folder = testEnvironment.CreateFolder(Path.Combine(folder.Path, thirdProjectName), createFolder: true);
+                TransientTestFolder project3SubFolder = testEnvironment.CreateFolder(Path.Combine(project3Folder.Path, thirdProjectName), createFolder: true);
+                TransientTestFile project3 = testEnvironment.CreateFile(project3SubFolder, $"{thirdProjectName}.proj",
+                    @"<Project>
+                        <PropertyGroup>
+                            <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
+                            <Platforms>AnyCPU;x64</Platforms>
+                        </PropertyGroup>
+                    </Project>
+                    ");
+
+
+                // Slashes here (and in the .slnf) are hardcoded as backslashes intentionally to support the common case.
+                TransientTestFile solutionFile = testEnvironment.CreateFile(folder, "SimpleProject.sln",
+                    @"
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio Version 16
+                    VisualStudioVersion = 16.0.29326.124
+                    MinimumVisualStudioVersion = 10.0.40219.1
+                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Project1"", ""1\1\1.csproj"", ""{79B5EBA6-5D27-4976-BC31-14422245A59A}""
+                    EndProject
+                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""2"", ""2\2\2.proj"", ""{8EFCCA22-9D51-4268-90F7-A595E11FCB2D}""
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug|x64 = Debug|x64
+                            Release|x64 = Release|x64
+                            EndGlobalSection
+                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                            {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|x64.ActiveCfg = Debug|x64
+                            {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|x64.Build.0 = Debug|x64
+                            {79B5EBA6-5D27-4976-BC31-14422245A59A}.Release|x64.ActiveCfg = Release|x64
+                            {79B5EBA6-5D27-4976-BC31-14422245A59A}.Release|x64.Build.0 = Release|x64
+
+                            {8EFCCA22-9D51-4268-90F7-A595E11FCB2D}.Debug|x64.ActiveCfg = Debug|Any CPU
+                            {8EFCCA22-9D51-4268-90F7-A595E11FCB2D}.Debug|x64.Build.0 = Debug|Any CPU
+                            {8EFCCA22-9D51-4268-90F7-A595E11FCB2D}.Release|x64.ActiveCfg = Release|Any CPU
+                            {8EFCCA22-9D51-4268-90F7-A595E11FCB2D}.Release|x64.Build.0 = Release|Any CPU
+                        EndGlobalSection
+                        GlobalSection(SolutionProperties) = preSolution
+                            HideSolutionNode = FALSE
+                        EndGlobalSection
+                        GlobalSection(ExtensibilityGlobals) = postSolution
+                            SolutionGuid = {DE7234EC-0C4D-4070-B66A-DCF1B4F0CFEF}
+                        EndGlobalSection
+                    EndGlobal
+                ");
+
+                ProjectCollection projectCollection = testEnvironment.CreateProjectCollection().Collection;
+                MockLogger logger = new();
+                projectCollection.RegisterLogger(logger);
+                ProjectGraphEntryPoint entryPoint = new(solutionFile.Path, new Dictionary<string, string>());
+
+                // We want to make sure negotiation respects configuration if defined but negotiates if not.
+                ProjectGraph graphFromSolution = new(entryPoint, projectCollection);
+                logger.AssertNoErrors();
+                GetFirstNodeWithProjectNumber(graphFromSolution, 2).ProjectInstance.GetPropertyValue("Platform").ShouldBe("AnyCPU", "Project2 should have followed the sln config to AnyCPU");
+                GetFirstNodeWithProjectNumber(graphFromSolution, 3).ProjectInstance.GetPropertyValue("Platform").ShouldBe("x64", "Project3 isn't in the solution so it should have negotiated to x64 to match Project1");
             }
         }
     }

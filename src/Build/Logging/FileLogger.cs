@@ -7,6 +7,7 @@ using System.Text;
 
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -39,6 +40,11 @@ namespace Microsoft.Build.Logging
                 colorReset: BaseConsoleLogger.DontResetColor)
         {
             WriteHandler = Write;
+
+            if (EncodingUtilities.GetExternalOverriddenUILanguageIfSupportableWithEncoding() != null)
+            {
+                _encoding = Encoding.UTF8;
+            }
         }
 
         #endregion
@@ -82,6 +88,9 @@ namespace Microsoft.Build.Logging
             // Finally, ask the base console logger class to initialize. It may
             // want to make decisions based on our verbosity, so we do this last.
             base.Initialize(eventSource, nodeCount);
+            KnownTelemetry.LoggingConfigurationTelemetry.FileLoggersCount++;
+            KnownTelemetry.LoggingConfigurationTelemetry.FileLogger = true;
+            KnownTelemetry.LoggingConfigurationTelemetry.FileLoggerVerbosity = Verbosity.ToString();
 
             if (!SkipProjectStartedText && Verbosity >= LoggerVerbosity.Normal)
             {

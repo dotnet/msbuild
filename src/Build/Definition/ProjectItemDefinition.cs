@@ -26,7 +26,7 @@ namespace Microsoft.Build.Evaluation
     /// ProjectMetadataElement, and these can be added, removed, and modified.
     /// </remarks>
     [DebuggerDisplay("{_itemType} #Metadata={MetadataCount}")]
-    public class ProjectItemDefinition : IKeyed, IMetadataTable, IItemDefinition<ProjectMetadata>, IProjectMetadataParent
+    public class ProjectItemDefinition : IKeyed, IMetadataTable, IItemDefinition<ProjectMetadata>, IProjectMetadataParent, IItemTypeDefinition
     {
         /// <summary>
         /// Project that this item definition lives in.

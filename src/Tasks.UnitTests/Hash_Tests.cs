@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
@@ -16,7 +17,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         public void HashTaskTest()
         {
             // This hash was pre-computed. If the implementation changes it may need to be adjusted.
-            var expectedHash = "5593e2db83ac26117cd95ed8917f09b02a02e2a0";
+            var expectedHash = "3a9e94b896536fdab1343db5038239847e2db371f27e6ac9b5e3e6ea4aa2f2bf";
 
             var actualHash = ExecuteHashTask(new ITaskItem[]
             {
@@ -52,7 +53,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         public void HashTaskLargeInputCountTest()
         {
             // This hash was pre-computed. If the implementation changes it may need to be adjusted.
-            var expectedHash = "8a996bbcb5e481981c2fba7ac408e20d0b4360a5";
+            var expectedHash = "ae8799dfc1f81c50b08d28ac138e25958947895c8563c8fce080ceb5cb44db6f";
 
             ITaskItem[] itemsToHash = new ITaskItem[1000];
             for (int i = 0; i < itemsToHash.Length; i++)
@@ -68,7 +69,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         public void HashTaskLargeInputSizeTest()
         {
             // This hash was pre-computed. If the implementation changes it may need to be adjusted.
-            var expectedHash = "0509142dd3d3a733f30a52a0eec37cd727d46122";
+            var expectedHash = "48a3fdf5cb1afc679497a418015edc85e571282bb70691d7a64f2ab2e32d5dbf";
 
             string[] array = new string[1000];
             for (int i = 0; i < array.Length; i++)
@@ -81,44 +82,36 @@ namespace Microsoft.Build.Tasks.UnitTests
             Assert.Equal(expectedHash, actualHash);
         }
 
-#pragma warning disable CA5350
         // This test verifies that hash computes correctly for various numbers of characters.
         // We would like to process edge of the buffer use cases regardless on the size of the buffer.
         [Fact]
         public void HashTaskDifferentInputSizesTest()
         {
             int maxInputSize = 2000;
-            string input = "";
-            using (var sha1 = System.Security.Cryptography.SHA1.Create())
+            MockEngine mockEngine = new();
+
+            var hashGroups =
+                Enumerable.Range(0, maxInputSize)
+                    .Select(cnt => new string('a', cnt))
+                    .Select(GetHash)
+                    .GroupBy(h => h)
+                    .Where(g => g.Count() > 1)
+                    .Select(g => g.Key);
+            // none of the hashes should repeat
+            Assert.Empty(hashGroups);
+
+            string GetHash(string input)
             {
-                var stringBuilder = new System.Text.StringBuilder(sha1.HashSize);
-                MockEngine mockEngine = new();
-                for (int i = 0; i < maxInputSize; i++)
+                Hash hashTask = new()
                 {
-                    input += "a";
-
-                    Hash hashTask = new()
-                    {
-                        BuildEngine = mockEngine,
-                        ItemsToHash = new ITaskItem[] { new TaskItem(input) },
-                        IgnoreCase = false
-                    };
-                    Assert.True(hashTask.Execute());
-                    string actualHash = hashTask.HashResult;
-
-                    byte[] hash = sha1.ComputeHash(System.Text.Encoding.UTF8.GetBytes(input + '\u2028'));
-                    stringBuilder.Clear();
-                    foreach (var b in hash)
-                    {
-                        stringBuilder.Append(b.ToString("x2"));
-                    }
-                    string expectedHash = stringBuilder.ToString();
-
-                    Assert.Equal(expectedHash, actualHash);
-                }
+                    BuildEngine = mockEngine,
+                    ItemsToHash = new ITaskItem[] { new TaskItem(input) },
+                    IgnoreCase = false
+                };
+                Assert.True(hashTask.Execute());
+                return hashTask.HashResult;
             }
         }
-#pragma warning restore CA5350
 
         [Fact]
         public void HashTaskIgnoreCaseTest()

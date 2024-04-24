@@ -9,6 +9,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Framework;
@@ -565,6 +566,7 @@ namespace Microsoft.Build.UnitTests
                 MSBuildApp.ProcessVerbositySwitch("loquacious");
             });
         }
+
         [Fact]
         public void ValidMaxCPUCountSwitch()
         {
@@ -616,6 +618,78 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
+        [Theory]
+        [InlineData("-getProperty:Foo;Bar", true, "EvalValue", false, false, false, true)]
+        [InlineData("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false, true)]
+        [InlineData("-getItem:MyItem", false, "", true, false, false, true)]
+        [InlineData("-getItem:MyItem -t:Build", false, "", true, true, false, true)]
+        [InlineData("-getItem:WrongItem -t:Build", false, "", false, false, false, true)]
+        [InlineData("-getProperty:Foo;Bar -getItem:MyItem -t:Build", true, "TargetValue", true, true, false, true)]
+        [InlineData("-getProperty:Foo;Bar -getItem:MyItem", true, "EvalValue", true, false, false, true)]
+        [InlineData("-getProperty:Foo;Bar -getTargetResult:MyTarget", true, "TargetValue", false, false, true, true)]
+        [InlineData("-getProperty:Foo;Bar", true, "EvalValue", false, false, false, false)]
+        [InlineData("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false, false)]
+        [InlineData("-getItem:MyItem", false, "", true, false, false, false)]
+        [InlineData("-getItem:MyItem -t:Build", false, "", true, true, false, false)]
+        [InlineData("-getItem:WrongItem -t:Build", false, "", false, false, false, false)]
+        [InlineData("-getProperty:Foo;Bar -getItem:MyItem -t:Build", true, "TargetValue", true, true, false, false)]
+        [InlineData("-getProperty:Foo;Bar -getItem:MyItem", true, "EvalValue", true, false, false, false)]
+        [InlineData("-getProperty:Foo;Bar -getTargetResult:MyTarget", true, "TargetValue", false, false, true, false)]
+        public void ExecuteAppWithGetPropertyItemAndTargetResult(
+            string extraSwitch,
+            bool fooPresent,
+            string fooResult,
+            bool itemIncludesAlwaysThere,
+            bool itemIncludesTargetItem,
+            bool targetResultPresent,
+            bool isGraphBuild)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile project = env.CreateFile("testProject.csproj", @"
+<Project>
+
+  <PropertyGroup>
+    <Foo>EvalValue</Foo>
+    <Baz>InnocuousValue</Baz>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <MyItem Include=""itemAlwaysThere"" Metadatum=""metadatumValue"" />
+  </ItemGroup>
+
+  <Target Name=""MyTarget"" BeforeTargets=""Build"">
+    <PropertyGroup>
+      <Foo>TargetValue</Foo>
+    </PropertyGroup>
+    <ItemGroup>
+      <MyItem Include=""targetItem"" Metadato=""OtherMetadatum"" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name=""Build"">
+
+  </Target>
+
+</Project>
+");
+            string graph = isGraphBuild ? "--graph" : "";
+            string results = RunnerUtilities.ExecMSBuild($" {project.Path} {extraSwitch} {graph}", out bool success);
+            success.ShouldBeTrue();
+            if (fooPresent)
+            {
+                results.ShouldContain($"\"Foo\": \"{fooResult}\"");
+                results.ShouldContain("\"Bar\": \"\"");
+            }
+
+            results.ShouldNotContain("InnocuousValue");
+
+            results.Contains("itemAlwaysThere").ShouldBe(itemIncludesAlwaysThere);
+            results.Contains("targetItem").ShouldBe(itemIncludesTargetItem);
+
+            results.Contains("MyTarget").ShouldBe(targetResultPresent);
+            results.Contains("\"Result\": \"Success\"").ShouldBe(targetResultPresent);
+        }
+
         /// <summary>
         /// Regression test for bug where the MSBuild.exe command-line app
         /// would sometimes set the UI culture to just "en" which is considered a "neutral" UI
@@ -641,6 +715,84 @@ namespace Microsoft.Build.UnitTests
             // Restore the current UI culture back to the way it was at the beginning of this unit test.
             thisThread.CurrentUICulture = originalUICulture;
         }
+
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ConsoleUIRespectsSDKLanguage(bool enableFeature)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
+            {
+                return; // The feature to detect .NET SDK Languages is not enabled on this machine, so don't test it.
+            }
+
+            const string DOTNET_CLI_UI_LANGUAGE = nameof(DOTNET_CLI_UI_LANGUAGE);
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            // Save the current environment info so it can be restored.
+            var originalUILanguage = Environment.GetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE);
+
+            var originalOutputEncoding = Console.OutputEncoding;
+            var originalInputEncoding = Console.InputEncoding;
+            Thread thisThread = Thread.CurrentThread;
+            CultureInfo originalUICulture = thisThread.CurrentUICulture;
+
+            try
+            {
+                // Set the UI language based on the SDK environment var.
+                testEnvironment.SetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE, "ja"); // Japanese chose arbitrarily.
+                ChangeWaves.ResetStateForTests();
+                if (!enableFeature)
+                {
+                    testEnvironment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_8.ToString());
+                }
+                MSBuildApp.SetConsoleUI();
+
+                Assert.Equal(enableFeature ? new CultureInfo("ja") : CultureInfo.CurrentUICulture.GetConsoleFallbackUICulture(), thisThread.CurrentUICulture);
+                if (enableFeature)
+                {
+                    Assert.Equal(65001, Console.OutputEncoding.CodePage); // UTF-8 enabled for correct rendering.
+                }
+            }
+            finally
+            {
+                // Restore the current UI culture back to the way it was at the beginning of this unit test.
+                thisThread.CurrentUICulture = originalUICulture;
+                // Restore for full framework
+                CultureInfo.CurrentCulture = originalUICulture;
+                CultureInfo.DefaultThreadCurrentUICulture = originalUICulture;
+
+                // MSBuild should also restore the encoding upon exit, but we don't create that context here.
+                Console.OutputEncoding = originalOutputEncoding;
+                Console.InputEncoding = originalInputEncoding;
+
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+            }
+        }
+
+        /// <summary>
+        /// We shouldn't change the UI culture if the current UI culture is invariant.
+        /// In other cases, we can get an exception on CultureInfo creation when System.Globalization.Invariant enabled.
+        /// </summary>
+
+        [Fact]
+        public void SetConsoleUICultureInInvariantCulture()
+        {
+            Thread thisThread = Thread.CurrentThread;
+
+            // Save the current UI culture, so we can restore it at the end of this unit test.
+            CultureInfo originalUICulture = thisThread.CurrentUICulture;
+
+            thisThread.CurrentUICulture = CultureInfo.InvariantCulture;
+            MSBuildApp.SetConsoleUI();
+
+            // Make sure we don't change culture.
+            thisThread.CurrentUICulture.ShouldBe(CultureInfo.InvariantCulture);
+
+            // Restore the current UI culture back to the way it was at the beginning of this unit test.
+            thisThread.CurrentUICulture = originalUICulture;
+        }
+
 
 #if FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
@@ -798,6 +950,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void MSBuildEngineLogger()
         {
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", "en"); // build machines may have other values.
+            CultureInfo.CurrentUICulture = new CultureInfo("en"); // Validate that the thread will produce an english log regardless of the machine OS language
+
             string oldValueForMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
             string projectString =
                    "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
@@ -833,6 +989,8 @@ namespace Microsoft.Build.UnitTests
                 File.Exists(logFile).ShouldBeTrue();
 
                 var logFileContents = File.ReadAllText(logFile);
+
+                Assert.Equal(new CultureInfo("en"), Thread.CurrentThread.CurrentUICulture);
 
                 logFileContents.ShouldContain("Process = ");
                 logFileContents.ShouldContain("MSBuild executable path = ");

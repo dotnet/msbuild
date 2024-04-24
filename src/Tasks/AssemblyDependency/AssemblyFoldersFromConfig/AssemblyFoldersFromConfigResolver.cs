@@ -151,26 +151,13 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
             }
         }
 
-        /// <summary>
-        /// Resolve a reference to a specific file name.
-        /// </summary>
-        /// <param name="assemblyName">The assemblyname of the reference.</param>
-        /// <param name="sdkName">Not used by this type.</param>
-        /// <param name="rawFileNameCandidate">Not used by this type.</param>
-        /// <param name="isPrimaryProjectReference">Whether or not this reference was directly from the project file (and therefore not a dependency)</param>
-        /// <param name="wantSpecificVersion">Whether an exact version match is requested.</param>
-        /// <param name="executableExtensions">Allowed executable extensions.</param>
-        /// <param name="hintPath">Not used by this type.</param>
-        /// <param name="assemblyFolderKey">Not used by this type.</param>
-        /// <param name="assembliesConsideredAndRejected">Receives the list of locations that this function tried to find the assembly. May be "null".</param>
-        /// <param name="foundPath">The path where the file was found.</param>
-        /// <param name="userRequestedSpecificFile">Whether or not the user wanted a specific file (for example, HintPath is a request for a specific file)</param>
-        /// <returns>True if the file was resolved.</returns>
+        /// <inheritdoc/>
         public override bool Resolve(
             AssemblyNameExtension assemblyName,
             string sdkName,
             string rawFileNameCandidate,
             bool isPrimaryProjectReference,
+            bool isImmutableFrameworkReference,
             bool wantSpecificVersion,
             string[] executableExtensions,
             string hintPath,

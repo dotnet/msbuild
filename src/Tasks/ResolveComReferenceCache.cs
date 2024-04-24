@@ -16,11 +16,7 @@ namespace Microsoft.Build.Tasks
     /// an earlier revision of a COM component, its timestamp can go back in time and we still need to regenerate its
     /// wrapper. So in ResolveComReference we compare the stored timestamp with the current component timestamp, and if 
     /// they are different, we regenerate the wrapper.
-    /// 
-    /// This is an on-disk serialization format, don't change field names or types or use readonly.
     /// </remarks>
-    /// Serializable should be included in all state files. It permits BinaryFormatter-based calls, including from GenerateResource, which we cannot move off BinaryFormatter.
-    [Serializable]
     internal sealed class ResolveComReferenceCache : StateFileBase, ITranslatable
     {
         /// <summary>

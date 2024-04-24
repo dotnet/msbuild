@@ -694,8 +694,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     try
                     {
                         var doc = new XmlDocument { PreserveWhitespace = true };
-                        var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                        using (XmlReader xr = XmlReader.Create(path, xrSettings))
+                        var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+                        FileStream fs = File.OpenRead(path);
+
+                        using (XmlReader xr = XmlReader.Create(fs, xrSettings))
                         {
                             doc.Load(xr);
                         }
@@ -838,7 +840,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 commandLine.AppendFormat(CultureInfo.InvariantCulture,
                                             "{0} {1} ",
-                                            useRFC3161Timestamp ? "/tr" : "/t",
+                                            useRFC3161Timestamp ? "/td sha256 /tr" : "/t",
                                             timestampUrl.ToString());
             }
             commandLine.AppendFormat(CultureInfo.InvariantCulture, "\"{0}\"", path);

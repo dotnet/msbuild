@@ -167,7 +167,9 @@ namespace Microsoft.Build.Shared
         internal static bool IsXmlException(Exception e)
         {
             return e is XmlException
-                || e is XmlSyntaxException
+#if FEATURE_SECURITY_PERMISSIONS
+                || e is System.Security.XmlSyntaxException
+#endif
                 || e is XmlSchemaException
                 || e is UriFormatException; // XmlTextReader for example uses this under the covers
         }

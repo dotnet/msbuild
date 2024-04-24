@@ -82,7 +82,7 @@ namespace Microsoft.Build.Collections
             /// <summary>
             /// Get the current element, converted
             /// </summary>
-            public TTo2 Current
+            public readonly TTo2 Current
             {
                 get
                 {

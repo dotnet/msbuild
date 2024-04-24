@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Xml;
 using Microsoft.Build.Collections;
 using Microsoft.Build.ObjectModelRemoting;
@@ -126,7 +125,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Gets any output children.
         /// </summary>
-        public ICollection<ProjectOutputElement> Outputs => new Collections.ReadOnlyCollection<ProjectOutputElement>(Children.OfType<ProjectOutputElement>());
+        public ICollection<ProjectOutputElement> Outputs => GetChildrenOfType<ProjectOutputElement>();
 
         /// <summary>
         /// Enumerable over the unevaluated parameters on the task.

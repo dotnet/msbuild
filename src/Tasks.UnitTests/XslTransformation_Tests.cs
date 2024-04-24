@@ -68,12 +68,10 @@ namespace Microsoft.Build.UnitTests
         private readonly string _xslDocument = "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:msxsl=\"urn:schemas-microsoft-com:xslt\" exclude-result-prefixes=\"msxsl\"><xsl:output method=\"xml\" indent=\"yes\"/><xsl:template match=\"@* | node()\"><surround><xsl:copy><xsl:apply-templates select=\"@* | node()\"/></xsl:copy></surround></xsl:template></xsl:stylesheet>";
 
 
-#if FEATURE_COMPILED_XSL
         /// <summary>
         /// The contents of another xsl document for tests
         /// </summary>
         private readonly string _xslDocument2 = "<?xml version = \"1.0\" ?><xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"><xsl:template match = \"myInclude\"><xsl:apply-templates select = \"document(@path)\"/></xsl:template><xsl:template match = \"@*|node()\"><xsl:copy><xsl:apply-templates select = \"@*|node()\"/></xsl:copy></xsl:template></xsl:stylesheet>";
-#endif
         /// <summary>
         /// The contents of xslparameters for tests.
         /// </summary>
@@ -1040,7 +1038,6 @@ namespace Microsoft.Build.UnitTests
             CleanUp(dir);
         }
 
-#if FEATURE_COMPILED_XSL
         /// <summary>
         /// Validate that the XslTransformation task allows use of the document function
         /// </summary>
@@ -1094,7 +1091,6 @@ namespace Microsoft.Build.UnitTests
 
             CleanUp(dir);
         }
-#endif
 
         /// <summary>
         /// Prepares the test environment, creates necessary files.

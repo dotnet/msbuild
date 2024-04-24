@@ -82,6 +82,30 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Equal(0, Helpers.Count(item.Metadata));
         }
 
+        [Fact]
+        public void ReadMetadataLocationPreserved()
+        {
+            string project = """
+                <Project>
+                    <Target Name='t'>
+                        <ItemGroup>
+                            <i Include='i' MetadataA='123' MetadataB='xyz' />
+                        </ItemGroup>
+                    </Target>
+                </Project>
+                """;
+
+            ProjectItemElement item = GetItemFromContent(project);
+            Assert.Equal(2, item.Metadata.Count);
+            ProjectMetadataElement metadatum1 = item.Metadata.First();
+            ProjectMetadataElement metadatum2 = item.Metadata.Skip(1).First();
+
+            Assert.Equal(4, metadatum1.Location.Line);
+            Assert.Equal(4, metadatum2.Location.Line);
+            Assert.Equal(27, metadatum1.Location.Column);
+            Assert.Equal(43, metadatum2.Location.Column);
+        }
+
         /// <summary>
         /// Read item with no include
         /// </summary>

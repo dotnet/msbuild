@@ -223,15 +223,17 @@ A project reference protocol may contain multiple targets, for example `A -> B, 
 
 The common project reference protocols (Build, Rebuild, Restore, Clean) will be specified by the common props and targets file in the msbuild repository. Other SDKs can implement their own protocols (e.g. ASPNET implementing Publish).
 
+For this section and the remainder of this spec, a project's default target(s) (what it would execute if no other targets are specified, so often Build but configurable via DefaultTargets) will be referred to as `.default`. That is also how it is used in MSBuild code.
+
 Here are the rules for the common protocols:
 
-`Build -> GetTargetFrameworks, <default>, GetNativeManifest, GetCopyToOutputDirectoryItems`
+`Build -> GetTargetFrameworks, .default, GetNativeManifest, GetCopyToOutputDirectoryItems`
 
-The default target (represented in this spec's pseudo protocol representation as `<default>`) is resolved for each project.
+`.default` is resolved for each project.
 
 `Clean -> GetTargetFrameworks, Clean`
 
-`Rebuild -> GetTargetFrameworks, Clean, <default>, GetNativeManifest, GetCopyToOutputDirectoryItems`
+`Rebuild -> GetTargetFrameworks, Clean, .default, GetNativeManifest, GetCopyToOutputDirectoryItems`
 
 `Rebuild` actually calls `Clean` and `Build`, which in turn uses the concatenation of the `Clean` and `Build` mappings. `GetTargetFrameworks` is repeated so only the first call to it remains in the final target list.
 
@@ -358,7 +360,7 @@ namespace Microsoft.Build.Experimental.Graph
 ```
 
 ## Isolated builds
-Building a project in isolation means enforcing the constraint that whenever a graph node is built, all the target calls that it does on its references **do not execute** because their results are already available. This means that any BuildResult objects for project references must be pre-computed and somehow provided as inputs to the referencing project.
+Building a project in isolation means enforcing the constraint that whenever a graph node is built, all the target calls that it does on its references **do not execute** because their results are already available. This means that any `BuildResult` objects for project references must be precomputed and somehow provided as inputs to the referencing project.
 
 If a project uses the MSBuild task, the build result must be in MSBuild's build result cache instead of just-in-time executing targets on that referenced project. If it is not in the build result cache, an error will be logged and the build will fail. If the project is calling into itself either via `CallTarget` or the MSBuild task with a different set of global properties, this will be allowed to support multitargeting and other build dimensions implemented in a similar way.
 
@@ -367,7 +369,7 @@ Because referenced projects and their entry targets are guaranteed to be in the 
 ### Isolated graph builds
 When building a graph in isolated mode, the graph is used to traverse and build the projects in the right order, but each individual project is built in isolation. The build result cache will just be in memory exactly as it is today, but on cache miss it will error. This enforces that both the graph and target mappings are complete and correct.
 
-Furthermore, running in this mode enforces that each (project, global properties) pair is executed only once and must execute all targets needed by all projects which reference that node. This gives it a concrete start and end time, which leads to some potential perf optimizations, like garbage collecting all project state (except the build results) once it finishes building. This can greatly reduce the memory overhead for large builds.
+Furthermore, running in this mode enforces that each `(project, global properties)` pair is executed only once and must execute all targets needed by all projects which reference that node. This gives it a concrete start and end time, which leads to some potential perf optimizations, like garbage collecting all project state (except the build results) once it finishes building. This can greatly reduce the memory overhead for large builds.
 
 This discrete start and end time also allows for easy integration with [I/O Tracking](#io-tracking) to observe all inputs and outputs for a project. Note however that I/O during target execution, particular target execution which may not normally happen as part of a project's individual build execution, would be attributed to the project reference project rather the project with the project reference. This differs from today's behavior, but seems like a desirable difference anyway.
 
@@ -387,9 +389,9 @@ These incremental builds could be extended to the entire graph by keeping a proj
 Details on how isolation and cache files are implemented in MSBuild can be found [here](./static-graph-implementation-details.md).
 
 #### APIs
-Cache file information is provided via [BuildParameters](https://github.com/dotnet/msbuild/blob/2d4dc592a638b809944af10ad1e48e7169e40808/src/Build/BackEnd/BuildManager/BuildParameters.cs#L746-L764). Input caches are applied in `BuildManager.BeginBuild`. Output cache files are written in `BuildManager.EndBuild`. Thus, the scope of the caches are one BuildManager BeginBuild/EndBuild session.
+Cache file information is provided via [`BuildParameters`](https://github.com/dotnet/msbuild/blob/2d4dc592a638b809944af10ad1e48e7169e40808/src/Build/BackEnd/BuildManager/BuildParameters.cs#L746-L764). Input caches are applied in `BuildManager.BeginBuild`. Output cache files are written in `BuildManager.EndBuild`. Thus, the scope of the caches are one `BuildManager` `BeginBuild`/`EndBuild` session.
 
-Isolation constraints are turned on via [BuildParameters.IsolateProjects](https://github.com/dotnet/msbuild/blob/b111470ae61eba02c6102374c2b7d62aebe45f5b/src/Build/BackEnd/BuildManager/BuildParameters.cs#L742). Isolation constraints are also automatically turned on if either input or output cache files are used.
+Isolation constraints are turned on via [`BuildParameters.IsolateProjects`](https://github.com/dotnet/msbuild/blob/b111470ae61eba02c6102374c2b7d62aebe45f5b/src/Build/BackEnd/BuildManager/BuildParameters.cs#L742). Isolation constraints are also automatically turned on if either input or output cache files are used, except when the `isolate:MessageUponIsolationViolation` switch is used.
 
 #### Command line
 Caches are provided to MSBuild.exe via the multi value `/inputResultsCaches` and the single value `/outputResultsCache`.
@@ -401,14 +403,21 @@ In certain situations one may want to exempt a reference from isolation constrai
 - exempting references whose project files are generated at build times with random names (for example, each WPF project, before the Build target, generates and builds a helper .csproj with a random file name)
 - relaxing constraints for MSBuild task calling patterns that static graph cannot express (for exemple, if a project is calculating references, or the targets to call on references, at runtime via an arbitrary algorithm)
 
-A project is exempt from isolation constraints by adding its full path to the `GraphIsolationExemptReference` item. For example, if project A.csproj references project B.csproj, the following snippet exempts B.csproj from isolation constraints while A.csproj is built:
-```xml
-<ItemGroup>
-  <GraphIsolationExemptReference Include="/Full/Path/To/B.csproj" />
-</ItemGroup>
-```
+A project may be exempt from isolation constraints in two ways:
 
-A reference is exempt only in projects that add the reference in `GraphIsolationExemptReference`. If multiple projects need to exempt the same reference, all of them need to add the reference to `GraphIsolationExemptReference`.
+<!-- List is encoded in HTML since XML code block
+and its following text won't be indented properly. -->
+<ul>
+<li>its full path is added to the <code>GraphIsolationExemptReference</code> item. For example, if project <code>A.csproj</code> references project <code>B.csproj</code>, the following snippet exempts <code>B.csproj</code> from isolation constraints while <code>A.csproj</code> is built:
+<pre><code class="lang-xml"><span class="hljs-tag">&lt;<span class="hljs-name">ItemGroup</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">GraphIsolationExemptReference</span> <span class="hljs-attr">Include</span>=<span class="hljs-string">"/Full/Path/To/B.csproj"</span> /&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">ItemGroup</span>&gt;</span>
+</code></pre>
+If multiple projects need to exempt the same reference, all of them need to add the reference to <code>GraphIsolationExemptReference</code>.
+</li>
+<li> via the <code>isolate:MessageUponIsolationViolation</code> switch
+</li>
+</ul>
 
 For now, self-builds (a project building itself with different global properties) are also exempt from isolation constraints, but this behaviour is of dubious value and might be changed in the future.
 

@@ -30,14 +30,13 @@ namespace Microsoft.Build.Tasks
             _resolvedSDKs = resolvedSDKs;
         }
 
-        /// <summary>
-        /// Resolve references which are found in a specific SDK
-        /// </summary>
+        /// <inheritdoc/>
         public override bool Resolve(
             AssemblyNameExtension assemblyName,
             string sdkName,
             string rawFileNameCandidate,
             bool isPrimaryProjectReference,
+            bool isImmutableFrameworkReference,
             bool wantSpecificVersion,
             string[] executableExtensions,
             string hintPath,

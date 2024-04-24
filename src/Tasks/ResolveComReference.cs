@@ -333,7 +333,7 @@ namespace Microsoft.Build.Tasks
             allProjectRefs = new List<ComReferenceInfo>();
             allDependencyRefs = new List<ComReferenceInfo>();
 
-            _timestampCache = (ResolveComReferenceCache)StateFileBase.DeserializeCache(StateFile, Log, typeof(ResolveComReferenceCache));
+            _timestampCache = StateFileBase.DeserializeCache<ResolveComReferenceCache>(StateFile, Log);
 
             if (_timestampCache?.ToolPathsMatchCachePaths(_tlbimpPath, _aximpPath) != true)
             {

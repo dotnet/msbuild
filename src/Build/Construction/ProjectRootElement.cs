@@ -287,81 +287,81 @@ namespace Microsoft.Build.Construction
         /// <remarks>
         /// The name is inconsistent to make it more understandable, per API review.
         /// </remarks>
-        public ICollection<ProjectChooseElement> ChooseElements => new ReadOnlyCollection<ProjectChooseElement>(Children.OfType<ProjectChooseElement>());
+        public ICollection<ProjectChooseElement> ChooseElements => GetChildrenOfType<ProjectChooseElement>();
 
         /// <summary>
         /// Get a read-only collection of the child item definition groups, if any
         /// </summary>
-        public ICollection<ProjectItemDefinitionGroupElement> ItemDefinitionGroups => new ReadOnlyCollection<ProjectItemDefinitionGroupElement>(Children.OfType<ProjectItemDefinitionGroupElement>());
+        public ICollection<ProjectItemDefinitionGroupElement> ItemDefinitionGroups => GetChildrenOfType<ProjectItemDefinitionGroupElement>();
 
         /// <summary>
         /// Get a read-only collection of the child item definitions, if any, in all item definition groups anywhere in the project file.
         /// </summary>
-        public ICollection<ProjectItemDefinitionElement> ItemDefinitions => new ReadOnlyCollection<ProjectItemDefinitionElement>(AllChildren.OfType<ProjectItemDefinitionElement>());
+        public ICollection<ProjectItemDefinitionElement> ItemDefinitions => new ReadOnlyCollection<ProjectItemDefinitionElement>(GetAllChildrenOfType<ProjectItemDefinitionElement>());
 
         /// <summary>
         /// Get a read-only collection over the child item groups, if any.
         /// Does not include any that may not be at the root, i.e. inside Choose elements.
         /// </summary>
-        public ICollection<ProjectItemGroupElement> ItemGroups => new ReadOnlyCollection<ProjectItemGroupElement>(Children.OfType<ProjectItemGroupElement>());
+        public ICollection<ProjectItemGroupElement> ItemGroups => GetChildrenOfType<ProjectItemGroupElement>();
 
         /// <summary>
         /// Get a read-only collection of the child items, if any, in all item groups anywhere in the project file.
         /// Not restricted to root item groups: traverses through Choose elements.
         /// </summary>
-        public ICollection<ProjectItemElement> Items => new ReadOnlyCollection<ProjectItemElement>(AllChildren.OfType<ProjectItemElement>());
+        public ICollection<ProjectItemElement> Items => new ReadOnlyCollection<ProjectItemElement>(GetAllChildrenOfType<ProjectItemElement>());
 
         /// <summary>
         /// Get a read-only collection of the child import groups, if any.
         /// </summary>
-        public ICollection<ProjectImportGroupElement> ImportGroups => new ReadOnlyCollection<ProjectImportGroupElement>(Children.OfType<ProjectImportGroupElement>());
+        public ICollection<ProjectImportGroupElement> ImportGroups => GetChildrenOfType<ProjectImportGroupElement>();
 
         /// <summary>
         /// Get a read-only collection of the child imports
         /// </summary>
-        public ICollection<ProjectImportElement> Imports => new ReadOnlyCollection<ProjectImportElement>(AllChildren.OfType<ProjectImportElement>());
+        public ICollection<ProjectImportElement> Imports => new ReadOnlyCollection<ProjectImportElement>(GetAllChildrenOfType<ProjectImportElement>());
 
         /// <summary>
         /// Get a read-only collection of the child property groups, if any.
         /// Does not include any that may not be at the root, i.e. inside Choose elements.
         /// </summary>
-        public ICollection<ProjectPropertyGroupElement> PropertyGroups => new ReadOnlyCollection<ProjectPropertyGroupElement>(Children.OfType<ProjectPropertyGroupElement>());
+        public ICollection<ProjectPropertyGroupElement> PropertyGroups => GetChildrenOfType<ProjectPropertyGroupElement>();
 
         /// <summary>
         /// Geta read-only collection of the child properties, if any, in all property groups anywhere in the project file.
         /// Not restricted to root property groups: traverses through Choose elements.
         /// </summary>
-        public ICollection<ProjectPropertyElement> Properties => new ReadOnlyCollection<ProjectPropertyElement>(AllChildren.OfType<ProjectPropertyElement>());
+        public ICollection<ProjectPropertyElement> Properties => new ReadOnlyCollection<ProjectPropertyElement>(GetAllChildrenOfType<ProjectPropertyElement>());
 
         /// <summary>
         /// Get a read-only collection of the child targets
         /// </summary>
-        public ICollection<ProjectTargetElement> Targets => new ReadOnlyCollection<ProjectTargetElement>(Children.OfType<ProjectTargetElement>());
+        public ICollection<ProjectTargetElement> Targets => GetChildrenOfType<ProjectTargetElement>();
 
         /// <summary>
         /// Get a read-only collection of the child usingtasks, if any
         /// </summary>
-        public ICollection<ProjectUsingTaskElement> UsingTasks => new ReadOnlyCollection<ProjectUsingTaskElement>(Children.OfType<ProjectUsingTaskElement>());
+        public ICollection<ProjectUsingTaskElement> UsingTasks => GetChildrenOfType<ProjectUsingTaskElement>();
 
         /// <summary>
         /// Get a read-only collection of the child item groups, if any, in reverse order
         /// </summary>
-        public ICollection<ProjectItemGroupElement> ItemGroupsReversed => new ReadOnlyCollection<ProjectItemGroupElement>(ChildrenReversed.OfType<ProjectItemGroupElement>());
+        public ICollection<ProjectItemGroupElement> ItemGroupsReversed => GetChildrenReversedOfType<ProjectItemGroupElement>();
 
         /// <summary>
         /// Get a read-only collection of the child item definition groups, if any, in reverse order
         /// </summary>
-        public ICollection<ProjectItemDefinitionGroupElement> ItemDefinitionGroupsReversed => new ReadOnlyCollection<ProjectItemDefinitionGroupElement>(ChildrenReversed.OfType<ProjectItemDefinitionGroupElement>());
+        public ICollection<ProjectItemDefinitionGroupElement> ItemDefinitionGroupsReversed => GetChildrenReversedOfType<ProjectItemDefinitionGroupElement>();
 
         /// <summary>
         /// Get a read-only collection of the child import groups, if any, in reverse order
         /// </summary>
-        public ICollection<ProjectImportGroupElement> ImportGroupsReversed => new ReadOnlyCollection<ProjectImportGroupElement>(ChildrenReversed.OfType<ProjectImportGroupElement>());
+        public ICollection<ProjectImportGroupElement> ImportGroupsReversed => GetChildrenReversedOfType<ProjectImportGroupElement>();
 
         /// <summary>
         /// Get a read-only collection of the child property groups, if any, in reverse order
         /// </summary>
-        public ICollection<ProjectPropertyGroupElement> PropertyGroupsReversed => new ReadOnlyCollection<ProjectPropertyGroupElement>(ChildrenReversed.OfType<ProjectPropertyGroupElement>());
+        public ICollection<ProjectPropertyGroupElement> PropertyGroupsReversed => GetChildrenReversedOfType<ProjectPropertyGroupElement>();
 
         #endregion
 
@@ -702,7 +702,7 @@ namespace Microsoft.Build.Construction
         /// Not public as we do not wish to encourage the use of ProjectExtensions.
         /// </remarks>
         internal ProjectExtensionsElement ProjectExtensions
-            => ChildrenReversed.OfType<ProjectExtensionsElement>().FirstOrDefault();
+            => GetChildrenReversedOfType<ProjectExtensionsElement>().FirstOrDefault();
 
         /// <summary>
         /// Returns an unlocalized indication of how this file was last dirtied.
@@ -1328,12 +1328,21 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectMetadataElement CreateMetadataElement(string name, string unevaluatedValue)
         {
+            return this.CreateMetadataElement(name, unevaluatedValue, null);
+        }
+
+        /// <summary>
+        /// Creates a metadata node.
+        /// Caller must add it to the location of choice in the project.
+        /// </summary>
+        public ProjectMetadataElement CreateMetadataElement(string name, string unevaluatedValue, ElementLocation location)
+        {
             if (Link != null)
             {
                 return RootLink.CreateMetadataElement(name, unevaluatedValue);
             }
 
-            ProjectMetadataElement metadatum = ProjectMetadataElement.CreateDisconnected(name, this);
+            ProjectMetadataElement metadatum = ProjectMetadataElement.CreateDisconnected(name, this, location);
 
             metadatum.Value = unevaluatedValue;
 
@@ -1786,13 +1795,22 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// Creates a metadata node.
+        /// Caller must add it to the location of choice in the project.
+        /// </summary>
+        internal ProjectMetadataElement CreateMetadataElement(XmlAttributeWithLocation attribute)
+        {
+            return CreateMetadataElement(attribute.Name, attribute.Value, attribute.Location);
+        }
+
+        /// <summary>
         /// Creates a XmlElement with the specified name in the document
         /// containing this project.
         /// </summary>
-        internal XmlElementWithLocation CreateElement(string name)
+        internal XmlElementWithLocation CreateElement(string name, ElementLocation location = null)
         {
             ErrorUtilities.VerifyThrow(Link == null, "External project");
-            return (XmlElementWithLocation)XmlDocument.CreateElement(name, XmlNamespace);
+            return (XmlElementWithLocation)XmlDocument.CreateElement(name, XmlNamespace, location);
         }
 
         /// <summary>
@@ -1887,15 +1905,18 @@ namespace Microsoft.Build.Construction
                 }
             }
 
-            foreach (var sdkNode in Children.OfType<ProjectSdkElement>())
+            foreach (ProjectElement child in ChildrenEnumerable)
             {
-                var referencedSdk = new SdkReference(
-                    sdkNode.XmlElement.GetAttribute("Name"),
-                    sdkNode.XmlElement.GetAttribute("Version"),
-                    sdkNode.XmlElement.GetAttribute("MinimumVersion"));
+                if (child is ProjectSdkElement sdkNode)
+                {
+                    var referencedSdk = new SdkReference(
+                        sdkNode.XmlElement.GetAttribute("Name"),
+                        sdkNode.XmlElement.GetAttribute("Version"),
+                        sdkNode.XmlElement.GetAttribute("MinimumVersion"));
 
-                nodes.Add(ProjectImportElement.CreateImplicit("Sdk.props", currentProjectOrImport, ImplicitImportLocation.Top, referencedSdk, sdkNode));
-                nodes.Add(ProjectImportElement.CreateImplicit("Sdk.targets", currentProjectOrImport, ImplicitImportLocation.Bottom, referencedSdk, sdkNode));
+                    nodes.Add(ProjectImportElement.CreateImplicit("Sdk.props", currentProjectOrImport, ImplicitImportLocation.Top, referencedSdk, sdkNode));
+                    nodes.Add(ProjectImportElement.CreateImplicit("Sdk.targets", currentProjectOrImport, ImplicitImportLocation.Bottom, referencedSdk, sdkNode));
+                }
             }
 
             return nodes;

@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
@@ -55,7 +54,7 @@ namespace Microsoft.Build.Construction
         /// Get any child items.
         /// This is a live collection.
         /// </summary>
-        public ICollection<ProjectItemElement> Items => new ReadOnlyCollection<ProjectItemElement>(Children.OfType<ProjectItemElement>());
+        public ICollection<ProjectItemElement> Items => GetChildrenOfType<ProjectItemElement>();
 
         /// <summary>
         /// True if it is known that no child items have wildcards in their

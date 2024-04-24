@@ -13,6 +13,9 @@ namespace Microsoft.Build.Tasks.ResourceHandling
     {
         public PreserializedResourceWriterRequiredException() { }
 
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
         private PreserializedResourceWriterRequiredException(SerializationInfo info, StreamingContext context)
             : base(info, context) { }
     }

@@ -10,7 +10,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Tasks
 {
-    public sealed class ZipDirectory : TaskExtension
+    public sealed class ZipDirectory : TaskExtension, IIncrementalTask
     {
         /// <summary>
         /// Gets or sets a <see cref="ITaskItem"/> containing the full path to the destination file to create.
@@ -28,6 +28,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [Required]
         public ITaskItem SourceDirectory { get; set; }
+
+        /// <summary>
+        /// Question the incremental nature of this task.
+        /// </summary>
+        /// <remarks>This task does not support incremental build and will error out instead.</remarks>
+        public bool FailIfNotIncremental { get; set; }
 
         public override bool Execute()
         {
@@ -47,7 +53,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (destinationFile.Exists)
                 {
-                    if (!Overwrite)
+                    if (!Overwrite || FailIfNotIncremental)
                     {
                         Log.LogErrorWithCodeFromResources("ZipDirectory.ErrorFileExists", destinationFile.FullName);
 
@@ -68,8 +74,15 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
-                    Log.LogMessageFromResources(MessageImportance.High, "ZipDirectory.Comment", sourceDirectory.FullName, destinationFile.FullName);
-                    ZipFile.CreateFromDirectory(sourceDirectory.FullName, destinationFile.FullName);
+                    if (FailIfNotIncremental)
+                    {
+                        Log.LogErrorFromResources("ZipDirectory.Comment", sourceDirectory.FullName, destinationFile.FullName);
+                    }
+                    else
+                    {
+                        Log.LogMessageFromResources(MessageImportance.High, "ZipDirectory.Comment", sourceDirectory.FullName, destinationFile.FullName);
+                        ZipFile.CreateFromDirectory(sourceDirectory.FullName, destinationFile.FullName);
+                    }
                 }
                 catch (Exception e)
                 {

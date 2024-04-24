@@ -766,7 +766,7 @@ namespace Microsoft.Build.Graph
 
             public ImmutableList<string> RequestedTargets { get; }
 
-            public bool Equals(ProjectGraphBuildRequest other)
+            public readonly bool Equals(ProjectGraphBuildRequest other)
             {
                 if (Node != other.Node
                     || RequestedTargets.Count != other.RequestedTargets.Count)
@@ -786,12 +786,12 @@ namespace Microsoft.Build.Graph
                 return true;
             }
 
-            public override bool Equals(object obj)
+            public override readonly bool Equals(object obj)
             {
                 return !(obj is null) && obj is ProjectGraphBuildRequest graphNodeWithTargets && Equals(graphNodeWithTargets);
             }
 
-            public override int GetHashCode()
+            public override readonly int GetHashCode()
             {
                 unchecked
                 {

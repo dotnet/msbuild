@@ -164,7 +164,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Loggers = new ILogger[] { logger },
                     EnableNodeReuse = false
                 };
-                ;
 
                 BuildRequestData data = new BuildRequestData(project.CreateProjectInstance(), new string[] { "test" }, collection.HostServices);
                 manager.BeginBuild(_parameters);
@@ -595,6 +594,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput, LoggerVerbosity.Diagnostic);
             logger.AssertLogContains("[foo: ]");
+        }
+
+        /// <summary>
+        /// If an item returned from a task has bare-minimum metadata implementation, we shouldn't crash.
+        /// </summary>
+        [Fact]
+        public void MinimalLegacyOutputItems()
+        {
+            string customTaskPath = Assembly.GetExecutingAssembly().Location;
+
+            string projectContents = $"""
+                                     <Project>
+                                       <UsingTask TaskName="TaskThatReturnsMinimalItem" AssemblyFile="{customTaskPath}" />
+
+                                       <Target Name="Build">
+                                         <TaskThatReturnsMinimalItem>
+                                           <Output TaskParameter="MinimalTaskItemOutput" ItemName="Outputs"/>
+                                         </TaskThatReturnsMinimalItem>
+
+                                         <Message Text="[%(Outputs.Identity): %(Outputs.a)]" Importance="High" />
+                                       </Target>
+                                     </Project>
+                                     """;
+
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput, LoggerVerbosity.Diagnostic);
         }
 
         /// <summary>

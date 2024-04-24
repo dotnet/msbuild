@@ -97,6 +97,7 @@ namespace Microsoft.Build.Logging
             ErrorUtilities.VerifyThrowArgumentNull(eventSource, nameof(eventSource));
             ParseFileLoggerParameters();
             string fileName = _logFile;
+
             try
             {
                 // Create a new file logger and pass it some parameters to make the build log very detailed

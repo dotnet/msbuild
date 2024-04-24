@@ -34,6 +34,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="sdkName"></param>
         /// <param name="rawFileNameCandidate">The file name to match if {RawFileName} is seen. (May be null).</param>
         /// <param name="isPrimaryProjectReference">True if this is a primary reference directly from the project file.</param>
+        /// <param name="isImmutableFrameworkReference">True if <paramref name="rawFileNameCandidate"/> is immutable and guaranteed to exist.</param>
         /// <param name="wantSpecificVersion"></param>
         /// <param name="executableExtensions">The filename extension of the assembly. Must be this or its no match.</param>
         /// <param name="hintPath">This reference's hintpath</param>
@@ -48,6 +49,7 @@ namespace Microsoft.Build.Tasks
             string sdkName,
             string rawFileNameCandidate,
             bool isPrimaryProjectReference,
+            bool isImmutableFrameworkReference,
             bool wantSpecificVersion,
             string[] executableExtensions,
             string hintPath,
@@ -79,6 +81,7 @@ namespace Microsoft.Build.Tasks
                             sdkName,
                             rawFileNameCandidate,
                             isPrimaryProjectReference,
+                            isImmutableFrameworkReference,
                             wantSpecificVersion,
                             executableExtensions,
                             hintPath,

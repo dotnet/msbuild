@@ -45,6 +45,24 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             string resolvedPath = Resolve(path);
             Uri u = new Uri(resolvedPath);
+            //
+            // GB18030: Uri class does not correctly encode chars in the PUA range for implicit 
+            // file paths (paths without explicit scheme):
+            // https://github.com/dotnet/runtime/issues/89538
+            // Workaround is to use UriBuilder with the file scheme specified explicitly to 
+            // correctly encode the PUA chars.
+            //
+            if (Uri.UriSchemeFile.Equals(u.Scheme, StringComparison.OrdinalIgnoreCase) &&
+                !IsAsciiString(resolvedPath))
+            {
+                UriBuilder builder = new UriBuilder()
+                {
+                    Scheme = Uri.UriSchemeFile,
+                    Host = string.Empty,
+                    Path = resolvedPath,
+                };
+                u = builder.Uri;
+            }
             return u.AbsoluteUri;
         }
 
@@ -208,6 +226,16 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             // if not unc or url then it must be a local disk path...
             return Path.GetFullPath(path); // make sure it's a full path
+        }
+
+        private static bool IsAsciiString(string str)
+        {
+            foreach (char c in str)
+            {
+                if (c > 127)
+                {  return false; }
+            }
+            return true;
         }
     }
 }

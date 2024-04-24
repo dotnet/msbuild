@@ -1037,7 +1037,7 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     // Not using sharedReadBuffer because this is not a memory stream and so the buffer won't be used anyway.
-                    return BinaryTranslator.GetReadTranslator(File.OpenRead(cacheFile), null);
+                    return BinaryTranslator.GetReadTranslator(File.OpenRead(cacheFile), InterningBinaryReader.PoolingBuffer);
                 }
             }
             catch (Exception e) when (e is DirectoryNotFoundException || e is UnauthorizedAccessException)

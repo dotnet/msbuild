@@ -23,12 +23,9 @@ variables:
   - name: SourceBranch
     value: $(IbcSourceBranchName)
   # If we're not on a vs* branch, use main as our optprof collection branch
-  # NOTE: the code is temporarily fixed. For the branches that should use opt-prof from the main branch we should use the latest working Opt-Prof collected from main 20230217.4.
   - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
-    - name: OptProfDrop
-      value: 'OptimizationData/DotNet-msbuild-Trusted/main/20230217.4/7352286/1'   
     - name: SourceBranch
-      value: ''
+      value: main
   # if OptProfDropName is set as a parameter, set OptProfDrop to the parameter and unset SourceBranch
   - ${{ if ne(parameters.OptProfDropName, 'default') }}:
     - name: OptProfDrop

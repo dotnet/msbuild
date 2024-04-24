@@ -93,7 +93,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         public static CacheResult IndicateNonCacheHit(CacheResultType resultType)
         {
-            ErrorUtilities.VerifyThrowInvalidOperation(resultType != CacheResultType.CacheHit, "CantBeCacheHit");
+            ErrorUtilities.VerifyThrow(resultType != CacheResultType.CacheHit, "CantBeCacheHit");
             return new CacheResult(resultType);
         }
 

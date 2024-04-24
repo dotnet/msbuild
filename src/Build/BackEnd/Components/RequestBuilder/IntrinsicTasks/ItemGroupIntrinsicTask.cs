@@ -184,7 +184,17 @@ namespace Microsoft.Build.BackEnd
 
                 if (condition)
                 {
-                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, ExpanderOptions.ExpandAll, metadataInstance.Location, loggingContext);
+                    ExpanderOptions expanderOptions = ExpanderOptions.ExpandAll;
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) &&
+                        // If multiple buckets were expanded - we do not want to repeat same error for same metadatum on a same line
+                        bucket.BucketSequenceNumber == 0 &&
+                        // Referring to unqualified metadata of other item (transform) is fine.
+                        child.Include.IndexOf("@(", StringComparison.Ordinal) == -1)
+                    {
+                        expanderOptions |= ExpanderOptions.LogOnItemMetadataSelfReference;
+                    }
+
+                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, expanderOptions, metadataInstance.Location, loggingContext);
 
                     // This both stores the metadata so we can add it to all the items we just created later, and 
                     // exposes this metadata to further metadata evaluations in subsequent loop iterations.
@@ -403,27 +413,28 @@ namespace Microsoft.Build.BackEnd
 
             // Split Include on any semicolons, and take each split in turn
             var includeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedInclude);
-            ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(this.Project, originalItem.ItemType);
+            ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(Project, originalItem.ItemType);
+
+            // EngineFileUtilities.GetFileListEscaped api invocation evaluates excludes by default.
+            // If the code process any expression like "@(x)", we need to handle excludes explicitly using EvaluateExcludePaths().
+            bool anyTransformExprProceeded = false;
 
             foreach (string includeSplit in includeSplits)
             {
                 // If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
-                bool throwaway;
-
-                IList<ProjectItemInstance> itemsFromSplit = expander.ExpandSingleItemVectorExpressionIntoItems(includeSplit,
+                IList<ProjectItemInstance> itemsFromSplit = expander.ExpandSingleItemVectorExpressionIntoItems(
+                    includeSplit,
                     itemFactory,
                     ExpanderOptions.ExpandItems,
                     false /* do not include null expansion results */,
-                    out throwaway,
+                    out _,
                     originalItem.IncludeLocation);
 
                 if (itemsFromSplit != null)
                 {
                     // Expression is in form "@(X)", so add these items directly.
-                    foreach (ProjectItemInstance item in itemsFromSplit)
-                    {
-                        items.Add(item);
-                    }
+                    items.AddRange(itemsFromSplit);
+                    anyTransformExprProceeded = true;
                 }
                 else
                 {
@@ -453,34 +464,17 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            // Evaluate, split, expand and subtract any Exclude
-            HashSet<string> excludesUnescapedForComparison = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (string excludeSplit in excludes)
+            // There is a need to Evaluate Exclude part explicitly because of of the expressions had the form "@(X)".
+            if (anyTransformExprProceeded)
             {
-                string[] excludeSplitFiles = EngineFileUtilities.GetFileListUnescaped(
-                    Project.Directory,
-                    excludeSplit,
-                    loggingMechanism: LoggingContext,
-                    excludeLocation: originalItem.ExcludeLocation);
+                // Calculate all Exclude
+                var excludesUnescapedForComparison = EvaluateExcludePaths(excludes, originalItem.ExcludeLocation);
 
-                foreach (string excludeSplitFile in excludeSplitFiles)
-                {
-                    excludesUnescapedForComparison.Add(excludeSplitFile.NormalizeForPathComparison());
-                }
+                // Subtract any Exclude
+                items = items
+                    .Where(i => !excludesUnescapedForComparison.Contains(((IItem)i).EvaluatedInclude.NormalizeForPathComparison()))
+                    .ToList();
             }
-
-            List<ProjectItemInstance> remainingItems = new List<ProjectItemInstance>();
-
-            for (int i = 0; i < items.Count; i++)
-            {
-                if (!excludesUnescapedForComparison.Contains(((IItem)items[i]).EvaluatedInclude.NormalizeForPathComparison()))
-                {
-                    remainingItems.Add(items[i]);
-                }
-            }
-
-            items = remainingItems;
 
             // Filter the metadata as appropriate
             if (keepMetadata != null)
@@ -507,6 +501,32 @@ namespace Microsoft.Build.BackEnd
             }
 
             return items;
+        }
+
+        /// <summary>
+        /// Returns a list of all items specified in Exclude parameter.
+        /// If no items match, returns empty list.
+        /// </summary>
+        /// <param name="excludes">The items to match</param>
+        /// <param name="excludeLocation">The specification to match against the items.</param>
+        /// <returns>A list of matching items</returns>
+        private HashSet<string> EvaluateExcludePaths(IReadOnlyList<string> excludes, ElementLocation excludeLocation)
+        {
+            HashSet<string> excludesUnescapedForComparison = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (string excludeSplit in excludes)
+            {
+                string[] excludeSplitFiles = EngineFileUtilities.GetFileListUnescaped(
+                    Project.Directory,
+                    excludeSplit,
+                    loggingMechanism: LoggingContext,
+                    excludeLocation: excludeLocation);
+                foreach (string excludeSplitFile in excludeSplitFiles)
+                {
+                    excludesUnescapedForComparison.Add(excludeSplitFile.NormalizeForPathComparison());
+                }
+            }
+
+            return excludesUnescapedForComparison;
         }
 
         /// <summary>
@@ -612,7 +632,7 @@ namespace Microsoft.Build.BackEnd
         /// 1. The metadata table created for the bucket, may be null.
         /// 2. The metadata table derived from the item definition group, may be null.
         /// </summary>
-        private class NestedMetadataTable : IMetadataTable
+        private class NestedMetadataTable : IMetadataTable, IItemTypeDefinition
         {
             /// <summary>
             /// The table for all metadata added during expansion
@@ -722,6 +742,8 @@ namespace Microsoft.Build.BackEnd
             {
                 _addTable[name] = value;
             }
+
+            string IItemTypeDefinition.ItemType => _itemType;
         }
     }
 }

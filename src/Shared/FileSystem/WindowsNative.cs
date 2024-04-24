@@ -141,7 +141,7 @@ namespace Microsoft.Build.Shared.FileSystem
             /// <summary>
             /// Indicates if enumeration succeeded.
             /// </summary>
-            public bool Succeeded
+            public readonly bool Succeeded
             {
                 get { return Status == EnumerateDirectoryStatus.Success; }
             }
@@ -153,7 +153,7 @@ namespace Microsoft.Build.Shared.FileSystem
             /// <remarks>
             /// This is a good <c>default:</c> case when switching on every possible <see cref="EnumerateDirectoryStatus"/>
             /// </remarks>
-            public NativeWin32Exception ThrowForUnknownError()
+            public readonly NativeWin32Exception ThrowForUnknownError()
             {
                 Debug.Assert(Status == EnumerateDirectoryStatus.UnknownError);
                 throw CreateExceptionForError();
@@ -173,7 +173,7 @@ namespace Microsoft.Build.Shared.FileSystem
             /// <summary>
             /// Creates (but does not throw) an exception for this result. The result must not be successful.
             /// </summary>
-            public NativeWin32Exception CreateExceptionForError()
+            public readonly NativeWin32Exception CreateExceptionForError()
             {
                 Debug.Assert(Status != EnumerateDirectoryStatus.Success);
                 if (Status == EnumerateDirectoryStatus.UnknownError)

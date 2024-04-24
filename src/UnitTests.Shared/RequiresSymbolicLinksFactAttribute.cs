@@ -27,7 +27,7 @@ namespace Microsoft.Build.UnitTests
             // In Windows, a process can create symlinks only if it has sufficient permissions.
             // We simply try to create one and if it fails we skip the test.
             string sourceFile = FileUtilities.GetTemporaryFile();
-            string destinationFile = FileUtilities.GetTemporaryFile();
+            string destinationFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 File.Create(sourceFile).Dispose();

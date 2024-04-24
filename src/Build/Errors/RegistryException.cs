@@ -3,6 +3,7 @@
 
 using System;
 using System.Runtime.Serialization;
+using Microsoft.Build.Framework.BuildException;
 
 #nullable disable
 
@@ -12,7 +13,7 @@ namespace Microsoft.Build.Exceptions
     /// Generic exception used to wrap exceptions thrown during Registry access.
     /// </summary>
     [Serializable]
-    internal class RegistryException : Exception
+    internal class RegistryException : BuildExceptionBase
     {
         /// <summary>
         /// Basic constructor.
@@ -56,6 +57,9 @@ namespace Microsoft.Build.Exceptions
         /// <summary>
         /// Since this class implements Iserializable this constructor is required to be implemented.
         /// </summary>
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
         protected RegistryException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
             // We don't have any reason at the moment to do any custom serizlization or deserialization, this methods was added

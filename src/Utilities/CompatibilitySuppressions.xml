@@ -1,5 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- https://learn.microsoft.com/en-us/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <!-- We don't have the net7 reference assemblies handy to pass in to compare against the net8 ones -->
+  <Suppression>
+    <DiagnosticId>CP1002</DiagnosticId>
+    <Target>System.Runtime, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</Target>
+    <Left>ref/net7.0/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
   <!-- PKV004 for netstandard2.0-supporting TFs that we do not have runtime assemblies for.
        This is intentional, because you can only use MSBuild in the context of a .NET SDK
        (on net7.0, as of MSBuild 17.4) or in the context of Visual Studio (net472), but we
@@ -52,5 +61,10 @@
   <Suppression>
     <DiagnosticId>PKV004</DiagnosticId>
     <Target>Xamarin.XboxOne,Version=v0.0</Target>
+  </Suppression>
+<!-- For updating target framework from net 7.0 to net 8.0 in MSBuild 17.8 suppress baseline package validation error PKV006 on net 7.0 -->
+  <Suppression>
+    <DiagnosticId>PKV006</DiagnosticId>
+    <Target>net7.0</Target>
   </Suppression>
 </Suppressions>

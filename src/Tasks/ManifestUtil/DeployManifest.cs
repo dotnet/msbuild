@@ -213,8 +213,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             try
             {
                 var doc = new XmlDocument();
-                var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                using (XmlReader xr = XmlReader.Create(redistListFilePath, xrSettings))
+                var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+                FileStream fs = File.OpenRead(redistListFilePath);
+                using (XmlReader xr = XmlReader.Create(fs, xrSettings))
                 {
                     doc.Load(xr);
                     XmlNode fileListNode = doc.DocumentElement;

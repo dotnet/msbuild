@@ -47,7 +47,6 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void SimpleDelete()
         {
-
             using (TestEnvironment env = TestEnvironment.Create(_output))
             {
                 List<TaskItem> list = new List<TaskItem>();
@@ -57,19 +56,36 @@ namespace Microsoft.Build.UnitTests
                     list.Add(new TaskItem(env.CreateFolder().Path));
                 }
 
-                RemoveDir t = new RemoveDir();
+                // Question RemoveDir when files exists.
+                RemoveDir t = new RemoveDir()
+                {
+                    Directories = list.ToArray(),
+                    BuildEngine = new MockEngine(_output),
+                    FailIfNotIncremental = true,
+                };
+                t.Execute().ShouldBeFalse();
 
-                t.Directories = list.ToArray();
-                t.BuildEngine = new MockEngine(_output);
-
-                t.Execute().ShouldBeTrue();
-
-                t.RemovedDirectories.Length.ShouldBe(list.Count);
+                RemoveDir t2 = new RemoveDir()
+                {
+                    Directories = list.ToArray(),
+                    BuildEngine = new MockEngine(_output),
+                };
+                t2.Execute().ShouldBeTrue();
+                t2.RemovedDirectories.Length.ShouldBe(list.Count);
 
                 for (int i = 0; i < 20; i++)
                 {
                     Directory.Exists(list[i].ItemSpec).ShouldBeFalse();
                 }
+
+                // Question again to make sure all files were deleted.
+                RemoveDir t3 = new RemoveDir()
+                {
+                    Directories = list.ToArray(),
+                    BuildEngine = new MockEngine(_output),
+                    FailIfNotIncremental = true,
+                };
+                t3.Execute().ShouldBeTrue();
             }
         }
 

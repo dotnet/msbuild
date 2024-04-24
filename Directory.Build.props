@@ -25,7 +25,7 @@
           src/Framework/README.md
           src/Utilities/README.md
      -->
-    <LatestDotNetCoreForMSBuild>net7.0</LatestDotNetCoreForMSBuild>
+    <LatestDotNetCoreForMSBuild>$(NetCurrent)</LatestDotNetCoreForMSBuild>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -75,10 +75,6 @@
     <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
     <DebugType Condition="'$(DebugType)' == ''">none</DebugType>
     <MachineIndependentBuild>true</MachineIndependentBuild>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <AssemblyInformationCachePaths Condition="Exists('$(NetCoreRoot)sdk\$(NetCoreSdkVersion)\SdkPrecomputedAssemblyReferences.cache')">$(AssemblyInformationCachePaths);$(NetCoreRoot)sdk\$(NetCoreSdkVersion)\SDKPrecomputedAssemblyReferences.cache</AssemblyInformationCachePaths>
   </PropertyGroup>
 
   <PropertyGroup>

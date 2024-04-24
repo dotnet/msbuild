@@ -110,7 +110,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                                     string pattern = reader.ReadElementContentAsString();
                                     try
                                     {
-                                        manifest.ResolvableSdkRegex = new Regex(pattern, RegexOptions.Compiled | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(SdkResolverPatternRegexTimeoutMsc));
+                                        RegexOptions regexOptions = RegexOptions.CultureInvariant;
+                                        // For the kind of patterns used here, compiled regexes on .NET Framework tend to run slower than interpreted ones.
+#if RUNTIME_TYPE_NETCORE
+                                        regexOptions |= RegexOptions.Compiled;
+#endif
+                                        manifest.ResolvableSdkRegex = new Regex(pattern, regexOptions, TimeSpan.FromMilliseconds(SdkResolverPatternRegexTimeoutMsc));
                                     }
                                     catch (ArgumentException ex)
                                     {

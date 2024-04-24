@@ -333,7 +333,7 @@ namespace Microsoft.Build.BackEnd
             // Get the properties that exist on this task.  We need to gather all of the ones that are marked
             // "required" so that we can keep track of whether or not they all get set.
             var setParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            IDictionary<string, string> requiredParameters = GetNamesOfPropertiesWithRequiredAttribute();
+            IReadOnlyDictionary<string, string> requiredParameters = GetNamesOfPropertiesWithRequiredAttribute();
 
             // look through all the attributes of the task element
             foreach (KeyValuePair<string, (string, ElementLocation)> parameter in parameters)
@@ -367,6 +367,11 @@ namespace Microsoft.Build.BackEnd
                     // table that aren't also in the setParameters table.
                     setParameters[parameter.Key] = String.Empty;
                 }
+            }
+
+            if (this.TaskInstance is IIncrementalTask incrementalTask)
+            {
+                incrementalTask.FailIfNotIncremental = _buildComponentHost.BuildParameters.Question;
             }
 
             if (taskInitialized)
@@ -1390,9 +1395,15 @@ namespace Microsoft.Build.BackEnd
                                     // Setting an item spec expects the escaped value, as does setting metadata.
                                     newItem = new ProjectItemInstance(_projectInstance, outputTargetName, EscapingUtilities.Escape(output.ItemSpec), parameterLocationEscaped);
 
-                                    newItem.SetMetadataOnTaskOutput(output.CloneCustomMetadata()
-                                        .Cast<DictionaryEntry>()
-                                        .Select(x => new KeyValuePair<string, string>((string)x.Key, EscapingUtilities.Escape((string)x.Value))));
+                                    newItem.SetMetadataOnTaskOutput(EnumerateMetadata(output.CloneCustomMetadata()));
+
+                                    static IEnumerable<KeyValuePair<string, string>> EnumerateMetadata(IDictionary customMetadata)
+                                    {
+                                        foreach (DictionaryEntry de in customMetadata)
+                                        {
+                                            yield return new KeyValuePair<string, string>((string)de.Key, EscapingUtilities.Escape((string)de.Value));
+                                        }
+                                    }
                                 }
                             }
 
@@ -1529,10 +1540,10 @@ namespace Microsoft.Build.BackEnd
         /// Returns them as keys in a dictionary.
         /// </summary>
         /// <returns>Gets a list of properties which are required.</returns>
-        private IDictionary<string, string> GetNamesOfPropertiesWithRequiredAttribute()
+        private IReadOnlyDictionary<string, string> GetNamesOfPropertiesWithRequiredAttribute()
         {
             ErrorUtilities.VerifyThrow(_taskFactoryWrapper != null, "Expected taskFactoryWrapper to not be null");
-            IDictionary<string, string> requiredParameters = null;
+            IReadOnlyDictionary<string, string> requiredParameters = null;
 
             try
             {

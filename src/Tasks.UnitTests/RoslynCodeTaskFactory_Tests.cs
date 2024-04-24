@@ -450,6 +450,9 @@ End Namespace
             TryLoadTaskBodyAndExpectSuccess("<Code Language=\"vb\">code</Code>", expectedCodeLanguage: "VB");
             TryLoadTaskBodyAndExpectSuccess("<Code Language=\"visualbasic\">code</Code>", expectedCodeLanguage: "VB");
             TryLoadTaskBodyAndExpectSuccess("<Code Language=\"ViSuAl BaSic\">code</Code>", expectedCodeLanguage: "VB");
+
+            // Default when the Language attribute is not present.
+            TryLoadTaskBodyAndExpectSuccess("<Code>code</Code>", expectedCodeLanguage: "CS");
         }
 
         [Fact]
@@ -472,6 +475,31 @@ End Namespace
                     TryLoadTaskBodyAndExpectSuccess($"<Code Source=\"{file.Path}\" Type=\"{codeType}\">code</Code>", expectedCodeType: codeType);
                 }
             }
+        }
+
+        [Fact]
+        public void CSharpClass()
+        {
+            const string taskClassSourceCode = @"namespace InlineTask
+{
+    using Microsoft.Build.Utilities;
+
+    public class HelloWorld : Task
+    {
+        public override bool Execute()
+        {
+            Log.LogMessage(""Hello, world!"");
+            return !Log.HasLoggedErrors;
+        }
+    }
+}
+";
+
+            TryLoadTaskBodyAndExpectSuccess(
+                $"<Code Type=\"Class\">{taskClassSourceCode}</Code>",
+                expectedSourceCode: taskClassSourceCode,
+                expectedCodeType: RoslynCodeTaskFactoryCodeType.Class,
+                expectedCodeLanguage: "CS");
         }
 
         [Fact]
@@ -688,6 +716,36 @@ namespace InlineCode {{
                 taskBody: $"<Code Type=\"Method\">{method}</Code>",
                 expectedSourceCode: expectedSourceCode,
                 expectedCodeType: RoslynCodeTaskFactoryCodeType.Method);
+        }
+
+        [Fact]
+        public void CSharpClassSourceCodeFromFile()
+        {
+            const string taskClassSourceCode = @"namespace InlineTask
+{
+    using Microsoft.Build.Utilities;
+
+    public class HelloWorld : Task
+    {
+        public override bool Execute()
+        {
+            Log.LogMessage(""Hello, world!"");
+            return !Log.HasLoggedErrors;
+        }
+    }
+}
+";
+
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFile file = env.CreateFile(fileName: "CSharpClassSourceCodeFromFile.tmp", contents: taskClassSourceCode);
+
+                TryLoadTaskBodyAndExpectSuccess(
+                    $"<Code Source=\"{file.Path}\" />",
+                    expectedSourceCode: taskClassSourceCode,
+                    expectedCodeType: RoslynCodeTaskFactoryCodeType.Class,
+                    expectedCodeLanguage: "CS");
+            }
         }
 
         [Fact]
@@ -966,6 +1024,47 @@ namespace InlineCode {{
                     $"<Code Source=\"{file.Path}\"/>",
                     expectedSourceCode: sourceCodeFileContents,
                     expectedCodeType: RoslynCodeTaskFactoryCodeType.Class);
+            }
+        }
+
+        [Fact]
+        public void MismatchedTaskNameAndTaskClassName()
+        {
+            const string taskName = "SayHello";
+            const string className = "HelloWorld";
+            taskName.ShouldNotBe(className, "The test is misconfigured.");
+            string errorMessage = string.Format(ResourceUtilities.GetResourceString("CodeTaskFactory.CouldNotFindTaskInAssembly"), taskName);
+
+            const string projectContent = @"<Project>
+  <UsingTask TaskName=""" + taskName + @""" TaskFactory=""RoslynCodeTaskFactory"" AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
+    <Task>
+      <Code Type=""Class"">
+namespace InlineTask
+{
+    using Microsoft.Build.Utilities;
+
+    public class " + className + @" : Task
+    {
+        public override bool Execute()
+        {
+            Log.LogMessage(""Hello, world!"");
+            return !Log.HasLoggedErrors;
+        }
+    }
+}
+      </Code>
+    </Task>
+  </UsingTask>
+  <Target Name=""Build"">
+    <" + taskName + @" />
+  </Target>
+</Project>";
+
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles(projectContent);
+                var logger = proj.BuildProjectExpectFailure();
+                logger.AssertLogContains(errorMessage);
             }
         }
 

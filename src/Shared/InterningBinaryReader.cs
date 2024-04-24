@@ -191,10 +191,18 @@ namespace Microsoft.Build
         /// <remarks>
         /// The caller is responsible for managing the lifetime of the returned buffer and for passing it to <see cref="Create"/>.
         /// </remarks>
-        internal static SharedReadBuffer CreateSharedBuffer()
+        internal static BinaryReaderFactory CreateSharedBuffer()
         {
             return new Buffer();
         }
+
+        /// <summary>
+        /// A placeholder instructing InterningBinaryReader to use pooled buffer (to avoid extra allocations).
+        /// </summary>
+        /// <remarks>
+        /// Lifetime of the pooled buffer is managed by InterningBinaryReader (tied to BinaryReader lifetime wrapping the buffer)
+        /// </remarks> 
+        internal static BinaryReaderFactory PoolingBuffer => NullBuffer.Instance;
 
         /// <summary>
         /// Gets a buffer from the pool or creates a new one.
@@ -232,7 +240,7 @@ namespace Microsoft.Build
         /// Create a BinaryReader. It will either be an interning reader or standard binary reader
         /// depending on whether the interning reader is possible given the buffer and stream.
         /// </summary>
-        internal static BinaryReader Create(Stream stream, SharedReadBuffer sharedBuffer)
+        private static BinaryReader Create(Stream stream, BinaryReaderFactory sharedBuffer)
         {
             Buffer buffer = (Buffer)sharedBuffer;
             if (buffer != null)
@@ -245,7 +253,7 @@ namespace Microsoft.Build
         /// <summary>
         /// Holds thepreallocated buffer. 
         /// </summary>
-        private class Buffer : SharedReadBuffer
+        private class Buffer : BinaryReaderFactory
         {
             private char[] _charBuffer;
             private byte[] _byteBuffer;
@@ -280,13 +288,24 @@ namespace Microsoft.Build
                     return _byteBuffer;
                 }
             }
-        }
-    }
 
-    /// <summary>
-    /// Opaque holder of shared buffer.
-    /// </summary>
-    internal abstract class SharedReadBuffer
-    {
+            public override BinaryReader Create(Stream stream)
+            {
+                return InterningBinaryReader.Create(stream, this);
+            }
+        }
+
+        private class NullBuffer : BinaryReaderFactory
+        {
+            private NullBuffer()
+            { }
+
+            public static readonly BinaryReaderFactory Instance = new NullBuffer();
+
+            public override BinaryReader Create(Stream stream)
+            {
+                return InterningBinaryReader.Create(stream, null);
+            }
+        }
     }
 }

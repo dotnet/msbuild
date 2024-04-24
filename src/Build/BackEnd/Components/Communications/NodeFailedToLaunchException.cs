@@ -3,6 +3,7 @@
 
 using System;
 using System.Runtime.Serialization;
+using Microsoft.Build.Framework.BuildException;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
 #endif
@@ -19,7 +20,7 @@ namespace Microsoft.Build.BackEnd
     /// If you add fields to this class, add a custom serialization constructor and override GetObjectData().
     /// </remarks>
     [Serializable]
-    internal class NodeFailedToLaunchException : Exception
+    internal class NodeFailedToLaunchException : BuildExceptionBase
     {
         /// <summary>
         /// Constructs a standard NodeFailedToLaunchException.
@@ -31,6 +32,10 @@ namespace Microsoft.Build.BackEnd
 
         internal NodeFailedToLaunchException(Exception innerException)
             : base(innerException.Message, innerException)
+        { }
+
+        public NodeFailedToLaunchException(string message, Exception inner)
+            : base(message, inner)
         { }
 
         /// <summary>
@@ -46,6 +51,9 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor for deserialization.
         /// </summary>
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
         protected NodeFailedToLaunchException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -77,6 +85,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
 #if FEATURE_SECURITY_PERMISSIONS
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+#endif
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
 #endif
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {

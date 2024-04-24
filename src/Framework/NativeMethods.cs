@@ -35,6 +35,7 @@ internal static class NativeMethods
     internal const uint RUNTIME_INFO_DONT_SHOW_ERROR_DIALOG = 0x40;
     internal const uint FILE_TYPE_CHAR = 0x0002;
     internal const Int32 STD_OUTPUT_HANDLE = -11;
+    internal const Int32 STD_ERROR_HANDLE = -12;
     internal const uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
     internal const uint RPC_S_CALLPENDING = 0x80010115;
     internal const uint E_ABORT = (uint)0x80004004;
@@ -75,6 +76,12 @@ internal static class NativeMethods
     #endregion
 
     #region Enums
+
+    internal enum StreamHandleType
+    {
+        StdOut = STD_OUTPUT_HANDLE,
+        StdErr = STD_ERROR_HANDLE,
+    };
 
     private enum PROCESSINFOCLASS : int
     {
@@ -345,7 +352,7 @@ internal static class NativeMethods
         public UIntPtr UniqueProcessId;
         public UIntPtr InheritedFromUniqueProcessId;
 
-        public uint Size
+        public readonly uint Size
         {
             get
             {
@@ -1300,7 +1307,7 @@ internal static class NativeMethods
                 // using (var r = FileUtilities.OpenRead("/proc/" + processId + "/stat"))
                 // and could be again when FileUtilities moves to Framework
 
-                using var fileStream = new FileStream("/proc/" + processId + "/stat", FileMode.Open, FileAccess.Read);
+                using var fileStream = new FileStream("/proc/" + processId + "/stat", FileMode.Open, System.IO.FileAccess.Read);
                 using StreamReader r = new(fileStream);
 
                 line = r.ReadLine();
@@ -1479,6 +1486,73 @@ internal static class NativeMethods
             ThrowExceptionForErrorCode(code);
         }
     }
+
+#if !CLR2COMPATIBILITY
+    internal static (bool acceptAnsiColorCodes, bool outputIsScreen, uint? originalConsoleMode) QueryIsScreenAndTryEnableAnsiColorCodes(StreamHandleType handleType = StreamHandleType.StdOut)
+    {
+        if (Console.IsOutputRedirected)
+        {
+            // There's no ANSI terminal support if console output is redirected.
+            return (acceptAnsiColorCodes: false, outputIsScreen: false, originalConsoleMode: null);
+        }
+
+        bool acceptAnsiColorCodes = false;
+        bool outputIsScreen = false;
+        uint? originalConsoleMode = null;
+        if (IsWindows)
+        {
+            try
+            {
+                IntPtr outputStream = GetStdHandle((int)handleType);
+                if (GetConsoleMode(outputStream, out uint consoleMode))
+                {
+                    if ((consoleMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) == ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+                    {
+                        // Console is already in required state.
+                        acceptAnsiColorCodes = true;
+                    }
+                    else
+                    {
+                        originalConsoleMode = consoleMode;
+                        consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+                        if (SetConsoleMode(outputStream, consoleMode) && GetConsoleMode(outputStream, out consoleMode))
+                        {
+                            // We only know if vt100 is supported if the previous call actually set the new flag, older
+                            // systems ignore the setting.
+                            acceptAnsiColorCodes = (consoleMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) == ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+                        }
+                    }
+
+                    uint fileType = GetFileType(outputStream);
+                    // The std out is a char type (LPT or Console).
+                    outputIsScreen = fileType == FILE_TYPE_CHAR;
+                    acceptAnsiColorCodes &= outputIsScreen;
+                }
+            }
+            catch
+            {
+                // In the unlikely case that the above fails we just ignore and continue.
+            }
+        }
+        else
+        {
+            // On posix OSes we expect console always supports VT100 coloring unless it is explicitly marked as "dumb".
+            acceptAnsiColorCodes = Environment.GetEnvironmentVariable("TERM") != "dumb";
+            // It wasn't redirected as tested above so we assume output is screen/console
+            outputIsScreen = true; 
+        }
+        return (acceptAnsiColorCodes, outputIsScreen, originalConsoleMode);
+    }
+
+    internal static void RestoreConsoleMode(uint? originalConsoleMode, StreamHandleType handleType = StreamHandleType.StdOut)
+    {
+        if (IsWindows && originalConsoleMode is not null)
+        {
+            IntPtr stdOut = GetStdHandle((int)handleType);
+            _ = SetConsoleMode(stdOut, originalConsoleMode.Value);
+        }
+    }
+#endif // !CLR2COMPATIBILITY
 
     #endregion
 

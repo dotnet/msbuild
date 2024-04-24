@@ -898,10 +898,10 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Synthesizes Link metadata if the items are defined in an import and are on the whitelist
+        /// Synthesizes Link metadata if the items are defined in an import and are on the allowlist
         /// </summary>
         [Fact]
-        public void SynthesizeLinkMetadataForItemsOnWhitelist()
+        public void SynthesizeLinkMetadataForItemsOnAllowlist()
         {
             string outputPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             string directoryToDelete = null;

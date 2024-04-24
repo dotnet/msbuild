@@ -681,6 +681,8 @@ namespace Microsoft.Build.Graph.UnitTests
             // This test exercises two key features of solution-based builds from AssignProjectConfiguration:
             // 1. Adding synthetic project references
             // 2. Resolving project configuration based on the sln
+            // 3. Handling unresolved project references with ShouldUnsetParentConfigurationAndPlatform=true
+            // 4. Handling unresolved project references with ShouldUnsetParentConfigurationAndPlatform=false
             using (var env = TestEnvironment.Create())
             {
                 const string SolutionFileContents = """
@@ -766,21 +768,37 @@ namespace Microsoft.Build.Graph.UnitTests
                 project1Xml.AddItem("ProjectReference", "Project2.vcxproj");
 
                 ProjectRootElement project2Xml = ProjectRootElement.Create();
+
+                // Project 2 depends on Project 4, which is not in the solution and uses ShouldUnsetParentConfigurationAndPlatform=true (the default)
+                project2Xml.AddItem("ProjectReference", "Project4.vcxproj");
+                project2Xml.AddProperty("ShouldUnsetParentConfigurationAndPlatform", "true");
+
                 ProjectRootElement project3Xml = ProjectRootElement.Create();
+
+                // Project 3 depends on Project 5, which is not in the solution and uses ShouldUnsetParentConfigurationAndPlatform=false
+                project3Xml.AddItem("ProjectReference", "Project5.vcxproj");
+                project3Xml.AddProperty("ShouldUnsetParentConfigurationAndPlatform", "false");
+
+                ProjectRootElement project4Xml = ProjectRootElement.Create();
+                ProjectRootElement project5Xml = ProjectRootElement.Create();
 
                 string project1Path = Path.Combine(env.DefaultTestDirectory.Path, "Project1.csproj");
                 string project2Path = Path.Combine(env.DefaultTestDirectory.Path, "Project2.vcxproj");
                 string project3Path = Path.Combine(env.DefaultTestDirectory.Path, "Project3.vcxproj");
+                string project4Path = Path.Combine(env.DefaultTestDirectory.Path, "Project4.vcxproj");
+                string project5Path = Path.Combine(env.DefaultTestDirectory.Path, "Project5.vcxproj");
 
                 project1Xml.Save(project1Path);
                 project2Xml.Save(project2Path);
                 project3Xml.Save(project3Path);
+                project4Xml.Save(project4Path);
+                project5Xml.Save(project5Path);
 
                 var projectGraph = new ProjectGraph(slnFile.Path);
                 projectGraph.EntryPointNodes.Count.ShouldBe(3);
                 projectGraph.GraphRoots.Count.ShouldBe(1);
                 projectGraph.GraphRoots.First().ProjectInstance.FullPath.ShouldBe(project1Path);
-                projectGraph.ProjectNodes.Count.ShouldBe(3);
+                projectGraph.ProjectNodes.Count.ShouldBe(5);
 
                 ProjectGraphNode project1Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project1Path);
                 project1Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
@@ -790,12 +808,24 @@ namespace Microsoft.Build.Graph.UnitTests
                 ProjectGraphNode project2Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project2Path);
                 project2Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
                 project2Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("Win32");
-                project2Node.ProjectReferences.Count.ShouldBe(0);
+                project2Node.ProjectReferences.Count.ShouldBe(1);
 
                 ProjectGraphNode project3Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project3Path);
                 project3Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
                 project3Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("Win32");
-                project3Node.ProjectReferences.Count.ShouldBe(0);
+                project3Node.ProjectReferences.Count.ShouldBe(1);
+
+                // Configuration and Platform get unset
+                ProjectGraphNode project4Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project4Path);
+                project4Node.ProjectInstance.GlobalProperties.ContainsKey("Configuration").ShouldBeFalse();
+                project4Node.ProjectInstance.GlobalProperties.ContainsKey("Platform").ShouldBeFalse();
+                project4Node.ProjectReferences.Count.ShouldBe(0);
+
+                // Configuration and Platform are inherited from the referencing project
+                ProjectGraphNode project5Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project5Path);
+                project5Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
+                project5Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("Win32");
+                project5Node.ProjectReferences.Count.ShouldBe(0);
             }
         }
 
@@ -2631,6 +2661,71 @@ $@"
             project1.ProjectReferences.ShouldHaveSingleItem().ShouldBe(project2);
             targetLists[project1].ShouldBe(new[] { "SomeDefaultTarget1" });
             targetLists[project2].ShouldBe(new[] { "SomeDefaultTarget2", "SomeOtherTarget" });
+        }
+
+        [Fact]
+        public void MultitargettingTargetsWithBuildProjectReferencesFalse()
+        {
+            // This test should emulate Microsoft.Managed.After.targets's handling of multitargetting projects.
+            ProjectGraph graph = Helpers.CreateProjectGraph(
+                env: _env,
+                dependencyEdges: new Dictionary<int, int[]>()
+                {
+                    { 1, new[] { 2 } },
+                },
+                globalProperties: new Dictionary<string, string> { { "BuildProjectReferences", "false" } },
+                extraContentForAllNodes: """
+                <PropertyGroup>
+                  <TargetFrameworks>netcoreapp3.1;net6.0;net7.0</TargetFrameworks>
+                </PropertyGroup>
+
+                <PropertyGroup Condition="'$(TargetFrameworks)' != '' and '$(TargetFramework)' == ''">
+                  <IsCrossTargetingBuild>true</IsCrossTargetingBuild>
+                </PropertyGroup>
+
+                <PropertyGroup>
+                  <InnerBuildProperty>TargetFramework</InnerBuildProperty>
+                  <InnerBuildPropertyValues>TargetFrameworks</InnerBuildPropertyValues>
+                </PropertyGroup>
+
+                <PropertyGroup Condition="'$(IsGraphBuild)' == 'true' and '$(IsCrossTargetingBuild)' != 'true'">
+                  <_MainReferenceTargetForBuild Condition="'$(BuildProjectReferences)' == '' or '$(BuildProjectReferences)' == 'true'">.projectReferenceTargetsOrDefaultTargets</_MainReferenceTargetForBuild>
+                  <_MainReferenceTargetForBuild Condition="'$(_MainReferenceTargetForBuild)' == ''">GetTargetPath</_MainReferenceTargetForBuild>
+
+                  <ProjectReferenceTargetsForBuild>$(_MainReferenceTargetForBuild);GetNativeManifest;$(_RecursiveTargetForContentCopying);$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
+                </PropertyGroup>
+                <PropertyGroup Condition="'$(IsGraphBuild)' == 'true' and '$(IsCrossTargetingBuild)' == 'true'">
+                  <ProjectReferenceTargetsForBuild>.default;$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
+                </PropertyGroup>
+
+                <ItemGroup Condition="'$(IsGraphBuild)' == 'true'">
+                  <ProjectReferenceTargets Include="Build" Targets="GetTargetFrameworks" OuterBuild="true" SkipNonexistentTargets="true" Condition="'$(IsCrossTargetingBuild)' != 'true'" />
+                  <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuild)" Condition=" '$(ProjectReferenceTargetsForBuild)' != '' " />
+
+                  <ProjectReferenceTargets Include="Build" Targets="GetTargetFrameworksWithPlatformForSingleTargetFramework" SkipNonexistentTargets="true" Condition="'$(IsCrossTargetingBuild)' != 'true'" />
+                </ItemGroup>
+
+                <Target Name="Build" />
+                <Target Name="GetTargetPath" />
+                <Target Name="GetNativeManifest" />
+                <Target Name="GetTargetFrameworks" />
+                <Target Name="GetTargetFrameworksWithPlatformForSingleTargetFramework" />
+                """);
+
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(Array.Empty<string>());
+
+            targetLists[GetOuterBuild(graph, 1)].ShouldBe(new[] { "Build" });
+            foreach (ProjectGraphNode inner in GetInnerBuilds(graph, 1))
+            {
+                targetLists[inner].ShouldBe(new[] { "Build" });
+            }
+
+            targetLists[GetOuterBuild(graph, 2)].ShouldBe(new[] { "GetTargetFrameworks" });
+            foreach (ProjectGraphNode inner in GetInnerBuilds(graph, 2))
+            {
+                // GetTargetFrameworks actually shouldn't be here...
+                targetLists[inner].ShouldBe(new[] { "GetTargetFrameworks", "GetTargetPath", "GetNativeManifest", "GetTargetFrameworksWithPlatformForSingleTargetFramework" });
+            }
         }
 
         public void Dispose()

@@ -40,7 +40,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal HashSet<string> Items
         {
-            get
+            readonly get
             {
                 return _items;
             }
@@ -58,7 +58,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal Dictionary<string, MetadataReference> Metadata
         {
-            get
+            readonly get
             {
                 return _metadata;
             }

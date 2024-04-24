@@ -166,6 +166,63 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        /// <summary>
+        /// Question Create Directory when a directory is needed to be created should return false.
+        /// </summary>
+        [Fact]
+        public void QuestionCreateNewDirectory()
+        {
+            string temp = Path.GetTempPath();
+            string dir = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A38C");
+
+            try
+            {
+                var dirList = new ITaskItem[]
+                {
+                    new TaskItem(dir)
+                };
+                MakeDir t = new MakeDir();
+                MockEngine engine = new MockEngine();
+                t.BuildEngine = engine;
+                t.FailIfNotIncremental = true;
+                t.Directories = dirList;
+
+                bool success = t.Execute();
+
+                Assert.False(success);
+                Assert.Single(t.DirectoriesCreated);
+                Assert.Contains(
+                    String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir),
+                    engine.Log);
+
+                // Actually create the directory
+                // Note: Need a new task to reset the Log.HasLoggedErrors
+                engine.Log = "";
+                t = new MakeDir();
+                t.BuildEngine = engine;
+                t.Directories = dirList;
+                success = t.Execute();
+                Assert.True(success);
+
+                // Question an existing directory should return true.
+                engine.Log = "";
+                t.FailIfNotIncremental = true;
+                success = t.Execute();
+                Assert.True(success);
+
+                // should still return directory even though it didn't need to be created
+                Assert.Single(t.DirectoriesCreated);
+                Assert.Equal(dir, t.DirectoriesCreated[0].ItemSpec);
+                Assert.DoesNotContain(
+                    String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir),
+                    engine.Log);
+            }
+            finally
+            {
+                FileUtilities.DeleteWithoutTrailingBackslash(dir);
+            }
+        }
+
         /*
         * Method:   FileAlreadyExists
         *

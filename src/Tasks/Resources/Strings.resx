@@ -625,6 +625,9 @@
   <data name="GenerateBindingRedirects.ProcessingSuggestedRedirect">
     <value>Processing suggested binding redirect on "{0}" with MaxVersion "{1}".</value>
   </data>
+  <data name="GenerateBindingRedirects.CreatingBindingRedirectionFile">
+    <value>Creating binding redirection file "{0}".</value>
+  </data>
   <!--
         The GenerateBootstrapper message bucket is: MSB3141 - MSB3170
 
@@ -1161,7 +1164,16 @@
     <value>MSB3824: In order to build with .NET Core, resource inputs must be in .txt or .resx format.</value>
     <comment>{StrBegin="MSB3824: "}</comment>
   </data>
+  <data name="GenerateResource.BinaryFormatterUse">
+    <value>MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://aka.ms/msbuild/net8-binaryformatter</value>
+    <comment>{StrBegin="MSB3825: "}</comment>
+  </data>
 
+  <data name="GenerateResource.MimeTypeNotSupportedOnCore">
+    <value>MSB3826: Resource \"{0}\" in \"{1}\" uses MIME type \"{2}\", which is not supported by MSBuild when running on .NET.</value>
+    <comment>{StrBegin="MSB3826: "}</comment>
+  </data>
 
   <!--
         The GetAssemblyIdentity message bucket is: MSB3441 - MSB3450
@@ -1736,7 +1748,7 @@
   <data name="ResolveAssemblyReference.TargetFrameworkSubsetLogHeader">
     <value>TargetFramework Profile List Information:</value>
   </data>
-  <data name="ResolveAssemblyReference.TargetFrameworkWhiteListLogHeader">
+  <data name="ResolveAssemblyReference.TargetFrameworkAllowListLogHeader">
     <value>TargetFramework Profile List Paths:</value>
   </data>
   <data name="ResolveAssemblyReference.TargetFrameworkRedistLogHeader">
@@ -1758,6 +1770,10 @@
   </data>
   <data name="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
     <value>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</value>
+    <comment></comment>
+  </data>
+  <data name="ResolveAssemblyReference.WritingCacheFile">
+    <value>Updating assembly cache file "{0}".</value>
     <comment></comment>
   </data>
   <!--
@@ -2318,6 +2334,9 @@
   <data name="XslTransform.UseTrustedSettings" xml:space="preserve">
     <value>The usage of the document() method and embedded scripts is prohibited by default, due to risks of foreign code execution.  If "{0}" is a trusted source that requires those constructs, please set the "UseTrustedSettings" parameter to "true" to allow their execution.</value>
   </data>
+  <data name="XslTransform.SecuritySettingsViaUseTrustedSettings" xml:space="preserve">
+    <value>You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</value>
+  </data>
     <data name="XslTransform.PrecompiledXsltError" xml:space="preserve">
     <value>MSB3705: XslCompiledDllPath is not supported when building with .NET Core.</value>
     <comment>{StrBegin="MSB3705: "}</comment>
@@ -2762,6 +2781,14 @@
     <value>MSB3893: Could not use a link to copy "{0}" to "{1}".</value>
     <comment>{StrBegin="MSB3893: "} LOCALIZATION: {0} and {1} are paths.</comment>
   </data>
+  <data name="Copy.IOException">
+    <value>MSB3894: Got {0} copying "{1}" to "{2}" and HR is {3}</value>
+    <comment>{StrBegin="MSB3894: "} LOCALIZATION: {0} is exception.ToString(), {1} and {2} are paths, {3} is a number")</comment>
+  </data>
+  <data name="Copy.RetryingOnAccessDenied">
+    <value>MSB3895: Retrying on ERROR_ACCESS_DENIED because environment variable MSBUILDALWAYSRETRY=1</value>
+    <comment>{StrBegin="MSB3895: "} LOCALIZATION: Do NOT translate MSBUILDALWAYSRETRY)</comment>
+  </data>
 
   <!--
         MSB3901 - MSB3910   Task: Telemetry
@@ -2966,6 +2993,18 @@
   <data name="ResolveKeySource.PfxUnsupported" xml:space="preserve">
     <value>PFX signing not supported on .NET Core.</value>
   </data>
+
+  <!--
+        MSB3991 - MSB3999   Task: CombineTargetFrameworkInfoProperties
+  -->
+  <data name="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
+    <value>MSB3991: '{0}' is not set or empty. When {1} is false, make sure to set a non-empty value for '{0}'.</value>
+    <comment>{StrBegin="MSB3991: "}</comment>
+  </data>
+  <data name="CombineTargetFrameworkInfoProperties.NotNullRootElementName">
+    <value>MSB3992: '{0}' is not set. When {1} is true, make sure to set a value for '{0}'.</value>
+    <comment>{StrBegin="MSB3992: "}</comment>
+  </data>
   <!--
         The tasks message bucket is: MSB3001 - MSB3999
 
@@ -3052,6 +3091,7 @@
             MSB3961 - MSB3970   Task: GenerateLauncher
             MSB3971 - MSB3980   Task: GetReferenceAssemblyPaths overflow
             MSB3981 - MSB3990   Task: GetCompatiblePlatform
+            MSB3991 - MSB3999   Task: CombineTargetFrameworkInfoProperties
 
             MSB4000 - MSB4200   Portable targets & tasks (vsproject\flavors\portable\msbuild)
             MSB9000 - MSB9900   MSBuild targets files (C++)

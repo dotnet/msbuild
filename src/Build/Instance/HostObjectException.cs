@@ -2,13 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using Microsoft.Build.Framework.BuildException;
 
 #nullable disable
 
 namespace Microsoft.Build.Execution
 {
     [Serializable]
-    internal sealed class HostObjectException : Exception
+    internal sealed class HostObjectException : BuildExceptionBase
     {
         private const string ErrorMessagePrefix = "Error for HostObject:";
         private const string ErrorMessageProjectTargetTask = "In Project '{0}', Target '{1}', Task '{2}'.";
@@ -56,5 +57,11 @@ namespace Microsoft.Build.Execution
                 + string.Format(ErrorMessageProjectTargetTask, projectFile, targetName, taskName) + message)
         {
         }
+
+        internal HostObjectException(string message, Exception innerException)
+            : base(
+                message,
+                innerException)
+        { }
     }
 }

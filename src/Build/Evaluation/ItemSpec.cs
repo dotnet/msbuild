@@ -80,7 +80,7 @@ namespace Microsoft.Build.Evaluation
 
             public override int MatchCount(string itemToMatch)
             {
-                return ReferencedItems.Count(v => v.ItemAsValueFragment.MatchCount(itemToMatch) > 0);
+                return ReferencedItems.Count(v => v.ItemAsValueFragment.IsMatch(itemToMatch));
             }
 
             public override bool IsMatch(string itemToMatch)

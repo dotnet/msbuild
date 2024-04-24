@@ -503,6 +503,23 @@ namespace Microsoft.Build.Utilities
 #endif
         }
 
+        /// <summary>
+        /// Flatten the inner exception message
+        /// </summary>
+        /// <param name="e">Exception to flatten.</param>
+        /// <returns></returns>
+        public static string GetInnerExceptionMessageString(Exception e)
+        {
+            StringBuilder flattenedMessage = new StringBuilder(e.Message);
+            Exception excep = e;
+            while (excep.InnerException != null)
+            {
+                excep = excep.InnerException;
+                flattenedMessage.Append(" ---> ").Append(excep.Message);
+            }
+            return flattenedMessage.ToString();
+        }
+
         #endregion
 
         #region ExternalProjectStarted/Finished logging methods

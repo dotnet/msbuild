@@ -103,7 +103,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>The build results for the specified request.</returns>
         public BuildResult GetResultForRequest(BuildRequest request)
         {
-            ErrorUtilities.VerifyThrowArgument(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
+            ErrorUtilities.VerifyThrow(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
 
             lock (_resultsByConfiguration)
             {
@@ -155,7 +155,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>A response indicating the results, if any, and the targets needing to be built, if any.</returns>
         public ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss)
         {
-            ErrorUtilities.VerifyThrowArgument(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
+            ErrorUtilities.VerifyThrow(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
             ResultsCacheResponse response = new ResultsCacheResponse(ResultsCacheResponseType.NotSatisfied);
 
             lock (_resultsByConfiguration)

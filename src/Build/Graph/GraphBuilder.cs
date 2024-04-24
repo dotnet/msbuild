@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -257,7 +258,7 @@ namespace Microsoft.Build.Graph
             ProjectGraphEntryPoint solutionEntryPoint = entryPoints.Single();
             ImmutableDictionary<string, string>.Builder solutionGlobalPropertiesBuilder = ImmutableDictionary.CreateBuilder(
                 keyComparer: StringComparer.OrdinalIgnoreCase,
-                valueComparer: StringComparer.OrdinalIgnoreCase);
+                valueComparer: StringComparer.Ordinal);
 
             if (solutionEntryPoint.GlobalProperties != null)
             {
@@ -278,10 +279,26 @@ namespace Microsoft.Build.Graph
 
             IReadOnlyCollection<ProjectInSolution> projectsInSolution = GetBuildableProjects(solution);
 
+            // Mimic behavior of SolutionProjectGenerator
             SolutionConfigurationInSolution currentSolutionConfiguration = SelectSolutionConfiguration(solution, solutionEntryPoint.GlobalProperties);
+            solutionGlobalPropertiesBuilder["Configuration"] = currentSolutionConfiguration.ConfigurationName;
+            solutionGlobalPropertiesBuilder["Platform"] = currentSolutionConfiguration.PlatformName;
 
             string solutionConfigurationXml = SolutionProjectGenerator.GetSolutionConfiguration(solution, currentSolutionConfiguration);
             solutionGlobalPropertiesBuilder["CurrentSolutionConfigurationContents"] = solutionConfigurationXml;
+            solutionGlobalPropertiesBuilder["BuildingSolutionFile"] = "true";
+
+            string solutionDirectoryName = solution.SolutionFileDirectory;
+            if (!solutionDirectoryName.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
+            {
+                solutionDirectoryName += Path.DirectorySeparatorChar;
+            }
+
+            solutionGlobalPropertiesBuilder["SolutionDir"] = EscapingUtilities.Escape(solutionDirectoryName);
+            solutionGlobalPropertiesBuilder["SolutionExt"] = EscapingUtilities.Escape(Path.GetExtension(solution.FullPath));
+            solutionGlobalPropertiesBuilder["SolutionFileName"] = EscapingUtilities.Escape(Path.GetFileName(solution.FullPath));
+            solutionGlobalPropertiesBuilder["SolutionName"] = EscapingUtilities.Escape(Path.GetFileNameWithoutExtension(solution.FullPath));
+            solutionGlobalPropertiesBuilder[SolutionProjectGenerator.SolutionPathPropertyName] = EscapingUtilities.Escape(Path.Combine(solution.SolutionFileDirectory, Path.GetFileName(solution.FullPath)));
 
             // Project configurations are reused heavily, so cache the global properties for each
             Dictionary<string, ImmutableDictionary<string, string>> globalPropertiesForProjectConfiguration = new(StringComparer.OrdinalIgnoreCase);

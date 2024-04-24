@@ -66,7 +66,7 @@ namespace Microsoft.Build.Tasks
                 this.index = index;
             }
 
-            public override string ToString()
+            public override readonly string ToString()
             {
                 return string.Format(CultureInfo.InvariantCulture, "{0}.{1}.{2}.{3}:{4}",
                     this.guid, this.wMajorVerNum,

@@ -13,6 +13,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,6 +26,7 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Experimental.ProjectCache;
+using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Graph;
@@ -306,6 +308,7 @@ namespace Microsoft.Build.Execution
             _nextUnnamedProjectId = 1;
             _componentFactories = new BuildComponentFactoryCollection(this);
             _componentFactories.RegisterDefaultFactories();
+            SerializationContractInitializer.Initialize();
             _projectStartedEvents = new Dictionary<int, BuildEventArgs>();
 
             _projectStartedEventHandler = OnProjectStarted;
@@ -334,13 +337,13 @@ namespace Microsoft.Build.Execution
             Idle,
 
             /// <summary>
-            /// This is the state the BuildManager is in after <see cref="BeginBuild(BuildParameters)"/> has been called but before <see cref="EndBuild"/> has been called.
-            /// <see cref="BuildManager.PendBuildRequest(Microsoft.Build.Execution.BuildRequestData)"/>, <see cref="BuildManager.BuildRequest(Microsoft.Build.Execution.BuildRequestData)"/>, <see cref="BuildManager.PendBuildRequest(GraphBuildRequestData)"/>, <see cref="BuildManager.BuildRequest(GraphBuildRequestData)"/>, and <see cref="BuildManager.EndBuild"/> may be called in this state.
+            /// This is the state the BuildManager is in after <see cref="BeginBuild(BuildParameters)"/> has been called but before <see cref="EndBuild()"/> has been called.
+            /// <see cref="BuildManager.PendBuildRequest(Microsoft.Build.Execution.BuildRequestData)"/>, <see cref="BuildManager.BuildRequest(Microsoft.Build.Execution.BuildRequestData)"/>, <see cref="BuildManager.PendBuildRequest(GraphBuildRequestData)"/>, <see cref="BuildManager.BuildRequest(GraphBuildRequestData)"/>, and <see cref="BuildManager.EndBuild()"/> may be called in this state.
             /// </summary>
             Building,
 
             /// <summary>
-            /// This is the state the BuildManager is in after <see cref="BuildManager.EndBuild"/> has been called but before all existing submissions have completed.
+            /// This is the state the BuildManager is in after <see cref="BuildManager.EndBuild()"/> has been called but before all existing submissions have completed.
             /// </summary>
             WaitingForBuildToComplete
         }
@@ -557,6 +560,13 @@ namespace Microsoft.Build.Execution
                     _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath("msbuild-cache");
                 }
 
+#if FEATURE_REPORTFILEACCESSES
+                if (_buildParameters.ReportFileAccesses)
+                {
+                    EnableDetouredNodeLauncher();
+                }
+#endif
+
                 // Initialize components.
                 _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
 
@@ -565,11 +575,23 @@ namespace Microsoft.Build.Execution
                 // Log deferred messages and response files
                 LogDeferredMessages(loggingService, _deferredBuildMessages);
 
+                // Log known deferred telemetry
+                KnownTelemetry.LoggingConfigurationTelemetry.UpdateEventProperties();
+                loggingService.LogTelemetry(buildEventContext: null, KnownTelemetry.LoggingConfigurationTelemetry.EventName, KnownTelemetry.LoggingConfigurationTelemetry.Properties);
+
                 InitializeCaches();
+
+#if FEATURE_REPORTFILEACCESSES
+                var fileAccessManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.FileAccessManager) as IFileAccessManager;
+#endif
 
                 _projectCacheService = new ProjectCacheService(
                     this,
                     loggingService,
+#if FEATURE_REPORTFILEACCESSES
+                    fileAccessManager,
+#endif
+                    _configCache,
                     _buildParameters.ProjectCacheDescriptor);
 
                 _taskHostNodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.TaskHostNodeManager) as INodeManager;
@@ -579,7 +601,9 @@ namespace Microsoft.Build.Execution
                 _nodeManager.RegisterPacketHandler(NodePacketType.BuildRequestConfiguration, BuildRequestConfiguration.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.BuildRequestConfigurationResponse, BuildRequestConfigurationResponse.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.BuildResult, BuildResult.FactoryForDeserialization, this);
+                _nodeManager.RegisterPacketHandler(NodePacketType.FileAccessReport, FileAccessReport.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
+                _nodeManager.RegisterPacketHandler(NodePacketType.ProcessReport, ProcessReport.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.ResolveSdkRequest, SdkResolverRequest.FactoryForDeserialization, SdkResolverService as INodePacketHandler);
                 _nodeManager.RegisterPacketHandler(NodePacketType.ResourceRequest, ResourceRequest.FactoryForDeserialization, this);
 
@@ -693,6 +717,29 @@ namespace Microsoft.Build.Execution
                 }
             }
         }
+
+#if FEATURE_REPORTFILEACCESSES
+        /// <summary>
+        /// Configure the build to use I/O tracking for nodes.
+        /// </summary>
+        /// <remarks>
+        /// Must be a separate non-inlinable method to avoid loading the BuildXL assembly when not opted in.
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void EnableDetouredNodeLauncher()
+        {
+            // Currently BuildXL only supports x64. Once this feature moves out of the experimental phase, this will need to be addressed.
+            ErrorUtilities.VerifyThrowInvalidOperation(NativeMethodsShared.ProcessorArchitecture == NativeMethodsShared.ProcessorArchitectures.X64, "ReportFileAccessesX64Only");
+
+            // To properly report file access, we need to disable the in-proc node which won't be detoured.
+            _buildParameters.DisableInProcNode = true;
+
+            // Node reuse must be disabled as future builds will not be able to listen to events raised by detours.
+            _buildParameters.EnableNodeReuse = false;
+
+            _componentFactories.ReplaceFactory(BuildComponentType.NodeLauncher, DetouredNodeLauncher.CreateComponent);
+        }
+#endif
 
         private static void AttachDebugger()
         {
@@ -1559,6 +1606,16 @@ namespace Microsoft.Build.Execution
                         HandleNodeShutdown(node, shutdownPacket);
                         break;
 
+                    case NodePacketType.FileAccessReport:
+                        FileAccessReport fileAccessReport = ExpectPacketType<FileAccessReport>(packet, NodePacketType.FileAccessReport);
+                        HandleFileAccessReport(node, fileAccessReport);
+                        break;
+
+                    case NodePacketType.ProcessReport:
+                        ProcessReport processReport = ExpectPacketType<ProcessReport>(packet, NodePacketType.ProcessReport);
+                        HandleProcessReport(node, processReport);
+                        break;
+
                     default:
                         ErrorUtilities.ThrowInternalError("Unexpected packet received by BuildManager: {0}", packet.Type);
                         break;
@@ -2366,6 +2423,39 @@ namespace Microsoft.Build.Execution
                 configuration.ProjectTargets ??= result.ProjectTargets;
             }
 
+            // Only report results to the project cache services if it's the result for a build submission.
+            // Note that graph builds create a submission for each node in the graph, so each node in the graph will be
+            // handled here. This intentionally mirrors the behavior for cache requests, as it doesn't make sense to
+            // report for projects which aren't going to be requested. Ideally, *any* request could be handled, but that
+            // would require moving the cache service interactions to the Scheduler.
+            if (_buildSubmissions.TryGetValue(result.SubmissionId, out BuildSubmission buildSubmission))
+            {
+                // The result may be associated with the build submission due to it being the submission which
+                // caused the build, but not the actual request which was originally used with the build submission.
+                // ie. it may be a dependency of the "root-level" project which is associated with this submission, which
+                // isn't what we're looking for. Ensure only the actual submission's request is considered.
+                if (buildSubmission.BuildRequest != null
+                    && buildSubmission.BuildRequest.ConfigurationId == configuration.ConfigurationId
+                    && _projectCacheService.ShouldUseCache(configuration))
+                {
+                    BuildEventContext buildEventContext = _projectStartedEvents.TryGetValue(result.SubmissionId, out BuildEventArgs buildEventArgs)
+                        ? buildEventArgs.BuildEventContext
+                        : new BuildEventContext(result.SubmissionId, node, configuration.Project?.EvaluationId ?? BuildEventContext.InvalidEvaluationId, configuration.ConfigurationId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                    try
+                    {
+                        _projectCacheService.HandleBuildResultAsync(configuration, result, buildEventContext, _executionCancellationTokenSource.Token).Wait();
+                    }
+                    catch (AggregateException ex) when (ex.InnerExceptions.All(inner => inner is OperationCanceledException))
+                    {
+                        // The build is being cancelled. Swallow any exceptions related specifically to cancellation.
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // The build is being cancelled. Swallow any exceptions related specifically to cancellation.
+                    }
+                }
+            }
+
             IEnumerable<ScheduleResponse> response = _scheduler.ReportResult(node, result);
             PerformSchedulingActions(response);
         }
@@ -2433,6 +2523,36 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Report the received <paramref name="fileAccessReport"/> to the file access manager.
+        /// </summary>
+        /// <param name="nodeId">The id of the node from which the <paramref name="fileAccessReport"/> was received.</param>
+        /// <param name="fileAccessReport">The file access report.</param>
+        private void HandleFileAccessReport(int nodeId, FileAccessReport fileAccessReport)
+        {
+#if FEATURE_REPORTFILEACCESSES
+            if (_buildParameters.ReportFileAccesses)
+            {
+                ((FileAccessManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.FileAccessManager)).ReportFileAccess(fileAccessReport.FileAccessData, nodeId);
+            }
+#endif
+        }
+
+        /// <summary>
+        /// Report the received <paramref name="processReport"/> to the file access manager.
+        /// </summary>
+        /// <param name="nodeId">The id of the node from which the <paramref name="processReport"/> was received.</param>
+        /// <param name="processReport">The process data report.</param>
+        private void HandleProcessReport(int nodeId, ProcessReport processReport)
+        {
+#if FEATURE_REPORTFILEACCESSES
+            if (_buildParameters.ReportFileAccesses)
+            {
+                ((FileAccessManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.FileAccessManager)).ReportProcess(processReport.ProcessData, nodeId);
+            }
+#endif
+        }
+
+        /// <summary>
         /// If there are no more active nodes, cleans up any remaining submissions.
         /// </summary>
         /// <remarks>
@@ -2465,7 +2585,6 @@ namespace Microsoft.Build.Execution
                     // shut down.
                     submission.CompleteLogging();
 
-                    _overallBuildSuccess = _overallBuildSuccess && (submission.BuildResult.OverallResult == BuildResultCode.Success);
                     CheckSubmissionCompletenessAndRemove(submission);
                 }
 
@@ -2479,7 +2598,6 @@ namespace Microsoft.Build.Execution
 
                     submission.CompleteResults(new GraphBuildResult(submission.SubmissionId, new BuildAbortedException()));
 
-                    _overallBuildSuccess &= submission.BuildResult.OverallResult == BuildResultCode.Success;
                     CheckSubmissionCompletenessAndRemove(submission);
                 }
 
@@ -2591,8 +2709,6 @@ namespace Microsoft.Build.Execution
 
                     submission.CompleteResults(result);
 
-                    _overallBuildSuccess = _overallBuildSuccess && (_buildSubmissions[result.SubmissionId].BuildResult.OverallResult == BuildResultCode.Success);
-
                     CheckSubmissionCompletenessAndRemove(submission);
                 }
             }
@@ -2610,8 +2726,6 @@ namespace Microsoft.Build.Execution
                 {
                     submission.CompleteResults(result);
 
-                    _overallBuildSuccess &= submission.BuildResult.OverallResult == BuildResultCode.Success;
-
                     CheckSubmissionCompletenessAndRemove(submission);
                 }
             }
@@ -2627,6 +2741,7 @@ namespace Microsoft.Build.Execution
                 // If the submission has completed or never started, remove it.
                 if (submission.IsCompleted || submission.BuildRequest == null)
                 {
+                    _overallBuildSuccess &= (submission.BuildResult?.OverallResult == BuildResultCode.Success);
                     _buildSubmissions.Remove(submission.SubmissionId);
 
                     // Clear all cached SDKs for the submission
@@ -2647,6 +2762,7 @@ namespace Microsoft.Build.Execution
                 // If the submission has completed or never started, remove it.
                 if (submission.IsCompleted || !submission.IsStarted)
                 {
+                    _overallBuildSuccess &= submission.BuildResult?.OverallResult == BuildResultCode.Success;
                     _graphBuildSubmissions.Remove(submission.SubmissionId);
 
                     // Clear all cached SDKs for the submission

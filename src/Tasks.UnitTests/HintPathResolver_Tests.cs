@@ -78,6 +78,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 sdkName: "",
                 rawFileNameCandidate: "FakeSystem.Net.Http",
                 isPrimaryProjectReference: true,
+                isImmutableFrameworkReference: false,
                 wantSpecificVersion: false,
                 executableExtensions: new string[] { ".winmd", ".dll", ".exe" },
                 hintPath: hintPath,
