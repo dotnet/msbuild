@@ -28,6 +28,11 @@ internal sealed class BuildCheckConnectorLogger(
     {
         eventSource.AnyEventRaised += EventSource_AnyEventRaised;
         eventSource.BuildFinished += EventSource_BuildFinished;
+
+        if (eventSource is IEventSource4 eventSource4)
+        {
+            eventSource4.IncludeEvaluationPropertiesAndItems();
+        }
     }
 
     private void EventSource_AnyEventRaised(object sender, BuildEventArgs e)

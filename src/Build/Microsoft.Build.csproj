@@ -391,7 +391,6 @@
     <Compile Include="BackEnd\Components\Scheduler\ScheduleResponse.cs" />
     <Compile Include="BackEnd\Node\INode.cs" />
     <!-- ########################## -->
-    <Compile Include="BackEnd\TaskExecutionHost\AddInParts\ITaskExecutionHost.cs" />
     <Compile Include="BackEnd\TaskExecutionHost\TaskExecutionHost.cs" />
     <!-- #### COLLECTIONS ### -->
     <Compile Include="..\Shared\CollectionHelpers.cs" />

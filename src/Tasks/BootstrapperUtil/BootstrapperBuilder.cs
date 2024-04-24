@@ -225,7 +225,8 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     var fi = new FileInfo(de.Value);
                     using (FileStream fs = fi.OpenRead())
                     {
-                        data = new StreamReader(fs).ReadToEnd();
+                        using var sr = new StreamReader(fs);
+                        data = sr.ReadToEnd();
                     }
 
                     resourceUpdater.AddStringResource(44, de.Key, data);
@@ -835,7 +836,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     if (validate)
                     {
 #pragma warning disable 618 // Using XmlValidatingReader. TODO: We need to switch to using XmlReader.Create() with validation.
-                        var validatingReader = new XmlValidatingReader(xmlReader);
+                        using var validatingReader = new XmlValidatingReader(xmlReader);
 #pragma warning restore 618
                         var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
                         FileStream fs = File.OpenRead(schemaPath);
@@ -1657,7 +1658,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             // pre-signed anwyay; this is a fallback in case we ever encounter a bootstrapper that is
             // not signed.
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-            System.Security.Cryptography.SHA256 sha = System.Security.Cryptography.SHA256.Create(
+            using System.Security.Cryptography.SHA256 sha = System.Security.Cryptography.SHA256.Create(
 #if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
                 "System.Security.Cryptography.SHA256CryptoServiceProvider"
 #endif
@@ -2033,7 +2034,8 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     {
                         xmlwriter.Formatting = Formatting.Indented;
                         xmlwriter.Indentation = 4;
-                        xmlwriter.WriteNode(new XmlNodeReader(node), true);
+                        using var xmlReader = new XmlNodeReader(node);
+                        xmlwriter.WriteNode(xmlReader, true);
                     }
                 }
                 catch (IOException)
@@ -2194,7 +2196,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             {
                 try
                 {
-                    var cert = new X509Certificate(fileSource);
+                    using var cert = new X509Certificate(fileSource);
                     string publicKey = cert.GetPublicKeyString();
                     return publicKey;
                 }

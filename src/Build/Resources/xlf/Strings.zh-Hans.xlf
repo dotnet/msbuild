@@ -285,7 +285,7 @@
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
         <source>EvaluationContext objects created with SharingPolicy.Isolated or SharingPolicy.SharedSDKCache do not support being passed an MSBuildFileSystemBase file system.</source>
-        <target state="translated">使用 SharingPolicy.Isolated 创建的 EvaluationContext 对象。SharingPolicy.SharedSDKCache 不支持被传递 MSBuildFileSystemBase 文件系统。</target>
+        <target state="translated">使用 SharingPolicy.Isolated 或 SharingPolicy.SharedSDKCache 创建的 EvaluationContext 对象不支持被传递 MSBuildFileSystemBase 文件系统。</target>
         <note />
       </trans-unit>
       <trans-unit id="ItemReferencingSelfInTarget">
@@ -594,6 +594,11 @@ Errors: {3}</source>
       <trans-unit id="TaskAssemblyLoadedWithAssemblyLoadContext">
         <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</source>
         <target state="translated">在 {0}{1} 期间加载的程序集: {2} (位置: {3}，MVID: {4}，AssemblyLoadContext: {5})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TaskAssemblyLocationMismatch">
+        <source>Task assembly was loaded from '{0}' while the desired location was '{1}'.</source>
+        <target state="new">Task assembly was loaded from '{0}' while the desired location was '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
