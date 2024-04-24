@@ -238,7 +238,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             var xs = new XmlSerializer(t);
 
             int t1 = Environment.TickCount;
-            var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+            var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = false };
             using (XmlReader xr = XmlReader.Create(s, xrSettings))
             {
                 var m = (Manifest)xs.Deserialize(xr);

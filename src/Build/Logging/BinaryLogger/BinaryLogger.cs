@@ -121,7 +121,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public ProjectImportsCollectionMode CollectProjectImports { get; set; } = ProjectImportsCollectionMode.Embed;
 
-        private string FilePath { get; set; }
+        internal string FilePath { get; private set; }
 
         /// <summary> Gets or sets the verbosity level.</summary>
         /// <remarks>
@@ -134,6 +134,15 @@ namespace Microsoft.Build.Logging
         /// Gets or sets the parameters. The only supported parameter is the output log file path (for example, "msbuild.binlog").
         /// </summary>
         public string Parameters { get; set; }
+
+        /// <summary>
+        /// Optional expander of wildcard(s) within the LogFile path parameter of a binlog <see cref="Parameters"/>.
+        /// Wildcards can be used in the LogFile parameter in a form for curly brackets ('{}', '{[param]}').
+        /// Currently, the only supported wildcard is '{}', the optional parameters within the curly brackets
+        ///  are not currently supported, however the string parameter to the <see cref="PathParameterExpander"/> func
+        /// is reserved for this purpose.
+        /// </summary>
+        internal Func<string, string> PathParameterExpander { private get; set; } = ExpandPathParameter;
 
         /// <summary>
         /// Initializes the logger by subscribing to events of the specified event source and embedded content source.
@@ -417,15 +426,9 @@ namespace Microsoft.Build.Logging
                 {
                     omitInitialInfo = true;
                 }
-                else if (parameter.EndsWith(".binlog", StringComparison.OrdinalIgnoreCase))
+                else if (TryInterpretPathParameter(parameter, out string filePath))
                 {
-                    FilePath = parameter;
-                    if (FilePath.StartsWith("LogFile=", StringComparison.OrdinalIgnoreCase))
-                    {
-                        FilePath = FilePath.Substring("LogFile=".Length);
-                    }
-
-                    FilePath = FilePath.Trim('"');
+                    FilePath = filePath;
                 }
                 else
                 {
@@ -451,5 +454,47 @@ namespace Microsoft.Build.Logging
                 throw new LoggerException(message, e, errorCode, helpKeyword);
             }
         }
+
+        private bool TryInterpretPathParameter(string parameter, out string filePath)
+        {
+            bool hasPathPrefix = parameter.StartsWith("LogFile=", StringComparison.OrdinalIgnoreCase);
+
+            if (hasPathPrefix)
+            {
+                parameter = parameter.Substring("LogFile=".Length);
+            }
+
+            parameter = parameter.Trim('"');
+
+            bool isWildcard = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12) && parameter.Contains("{}");
+            bool hasProperExtension = parameter.EndsWith(".binlog", StringComparison.OrdinalIgnoreCase);
+            filePath = parameter;
+
+            if (!isWildcard)
+            {
+                return hasProperExtension;
+            }
+
+            filePath = parameter.Replace("{}", GetUniqueStamp(), StringComparison.Ordinal);
+
+            if (!hasProperExtension)
+            {
+                filePath += ".binlog";
+            }
+            return true;
+        }
+
+        private string GetUniqueStamp()
+            => (PathParameterExpander ?? ExpandPathParameter)(string.Empty);
+
+        private static string ExpandPathParameter(string parameters)
+            => $"{DateTime.UtcNow.ToString("yyyyMMdd-HHmmss")}--{ProcessId}--{StringUtils.GenerateRandomString(6)}";
+
+        private static int ProcessId
+#if NET
+            => Environment.ProcessId;
+#else
+            => System.Diagnostics.Process.GetCurrentProcess().Id;
+#endif
     }
 }
