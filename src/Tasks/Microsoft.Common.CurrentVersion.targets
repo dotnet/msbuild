@@ -389,7 +389,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup Condition="'$(MSBuildCopyMarkerName)' == ''">
     <MSBuildCopyMarkerName>$(MSBuildProjectFile)</MSBuildCopyMarkerName>
     <!-- For a long MSBuildProjectFile let's shorten this to 17 chars - using the first 8 chars of the filename and a filename hash. -->
-    <MSBuildCopyMarkerName Condition="'$(MSBuildCopyMarkerName.Length)' &gt; '17'">$(MSBuildProjectFile.Substring(0,8)).$([MSBuild]::StableStringHash($(MSBuildProjectFile)).ToString("X8"))</MSBuildCopyMarkerName>
+    <ShortenAndHashProjectName ProjectName="$(MSBuildCopyMarkerName)">
+      <Output TaskParameter="ShortProjectName" ItemName="MSBuildCopyMarkerName" />
+    </ShortenAndHashProjectName>
     <MSBuildCopyMarkerName>$(MSBuildCopyMarkerName).Up2Date</MSBuildCopyMarkerName>
   </PropertyGroup>
 
@@ -5579,7 +5581,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         File="$(IntermediateOutputPath)$(CleanFile)"
         Lines="@(_CleanUniqueRemainingFileWritesAfterIncrementalClean)"
         Condition="'@(_CleanUnfilteredPriorFileWrites)'!='@(_CleanUniqueRemainingFileWritesAfterIncrementalClean)'"
-        Encoding="Unicode"
         Overwrite="true"/>
 
   </Target>
