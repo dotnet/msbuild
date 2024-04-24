@@ -1,8 +1,7 @@
----
-title: Threat model of MSBuild BuildCheck feature
----
 
-# BuildCheck Feature Description
+# Threat model of MSBuild BuildCheck feature
+
+## BuildCheck Feature Description
 
 The infrastructure within MSBuild allowing pluggability and execution of
 Analyzers and their Rules previously known as "warning waves" and
@@ -12,6 +11,7 @@ The feature is meant to help customers to improve and understand quality of thei
 
 [Design
 Spec](https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck.md)
+
 [Architecture](https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md)
 
 # Threats Identification
