@@ -33,7 +33,12 @@ internal sealed class BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> tr
         IsAggregatedGlobalReport = isAggregatedGlobalReport;
     }
 
+    /// <summary>
+    /// When true, the tracing information is from the whole build for logging purposes
+    /// When false, the tracing is being used for communication between nodes and central process
+    /// </summary>
     public bool IsAggregatedGlobalReport { get; private set; } = false;
+
     public Dictionary<string, TimeSpan> TracingData { get; private set; } = tracingData;
 
     internal override void WriteToStream(BinaryWriter writer)
