@@ -172,8 +172,11 @@ public class EndToEndTests : IDisposable
             string candidateAnalysisBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
                  $"{candidateAnalysisProjectPath} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path}", out bool success);
 
-            var candidatesNugetPackageFullPath = Regex.Match(candidateAnalysisBuildLog, @"Successfully created package '(.*?)'").Groups[1].Value;
-            candidatesNugetFullPaths.Add(candidatesNugetPackageFullPath);
+            if (success)
+            {
+                var candidatesNugetPackageFullPath = Regex.Match(candidateAnalysisBuildLog, @"Successfully created package '(.*?)'").Groups[1].Value;
+                candidatesNugetFullPaths.Add(candidatesNugetPackageFullPath);
+            }
         }
 
         return candidatesNugetFullPaths;
@@ -185,9 +188,8 @@ public class EndToEndTests : IDisposable
 
         var doc = new XmlDocument();
         doc.Load(nugetTemplatePath);
-
         XmlNode packageSourcesNode = doc.SelectSingleNode("//packageSources");
-        for (var i = 0; i < candidatesNugetPackageFullPaths.Count; i++)
+        for (int i = 0; i < candidatesNugetPackageFullPaths.Count; i++)
         {
             AddPackageSource(doc, packageSourcesNode, $"Key{i}", Path.GetDirectoryName(candidatesNugetPackageFullPaths[i]));
         }
@@ -195,18 +197,20 @@ public class EndToEndTests : IDisposable
         doc.Save(Path.Combine(analysisCandidatePath, "nuget.config"));
     }
 
-    private static void AddPackageSource(XmlDocument doc, XmlNode packageSourcesNode, string key, string value)
+    private void AddPackageSource(XmlDocument doc, XmlNode packageSourcesNode, string key, string value)
     {
-        var addNode = doc.CreateElement("add");
+        XmlElement addNode = doc.CreateElement("add");
 
-        var keyAttribute = doc.CreateAttribute("key");
-        keyAttribute.Value = key;
-        addNode.Attributes.Append(keyAttribute);
+        PopulateXmlAttribute(doc, addNode, "key", key);
+        PopulateXmlAttribute(doc, addNode, "value", value);
 
-        var valueAttribute = doc.CreateAttribute("value");
-        valueAttribute.Value = value;
-        addNode.Attributes.Append(valueAttribute);
+        _ = packageSourcesNode.AppendChild(addNode);
+    }
 
-        packageSourcesNode.AppendChild(addNode);
+    private void PopulateXmlAttribute(XmlDocument doc, XmlNode node, string attributeName, string attributeValue)
+    {
+        var attribute = doc.CreateAttribute(attributeName);
+        attribute.Value = attributeValue;
+        node.Attributes.Append(attribute);
     }
 }
