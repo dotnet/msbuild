@@ -49,10 +49,13 @@ internal sealed class BuildCheckConnectorLogger : ILogger
     {
     }
 
-    }
-
     private void HandleProjectEvaluationFinishedEvent(ProjectEvaluationFinishedEventArgs eventArgs)
     {
+        if (isRestore)
+        {
+            return;
+        }
+
         if (!IsMetaProjFile(eventArgs.ProjectFile))
         {
             _buildCheckManager.ProcessEvaluationFinishedEventArgs(
@@ -65,9 +68,27 @@ internal sealed class BuildCheckConnectorLogger : ILogger
 
     private void HandleProjectEvaluationStartedEvent(ProjectEvaluationStartedEventArgs eventArgs)
     {
+        if (eventArgs.IsRestore)
+        {
+            isRestore = true;
+            return;
+        }
+
         if (!IsMetaProjFile(eventArgs.ProjectFile))
         {
             _buildCheckManager.StartProjectEvaluation(BuildCheckDataSource.EventArgs, eventArgs.BuildEventContext!, eventArgs.ProjectFile!);
+        }
+    }
+
+    private void HandleProjectFinishedEvent(ProjectFinishedEventArgs projectFinishedEventArgs)
+    {
+        if (isRestore)
+        {
+            isRestore = false;
+        }
+        else
+        {
+            _buildCheckManager.EndProjectRequest(BuildCheckDataSource.EventArgs, projectFinishedEventArgs.BuildEventContext!);
         }
     }
 
@@ -105,8 +126,15 @@ internal sealed class BuildCheckConnectorLogger : ILogger
     {
         { typeof(ProjectEvaluationFinishedEventArgs), (BuildEventArgs e) => HandleProjectEvaluationFinishedEvent((ProjectEvaluationFinishedEventArgs) e) },
         { typeof(ProjectEvaluationStartedEventArgs), (BuildEventArgs e) => HandleProjectEvaluationStartedEvent((ProjectEvaluationStartedEventArgs) e) },
-        { typeof(ProjectStartedEventArgs), (BuildEventArgs e) => _buildCheckManager.StartProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!) },
-        { typeof(ProjectFinishedEventArgs), (BuildEventArgs e) => _buildCheckManager.EndProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!) },
+        { typeof(ProjectStartedEventArgs), (BuildEventArgs e) => 
+            {
+              if (!isRestore)
+              {
+                _buildCheckManager.StartProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!);
+              }
+            }
+        },
+        { typeof(ProjectFinishedEventArgs), (BuildEventArgs e) => HandleProjectFinishedEvent((ProjectFinishedEventArgs) e) },
         { typeof(BuildCheckTracingEventArgs), (BuildEventArgs e) => _stats.Merge(((BuildCheckTracingEventArgs)e).TracingData, (span1, span2) => span1 + span2) },
         { typeof(BuildCheckAcquisitionEventArgs), (BuildEventArgs e) => _buildCheckManager.ProcessAnalyzerAcquisition(((BuildCheckAcquisitionEventArgs)e).ToAnalyzerAcquisitionData(), e.BuildEventContext!) },
     };

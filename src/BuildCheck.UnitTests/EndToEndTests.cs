@@ -39,7 +39,7 @@ public class EndToEndTests : IDisposable
         _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", buildInOutOfProcessNode ? "1" : "0");
         _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore" +
+            $"{Path.GetFileName(projectFile.Path)} /m:1 /p:BuildProjectReferences=false -nr:False -restore" +
             (analysisRequested ? " -analyze" : string.Empty), out bool success, false, _env.Output);
         _env.Output.WriteLine(output);
         success.ShouldBeTrue();
