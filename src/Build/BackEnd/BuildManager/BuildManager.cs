@@ -1461,7 +1461,7 @@ namespace Microsoft.Build.Execution
             {
                 buildEventContext = new BuildEventContext(request.SubmissionId, 0, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
             }
-
+            
             var instances = ProjectInstance.LoadSolutionForBuild(
                 config.ProjectFullPath,
                 config.GlobalProperties,

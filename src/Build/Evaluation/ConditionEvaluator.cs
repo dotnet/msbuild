@@ -186,11 +186,9 @@ namespace Microsoft.Build.Evaluation
             ExpanderOptions expanderOptions,
             string evaluationDirectory,
             ElementLocation elementLocation,
-            ILoggingService loggingServices,
-            BuildEventContext buildEventContext,
             IFileSystem fileSystem,
-            ProjectRootElementCacheBase? projectRootElementCache = null,
-            LoggingContext? loggingContext = null)
+            LoggingContext? loggingContext,
+            ProjectRootElementCacheBase? projectRootElementCache = null)
             where P : class, IProperty
             where I : class, IItem
         {
@@ -202,11 +200,9 @@ namespace Microsoft.Build.Evaluation
                 conditionedPropertiesTable: null /* do not collect conditioned properties */,
                 evaluationDirectory,
                 elementLocation,
-                loggingServices,
-                buildEventContext,
                 fileSystem,
-                projectRootElementCache,
-                loggingContext);
+                loggingContext,
+                projectRootElementCache);
         }
 
         /// <summary>
@@ -224,18 +220,15 @@ namespace Microsoft.Build.Evaluation
             Dictionary<string, List<string>>? conditionedPropertiesTable,
             string evaluationDirectory,
             ElementLocation elementLocation,
-            ILoggingService loggingServices,
-            BuildEventContext buildEventContext,
             IFileSystem fileSystem,
-            ProjectRootElementCacheBase? projectRootElementCache = null,
-            LoggingContext? loggingContext = null)
+            LoggingContext? loggingContext,
+            ProjectRootElementCacheBase? projectRootElementCache = null)
             where P : class, IProperty
             where I : class, IItem
         {
             ErrorUtilities.VerifyThrowArgumentNull(condition, nameof(condition));
             ErrorUtilities.VerifyThrowArgumentNull(expander, nameof(expander));
             ErrorUtilities.VerifyThrowArgumentLength(evaluationDirectory, nameof(evaluationDirectory));
-            ErrorUtilities.VerifyThrowArgumentNull(buildEventContext, nameof(buildEventContext));
 
             // An empty condition is equivalent to a "true" condition.
             if (condition.Length == 0)
@@ -263,8 +256,8 @@ namespace Microsoft.Build.Evaluation
                 var conditionParser = new Parser();
 
                 #region REMOVE_COMPAT_WARNING
-                conditionParser.LoggingServices = loggingServices;
-                conditionParser.LogBuildEventContext = buildEventContext;
+                conditionParser.LoggingServices = loggingContext?.LoggingService;
+                conditionParser.LogBuildEventContext = loggingContext?.BuildEventContext ?? BuildEventContext.Invalid;
                 #endregion
 
                 parsedExpression = conditionParser.Parse(condition, options, elementLocation);

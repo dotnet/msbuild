@@ -311,9 +311,9 @@ namespace Microsoft.Build.BackEnd
 #endif
                         taskHost.IsOutOfProc, _cancellationToken);
                 }
-
+                
                 List<string> taskParameterValues = CreateListOfParameterValues();
-                buckets = BatchingEngine.PrepareBatchingBuckets(taskParameterValues, lookup, _targetChildInstance.Location);
+                buckets = BatchingEngine.PrepareBatchingBuckets(taskParameterValues, lookup, _targetChildInstance.Location, _targetLoggingContext);
 
                 Dictionary<string, string> lookupHash = null;
 
@@ -379,8 +379,6 @@ namespace Microsoft.Build.BackEnd
                 ExpanderOptions.ExpandAll,
                 _buildRequestEntry.ProjectRootDirectory,
                 _targetChildInstance.ConditionLocation,
-                _targetLoggingContext.LoggingService,
-                _targetLoggingContext.BuildEventContext,
                 FileSystems.Default,
                 loggingContext: _targetLoggingContext);
 
@@ -1080,9 +1078,8 @@ namespace Microsoft.Build.BackEnd
                     ExpanderOptions.ExpandAll,
                     _buildRequestEntry.ProjectRootDirectory,
                     taskOutputSpecification.ConditionLocation,
-                    _targetLoggingContext.LoggingService,
-                    _targetLoggingContext.BuildEventContext,
-                    FileSystems.Default);
+                    FileSystems.Default,
+                    _targetLoggingContext);
 
                 if (condition)
                 {

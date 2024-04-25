@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Components.Logging;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -147,7 +148,7 @@ namespace Microsoft.Build.Evaluation
         public IItemDictionary<I> Items => _wrapped.Items;
         public List<ProjectItemElement> EvaluatedItemElements => _wrapped.EvaluatedItemElements;
         public PropertyDictionary<ProjectPropertyInstance> EnvironmentVariablePropertiesDictionary => _wrapped.EnvironmentVariablePropertiesDictionary;
-        public void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext) => _wrapped.InitializeForEvaluation(toolsetProvider, evaluationContext);
+        public void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext, LoggingContext loggingContext) => _wrapped.InitializeForEvaluation(toolsetProvider, evaluationContext, loggingContext);
         public void FinishEvaluation() => _wrapped.FinishEvaluation();
         public void AddItem(I item) => _wrapped.AddItem(item);
         public void AddItemIgnoringCondition(I item) => _wrapped.AddItemIgnoringCondition(item);

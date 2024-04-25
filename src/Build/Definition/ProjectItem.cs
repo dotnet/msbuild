@@ -497,6 +497,11 @@ namespace Microsoft.Build.Evaluation
 
                 if (metadatum != null && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
                 {
+                    // this.Project.LoggingService
+                    // this.Project.FullPath
+
+                    Debugger.Launch();
+
                     Expander<ProjectProperty, ProjectItem> expander = new Expander<ProjectProperty, ProjectItem>(null, null, new BuiltInMetadataTable(this), FileSystems.Default);
 
                     value = expander.ExpandIntoStringLeaveEscaped(metadatum.EvaluatedValueEscaped, ExpanderOptions.ExpandBuiltInMetadata, metadatum.Location);

@@ -241,7 +241,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 )
                 {
                     throw new BuildCheckConfigurationException(
-                        $"The analyzer '{analyzer.FriendlyName}' exposes rules '{analyzer.SupportedRules.Select(r => r.Id).ToCsvString()}', but different rules were declared during registration: '{analyzerFactoryContext.RuleIds.ToCsvString()}'");
+                        $"The analyzer '{analyzer.FriendlyName}' exposes rules '{analyzer.SupportedRules.Select(r => r.Id).ToCsvString()}', but different rules were declared during registration: '{analyzerFactoryContext.RuleIds.ToCsvString()}'. Check the '[MSBuild]::RegisterAnalyzer' intrinsic function call in the analyzer package .props file.");
                 }
 
                 configurations = ConfigurationProvider.GetMergedConfigurations(userConfigs, analyzer);

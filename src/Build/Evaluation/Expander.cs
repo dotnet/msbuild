@@ -326,31 +326,44 @@ namespace Microsoft.Build.Evaluation
         /// Creates an expander passing it some properties to use.
         /// Properties may be null.
         /// </summary>
-        internal Expander(IPropertyProvider<P> properties, IFileSystem fileSystem)
+        internal Expander(IPropertyProvider<P> properties, IFileSystem fileSystem, LoggingContext loggingContext)
         {
             _properties = properties;
             _propertiesUsageTracker = new PropertiesUsageTracker();
             _fileSystem = fileSystem;
+            _loggingContext = loggingContext;
         }
+
+        /// <summary>
+        /// Creates an expander passing it some properties to use.
+        /// Properties may be null.
+        ///
+        /// Used for tests and for ToolsetReader - that operates agnostic on the project
+        ///   - so no logging context is passed, and no BuildCheck analysis will be executed.
+        /// </summary>
+        internal Expander(IPropertyProvider<P> properties, IFileSystem fileSystem)
+        : this(properties, fileSystem, null)
+        { }
 
         /// <summary>
         /// Creates an expander passing it some properties to use and the evaluation context.
         /// Properties may be null.
         /// </summary>
-        internal Expander(IPropertyProvider<P> properties, EvaluationContext evaluationContext)
+        internal Expander(IPropertyProvider<P> properties, EvaluationContext evaluationContext, LoggingContext loggingContext)
         {
             _properties = properties;
             _propertiesUsageTracker = new PropertiesUsageTracker();
             _fileSystem = evaluationContext.FileSystem;
             EvaluationContext = evaluationContext;
+            _loggingContext = loggingContext;
         }
 
         /// <summary>
         /// Creates an expander passing it some properties and items to use.
         /// Either or both may be null.
         /// </summary>
-        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IFileSystem fileSystem)
-            : this(properties, fileSystem)
+        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IFileSystem fileSystem, LoggingContext loggingContext)
+            : this(properties, fileSystem, loggingContext)
         {
             _items = items;
         }
@@ -360,8 +373,8 @@ namespace Microsoft.Build.Evaluation
         /// Creates an expander passing it some properties and items to use, and the evaluation context.
         /// Either or both may be null.
         /// </summary>
-        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, EvaluationContext evaluationContext)
-            : this(properties, evaluationContext)
+        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, EvaluationContext evaluationContext, LoggingContext loggingContext)
+            : this(properties, evaluationContext, loggingContext)
         {
             _items = items;
         }
@@ -385,8 +398,23 @@ namespace Microsoft.Build.Evaluation
         /// Creates an expander passing it some properties, items, and/or metadata to use.
         /// Any or all may be null.
         /// </summary>
+        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IMetadataTable metadata, IFileSystem fileSystem, LoggingContext loggingContext)
+            : this(properties, items, fileSystem, loggingContext)
+        {
+            _metadata = metadata;
+        }
+
+        /// <summary>
+        /// Creates an expander passing it some properties, items, and/or metadata to use.
+        /// Any or all may be null.
+        ///
+        /// This is for the purpose of evaluations through API calls, that might not be able to pass the logging context
+        ///  - BuildCheck analysis won't be executed for those.
+        /// (for one of the calls we can actually pass IDataConsumingContext - as we have logging service and project)
+        /// 
+        /// </summary>
         internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IMetadataTable metadata, IFileSystem fileSystem)
-            : this(properties, items, fileSystem)
+            : this(properties, items, fileSystem, null)
         {
             _metadata = metadata;
         }
@@ -2303,14 +2331,6 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns the number of items in the list.
-                /// </summary>
-                internal static IEnumerable<KeyValuePair<string, S>> Count(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
-                {
-                    yield return new KeyValuePair<string, S>(Convert.ToString(itemsOfType.Count(), CultureInfo.InvariantCulture), null /* no base item */);
-                }
-
-                /// <summary>
                 /// Intrinsic function that returns the specified built-in modifer value of the items in itemsOfType
                 /// Tuple is {current item include, item under transformation}.
                 /// </summary>
@@ -3014,43 +3034,6 @@ namespace Microsoft.Build.Evaluation
                     _itemSpec = itemSpec;
                     _sourceOfMetadata = sourceOfMetadata;
                     _elementLocation = elementLocation;
-                }
-
-                /// <summary>
-                /// Expands the metadata in the match provided into a string result.
-                /// The match is expected to be the content of a transform.
-                /// For example, representing "%(Filename.obj)" in the original expression "@(Compile->'%(Filename.obj)')".
-                /// </summary>
-                internal string GetMetadataValueFromMatch(Match match)
-                {
-                    string name = match.Groups[RegularExpressions.NameGroup].Value;
-
-                    ProjectErrorUtilities.VerifyThrowInvalidProject(match.Groups[RegularExpressions.ItemSpecificationGroup].Length == 0, _elementLocation, "QualifiedMetadataInTransformNotAllowed", match.Value, name);
-
-                    string value = null;
-                    try
-                    {
-                        if (FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(name))
-                        {
-                            // If we're not a ProjectItem or ProjectItemInstance, then ProjectDirectory will be null.
-                            // In that case, we're safe to get the current directory as we'll be running on TaskItems which
-                            // only exist within a target where we can trust the current directory
-                            string directoryToUse = _sourceOfMetadata.ProjectDirectory ?? Directory.GetCurrentDirectory();
-                            string definingProjectEscaped = _sourceOfMetadata.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
-
-                            value = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(directoryToUse, _itemSpec, definingProjectEscaped, name);
-                        }
-                        else
-                        {
-                            value = _sourceOfMetadata.GetMetadataValueEscaped(name);
-                        }
-                    }
-                    catch (InvalidOperationException ex)
-                    {
-                        ProjectErrorUtilities.ThrowInvalidProject(_elementLocation, "CannotEvaluateItemMetadata", name, ex.Message);
-                    }
-
-                    return value;
                 }
             }
         }
@@ -5497,6 +5480,11 @@ namespace Microsoft.Build.Evaluation
 
             // TODO: This might get executed even before the logging service and BuildComponentCollections
             //  are initialized (for the toolset initialization)
+
+            if (BuildCheckManagerProvider.GlobalBuildEngineDataConsumer is not null && loggingContext is null)
+            {
+                Debugger.Launch();
+            }
 
             // We are collecting the read data here - instead of in the PropertyTrackingEvaluatorDataWrapper
             //  because that one is used only during evaluation, however already not from within Targets

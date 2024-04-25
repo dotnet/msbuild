@@ -220,6 +220,8 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowInternalNull(loggingService, nameof(loggingService));
             ErrorUtilities.VerifyThrowInternalNull(buildEventContext, nameof(buildEventContext));
 
+            // Debugger.Launch();
+
             _evaluationLoggingContext = new EvaluationLoggingContext(
                 loggingService,
                 buildEventContext,
@@ -238,7 +240,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             // Create containers for the evaluation results
-            data.InitializeForEvaluation(toolsetProvider, _evaluationContext);
+            data.InitializeForEvaluation(toolsetProvider, _evaluationContext, _evaluationLoggingContext);
 
             _expander = new Expander<P, I>(data, data, _evaluationContext, _evaluationLoggingContext);
 
@@ -711,8 +713,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     // Evaluate the usingtask and add the result into the data passed in
                     TaskRegistry.InitializeTaskRegistryFromUsingTaskElements<P, I>(
-                        _evaluationLoggingContext.LoggingService,
-                        _evaluationLoggingContext.BuildEventContext,
+                        _evaluationLoggingContext,
                         _usingTaskElements.Select(p => (p.Value, p.Key)),
                         _data.TaskRegistry,
                         _expander,
@@ -2390,8 +2391,6 @@ namespace Microsoft.Build.Evaluation
                     expanderOptions,
                     GetCurrentDirectoryForConditionEvaluation(element),
                     element.ConditionLocation,
-                    _evaluationLoggingContext.LoggingService,
-                    _evaluationLoggingContext.BuildEventContext,
                     _evaluationContext.FileSystem,
                     loggingContext: _evaluationLoggingContext);
 
@@ -2429,9 +2428,8 @@ namespace Microsoft.Build.Evaluation
                     _data.ConditionedProperties,
                     GetCurrentDirectoryForConditionEvaluation(element),
                     element.ConditionLocation,
-                    _evaluationLoggingContext.LoggingService,
-                    _evaluationLoggingContext.BuildEventContext,
                     _evaluationContext.FileSystem,
+                    _evaluationLoggingContext,
                     projectRootElementCache);
 
                 return result;

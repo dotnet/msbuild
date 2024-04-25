@@ -1296,11 +1296,13 @@ namespace Microsoft.Build.Execution
                         return metadatum.EvaluatedValueEscaped;
                     }
                 }
-
+                
                 metadatum = GetItemDefinitionMetadata(metadataName);
 
                 if (metadatum != null && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
                 {
+                    Debugger.Launch();
+
                     Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(null, null, new BuiltInMetadataTable(null, this), FileSystems.Default);
 
                     // We don't have a location to use, but this is very unlikely to error

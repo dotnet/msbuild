@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
@@ -249,8 +250,7 @@ namespace Microsoft.Build.Execution
         /// <typeparam name="P">A type derived from IProperty</typeparam>
         /// <typeparam name="I">A type derived from IItem</typeparam>
         internal static void InitializeTaskRegistryFromUsingTaskElements<P, I>(
-            ILoggingService loggingService,
-            BuildEventContext buildEventContext,
+            LoggingContext loggingContext,
             IEnumerable<(ProjectUsingTaskElement projectUsingTaskXml, string directoryOfImportingFile)> registrations,
             TaskRegistry taskRegistry,
             Expander<P, I> expander,
@@ -262,8 +262,7 @@ namespace Microsoft.Build.Execution
             foreach ((ProjectUsingTaskElement projectUsingTaskXml, string directoryOfImportingFile) registration in registrations)
             {
                 RegisterTasksFromUsingTaskElement(
-                    loggingService,
-                    buildEventContext,
+                    loggingContext,
                     registration.directoryOfImportingFile,
                     registration.projectUsingTaskXml,
                     taskRegistry,
@@ -284,8 +283,7 @@ namespace Microsoft.Build.Execution
         /// <typeparam name="I">A type derived from IItem</typeparam>
         private static void RegisterTasksFromUsingTaskElement
             <P, I>(
-            ILoggingService loggingService,
-            BuildEventContext buildEventContext,
+            LoggingContext loggingContext,
             string directoryOfImportingFile,
             ProjectUsingTaskElement projectUsingTaskXml,
             TaskRegistry taskRegistry,
@@ -307,9 +305,8 @@ namespace Microsoft.Build.Execution
                     expanderOptions,
                     projectUsingTaskXml.ContainingProject.DirectoryPath,
                     projectUsingTaskXml.ConditionLocation,
-                    loggingService,
-                    buildEventContext,
-                    fileSystem))
+                    fileSystem,
+                    loggingContext))
             {
                 return;
             }
@@ -444,7 +441,7 @@ namespace Microsoft.Build.Execution
                 taskFactoryParameters.Add(XMakeAttributes.architecture, architecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : architecture);
             }
 
-            taskRegistry.RegisterTask(taskName, AssemblyLoadInfo.Create(assemblyName, assemblyFile), taskFactory, taskFactoryParameters, parameterGroupAndTaskElementRecord, loggingService, buildEventContext, projectUsingTaskXml, ConversionUtilities.ValidBooleanTrue(overrideUsingTask));
+            taskRegistry.RegisterTask(taskName, AssemblyLoadInfo.Create(assemblyName, assemblyFile), taskFactory, taskFactoryParameters, parameterGroupAndTaskElementRecord, loggingContext, projectUsingTaskXml, ConversionUtilities.ValidBooleanTrue(overrideUsingTask));
         }
 
         private static Dictionary<string, string> CreateTaskFactoryParametersDictionary(int? initialCount = null)
@@ -547,7 +544,7 @@ namespace Microsoft.Build.Execution
             // Try the override task registry first
             if (_toolset != null)
             {
-                TaskRegistry toolsetRegistry = _toolset.GetOverrideTaskRegistry(targetLoggingContext.LoggingService, targetLoggingContext.BuildEventContext, RootElementCache);
+                TaskRegistry toolsetRegistry = _toolset.GetOverrideTaskRegistry(targetLoggingContext, RootElementCache);
                 taskRecord = toolsetRegistry.GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache);
             }
 
@@ -606,7 +603,7 @@ namespace Microsoft.Build.Execution
             // If we didn't find the task but we have a fallback registry in the toolset state, try that one.
             if (taskRecord == null && _toolset != null)
             {
-                TaskRegistry toolsetRegistry = _toolset.GetTaskRegistry(targetLoggingContext.LoggingService, targetLoggingContext.BuildEventContext, RootElementCache);
+                TaskRegistry toolsetRegistry = _toolset.GetTaskRegistry(targetLoggingContext, RootElementCache);
                 taskRecord = toolsetRegistry.GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache);
             }
 
@@ -687,8 +684,7 @@ namespace Microsoft.Build.Execution
             string taskFactory,
             Dictionary<string, string> taskFactoryParameters,
             RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord,
-            ILoggingService loggingService,
-            BuildEventContext context,
+            LoggingContext loggingContext,
             ProjectUsingTaskElement projectUsingTaskInXml,
             bool overrideTask = false)
         {
@@ -733,7 +729,7 @@ namespace Microsoft.Build.Execution
                     {
                         if (rec.RegisteredName.Equals(taskIdentity.Name, StringComparison.OrdinalIgnoreCase))
                         {
-                            loggingService.LogError(context, null, new BuildEventFileInfo(projectUsingTaskInXml.OverrideLocation), "DuplicateOverrideUsingTaskElement", taskName);
+                            loggingContext.LogError(new BuildEventFileInfo(projectUsingTaskInXml.OverrideLocation), "DuplicateOverrideUsingTaskElement", taskName);
                             break;
                         }
                     }
@@ -745,7 +741,7 @@ namespace Microsoft.Build.Execution
                     List<RegisteredTaskRecord> unqualifiedTaskNameMatches = new();
                     unqualifiedTaskNameMatches.Add(newRecord);
                     _overriddenTasks.Add(unqualifiedTaskName, unqualifiedTaskNameMatches);
-                    loggingService.LogComment(context, MessageImportance.Low, "OverrideUsingTaskElementCreated", taskName, projectUsingTaskInXml.OverrideLocation);
+                    loggingContext.LogComment(MessageImportance.Low, "OverrideUsingTaskElementCreated", taskName, projectUsingTaskInXml.OverrideLocation);
                 }
             }
 

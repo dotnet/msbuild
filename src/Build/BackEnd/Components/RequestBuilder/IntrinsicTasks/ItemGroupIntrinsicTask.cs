@@ -58,7 +58,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     List<string> parameterValues = new List<string>();
                     GetBatchableValuesFromBuildItemGroupChild(parameterValues, child);
-                    buckets = BatchingEngine.PrepareBatchingBuckets(parameterValues, lookup, child.ItemType, _taskInstance.Location);
+                    buckets = BatchingEngine.PrepareBatchingBuckets(parameterValues, lookup, child.ItemType, _taskInstance.Location, LoggingContext);
 
                     // "Execute" each bucket
                     foreach (ItemBucket bucket in buckets)
@@ -70,9 +70,8 @@ namespace Microsoft.Build.BackEnd
                             ExpanderOptions.ExpandAll,
                             Project.Directory,
                             child.ConditionLocation,
-                            LoggingContext.LoggingService,
-                            LoggingContext.BuildEventContext,
-                            FileSystems.Default);
+                            FileSystems.Default,
+                            LoggingContext);
 
                         if (condition)
                         {
@@ -177,8 +176,6 @@ namespace Microsoft.Build.BackEnd
                     ExpanderOptions.ExpandAll,
                     Project.Directory,
                     metadataInstance.Location,
-                    LoggingContext.LoggingService,
-                    LoggingContext.BuildEventContext,
                     FileSystems.Default,
                     loggingContext: loggingContext);
 
@@ -216,9 +213,8 @@ namespace Microsoft.Build.BackEnd
                 ExpanderOptions.ExpandAll,
                 Project.Directory,
                 child.KeepDuplicatesLocation,
-                LoggingContext.LoggingService,
-                LoggingContext.BuildEventContext,
-                FileSystems.Default);
+                FileSystems.Default,
+                LoggingContext);
 
             if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && itemsToAdd?.Count > 0)
             {
@@ -325,8 +321,6 @@ namespace Microsoft.Build.BackEnd
                     ExpanderOptions.ExpandAll,
                     Project.Directory,
                     metadataInstance.ConditionLocation,
-                    LoggingContext.LoggingService,
-                    LoggingContext.BuildEventContext,
                     FileSystems.Default,
                     loggingContext: loggingContext);
 

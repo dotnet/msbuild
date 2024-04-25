@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -80,9 +81,10 @@ namespace Microsoft.Build.BackEnd
         internal static List<ItemBucket> PrepareBatchingBuckets(
             List<string> batchableObjectParameters,
             Lookup lookup,
-            ElementLocation elementLocation)
+            ElementLocation elementLocation,
+            LoggingContext loggingContext)
         {
-            return PrepareBatchingBuckets(batchableObjectParameters, lookup, null, elementLocation);
+            return PrepareBatchingBuckets(batchableObjectParameters, lookup, null, elementLocation, loggingContext);
         }
 
         /// <summary>
@@ -94,12 +96,14 @@ namespace Microsoft.Build.BackEnd
         /// <param name="lookup"></param>
         /// <param name="implicitBatchableItemType">Any item type that can be considered an implicit input to this batchable object.
         /// This is useful for items inside targets, where the item name is plainly an item type that's an "input" to the object.</param>
+        /// <param name="loggingContext"></param>
         /// <returns>List containing ItemBucket objects, each one representing an execution batch.</returns>
         internal static List<ItemBucket> PrepareBatchingBuckets(
             List<string> batchableObjectParameters,
             Lookup lookup,
             string implicitBatchableItemType,
-            ElementLocation elementLocation)
+            ElementLocation elementLocation,
+            LoggingContext loggingContext)
         {
             if (batchableObjectParameters == null)
             {
@@ -160,7 +164,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // If the batchable object consumes item metadata as well as items to be batched,
                     // we need to partition the items consumed by the object.
-                    buckets = BucketConsumedItems(lookup, itemListsToBeBatched, consumedMetadataReferences, elementLocation);
+                    buckets = BucketConsumedItems(lookup, itemListsToBeBatched, consumedMetadataReferences, elementLocation, loggingContext);
                 }
             }
 
@@ -170,7 +174,7 @@ namespace Microsoft.Build.BackEnd
             {
                 // create a default bucket that references the project items and properties -- this way we always have a bucket
                 buckets = new List<ItemBucket>(1);
-                buckets.Add(new ItemBucket(null, null, lookup, buckets.Count));
+                buckets.Add(new ItemBucket(null, null, lookup, loggingContext, buckets.Count));
             }
 
             return buckets;
@@ -292,7 +296,8 @@ namespace Microsoft.Build.BackEnd
             Lookup lookup,
             Dictionary<string, ICollection<ProjectItemInstance>> itemListsToBeBatched,
             Dictionary<string, MetadataReference> consumedMetadataReferences,
-            ElementLocation elementLocation)
+            ElementLocation elementLocation,
+            LoggingContext loggingContext)
         {
             ErrorUtilities.VerifyThrow(itemListsToBeBatched.Count > 0, "Need item types consumed by the batchable object.");
             ErrorUtilities.VerifyThrow(consumedMetadataReferences.Count > 0, "Need item metadata consumed by the batchable object.");
@@ -329,7 +334,7 @@ namespace Microsoft.Build.BackEnd
                         // this item to the bucket.
                         if (matchingBucket == null)
                         {
-                            matchingBucket = new ItemBucket(itemListsToBeBatched.Keys, itemMetadataValues, lookup, buckets.Count);
+                            matchingBucket = new ItemBucket(itemListsToBeBatched.Keys, itemMetadataValues, lookup, loggingContext, buckets.Count);
 
                             // make sure to put the new bucket into the appropriate location
                             // in the sorted list as indicated by the binary search
