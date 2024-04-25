@@ -163,7 +163,7 @@ namespace Microsoft.Build.Evaluation
         private readonly ProjectRootElementCacheBase _projectRootElementCache;
 
         /// <summary>
-        /// The logging context to be used and piped down throughout evaluation
+        /// The logging context to be used and piped down throughout evaluation.
         /// </summary>
         private EvaluationLoggingContext _evaluationLoggingContext;
 
@@ -242,7 +242,7 @@ namespace Microsoft.Build.Evaluation
             // Create containers for the evaluation results
             data.InitializeForEvaluation(toolsetProvider, _evaluationContext);
 
-            _expander = new Expander<P, I>(data, data, _evaluationContext);
+            _expander = new Expander<P, I>(data, data, _evaluationContext, _evaluationLoggingContext);
 
             // This setting may change after the build has started, therefore if the user has not set the property to true on the build parameters we need to check to see if it is set to true on the environment variable.
             _expander.WarnForUninitializedProperties = BuildParameters.WarnOnUninitializedProperty || Traits.Instance.EscapeHatches.WarnOnUninitializedProperty;
