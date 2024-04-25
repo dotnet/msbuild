@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BuildCheck.Acquisition;
+using Microsoft.Build.BuildCheck.Utilities;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using static Microsoft.Build.BuildCheck.Infrastructure.BuildCheckManagerProvider;
@@ -20,10 +21,12 @@ internal sealed class BuildCheckConnectorLogger : ILogger
 
     internal BuildCheckConnectorLogger(
         IBuildAnalysisLoggingContextFactory loggingContextFactory,
-        IBuildCheckManager buildCheckManager)
+        IBuildCheckManager buildCheckManager,
+        bool areStatsEnabled)
     {
         _buildCheckManager = buildCheckManager;
         _loggingContextFactory = loggingContextFactory;
+        _areStatsEnabled = areStatsEnabled;
         _eventHandlers = GetBuildEventHandlers();
     }
 
@@ -31,7 +34,7 @@ internal sealed class BuildCheckConnectorLogger : ILogger
 
     public string? Parameters { get; set; }
 
-    private bool _areStatsEnabled = areStatsEnabled;
+    private bool _areStatsEnabled { get; set; }
 
     public void Initialize(IEventSource eventSource)
     {
@@ -91,7 +94,7 @@ internal sealed class BuildCheckConnectorLogger : ILogger
 
         LoggingContext loggingContext = _loggingContextFactory.CreateLoggingContext(buildEventContext);
 
-        _stats.Merge(buildCheckManager.CreateAnalyzerTracingStats()!, (span1, span2) => span1 + span2);
+        _stats.Merge(_buildCheckManager.CreateAnalyzerTracingStats()!, (span1, span2) => span1 + span2);
         LogAnalyzerStats(loggingContext);
     }
     
