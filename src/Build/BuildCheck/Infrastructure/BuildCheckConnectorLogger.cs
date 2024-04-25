@@ -83,14 +83,7 @@ internal sealed class BuildCheckConnectorLogger : ILogger
         _stats.Merge(_buildCheckManager.CreateTracingStats(), (span1, span2) => span1 + span2);
         string msg = string.Join(Environment.NewLine, _stats.Select(a => a.Key + ": " + a.Value));
 
-        BuildEventContext buildEventContext = e.BuildEventContext
-            ?? new BuildEventContext(
-                BuildEventContext.InvalidNodeId,
-                BuildEventContext.InvalidTargetId,
-                BuildEventContext.InvalidProjectContextId,
-                BuildEventContext.InvalidTaskId);
-
-        LoggingContext loggingContext = _loggingContextFactory.CreateLoggingContext(buildEventContext);
+        LoggingContext loggingContext = _loggingContextFactory.CreateLoggingContext(GetBuildEventContext(e));
 
         // Tracing: https://github.com/dotnet/msbuild/issues/9629
         loggingContext.LogCommentFromText(MessageImportance.High, msg);
@@ -103,6 +96,13 @@ internal sealed class BuildCheckConnectorLogger : ILogger
         { typeof(ProjectStartedEventArgs), (BuildEventArgs e) => _buildCheckManager.StartProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!) },
         { typeof(ProjectFinishedEventArgs), (BuildEventArgs e) => _buildCheckManager.EndProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!) },
         { typeof(BuildCheckTracingEventArgs), (BuildEventArgs e) => _stats.Merge(((BuildCheckTracingEventArgs)e).TracingData, (span1, span2) => span1 + span2) },
-        { typeof(BuildCheckAcquisitionEventArgs), (BuildEventArgs e) => _buildCheckManager.ProcessAnalyzerAcquisition(((BuildCheckAcquisitionEventArgs)e).ToAnalyzerAcquisitionData(), e.BuildEventContext!) },
+        { typeof(BuildCheckAcquisitionEventArgs), (BuildEventArgs e) => _buildCheckManager.ProcessAnalyzerAcquisition(((BuildCheckAcquisitionEventArgs)e).ToAnalyzerAcquisitionData(), GetBuildEventContext(e)) },
     };
+
+    private BuildEventContext GetBuildEventContext(BuildEventArgs e) => e.BuildEventContext
+        ?? new BuildEventContext(
+                BuildEventContext.InvalidNodeId,
+                BuildEventContext.InvalidTargetId,
+                BuildEventContext.InvalidProjectContextId,
+                BuildEventContext.InvalidTaskId);
 }

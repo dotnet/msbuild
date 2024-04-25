@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
@@ -135,34 +134,37 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
-    [InlineData("CustomAnalyzer", "AnalysisCandidate", new[] { "CustomRule1" })]
-    public void CustomAnalyzerTest(string caName, string acName, string[] expectedRegistedRulesNames)
+    [InlineData("CustomAnalyzer", "AnalysisCandidate", "CustomRule1")]
+    public void CustomAnalyzerTest(string customAnalyzerName, string analysisCandidate, string expectedRegistredRule)
     {
         using (var env = TestEnvironment.Create())
         {
-            var caProjectPath = Path.Combine(TestAssetsRootPath, caName, $"{caName}.csproj");
-            string caBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
-                 $"{caProjectPath} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path}", out bool success);
+            var candidateAnalysisProjectPath = Path.Combine(TestAssetsRootPath, customAnalyzerName, $"{customAnalyzerName}.csproj");
+            string candidateAnalysisBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                 $"{candidateAnalysisProjectPath} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path}", out bool success);
 
             if (success)
             {
-                var caNugetPackageFullPath = Regex.Match(caBuildLog, @"Successfully created package '(.*?)'").Groups[1].Value;
-                var analysisCandidateSolutionPath = Path.Combine(TestAssetsRootPath, acName);
-                AddCutomDataSourceToNugetConfig(analysisCandidateSolutionPath, Path.GetDirectoryName(caNugetPackageFullPath));
+                var analysisCandidatePath = Path.Combine(TestAssetsRootPath, analysisCandidate);
+                AddCustomDataSourceToNugetConfig(analysisCandidatePath, candidateAnalysisBuildLog);
 
                 string acBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
-                 $"{Path.Combine(analysisCandidateSolutionPath, $"{acName}.csproj")} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path} -verbosity:d", out _);
+                    $"{Path.Combine(analysisCandidatePath, $"{analysisCandidate}.csproj")} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path} -analyze -verbosity:d",
+                    out bool _);
 
+                acBuildLog.ShouldContain($"Custom analyzer rule: {expectedRegistredRule} has been registered successfully.");
             }
         }
     }
 
-    private void AddCutomDataSourceToNugetConfig(string filePath, string pathToCustomDataSource)
+    private void AddCustomDataSourceToNugetConfig(string analysisCandidatePath, string candidateAnalysisBuildLog)
     {
-        var nugetTemplatePath = Path.Combine(filePath, "nugetTemplate.config");
-        string existingContent = File.ReadAllText(nugetTemplatePath);
+        var candidatesNugetPackageFullPath = Regex.Match(candidateAnalysisBuildLog, @"Successfully created package '(.*?)'").Groups[1].Value;
+        string pathToCustomDataSource = Path.GetDirectoryName(candidatesNugetPackageFullPath) ?? string.Empty;
+        var nugetTemplatePath = Path.Combine(analysisCandidatePath, "nugetTemplate.config");
 
-        string modifiedContent = existingContent.Replace("LocalPackageSourcePlaceholder", pathToCustomDataSource);
-        File.WriteAllText(Path.Combine(filePath, "nuget.config"), modifiedContent);
+        File.WriteAllText(
+            Path.Combine(analysisCandidatePath, "nuget.config"),
+            File.ReadAllText(nugetTemplatePath).Replace("LocalPackageSourcePlaceholder", pathToCustomDataSource));
     }
 }
