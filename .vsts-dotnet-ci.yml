@@ -4,7 +4,43 @@ trigger:
 - vs*
 
 jobs:
+- job: CheckVersionBumpOnReleaseBranches
+  displayName: "Check Version Bump On Release Branches"
+  steps:
+  - powershell: |
+      $versionsFile = "eng/Versions.props"
+      $changedFiles = git diff --name-only HEAD HEAD~1
+      $changedVersionsFile = $changedFiles | Where-Object { $_ -eq $versionsFile }
+      $isInitialCommit = $false
+      $isVersionBumped = $false
+      if ($changedVersionsFile -ne $null) {
+        $difference = git diff HEAD~1 $versionsFile
+        $changedContent = $difference -join " "
+        # 'DotNetFinalVersionKind' is expected to be added only during the initial setup of the release branch
+        $initialCommitPattern = '-\s*<VersionPrefix>\d+\.\d+\.\d+<\/VersionPrefix> \+\s*<VersionPrefix>\d+\.\d+\.\d+<\/VersionPrefix>.*<DotNetFinalVersionKind>release<\/DotNetFinalVersionKind>'
+        $isInitialCommit = $changedContent -match $initialCommitPattern
+        $pattern = '-\s*<VersionPrefix>\d+\.\d+\.(?<previous>\d+)<\/VersionPrefix>.* \+\s*<VersionPrefix>\d+\.\d+\.(?<current>\d+)<\/VersionPrefix>'
+        if (!($isInitialCommit) -and ($changedContent -match $pattern)) {
+          try {
+            $previousPatch = [Convert]::ToInt32($Matches.previous)
+            $currentPatch = [Convert]::ToInt32($Matches.current)
+            if ($currentPatch -gt $previousPatch) {
+              $isVersionBumped = $true
+            }
+          } catch {
+            Write-Host "An error occurred during conversion: $_"
+          }
+        }
+      }
+
+      if (!($isInitialCommit -or $isVersionBumped)) {
+        throw "Hello! I noticed that you're targeting one of our servicing branches. You need to increase the revision version number (the last part) of 'VersionPrefix' in eng/Versions.props."
+      }
+    condition: startsWith(variables['System.PullRequest.TargetBranch'], 'vs')
+    displayName: "Check if patch version is bumped up"
+
 - job: IfOnlyDocumentionChanged
+  dependsOn: CheckVersionBumpOnReleaseBranches
   displayName: "Check whether Test Results need to be executed"
   steps:
   - powershell: |

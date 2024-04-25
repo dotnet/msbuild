@@ -216,7 +216,7 @@ namespace Microsoft.Build.Tasks
                     {
                         bool imported = false;
                         // first try it with no password
-                        var cert = new X509Certificate2();
+                        using var cert = new X509Certificate2();
                         var personalStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
                         try
                         {

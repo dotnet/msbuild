@@ -186,6 +186,12 @@ namespace Microsoft.Build.Execution
         private int _evaluationId = BuildEventContext.InvalidEvaluationId;
 
         /// <summary>
+        /// The property and item filter used when creating this instance, or null if this is not a filtered copy
+        /// of another ProjectInstance. <seealso cref="ProjectInstance(ProjectInstance, bool, RequestedProjectState)"/>
+        /// </summary>
+        private RequestedProjectState _requestedProjectStateFilter;
+
+        /// <summary>
         /// Creates a ProjectInstance directly.
         /// No intermediate Project object is created.
         /// This is ideal if the project is simply going to be built, and not displayed or edited.
@@ -245,6 +251,23 @@ namespace Microsoft.Build.Execution
         /// <returns>A new project instance</returns>
         public ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection)
             : this(projectFile, globalProperties, toolsVersion, subToolsetVersion, projectCollection, projectLoadSettings: null, evaluationContext: null, directoryCacheFactory: null, interactive: false)
+        {
+        }
+
+        /// <summary>
+        /// Creates a ProjectInstance directly.
+        /// No intermediate Project object is created.
+        /// This is ideal if the project is simply going to be built, and not displayed or edited.
+        /// </summary>
+        /// <param name="projectFile">The path to the project file.</param>
+        /// <param name="globalProperties">The global properties to use.</param>
+        /// <param name="toolsVersion">The tools version. May be <see langword="null"/>.</param>
+        /// <param name="subToolsetVersion">The sub-toolset version, used in tandem with <paramref name="toolsVersion"/> to determine the set of toolset properties. May be <see langword="null"/>.</param>
+        /// <param name="projectCollection">Project collection</param>
+        /// <param name="context">Context to evaluate inside, potentially sharing caches with other evaluations.</param>
+        /// <param name="interactive">Indicates if loading the project is allowed to interact with the user.</param>
+        internal ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, EvaluationContext context, bool interactive = false)
+            : this(projectFile, globalProperties, toolsVersion, subToolsetVersion, projectCollection, projectLoadSettings: null, evaluationContext: context, directoryCacheFactory: null, interactive: interactive)
         {
         }
 
@@ -679,6 +702,7 @@ namespace Microsoft.Build.Execution
             _isImmutable = isImmutable;
             _evaluationId = that.EvaluationId;
             _translateEntireState = that._translateEntireState;
+            _requestedProjectStateFilter = filter?.DeepClone();
 
             if (filter == null)
             {
@@ -1114,6 +1138,12 @@ namespace Microsoft.Build.Execution
         {
             get { return _isImmutable; }
         }
+
+        /// <summary>
+        /// The property and item filter used when creating this instance, or null if this is not a filtered copy
+        /// of another ProjectInstance. <seealso cref="ProjectInstance(ProjectInstance, bool, RequestedProjectState)"/>
+        /// </summary>
+        internal RequestedProjectState RequestedProjectStateFilter => _requestedProjectStateFilter;
 
         /// <summary>
         /// Task classes and locations known to this project.
@@ -2228,6 +2258,7 @@ namespace Microsoft.Build.Execution
         {
             translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
             translator.TranslateDictionary(ref _properties, ProjectPropertyInstance.FactoryForDeserialization);
+            translator.Translate(ref _requestedProjectStateFilter);
             translator.Translate(ref _isImmutable);
             TranslateItems(translator);
         }
@@ -2768,14 +2799,26 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            XmlReaderSettings xrs = new XmlReaderSettings();
-            xrs.DtdProcessing = DtdProcessing.Ignore;
+            XmlReaderSettings xrs = new XmlReaderSettings
+            {
+                DtdProcessing = DtdProcessing.Ignore
+            };
 
-            ProjectRootElement projectRootElement = new ProjectRootElement(XmlReader.Create(new StringReader(wrapperProjectXml), xrs), projectRootElementCache, isExplicitlyLoaded,
-                preserveFormatting: false);
-            projectRootElement.DirectoryPath = Path.GetDirectoryName(projectFile);
-            ProjectInstance instance = new ProjectInstance(projectRootElement, globalProperties, toolsVersion, buildParameters, loggingService, projectBuildEventContext, sdkResolverService, submissionId);
-            return new ProjectInstance[] { instance };
+            StringReader sr = new StringReader(wrapperProjectXml);
+            using (XmlReader xmlReader = XmlReader.Create(sr, xrs))
+            {
+                ProjectRootElement projectRootElement = new(
+                    xmlReader,
+                    projectRootElementCache,
+                    isExplicitlyLoaded,
+                    preserveFormatting: false)
+                {
+                    DirectoryPath = Path.GetDirectoryName(projectFile)
+                };
+                ProjectInstance instance = new(projectRootElement, globalProperties, toolsVersion, buildParameters, loggingService, projectBuildEventContext, sdkResolverService, submissionId);
+
+                return new[] { instance };
+            }
         }
 
         /// <summary>

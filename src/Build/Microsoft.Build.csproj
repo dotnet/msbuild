@@ -120,6 +120,9 @@
     <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelperExtension.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\IsExternalInit.cs">
+      <Link>BuildCheck\Utilities\IsExternalInit.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
     <Compile Include="..\Shared\TranslatorHelpers.cs" />
@@ -153,6 +156,38 @@
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverException.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\TranslationHelpers.cs" />
     <Compile Include="FileSystem\*.cs" />
+    <Compile Include="BuildCheck\Acquisition\AnalyzerAcquisitionData.cs" />
+    <Compile Include="BuildCheck\Acquisition\BuildCheckAcquisitionModule.cs" />
+    <Compile Include="BuildCheck\Acquisition\IBuildCheckAcquisitionModule.cs" />
+    <Compile Include="BuildCheck\Analyzers\SharedOutputPathAnalyzer.cs" />
+    <Compile Include="BuildCheck\Infrastructure\BuildCheckConfigurationException.cs" />
+    <Compile Include="BuildCheck\Infrastructure\BuildEventsProcessor.cs" />
+    <Compile Include="BuildCheck\Infrastructure\IBuildCheckManagerProvider.cs" />
+    <Compile Include="BuildCheck\Infrastructure\NullBuildCheckManager.cs" />
+    <Compile Include="BuildCheck\Infrastructure\NullBuildCheckManagerProvider.cs" />
+    <Compile Include="BuildCheck\Infrastructure\TracingReporter.cs" />
+    <Compile Include="BuildCheck\OM\BuildCheckDataContext.cs" />
+    <Compile Include="BuildCheck\API\BuildAnalyzer.cs" />
+    <Compile Include="BuildCheck\API\BuildAnalyzerConfiguration.cs" />
+    <Compile Include="BuildCheck\API\BuildCheckResult.cs" />
+    <Compile Include="BuildCheck\API\BuildAnalyzerResultSeverity.cs" />
+    <Compile Include="BuildCheck\API\BuildAnalyzerRule.cs" />
+    <Compile Include="BuildCheck\API\ConfigurationContext.cs" />
+    <Compile Include="BuildCheck\API\EvaluationAnalysisScope.cs" />
+    <Compile Include="BuildCheck\Infrastructure\BuildAnalyzerConfigurationInternal.cs" />
+    <Compile Include="BuildCheck\Infrastructure\BuildAnalyzerWrapper.cs" />
+    <Compile Include="BuildCheck\Infrastructure\BuildCheckCentralContext.cs" />
+    <Compile Include="BuildCheck\Infrastructure\BuildCheckConnectorLogger.cs" />
+    <Compile Include="BuildCheck\Infrastructure\BuildCheckContext.cs" />
+    <Compile Include="BuildCheck\Infrastructure\BuildCheckManagerProvider.cs" />
+    <Compile Include="BuildCheck\Infrastructure\ConfigurationProvider.cs" />
+    <Compile Include="BuildCheck\Infrastructure\CustomConfigurationData.cs" />
+    <Compile Include="BuildCheck\API\IBuildCheckRegistrationContext.cs" />
+    <Compile Include="BuildCheck\Infrastructure\IBuildCheckManager.cs" />
+    <Compile Include="BuildCheck\Logging\IBuildAnalysisLoggingContextFactory.cs" />
+    <Compile Include="BuildCheck\OM\EvaluatedPropertiesAnalysisData.cs" />
+    <Compile Include="BuildCheck\OM\ParsedItemsAnalysisData.cs" />
+    <Compile Include="BuildCheck\Utilities\EnumerableExtensions.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
     <Compile Include="FileAccess\DesiredAccess.cs" />
     <Compile Include="FileAccess\FileAccessData.cs" />
@@ -160,6 +195,8 @@
     <Compile Include="FileAccess\ProcessData.cs" />
     <Compile Include="FileAccess\ReportedFileOperation.cs" />
     <Compile Include="FileAccess\RequestedAccess.cs" />
+    <Compile Include="BuildCheck\Logging\AnalyzerLoggingContext.cs" />
+    <Compile Include="BuildCheck\Logging\AnalyzerLoggingContextFactory.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />
@@ -354,7 +391,6 @@
     <Compile Include="BackEnd\Components\Scheduler\ScheduleResponse.cs" />
     <Compile Include="BackEnd\Node\INode.cs" />
     <!-- ########################## -->
-    <Compile Include="BackEnd\TaskExecutionHost\AddInParts\ITaskExecutionHost.cs" />
     <Compile Include="BackEnd\TaskExecutionHost\TaskExecutionHost.cs" />
     <!-- #### COLLECTIONS ### -->
     <Compile Include="..\Shared\CollectionHelpers.cs" />
@@ -682,11 +718,7 @@
   <!-- Extract binding redirects for MSBuild and dependencies from MSBuild.exe.config into a source file.
        This allows us to create secondary AppDomains with the same redirects at run-time, see
        https://github.com/dotnet/msbuild/blob/main/documentation/NETFramework-NGEN.md#nugetframeworks -->
-  <Target Name="GenerateAppDomainConfig"
-          Inputs="..\MSBuild\app.config;..\MSBuild\app.amd64.config;$(MSBuildThisFileFullPath)"
-          Outputs="$(NuGetFrameworkWrapperRedirects_FilePath)"
-          BeforeTargets="CoreCompile"
-          Condition="'$(FeatureAppDomain)' == 'true'">
+  <Target Name="GenerateAppDomainConfig" Inputs="..\MSBuild\app.config;..\MSBuild\app.amd64.config;$(MSBuildThisFileFullPath)" Outputs="$(NuGetFrameworkWrapperRedirects_FilePath)" BeforeTargets="CoreCompile" Condition="'$(FeatureAppDomain)' == 'true'">
     <PropertyGroup>
       <BindingRedirectNamespace>&lt;Namespace Prefix='ns' Uri='urn:schemas-microsoft-com:asm.v1' /&gt;</BindingRedirectNamespace>
       <BindingRedirectXPath>/configuration/runtime/ns:assemblyBinding/*</BindingRedirectXPath>

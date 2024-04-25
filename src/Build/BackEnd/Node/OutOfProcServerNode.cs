@@ -4,6 +4,9 @@
 using System;
 using System.Collections.Concurrent;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
@@ -430,28 +433,115 @@ namespace Microsoft.Build.Experimental
             _shutdownReason = _cancelRequested ? NodeEngineShutdownReason.BuildComplete : NodeEngineShutdownReason.BuildCompleteReuse;
             _shutdownEvent.Set();
         }
-        internal sealed class RedirectConsoleWriter : StringWriter
+
+        internal sealed class RedirectConsoleWriter : TextWriter
         {
             private readonly Action<string> _writeCallback;
             private readonly Timer _timer;
             private readonly TextWriter _syncWriter;
 
+            private readonly StringWriter _internalWriter;
+
             private RedirectConsoleWriter(Action<string> writeCallback)
             {
                 _writeCallback = writeCallback;
-                _syncWriter = Synchronized(this);
+                _internalWriter = new StringWriter();
+                _syncWriter = Synchronized(_internalWriter);
                 _timer = new Timer(TimerCallback, null, 0, 40);
             }
 
+            public override Encoding Encoding => _internalWriter.Encoding;
+
             public static TextWriter Create(Action<string> writeCallback)
             {
-                RedirectConsoleWriter writer = new(writeCallback);
-                return writer._syncWriter;
+                RedirectConsoleWriter writer = new RedirectConsoleWriter(writeCallback);
+
+                return writer;
             }
+
+            public override void Flush()
+            {
+                var sb = _internalWriter.GetStringBuilder();
+                string captured = sb.ToString();
+                sb.Clear();
+
+                _writeCallback(captured);
+                _internalWriter.Flush();
+            }
+
+            public override void Write(char value) => _syncWriter.Write(value);
+
+            public override void Write(char[]? buffer) => _syncWriter.Write(buffer);
+
+            public override void Write(char[] buffer, int index, int count) => _syncWriter.Write(buffer, index, count);
+
+            public override void Write(bool value) => _syncWriter.Write(value);
+
+            public override void Write(int value) => _syncWriter.Write(value);
+
+            public override void Write(uint value) => _syncWriter.Write(value);
+
+            public override void Write(long value) => _syncWriter.Write(value);
+
+            public override void Write(ulong value) => _syncWriter.Write(value);
+ 
+            public override void Write(float value) => _syncWriter.Write(value);
+
+            public override void Write(double value) => _syncWriter.Write(value);
+
+            public override void Write(decimal value) => _syncWriter.Write(value);
+
+            public override void Write(string? value) => _syncWriter.Write(value);
+
+            public override void Write(object? value) => _syncWriter.Write(value);
+
+            public override void Write(string format, object? arg0) => _syncWriter.Write(format, arg0);
+
+            public override void Write(string format, object? arg0, object? arg1) => _syncWriter.Write(format, arg0, arg1);
+
+            public override void Write(string format, object? arg0, object? arg1, object? arg2) => _syncWriter.Write(format, arg0, arg1, arg2);
+
+            public override void Write(string format, params object?[] arg) => _syncWriter.WriteLine(format, arg);
+
+            public override void WriteLine() => _syncWriter.WriteLine();
+
+            public override void WriteLine(char value) => _syncWriter.WriteLine(value);
+
+            public override void WriteLine(decimal value) => _syncWriter.WriteLine(value);
+
+            public override void WriteLine(char[]? buffer) => _syncWriter.WriteLine(buffer);
+
+            public override void WriteLine(char[] buffer, int index, int count) => _syncWriter.WriteLine(buffer, index, count);
+
+            public override void WriteLine(bool value) => _syncWriter.WriteLine(value);
+
+            public override void WriteLine(int value) => _syncWriter.WriteLine(value);
+
+            public override void WriteLine(uint value) => _syncWriter.WriteLine(value);
+
+            public override void WriteLine(long value) => _syncWriter.WriteLine(value);
+
+            public override void WriteLine(ulong value) => _syncWriter.WriteLine(value);
+
+            public override void WriteLine(float value) => _syncWriter.WriteLine(value);
+
+            public override void WriteLine(double value) => _syncWriter.WriteLine(value);
+
+            public override void WriteLine(string? value) => _syncWriter.WriteLine(value);
+
+            public override void WriteLine(object? value) => _syncWriter.WriteLine(value);
+
+            public override void WriteLine(string format, object? arg0) => _syncWriter.WriteLine(format, arg0);
+
+            public override void WriteLine(string format, object? arg0, object? arg1) => _syncWriter.WriteLine(format, arg0, arg1);
+
+            public override void WriteLine(string format, object? arg0, object? arg1, object? arg2) => _syncWriter.WriteLine(format, arg0, arg1, arg2);
+
+            public override void WriteLine(string format, params object?[] arg) => _syncWriter.WriteLine(format, arg);
 
             private void TimerCallback(object? state)
             {
-                if (GetStringBuilder().Length > 0)
+                if (_internalWriter.GetStringBuilder().Length > 0)
                 {
                     _syncWriter.Flush();
                 }
@@ -463,19 +553,10 @@ namespace Microsoft.Build.Experimental
                 {
                     _timer.Dispose();
                     Flush();
+                    _internalWriter?.Dispose();
                 }
 
                 base.Dispose(disposing);
-            }
-
-            public override void Flush()
-            {
-                var sb = GetStringBuilder();
-                var captured = sb.ToString();
-                sb.Clear();
-                _writeCallback(captured);
-
-                base.Flush();
             }
         }
     }

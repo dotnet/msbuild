@@ -123,7 +123,7 @@
                      Hace que MSBuild informe de los accesos a los archivos a cualquier
                      complemento de caché de proyectos.
 
-                     Esta marca es experimental y puede que no funcione según lo previsto.
+Esta marca es experimental y puede que no funcione según lo previsto.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -578,14 +578,18 @@
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
         <target state="translated">  -logger:&lt;registrador&gt;   Use este registrador para registrar eventos
-                     de MSBuild. Para especificar varios registradores, especifique cada uno de ellos por separado.
+                     de MSBuild. Para especificar varios registradores, especifique
+                     cada uno de ellos por separado.
                      La sintaxis de &lt;registrador&gt; es:
-                       [&lt;clase&gt;,]&lt;assembly&gt;[,&lt;opciones&gt;][;&lt;parámetros&gt;]
+                       [&lt;clase&gt;,]&lt;ensamblado&gt;[,&lt;opciones&gt;][;&lt;parámetros&gt;]
                      La sintaxis de &lt;clase del registrador&gt; es:
-                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre de clase del registrador&gt;
-                       La sintaxis de &lt;ensamblado del registrador&gt; es:
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
-                     Las opciones del registrador especifican cómo crea MSBuild el registrador.
+                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre de
+                       clase del registrador&gt;
+                     La sintaxis de &lt;ensamblado del registrador&gt; es:
+                       {&lt;nombre del ensamblado&gt;[,&lt;strong name&gt;] | &lt;archivo
+                       de ensamblado&gt;}
+                     Las opciones del registrador especifican cómo crea MSBuild
+                     el registrador.
                      Los &lt;parámetros del registrador&gt; son opcionales y se pasan
                      al registrador tal como se escriben. (Forma corta: -l)
                      Ejemplos:
@@ -862,12 +866,15 @@
                      Para especificar varios registradores, especifique cada uno
                      de ellos por separado. (Forma corta: -dl)
                      La sintaxis de &lt;registrador&gt; es:
-                       [&lt;clase&gt;,]&lt;assembly&gt;[,&lt;opciones&gt;][;&lt;parámetros&gt;]
+                       [&lt;clase&gt;,]&lt;ensamblado&gt;[,&lt;opciones&gt;][;&lt;parámetros&gt;]
                      La sintaxis de &lt;clase del registrador&gt; es:
-                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre de la clase del registrador&gt;
+                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre
+                       de la clase del registrador&gt;
                      La sintaxis de &lt;ensamblado del registrador&gt; es:
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
-                     Las opciones del registrador especifican cómo crea MSBuild el registrador.
+                       {&lt;nombre del ensamblado&gt;[,&lt;strong name&gt;] | &lt;archivo
+                      de ensamblado&gt;}
+                     Las opciones del registrador especifican cómo crea MSBuild
+                     el registrador.
                      Los &lt;parámetros del registrador&gt; son opcionales y se pasan
                      al registrador tal como se escriben. (Forma corta: -l)
                      Ejemplos:
@@ -1689,11 +1696,30 @@
       {4}: duration in seconds with 1 decimal point
     </note>
       </trans-unit>
-      <trans-unit id="TestSummary">
-        <source>Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</source>
-        <target state="translated">Serie de pruebas {0}. Total: {1} error: {2} Pasado: {3} Omitido: {4}, Duración: {5}s</target>
-        <note>{0} string, localized result e.g. Failed surrounded by ANSI colors.
-{1-5} whole number</note>
+      <trans-unit id="TestSummary_BannerAndTotal">
+        <source>Test summary: total: {0}</source>
+        <target state="translated">Resumen de pruebas: total: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Duration">
+        <source>duration: {0}s</source>
+        <target state="translated">duración: {0} s</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Failed">
+        <source>failed: {0}</source>
+        <target state="translated">con errores: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Skipped">
+        <source>skipped: {0}</source>
+        <target state="translated">omitido: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Succeeded">
+        <source>succeeded: {0}</source>
+        <target state="translated">correcto: {0}</target>
+        <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>

@@ -9,7 +9,9 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Text.RegularExpressions;
-
+using System.Globalization;
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -27,7 +29,7 @@ namespace Microsoft.Build.Evaluation
 {
     /// <summary>
     /// The Intrinsic class provides static methods that can be accessed from MSBuild's
-    /// property functions using $([MSBuild]::Function(x,y))
+    /// property functions using $([MSBuild]::Function(x,y)).
     /// </summary>
     internal static class IntrinsicFunctions
     {
@@ -291,6 +293,7 @@ namespace Microsoft.Build.Evaluation
                         return string.Empty;
                     }
 
+#pragma warning disable CA2000 // Dispose objects before losing scope is false positive here.
                     using (RegistryKey key = GetBaseKeyFromKeyName(keyName, view, out string subKeyName))
                     {
                         if (key != null)
@@ -311,6 +314,7 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                     }
+#pragma warning restore CA2000 // Dispose objects before losing scope
                 }
             }
 
@@ -446,12 +450,13 @@ namespace Microsoft.Build.Evaluation
 
         private static string CalculateSha256(string toHash)
         {
-            var sha = System.Security.Cryptography.SHA256.Create();
+            using var sha = System.Security.Cryptography.SHA256.Create();
             var hashResult = new StringBuilder();
             foreach (byte theByte in sha.ComputeHash(Encoding.UTF8.GetBytes(toHash)))
             {
                 hashResult.Append(theByte.ToString("x2"));
             }
+
             return hashResult.ToString();
         }
 
@@ -624,6 +629,12 @@ namespace Microsoft.Build.Evaluation
             return ChangeWaves.AreFeaturesEnabled(wave);
         }
 
+        internal static string SubstringByTextElements(string input, int start, int length)
+        {
+            StringInfo stringInfo = new StringInfo(input);
+            return stringInfo.SubstringByTextElements(start, length);
+        }
+
         internal static string CheckFeatureAvailability(string featureName)
         {
             return Features.CheckFeatureAvailability(featureName).ToString();
@@ -664,9 +675,21 @@ namespace Microsoft.Build.Evaluation
             return BuildEnvironmentHelper.Instance.MSBuildExtensionsPath;
         }
 
-        public static bool IsRunningFromVisualStudio()
+        public static bool IsRunningFromVisualStudio() => BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio;
+
+        public static bool RegisterAnalyzer(string pathToAssembly, LoggingContext loggingContext)
         {
-            return BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio;
+            pathToAssembly = FileUtilities.GetFullPathNoThrow(pathToAssembly);
+            if (File.Exists(pathToAssembly))
+            {
+                loggingContext.LogBuildEvent(new BuildCheckAcquisitionEventArgs(pathToAssembly));
+
+                return true;
+            }
+
+            loggingContext.LogComment(MessageImportance.Low, "CustomAnalyzerAssemblyNotExist", pathToAssembly);
+
+            return false;
         }
 
         #region Debug only intrinsics

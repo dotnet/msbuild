@@ -207,6 +207,26 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
+      <trans-unit id="CustomAnalyzerAssemblyNotExist">
+        <source>Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</source>
+        <target state="new">Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</target>
+        <note>The message is emitted when the custom analyzer assembly can not be found.</note>
+      </trans-unit>
+      <trans-unit id="CustomAnalyzerFailedAcquisition">
+        <source>Failed to register the custom analyzer: {0}.</source>
+        <target state="new">Failed to register the custom analyzer: {0}.</target>
+        <note>The message is emitted on failed loading of the custom analyzer in process.</note>
+      </trans-unit>
+      <trans-unit id="CustomAnalyzerFailedRuleLoading">
+        <source>Failed to instantiate the custom analyzer rule with the following exception: {0}.</source>
+        <target state="new">Failed to instantiate the custom analyzer rule with the following exception: {0}.</target>
+        <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
+      </trans-unit>
+      <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
+        <source>Custom analyzer rule: {0} has been registered successfully.</source>
+        <target state="new">Custom analyzer rule: {0} has been registered successfully.</target>
+        <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
+      </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
         <target state="translated">MSB4276: Le programme de résolution du SDK par défaut n’a pas pu résoudre le SDK «{0}», car le répertoire «{1}» n’existait pas.</target>
@@ -596,6 +616,11 @@ Erreurs : {3}</target>
         <target state="translated">Assembly chargé pendant {0}{1} : {2} (emplacement : {3}, MVID : {4}, AssemblyLoadContext : {5})</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskAssemblyLocationMismatch">
+        <source>Task assembly was loaded from '{0}' while the desired location was '{1}'.</source>
+        <target state="new">Task assembly was loaded from '{0}' while the desired location was '{1}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">La tâche "{0}" a libéré {1} cœur. Elle détient désormais {2} cœurs au total.</target>
@@ -622,7 +647,7 @@ Erreurs : {3}</target>
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Il s’agit d’une exception non prise en charge dans MSBuild –– VOTEZ POUR UN PROBLÈME EXISTANT OU CRÉEZ-EN UN SUR https://aka.ms/msbuild/unhandled
+        <target state="translated">Il s’agit d’une exception non gérée dans MSBuild –– VOTEZ POUR UN PROBLÈME EXISTANT OU ENTREZ UN NOUVEAU FICHIER À https://aka.ms/msbuild/unhandled.
     {0}</target>
         <note />
       </trans-unit>

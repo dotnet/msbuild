@@ -12,9 +12,12 @@ using System.Text;
 using System.Threading;
 using System.Xml;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -23,7 +26,6 @@ using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using Shouldly;
 using Xunit;
-using Xunit.NetCore.Extensions;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectHelpers = Microsoft.Build.UnitTests.BackEnd.ProjectHelpers;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
@@ -4380,6 +4382,18 @@ $(
             Assert.Equal(availability, result);
         }
 
+        [Theory]
+        [InlineData("\u3407\ud840\udc60\ud86a\ude30\ud86e\udc0a\ud86e\udda0\ud879\udeae\u2fd5\u0023", 0, 3, "\u3407\ud840\udc60\ud86a\ude30")]
+        [InlineData("\u3407\ud840\udc60\ud86a\ude30\ud86e\udc0a\ud86e\udda0\ud879\udeae\u2fd5\u0023", 2, 5, "\ud86a\ude30\ud86e\udc0a\ud86e\udda0\ud879\udeae\u2fd5")]
+        public void SubstringByTextElements(string featureName, int start, int length, string expected)
+        {
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default);
+
+            var result = expander.ExpandIntoStringLeaveEscaped($"$([MSBuild]::SubstringByTextElements({featureName}, {start}, {length}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            Assert.Equal(expected, result);
+        }
+
         [Fact]
         public void PropertyFunctionIntrinsicFunctionGetCurrentToolsDirectory()
         {
@@ -5054,6 +5068,28 @@ $(
             byte[] bytes = sortVersion.SortId.ToByteArray();
             int version = bytes[3] << 24 | bytes[2] << 16 | bytes[1] << 8 | bytes[0];
             return version != 0 && version == sortVersion.FullVersion;
+        }
+
+        [Fact]
+        public void PropertyFunctionRegisterAnalyzer()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var logger = new MockLogger();
+                ILoggingService loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+                loggingService.RegisterLogger(logger);
+                var loggingContext = new MockLoggingContext(
+                    loggingService,
+                    new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0, 0));
+                var dummyAssemblyFile = env.CreateFile(env.CreateFolder(), "test.dll");
+
+                var result = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default)
+                    .ExpandIntoStringLeaveEscaped($"$([MSBuild]::RegisterAnalyzer({dummyAssemblyFile.Path}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance, loggingContext);
+
+                result.ShouldBe(Boolean.TrueString);
+                _ = logger.AllBuildEvents.Select(be => be.ShouldBeOfType<BuildCheckAcquisitionEventArgs>());
+                logger.AllBuildEvents.Count.ShouldBe(1);
+            }
         }
     }
 }

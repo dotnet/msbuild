@@ -116,6 +116,7 @@ namespace Microsoft.Build.Tasks
                         {
                             using (FileStream stream = new FileStream(sourceFile.ItemSpec, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 0x1000, useAsync: false))
                             {
+#pragma warning disable CA2000 // Dispose objects before losing scope because ZipArchive will dispose the stream when it is disposed.
                                 using (ZipArchive zipArchive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: false))
                                 {
                                     try
@@ -129,6 +130,7 @@ namespace Microsoft.Build.Tasks
                                         return false;
                                     }
                                 }
+#pragma warning restore CA2000 // Dispose objects before losing scope
                             }
                         }
                         catch (OperationCanceledException)
