@@ -134,8 +134,8 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
-    [InlineData("CustomAnalyzer", "AnalysisCandidate", "CustomRule1")]
-    public void CustomAnalyzerTest(string customAnalyzerName, string analysisCandidate, string expectedRegistredRule)
+    [InlineData("CustomAnalyzer", "AnalysisCandidate", new[] { "CustomRule1", "CustomRule2" })]
+    public void CustomAnalyzerTest(string customAnalyzerName, string analysisCandidate, string[] expectedRegisteredRules)
     {
         using (var env = TestEnvironment.Create())
         {
@@ -152,7 +152,10 @@ public class EndToEndTests : IDisposable
                     $"{Path.Combine(analysisCandidatePath, $"{analysisCandidate}.csproj")} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path} -analyze -verbosity:d",
                     out bool _);
 
-                acBuildLog.ShouldContain($"Custom analyzer rule: {expectedRegistredRule} has been registered successfully.");
+                foreach (var expectedRegisteredRule in expectedRegisteredRules)
+                {
+                    acBuildLog.ShouldContain($"Custom analyzer rule: {expectedRegisteredRule} has been registered successfully.");
+                }
             }
         }
     }
