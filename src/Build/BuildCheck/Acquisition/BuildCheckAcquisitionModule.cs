@@ -17,14 +17,11 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
 {
     private readonly ILoggingService _loggingService;
 
-    internal BuildCheckAcquisitionModule(ILoggingService loggingService)
-    {
-        _loggingService = loggingService;
-    }
+    internal BuildCheckAcquisitionModule(ILoggingService loggingService) => _loggingService = loggingService;
 
 #if FEATURE_ASSEMBLYLOADCONTEXT
     /// <summary>
-    /// AssemblyContextLoader used to load DLLs outside of msbuild.exe directory
+    /// AssemblyContextLoader used to load DLLs outside of msbuild.exe directory.
     /// </summary>
     private static readonly CoreClrAssemblyLoader s_coreClrAssemblyLoader = new();
 #endif
@@ -45,7 +42,7 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
             assembly = Assembly.LoadFrom(analyzerAcquisitionData.AssemblyPath);
 #endif
 
-            IEnumerable<Type> analyzerTypes = assembly.GetTypes().Where(t => typeof(BuildAnalyzer).IsAssignableFrom(t));
+            IEnumerable<Type> analyzerTypes = assembly.GetExportedTypes().Where(t => typeof(BuildAnalyzer).IsAssignableFrom(t));
 
             foreach (Type analyzerType in analyzerTypes)
             {
@@ -68,6 +65,10 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
                     _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerFailedRuleLoading", loaderException?.Message);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerFailedRuleLoading", ex?.Message);
         }
 
         return analyzersFactories;

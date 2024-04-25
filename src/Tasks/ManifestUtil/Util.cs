@@ -209,7 +209,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static string GetEmbeddedResourceString(string name)
         {
             Stream s = GetEmbeddedResourceStream(name);
-            StreamReader r = new StreamReader(s);
+            using StreamReader r = new StreamReader(s);
             return r.ReadToEnd();
         }
 
@@ -238,10 +238,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             length = fi.Length;
 
             Stream s = null;
+            HashAlgorithm hashAlg = null;
             try
             {
                 s = fi.OpenRead();
-                HashAlgorithm hashAlg;
 
                 if (string.IsNullOrEmpty(targetFrameWorkVersion) || CompareFrameworkVersions(targetFrameWorkVersion, Constants.TargetFrameworkVersion40) <= 0)
                 {
@@ -269,6 +269,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             finally
             {
                 s?.Close();
+                hashAlg?.Dispose();
             }
         }
 
@@ -473,7 +474,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         public static void WriteFile(string path, Stream s)
         {
-            StreamReader r = new StreamReader(s);
+            using StreamReader r = new StreamReader(s);
             WriteFile(path, r.ReadToEnd());
         }
 
@@ -520,7 +521,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
 
             string path = Path.Combine(logPath, filename);
-            StreamReader r = new StreamReader(s);
+            using var r = new StreamReader(s, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, 1024, leaveOpen: true);
             string text = r.ReadToEnd();
             try
             {
@@ -538,6 +539,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             catch (SecurityException)
             {
             }
+
             s.Position = 0;
         }
 

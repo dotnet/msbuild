@@ -120,7 +120,7 @@ public class EndToEndTests : IDisposable
         _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore" +
-            (analysisRequested ? " -analyze" : string.Empty), out bool success);
+            (analysisRequested ? " -analyze" : string.Empty), out bool success, false, _env.Output);
         _env.Output.WriteLine(output);
         success.ShouldBeTrue();
         // The conflicting outputs warning appears - but only if analysis was requested

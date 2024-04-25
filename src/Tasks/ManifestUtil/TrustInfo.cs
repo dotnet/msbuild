@@ -534,7 +534,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             var m = new MemoryStream();
             Write(m);
             m.Position = 0;
-            var r = new StreamReader(m);
+            using var r = new StreamReader(m);
+
             return r.ReadToEnd();
         }
 
