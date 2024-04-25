@@ -66,6 +66,10 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
                 }
             }
         }
+        catch (Exception ex)
+        {
+            _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerFailedRuleLoading", ex?.Message);
+        }
 
         return analyzersFactories;
     }
