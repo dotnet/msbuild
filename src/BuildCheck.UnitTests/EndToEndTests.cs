@@ -187,30 +187,39 @@ public class EndToEndTests : IDisposable
         var nugetTemplatePath = Path.Combine(analysisCandidatePath, "nugetTemplate.config");
 
         var doc = new XmlDocument();
-        doc.Load(nugetTemplatePath);
-        XmlNode packageSourcesNode = doc.SelectSingleNode("//packageSources");
-        for (int i = 0; i < candidatesNugetPackageFullPaths.Count; i++)
+        doc.LoadXml(File.ReadAllText(nugetTemplatePath));
+        if (doc.DocumentElement != null)
         {
-            AddPackageSource(doc, packageSourcesNode, $"Key{i}", Path.GetDirectoryName(candidatesNugetPackageFullPaths[i]));
-        }
+            XmlNode? packageSourcesNode = doc.SelectSingleNode("//packageSources");
+            for (int i = 0; i < candidatesNugetPackageFullPaths.Count; i++)
+            {
+                AddPackageSource(doc, packageSourcesNode, $"Key{i}", Path.GetDirectoryName(candidatesNugetPackageFullPaths[i]) ?? string.Empty);
+            }
 
-        doc.Save(Path.Combine(analysisCandidatePath, "nuget.config"));
+            doc.Save(Path.Combine(analysisCandidatePath, "nuget.config"));
+        }
     }
 
-    private void AddPackageSource(XmlDocument doc, XmlNode packageSourcesNode, string key, string value)
+    private void AddPackageSource(XmlDocument doc, XmlNode? packageSourcesNode, string key, string value)
     {
-        XmlElement addNode = doc.CreateElement("add");
+        if (packageSourcesNode != null)
+        {
+            XmlElement addNode = doc.CreateElement("add");
 
-        PopulateXmlAttribute(doc, addNode, "key", key);
-        PopulateXmlAttribute(doc, addNode, "value", value);
+            PopulateXmlAttribute(doc, addNode, "key", key);
+            PopulateXmlAttribute(doc, addNode, "value", value);
 
-        _ = packageSourcesNode.AppendChild(addNode);
+            packageSourcesNode.AppendChild(addNode);
+        }
     }
 
     private void PopulateXmlAttribute(XmlDocument doc, XmlNode node, string attributeName, string attributeValue)
     {
-        var attribute = doc.CreateAttribute(attributeName);
-        attribute.Value = attributeValue;
-        node.Attributes.Append(attribute);
+        if (node != null)
+        {
+            var attribute = doc.CreateAttribute(attributeName);
+            attribute.Value = attributeValue;
+            node.Attributes!.Append(attribute);
+        }
     }
 }
