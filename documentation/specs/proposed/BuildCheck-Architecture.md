@@ -93,7 +93,15 @@ To streamline the creation of custom rules, a special [template](https://learn.m
 To enable MSBuild to recognize a custom analyzer, it must invoke the intrinsic function `void RegisterAnalyzer(string path)`, which requires the path to the assembly as input. Therefore, it's essential for the user to ensure that the assembly exists in the specified location.
 Additionally, the custom rule must use [BuildAnalyzerRule.cs](https://github.com/dotnet/msbuild/blob/9cdb3615adb4115f92b390de2f258fac5f320909/src/Build/BuildCheck/API/BuildAnalyzerRule.cs#L11C14-L11C31) as a parent class; otherwise, the system will not register it.
 
-**The link to example rule has to be here with some explanations**
+Examples of custom rules can be found in the end-to-end tests, showcasing various scenarios:
+
+1. Single Custom Rule Packaged as a NuGet Package: Demonstrates the implementation of a custom rule encapsulated within a NuGet package. This example illustrates the process of creating, packaging, and integrating a single custom rule into a project.
+2. Project with Multiple Analyzers Referenced: Illustrates a project setup where multiple custom analyzers are referenced. This scenario is common in larger projects where multiple rule sets need to be enforced simultaneously.
+
+Important Note: In these examples, pay attention to the presence of the `CustomAnalyzerName.props` file. This file contains intrinsic function invocations necessary for successful rule registration. Understanding and correctly implementing these invocations are crucial for integrating custom rules into your projects effectively.
+
+### Future Enhancements
+As our library of custom rules expands, we plan to enrich this section with real-world production rule examples. These examples will showcase a diverse range of rules addressing common development challenges. Once these production rules are published and available on nuget.org, we will update this documentation accordingly.
 
 # Build OM for Analyzers Authoring
 
