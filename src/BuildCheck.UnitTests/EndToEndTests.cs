@@ -2,8 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
+using System.Xml;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
@@ -134,40 +137,76 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
-    [InlineData("CustomAnalyzer", "AnalysisCandidate", new[] { "CustomRule1", "CustomRule2" })]
-    public void CustomAnalyzerTest(string customAnalyzerName, string analysisCandidate, string[] expectedRegisteredRules)
+    [InlineData(new[] { "CustomAnalyzer" }, "AnalysisCandidate", new[] { "CustomRule1", "CustomRule2" })]
+    [InlineData(new[] { "CustomAnalyzer", "CustomAnalyzer2" }, "AnalysisCandidateWithMultipleRulesInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" })]
+    public void CustomAnalyzerTest(string[] customAnalyzerNames, string analysisCandidate, string[] expectedRegisteredRules)
     {
         using (var env = TestEnvironment.Create())
         {
-            var candidateAnalysisProjectPath = Path.Combine(TestAssetsRootPath, customAnalyzerName, $"{customAnalyzerName}.csproj");
-            string candidateAnalysisBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
-                 $"{candidateAnalysisProjectPath} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path}", out bool success);
+            var candidatesNugetFullPaths = BuildAnalyzerRules(env, customAnalyzerNames);
 
-            if (success)
+            if (candidatesNugetFullPaths.Any())
             {
                 var analysisCandidatePath = Path.Combine(TestAssetsRootPath, analysisCandidate);
-                AddCustomDataSourceToNugetConfig(analysisCandidatePath, candidateAnalysisBuildLog);
+                AddCustomDataSourceToNugetConfig(analysisCandidatePath, candidatesNugetFullPaths);
 
-                string acBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                string projectAnalysisBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
                     $"{Path.Combine(analysisCandidatePath, $"{analysisCandidate}.csproj")} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path} -analyze -verbosity:d",
                     out bool _);
 
-                foreach (var expectedRegisteredRule in expectedRegisteredRules)
+                foreach (string expectedRegisteredRule in expectedRegisteredRules)
                 {
-                    acBuildLog.ShouldContain($"Custom analyzer rule: {expectedRegisteredRule} has been registered successfully.");
+                    projectAnalysisBuildLog.ShouldContain($"Custom analyzer rule: {expectedRegisteredRule} has been registered successfully.");
                 }
             }
         }
     }
 
-    private void AddCustomDataSourceToNugetConfig(string analysisCandidatePath, string candidateAnalysisBuildLog)
+    private IList<string> BuildAnalyzerRules(TestEnvironment env, string[] customAnalyzerNames)
     {
-        var candidatesNugetPackageFullPath = Regex.Match(candidateAnalysisBuildLog, @"Successfully created package '(.*?)'").Groups[1].Value;
-        string pathToCustomDataSource = Path.GetDirectoryName(candidatesNugetPackageFullPath) ?? string.Empty;
+        var candidatesNugetFullPaths = new List<string>();
+
+        foreach (var customAnalyzerName in customAnalyzerNames)
+        {
+            var candidateAnalysisProjectPath = Path.Combine(TestAssetsRootPath, customAnalyzerName, $"{customAnalyzerName}.csproj");
+            string candidateAnalysisBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                 $"{candidateAnalysisProjectPath} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path}", out bool success);
+
+            var candidatesNugetPackageFullPath = Regex.Match(candidateAnalysisBuildLog, @"Successfully created package '(.*?)'").Groups[1].Value;
+            candidatesNugetFullPaths.Add(candidatesNugetPackageFullPath);
+        }
+
+        return candidatesNugetFullPaths;
+    }
+
+    private void AddCustomDataSourceToNugetConfig(string analysisCandidatePath, IList<string> candidatesNugetPackageFullPaths)
+    {
         var nugetTemplatePath = Path.Combine(analysisCandidatePath, "nugetTemplate.config");
 
-        File.WriteAllText(
-            Path.Combine(analysisCandidatePath, "nuget.config"),
-            File.ReadAllText(nugetTemplatePath).Replace("LocalPackageSourcePlaceholder", pathToCustomDataSource));
+        var doc = new XmlDocument();
+        doc.Load(nugetTemplatePath);
+
+        XmlNode packageSourcesNode = doc.SelectSingleNode("//packageSources");
+        for (var i = 0; i < candidatesNugetPackageFullPaths.Count; i++)
+        {
+            AddPackageSource(doc, packageSourcesNode, $"Key{i}", Path.GetDirectoryName(candidatesNugetPackageFullPaths[i]));
+        }
+
+        doc.Save(Path.Combine(analysisCandidatePath, "nuget.config"));
+    }
+
+    private static void AddPackageSource(XmlDocument doc, XmlNode packageSourcesNode, string key, string value)
+    {
+        var addNode = doc.CreateElement("add");
+
+        var keyAttribute = doc.CreateAttribute("key");
+        keyAttribute.Value = key;
+        addNode.Attributes.Append(keyAttribute);
+
+        var valueAttribute = doc.CreateAttribute("value");
+        valueAttribute.Value = value;
+        addNode.Attributes.Append(valueAttribute);
+
+        packageSourcesNode.AppendChild(addNode);
     }
 }
