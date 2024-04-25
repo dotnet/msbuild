@@ -3,9 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BuildCheck.Acquisition;
 using Microsoft.Build.BuildCheck.Logging;
@@ -16,36 +13,51 @@ namespace Microsoft.Build.BuildCheck.Infrastructure;
 
 internal class NullBuildCheckManager : IBuildCheckManager
 {
-    public void Shutdown() { }
+    public void Shutdown()
+    {
+    }
 
-    public void ProcessEvaluationFinishedEventArgs(AnalyzerLoggingContext buildAnalysisContext,
+    public void ProcessEvaluationFinishedEventArgs(
+        AnalyzerLoggingContext buildAnalysisContext,
         ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs)
-    { }
+    {
+    }
 
-    public void SetDataSource(BuildCheckDataSource buildCheckDataSource) { }
-    public void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData) { }
+    public void SetDataSource(BuildCheckDataSource buildCheckDataSource)
+    {
+    }
+
+    public void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, BuildEventContext buildEventContext) 
+    {
+    }
 
     public void FinalizeProcessing(LoggingContext loggingContext)
-    { }
+    {
+    }
 
-    public void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext,
-        string fullPath)
-    { }
+    public void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext, string fullPath)
+    {
+    }
 
     public void EndProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
-    { }
+    {
+    }
 
     public void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
-    { }
+    {
+    }
 
     public void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
-    { }
+    {
+    }
 
     public void YieldProject(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
-    { }
+    {
+    }
 
     public void ResumeProject(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
-    { }
+    {
+    }
 
     public Dictionary<string, TimeSpan> CreateAnalyzerTracingStats() => new Dictionary<string, TimeSpan>();
 }

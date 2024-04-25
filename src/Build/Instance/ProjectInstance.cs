@@ -258,6 +258,23 @@ namespace Microsoft.Build.Execution
         /// Creates a ProjectInstance directly.
         /// No intermediate Project object is created.
         /// This is ideal if the project is simply going to be built, and not displayed or edited.
+        /// </summary>
+        /// <param name="projectFile">The path to the project file.</param>
+        /// <param name="globalProperties">The global properties to use.</param>
+        /// <param name="toolsVersion">The tools version. May be <see langword="null"/>.</param>
+        /// <param name="subToolsetVersion">The sub-toolset version, used in tandem with <paramref name="toolsVersion"/> to determine the set of toolset properties. May be <see langword="null"/>.</param>
+        /// <param name="projectCollection">Project collection</param>
+        /// <param name="context">Context to evaluate inside, potentially sharing caches with other evaluations.</param>
+        /// <param name="interactive">Indicates if loading the project is allowed to interact with the user.</param>
+        internal ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, EvaluationContext context, bool interactive = false)
+            : this(projectFile, globalProperties, toolsVersion, subToolsetVersion, projectCollection, projectLoadSettings: null, evaluationContext: context, directoryCacheFactory: null, interactive: interactive)
+        {
+        }
+
+        /// <summary>
+        /// Creates a ProjectInstance directly.
+        /// No intermediate Project object is created.
+        /// This is ideal if the project is simply going to be built, and not displayed or edited.
         /// Global properties may be null.
         /// Tools version may be null.
         /// Evaluation context may be null.

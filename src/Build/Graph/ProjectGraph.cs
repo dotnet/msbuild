@@ -13,6 +13,7 @@ using System.Threading;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
@@ -57,6 +58,8 @@ namespace Microsoft.Build.Graph
             ProjectCollection projectCollection);
 
         private readonly Lazy<IReadOnlyCollection<ProjectGraphNode>> _projectNodesTopologicallySorted;
+
+        private readonly EvaluationContext _evaluationContext = null;
 
         private GraphBuilder.GraphEdges Edges { get; }
 
@@ -422,7 +425,11 @@ namespace Microsoft.Build.Graph
 
             var measurementInfo = BeginMeasurement();
 
-            projectInstanceFactory ??= DefaultProjectInstanceFactory;
+            if (projectInstanceFactory is null)
+            {
+                _evaluationContext = EvaluationContext.Create(EvaluationContext.SharingPolicy.Shared);
+                projectInstanceFactory = DefaultProjectInstanceFactory;
+            }
 
             var graphBuilder = new GraphBuilder(
                 entryPoints,
@@ -825,16 +832,33 @@ namespace Microsoft.Build.Graph
             return targets;
         }
 
-        internal static ProjectInstance DefaultProjectInstanceFactory(
+        internal ProjectInstance DefaultProjectInstanceFactory(
             string projectPath,
             Dictionary<string, string> globalProperties,
             ProjectCollection projectCollection)
+        {
+            Debug.Assert(_evaluationContext is not null);
+
+            return StaticProjectInstanceFactory(
+                                projectPath,
+                                globalProperties,
+                                projectCollection,
+                                _evaluationContext);
+        }
+
+        internal static ProjectInstance StaticProjectInstanceFactory(
+            string projectPath,
+            Dictionary<string, string> globalProperties,
+            ProjectCollection projectCollection,
+            EvaluationContext evaluationContext)
         {
             return new ProjectInstance(
                 projectPath,
                 globalProperties,
                 MSBuildConstants.CurrentToolsVersion,
-                projectCollection);
+                subToolsetVersion: null,
+                projectCollection,
+                evaluationContext);
         }
 
         private struct ProjectGraphBuildRequest : IEquatable<ProjectGraphBuildRequest>
