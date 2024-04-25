@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Globalization;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
@@ -626,6 +627,12 @@ namespace Microsoft.Build.Evaluation
         internal static bool AreFeaturesEnabled(Version wave)
         {
             return ChangeWaves.AreFeaturesEnabled(wave);
+        }
+
+        internal static string SubstringByTextElements(string input, int start, int length)
+        {
+            StringInfo stringInfo = new StringInfo(input);
+            return stringInfo.SubstringByTextElements(start, length);
         }
 
         internal static string CheckFeatureAvailability(string featureName)

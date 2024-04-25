@@ -4382,6 +4382,18 @@ $(
             Assert.Equal(availability, result);
         }
 
+        [Theory]
+        [InlineData("\u3407\ud840\udc60\ud86a\ude30\ud86e\udc0a\ud86e\udda0\ud879\udeae\u2fd5\u0023", 0, 3, "\u3407\ud840\udc60\ud86a\ude30")]
+        [InlineData("\u3407\ud840\udc60\ud86a\ude30\ud86e\udc0a\ud86e\udda0\ud879\udeae\u2fd5\u0023", 2, 5, "\ud86a\ude30\ud86e\udc0a\ud86e\udda0\ud879\udeae\u2fd5")]
+        public void SubstringByTextElements(string featureName, int start, int length, string expected)
+        {
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default);
+
+            var result = expander.ExpandIntoStringLeaveEscaped($"$([MSBuild]::SubstringByTextElements({featureName}, {start}, {length}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            Assert.Equal(expected, result);
+        }
+
         [Fact]
         public void PropertyFunctionIntrinsicFunctionGetCurrentToolsDirectory()
         {
