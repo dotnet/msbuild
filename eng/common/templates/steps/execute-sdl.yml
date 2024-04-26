@@ -33,7 +33,7 @@ steps:
 
 - ${{ if ne(parameters.overrideParameters, '') }}:
   - powershell: ${{ parameters.executeAllSdlToolsScript }} ${{ parameters.overrideParameters }}
-    displayName: Execute SDL (Overridden)
+    displayName: Execute SDL
     continueOnError: ${{ parameters.sdlContinueOnError }}
     condition: ${{ parameters.condition }}
 

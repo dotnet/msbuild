@@ -1,13 +1,16 @@
 parameters:
   runAsPublic: false
-  sourceIndexPackageVersion: 1.0.1-20230228.2
+  sourceIndexPackageVersion: 1.0.1-20240320.1
   sourceIndexPackageSource: https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools/nuget/v3/index.json
   sourceIndexBuildCommand: powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -Command "eng/common/build.ps1 -restore -build -binarylog -ci"
   preSteps: []
   binlogPath: artifacts/log/Debug/Build.binlog
+  pool:
+    name: NetCore1ESPool-Svc-Internal
+    image: 1es-windows-2022
+    os: windows
   condition: ''
   dependsOn: ''
-  pool: ''
 
 jobs:
 - job: SourceIndexStage1
@@ -22,29 +25,17 @@ jobs:
     value: ${{ parameters.binlogPath }}
   - ${{ if and(eq(parameters.runAsPublic, 'false'), ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     - group: source-dot-net stage1 variables
-  - template: /eng/common/templates-official/variables/pool-providers.yml
 
-  ${{ if ne(parameters.pool, '') }}:
-    pool: ${{ parameters.pool }}
-  ${{ if eq(parameters.pool, '') }}:
-    pool:
-      ${{ if eq(variables['System.TeamProject'], 'public') }}:
-        name: $(DncEngPublicBuildPool)
-        demands: ImageOverride -equals windows.vs2019.amd64.open
-      ${{ if eq(variables['System.TeamProject'], 'internal') }}:
-        name: $(DncEngInternalBuildPool)
-        image: 1es-windows-2022-pt
-        os: windows
-
+  pool: ${{ parameters.pool }}
   steps:
   - ${{ each preStep in parameters.preSteps }}:
     - ${{ preStep }}
 
   - task: UseDotNet@2
-    displayName: Use .NET Core SDK 6
+    displayName: Use .NET 8 SDK
     inputs:
       packageType: sdk
-      version: 6.0.x
+      version: 8.0.x
       installationPath: $(Agent.TempDirectory)/dotnet
       workingDirectory: $(Agent.TempDirectory)
 

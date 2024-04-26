@@ -14,7 +14,6 @@ parameters:
   ReusePr: true
   UseLfLineEndings: true
   UseCheckedInLocProjectJson: false
-  SkipLocProjectJsonGeneration: false
   LanguageSet: VS_Main_Languages
   LclSource: lclFilesInRepo
   LclPackageId: ''
@@ -23,25 +22,13 @@ parameters:
   MirrorRepo: ''
   MirrorBranch: main
   condition: ''
-  JobNameSuffix: ''
 
 jobs:
-- job: OneLocBuild${{ parameters.JobNameSuffix }}
+- job: OneLocBuild
   
   dependsOn: ${{ parameters.dependsOn }}
 
-  displayName: OneLocBuild${{ parameters.JobNameSuffix }}
-
-  variables:
-    - group: OneLocBuildVariables # Contains the CeapexPat and GithubPat
-    - name: _GenerateLocProjectArguments
-      value: -SourcesDirectory ${{ parameters.SourcesDirectory }}
-        -LanguageSet "${{ parameters.LanguageSet }}"
-        -CreateNeutralXlfs
-    - ${{ if eq(parameters.UseCheckedInLocProjectJson, 'true') }}:
-      - name: _GenerateLocProjectArguments
-        value: ${{ variables._GenerateLocProjectArguments }} -UseCheckedInLocProjectJson
-    - template: /eng/common/templates/variables/pool-providers.yml
+  displayName: OneLocBuild
 
   ${{ if ne(parameters.pool, '') }}:
     pool: ${{ parameters.pool }}
@@ -53,17 +40,27 @@ jobs:
         demands: Cmd
       # If it's not devdiv, it's dnceng
       ${{ if ne(variables['System.TeamProject'], 'DevDiv') }}:
-        name: $(DncEngInternalBuildPool)
+        name: NetCore1ESPool-Svc-Internal
         demands: ImageOverride -equals windows.vs2019.amd64
 
+  variables:
+    - group: OneLocBuildVariables # Contains the CeapexPat and GithubPat
+    - name: _GenerateLocProjectArguments
+      value: -SourcesDirectory ${{ parameters.SourcesDirectory }}
+        -LanguageSet "${{ parameters.LanguageSet }}"
+        -CreateNeutralXlfs
+    - ${{ if eq(parameters.UseCheckedInLocProjectJson, 'true') }}:
+      - name: _GenerateLocProjectArguments
+        value: ${{ variables._GenerateLocProjectArguments }} -UseCheckedInLocProjectJson
+      
+
   steps:
-    - ${{ if ne(parameters.SkipLocProjectJsonGeneration, 'true') }}:
-      - task: Powershell@2
-        inputs:
-          filePath: $(Build.SourcesDirectory)/eng/common/generate-locproject.ps1
-          arguments: $(_GenerateLocProjectArguments)
-        displayName: Generate LocProject.json
-        condition: ${{ parameters.condition }}
+    - task: Powershell@2
+      inputs:
+        filePath: $(Build.SourcesDirectory)/eng/common/generate-locproject.ps1
+        arguments: $(_GenerateLocProjectArguments)
+      displayName: Generate LocProject.json
+      condition: ${{ parameters.condition }}
 
     - task: OneLocBuild@2
       displayName: OneLocBuild
@@ -75,8 +72,8 @@ jobs:
         lclSource: ${{ parameters.LclSource }}
         lclPackageId: ${{ parameters.LclPackageId }}
         isCreatePrSelected: ${{ parameters.CreatePr }}
-        isAutoCompletePrSelected: ${{ parameters.AutoCompletePr }}
         ${{ if eq(parameters.CreatePr, true) }}:
+          isAutoCompletePrSelected: ${{ parameters.AutoCompletePr }}
           isUseLfLineEndingsSelected: ${{ parameters.UseLfLineEndings }}
           ${{ if eq(parameters.RepoType, 'gitHub') }}:
             isShouldReusePrSelected: ${{ parameters.ReusePr }}

@@ -17,9 +17,7 @@ Param(
   # Optional: Additional params to add to any tool using PoliCheck.
   [string[]] $PoliCheckAdditionalRunConfigParams,
   # Optional: Additional params to add to any tool using CodeQL/Semmle.
-  [string[]] $CodeQLAdditionalRunConfigParams,
-  # Optional: Additional params to add to any tool using Binskim.
-  [string[]] $BinskimAdditionalRunConfigParams
+  [string[]] $CodeQLAdditionalRunConfigParams
 )
 
 $ErrorActionPreference = 'Stop'
@@ -71,34 +69,22 @@ try {
     $gdnConfigFile = Join-Path $gdnConfigPath "$toolConfigName-configure.gdnconfig"
 
     # For some tools, add default and automatic args.
-    switch -Exact ($tool.Name) {
-      'credscan' {
-        if ($targetDirectory) {
-          $tool.Args += "`"TargetDirectory < $TargetDirectory`""
-        }
-        $tool.Args += "`"OutputType < pre`""
-        $tool.Args += $CrScanAdditionalRunConfigParams
+    if ($tool.Name -eq 'credscan') {
+      if ($targetDirectory) {
+        $tool.Args += "TargetDirectory < $TargetDirectory"
       }
-      'policheck' {
-        if ($targetDirectory) {
-          $tool.Args += "`"Target < $TargetDirectory`""
-        }
-        $tool.Args += $PoliCheckAdditionalRunConfigParams
+      $tool.Args += "OutputType < pre"
+      $tool.Args += $CrScanAdditionalRunConfigParams
+    } elseif ($tool.Name -eq 'policheck') {
+      if ($targetDirectory) {
+        $tool.Args += "Target < $TargetDirectory"
       }
-      {$_ -in 'semmle', 'codeql'} {
-        if ($targetDirectory) {
-          $tool.Args += "`"SourceCodeDirectory < $TargetDirectory`""
-        }
-        $tool.Args += $CodeQLAdditionalRunConfigParams
+      $tool.Args += $PoliCheckAdditionalRunConfigParams
+    } elseif ($tool.Name -eq 'semmle' -or $tool.Name -eq 'codeql') {
+      if ($targetDirectory) {
+        $tool.Args += "`"SourceCodeDirectory < $TargetDirectory`""
       }
-      'binskim' {
-        if ($targetDirectory) {
-          # Binskim crashes due to specific PDBs. GitHub issue: https://github.com/microsoft/binskim/issues/924.
-          # We are excluding all `_.pdb` files from the scan.
-          $tool.Args += "`"Target < $TargetDirectory\**;-:file|$TargetDirectory\**\_.pdb`""
-        }
-        $tool.Args += $BinskimAdditionalRunConfigParams
-      }
+      $tool.Args += $CodeQLAdditionalRunConfigParams
     }
 
     # Create variable pointing to the args array directly so we can use splat syntax later.
