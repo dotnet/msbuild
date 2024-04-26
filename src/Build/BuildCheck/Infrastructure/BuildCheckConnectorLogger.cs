@@ -140,7 +140,14 @@ internal sealed class BuildCheckConnectorLogger : ILogger
         { typeof(ProjectEvaluationStartedEventArgs), (BuildEventArgs e) => HandleProjectEvaluationStartedEvent((ProjectEvaluationStartedEventArgs) e) },
         { typeof(ProjectStartedEventArgs), (BuildEventArgs e) => _buildCheckManager.StartProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!) },
         { typeof(ProjectFinishedEventArgs), (BuildEventArgs e) => _buildCheckManager.EndProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!) },
-        { typeof(BuildCheckTracingEventArgs), (BuildEventArgs e) => _stats.Merge(((BuildCheckTracingEventArgs)e).TracingData, (span1, span2) => span1 + span2) },
+        { typeof(BuildCheckTracingEventArgs), (BuildEventArgs e) => 
+        {
+            if(!((BuildCheckTracingEventArgs)e).IsAggregatedGlobalReport)
+            {
+                _stats.Merge(((BuildCheckTracingEventArgs)e).TracingData, (span1, span2) => span1 + span2);
+            }
+        }
+        },
         { typeof(BuildCheckAcquisitionEventArgs), (BuildEventArgs e) => _buildCheckManager.ProcessAnalyzerAcquisition(((BuildCheckAcquisitionEventArgs)e).ToAnalyzerAcquisitionData(), e.BuildEventContext!) },
     };
 }
