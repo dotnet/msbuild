@@ -156,20 +156,21 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    if (initialTargets.Contains(targetName))
+                    TargetBuiltReason buildReason = TargetBuiltReason.None;
+                    if (entry.Request.Targets.Contains(targetName))
                     {
-                        targets.Add(new TargetSpecification(
-                            targetName,
-                            targetExists ? targetInstance.Location : _projectInstance.ProjectFileLocation,
-                            TargetBuiltReason.InitialTarget));
-                    } else if (defaultTargets.Contains(targetName))
-                    {
-                        targets.Add(new TargetSpecification(
-                            targetName,
-                            targetExists ? targetInstance.Location : _projectInstance.ProjectFileLocation,
-                            TargetBuiltReason.DefaultTarget));
+                        buildReason = TargetBuiltReason.EntryTarget;
                     }
-                    targets.Add(new TargetSpecification(targetName, targetExists ? targetInstance.Location : _projectInstance.ProjectFileLocation));
+                    else if (initialTargets.Contains(targetName))
+                    {
+                        buildReason = TargetBuiltReason.InitialTarget;
+                    } 
+                    else if (defaultTargets.Contains(targetName))
+                    {
+                        buildReason = TargetBuiltReason.DefaultTarget;
+                    }
+
+                    targets.Add(new TargetSpecification(targetName, targetExists ? targetInstance.Location : _projectInstance.ProjectFileLocation, buildReason));
                 }
             }
 

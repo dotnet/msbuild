@@ -32,6 +32,8 @@ namespace Microsoft.Build.Framework
 
         InitialTarget,
 
-        DefaultTarget
+        DefaultTarget,
+
+        EntryTarget
     }
 }
