@@ -618,7 +618,7 @@ Chyby: {3}</target>
       </trans-unit>
       <trans-unit id="TaskAssemblyLocationMismatch">
         <source>Task assembly was loaded from '{0}' while the desired location was '{1}'.</source>
-        <target state="new">Task assembly was loaded from '{0}' while the desired location was '{1}'.</target>
+        <target state="translated">Sestavení úlohy bylo načteno z{0}, ale požadované umístění bylo{1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
