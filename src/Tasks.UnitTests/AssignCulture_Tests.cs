@@ -287,7 +287,7 @@ namespace Microsoft.Build.UnitTests
         /// Any pre-existing Culture attribute on the item is not to be respected, because culture is not set
         /// </summary>
         [Fact]
-        public void CultureMetaDataShouldNoBeRespected()
+        public void CultureMetaDataShouldNotBeRespected()
         {
             AssignCulture t = new AssignCulture();
             t.BuildEngine = new MockEngine();
