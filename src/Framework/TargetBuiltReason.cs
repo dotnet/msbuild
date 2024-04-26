@@ -30,10 +30,20 @@ namespace Microsoft.Build.Framework
         /// </summary>
         AfterTargets,
 
+        /// <summary>
+        /// The target was defined as an initial target of the project.
+        /// </summary>
         InitialTarget,
 
+
+        /// <summary>
+        /// The target was the default target of the project
+        /// </summary>
         DefaultTarget,
 
+        /// <summary>
+        /// The target was the target explicitly called to be built.
+        /// </summary>
         EntryTarget
     }
 }
