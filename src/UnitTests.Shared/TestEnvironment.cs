@@ -53,6 +53,10 @@ namespace Microsoft.Build.UnitTests
                 env.WithInvariant(new BuildFailureLogInvariant());
             }
 
+            // Clear these two environment variables first in case pre-setting affects the test.
+            env.SetEnvironmentVariable("MSBUILDLIVELOGGER", null);
+            env.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", null);
+
             return env;
         }
 
@@ -83,10 +87,10 @@ namespace Microsoft.Build.UnitTests
             {
                 _disposed = true;
 
-                // Reset test variants
-                foreach (var variant in _variants)
+                // Reset test variants in reverse order to get back to original state.
+                for (int i = _variants.Count - 1; i >= 0; i--)
                 {
-                    variant.Revert();
+                    _variants[i].Revert();
                 }
 
                 // Assert invariants
@@ -262,6 +266,17 @@ namespace Microsoft.Build.UnitTests
         public TransientTestFile ExpectFile(string extension = ".tmp")
         {
             return WithTransientTestState(new TransientTestFile(extension, createFile: false, expectedAsOutput: true));
+        }
+
+        /// <summary>
+        ///     Create a temp file name that is expected to exist under specified folder when the test completes.
+        /// </summary>
+        /// <param name="folderPath">Folder path of the file.</param>
+        /// <param name="extension">Extension of the file (defaults to '.tmp')</param>
+        /// <returns></returns>
+        public TransientTestFile ExpectFile(string folderPath, string extension = ".tmp")
+        {
+            return WithTransientTestState(new TransientTestFile(folderPath, extension, createFile: false, expectedAsOutput: true));
         }
 
         /// <summary>

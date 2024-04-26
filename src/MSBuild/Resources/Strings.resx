@@ -1222,6 +1222,14 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>
+  <data name="MissingGetResultFileError" xml:space="preserve">
+    <value>MSBUILD : error MSB1068: Must provide a file for the getResultOutputFile switch.</value>
+    <comment>
+      {StrBegin="MSBUILD : error MSB1068: "}UE: This happens if the user does something like "msbuild.exe -getResultOutputFile". The user must pass in an actual file
+      following the switch, as in "msbuild.exe -getTargetResult:blah -getResultOutputFile:blah.txt".
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </comment>
+  </data>
   <data name="SolutionBuildInvalidForCommandLineEvaluation" xml:space="preserve">
     <value>MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</value>
     <comment>
@@ -1624,13 +1632,19 @@
     </comment>
   </data>
   <data name="BuildResult_FailedWithErrors" xml:space="preserve">
-    <value>failed with errors</value>
+    <value>failed with {0} error(s)</value>
+    <comment>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="BuildResult_FailedWithErrorsAndWarnings" xml:space="preserve">
+    <value>failed with {0} error(s) and {1} warning(s)</value>
     <comment>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </comment>
   </data>
   <data name="BuildResult_FailedWithWarnings" xml:space="preserve">
-    <value>failed with warnings</value>
+    <value>failed with {0} warning(s)</value>
     <comment>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </comment>
@@ -1648,7 +1662,7 @@
     </comment>
   </data>
   <data name="BuildResult_SucceededWithWarnings" xml:space="preserve">
-    <value>succeeded with warnings</value>
+    <value>succeeded with {0} warning(s)</value>
     <comment>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </comment>
@@ -1729,7 +1743,7 @@
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1068.
+        Next error code should be MSB1069.
 
         Don't forget to update this comment after using the new code.
   -->

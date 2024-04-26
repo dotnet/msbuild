@@ -1160,7 +1160,7 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="Folder" type="msb:SimpleItemType" substitutionGroup="msb:Item">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="Folder" _locComment="" -->Folder on disk</xs:documentation>
+            <xs:documentation><!-- _locID_text="Folder" _locComment="" -->Used by Visual Studio to identify an empty folder.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="Import" type="msb:SimpleItemType" substitutionGroup="msb:Item">

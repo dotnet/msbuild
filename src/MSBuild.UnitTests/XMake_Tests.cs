@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Build.CommandLine;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
@@ -834,6 +835,10 @@ namespace Microsoft.Build.UnitTests
             success.ShouldBeTrue();
             File.Exists(resultFile).ShouldBeTrue();
             File.ReadAllText(resultFile).ShouldContain(result);
+
+            result = RunnerUtilities.ExecMSBuild($" {project.Path} {extraSwitch} -getResultOutputFile:", out success);
+            success.ShouldBeFalse();
+            result.ShouldContain("MSB1068");
         }
 
         [Theory]
@@ -890,6 +895,7 @@ namespace Microsoft.Build.UnitTests
 
             // Restore the current UI culture back to the way it was at the beginning of this unit test.
             thisThread.CurrentUICulture = originalUICulture;
+            MSBuildApp.SetConsoleUI();
         }
 
 
@@ -2606,6 +2612,41 @@ EndGlobal
         }
 
         [Theory]
+        [InlineData("", true)]
+        [InlineData("/tl:true", false)]
+        [InlineData("/nologo", false)]
+        [InlineData("/getProperty:p", false)]
+        public void EndToEndVersionMessage(string arguments, bool shouldContainVersionMessage)
+        {
+            using TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create();
+
+            string projectContents = ObjectModelHelpers.CleanupFileContents("""
+                                                                            <Project>
+                                                                                <Target Name="Hello">
+                                                                                </Target>
+                                                                            </Project>
+                                                                            """);
+
+            TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents);
+
+            string output = RunnerUtilities.ExecMSBuild($"{arguments} \"{testProject.ProjectFile}\"", out bool success, _output);
+            success.ShouldBeTrue();
+
+            string expectedVersionString =
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildVersionMessage",
+                    ProjectCollection.DisplayVersion, NativeMethodsShared.FrameworkName);
+
+            if (shouldContainVersionMessage)
+            {
+                output.ShouldContain(expectedVersionString);
+            }
+            else
+            {
+                output.ShouldNotContain(expectedVersionString);
+            }
+        }
+
+        [Theory]
         [InlineData("/v:diagnostic", MessageImportance.Low)]
         [InlineData("/v:detailed", MessageImportance.Low)]
         [InlineData("/v:normal", MessageImportance.Normal)]
@@ -2616,6 +2657,11 @@ EndGlobal
         [InlineData("/v:normal /bl", MessageImportance.Low)] // v:normal but with binary logger so everything must be logged
         [InlineData("/v:minimal /bl", MessageImportance.Low)] // v:minimal but with binary logger so everything must be logged
         [InlineData("/v:quiet /bl", MessageImportance.Low)] // v:quiet but with binary logger so everything must be logged
+        [InlineData("/v:diagnostic /analyze", MessageImportance.Low)]
+        [InlineData("/v:detailed /analyze", MessageImportance.Low)]
+        [InlineData("/v:normal /analyze", MessageImportance.Low)] // v:normal but with analyzers so everything must be logged
+        [InlineData("/v:minimal /analyze", MessageImportance.Low)] // v:minimal but with analyzers so everything must be logged
+        [InlineData("/v:quiet /analyze", MessageImportance.Low)] // v:quiet but with analyzers so everything must be logged
         public void EndToEndMinimumMessageImportance(string arguments, MessageImportance expectedMinimumMessageImportance)
         {
             using TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create();

@@ -18,6 +18,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
+using Shouldly;
 using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -1048,6 +1050,80 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 """);
             ml.AssertLogContains("a=b");
         }
+
+        [Theory]
+        [InlineData(typeof(OutOfMemoryException), true)]
+        [InlineData(typeof(ArgumentException), false)]
+        public void TaskExceptionHandlingTest(Type exceptionType, bool isCritical)
+        {
+            string testExceptionMessage = "Test Message";
+            string customTaskPath = Assembly.GetExecutingAssembly().Location;
+            MockLogger ml = new MockLogger() { AllowTaskCrashes = true };
+
+            using TestEnvironment env = TestEnvironment.Create();
+            var debugFolder = env.CreateFolder();
+            // inject the location for failure logs - not to interact with other tests
+            env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugFolder.Path);
+            // Force initing the DebugPath from the env var - as we need it to be unique for those tests.
+            // The ProjectCacheTests DataMemberAttribute usages (specifically SuccessfulGraphsWithBuildParameters) lead
+            //  to the DebugPath being set before this test runs - and hence the env var is ignored.
+            DebugUtils.SetDebugPath();
+
+            ObjectModelHelpers.BuildProjectExpectFailure($"""
+                     <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                         <UsingTask TaskName=`TaskThatThrows` AssemblyFile=`{customTaskPath}`/>
+                         <Target Name=`Build`>
+                            <TaskThatThrows ExceptionType="{exceptionType.ToString()}" ExceptionMessage="{testExceptionMessage}">
+                             </TaskThatThrows>
+                         </Target>
+                     </Project>
+                  """,
+                ml);
+            // 'This is an unhandled exception from a task'
+            ml.AssertLogContains("MSB4018");
+            // 'An internal failure occurred while running MSBuild'
+            ml.AssertLogDoesntContain("MSB1025");
+            // 'This is an unhandled error in MSBuild'
+            ml.AssertLogDoesntContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("UnhandledMSBuildError", string.Empty));
+            ml.AssertLogContains(testExceptionMessage);
+
+            File.Exists(ExceptionHandling.DumpFilePath).ShouldBe(isCritical,
+                $"{ExceptionHandling.DumpFilePath} expected to exist: {isCritical}");
+            if (isCritical)
+            {
+                FileUtilities.DeleteNoThrow(ExceptionHandling.DumpFilePath);
+            }
+        }
+
+        [Fact]
+        public void TestTaskParameterLogging()
+        {
+            string customTaskPath = Assembly.GetExecutingAssembly().Location;
+            MockLogger ml = ObjectModelHelpers.BuildProjectExpectSuccess($"""
+                    <Project>
+                        <UsingTask TaskName=`TaskThatReturnsDictionaryTaskItem` AssemblyFile=`{customTaskPath}`/>
+                        <ItemGroup>
+                            <MyItem Include="item1"/>
+                            <MyItem Include="item2"/>
+                        </ItemGroup>
+                        <Target Name=`Build`>
+                           <TaskThatReturnsDictionaryTaskItem Key="a" Value="b" AdditionalParameters="@(MyItem)" />
+                        </Target>
+                    </Project>
+                """);
+
+            // Each parameter should be logged as TaskParameterEvent.
+            ml.TaskParameterEvents.Count.ShouldBe(3);
+            IList<string> messages = ml.TaskParameterEvents.Select(e => e.Message).ToList();
+            messages.ShouldContain($"{ItemGroupLoggingHelper.TaskParameterPrefix}Key=a");
+            messages.ShouldContain($"{ItemGroupLoggingHelper.TaskParameterPrefix}Value=b");
+            messages.ShouldContain($"{ItemGroupLoggingHelper.TaskParameterPrefix}\n    AdditionalParameters=\n        item1\n        item2");
+
+            // Parameters should not be logged as messages.
+            messages = ml.BuildMessageEvents.Select(e => e.Message).ToList();
+            messages.ShouldNotContain(m => m.StartsWith(ItemGroupLoggingHelper.TaskParameterPrefix));
+        }
+
         #endregion
 
         #region ITestTaskHost Members
