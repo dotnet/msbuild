@@ -3244,6 +3244,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="SplitResourcesByCulture"
       DependsOnTargets="AssignTargetPaths">
 
+    <PropertyGroup>
+      <RespectAlreadyAssignedItemCulture Condition="'$(RespectAlreadyAssignedItemCulture)' == ''">false</RespectAlreadyAssignedItemCulture>
+    </PropertyGroup>
+
     <Warning Condition="'@(ResxWithNoCulture)'!=''" Code="MSB9000" Text="ResxWithNoCulture item type is deprecated. Use EmbeddedResource items instead."/>
     <Warning Condition="'@(ResxWithCulture)'!=''" Code="MSB9001" Text="ResxWithCulture item type is deprecated. Use EmbeddedResource items instead."/>
     <Warning Condition="'@(NonResxWithCulture)'!=''" Code="MSB9002" Text="NonResxWithCulture item type is deprecated. Use EmbeddedResource items instead."/>
@@ -3261,7 +3265,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </EmbeddedResource>
     </ItemGroup>
 
-    <AssignCulture Files="@(EmbeddedResource)" Condition="'%(Extension)'!='.licx'">
+    <AssignCulture Files="@(EmbeddedResource)" Condition="'%(Extension)'!='.licx'"  RespectAlreadyAssignedItemCulture="$(RespectAlreadyAssignedItemCulture)">
       <!-- Create the list of culture resx and embedded resource files -->
       <Output TaskParameter="AssignedFilesWithCulture" ItemName="_MixedResourceWithCulture"/>
       <!-- Create the list of non-culture resx and embedded resource files -->
