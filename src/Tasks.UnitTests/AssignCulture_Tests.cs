@@ -181,7 +181,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Test the usage of Windows Pseudo-Locales
-        /// * https://docs.microsoft.com/en-gb/windows/desktop/Intl/pseudo-locales
+        /// https://docs.microsoft.com/en-gb/windows/desktop/Intl/pseudo-locales
         /// </summary>
         /// <param name="culture"></param>
         [Theory]
