@@ -209,22 +209,22 @@
       </trans-unit>
       <trans-unit id="CustomAnalyzerAssemblyNotExist">
         <source>Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</source>
-        <target state="new">Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</target>
+        <target state="translated">Nepodařilo se najít zadané sestavení vlastního analyzátoru: {0}. Zkontrolujte prosím, jestli existuje.</target>
         <note>The message is emitted when the custom analyzer assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedAcquisition">
         <source>Failed to register the custom analyzer: {0}.</source>
-        <target state="new">Failed to register the custom analyzer: {0}.</target>
+        <target state="translated">Nepodařilo se zaregistrovat vlastní analyzátor: {0}.</target>
         <note>The message is emitted on failed loading of the custom analyzer in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedRuleLoading">
         <source>Failed to instantiate the custom analyzer rule with the following exception: {0}.</source>
-        <target state="new">Failed to instantiate the custom analyzer rule with the following exception: {0}.</target>
+        <target state="translated">Nepovedlo se vytvořit instanci pravidla vlastního analyzátoru s následující výjimkou: {0}.</target>
         <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
         <source>Custom analyzer rule: {0} has been registered successfully.</source>
-        <target state="new">Custom analyzer rule: {0} has been registered successfully.</target>
+        <target state="translated">Pravidlo vlastního analyzátoru: {0} se úspěšně zaregistrovalo.</target>
         <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
