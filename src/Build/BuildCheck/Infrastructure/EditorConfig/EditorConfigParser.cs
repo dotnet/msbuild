@@ -39,6 +39,7 @@ namespace Microsoft.Build.BuildCheck.Infrastructure.EditorConfig
             var editorConfigDataFromFilesList = new List<EditorConfigFile>();
 
             var directoryOfTheProject = Path.GetDirectoryName(filePath);
+            // The method will look for the file in parent directory if not found in current until found or the directory is root. 
             var editorConfigFilePath = FileUtilities.GetPathOfFileAbove(EditorconfigFile, directoryOfTheProject);
 
             while (editorConfigFilePath != string.Empty)

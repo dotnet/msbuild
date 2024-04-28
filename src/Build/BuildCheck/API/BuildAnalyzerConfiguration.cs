@@ -54,13 +54,13 @@ public class BuildAnalyzerConfiguration
     /// </summary>
     /// <param name="configDictionary">The configuration dictionary containing the settings for the build analyzer. The configuration's keys are expected to be in lower case or the EqualityComparer to ignore case.</param>
     /// <returns>A new instance of <see cref="BuildAnalyzerConfiguration"/> with the specified settings.</returns>
-    public static BuildAnalyzerConfiguration Create(Dictionary<string, string>? configDictionary)
+    internal static BuildAnalyzerConfiguration Create(Dictionary<string, string>? configDictionary)
     {
         return new()
         {
-            EvaluationAnalysisScope = TryExtractValue(nameof(EvaluationAnalysisScope).ToLower(), configDictionary, out EvaluationAnalysisScope evaluationAnalysisScope) ? evaluationAnalysisScope : null,
-            Severity = TryExtractValue(nameof(Severity).ToLower(), configDictionary, out BuildAnalyzerResultSeverity severity) ? severity : null,
-            IsEnabled = TryExtractValue(nameof(IsEnabled).ToLower(), configDictionary, out bool isEnabled) ? isEnabled : null,
+            EvaluationAnalysisScope = TryExtractValue(nameof(EvaluationAnalysisScope), configDictionary, out EvaluationAnalysisScope evaluationAnalysisScope) ? evaluationAnalysisScope : null,
+            Severity = TryExtractValue(nameof(Severity), configDictionary, out BuildAnalyzerResultSeverity severity) ? severity : null,
+            IsEnabled = TryExtractValue(nameof(IsEnabled), configDictionary, out bool isEnabled) ? isEnabled : null,
         };
     }
 
@@ -68,7 +68,7 @@ public class BuildAnalyzerConfiguration
     {
         value = default;
 
-        if (config == null || !config.TryGetValue(key, out var stringValue) || stringValue is null)
+        if (config == null || !config.TryGetValue(key.ToLower(), out var stringValue) || stringValue is null)
         {
             return false;
         }
@@ -87,7 +87,7 @@ public class BuildAnalyzerConfiguration
     {
         value = default;
 
-        if (config == null || !config.TryGetValue(key, out var stringValue) || stringValue is null)
+        if (config == null || !config.TryGetValue(key.ToLower(), out var stringValue) || stringValue is null)
         {
             return false;
         }

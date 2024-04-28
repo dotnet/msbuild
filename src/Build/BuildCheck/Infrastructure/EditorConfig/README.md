@@ -44,8 +44,9 @@ The implementation differs depending on category:
  - Infra related config: Merges the configuration retrieved from configuration module with default values (respecting the specified configs in editorconfig) 
  - Custom configuration: Remove all infra related keys from dictionary
 
-Two levels of cache introduced: 
+Three levels of cache introduced: 
 - When retrieving and parsing the editor config -> Parsed results are saved into dictionary: editorconfigPath = ParsedEditorConfig
+- When retrieving and merging the editor config data for project -> Parsed and merged results are saved into dictionary: projectFilePath = MargedData of ParsedEditorConfig
 - When retrieving Infra related config: ruleId-projectPath = BuildConfigInstance
 
 Usage examples (API)

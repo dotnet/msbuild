@@ -3,15 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Text.Json;
-using Microsoft.Build.Experimental.BuildCheck;
-using System.Configuration;
 using Microsoft.Build.BuildCheck.Infrastructure.EditorConfig;
+using Microsoft.Build.Experimental.BuildCheck;
 
 namespace Microsoft.Build.BuildCheck.Infrastructure;
 
@@ -21,16 +15,13 @@ internal sealed class ConfigurationProvider
 
     private const string BuildCheck_ConfigurationKey = "build_check";
 
-    // TODO: This module should have a mechanism for removing unneeded configurations
-    //  (disabled rules and analyzers that need to run in different node)
-
     /// <summary>
-    /// The dictionary used for storing the BuildAnalyzerConfiguration per projectfile and rule id. The key is equal to {projectFullPath}-{ruleId}
+    /// The dictionary used for storing the BuildAnalyzerConfiguration per projectfile and rule id. The key is equal to {projectFullPath}-{ruleId}.
     /// </summary>
     private readonly Dictionary<string, BuildAnalyzerConfiguration> _buildAnalyzerConfiguration = new Dictionary<string, BuildAnalyzerConfiguration>(StringComparer.InvariantCultureIgnoreCase);
 
     /// <summary>
-    /// The dictionary used for storing the key-value pairs retrieved from the .editorconfigs for specific projectfile. The key is equal to projectFullPath
+    /// The dictionary used for storing the key-value pairs retrieved from the .editorconfigs for specific projectfile. The key is equal to projectFullPath.
     /// </summary>
     private readonly Dictionary<string, Dictionary<string, string>> _editorConfigData = new Dictionary<string, Dictionary<string, string>>(StringComparer.InvariantCultureIgnoreCase);
 
@@ -180,7 +171,7 @@ internal sealed class ConfigurationProvider
                 {
                     newKey = kv.Key.Substring(keyFilter.Length);
                 }
-                
+
                 filteredConfig[newKey] = kv.Value;
             }
         }
