@@ -241,7 +241,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\MSBuild.ico" />
+    <Content Include="..\MSBuild\MSBuild.ico" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\StringTools\StringTools.csproj" />

@@ -25,8 +25,10 @@ internal abstract class BuildCheckEventArgs : BuildEventArgs
 /// <param name="tracingData"></param>
 internal sealed class BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> tracingData) : BuildCheckEventArgs
 {
-    internal BuildCheckTracingEventArgs() : this(new Dictionary<string, TimeSpan>())
-    { }
+    internal BuildCheckTracingEventArgs()
+        : this([])
+    {
+    }
 
     public Dictionary<string, TimeSpan> TracingData { get; private set; } = tracingData;
 
@@ -58,25 +60,38 @@ internal sealed class BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> tr
     }
 }
 
-internal sealed class BuildCheckAcquisitionEventArgs(string acquisitionData) : BuildCheckEventArgs
+internal sealed class BuildCheckAcquisitionEventArgs(string acquisitionPath) : BuildCheckEventArgs
 {
-    internal BuildCheckAcquisitionEventArgs() : this(string.Empty)
-    { }
+    internal BuildCheckAcquisitionEventArgs()
+        : this(string.Empty)
+    {
+    }
 
-    public string AcquisitionData { get; private set; } = acquisitionData;
+    /// <summary>
+    /// Gets the path to the analyzer assembly that needs to be loaded into the application context.
+    /// </summary>
+    /// <remarks>
+    /// The <see cref="AcquisitionPath"/> property contains the file system path to the assembly
+    /// that is required to be loaded into the application context. This path is used for loading
+    /// the specified assembly dynamically during runtime.
+    /// </remarks>
+    /// <value>
+    /// A <see cref="System.String"/> representing the file system path to the assembly.
+    /// </value>
+    public string AcquisitionPath { get; private set; } = acquisitionPath;
 
     internal override void WriteToStream(BinaryWriter writer)
     {
         base.WriteToStream(writer);
 
-        writer.Write(AcquisitionData);
+        writer.Write(AcquisitionPath);
     }
 
     internal override void CreateFromStream(BinaryReader reader, int version)
     {
         base.CreateFromStream(reader, version);
 
-        AcquisitionData = reader.ReadString();
+        AcquisitionPath = reader.ReadString();
     }
 }
 internal sealed class BuildCheckResultWarning : BuildWarningEventArgs

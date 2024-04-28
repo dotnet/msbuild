@@ -22,6 +22,13 @@ internal sealed class ConfigurationProvider
     private const string BuildCheck_ConfigurationKey = "build_check";
 
     // TODO: This module should have a mechanism for removing unneeded configurations
+=========
+// Let's flip form statics to instance, with exposed interface (so that we can easily swap implementations)
+// Tracked via: https://github.com/dotnet/msbuild/issues/9828
+internal static class ConfigurationProvider
+{
+    // We might want to have a mechanism for removing unneeded configurations
+>>>>>>>>> Temporary merge branch 2
     //  (disabled rules and analyzers that need to run in different node)
 
     /// <summary>
