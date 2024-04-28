@@ -18,168 +18,167 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Microsoft.Build.BuildCheck.Infrastructure.EditorConfig
-{
-    internal partial class EditorConfigFile
-    {
-        // Matches EditorConfig section header such as "[*.{js,py}]", see https://editorconfig.org for details
-        private const string s_sectionMatcherPattern = @"^\s*\[(([^#;]|\\#|\\;)+)\]\s*([#;].*)?$";
+namespace Microsoft.Build.BuildCheck.Infrastructure.EditorConfig;
 
-        // Matches EditorConfig property such as "indent_style = space", see https://editorconfig.org for details
-        private const string s_propertyMatcherPattern = @"^\s*([\w\.\-_]+)\s*[=:]\s*(.*?)\s*([#;].*)?$";
+internal partial class EditorConfigFile
+{
+    // Matches EditorConfig section header such as "[*.{js,py}]", see https://editorconfig.org for details
+    private const string s_sectionMatcherPattern = @"^\s*\[(([^#;]|\\#|\\;)+)\]\s*([#;].*)?$";
+
+    // Matches EditorConfig property such as "indent_style = space", see https://editorconfig.org for details
+    private const string s_propertyMatcherPattern = @"^\s*([\w\.\-_]+)\s*[=:]\s*(.*?)\s*([#;].*)?$";
 
 #if NETCOREAPP
 
-    [GeneratedRegex(s_sectionMatcherPattern)]
-    private static partial Regex GetSectionMatcherRegex();
+[GeneratedRegex(s_sectionMatcherPattern)]
+private static partial Regex GetSectionMatcherRegex();
 
-    [GeneratedRegex(s_propertyMatcherPattern)]
-    private static partial Regex GetPropertyMatcherRegex();
+[GeneratedRegex(s_propertyMatcherPattern)]
+private static partial Regex GetPropertyMatcherRegex();
 
 #else
-        private static readonly Regex s_sectionMatcher = new Regex(s_sectionMatcherPattern, RegexOptions.Compiled);
+    private static readonly Regex s_sectionMatcher = new Regex(s_sectionMatcherPattern, RegexOptions.Compiled);
 
-        private static readonly Regex s_propertyMatcher = new Regex(s_propertyMatcherPattern, RegexOptions.Compiled);
+    private static readonly Regex s_propertyMatcher = new Regex(s_propertyMatcherPattern, RegexOptions.Compiled);
 
-        private static Regex GetSectionMatcherRegex() => s_sectionMatcher;
+    private static Regex GetSectionMatcherRegex() => s_sectionMatcher;
 
-        private static Regex GetPropertyMatcherRegex() => s_propertyMatcher;
+    private static Regex GetPropertyMatcherRegex() => s_propertyMatcher;
 
 #endif
 
-        internal Section GlobalSection { get; }
+    internal Section GlobalSection { get; }
 
-        internal ImmutableArray<Section> NamedSections { get; }
+    internal ImmutableArray<Section> NamedSections { get; }
 
-        /// <summary>
-        /// Gets whether this editorconfig is a topmost editorconfig.
-        /// </summary>
-        internal bool IsRoot => GlobalSection.Properties.TryGetValue("root", out string? val) && val?.ToLower() == "true";
+    /// <summary>
+    /// Gets whether this editorconfig is a topmost editorconfig.
+    /// </summary>
+    internal bool IsRoot => GlobalSection.Properties.TryGetValue("root", out string? val) && val?.ToLower() == "true";
 
-        private EditorConfigFile(
-            Section globalSection,
-            ImmutableArray<Section> namedSections)
+    private EditorConfigFile(
+        Section globalSection,
+        ImmutableArray<Section> namedSections)
+    {
+        GlobalSection = globalSection;
+        NamedSections = namedSections;
+    }
+
+    /// <summary>
+    /// Parses an editor config file text located at the given path. No parsing
+    /// errors are reported. If any line contains a parse error, it is dropped.
+    /// </summary>
+    internal static EditorConfigFile Parse(string text)
+    {
+        Section? globalSection = null;
+        var namedSectionBuilder = ImmutableArray.CreateBuilder<Section>();
+
+        // N.B. The editorconfig documentation is quite loose on property interpretation.
+        // Specifically, it says:
+        //      Currently all properties and values are case-insensitive.
+        //      They are lowercased when parsed.
+        // To accommodate this, we use a lower case Unicode mapping when adding to the
+        // dictionary, but we also use a case-insensitive key comparer when doing lookups
+        var activeSectionProperties = ImmutableDictionary.CreateBuilder<string, string>(StringComparer.OrdinalIgnoreCase);
+        string activeSectionName = "";
+        var lines = string.IsNullOrEmpty(text) ? Array.Empty<string>() : text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+
+        foreach(var line in lines)
         {
-            GlobalSection = globalSection;
-            NamedSections = namedSections;
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                continue;
+            }
+
+            if (IsComment(line))
+            {
+                continue;
+            }
+
+            var sectionMatches = GetSectionMatcherRegex().Matches(line);
+            if (sectionMatches.Count > 0 && sectionMatches[0].Groups.Count > 0)
+            {
+                addNewSection();
+
+                var sectionName = sectionMatches[0].Groups[1].Value;
+                Debug.Assert(!string.IsNullOrEmpty(sectionName));
+
+                activeSectionName = sectionName;
+                activeSectionProperties = ImmutableDictionary.CreateBuilder<string, string>();
+                continue;
+            }
+
+            var propMatches = GetPropertyMatcherRegex().Matches(line);
+            if (propMatches.Count > 0 && propMatches[0].Groups.Count > 1)
+            {
+                var key = propMatches[0].Groups[1].Value.ToLower();
+                var value = propMatches[0].Groups[2].Value;
+
+                Debug.Assert(!string.IsNullOrEmpty(key));
+                Debug.Assert(key == key.Trim());
+                Debug.Assert(value == value?.Trim());
+
+                activeSectionProperties[key] = value ?? "";
+                continue;
+            }
+        }
+
+        // Add the last section
+        addNewSection();
+
+        return new EditorConfigFile(globalSection!, namedSectionBuilder.ToImmutable());
+
+        void addNewSection()
+        {
+            // Close out the previous section
+            var previousSection = new Section(activeSectionName, activeSectionProperties.ToImmutable());
+            if (activeSectionName == "")
+            {
+                // This is the global section
+                globalSection = previousSection;
+            }
+            else
+            {
+                namedSectionBuilder.Add(previousSection);
+            }
+        }
+    }
+
+    private static bool IsComment(string line)
+    {
+        foreach (char c in line)
+        {
+            if (!char.IsWhiteSpace(c))
+            {
+                return c == '#' || c == ';';
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Represents a named section of the editorconfig file, which consists of a name followed by a set
+    /// of key-value pairs.
+    /// </summary>
+    internal sealed class Section
+    {
+        public Section(string name, ImmutableDictionary<string, string> properties)
+        {
+            Name = name;
+            Properties = properties;
         }
 
         /// <summary>
-        /// Parses an editor config file text located at the given path. No parsing
-        /// errors are reported. If any line contains a parse error, it is dropped.
+        /// For regular files, the name as present directly in the section specification of the editorconfig file. For sections in
+        /// global configs, this is the unescaped full file path.
         /// </summary>
-        internal static EditorConfigFile Parse(string text)
-        {
-            Section? globalSection = null;
-            var namedSectionBuilder = ImmutableArray.CreateBuilder<Section>();
-
-            // N.B. The editorconfig documentation is quite loose on property interpretation.
-            // Specifically, it says:
-            //      Currently all properties and values are case-insensitive.
-            //      They are lowercased when parsed.
-            // To accommodate this, we use a lower case Unicode mapping when adding to the
-            // dictionary, but we also use a case-insensitive key comparer when doing lookups
-            var activeSectionProperties = ImmutableDictionary.CreateBuilder<string, string>(StringComparer.OrdinalIgnoreCase);
-            string activeSectionName = "";
-            var lines = string.IsNullOrEmpty(text) ? Array.Empty<string>() : text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
-
-            foreach(var line in lines)
-            {
-                if (string.IsNullOrWhiteSpace(line))
-                {
-                    continue;
-                }
-
-                if (IsComment(line))
-                {
-                    continue;
-                }
-
-                var sectionMatches = GetSectionMatcherRegex().Matches(line);
-                if (sectionMatches.Count > 0 && sectionMatches[0].Groups.Count > 0)
-                {
-                    addNewSection();
-
-                    var sectionName = sectionMatches[0].Groups[1].Value;
-                    Debug.Assert(!string.IsNullOrEmpty(sectionName));
-
-                    activeSectionName = sectionName;
-                    activeSectionProperties = ImmutableDictionary.CreateBuilder<string, string>();
-                    continue;
-                }
-
-                var propMatches = GetPropertyMatcherRegex().Matches(line);
-                if (propMatches.Count > 0 && propMatches[0].Groups.Count > 1)
-                {
-                    var key = propMatches[0].Groups[1].Value.ToLower();
-                    var value = propMatches[0].Groups[2].Value;
-
-                    Debug.Assert(!string.IsNullOrEmpty(key));
-                    Debug.Assert(key == key.Trim());
-                    Debug.Assert(value == value?.Trim());
-
-                    activeSectionProperties[key] = value ?? "";
-                    continue;
-                }
-            }
-
-            // Add the last section
-            addNewSection();
-
-            return new EditorConfigFile(globalSection!, namedSectionBuilder.ToImmutable());
-
-            void addNewSection()
-            {
-                // Close out the previous section
-                var previousSection = new Section(activeSectionName, activeSectionProperties.ToImmutable());
-                if (activeSectionName == "")
-                {
-                    // This is the global section
-                    globalSection = previousSection;
-                }
-                else
-                {
-                    namedSectionBuilder.Add(previousSection);
-                }
-            }
-        }
-
-        private static bool IsComment(string line)
-        {
-            foreach (char c in line)
-            {
-                if (!char.IsWhiteSpace(c))
-                {
-                    return c == '#' || c == ';';
-                }
-            }
-
-            return false;
-        }
+        public string Name { get; }
 
         /// <summary>
-        /// Represents a named section of the editorconfig file, which consists of a name followed by a set
-        /// of key-value pairs.
+        /// Keys and values for this section. All keys are lower-cased according to the
+        /// EditorConfig specification and keys are compared case-insensitively. 
         /// </summary>
-        internal sealed class Section
-        {
-            public Section(string name, ImmutableDictionary<string, string> properties)
-            {
-                Name = name;
-                Properties = properties;
-            }
-
-            /// <summary>
-            /// For regular files, the name as present directly in the section specification of the editorconfig file. For sections in
-            /// global configs, this is the unescaped full file path.
-            /// </summary>
-            public string Name { get; }
-
-            /// <summary>
-            /// Keys and values for this section. All keys are lower-cased according to the
-            /// EditorConfig specification and keys are compared case-insensitively. 
-            /// </summary>
-            public ImmutableDictionary<string, string> Properties { get; }
-        }
+        public ImmutableDictionary<string, string> Properties { get; }
     }
 }
