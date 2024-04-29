@@ -13,17 +13,15 @@ namespace Microsoft.Build.Engine.UnitTests
 {
     internal sealed class TestLoggingContext : LoggingContext
     {
-        public TestLoggingContext(ILoggingService loggingService, BuildEventContext eventContext) : base(
-            loggingService, eventContext)
+        public TestLoggingContext(ILoggingService? loggingService, BuildEventContext eventContext) : base(
+            loggingService ?? Build.BackEnd.Logging.LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1), eventContext)
         {
             IsValid = true;
         }
 
         public static LoggingContext CreateTestContext(BuildEventContext buildEventContext)
         {
-            return new TestLoggingContext(
-                Build.BackEnd.Logging.LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1),
-                buildEventContext);
+            return new TestLoggingContext(null, buildEventContext);
         }
     }
 }
