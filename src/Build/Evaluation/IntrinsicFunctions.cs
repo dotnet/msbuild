@@ -632,7 +632,9 @@ namespace Microsoft.Build.Evaluation
         internal static string SubstringByTextElements(string input, int start, int length)
         {
             StringInfo stringInfo = new StringInfo(input);
-            return stringInfo.SubstringByTextElements(start, length);
+            if (stringInfo.LengthInTextElements > length + start)
+                return stringInfo.SubstringByTextElements(start, length);
+            return input;
         }
 
         internal static string CheckFeatureAvailability(string featureName)
