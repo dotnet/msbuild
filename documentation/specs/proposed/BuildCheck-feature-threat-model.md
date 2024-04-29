@@ -82,6 +82,6 @@ Threat actor can write malicious analyzer registration property function in proj
 
 #### Mitigation
 
-This thread is out of scope of this document, as this requires malicious modification of source code (repository) making these sources untrusted.
+This threat is out of scope of this document, as this requires malicious modification of source code (repository) making these sources untrusted.
 
 It is mentioned here, as a note that we have thought about it.
