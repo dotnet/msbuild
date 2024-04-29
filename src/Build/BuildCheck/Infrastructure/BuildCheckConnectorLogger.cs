@@ -107,7 +107,7 @@ internal sealed class BuildCheckConnectorLogger : ILogger
         {
             if (stat.Key.StartsWith(BuildCheckConstants.infraStatPrefix))
             {
-                string newKey = stat.Key.Replace(BuildCheckConstants.infraStatPrefix, string.Empty);
+                string newKey = stat.Key.Substring(BuildCheckConstants.infraStatPrefix.Length);
                 infraStats[newKey] = stat.Value;
             }
             else
