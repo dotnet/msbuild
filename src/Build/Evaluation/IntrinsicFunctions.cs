@@ -633,7 +633,9 @@ namespace Microsoft.Build.Evaluation
         {
             StringInfo stringInfo = new StringInfo(input);
             if (stringInfo.LengthInTextElements > length + start)
+            {
                 return stringInfo.SubstringByTextElements(start, length);
+            }
             return input;
         }
 
