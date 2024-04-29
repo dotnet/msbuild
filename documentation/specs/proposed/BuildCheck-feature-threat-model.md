@@ -49,7 +49,7 @@ Vulnerabilities in custom analyzer or its dependencies.
 
 #### Mitigation
 
-Custom analyzers are delivered as regular nuget packages by MSBuild `<PackageReference />` element. This way custom analyzer packages will be included in the generated SBOM and Component Government can detect and warn about known malicious custom analyzers.
+Custom analyzers are delivered as regular NuGet packages by MSBuild `<PackageReference />` element. This way custom analyzer packages will be included in the generated SBOM and Component Government can detect and warn about known malicious custom analyzers.
 
 ## Configuration
 
