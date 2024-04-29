@@ -2331,6 +2331,14 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 /// <summary>
+                /// Intrinsic function that returns the number of items in the list.
+                /// </summary>
+                internal static IEnumerable<KeyValuePair<string, S>> Count(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
+                {
+                    yield return new KeyValuePair<string, S>(Convert.ToString(itemsOfType.Count(), CultureInfo.InvariantCulture), null /* no base item */);
+                }
+
+                /// <summary>
                 /// Intrinsic function that returns the specified built-in modifer value of the items in itemsOfType
                 /// Tuple is {current item include, item under transformation}.
                 /// </summary>
@@ -3034,6 +3042,43 @@ namespace Microsoft.Build.Evaluation
                     _itemSpec = itemSpec;
                     _sourceOfMetadata = sourceOfMetadata;
                     _elementLocation = elementLocation;
+                }
+
+                /// <summary>
+                /// Expands the metadata in the match provided into a string result.
+                /// The match is expected to be the content of a transform.
+                /// For example, representing "%(Filename.obj)" in the original expression "@(Compile->'%(Filename.obj)')".
+                /// </summary>
+                internal string GetMetadataValueFromMatch(Match match)
+                {
+                    string name = match.Groups[RegularExpressions.NameGroup].Value;
+
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(match.Groups[RegularExpressions.ItemSpecificationGroup].Length == 0, _elementLocation, "QualifiedMetadataInTransformNotAllowed", match.Value, name);
+
+                    string value = null;
+                    try
+                    {
+                        if (FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(name))
+                        {
+                            // If we're not a ProjectItem or ProjectItemInstance, then ProjectDirectory will be null.
+                            // In that case, we're safe to get the current directory as we'll be running on TaskItems which
+                            // only exist within a target where we can trust the current directory
+                            string directoryToUse = _sourceOfMetadata.ProjectDirectory ?? Directory.GetCurrentDirectory();
+                            string definingProjectEscaped = _sourceOfMetadata.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
+
+                            value = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(directoryToUse, _itemSpec, definingProjectEscaped, name);
+                        }
+                        else
+                        {
+                            value = _sourceOfMetadata.GetMetadataValueEscaped(name);
+                        }
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        ProjectErrorUtilities.ThrowInvalidProject(_elementLocation, "CannotEvaluateItemMetadata", name, ex.Message);
+                    }
+
+                    return value;
                 }
             }
         }
