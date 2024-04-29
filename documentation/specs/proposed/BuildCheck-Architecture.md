@@ -89,9 +89,9 @@ Planned model:
 BuildCheck employs two distinct types of analyzers: inbox and custom. As a result, the acquisition and distribution processes vary.
 Inbox rules are integrated into the MSBuild repository, while custom analyzers can be packaged as NuGet packages and detected by MSBuild provided they adhere to a specific structure. 
 
-To streamline the creation of custom rules, a special [template](https://learn.microsoft.com/en-us/dotnet/core/tools/custom-templates) has been introduced.
+To streamline the creation of custom rules, a special [template](https://learn.microsoft.com/dotnet/core/tools/custom-templates) has been introduced.
 To enable MSBuild to recognize a custom analyzer, it must invoke the intrinsic function `void RegisterAnalyzer(string path)`, which requires the path to the assembly as input. Therefore, it's essential for the user to ensure that the assembly exists in the specified location.
-Additionally, the custom rule must use [BuildAnalyzerRule.cs](https://github.com/dotnet/msbuild/blob/9cdb3615adb4115f92b390de2f258fac5f320909/src/Build/BuildCheck/API/BuildAnalyzerRule.cs#L11C14-L11C31) as a parent class; otherwise, the system will not register it.
+Additionally, the custom rule must use [`BuildAnalyzerRule`](https://github.com/dotnet/msbuild/blob/9cdb3615adb4115f92b390de2f258fac5f320909/src/Build/BuildCheck/API/BuildAnalyzerRule.cs#L11C14-L11C31) as a parent class; otherwise, the system will not register it.
 
 Examples of custom rules can be found in the end-to-end tests, showcasing various scenarios:
 
