@@ -73,6 +73,10 @@ internal sealed class BuildCheckConnectorLogger : ILogger
             isRestore = true;
             return;
         }
+        if (isRestore) 
+        {
+            isRestore = false;
+        }
 
         if (!IsMetaProjFile(eventArgs.ProjectFile))
         {
@@ -82,14 +86,7 @@ internal sealed class BuildCheckConnectorLogger : ILogger
 
     private void HandleProjectFinishedEvent(ProjectFinishedEventArgs projectFinishedEventArgs)
     {
-        if (isRestore)
-        {
-            isRestore = false;
-        }
-        else
-        {
-            _buildCheckManager.EndProjectRequest(BuildCheckDataSource.EventArgs, projectFinishedEventArgs.BuildEventContext!);
-        }
+        _buildCheckManager.EndProjectRequest(BuildCheckDataSource.EventArgs, projectFinishedEventArgs.BuildEventContext!);
     }
 
     private bool IsMetaProjFile(string? projectFile) => !string.IsNullOrEmpty(projectFile) && projectFile!.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
@@ -128,13 +125,20 @@ internal sealed class BuildCheckConnectorLogger : ILogger
         { typeof(ProjectEvaluationStartedEventArgs), (BuildEventArgs e) => HandleProjectEvaluationStartedEvent((ProjectEvaluationStartedEventArgs) e) },
         { typeof(ProjectStartedEventArgs), (BuildEventArgs e) => 
             {
-              if (!isRestore)
-              {
+                if (!isRestore)
+                {
                 _buildCheckManager.StartProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!);
-              }
+                }
             }
         },
-        { typeof(ProjectFinishedEventArgs), (BuildEventArgs e) => HandleProjectFinishedEvent((ProjectFinishedEventArgs) e) },
+        { typeof(ProjectFinishedEventArgs), (BuildEventArgs e) =>
+            {
+                if (!isRestore)
+                {
+                    _buildCheckManager.EndProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!);
+                }
+            }
+        },
         { typeof(BuildCheckTracingEventArgs), (BuildEventArgs e) => _stats.Merge(((BuildCheckTracingEventArgs)e).TracingData, (span1, span2) => span1 + span2) },
         { typeof(BuildCheckAcquisitionEventArgs), (BuildEventArgs e) => _buildCheckManager.ProcessAnalyzerAcquisition(((BuildCheckAcquisitionEventArgs)e).ToAnalyzerAcquisitionData(), e.BuildEventContext!) },
     };
