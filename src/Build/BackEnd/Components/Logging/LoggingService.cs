@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
+using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -1757,6 +1758,10 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 Build.Logging.ConsoleLogger consoleLogger => consoleLogger.GetMinimumMessageImportance(),
                 Build.Logging.ConfigurableForwardingLogger forwardingLogger => forwardingLogger.GetMinimumMessageImportance(),
+
+                // The BuildCheck connector logger consumes only high priority messages.
+                BuildCheckForwardingLogger => MessageImportance.High,
+                BuildCheck.Infrastructure.BuildCheckConnectorLogger => MessageImportance.High,
 
                 // Central forwarding loggers are used in worker nodes if logging verbosity could not be optimized, i.e. in cases
                 // where we must log everything. They can be ignored in inproc nodes.
