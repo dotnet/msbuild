@@ -94,7 +94,7 @@ internal sealed class BuildCheckConnectorLogger : ILogger
 
         LoggingContext loggingContext = _loggingContextFactory.CreateLoggingContext(buildEventContext);
 
-        _stats.Merge(_buildCheckManager.CreateAnalyzerTracingStats()!, (span1, span2) => span1 + span2);
+        _stats.Merge(_buildCheckManager.CreateAnalyzerTracingStats(), (span1, span2) => span1 + span2);
         LogAnalyzerStats(loggingContext);
     }
     

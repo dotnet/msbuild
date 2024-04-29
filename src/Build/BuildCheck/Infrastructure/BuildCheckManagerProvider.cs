@@ -89,21 +89,19 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         /// <param name="buildCheckDataSource"></param>
         public void SetDataSource(BuildCheckDataSource buildCheckDataSource)
         {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
+            Stopwatch stopwatch = Stopwatch.StartNew();
             if (!_enabledDataSources[(int)buildCheckDataSource])
             {
                 _enabledDataSources[(int)buildCheckDataSource] = true;
                 RegisterBuiltInAnalyzers(buildCheckDataSource);
             }
             stopwatch.Stop();
-            _tracingReporter.analyzerSetDataSourceTime = stopwatch.Elapsed;
+            _tracingReporter.AddSetDataSourceStats(stopwatch.Elapsed);
         }
 
         public void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, BuildEventContext buildEventContext)
         {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
+            Stopwatch stopwatch = Stopwatch.StartNew();
             if (IsInProcNode)
             {
                 var analyzersFactories = _acquisitionModule.CreateBuildAnalyzerFactories(acquisitionData, buildEventContext);
@@ -124,7 +122,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 _loggingService.LogBuildEvent(eventArgs);
             }
             stopwatch.Stop();
-            _tracingReporter.analyzerAcquisitionTime = stopwatch.Elapsed;
+            _tracingReporter.AddAcquisitionStats(stopwatch.Elapsed);
         }
 
         private static T Construct<T>() where T : new() => new();
@@ -275,8 +273,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             // On an execution node - we might remove and dispose the analyzers once project is done
 
             // If it's already constructed - just control the custom settings do not differ
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
+            Stopwatch stopwatch = Stopwatch.StartNew();
             List<BuildAnalyzerFactoryContext> analyzersToRemove = new();
             foreach (BuildAnalyzerFactoryContext analyzerFactoryContext in _analyzersRegistry)
             {
@@ -301,12 +298,12 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             foreach (var analyzerToRemove in analyzersToRemove.Select(a => a.MaterializedAnalyzer).Where(a => a != null))
             {
                 _buildCheckCentralContext.DeregisterAnalyzer(analyzerToRemove!);
-                _tracingReporter.AddStats(analyzerToRemove!.BuildAnalyzer.FriendlyName, analyzerToRemove.Elapsed);
+                _tracingReporter.AddAnalyzerStats(analyzerToRemove!.BuildAnalyzer.FriendlyName, analyzerToRemove.Elapsed);
                 analyzerToRemove.BuildAnalyzer.Dispose();
             }
 
             stopwatch.Stop();
-            _tracingReporter.newProjectAnalyzersTime = stopwatch.Elapsed;
+            _tracingReporter.AddNewProjectStats(stopwatch.Elapsed);
         }
 
         public void ProcessEvaluationFinishedEventArgs(
@@ -321,7 +318,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             {
                 if (analyzerFactoryContext.MaterializedAnalyzer != null)
                 {
-                    _tracingReporter.AddStats(analyzerFactoryContext.FriendlyName,
+                    _tracingReporter.AddAnalyzerStats(analyzerFactoryContext.FriendlyName,
                         analyzerFactoryContext.MaterializedAnalyzer.Elapsed);
                     analyzerFactoryContext.MaterializedAnalyzer.ClearStats();
                 }

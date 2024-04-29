@@ -15,12 +15,13 @@ internal class TracingReporter
 {
     internal Dictionary<string, TimeSpan> TracingStats { get; } = new();
 
-    // Infrastructure time keepers, examples for now
+    // Infrastructure time keepers
+    // TODO: add more timers throughout BuildCheck run
     internal TimeSpan analyzerAcquisitionTime;
     internal TimeSpan analyzerSetDataSourceTime;
     internal TimeSpan newProjectAnalyzersTime;
 
-    public void AddStats(string name, TimeSpan subtotal)
+    public void AddAnalyzerStats(string name, TimeSpan subtotal)
     {
         if (TracingStats.TryGetValue(name, out TimeSpan existing))
         {
@@ -30,6 +31,21 @@ internal class TracingReporter
         {
             TracingStats[name] = subtotal;
         }
+    }
+
+    public void AddAcquisitionStats(TimeSpan subtotal)
+    {
+        analyzerAcquisitionTime += subtotal;
+    }
+
+    public void AddSetDataSourceStats(TimeSpan subtotal)
+    {
+        analyzerSetDataSourceTime += subtotal;
+    }
+
+    public void AddNewProjectStats(TimeSpan subtotal)
+    {
+        newProjectAnalyzersTime += subtotal;
     }
 
     public void AddAnalyzerInfraStats()
