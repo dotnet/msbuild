@@ -631,12 +631,33 @@ namespace Microsoft.Build.Evaluation
 
         internal static string SubstringByTextElements(string input, int start, int length)
         {
+            if (start < 0)
+                throw new ArgumentException("Start index of the substring cannot be less than 0.");
+
+// in .net framework parts of one emoji are treated as separate graphemes (text elements) while for .net 5.0+ they are one grapheme, see doc with change log:
+// https://learn.microsoft.com/en-us/dotnet/core/compatibility/globalization/5.0/uax29-compliant-grapheme-enumeration?WT.mc_id=DOP-MVP-5002735#change-description
+// Runes in .net core behave same as StringInfo grapheme segmentation in .net framework
+#if NETFRAMEWORK
             StringInfo stringInfo = new StringInfo(input);
             if (stringInfo.LengthInTextElements > length + start)
             {
                 return stringInfo.SubstringByTextElements(start, length);
             }
             return input;
+#else
+            StringBuilder sb = new StringBuilder();
+            int i = 0;
+            foreach (Rune rune in input.EnumerateRunes())
+            {
+                if (i >= start + length)
+                {
+                    break;
+                }
+                sb.Append(rune.ToString());
+                i++;
+            }
+            return sb.Length > 0 ? sb.ToString() : input;
+#endif
         }
 
         internal static string CheckFeatureAvailability(string featureName)
