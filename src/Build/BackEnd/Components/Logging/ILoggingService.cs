@@ -485,7 +485,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="eventContext">The event context to use for logging</param>
         /// <param name="projectFile">Project file being built</param>
-        /// <param name="isRestore">Something for now</param>
+        /// <param name="isRestore">If the project is currently in restore phase </param>
         /// <returns>The evaluation event context for the project.</returns>
         void LogProjectEvaluationStarted(BuildEventContext eventContext, string projectFile, bool isRestore);
 

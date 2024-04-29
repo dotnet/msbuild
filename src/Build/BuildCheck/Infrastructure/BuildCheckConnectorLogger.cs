@@ -84,11 +84,6 @@ internal sealed class BuildCheckConnectorLogger : ILogger
         }
     }
 
-    private void HandleProjectFinishedEvent(ProjectFinishedEventArgs projectFinishedEventArgs)
-    {
-        _buildCheckManager.EndProjectRequest(BuildCheckDataSource.EventArgs, projectFinishedEventArgs.BuildEventContext!);
-    }
-
     private bool IsMetaProjFile(string? projectFile) => !string.IsNullOrEmpty(projectFile) && projectFile!.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
 
     private void EventSource_AnyEventRaised(object sender, BuildEventArgs e)

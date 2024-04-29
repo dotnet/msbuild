@@ -31,7 +31,9 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public string? ProjectFile { get; set; }
 
-
+        /// <summary>
+        /// Gets or sets is the project is currently on restore phase.
+        /// </summary>
         public bool IsRestore { get; internal set; }
     }
 }
