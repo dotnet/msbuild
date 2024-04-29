@@ -429,7 +429,7 @@ namespace Microsoft.Build.BackEnd
 
                             // Push our after targets, if any.  Our parent is the parent of the target after which we are running.
                             IList<TargetSpecification> afterTargets = _requestEntry.RequestConfiguration.Project.GetTargetsWhichRunAfter(currentTargetEntry.Name);
-                            bool didPushTargets = await PushTargets(afterTargets, currentTargetEntry.ParentEntry, currentTargetEntry.Lookup, currentTargetEntry.ErrorTarget, currentTargetEntry.StopProcessingOnCompletion, TargetBuiltReason.AfterTargets);
+                            bool didPushTargets = await PushTargets(afterTargets, currentTargetEntry, currentTargetEntry.Lookup, currentTargetEntry.ErrorTarget, currentTargetEntry.StopProcessingOnCompletion, TargetBuiltReason.AfterTargets);
 
                             // If we have after targets, the last one to run will inherit the stopProcessing flag and we will reset ours.  If we didn't push any targets, then we shouldn't clear the
                             // flag because it means we are still on the bottom of this CallTarget stack.
