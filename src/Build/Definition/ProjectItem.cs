@@ -500,7 +500,7 @@ namespace Microsoft.Build.Evaluation
                     // this.Project.LoggingService
                     // this.Project.FullPath
 
-                    Debugger.Launch();
+                    // Debugger.Launch();
 
                     Expander<ProjectProperty, ProjectItem> expander = new Expander<ProjectProperty, ProjectItem>(null, null, new BuiltInMetadataTable(this), FileSystems.Default);
 
