@@ -17,9 +17,9 @@ internal class TracingReporter
 
     // Infrastructure time keepers
     // TODO: add more timers throughout BuildCheck run
-    internal TimeSpan analyzerAcquisitionTime;
-    internal TimeSpan analyzerSetDataSourceTime;
-    internal TimeSpan newProjectAnalyzersTime;
+    private TimeSpan analyzerAcquisitionTime;
+    private TimeSpan analyzerSetDataSourceTime;
+    private TimeSpan newProjectAnalyzersTime;
 
     public void AddAnalyzerStats(string name, TimeSpan subtotal)
     {
