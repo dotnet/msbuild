@@ -4229,11 +4229,11 @@ namespace Microsoft.Build.Evaluation
                                 return true;
                             }
                         }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.SubstringByTextElements), StringComparison.OrdinalIgnoreCase))
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.SubstringByAsciiChars), StringComparison.OrdinalIgnoreCase))
                         {
                             if (TryGetArgs(args, out string arg0, out int arg1, out int arg2))
                             {
-                                returnVal = IntrinsicFunctions.SubstringByTextElements(arg0, arg1, arg2);
+                                returnVal = IntrinsicFunctions.SubstringByAsciiChars(arg0, arg1, arg2);
                                 return true;
                             }
                         }
