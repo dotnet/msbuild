@@ -9,7 +9,6 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Globalization;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
@@ -19,6 +18,7 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using Microsoft.NET.StringTools;
 using Microsoft.Win32;
+using System.Linq;
 
 // Needed for DoesTaskHostExistForParameters
 using NodeProviderOutOfProcTaskHost = Microsoft.Build.BackEnd.NodeProviderOutOfProcTaskHost;
@@ -643,7 +643,7 @@ namespace Microsoft.Build.Evaluation
             for (int i = start; i < start + length; i++)
             {
                 char c = input[i];
-                if (c >= 32 && c <= 126)
+                if (c >= 32 && c <= 126 && !FileUtilities.InvalidFileNameChars.Contains(c))
                 {
                     sb.Append(c);
                 }
