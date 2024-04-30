@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -86,17 +87,27 @@ internal class PropertiesUsageAnalyzer : InternalBuildAnalyzer
         registrationContext.RegisterProjectProcessingDoneAction(DoneWithProject);
     }
 
-    private Dictionary<string, IMsBuildElementLocation?> _writenProperties = new Dictionary<string, IMsBuildElementLocation?>(MSBuildNameIgnoreCaseComparer.Default);
-    private HashSet<string> _readProperties = new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
-    private Dictionary<string, IMsBuildElementLocation> _uninitializedReads = new Dictionary<string, IMsBuildElementLocation>(MSBuildNameIgnoreCaseComparer.Default);
+    private Dictionary<string, IMsBuildElementLocation?> _writenProperties = new(MSBuildNameIgnoreCaseComparer.Default);
+    private HashSet<string> _readProperties = new(MSBuildNameIgnoreCaseComparer.Default);
+    private Dictionary<string, IMsBuildElementLocation> _uninitializedReads = new(MSBuildNameIgnoreCaseComparer.Default);
+
+    // TODO: this is temporary - will be improved once we have scoping argument propagated to user config data.
+    private bool IsActionInObservedScope(IMsBuildElementLocation? location, string projectFilePath)
+    {
+        return location != null && location.File == projectFilePath;
+    }
 
     private void ProcessPropertyWrite(BuildCheckDataContext<PropertyWriteData> context)
     {
         PropertyWriteData writeData = context.Data;
 
-        _writenProperties[writeData.PropertyName] = writeData.ElementLocation;
+        if (IsActionInObservedScope(writeData.ElementLocation, writeData.ProjectFilePath))
+        {
+            _writenProperties[writeData.PropertyName] = writeData.ElementLocation;
+        }
 
-        if (!writeData.IsEmpty && _uninitializedReads.TryGetValue(writeData.PropertyName, out IMsBuildElementLocation? uninitReadLocation))
+        if (!writeData.IsEmpty &&
+            _uninitializedReads.TryGetValue(writeData.PropertyName, out IMsBuildElementLocation? uninitReadLocation))
         {
             _uninitializedReads.Remove(writeData.PropertyName);
 
@@ -119,7 +130,9 @@ internal class PropertiesUsageAnalyzer : InternalBuildAnalyzer
         if (readData.IsUninitialized &&
             readData.PropertyReadContext != PropertyReadContext.PropertyEvaluationSelf &&
             readData.PropertyReadContext != PropertyReadContext.ConditionEvaluationWithOneSideEmpty &&
-            (!_allowUninitPropsInConditions || readData.PropertyReadContext != PropertyReadContext.ConditionEvaluation))
+            (!_allowUninitPropsInConditions ||
+             readData.PropertyReadContext != PropertyReadContext.ConditionEvaluation) &&
+            IsActionInObservedScope(readData.ElementLocation, readData.ProjectFilePath))
         {
             _uninitializedReads[readData.PropertyName] = readData.ElementLocation;
         }

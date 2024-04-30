@@ -5528,7 +5528,7 @@ namespace Microsoft.Build.Evaluation
 
             if (BuildCheckManagerProvider.GlobalBuildEngineDataConsumer is not null && loggingContext is null)
             {
-                Debugger.Launch();
+                // Debugger.Launch();
             }
 
             // We are collecting the read data here - instead of in the PropertyTrackingEvaluatorDataWrapper
