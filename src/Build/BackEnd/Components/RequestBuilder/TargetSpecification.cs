@@ -26,7 +26,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="targetName">The name of the target</param>
         /// <param name="referenceLocation">The location from which it was referred.</param>
-        /// <param name="targetBuiltReason"> TODO ADD STUFF</param>
+        /// <param name="targetBuiltReason">Reason the target is being built</param>
         internal TargetSpecification(string targetName, ElementLocation referenceLocation, TargetBuiltReason targetBuiltReason = TargetBuiltReason.None)
         {
             ErrorUtilities.VerifyThrowArgumentLength(targetName, nameof(targetName));
