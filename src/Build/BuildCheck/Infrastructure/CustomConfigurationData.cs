@@ -97,23 +97,6 @@ public class CustomConfigurationData
 
     public override int GetHashCode()
     {
-        if (!NotNull(this))
-        {
-            return 0;
-        }
-
-        var hashCode = RuleId.GetHashCode();
-        if (ConfigurationData != null)
-        {
-            foreach (var keyVal in ConfigurationData)
-            {
-                unchecked
-                {
-                    hashCode = hashCode + keyVal.Key.GetHashCode() + keyVal.Value.GetHashCode();
-                }
-            }
-        }
-
-        return hashCode;
+        throw new NotImplementedException("CustomConfigurationData does not implement GetHashCode method");
     }
 }
