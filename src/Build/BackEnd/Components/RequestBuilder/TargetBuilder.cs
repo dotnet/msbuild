@@ -124,9 +124,6 @@ namespace Microsoft.Build.BackEnd
             // Get the actual target objects from the names
             BuildRequestConfiguration configuration = _requestEntry.RequestConfiguration;
 
-            var initialTargets = configuration.ProjectInitialTargets;
-            var defaultTargets = configuration.ProjectDefaultTargets;
-
             bool previousCacheableStatus = configuration.IsCacheable;
             configuration.IsCacheable = false;
             configuration.RetrieveFromCache();
@@ -161,11 +158,11 @@ namespace Microsoft.Build.BackEnd
                     {
                         buildReason = TargetBuiltReason.EntryTarget;
                     }
-                    else if (initialTargets.Contains(targetName))
+                    else if (configuration.ProjectInitialTargets.Contains(targetName))
                     {
                         buildReason = TargetBuiltReason.InitialTarget;
                     } 
-                    else if (defaultTargets.Contains(targetName))
+                    else if (configuration.ProjectDefaultTargets.Contains(targetName))
                     {
                         buildReason = TargetBuiltReason.DefaultTarget;
                     }
