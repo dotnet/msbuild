@@ -209,22 +209,22 @@
       </trans-unit>
       <trans-unit id="CustomAnalyzerAssemblyNotExist">
         <source>Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</source>
-        <target state="new">Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</target>
+        <target state="translated">Impossibile trovare l'assembly dell'analizzatore personalizzato specificato: {0}. Verificare se esiste.</target>
         <note>The message is emitted when the custom analyzer assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedAcquisition">
         <source>Failed to register the custom analyzer: {0}.</source>
-        <target state="new">Failed to register the custom analyzer: {0}.</target>
+        <target state="translated">Impossibile registrare l'analizzatore personalizzato: {0}.</target>
         <note>The message is emitted on failed loading of the custom analyzer in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedRuleLoading">
         <source>Failed to instantiate the custom analyzer rule with the following exception: {0}.</source>
-        <target state="new">Failed to instantiate the custom analyzer rule with the following exception: {0}.</target>
+        <target state="translated">Impossibile creare un'istanza della regola dell'analizzatore personalizzato con l'eccezione seguente: {0}.</target>
         <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
         <source>Custom analyzer rule: {0} has been registered successfully.</source>
-        <target state="new">Custom analyzer rule: {0} has been registered successfully.</target>
+        <target state="translated">Regola dell'analizzatore personalizzato: {0} è stata registrata.</target>
         <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
@@ -618,7 +618,7 @@ Errori: {3}</target>
       </trans-unit>
       <trans-unit id="TaskAssemblyLocationMismatch">
         <source>Task assembly was loaded from '{0}' while the desired location was '{1}'.</source>
-        <target state="new">Task assembly was loaded from '{0}' while the desired location was '{1}'.</target>
+        <target state="translated">L'assembly attività è stato caricato da "{0}" mentre era "{1}" il percorso desiderato.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
