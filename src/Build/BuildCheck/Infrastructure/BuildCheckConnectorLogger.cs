@@ -15,14 +15,15 @@ namespace Microsoft.Build.BuildCheck.Infrastructure;
 internal sealed class BuildCheckConnectorLogger : ILogger
 {
     private readonly Dictionary<Type, Action<BuildEventArgs>> _eventHandlers;
-    private readonly IBuildCheckManager _buildCheckManager;
+    private IBuildCheckManager _buildCheckManager;
+    private readonly IBuildCheckManager _buildCheckManagerForEnabledState;
     private readonly IBuildAnalysisLoggingContextFactory _loggingContextFactory;
 
     internal BuildCheckConnectorLogger(
         IBuildAnalysisLoggingContextFactory loggingContextFactory,
         IBuildCheckManager buildCheckManager)
     {
-        _buildCheckManager = buildCheckManager;
+        _buildCheckManager = _buildCheckManagerForEnabledState = buildCheckManager;
         _loggingContextFactory = loggingContextFactory;
         _eventHandlers = GetBuildEventHandlers();
     }
@@ -30,6 +31,13 @@ internal sealed class BuildCheckConnectorLogger : ILogger
     public LoggerVerbosity Verbosity { get; set; }
 
     public string? Parameters { get; set; }
+
+    public bool Enabled
+    {
+        get => _buildCheckManager == _buildCheckManagerForEnabledState;
+
+        set => _buildCheckManager = value ? _buildCheckManagerForEnabledState : new NullBuildCheckManager();
+    }
 
     public void Initialize(IEventSource eventSource)
     {

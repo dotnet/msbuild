@@ -1834,9 +1834,21 @@ namespace Microsoft.Build.CommandLine
                 hostServices: null,
                 flags: flags);
 
-            return ExecuteBuild(buildManager, restoreRequest);
+            bool? wasBuildCheckEnabled = null;
+            try
+            {
+                wasBuildCheckEnabled = buildManager.ConfigureBuildCheck(false);
+                BuildResult restoreResult = ExecuteBuild(buildManager, restoreRequest);
+                return restoreResult;
+            }
+            finally
+            {
+                if (wasBuildCheckEnabled == true)
+                {
+                    buildManager.ConfigureBuildCheck(true);
+                }
+            }
         }
-
 
         /// <summary>
         /// Verifies that the code is running on a supported operating system.

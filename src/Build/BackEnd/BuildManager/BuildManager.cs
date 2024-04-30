@@ -271,6 +271,11 @@ namespace Microsoft.Build.Execution
 
         private bool _hasProjectCacheServiceInitializedVsScenario;
 
+        /// <summary>
+        /// Forwarding logging event args to BuildCheck analyzers
+        /// </summary>
+        private BuildCheckConnectorLogger _buildCheckConnectorLogger;
+
 #if DEBUG
         /// <summary>
         /// <code>true</code> to wait for a debugger to be attached, otherwise <code>false</code>.
@@ -1372,6 +1377,18 @@ namespace Microsoft.Build.Execution
                 // We were already canceled!
                 CompleteSubmissionWithException(submission, resolvedConfiguration, new BuildAbortedException());
             }
+        }
+
+        public bool ConfigureBuildCheck(bool isEnabled)
+        {
+            if (_buildCheckConnectorLogger == null)
+                return false;
+
+            bool previousState = _buildCheckConnectorLogger.Enabled;
+
+            _buildCheckConnectorLogger.Enabled = false;
+
+            return previousState;
         }
 
         // Cache requests on configuration N do not block future build submissions depending on configuration N.
@@ -2991,7 +3008,7 @@ namespace Microsoft.Build.Execution
 
                 loggers = (loggers ?? Enumerable.Empty<ILogger>()).Concat(new[]
                 {
-                    new BuildCheckConnectorLogger(new AnalyzerLoggingContextFactory(loggingService), buildCheckManagerProvider.Instance)
+                    _buildCheckConnectorLogger = new BuildCheckConnectorLogger(new AnalyzerLoggingContextFactory(loggingService), buildCheckManagerProvider.Instance)
                 });
             }
 
