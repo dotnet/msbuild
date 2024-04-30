@@ -21,20 +21,16 @@ internal sealed class BuildCheckConnectorLogger : ILogger
 
     internal BuildCheckConnectorLogger(
         IBuildAnalysisLoggingContextFactory loggingContextFactory,
-        IBuildCheckManager buildCheckManager,
-        bool areStatsEnabled)
+        IBuildCheckManager buildCheckManager)
     {
         _buildCheckManager = buildCheckManager;
         _loggingContextFactory = loggingContextFactory;
-        _areStatsEnabled = areStatsEnabled;
         _eventHandlers = GetBuildEventHandlers();
     }
 
     public LoggerVerbosity Verbosity { get; set; }
 
     public string? Parameters { get; set; }
-
-    private bool _areStatsEnabled { get; set; }
 
     public void Initialize(IEventSource eventSource)
     {
@@ -121,12 +117,11 @@ internal sealed class BuildCheckConnectorLogger : ILogger
 
         loggingContext.LogBuildEvent(statEvent);
 
-        MessageImportance importance = _areStatsEnabled ? MessageImportance.High : MessageImportance.Low;
-        loggingContext.LogCommentFromText(importance, $"BuildCheck run times{Environment.NewLine}");
+        loggingContext.LogCommentFromText(MessageImportance.Low, $"BuildCheck run times{Environment.NewLine}");
         string infraData = BuildCsvString("Infrastructure run times", infraStats);
-        loggingContext.LogCommentFromText(importance, infraData);
+        loggingContext.LogCommentFromText(MessageImportance.Low, infraData);
         string analyzerData = BuildCsvString("Analyzer run times", analyzerStats);
-        loggingContext.LogCommentFromText(importance, analyzerData);
+        loggingContext.LogCommentFromText(MessageImportance.Low, analyzerData);
     }
 
     private string BuildCsvString(string title, Dictionary<string, TimeSpan> rowData)
