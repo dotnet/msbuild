@@ -1301,7 +1301,7 @@ namespace Microsoft.Build.Execution
 
                 if (metadatum != null && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
                 {
-                    Debugger.Launch();
+                    // Debugger.Launch();
 
                     Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(null, null, new BuiltInMetadataTable(null, this), FileSystems.Default);
 
