@@ -545,6 +545,13 @@ Errors: {3}</source>
         <target state="translated">SDK "{1}"을(를) 확인하는 동안 SDK 확인자 "{0}"이(가) 실패했습니다. 예외: "{2}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="SDKResolverNullMessage">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</source>
+        <target state="new">The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</target>
+        <note>
+      LOCALIZATION: Do not localize the word SDK.
+    </note>
+      </trans-unit>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>
         <target state="translated">SDK 확인자 "{0}"이(가) null을 반환했습니다.</target>

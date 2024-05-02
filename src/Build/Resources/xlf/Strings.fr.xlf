@@ -545,6 +545,13 @@ Erreurs : {3}</target>
         <target state="translated">Échec du programme de résolution SDK «{0}» lors de la tentative de résolution du kit de développement logiciel (SDK) «{1}». Exception : "{2}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="SDKResolverNullMessage">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</source>
+        <target state="new">The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</target>
+        <note>
+      LOCALIZATION: Do not localize the word SDK.
+    </note>
+      </trans-unit>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>
         <target state="translated">Le programme de résolution du Kit de développement logiciel (SDK) «{0}» a retourné null.</target>
