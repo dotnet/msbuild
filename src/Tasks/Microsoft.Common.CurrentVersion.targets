@@ -3245,7 +3245,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       DependsOnTargets="AssignTargetPaths">
 
     <PropertyGroup>
-      <RespectAlreadyAssignedItemCulture Condition="'$(RespectAlreadyAssignedItemCulture)' == ''">false</RespectAlreadyAssignedItemCulture>
+      <RespectAlreadyAssignedItemCulture Condition="'$(RespectAlreadyAssignedItemCulture)' == '' and '$([MSBuild]::AreFeaturesEnabled(17.12))' != 'true'">false</RespectAlreadyAssignedItemCulture>
+      <RespectAlreadyAssignedItemCulture Condition="'$(RespectAlreadyAssignedItemCulture)' == '' and $([MSBuild]::AreFeaturesEnabled(17.12))">true</RespectAlreadyAssignedItemCulture>
     </PropertyGroup>
 
     <Warning Condition="'@(ResxWithNoCulture)'!=''" Code="MSB9000" Text="ResxWithNoCulture item type is deprecated. Use EmbeddedResource items instead."/>

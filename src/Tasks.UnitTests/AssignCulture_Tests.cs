@@ -40,18 +40,24 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CultureAttributePrecedence()
         {
-            AssignCulture t = new AssignCulture();
-            t.BuildEngine = new MockEngine();
-            ITaskItem i = new TaskItem("MyResource.fr.resx");
-            i.SetMetadata("Culture", "en-GB");
-            t.Files = new ITaskItem[] { i };
-            t.Execute();
+            using(var testEnv = TestEnvironment.Create())
+            {
+                // AssignCulture behaviour before ChangeWave 17.12
+                testEnv.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "17.12");
 
-            Assert.Single(t.AssignedFiles);
-            Assert.Single(t.CultureNeutralAssignedFiles);
-            Assert.Equal("fr", t.AssignedFiles[0].GetMetadata("Culture"));
-            Assert.Equal("MyResource.fr.resx", t.AssignedFiles[0].ItemSpec);
-            Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
+                AssignCulture t = new AssignCulture();
+                t.BuildEngine = new MockEngine();
+                ITaskItem i = new TaskItem("MyResource.fr.resx");
+                i.SetMetadata("Culture", "en-GB");
+                t.Files = new ITaskItem[] { i };
+                t.Execute();
+
+                Assert.Single(t.AssignedFiles);
+                Assert.Single(t.CultureNeutralAssignedFiles);
+                Assert.Equal("fr", t.AssignedFiles[0].GetMetadata("Culture"));
+                Assert.Equal("MyResource.fr.resx", t.AssignedFiles[0].ItemSpec);
+                Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
+            }
         }
 
         /// <summary>
@@ -62,18 +68,24 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CultureAttributePrecedenceWithBogusCulture()
         {
-            AssignCulture t = new AssignCulture();
-            t.BuildEngine = new MockEngine();
-            ITaskItem i = new TaskItem("MyResource.fr.resx");
-            i.SetMetadata("Culture", "invalid");   // Bogus culture.
-            t.Files = new ITaskItem[] { i };
-            t.Execute();
+            using (var testEnv = TestEnvironment.Create())
+            {
+                // AssignCulture behaviour before ChangeWave 17.12
+                testEnv.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "17.12");
 
-            Assert.Single(t.AssignedFiles);
-            Assert.Single(t.CultureNeutralAssignedFiles);
-            Assert.Equal("fr", t.AssignedFiles[0].GetMetadata("Culture"));
-            Assert.Equal("MyResource.fr.resx", t.AssignedFiles[0].ItemSpec);
-            Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
+                AssignCulture t = new AssignCulture();
+                t.BuildEngine = new MockEngine();
+                ITaskItem i = new TaskItem("MyResource.fr.resx");
+                i.SetMetadata("Culture", "invalid");   // Bogus culture.
+                t.Files = new ITaskItem[] { i };
+                t.Execute();
+
+                Assert.Single(t.AssignedFiles);
+                Assert.Single(t.CultureNeutralAssignedFiles);
+                Assert.Equal("fr", t.AssignedFiles[0].GetMetadata("Culture"));
+                Assert.Equal("MyResource.fr.resx", t.AssignedFiles[0].ItemSpec);
+                Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
+            }
         }
 
         /// <summary>
@@ -101,7 +113,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Test the case where an item has no embedded culture. For example:
-        /// "MyResource.resx"
+        /// "MyResource.resx".
         /// </summary>
         [Fact]
         public void NoCulture()
@@ -263,17 +275,22 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Any pre-existing Culture attribute on the item is to be respected
+        /// Any pre-existing Culture attribute on the item is to be respected.
         /// </summary>
-        [Fact]
-        public void CultureMetaDataShouldBeRespected()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void CultureMetaDataShouldBeRespected(bool enableRespectAlreadyAssignedItemCultureExplicitly)
         {
             AssignCulture t = new AssignCulture();
             t.BuildEngine = new MockEngine();
             ITaskItem i = new TaskItem("MyResource.fr.resx");
             i.SetMetadata("Culture", "en-GB");
             t.Files = new ITaskItem[] { i };
-            t.RespectAlreadyAssignedItemCulture = true;
+            if (enableRespectAlreadyAssignedItemCultureExplicitly)
+            {
+                t.RespectAlreadyAssignedItemCulture = true;
+            }
             t.Execute();
 
             Assert.Single(t.AssignedFiles);
@@ -284,17 +301,22 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Any pre-existing Culture attribute on the item is not to be respected, because culture is not set
+        /// Any pre-existing Culture attribute on the item is not to be respected, because culture is not set.
         /// </summary>
-        [Fact]
-        public void CultureMetaDataShouldNotBeRespected()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void CultureMetaDataShouldNotBeRespected(bool enableRespectAlreadyAssignedItemCultureExplicitly)
         {
             AssignCulture t = new AssignCulture();
             t.BuildEngine = new MockEngine();
             ITaskItem i = new TaskItem("MyResource.fr.resx");
             i.SetMetadata("Culture", "");
             t.Files = new ITaskItem[] { i };
-            t.RespectAlreadyAssignedItemCulture = true;
+            if (enableRespectAlreadyAssignedItemCultureExplicitly)
+            {
+                t.RespectAlreadyAssignedItemCulture = true;
+            }
             t.Execute();
 
             Assert.Single(t.AssignedFiles);

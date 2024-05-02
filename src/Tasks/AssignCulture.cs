@@ -45,7 +45,7 @@ namespace Microsoft.Build.Tasks
         /// If the flag set to 'true' the incoming list with existing Culture metadata will not be ammended and CultureNeutralAssignedFiles filename will be equal to the original.
         /// In case the Culture metadata was not provided, the logic of RespectAlreadyAssignedItemCulture will not take any effect.
         /// </summary>
-        public bool RespectAlreadyAssignedItemCulture { get; set; } = false;
+        public bool RespectAlreadyAssignedItemCulture { get; set; } = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12);
 
         /// <summary>
         /// This outgoing list of files is exactly the same as the incoming Files
