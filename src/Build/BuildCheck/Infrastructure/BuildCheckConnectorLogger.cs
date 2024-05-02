@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BuildCheck.Acquisition;
+using Microsoft.Build.BuildCheck.Utilities;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using static Microsoft.Build.BuildCheck.Infrastructure.BuildCheckManagerProvider;
@@ -80,9 +81,6 @@ internal sealed class BuildCheckConnectorLogger : ILogger
 
     private void EventSource_BuildFinished(object sender, BuildFinishedEventArgs e)
     {
-        _stats.Merge(_buildCheckManager.CreateTracingStats(), (span1, span2) => span1 + span2);
-        string msg = string.Join(Environment.NewLine, _stats.Select(a => a.Key + ": " + a.Value));
-
         BuildEventContext buildEventContext = e.BuildEventContext
             ?? new BuildEventContext(
                 BuildEventContext.InvalidNodeId,
@@ -92,8 +90,43 @@ internal sealed class BuildCheckConnectorLogger : ILogger
 
         LoggingContext loggingContext = _loggingContextFactory.CreateLoggingContext(buildEventContext);
 
-        // Tracing: https://github.com/dotnet/msbuild/issues/9629
-        loggingContext.LogCommentFromText(MessageImportance.High, msg);
+        _stats.Merge(_buildCheckManager.CreateAnalyzerTracingStats(), (span1, span2) => span1 + span2);
+        LogAnalyzerStats(loggingContext);
+    }
+    
+    private void LogAnalyzerStats(LoggingContext loggingContext)
+    {
+        Dictionary<string, TimeSpan> infraStats = new Dictionary<string, TimeSpan>();
+        Dictionary<string, TimeSpan> analyzerStats = new Dictionary<string, TimeSpan>();
+
+        foreach (var stat in _stats)
+        {
+            if (stat.Key.StartsWith(BuildCheckConstants.infraStatPrefix))
+            {
+                string newKey = stat.Key.Substring(BuildCheckConstants.infraStatPrefix.Length);
+                infraStats[newKey] = stat.Value;
+            }
+            else
+            {
+                analyzerStats[stat.Key] = stat.Value;
+            }
+        }
+
+        BuildCheckTracingEventArgs statEvent = new BuildCheckTracingEventArgs(_stats, true)
+        { BuildEventContext = loggingContext.BuildEventContext };
+
+        loggingContext.LogBuildEvent(statEvent);
+
+        loggingContext.LogCommentFromText(MessageImportance.Low, $"BuildCheck run times{Environment.NewLine}");
+        string infraData = BuildCsvString("Infrastructure run times", infraStats);
+        loggingContext.LogCommentFromText(MessageImportance.Low, infraData);
+        string analyzerData = BuildCsvString("Analyzer run times", analyzerStats);
+        loggingContext.LogCommentFromText(MessageImportance.Low, analyzerData);
+    }
+
+    private string BuildCsvString(string title, Dictionary<string, TimeSpan> rowData)
+    {
+        return title + Environment.NewLine + String.Join(Environment.NewLine, rowData.Select(a => $"{a.Key},{a.Value}")) + Environment.NewLine;
     }
 
     private Dictionary<Type, Action<BuildEventArgs>> GetBuildEventHandlers() => new()
@@ -102,7 +135,14 @@ internal sealed class BuildCheckConnectorLogger : ILogger
         { typeof(ProjectEvaluationStartedEventArgs), (BuildEventArgs e) => HandleProjectEvaluationStartedEvent((ProjectEvaluationStartedEventArgs) e) },
         { typeof(ProjectStartedEventArgs), (BuildEventArgs e) => _buildCheckManager.StartProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!) },
         { typeof(ProjectFinishedEventArgs), (BuildEventArgs e) => _buildCheckManager.EndProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!) },
-        { typeof(BuildCheckTracingEventArgs), (BuildEventArgs e) => _stats.Merge(((BuildCheckTracingEventArgs)e).TracingData, (span1, span2) => span1 + span2) },
+        { typeof(BuildCheckTracingEventArgs), (BuildEventArgs e) => 
+        {
+            if(!((BuildCheckTracingEventArgs)e).IsAggregatedGlobalReport)
+            {
+                _stats.Merge(((BuildCheckTracingEventArgs)e).TracingData, (span1, span2) => span1 + span2);
+            }
+        }
+        },
         { typeof(BuildCheckAcquisitionEventArgs), (BuildEventArgs e) => _buildCheckManager.ProcessAnalyzerAcquisition(((BuildCheckAcquisitionEventArgs)e).ToAnalyzerAcquisitionData(), e.BuildEventContext!) },
     };
 }

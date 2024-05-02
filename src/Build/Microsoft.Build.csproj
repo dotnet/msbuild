@@ -188,6 +188,7 @@
     <Compile Include="BuildCheck\Logging\IBuildAnalysisLoggingContextFactory.cs" />
     <Compile Include="BuildCheck\OM\EvaluatedPropertiesAnalysisData.cs" />
     <Compile Include="BuildCheck\OM\ParsedItemsAnalysisData.cs" />
+    <Compile Include="BuildCheck\Utilities\Constants.cs" />
     <Compile Include="BuildCheck\Utilities\EnumerableExtensions.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
     <Compile Include="FileAccess\DesiredAccess.cs" />
