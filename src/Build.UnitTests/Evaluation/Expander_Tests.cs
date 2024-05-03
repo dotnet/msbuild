@@ -5089,7 +5089,7 @@ $(
                     new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0, 0));
                 var dummyAssemblyFile = env.CreateFile(env.CreateFolder(), "test.dll");
 
-                var result = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default)
+                var result = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default, loggingContext)
                     .ExpandIntoStringLeaveEscaped($"$([MSBuild]::RegisterAnalyzer({dummyAssemblyFile.Path}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
                 result.ShouldBe(Boolean.TrueString);
