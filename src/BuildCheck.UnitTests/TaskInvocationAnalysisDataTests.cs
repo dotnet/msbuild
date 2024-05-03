@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
@@ -134,8 +135,10 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             data.Parameters["Paths"].Value.ShouldBeAssignableTo(typeof(IList));
             IList listValue = (IList)data.Parameters["Paths"].Value!;
             listValue.Count.ShouldBe(2);
-            listValue[0]!.ToString().ShouldBe("item1");
-            listValue[1]!.ToString().ShouldBe("item2");
+            listValue[0]!.ShouldBeAssignableTo(typeof(ITaskItem));
+            listValue[1]!.ShouldBeAssignableTo(typeof(ITaskItem));
+            ((ITaskItem)listValue[0]!).ItemSpec.ShouldBe("item1");
+            ((ITaskItem)listValue[1]!).ItemSpec.ShouldBe("item2");
 
             // The name of the parameter would ideally be "CombinedPaths" but we don't seem to be currently logging it.
             data.Parameters["OutputDirectories"].IsOutput.ShouldBe(true);
