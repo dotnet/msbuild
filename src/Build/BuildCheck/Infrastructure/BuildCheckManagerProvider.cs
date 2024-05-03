@@ -11,6 +11,7 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BuildCheck.Acquisition;
 using Microsoft.Build.BuildCheck.Analyzers;
 using Microsoft.Build.BuildCheck.Logging;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -64,7 +65,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
     public void ShutdownComponent() => GlobalInstance.Shutdown();
 
-    private sealed class BuildCheckManager : IBuildCheckManager, IBuildEngineDataConsumer
+    internal sealed class BuildCheckManager : IBuildCheckManager, IBuildEngineDataConsumer
     {
         private readonly TracingReporter _tracingReporter = new TracingReporter();
         private readonly BuildCheckCentralContext _buildCheckCentralContext = new();

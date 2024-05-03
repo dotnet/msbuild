@@ -380,21 +380,6 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Expander{P, I}"/> class with the specified property provider, item provider, evaluation context, and logging context.
-        /// </summary>
-        /// <param name="properties">The property provider supplying properties for expansion.</param>
-        /// <param name="items">The item provider supplying items for expansion.</param>
-        /// <param name="evaluationContext">The evaluation context used during expansion.</param>
-        /// <param name="loggingContext">The logging context used for logging or emmitting events during expansion.</param>
-        /// <exception cref="ArgumentNullException">Thrown when either <paramref name="properties"/> or <paramref name="evaluationContext"/> is null.</exception>
-        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, EvaluationContext evaluationContext, LoggingContext loggingContext)
-            : this(properties, evaluationContext)
-        {
-            _items = items;
-            _loggingContext = loggingContext;
-        }
-
-        /// <summary>
         /// Creates an expander passing it some properties, items, and/or metadata to use.
         /// Any or all may be null.
         /// </summary>
