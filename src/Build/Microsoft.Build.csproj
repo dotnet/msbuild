@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -199,6 +199,7 @@
     <Compile Include="FileAccess\RequestedAccess.cs" />
     <Compile Include="BuildCheck\Logging\AnalyzerLoggingContext.cs" />
     <Compile Include="BuildCheck\Logging\AnalyzerLoggingContextFactory.cs" />
+    <Compile Include="Instance\IElementWithLocation.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />

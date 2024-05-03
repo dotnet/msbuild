@@ -1177,7 +1177,7 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     // Expand out all the metadata, properties, and item vectors in the string.
-                    string expandedParameterValue = _batchBucket.Expander.ExpandIntoStringAndUnescape(parameterValue, ExpanderOptions.ExpandAll, parameterLocation, _targetLoggingContext);
+                    string expandedParameterValue = _batchBucket.Expander.ExpandIntoStringAndUnescape(parameterValue, ExpanderOptions.ExpandAll, parameterLocation);
 
                     if (expandedParameterValue.Length == 0)
                     {

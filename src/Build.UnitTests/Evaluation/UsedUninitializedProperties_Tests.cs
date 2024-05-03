@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.Build.Engine.UnitTests;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 
@@ -13,7 +15,7 @@ public sealed class UsedUninitializedProperties_Tests
     [Fact]
     public void Basics()
     {
-        UsedUninitializedProperties props = new();
+        PropertiesUsageTracker props = new(TestLoggingContext.CreateTestContext(new BuildEventContext(1, 2, 3, 4)));
 
         Assert.False(props.TryGetPropertyElementLocation("Hello", out IElementLocation? elementLocation));
         Assert.Null(elementLocation);

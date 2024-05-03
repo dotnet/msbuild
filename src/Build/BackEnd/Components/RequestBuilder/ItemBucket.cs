@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -69,11 +70,13 @@ namespace Microsoft.Build.BackEnd
         /// <param name="itemNames">Item types being batched on: null indicates no batching is occurring</param>
         /// <param name="metadata">Hashtable of item metadata values: null indicates no batching is occurring</param>
         /// <param name="lookup">The <see cref="Lookup"/> to use for the items in the bucket.</param>
+        /// <param name="loggingContext"></param>
         /// <param name="bucketSequenceNumber">A sequence number indication what order the buckets were created in.</param>
         internal ItemBucket(
             ICollection<string> itemNames,
             Dictionary<string, string> metadata,
             Lookup lookup,
+            LoggingContext loggingContext,
             int bucketSequenceNumber)
         {
             ErrorUtilities.VerifyThrow(lookup != null, "Need lookup.");
@@ -95,9 +98,18 @@ namespace Microsoft.Build.BackEnd
             }
 
             _metadata = metadata;
-            _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(_lookup, _lookup, new StringMetadataTable(metadata), FileSystems.Default);
+            _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(_lookup, _lookup, new StringMetadataTable(metadata), FileSystems.Default, loggingContext);
 
             _bucketSequenceNumber = bucketSequenceNumber;
+        }
+
+        /// <summary>
+        /// Updates the logging context that this bucket is going to use.
+        /// </summary>
+        /// <param name="loggingContext"></param>
+        internal void UpdateLoggingContext(LoggingContext loggingContext)
+        {
+            _expander = _expander.WithLoggingContext(loggingContext);
         }
 
         #endregion

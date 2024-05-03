@@ -248,7 +248,7 @@ namespace Microsoft.Build.Evaluation
                                 continue;
                             }
 
-                            string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, metadataExpansionOptions, metadataElement.Location, _lazyEvaluator._loggingContext);
+                            string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, metadataExpansionOptions, metadataElement.Location);
                             evaluatedValue = FileUtilities.MaybeAdjustFilePath(evaluatedValue, metadataElement.ContainingProject.DirectoryPath);
 
                             metadataTable.SetValue(metadataElement, evaluatedValue);
