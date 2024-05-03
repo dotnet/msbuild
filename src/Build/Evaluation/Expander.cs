@@ -4229,6 +4229,14 @@ namespace Microsoft.Build.Evaluation
                                 return true;
                             }
                         }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.SubstringByAsciiChars), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArgs(args, out string arg0, out int arg1, out int arg2))
+                            {
+                                returnVal = IntrinsicFunctions.SubstringByAsciiChars(arg0, arg1, arg2);
+                                return true;
+                            }
+                        }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.CheckFeatureAvailability), StringComparison.OrdinalIgnoreCase))
                         {
                             if (TryGetArg(args, out string arg0))
@@ -4554,6 +4562,32 @@ namespace Microsoft.Build.Evaluation
                     arg0 = value0;
                     arg1 = value1;
 
+                    return true;
+                }
+
+                return false;
+            }
+
+            private static bool TryGetArgs(object[] args, out string arg0, out int arg1, out int arg2)
+            {
+                arg0 = null;
+                arg1 = 0;
+                arg2 = 0;
+
+                if (args.Length != 3)
+                {
+                    return false;
+                }
+
+                var value1 = args[1] as string;
+                var value2 = args[2] as string;
+                arg0 = args[0] as string;
+                if (value1 != null &&
+                    value2 != null &&
+                    arg0 != null &&
+                    int.TryParse(value1, out arg1) &&
+                    int.TryParse(value2, out arg2))
+                {
                     return true;
                 }
 

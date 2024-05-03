@@ -18,6 +18,7 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using Microsoft.NET.StringTools;
 using Microsoft.Win32;
+using System.Linq;
 
 // Needed for DoesTaskHostExistForParameters
 using NodeProviderOutOfProcTaskHost = Microsoft.Build.BackEnd.NodeProviderOutOfProcTaskHost;
@@ -626,6 +627,32 @@ namespace Microsoft.Build.Evaluation
         internal static bool AreFeaturesEnabled(Version wave)
         {
             return ChangeWaves.AreFeaturesEnabled(wave);
+        }
+
+        internal static string SubstringByAsciiChars(string input, int start, int length)
+        {
+            if (start > input.Length)
+            {
+                return string.Empty;
+            }
+            if (start + length > input.Length)
+            {
+                length = input.Length - start;
+            }
+            StringBuilder sb = new StringBuilder();
+            for (int i = start; i < start + length; i++)
+            {
+                char c = input[i];
+                if (c >= 32 && c <= 126 && !FileUtilities.InvalidFileNameChars.Contains(c))
+                {
+                    sb.Append(c);
+                }
+                else
+                {
+                    sb.Append('_');
+                }
+            }
+            return sb.ToString();
         }
 
         internal static string CheckFeatureAvailability(string featureName)
