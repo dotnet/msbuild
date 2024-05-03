@@ -77,6 +77,12 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         AnalyzerLoggingContext buildAnalysisContext,
         TaskStartedEventArgs taskStartedEventArgs)
     {
+        if (!_buildCheckCentralContext.HasTaskInvocationActions)
+        {
+            // No analyzer is interested in task invocation actions -> nothing to do.
+            return;
+        }
+
         if (taskStartedEventArgs.BuildEventContext is not null)
         {
             // Add a new entry to _tasksBeingExecuted. TaskParameters are initialized empty and will be recorded
@@ -104,6 +110,12 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         AnalyzerLoggingContext buildAnalysisContext,
         TaskFinishedEventArgs taskFinishedEventArgs)
     {
+        if (!_buildCheckCentralContext.HasTaskInvocationActions)
+        {
+            // No analyzer is interested in task invocation actions -> nothing to do.
+            return;
+        }
+
         if (taskFinishedEventArgs.BuildEventContext is not null &&
             _tasksBeingExecuted.TryGetValue(taskFinishedEventArgs.BuildEventContext.TaskId, out ExecutingTaskData taskData))
         {
@@ -117,6 +129,12 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         AnalyzerLoggingContext buildAnalysisContext,
         TaskParameterEventArgs taskParameterEventArgs)
     {
+        if (!_buildCheckCentralContext.HasTaskInvocationActions)
+        {
+            // No analyzer is interested in task invocation actions -> nothing to do.
+            return;
+        }
+
         bool isOutput;
         switch (taskParameterEventArgs.Kind)
         {

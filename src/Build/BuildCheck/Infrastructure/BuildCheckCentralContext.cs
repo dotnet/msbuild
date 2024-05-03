@@ -28,8 +28,9 @@ internal sealed class BuildCheckCentralContext
 
     // This we can potentially use to subscribe for receiving evaluated props in the
     //  build event args. However - this needs to be done early on, when analyzers might not be known yet
-    internal bool HasEvaluatedPropertiesActions => _globalCallbacks.EvaluatedPropertiesActions.Any();
-    internal bool HasParsedItemsActions => _globalCallbacks.ParsedItemsActions.Any();
+    internal bool HasEvaluatedPropertiesActions => _globalCallbacks.EvaluatedPropertiesActions.Count > 0;
+    internal bool HasParsedItemsActions => _globalCallbacks.ParsedItemsActions.Count > 0;
+    internal bool HasTaskInvocationActions => _globalCallbacks.TaskInvocationActions.Count > 0;
 
     internal void RegisterEvaluatedPropertiesAction(BuildAnalyzerWrapper analyzer, Action<BuildCheckDataContext<EvaluatedPropertiesAnalysisData>> evaluatedPropertiesAction)
         // Here we might want to communicate to node that props need to be sent.
