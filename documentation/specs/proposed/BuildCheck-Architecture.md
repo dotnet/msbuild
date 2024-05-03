@@ -98,7 +98,9 @@ Examples of custom rules can be found in the end-to-end tests, showcasing variou
 1. Single Custom Rule Packaged as a NuGet Package: Demonstrates the implementation of a custom rule encapsulated within a NuGet package. This example illustrates the process of creating, packaging, and integrating a single custom rule into a project.
 2. Project with Multiple Analyzers Referenced: Illustrates a project setup where multiple custom analyzers are referenced. This scenario is common in larger projects where multiple rule sets need to be enforced simultaneously.
 
-Important Note: In these examples, pay attention to the presence of the `CustomAnalyzerName.props` file. This file contains intrinsic function invocations necessary for successful rule registration. Understanding and correctly implementing these invocations are crucial for integrating custom rules into your projects effectively.
+Important Notes: 
+- In these examples, pay attention to the presence of the `CustomAnalyzerName.props` file. This file contains intrinsic function invocations necessary for successful rule registration. Understanding and correctly implementing these invocations are crucial for integrating custom rules into your projects effectively.
+- The examples do not include references to third-party assemblies that might be required in other custom analyzers. To load the custom instance in MSBuild, third-party assemblies have to be included in the NuGet package. The current implementation achieves this goal by using a special target [AddNuGetDlls](https://github.com/dotnet/msbuild/blob/f25414599dcb07202a9f8bfd8125d04a6e5c14be/template_feed/Microsoft.AnalyzerTemplate/Company.AnalyzerTemplate.csproj#L22).
 
 ### Future Enhancements
 As our library of custom rules expands, we plan to enrich this section with real-world production rule examples. These examples will showcase a diverse range of rules addressing common development challenges. Once these production rules are published and available on nuget.org, we will update this documentation accordingly.
