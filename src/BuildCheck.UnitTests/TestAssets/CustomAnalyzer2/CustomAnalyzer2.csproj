@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
     <!-- The output structure was modified for msbuild development needs.-->
     <NoWarn>NU5101;NU5128</NoWarn>
   </PropertyGroup>
@@ -13,27 +12,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build" PrivateAssets="all" IncludeInPackage="true" Version="17.11.0-preview-24218-01" />
+    <!-- In the real world scenario, the DLLs are added as PackageReference, modified for test purposes only. -->
+    <Reference Include="Microsoft.Build">
+      <HintPath>$(MSBuildProjectDirectory)\..\..\Microsoft.Build.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <Target Name="AddNuGetDlls" BeforeTargets="_GetPackageFiles">
-    <!-- Merge the collection of PackageReference and Assemblies using the NuGetPackageId key.
-       This produces a new list containing the DLL path and the "IncludeInPackage" metadata-->
-    <JoinItems Left="@(ResolvedCompileFileDefinitions)" LeftKey="NuGetPackageId" LeftMetadata="*" Right="@(PackageReference)" RightKey="" RightMetadata="*" ItemSpecToUse="Left">
-      <Output TaskParameter="JoinResult" ItemName="_PackagesToPack" />
-    </JoinItems>
-
     <ItemGroup>
-      <!-- Remove NETStandard DLLs -->
-      <_PackagesToPack Remove="@(_PackagesToPack)" />
-    </ItemGroup>
-
-    <Message Importance="High" Text="Adding DLLs from the following packages: @(_PackagesToPack->'%(NuGetPackageId)')" />
-
-    <ItemGroup>
-      <!-- Update the collection of items to pack with the DLLs from the NuGet packages -->
-      <None Include="@(_PackagesToPack)" Pack="true" PackagePath="lib" Visible="false" />
-
       <!-- Add the DLL produced by the current project to the NuGet package -->
       <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="lib" Visible="false" />
     </ItemGroup>

@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.Build.UnitTests;
@@ -27,7 +26,7 @@ public class EndToEndTests : IDisposable
         _env.WithEnvironmentInvariant();
     }
 
-    private static string TestAssetsRootPath { get; } = Path.Combine(AppContext.BaseDirectory, "TestAssets");
+    private static string TestAssetsRootPath { get; } = Path.Combine(Path.GetDirectoryName(typeof(EndToEndTests).Assembly.Location) ?? AppContext.BaseDirectory, "TestAssets");
 
     public void Dispose() => _env.Dispose();
 
@@ -138,26 +137,26 @@ public class EndToEndTests : IDisposable
 
     [Theory]
     [InlineData(new[] { "CustomAnalyzer" }, "AnalysisCandidate", new[] { "CustomRule1", "CustomRule2" })]
-    [InlineData(new[] { "CustomAnalyzer", "CustomAnalyzer2" }, "AnalysisCandidateWithMultipleRulesInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" })]
+    [InlineData(new[] { "CustomAnalyzer", "CustomAnalyzer2" }, "AnalysisCandidateWithMultipleAnalyzersInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" })]
     public void CustomAnalyzerTest(string[] customAnalyzerNames, string analysisCandidate, string[] expectedRegisteredRules)
     {
         using (var env = TestEnvironment.Create())
         {
             var candidatesNugetFullPaths = BuildAnalyzerRules(env, customAnalyzerNames);
 
-            if (candidatesNugetFullPaths.Any())
+            candidatesNugetFullPaths.ShouldNotBeEmpty("Nuget package with custom analyzer was not generated or detected.");
+
+            var analysisCandidatePath = Path.Combine(TestAssetsRootPath, analysisCandidate);
+            AddCustomDataSourceToNugetConfig(analysisCandidatePath, candidatesNugetFullPaths);
+
+            string projectAnalysisBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"{Path.Combine(analysisCandidatePath, $"{analysisCandidate}.csproj")} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path} -analyze -verbosity:d",
+                out bool successBuild);
+            successBuild.ShouldBeTrue();
+
+            foreach (string expectedRegisteredRule in expectedRegisteredRules)
             {
-                var analysisCandidatePath = Path.Combine(TestAssetsRootPath, analysisCandidate);
-                AddCustomDataSourceToNugetConfig(analysisCandidatePath, candidatesNugetFullPaths);
-
-                string projectAnalysisBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
-                    $"{Path.Combine(analysisCandidatePath, $"{analysisCandidate}.csproj")} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path} -analyze -verbosity:d",
-                    out bool _);
-
-                foreach (string expectedRegisteredRule in expectedRegisteredRules)
-                {
-                    projectAnalysisBuildLog.ShouldContain($"Custom analyzer rule: {expectedRegisteredRule} has been registered successfully.");
-                }
+                projectAnalysisBuildLog.ShouldContain($"Custom analyzer rule: {expectedRegisteredRule} has been registered successfully.");
             }
         }
     }
@@ -171,12 +170,10 @@ public class EndToEndTests : IDisposable
             var candidateAnalysisProjectPath = Path.Combine(TestAssetsRootPath, customAnalyzerName, $"{customAnalyzerName}.csproj");
             string candidateAnalysisBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
                  $"{candidateAnalysisProjectPath} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path}", out bool success);
+            success.ShouldBeTrue();
 
-            if (success)
-            {
-                var candidatesNugetPackageFullPath = Regex.Match(candidateAnalysisBuildLog, @"Successfully created package '(.*?)'").Groups[1].Value;
-                candidatesNugetFullPaths.Add(candidatesNugetPackageFullPath);
-            }
+            var candidatesNugetPackageFullPath = Regex.Match(candidateAnalysisBuildLog, @"Successfully created package '(.*?)'").Groups[1].Value;
+            candidatesNugetFullPaths.Add(candidatesNugetPackageFullPath);
         }
 
         return candidatesNugetFullPaths;
@@ -215,11 +212,9 @@ public class EndToEndTests : IDisposable
 
     private void PopulateXmlAttribute(XmlDocument doc, XmlNode node, string attributeName, string attributeValue)
     {
-        if (node != null)
-        {
-            var attribute = doc.CreateAttribute(attributeName);
-            attribute.Value = attributeValue;
-            node.Attributes!.Append(attribute);
-        }
+        node.ShouldNotBeNull($"The attribute {attributeName} can not be populated with {attributeValue}. Xml node is null.");
+        var attribute = doc.CreateAttribute(attributeName);
+        attribute.Value = attributeValue;
+        node.Attributes!.Append(attribute);
     }
 }
