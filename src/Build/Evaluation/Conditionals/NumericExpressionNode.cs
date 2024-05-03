@@ -23,18 +23,18 @@ namespace Microsoft.Build.Evaluation
             _value = value;
         }
 
-        internal override bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result, LoggingContext loggingContext = null)
+        internal override bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result)
         {
             result = default;
             return false;
         }
 
-        internal override bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result, LoggingContext loggingContext = null)
+        internal override bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result)
         {
             return ConversionUtilities.TryConvertDecimalOrHexToDouble(_value, out result);
         }
 
-        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result, LoggingContext loggingContext = null)
+        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result)
         {
             return Version.TryParse(_value, out result);
         }
@@ -50,7 +50,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Get the expanded value
         /// </summary>
-        internal override string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
+        internal override string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state)
         {
             return _value;
         }

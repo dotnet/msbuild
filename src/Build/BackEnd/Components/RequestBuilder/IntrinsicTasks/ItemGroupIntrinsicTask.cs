@@ -82,7 +82,7 @@ namespace Microsoft.Build.BackEnd
 
                             if (!String.IsNullOrEmpty(child.KeepMetadata))
                             {
-                                var keepMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.KeepMetadata, ExpanderOptions.ExpandAll, child.KeepMetadataLocation, LoggingContext).ToList();
+                                var keepMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.KeepMetadata, ExpanderOptions.ExpandAll, child.KeepMetadataLocation).ToList();
                                 if (keepMetadataEvaluated.Count > 0)
                                 {
                                     keepMetadata = new HashSet<string>(keepMetadataEvaluated);
@@ -91,7 +91,7 @@ namespace Microsoft.Build.BackEnd
 
                             if (!String.IsNullOrEmpty(child.RemoveMetadata))
                             {
-                                var removeMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.RemoveMetadata, ExpanderOptions.ExpandAll, child.RemoveMetadataLocation, LoggingContext).ToList();
+                                var removeMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.RemoveMetadata, ExpanderOptions.ExpandAll, child.RemoveMetadataLocation).ToList();
                                 if (removeMetadataEvaluated.Count > 0)
                                 {
                                     removeMetadata = new HashSet<string>(removeMetadataEvaluated);
@@ -100,7 +100,7 @@ namespace Microsoft.Build.BackEnd
 
                             if (!String.IsNullOrEmpty(child.MatchOnMetadata))
                             {
-                                var matchOnMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.MatchOnMetadata, ExpanderOptions.ExpandAll, child.MatchOnMetadataLocation, LoggingContext).ToList();
+                                var matchOnMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.MatchOnMetadata, ExpanderOptions.ExpandAll, child.MatchOnMetadataLocation).ToList();
                                 if (matchOnMetadataEvaluated.Count > 0)
                                 {
                                     matchOnMetadata = new HashSet<string>(matchOnMetadataEvaluated);
@@ -191,7 +191,7 @@ namespace Microsoft.Build.BackEnd
                         expanderOptions |= ExpanderOptions.LogOnItemMetadataSelfReference;
                     }
 
-                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, expanderOptions, metadataInstance.Location, loggingContext);
+                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, expanderOptions, metadataInstance.Location);
 
                     // This both stores the metadata so we can add it to all the items we just created later, and
                     // exposes this metadata to further metadata evaluations in subsequent loop iterations.
@@ -251,7 +251,7 @@ namespace Microsoft.Build.BackEnd
             List<ProjectItemInstance> itemsToRemove;
             if (matchOnMetadata == null)
             {
-                itemsToRemove = FindItemsMatchingSpecification(group, child.Remove, child.RemoveLocation, bucket.Expander, LoggingContext);
+                itemsToRemove = FindItemsMatchingSpecification(group, child.Remove, child.RemoveLocation, bucket.Expander);
             }
             else
             {
@@ -326,7 +326,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (condition)
                 {
-                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, ExpanderOptions.ExpandAll, metadataInstance.Location, loggingContext);
+                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, ExpanderOptions.ExpandAll, metadataInstance.Location);
                     metadataToSet[metadataInstance.Name] = Lookup.MetadataModification.CreateFromNewValue(evaluatedValue);
                 }
             }
@@ -381,7 +381,7 @@ namespace Microsoft.Build.BackEnd
             List<ProjectItemInstance> items = new List<ProjectItemInstance>();
 
             // Expand properties and metadata in Include
-            string evaluatedInclude = expander.ExpandIntoStringLeaveEscaped(originalItem.Include, ExpanderOptions.ExpandPropertiesAndMetadata, originalItem.IncludeLocation, loggingContext);
+            string evaluatedInclude = expander.ExpandIntoStringLeaveEscaped(originalItem.Include, ExpanderOptions.ExpandPropertiesAndMetadata, originalItem.IncludeLocation);
 
             if (evaluatedInclude.Length == 0)
             {
@@ -392,7 +392,7 @@ namespace Microsoft.Build.BackEnd
             var excludes = ImmutableList<string>.Empty.ToBuilder();
             if (originalItem.Exclude.Length > 0)
             {
-                string evaluatedExclude = expander.ExpandIntoStringLeaveEscaped(originalItem.Exclude, ExpanderOptions.ExpandAll, originalItem.ExcludeLocation, loggingContext);
+                string evaluatedExclude = expander.ExpandIntoStringLeaveEscaped(originalItem.Exclude, ExpanderOptions.ExpandAll, originalItem.ExcludeLocation);
 
                 if (evaluatedExclude.Length > 0)
                 {
@@ -531,14 +531,12 @@ namespace Microsoft.Build.BackEnd
         /// <param name="specification">The specification to match against the items.</param>
         /// <param name="specificationLocation">The specification to match against the provided items</param>
         /// <param name="expander">The expander to use</param>
-        /// <param name="loggingContext">Context for logging</param>
         /// <returns>A list of matching items</returns>
         private List<ProjectItemInstance> FindItemsMatchingSpecification(
             ICollection<ProjectItemInstance> items,
             string specification,
             ElementLocation specificationLocation,
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander,
-            LoggingContext loggingContext = null)
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
         {
             if (items.Count == 0 || specification.Length == 0)
             {
@@ -550,7 +548,7 @@ namespace Microsoft.Build.BackEnd
             HashSet<string> specificationsToFind = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             // Split by semicolons
-            var specificationPieces = expander.ExpandIntoStringListLeaveEscaped(specification, ExpanderOptions.ExpandAll, specificationLocation, loggingContext);
+            var specificationPieces = expander.ExpandIntoStringListLeaveEscaped(specification, ExpanderOptions.ExpandAll, specificationLocation);
 
             foreach (string piece in specificationPieces)
             {

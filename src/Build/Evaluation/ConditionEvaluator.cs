@@ -282,7 +282,7 @@ namespace Microsoft.Build.Evaluation
             {
                 try
                 {
-                    result = parsedExpression.Evaluate(state, loggingContext);
+                    result = parsedExpression.Evaluate(state);
                 }
                 finally
                 {
@@ -360,7 +360,7 @@ namespace Microsoft.Build.Evaluation
             ///     May return null if the expression would expand to non-empty and it broke out early.
             ///     Otherwise, returns the correctly expanded expression.
             /// </summary>
-            string ExpandIntoStringBreakEarly(string expression, LoggingContext? loggingContext = null);
+            string ExpandIntoStringBreakEarly(string expression);
 
             /// <summary>
             ///     Expands the specified expression into a list of TaskItem's.
@@ -370,7 +370,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             ///     Expands the specified expression into a string.
             /// </summary>
-            string ExpandIntoString(string expression, LoggingContext? loggingContext = null);
+            string ExpandIntoString(string expression);
 
             /// <summary>
             ///     PRE cache
@@ -447,9 +447,9 @@ namespace Microsoft.Build.Evaluation
             /// May return null if the expression would expand to non-empty and it broke out early.
             /// Otherwise, returns the correctly expanded expression.
             /// </summary>
-            public string ExpandIntoStringBreakEarly(string expression, LoggingContext? loggingContext = null)
+            public string ExpandIntoStringBreakEarly(string expression)
             {
-                expression = _expander.ExpandIntoStringAndUnescape(expression, _expanderOptions | ExpanderOptions.BreakOnNotEmpty, ElementLocation, loggingContext);
+                expression = _expander.ExpandIntoStringAndUnescape(expression, _expanderOptions | ExpanderOptions.BreakOnNotEmpty, ElementLocation);
 
                 return expression;
             }
@@ -470,11 +470,10 @@ namespace Microsoft.Build.Evaluation
             /// Expands the specified expression into a string.
             /// </summary>
             /// <param name="expression">The expression to expand.</param>
-            /// <param name="loggingContext"></param>
             /// <returns>The expanded string.</returns>
-            public string ExpandIntoString(string expression, LoggingContext? loggingContext = null)
+            public string ExpandIntoString(string expression)
             {
-                expression = _expander.ExpandIntoStringAndUnescape(expression, _expanderOptions, ElementLocation, loggingContext);
+                expression = _expander.ExpandIntoStringAndUnescape(expression, _expanderOptions, ElementLocation);
 
                 return expression;
             }

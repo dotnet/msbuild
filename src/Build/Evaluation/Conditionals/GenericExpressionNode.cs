@@ -14,9 +14,9 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal abstract class GenericExpressionNode
     {
-        internal abstract bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result, LoggingContext loggingContext = null);
-        internal abstract bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result, LoggingContext loggingContext = null);
-        internal abstract bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result, LoggingContext loggingContext = null);
+        internal abstract bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result);
+        internal abstract bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result);
+        internal abstract bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result);
 
         /// <summary>
         /// Returns true if this node evaluates to an empty string,
@@ -25,7 +25,7 @@ namespace Microsoft.Build.Evaluation
         /// to empty than to fully evaluate it.)
         /// Implementations should cache the result so that calls after the first are free.
         /// </summary>
-        internal virtual bool EvaluatesToEmpty(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
+        internal virtual bool EvaluatesToEmpty(ConditionEvaluator.IConditionEvaluationState state)
         {
             return false;
         }
@@ -34,7 +34,7 @@ namespace Microsoft.Build.Evaluation
         /// Value after any item and property expressions are expanded
         /// </summary>
         /// <returns></returns>
-        internal abstract string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null);
+        internal abstract string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state);
 
         /// <summary>
         /// Value before any item and property expressions are expanded
@@ -52,17 +52,16 @@ namespace Microsoft.Build.Evaluation
         /// The main evaluate entry point for expression trees
         /// </summary>
         /// <param name="state"></param>
-        /// <param name="loggingContext"></param>
         /// <returns></returns>
-        internal bool Evaluate(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
+        internal bool Evaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
-            if (!TryBoolEvaluate(state, out bool boolValue, loggingContext))
+            if (!TryBoolEvaluate(state, out bool boolValue))
             {
                 ProjectErrorUtilities.ThrowInvalidProject(
                     state.ElementLocation,
                     "ConditionNotBooleanDetail",
                     state.Condition,
-                    GetExpandedValue(state, loggingContext));
+                    GetExpandedValue(state));
             }
 
             return boolValue;

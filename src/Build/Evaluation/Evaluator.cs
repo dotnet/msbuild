@@ -859,12 +859,12 @@ namespace Microsoft.Build.Evaluation
             using (_evaluationProfiler.TrackFile(currentProjectOrImport.FullPath))
             {
                 // We accumulate InitialTargets from the project and each import
-                var initialTargets = _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.InitialTargets, ExpanderOptions.ExpandProperties, currentProjectOrImport.InitialTargetsLocation, _evaluationLoggingContext);
+                var initialTargets = _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.InitialTargets, ExpanderOptions.ExpandProperties, currentProjectOrImport.InitialTargetsLocation);
                 _initialTargetsList.AddRange(initialTargets);
 
                 if (!Traits.Instance.EscapeHatches.IgnoreTreatAsLocalProperty)
                 {
-                    foreach (string propertyName in _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.TreatAsLocalProperty, ExpanderOptions.ExpandProperties, currentProjectOrImport.TreatAsLocalPropertyLocation, _evaluationLoggingContext))
+                    foreach (string propertyName in _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.TreatAsLocalProperty, ExpanderOptions.ExpandProperties, currentProjectOrImport.TreatAsLocalPropertyLocation))
                     {
                         XmlUtilities.VerifyThrowProjectValidElementName(propertyName, currentProjectOrImport.Location);
                         _data.GlobalPropertiesToTreatAsLocal.Add(propertyName);
@@ -945,7 +945,7 @@ namespace Microsoft.Build.Evaluation
         {
             if (_data.DefaultTargets == null)
             {
-                string expanded = _expander.ExpandIntoStringLeaveEscaped(currentProjectOrImport.DefaultTargets, ExpanderOptions.ExpandProperties, currentProjectOrImport.DefaultTargetsLocation, _evaluationLoggingContext);
+                string expanded = _expander.ExpandIntoStringLeaveEscaped(currentProjectOrImport.DefaultTargets, ExpanderOptions.ExpandProperties, currentProjectOrImport.DefaultTargetsLocation);
 
                 if (expanded.Length > 0)
                 {
@@ -1050,8 +1050,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void AddBeforeAndAfterTargetMappings(ProjectTargetElement targetElement, Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets, Dictionary<string, List<TargetSpecification>> targetsWhichRunBeforeByTarget, Dictionary<string, List<TargetSpecification>> targetsWhichRunAfterByTarget)
         {
-            var beforeTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.BeforeTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.BeforeTargetsLocation, _evaluationLoggingContext);
-            var afterTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.AfterTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.AfterTargetsLocation, _evaluationLoggingContext);
+            var beforeTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.BeforeTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.BeforeTargetsLocation);
+            var afterTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.AfterTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.AfterTargetsLocation);
 
             foreach (string beforeTarget in beforeTargets)
             {
@@ -1296,7 +1296,7 @@ namespace Microsoft.Build.Evaluation
                 // it is the same as what we are setting the value on. Note: This needs to be set before we expand the property we are currently setting.
                 _expander.PropertiesUsageTracker.CurrentlyEvaluatingPropertyElementName = propertyElement.Name;
 
-                string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(propertyElement.Value, ExpanderOptions.ExpandProperties, propertyElement.Location, _evaluationLoggingContext);
+                string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(propertyElement.Value, ExpanderOptions.ExpandProperties, propertyElement.Location);
 
                 _expander.PropertiesUsageTracker.CheckPreexistingUndefinedUsage(propertyElement, evaluatedValue, _evaluationLoggingContext);
 
@@ -1354,7 +1354,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     if (EvaluateCondition(metadataElement, ExpanderOptions.ExpandPropertiesAndMetadata, ParserOptions.AllowPropertiesAndCustomMetadata))
                     {
-                        string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, ExpanderOptions.ExpandPropertiesAndCustomMetadata, itemDefinitionElement.Location, _evaluationLoggingContext);
+                        string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, ExpanderOptions.ExpandPropertiesAndCustomMetadata, itemDefinitionElement.Location);
 
                         M predecessor = itemDefinition.GetMetadata(metadataElement.Name);
 
@@ -1748,7 +1748,7 @@ namespace Microsoft.Build.Evaluation
                         }
 
                         static string EvaluateProperty(string value, IElementLocation location,
-                            Expander<P, I> expander, SdkReferencePropertyExpansionMode mode, LoggingContext loggingContext)
+                            Expander<P, I> expander, SdkReferencePropertyExpansionMode mode)
                         {
                             if (value == null)
                             {
@@ -1762,7 +1762,7 @@ namespace Microsoft.Build.Evaluation
                                 case SdkReferencePropertyExpansionMode.ExpandUnescape:
                                     return expander.ExpandIntoStringAndUnescape(value, Options, location);
                                 case SdkReferencePropertyExpansionMode.ExpandLeaveEscaped:
-                                    return expander.ExpandIntoStringLeaveEscaped(value, Options, location, loggingContext);
+                                    return expander.ExpandIntoStringLeaveEscaped(value, Options, location);
                                 case SdkReferencePropertyExpansionMode.NoExpansion:
                                 case SdkReferencePropertyExpansionMode.DefaultExpand:
                                 default:
@@ -1774,9 +1774,9 @@ namespace Microsoft.Build.Evaluation
                         IElementLocation sdkReferenceOrigin = importElement.SdkLocation;
 
                         sdkReference = new SdkReference(
-                            EvaluateProperty(sdkReference.Name, sdkReferenceOrigin, _expander, mode, _evaluationLoggingContext),
-                            EvaluateProperty(sdkReference.Version, sdkReferenceOrigin, _expander, mode, _evaluationLoggingContext),
-                            EvaluateProperty(sdkReference.MinimumVersion, sdkReferenceOrigin, _expander, mode, _evaluationLoggingContext));
+                            EvaluateProperty(sdkReference.Name, sdkReferenceOrigin, _expander, mode),
+                            EvaluateProperty(sdkReference.Version, sdkReferenceOrigin, _expander, mode),
+                            EvaluateProperty(sdkReference.MinimumVersion, sdkReferenceOrigin, _expander, mode));
                     }
                 }
 
@@ -1967,7 +1967,7 @@ namespace Microsoft.Build.Evaluation
         {
             imports = null;
 
-            string importExpressionEscaped = _expander.ExpandIntoStringLeaveEscaped(unescapedExpression, ExpanderOptions.ExpandProperties, importElement.ProjectLocation, _evaluationLoggingContext);
+            string importExpressionEscaped = _expander.ExpandIntoStringLeaveEscaped(unescapedExpression, ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
             ElementLocation importLocationInProject = importElement.Location;
 
             if (String.IsNullOrWhiteSpace(importExpressionEscaped))
@@ -2479,7 +2479,7 @@ namespace Microsoft.Build.Evaluation
                 importExpandedWithDefaultPath =
                     _expander.ExpandIntoStringLeaveEscaped(
                         importElement.Project.Replace(searchPathMatch.MsBuildPropertyFormat, extensionsPathPropValue),
-                        ExpanderOptions.ExpandProperties, importElement.ProjectLocation, _evaluationLoggingContext);
+                        ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
 
                 try
                 {

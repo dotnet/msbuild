@@ -103,6 +103,15 @@ namespace Microsoft.Build.BackEnd
             _bucketSequenceNumber = bucketSequenceNumber;
         }
 
+        /// <summary>
+        /// Updates the logging context that this bucket is going to use.
+        /// </summary>
+        /// <param name="loggingContext"></param>
+        internal void UpdateLoggingContext(LoggingContext loggingContext)
+        {
+            _expander = _expander.WithLoggingContext(loggingContext);
+        }
+
         #endregion
 
         #region Comparison methods

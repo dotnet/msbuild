@@ -31,34 +31,34 @@ namespace Microsoft.Build.Evaluation
             _expandable = expandable;
         }
 
-        internal override bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result, LoggingContext loggingContext = null)
+        internal override bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result)
         {
-            return ConversionUtilities.TryConvertStringToBool(GetExpandedValue(state, loggingContext), out result);
+            return ConversionUtilities.TryConvertStringToBool(GetExpandedValue(state), out result);
         }
 
-        internal override bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result, LoggingContext loggingContext = null)
+        internal override bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result)
         {
-            if (ShouldBeTreatedAsVisualStudioVersion(state, loggingContext))
+            if (ShouldBeTreatedAsVisualStudioVersion(state))
             {
                 result = ConversionUtilities.ConvertDecimalOrHexToDouble(MSBuildConstants.CurrentVisualStudioVersion);
                 return true;
             }
             else
             {
-                return ConversionUtilities.TryConvertDecimalOrHexToDouble(GetExpandedValue(state, loggingContext), out result);
+                return ConversionUtilities.TryConvertDecimalOrHexToDouble(GetExpandedValue(state), out result);
             }
         }
 
-        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result, LoggingContext loggingContext = null)
+        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result)
         {
-            if (ShouldBeTreatedAsVisualStudioVersion(state, loggingContext))
+            if (ShouldBeTreatedAsVisualStudioVersion(state))
             {
                 result = Version.Parse(MSBuildConstants.CurrentVisualStudioVersion);
                 return true;
             }
             else
             {
-                return Version.TryParse(GetExpandedValue(state, loggingContext), out result);
+                return Version.TryParse(GetExpandedValue(state), out result);
             }
         }
 
@@ -69,7 +69,7 @@ namespace Microsoft.Build.Evaluation
         /// to empty than to fully evaluate it.
         /// Implementations should cache the result so that calls after the first are free.
         /// </summary>
-        internal override bool EvaluatesToEmpty(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
+        internal override bool EvaluatesToEmpty(ConditionEvaluator.IConditionEvaluationState state)
         {
             if (_cachedExpandedValue == null)
             {
@@ -94,7 +94,7 @@ namespace Microsoft.Build.Evaluation
                             break;
                     }
 
-                    string expandBreakEarly = state.ExpandIntoStringBreakEarly(_value, loggingContext);
+                    string expandBreakEarly = state.ExpandIntoStringBreakEarly(_value);
 
                     if (expandBreakEarly == null)
                     {
@@ -130,13 +130,13 @@ namespace Microsoft.Build.Evaluation
         /// Value after any item and property expressions are expanded
         /// </summary>
         /// <returns></returns>
-        internal override string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
+        internal override string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state)
         {
             if (_cachedExpandedValue == null)
             {
                 if (_expandable)
                 {
-                    _cachedExpandedValue = state.ExpandIntoString(_value, loggingContext);
+                    _cachedExpandedValue = state.ExpandIntoString(_value);
                 }
                 else
                 {
@@ -169,7 +169,7 @@ namespace Microsoft.Build.Evaluation
         /// but now cause the project to throw InvalidProjectException when
         /// ToolsVersion is "Current". https://github.com/dotnet/msbuild/issues/4150
         /// </remarks>
-        private bool ShouldBeTreatedAsVisualStudioVersion(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
+        private bool ShouldBeTreatedAsVisualStudioVersion(ConditionEvaluator.IConditionEvaluationState state)
         {
             if (!_shouldBeTreatedAsVisualStudioVersion.HasValue)
             {
@@ -177,7 +177,7 @@ namespace Microsoft.Build.Evaluation
 
                 // Do this check first, because if it's not (common) we can early-out and the next
                 // expansion will be cheap because this will populate the cached expanded value.
-                if (string.Equals(GetExpandedValue(state, loggingContext), MSBuildConstants.CurrentToolsVersion, StringComparison.Ordinal))
+                if (string.Equals(GetExpandedValue(state), MSBuildConstants.CurrentToolsVersion, StringComparison.Ordinal))
                 {
                     // and it is just an expansion of MSBuildToolsVersion
                     _shouldBeTreatedAsVisualStudioVersion = string.Equals(_value, "$(MSBuildToolsVersion)", StringComparison.OrdinalIgnoreCase);

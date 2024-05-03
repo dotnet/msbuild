@@ -37,7 +37,7 @@ namespace Microsoft.Build.Evaluation
         /// Order in which comparisons are attempted is numeric, boolean, then string.
         /// Updates conditioned properties table.
         /// </summary>
-        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext)
+        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
             ProjectErrorUtilities.VerifyThrowInvalidProject(
                 LeftChild != null && RightChild != null,
@@ -59,8 +59,8 @@ namespace Microsoft.Build.Evaluation
                 state.PropertiesUsageTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluationWithOneSideEmpty;
             }
 
-            bool leftEmpty = LeftChild.EvaluatesToEmpty(state, loggingContext);
-            bool rightEmpty = RightChild.EvaluatesToEmpty(state, loggingContext);
+            bool leftEmpty = LeftChild.EvaluatesToEmpty(state);
+            bool rightEmpty = RightChild.EvaluatesToEmpty(state);
             if (leftEmpty || rightEmpty)
             {
                 UpdateConditionedProperties(state);
@@ -77,13 +77,13 @@ namespace Microsoft.Build.Evaluation
                 // is 17.0).
                 return Compare(leftNumericValue, rightNumericValue);
             }
-            else if (LeftChild.TryBoolEvaluate(state, out bool leftBoolValue, loggingContext) && RightChild.TryBoolEvaluate(state, out bool rightBoolValue, loggingContext))
+            else if (LeftChild.TryBoolEvaluate(state, out bool leftBoolValue) && RightChild.TryBoolEvaluate(state, out bool rightBoolValue))
             {
                 return Compare(leftBoolValue, rightBoolValue);
             }
 
-            string leftExpandedValue = LeftChild.GetExpandedValue(state, loggingContext);
-            string rightExpandedValue = RightChild.GetExpandedValue(state, loggingContext);
+            string leftExpandedValue = LeftChild.GetExpandedValue(state);
+            string rightExpandedValue = RightChild.GetExpandedValue(state);
 
             ProjectErrorUtilities.VerifyThrowInvalidProject(
                 leftExpandedValue != null && rightExpandedValue != null,

@@ -13,6 +13,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BuildCheck.Infrastructure;
@@ -322,16 +323,21 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal EvaluationContext EvaluationContext { get; }
 
+        private Expander(IPropertyProvider<P> properties, LoggingContext loggingContext)
+        {
+            _properties = properties;
+            _propertiesUsageTracker = new PropertiesUsageTracker(loggingContext);
+            _loggingContext = loggingContext;
+        }
+
         /// <summary>
         /// Creates an expander passing it some properties to use.
         /// Properties may be null.
         /// </summary>
         internal Expander(IPropertyProvider<P> properties, IFileSystem fileSystem, LoggingContext loggingContext)
+            : this(properties, loggingContext)
         {
-            _properties = properties;
-            _propertiesUsageTracker = new PropertiesUsageTracker();
             _fileSystem = fileSystem;
-            _loggingContext = loggingContext;
         }
 
         /// <summary>
@@ -349,13 +355,12 @@ namespace Microsoft.Build.Evaluation
         /// Creates an expander passing it some properties to use and the evaluation context.
         /// Properties may be null.
         /// </summary>
-        internal Expander(IPropertyProvider<P> properties, EvaluationContext evaluationContext, LoggingContext loggingContext)
+        internal Expander(IPropertyProvider<P> properties, EvaluationContext evaluationContext,
+            LoggingContext loggingContext)
+            : this(properties, loggingContext)
         {
-            _properties = properties;
-            _propertiesUsageTracker = new PropertiesUsageTracker();
             _fileSystem = evaluationContext.FileSystem;
             EvaluationContext = evaluationContext;
-            _loggingContext = loggingContext;
         }
 
         /// <summary>
@@ -404,6 +409,28 @@ namespace Microsoft.Build.Evaluation
             _metadata = metadata;
         }
 
+        private Expander(
+            IPropertyProvider<P> properties,
+            IItemProvider<I> items,
+            IMetadataTable metadata,
+            IFileSystem fileSystem,
+            EvaluationContext evaluationContext,
+            LoggingContext loggingContext)
+            : this(properties, items, metadata, fileSystem, loggingContext)
+        {
+            EvaluationContext = evaluationContext;
+        }
+
+        /// <summary>
+        /// Recreates the expander with passed in logging context
+        /// </summary>
+        /// <param name="loggingContext"></param>
+        /// <returns></returns>
+        internal Expander<P, I> WithLoggingContext(LoggingContext loggingContext)
+        {
+            return new Expander<P, I>(_properties, _items, _metadata, _fileSystem, EvaluationContext, loggingContext);
+        }
+
         /// <summary>
         /// Accessor for the metadata.
         /// Set temporarily during item metadata evaluation.
@@ -450,9 +477,9 @@ namespace Microsoft.Build.Evaluation
         ///
         /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.
         /// </summary>
-        internal string ExpandIntoStringAndUnescape(string expression, ExpanderOptions options, IElementLocation elementLocation, LoggingContext loggingContext = null)
+        internal string ExpandIntoStringAndUnescape(string expression, ExpanderOptions options, IElementLocation elementLocation)
         {
-            string result = ExpandIntoStringLeaveEscaped(expression, options, elementLocation, loggingContext);
+            string result = ExpandIntoStringLeaveEscaped(expression, options, elementLocation);
 
             return (result == null) ? null : EscapingUtilities.UnescapeAll(result);
         }
@@ -464,7 +491,7 @@ namespace Microsoft.Build.Evaluation
         ///
         /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.
         /// </summary>
-        internal string ExpandIntoStringLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation, LoggingContext loggingContext = null)
+        internal string ExpandIntoStringLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation)
         {
             if (expression.Length == 0)
             {
@@ -473,8 +500,8 @@ namespace Microsoft.Build.Evaluation
 
             ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
 
-            string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation, loggingContext);
-            result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _propertiesUsageTracker, _fileSystem, loggingContext);
+            string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation, _loggingContext);
+            result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _propertiesUsageTracker, _fileSystem);
             result = ItemExpander.ExpandItemVectorsIntoString<I>(this, result, _items, options, elementLocation);
             result = FileUtilities.MaybeAdjustFilePath(result);
 
@@ -504,11 +531,11 @@ namespace Microsoft.Build.Evaluation
         /// Use this form when the result is going to be processed further, for example by matching against the file system,
         /// so literals must be distinguished, and you promise to unescape after that.
         /// </summary>
-        internal SemiColonTokenizer ExpandIntoStringListLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation, LoggingContext loggingContext = null)
+        internal SemiColonTokenizer ExpandIntoStringListLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation)
         {
             ErrorUtilities.VerifyThrow((options & ExpanderOptions.BreakOnNotEmpty) == 0, "not supported");
 
-            return ExpressionShredder.SplitSemiColonSeparatedList(ExpandIntoStringLeaveEscaped(expression, options, elementLocation, loggingContext));
+            return ExpressionShredder.SplitSemiColonSeparatedList(ExpandIntoStringLeaveEscaped(expression, options, elementLocation));
         }
 
         /// <summary>
@@ -1129,8 +1156,7 @@ namespace Microsoft.Build.Evaluation
                 ExpanderOptions options,
                 IElementLocation elementLocation,
                 PropertiesUsageTracker propertiesUsageTracker,
-                IFileSystem fileSystem,
-                LoggingContext loggingContext = null)
+                IFileSystem fileSystem)
             {
                 return
                     ConvertToString(
@@ -1140,8 +1166,7 @@ namespace Microsoft.Build.Evaluation
                             options,
                             elementLocation,
                             propertiesUsageTracker,
-                            fileSystem,
-                            loggingContext));
+                            fileSystem));
             }
 
             /// <summary>
@@ -1167,8 +1192,7 @@ namespace Microsoft.Build.Evaluation
                 ExpanderOptions options,
                 IElementLocation elementLocation,
                 PropertiesUsageTracker propertiesUsageTracker,
-                IFileSystem fileSystem,
-                LoggingContext loggingContext = null)
+                IFileSystem fileSystem)
             {
                 if (((options & ExpanderOptions.ExpandProperties) == 0) || String.IsNullOrEmpty(expression))
                 {
@@ -1278,12 +1302,11 @@ namespace Microsoft.Build.Evaluation
                                 options,
                                 elementLocation,
                                 propertiesUsageTracker,
-                                fileSystem,
-                                loggingContext);
+                                fileSystem);
                         }
                         else // This is a regular property
                         {
-                            propertyValue = LookupProperty(properties, expression, propertyStartIndex + 2, propertyEndIndex - 1, elementLocation, propertiesUsageTracker, loggingContext);
+                            propertyValue = LookupProperty(properties, expression, propertyStartIndex + 2, propertyEndIndex - 1, elementLocation, propertiesUsageTracker);
                         }
 
                         if (propertyValue != null)
@@ -1327,8 +1350,7 @@ namespace Microsoft.Build.Evaluation
                 ExpanderOptions options,
                 IElementLocation elementLocation,
                 PropertiesUsageTracker propertiesUsageTracker,
-                IFileSystem fileSystem,
-                LoggingContext loggingContext)
+                IFileSystem fileSystem)
             {
                 Function<T> function = null;
                 string propertyName = propertyBody;
@@ -1360,7 +1382,7 @@ namespace Microsoft.Build.Evaluation
                             propertyValue,
                             propertiesUsageTracker,
                             fileSystem,
-                            loggingContext);
+                            propertiesUsageTracker.LoggingContext);
 
                         // We may not have been able to parse out a function
                         if (function != null)
@@ -1399,8 +1421,7 @@ namespace Microsoft.Build.Evaluation
                                 options,
                                 elementLocation,
                                 propertiesUsageTracker,
-                                fileSystem,
-                                loggingContext);
+                                fileSystem);
                         }
                     }
                     else
@@ -1532,7 +1553,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Look up a simple property reference by the name of the property, e.g. "Foo" when expanding $(Foo).
             /// </summary>
-            private static object LookupProperty(IPropertyProvider<T> properties, string propertyName, int startIndex, int endIndex, IElementLocation elementLocation, PropertiesUsageTracker propertiesUsageTracker, LoggingContext loggingContext = null)
+            private static object LookupProperty(IPropertyProvider<T> properties, string propertyName, int startIndex, int endIndex, IElementLocation elementLocation, PropertiesUsageTracker propertiesUsageTracker)
             {
                 T property = properties.GetProperty(propertyName, startIndex, endIndex);
 
@@ -1541,8 +1562,8 @@ namespace Microsoft.Build.Evaluation
                 bool isArtifical = property == null && ((endIndex - startIndex) >= 7) &&
                                    MSBuildNameIgnoreCaseComparer.Default.Equals("MSBuild", propertyName, startIndex, 7);
 
-                propertiesUsageTracker.TrackRead(propertyName, startIndex, endIndex, elementLocation, property == null, isArtifical, loggingContext);
-
+                propertiesUsageTracker.TrackRead(propertyName, startIndex, endIndex, elementLocation, property == null, isArtifical);
+                
                 if (isArtifical)
                 {
                     // It could be one of the MSBuildThisFileXXXX properties,
@@ -1564,7 +1585,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     if (property is ProjectPropertyInstance.EnvironmentDerivedProjectPropertyInstance environmentDerivedProperty)
                     {
-                        environmentDerivedProperty.loggingContext = loggingContext;
+                        environmentDerivedProperty.loggingContext = propertiesUsageTracker.LoggingContext;
                     }
 
                     propertyValue = property.EvaluatedValueEscaped;
@@ -3305,7 +3326,7 @@ namespace Microsoft.Build.Evaluation
                 string expressionFunction,
                 IElementLocation elementLocation,
                 object propertyValue,
-                PropertiesUsageTracker usedUnInitializedPropertiesUsageTracker,
+                PropertiesUsageTracker propertiesUsageTracker,
                 IFileSystem fileSystem,
                 LoggingContext loggingContext)
             {
@@ -3329,7 +3350,7 @@ namespace Microsoft.Build.Evaluation
                 ProjectErrorUtilities.VerifyThrowInvalidProject(!expressionRoot.IsEmpty, elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
 
                 functionBuilder.Expression = expressionFunction;
-                functionBuilder.PropertiesUsageTracker = usedUnInitializedPropertiesUsageTracker;
+                functionBuilder.PropertiesUsageTracker = propertiesUsageTracker;
 
                 // This is a static method call
                 // A static method is the content that follows the last "::", the rest being the type
@@ -3616,8 +3637,7 @@ namespace Microsoft.Build.Evaluation
                         options,
                         elementLocation,
                         _propertiesUsageTracker,
-                        _fileSystem,
-                        _loggingContext);
+                        _fileSystem);
                 }
 
                 // Exceptions coming from the actual function called are wrapped in a TargetInvocationException
@@ -5489,6 +5509,10 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal sealed class PropertiesUsageTracker
     {
+        internal LoggingContext LoggingContext { get; init; }
+
+        public PropertiesUsageTracker(LoggingContext loggingContext) => LoggingContext = loggingContext;
+
         /// <summary>
         /// Whether to warn when we set a property for the first time, after it was previously used.
         /// Default is false, unless MSBUILDWARNONUNINITIALIZEDPROPERTY is set.
@@ -5511,9 +5535,9 @@ namespace Microsoft.Build.Evaluation
             // TODO: This might get executed even before the logging service and BuildComponentCollections
             //  are initialized (for the toolset initialization)
 
-            if (BuildCheckManagerProvider.GlobalBuildEngineDataConsumer is not null && loggingContext is null)
+            if (BuildCheckManagerProvider.GlobalBuildEngineDataConsumer is not null && (loggingContext ?? LoggingContext) is null)
             {
-                // Debugger.Launch();
+                Debugger.Launch();
             }
 
             // We are collecting the read data here - instead of in the PropertyTrackingEvaluatorDataWrapper
@@ -5521,7 +5545,7 @@ namespace Microsoft.Build.Evaluation
             BuildCheckManagerProvider.GlobalBuildEngineDataConsumer?.ProcessPropertyRead(
                 propertyName, startIndex, endIndex,
                 elementLocation, isUninitialized, GetPropertyReadContext(propertyName, startIndex, endIndex),
-                loggingContext?.BuildEventContext);
+                (loggingContext ?? LoggingContext)?.BuildEventContext);
 
             if (!isUninitialized)
             {

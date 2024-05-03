@@ -83,7 +83,7 @@ namespace Microsoft.Build.BackEnd
                                 PropertyReadContext.PropertyEvaluation;
 
 
-                            string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(property.Value, ExpanderOptions.ExpandAll, property.Location, LoggingContext);
+                            string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(property.Value, ExpanderOptions.ExpandAll, property.Location);
                             bucket.Expander.PropertiesUsageTracker.CheckPreexistingUndefinedUsage(property, evaluatedValue, LoggingContext);
 
                             if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents)

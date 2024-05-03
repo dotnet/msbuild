@@ -401,7 +401,7 @@ namespace Microsoft.Build.BackEnd
                 return new List<TargetSpecification>();
             }
 
-            var dependencies = _expander.ExpandIntoStringListLeaveEscaped(_target.DependsOnTargets, ExpanderOptions.ExpandPropertiesAndItems, _target.DependsOnTargetsLocation, projectLoggingContext);
+            var dependencies = _expander.ExpandIntoStringListLeaveEscaped(_target.DependsOnTargets, ExpanderOptions.ExpandPropertiesAndItems, _target.DependsOnTargetsLocation);
             List<TargetSpecification> dependencyTargets = new List<TargetSpecification>();
             foreach (string escapedDependency in dependencies)
             {
@@ -453,6 +453,7 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     targetLoggingContext = projectLoggingContext.LogTargetBatchStarted(projectFullPath, _target, parentTargetName, _buildReason);
+                    bucket.UpdateLoggingContext(targetLoggingContext);
                     WorkUnitResult bucketResult = null;
                     targetSuccess = false;
 

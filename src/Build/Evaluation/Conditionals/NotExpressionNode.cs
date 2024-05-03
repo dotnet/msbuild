@@ -19,9 +19,9 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Evaluate as boolean
         /// </summary>
-        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
+        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
-            if (!LeftChild.TryBoolEvaluate(state, out bool boolValue, loggingContext))
+            if (!LeftChild.TryBoolEvaluate(state, out bool boolValue))
             {
                 ProjectErrorUtilities.ThrowInvalidProject(
                     state.ElementLocation,
@@ -45,9 +45,9 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Returns expanded value with '!' prepended. Useful for error messages.
         /// </summary>
-        internal override string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
+        internal override string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state)
         {
-            return "!" + LeftChild.GetExpandedValue(state, loggingContext);
+            return "!" + LeftChild.GetExpandedValue(state);
         }
 
         internal override string DebuggerDisplay => $"(not {LeftChild.DebuggerDisplay})";
