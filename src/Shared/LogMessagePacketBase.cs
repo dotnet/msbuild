@@ -9,6 +9,11 @@ using System.Reflection;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 
+#if !TASKHOST
+using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.BuildCheck.Infrastructure;
+#endif
+
 #if !TASKHOST && !MSBUILDENTRYPOINTEXE
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework.Profiler;
@@ -210,6 +215,31 @@ namespace Microsoft.Build.Shared
         /// Event is a <see cref="GeneratedFileUsedEventArgs"/>
         /// </summary>
         GeneratedFileUsedEvent = 34,
+        
+        /// <summary>
+        /// Event is <see cref="BuildCheckResultMessage"/>
+        /// </summary>
+        BuildCheckMessageEvent = 35,
+
+        /// <summary>
+        /// Event is <see cref="BuildCheckResultWarning"/>
+        /// </summary>
+        BuildCheckWarningEvent = 36,
+
+        /// <summary>
+        /// Event is <see cref="BuildCheckResultError"/>
+        /// </summary>
+        BuildCheckErrorEvent = 37,
+
+        /// <summary>
+        /// Event is <see cref="BuildCheckTracingEventArgs"/>
+        /// </summary>
+        BuildCheckTracingEvent = 38,
+
+        /// <summary>
+        /// Event is <see cref="BuildCheckAcquisitionEventArgs"/>
+        /// </summary>
+        BuildCheckAcquisitionEvent = 39,
     }
     #endregion
 
@@ -617,6 +647,11 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.PropertyReassignment => new PropertyReassignmentEventArgs(),
                 LoggingEventType.UninitializedPropertyRead => new UninitializedPropertyReadEventArgs(),
                 LoggingEventType.GeneratedFileUsedEvent => new GeneratedFileUsedEventArgs(),
+                LoggingEventType.BuildCheckMessageEvent => new BuildCheckResultMessage(),
+                LoggingEventType.BuildCheckWarningEvent => new BuildCheckResultWarning(),
+                LoggingEventType.BuildCheckErrorEvent => new BuildCheckResultError(),
+                LoggingEventType.BuildCheckAcquisitionEvent => new BuildCheckAcquisitionEventArgs(),
+                LoggingEventType.BuildCheckTracingEvent => new BuildCheckTracingEventArgs(),
 #endif
                 _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
             };
@@ -731,6 +766,26 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(GeneratedFileUsedEventArgs))
             {
                 return LoggingEventType.GeneratedFileUsedEvent;
+            }
+            else if (eventType == typeof(BuildCheckResultMessage))
+            {
+                return LoggingEventType.BuildCheckMessageEvent;
+            }
+            else if (eventType == typeof(BuildCheckResultWarning))
+            {
+                return LoggingEventType.BuildCheckWarningEvent;
+            }
+            else if (eventType == typeof(BuildCheckResultError))
+            {
+                return LoggingEventType.BuildCheckErrorEvent;
+            }
+            else if (eventType == typeof(BuildCheckAcquisitionEventArgs))
+            {
+                return LoggingEventType.BuildCheckAcquisitionEvent;
+            }
+            else if (eventType == typeof(BuildCheckTracingEventArgs))
+            {
+                return LoggingEventType.BuildCheckTracingEvent;
             }
 #endif
             else if (eventType == typeof(TargetStartedEventArgs))

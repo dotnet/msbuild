@@ -4,7 +4,11 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Build.Shared;
+using System.IO;
+using System.Reflection;
+using Microsoft.Build.Framework;
 using Xunit.Abstractions;
+using System.Linq;
 
 #nullable disable
 
@@ -45,6 +49,21 @@ namespace Microsoft.Build.UnitTests.Shared
             msbuildParameters = FileUtilities.EnsureDoubleQuotes(pathToMsBuildExe) + " " + msbuildParameters;
 #endif
 
+            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper);
+        }
+
+        public static string ExecBootstrapedMSBuild(string msbuildParameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
+        {
+            BootstrapLocationAttribute attribute = Assembly.GetExecutingAssembly().GetCustomAttribute<BootstrapLocationAttribute>()
+                                                   ?? throw new InvalidOperationException("This test assembly does not have the BootstrapLocationAttribute");
+
+            string binaryFolder = attribute.BootstrapMsbuildBinaryLocation;
+#if NET
+            string pathToExecutable = EnvironmentProvider.GetDotnetExePath()!;
+            msbuildParameters = Path.Combine(binaryFolder, "MSBuild.dll") + " " + msbuildParameters;
+#else
+            string pathToExecutable = Path.Combine(binaryFolder, "MSBuild.exe");
+#endif
             return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper);
         }
 
@@ -91,8 +110,9 @@ namespace Microsoft.Build.UnitTests.Shared
             {
                 DataReceivedEventHandler handler = delegate (object sender, DataReceivedEventArgs args)
                 {
-                    if (args != null)
+                    if (args != null && args.Data != null)
                     {
+                        WriteOutput(args.Data);
                         output += args.Data + "\r\n";
                     }
                 };
@@ -100,15 +120,18 @@ namespace Microsoft.Build.UnitTests.Shared
                 p.OutputDataReceived += handler;
                 p.ErrorDataReceived += handler;
 
-                outputHelper?.WriteLine("Executing [{0} {1}]", process, parameters);
-                Console.WriteLine("Executing [{0} {1}]", process, parameters);
-
+                WriteOutput( $"Executing [{process} {parameters}]");
+                WriteOutput("==== OUTPUT ====");
                 p.Start();
                 p.BeginOutputReadLine();
                 p.BeginErrorReadLine();
                 p.StandardInput.Dispose();
 
-                if (!p.WaitForExit(30_000))
+                if (Traits.Instance.DebugUnitTests)
+                {
+                    p.WaitForExit();
+                }
+                else if (!p.WaitForExit(30_000))
                 {
                     // Let's not create a unit test for which we need more than 30 sec to execute.
                     // Please consider carefully if you would like to increase the timeout.
@@ -125,18 +148,17 @@ namespace Microsoft.Build.UnitTests.Shared
                 successfulExit = p.ExitCode == 0;
             }
 
-            outputHelper?.WriteLine("==== OUTPUT ====");
-            outputHelper?.WriteLine(output);
-            outputHelper?.WriteLine("Process ID is " + pid + "\r\n");
-            outputHelper?.WriteLine("==============");
-
-            Console.WriteLine("==== OUTPUT ====");
-            Console.WriteLine(output);
-            Console.WriteLine("Process ID is " + pid + "\r\n");
-            Console.WriteLine("==============");
+            WriteOutput("Process ID is " + pid + "\r\n");
+            WriteOutput("==============");
 
             output += "Process ID is " + pid + "\r\n";
             return output;
+
+            void WriteOutput(string data)
+            {
+                outputHelper?.WriteLine(data);
+                Console.WriteLine(data);
+            }
         }
     }
 }

@@ -2000,7 +2000,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
     </comment>
   </data>
-   <data name="DefaultSDKResolverError" xml:space="preserve">
+  <data name="DefaultSDKResolverError" xml:space="preserve">
     <value>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</value>
   </data>
   <data name="SDKResolverReturnedNull" xml:space="preserve">
@@ -2094,6 +2094,25 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <comment>
       LOCALIZATION: {0} is integer number denoting number of bytes. 'int.MaxValue' should not be translated.
     </comment>
+  </data>
+  <data name="CustomAnalyzerSuccessfulAcquisition" xml:space="preserve">
+    <value>Custom analyzer rule: {0} has been registered successfully.</value>
+    <comment>The message is emitted on successful loading of the custom analyzer rule in process.</comment>
+  </data>
+  <data name="CustomAnalyzerFailedAcquisition" xml:space="preserve">
+    <value>Failed to register the custom analyzer: {0}.</value>
+    <comment>The message is emitted on failed loading of the custom analyzer in process.</comment>
+  </data>
+  <data name="CustomAnalyzerFailedRuleLoading" xml:space="preserve">
+    <value>Failed to instantiate the custom analyzer rule with the following exception: {0}.</value>
+    <comment>The message is emitted on failed loading of the custom analyzer rule in process.</comment>
+  </data>
+  <data name="CustomAnalyzerAssemblyNotExist" xml:space="preserve">
+    <value>Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</value>
+    <comment>The message is emitted when the custom analyzer assembly can not be found.</comment>
+  </data>
+  <data name="TaskAssemblyLocationMismatch" xml:space="preserve">
+    <value>Task assembly was loaded from '{0}' while the desired location was '{1}'.</value>
   </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999

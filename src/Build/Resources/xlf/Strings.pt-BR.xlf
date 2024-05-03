@@ -207,6 +207,26 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
+      <trans-unit id="CustomAnalyzerAssemblyNotExist">
+        <source>Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</source>
+        <target state="translated">Falha ao localizar o assembly do analisador personalizado especificado: {0}. Verifique se existe.</target>
+        <note>The message is emitted when the custom analyzer assembly can not be found.</note>
+      </trans-unit>
+      <trans-unit id="CustomAnalyzerFailedAcquisition">
+        <source>Failed to register the custom analyzer: {0}.</source>
+        <target state="translated">Falha ao registrar o analisador personalizado: {0}.</target>
+        <note>The message is emitted on failed loading of the custom analyzer in process.</note>
+      </trans-unit>
+      <trans-unit id="CustomAnalyzerFailedRuleLoading">
+        <source>Failed to instantiate the custom analyzer rule with the following exception: {0}.</source>
+        <target state="translated">Falha ao criar uma instância da regra do analisador personalizado com a seguinte exceção: {0}.</target>
+        <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
+      </trans-unit>
+      <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
+        <source>Custom analyzer rule: {0} has been registered successfully.</source>
+        <target state="translated">Regra do analisador personalizado: {0} foi registrado com sucesso.</target>
+        <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
+      </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
         <target state="translated">MSB4276: O resolvedor SDK padrão falhou ao resolver SDK "{0}" porque o diretório "{1}" não existia.</target>
@@ -252,7 +272,7 @@
       <trans-unit id="FatalErrorWhileLoggingWithInnerException">
         <source>MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
     {0}</source>
-        <target state="translated">MSB4017: a compilação parou inesperadamente devido a uma falha do agente.
+        <target state="translated">MSB4017: A compilação parou inesperadamente devido a uma falha do agente de log.
     {0}</target>
         <note>{StrBegin="MSB4017: "}UE: This message is used for a special exception that is thrown when a logger fails while logging an event (most
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
@@ -596,6 +616,11 @@ Erros: {3}</target>
         <target state="translated">Assembly carregado durante {0}{1}: {2} (local: {3}, MVID: {4}, AssemblyLoadContext: {5})</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskAssemblyLocationMismatch">
+        <source>Task assembly was loaded from '{0}' while the desired location was '{1}'.</source>
+        <target state="translated">O assembly da tarefa foi carregado de "{0}" enquanto o local desejado era "{1}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">A tarefa "{0}" liberou {1} núcleos e agora contém {2} núcleos no total.</target>
@@ -622,7 +647,7 @@ Erros: {3}</target>
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Essa é uma exceção não tratada no MSBuild -- POR FAVOR, ATUALIZE UMA QUESTÃO EXISTENTE OU ENCAMINHE UMA NOVA EM https://aka.ms/msbuild/unhandled
+        <target state="translated">Esta é uma exceção não tratada no MSBuild -- POR FAVOR, APOIE UM PROBLEMA EXISTENTE OU ARQUIVE UM NOVO EM https://aka.ms/msbuild/unhandled
     {0}</target>
         <note />
       </trans-unit>

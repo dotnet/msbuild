@@ -37,6 +37,9 @@
     <PackageVersion Include="Shouldly" Version="4.2.1" />
     <PackageVersion Update="Shouldly" Condition="'$(ShouldlyVersion)' != ''" Version="$(ShouldlyVersion)" />
 
+    <PackageVersion Include="FakeItEasy" Version="8.1.0" />
+    <PackageVersion Update="FakeItEasy" Condition="'$(FakeItEasyVersion)' != ''" Version="$(FakeItEasyVersion)" />
+
     <PackageVersion Include="System.CodeDom" Version="8.0.0" />
     <PackageVersion Update="System.CodeDom" Condition="'$(SystemCodeDomVersion)' != ''" Version="$(SystemCodeDomVersion)" />
 

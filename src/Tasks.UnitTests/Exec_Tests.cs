@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using Microsoft.Build.Evaluation;
@@ -169,7 +170,10 @@ namespace Microsoft.Build.UnitTests
             Assert.False(result);
             Assert.Equal(expectedExitCode, exec.ExitCode);
             ((MockEngine)exec.BuildEngine).AssertLogContains("MSB5002");
-            Assert.Equal(1, ((MockEngine)exec.BuildEngine).Warnings);
+            int warningsCount = ((MockEngine)exec.BuildEngine).Warnings;
+            warningsCount.ShouldBe(1,
+                $"Expected 1 warning, encountered {warningsCount}: " + string.Join(",",
+                    ((MockEngine)exec.BuildEngine).WarningEvents.Select(w => w.Message)));
 
             // ToolTask does not log an error on timeout.
             Assert.Equal(0, ((MockEngine)exec.BuildEngine).Errors);

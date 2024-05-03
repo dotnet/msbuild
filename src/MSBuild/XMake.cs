@@ -34,8 +34,6 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
-using static Microsoft.Build.CommandLine.MSBuildApp;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
 using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using FileLogger = Microsoft.Build.Logging.FileLogger;
@@ -662,6 +660,9 @@ namespace Microsoft.Build.CommandLine
             ExitType exitType = ExitType.Success;
 
             ConsoleCancelEventHandler cancelHandler = Console_CancelKeyPress;
+
+            TextWriter preprocessWriter = null;
+            TextWriter targetsWriter = null;
             try
             {
 #if FEATURE_GET_COMMANDLINE
@@ -701,8 +702,6 @@ namespace Microsoft.Build.CommandLine
 #else
                 bool enableNodeReuse = false;
 #endif
-                TextWriter preprocessWriter = null;
-                TextWriter targetsWriter = null;
                 bool detailedSummary = false;
                 ISet<string> warningsAsErrors = null;
                 ISet<string> warningsNotAsErrors = null;
@@ -717,6 +716,7 @@ namespace Microsoft.Build.CommandLine
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
                 bool question = false;
+                bool isBuildCheckEnabled = false;
                 string[] getProperty = Array.Empty<string>();
                 string[] getItem = Array.Empty<string>();
                 string[] getTargetResult = Array.Empty<string>();
@@ -764,6 +764,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                             ref lowPriority,
                                             ref question,
+                                            ref isBuildCheckEnabled,
                                             ref getProperty,
                                             ref getItem,
                                             ref getTargetResult,
@@ -824,8 +825,18 @@ namespace Microsoft.Build.CommandLine
                             using (ProjectCollection collection = new(globalProperties, loggers, ToolsetDefinitionLocations.Default))
                             {
                                 Project project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
-                                TextWriter output = getResultOutputFile.Length > 0 ? new StreamWriter(getResultOutputFile) : Console.Out;
-                                exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project, output);
+
+                                if (getResultOutputFile.Length == 0)
+                                {
+                                    exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project, Console.Out);
+                                }
+                                else
+                                {
+                                    using (var streamWriter = new StreamWriter(getResultOutputFile))
+                                    {
+                                        exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project, streamWriter);
+                                    }
+                                }
                                 collection.LogBuildFinishedEvent(exitType == ExitType.Success);
                             }
                         }
@@ -866,6 +877,7 @@ namespace Microsoft.Build.CommandLine
                                     graphBuildOptions,
                                     lowPriority,
                                     question,
+                                    isBuildCheckEnabled,
                                     inputResultsCaches,
                                     outputResultsCache,
                                     saveProjectResult: outputPropertiesItemsOrTargetResults,
@@ -887,8 +899,17 @@ namespace Microsoft.Build.CommandLine
 
                     if (outputPropertiesItemsOrTargetResults && targets?.Length > 0 && result is not null)
                     {
-                        TextWriter outputStream = getResultOutputFile.Length > 0 ? new StreamWriter(getResultOutputFile) : Console.Out;
-                        exitType = OutputBuildInformationInJson(result, getProperty, getItem, getTargetResult, loggers, exitType, outputStream);
+                        if (getResultOutputFile.Length == 0)
+                        {
+                            exitType = OutputBuildInformationInJson(result, getProperty, getItem, getTargetResult, loggers, exitType, Console.Out);
+                        }
+                        else
+                        {
+                            using (var streamWriter = new StreamWriter(getResultOutputFile))
+                            {
+                                exitType = OutputBuildInformationInJson(result, getProperty, getItem, getTargetResult, loggers, exitType, streamWriter);
+                            }
+                        }
                     }
 
                     if (!string.IsNullOrEmpty(timerOutputFilename))
@@ -1031,6 +1052,9 @@ namespace Microsoft.Build.CommandLine
                 s_cancelComplete.WaitOne();
 
                 NativeMethodsShared.RestoreConsoleMode(s_originalConsoleMode);
+
+                preprocessWriter?.Dispose();
+                targetsWriter?.Dispose();
 
 #if FEATURE_GET_COMMANDLINE
                 MSBuildEventSource.Log.MSBuildExeStop(commandLine);
@@ -1252,6 +1276,7 @@ namespace Microsoft.Build.CommandLine
             GraphBuildOptions graphBuildOptions,
             bool lowPriority,
             bool question,
+            bool isBuildCheckEnabled,
             string[] inputResultsCaches,
             string outputResultsCache,
             bool saveProjectResult,
@@ -1453,6 +1478,7 @@ namespace Microsoft.Build.CommandLine
                     parameters.InputResultsCacheFiles = inputResultsCaches;
                     parameters.OutputResultsCacheFile = outputResultsCache;
                     parameters.Question = question;
+                    parameters.IsBuildCheckEnabled = isBuildCheckEnabled;
 #if FEATURE_REPORTFILEACCESSES
                     parameters.ReportFileAccesses = reportFileAccesses;
 #endif
@@ -2447,6 +2473,7 @@ namespace Microsoft.Build.CommandLine
 #endif
             ref bool lowPriority,
             ref bool question,
+            ref bool isBuildCheckEnabled,
             ref string[] getProperty,
             ref string[] getItem,
             ref string[] getTargetResult,
@@ -2577,6 +2604,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                                            ref lowPriority,
                                                            ref question,
+                                                           ref isBuildCheckEnabled,
                                                            ref getProperty,
                                                            ref getItem,
                                                            ref getTargetResult,
@@ -2662,6 +2690,8 @@ namespace Microsoft.Build.CommandLine
 
                     question = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Question);
 
+                    isBuildCheckEnabled = IsBuildCheckEnabled(commandLineSwitches);
+
                     inputResultsCaches = ProcessInputResultsCaches(commandLineSwitches);
 
                     outputResultsCache = ProcessOutputResultsCache(commandLineSwitches);
@@ -2732,6 +2762,13 @@ namespace Microsoft.Build.CommandLine
             ErrorUtilities.VerifyThrow(!invokeBuild || !string.IsNullOrEmpty(projectFile), "We should have a project file if we're going to build.");
 
             return invokeBuild;
+        }
+
+        private static bool IsBuildCheckEnabled(CommandLineSwitches commandLineSwitches)
+        {
+            // Opt-in behavior to be determined by: https://github.com/dotnet/msbuild/issues/9723
+            bool isAnalysisEnabled = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Analyze);
+            return isAnalysisEnabled;
         }
 
         private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)
@@ -3757,16 +3794,16 @@ namespace Microsoft.Build.CommandLine
             }
             else if (terminalloggerOptIn)
             {
-                ProcessTerminalLogger(noConsoleLogger, aggregatedTerminalLoggerParameters, distributedLoggerRecords, cpuCount, loggers);
+                ProcessTerminalLogger(noConsoleLogger, aggregatedTerminalLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
             }
             else
             {
                 ProcessConsoleLoggerSwitch(noConsoleLogger, consoleLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
             }
 
-            ProcessDistributedFileLogger(distributedFileLogger, fileLoggerParameters, distributedLoggerRecords, loggers, cpuCount);
+            ProcessDistributedFileLogger(distributedFileLogger, fileLoggerParameters, distributedLoggerRecords);
 
-            ProcessFileLoggers(groupedFileLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
+            ProcessFileLoggers(groupedFileLoggerParameters, distributedLoggerRecords, cpuCount, loggers);
 
             verbosity = outVerbosity;
 
@@ -3808,7 +3845,7 @@ namespace Microsoft.Build.CommandLine
         /// Add a file logger with the appropriate parameters to the loggers list for each
         /// non-empty set of file logger parameters provided.
         /// </summary>
-        private static void ProcessFileLoggers(string[][] groupedFileLoggerParameters, List<DistributedLoggerRecord> distributedLoggerRecords, LoggerVerbosity verbosity, int cpuCount, List<ILogger> loggers)
+        private static void ProcessFileLoggers(string[][] groupedFileLoggerParameters, List<DistributedLoggerRecord> distributedLoggerRecords, int cpuCount, List<ILogger> loggers)
         {
             for (int i = 0; i < groupedFileLoggerParameters.Length; i++)
             {
@@ -3936,13 +3973,14 @@ namespace Microsoft.Build.CommandLine
         private static void ProcessTerminalLogger(bool noConsoleLogger,
             string aggregatedLoggerParameters,
             List<DistributedLoggerRecord> distributedLoggerRecords,
+            LoggerVerbosity verbosity,
             int cpuCount,
             List<ILogger> loggers)
         {
             if (!noConsoleLogger)
             {
                 // A central logger will be created for both single proc and multiproc.
-                TerminalLogger logger = new TerminalLogger()
+                TerminalLogger logger = new TerminalLogger(verbosity)
                 {
                     Parameters = aggregatedLoggerParameters
                 };
@@ -4000,9 +4038,7 @@ namespace Microsoft.Build.CommandLine
         internal static void ProcessDistributedFileLogger(
             bool distributedFileLogger,
             string[] fileLoggerParameters,
-            List<DistributedLoggerRecord> distributedLoggerRecords,
-            List<ILogger> loggers,
-            int cpuCount)
+            List<DistributedLoggerRecord> distributedLoggerRecords)
         {
             if (distributedFileLogger)
             {

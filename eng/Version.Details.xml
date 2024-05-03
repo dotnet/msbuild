@@ -53,9 +53,9 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
       <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
     </Dependency>
-    <Dependency Name="System.Text.Json" Version="8.0.0">
+    <Dependency Name="System.Text.Json" Version="8.0.3">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
-      <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
+      <Sha>9f4b1f5d664afdfc80e1508ab7ed099dff210fbd</Sha>
     </Dependency>
     <Dependency Name="System.Threading.Tasks.Dataflow" Version="8.0.0">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
@@ -87,13 +87,13 @@
       <Sha>73f0850939d96131c28cf6ea6ee5aacb4da0083a</Sha>
       <SourceBuild RepoName="xliff-tasks" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.10.0-preview.2.81">
+    <Dependency Name="NuGet.Build.Tasks" Version="6.10.0-preview.2.97">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>1845d6bd450a7453d573035371c9fec43683d1ef</Sha>
+      <Sha>fb50d1a45ed10b39b5f335bc3a4bdcaea9b951cf</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.10.0-3.24175.2">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.10.0-3.24225.4">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>919d4dbfb0dffb35a702417e28ceea652d248bc6</Sha>
+      <Sha>0156fea1a01c1fd88ef625b45fda9d4239c99fb3</Sha>
       <SourceBuild RepoName="roslyn" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="8.0.0-beta.24225.1">

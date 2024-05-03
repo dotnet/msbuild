@@ -738,7 +738,7 @@ namespace Microsoft.Build.Tasks
 
                 // Horrible code dom / compilation declarations
                 var codeBuilder = new StringBuilder();
-                var writer = new StringWriter(codeBuilder, CultureInfo.CurrentCulture);
+                using var writer = new StringWriter(codeBuilder, CultureInfo.CurrentCulture);
                 var codeGeneratorOptions = new CodeGeneratorOptions
                 {
                     BlankLinesBetweenMembers = true,
