@@ -90,14 +90,13 @@ namespace Microsoft.Build.Evaluation
         public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false, LoggingContext? loggingContext = null)
         {
             P? originalProperty = _wrapped.GetProperty(name);
-            P newProperty = _wrapped.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, isEnvironmentVariable);
+            P newProperty = _wrapped.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, isEnvironmentVariable, _evaluationLoggingContext);
 
             this.TrackPropertyWrite(
                 originalProperty,
                 newProperty,
                 null,
-                this.DeterminePropertySource(isGlobalProperty, mayBeReserved, isEnvironmentVariable),
-                _evaluationLoggingContext);
+                this.DeterminePropertySource(isGlobalProperty, mayBeReserved, isEnvironmentVariable));
 
             return newProperty;
         }
@@ -118,8 +117,7 @@ namespace Microsoft.Build.Evaluation
                 originalProperty,
                 newProperty,
                 propertyElement.Location,
-                PropertySource.Xml,
-                _evaluationLoggingContext);
+                PropertySource.Xml);
 
             return newProperty;
         }
@@ -241,7 +239,7 @@ namespace Microsoft.Build.Evaluation
             _evaluationLoggingContext.LogBuildEvent(args);
         }
 
-        private void TrackPropertyWrite(P? predecessor, P property, IElementLocation? location, PropertySource source, BackEnd.Logging.LoggingContext? loggingContext = null)
+        private void TrackPropertyWrite(P? predecessor, P property, IElementLocation? location, PropertySource source)
         {
             string name = property.Name;
 
