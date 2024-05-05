@@ -91,6 +91,41 @@ public class EndToEndTests : IDisposable
         }
     }
 
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
+    public void SampleAnalyzerIntegrationTest_AnalyzeOnBuildReplay(bool buildInOutOfProcessNode, bool analysisRequested)
+    {
+        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile);
+
+        var projectDirectory = Path.GetDirectoryName(projectFile.Path);
+        string logFile = _env.ExpectFile(".binlog").Path;
+
+        RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -bl:{logFile}",
+            out bool success, false, _env.Output);
+
+        success.ShouldBeTrue();
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{logFile} -flp:logfile={Path.Combine(projectDirectory!, "logFile.log")};verbosity=diagnostic {(analysisRequested ? " -analyze" : string.Empty)}",
+            out success, false, _env.Output);
+        _env.Output.WriteLine(output);
+
+        success.ShouldBeTrue();
+
+        // The conflicting outputs warning appears - but only if analysis was requested
+        if (analysisRequested)
+        {
+            output.ShouldContain("BC0101");
+        }
+        else
+        {
+            output.ShouldNotContain("BC0101");
+        }
+    }
+
     private void PrepareSampleProjectsAndConfig(bool buildInOutOfProcessNode, out TransientTestFile projectFile)
     {
         string contents = $"""
