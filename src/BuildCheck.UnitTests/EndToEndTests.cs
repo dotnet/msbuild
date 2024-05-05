@@ -33,7 +33,65 @@ public class EndToEndTests : IDisposable
     [InlineData(true, true)]
     [InlineData(false, true)]
     [InlineData(false, false)]
-    public void SampleAnalyzerIntegrationTest(bool buildInOutOfProcessNode, bool analysisRequested)
+    public void SampleAnalyzerIntegrationTest_AnalyzeOnBuild(bool buildInOutOfProcessNode, bool analysisRequested)
+    {
+        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile);
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore" +
+            (analysisRequested ? " -analyze" : string.Empty), out bool success, false, _env.Output);
+
+        _env.Output.WriteLine(output);
+
+        success.ShouldBeTrue();
+
+        // The conflicting outputs warning appears - but only if analysis was requested
+        if (analysisRequested)
+        {
+            output.ShouldContain("BC0101");
+        }
+        else
+        {
+            output.ShouldNotContain("BC0101");
+        }
+    }
+
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
+    public void SampleAnalyzerIntegrationTest_ReplayAnalyzedBuild(bool buildInOutOfProcessNode, bool analysisRequested)
+    {
+        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile);
+
+        var projectDirectory = Path.GetDirectoryName(projectFile.Path);
+        string logFile = _env.ExpectFile(".binlog").Path;
+
+        RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -bl:{logFile} {(analysisRequested ? " -analyze" : string.Empty)}",
+            out bool success, false, _env.Output);
+
+        success.ShouldBeTrue();
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{logFile} -flp:logfile={Path.Combine(projectDirectory!, "logFile.log")};verbosity=diagnostic",
+            out success, false, _env.Output);
+        _env.Output.WriteLine(output);
+
+        success.ShouldBeTrue();
+
+        // The conflicting outputs warning appears - but only if analysis was requested
+        if (analysisRequested)
+        {
+            output.ShouldContain("BC0101");
+        }
+        else
+        {
+            output.ShouldNotContain("BC0101");
+        }
+    }
+
+    private void PrepareSampleProjectsAndConfig(bool buildInOutOfProcessNode, out TransientTestFile projectFile)
     {
         string contents = $"""
             <Project Sdk="Microsoft.NET.Sdk" DefaultTargets="Hello">
@@ -85,7 +143,7 @@ public class EndToEndTests : IDisposable
             </Project>
             """;
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
-        TransientTestFile projectFile = _env.CreateFile(workFolder, "FooBar.csproj", contents);
+        projectFile = _env.CreateFile(workFolder, "FooBar.csproj", contents);
         TransientTestFile projectFile2 = _env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
 
         // var cache = new SimpleProjectRootElementCache();
@@ -119,19 +177,5 @@ public class EndToEndTests : IDisposable
 
         _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", buildInOutOfProcessNode ? "1" : "0");
         _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
-        string output = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore" +
-            (analysisRequested ? " -analyze" : string.Empty), out bool success, false, _env.Output);
-        _env.Output.WriteLine(output);
-        success.ShouldBeTrue();
-        // The conflicting outputs warning appears - but only if analysis was requested
-        if (analysisRequested)
-        {
-            output.ShouldContain("BC0101");
-        }
-        else
-        {
-            output.ShouldNotContain("BC0101");
-        }
     }
 }
