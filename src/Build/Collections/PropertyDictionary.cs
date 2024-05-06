@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -216,10 +216,7 @@ namespace Microsoft.Build.Collections
         /// Returns true if a property with the specified name is present in the collection,
         /// otherwise false.
         /// </summary>
-        public bool Contains(string name)
-        {
-            return ((IDictionary<string, T>)this).ContainsKey(name);
-        }
+        public bool Contains(string name) => ContainsKey(name);
 
         /// <summary>
         /// Empties the collection
@@ -336,6 +333,11 @@ namespace Microsoft.Build.Collections
             // The properties lock is locked in the set method
             Set(value);
         }
+
+        /// <summary>
+        /// Returns true if the dictionary contains the key
+        /// </summary>
+        public bool ContainsKey(string key) => ((IDictionary<string, T>)this).ContainsKey(key);
 
         /// <summary>
         /// Returns true if the dictionary contains the key
