@@ -11,7 +11,6 @@ Note: Single analyzer can have multiple rules.
 - Execution and configuration issues and execution time reporting for analyzers.
 - Preventing clashes of identification within a single build and clashes of custom rules/analyzers with well-known rules/analyzers.
 - Possibility to configure the rule.
-- Categorization of the rules/analyzers.
 
 ## Proposal
 
