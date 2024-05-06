@@ -33,7 +33,6 @@
 
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
-    <PackageReference Include="System.Security.Principal.Windows" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
 
     <PackageReference Include="System.Reflection.MetadataLoadContext" />
@@ -49,6 +48,7 @@
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="System.IO.Compression" />
     <PackageReference Include="System.Memory" />
+    <PackageReference Include="System.Security.Principal.Windows" />
     <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
@@ -161,6 +161,7 @@
     <Compile Include="BuildCheck\Acquisition\IBuildCheckAcquisitionModule.cs" />
     <Compile Include="BuildCheck\Analyzers\SharedOutputPathAnalyzer.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildCheckConfigurationException.cs" />
+    <Compile Include="BuildCheck\Infrastructure\BuildCheckForwardingLogger.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildEventsProcessor.cs" />
     <Compile Include="BuildCheck\Infrastructure\IBuildCheckManagerProvider.cs" />
     <Compile Include="BuildCheck\Infrastructure\NullBuildCheckManager.cs" />
@@ -187,6 +188,7 @@
     <Compile Include="BuildCheck\Logging\IBuildAnalysisLoggingContextFactory.cs" />
     <Compile Include="BuildCheck\OM\EvaluatedPropertiesAnalysisData.cs" />
     <Compile Include="BuildCheck\OM\ParsedItemsAnalysisData.cs" />
+    <Compile Include="BuildCheck\Utilities\Constants.cs" />
     <Compile Include="BuildCheck\Utilities\EnumerableExtensions.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
     <Compile Include="FileAccess\DesiredAccess.cs" />
