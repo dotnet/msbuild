@@ -12,7 +12,9 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -336,6 +338,77 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return sdkResult;
         }
 
+        private IEnumerable<string> DiscoverProjects(string solutionPath, string projectPath)
+        {
+            if (!string.IsNullOrEmpty(solutionPath))
+            {
+                return SolutionFile.Parse(solutionPath).ProjectsInOrder
+                    .Where(p => p.ProjectType != SolutionProjectType.SolutionFolder)
+                    .Select(p => p.AbsolutePath);
+            }
+            else if (!string.IsNullOrEmpty(projectPath))
+            {
+                return [projectPath];
+            }
+            else
+            {
+                DirectoryInfo currentDirectory = new(Directory.GetCurrentDirectory());
+                IEnumerable<FileInfo> slnFiles = currentDirectory.EnumerateFiles().Where(fi => FileUtilities.IsSolutionFilename(fi.Name));
+                if (slnFiles.Any())
+                {
+                    return SolutionFile.Parse(slnFiles.First().FullName).ProjectsInOrder
+                        .Where(p => p.ProjectType != SolutionProjectType.SolutionFolder)
+                        .Select(p => p.AbsolutePath);
+                }
+                else
+                {
+                    return [currentDirectory.EnumerateFiles().First(fi => fi.Extension.EndsWith("proj")).FullName];
+                }
+            }
+        }
+
+        private bool ContainWorkloads(IEnumerable<string> projects)
+        {
+            Dictionary<string, string> globalProperties = new(StringComparer.OrdinalIgnoreCase)
+            {
+                { "SkipResolvePackageAssets", "true" },
+            };
+
+            foreach (string project in projects)
+            {
+                ProjectInstance instance = new(project, globalProperties, null);
+                if (!instance.Build(
+                    ["_GetRequiredWorkloads"],
+                    loggers: new ILogger[]
+                    {
+                        new ConsoleLogger(LoggerVerbosity.Quiet),
+                    },
+                    targetOutputs: out IDictionary<string, TargetResult> targetOutputs))
+                {
+                    // If the build fails, fall back to assuming workloads are needed
+                    return true;
+                }
+
+                if (targetOutputs["_GetRequiredWorkloads"].Items.Length == 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool IsUnneededWorkloadSdk(SdkReference sdk, string solutionPath, string projectPath)
+        {
+            if (sdk.Name.Equals("Microsoft.NET.SDK.WorkloadAutoImportPropsLocator", StringComparison.OrdinalIgnoreCase) || sdk.Name.Equals("Microsoft.NET.SDK.WorkloadManifestTargetsLocator", StringComparison.OrdinalIgnoreCase))
+            {
+                IEnumerable<string> projects = DiscoverProjects(solutionPath, projectPath);
+                return !ContainWorkloads(projects);
+            }
+
+            return false;
+        }
+
         private bool TryResolveSdkUsingSpecifiedResolvers(
             IReadOnlyList<SdkResolver> resolvers,
             int submissionId,
@@ -357,14 +430,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             // Loop through resolvers which have already been sorted by priority, returning the first result that was successful
             SdkLogger buildEngineLogger = new SdkLogger(loggingContext);
 
+            SdkResultFactory resultFactory = new SdkResultFactory(sdk);
+
             foreach (SdkResolver sdkResolver in resolvers)
             {
                 SdkResolverContext context = new SdkResolverContext(buildEngineLogger, projectPath, solutionPath, ProjectCollection.Version, interactive, isRunningInVisualStudio)
                 {
                     State = GetResolverState(submissionId, sdkResolver)
                 };
-
-                SdkResultFactory resultFactory = new SdkResultFactory(sdk);
 
                 SdkResult result = null;
 
@@ -423,6 +496,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 }
 
                 results.Add(result);
+            }
+
+            if (IsUnneededWorkloadSdk(sdk, solutionPath, projectPath))
+            {
+                sdkResult = (SdkResult)resultFactory.IndicateSuccess(null, null, null);
+                return true;
             }
 
             warnings = results.SelectMany(r => r.Warnings ?? Array.Empty<string>());
