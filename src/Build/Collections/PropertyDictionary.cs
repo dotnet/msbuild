@@ -337,18 +337,18 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Returns true if the dictionary contains the key
         /// </summary>
-        public bool ContainsKey(string key) => ((IDictionary<string, T>)this).ContainsKey(key);
-
-        /// <summary>
-        /// Returns true if the dictionary contains the key
-        /// </summary>
-        bool IDictionary<string, T>.ContainsKey(string key)
+        public bool ContainsKey(string key)
         {
             lock (_properties)
             {
                 return _properties.ContainsKey(key);
             }
         }
+
+        /// <summary>
+        /// Returns true if the dictionary contains the key
+        /// </summary>
+        bool IDictionary<string, T>.ContainsKey(string key) => ContainsKey(key);
 
         /// <summary>
         /// Removes a property
