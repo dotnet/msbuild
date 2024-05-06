@@ -8,8 +8,8 @@ Note: Single analyzer can have multiple rules.
 
 ### Problems to address:
 - The report should unambiguously point to the rule.
-- Errors and execution time reporting for analyzers.
-- Preventing clashes of identification within a single build: Clashes with well-known rules/analyzers.
+- Execution and configuration issues and execution time reporting for analyzers.
+- Preventing clashes of identification within a single build and clashes of custom rules/analyzers with well-known rules/analyzers.
 - Possibility to configure the rule.
 - Categorization of the rules/analyzers.
 
@@ -33,7 +33,7 @@ Custom analyzer will have the friendly name: `{NameOfTheAnalyzer}` with defined 
 
 Each Custom Analyzer Rule will have the rule id format as follows:
 - `^[A-Z]{1}[A-Za-z]{0,}[0-9]{1,}$`. 
-- should not start from `BC.` this is reserved prefix for built-in rules.
+- should not start from `BC` this is reserved prefix for built-in rules.
 
 #### Example of a custom analyzer:
 - Name: `SharedOutputPath`, `SharedOutputPath` 
@@ -41,7 +41,7 @@ Each Custom Analyzer Rule will have the rule id format as follows:
 
 Any registered analyzers that don't follow the pattern (built-in and custom) will raise an exception and fail the build.
 
-The identification of the rule consists of two components: the Friendlyname and the RuleId.
+The identification of the rule will consist of two components: the Friendlyname and the RuleId.
 
 #### Examples 
 - Built-in
@@ -76,9 +76,9 @@ Example configuration for a category rule:
 
 #### Priority of configuration
 
-- Category
-- Analyzer
 - Rule
+- Analyzer
+- Category
 
 
 ### EditorConfig configurations
