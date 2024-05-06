@@ -52,9 +52,9 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
     </Dependency>
-    <Dependency Name="System.Text.Json" Version="7.0.3">
+    <Dependency Name="System.Text.Json" Version="8.0.4">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>5b20af47d99620150c53eaf5db8636fdf730b126</Sha>
+      <Sha>fa5b0d8f4a8b424732cc992158aa92842f8a2846</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
