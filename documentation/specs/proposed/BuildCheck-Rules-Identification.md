@@ -63,22 +63,18 @@ Restore:
 ...
 ```
 
-### Categorization
-The proposal is to implement the configuration of the class/category of analyzers by single line in .editorconfig
-For example, categories can include:
-- Output
-- MSBuildProperty
+### Rules Identification clash prevention
 
-Category configuration's priority is higher than that of a singular rule or analyzer.
-Example configuration for a category rule:
-- build_check.Category.Output.enabled = true|false
-- build_check.Category.MSBuildProperty.severity = Error
+#### Custom VS Built-In
+The prevention of having the same analyzer/rule's name/id's between built-in and custom is guaranteed by preserved prefixes
+- Name Prefix: (BuildCheck|MSBuild|Microsoft)
+- Id Prefix: (BC|MSB|MS)
+If custom analyzer will not meet predefined pattern the registration of the custom analyzer will fail.
 
-#### Priority of configuration
-
-- Rule
-- Analyzer
-- Category
+#### Custom VS Custom
+The prevention of having the same analyzer/rule's name/id's between custom analyzers is not guaranteed hence:
+During the registration of the custom analyzer additional check will happen
+- If Analyzer name already registered registration will fail
 
 
 ### EditorConfig configurations
@@ -98,7 +94,7 @@ Any build check related configuration should start with the `build_check.` prefi
 - To configure the analyzer (Priority of this is higher than configuring the single rule)
     -  `build_check.SharedOutputPath.enabled = true|false`
 
-.editorconfig example:
+.editorconfig examples:
 
 ```
 root=true
@@ -111,3 +107,20 @@ build_check.BuildCheck.SharedOutputPath.BC0002.Severity=error
 build_check.BuildCheck.SharedOutputPath.BC0002.IsEnabled=true
 build_check.BuildCheck.SharedOutputPath.BC0002.Severity=error
 ```
+
+```
+root=true
+
+[FooBar.csproj]
+build_check.BuildCheck.SharedOutputPath.IsEnabled=true
+build_check.BuildCheck.SharedOutputPath.Severity=error
+
+[FooBar-Copy.csproj]
+build_check.BuildCheck.SharedOutputPath.IsEnabled=true
+build_check.BuildCheck.SharedOutputPath.Severity=error
+```
+
+#### Priority of configuration
+
+- Rule
+- Analyzer
