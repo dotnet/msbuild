@@ -71,9 +71,7 @@ The prevention of having the same analyzer/rule's name/id's between built-in and
 If custom analyzer will not meet predefined pattern the registration of the custom analyzer will fail.
 
 #### Custom VS Custom
-The prevention of having the same analyzer/rule's name/id's between custom analyzers is not guaranteed hence:
-During the registration of the custom analyzer additional check will happen
-- If Analyzer name already registered registration will fail
+The prevention of having the same analyzer/rule's name/id's between custom analyzers is not guaranteed, and during the registration of the custom analyzer, an additional check will happen to ensure that the analyzer name is not already registered.
 
 
 ### EditorConfig configurations
@@ -93,7 +91,7 @@ Any build check related configuration should start with the `build_check.` prefi
 - To configure the analyzer (Priority of this is higher than configuring the single rule)
     -  `build_check.SharedOutputPath.enabled = true|false`
 
-.editorconfig examples:
+#### .editorconfig examples:
 
 ```
 root=true
