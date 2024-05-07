@@ -36,10 +36,10 @@
 
     <ItemGroup>
     <!-- Update the collection of items to pack with the DLLs from the NuGet packages -->
-    <None Include="@(_PackagesToPack)" Pack="true" PackagePath="lib" Visible="false" />
+    <None Include="@(_PackagesToPack)" Pack="true" PackagePath="build" Visible="false" />
 
     <!-- Add the DLL produced by the current project to the NuGet package -->
-    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="lib" Visible="false" />
+    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="build" Visible="false" />
     </ItemGroup>
   </Target>
 </Project>

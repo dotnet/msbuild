@@ -697,7 +697,7 @@ namespace Microsoft.Build.Evaluation
 
         public static bool IsRunningFromVisualStudio() => BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio;
 
-        public static bool RegisterAnalyzer(string pathToAssembly, LoggingContext loggingContext)
+        public static bool RegisterBuildCheck(string pathToAssembly, LoggingContext loggingContext)
         {
             pathToAssembly = FileUtilities.GetFullPathNoThrow(pathToAssembly);
             if (File.Exists(pathToAssembly))
