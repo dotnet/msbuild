@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using Microsoft.Build.BackEnd;
@@ -91,15 +92,19 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         /// <param name="buildCheckDataSource"></param>
         public void SetDataSource(BuildCheckDataSource buildCheckDataSource)
         {
+            Stopwatch stopwatch = Stopwatch.StartNew();
             if (!_enabledDataSources[(int)buildCheckDataSource])
             {
                 _enabledDataSources[(int)buildCheckDataSource] = true;
                 RegisterBuiltInAnalyzers(buildCheckDataSource);
             }
+            stopwatch.Stop();
+            _tracingReporter.AddSetDataSourceStats(stopwatch.Elapsed);
         }
 
         public void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, BuildEventContext buildEventContext)
         {
+            Stopwatch stopwatch = Stopwatch.StartNew();
             if (IsInProcNode)
             {
                 var analyzersFactories = _acquisitionModule.CreateBuildAnalyzerFactories(acquisitionData, buildEventContext);
@@ -119,6 +124,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
                 _loggingService.LogBuildEvent(eventArgs);
             }
+            stopwatch.Stop();
+            _tracingReporter.AddAcquisitionStats(stopwatch.Elapsed);
         }
 
         private static T Construct<T>() where T : new() => new();
@@ -269,7 +276,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             // On an execution node - we might remove and dispose the analyzers once project is done
 
             // If it's already constructed - just control the custom settings do not differ
-
+            Stopwatch stopwatch = Stopwatch.StartNew();
             List<BuildAnalyzerFactoryContext> analyzersToRemove = new();
             foreach (BuildAnalyzerFactoryContext analyzerFactoryContext in _analyzersRegistry)
             {
@@ -294,9 +301,12 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             foreach (var analyzerToRemove in analyzersToRemove.Select(a => a.MaterializedAnalyzer).Where(a => a != null))
             {
                 _buildCheckCentralContext.DeregisterAnalyzer(analyzerToRemove!);
-                _tracingReporter.AddStats(analyzerToRemove!.BuildAnalyzer.FriendlyName, analyzerToRemove.Elapsed);
+                _tracingReporter.AddAnalyzerStats(analyzerToRemove!.BuildAnalyzer.FriendlyName, analyzerToRemove.Elapsed);
                 analyzerToRemove.BuildAnalyzer.Dispose();
             }
+
+            stopwatch.Stop();
+            _tracingReporter.AddNewProjectStats(stopwatch.Elapsed);
         }
 
         public void ProcessEvaluationFinishedEventArgs(
@@ -305,19 +315,19 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             => _buildEventsProcessor
                 .ProcessEvaluationFinishedEventArgs(buildAnalysisContext, evaluationFinishedEventArgs);
 
-        // Tracing: https://github.com/dotnet/msbuild/issues/9629
-        public Dictionary<string, TimeSpan> CreateTracingStats()
+        public Dictionary<string, TimeSpan> CreateAnalyzerTracingStats()
         {
             foreach (BuildAnalyzerFactoryContext analyzerFactoryContext in _analyzersRegistry)
             {
                 if (analyzerFactoryContext.MaterializedAnalyzer != null)
                 {
-                    _tracingReporter.AddStats(analyzerFactoryContext.FriendlyName,
+                    _tracingReporter.AddAnalyzerStats(analyzerFactoryContext.FriendlyName,
                         analyzerFactoryContext.MaterializedAnalyzer.Elapsed);
                     analyzerFactoryContext.MaterializedAnalyzer.ClearStats();
                 }
             }
 
+            _tracingReporter.AddAnalyzerInfraStats();
             return _tracingReporter.TracingStats;
         }
 
@@ -329,9 +339,11 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 return;
             }
 
-            BuildCheckTracingEventArgs eventArgs =
-                new(CreateTracingStats()) { BuildEventContext = loggingContext.BuildEventContext };
-            loggingContext.LogBuildEvent(eventArgs);
+            var analyzerEventStats = CreateAnalyzerTracingStats();
+
+            BuildCheckTracingEventArgs analyzerEventArg =
+                new(analyzerEventStats) { BuildEventContext = loggingContext.BuildEventContext };
+            loggingContext.LogBuildEvent(analyzerEventArg);
         }
 
         public void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext,

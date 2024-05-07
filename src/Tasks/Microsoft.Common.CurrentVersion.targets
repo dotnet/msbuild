@@ -389,7 +389,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup Condition="'$(MSBuildCopyMarkerName)' == ''">
     <MSBuildCopyMarkerName>$(MSBuildProjectFile)</MSBuildCopyMarkerName>
     <!-- For a long MSBuildProjectFile let's shorten this to 17 chars - using the first 8 codepoints of the filename and a filename hash. -->
-    <MSBuildCopyMarkerName Condition="'$(MSBuildCopyMarkerName.Length)' &gt; '17'">$([MSBuild]::SubstringByTextElements($(MSBuildProjectFile), 0, 8)).$([MSBuild]::StableStringHash($(MSBuildProjectFile)).ToString("X8"))</MSBuildCopyMarkerName>
+    <MSBuildCopyMarkerName Condition="'$(MSBuildCopyMarkerName.Length)' &gt; '17'">$([MSBuild]::SubstringByAsciiChars($(MSBuildProjectFile), 0, 8)).$([MSBuild]::StableStringHash($(MSBuildProjectFile)).ToString("X8"))</MSBuildCopyMarkerName>
     <MSBuildCopyMarkerName>$(MSBuildCopyMarkerName).Up2Date</MSBuildCopyMarkerName>
   </PropertyGroup>
 
