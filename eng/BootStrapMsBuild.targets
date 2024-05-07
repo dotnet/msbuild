@@ -196,6 +196,10 @@
     <MakeDir Directories="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver" />
     <Touch Files="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\DisableWorkloadResolver.sentinel"
            AlwaysCreate="true" />
+
+    <MakeDir Directories="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\amd64\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver" />
+    <Touch Files="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\amd64\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\DisableWorkloadResolver.sentinel"
+           AlwaysCreate="true" />
   </Target>
 
   <Target Name="BootstrapNetCore" DependsOnTargets="CleanBootstrapFolder">
