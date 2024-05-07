@@ -5071,7 +5071,7 @@ $(
         }
 
         [Fact]
-        public void PropertyFunctionRegisterAnalyzer()
+        public void PropertyFunctionRegisterBuildCheck()
         {
             using (var env = TestEnvironment.Create())
             {
@@ -5084,7 +5084,7 @@ $(
                 var dummyAssemblyFile = env.CreateFile(env.CreateFolder(), "test.dll");
 
                 var result = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default)
-                    .ExpandIntoStringLeaveEscaped($"$([MSBuild]::RegisterAnalyzer({dummyAssemblyFile.Path}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance, loggingContext);
+                    .ExpandIntoStringLeaveEscaped($"$([MSBuild]::RegisterBuildCheck({dummyAssemblyFile.Path}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance, loggingContext);
 
                 result.ShouldBe(Boolean.TrueString);
                 _ = logger.AllBuildEvents.Select(be => be.ShouldBeOfType<BuildCheckAcquisitionEventArgs>());

@@ -3917,12 +3917,12 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (_receiverType == typeof(IntrinsicFunctions))
                     {
-                        if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.RegisterAnalyzer), StringComparison.OrdinalIgnoreCase))
+                        if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.RegisterBuildCheck), StringComparison.OrdinalIgnoreCase))
                         {
-                            ErrorUtilities.VerifyThrow(_loggingContext != null, $"The logging context is missed. {nameof(IntrinsicFunctions.RegisterAnalyzer)} can not be invoked.");
+                            ErrorUtilities.VerifyThrow(_loggingContext != null, $"The logging context is missed. {nameof(IntrinsicFunctions.RegisterBuildCheck)} can not be invoked.");
                             if (TryGetArg(args, out string arg0))
                             {
-                                returnVal = IntrinsicFunctions.RegisterAnalyzer(arg0, _loggingContext);
+                                returnVal = IntrinsicFunctions.RegisterBuildCheck(arg0, _loggingContext);
                                 return true;
                             }
                         }
@@ -4229,14 +4229,14 @@ namespace Microsoft.Build.Evaluation
                                 return true;
                             }
                         }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.SubstringByAsciiChars), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out string arg0, out int arg1, out int arg2))
-                            {
-                                returnVal = IntrinsicFunctions.SubstringByAsciiChars(arg0, arg1, arg2);
-                                return true;
-                            }
-                        }
+                        //else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.SubstringByAsciiChars), StringComparison.OrdinalIgnoreCase))
+                        //{
+                        //    if (TryGetArgs(args, out string arg0, out int arg1, out int arg2))
+                        //    {
+                        //        returnVal = IntrinsicFunctions.SubstringByAsciiChars(arg0, arg1, arg2);
+                        //        return true;
+                        //    }
+                        //}
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.CheckFeatureAvailability), StringComparison.OrdinalIgnoreCase))
                         {
                             if (TryGetArg(args, out string arg0))
