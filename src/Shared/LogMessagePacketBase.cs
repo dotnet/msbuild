@@ -11,7 +11,7 @@ using Microsoft.Build.Framework;
 
 #if !TASKHOST
 using Microsoft.Build.Experimental.BuildCheck;
-using Microsoft.Build.BuildCheck.Infrastructure;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 #endif
 
 #if !TASKHOST && !MSBUILDENTRYPOINTEXE
