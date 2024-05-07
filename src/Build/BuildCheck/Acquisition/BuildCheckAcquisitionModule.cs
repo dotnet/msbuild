@@ -42,17 +42,17 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
             assembly = Assembly.LoadFrom(analyzerAcquisitionData.AssemblyPath);
 #endif
 
-            IEnumerable<Type> analyzerTypes = assembly.GetExportedTypes().Where(t => typeof(BuildAnalyzer).IsAssignableFrom(t));
+            IEnumerable<Type> analyzerCandidates = assembly.GetExportedTypes();
 
-            foreach (Type analyzerType in analyzerTypes)
+            foreach (Type analyzerCandidate in analyzerCandidates)
             {
-                if (Activator.CreateInstance(analyzerType) is BuildAnalyzer instance)
+                if (Activator.CreateInstance(analyzerCandidate) is BuildAnalyzer instance)
                 {
                     analyzersFactories.Add(() => instance);
                 }
                 else
                 {
-                    throw new InvalidOperationException($"Failed to create an instance of type {analyzerType.FullName} as BuildAnalyzer.");
+                    _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerBaseTypeNotAssignable", analyzerCandidate.FullName);
                 }
             }
         }

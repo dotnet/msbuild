@@ -212,6 +212,11 @@
         <target state="translated">Impossibile trovare l'assembly dell'analizzatore personalizzato specificato: {0}. Verificare se esiste.</target>
         <note>The message is emitted when the custom analyzer assembly can not be found.</note>
       </trans-unit>
+      <trans-unit id="CustomAnalyzerBaseTypeNotAssignable">
+        <source>Failed to load the specified custom analyzer assembly: {0}. Make sure it inherits BuildAnalyzer base class. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
+        <target state="new">Failed to load the specified custom analyzer assembly: {0}. Make sure it inherits BuildAnalyzer base class. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <note>The message is emitted when the custom analyzer assembly can not be found.</note>
+      </trans-unit>
       <trans-unit id="CustomAnalyzerFailedAcquisition">
         <source>Failed to register the custom analyzer: {0}.</source>
         <target state="translated">Impossibile registrare l'analizzatore personalizzato: {0}.</target>

@@ -212,6 +212,11 @@
         <target state="translated">找不到指定的自訂分析器組件: {0}。請檢查它是否存在。</target>
         <note>The message is emitted when the custom analyzer assembly can not be found.</note>
       </trans-unit>
+      <trans-unit id="CustomAnalyzerBaseTypeNotAssignable">
+        <source>Failed to load the specified custom analyzer assembly: {0}. Make sure it inherits BuildAnalyzer base class. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
+        <target state="new">Failed to load the specified custom analyzer assembly: {0}. Make sure it inherits BuildAnalyzer base class. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <note>The message is emitted when the custom analyzer assembly can not be found.</note>
+      </trans-unit>
       <trans-unit id="CustomAnalyzerFailedAcquisition">
         <source>Failed to register the custom analyzer: {0}.</source>
         <target state="translated">無法登錄自訂分析器: {0}。</target>

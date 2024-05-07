@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Newtonsoft.Json.Linq;
@@ -137,8 +138,8 @@ public class EndToEndTests : IDisposable
 
     [Theory]
     [InlineData(new[] { "CustomAnalyzer" }, "AnalysisCandidate", new[] { "CustomRule1", "CustomRule2" })]
-    [InlineData(new[] { "CustomAnalyzer", "CustomAnalyzer2" }, "AnalysisCandidateWithMultipleAnalyzersInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" })]
-    public void CustomAnalyzerTest(string[] customAnalyzerNames, string analysisCandidate, string[] expectedRegisteredRules)
+    [InlineData(new[] { "CustomAnalyzer", "CustomAnalyzer2", "InvalidCustomAnalyzer" }, "AnalysisCandidateWithMultipleAnalyzersInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, new[] { "InvalidCustomAnalyzer" })]
+    public void CustomAnalyzerTest(string[] customAnalyzerNames, string analysisCandidate, string[] expectedRegisteredRules, string[]? expectedRejectedRules = null)
     {
         using (var env = TestEnvironment.Create())
         {
@@ -154,9 +155,17 @@ public class EndToEndTests : IDisposable
                 out bool successBuild);
             successBuild.ShouldBeTrue();
 
-            foreach (string expectedRegisteredRule in expectedRegisteredRules)
+            foreach (string registeredRule in expectedRegisteredRules)
             {
-                projectAnalysisBuildLog.ShouldContain($"Custom analyzer rule: {expectedRegisteredRule} has been registered successfully.");
+                projectAnalysisBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CustomAnalyzerSuccessfulAcquisition", registeredRule));
+            }
+
+            if (expectedRejectedRules != null)
+            {
+                foreach (string rejectedRule in expectedRejectedRules)
+                {
+                    projectAnalysisBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CustomAnalyzerBaseTypeNotAssignable", rejectedRule));
+                }
             }
         }
     }
