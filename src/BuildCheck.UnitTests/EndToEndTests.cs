@@ -4,10 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
+using Newtonsoft.Json.Linq;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -168,11 +168,14 @@ public class EndToEndTests : IDisposable
         foreach (var customAnalyzerName in customAnalyzerNames)
         {
             var candidateAnalysisProjectPath = Path.Combine(TestAssetsRootPath, customAnalyzerName, $"{customAnalyzerName}.csproj");
-            string candidateAnalysisBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
-                 $"{candidateAnalysisProjectPath} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path}", out bool success);
+            var nugetPackResults = RunnerUtilities.ExecBootstrapedMSBuild(
+                 $"{candidateAnalysisProjectPath} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path} -getTargetResult:Build", out bool success, attachProcessId: false);
+
             success.ShouldBeTrue();
 
-            var candidatesNugetPackageFullPath = Regex.Match(candidateAnalysisBuildLog, @"Successfully created package '(.*?)'").Groups[1].Value;
+            string? candidatesNugetPackageFullPath = (string?)(JObject.Parse(nugetPackResults)?["TargetResults"]?["Build"]?["Items"]?[0]?["RelativeDir"] ?? string.Empty);
+
+            candidatesNugetPackageFullPath.ShouldNotBeNull();
             candidatesNugetFullPaths.Add(candidatesNugetPackageFullPath);
         }
 

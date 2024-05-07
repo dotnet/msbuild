@@ -5,7 +5,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <!-- The output structure was modified for msbuild development needs.-->
-    <NoWarn>NU5101;NU5128</NoWarn>
+    <NoWarn>NU5101;NU5128;MSB3277</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
