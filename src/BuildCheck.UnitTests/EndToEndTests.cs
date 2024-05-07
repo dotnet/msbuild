@@ -138,7 +138,7 @@ public class EndToEndTests : IDisposable
 
     [Theory]
     [InlineData(new[] { "CustomAnalyzer" }, "AnalysisCandidate", new[] { "CustomRule1", "CustomRule2" })]
-    [InlineData(new[] { "CustomAnalyzer", "CustomAnalyzer2", "InvalidCustomAnalyzer" }, "AnalysisCandidateWithMultipleAnalyzersInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, new[] { "InvalidCustomAnalyzer" })]
+    [InlineData(new[] { "CustomAnalyzer", "CustomAnalyzer2", "InvalidCustomAnalyzer" }, "AnalysisCandidateWithMultipleAnalyzersInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, new[] { "InvalidCustomAnalyzer.InvalidAnalyzer" })]
     public void CustomAnalyzerTest(string[] customAnalyzerNames, string analysisCandidate, string[] expectedRegisteredRules, string[]? expectedRejectedRules = null)
     {
         using (var env = TestEnvironment.Create())
