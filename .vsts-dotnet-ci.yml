@@ -3,6 +3,15 @@ trigger:
 - exp/*
 - vs*
 
+variables:
+- group: AzureDevOps-Artifact-Feeds-Pats
+- name: cfsNugetWarnLevel
+  value: warn
+- name: nugetMultiFeedWarnLevel
+  value: none
+- name: NugetSecurityAnalysisWarningLevel
+  value: none
+
 jobs:
 - job: CheckVersionBumpOnReleaseBranches
   displayName: "Check Version Bump On Release Branches"
@@ -66,6 +75,13 @@ jobs:
   pool:
     vmImage: 'windows-2022'
   steps:
+  - task: PowerShell@2
+    displayName: Setup Private Feeds Credentials
+    inputs:
+      filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+      arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+    env:
+      Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - task: BatchScript@1
     displayName: cibuild_bootstrapped_msbuild.cmd
     inputs:
@@ -137,6 +153,13 @@ jobs:
   pool:
     vmImage: 'windows-2022'
   steps:
+  - task: PowerShell@2
+    displayName: Setup Private Feeds Credentials
+    inputs:
+      filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+      arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+    env:
+      Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - task: BatchScript@1
     displayName: cibuild_bootstrapped_msbuild.cmd
     inputs:
@@ -192,6 +215,13 @@ jobs:
       name: VSEngSS-MicroBuild2022-1ES
       demands: agent.os -equals Windows_NT
   steps:
+  - task: PowerShell@2
+    displayName: Setup Private Feeds Credentials
+    inputs:
+      filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+      arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+    env:
+      Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - task: BatchScript@1
     displayName: cibuild.cmd
     inputs:
@@ -266,6 +296,13 @@ jobs:
   pool:
     vmImage: 'ubuntu-latest'
   steps:
+  - task: Bash@3
+    displayName: Setup Private Feeds Credentials
+    inputs:
+      filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.sh
+      arguments: $(Build.SourcesDirectory)/NuGet.config $Token
+    env:
+      Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged)
     displayName: CI Build
   - task: PublishTestResults@2
@@ -323,6 +360,13 @@ jobs:
   pool:
     vmImage: 'macOS-latest'
   steps:
+  - task: Bash@3
+    displayName: Setup Private Feeds Credentials
+    inputs:
+      filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.sh
+      arguments: $(Build.SourcesDirectory)/NuGet.config $Token
+    env:
+      Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged)
     displayName: CI Build
   - task: PublishTestResults@2
