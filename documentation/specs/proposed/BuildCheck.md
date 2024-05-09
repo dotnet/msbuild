@@ -22,9 +22,11 @@ Users are able to tune the behavior of the checks via `.editorconfig` which brin
 
 Powerusers are able to develop, test and publish their custom analyzers easily and contribute them back to community. The local development scenario doesn’t require roundtrip through packaging.
 
-A solid set of in-the-box analyzers is provided by MSBuild and the .NET SDK, extended each release, with high quality reports (pointing exact locations of issue, offering clear and actionable explanations, not repetitive for builds with multi-execution or/and multi-importing of a same script in single build context). The existing in-the-box analyzers are gradually enabled by default and their severity increased - in waves (likely tied to sdk releases) - aiming to constantly increase quality of our customers build scripts. MSBuild.exe (and hence Visual Studio) builds will take more conservative approach with requiring an explicit opt-in into the analyzers - in order to not introduce upgrade blockers. 
+A solid set of in-the-box analyzers is provided by MSBuild and the .NET SDK, extended each release, with high quality reports (pointing exact locations of issue, offering clear and actionable explanations, not repetitive for builds with multi-execution or/and multi-importing of a same script in single build context). The existing in-the-box analyzers are gradually enabled by default and their severity increased - in waves (likely tied to sdk releases) - aiming to constantly increase the quality of our customers build scripts. To avoid breaking customers builds, there will still be an explicit user gesture required to opt into running the analysis. This will be done either by configuring the analyzers with `.editorconfig` or auto-enabling the analysis based on the TFM of the project. There will be no difference between building with `dotnet build` and with `MSBuild.exe`, they will follow the same enablement rules with the set of enabled built-in analyzers derived from `.editorconfig` and TFM/props. Building in Visual Studio will eventually reach parity with command-line build as well.
 
-The analysis has small impact on build duration with ability to disable analysis altogether which will remove all the performance costs associated with the analysis. The perf impact on representative projects is continuously monitored and documented by the MsBuild team.
+Projects that don't use the .NET SDK and those that are not SDK-style at all are TBD. There is a possibility of using a property like `MSBuildAnalysisLevel` to enable some base analyzers we believe will add value everywhere.
+
+The analysis has small impact on build duration with ability to disable analysis altogether which will remove all the performance costs associated with the analysis. The perf impact on representative projects is continuously monitored and documented by the MSBuild team.
 
 
 # Scope of initial iteration
@@ -99,7 +101,7 @@ The proposed initial configuration for those is TBD (as well based on initial te
 
 ### Live Build
 
-BuildCheck will run as part of the build and execute [inbox analyzers](#inbox-analyzers) and [custom analyzers](#acquisition-of-custom-analyzers) based on the [configuration](#configuration). Users will have an option to completely opt-out from BuildCheck to run via commandline switch.
+BuildCheck will run as part of the build and execute [inbox analyzers](#inbox-analyzers) and [custom analyzers](#acquisition-of-custom-analyzers) based on the [configuration](#configuration). Users will have an option to completely opt-out from BuildCheck to run via an MSBuild property (could be set in a project file or passed on the commandline).
 
 Findings - reports - of analyzers will be output as build messages/warnings/errors, and the message/warnings/error code should help distinguish BuildCheck produced reports from regular build errors/warnings.
 
@@ -128,8 +130,19 @@ We might as well consider specifying custom analyzers on a command line (as a no
 
 There will be 3 mechanisms of configuring the analyzers and rules:
 * The default configuration declared by the analyzers themselves ([more details on implementation](#rules-declaration))
-* [Sdk Analysis Level property](https://github.com/dotnet/designs/blob/main/proposed/sdk-analysis-level.md) – mostly for the inbox analyzers
+* The TFM of the project and the [Sdk Analysis Level property](https://github.com/dotnet/designs/blob/main/proposed/sdk-analysis-level.md) – mostly for the inbox analyzers
 * `.editorconfig` file
+
+We will also consider respecting `SdkAnalysisLevel` to override the per-TFM defaults. Additionally, we may introduce a new "master switch" property, tentatively called `RunMSBuildChecks`, to make it possible to disable everything whole-sale. This would be used in scenarios like F5 in VS.
+```
+Skipping analyzers to speed up the build. You can execute 'Build' or 'Rebuild' command to run analyzers.
+```
+
+Here's the proposed release schedule:
+- **.NET 9** - the feature is introduced and enabled in `dotnet build` and `MSBuild.exe` command-line builds. It is not enabled in VS just yet. No analyzers are enabled by default. It is not technically required to read the TFM or any other props during evaluation, though it would be nice to respect `RunMSBuildChecks` already in this release. `.editorconfig` can be the sole source of configuration.
+- **.NET 10** - based on feedback and testing, we choose a set of analyzers to enable by default for projects targeting `net10.0`, and enable the feature as a whole in Visual Studio. Depending on how we feel about the perf characteristics of evaluation, especially the "double evaluation" mandated by discovering evaluation-tracking analyzers just-in-time, we may want to omit such analyzers from the default set.
+- **.NET 11** and beyond - some more analyzers are enabled for projects targeting `net11.0`, the `net10.0` does not change. Everything is mature and performant enough that we are able to auto-enable any analyzer. The gradual tightening of rules enabled by default gets us closer to the long envisioned "strict mode", which will ultimately allow us to evolve MSBuild to be simpler and more performant.
+
 
 For the `.editorconfig` file configuration, following will apply:
 * Only `.editorconfig` files collocated with the project file or up the folder hierarchy will be considered.
