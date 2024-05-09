@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Build.BuildCheck.Utilities
+namespace Microsoft.Build.Experimental.BuildCheck.Utilities
 {
     /// <summary>
     /// Constants to be shared within BuildCheck infrastructure

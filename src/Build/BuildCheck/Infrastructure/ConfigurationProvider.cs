@@ -12,7 +12,7 @@ using System.Text.Json;
 using Microsoft.Build.Experimental.BuildCheck;
 using System.Configuration;
 
-namespace Microsoft.Build.BuildCheck.Infrastructure;
+namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 
 // Let's flip form statics to instance, with exposed interface (so that we can easily swap implementations)
