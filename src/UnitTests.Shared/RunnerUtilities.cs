@@ -52,7 +52,12 @@ namespace Microsoft.Build.UnitTests.Shared
             return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper);
         }
 
-        public static string ExecBootstrapedMSBuild(string msbuildParameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
+        public static string ExecBootstrapedMSBuild(
+            string msbuildParameters,
+            out bool successfulExit,
+            bool shellExecute = false,
+            ITestOutputHelper outputHelper = null,
+            bool attachProcessId = true)
         {
             BootstrapLocationAttribute attribute = Assembly.GetExecutingAssembly().GetCustomAttribute<BootstrapLocationAttribute>()
                                                    ?? throw new InvalidOperationException("This test assembly does not have the BootstrapLocationAttribute");
@@ -64,7 +69,7 @@ namespace Microsoft.Build.UnitTests.Shared
 #else
             string pathToExecutable = Path.Combine(binaryFolder, "MSBuild.exe");
 #endif
-            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper);
+            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper, attachProcessId);
         }
 
         private static void AdjustForShellExecution(ref string pathToExecutable, ref string arguments)
@@ -84,9 +89,15 @@ namespace Microsoft.Build.UnitTests.Shared
         }
 
         /// <summary>
-        /// Run the process and get stdout and stderr
+        /// Run the process and get stdout and stderr.
         /// </summary>
-        public static string RunProcessAndGetOutput(string process, string parameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
+        public static string RunProcessAndGetOutput(
+            string process,
+            string parameters,
+            out bool successfulExit,
+            bool shellExecute = false,
+            ITestOutputHelper outputHelper = null,
+            bool attachProcessId = true)
         {
             if (shellExecute)
             {
@@ -148,10 +159,13 @@ namespace Microsoft.Build.UnitTests.Shared
                 successfulExit = p.ExitCode == 0;
             }
 
-            WriteOutput("Process ID is " + pid + "\r\n");
-            WriteOutput("==============");
+            if (attachProcessId)
+            {
+                output += "Process ID is " + pid + "\r\n";
+                WriteOutput("Process ID is " + pid + "\r\n");
+                WriteOutput("==============");
+            }
 
-            output += "Process ID is " + pid + "\r\n";
             return output;
 
             void WriteOutput(string data)

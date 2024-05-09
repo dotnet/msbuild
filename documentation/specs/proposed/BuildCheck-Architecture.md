@@ -86,8 +86,24 @@ Planned model:
 
 # Acquisition
 
-**TBD** - implementation details to be amended by @YuliiaKovalova
+BuildCheck employs two distinct types of analyzers: inbox and custom. As a result, the acquisition and distribution processes vary.
+Inbox rules are integrated into the MSBuild repository, while custom analyzers can be packaged as NuGet packages and detected by MSBuild provided they adhere to a specific structure. 
 
+To streamline the creation of custom rules, a special [template](https://learn.microsoft.com/dotnet/core/tools/custom-templates) has been introduced.
+To enable MSBuild to recognize a custom analyzer, it must invoke the intrinsic function [`void RegisterBuildCheck(string path)`](https://github.com/dotnet/msbuild/blob/1c3b240ce7417223672c62862a6ff7e884e6997a/src/Build/Evaluation/IntrinsicFunctions.cs#L700), which requires the path to the assembly as input. Therefore, it's essential for the user to ensure that the assembly exists in the specified location.
+Additionally, the custom rule must use [`BuildAnalyzerRule`](https://github.com/dotnet/msbuild/blob/9cdb3615adb4115f92b390de2f258fac5f320909/src/Build/BuildCheck/API/BuildAnalyzerRule.cs#L11C14-L11C31) as a parent class; otherwise, MSBuild will not register it.
+
+Examples of custom rules can be found in the [end-to-end tests](https://github.com/dotnet/msbuild/blob/1c3b240ce7417223672c62862a6ff7e884e6997a/src/BuildCheck.UnitTests/EndToEndTests.cs#L139), showcasing various scenarios:
+
+1. [`Single Custom Rule Packaged as a NuGet Package`](https://github.com/dotnet/msbuild/tree/main/src/BuildCheck.UnitTests/TestAssets/AnalysisCandidate): Demonstrates the implementation of a custom rule encapsulated within a NuGet package. It contains the process of creating, packaging, and integrating a single custom rule into a project.
+2. [`Project with Multiple Analyzers Referenced`](https://github.com/dotnet/msbuild/tree/main/src/BuildCheck.UnitTests/TestAssets/AnalysisCandidateWithMultipleAnalyzersInjected): Illustrates a project setup where multiple custom analyzers are referenced. This scenario is common in larger projects where multiple rule sets need to be enforced simultaneously.
+
+Important Notes: 
+- In these examples, pay attention to the presence of the `CustomAnalyzerName.props` file. This file contains intrinsic function invocations necessary for successful rule registration. Understanding and correctly implementing these invocations are crucial for integrating custom rules into your projects effectively.
+- The examples do not include references to third-party assemblies that might be required in other custom analyzers. To load the custom instance in MSBuild, third-party assemblies have to be included in the NuGet package. The current implementation achieves this goal by using a special target: [AddNuGetDlls](https://github.com/dotnet/msbuild/blob/1c3b240ce7417223672c62862a6ff7e884e6997a/template_feed/Microsoft.AnalyzerTemplate/Company.AnalyzerTemplate.csproj#L22).
+
+### Future Enhancements
+As our library of custom rules expands, we plan to enrich this section with real-world production rule examples. These examples will showcase a diverse range of rules addressing common development challenges. Once these production rules are published and available on nuget.org, we will update this documentation accordingly.
 
 # Build OM for Analyzers Authoring
 
