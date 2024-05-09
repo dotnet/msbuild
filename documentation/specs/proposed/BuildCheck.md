@@ -133,13 +133,13 @@ There will be 3 mechanisms of configuring the analyzers and rules:
 * The TFM of the project and the [Sdk Analysis Level property](https://github.com/dotnet/designs/blob/main/proposed/sdk-analysis-level.md) – mostly for the inbox analyzers
 * `.editorconfig` file
 
-We will also consider respecting `SdkAnalysisLevel` to override the per-TFM defaults. Additionally we may use the existing `RunAnalyzers` "master switch" property to make it possible to disable everything whole-sale. This would be used in scenarios like F5 in VS.
+We will also consider respecting `SdkAnalysisLevel` to override the per-TFM defaults. Additionally, we may introduce a new "master switch" property, tentatively called `RunMSBuildChecks`, to make it possible to disable everything whole-sale. This would be used in scenarios like F5 in VS.
 ```
 Skipping analyzers to speed up the build. You can execute 'Build' or 'Rebuild' command to run analyzers.
 ```
 
 Here's the proposed release schedule:
-- **.NET 9** - the feature is introduced and enabled in `dotnet build` and `MSBuild.exe` command-line builds. It is not enabled in VS just yet. No analyzers are enabled by default. It is not technically required to read the TFM or any other props during evaluation, though it would be nice to respect `RunAnalyzers` already in this release. `.editorconfig` can be the sole source of configuration.
+- **.NET 9** - the feature is introduced and enabled in `dotnet build` and `MSBuild.exe` command-line builds. It is not enabled in VS just yet. No analyzers are enabled by default. It is not technically required to read the TFM or any other props during evaluation, though it would be nice to respect `RunMSBuildChecks` already in this release. `.editorconfig` can be the sole source of configuration.
 - **.NET 10** - based on feedback and testing, we choose a set of analyzers to enable by default for projects targeting `net10.0`, and enable the feature as a whole in Visual Studio. Depending on how we feel about the perf characteristics of evaluation, especially the "double evaluation" mandated by discovering evaluation-tracking analyzers just-in-time, we may want to omit such analyzers from the default set.
 - **.NET 11** and beyond - some more analyzers are enabled for projects targeting `net11.0`, the `net10.0` does not change. Everything is mature and performant enough that we are able to auto-enable any analyzer. The gradual tightening of rules enabled by default gets us closer to the long envisioned "strict mode", which will ultimately allow us to evolve MSBuild to be simpler and more performant.
 
