@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Security.Cryptography;
 
 namespace Microsoft.Build.Framework;
 
@@ -17,15 +18,16 @@ internal static class StringUtils
     internal static string GenerateRandomString(int length)
     {
         // Base64, 2^6 = 64
+        using var rng = RandomNumberGenerator.Create();
+
         const int eachStringCharEncodesBites = 6;
         const int eachByteHasBits = 8;
         const double bytesNumNeededForSingleStringChar = eachStringCharEncodesBites / (double)eachByteHasBits;
 
         int randomBytesNeeded = (int)Math.Ceiling(length * bytesNumNeededForSingleStringChar);
-        Random random = new();
-
         byte[] randomBytes = new byte[randomBytesNeeded];
-        random.NextBytes(randomBytes);
+        rng.GetBytes(randomBytes);
+
         // Base64: [A-Z], [a-z], [0-9], +, /, =
         // We are replacing '/' to get a valid path
         string randomBase64String = Convert.ToBase64String(randomBytes).Replace('/', '_');
