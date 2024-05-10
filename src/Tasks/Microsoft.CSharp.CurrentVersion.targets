@@ -84,7 +84,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
 
     <PropertyGroup>
-        <CreateManifestResourceNamesDependsOn></CreateManifestResourceNamesDependsOn>
+        <CreateManifestResourceNamesDependsOn>$(CreateManifestResourceNamesDependsOn)</CreateManifestResourceNamesDependsOn>
     </PropertyGroup>
 
     <Target
