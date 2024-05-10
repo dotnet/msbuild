@@ -3017,7 +3017,8 @@ namespace Microsoft.Build.Execution
                     }
                 }
 
-                if (loggingService.Loggers.Count == 0)
+                forwardingLoggers = forwardingLoggers?.ToList();
+                if (loggingService.Loggers.Count == 0 && (forwardingLoggers?.Count() ?? 0) == 0)
                 {
                     // We need to register SOME logger if we don't have any. This ensures the out of proc nodes will still send us message,
                     // ensuring we receive project started and finished events.
