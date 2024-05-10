@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Experimental.BuildCheck;
 
-namespace Microsoft.Build.BuildCheck.Infrastructure;
+namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 /// <summary>
 /// A manager of the runs of the analyzers - deciding based on configuration of what to run and what to postfilter.

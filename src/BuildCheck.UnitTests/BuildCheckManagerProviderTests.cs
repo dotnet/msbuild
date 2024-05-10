@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BuildCheck.Acquisition;
-using Microsoft.Build.BuildCheck.Infrastructure;
+using Microsoft.Build.Experimental.BuildCheck.Acquisition;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
@@ -14,7 +14,7 @@ using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using static Microsoft.Build.BuildCheck.Infrastructure.BuildCheckManagerProvider;
+using static Microsoft.Build.Experimental.BuildCheck.Infrastructure.BuildCheckManagerProvider;
 
 namespace Microsoft.Build.BuildCheck.UnitTests;
 

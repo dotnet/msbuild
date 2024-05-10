@@ -3,7 +3,7 @@
 
 using Microsoft.Build.Experimental.BuildCheck;
 
-namespace Microsoft.Build.BuildCheck.Infrastructure;
+namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 /// <summary>
 /// Counterpart type for BuildAnalyzerConfiguration - with all properties non-nullable

@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.Experimental.BuildCheck;
 
-namespace Microsoft.Build.BuildCheck.Acquisition;
+namespace Microsoft.Build.Experimental.BuildCheck.Acquisition;
 
 // https://github.com/dotnet/msbuild/issues/9633
 // Acquisition
