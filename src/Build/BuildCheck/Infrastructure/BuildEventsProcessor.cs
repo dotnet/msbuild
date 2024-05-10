@@ -85,6 +85,11 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
 
         if (taskStartedEventArgs.BuildEventContext is not null)
         {
+            ElementLocation invocationLocation = ElementLocation.Create(
+                taskStartedEventArgs.TaskFile,
+                taskStartedEventArgs.LineNumber,
+                taskStartedEventArgs.ColumnNumber);
+
             // Add a new entry to _tasksBeingExecuted. TaskParameters are initialized empty and will be recorded
             // based on TaskParameterEventArgs we receive later.
             Dictionary<string, TaskInvocationAnalysisData.TaskParameter> taskParameters = new();
@@ -94,10 +99,8 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
                 TaskParameters = taskParameters,
                 AnalysisData = new(
                     projectFilePath: taskStartedEventArgs.ProjectFile!,
-                    lineNumber: taskStartedEventArgs.LineNumber,
-                    columnNumber: taskStartedEventArgs.ColumnNumber,
+                    taskInvocationLocation: invocationLocation,
                     taskName: taskStartedEventArgs.TaskName,
-                    taskFile: taskStartedEventArgs.TaskFile,
                     taskAssemblyLocation: taskStartedEventArgs.TaskAssemblyLocation,
                     parameters: taskParameters),
             };

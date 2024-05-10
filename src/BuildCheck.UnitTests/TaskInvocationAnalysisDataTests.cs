@@ -95,8 +95,8 @@ namespace Microsoft.Build.BuildCheck.UnitTests
                 foreach (var data in s_testAnalyzer!.AnalysisData)
                 {
                     data.ProjectFilePath.ShouldBe(testProject.ProjectFile);
-                    data.LineNumber.ShouldBeGreaterThan(0);
-                    data.ColumnNumber.ShouldBeGreaterThan(0);
+                    data.TaskInvocationLocation.Line.ShouldBeGreaterThan(0);
+                    data.TaskInvocationLocation.Column.ShouldBeGreaterThan(0);
                 }
             }
         }

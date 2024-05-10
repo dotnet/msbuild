@@ -54,30 +54,28 @@ public class ParsedItemsAnalysisData : AnalysisData
 /// <summary>
 /// BuildCheck OM data representing a task executed by a project.
 /// </summary>
-public sealed class TaskInvocationAnalysisData : AnalysisDataWithLocation
+public sealed class TaskInvocationAnalysisData : AnalysisData
 {
     public record class TaskParameter(object? Value, bool IsOutput);
 
     internal TaskInvocationAnalysisData(
         string projectFilePath,
-        int lineNumber,
-        int columnNumber,
+        ElementLocation taskInvocationLocation,
         string taskName,
-        string taskFile,
         string taskAssemblyLocation,
-        IReadOnlyDictionary<string, TaskParameter> parameters) :
-        base(projectFilePath, lineNumber, columnNumber)
+        IReadOnlyDictionary<string, TaskParameter> parameters)
+        : base(projectFilePath)
     {
+        TaskInvocationLocation = taskInvocationLocation;
         TaskName = taskName;
-        TaskFile = taskFile;
         TaskAssemblyLocation = taskAssemblyLocation;
         Parameters = parameters;
     }
 
     /// <summary>
-    /// MSBuild file where this task was defined.
+    /// The project file and line/column number where the task is invoked.
     /// </summary>
-    public string TaskFile { get; }
+    public ElementLocation TaskInvocationLocation { get; }
 
     /// <summary>
     /// Name of the task.
