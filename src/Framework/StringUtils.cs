@@ -11,7 +11,7 @@ internal static class StringUtils
     /// <summary>
     /// Generates a random string of the specified length.
     /// The generated string is suitable for use in file paths.
-    /// The randomness distribution is given by the System.Random.
+    /// The randomness distribution is given by the System.Security.Cryptography.RandomNumberGenerator.
     /// </summary>
     /// <param name="length"></param>
     /// <returns></returns>
