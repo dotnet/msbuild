@@ -43,6 +43,12 @@ namespace Microsoft.Build.Evaluation
         internal abstract string GetUnexpandedValue(ConditionEvaluator.IConditionEvaluationState state);
 
         /// <summary>
+        /// Checks if value is empty before any item and property expressions are expanded
+        /// </summary>
+        /// <returns></returns>
+        internal abstract bool IsUnexpandedValueEmpty(ConditionEvaluator.IConditionEvaluationState state);
+
+        /// <summary>
         /// If any expression nodes cache any state for the duration of evaluation,
         /// now's the time to clean it up
         /// </summary>

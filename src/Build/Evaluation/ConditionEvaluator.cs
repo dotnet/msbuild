@@ -292,10 +292,9 @@ namespace Microsoft.Build.Evaluation
                         // Finished using the expression tree. Add it back to the pool so other threads can use it.
                         expressionPool.Push(parsedExpression);
                     }
+                    expander.PropertiesUsageTracker.ResetPropertyReadContext();
                 }
             }
-
-            expander.PropertiesUsageTracker.ResetPropertyReadContext();
 
             return result;
         }

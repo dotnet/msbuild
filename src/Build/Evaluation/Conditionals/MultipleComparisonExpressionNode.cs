@@ -53,8 +53,8 @@ namespace Microsoft.Build.Evaluation
             // which is a performance advantage if @(X) is a huge item list.
 
             // this is the possible case of '$(a)' == ''
-            if (string.IsNullOrEmpty(LeftChild.GetUnexpandedValue(state)) ||
-                string.IsNullOrEmpty(RightChild.GetUnexpandedValue(state)))
+            if (LeftChild.IsUnexpandedValueEmpty(state) ||
+                RightChild.IsUnexpandedValueEmpty(state))
             {
                 state.PropertiesUsageTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluationWithOneSideEmpty;
             }

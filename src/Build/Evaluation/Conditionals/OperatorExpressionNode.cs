@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Collections;
 
 #nullable disable
 
@@ -41,6 +42,10 @@ namespace Microsoft.Build.Evaluation
         {
             return null;
         }
+
+        /// <inheritdoc cref="GenericExpressionNode"/>
+        internal override bool IsUnexpandedValueEmpty(ConditionEvaluator.IConditionEvaluationState state)
+            => true;
 
         /// <summary>
         /// Value before any item and property expressions are expanded

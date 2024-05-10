@@ -81,7 +81,6 @@ namespace Microsoft.Build.BackEnd
                             bucket.Expander.PropertiesUsageTracker.PropertyReadContext =
                                 PropertyReadContext.PropertyEvaluation;
 
-
                             string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(property.Value, ExpanderOptions.ExpandAll, property.Location);
                             bucket.Expander.PropertiesUsageTracker.CheckPreexistingUndefinedUsage(property, evaluatedValue, LoggingContext);
 
@@ -91,7 +90,6 @@ namespace Microsoft.Build.BackEnd
                             }
 
                             bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(property.Name, evaluatedValue, property.Location, Project.IsImmutable));
-                            bucket.Expander.PropertiesUsageTracker.ResetPropertyReadContext(false);
                         }
                     }
                 }
@@ -103,6 +101,7 @@ namespace Microsoft.Build.BackEnd
                         foreach (ItemBucket bucket in buckets)
                         {
                             bucket.LeaveScope();
+                            bucket.Expander.PropertiesUsageTracker.ResetPropertyReadContext(false);
                         }
                     }
                 }

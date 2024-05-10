@@ -39,6 +39,10 @@ namespace Microsoft.Build.Evaluation
             return Version.TryParse(_value, out result);
         }
 
+        /// <inheritdoc cref="GenericExpressionNode"/>
+        internal override bool IsUnexpandedValueEmpty(ConditionEvaluator.IConditionEvaluationState state)
+            => string.IsNullOrEmpty(_value);
+
         /// <summary>
         /// Get the unexpanded value
         /// </summary>
