@@ -34,6 +34,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public TaskParameterEventArgs(
             TaskParameterMessageKind kind,
+            string parameterName,
             string itemType,
             IList items,
             bool logItemMetadata,
@@ -41,14 +42,49 @@ namespace Microsoft.Build.Framework
             : base(null, null, null, MessageImportance.Low, eventTimestamp)
         {
             Kind = kind;
+            ParameterName = parameterName;
             ItemType = itemType;
             Items = items;
             LogItemMetadata = logItemMetadata;
         }
 
+        /// <summary>
+        /// Creates an instance of this class for the given task parameter.
+        /// </summary>
+        public TaskParameterEventArgs(
+            TaskParameterMessageKind kind,
+            string itemType,
+            IList items,
+            bool logItemMetadata,
+            DateTime eventTimestamp)
+            : this(kind, parameterName: null, itemType, items, logItemMetadata, eventTimestamp)
+        { }
+
+        /// <summary>
+        /// The kind of event represented by this instance.
+        /// </summary>
         public TaskParameterMessageKind Kind { get; private set; }
+
+        /// <summary>
+        /// The name of the item being manipulated, e.g. "Compile". For backward compatibility, this property has the same value
+        /// as <see cref="ParameterName"/> in cases where the operation does not manipulate any items, such as when representing
+        /// task inputs or task outputs assigned to properties.
+        /// </summary>
         public string ItemType { get; private set; }
+
+        /// <summary>
+        /// The name of the parameter if <see cref="Kind"/> is <see cref="TaskParameterMessageKind.TaskInput"/> or <see cref="TaskParameterMessageKind.TaskOutput"/>.
+        /// </summary>
+        public string ParameterName { get; private set; }
+
+        /// <summary>
+        /// The values being manipulated (added, removed, passed to/from task).
+        /// </summary>
         public IList Items { get; private set; }
+
+        /// <summary>
+        /// True if the <see cref="Message"/> string should include metadata.
+        /// </summary>
         public bool LogItemMetadata { get; private set; }
 
         /// <summary>

@@ -225,6 +225,7 @@ namespace Microsoft.Build.BackEnd
                 ItemGroupLoggingHelper.LogTaskParameter(
                     LoggingContext,
                     TaskParameterMessageKind.AddItem,
+                    parameterName: null,
                     child.ItemType,
                     itemsToAdd,
                     logItemMetadata: true,
@@ -269,6 +270,7 @@ namespace Microsoft.Build.BackEnd
                     ItemGroupLoggingHelper.LogTaskParameter(
                         LoggingContext,
                         TaskParameterMessageKind.RemoveItem,
+                        parameterName: null,
                         child.ItemType,
                         itemsToRemove,
                         logItemMetadata: true,

@@ -1321,6 +1321,7 @@ namespace Microsoft.Build.BackEnd
                             _taskLoggingContext,
                             TaskParameterMessageKind.TaskInput,
                             parameter.Name,
+                            parameter.Name,
                             parameterValueAsList ?? new object[] { parameterValue },
                             parameter.LogItemMetadata);
                     }
@@ -1429,6 +1430,7 @@ namespace Microsoft.Build.BackEnd
                         ItemGroupLoggingHelper.LogTaskParameter(
                             _taskLoggingContext,
                             TaskParameterMessageKind.TaskOutput,
+                            parameter.Name,
                             outputTargetName,
                             outputs,
                             parameter.LogItemMetadata);
@@ -1470,7 +1472,20 @@ namespace Microsoft.Build.BackEnd
                         var outputString = joinedOutputs.ToString();
                         if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents)
                         {
-                            _taskLoggingContext.LogComment(MessageImportance.Low, "OutputPropertyLogMessage", outputTargetName, outputString);
+                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
+                            {
+                                ItemGroupLoggingHelper.LogTaskParameter(
+                                    _taskLoggingContext,
+                                    TaskParameterMessageKind.TaskOutput,
+                                    parameter.Name,
+                                    parameter.Name,
+                                    new object[] { outputString },
+                                    parameter.LogItemMetadata);
+                            }
+                            else
+                            {
+                                _taskLoggingContext.LogComment(MessageImportance.Low, "OutputPropertyLogMessage", outputTargetName, outputString);
+                            }
                         }
 
                         _batchBucket.Lookup.SetProperty(ProjectPropertyInstance.Create(outputTargetName, outputString, parameterLocation, _projectInstance.IsImmutable));
@@ -1505,6 +1520,7 @@ namespace Microsoft.Build.BackEnd
                         ItemGroupLoggingHelper.LogTaskParameter(
                             _taskLoggingContext,
                             TaskParameterMessageKind.TaskOutput,
+                            parameter.Name,
                             outputTargetName,
                             outputs,
                             parameter.LogItemMetadata);
@@ -1539,7 +1555,20 @@ namespace Microsoft.Build.BackEnd
                         var outputString = joinedOutputs.ToString();
                         if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents)
                         {
-                            _taskLoggingContext.LogComment(MessageImportance.Low, "OutputPropertyLogMessage", outputTargetName, outputString);
+                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
+                            {
+                                ItemGroupLoggingHelper.LogTaskParameter(
+                                    _taskLoggingContext,
+                                    TaskParameterMessageKind.TaskOutput,
+                                    parameter.Name,
+                                    parameter.Name,
+                                    new object[] { outputString },
+                                    parameter.LogItemMetadata);
+                            }
+                            else
+                            {
+                                _taskLoggingContext.LogComment(MessageImportance.Low, "OutputPropertyLogMessage", outputTargetName, outputString);
+                            }
                         }
 
                         _batchBucket.Lookup.SetProperty(ProjectPropertyInstance.Create(outputTargetName, outputString, parameterLocation, _projectInstance.IsImmutable));

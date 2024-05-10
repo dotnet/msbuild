@@ -255,6 +255,7 @@ namespace Microsoft.Build.BackEnd
         internal static void LogTaskParameter(
             LoggingContext loggingContext,
             TaskParameterMessageKind messageKind,
+            string parameterName,
             string itemType,
             IList items,
             bool logItemMetadata,
@@ -263,6 +264,7 @@ namespace Microsoft.Build.BackEnd
             var args = CreateTaskParameterEventArgs(
                 loggingContext.BuildEventContext,
                 messageKind,
+                parameterName,
                 itemType,
                 items,
                 logItemMetadata,
@@ -276,6 +278,7 @@ namespace Microsoft.Build.BackEnd
         internal static TaskParameterEventArgs CreateTaskParameterEventArgs(
             BuildEventContext buildEventContext,
             TaskParameterMessageKind messageKind,
+            string parameterName,
             string itemType,
             IList items,
             bool logItemMetadata,
@@ -290,6 +293,7 @@ namespace Microsoft.Build.BackEnd
 
             var args = new TaskParameterEventArgs(
                 messageKind,
+                parameterName,
                 itemType,
                 items,
                 logItemMetadata,

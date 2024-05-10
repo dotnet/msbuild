@@ -571,6 +571,7 @@ namespace Microsoft.Build.Logging
             Write((int)e.Kind);
             WriteDeduplicatedString(e.ItemType);
             WriteTaskItemList(e.Items, e.LogItemMetadata);
+            WriteDeduplicatedString(e.ParameterName);
             if (e.Kind == TaskParameterMessageKind.AddItem
                || e.Kind == TaskParameterMessageKind.TaskOutput)
             {
