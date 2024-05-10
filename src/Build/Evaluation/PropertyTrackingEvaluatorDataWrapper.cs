@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation.Context;
