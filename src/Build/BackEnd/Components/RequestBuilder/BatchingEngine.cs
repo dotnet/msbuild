@@ -174,7 +174,12 @@ namespace Microsoft.Build.BackEnd
             {
                 // create a default bucket that references the project items and properties -- this way we always have a bucket
                 buckets = new List<ItemBucket>(1);
-                buckets.Add(new ItemBucket(null, null, lookup, loggingContext, buckets.Count));
+                var bucket = new ItemBucket(null, null, lookup, buckets.Count);
+                if (loggingContext != null)
+                {
+                    bucket.Initialize(loggingContext);
+                }
+                buckets.Add(bucket);
             }
 
             return buckets;
@@ -334,7 +339,11 @@ namespace Microsoft.Build.BackEnd
                         // this item to the bucket.
                         if (matchingBucket == null)
                         {
-                            matchingBucket = new ItemBucket(itemListsToBeBatched.Keys, itemMetadataValues, lookup, loggingContext, buckets.Count);
+                            matchingBucket = new ItemBucket(itemListsToBeBatched.Keys, itemMetadataValues, lookup, buckets.Count);
+                            if (loggingContext != null)
+                            {
+                                matchingBucket.Initialize(loggingContext);
+                            }
 
                             // make sure to put the new bucket into the appropriate location
                             // in the sorted list as indicated by the binary search

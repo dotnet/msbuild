@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
@@ -31,12 +32,12 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Metadata in this bucket
         /// </summary>
-        private Dictionary<string, string> _metadata;
+        private readonly Dictionary<string, string> _metadata;
 
         /// <summary>
         /// The items for this bucket.
         /// </summary>
-        private Lookup _lookup;
+        private readonly Lookup _lookup;
 
         /// <summary>
         /// When buckets are being created for batching purposes, this indicates which order the
@@ -45,12 +46,12 @@ namespace Microsoft.Build.BackEnd
         /// bucket created gets bucketSequenceNumber=0, the second bucket created gets
         /// bucketSequenceNumber=1, etc.
         /// </summary>
-        private int _bucketSequenceNumber;
+        private readonly int _bucketSequenceNumber;
 
         /// <summary>
         /// The entry we enter when we create the bucket.
         /// </summary>
-        private Lookup.Scope _lookupEntry;
+        private readonly Lookup.Scope _lookupEntry;
 
         #endregion
 
@@ -59,8 +60,9 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Private default constructor disallows parameterless instantiation.
         /// </summary>
-        private ItemBucket()
+        private ItemBucket(Dictionary<string, string> metadata)
         {
+            _metadata = metadata;
             // do nothing
         }
 
@@ -70,13 +72,11 @@ namespace Microsoft.Build.BackEnd
         /// <param name="itemNames">Item types being batched on: null indicates no batching is occurring</param>
         /// <param name="metadata">Hashtable of item metadata values: null indicates no batching is occurring</param>
         /// <param name="lookup">The <see cref="Lookup"/> to use for the items in the bucket.</param>
-        /// <param name="loggingContext"></param>
         /// <param name="bucketSequenceNumber">A sequence number indication what order the buckets were created in.</param>
         internal ItemBucket(
             ICollection<string> itemNames,
             Dictionary<string, string> metadata,
             Lookup lookup,
-            LoggingContext loggingContext,
             int bucketSequenceNumber)
         {
             ErrorUtilities.VerifyThrow(lookup != null, "Need lookup.");
@@ -98,7 +98,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             _metadata = metadata;
-            _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(_lookup, _lookup, new StringMetadataTable(metadata), FileSystems.Default, loggingContext);
 
             _bucketSequenceNumber = bucketSequenceNumber;
         }
@@ -107,9 +106,9 @@ namespace Microsoft.Build.BackEnd
         /// Updates the logging context that this bucket is going to use.
         /// </summary>
         /// <param name="loggingContext"></param>
-        internal void UpdateLoggingContext(LoggingContext loggingContext)
+        internal void Initialize(LoggingContext loggingContext)
         {
-            _expander = _expander.WithLoggingContext(loggingContext);
+            _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(_lookup, _lookup, new StringMetadataTable(_metadata), FileSystems.Default, loggingContext);
         }
 
         #endregion
@@ -143,8 +142,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>An item bucket that is invalid for everything except comparisons.</returns>
         internal static ItemBucket GetDummyBucketForComparisons(Dictionary<string, string> metadata)
         {
-            ItemBucket bucket = new ItemBucket();
-            bucket._metadata = metadata;
+            ItemBucket bucket = new ItemBucket(metadata);
 
             return bucket;
         }

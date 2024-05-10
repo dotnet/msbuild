@@ -428,7 +428,7 @@ namespace Microsoft.Build.BackEnd
 
                 // Generate the batching buckets.  Note that each bucket will get a lookup based on the baseLookup.  This lookup will be in its
                 // own scope, which we will collapse back down into the baseLookup at the bottom of the function.
-                List<ItemBucket> buckets = BatchingEngine.PrepareBatchingBuckets(GetBatchableParametersForTarget(), _baseLookup, _target.Location, projectLoggingContext);
+                List<ItemBucket> buckets = BatchingEngine.PrepareBatchingBuckets(GetBatchableParametersForTarget(), _baseLookup, _target.Location, null);
 
                 WorkUnitResult aggregateResult = new WorkUnitResult();
                 TargetLoggingContext targetLoggingContext = null;
@@ -453,7 +453,7 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     targetLoggingContext = projectLoggingContext.LogTargetBatchStarted(projectFullPath, _target, parentTargetName, _buildReason);
-                    bucket.UpdateLoggingContext(targetLoggingContext);
+                    bucket.Initialize(targetLoggingContext);
                     WorkUnitResult bucketResult = null;
                     targetSuccess = false;
 
