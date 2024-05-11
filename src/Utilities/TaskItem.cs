@@ -80,6 +80,9 @@ namespace Microsoft.Build.Utilities
             _itemSpec = FileUtilities.FixFilePath(itemSpec);
         }
 
+        private const string FixFilePath = nameof(FixFilePath);
+        private const string TargetOs = nameof(TargetOs);
+
         /// <summary>
         /// This constructor creates a new TaskItem, using the given item spec and metadata.
         /// </summary>
@@ -91,10 +94,12 @@ namespace Microsoft.Build.Utilities
         /// <param name="itemMetadata">Custom metadata on the item.</param>
         public TaskItem(
             string itemSpec,
-            IDictionary itemMetadata) :
-            this(itemSpec)
+            IDictionary itemMetadata)
         {
             ErrorUtilities.VerifyThrowArgumentNull(itemMetadata, nameof(itemMetadata));
+
+            bool fixFilePath = true;
+            string targetOs = null;
 
             if (itemMetadata.Count > 0)
             {
@@ -106,10 +111,25 @@ namespace Microsoft.Build.Utilities
                     string key = (string)singleMetadata.Key;
                     if (!FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(key))
                     {
-                        _metadata[key] = (string)singleMetadata.Value ?? string.Empty;
+                        string value = (string)singleMetadata.Value;
+                        _metadata[key] = value ?? string.Empty;
+
+                        // Check if the special metadata FixFilePath is set to false - if so, don't fix the file path
+                        if (FixFilePath.Equals(key) && bool.TryParse(value, out bool fixFilePathValue))
+                        {
+                            fixFilePath = fixFilePathValue;
+                        }
+
+                        // Check if the special metadata TargetPlatform is set - if it is, use that when fixing the paths
+                        if (TargetOs.Equals(key))
+                        {
+                            targetOs = value;
+                        }
                     }
                 }
             }
+
+            _itemSpec = fixFilePath ? FileUtilities.FixFilePath(itemSpec, targetOs) : itemSpec;
         }
 
         /// <summary>
