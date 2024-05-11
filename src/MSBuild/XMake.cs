@@ -808,7 +808,15 @@ namespace Microsoft.Build.CommandLine
                     // as if a build is happening
                     if (FileUtilities.IsBinaryLogFilename(projectFile))
                     {
-                        ReplayBinaryLog(projectFile, loggers, distributedLoggerRecords, cpuCount);
+                        ReplayBinaryLog(
+                            projectFile,
+                            loggers,
+                            distributedLoggerRecords,
+                            cpuCount,
+                            isBuildCheckEnabled,
+                            warningsAsErrors,
+                            warningsNotAsErrors,
+                            warningsAsMessages);
                     }
                     else if (outputPropertiesItemsOrTargetResults && FileUtilities.IsSolutionFilename(projectFile))
                     {
@@ -4406,9 +4414,34 @@ namespace Microsoft.Build.CommandLine
             string binaryLogFilePath,
             ILogger[] loggers,
             IEnumerable<DistributedLoggerRecord> distributedLoggerRecords,
-            int cpuCount)
+            int cpuCount,
+            bool isBuildCheckEnabled,
+            ISet<string> warningsAsErrors,
+            ISet<string> warningsNotAsErrors,
+            ISet<string> warningsAsMessages)
         {
             var replayEventSource = new BinaryLogReplayEventSource();
+
+            ILogger buildCheckLogger = null;
+
+            if (isBuildCheckEnabled)
+            {
+                List<ForwardingLoggerRecord> remoteLoggerRecords = new List<ForwardingLoggerRecord>();
+                foreach (DistributedLoggerRecord distRecord in distributedLoggerRecords)
+                {
+                    remoteLoggerRecords.Add(new ForwardingLoggerRecord(distRecord.CentralLogger, distRecord.ForwardingLoggerDescription));
+                }
+
+                BuildManager.DefaultBuildManager.AttachBuildCheckForReplay(
+                    loggers,
+                    remoteLoggerRecords,
+                    warningsAsErrors,
+                    warningsNotAsErrors,
+                    warningsAsMessages,
+                    out buildCheckLogger);
+
+                buildCheckLogger.Initialize(replayEventSource);
+            }
 
             foreach (var distributedLoggerRecord in distributedLoggerRecords)
             {
@@ -4454,6 +4487,8 @@ namespace Microsoft.Build.CommandLine
             {
                 distributedLoggerRecord.CentralLogger?.Shutdown();
             }
+
+            buildCheckLogger?.Shutdown();
         }
 
         /// <summary>

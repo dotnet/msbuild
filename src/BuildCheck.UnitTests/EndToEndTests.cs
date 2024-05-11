@@ -68,8 +68,8 @@ public class EndToEndTests : IDisposable
         string logFile = _env.ExpectFile(".binlog").Path;
 
         RunnerUtilities.ExecBootstrapedMSBuild(
-            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -bl:{logFile} {(analysisRequested ? " -analyze" : string.Empty)}",
-            out bool success, false, _env.Output);
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -bl:{logFile} {(analysisRequested ? "-analyze" : string.Empty)}",
+            out bool success);
 
         success.ShouldBeTrue();
 
@@ -104,13 +104,18 @@ public class EndToEndTests : IDisposable
 
         RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -bl:{logFile}",
-            out bool success, false, _env.Output);
+            out bool success);
 
         success.ShouldBeTrue();
 
+        // string output = RunnerUtilities.ExecBootstrapedMSBuild(
+        //  $"{logFile} -flp:logfile={Path.Combine(projectDirectory!, "logFile.log")};verbosity=diagnostic {(analysisRequested ? "-analyze" : string.Empty)}",
+        //  out success, false, _env.Output);
+
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"{logFile} -flp:logfile={Path.Combine(projectDirectory!, "logFile.log")};verbosity=diagnostic {(analysisRequested ? " -analyze" : string.Empty)}",
-            out success, false, _env.Output);
+          $"{logFile} {(analysisRequested ? "-analyze" : string.Empty)}",
+          out success, false, _env.Output);
+
         _env.Output.WriteLine(output);
 
         success.ShouldBeTrue();

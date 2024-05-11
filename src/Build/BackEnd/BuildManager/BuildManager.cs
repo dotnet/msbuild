@@ -634,7 +634,8 @@ namespace Microsoft.Build.Execution
                     _buildParameters.ForwardingLoggers,
                     _buildParameters.WarningsAsErrors,
                     _buildParameters.WarningsNotAsErrors,
-                    _buildParameters.WarningsAsMessages);
+                    _buildParameters.WarningsAsMessages,
+                    out ILogger buildCheckLogger);
 
                 _nodeManager.RegisterPacketHandler(NodePacketType.LogMessage, LogMessagePacket.FactoryForDeserialization, loggingService as INodePacketHandler);
 
@@ -2951,6 +2952,34 @@ namespace Microsoft.Build.Execution
             });
         }
 
+        public void AttachBuildCheckForReplay(
+            IEnumerable<ILogger> loggers,
+            IEnumerable<ForwardingLoggerRecord> forwardingLoggers,
+            ISet<string> warningsAsErrors,
+            ISet<string> warningsNotAsErrors,
+            ISet<string> warningsAsMessages,
+            out ILogger buildCheckLogger)
+        {
+            _buildParameters = new BuildParameters
+            {
+                MaxNodeCount = 1,
+                IsBuildCheckEnabled = true
+            };
+
+            lock (_syncLock)
+            {
+                AttachDebugger();
+
+                CreateLoggingService(
+                loggers,
+                forwardingLoggers,
+                warningsAsErrors,
+                warningsNotAsErrors,
+                warningsAsMessages,
+                out buildCheckLogger);
+            }
+        }
+
         /// <summary>
         /// Creates a logging service around the specified set of loggers.
         /// </summary>
@@ -2959,7 +2988,8 @@ namespace Microsoft.Build.Execution
             IEnumerable<ForwardingLoggerRecord> forwardingLoggers,
             ISet<string> warningsAsErrors,
             ISet<string> warningsNotAsErrors,
-            ISet<string> warningsAsMessages)
+            ISet<string> warningsAsMessages,
+            out ILogger buildCheckLogger)
         {
             Debug.Assert(Monitor.IsEntered(_syncLock));
 
@@ -2998,13 +3028,17 @@ namespace Microsoft.Build.Execution
                     loggerSwitchParameters: null,
                     verbosity: LoggerVerbosity.Quiet);
 
-                ILogger buildCheckLogger =
+                buildCheckLogger =
                     new BuildCheckConnectorLogger(new AnalyzerLoggingContextFactory(loggingService),
                         buildCheckManagerProvider.Instance);
 
                 ForwardingLoggerRecord[] forwardingLogger = { new ForwardingLoggerRecord(buildCheckLogger, forwardingLoggerDescription) };
 
                 forwardingLoggers = forwardingLoggers?.Concat(forwardingLogger) ?? forwardingLogger;
+            }
+            else
+            {
+                buildCheckLogger = null;
             }
 
             try
