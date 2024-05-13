@@ -66,16 +66,16 @@ namespace Microsoft.Build.Framework
         public TaskParameterMessageKind Kind { get; private set; }
 
         /// <summary>
+        /// The name of the parameter if <see cref="Kind"/> is <see cref="TaskParameterMessageKind.TaskInput"/> or <see cref="TaskParameterMessageKind.TaskOutput"/>.
+        /// </summary>
+        public string ParameterName { get; private set; }
+
+        /// <summary>
         /// The name of the item being manipulated, e.g. "Compile". For backward compatibility, this property has the same value
         /// as <see cref="ParameterName"/> in cases where the operation does not manipulate any items, such as when representing
         /// task inputs or task outputs assigned to properties.
         /// </summary>
         public string ItemType { get; private set; }
-
-        /// <summary>
-        /// The name of the parameter if <see cref="Kind"/> is <see cref="TaskParameterMessageKind.TaskInput"/> or <see cref="TaskParameterMessageKind.TaskOutput"/>.
-        /// </summary>
-        public string ParameterName { get; private set; }
 
         /// <summary>
         /// The values being manipulated (added, removed, passed to/from task).
@@ -121,6 +121,7 @@ namespace Microsoft.Build.Framework
             RawTimestamp = reader.ReadTimestamp();
             BuildEventContext = reader.ReadOptionalBuildEventContext();
             Kind = (TaskParameterMessageKind)reader.Read7BitEncodedInt();
+            ParameterName = reader.ReadOptionalString();
             ItemType = reader.ReadOptionalString();
             LineNumber = reader.Read7BitEncodedInt();
             ColumnNumber = reader.Read7BitEncodedInt();
@@ -170,6 +171,7 @@ namespace Microsoft.Build.Framework
             writer.WriteTimestamp(RawTimestamp);
             writer.WriteOptionalBuildEventContext(BuildEventContext);
             writer.Write7BitEncodedInt((int)Kind);
+            writer.WriteOptionalString(ParameterName);
             writer.WriteOptionalString(ItemType);
             writer.Write7BitEncodedInt(LineNumber);
             writer.Write7BitEncodedInt(ColumnNumber);
