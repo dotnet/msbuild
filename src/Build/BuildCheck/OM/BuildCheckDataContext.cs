@@ -16,7 +16,7 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// <summary>
 /// Base for a data passed from infrastructure to build analyzers.
 /// </summary>
-/// <param name="projectFilePath">Currently build project.</param>
+/// <param name="projectFilePath">Currently built project.</param>
 public abstract class AnalysisData(string projectFilePath)
 {
     /// <summary>

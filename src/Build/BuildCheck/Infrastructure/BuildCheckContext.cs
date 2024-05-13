@@ -18,4 +18,9 @@ internal sealed class BuildCheckRegistrationContext(BuildAnalyzerWrapper analyze
     {
         buildCheckCentralContext.RegisterParsedItemsAction(analyzerWrapper, parsedItemsAction);
     }
+
+    public void RegisterTaskInvocationAction(Action<BuildCheckDataContext<TaskInvocationAnalysisData>> taskInvocationAction)
+    {
+        buildCheckCentralContext.RegisterTaskInvocationAction(analyzerWrapper, taskInvocationAction);
+    }
 }

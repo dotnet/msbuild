@@ -150,7 +150,7 @@ public class EndToEndTests : IDisposable
             AddCustomDataSourceToNugetConfig(analysisCandidatePath, candidatesNugetFullPaths);
 
             string projectAnalysisBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"{Path.Combine(analysisCandidatePath, $"{analysisCandidate}.csproj")} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path} -analyze -verbosity:d",
+                $"{Path.Combine(analysisCandidatePath, $"{analysisCandidate}.csproj")} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path} -analyze -verbosity:n",
                 out bool successBuild);
             successBuild.ShouldBeTrue();
 

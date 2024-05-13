@@ -36,6 +36,10 @@ internal sealed class BuildCheckConnectorLogger : ILogger
         eventSource.AnyEventRaised += EventSource_AnyEventRaised;
         eventSource.BuildFinished += EventSource_BuildFinished;
 
+        if (eventSource is IEventSource3 eventSource3)
+        {
+            eventSource3.IncludeTaskInputs();
+        }
         if (eventSource is IEventSource4 eventSource4)
         {
             eventSource4.IncludeEvaluationPropertiesAndItems();
@@ -72,6 +76,27 @@ internal sealed class BuildCheckConnectorLogger : ILogger
         {
             _stats.Merge(eventArgs.TracingData, (span1, span2) => span1 + span2);
         }
+    }
+
+    private void HandleTaskStartedEvent(TaskStartedEventArgs eventArgs)
+    {
+        _buildCheckManager.ProcessTaskStartedEventArgs(
+            _loggingContextFactory.CreateLoggingContext(eventArgs.BuildEventContext!),
+            eventArgs);
+    }
+
+    private void HandleTaskFinishedEvent(TaskFinishedEventArgs eventArgs)
+    {
+        _buildCheckManager.ProcessTaskFinishedEventArgs(
+            _loggingContextFactory.CreateLoggingContext(eventArgs.BuildEventContext!),
+            eventArgs);
+    }
+
+    private void HandleTaskParameterEvent(TaskParameterEventArgs eventArgs)
+    {
+        _buildCheckManager.ProcessTaskParameterEventArgs(
+            _loggingContextFactory.CreateLoggingContext(eventArgs.BuildEventContext!),
+            eventArgs);
     }
 
     private bool IsMetaProjFile(string? projectFile) => !string.IsNullOrEmpty(projectFile) && projectFile!.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
@@ -137,6 +162,9 @@ internal sealed class BuildCheckConnectorLogger : ILogger
         { typeof(ProjectFinishedEventArgs), (BuildEventArgs e) => _buildCheckManager.EndProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!) },
         { typeof(BuildCheckTracingEventArgs), (BuildEventArgs e) => HandleBuildCheckTracingEvent((BuildCheckTracingEventArgs)e) },
         { typeof(BuildCheckAcquisitionEventArgs), (BuildEventArgs e) => _buildCheckManager.ProcessAnalyzerAcquisition(((BuildCheckAcquisitionEventArgs)e).ToAnalyzerAcquisitionData(), GetBuildEventContext(e)) },
+        { typeof(TaskStartedEventArgs), (BuildEventArgs e) => HandleTaskStartedEvent((TaskStartedEventArgs)e) },
+        { typeof(TaskFinishedEventArgs), (BuildEventArgs e) => HandleTaskFinishedEvent((TaskFinishedEventArgs)e) },
+        { typeof(TaskParameterEventArgs), (BuildEventArgs e) => HandleTaskParameterEvent((TaskParameterEventArgs)e) },
     };
 
     private BuildEventContext GetBuildEventContext(BuildEventArgs e) => e.BuildEventContext

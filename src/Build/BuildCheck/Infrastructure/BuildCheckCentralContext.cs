@@ -17,9 +17,10 @@ internal sealed class BuildCheckCentralContext
 {
     private record CallbackRegistry(
         List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<EvaluatedPropertiesAnalysisData>>)> EvaluatedPropertiesActions,
-        List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<ParsedItemsAnalysisData>>)> ParsedItemsActions)
+        List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<ParsedItemsAnalysisData>>)> ParsedItemsActions,
+        List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<TaskInvocationAnalysisData>>)> TaskInvocationActions)
     {
-        public CallbackRegistry() : this([],[]) { }
+        public CallbackRegistry() : this([], [], []) { }
     }
 
     // In a future we can have callbacks per project as well
@@ -27,8 +28,9 @@ internal sealed class BuildCheckCentralContext
 
     // This we can potentially use to subscribe for receiving evaluated props in the
     //  build event args. However - this needs to be done early on, when analyzers might not be known yet
-    internal bool HasEvaluatedPropertiesActions => _globalCallbacks.EvaluatedPropertiesActions.Any();
-    internal bool HasParsedItemsActions => _globalCallbacks.ParsedItemsActions.Any();
+    internal bool HasEvaluatedPropertiesActions => _globalCallbacks.EvaluatedPropertiesActions.Count > 0;
+    internal bool HasParsedItemsActions => _globalCallbacks.ParsedItemsActions.Count > 0;
+    internal bool HasTaskInvocationActions => _globalCallbacks.TaskInvocationActions.Count > 0;
 
     internal void RegisterEvaluatedPropertiesAction(BuildAnalyzerWrapper analyzer, Action<BuildCheckDataContext<EvaluatedPropertiesAnalysisData>> evaluatedPropertiesAction)
         // Here we might want to communicate to node that props need to be sent.
@@ -37,6 +39,9 @@ internal sealed class BuildCheckCentralContext
 
     internal void RegisterParsedItemsAction(BuildAnalyzerWrapper analyzer, Action<BuildCheckDataContext<ParsedItemsAnalysisData>> parsedItemsAction)
         => RegisterAction(analyzer, parsedItemsAction, _globalCallbacks.ParsedItemsActions);
+
+    internal void RegisterTaskInvocationAction(BuildAnalyzerWrapper analyzer, Action<BuildCheckDataContext<TaskInvocationAnalysisData>> taskInvocationAction)
+        => RegisterAction(analyzer, taskInvocationAction, _globalCallbacks.TaskInvocationActions);
 
     private void RegisterAction<T>(
         BuildAnalyzerWrapper wrappedAnalyzer,
@@ -60,6 +65,7 @@ internal sealed class BuildCheckCentralContext
     {
         _globalCallbacks.EvaluatedPropertiesActions.RemoveAll(a => a.Item1 == analyzer);
         _globalCallbacks.ParsedItemsActions.RemoveAll(a => a.Item1 == analyzer);
+        _globalCallbacks.TaskInvocationActions.RemoveAll(a => a.Item1 == analyzer);
     }
 
     internal void RunEvaluatedPropertiesActions(
@@ -76,6 +82,14 @@ internal sealed class BuildCheckCentralContext
         Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.ParsedItemsActions, parsedItemsAnalysisData,
+            loggingContext, resultHandler);
+
+    internal void RunTaskInvocationActions(
+        TaskInvocationAnalysisData taskInvocationAnalysisData,
+        LoggingContext loggingContext,
+        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
+            resultHandler)
+        => RunRegisteredActions(_globalCallbacks.TaskInvocationActions, taskInvocationAnalysisData,
             loggingContext, resultHandler);
 
     private void RunRegisteredActions<T>(
