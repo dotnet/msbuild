@@ -32,7 +32,7 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
     /// </summary>
     public List<BuildAnalyzerFactory> CreateBuildAnalyzerFactories(AnalyzerAcquisitionData analyzerAcquisitionData, BuildEventContext buildEventContext)
     {
-        var analyzersFactories = new List<BuildAnalyzerFactory?>();
+        var analyzersFactories = new List<BuildAnalyzerFactory>();
 
         try
         {
