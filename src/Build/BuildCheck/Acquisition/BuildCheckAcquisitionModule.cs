@@ -42,18 +42,17 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
             assembly = Assembly.LoadFrom(analyzerAcquisitionData.AssemblyPath);
 #endif
 
-            IEnumerable<Type> analyzerCandidates = assembly.GetExportedTypes();
+            IList<Type> availableTypes = assembly.GetExportedTypes();
+            IList<Type> analyzerTypes = availableTypes.Where(t => typeof(BuildAnalyzer).IsAssignableFrom(t)).ToArray();
 
-            foreach (Type analyzerCandidate in analyzerCandidates)
+            foreach (Type analyzerCandidate in analyzerTypes)
             {
-                if (Activator.CreateInstance(analyzerCandidate) is BuildAnalyzer instance)
-                {
-                    analyzersFactories.Add(() => instance);
-                }
-                else
-                {
-                    _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerBaseTypeNotAssignable", analyzerCandidate.FullName);
-                }
+                analyzersFactories.Add(() => (BuildAnalyzer)Activator.CreateInstance(analyzerCandidate));
+            }
+
+            if (availableTypes.Count != analyzerTypes.Count)
+            {
+                availableTypes.Except(analyzerTypes).ToList().ForEach(t => _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerBaseTypeNotAssignable", t.Name, t.Assembly));
             }
         }
         catch (ReflectionTypeLoadException ex)

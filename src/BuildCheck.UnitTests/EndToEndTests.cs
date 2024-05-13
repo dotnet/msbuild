@@ -138,8 +138,8 @@ public class EndToEndTests : IDisposable
 
     [Theory]
     [InlineData(new[] { "CustomAnalyzer" }, "AnalysisCandidate", new[] { "CustomRule1", "CustomRule2" })]
-    [InlineData(new[] { "CustomAnalyzer", "CustomAnalyzer2", "InvalidCustomAnalyzer" }, "AnalysisCandidateWithMultipleAnalyzersInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, new[] { "InvalidCustomAnalyzer.InvalidAnalyzer" })]
-    public void CustomAnalyzerTest(string[] customAnalyzerNames, string analysisCandidate, string[] expectedRegisteredRules, string[]? expectedRejectedRules = null)
+    [InlineData(new[] { "CustomAnalyzer", "CustomAnalyzer2", "InvalidCustomAnalyzer" }, "AnalysisCandidateWithMultipleAnalyzersInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
+    public void CustomAnalyzerTest(string[] customAnalyzerNames, string analysisCandidate, string[] expectedRegisteredRules, bool expectedRejectedAnalyzers = false)
     {
         using (var env = TestEnvironment.Create())
         {
@@ -160,12 +160,9 @@ public class EndToEndTests : IDisposable
                 projectAnalysisBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CustomAnalyzerSuccessfulAcquisition", registeredRule));
             }
 
-            if (expectedRejectedRules != null)
+            if (expectedRejectedAnalyzers)
             {
-                foreach (string rejectedRule in expectedRejectedRules)
-                {
-                    projectAnalysisBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CustomAnalyzerBaseTypeNotAssignable", rejectedRule));
-                }
+                projectAnalysisBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CustomAnalyzerBaseTypeNotAssignable", "InvalidAnalyzer", "InvalidCustomAnalyzer, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"));
             }
         }
     }
