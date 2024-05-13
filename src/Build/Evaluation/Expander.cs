@@ -5522,12 +5522,7 @@ namespace Microsoft.Build.Evaluation
 
         internal void TrackRead(string propertyName, int startIndex, int endIndex, IElementLocation elementLocation, bool isUninitialized, bool isArtificial)
         {
-            if (isArtificial)
-            {
-                return;
-            }
-
-            if (!isUninitialized)
+            if (isArtificial || !isUninitialized)
             {
                 return;
             }
