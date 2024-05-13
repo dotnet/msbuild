@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
@@ -31,7 +32,7 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
     /// </summary>
     public List<BuildAnalyzerFactory> CreateBuildAnalyzerFactories(AnalyzerAcquisitionData analyzerAcquisitionData, BuildEventContext buildEventContext)
     {
-        var analyzersFactories = new List<BuildAnalyzerFactory>();
+        var analyzersFactories = new List<BuildAnalyzerFactory?>();
 
         try
         {
@@ -42,12 +43,13 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
             assembly = Assembly.LoadFrom(analyzerAcquisitionData.AssemblyPath);
 #endif
 
+            Debugger.Launch();
             IList<Type> availableTypes = assembly.GetExportedTypes();
             IList<Type> analyzerTypes = availableTypes.Where(t => typeof(BuildAnalyzer).IsAssignableFrom(t)).ToArray();
 
             foreach (Type analyzerCandidate in analyzerTypes)
             {
-                analyzersFactories.Add(() => (BuildAnalyzer)Activator.CreateInstance(analyzerCandidate));
+                analyzersFactories.Add(() => (BuildAnalyzer)Activator.CreateInstance(analyzerCandidate)!);
             }
 
             if (availableTypes.Count != analyzerTypes.Count)
