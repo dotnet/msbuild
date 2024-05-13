@@ -3042,16 +3042,18 @@ namespace Microsoft.Build.Execution
 
             // We need to register SOME logger if we don't have any. This ensures the out of proc nodes will still send us message,
             // ensuring we receive project started and finished events.
-            List<ForwardingLoggerRecord> ProcessForwardingLoggers(IEnumerable<ForwardingLoggerRecord> forwarders)
+            static List<ForwardingLoggerRecord> ProcessForwardingLoggers(IEnumerable<ForwardingLoggerRecord> forwarders)
             {
+                Type configurableLoggerType = typeof(ConfigurableForwardingLogger);
+                string engineAssemblyName = configurableLoggerType.GetTypeInfo().Assembly.GetName().FullName;
+                string configurableLoggerName = configurableLoggerType.FullName;
+
                 if (forwarders == null)
                 {
                     return [CreateMinimalForwarder()];
                 }
 
                 List<ForwardingLoggerRecord> result = forwarders.ToList();
-
-                string engineAssemblyName = typeof(ConfigurableForwardingLogger).GetTypeInfo().Assembly.GetName().FullName;
 
                 // The forwarding loggers that are registered are unknown to us - we cannot make any assumptions.
                 // So to be on a sure side - we need to add ours.
@@ -3065,7 +3067,7 @@ namespace Microsoft.Build.Execution
                 if (result.Any(l =>
                         l.ForwardingLoggerDescription.Name.Contains(typeof(CentralForwardingLogger).FullName)
                         ||
-                        (l.ForwardingLoggerDescription.Name.Contains(typeof(ConfigurableForwardingLogger).FullName)
+                        (l.ForwardingLoggerDescription.Name.Contains(configurableLoggerName)
                          &&
                          l.ForwardingLoggerDescription.LoggerSwitchParameters.Contains("PROJECTSTARTEDEVENT")
                          &&
@@ -3079,7 +3081,7 @@ namespace Microsoft.Build.Execution
 
                 // In case there is a ConfigurableForwardingLogger, that is not configured as we'd need - we can adjust the config
                 ForwardingLoggerRecord configurableLogger = result.FirstOrDefault(l =>
-                    l.ForwardingLoggerDescription.Name.Contains(typeof(ConfigurableForwardingLogger).FullName));
+                    l.ForwardingLoggerDescription.Name.Contains(configurableLoggerName));
 
                 // If there is not - we need to add our own.
                 if (configurableLogger == null)
@@ -3097,8 +3099,8 @@ namespace Microsoft.Build.Execution
                     // We need to register SOME logger if we don't have any. This ensures the out of proc nodes will still send us message,
                     // ensuring we receive project started and finished events.
                     LoggerDescription forwardingLoggerDescription = new LoggerDescription(
-                        loggerClassName: typeof(ConfigurableForwardingLogger).FullName,
-                        loggerAssemblyName: typeof(ConfigurableForwardingLogger).GetTypeInfo().Assembly.GetName().FullName,
+                        loggerClassName: configurableLoggerName,
+                        loggerAssemblyName: engineAssemblyName,
                         loggerAssemblyFile: null,
                         loggerSwitchParameters: "PROJECTSTARTEDEVENT;PROJECTFINISHEDEVENT;FORWARDPROJECTCONTEXTEVENTS",
                         verbosity: LoggerVerbosity.Quiet);
