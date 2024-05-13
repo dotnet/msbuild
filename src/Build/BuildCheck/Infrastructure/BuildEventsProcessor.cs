@@ -12,8 +12,8 @@ using System.Runtime.ConstrainedExecution;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BuildCheck.Analyzers;
-using Microsoft.Build.BuildCheck.Logging;
+using Microsoft.Build.Experimental.BuildCheck.Analyzers;
+using Microsoft.Build.Experimental.BuildCheck.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
@@ -21,7 +21,7 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.BuildCheck.Infrastructure;
+namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralContext)
 {

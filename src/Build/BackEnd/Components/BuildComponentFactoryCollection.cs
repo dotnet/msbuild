@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.SdkResolution;
-using Microsoft.Build.BuildCheck.Infrastructure;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Shared;
 

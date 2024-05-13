@@ -4,12 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using System.Xml;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
+using Newtonsoft.Json.Linq;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -19,6 +17,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests;
 public class EndToEndTests : IDisposable
 {
     private readonly TestEnvironment _env;
+
     public EndToEndTests(ITestOutputHelper output)
     {
         _env = TestEnvironment.Create(output);
@@ -26,6 +25,8 @@ public class EndToEndTests : IDisposable
         // this is needed to ensure the binary logger does not pollute the environment
         _env.WithEnvironmentInvariant();
     }
+
+    private static string TestAssetsRootPath { get; } = Path.Combine(Path.GetDirectoryName(typeof(EndToEndTests).Assembly.Location) ?? AppContext.BaseDirectory, "TestAssets");
 
     public void Dispose() => _env.Dispose();
 
@@ -189,7 +190,6 @@ public class EndToEndTests : IDisposable
         // var cache = new SimpleProjectRootElementCache();
         // ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile.Path, /*unused*/null, /*unused*/null, cache, false /*Not explicitly loaded - unused*/);
 
-
         TransientTestFile config = _env.CreateFile(workFolder, "editorconfig.json",
             /*lang=json,strict*/
             """
@@ -217,5 +217,91 @@ public class EndToEndTests : IDisposable
 
         _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", buildInOutOfProcessNode ? "1" : "0");
         _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
+    }
+
+    [Theory]
+    [InlineData(new[] { "CustomAnalyzer" }, "AnalysisCandidate", new[] { "CustomRule1", "CustomRule2" })]
+    [InlineData(new[] { "CustomAnalyzer", "CustomAnalyzer2" }, "AnalysisCandidateWithMultipleAnalyzersInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" })]
+    public void CustomAnalyzerTest(string[] customAnalyzerNames, string analysisCandidate, string[] expectedRegisteredRules)
+    {
+        using (var env = TestEnvironment.Create())
+        {
+            var candidatesNugetFullPaths = BuildAnalyzerRules(env, customAnalyzerNames);
+
+            candidatesNugetFullPaths.ShouldNotBeEmpty("Nuget package with custom analyzer was not generated or detected.");
+
+            var analysisCandidatePath = Path.Combine(TestAssetsRootPath, analysisCandidate);
+            AddCustomDataSourceToNugetConfig(analysisCandidatePath, candidatesNugetFullPaths);
+
+            string projectAnalysisBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"{Path.Combine(analysisCandidatePath, $"{analysisCandidate}.csproj")} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path} -analyze -verbosity:d",
+                out bool successBuild);
+            successBuild.ShouldBeTrue();
+
+            foreach (string expectedRegisteredRule in expectedRegisteredRules)
+            {
+                projectAnalysisBuildLog.ShouldContain($"Custom analyzer rule: {expectedRegisteredRule} has been registered successfully.");
+            }
+        }
+    }
+
+    private IList<string> BuildAnalyzerRules(TestEnvironment env, string[] customAnalyzerNames)
+    {
+        var candidatesNugetFullPaths = new List<string>();
+
+        foreach (var customAnalyzerName in customAnalyzerNames)
+        {
+            var candidateAnalysisProjectPath = Path.Combine(TestAssetsRootPath, customAnalyzerName, $"{customAnalyzerName}.csproj");
+            var nugetPackResults = RunnerUtilities.ExecBootstrapedMSBuild(
+                 $"{candidateAnalysisProjectPath} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path} -getTargetResult:Build", out bool success, attachProcessId: false);
+
+            success.ShouldBeTrue();
+
+            string? candidatesNugetPackageFullPath = (string?)(JObject.Parse(nugetPackResults)?["TargetResults"]?["Build"]?["Items"]?[0]?["RelativeDir"] ?? string.Empty);
+
+            candidatesNugetPackageFullPath.ShouldNotBeNull();
+            candidatesNugetFullPaths.Add(candidatesNugetPackageFullPath);
+        }
+
+        return candidatesNugetFullPaths;
+    }
+
+    private void AddCustomDataSourceToNugetConfig(string analysisCandidatePath, IList<string> candidatesNugetPackageFullPaths)
+    {
+        var nugetTemplatePath = Path.Combine(analysisCandidatePath, "nugetTemplate.config");
+
+        var doc = new XmlDocument();
+        doc.LoadXml(File.ReadAllText(nugetTemplatePath));
+        if (doc.DocumentElement != null)
+        {
+            XmlNode? packageSourcesNode = doc.SelectSingleNode("//packageSources");
+            for (int i = 0; i < candidatesNugetPackageFullPaths.Count; i++)
+            {
+                AddPackageSource(doc, packageSourcesNode, $"Key{i}", Path.GetDirectoryName(candidatesNugetPackageFullPaths[i]) ?? string.Empty);
+            }
+
+            doc.Save(Path.Combine(analysisCandidatePath, "nuget.config"));
+        }
+    }
+
+    private void AddPackageSource(XmlDocument doc, XmlNode? packageSourcesNode, string key, string value)
+    {
+        if (packageSourcesNode != null)
+        {
+            XmlElement addNode = doc.CreateElement("add");
+
+            PopulateXmlAttribute(doc, addNode, "key", key);
+            PopulateXmlAttribute(doc, addNode, "value", value);
+
+            packageSourcesNode.AppendChild(addNode);
+        }
+    }
+
+    private void PopulateXmlAttribute(XmlDocument doc, XmlNode node, string attributeName, string attributeValue)
+    {
+        node.ShouldNotBeNull($"The attribute {attributeName} can not be populated with {attributeValue}. Xml node is null.");
+        var attribute = doc.CreateAttribute(attributeName);
+        attribute.Value = attributeValue;
+        node.Attributes!.Append(attribute);
     }
 }

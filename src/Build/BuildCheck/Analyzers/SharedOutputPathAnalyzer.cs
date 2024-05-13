@@ -6,11 +6,11 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
-using Microsoft.Build.BuildCheck.Infrastructure;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck;
 
-namespace Microsoft.Build.BuildCheck.Analyzers;
+namespace Microsoft.Build.Experimental.BuildCheck.Analyzers;
 
 internal sealed class SharedOutputPathAnalyzer : BuildAnalyzer
 {
