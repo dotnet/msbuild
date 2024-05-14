@@ -8,14 +8,14 @@ using System.Linq;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BuildCheck.Acquisition;
-using Microsoft.Build.BuildCheck.Analyzers;
-using Microsoft.Build.BuildCheck.Logging;
+using Microsoft.Build.Experimental.BuildCheck.Acquisition;
+using Microsoft.Build.Experimental.BuildCheck.Analyzers;
+using Microsoft.Build.Experimental.BuildCheck.Logging;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.BuildCheck.Infrastructure;
+namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 internal delegate BuildAnalyzer BuildAnalyzerFactory();
 internal delegate BuildAnalyzerWrapper BuildAnalyzerWrapperFactory(ConfigurationContext configurationContext);
@@ -140,11 +140,23 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             []
         ];
 
+        /// <summary>
+        /// For tests only. TODO: Remove when analyzer acquisition is done.
+        /// </summary>
+        internal static (string[] ruleIds, bool defaultEnablement, BuildAnalyzerFactory factory)[][]? s_testFactoriesPerDataSource;
+
         private void RegisterBuiltInAnalyzers(BuildCheckDataSource buildCheckDataSource)
         {
             _analyzersRegistry.AddRange(
                 s_builtInFactoriesPerDataSource[(int)buildCheckDataSource]
                     .Select(v => new BuildAnalyzerFactoryContext(v.factory, v.ruleIds, v.defaultEnablement)));
+
+            if (s_testFactoriesPerDataSource is not null)
+            {
+                _analyzersRegistry.AddRange(
+                    s_testFactoriesPerDataSource[(int)buildCheckDataSource]
+                        .Select(v => new BuildAnalyzerFactoryContext(v.factory, v.ruleIds, v.defaultEnablement)));
+            }
         }
 
         /// <summary>
@@ -314,6 +326,24 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
             => _buildEventsProcessor
                 .ProcessEvaluationFinishedEventArgs(buildAnalysisContext, evaluationFinishedEventArgs);
+
+        public void ProcessTaskStartedEventArgs(
+            AnalyzerLoggingContext buildAnalysisContext,
+            TaskStartedEventArgs taskStartedEventArgs)
+            => _buildEventsProcessor
+                .ProcessTaskStartedEventArgs(buildAnalysisContext, taskStartedEventArgs);
+
+        public void ProcessTaskFinishedEventArgs(
+            AnalyzerLoggingContext buildAnalysisContext,
+            TaskFinishedEventArgs taskFinishedEventArgs)
+            => _buildEventsProcessor
+                .ProcessTaskFinishedEventArgs(buildAnalysisContext, taskFinishedEventArgs);
+
+        public void ProcessTaskParameterEventArgs(
+            AnalyzerLoggingContext buildAnalysisContext,
+            TaskParameterEventArgs taskParameterEventArgs)
+            => _buildEventsProcessor
+                .ProcessTaskParameterEventArgs(buildAnalysisContext, taskParameterEventArgs);
 
         public Dictionary<string, TimeSpan> CreateAnalyzerTracingStats()
         {

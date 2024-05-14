@@ -8,7 +8,7 @@ using System.Linq;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Experimental.BuildCheck;
 
-namespace Microsoft.Build.BuildCheck.Infrastructure;
+namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 /// <summary>
 /// A wrapping, enriching class for BuildAnalyzer - so that we have additional data and functionality.

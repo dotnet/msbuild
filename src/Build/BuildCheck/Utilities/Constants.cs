@@ -7,12 +7,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Build.BuildCheck.Utilities;
-
-/// <summary>
-/// Constants to be shared within BuildCheck infrastructure
-/// </summary>
-internal static class BuildCheckConstants
+namespace Microsoft.Build.Experimental.BuildCheck.Utilities
 {
-    internal const string infraStatPrefix = "infrastructureStat_";
+    /// <summary>
+    /// Constants to be shared within BuildCheck infrastructure
+    /// </summary>
+    internal static class BuildCheckConstants
+    {
+        internal const string infraStatPrefix = "infrastructureStat_";
+    }
 }

@@ -7,7 +7,7 @@ using System.Linq;
 using Microsoft.Build.BuildCheck.Infrastructure.EditorConfig;
 using Microsoft.Build.Experimental.BuildCheck;
 
-namespace Microsoft.Build.BuildCheck.Infrastructure;
+namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 internal sealed class ConfigurationProvider
 {
