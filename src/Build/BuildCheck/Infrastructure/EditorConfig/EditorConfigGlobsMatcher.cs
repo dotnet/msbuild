@@ -19,7 +19,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Microsoft.Build.BuildCheck.Infrastructure.EditorConfig;
+namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
 
 internal class EditorConfigGlobsMatcher
 {

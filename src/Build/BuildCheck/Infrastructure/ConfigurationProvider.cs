@@ -4,14 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Build.BuildCheck.Infrastructure.EditorConfig;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
 using Microsoft.Build.Experimental.BuildCheck;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 internal sealed class ConfigurationProvider
 {
-    private readonly EditorConfigParser s_editorConfigParser = new EditorConfigParser();
+    private readonly EditorConfigParser _editorConfigParser = new EditorConfigParser();
 
     private const string BuildCheck_ConfigurationKey = "build_check";
 
@@ -197,7 +197,7 @@ internal sealed class ConfigurationProvider
         Dictionary<string, string> config;
         try
         {
-            config = s_editorConfigParser.Parse(projectFullPath);
+            config = _editorConfigParser.Parse(projectFullPath);
         }
         catch (Exception exception)
         {

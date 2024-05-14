@@ -11,9 +11,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.Shared;
-using static Microsoft.Build.BuildCheck.Infrastructure.EditorConfig.EditorConfigGlobsMatcher;
+using static Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig.EditorConfigGlobsMatcher;
 
-namespace Microsoft.Build.BuildCheck.Infrastructure.EditorConfig;
+namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
 
 internal sealed class EditorConfigParser
 {
@@ -46,7 +46,7 @@ internal sealed class EditorConfigParser
         {
             if (!_editorConfigFileCache.TryGetValue(editorConfigFilePath, out var editorConfig))
             {
-                using (FileStream stream = new FileStream(editorConfigFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (FileStream stream = new FileStream(editorConfigFilePath, FileMode.Open, System.IO.FileAccess.Read, FileShare.Read))
                 {
                     using StreamReader sr = new StreamReader(editorConfigFilePath);
                     var editorConfigfileContent = sr.ReadToEnd();
