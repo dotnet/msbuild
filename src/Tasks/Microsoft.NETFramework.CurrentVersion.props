@@ -85,6 +85,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(TargetingClr2Framework)' != 'true' and '$(TargetFrameworkVersion)' != 'v4.0' and ('$(OutputType)' == 'exe' or '$(OutputType)' == 'winexe' or '$(OutputType)' == 'appcontainerexe' or '$(OutputType)' == '')">
     <Prefer32Bit Condition="'$(Prefer32Bit)' == ''">true</Prefer32Bit>
+    <PreferNativeArm64 Condition="'$(PreferNativeArm64)' == ''">false</PreferNativeArm64>
   </PropertyGroup>
 
   <PropertyGroup>

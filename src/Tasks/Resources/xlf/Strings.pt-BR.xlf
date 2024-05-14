@@ -1564,6 +1564,16 @@
         <target state="translated">StopOnFirstFailure não terá efeito quando estas condições existirem: 1) O sistema estiver sendo executado no modo de processamento múltiplo 2) A propriedade BuildInParallel for true. 3) A propriedade RunEachTargetSeparately for false.</target>
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
       </trans-unit>
+      <trans-unit id="PopulateSupportedArchitectures.AssemblyNodeIsMissed">
+        <source>The assembly node is missing from the manifest. Check your ApplicationManifest file.</source>
+        <target state="new">The assembly node is missing from the manifest. Check your ApplicationManifest file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PopulateSupportedArchitectures.InvalidValueInSupportedArchitectures">
+        <source>MSB9911: The specified value: '{0}' for supportedArchitectures element is invalid. Either remove it from manifest or set as 'amd64 arm64'.</source>
+        <target state="new">MSB9911: The specified value: '{0}' for supportedArchitectures element is invalid. Either remove it from manifest or set as 'amd64 arm64'.</target>
+        <note>{StrBegin="MSB3991: "}</note>
+      </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>
         <target state="translated">MSB3501: Não foi possível ler linhas do arquivo "{0}". {1}</target>

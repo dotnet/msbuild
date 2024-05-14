@@ -1564,6 +1564,16 @@
         <target state="translated">다음 조건이 모두 충족되면 StopOnFirstFailure가 효과가 없습니다. 1) 시스템이 다중 프로세스 모드에서 실행 중입니다. 2) BuildInParallel 속성이 true입니다. 3) RunEachTargetSeparately 속성이 false입니다.</target>
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
       </trans-unit>
+      <trans-unit id="PopulateSupportedArchitectures.AssemblyNodeIsMissed">
+        <source>The assembly node is missing from the manifest. Check your ApplicationManifest file.</source>
+        <target state="new">The assembly node is missing from the manifest. Check your ApplicationManifest file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PopulateSupportedArchitectures.InvalidValueInSupportedArchitectures">
+        <source>MSB9911: The specified value: '{0}' for supportedArchitectures element is invalid. Either remove it from manifest or set as 'amd64 arm64'.</source>
+        <target state="new">MSB9911: The specified value: '{0}' for supportedArchitectures element is invalid. Either remove it from manifest or set as 'amd64 arm64'.</target>
+        <note>{StrBegin="MSB3991: "}</note>
+      </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>
         <target state="translated">MSB3501: "{0}" 파일에서 줄을 읽을 수 없습니다. {1}</target>

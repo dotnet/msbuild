@@ -199,6 +199,12 @@ namespace Microsoft.Build.Tasks
             get => GetBoolParameterWithDefault(nameof(Prefer32Bit), false);
         }
 
+        public bool PreferNativeArm64
+        {
+            set => Bag[nameof(PreferNativeArm64)] = value;
+            get => GetBoolParameterWithDefault(nameof(PreferNativeArm64), false);
+        }
+
         public string ProductName
         {
             set => Bag[nameof(ProductName)] = value;
@@ -446,6 +452,8 @@ namespace Microsoft.Build.Tasks
 
         public bool Prefer32Bit { get; set; }
 
+        public bool PreferNativeArm64 { get; set; }
+
         public string ProductName { get; set; }
 
         public string ProductVersion { get; set; }
@@ -501,6 +509,7 @@ namespace Microsoft.Build.Tasks
         ITaskItem OutputAssembly { get; set; }
         string Platform { get; set; }
         bool Prefer32Bit { get; set; }
+        bool PreferNativeArm64 { get; set; }
         string ProductName { get; set; }
         string ProductVersion { get; set; }
         string[] ResponseFiles { get; set; }
