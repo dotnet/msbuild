@@ -43,7 +43,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <inheritdoc cref="GenericExpressionNode"/>
-        internal override bool IsUnexpandedValueEmpty(ConditionEvaluator.IConditionEvaluationState state) => false;
+        internal override bool IsUnexpandedValueEmpty() => false;
 
         /// <summary>
         /// Returns expanded value with '!' prepended. Useful for error messages.

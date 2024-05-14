@@ -15,7 +15,7 @@ public sealed class UsedUninitializedProperties_Tests
     [Fact]
     public void Basics()
     {
-        PropertiesUsageTracker props = new(TestLoggingContext.CreateTestContext(new BuildEventContext(1, 2, 3, 4)));
+        PropertiesUseTracker props = new(TestLoggingContext.CreateTestContext(new BuildEventContext(1, 2, 3, 4)));
 
         Assert.False(props.TryGetPropertyElementLocation("Hello", out IElementLocation? elementLocation));
         Assert.Null(elementLocation);

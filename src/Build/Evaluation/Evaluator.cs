@@ -1279,21 +1279,21 @@ namespace Microsoft.Build.Evaluation
                     return;
                 }
 
-                _expander.PropertiesUsageTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
+                _expander.PropertiesUseTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
                 if (!EvaluateConditionCollectingConditionedProperties(propertyElement, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties))
                 {
                     return;
                 }
 
-                _expander.PropertiesUsageTracker.PropertyReadContext = PropertyReadContext.PropertyEvaluation;
+                _expander.PropertiesUseTracker.PropertyReadContext = PropertyReadContext.PropertyEvaluation;
 
                 // Set the name of the property we are currently evaluating so when we are checking to see if we want to add the property to the list of usedUninitialized properties we can not add the property if
                 // it is the same as what we are setting the value on. Note: This needs to be set before we expand the property we are currently setting.
-                _expander.PropertiesUsageTracker.CurrentlyEvaluatingPropertyElementName = propertyElement.Name;
+                _expander.PropertiesUseTracker.CurrentlyEvaluatingPropertyElementName = propertyElement.Name;
 
                 string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(propertyElement.Value, ExpanderOptions.ExpandProperties, propertyElement.Location);
 
-                _expander.PropertiesUsageTracker.CheckPreexistingUndefinedUsage(propertyElement, evaluatedValue, _evaluationLoggingContext);
+                _expander.PropertiesUseTracker.CheckPreexistingUndefinedUsage(propertyElement, evaluatedValue, _evaluationLoggingContext);
 
                 _data.SetProperty(propertyElement, evaluatedValue);
             }

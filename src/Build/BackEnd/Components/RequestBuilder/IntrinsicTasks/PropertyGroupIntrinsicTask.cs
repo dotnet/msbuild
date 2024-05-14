@@ -77,12 +77,12 @@ namespace Microsoft.Build.BackEnd
                                 "CannotModifyReservedProperty",
                                 property.Name);
 
-                            bucket.Expander.PropertiesUsageTracker.CurrentlyEvaluatingPropertyElementName = property.Name;
-                            bucket.Expander.PropertiesUsageTracker.PropertyReadContext =
+                            bucket.Expander.PropertiesUseTracker.CurrentlyEvaluatingPropertyElementName = property.Name;
+                            bucket.Expander.PropertiesUseTracker.PropertyReadContext =
                                 PropertyReadContext.PropertyEvaluation;
 
                             string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(property.Value, ExpanderOptions.ExpandAll, property.Location);
-                            bucket.Expander.PropertiesUsageTracker.CheckPreexistingUndefinedUsage(property, evaluatedValue, LoggingContext);
+                            bucket.Expander.PropertiesUseTracker.CheckPreexistingUndefinedUsage(property, evaluatedValue, LoggingContext);
 
                             if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents)
                             {
@@ -101,7 +101,8 @@ namespace Microsoft.Build.BackEnd
                         foreach (ItemBucket bucket in buckets)
                         {
                             bucket.LeaveScope();
-                            bucket.Expander.PropertiesUsageTracker.ResetPropertyReadContext(false);
+                            // We are now done processing this property - so no need to pop its previous context.
+                            bucket.Expander.PropertiesUseTracker.ResetPropertyReadContext(pop: false);
                         }
                     }
                 }

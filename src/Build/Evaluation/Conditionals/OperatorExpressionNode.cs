@@ -44,8 +44,8 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <inheritdoc cref="GenericExpressionNode"/>
-        internal override bool IsUnexpandedValueEmpty(ConditionEvaluator.IConditionEvaluationState state)
-            => true;
+        internal override bool IsUnexpandedValueEmpty()
+            => LeftChild.IsUnexpandedValueEmpty() && RightChild.IsUnexpandedValueEmpty();
 
         /// <summary>
         /// Value before any item and property expressions are expanded

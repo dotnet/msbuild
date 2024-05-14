@@ -52,11 +52,13 @@ namespace Microsoft.Build.Evaluation
             // That means we don't have to fully expand a condition like " '@(X)' == '' "
             // which is a performance advantage if @(X) is a huge item list.
 
-            // this is the possible case of '$(a)' == ''
-            if (LeftChild.IsUnexpandedValueEmpty(state) ||
-                RightChild.IsUnexpandedValueEmpty(state))
+            // This is the possible case of an expression similar to '$(a)' == '', where a usage of uninitialized
+            //  property is reasonable and should not be flagged by uninitialized reads detection.
+            // So if at least one side is empty, we know to signal to PropertiesUseTracker to not flag in this scope.
+            // The other side might not be property at all - that's fine, as then PropertiesUseTracker won't be even called.
+            if (LeftChild.IsUnexpandedValueEmpty() || RightChild.IsUnexpandedValueEmpty())
             {
-                state.PropertiesUsageTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluationWithOneSideEmpty;
+                state.PropertiesUseTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluationWithOneSideEmpty;
             }
 
             bool leftEmpty = LeftChild.EvaluatesToEmpty(state);
@@ -94,7 +96,7 @@ namespace Microsoft.Build.Evaluation
             UpdateConditionedProperties(state);
 
             // reset back the property read context (it's no longer a condition with one side empty)
-            state.PropertiesUsageTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
+            state.PropertiesUseTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
 
             return Compare(leftExpandedValue, rightExpandedValue);
         }

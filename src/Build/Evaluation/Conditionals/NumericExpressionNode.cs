@@ -3,10 +3,7 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
-
-#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -16,10 +13,11 @@ namespace Microsoft.Build.Evaluation
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     internal sealed class NumericExpressionNode : OperandExpressionNode
     {
-        private string _value;
+        private readonly string _value;
 
         internal NumericExpressionNode(string value)
         {
+            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(value), "NumericExpressionNode cannot have empty value");
             _value = value;
         }
 
@@ -34,14 +32,14 @@ namespace Microsoft.Build.Evaluation
             return ConversionUtilities.TryConvertDecimalOrHexToDouble(_value, out result);
         }
 
-        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result)
+        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version? result)
         {
             return Version.TryParse(_value, out result);
         }
 
         /// <inheritdoc cref="GenericExpressionNode"/>
-        internal override bool IsUnexpandedValueEmpty(ConditionEvaluator.IConditionEvaluationState state)
-            => string.IsNullOrEmpty(_value);
+        internal override bool IsUnexpandedValueEmpty()
+            => false;
 
         /// <summary>
         /// Get the unexpanded value

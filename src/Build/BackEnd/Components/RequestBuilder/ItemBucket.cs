@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
@@ -58,7 +59,7 @@ namespace Microsoft.Build.BackEnd
         #region Constructors
 
         /// <summary>
-        /// Private default constructor disallows parameterless instantiation.
+        /// Private constructor for creating comparison bucket.
         /// </summary>
         private ItemBucket(Dictionary<string, string> metadata)
         {
@@ -157,6 +158,7 @@ namespace Microsoft.Build.BackEnd
         {
             get
             {
+                Debug.Assert(_expander != null, "ItemBucket.Initialize was not properly called");
                 return _expander;
             }
         }

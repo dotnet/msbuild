@@ -15,7 +15,7 @@ namespace Microsoft.Build.Execution
     /// Immutable.
     /// </summary>
     [DebuggerDisplay("{_name}={Value} Condition={_condition}")]
-    public class ProjectPropertyGroupTaskPropertyInstance : ITranslatable, IElementWithLocation
+    public class ProjectPropertyGroupTaskPropertyInstance : ITranslatable, IPropertyElementWithLocation
     {
         /// <summary>
         /// Name of the property

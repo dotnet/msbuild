@@ -275,7 +275,7 @@ namespace Microsoft.Build.Evaluation
                 fileSystem,
                 projectRootElementCache);
 
-            expander.PropertiesUsageTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
+            expander.PropertiesUseTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
             // We are evaluating this expression now and it can cache some state for the duration,
             // so we don't want multiple threads working on the same expression
             lock (parsedExpression)
@@ -292,7 +292,7 @@ namespace Microsoft.Build.Evaluation
                         // Finished using the expression tree. Add it back to the pool so other threads can use it.
                         expressionPool.Push(parsedExpression);
                     }
-                    expander.PropertiesUsageTracker.ResetPropertyReadContext();
+                    expander.PropertiesUseTracker.ResetPropertyReadContext();
                 }
             }
 
@@ -345,7 +345,7 @@ namespace Microsoft.Build.Evaluation
 
             ElementLocation ElementLocation { get; }
 
-            PropertiesUsageTracker PropertiesUsageTracker { get; }
+            PropertiesUseTracker PropertiesUseTracker { get; }
 
             /// <summary>
             ///     Table of conditioned properties and their values.
@@ -400,7 +400,7 @@ namespace Microsoft.Build.Evaluation
 
             public ElementLocation ElementLocation { get; }
 
-            public PropertiesUsageTracker PropertiesUsageTracker => _expander.PropertiesUsageTracker;
+            public PropertiesUseTracker PropertiesUseTracker => _expander.PropertiesUseTracker;
 
             public IFileSystem FileSystem { get; }
 

@@ -21,7 +21,7 @@ namespace Microsoft.Build.Construction
     /// So the CM only represents Normal properties.
     /// </remarks>
     [DebuggerDisplay("{Name} Value={Value} Condition={Condition}")]
-    public class ProjectPropertyElement : ProjectElement, IElementWithLocation
+    public class ProjectPropertyElement : ProjectElement, IPropertyElementWithLocation
     {
         internal ProjectPropertyElementLink PropertyLink => (ProjectPropertyElementLink)Link;
 

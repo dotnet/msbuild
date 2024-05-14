@@ -118,7 +118,7 @@ namespace Microsoft.Build.Evaluation
 
 
         /// <inheritdoc cref="GenericExpressionNode"/>
-        internal override bool IsUnexpandedValueEmpty(ConditionEvaluator.IConditionEvaluationState state) 
+        internal override bool IsUnexpandedValueEmpty() 
             => string.IsNullOrEmpty(_value);
 
         /// <summary>
