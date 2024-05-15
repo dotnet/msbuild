@@ -29,10 +29,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
         private readonly ITestOutputHelper _testOutput;
 
-        public PopulateSupportedArchitectures_Tests(ITestOutputHelper testOutput)
-        {
-            _testOutput = testOutput;
-        }
+        public PopulateSupportedArchitectures_Tests(ITestOutputHelper testOutput) => _testOutput = testOutput;
 
         [Theory]
         [InlineData("testManifestWithInvalidSupportedArchs.manifest", false)]
