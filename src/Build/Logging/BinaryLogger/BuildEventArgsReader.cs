@@ -1022,8 +1022,9 @@ namespace Microsoft.Build.Logging
             var kind = (TaskParameterMessageKind)ReadInt32();
             var itemType = ReadDeduplicatedString();
             var items = ReadTaskItemList() as IList;
-            var parameterName = ReadDeduplicatedString();
-            var propertyName = ReadDeduplicatedString();
+            var (parameterName, propertyName) = _fileFormatVersion >= 21
+                ? (ReadDeduplicatedString(), ReadDeduplicatedString())
+                : (null, null);
 
             var e = ItemGroupLoggingHelper.CreateTaskParameterEventArgs(
                 fields.BuildEventContext,
