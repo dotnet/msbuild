@@ -3015,11 +3015,11 @@
   </data>
 
   <!--
-        MSB9911 - MSB9920   Task: PopulateSupportedArchitectures
+        MSB4300 - MSB4310   Task: PopulateSupportedArchitectures
   -->
   <data name="PopulateSupportedArchitectures.InvalidValueInSupportedArchitectures">
-    <value>MSB9911: The specified value: '{0}' for supportedArchitectures element is invalid. Either remove it from manifest or set as 'amd64 arm64'.</value>
-    <comment>{StrBegin="MSB3991: "}</comment>
+    <value>MSB4300: The specified value: '{0}' for supportedArchitectures element is invalid. Either remove it from manifest or set as 'amd64 arm64'.</value>
+    <comment>{StrBegin="MSB4300: "}</comment>
   </data>
   <data name="PopulateSupportedArchitectures.AssemblyNodeIsMissed">
     <value>The assembly node is missing from the manifest. Check your ApplicationManifest file.</value>
@@ -3111,7 +3111,7 @@
             MSB3971 - MSB3980   Task: GetReferenceAssemblyPaths overflow
             MSB3981 - MSB3990   Task: GetCompatiblePlatform
             MSB3991 - MSB3999   Task: CombineTargetFrameworkInfoProperties
-            MSB9911 - MSB9920   Task: PopulateSupportedArchitectures
+            MSB4300 - MSB4310   Task: PopulateSupportedArchitectures
 
             MSB4000 - MSB4200   Portable targets & tasks (vsproject\flavors\portable\msbuild)
             MSB9000 - MSB9900   MSBuild targets files (C++)

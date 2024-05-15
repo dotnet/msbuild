@@ -4121,7 +4121,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
       Name="SetWin32ManifestProperties"
       Condition="'$(Win32Manifest)'==''"
-      DependsOnTargets="ResolveComReferences;ResolveNativeReferences;_SetExternalWin32ManifestProperties;_SetPreferNativeArm64Win32ManifestProperties" />
+      DependsOnTargets="ResolveComReferences;ResolveNativeReferences;_SetExternalWin32ManifestProperties;_SetEmbeddedWin32ManifestProperties;_SetPreferNativeArm64Win32ManifestProperties" />
 
   <Target
       Name="_SetExternalWin32ManifestProperties"
@@ -4146,11 +4146,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target
     Name="_SetPreferNativeArm64Win32ManifestProperties"
-    Condition=" '$(PreferNativeArm64)'=='true' and '$(Platform)'=='AnyCPU' and '$(Prefer32Bit)'!='true' and '$(NoWin32Manifest)'!='true' ">
+    Condition=" '$(PreferNativeArm64)'=='true' ">
 
+    <PropertyGroup>
+      <SupportedArchitectures>amd64 arm64</SupportedArchitectures>
+    </PropertyGroup>
     <PopulateSupportedArchitectures
         ApplicationManifestPath="$(ApplicationManifest)"
-        OutputPath="$(IntermediateOutputPath)">
+        OutputDirectory="$(IntermediateOutputPath)"
+        SupportedArchitectures="$(SupportedArchitectures)">
 
         <Output TaskParameter="ManifestPath" PropertyName="Win32Manifest"/>
     </PopulateSupportedArchitectures>

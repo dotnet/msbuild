@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Runtime.Versioning;
 using System.Text;
 using System.Xml;
 
@@ -19,18 +18,38 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Generates an application manifest or adds an entry to the existing one when PreferNativeArm64 property is true.
     /// </summary>
-    [SupportedOSPlatform("windows")]
     public sealed class PopulateSupportedArchitectures : TaskExtension
     {
         private const string supportedArchitectures = "supportedArchitectures";
         private const string windowsSettings = "windowsSettings";
-        private const string SupportedArchitecturesValue = "amd64 arm64";
         private const string asmv3Prefix = "asmv3";
         private const string DefaultManifestName = "default.win32manifest";
         private const string WindowsSettingsNamespace = "http://schemas.microsoft.com/SMI/2024/WindowsSettings";
 
-        private string _outputPath = string.Empty;
+        private string _outputDirectory = string.Empty;
+        private string _supportedArchitectures = string.Empty;
         private string _generatedManifestFullPath = string.Empty;
+
+        /// <summary>
+        /// Represents the result of validating an application manifest.
+        /// </summary>
+        private enum ManifestValidationResult
+        {
+            /// <summary>
+            /// The manifest validation was successful.
+            /// </summary>
+            Success = 1,
+
+            /// <summary>
+            /// The manifest validation failed.
+            /// </summary>
+            Failure,
+
+            /// <summary>
+            /// The supported architectures exist in the manifest with the expected value.
+            /// </summary>
+            SupportedArchitecturesExists,
+        }
 
         /// <summary>
         /// Path to the existing application manifest.
@@ -38,13 +57,23 @@ namespace Microsoft.Build.Tasks
         public string? ApplicationManifestPath { get; set; }
 
         /// <summary>
-        /// Intermediate output path.
+        /// Intermediate output directory.
         /// </summary>
         [Required]
-        public string OutputPath
+        public string OutputDirectory
         {
-            get => _outputPath;
-            set => _outputPath = value ?? throw new ArgumentNullException(nameof(OutputPath));
+            get => _outputDirectory;
+            set => _outputDirectory = value ?? throw new ArgumentNullException(nameof(OutputDirectory));
+        }
+
+        /// <summary>
+        /// Value for supportedArchitectures node.
+        /// </summary>
+        [Required]
+        public string SupportedArchitectures
+        {
+            get => _supportedArchitectures;
+            set => _supportedArchitectures = value ?? throw new ArgumentNullException(nameof(SupportedArchitectures));
         }
 
         /// <summary>
@@ -57,6 +86,10 @@ namespace Microsoft.Build.Tasks
             private set => _generatedManifestFullPath = value;
         }
 
+        private string PathToManifest => string.IsNullOrEmpty(ApplicationManifestPath) || !File.Exists(ApplicationManifestPath)
+            ? ToolLocationHelper.GetPathToDotNetFrameworkFile(DefaultManifestName, TargetDotNetFrameworkVersion.Latest)
+            : ApplicationManifestPath ?? string.Empty;
+
         public override bool Execute()
         {
             if (!string.IsNullOrEmpty(PathToManifest))
@@ -66,6 +99,7 @@ namespace Microsoft.Build.Tasks
 
                 ManifestValidationResult validationResult = ValidateManifest(document, xmlNamespaceManager);
 
+                ManifestPath = Path.Combine(OutputDirectory, Path.GetFileName(PathToManifest));
                 switch (validationResult)
                 {
                     case ManifestValidationResult.Success:
@@ -96,8 +130,6 @@ namespace Microsoft.Build.Tasks
 
         private void SaveManifest(XmlDocument document)
         {
-            ManifestPath = Path.Combine(OutputPath, Path.GetFileName(PathToManifest));
-
             using (XmlWriter xmlWriter = XmlWriter.Create(ManifestPath, new XmlWriterSettings { Indent = true, Encoding = Encoding.UTF8 }))
             {
                 document.Save(xmlWriter);
@@ -117,7 +149,7 @@ namespace Microsoft.Build.Tasks
                 XmlNode? supportedArchitecturesNode = assemblyNode.SelectSingleNode($"//*[local-name()='{supportedArchitectures}']", xmlNamespaceManager);
                 if (supportedArchitecturesNode != null)
                 {
-                    if (!string.Equals(supportedArchitecturesNode.InnerText.Trim(), SupportedArchitecturesValue, StringComparison.OrdinalIgnoreCase))
+                    if (!string.Equals(supportedArchitecturesNode.InnerText.Trim(), SupportedArchitectures, StringComparison.OrdinalIgnoreCase))
                     {
                         Log.LogErrorWithCodeFromResources("PopulateSupportedArchitectures.InvalidValueInSupportedArchitectures", supportedArchitecturesNode.InnerText);
 
@@ -133,10 +165,6 @@ namespace Microsoft.Build.Tasks
             return ManifestValidationResult.Failure;
         }
 
-        private string PathToManifest => string.IsNullOrEmpty(ApplicationManifestPath) || !File.Exists(ApplicationManifestPath)
-                ? ToolLocationHelper.GetPathToDotNetFrameworkFile(DefaultManifestName, TargetDotNetFrameworkVersion.Latest)
-                : ApplicationManifestPath ?? string.Empty;
-
         private void PopulateSupportedArchitecturesElement(XmlDocument document, XmlNamespaceManager xmlNamespaceManager)
         {
             XmlNode assemblyNode = document.SelectSingleNode(XPaths.assemblyElement, xmlNamespaceManager)
@@ -150,7 +178,7 @@ namespace Microsoft.Build.Tasks
             }
 
             XmlElement supportedArchitecturesNode = GetOrCreateXmlElement(document, xmlNamespaceManager, supportedArchitectures, namespaceURI: WindowsSettingsNamespace);
-            supportedArchitecturesNode.InnerText = SupportedArchitecturesValue;
+            supportedArchitecturesNode.InnerText = SupportedArchitectures;
             winSettingsNode.AppendChild(supportedArchitecturesNode);
             appNode.AppendChild(winSettingsNode);
             assemblyNode.AppendChild(appNode);
@@ -172,27 +200,6 @@ namespace Microsoft.Build.Tasks
             return isPrefixed
                 ? document.CreateElement(prefix, localName, namespaceURI)
                 : document.CreateElement(localName, namespaceURI);
-        }
-
-        /// <summary>
-        /// Represents the result of validating an application manifest.
-        /// </summary>
-        private enum ManifestValidationResult
-        {
-            /// <summary>
-            /// The manifest validation was successful.
-            /// </summary>
-            Success = 1,
-
-            /// <summary>
-            /// The manifest validation failed.
-            /// </summary>
-            Failure,
-
-            /// <summary>
-            /// The supported architectures exist in the manifest with the expected value.
-            /// </summary>
-            SupportedArchitecturesExists,
         }
     }
 }

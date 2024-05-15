@@ -238,11 +238,6 @@ namespace Microsoft.Build.Tasks
         public bool Prefer32Bit { get; set; }
 
         /// <summary>
-        /// The preferNativeArm64 flag used during the build
-        /// </summary>
-        public bool PreferNativeArm64 { get; set; }
-
-        /// <summary>
         /// Resolved SDK References
         /// </summary>
         [Output]
