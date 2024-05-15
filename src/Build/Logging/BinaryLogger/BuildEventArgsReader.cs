@@ -1023,11 +1023,13 @@ namespace Microsoft.Build.Logging
             var itemType = ReadDeduplicatedString();
             var items = ReadTaskItemList() as IList;
             var parameterName = ReadDeduplicatedString();
+            var propertyName = ReadDeduplicatedString();
 
             var e = ItemGroupLoggingHelper.CreateTaskParameterEventArgs(
                 fields.BuildEventContext,
                 kind,
                 parameterName,
+                propertyName,
                 itemType,
                 items,
                 logItemMetadata: true,

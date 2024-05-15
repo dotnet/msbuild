@@ -650,13 +650,14 @@ namespace Microsoft.Build.UnitTests
                 new TaskItemData("ItemSpec1", null),
                 new TaskItemData("ItemSpec2", Enumerable.Range(1,3).ToDictionary(i => i.ToString(), i => i.ToString() + "value"))
             };
-            var args = new TaskParameterEventArgs(TaskParameterMessageKind.TaskOutput, "ParameterName", "ItemName", items, true, DateTime.MinValue);
+            var args = new TaskParameterEventArgs(TaskParameterMessageKind.TaskOutput, "ParameterName", "PropertyName", "ItemName", items, true, DateTime.MinValue);
             args.LineNumber = 265;
             args.ColumnNumber = 6;
 
             Roundtrip(args,
                 e => e.Kind.ToString(),
                 e => e.ParameterName,
+                e => e.PropertyName,
                 e => e.ItemType,
                 e => e.LogItemMetadata.ToString(),
                 e => e.LineNumber.ToString(),

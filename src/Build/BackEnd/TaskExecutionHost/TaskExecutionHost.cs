@@ -1320,8 +1320,9 @@ namespace Microsoft.Build.BackEnd
                         ItemGroupLoggingHelper.LogTaskParameter(
                             _taskLoggingContext,
                             TaskParameterMessageKind.TaskInput,
-                            parameter.Name,
-                            parameter.Name,
+                            parameterName: parameter.Name,
+                            propertyName: null,
+                            itemType: parameter.Name,
                             parameterValueAsList ?? new object[] { parameterValue },
                             parameter.LogItemMetadata);
                     }
@@ -1430,8 +1431,9 @@ namespace Microsoft.Build.BackEnd
                         ItemGroupLoggingHelper.LogTaskParameter(
                             _taskLoggingContext,
                             TaskParameterMessageKind.TaskOutput,
-                            parameter.Name,
-                            outputTargetName,
+                            parameterName: parameter.Name,
+                            propertyName: null,
+                            itemType: outputTargetName,
                             outputs,
                             parameter.LogItemMetadata);
                     }
@@ -1477,8 +1479,9 @@ namespace Microsoft.Build.BackEnd
                                 ItemGroupLoggingHelper.LogTaskParameter(
                                     _taskLoggingContext,
                                     TaskParameterMessageKind.TaskOutput,
-                                    parameter.Name,
-                                    parameter.Name,
+                                    parameterName: parameter.Name,
+                                    propertyName: outputTargetName,
+                                    itemType: null,
                                     new object[] { outputString },
                                     parameter.LogItemMetadata);
                             }
@@ -1520,8 +1523,9 @@ namespace Microsoft.Build.BackEnd
                         ItemGroupLoggingHelper.LogTaskParameter(
                             _taskLoggingContext,
                             TaskParameterMessageKind.TaskOutput,
-                            parameter.Name,
-                            outputTargetName,
+                            parameterName: parameter.Name,
+                            propertyName: null,
+                            itemType: outputTargetName,
                             outputs,
                             parameter.LogItemMetadata);
                     }
@@ -1560,8 +1564,9 @@ namespace Microsoft.Build.BackEnd
                                 ItemGroupLoggingHelper.LogTaskParameter(
                                     _taskLoggingContext,
                                     TaskParameterMessageKind.TaskOutput,
-                                    parameter.Name,
-                                    parameter.Name,
+                                    parameterName: parameter.Name,
+                                    propertyName: outputTargetName,
+                                    itemType: null,
                                     new object[] { outputString },
                                     parameter.LogItemMetadata);
                             }

@@ -35,6 +35,7 @@ namespace Microsoft.Build.Framework
         public TaskParameterEventArgs(
             TaskParameterMessageKind kind,
             string parameterName,
+            string propertyName,
             string itemType,
             IList items,
             bool logItemMetadata,
@@ -43,6 +44,7 @@ namespace Microsoft.Build.Framework
         {
             Kind = kind;
             ParameterName = parameterName;
+            PropertyName = propertyName;
             ItemType = itemType;
             Items = items;
             LogItemMetadata = logItemMetadata;
@@ -57,7 +59,7 @@ namespace Microsoft.Build.Framework
             IList items,
             bool logItemMetadata,
             DateTime eventTimestamp)
-            : this(kind, parameterName: null, itemType, items, logItemMetadata, eventTimestamp)
+            : this(kind, parameterName: null, propertyName: null, itemType, items, logItemMetadata, eventTimestamp)
         { }
 
         /// <summary>
@@ -66,14 +68,20 @@ namespace Microsoft.Build.Framework
         public TaskParameterMessageKind Kind { get; private set; }
 
         /// <summary>
-        /// The name of the parameter if <see cref="Kind"/> is <see cref="TaskParameterMessageKind.TaskInput"/> or <see cref="TaskParameterMessageKind.TaskOutput"/>.
+        /// The name of the parameter if <see cref="Kind"/> is <see cref="TaskParameterMessageKind.TaskInput"/> or <see cref="TaskParameterMessageKind.TaskOutput"/>,
+        /// null otherwise.
         /// </summary>
         public string ParameterName { get; private set; }
 
         /// <summary>
-        /// The name of the item being manipulated, e.g. "Compile". For backward compatibility, this property has the same value
-        /// as <see cref="ParameterName"/> in cases where the operation does not manipulate any items, such as when representing
-        /// task inputs or task outputs assigned to properties.
+        /// The name of the property if <see cref="Kind"/> is <see cref="TaskParameterMessageKind.TaskOutput"/> and the task output
+        /// is assigned to a property, null otherwise.
+        /// </summary>
+        public string PropertyName { get; private set; }
+
+        /// <summary>
+        /// The name of the item being manipulated, e.g. "Compile", or null in cases where the operation does not manipulate
+        /// any items, such as when representing task inputs or task outputs assigned to properties.
         /// </summary>
         public string ItemType { get; private set; }
 
@@ -122,6 +130,7 @@ namespace Microsoft.Build.Framework
             BuildEventContext = reader.ReadOptionalBuildEventContext();
             Kind = (TaskParameterMessageKind)reader.Read7BitEncodedInt();
             ParameterName = reader.ReadOptionalString();
+            PropertyName = reader.ReadOptionalString();
             ItemType = reader.ReadOptionalString();
             LineNumber = reader.Read7BitEncodedInt();
             ColumnNumber = reader.Read7BitEncodedInt();
@@ -172,6 +181,7 @@ namespace Microsoft.Build.Framework
             writer.WriteOptionalBuildEventContext(BuildEventContext);
             writer.Write7BitEncodedInt((int)Kind);
             writer.WriteOptionalString(ParameterName);
+            writer.WriteOptionalString(PropertyName);
             writer.WriteOptionalString(ItemType);
             writer.Write7BitEncodedInt(LineNumber);
             writer.Write7BitEncodedInt(ColumnNumber);

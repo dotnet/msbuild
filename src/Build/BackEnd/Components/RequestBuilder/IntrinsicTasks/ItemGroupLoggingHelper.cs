@@ -10,6 +10,7 @@ using System.Runtime.Remoting;
 #endif
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -35,6 +36,7 @@ namespace Microsoft.Build.BackEnd
         internal static string ItemGroupIncludeLogMessagePrefix = ResourceUtilities.GetResourceString("ItemGroupIncludeLogMessagePrefix");
         internal static string ItemGroupRemoveLogMessage = ResourceUtilities.GetResourceString("ItemGroupRemoveLogMessage");
         internal static string OutputItemParameterMessagePrefix = ResourceUtilities.GetResourceString("OutputItemParameterMessagePrefix");
+        internal static string OutputPropertyLogMessagePrefix = ResourceUtilities.GetResourceString("OutputPropertyLogMessagePrefix");
         internal static string TaskParameterPrefix = ResourceUtilities.GetResourceString("TaskParameterPrefix");
         internal static string SkipTargetUpToDateInputs = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("SkipTargetUpToDateInputs", string.Empty);
         internal static string SkipTargetUpToDateOutputs = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("SkipTargetUpToDateOutputs", string.Empty);
@@ -256,6 +258,7 @@ namespace Microsoft.Build.BackEnd
             LoggingContext loggingContext,
             TaskParameterMessageKind messageKind,
             string parameterName,
+            string propertyName,
             string itemType,
             IList items,
             bool logItemMetadata,
@@ -265,6 +268,7 @@ namespace Microsoft.Build.BackEnd
                 loggingContext.BuildEventContext,
                 messageKind,
                 parameterName,
+                propertyName,
                 itemType,
                 items,
                 logItemMetadata,
@@ -279,6 +283,7 @@ namespace Microsoft.Build.BackEnd
             BuildEventContext buildEventContext,
             TaskParameterMessageKind messageKind,
             string parameterName,
+            string propertyName,
             string itemType,
             IList items,
             bool logItemMetadata,
@@ -294,6 +299,7 @@ namespace Microsoft.Build.BackEnd
             var args = new TaskParameterEventArgs(
                 messageKind,
                 parameterName,
+                propertyName,
                 itemType,
                 items,
                 logItemMetadata,
@@ -359,26 +365,23 @@ namespace Microsoft.Build.BackEnd
 #endif
 
         internal static string GetTaskParameterText(TaskParameterEventArgs args)
-            => GetTaskParameterText(args.Kind, args.ItemType, args.Items, args.LogItemMetadata);
-
-        internal static string GetTaskParameterText(TaskParameterMessageKind messageKind, string itemType, IList items, bool logItemMetadata)
         {
-            var resourceText = messageKind switch
+            var resourceText = args.Kind switch
             {
                 TaskParameterMessageKind.AddItem => ItemGroupIncludeLogMessagePrefix,
                 TaskParameterMessageKind.RemoveItem => ItemGroupRemoveLogMessage,
                 TaskParameterMessageKind.TaskInput => TaskParameterPrefix,
-                TaskParameterMessageKind.TaskOutput => OutputItemParameterMessagePrefix,
+                TaskParameterMessageKind.TaskOutput => args.PropertyName is null ? OutputItemParameterMessagePrefix : OutputPropertyLogMessagePrefix,
                 TaskParameterMessageKind.SkippedTargetInputs => SkipTargetUpToDateInputs,
                 TaskParameterMessageKind.SkippedTargetOutputs => SkipTargetUpToDateOutputs,
-                _ => throw new NotImplementedException($"Unsupported {nameof(TaskParameterMessageKind)} value: {messageKind}")
+                _ => throw new NotImplementedException($"Unsupported {nameof(TaskParameterMessageKind)} value: {args.Kind}")
             };
 
             var itemGroupText = GetParameterText(
                 resourceText,
-                itemType,
-                items,
-                logItemMetadata);
+                args.PropertyName ?? args.ItemType,
+                args.Items,
+                args.LogItemMetadata);
             return itemGroupText;
         }
     }

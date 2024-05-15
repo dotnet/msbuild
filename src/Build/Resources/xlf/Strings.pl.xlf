@@ -393,6 +393,11 @@
         <target state="translated">Metody {0} nie można wywołać przy użyciu kolekcji zawierającej nazwy docelowe o wartości null lub puste.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OutputPropertyLogMessagePrefix">
+        <source>Output Property: </source>
+        <target state="new">Output Property: </target>
+        <note />
+      </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">
         <source>Created an override using task: {0} at {1}</source>
         <target state="translated">Utworzono zastąpienie przy użyciu zadania: {0} o {1}</target>
