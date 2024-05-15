@@ -864,9 +864,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
            Text="NoWin32Manifest and PreferNativeArm64 options are mutually exclusive. Please disable one of those."
             />
 
-    <Warning Condition=" '$(PreferNativeArm64)' == 'true' and '$(PlatformName)' != 'AnyCPU' "
+    <Warning Condition=" '$(PreferNativeArm64)' == 'true' and '$(Platform)' != 'AnyCPU' "
              Code="MSB9903"
-             Text="When PreferNativeArm64 is enabled, ensure that the Target Platform is set to Any CPU."
+             Text="When PreferNativeArm64 is enabled, ensure that the Platform is set to Any CPU."
              />
     <!--
       Log an error if the user set MSBuildProjectExtensionsPath in the body of a project. In an SDK style project
@@ -4225,23 +4225,24 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   in the existing Application Manifest.
 
     [IN]
-    $(ApplicationManifest) - path to Application Manifest if exists.
+    @(AppConfigWithTargetPath) - Path to Application Manifest if exists.
     $(IntermediateOutputPath) - Path to the intermediate output directory.
 
     [OUT]
-    $(Win32Manifest) - path to manifest file with generated or updated content.
+    $(AppConfigWithTargetPath) - path to manifest file with generated or updated content.
 -->
 
   <Target
     Name="_SetPreferNativeArm64Win32ManifestProperties"
-    Condition="''$(Platform)' == 'AnyCPU' and '@(PreferNativeArm64)'=='true' '@(Prefer32Bit)'!='true' @(NoWin32Manifest)'!='true' "
-    Outputs="@(Win32Manifest)">
+    Inputs="@(AppConfigWithTargetPath)"
+    Condition=" '$(Platform)'=='AnyCPU' and '$(PreferNativeArm64)'=='true' and '$(Prefer32Bit)'!='true' and '$(NoWin32Manifest)'!='true' "
+    Outputs="@(AppConfigWithTargetPath)">
 
     <PopulateSupportedArchitectures
-        ApplicationManifestPath="@(ApplicationManifest)"
+        ApplicationManifestPath="@(AppConfigWithTargetPath)"
         OutputPath="$(IntermediateOutputPath)">
 
-     <Output TaskParameter="ManifestPath" ItemName="Win32Manifest"/>
+     <Output TaskParameter="ManifestPath" ItemName="AppConfigWithTargetPath"/>
     </PopulateSupportedArchitectures>
   
   </Target>
