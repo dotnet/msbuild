@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Build.BuildCheck.Infrastructure;
+namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 internal sealed class BuildCheckConfigurationException : Exception
 {

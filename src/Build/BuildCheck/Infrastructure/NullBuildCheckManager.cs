@@ -4,12 +4,12 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BuildCheck.Acquisition;
-using Microsoft.Build.BuildCheck.Logging;
+using Microsoft.Build.Experimental.BuildCheck.Acquisition;
+using Microsoft.Build.Experimental.BuildCheck.Logging;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.BuildCheck.Infrastructure;
+namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 internal class NullBuildCheckManager : IBuildCheckManager
 {
@@ -24,6 +24,21 @@ internal class NullBuildCheckManager : IBuildCheckManager
     }
 
     public void SetDataSource(BuildCheckDataSource buildCheckDataSource)
+    {
+    }
+
+    public void ProcessTaskStartedEventArgs(AnalyzerLoggingContext buildAnalysisContext,
+        TaskStartedEventArgs taskStartedEventArgs)
+    {
+    }
+
+    public void ProcessTaskFinishedEventArgs(AnalyzerLoggingContext buildAnalysisContext,
+        TaskFinishedEventArgs taskFinishedEventArgs)
+    {
+    }
+
+    public void ProcessTaskParameterEventArgs(AnalyzerLoggingContext buildAnalysisContext,
+        TaskParameterEventArgs taskParameterEventArgs)
     {
     }
 
@@ -60,4 +75,13 @@ internal class NullBuildCheckManager : IBuildCheckManager
     }
 
     public Dictionary<string, TimeSpan> CreateAnalyzerTracingStats() => new Dictionary<string, TimeSpan>();
+
+    public void StartTaskInvocation(BuildCheckDataSource buildCheckDataSource, TaskStartedEventArgs eventArgs)
+    { }
+
+    public void EndTaskInvocation(BuildCheckDataSource buildCheckDataSource, TaskFinishedEventArgs eventArgs)
+    { }
+
+    public void ProcessTaskParameter(BuildCheckDataSource buildCheckDataSource, TaskParameterEventArgs eventArg)
+    { }
 }

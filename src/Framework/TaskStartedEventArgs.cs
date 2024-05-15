@@ -171,22 +171,22 @@ namespace Microsoft.Build.Framework
         public string ProjectFile => projectFile;
 
         /// <summary>
-        /// MSBuild file where this task was defined.
+        /// MSBuild file in which this task was invoked.
         /// </summary>
         public string TaskFile => taskFile;
 
         /// <summary>
-        /// Line number of the task invocation in the project file
+        /// Line number of the task invocation in the project file.
         /// </summary>
         public int LineNumber { get; internal set; }
 
         /// <summary>
-        /// Column number of the task invocation in the project file
+        /// Column number of the task invocation in the project file.
         /// </summary>
         public int ColumnNumber { get; internal set; }
 
         /// <summary>
-        /// The location of the assembly containing the implementation of the task
+        /// The location of the assembly containing the implementation of the task.
         /// </summary>
         public string TaskAssemblyLocation { get; private set; }
 

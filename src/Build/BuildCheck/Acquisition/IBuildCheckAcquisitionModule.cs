@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using Microsoft.Build.BuildCheck.Infrastructure;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.BuildCheck.Acquisition;
+namespace Microsoft.Build.Experimental.BuildCheck.Acquisition;
 
 internal interface IBuildCheckAcquisitionModule
 {
