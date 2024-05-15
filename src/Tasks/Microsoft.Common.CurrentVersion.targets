@@ -4121,7 +4121,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
       Name="SetWin32ManifestProperties"
       Condition="'$(Win32Manifest)'==''"
-      DependsOnTargets="ResolveComReferences;ResolveNativeReferences;_SetExternalWin32ManifestProperties;_SetEmbeddedWin32ManifestProperties" />
+      DependsOnTargets="ResolveComReferences;ResolveNativeReferences;_SetExternalWin32ManifestProperties;_SetPreferNativeArm64Win32ManifestProperties" />
 
   <Target
       Name="_SetExternalWin32ManifestProperties"
@@ -4141,6 +4141,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                  a manifest to their built assemblies -->
       <NoWin32Manifest Condition="'$(NoWin32Manifest)'==''">true</NoWin32Manifest>
     </PropertyGroup>
+
+  </Target>
+
+  <Target
+    Name="_SetPreferNativeArm64Win32ManifestProperties"
+    Condition=" '$(PreferNativeArm64)'=='true' and '$(Platform)'=='AnyCPU' and '$(Prefer32Bit)'!='true' and '$(NoWin32Manifest)'!='true' ">
+
+    <PopulateSupportedArchitectures
+        ApplicationManifestPath="$(ApplicationManifest)"
+        OutputPath="$(IntermediateOutputPath)">
+
+        <Output TaskParameter="ManifestPath" PropertyName="Win32Manifest"/>
+    </PopulateSupportedArchitectures>
 
   </Target>
 
@@ -4217,36 +4230,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Condition="'$(GenerateClickOnceManifests)'=='true' or '@(NativeReference)'!='' or '@(ResolvedIsolatedComModules)'!='' or '$(GenerateAppxManifest)' == 'true'"
       DependsOnTargets="$(GenerateManifestsDependsOn)"/>
 
-<!--
-  ============================================================
-                                        _SetPreferNativeArm64Win32ManifestProperties
-  
-  The target sets property related to Native Arm64 architecture either in default Windows 32-bit manifest file or
-  in the existing Application Manifest.
-
-    [IN]
-    @(AppConfigWithTargetPath) - Path to Application Manifest if exists.
-    $(IntermediateOutputPath) - Path to the intermediate output directory.
-
-    [OUT]
-    $(AppConfigWithTargetPath) - path to manifest file with generated or updated content.
--->
-
-  <Target
-    Name="_SetPreferNativeArm64Win32ManifestProperties"
-    Inputs="@(AppConfigWithTargetPath)"
-    Condition=" '$(Platform)'=='AnyCPU' and '$(PreferNativeArm64)'=='true' and '$(Prefer32Bit)'!='true' and '$(NoWin32Manifest)'!='true' "
-    Outputs="@(AppConfigWithTargetPath)">
-
-    <PopulateSupportedArchitectures
-        ApplicationManifestPath="@(AppConfigWithTargetPath)"
-        OutputPath="$(IntermediateOutputPath)">
-
-     <Output TaskParameter="ManifestPath" ItemName="AppConfigWithTargetPath"/>
-    </PopulateSupportedArchitectures>
-  
-  </Target>
-
   <!--
     ============================================================
                                         GenerateApplicationManifest
@@ -4275,8 +4258,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             _DeploymentComputeClickOnceManifestInfo;
             ResolveComReferences;
             ResolveNativeReferences;
-            _GenerateResolvedDeploymentManifestEntryPoint;
-            _SetPreferNativeArm64Win32ManifestProperties"
+            _GenerateResolvedDeploymentManifestEntryPoint"
       Inputs="
             $(MSBuildAllProjects);
             @(AppConfigWithTargetPath);
