@@ -84,32 +84,36 @@ namespace Microsoft.Build.Tasks
             private set => _generatedManifestFullPath = value;
         }
 
-        private (bool canProcceed, string? path) GetPathToManifest()
+        private Stream? GetManifestStream()
         {
             if (!string.IsNullOrEmpty(ApplicationManifestPath))
             {
                 if (!File.Exists(ApplicationManifestPath))
                 {
                     Log.LogErrorWithCodeFromResources("PopulateSupportedArchitectures.SpecifiedApplicationManifestCanNotBeFound", ApplicationManifestPath);
-                    return (false, null);
+                    return null;
                 }
 
-                return (true, ApplicationManifestPath);
+                return File.OpenRead(ApplicationManifestPath);
             }
+
+            string? defaultManifestPath = ToolLocationHelper.GetPathToDotNetFrameworkFile(DefaultManifestName, TargetDotNetFrameworkVersion.Version46);
 
             // The logic for getting default manifest is similar to the one from Roslyn:
             // If Roslyn logic returns null, we fall back to reading embedded manifest.
-            return (true, ToolLocationHelper.GetPathToDotNetFrameworkFile(DefaultManifestName, TargetDotNetFrameworkVersion.Version46));
+            return defaultManifestPath is null
+                    ? typeof(PopulateSupportedArchitectures).Assembly.GetManifestResourceStream($"Microsoft.Build.Tasks.Resources.{DefaultManifestName}")
+                    : File.OpenRead(defaultManifestPath);
         }
 
         public override bool Execute()
         {
-            (bool canProcceed, string? pathToManifest) = GetPathToManifest();
+            using Stream? stream = GetManifestStream();
 
             // Only if ApplicationManifest was not specified, we can try to load the embedded manifest.
-            if (canProcceed)
+            if (stream is not null)
             {
-                XmlDocument document = LoadManifest(pathToManifest);
+                XmlDocument document = LoadManifest(stream);
                 XmlNamespaceManager xmlNamespaceManager = XmlNamespaces.GetNamespaceManager(document.NameTable);
 
                 ManifestValidationResult validationResult = ValidateManifest(document, xmlNamespaceManager);
@@ -118,7 +122,7 @@ namespace Microsoft.Build.Tasks
                 {
                     case ManifestValidationResult.Success:
                         PopulateSupportedArchitecturesElement(document, xmlNamespaceManager);
-                        SaveManifest(document, Path.GetFileName(pathToManifest) ?? DefaultManifestName);
+                        SaveManifest(document, Path.GetFileName(ApplicationManifestPath) ?? DefaultManifestName);
                         return true;
                     case ManifestValidationResult.SupportedArchitecturesExists:
                         return true;
@@ -130,20 +134,13 @@ namespace Microsoft.Build.Tasks
             return false;
         }
 
-        private XmlDocument LoadManifest(string? path)
+        private XmlDocument LoadManifest(Stream stream)
         {
             XmlDocument document = new XmlDocument();
 
-            using Stream? stream = path is null
-                ? typeof(PopulateSupportedArchitectures).Assembly.GetManifestResourceStream($"Microsoft.Build.Tasks.Resources.{DefaultManifestName}")
-                : File.OpenRead(path);
-
-            if (stream is not null)
+            using (XmlReader xr = XmlReader.Create(stream, new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true }))
             {
-                using (XmlReader xr = XmlReader.Create(stream, new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true }))
-                {
-                    document.Load(xr);
-                }
+                document.Load(xr);
             }
 
             return document;

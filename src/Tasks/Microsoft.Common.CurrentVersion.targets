@@ -4170,13 +4170,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       DependsOnTargets="SetWin32ManifestProperties">
 
     <PropertyGroup>
-      <SupportedArchitectures>amd64 arm64</SupportedArchitectures>
+      <_SupportedArchitectures>amd64 arm64</_SupportedArchitectures>
     </PropertyGroup>
 
     <PopulateSupportedArchitectures
         ApplicationManifestPath="$(Win32Manifest)"
         OutputDirectory="$(IntermediateOutputPath)"
-        SupportedArchitectures="$(SupportedArchitectures)">
+        SupportedArchitectures="$(_SupportedArchitectures)">
 
         <Output TaskParameter="ManifestPath" PropertyName="_Win32Manifest"/>
     </PopulateSupportedArchitectures>

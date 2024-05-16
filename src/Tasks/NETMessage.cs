@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks.Deployment.Bootstrapper;
 
@@ -10,37 +9,6 @@ namespace Microsoft.Build.Tasks
 {
     public sealed class NETMessage : TaskExtension
     {
-        private readonly Dictionary<BuildMessageSeverity, Func<bool>> _severityToActionMap;
-
-        public NETMessage()
-        {
-            _severityToActionMap = new Dictionary<BuildMessageSeverity, Func<bool>>()
-            {
-                {
-                    BuildMessageSeverity.Error, () =>
-                    {
-                        Log.LogErrorWithCodeFromResources(ResourceName, FormatArguments);
-                        return false;
-                    }
-                },
-                {
-                    BuildMessageSeverity.Warning, () =>
-                    {
-                        Log.LogWarningWithCodeFromResources(ResourceName, FormatArguments);
-                        return true;
-                    }
-                },
-                {
-                    BuildMessageSeverity.Info, () =>
-                    {
-                        MessageImportance importance = (MessageImportance)Enum.Parse(typeof(MessageImportance), MessageImportance, true);
-                        Log.LogMessageFromResources(importance, ResourceName, FormatArguments);
-                        return true;
-                    }
-                },
-            };
-        }
-
         /// <summary>
         /// The name of the resource in Strings.resx that contains the desired error message.
         /// </summary>
@@ -67,9 +35,23 @@ namespace Microsoft.Build.Tasks
         {
             if (Enum.TryParse(Severity, ignoreCase: true, out BuildMessageSeverity severity))
             {
-                if (_severityToActionMap.TryGetValue(severity, out Func<bool>? logMessageFunc))
+                switch (severity)
                 {
-                    return logMessageFunc();
+                    case BuildMessageSeverity.Error:
+                        Log.LogErrorWithCodeFromResources(ResourceName, FormatArguments);
+                        return false;
+
+                    case BuildMessageSeverity.Warning:
+                        Log.LogWarningWithCodeFromResources(ResourceName, FormatArguments);
+                        return true;
+
+                    case BuildMessageSeverity.Info:
+                        MessageImportance importance = (MessageImportance)Enum.Parse(typeof(MessageImportance), MessageImportance, true);
+                        Log.LogMessageFromResources(importance, ResourceName, FormatArguments);
+                        return true;
+
+                    default:
+                        return false;
                 }
             }
 

@@ -66,8 +66,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-#if NETFRAMEWORK
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData(null, true)]
         [InlineData("buildIn.manifest", true)]
         [InlineData("testManifestWithValidSupportedArchs.manifest", true)]
@@ -176,6 +175,5 @@ namespace Microsoft.Build.Tasks.UnitTests
                 return null;
             }
         }
-#endif
     }
 }
