@@ -106,7 +106,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             string content = string.Format(projectFormatString, SdkName, projectInnerContents);
 
-            ProjectRootElement projectRootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using var xmlReader = XmlReader.Create(new StringReader(content));
+            ProjectRootElement projectRootElement = ProjectRootElement.Create(xmlReader);
 
             var project = new Project(projectRootElement);
 
@@ -128,7 +129,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             File.WriteAllText(_sdkTargetsPath, _sdkTargetsContent);
             string content = string.Format(projectFormatString, SdkName, projectInnerContents);
 
-            ProjectRootElement projectRootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using var xmlReader = XmlReader.Create(new StringReader(content));
+            ProjectRootElement projectRootElement = ProjectRootElement.Create(xmlReader);
 
             var project = new Project(projectRootElement);
 
@@ -194,7 +196,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
             string content = string.Format(projectFormatString, sdkNames[0], sdkNames[1], sdkNames[2]);
 
-            ProjectRootElement projectRootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using var xmlReader = XmlReader.Create(new StringReader(content));
+            ProjectRootElement projectRootElement = ProjectRootElement.Create(xmlReader);
 
             Project project = new Project(projectRootElement);
 
@@ -237,7 +240,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             // Based on the new-console-project CLI template (but not matching exactly
             // should not be a deal-breaker).
             string content = string.Format(projectFormatString, SdkName, projectInnerContents);
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using var xmlReader = XmlReader.Create(new StringReader(content));
+            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
 
             project.DeepClone();
         }
@@ -270,8 +274,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             // Based on the new-console-project CLI template (but not matching exactly
             // should not be a deal-breaker).
             string content = string.Format(projectFormatString, SdkName, projectInnerContents);
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            ProjectRootElement clone = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using var xmlReader = XmlReader.Create(new StringReader(content));
+            using var cloneXmlReader = XmlReader.Create(new StringReader(content));
+            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
+            ProjectRootElement clone = ProjectRootElement.Create(cloneXmlReader);
 
             clone.DeepCopyFrom(project);
 
@@ -325,7 +331,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
             else
             {
-                var project = new Project(ProjectRootElement.Create(XmlReader.Create(new StringReader(content))));
+                using var xmlReader = XmlReader.Create(new StringReader(content));
+                var project = new Project(ProjectRootElement.Create(xmlReader));
                 Assert.Empty(project.Imports);
             }
         }
@@ -434,7 +441,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             string content = string.Format(projectFormatString, SdkName, projectInnerContents, sdkVersion, minimumSdkVersion);
 
-            ProjectRootElement projectRootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using var xmlReader = XmlReader.Create(new StringReader(content));
+            ProjectRootElement projectRootElement = ProjectRootElement.Create(xmlReader);
             var project = new Project(projectRootElement);
             project.Imports.Count.ShouldBe(2);
             var importElement = project.Imports[0].ImportingElement;
@@ -509,7 +517,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             File.WriteAllText(_sdkTargetsPath, _sdkTargetsContent);
             string projectContents = string.Format(projectTemplate, SdkName, _projectInnerContents, version, minimumVersion);
 
-            var project = Project.FromXmlReader(XmlReader.Create(new StringReader(projectContents)), new ProjectOptions());
+            using var xmlReader = XmlReader.Create(new StringReader(projectContents));
+            var project = Project.FromXmlReader(xmlReader, new ProjectOptions());
 
             project.Imports.Count.ShouldBe(2);
             var imports = project.Imports;

@@ -462,9 +462,11 @@ namespace Microsoft.Build.UnitTests.Logging
             try
             {
                 Directory.CreateDirectory(testTempPath);
-                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectfileContent)));
+                using var projectfileReader = XmlReader.Create(new StringReader(projectfileContent));
+                ProjectRootElement project = ProjectRootElement.Create(projectfileReader);
                 project.Save(projectFile);
-                project = ProjectRootElement.Create(XmlReader.Create(new StringReader(targetsfileContent)));
+                using var targetsfileReader = XmlReader.Create(new StringReader(targetsfileContent));
+                project = ProjectRootElement.Create(targetsfileReader);
                 project.Save(targetsFile);
                 Project msbuildProject = new Project(projectFile);
                 msbuildProject.Build(mockLogger);

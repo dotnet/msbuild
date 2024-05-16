@@ -135,7 +135,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using var xmlReader = XmlReader.Create(new StringReader(content));
+            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
             ProjectUsingTaskElement usingTask = (ProjectUsingTaskElement)Helpers.GetFirst(project.Children);
             ProjectUsingTaskBodyElement body = usingTask.TaskBody;
             return body;

@@ -45,7 +45,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void EmptyItemSpecInTargetInputs()
         {
             MockLogger ml = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
 	                <ItemGroup>
 	                    <MyFile Include='a.cs; b.cs; c.cs'/>
@@ -55,7 +55,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 	                        Outputs='foo.exe'>
 	                        <Message Text='Running Build target' Importance='High'/>
 	                </Target>
-	            </Project>"))));
+	            </Project>")));
+            Project p = new Project(xmlReader);
 
             bool success = p.Build(new string[] { "Build" }, new ILogger[] { ml });
 
@@ -72,7 +73,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void EmptyItemSpecInTargetOutputs()
         {
             MockLogger ml = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
       	        <Target Name='Build'
 		            Inputs='@(TASKXML)'
@@ -87,7 +88,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         <PasFile>ccc32task.pas</PasFile>
 		            </TASKXML>
 	            </ItemGroup>
-              </Project>"))));
+              </Project>")));
+            Project p = new Project(xmlReader);
 
             bool success = p.Build("Build", new ILogger[] { ml });
 
@@ -97,7 +99,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ml.AssertLogContains("Running Build target");
 
             ml = new MockLogger();
-            p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            using var projectReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
       	        <Target Name='Build'
 		            Inputs='@(TASKXML)'
@@ -110,7 +112,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
       		        <TASKXML Include='ccc32task.xml'>
 		            </TASKXML>
 	            </ItemGroup>
-              </Project>"))));
+              </Project>")));
+            p = new Project(projectReader);
 
             success = p.Build("Build", new ILogger[] { ml });
 
@@ -283,7 +286,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
     </Target>
 </Project>
             ");
-            Project p = new Project(XmlReader.Create(new StringReader(projectText.Replace("`", "\""))));
+            using var xmlReader = XmlReader.Create(new StringReader(projectText.Replace("`", "\"")));
+            Project p = new Project(xmlReader);
 
             Assert.True(p.Build(new string[] { "Build" }, new ILogger[] { logger }));
 
@@ -311,7 +315,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
     </Target>
 </Project>
             ");
-            Project p = new Project(XmlReader.Create(new StringReader(projectText.Replace("`", "\""))));
+            using var xmlReader = XmlReader.Create(new StringReader(projectText.Replace("`", "\"")));
+            Project p = new Project(xmlReader);
 
             Assert.True(p.Build(new string[] { "Build" }, new ILogger[] { logger }));
 
@@ -339,7 +344,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
     </Target>
 </Project>
             ");
-            Project p = new Project(XmlReader.Create(new StringReader(projectText.Replace("`", "\""))));
+            using var xmlReader = XmlReader.Create(new StringReader(projectText.Replace("`", "\"")));
+            Project p = new Project(xmlReader);
 
             Assert.True(p.Build(new string[] { "Build" }, new ILogger[] { logger }));
 
@@ -368,7 +374,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
     </Target>
 </Project>
             ");
-            Project p = new Project(XmlReader.Create(new StringReader(projectText.Replace("`", "\""))));
+            using var xmlReader = XmlReader.Create(new StringReader(projectText.Replace("`", "\"")));
+            Project p = new Project(xmlReader);
 
             Assert.True(p.Build(new string[] { "Build" }, new ILogger[] { logger }));
 
@@ -402,7 +409,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
     </Target>
 </Project>
             ");
-            Project p = new Project(XmlReader.Create(new StringReader(projectText.Replace("`", "\""))));
+            using var xmlReader = XmlReader.Create(new StringReader(projectText.Replace("`", "\"")));
+            Project p = new Project(xmlReader);
 
             Assert.True(p.Build(new string[] { "Build" }, new ILogger[] { logger }));
 
@@ -428,7 +436,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 Directory.SetCurrentDirectory(ObjectModelHelpers.TempProjectDir);
                 MockLogger logger = new MockLogger();
-                Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+                using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
 <Project InitialTargets='Setup' xmlns='msbuildnamespace'>
 
   <ItemGroup>
@@ -478,7 +486,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         <Message Text='GAFT B:@(B)' />
   </Target>
 </Project>
-                "))));
+                ")));
+                Project p = new Project(xmlReader);
 
                 p.Build(new string[] { "Build" }, new ILogger[] { logger });
 

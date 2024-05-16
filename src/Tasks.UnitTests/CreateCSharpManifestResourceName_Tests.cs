@@ -83,9 +83,9 @@ namespace Microsoft.Build.UnitTests
             m.Flush();
             m.Seek(0, SeekOrigin.Begin);
 #if FEATURE_ENCODING_DEFAULT
-            StreamReader r = new StreamReader(m, System.Text.Encoding.Default, true); // HIGHCHAR: Test reads ANSI because that's the scenario.
+            using StreamReader r = new StreamReader(m, System.Text.Encoding.Default, true); // HIGHCHAR: Test reads ANSI because that's the scenario.
 #else
-            StreamReader r = new StreamReader(m, System.Text.Encoding.ASCII, true); // HIGHCHAR: Test reads ANSI because that's the scenario.
+            using StreamReader r = new StreamReader(m, System.Text.Encoding.ASCII, true); // HIGHCHAR: Test reads ANSI because that's the scenario.
 #endif
             string className = r.ReadToEnd();
 

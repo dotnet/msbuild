@@ -76,7 +76,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       </Target>
                       </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using var xmlReader = XmlReader.Create(new StringReader(projectFileContents));
+            Project project = new Project(xmlReader);
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             project.Build("t", loggers);
@@ -128,7 +129,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       </Target>
                       </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using var xmlReader = XmlReader.Create(new StringReader(projectFileContents));
+            Project project = new Project(xmlReader);
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             project.Build("t", loggers);
@@ -153,7 +155,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </Project>";
 
                 MockLogger logger = new MockLogger(_testOutput);
-                ManualResetEvent waitCommandExecuted = new ManualResetEvent(false);
+                using ManualResetEvent waitCommandExecuted = new ManualResetEvent(false);
                 string unescapedSleepCommand = sleepCommand.Replace("&quot;", "\"").Replace("&gt;", ">");
                 logger.AdditionalHandlers.Add((sender, args) =>
                 {
@@ -163,7 +165,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     }
                 });
 
-                var project = new Project(XmlReader.Create(new StringReader(contents)), null, MSBuildConstants.CurrentToolsVersion, collection)
+                using var xmlReader = XmlReader.Create(new StringReader(contents));
+                var project = new Project(xmlReader, null, MSBuildConstants.CurrentToolsVersion, collection)
                 {
                     FullPath = env.CreateFile().Path
                 };
@@ -234,7 +237,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       </Target>
                       </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using var xmlReader = XmlReader.Create(new StringReader(projectFileContents));
+            Project project = new Project(xmlReader);
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             project.Build("t", loggers);
@@ -286,7 +290,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </Target>
                     </Project>");
 
-                Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+                using var xmlReader = XmlReader.Create(new StringReader(projectFileContents));
+                Project project = new Project(xmlReader);
                 List<ILogger> loggers = new List<ILogger>();
                 loggers.Add(logger);
                 project.Build("t2", loggers);
@@ -356,7 +361,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </Target>
                 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using var xmlReader = XmlReader.Create(new StringReader(projectFileContents));
+            Project project = new Project(xmlReader);
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             project.Build(loggers);
@@ -405,7 +411,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
     </Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using var xmlReader = XmlReader.Create(new StringReader(projectFileContents));
+            Project project = new Project(xmlReader);
             List<ILogger> loggers = new List<ILogger>();
             MockLogger logger = new MockLogger();
             loggers.Add(logger);
@@ -442,7 +449,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using var xmlReader = XmlReader.Create(new StringReader(projectFileContents));
+            Project project = new Project(xmlReader);
             project.Build("t", new[] { logger }).ShouldBeTrue();
 
             // Assuming the current directory of the test .dll has at least one subfolder
@@ -469,7 +477,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using var xmlReader = XmlReader.Create(new StringReader(projectFileContents));
+            Project project = new Project(xmlReader);
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
@@ -492,7 +501,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using var xmlReader = XmlReader.Create(new StringReader(projectFileContents));
+            Project project = new Project(xmlReader);
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
@@ -522,7 +532,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using var xmlReader = XmlReader.Create(new StringReader(projectFileContents));
+            Project project = new Project(xmlReader);
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
@@ -552,7 +563,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using var xmlReader = XmlReader.Create(new StringReader(projectFileContents));
+            Project project = new Project(xmlReader);
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
@@ -1084,7 +1096,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 	</Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using var xmlReader = XmlReader.Create(new StringReader(projectFileContents));
+            Project project = new Project(xmlReader);
 
             return project;
         }
@@ -1229,7 +1242,8 @@ namespace ClassLibrary2
 
             IConfigCache cache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("testfile", new Dictionary<string, string>(), "3.5", Array.Empty<string>(), null), "2.0");
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using var xmlReader = XmlReader.Create(new StringReader(projectFileContents));
+            Project project = new Project(xmlReader);
             config.Project = project.CreateProjectInstance();
             cache.AddConfiguration(config);
 

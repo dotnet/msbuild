@@ -176,7 +176,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void PropertyGroupWithConditionOnGroup()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
                 <PropertyGroup Condition='false'>
@@ -185,13 +185,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </PropertyGroup>
                 <Message Text='[$(P1)][$(P2)]'/>
             </Target>
-            </Project>"))));
+            </Project>")));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "t" }, new ILogger[] { logger });
             logger.AssertLogDoesntContain("[v1][v2]");
             logger.ClearLog();
 
-            p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            using var xmlReaderProject = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
                 <PropertyGroup Condition='true'>
@@ -200,7 +201,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </PropertyGroup>
                 <Message Text='[$(P1)][$(P2)]'/>
             </Target>
-            </Project>"))));
+            </Project>")));
+            p = new Project(xmlReaderProject);
             p.Build(new string[] { "t" }, new ILogger[] { logger });
             logger.AssertLogContains("[v1][v2]");
         }
@@ -209,7 +211,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void PropertyGroupWithConditionOnGroupUsingMetadataErrors()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
             @"
             <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
@@ -218,7 +220,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <p2>%(i0.m)</p2>
                 </PropertyGroup>
             </Target>
-            </Project>"))));
+            </Project>")));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "t" }, new ILogger[] { logger });
             logger.AssertLogContains("MSB4191"); // Metadata not allowed
@@ -873,7 +876,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void ItemGroupWithConditionOnGroup()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
                 <ItemGroup Condition='false'>
@@ -882,13 +885,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </ItemGroup>
                 <Message Text='[@(i1)][@(i2)]'/>
             </Target>
-            </Project>"))));
+            </Project>")));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "t" }, new ILogger[] { logger });
             logger.AssertLogDoesntContain("[a1][b1]");
             logger.ClearLog();
 
-            p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            using var xmlReaderProject = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
                 <ItemGroup Condition='true'>
@@ -897,7 +901,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </ItemGroup>
                 <Message Text='[@(i1)][@(i2)]'/>
             </Target>
-            </Project>"))));
+            </Project>")));
+            p = new Project(xmlReaderProject);
 
             p.Build(new string[] { "t" }, new ILogger[] { logger });
             logger.AssertLogContains("[a1][b1]");
@@ -907,7 +912,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void ItemGroupWithConditionOnGroupUsingMetadataErrors()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
                 <ItemGroup Condition=""'%(i0.m)'!='m1'"">
@@ -917,7 +922,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <i4 Include='@(i0)'/>
                 </ItemGroup>
             </Target>
-            </Project>"))));
+            </Project>")));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "t" }, new ILogger[] { logger });
             logger.AssertLogContains("MSB4191"); // Metadata not allowed
@@ -1041,13 +1047,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void ItemGroupWithMetadataReferencesOnItemGroupAndItemConditionsErrors()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
                 <ItemGroup Condition=""'%(i0.m)' != m1"" >
                     <i1 Include=""%(m)"" Condition=""'%(i0.m)' != m3""/>
                 </ItemGroup>
-            </Target></Project>"))));
+            </Target></Project>")));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "t" }, new ILogger[] { logger });
             logger.AssertLogContains("MSB4191"); // Metadata not allowed
@@ -1123,13 +1130,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void PropertyGroupWithMetadataReferencesOnGroupErrors()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
                 <PropertyGroup Condition=""'%(i0.m)' != m1"">
                     <p1>%(i0.m)</p1>
                 </PropertyGroup>
-            </Target></Project>"))));
+            </Target></Project>")));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "t" }, new ILogger[] { logger });
             logger.AssertLogContains("MSB4191");
@@ -1171,7 +1179,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void PropertiesCanReferenceItemsInSameTarget()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <Target Name='t'>
                     <ItemGroup>
@@ -1183,7 +1191,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='[$(p)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogContains("[#a1#*#a2#]");
@@ -1193,7 +1202,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void ItemsCanReferencePropertiesInSameTarget()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <Target Name='t'>
                     <PropertyGroup>
@@ -1205,7 +1214,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='[@(i1)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogContains("[v0]");
@@ -1218,7 +1228,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Dictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             globalProperties.Add("global", "v0");
 
-            Project project = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <PropertyGroup>
                     <global>v1</global>
@@ -1234,7 +1244,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='end:[$(global)]'/>
                   </Target>
                 </Project>
-            "))), globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion);
+            ")));
+            Project project = new Project(xmlReader, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
             ProjectInstance p = project.CreateProjectInstance();
 
@@ -1255,7 +1266,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void PropertiesAreRevertedAfterBuild()
         {
             MockLogger logger = new MockLogger();
-            Project project = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <PropertyGroup>
                     <p>p0</p>
@@ -1266,7 +1277,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </PropertyGroup>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project project = new Project(xmlReader);
 
             ProjectInstance p = project.CreateProjectInstance();
             p.Build(new string[] { "t" }, new ILogger[] { logger });
@@ -1284,7 +1296,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void PropertiesVisibleToSubsequentTask()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <Target Name='t'>
                     <PropertyGroup>
@@ -1293,7 +1305,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='[$(p)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogContains("[p1]");
@@ -1303,7 +1316,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void PropertiesVisibleToSubsequentTarget()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <Target Name='t2' DependsOnTargets='t'>
                     <Message Text='[$(p)]'/>
@@ -1314,7 +1327,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </PropertyGroup>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t2" }, new ILogger[] { logger });
 
             logger.AssertLogContains("[p1]");
@@ -1324,7 +1338,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void ItemsVisibleToSubsequentTask()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <Target Name='t'>
                     <ItemGroup>
@@ -1333,7 +1347,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='[@(i)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogContains("[i1]");
@@ -1343,7 +1358,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void ItemsVisibleToSubsequentTarget()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <Target Name='t2' DependsOnTargets='t'>
                     <Message Text='[@(i)]'/>
@@ -1354,7 +1369,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </ItemGroup>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t2" }, new ILogger[] { logger });
 
             logger.AssertLogContains("[i1]");
@@ -1364,7 +1380,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void ItemsNotVisibleToParallelTargetBatches()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <i Include='1.in'><output>1.out</output></i>
@@ -1378,7 +1394,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='end:[@(j)]'/>
                 </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogContains(new string[] { "start:[1.in]", "end:[1.in]", "start:[2.in]", "end:[2.in]" });
@@ -1388,7 +1405,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void PropertiesNotVisibleToParallelTargetBatches()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <i Include='1.in'><output>1.out</output></i>
@@ -1402,7 +1419,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='end:[$(p)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogContains(new string[] { "start:[]", "end:[p1]", "start:[]", "end:[p1]" });
@@ -1419,7 +1437,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 newFiles = ObjectModelHelpers.GetTempFiles(2, new DateTime(2006, 1, 1));
 
                 MockLogger logger = new MockLogger();
-                Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+                using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <i Include='" + oldFiles.First() + "'><output>" + newFiles.First() + @"</output></i>
@@ -1436,7 +1454,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='end:[@(j)]'/>
                 </Target>
                 </Project>
-            "))));
+            ")));
+                Project p = new Project(xmlReader);
                 p.Build(new string[] { "t2" }, new ILogger[] { logger });
 
                 // We should only see messages for the out of date inputs, but the itemgroup should do its work for both inputs
@@ -1460,7 +1479,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 newFiles = ObjectModelHelpers.GetTempFiles(2, new DateTime(2006, 1, 1));
 
                 MockLogger logger = new MockLogger();
-                Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+                using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <i Include='" + oldFiles.First() + "'><output>" + newFiles.First() + @"</output></i>
@@ -1477,7 +1496,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='end:[$(p)]'/>
                 </Target>
                 </Project>
-            "))));
+            ")));
+                Project p = new Project(xmlReader);
                 p.Build(new string[] { "t2" }, new ILogger[] { logger });
 
                 // We should only see messages for the out of date inputs, but the propertygroup should do its work for both inputs
@@ -1506,7 +1526,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 string newOutput = newFiles.First();
 
                 MockLogger logger = new MockLogger();
-                Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+                using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <i Include='" + oldInput + "'><output>" + newOutput + @"</output></i>
@@ -1527,7 +1547,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='end:[@(i)]'/>
                 </Target>
                 </Project>
-            "))));
+            ")));
+                Project p = new Project(xmlReader);
                 p.Build(new string[] { "t2" }, new ILogger[] { logger });
 
                 // We should only see messages for the out of date inputs, but the itemgroup should do its work for both inputs;
@@ -1607,7 +1628,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void RemoveOfItemAddedInTargetByParallelTargetBatchDoesNothing()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <!-- just to cause two target batches -->
@@ -1636,7 +1657,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='final:[@(j)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t", "t2" }, new ILogger[] { logger });
 
             logger.AssertLogContains(new string[] { "final:[a;b;d]" });
@@ -2230,7 +2252,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void RemovesOfPersistedItemsAreReversed()
         {
             MockLogger logger = new MockLogger();
-            Project project = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <i0 Include='a1'/>
@@ -2242,7 +2264,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='[@(i0)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project project = new Project(xmlReader);
 
             ProjectInstance p = project.CreateProjectInstance();
             p.Build(new string[] { "t" }, new ILogger[] { logger });
@@ -2262,7 +2285,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void RemovesOfPersistedItemsAreReversed1()
         {
             MockLogger logger = new MockLogger();
-            Project project = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <i0 Include='a1'/>
@@ -2275,7 +2298,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='[@(i0)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project project = new Project(xmlReader);
 
             ProjectInstance p = project.CreateProjectInstance();
             p.Build(new string[] { "t" }, new ILogger[] { logger });
@@ -2294,7 +2318,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void RemovesOfPersistedItemsAreReversed2()
         {
             MockLogger logger = new MockLogger();
-            Project project = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <i0 Include='a1'/>
@@ -2311,7 +2335,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='[@(i0)][@(i1)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project project = new Project(xmlReader);
 
             ProjectInstance p = project.CreateProjectInstance();
             p.Build(new string[] { "t" }, new ILogger[] { logger });
@@ -2331,7 +2356,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void RemovesOfPersistedItemsAreReversed3()
         {
             MockLogger logger = new MockLogger();
-            Project project = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <i0 Include='a1'>
@@ -2348,7 +2373,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='[%(i0.m)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project project = new Project(xmlReader);
             ProjectInstance p = project.CreateProjectInstance();
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
@@ -2370,7 +2396,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void RemovesOfPersistedItemsAreReversed4()
         {
             MockLogger logger = new MockLogger();
-            Project project = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <i0 Include='a1'/>
@@ -2383,7 +2409,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='[@(i0)][@(i1)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project project = new Project(xmlReader);
 
             ProjectInstance p = project.CreateProjectInstance();
             p.Build(new string[] { "t" }, new ILogger[] { logger });
@@ -2404,7 +2431,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void RemovesOfItemsOnlyWithMetadataValue()
         {
             MockLogger logger = new MockLogger();
-            Project project = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <i0 Include='a1'>
@@ -2421,7 +2448,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='[%(i0.m)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project project = new Project(xmlReader);
             ProjectInstance p = project.CreateProjectInstance();
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
@@ -2433,7 +2461,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void RemoveBatchingOnRemoveValue()
         {
             MockLogger logger = new MockLogger();
-            Project project = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <i0 Include='m1;m2;m3'/>
@@ -2451,7 +2479,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='[@(i0)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project project = new Project(xmlReader);
             ProjectInstance p = project.CreateProjectInstance();
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
@@ -2492,7 +2521,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void RemovesNotVisibleToParallelTargetBatches()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <i Include='1.in'><output>1.out</output></i>
@@ -2506,7 +2535,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='end:[@(i)]'/>
                 </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogContains(new string[] { "start:[1.in]", "end:[]", "start:[2.in]", "end:[]" });
@@ -2516,7 +2546,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void RemovesNotVisibleToParallelTargetBatches2()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <i Include='1.in'><output>1.out</output></i>
@@ -2531,7 +2561,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='end:[@(j)]'/>
                 </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogContains(new string[] { "start:[j1]", "end:[]", "start:[j1]", "end:[]" });
@@ -2546,7 +2577,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void CalledTargetItemsAreNotVisibleToCallerTarget()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <i Include='a'/>
@@ -2574,7 +2605,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </PropertyGroup>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t3" }, new ILogger[] { logger });
 
             logger.AssertLogContains(new string[] { "in target:[a][a]", "after target:[a;b;c][a;b;c]" });
@@ -2587,7 +2619,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void CalledTargetItemsAreVisibleWhenTargetsRunFromSeperateTasks()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
     <Target Name='Build' DependsOnTargets='t'>
         <Message Text='Props During Build:[$(SomeProperty)]'/>
@@ -2616,7 +2648,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         <Message Text='Items During t2:[@(SomeItem)]'/>
     </Target>
 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "Build" }, new ILogger[] { logger });
 
             logger.AssertLogContains(new string[] { "Props During t1:[prop]", "Props During t2:[prop]", "Props After t1;t2:[]", "Props During Build:[prop]" });
@@ -2631,7 +2664,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void CalledTargetItemsAreVisibleWhenTargetsRunSeperately()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
     <Target Name='Build' DependsOnTargets='t'>
         <Message Text='Props During Build:[$(SomeProperty)]'/>
@@ -2659,7 +2692,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         <Message Text='Items During t2:[@(SomeItem)]'/>
     </Target>
 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "Build" }, new ILogger[] { logger });
 
             logger.AssertLogContains(new string[] { "Props During t1:[prop]", "Props During t2:[prop]", "Props After t1;t2:[]", "Props During Build:[prop]" });
@@ -2674,7 +2708,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void CalledTargetItemsAreVisibleWhenTargetsRunTogether()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
     <Target Name='Build' DependsOnTargets='t'>
         <Message Text='Props During Build:[$(SomeProperty)]'/>
@@ -2702,7 +2736,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         <Message Text='Items During t2:[@(SomeItem)]'/>
     </Target>
 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "Build" }, new ILogger[] { logger });
 
             logger.AssertLogContains(new string[] { "Props During t1:[prop]", "Props During t2:[prop]", "Props After t1;t2:[]", "Props During Build:[prop]" });
@@ -2718,7 +2753,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void CallerTargetItemsAreNotVisibleToCalledTarget()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <i Include='a'/>
@@ -2746,7 +2781,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='in target:[$(p)][@(i)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t3" }, new ILogger[] { logger });
 
             logger.AssertLogContains(new string[] { "in target:[a][a]", "after target:[a;b;c][a;b;c]" });
@@ -2796,7 +2832,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void ModifyItemInTargetComplex()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
               <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                 <PropertyGroup>
                   <p1>true</p1>
@@ -2818,7 +2854,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='[%(i.identity)|%(i.m1)|%(i.m2)|%(i.m3)]'/>
                 </Target>
               </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogContains(@"[item1|v1|v2|v3]");
@@ -2853,7 +2890,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void ModifyItemEmittedByTask()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <Target Name='t'>
                     <CreateItem Include='a1' AdditionalMetadata='m=m1;n=n1'>
@@ -2867,7 +2904,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='[%(i1.m)][%(i1.n)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogContains(new string[] { "[m2][n1]" });
@@ -3058,7 +3096,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void RemoveComplexMidlExample()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
   <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
     <PropertyGroup>
       <UseIdlBasedDllData>true</UseIdlBasedDllData>
@@ -3096,7 +3134,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         <Message Text='[%(idl.identity)|%(idl.dlldatafilename)|%(idl.headerfilename)|%(idl.TypeLibraryName)|%(idl.ProxyFileName)|%(idl.InterfaceIdentifierFileName)]'/>
     </Target>
   </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "MIDL" }, new ILogger[] { logger });
 
             logger.AssertLogContains(@"[a.idl|dlldatadir\a_dlldata.c|headerdir\a.h|tlbdir\a.tlb|proxydir\a_p.c|interfacedir\a_i.c]",
@@ -3108,7 +3147,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void ModifiesOfPersistedItemsAreReversed1()
         {
             MockLogger logger = new MockLogger();
-            Project project = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <i0 Include='i1'>
@@ -3126,7 +3165,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='[%(i0.m)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project project = new Project(xmlReader);
 
             ProjectInstance p = project.CreateProjectInstance();
             p.Build(new string[] { "t", "t2" }, new ILogger[] { logger });
@@ -3148,7 +3188,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void ModifiesOfPersistedItemsAreReversed2()
         {
             MockLogger logger = new MockLogger();
-            Project project = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <i0 Include='i1'>
@@ -3171,7 +3211,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='[%(i1.m)][%(i1.n)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project project = new Project(xmlReader);
 
             ProjectInstance p = project.CreateProjectInstance();
             p.Build(new string[] { "t", "t2" }, new ILogger[] { logger });
@@ -3202,7 +3243,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             MockLogger logger = new MockLogger();
 
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project xmlns='msbuildnamespace'>
                    <Target Name='a'>
                      <ItemGroup>
@@ -3212,7 +3253,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                       <Message Text='[%(Content.Identity)]->[%(Content.Extension)]' Importance='High'/>
                    </Target>
-                </Project> "))));
+                </Project> ")));
+            Project p = new Project(xmlReader);
             bool success = p.Build(new string[] { "a" }, new ILogger[] { logger });
             Assert.True(success);
             logger.AssertLogContains("[a.dll]->[.dll]");
@@ -3228,7 +3270,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             MockLogger logger = new MockLogger();
 
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project xmlns='msbuildnamespace'>
                    <Target Name='a'>
                      <ItemGroup>
@@ -3239,7 +3281,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                       <Message Text='[%(Content.Identity)]->[%(Content.Extension)]' Importance='High'/>
                    </Target>
-                </Project> "))));
+                </Project> ")));
+            Project p = new Project(xmlReader);
             bool success = p.Build(new string[] { "a" }, new ILogger[] { logger });
             Assert.True(success);
             logger.AssertLogContains("[a.dll]->[.dll]");
@@ -3275,7 +3318,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 File.WriteAllText(fileForTest, fileForTest);
 
-                Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+                using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project xmlns='msbuildnamespace'>
                    <Target Name='a'>
                      <ItemGroup>
@@ -3284,7 +3327,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </ItemGroup>
                          <Message Text='[%(Content.Identity)]->[%(Content.Extension)]->[%(Content.RecursiveDir)]' Importance='High'/>
                      </Target>
-                </Project> "))));
+                </Project> ")));
+                Project p = new Project(xmlReader);
                 bool success = p.Build(new string[] { "a" }, new ILogger[] { logger });
                 Assert.True(success);
                 logger.AssertLogContains("[a.dll]->[.dll]->[]");
@@ -3317,7 +3361,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                   </ItemGroup>
                 </Project>
             "));
-                Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+                using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                     <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                       <Import Project='" + importedFile + @"'/>
                       <Target Name='t'>
@@ -3328,7 +3372,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         <Message Text='[@(i1)]'/>
                       </Target>
                     </Project>
-                "))));
+                ")));
+                Project p = new Project(xmlReader);
                 p.Build(new string[] { "t" }, new ILogger[] { logger });
 
                 logger.AssertLogContains("[imported]", "[]");
@@ -3355,7 +3400,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                   </ItemGroup>
                 </Project>
             "));
-                Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+                using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                     <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                       <Import Project='" + importedFile + @"'/>
                       <Target Name='t'>
@@ -3367,7 +3412,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         <Message Text='[%(i1.m)]'/>
                       </Target>
                     </Project>
-                "))));
+                ")));
+                Project p = new Project(xmlReader);
                 p.Build(new string[] { "t" }, new ILogger[] { logger });
 
                 logger.AssertLogContains("[m1]");
@@ -3385,7 +3431,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void OutputPropertiesInTargetBatchesCreateItem()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <!-- just to cause two target batches -->
@@ -3403,7 +3449,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='final:[$(p)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t", "t2" }, new ILogger[] { logger });
 
             logger.AssertLogContains(new string[] { "start:[]", "end:[--1.in]", "start:[]", "end:[--2.in]", "final:[--2.in]" });
@@ -3416,7 +3463,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void OutputPropertiesInTaskBatchesCreateItem()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <Target Name='t'>
                     <ItemGroup>
@@ -3428,7 +3475,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='end:[$(p)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogContains(new string[] { "end:[--2.in]" });
@@ -3440,7 +3488,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void PhoenixBatchingIssue()
         {
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
             <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                 <ItemGroup>
                     <CppCompile Include='gen.cpp'/>
@@ -3460,7 +3508,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </ItemGroup>
                 </Target>
             </Project>
-            "))));
+            ")));
+            ProjectRootElement xml = ProjectRootElement.Create(xmlReader);
             ProjectInstance instance = new ProjectInstance(xml);
             instance.Build();
 
@@ -3478,7 +3527,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 files = ObjectModelHelpers.GetTempFiles(2, new DateTime(2005, 1, 1));
 
                 MockLogger logger = new MockLogger();
-                Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+                using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <i Include='" + files.First() + "'><output>" + files.ElementAt(1) + @"</output></i>
@@ -3494,7 +3543,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='end:[$(p)]'/>
                 </Target>
                 </Project>
-            "))));
+            ")));
+                Project p = new Project(xmlReader);
                 p.Build(new string[] { "t2" }, new ILogger[] { logger });
 
                 // We should only see messages from the second target, as the first is only inferred
@@ -3512,7 +3562,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void ModifyItemPreviouslyModified()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <x Include='a'/>
@@ -3529,7 +3579,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='[%(x.m1)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogDoesntContain("[1]");
@@ -3540,7 +3591,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void ModifyItemPreviouslyModified2()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <x Include='a'/>
@@ -3559,7 +3610,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='[%(x.m1)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogDoesntContain("[1]");
@@ -3570,7 +3622,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void RemoveItemPreviouslyModified()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <x Include='a'/>
@@ -3585,7 +3637,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='[%(x.m1)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogDoesntContain("[1]");
@@ -3596,7 +3649,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void RemoveItemPreviouslyModified2()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <x Include='a'/>
@@ -3613,7 +3666,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='[%(x.m1)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogDoesntContain("[1]");
@@ -3624,7 +3678,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void FilterItemPreviouslyModified()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <x Include='a'/>
@@ -3641,7 +3695,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='[%(x.m1)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogDoesntContain("[1]");
@@ -3652,7 +3707,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void FilterItemPreviouslyModified2()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
                     <x Include='a'/>
@@ -3669,7 +3724,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Message Text='[%(x.m1)]'/>
                   </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogDoesntContain("[1]");
@@ -3680,7 +3736,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void FilterItemPreviouslyModified3()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                    <ItemGroup>
                        <A Include='a;b;c'>
@@ -3706,7 +3762,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                        <Message Text='[@(A) = %(A.m)]'/>
                    </Target>
                 </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogContains("[a;b;c = m4]");
@@ -3716,7 +3773,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void FilterItemPreviouslyModified4()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                    <Target Name='t'>
                        <ItemGroup>
@@ -3733,7 +3790,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                        <Message Text='[@(A) = %(A.m)]'/>
                    </Target>
                </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogContains("[b = m1]");
@@ -3744,7 +3802,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void FilterItemPreviouslyModified5()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                    <Target Name='t'>
                        <ItemGroup>
@@ -3761,7 +3819,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                        <Message Text='[@(A) = %(A.m)]'/>
                    </Target>
                </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogContains("[a = m3]");
@@ -3773,7 +3832,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void FilterItemPreviouslyModified6()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                     <ItemGroup>
                         <A Include='a;b;c'>
@@ -3799,7 +3858,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         <Message Text='[@(A)=%(A.m)]'/>
                     </Target>
                </Project>
-            "))));
+            ")));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "t" }, new ILogger[] { logger });
 
             logger.AssertLogContains("[a;b;c=]");
@@ -3860,7 +3920,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         private static IntrinsicTask CreateIntrinsicTask(string content)
         {
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using var xmlReader = XmlReader.Create(new StringReader(content));
+            Project project = new Project(xmlReader);
             ProjectInstance projectInstance = project.CreateProjectInstance();
             ProjectTargetInstanceChild targetChild = projectInstance.Targets["t"].Children.First();
 

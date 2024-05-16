@@ -287,7 +287,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using var xmlReader = XmlReader.Create(new StringReader(content));
+            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
             ProjectTargetElement target = (ProjectTargetElement)Helpers.GetFirst(project.Children);
             ProjectTaskElement task = (ProjectTaskElement)Helpers.GetFirst(target.Children);
             return Helpers.GetFirst(task.Outputs);
@@ -309,7 +310,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using var xmlReader = XmlReader.Create(new StringReader(content));
+            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
             ProjectTargetElement target = (ProjectTargetElement)Helpers.GetFirst(project.Children);
             ProjectTaskElement task = (ProjectTaskElement)Helpers.GetFirst(target.Children);
             return Helpers.GetFirst(task.Outputs);

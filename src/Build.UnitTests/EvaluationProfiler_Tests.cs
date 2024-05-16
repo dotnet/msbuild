@@ -301,7 +301,8 @@ namespace Microsoft.Build.Engine.UnitTests
         /// </summary>
         private Project CreateProject(string contents, string toolsVersion, ProjectCollection projectCollection)
         {
-            Project project = new Project(XmlReader.Create(new StringReader(contents)), null, toolsVersion, projectCollection)
+            using var xmlReader = XmlReader.Create(new StringReader(contents));
+            Project project = new Project(xmlReader, null, toolsVersion, projectCollection)
             {
                 FullPath = _env.CreateFile().Path
             };

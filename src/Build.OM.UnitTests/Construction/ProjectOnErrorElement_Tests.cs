@@ -46,7 +46,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using var xmlReader = XmlReader.Create(new StringReader(content));
+            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
             ProjectTargetElement target = (ProjectTargetElement)Helpers.GetFirst(project.Children);
             var onErrors = Helpers.MakeList(target.OnErrors);
 
@@ -297,7 +298,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using var xmlReader = XmlReader.Create(new StringReader(content));
+            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
             ProjectTargetElement target = (ProjectTargetElement)Helpers.GetFirst(project.Children);
             ProjectOnErrorElement onError = (ProjectOnErrorElement)Helpers.GetFirst(target.Children);
             return onError;

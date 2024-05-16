@@ -707,7 +707,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void SetMetadata_ItemOriginatingWithItemList()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            using XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <h Include=""h1;h2"">
@@ -746,7 +746,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void SetMetadataUnevaluatedValue_ItemOriginatingWithItemList()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            using XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <h Include=""h1;h2"">
@@ -985,7 +985,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RenameItem_OriginatingWithItemList()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            using XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <h Include=""h1;h2"">
@@ -1319,7 +1319,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RemoveItem_OriginatingWithItemList()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            using XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <h Include=""h1;h2"">
@@ -1421,7 +1421,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RemoveItem_IncludingFromIgnoringConditionList()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            using XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup Condition=""false"">
     <i Include=""i1"" />
@@ -1991,7 +1991,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void AddMetadata_Reevaluation()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            using XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <i Include=""i1"">
@@ -2583,7 +2583,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             else
             {
-                var content = XmlReader.Create(new StringReader(projectContents));
+                using var content = XmlReader.Create(new StringReader(projectContents));
                 project = new Project(content);
 
                 setupProject?.Invoke(project);

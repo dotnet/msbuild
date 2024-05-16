@@ -150,7 +150,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>");
 
             Dictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            Project project = new Project(XmlReader.Create(new StringReader(projectBody)), globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion);
+            using var xmlReader = XmlReader.Create(new StringReader(projectBody));
+            Project project = new Project(xmlReader, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion);
             project.FullPath = "file";
 
             return project;

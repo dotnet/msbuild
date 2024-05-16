@@ -77,7 +77,8 @@ namespace Microsoft.Build.UnitTests.Definition
         /// </summary>
         private static IList<ProjectItem> GetItems(string content)
         {
-            ProjectRootElement projectXml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using var xmlReader = XmlReader.Create(new StringReader(content));
+            ProjectRootElement projectXml = ProjectRootElement.Create(xmlReader);
             Project project = new Project(projectXml);
             IList<ProjectItem> item = Helpers.MakeList(project.GetItems("i"));
 

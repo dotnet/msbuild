@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void Basic()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
 
                 <Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                    <Target Name='CleanUp'>
@@ -43,7 +43,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       <Error Text='This is an error.'/>
                       <OnError ExecuteTargets='CleanUp'/>
                    </Target>
-                </Project>"))));
+                </Project>")));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -88,7 +89,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       </data>
                     </root>");
 
-                Project project = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+                using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
                     <Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                         <Target Name='Build'>
 
@@ -107,7 +108,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                             <Message Text='[@(fileswrittenitem)]'/>
                             <Message Text='[$(fileswrittenproperty)]'/>
                         </Target>
-                    </Project>"))));
+                    </Project>")));
+                Project project = new Project(xmlReader);
 
                 ProjectInstance p = project.CreateProjectInstance();
                 p.Build(new string[] { "Build" }, new ILogger[] { l });
@@ -142,7 +144,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void OnErrorSeesPropertiesAndItemsFromFirstTarget()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
 
                 <Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
 
@@ -169,7 +171,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       <Message Text='[@(i1)][$(p1)][$(p2)]'/>
                    </Target>
 
-                </Project>"))));
+                </Project>")));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -186,7 +189,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TwoExecuteTargets()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
 
                 <Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                    <Target Name='CleanUp'>
@@ -199,7 +202,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       <Error Text='This is an error.'/>
                       <OnError ExecuteTargets='CleanUp;CleanUp2'/>
                    </Target>
-                </Project>"))));
+                </Project>")));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -217,7 +221,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TwoOnErrorClauses()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
 
                 <Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                    <Target Name='CleanUp'>
@@ -231,7 +235,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       <OnError ExecuteTargets='CleanUp'/>
                       <OnError ExecuteTargets='CleanUp2'/>
                    </Target>
-                </Project>"))));
+                </Project>")));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -250,7 +255,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void DependentTarget()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
 
                 <Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                    <Target Name='CleanUp' DependsOnTargets='CleanUp2'>
@@ -263,7 +268,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       <Error Text='This is an error.'/>
                       <OnError ExecuteTargets='CleanUp'/>
                    </Target>
-                </Project>"))));
+                </Project>")));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -282,7 +288,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void ErrorInChildIsHandledInParent()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
 
                 <Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                    <Target Name='CleanUp'>
@@ -294,7 +300,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                    <Target Name='Build' DependsOnTargets='BuildStep1'>
                       <OnError ExecuteTargets='CleanUp'/>
                    </Target>
-                </Project>"))));
+                </Project>")));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -313,14 +320,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void NonExistentExecuteTarget()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
 
                 <Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                    <Target Name='Build'>
                       <Error Text='This is an error.'/>
                       <OnError ExecuteTargets='CleanUp'/>
                    </Target>
-                </Project>"))));
+                </Project>")));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -337,7 +345,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TrueCondition()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
 
                 <Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                    <Target Name='CleanUp'>
@@ -347,7 +355,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       <Error Text='This is an error.'/>
                       <OnError Condition=""'A'!='B'"" ExecuteTargets='CleanUp'/>
                    </Target>
-                </Project>"))));
+                </Project>")));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -364,7 +373,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void FalseCondition()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
 
                 <Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                    <Target Name='CleanUp'>
@@ -374,7 +383,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       <Error Text='This is an error.'/>
                       <OnError Condition=""'A'=='B'"" ExecuteTargets='CleanUp'/>
                    </Target>
-                </Project>"))));
+                </Project>")));
+            Project p = new Project(xmlReader);
 
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
@@ -392,7 +402,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void PropertiesInExecuteTargets()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
 
                 <Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                    <PropertyGroup>
@@ -406,7 +416,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       <Error Text='This is an error.'/>
                       <OnError Condition=""'A'!='B'"" ExecuteTargets='$(Part1)$(Part2)'/>
                    </Target>
-                </Project>"))));
+                </Project>")));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -424,7 +435,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void ErrorTargetsContinueAfterErrorsInErrorHandler()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
 
                 <Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                    <Target Name='CleanUp1'>
@@ -446,7 +457,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                    <Target Name='Build' DependsOnTargets='CoreBuild'>
                       <OnError ExecuteTargets='CleanUp3'/>
                    </Target>
-                </Project>"))));
+                </Project>")));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -465,14 +477,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void ExecuteTargetIsMissing()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
 
                 <Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                    <Target Name='Build'>
                       <Error Text='This is an error.'/>
                       <OnError Condition=""'A'!='B'"" ExecuteTargets='CleanUp'/>
                    </Target>
-                </Project>"))));
+                </Project>")));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -489,7 +502,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void CommentsAroundOnError()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
 
                 <Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                    <Target Name='CleanUp'>
@@ -501,7 +514,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       <OnError Condition=""'A'!='B'"" ExecuteTargets='CleanUp'/>
                       <!-- Comment after OnError -->
                    </Target>
-                </Project>"))));
+                </Project>")));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -518,14 +532,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void CircularDependency()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
 
                 <Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                    <Target Name='Build'>
                       <Error Text='Error in Build-Target'/>
                       <OnError ExecuteTargets='Build'/>
                    </Target>
-                </Project>"))));
+                </Project>")));
+            Project p = new Project(xmlReader);
 
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
@@ -596,8 +611,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void PostBuildBasic()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project(
-                XmlReader.Create(new StringReader(PostBuildBuilder("On_Success", FailAt.Nowhere))));
+            using var xmlReader = XmlReader.Create(new StringReader(PostBuildBuilder("On_Success", FailAt.Nowhere)));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -618,8 +633,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void PostBuildOnSuccessWhereCompileFailed()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project(
-                XmlReader.Create(new StringReader(PostBuildBuilder("On_Success", FailAt.Compile))));
+            using var xmlReader = XmlReader.Create(new StringReader(PostBuildBuilder("On_Success", FailAt.Compile)));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -641,8 +656,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void PostBuildOnSuccessWhereGenerateSatellitesFailed()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project(
-                XmlReader.Create(new StringReader(PostBuildBuilder("On_Success", FailAt.GenerateSatellites))));
+            using var xmlReader = XmlReader.Create(new StringReader(PostBuildBuilder("On_Success", FailAt.GenerateSatellites)));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -664,8 +679,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void PostBuildAlwaysWhereCompileFailed()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project(
-                XmlReader.Create(new StringReader(PostBuildBuilder("Always", FailAt.Compile))));
+            using var xmlReader = XmlReader.Create(new StringReader(PostBuildBuilder("Always", FailAt.Compile)));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -687,8 +702,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void PostBuildFinalOutputChangedWhereCompileFailed()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project(
-                XmlReader.Create(new StringReader(PostBuildBuilder("Final_Output_Changed", FailAt.Compile))));
+            using var xmlReader = XmlReader.Create(new StringReader(PostBuildBuilder("Final_Output_Changed", FailAt.Compile)));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -710,8 +725,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void PostBuildFinalOutputChangedWhereGenerateSatellitesFailed()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project(
-                XmlReader.Create(new StringReader(PostBuildBuilder("Final_Output_Changed", FailAt.GenerateSatellites))));
+            using var xmlReader = XmlReader.Create(new StringReader(PostBuildBuilder("Final_Output_Changed", FailAt.GenerateSatellites)));
+            Project p = new Project(xmlReader);
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 

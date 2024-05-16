@@ -2313,7 +2313,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void Dirtying_ItemCondition()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            using XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <i Include=""i1"" />
@@ -2338,7 +2338,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void Dirtying_MetadataCondition()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            using XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <i Include=""i1"">

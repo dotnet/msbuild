@@ -320,7 +320,8 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
             ",
              path);
 
-            Project p = new Project(XmlReader.Create(new StringReader(content)));
+            using var xmlReader = XmlReader.Create(new StringReader(content));
+            Project p = new Project(xmlReader);
             p.Build(new string[] { "Build" }, new ILogger[] { logger });
 
             // There should be no duplicates in the list - if there are, then skipped targets are being inferred multiple times
@@ -1316,7 +1317,8 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
 </Project>
       ";
             StringReader reader = new StringReader(projectContents);
-            Project project = new Project(new XmlTextReader(reader), null, null);
+            using var xmlReader = new XmlTextReader(reader);
+            Project project = new Project(xmlReader, null, null);
             bool success = project.Build(_mockLogger);
             Assert.False(success);
         }
@@ -1343,7 +1345,8 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
             string errorMessage = @"There is a circular dependency in the target dependency graph involving target ""TargetA"". Since ""TargetC"" has ""DependsOn"" dependence on ""TargetA"", the circular is ""TargetA<-TargetC<-TargetB<-TargetA"".";
 
             StringReader reader = new StringReader(projectContents);
-            Project project = new Project(new XmlTextReader(reader), null, null);
+            using var xmlReader = new XmlTextReader(reader);
+            Project project = new Project(xmlReader, null, null);
             project.Build(_mockLogger).ShouldBeFalse();
             _mockLogger.ErrorCount.ShouldBe(1);
             _mockLogger.Errors[0].Message.ShouldBe(errorMessage);
@@ -1642,7 +1645,8 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
 
             IConfigCache cache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("testFile", new Dictionary<string, string>(), "3.5", Array.Empty<string>(), null), "2.0");
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using var xmlReader = XmlReader.Create(new StringReader(projectFileContents));
+            Project project = new Project(xmlReader);
 
             config.Project = project.CreateProjectInstance();
             cache.AddConfiguration(config);
