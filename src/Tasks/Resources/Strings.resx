@@ -3024,6 +3024,29 @@
   <data name="PopulateSupportedArchitectures.AssemblyNodeIsMissed">
     <value>The assembly node is missing from the manifest. Check your ApplicationManifest file.</value>
   </data>
+  <data name="PopulateSupportedArchitectures.SpecifiedApplicationManifestCanNotBeFound">
+    <value>The file specified in ApplicationManifest can not be found: '{0}'. Please make sure it exists.</value>
+  </data>
+
+  <!--
+        MSB9901 - MSB9990   MSBuild common targets messages
+  -->
+  <data name="CommonTarget.SpecifiedSeverityDoesNotExist">
+    <value>The specified severity is not relevant: '{0}' for the message: '{1}'.</value>
+  </data>
+  <data name="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled">
+    <value>MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please disable one of those.</value>
+    <comment>{StrBegin="MSB9902: "}</comment>
+  </data>
+  <data name="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled">
+    <value>MSB9903: NoWin32Manifest and PreferNativeArm64 options are mutually exclusive. Please disable one of those.</value>
+    <comment>{StrBegin="MSB9903: "}</comment>
+  </data>
+  <data name="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
+    <value>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU.</value>
+    <comment>{StrBegin="MSB9904: "}</comment>
+  </data>
+
   <!--
         The tasks message bucket is: MSB3001 - MSB3999
 
@@ -3116,7 +3139,7 @@
             MSB4000 - MSB4200   Portable targets & tasks (vsproject\flavors\portable\msbuild)
             MSB9000 - MSB9900   MSBuild targets files (C++)
             
-            MSB9901 - MSB9910   MSBuild internal targets
+            MSB9901 - MSB9990   MSBuild common targets messages
 
         The following codes are not longer used but have shipped so should not be reused:
             MSB3109

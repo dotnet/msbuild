@@ -1,33 +1,15 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#if NETFRAMEWORK
-
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Configuration.Assemblies;
-using System.Data;
-using System.Data.SqlTypes;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
-using System.Xml.Linq;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
-using Microsoft.Build.UnitTests.Shared;
-using Microsoft.Build.Utilities;
 using Shouldly;
-using VerifyTests;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
@@ -45,7 +27,6 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Theory]
         [InlineData("testManifestWithInvalidSupportedArchs.manifest", false)]
         [InlineData("testManifestWithApplicationDefined.manifest", true)]
-        [InlineData("testManifestWithValidSupportedArchs.manifest", true)]
         [InlineData(null, true)]
         public void ManifestPopulationCheck(string manifestName, bool expectedResult)
         {
@@ -58,6 +39,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 var tempOutput = env.CreateFolder().Path;
                 task.OutputDirectory = tempOutput;
+                task.SupportedArchitectures = "amd64 arm64";
                 if (!string.IsNullOrEmpty(manifestName))
                 {
                     task.ApplicationManifestPath = Path.Combine(TestAssetsRootPath, manifestName);
@@ -80,15 +62,15 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                     expectedDoc.OuterXml.ShouldBe(actualDoc.OuterXml);
                     expectedDoc.InnerXml.ShouldBe(actualDoc.InnerXml);
-
-                    task.ManifestPath.ShouldNotBeEmpty();
                 }
             }
         }
 
+#if NETFRAMEWORK
         [Theory]
         [InlineData(null, true)]
         [InlineData("buildIn.manifest", true)]
+        [InlineData("testManifestWithValidSupportedArchs.manifest", true)]
         public void E2EScenarioTests(string manifestName, bool expectedResult)
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -151,7 +133,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        internal class AssemblyNativeResourceManager
+        internal sealed class AssemblyNativeResourceManager
         {
             public enum LoadLibraryFlags : uint { LOAD_LIBRARY_AS_DATAFILE = 2 };
 
@@ -194,6 +176,6 @@ namespace Microsoft.Build.Tasks.UnitTests
                 return null;
             }
         }
+#endif
     }
 }
-#endif

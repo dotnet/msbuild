@@ -854,20 +854,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <PlatformTargetAsMSBuildArchitecture>x86</PlatformTargetAsMSBuildArchitecture>
     </PropertyGroup>
 
-    <Error Condition=" '$(Prefer32Bit)' == 'true' and '$(PreferNativeArm64)' == 'true' "
-           Code="MSB9901"
-           Text="Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please disable one of those."
-            />
+    <NETMessage Condition=" '$(Prefer32Bit)' == 'true' and '$(PreferNativeArm64)' == 'true' " ResourceName="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled" Severity="Error"/>
 
-    <Error Condition=" '$(NoWin32Manifest)' == 'true' and '$(PreferNativeArm64)' == 'true' "
-           Code="MSB9902"
-           Text="NoWin32Manifest and PreferNativeArm64 options are mutually exclusive. Please disable one of those."
-            />
+    <NETMessage Condition=" '$(NoWin32Manifest)' == 'true' and '$(PreferNativeArm64)' == 'true' " ResourceName="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled" Severity="Error"/>
 
-    <Warning Condition=" '$(PreferNativeArm64)' == 'true' and '$(Platform)' != 'AnyCPU' "
-             Code="MSB9903"
-             Text="When PreferNativeArm64 is enabled, ensure that the Platform is set to Any CPU."
-             />
+    <NETMessage Condition=" '$(PreferNativeArm64)' == 'true' and '$(Platform)' != 'AnyCPU' " ResourceName="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled" Severity="Warning" />
+
     <!--
       Log an error if the user set MSBuildProjectExtensionsPath in the body of a project. In an SDK style project
       if you set a value in the body, the value is not used by the top implicit import but is used by the bottom.
@@ -3613,6 +3605,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <CompileDependsOn>
       ResolveReferences;
       ResolveKeySource;
+      _SetPreferNativeArm64Win32ManifestProperties;
       SetWin32ManifestProperties;
       FindReferenceAssembliesForReferences;
       _GenerateCompileInputs;
@@ -4121,7 +4114,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
       Name="SetWin32ManifestProperties"
       Condition="'$(Win32Manifest)'==''"
-      DependsOnTargets="ResolveComReferences;ResolveNativeReferences;_SetExternalWin32ManifestProperties;_SetEmbeddedWin32ManifestProperties;_SetPreferNativeArm64Win32ManifestProperties" />
+      DependsOnTargets="ResolveComReferences;ResolveNativeReferences;_SetExternalWin32ManifestProperties;_SetEmbeddedWin32ManifestProperties;" />
 
   <Target
       Name="_SetExternalWin32ManifestProperties"
@@ -4145,23 +4138,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </Target>
 
   <Target
-    Name="_SetPreferNativeArm64Win32ManifestProperties"
-    Condition=" '$(PreferNativeArm64)'=='true' ">
-
-    <PropertyGroup>
-      <SupportedArchitectures>amd64 arm64</SupportedArchitectures>
-    </PropertyGroup>
-    <PopulateSupportedArchitectures
-        ApplicationManifestPath="$(ApplicationManifest)"
-        OutputDirectory="$(IntermediateOutputPath)"
-        SupportedArchitectures="$(SupportedArchitectures)">
-
-        <Output TaskParameter="ManifestPath" PropertyName="Win32Manifest"/>
-    </PopulateSupportedArchitectures>
-
-  </Target>
-
-  <Target
       Name="_SetEmbeddedWin32ManifestProperties"
       Condition="'$(GenerateClickOnceManifests)'!='true' and '@(NativeReference)'=='' and '@(ResolvedIsolatedComModules)'==''" >
 
@@ -4176,6 +4152,37 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <PropertyGroup>
       <EmbeddedWin32Manifest  Condition="'$(ApplicationManifest)'=='' and '$(NoWin32Manifest)'!='true' and Exists('$(_FrameworkVersion40Path)\default.win32manifest')">$(_FrameworkVersion40Path)\default.win32manifest</EmbeddedWin32Manifest>
+    </PropertyGroup>
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        _SetPreferNativeArm64Win32ManifestProperties
+
+    Populates Manifest with SupportedArchitectures and produces Win32Manifest property to be used later in the build.
+    ============================================================
+    -->
+
+  <Target
+      Name="_SetPreferNativeArm64Win32ManifestProperties"
+      Condition=" '$(PreferNativeArm64)'=='true' "
+      DependsOnTargets="SetWin32ManifestProperties">
+
+    <PropertyGroup>
+      <SupportedArchitectures>amd64 arm64</SupportedArchitectures>
+    </PropertyGroup>
+
+    <PopulateSupportedArchitectures
+        ApplicationManifestPath="$(Win32Manifest)"
+        OutputDirectory="$(IntermediateOutputPath)"
+        SupportedArchitectures="$(SupportedArchitectures)">
+
+        <Output TaskParameter="ManifestPath" PropertyName="_Win32Manifest"/>
+    </PopulateSupportedArchitectures>
+
+    <PropertyGroup>
+      <Win32Manifest Condition="'$(_Win32Manifest)' != ''">$(_Win32Manifest)</Win32Manifest>
     </PropertyGroup>
 
   </Target>

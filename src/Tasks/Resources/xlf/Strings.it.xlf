@@ -131,6 +131,26 @@
         <target state="translated">MSB3992: '{0}' non è impostato. Quando {1} è true, assicurarsi di impostare un valore per '{0}'.</target>
         <note>{StrBegin="MSB3992: "}</note>
       </trans-unit>
+      <trans-unit id="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled">
+        <source>MSB9903: NoWin32Manifest and PreferNativeArm64 options are mutually exclusive. Please disable one of those.</source>
+        <target state="new">MSB9903: NoWin32Manifest and PreferNativeArm64 options are mutually exclusive. Please disable one of those.</target>
+        <note>{StrBegin="MSB9903: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
+        <source>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU.</source>
+        <target state="new">MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU.</target>
+        <note>{StrBegin="MSB9904: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled">
+        <source>MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please disable one of those.</source>
+        <target state="new">MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please disable one of those.</target>
+        <note>{StrBegin="MSB9902: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonTarget.SpecifiedSeverityDoesNotExist">
+        <source>The specified severity is not relevant: '{0}' for the message: '{1}'.</source>
+        <target state="new">The specified severity is not relevant: '{0}' for the message: '{1}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
         <source>MSB3881: Fatal Error: more than {0} command line arguments.</source>
         <target state="translated">MSB3881: Errore irreversibile: più di {0} argomenti della riga di comando.</target>
@@ -1573,6 +1593,11 @@
         <source>MSB4300: The specified value: '{0}' for supportedArchitectures element is invalid. Either remove it from manifest or set as 'amd64 arm64'.</source>
         <target state="new">MSB4300: The specified value: '{0}' for supportedArchitectures element is invalid. Either remove it from manifest or set as 'amd64 arm64'.</target>
         <note>{StrBegin="MSB4300: "}</note>
+      </trans-unit>
+      <trans-unit id="PopulateSupportedArchitectures.SpecifiedApplicationManifestCanNotBeFound">
+        <source>The file specified in ApplicationManifest can not be found: '{0}'. Please make sure it exists.</source>
+        <target state="new">The file specified in ApplicationManifest can not be found: '{0}'. Please make sure it exists.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>

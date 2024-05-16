@@ -258,7 +258,9 @@
     <Compile Include="Move.cs" />
     <Compile Include="MSBuild.cs" />
     <Compile Include="NativeMethods.cs" />
+    <Compile Include="NETMessage.cs" />
     <Compile Include="ParserState.cs" />
+    <Compile Include="PopulateSupportedArchitectures.cs" />
     <Compile Include="RedistList.cs" />
     <Compile Include="RemoveDir.cs" />
     <Compile Include="ResGenDependencies.cs" />
@@ -336,7 +338,6 @@
     <Compile Include="ManifestUtil\CngLightup.cs" />
     <Compile Include="RCWForCurrentContext.cs" />
     <Compile Include="PiaReference.cs" />
-    <Compile Include="PopulateSupportedArchitectures.cs" />
     <Compile Include="ResGen.cs" />
     <Compile Include="ResolveComReferenceCache.cs" />
     <Compile Include="StrongNameException.cs" />
@@ -485,6 +486,8 @@
       <LogicalName>$(AssemblyName).Strings.ManifestUtilities.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <!-- The manifest is needed when PreferNativeArm64 is enabled in Unix environments. -->
+    <EmbeddedResource Include="Resources\default.win32manifest" />
     <!-- Other Source Files -->
     <EmbeddedResource Include="ManifestUtil\manifest.xml">
       <LogicalName>Microsoft.Build.Tasks.Deployment.ManifestUtilities.manifest.xml</LogicalName>
@@ -654,6 +657,9 @@
     <Reference Include="System.Xml.Linq" />
     <!-- Needed by Xaml Task Factory -->
     <Reference Include="System.Xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\default.win32manifest" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
