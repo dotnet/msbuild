@@ -30,9 +30,10 @@ Custom BuildCheck analyzers are executed during build. If bad external actors in
 
 #### Mitigation
 
-Custom analyzers are delivered as regular nuget packages by MSBuild `<PackageReference />` element. This way custom analyzer packages will be included in the generated SBOM and Component Government can detect and warn about known malicious custom analyzers.
+Detecting unsecure packages is not MSBuild responsibility and is currently out of scope of this feature.
 
-It is identical to Roslyn analyzers or any other nuget package, for that matter.
+Custom analyzers are delivered as regular nuget packages by MSBuild `<PackageReference />` element.
+Users is expected to implement process to detect and warn about known malicious custom analyzers.
 
 ## Execution
 
@@ -42,14 +43,14 @@ Custom BuildCheck analyzers are executed during build. If bad external actors in
 
 #### Mitigation
 
-Identical to mitigation of threat [Supply chain attack on custom analyzer](#threat-supply-chain-attack-on-custom-analyzer).
+Detecting unsecure packages is not MSBuild responsibility and is currently out of scope of this feature.
 
 ### Threat: Third-Party Vulnerabilities
 Vulnerabilities in custom analyzer or its dependencies.
 
 #### Mitigation
 
-Custom analyzers are delivered as regular NuGet packages by MSBuild `<PackageReference />` element. This way custom analyzer packages will be included in the generated SBOM and Component Government can detect and warn about known malicious custom analyzers.
+Detecting unsecure packages is not MSBuild responsibility and is currently out of scope of this feature.
 
 ## Configuration
 
@@ -70,9 +71,7 @@ Malicious actors can define analyzer ID to be identical or like existing well kn
 
 #### Mitigation
 
-Main mitigation relays on nuget packages component governance.
-
-BuildCheck also disallow duplicated analyzer IDs and do not allow well known prefixes, for example `microsoft-\*`, in custom analyzers.
+Detecting unsecure packages is not MSBuild responsibility and is currently out of scope of this feature.
 
 ## Declaration
 
@@ -83,5 +82,3 @@ Threat actor can write malicious analyzer registration property function in proj
 #### Mitigation
 
 This threat is out of scope of this document, as this requires malicious modification of source code (repository) making these sources untrusted.
-
-It is mentioned here, as a note that we have thought about it.
