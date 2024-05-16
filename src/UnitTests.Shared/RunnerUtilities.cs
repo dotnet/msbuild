@@ -57,7 +57,8 @@ namespace Microsoft.Build.UnitTests.Shared
             out bool successfulExit,
             bool shellExecute = false,
             ITestOutputHelper outputHelper = null,
-            bool attachProcessId = true)
+            bool attachProcessId = true,
+            int timeoutMilliseconds = 30_000)
         {
             BootstrapLocationAttribute attribute = Assembly.GetExecutingAssembly().GetCustomAttribute<BootstrapLocationAttribute>()
                                                    ?? throw new InvalidOperationException("This test assembly does not have the BootstrapLocationAttribute");
@@ -69,7 +70,7 @@ namespace Microsoft.Build.UnitTests.Shared
 #else
             string pathToExecutable = Path.Combine(binaryFolder, "MSBuild.exe");
 #endif
-            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper, attachProcessId);
+            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper, attachProcessId, timeoutMilliseconds);
         }
 
         private static void AdjustForShellExecution(ref string pathToExecutable, ref string arguments)
@@ -97,7 +98,8 @@ namespace Microsoft.Build.UnitTests.Shared
             out bool successfulExit,
             bool shellExecute = false,
             ITestOutputHelper outputHelper = null,
-            bool attachProcessId = true)
+            bool attachProcessId = true,
+            int timeoutMilliseconds = 30_000)
         {
             if (shellExecute)
             {
@@ -142,7 +144,7 @@ namespace Microsoft.Build.UnitTests.Shared
                 {
                     p.WaitForExit();
                 }
-                else if (!p.WaitForExit(30_000))
+                else if (!p.WaitForExit(timeoutMilliseconds))
                 {
                     // Let's not create a unit test for which we need more than 30 sec to execute.
                     // Please consider carefully if you would like to increase the timeout.
