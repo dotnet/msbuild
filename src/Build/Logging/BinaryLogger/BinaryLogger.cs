@@ -72,7 +72,7 @@ namespace Microsoft.Build.Logging
         // version 20:
         //   - TaskStartedEventArgs: Added TaskAssemblyLocation property
         // version 21:
-        //   - TaskParameterEventArgs: Added ParameterName property
+        //   - TaskParameterEventArgs: Added ParameterName and PropertyName properties
 
         // This should be never changed.
         // The minimum version of the binary log reader that can read log of above version.
