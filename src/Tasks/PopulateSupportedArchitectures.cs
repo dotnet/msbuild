@@ -84,30 +84,30 @@ namespace Microsoft.Build.Tasks
             private set => _generatedManifestFullPath = value;
         }
 
-        private string? GetPathToManifest()
+        private (bool canProcceed, string? path) GetPathToManifest()
         {
             if (!string.IsNullOrEmpty(ApplicationManifestPath))
             {
                 if (!File.Exists(ApplicationManifestPath))
                 {
                     Log.LogErrorWithCodeFromResources("PopulateSupportedArchitectures.SpecifiedApplicationManifestCanNotBeFound", ApplicationManifestPath);
-                    return null;
+                    return (false, null);
                 }
 
-                return ApplicationManifestPath;
+                return (true, ApplicationManifestPath);
             }
 
             // The logic for getting default manifest is similar to the one from Roslyn:
             // If Roslyn logic returns null, we fall back to reading embedded manifest.
-            return ToolLocationHelper.GetPathToDotNetFrameworkFile(DefaultManifestName, TargetDotNetFrameworkVersion.Version46);
+            return (true, ToolLocationHelper.GetPathToDotNetFrameworkFile(DefaultManifestName, TargetDotNetFrameworkVersion.Version46));
         }
 
         public override bool Execute()
         {
-            string? pathToManifest = GetPathToManifest();
+            (bool canProcceed, string? pathToManifest) = GetPathToManifest();
 
             // Only if ApplicationManifest was not specified, we can try to load the embedded manifest.
-            if (!(string.IsNullOrEmpty(pathToManifest) || (string.IsNullOrEmpty(pathToManifest) && string.IsNullOrEmpty(ApplicationManifestPath))))
+            if (canProcceed)
             {
                 XmlDocument document = LoadManifest(pathToManifest);
                 XmlNamespaceManager xmlNamespaceManager = XmlNamespaces.GetNamespaceManager(document.NameTable);
