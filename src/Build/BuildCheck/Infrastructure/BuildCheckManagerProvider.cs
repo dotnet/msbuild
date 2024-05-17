@@ -74,7 +74,6 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         internal BuildCheckManager(ILoggingService loggingService)
         {
-            
             _analyzersRegistry = new List<BuildAnalyzerFactoryContext>();
             _acquisitionModule = new BuildCheckAcquisitionModule(loggingService);
             _loggingService = loggingService;
