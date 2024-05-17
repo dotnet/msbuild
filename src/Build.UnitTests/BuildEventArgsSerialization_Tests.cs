@@ -650,7 +650,7 @@ namespace Microsoft.Build.UnitTests
                 new TaskItemData("ItemSpec1", null),
                 new TaskItemData("ItemSpec2", Enumerable.Range(1,3).ToDictionary(i => i.ToString(), i => i.ToString() + "value"))
             };
-            var args = new TaskParameterEventArgs(TaskParameterMessageKind.TaskOutput, "ParameterName", "PropertyName", "ItemName", items, true, DateTime.MinValue);
+            var args = new TaskParameterEventArgs(TaskParameterMessageKind.TaskOutput, "ParameterName1", "PropertyName1", "ItemName1", items, true, DateTime.MinValue);
             args.LineNumber = 265;
             args.ColumnNumber = 6;
 
