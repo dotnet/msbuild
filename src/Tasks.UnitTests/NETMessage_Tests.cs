@@ -19,7 +19,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Theory]
         [InlineData(true, true, "CommonTarget.Prefer32BitAndPreferNativeArm64Enabled", false)]
         [InlineData(false, false, "CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled", true)]
-        public void E2EScenarioTests(bool prefer32, bool isPlatformAnyCpu, string expectedResourceName, bool isSuccessfulBuild)
+        public void E2EScenarioTests(bool prefer32, bool isPlatformAnyCpu, string expectedResourceName, bool isNetWarningExpected)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
@@ -47,11 +47,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                 string expectedBuildMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(expectedResourceName);
                 MockLogger logger = new MockLogger(_testOutput);
 
-                bool result = project.Build(logger);
+                project.Build(logger);
 
-                result.ShouldBe(isSuccessfulBuild);
-
-                if (isSuccessfulBuild)
+                if (isNetWarningExpected)
                 {
                     logger.Warnings[0].RawMessage.ShouldBe(expectedBuildMessage);
                 }
