@@ -763,7 +763,7 @@ namespace Microsoft.Build.UnitTests
                 t.BuildEngine = engine;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                     ? "/C echo hello_stdout & echo hello_stderr >&2"
-                    : "-c echo hello_stdout ; echo hello_stderr >&2";
+                    : "-c \"echo hello_stdout ; echo hello_stderr >&2\"";
 
                 t.Execute();
 
