@@ -136,6 +136,9 @@
     <Compile Include="..\Framework\NativeMethods.cs">
       <Link>NativeMethodsShared.cs</Link>
     </Compile>
+    <Compile Include="..\Framework\Logging\AnsiDetector.cs">
+      <Link>AnsiDetector.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\NodeBuildComplete.cs">
       <Link>NodeBuildComplete.cs</Link>
     </Compile>

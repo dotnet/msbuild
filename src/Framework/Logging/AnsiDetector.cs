@@ -7,11 +7,8 @@
 // https://github.com/keqingrong/supports-ansi/blob/master/index.js
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Microsoft.Build.Framework.Logging
 {
@@ -40,7 +37,7 @@ namespace Microsoft.Build.Framework.Logging
 
         internal static bool IsAnsiSupported(string termType)
         {
-            if (string.IsNullOrWhiteSpace(termType))
+            if (string.IsNullOrEmpty(termType))
             {
                 return false;
             }
