@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests
             _output = testOutput;
         }
 
-        private sealed class MyTool : ToolTask, IDisposable
+        private class MyTool : ToolTask, IDisposable
         {
             private string _fullToolName;
             private string _responseFileCommands = string.Empty;
@@ -735,6 +735,41 @@ namespace Microsoft.Build.UnitTests
             t.Execute();
             engine.AssertLogContains("echo \"hello \\\"world\\\"\"");
             engine.Errors.ShouldBe(0);
+        }
+
+        private sealed class MyToolWithCustomProcess : MyTool
+        {
+            protected override Process StartToolProcess(Process proc)
+            {
+                Process customProcess = new Process();
+                customProcess.StartInfo = proc.StartInfo;
+
+                customProcess.EnableRaisingEvents = true;
+                customProcess.Exited += ReceiveExitNotification;
+
+                customProcess.ErrorDataReceived += ReceiveStandardErrorData;
+                customProcess.OutputDataReceived += ReceiveStandardOutputData;
+
+                return base.StartToolProcess(customProcess);
+            }
+        }
+
+        [Fact]
+        public void UsesCustomProcess()
+        {
+            using (MyToolWithCustomProcess t = new MyToolWithCustomProcess())
+            {
+                MockEngine3 engine = new MockEngine3();
+                t.BuildEngine = engine;
+                t.MockCommandLineCommands = NativeMethodsShared.IsWindows
+                    ? "/C echo hello_stdout & echo hello_stderr >&2"
+                    : "-c echo hello_stdout ; echo hello_stderr >&2";
+
+                t.Execute();
+
+                engine.AssertLogContains("\nhello_stdout");
+                engine.AssertLogContains("\nhello_stderr");
+            }
         }
 
         /// <summary>
