@@ -39,11 +39,6 @@
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <PackageReference Include="System.Collections.Immutable" />
-    <PackageReference Include="System.Threading.Tasks.Dataflow" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildFromSource)' != 'true'">
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
   </ItemGroup>
@@ -52,6 +47,8 @@
     <PackageReference Include="System.Memory" />
     <PackageReference Include="System.Security.Principal.Windows" />
     <PackageReference Include="System.Text.Json" />
+    <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="System.Threading.Tasks.Dataflow" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
