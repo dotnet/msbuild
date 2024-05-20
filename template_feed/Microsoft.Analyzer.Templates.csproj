@@ -1,24 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- The package metadata. Fill in the properties marked as TODO below -->
-    <!-- Follow the instructions on https://learn.microsoft.com/en-us/nuget/create-packages/package-authoring-best-practices -->
     <PackageId>Microsoft.Analyzer.Templates</PackageId>
     <PackageVersion>1.0</PackageVersion>
     <Authors>Microsoft</Authors>
     <Description>Common Microsoft Analyzer Templates</Description>
     <PackageProjectUrl>https://github.com/dotnet/msbuild</PackageProjectUrl>
-
-    <!-- Keep package type as 'Template' to show the package as a template package on nuget.org and make your template available in dotnet new search.-->
     <PackageType>Template</PackageType>
     <TargetFramework>$(LatestDotNetCoreForMSBuild)</TargetFramework>
-    <IncludeContentInPack>true</IncludeContentInPack>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <ContentTargetFolders>content</ContentTargetFolders>
     <NoWarn>$(NoWarn);NU5128</NoWarn>
-    <NoDefaultExcludes>true</NoDefaultExcludes>
-    <!-- <WarnOnPackingNonPackableProject>true</WarnOnPackingNonPackableProject>
-    <IsPackable>false</IsPackable> -->
+    <IsPackable>true</IsPackable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup>
