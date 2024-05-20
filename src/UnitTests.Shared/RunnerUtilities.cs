@@ -140,16 +140,17 @@ namespace Microsoft.Build.UnitTests.Shared
                 p.BeginErrorReadLine();
                 p.StandardInput.Dispose();
 
+                TimeSpan timeout = TimeSpan.FromMilliseconds(timeoutMilliseconds);
                 if (Traits.Instance.DebugUnitTests)
                 {
                     p.WaitForExit();
                 }
-                else if (!p.WaitForExit(timeoutMilliseconds))
+                else if (!p.WaitForExit(timeout))
                 {
-                    // Let's not create a unit test for which we need more than 30 sec to execute.
+                    // Let's not create a unit test for which we need more than requested timeout to execute.
                     // Please consider carefully if you would like to increase the timeout.
                     p.KillTree(1000);
-                    throw new TimeoutException($"Test failed due to timeout: process {p.Id} is active for more than 30 sec.");
+                    throw new TimeoutException($"Test failed due to timeout: process {p.Id} is active for more than {timeout.TotalSeconds} sec.");
                 }
 
                 // We need the WaitForExit call without parameters because our processing of output/error streams is not synchronous.
