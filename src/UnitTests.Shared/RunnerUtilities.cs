@@ -145,7 +145,7 @@ namespace Microsoft.Build.UnitTests.Shared
                 {
                     p.WaitForExit();
                 }
-                else if (!p.WaitForExit(timeout))
+                else if (!p.WaitForExit(timeoutMilliseconds))
                 {
                     // Let's not create a unit test for which we need more than requested timeout to execute.
                     // Please consider carefully if you would like to increase the timeout.
