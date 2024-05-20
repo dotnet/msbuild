@@ -185,16 +185,36 @@
       <trans-unit id="HelpMessage_46_FeatureAvailabilitySwitch">
         <source>  -featureAvailability:featureName,...
                      Check feature availability. The result is one of the
-                     strings "Undefined", "Available", "NotAvailable".
+                     strings "Undefined", "Available", "NotAvailable" and
+                     "Preview".
+                     - Undefined - the availability of the feature is undefined
+                     (the feature name is unknown to the feature availability
+                     checker)
+                     - NotAvailable - the feature is not available (unlike
+                     Undefined, the feature name is known to the feature
+                     availability checker and it knows the feature is not
+                     supported by current MSBuild engine)
+                     - Available - the feature is available
+                     - Preview - the feature is in preview (not stable)
                      (Short form: -fa)
     </source>
         <target state="new">  -featureAvailability:featureName,...
                      Check feature availability. The result is one of the
-                     strings "Undefined", "Available", "NotAvailable".
+                     strings "Undefined", "Available", "NotAvailable" and
+                     "Preview".
+                     - Undefined - the availability of the feature is undefined
+                     (the feature name is unknown to the feature availability
+                     checker)
+                     - NotAvailable - the feature is not available (unlike
+                     Undefined, the feature name is known to the feature
+                     availability checker and it knows the feature is not
+                     supported by current MSBuild engine)
+                     - Available - the feature is available
+                     - Preview - the feature is in preview (not stable)
                      (Short form: -fa)
     </target>
         <note>
-      LOCALIZATION: "-featureAvailability", "-fa", "Undefined", "Available" and "NotAvailable"should not be localized.
+      LOCALIZATION: "-featureAvailability", "-fa", "Undefined", "Available" "NotAvailable" and "Preview"should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
