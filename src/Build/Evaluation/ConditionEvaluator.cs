@@ -186,11 +186,9 @@ namespace Microsoft.Build.Evaluation
             ExpanderOptions expanderOptions,
             string evaluationDirectory,
             ElementLocation elementLocation,
-            ILoggingService loggingServices,
-            BuildEventContext buildEventContext,
             IFileSystem fileSystem,
-            ProjectRootElementCacheBase? projectRootElementCache = null,
-            LoggingContext? loggingContext = null)
+            LoggingContext? loggingContext,
+            ProjectRootElementCacheBase? projectRootElementCache = null)
             where P : class, IProperty
             where I : class, IItem
         {
@@ -202,11 +200,9 @@ namespace Microsoft.Build.Evaluation
                 conditionedPropertiesTable: null /* do not collect conditioned properties */,
                 evaluationDirectory,
                 elementLocation,
-                loggingServices,
-                buildEventContext,
                 fileSystem,
-                projectRootElementCache,
-                loggingContext);
+                loggingContext,
+                projectRootElementCache);
         }
 
         /// <summary>
@@ -224,18 +220,15 @@ namespace Microsoft.Build.Evaluation
             Dictionary<string, List<string>>? conditionedPropertiesTable,
             string evaluationDirectory,
             ElementLocation elementLocation,
-            ILoggingService loggingServices,
-            BuildEventContext buildEventContext,
             IFileSystem fileSystem,
-            ProjectRootElementCacheBase? projectRootElementCache = null,
-            LoggingContext? loggingContext = null)
+            LoggingContext? loggingContext,
+            ProjectRootElementCacheBase? projectRootElementCache = null)
             where P : class, IProperty
             where I : class, IItem
         {
             ErrorUtilities.VerifyThrowArgumentNull(condition, nameof(condition));
             ErrorUtilities.VerifyThrowArgumentNull(expander, nameof(expander));
             ErrorUtilities.VerifyThrowArgumentLength(evaluationDirectory, nameof(evaluationDirectory));
-            ErrorUtilities.VerifyThrowArgumentNull(buildEventContext, nameof(buildEventContext));
 
             // An empty condition is equivalent to a "true" condition.
             if (condition.Length == 0)
@@ -263,8 +256,8 @@ namespace Microsoft.Build.Evaluation
                 var conditionParser = new Parser();
 
                 #region REMOVE_COMPAT_WARNING
-                conditionParser.LoggingServices = loggingServices;
-                conditionParser.LogBuildEventContext = buildEventContext;
+                conditionParser.LoggingServices = loggingContext?.LoggingService;
+                conditionParser.LogBuildEventContext = loggingContext?.BuildEventContext ?? BuildEventContext.Invalid;
                 #endregion
 
                 parsedExpression = conditionParser.Parse(condition, options, elementLocation);
@@ -282,13 +275,14 @@ namespace Microsoft.Build.Evaluation
                 fileSystem,
                 projectRootElementCache);
 
+            expander.PropertiesUseTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
             // We are evaluating this expression now and it can cache some state for the duration,
             // so we don't want multiple threads working on the same expression
             lock (parsedExpression)
             {
                 try
                 {
-                    result = parsedExpression.Evaluate(state, loggingContext);
+                    result = parsedExpression.Evaluate(state);
                 }
                 finally
                 {
@@ -298,6 +292,7 @@ namespace Microsoft.Build.Evaluation
                         // Finished using the expression tree. Add it back to the pool so other threads can use it.
                         expressionPool.Push(parsedExpression);
                     }
+                    expander.PropertiesUseTracker.ResetPropertyReadContext();
                 }
             }
 
@@ -350,6 +345,8 @@ namespace Microsoft.Build.Evaluation
 
             ElementLocation ElementLocation { get; }
 
+            PropertiesUseTracker PropertiesUseTracker { get; }
+
             /// <summary>
             ///     Table of conditioned properties and their values.
             ///     Used to populate configuration lists in some project systems.
@@ -362,7 +359,7 @@ namespace Microsoft.Build.Evaluation
             ///     May return null if the expression would expand to non-empty and it broke out early.
             ///     Otherwise, returns the correctly expanded expression.
             /// </summary>
-            string ExpandIntoStringBreakEarly(string expression, LoggingContext? loggingContext = null);
+            string ExpandIntoStringBreakEarly(string expression);
 
             /// <summary>
             ///     Expands the specified expression into a list of TaskItem's.
@@ -372,7 +369,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             ///     Expands the specified expression into a string.
             /// </summary>
-            string ExpandIntoString(string expression, LoggingContext? loggingContext = null);
+            string ExpandIntoString(string expression);
 
             /// <summary>
             ///     PRE cache
@@ -402,6 +399,8 @@ namespace Microsoft.Build.Evaluation
             public string EvaluationDirectory { get; }
 
             public ElementLocation ElementLocation { get; }
+
+            public PropertiesUseTracker PropertiesUseTracker => _expander.PropertiesUseTracker;
 
             public IFileSystem FileSystem { get; }
 
@@ -447,13 +446,9 @@ namespace Microsoft.Build.Evaluation
             /// May return null if the expression would expand to non-empty and it broke out early.
             /// Otherwise, returns the correctly expanded expression.
             /// </summary>
-            public string ExpandIntoStringBreakEarly(string expression, LoggingContext? loggingContext = null)
+            public string ExpandIntoStringBreakEarly(string expression)
             {
-                var originalValue = _expander.WarnForUninitializedProperties;
-
-                expression = _expander.ExpandIntoStringAndUnescape(expression, _expanderOptions | ExpanderOptions.BreakOnNotEmpty, ElementLocation, loggingContext);
-
-                _expander.WarnForUninitializedProperties = originalValue;
+                expression = _expander.ExpandIntoStringAndUnescape(expression, _expanderOptions | ExpanderOptions.BreakOnNotEmpty, ElementLocation);
 
                 return expression;
             }
@@ -465,11 +460,7 @@ namespace Microsoft.Build.Evaluation
             /// <returns>A list of items.</returns>
             public IList<TaskItem> ExpandIntoTaskItems(string expression)
             {
-                var originalValue = _expander.WarnForUninitializedProperties;
-
                 var items = _expander.ExpandIntoTaskItemsLeaveEscaped(expression, _expanderOptions, ElementLocation);
-
-                _expander.WarnForUninitializedProperties = originalValue;
 
                 return items;
             }
@@ -478,15 +469,10 @@ namespace Microsoft.Build.Evaluation
             /// Expands the specified expression into a string.
             /// </summary>
             /// <param name="expression">The expression to expand.</param>
-            /// <param name="loggingContext"></param>
             /// <returns>The expanded string.</returns>
-            public string ExpandIntoString(string expression, LoggingContext? loggingContext = null)
+            public string ExpandIntoString(string expression)
             {
-                var originalValue = _expander.WarnForUninitializedProperties;
-
-                expression = _expander.ExpandIntoStringAndUnescape(expression, _expanderOptions, ElementLocation, loggingContext);
-
-                _expander.WarnForUninitializedProperties = originalValue;
+                expression = _expander.ExpandIntoStringAndUnescape(expression, _expanderOptions, ElementLocation);
 
                 return expression;
             }

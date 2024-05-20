@@ -1284,6 +1284,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _twoItems = new ITaskItem[] { new TaskItem(item), new TaskItem(item2) };
 
             _bucket = new ItemBucket(Array.Empty<string>(), new Dictionary<string, string>(), new Lookup(itemsByName, new PropertyDictionary<ProjectPropertyInstance>()), 0);
+            _bucket.Initialize(null);
             _host.FindTask(null);
             _host.InitializeForBatch(talc, _bucket, null);
             _parametersSetOnTask = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);

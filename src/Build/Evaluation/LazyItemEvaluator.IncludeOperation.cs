@@ -109,14 +109,14 @@ namespace Microsoft.Build.Evaluation
                                 MSBuildEventSource.Log.ExpandGlobStart(_rootDirectory ?? string.Empty, glob, string.Join(", ", excludePatternsForGlobs));
                             }
 
-                            using (_lazyEvaluator._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
+                            using (_lazyEvaluator?._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
                             {
                                 includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
                                     _rootDirectory,
                                     glob,
                                     excludePatternsForGlobs,
                                     fileMatcher: FileMatcher,
-                                    loggingMechanism: _lazyEvaluator._loggingContext,
+                                    loggingMechanism: _lazyEvaluator?._loggingContext,
                                     includeLocation: _itemElement.IncludeLocation,
                                     excludeLocation: _itemElement.ExcludeLocation);
                             }
