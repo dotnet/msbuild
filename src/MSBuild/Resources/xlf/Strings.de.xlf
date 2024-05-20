@@ -226,27 +226,29 @@
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_48_TerminalLoggerParametersSwitch">
-        <source>  -terminalLoggerParameters:default=[true|false|on|off|auto]
-                      Users are able to opt-in and use the TerminalLogger.
+        <source>  -terminalLoggerParameters: &lt;parameters&gt;
+                      Parameters for the TerminalLogger. (Short form: -tlp)
+                      default parameter.
                       - `on`, `true`  forces TerminalLogger to be used even when
                       it would be disabled.
                       - `off`, `false` forces TerminalLogger to not be used even
                       when it would be enabled.
                       - `auto` enables TerminalLogger when the terminal supports
                       it and the session doesn't have redirected stdout/stderr
-                      (Short form: -tlp)
+
                       Example:
                         -terminalLoggerParameters:default=auto
     </source>
-        <target state="new">  -terminalLoggerParameters:default=[true|false|on|off|auto]
-                      Users are able to opt-in and use the TerminalLogger.
+        <target state="new">  -terminalLoggerParameters: &lt;parameters&gt;
+                      Parameters for the TerminalLogger. (Short form: -tlp)
+                      default parameter.
                       - `on`, `true`  forces TerminalLogger to be used even when
                       it would be disabled.
                       - `off`, `false` forces TerminalLogger to not be used even
                       when it would be enabled.
                       - `auto` enables TerminalLogger when the terminal supports
                       it and the session doesn't have redirected stdout/stderr
-                      (Short form: -tlp)
+
                       Example:
                         -terminalLoggerParameters:default=auto
     </target>
