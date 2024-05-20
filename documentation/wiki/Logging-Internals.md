@@ -14,7 +14,8 @@ In this document we'll be describing mainly the internal design and implementati
 * **Forwarding Logger** - a logger that has a single instance in each logical executing node and is capable of filtering and/or alter the tracing stream formed of the `BuildEventArg`s before it undergoes serialization and remoting into the Entrypoint node. Main built-in implementations are: `CentralForwardingLogger` and `ConfigurableForwardingLogger`.
 * **Distributed Logger** - It is a pair of Central Logger and a 'Forwarding Logger'
 * <a name="LoggerDescription"></a>**LoggerDescription** - Serializable information describing the Forwarding Logger - so that the forwarding logger can be constructed in the OOP node. It also holds the 'LoggerId' (AKA 'SinkId') - so that the remote data can be properly routed to the Central Logger. Other notable datapoints are `Verbosity` and `LoggerSwitchParameters` - which both serves for proper initialization of the forwarder after it's constructed in OOP node.
-![Distributed Logger](distnode.png)
+
+  ![Distributed Logger](distnode.png)
 * **EventSource** - source of the tracing events - either from the life build process or replayed post-hoc from the stored source.
 * **Sink** - Consumer of the tracing data that exposes and fires them as events - serving as a 'EventSource' for the consuming Logger
 * **In-Proc node** - the build executing unit that is running in the 'Entrypoint node'
