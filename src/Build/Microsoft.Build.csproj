@@ -561,7 +561,7 @@
     <Compile Include="Logging\BinaryLogger\BinaryLogger.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogRecordKind.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogReplayEventSource.cs" />
-    <Compile Include="Logging\BinaryLogger\BuildEventArgsDispatcher.cs" />
+    <Compile Include="Logging\BinaryLogger\EventArgsDispatcher.cs" />
     <Compile Include="Logging\BinaryLogger\BuildEventArgsFieldFlags.cs" />
     <Compile Include="Logging\BinaryLogger\BuildEventArgsFields.cs" />
     <Compile Include="Logging\BinaryLogger\BuildEventArgsReader.cs" />
