@@ -4422,25 +4422,33 @@ namespace Microsoft.Build.CommandLine
         {
             var replayEventSource = new BinaryLogReplayEventSource();
 
-            ILogger buildCheckLogger = null;
-
             if (isBuildCheckEnabled)
             {
-                List<ForwardingLoggerRecord> remoteLoggerRecords = new List<ForwardingLoggerRecord>();
+                List<ForwardingLoggerRecord> remoteLoggerRecords = [];
                 foreach (DistributedLoggerRecord distRecord in distributedLoggerRecords)
                 {
                     remoteLoggerRecords.Add(new ForwardingLoggerRecord(distRecord.CentralLogger, distRecord.ForwardingLoggerDescription));
                 }
 
                 BuildManager.DefaultBuildManager.AttachBuildCheckForReplay(
+                    replayEventSource,
                     loggers,
                     remoteLoggerRecords,
                     warningsAsErrors,
                     warningsNotAsErrors,
-                    warningsAsMessages,
-                    out buildCheckLogger);
+                    warningsAsMessages);
 
-                buildCheckLogger.Initialize(replayEventSource);
+                try
+                {
+                    replayEventSource.Replay(binaryLogFilePath, s_buildCancellationSource.Token);
+                }
+                catch (Exception ex)
+                {
+                    var message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidLogFileFormat", ex.Message);
+                    Console.WriteLine(message);
+                }
+
+                return;
             }
 
             foreach (var distributedLoggerRecord in distributedLoggerRecords)
@@ -4487,8 +4495,6 @@ namespace Microsoft.Build.CommandLine
             {
                 distributedLoggerRecord.CentralLogger?.Shutdown();
             }
-
-            buildCheckLogger?.Shutdown();
         }
 
         /// <summary>
