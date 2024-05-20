@@ -73,7 +73,7 @@ during the initialization of the [BuildAnalyzer](https://github.com/dotnet/msbui
 
 #### Example of consuming the CustomConfigurationData
 The `Initialize` method of BuildCheck Analyzer:
-```
+```C#
 public override void Initialize(ConfigurationContext configurationContext)
 {
     Console.WriteLine(configurationContext.CustomConfigurationData.Count);

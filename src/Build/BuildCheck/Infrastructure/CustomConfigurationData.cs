@@ -15,7 +15,7 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 ///  that were attribute to a particular rule, but were not recognized by the infrastructure.
 /// The configuration data that is recognized by the infrastructure is passed as <see cref="BuildAnalyzerConfiguration"/>.
 /// </summary>
-public class CustomConfigurationData
+public sealed class CustomConfigurationData
 {
     public static CustomConfigurationData Null { get; } = new(string.Empty);
 
@@ -60,7 +60,7 @@ public class CustomConfigurationData
             return true;
         }
 
-        if (obj.GetType() != this.GetType())
+        if (obj is not CustomConfigurationData)
         {
             return false;
         }
