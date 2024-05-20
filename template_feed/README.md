@@ -1,2 +1,9 @@
-<!-- Provide an overview of what your template package does and how to get started.
-Consider previewing the README before uploading (https://learn.microsoft.com/en-us/nuget/nuget-org/package-readme-on-nuget-org#preview-your-readme). -->
+## MSBuild Custom Analyzer Template Package
+
+The package contains the template designed to streamline the creation of MSBuild analyzer libraries.
+| Template name | Short name | Description|
+|---|---|---|
+|MSBuild Custom Analyzer Template|`msbuildanalyzer`|A project for creating a MSBuild analyzer library that targets .NET Standard.|
+
+The package is available for download from nuget.org.
+Please feel to contribute or provide the feedback in discussions or via opening the issue in dotnet/msbuild repo.
