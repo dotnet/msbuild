@@ -20,18 +20,8 @@ public class ConfigurationContext
 
     internal static ConfigurationContext FromDataEnumeration(CustomConfigurationData[] customConfigurationData)
     {
-        if (!customConfigurationData.Any(BuildCheck.CustomConfigurationData.NotNull))
-        {
-            return Null;
-        }
-
-        return new ConfigurationContext(
-            customConfigurationData
-                .Where(BuildCheck.CustomConfigurationData.NotNull)
-                .ToArray());
+        return new ConfigurationContext(customConfigurationData);
     }
-
-    internal static ConfigurationContext Null { get; } = new(Array.Empty<CustomConfigurationData>());
 
     /// <summary>
     /// Custom configuration data - per each rule that has some specified.
