@@ -210,9 +210,9 @@ namespace Microsoft.Build.CommandLine
         // WARNING: keep this map in the same order as the ParameterlessSwitch enumeration
         private static readonly ParameterlessSwitchInfo[] s_parameterlessSwitchesMap =
         {
-            //---------------------------------------------------------------------------------------------------------------------------------------------------
+            //----------------------------------------------------------------------------------------------------------------------------------------------------------
             //                                          Switch Names                        Switch Id                             Dup Error  Light up key    resourceId
-            //---------------------------------------------------------------------------------------------------------------------------------------------------
+            //----------------------------------------------------------------------------------------------------------------------------------------------------------
             new ParameterlessSwitchInfo(  new string[] { "help", "h", "?" },                         ParameterlessSwitch.Help,                  null,       "HelpMessage_4_HelpSwitch"),
             new ParameterlessSwitchInfo(  new string[] { "version", "ver" },                         ParameterlessSwitch.Version,               null,       "HelpMessage_6_VersionSwitch"),
             new ParameterlessSwitchInfo(  new string[] { "nologo" },                                 ParameterlessSwitch.NoLogo,                null,       "HelpMessage_5_NoLogoSwitch"),
@@ -230,7 +230,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterlessSwitchInfo(  new string[] { "filelogger9", "fl9" },                     ParameterlessSwitch.FileLogger9,           null,       "HelpMessage_20_FileLoggerSwitch"),
             new ParameterlessSwitchInfo(  new string[] { "distributedfilelogger", "dfl" },           ParameterlessSwitch.DistributedFileLogger, null,       "HelpMessage_21_DistributedFileLoggerSwitch"),
 #if DEBUG
-            new ParameterlessSwitchInfo(  new string[] { "waitfordebugger", "wfd" },                 ParameterlessSwitch.WaitForDebugger,       null,       "HelpMessage_49_WaitForDebuggerSwitch"),
+            new ParameterlessSwitchInfo(  new string[] { "waitfordebugger", "wfd" },                 ParameterlessSwitch.WaitForDebugger,       null,       null),
 #endif
         };
 
@@ -238,9 +238,9 @@ namespace Microsoft.Build.CommandLine
         // WARNING: keep this map in the same order as the ParameterizedSwitch enumeration
         private static readonly ParameterizedSwitchInfo[] s_parameterizedSwitchesMap =
         {
-            //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-            //                                          Switch Names                            Switch Id                                       Duplicate Switch Error          Multi Params?   Missing Parameters Error           Unquote?    Empty?
-            //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            //                                          Switch Names                            Switch Id                                       Duplicate Switch Error          Multi Params?   Missing Parameters Error           Unquote?    Empty?   reosurceId
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
             new ParameterizedSwitchInfo(  new string[] { null },                                ParameterizedSwitch.Project,                    "DuplicateProjectSwitchError",  false,          null,                                  true,   false,   null),
             new ParameterizedSwitchInfo(  new string[] { "target", "t"},                        ParameterizedSwitch.Target,                     null,                           true,           "MissingTargetError",                  true,   false,   "HelpMessage_9_TargetSwitch"),
             new ParameterizedSwitchInfo(  new string[] { "property", "p" },                     ParameterizedSwitch.Property,                   null,                           true,           "MissingPropertyError",                true,   false,   "HelpMessage_10_PropertySwitch"),
