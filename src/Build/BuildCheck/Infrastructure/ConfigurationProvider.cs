@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
 using Microsoft.Build.Experimental.BuildCheck;
+using System.Collections.Concurrent;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
@@ -18,17 +19,17 @@ internal sealed class ConfigurationProvider
     /// <summary>
     /// The dictionary used for storing the BuildAnalyzerConfiguration per projectfile and rule id. The key is equal to {projectFullPath}-{ruleId}.
     /// </summary>
-    private readonly Dictionary<string, BuildAnalyzerConfiguration> _buildAnalyzerConfiguration = new Dictionary<string, BuildAnalyzerConfiguration>(StringComparer.InvariantCultureIgnoreCase);
+    private readonly ConcurrentDictionary<string, BuildAnalyzerConfiguration> _buildAnalyzerConfiguration = new ConcurrentDictionary<string, BuildAnalyzerConfiguration>(StringComparer.InvariantCultureIgnoreCase);
 
     /// <summary>
     /// The dictionary used for storing the key-value pairs retrieved from the .editorconfigs for specific projectfile. The key is equal to projectFullPath.
     /// </summary>
-    private readonly Dictionary<string, Dictionary<string, string>> _editorConfigData = new Dictionary<string, Dictionary<string, string>>(StringComparer.InvariantCultureIgnoreCase);
+    private readonly ConcurrentDictionary<string, Dictionary<string, string>> _editorConfigData = new ConcurrentDictionary<string, Dictionary<string, string>>(StringComparer.InvariantCultureIgnoreCase);
 
     /// <summary>
     /// The dictionary used for storing the CustomConfigurationData per ruleId. The key is equal to ruleId.
     /// </summary>
-    private readonly Dictionary<string, CustomConfigurationData> _customConfigurationData = new Dictionary<string, CustomConfigurationData>(StringComparer.InvariantCultureIgnoreCase);
+    private readonly ConcurrentDictionary<string, CustomConfigurationData> _customConfigurationData = new ConcurrentDictionary<string, CustomConfigurationData>(StringComparer.InvariantCultureIgnoreCase);
 
     private readonly string[] _infrastructureConfigurationKeys = new string[] {
         nameof(BuildAnalyzerConfiguration.EvaluationAnalysisScope).ToLower(),
@@ -188,27 +189,25 @@ internal sealed class ConfigurationProvider
     /// <exception cref="BuildCheckConfigurationException"></exception>
     private Dictionary<string, string> FetchEditorConfigRules(string projectFullPath)
     {
-        // check if we have the data already
-        if (_editorConfigData.TryGetValue(projectFullPath, out var cachedConfig))
+        var editorConfigRules = _editorConfigData.GetOrAdd(projectFullPath, (key) =>
         {
-            return cachedConfig;
-        }
+            Dictionary<string, string> config;
+            try
+            {
+                config = _editorConfigParser.Parse(projectFullPath);
+            }
+            catch (Exception exception)
+            {
+                throw new BuildCheckConfigurationException($"Parsing editorConfig data failed", exception, BuildCheckConfigurationErrorScope.EditorConfigParser);
+            }
 
-        Dictionary<string, string> config;
-        try
-        {
-            config = _editorConfigParser.Parse(projectFullPath);
-        }
-        catch (Exception exception)
-        {
-            throw new BuildCheckConfigurationException($"Parsing editorConfig data failed", exception, BuildCheckConfigurationErrorScope.EditorConfigParser);
-        }
-
-        // clear the dictionary from the key-value pairs not BuildCheck related and
-        // store the data so there is no need to parse the .editorconfigs all over again
-        Dictionary<string, string> result = FilterDictionaryByKeys($"{BuildCheck_ConfigurationKey}.", config);
-        _editorConfigData[projectFullPath] = result;
-        return result;
+            // clear the dictionary from the key-value pairs not BuildCheck related and
+            // store the data so there is no need to parse the .editorconfigs all over again
+            Dictionary<string, string> filteredData = FilterDictionaryByKeys($"{BuildCheck_ConfigurationKey}.", config);
+            return filteredData;
+        });
+        
+        return editorConfigRules;
     }
 
     internal Dictionary<string, string> GetConfiguration(string projectFullPath, string ruleId)
@@ -231,22 +230,20 @@ internal sealed class ConfigurationProvider
     {
         var cacheKey = $"{ruleId}-{projectFullPath}";
 
-        if (_buildAnalyzerConfiguration.TryGetValue(cacheKey, out BuildAnalyzerConfiguration? cachedEditorConfig))
+        var editorConfigValue = _buildAnalyzerConfiguration.GetOrAdd(cacheKey, (key) =>
         {
-            return cachedEditorConfig;
-        }
+            BuildAnalyzerConfiguration? editorConfig = BuildAnalyzerConfiguration.Null;
+            var config = GetConfiguration(projectFullPath, ruleId);
 
-        BuildAnalyzerConfiguration? editorConfig = BuildAnalyzerConfiguration.Null;
-        var config = GetConfiguration(projectFullPath, ruleId);
+            if (config.Any())
+            {
+                editorConfig = BuildAnalyzerConfiguration.Create(config);
+            }
 
-        if (config.Any())
-        {
-            editorConfig = BuildAnalyzerConfiguration.Create(config);
-        }
+            return editorConfig;
+        });
 
-        _buildAnalyzerConfiguration[cacheKey] = editorConfig;
-
-        return editorConfig;
+        return editorConfigValue;
     }
 
     /// <summary>
