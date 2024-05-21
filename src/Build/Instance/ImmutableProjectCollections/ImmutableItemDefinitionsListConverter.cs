@@ -92,12 +92,8 @@ namespace Microsoft.Build.Instance
             int currentIndex = arrayIndex;
             void PutItemIntoArray(TCached item)
             {
-                T? instance = _getInstance(item);
-                if (instance != null)
-                {
-                    array[currentIndex] = instance;
-                    ++currentIndex;
-                }
+                array[currentIndex] = _getInstance(item);
+                ++currentIndex;
             }
 
             if (_itemList != null)

@@ -12,7 +12,6 @@ namespace Microsoft.Build.Collections
     /// <inheritdoc />
     [DebuggerTypeProxy(typeof(HashSetDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
-    [Serializable()]
 #if FEATURE_SECURITY_PERMISSIONS
     [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
 #endif

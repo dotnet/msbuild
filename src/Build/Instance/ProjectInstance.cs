@@ -10,7 +10,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
@@ -908,7 +907,8 @@ namespace Microsoft.Build.Execution
             var itemDictionary = new ImmutableItemDictionary<ProjectItem, ProjectItemInstance>(
                 linkedProject.Items,
                 itemsByType,
-                convertCachedItemToInstance);
+                convertCachedItemToInstance,
+                projectItemInstance => projectItemInstance.ItemType);
 
             return itemDictionary;
         }
