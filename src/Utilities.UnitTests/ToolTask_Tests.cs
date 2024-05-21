@@ -741,10 +741,11 @@ namespace Microsoft.Build.UnitTests
         {
             protected override Process StartToolProcess(Process proc)
             {
-                Process customProcess = new Process();
-                customProcess.StartInfo = proc.StartInfo;
-
-                customProcess.EnableRaisingEvents = true;
+                using var customProcess = new Process
+                {
+                    StartInfo = proc.StartInfo,
+                    EnableRaisingEvents = true
+                };
                 customProcess.Exited += ReceiveExitNotification;
 
                 customProcess.ErrorDataReceived += ReceiveStandardErrorData;
