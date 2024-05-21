@@ -156,15 +156,15 @@ namespace Microsoft.Build.BackEnd
                     TargetBuiltReason buildReason = TargetBuiltReason.None;
                     if (entry.Request.Targets.Contains(targetName))
                     {
-                        buildReason = TargetBuiltReason.EntryTarget;
+                        buildReason = TargetBuiltReason.EntryTargets;
                     }
                     else if (configuration.ProjectInitialTargets.Contains(targetName))
                     {
-                        buildReason = TargetBuiltReason.InitialTarget;
+                        buildReason = TargetBuiltReason.InitialTargets;
                     } 
                     else if (configuration.ProjectDefaultTargets.Contains(targetName))
                     {
-                        buildReason = TargetBuiltReason.DefaultTarget;
+                        buildReason = TargetBuiltReason.DefaultTargets;
                     }
 
                     targets.Add(new TargetSpecification(targetName, targetExists ? targetInstance.Location : _projectInstance.ProjectFileLocation, buildReason));

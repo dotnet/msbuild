@@ -33,17 +33,16 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// The target was defined as an initial target of the project.
         /// </summary>
-        InitialTarget,
-
-
-        /// <summary>
-        /// The target was the default target of the project
-        /// </summary>
-        DefaultTarget,
+        InitialTargets,
 
         /// <summary>
-        /// The target was the target explicitly called to be built.
+        /// The target was one of the default targets of the project.
         /// </summary>
-        EntryTarget
+        DefaultTargets,
+
+        /// <summary>
+        /// The target was one of the targets explicitly called to be built.
+        /// </summary>
+        EntryTargets
     }
 }
