@@ -937,7 +937,7 @@
                      used, write out the values after the build.
     </value>
     <comment>
-      LOCALIZATION: "-getProperty" should not be localized.
+      LOCALIZATION: "-getProperty", "-targets" and "-getTargetResult" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
@@ -950,7 +950,7 @@
                      the values after the build.
     </value>
     <comment>
-      LOCALIZATION: "-getItem" should not be localized.
+      LOCALIZATION: "-getItem", "targets" and "getTargetResult" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
@@ -987,17 +987,19 @@
   </data>
   <data name="HelpMessage_47_TerminalLoggerSwitch" Visibility="Public">
     <value>  -terminalLogger[:auto,on,off]
-                     Users are able to opt-in and use the TerminalLogger.
-                     Specify auto (or use the option without arguments) to
-                     use the terminal logger only if the standard output
-                     is not redirected.
-                     EXCEPT when:
-                     - The terminal does not support ANSI codes or color
-                     - Output is redirected to a file or pipe
+                     Enable or disable the terminal logger. Terminal logger
+                     provides enhanced build output on the console in real time,
+                     organized logically by project, and designed to highlight
+                     actionable information. Specify auto (or use the option
+                     without arguments) to use the terminal logger only if the
+                     standard output is not redirected. Don't parse the output
+                     or otherwise rely on it remaining unchanged in future
+                     versions. This option is available in MSBuild 17.8 and
+                     later.
                      (Short form: -tl)
     </value>
     <comment>
-      LOCALIZATION: "-terminalLogger" and "-tl" should not be localized.
+      LOCALIZATION: "-terminalLogger", "-tl", and "auto" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
@@ -1010,7 +1012,7 @@
                      This writes the value of property Bar into Biz.txt.
     </value>
     <comment>
-      LOCALIZATION: "-getResultOutputFile" should not be localized.
+      LOCALIZATION: "-getResultOutputFile", "get*" and "-getProperty" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
@@ -1029,7 +1031,7 @@
                         -terminalLoggerParameters:default=auto
     </value>
     <comment>
-      LOCALIZATION: "-terminalLoggerParameters"  and "-tlp" should not be localized.
+      LOCALIZATION: "-terminalLoggerParameters", "-tlp", "on", "true", "off", "false", "auto" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
