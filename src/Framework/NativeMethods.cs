@@ -10,7 +10,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-
+using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
@@ -1493,8 +1493,8 @@ internal static class NativeMethods
         }
         else
         {
-            // On posix OSes we expect console always supports VT100 coloring unless it is explicitly marked as "dumb".
-            acceptAnsiColorCodes = Environment.GetEnvironmentVariable("TERM") != "dumb";
+            // On posix OSes detect whether the terminal supports VT100 from the value of the TERM environment variable.
+            acceptAnsiColorCodes = AnsiDetector.IsAnsiSupported(Environment.GetEnvironmentVariable("TERM"));
             // It wasn't redirected as tested above so we assume output is screen/console
             outputIsScreen = true;
         }

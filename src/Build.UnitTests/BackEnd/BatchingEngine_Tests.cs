@@ -7,6 +7,7 @@ using System.IO;
 using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -52,7 +53,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             properties.Set(ProjectPropertyInstance.Create("UnitTests", "unittests.foo"));
             properties.Set(ProjectPropertyInstance.Create("OBJ", "obj"));
 
-            List<ItemBucket> buckets = BatchingEngine.PrepareBatchingBuckets(parameters, CreateLookup(itemsByType, properties), MockElementLocation.Instance);
+            List<ItemBucket> buckets = BatchingEngine.PrepareBatchingBuckets(
+                parameters,
+                CreateLookup(itemsByType, properties),
+                MockElementLocation.Instance,
+                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
 
             Assert.Equal(5, buckets.Count);
 
@@ -62,7 +67,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 XmlAttribute tempXmlAttribute = (new XmlDocument()).CreateAttribute("attrib");
                 tempXmlAttribute.Value = "'$(Obj)'=='obj'";
 
-                Assert.True(ConditionEvaluator.EvaluateCondition(tempXmlAttribute.Value, ParserOptions.AllowAll, bucket.Expander, ExpanderOptions.ExpandAll, Directory.GetCurrentDirectory(), MockElementLocation.Instance, null, new BuildEventContext(1, 2, 3, 4), FileSystems.Default));
+                Assert.True(ConditionEvaluator.EvaluateCondition(
+                    tempXmlAttribute.Value,
+                    ParserOptions.AllowAll,
+                    bucket.Expander, ExpanderOptions.ExpandAll,
+                    Directory.GetCurrentDirectory(),
+                    MockElementLocation.Instance,
+                    FileSystems.Default,
+                    new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4))));
                 Assert.Equal("a.doc;b.doc;c.doc;d.doc;e.doc", bucket.Expander.ExpandIntoStringAndUnescape("@(doc)", ExpanderOptions.ExpandItems, MockElementLocation.Instance));
                 Assert.Equal("unittests.foo", bucket.Expander.ExpandIntoStringAndUnescape("$(bogus)$(UNITTESTS)", ExpanderOptions.ExpandPropertiesAndMetadata, MockElementLocation.Instance));
             }
@@ -130,7 +142,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
 
-            List<ItemBucket> buckets = BatchingEngine.PrepareBatchingBuckets(parameters, CreateLookup(itemsByType, properties), null);
+            List<ItemBucket> buckets = BatchingEngine.PrepareBatchingBuckets(
+                parameters,
+                CreateLookup(itemsByType, properties),
+                null,
+                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
             Assert.Equal(2, buckets.Count);
         }
 
@@ -164,7 +180,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 // This is expected to throw because not all items contain a value for metadata "Culture".
                 // Only a.foo has a Culture metadata.  b.foo does not.
-                BatchingEngine.PrepareBatchingBuckets(parameters, CreateLookup(itemsByType, properties), MockElementLocation.Instance);
+                BatchingEngine.PrepareBatchingBuckets(
+                    parameters,
+                    CreateLookup(itemsByType, properties),
+                    MockElementLocation.Instance,
+                    new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
             });
         }
         /// <summary>
@@ -185,7 +205,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
 
                 // This is expected to throw because we have no idea what item list %(Culture) refers to.
-                BatchingEngine.PrepareBatchingBuckets(parameters, CreateLookup(itemsByType, properties), MockElementLocation.Instance);
+                BatchingEngine.PrepareBatchingBuckets(
+                    parameters,
+                    CreateLookup(itemsByType, properties),
+                    MockElementLocation.Instance,
+                    new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
             });
         }
         /// <summary>
@@ -211,7 +235,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
 
-            List<ItemBucket> buckets = BatchingEngine.PrepareBatchingBuckets(parameters, CreateLookup(itemsByType, properties), null);
+            List<ItemBucket> buckets = BatchingEngine.PrepareBatchingBuckets(
+                parameters,
+                CreateLookup(itemsByType, properties),
+                null,
+                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
 
             // If duplicate buckets have been folded correctly, then there will be exactly one bucket here
             // containing both a.foo and b.foo.

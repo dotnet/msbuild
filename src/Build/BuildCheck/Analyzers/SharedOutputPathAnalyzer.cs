@@ -21,7 +21,7 @@ internal sealed class SharedOutputPathAnalyzer : BuildAnalyzer
 
     public override string FriendlyName => "MSBuild.SharedOutputPathAnalyzer";
 
-    public override IReadOnlyList<BuildAnalyzerRule> SupportedRules { get; } =[SupportedRule];
+    public override IReadOnlyList<BuildAnalyzerRule> SupportedRules { get; } = [SupportedRule];
 
     public override void Initialize(ConfigurationContext configurationContext)
     {

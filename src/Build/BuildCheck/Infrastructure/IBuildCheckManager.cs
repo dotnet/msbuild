@@ -40,6 +40,18 @@ internal interface IBuildCheckManager
         AnalyzerLoggingContext buildAnalysisContext,
         ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs);
 
+    void ProcessTaskStartedEventArgs(
+        AnalyzerLoggingContext buildAnalysisContext,
+        TaskStartedEventArgs taskStartedEventArgs);
+
+    void ProcessTaskFinishedEventArgs(
+        AnalyzerLoggingContext buildAnalysisContext,
+        TaskFinishedEventArgs taskFinishedEventArgs);
+
+    void ProcessTaskParameterEventArgs(
+        AnalyzerLoggingContext buildAnalysisContext,
+        TaskParameterEventArgs taskParameterEventArgs);
+
     void SetDataSource(BuildCheckDataSource buildCheckDataSource);
 
     void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, BuildEventContext buildEventContext);

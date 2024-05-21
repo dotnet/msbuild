@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
@@ -685,7 +686,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Given a search path and a task pattern get a list of task or override task files.
         /// </summary>
-        internal static string[] GetTaskFiles(DirectoryGetFiles getFiles, ILoggingService loggingServices, BuildEventContext buildEventContext, string taskPattern, string searchPath, string taskFileWarning)
+        internal static string[] GetTaskFiles(DirectoryGetFiles getFiles, LoggingContext loggingContext, string taskPattern, string searchPath, string taskFileWarning)
         {
             string[] defaultTasksFiles = null;
 
@@ -703,8 +704,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (defaultTasksFiles.Length == 0)
                 {
-                    loggingServices.LogWarning(
-                        buildEventContext,
+                    loggingContext.LogWarning(
                         null,
                         new BuildEventFileInfo(/* this warning truly does not involve any file */ String.Empty),
                         taskFileWarning,
@@ -715,8 +715,7 @@ namespace Microsoft.Build.Evaluation
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                loggingServices.LogWarning(
-                    buildEventContext,
+                loggingContext.LogWarning(
                     null,
                     new BuildEventFileInfo(/* this warning truly does not involve any file */ String.Empty),
                     taskFileWarning,
@@ -819,13 +818,12 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Return a task registry stub for the tasks in the *.tasks file for this toolset
         /// </summary>
-        /// <param name="loggingServices">The logging services used to log during task registration.</param>
-        /// <param name="buildEventContext">The build event context used to log during task registration.</param>
+        /// <param name="loggingContext">The logging context used to log during task registration.</param>
         /// <param name="projectRootElementCache">The <see cref="ProjectRootElementCache"/> to use.</param>
         /// <returns>The task registry</returns>
-        internal TaskRegistry GetTaskRegistry(ILoggingService loggingServices, BuildEventContext buildEventContext, ProjectRootElementCacheBase projectRootElementCache)
+        internal TaskRegistry GetTaskRegistry(LoggingContext loggingContext, ProjectRootElementCacheBase projectRootElementCache)
         {
-            RegisterDefaultTasks(loggingServices, buildEventContext, projectRootElementCache);
+            RegisterDefaultTasks(loggingContext, projectRootElementCache);
             return _defaultTaskRegistry;
         }
 
@@ -846,13 +844,12 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Return a task registry for the override tasks in the *.overridetasks file for this toolset
         /// </summary>
-        /// <param name="loggingServices">The logging services used to log during task registration.</param>
-        /// <param name="buildEventContext">The build event context used to log during task registration.</param>
+        /// <param name="loggingContext">The logging context used to log during task registration.</param>
         /// <param name="projectRootElementCache">The <see cref="ProjectRootElementCache"/> to use.</param>
         /// <returns>The task registry</returns>
-        internal TaskRegistry GetOverrideTaskRegistry(ILoggingService loggingServices, BuildEventContext buildEventContext, ProjectRootElementCacheBase projectRootElementCache)
+        internal TaskRegistry GetOverrideTaskRegistry(LoggingContext loggingContext, ProjectRootElementCacheBase projectRootElementCache)
         {
-            RegisterOverrideTasks(loggingServices, buildEventContext, projectRootElementCache);
+            RegisterOverrideTasks(loggingContext, projectRootElementCache);
             return _overrideTaskRegistry;
         }
 
@@ -867,10 +864,9 @@ namespace Microsoft.Build.Evaluation
         /// 3) comment tags are always ignored regardless of their placement
         /// 4) the rest of the tags are expected to be &lt;UsingTask&gt; tags
         /// </remarks>
-        /// <param name="loggingServices">The logging services to use to log during this registration.</param>
-        /// <param name="buildEventContext">The build event context to use to log during this registration.</param>
+        /// <param name="loggingContext">The logging context to use to log during this registration.</param>
         /// <param name="projectRootElementCache">The <see cref="ProjectRootElementCache"/> to use.</param>
-        private void RegisterDefaultTasks(ILoggingService loggingServices, BuildEventContext buildEventContext, ProjectRootElementCacheBase projectRootElementCache)
+        private void RegisterDefaultTasks(LoggingContext loggingContext, ProjectRootElementCacheBase projectRootElementCache)
         {
             if (!_defaultTasksRegistrationAttempted)
             {
@@ -878,10 +874,10 @@ namespace Microsoft.Build.Evaluation
                 {
                     _defaultTaskRegistry = new TaskRegistry(projectRootElementCache);
 
-                    InitializeProperties(loggingServices, buildEventContext);
+                    InitializeProperties(loggingContext);
 
-                    string[] defaultTasksFiles = GetTaskFiles(_getFiles, loggingServices, buildEventContext, DefaultTasksFilePattern, ToolsPath, "DefaultTasksFileLoadFailureWarning");
-                    LoadAndRegisterFromTasksFile(defaultTasksFiles, loggingServices, buildEventContext, "DefaultTasksFileFailure", projectRootElementCache, _defaultTaskRegistry);
+                    string[] defaultTasksFiles = GetTaskFiles(_getFiles, loggingContext, DefaultTasksFilePattern, ToolsPath, "DefaultTasksFileLoadFailureWarning");
+                    LoadAndRegisterFromTasksFile(defaultTasksFiles, loggingContext, "DefaultTasksFileFailure", projectRootElementCache, _defaultTaskRegistry);
                 }
                 finally
                 {
@@ -893,7 +889,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Initialize the properties which are used to evaluate the tasks files.
         /// </summary>
-        private void InitializeProperties(ILoggingService loggingServices, BuildEventContext buildEventContext)
+        private void InitializeProperties(LoggingContext loggingContext)
         {
             if (_expander != null)
             {
@@ -965,18 +961,18 @@ namespace Microsoft.Build.Evaluation
 
                 propertyBag.ImportProperties(_globalProperties);
 
-                _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, FileSystems.Default);
+                _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, FileSystems.Default, loggingContext);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                loggingServices.LogError(buildEventContext, new BuildEventFileInfo(/* this warning truly does not involve any file it is just gathering properties */String.Empty), "TasksPropertyBagError", e.Message);
+                loggingContext.LogError(new BuildEventFileInfo(/* this warning truly does not involve any file it is just gathering properties */String.Empty), "TasksPropertyBagError", e.Message);
             }
         }
 
         /// <summary>
         /// Used to load information about MSBuild override tasks i.e. tasks that override tasks declared in tasks or project files.
         /// </summary>
-        private void RegisterOverrideTasks(ILoggingService loggingServices, BuildEventContext buildEventContext, ProjectRootElementCacheBase projectRootElementCache)
+        private void RegisterOverrideTasks(LoggingContext loggingContext, ProjectRootElementCacheBase projectRootElementCache)
         {
             if (!_overrideTasksRegistrationAttempted)
             {
@@ -1005,23 +1001,23 @@ namespace Microsoft.Build.Evaluation
                             if (!overrideDirectoryExists)
                             {
                                 string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskNotRootedPath", _overrideTasksPath);
-                                loggingServices.LogWarning(buildEventContext, null, new BuildEventFileInfo(String.Empty /* this warning truly does not involve any file*/), "OverrideTasksFileFailure", rootedPathMessage);
+                                loggingContext.LogWarning(null, new BuildEventFileInfo(String.Empty /* this warning truly does not involve any file*/), "OverrideTasksFileFailure", rootedPathMessage);
                             }
                         }
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
                         string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskProblemWithPath", _overrideTasksPath, e.Message);
-                        loggingServices.LogWarning(buildEventContext, null, new BuildEventFileInfo(String.Empty /* this warning truly does not involve any file*/), "OverrideTasksFileFailure", rootedPathMessage);
+                        loggingContext.LogWarning(null, new BuildEventFileInfo(String.Empty /* this warning truly does not involve any file*/), "OverrideTasksFileFailure", rootedPathMessage);
                     }
 
                     if (overrideDirectoryExists)
                     {
-                        InitializeProperties(loggingServices, buildEventContext);
-                        string[] overrideTasksFiles = GetTaskFiles(_getFiles, loggingServices, buildEventContext, OverrideTasksFilePattern, _overrideTasksPath, "OverrideTasksFileLoadFailureWarning");
+                        InitializeProperties(loggingContext);
+                        string[] overrideTasksFiles = GetTaskFiles(_getFiles, loggingContext, OverrideTasksFilePattern, _overrideTasksPath, "OverrideTasksFileLoadFailureWarning");
 
                         // Load and register any override tasks
-                        LoadAndRegisterFromTasksFile(overrideTasksFiles, loggingServices, buildEventContext, "OverrideTasksFileFailure", projectRootElementCache, _overrideTaskRegistry);
+                        LoadAndRegisterFromTasksFile(overrideTasksFiles, loggingContext, "OverrideTasksFileFailure", projectRootElementCache, _overrideTaskRegistry);
                     }
                 }
                 finally
@@ -1034,14 +1030,13 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Do the actual loading of the tasks or override tasks file and register the tasks in the task registry
         /// </summary>
-        private void LoadAndRegisterFromTasksFile(string[] defaultTaskFiles, ILoggingService loggingServices, BuildEventContext buildEventContext, string taskFileError, ProjectRootElementCacheBase projectRootElementCache, TaskRegistry registry)
+        private void LoadAndRegisterFromTasksFile(string[] defaultTaskFiles, LoggingContext loggingContext, string taskFileError, ProjectRootElementCacheBase projectRootElementCache, TaskRegistry registry)
         {
             string currentTasksFile = null;
             try
             {
                 TaskRegistry.InitializeTaskRegistryFromUsingTaskElements<ProjectPropertyInstance, ProjectItemInstance>(
-                    loggingServices,
-                    buildEventContext,
+                    loggingContext,
                     EnumerateTasksRegistrations(),
                     registry,
                     _expander,
@@ -1056,7 +1051,7 @@ namespace Microsoft.Build.Evaluation
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                loggingServices.LogError(buildEventContext, new BuildEventFileInfo(currentTasksFile),
+                loggingContext.LogError(new BuildEventFileInfo(currentTasksFile),
                     taskFileError, e.Message);
             }
 
