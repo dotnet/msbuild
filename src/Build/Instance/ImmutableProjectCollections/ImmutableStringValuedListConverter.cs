@@ -52,12 +52,8 @@ namespace Microsoft.Build.Instance
             int currentIndex = arrayIndex;
             foreach (var item in _itemList)
             {
-                string? stringValue = _getStringValue(item);
-                if (stringValue != null)
-                {
-                    array[currentIndex] = stringValue;
-                    ++currentIndex;
-                }
+                array[currentIndex] = _getStringValue(item);
+                ++currentIndex;
             }
         }
 

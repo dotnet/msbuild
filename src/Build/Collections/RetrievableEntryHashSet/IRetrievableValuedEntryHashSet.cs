@@ -8,6 +8,18 @@ using System.Runtime.Serialization;
 
 namespace Microsoft.Build.Collections
 {
+    /// <summary>
+    /// Like <see cref="IRetrievableEntryHashSet{T}"/>, this represents a hash set mapping string to <typeparamref name="T"/>
+    /// with the specialization that value lookup supports using substrings of a provided key without requiring instantiating
+    /// the substring (in order to avoid the memory usage of string allocation).
+    ///
+    /// This interface extends the functionality of <see cref="IRetrievableEntryHashSet{T}"/> by introducing the ability
+    /// to directly retrieve the Value of an instance of T instead of retrieving the instance of T itself. Implementations of
+    /// this interface can avoid the cost of allocating an instance of <typeparamref name="T"/> when the caller requests only
+    /// the Value.
+    /// </summary>
+    /// <typeparam name="T">The type of data the hash set contains (which must be
+    /// <see cref="IKeyed"/> and also <see cref="IValued"/>).</typeparam>
     internal interface IRetrievableValuedEntryHashSet<T> : IRetrievableEntryHashSet<T>
         where T : class, IKeyed, IValued
     {

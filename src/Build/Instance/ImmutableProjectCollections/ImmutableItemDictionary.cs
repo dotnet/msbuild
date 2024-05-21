@@ -24,8 +24,13 @@ namespace Microsoft.Build.Instance
         private readonly IDictionary<string, ICollection<TCached>> _itemsByType;
         private readonly ICollection<TCached> _allCachedItems;
         private readonly Func<TCached, T?> _getInstance;
+        private readonly Func<T, string?> _getItemType;
 
-        public ImmutableItemDictionary(ICollection<TCached> allItems, IDictionary<string, ICollection<TCached>> itemsByType, Func<TCached, T?> getInstance)
+        public ImmutableItemDictionary(
+            ICollection<TCached> allItems,
+            IDictionary<string, ICollection<TCached>> itemsByType,
+            Func<TCached, T?> getInstance,
+            Func<T, string?> getItemType)
         {
             if (allItems == null)
             {
@@ -35,6 +40,7 @@ namespace Microsoft.Build.Instance
             _allCachedItems = allItems;
             _itemsByType = itemsByType ?? throw new ArgumentNullException(nameof(itemsByType));
             _getInstance = getInstance;
+            _getItemType = getItemType;
         }
 
         /// <inheritdoc />
@@ -72,20 +78,19 @@ namespace Microsoft.Build.Instance
         /// <inheritdoc />
         public bool Contains(T projectItem)
         {
-            return _allCachedItems.Any(
-                    cachedItem =>
-                    {
-                        if (MSBuildNameIgnoreCaseComparer.Default.Equals(cachedItem.EvaluatedIncludeEscaped, projectItem.EvaluatedIncludeEscaped))
-                        {
-                            T? foundItem = _getInstance(cachedItem);
-                            if (foundItem is not null && foundItem.Equals(projectItem))
-                            {
-                                return true;
-                            }
-                        }
+            if (projectItem == null)
+            {
+                return false;
+            }
 
-                        return false;
-                    });
+            string? itemType = _getItemType(projectItem);
+            if (itemType == null)
+            {
+                return false;
+            }
+
+            ICollection<T> items = GetItems(itemType);
+            return items.Contains(projectItem);
         }
 
         /// <inheritdoc />

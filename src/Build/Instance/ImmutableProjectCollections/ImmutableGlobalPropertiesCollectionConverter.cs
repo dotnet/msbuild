@@ -17,11 +17,22 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Instance.ImmutableProjectCollections
 {
+    /// <summary>
+    /// A collection representing the set of Global ProjectPropertyInstance objects.
+    /// </summary>
+    /// <remarks>This class is used only when the containing ProjectInstance originates from an
+    /// immutable linked project source. It's specialized in order to reduce required allocations
+    /// by instead relying on the linked project source's collection of global properties
+    /// (the IDictionary _globalProperties) and the ProjectInstance's collection of all
+    /// properties (the PropertyDictionary _allProperties). When a property is requested,
+    /// _globalProperties is checked to determine whether the named property is actually
+    /// a global property and, if it is, then instance is retrieved from _allProperties.
+    /// </remarks>
     internal class ImmutableGlobalPropertiesCollectionConverter : IRetrievableEntryHashSet<ProjectPropertyInstance>
     {
-        private IDictionary<string, string> _globalProperties;
-        private PropertyDictionary<ProjectPropertyInstance> _allProperties;
-        private ValuesCollection _values;
+        private readonly IDictionary<string, string> _globalProperties;
+        private readonly PropertyDictionary<ProjectPropertyInstance> _allProperties;
+        private readonly ValuesCollection _values;
 
         public ImmutableGlobalPropertiesCollectionConverter(
             IDictionary<string, string> globalProperties,
@@ -92,12 +103,7 @@ namespace Microsoft.Build.Instance.ImmutableProjectCollections
 
         public ProjectPropertyInstance Get(string key)
         {
-            if (_globalProperties.ContainsKey(key))
-            {
-                return null;
-            }
-
-            return _allProperties[key];
+            return this[key];
         }
 
         public ProjectPropertyInstance Get(string key, int index, int length)
