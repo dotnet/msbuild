@@ -16,6 +16,11 @@ using Microsoft.Build.BuildEngine.Shared;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
+    ///   <format type="text/markdown"><![CDATA[
+    ///      > [!CAUTION]
+    ///      > This class has been deprecated. Please use Microsoft.Build.Evaluation.ProjectCollection and related types from the Microsoft.Build assembly instead.
+    ///      ]]>
+    ///   </format>
     /// This class represents a collection of items.  It may be represented
     /// physically by an &lt;ItemGroup&gt; element persisted in the project file,
     /// or it may just be a virtual BuildItemGroup (e.g., the evaluated items).
