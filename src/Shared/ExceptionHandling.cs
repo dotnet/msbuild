@@ -372,9 +372,8 @@ namespace Microsoft.Build.Shared
                     }
                 }
             }
-            catch (OutOfMemoryException)
+            catch
             {
-                throw;
             }
         }
 
