@@ -136,7 +136,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory]
+    [DotNetOnlyTheory]
     [InlineData("AnalysisCandidate", new[] { "CustomRule1", "CustomRule2" })]
     [InlineData("AnalysisCandidateWithMultipleAnalyzersInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
     public void CustomAnalyzerTest(string analysisCandidate, string[] expectedRegisteredRules, bool expectedRejectedAnalyzers = false)
