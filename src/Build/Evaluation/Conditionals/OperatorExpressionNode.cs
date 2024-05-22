@@ -45,7 +45,7 @@ namespace Microsoft.Build.Evaluation
 
         /// <inheritdoc cref="GenericExpressionNode"/>
         internal override bool IsUnexpandedValueEmpty()
-            => LeftChild.IsUnexpandedValueEmpty() && RightChild.IsUnexpandedValueEmpty();
+            => (LeftChild?.IsUnexpandedValueEmpty() ?? true) && (RightChild?.IsUnexpandedValueEmpty() ?? true);
 
         /// <summary>
         /// Value before any item and property expressions are expanded
