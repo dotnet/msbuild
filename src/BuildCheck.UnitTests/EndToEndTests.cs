@@ -149,7 +149,7 @@ public class EndToEndTests : IDisposable
             string projectAnalysisBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
                 $"{Path.Combine(analysisCandidatePath, $"{analysisCandidate}.csproj")} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path} -analyze -verbosity:d",
                 out bool successBuild);
-            successBuild.ShouldBeTrue();
+            successBuild.ShouldBeTrue(projectAnalysisBuildLog);
 
             foreach (string registeredRule in expectedRegisteredRules)
             {
