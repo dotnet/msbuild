@@ -38,4 +38,18 @@
     </None>
   </ItemGroup>
 
+  <!-- Custom Analyzers target netstandard2.0, so we don't need to build it as mutitarget.-->
+  <Target Name="BuildTestAssets" AfterTargets="Build" Condition="'$(TargetFramework)' == '$(LatestDotNetCoreForMSBuild)'">
+    <ItemGroup>
+      <TestAssetProject Include="$(RepoRoot)src\BuildCheck.UnitTests\TestAssets\CustomAnalyzer\CustomAnalyzer.csproj" />
+      <TestAssetProject Include="$(RepoRoot)src\BuildCheck.UnitTests\TestAssets\CustomAnalyzer2\CustomAnalyzer2.csproj" />
+      <TestAssetProject Include="$(RepoRoot)src\BuildCheck.UnitTests\TestAssets\InvalidCustomAnalyzer\InvalidCustomAnalyzer.csproj" />
+    </ItemGroup>
+
+    <MSBuild Projects="@(TestAssetProject)"
+             Properties="PackageOutputPath=$(ArtifactsBinDir)Microsoft.Build.BuildCheck.UnitTests\$(Configuration)\CustomAnalyzers;Version=1.0.0"
+             Targets="Restore;Build;Pack" />
+
+  </Target>
+
 </Project>

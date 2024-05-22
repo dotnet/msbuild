@@ -2,19 +2,20 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <!-- The output structure was modified for msbuild development needs.-->
-    <NoWarn>NU5101;NU5128;MSB3277</NoWarn>
+    <!-- The property set for nuget package production on build.-->
+    <IsPackable>true</IsPackable>
+    <NoWarn>NU5101;NU5128;MSB3277;NU1507</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="CustomAnalyzer2.props" Pack="true" PackagePath="build\CustomAnalyzer2.props" />
+    <Content Include="README.md" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- In the real world scenario, the DLLs are added as PackageReference, modified for test purposes only. -->
     <Reference Include="Microsoft.Build">
-      <HintPath>$(MSBuildProjectDirectory)\..\..\Microsoft.Build.dll</HintPath>
+      <HintPath>$(ArtifactsBinDir)Microsoft.Build\$(Configuration)\$(TargetFramework)\Microsoft.Build.dll</HintPath>
     </Reference>
   </ItemGroup>
 
@@ -24,5 +25,6 @@
       <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="build" Visible="false" />
     </ItemGroup>
   </Target>
+  <Target Name="UpdateXlf" />
 
 </Project>

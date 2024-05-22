@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
@@ -43,7 +42,6 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
             assembly = Assembly.LoadFrom(analyzerAcquisitionData.AssemblyPath);
 #endif
 
-            Debugger.Launch();
             IList<Type> availableTypes = assembly.GetExportedTypes();
             IList<Type> analyzerTypes = availableTypes.Where(t => typeof(BuildAnalyzer).IsAssignableFrom(t)).ToArray();
 
