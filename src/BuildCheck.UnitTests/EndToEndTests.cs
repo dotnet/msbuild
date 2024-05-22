@@ -173,9 +173,9 @@ public class EndToEndTests : IDisposable
         {
             XmlNode? packageSourcesNode = doc.SelectSingleNode("//packageSources");
 
-            // The test packages are generated during the build and saved in CustomAnalyzers folder.
-            string analyzersPath = Path.Combine(Directory.GetParent(AssemblyLocation)?.FullName ?? string.Empty, "CustomAnalyzers");
-            AddPackageSource(doc, packageSourcesNode, "Key", AssemblyLocation);
+            // The test packages are generated during the test project build and saved in CustomAnalyzers folder.
+            string analyzersPackagesPath = Path.Combine(Directory.GetParent(AssemblyLocation)?.FullName ?? string.Empty, "CustomAnalyzers");
+            AddPackageSource(doc, packageSourcesNode, "Key", analyzersPackagesPath);
 
             doc.Save(Path.Combine(analysisCandidatePath, "nuget.config"));
         }
