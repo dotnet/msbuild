@@ -80,8 +80,9 @@ namespace Microsoft.Build.Framework
         public string PropertyName { get; private set; }
 
         /// <summary>
-        /// The name of the item being manipulated, e.g. "Compile", or null in cases where the operation does not manipulate
-        /// any items, such as when representing task inputs or task outputs assigned to properties.
+        /// The name of the item being manipulated, e.g. "Compile" if this is an item operation. If this object represents a task input, this property should be set
+        /// to the same value as <see cref="ParameterName"/> for backward compatibility. Similarly, if this object represents a task output assigned to a property,
+        /// this should be set to the same value as <see cref="PropertyName"/> for backward compatibility.
         /// </summary>
         public string ItemType { get; private set; }
 

@@ -1317,6 +1317,8 @@ namespace Microsoft.Build.BackEnd
                     // Structured logging for all parameters that have logging enabled and are not empty lists.
                     if (parameterValueAsList?.Count > 0 || (parameterValueAsList == null && !legacyBehavior))
                     {
+                        // Note: We're setting TaskParameterEventArgs.ItemType to parameter name for backward compatibility with
+                        // older loggers and binlog viewers.
                         ItemGroupLoggingHelper.LogTaskParameter(
                             _taskLoggingContext,
                             TaskParameterMessageKind.TaskInput,
@@ -1476,12 +1478,14 @@ namespace Microsoft.Build.BackEnd
                         {
                             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
                             {
+                                // Note: We're setting TaskParameterEventArgs.ItemType to property name for backward compatibility with
+                                // older loggers and binlog viewers.
                                 ItemGroupLoggingHelper.LogTaskParameter(
                                     _taskLoggingContext,
                                     TaskParameterMessageKind.TaskOutput,
                                     parameterName: parameter.Name,
                                     propertyName: outputTargetName,
-                                    itemType: null,
+                                    itemType: outputTargetName,
                                     new object[] { outputString },
                                     parameter.LogItemMetadata);
                             }
@@ -1561,12 +1565,14 @@ namespace Microsoft.Build.BackEnd
                         {
                             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
                             {
+                                // Note: We're setting TaskParameterEventArgs.ItemType to property name for backward compatibility with
+                                // older loggers and binlog viewers.
                                 ItemGroupLoggingHelper.LogTaskParameter(
                                     _taskLoggingContext,
                                     TaskParameterMessageKind.TaskOutput,
                                     parameterName: parameter.Name,
                                     propertyName: outputTargetName,
-                                    itemType: null,
+                                    itemType: outputTargetName,
                                     new object[] { outputString },
                                     parameter.LogItemMetadata);
                             }
