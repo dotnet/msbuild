@@ -741,16 +741,16 @@ namespace Microsoft.Build.UnitTests
         {
             protected override Process StartToolProcess(Process proc)
             {
-                using var customProcess = new Process
-                {
-                    StartInfo = proc.StartInfo,
-                    EnableRaisingEvents = true
-                };
+#pragma warning disable CA2000 // Dispose objects before losing scope - caller needs the process
+                Process customProcess = new Process();
+#pragma warning restore CA2000
+                customProcess.StartInfo = proc.StartInfo;
+
+                customProcess.EnableRaisingEvents = true;
                 customProcess.Exited += ReceiveExitNotification;
 
                 customProcess.ErrorDataReceived += ReceiveStandardErrorData;
                 customProcess.OutputDataReceived += ReceiveStandardOutputData;
-
                 return base.StartToolProcess(customProcess);
             }
         }
