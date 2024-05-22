@@ -1,10 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <PackageId>Microsoft.Analyzer.Templates</PackageId>
-    <PackageVersion>1.0</PackageVersion>
+    <PackageId>Microsoft.Build.Templates</PackageId>
     <Authors>Microsoft</Authors>
-    <Description>Common Microsoft Analyzer Templates</Description>
+    <Description>Common Microsoft Build Templates</Description>
     <PackageProjectUrl>https://github.com/dotnet/msbuild</PackageProjectUrl>
     <PackageType>Template</PackageType>
     <TargetFramework>$(LatestDotNetCoreForMSBuild)</TargetFramework>

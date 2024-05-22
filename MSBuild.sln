@@ -82,7 +82,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.UnitTests.S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.BuildCheck.UnitTests", "src\BuildCheck.UnitTests\Microsoft.Build.BuildCheck.UnitTests.csproj", "{434CC6DB-1E66-4FB1-A66C-D5BBE99F0ED8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Analyzer.Templates", "template_feed\Microsoft.Analyzer.Templates.csproj", "{A86EE74A-AEF0-42ED-A5A7-7A54BC0773D8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Templates", "template_feed\Microsoft.Build.Templates.csproj", "{A86EE74A-AEF0-42ED-A5A7-7A54BC0773D8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
