@@ -2,6 +2,16 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="es" original="../Strings.resx">
     <body>
+      <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpenned">
+        <source>The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</source>
+        <target state="new">The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpennedWithException">
+        <source>The manifest file openning has failed with exception: '{0}'. Please make sure it exists and has relevant content.</source>
+        <target state="new">The manifest file openning has failed with exception: '{0}'. Please make sure it exists and has relevant content.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AppConfig.BindingRedirectMissingOldVersion">
         <source>BindingRedirect is missing required field 'oldVersion'.</source>
         <target state="translated">Falta el campo obligatorio 'oldVersion' en BindingRedirect.</target>
@@ -1584,17 +1594,17 @@
         <target state="translated">StopOnFirstFailure no surtirá efecto si se dan todas las condiciones siguientes: 1) El sistema se ejecuta en modo de proceso múltiple. 2) La propiedad BuildInParallel es true. 3) La propiedad RunEachTargetSeparately es false.</target>
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
       </trans-unit>
-      <trans-unit id="PopulateSupportedArchitectures.AssemblyNodeIsMissed">
+      <trans-unit id="AddToWin32Manifest.AssemblyNodeIsMissed">
         <source>The assembly element is missing from the application manifest.</source>
         <target state="new">The assembly element is missing from the application manifest.</target>
         <note />
       </trans-unit>
-      <trans-unit id="PopulateSupportedArchitectures.InvalidValueInSupportedArchitectures">
+      <trans-unit id="AddToWin32Manifest.InvalidValueInSupportedArchitectures">
         <source>MSB4300: The specified value: '{0}' for supportedArchitectures element is invalid. Either remove it from manifest or set as 'amd64 arm64'.</source>
         <target state="new">MSB4300: The specified value: '{0}' for supportedArchitectures element is invalid. Either remove it from manifest or set as 'amd64 arm64'.</target>
         <note>{StrBegin="MSB4300: "}</note>
       </trans-unit>
-      <trans-unit id="PopulateSupportedArchitectures.SpecifiedApplicationManifestCanNotBeFound">
+      <trans-unit id="AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound">
         <source>The application manifest file cannot be found: '{0}'. Please make sure it exists.</source>
         <target state="new">The application manifest file cannot be found: '{0}'. Please make sure it exists.</target>
         <note />

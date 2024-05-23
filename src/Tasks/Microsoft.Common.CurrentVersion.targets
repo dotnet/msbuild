@@ -854,11 +854,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <PlatformTargetAsMSBuildArchitecture>x86</PlatformTargetAsMSBuildArchitecture>
     </PropertyGroup>
 
-    <NETMessage Condition=" '$(Prefer32Bit)' == 'true' and '$(PreferNativeArm64)' == 'true' " ResourceName="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled" Severity="Error"/>
+    <MSBuildInternalMessage Condition=" '$(Prefer32Bit)' == 'true' and '$(PreferNativeArm64)' == 'true' " ResourceName="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled" Severity="Error"/>
 
-    <NETMessage Condition=" '$(NoWin32Manifest)' == 'true' and '$(PreferNativeArm64)' == 'true' " ResourceName="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled" Severity="Error"/>
+    <MSBuildInternalMessage Condition=" '$(NoWin32Manifest)' == 'true' and '$(PreferNativeArm64)' == 'true' " ResourceName="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled" Severity="Error"/>
 
-    <NETMessage Condition=" '$(PreferNativeArm64)' == 'true' and '$(Platform)' != 'AnyCPU' " ResourceName="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled" Severity="Warning" FormatArguments="$(Platform)" />
+    <MSBuildInternalMessage Condition=" '$(PreferNativeArm64)' == 'true' and '$(Platform)' != 'AnyCPU' " ResourceName="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled" Severity="Warning" FormatArguments="$(Platform)" />
 
     <!--
       Log an error if the user set MSBuildProjectExtensionsPath in the body of a project. In an SDK style project
@@ -3605,8 +3605,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <CompileDependsOn>
       ResolveReferences;
       ResolveKeySource;
-      _SetPreferNativeArm64Win32ManifestProperties;
       SetWin32ManifestProperties;
+      _SetPreferNativeArm64Win32ManifestProperties;
       FindReferenceAssembliesForReferences;
       _GenerateCompileInputs;
       BeforeCompile;
@@ -4173,13 +4173,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_SupportedArchitectures>amd64 arm64</_SupportedArchitectures>
     </PropertyGroup>
 
-    <PopulateSupportedArchitectures
+    <AddToWin32Manifest
         ApplicationManifestPath="$(Win32Manifest)"
         OutputDirectory="$(IntermediateOutputPath)"
         SupportedArchitectures="$(_SupportedArchitectures)">
 
         <Output TaskParameter="ManifestPath" PropertyName="_Win32Manifest"/>
-    </PopulateSupportedArchitectures>
+    </AddToWin32Manifest>
 
     <PropertyGroup>
       <Win32Manifest Condition="'$(_Win32Manifest)' != ''">$(_Win32Manifest)</Win32Manifest>

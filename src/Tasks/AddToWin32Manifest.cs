@@ -16,7 +16,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Generates an application manifest or adds an entry to the existing one when PreferNativeArm64 property is true.
     /// </summary>
-    public sealed class PopulateSupportedArchitectures : TaskExtension
+    public sealed class AddToWin32Manifest : TaskExtension
     {
         private const string supportedArchitectures = "supportedArchitectures";
         private const string windowsSettings = "windowsSettings";
@@ -91,7 +91,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (!File.Exists(ApplicationManifestPath))
                 {
-                    Log.LogErrorWithCodeFromResources("PopulateSupportedArchitectures.SpecifiedApplicationManifestCanNotBeFound", ApplicationManifestPath);
+                    Log.LogErrorFromResources("AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound", ApplicationManifestPath);
                     return null;
                 }
 
@@ -103,16 +103,23 @@ namespace Microsoft.Build.Tasks
             // The logic for getting default manifest is similar to the one from Roslyn:
             // If Roslyn logic returns null, we fall back to reading embedded manifest.
             return defaultManifestPath is null
-                    ? typeof(PopulateSupportedArchitectures).Assembly.GetManifestResourceStream($"Microsoft.Build.Tasks.Resources.{DefaultManifestName}")
+                    ? typeof(AddToWin32Manifest).Assembly.GetManifestResourceStream($"Microsoft.Build.Tasks.Resources.{DefaultManifestName}")
                     : File.OpenRead(defaultManifestPath);
         }
 
         public override bool Execute()
         {
-            using Stream? stream = GetManifestStream();
-
-            if (stream is not null)
+            try
             {
+                using Stream? stream = GetManifestStream();
+
+                if (stream is null)
+                {
+                    Log.LogErrorFromResources("AddToWin32Manifest.ManifestCanNotBeOpenned");
+
+                    return !Log.HasLoggedErrors;
+                }
+
                 XmlDocument document = LoadManifest(stream);
                 XmlNamespaceManager xmlNamespaceManager = XmlNamespaces.GetNamespaceManager(document.NameTable);
 
@@ -121,17 +128,23 @@ namespace Microsoft.Build.Tasks
                 switch (validationResult)
                 {
                     case ManifestValidationResult.Success:
-                        PopulateSupportedArchitecturesElement(document, xmlNamespaceManager);
+                        AddSupportedArchitecturesElement(document, xmlNamespaceManager);
                         SaveManifest(document, Path.GetFileName(ApplicationManifestPath) ?? DefaultManifestName);
-                        return true;
+                        return !Log.HasLoggedErrors;
                     case ManifestValidationResult.SupportedArchitecturesExists:
-                        return true;
+                        return !Log.HasLoggedErrors;
+                    case ManifestValidationResult.Failure:
+                        return !Log.HasLoggedErrors;
                     default:
                         return false;
                 }
             }
+            catch (Exception ex)
+            {
+                Log.LogErrorFromResources("AddToWin32Manifest.ManifestCanNotBeOpennedWithException", ex.Message);
 
-            return false;
+                return !Log.HasLoggedErrors;
+            }
         }
 
         private XmlDocument LoadManifest(Stream stream)
@@ -164,31 +177,31 @@ namespace Microsoft.Build.Tasks
                 return ManifestValidationResult.Success;
             }
 
-            XmlNode assemblyNode = document.SelectSingleNode(XPaths.assemblyElement, xmlNamespaceManager)
-                ?? throw new InvalidOperationException(ResourceUtilities.GetResourceString("PopulateSupportedArchitectures.AssemblyNodeIsMissed"));
+            XmlNode? assemblyNode = document.SelectSingleNode(XPaths.assemblyElement, xmlNamespaceManager);
 
-            if (assemblyNode != null)
+            if (assemblyNode is null)
             {
-                XmlNode? supportedArchitecturesNode = GetNode(assemblyNode, supportedArchitectures, xmlNamespaceManager);
-                if (supportedArchitecturesNode != null)
-                {
-                    if (!string.Equals(supportedArchitecturesNode.InnerText.Trim(), SupportedArchitectures, StringComparison.OrdinalIgnoreCase))
-                    {
-                        Log.LogErrorWithCodeFromResources("PopulateSupportedArchitectures.InvalidValueInSupportedArchitectures", supportedArchitecturesNode.InnerText);
-
-                        return ManifestValidationResult.Failure;
-                    }
-
-                    return ManifestValidationResult.SupportedArchitecturesExists;
-                }
-
-                return ManifestValidationResult.Success;
+                Log.LogErrorFromResources("AddToWin32Manifest.AssemblyNodeIsMissed");
+                return ManifestValidationResult.Failure;
             }
 
-            return ManifestValidationResult.Failure;
+            XmlNode? supportedArchitecturesNode = GetNode(assemblyNode, supportedArchitectures, xmlNamespaceManager);
+            if (supportedArchitecturesNode != null)
+            {
+                if (!string.Equals(supportedArchitecturesNode.InnerText.Trim(), SupportedArchitectures, StringComparison.OrdinalIgnoreCase))
+                {
+                    Log.LogErrorWithCodeFromResources("AddToWin32Manifest.InvalidValueInSupportedArchitectures", supportedArchitecturesNode.InnerText);
+
+                    return ManifestValidationResult.Failure;
+                }
+
+                return ManifestValidationResult.SupportedArchitecturesExists;
+            }
+
+            return ManifestValidationResult.Success;
         }
 
-        private void PopulateSupportedArchitecturesElement(XmlDocument document, XmlNamespaceManager xmlNamespaceManager)
+        private void AddSupportedArchitecturesElement(XmlDocument document, XmlNamespaceManager xmlNamespaceManager)
         {
             XmlNode? assemblyNode = document.SelectSingleNode(XPaths.assemblyElement, xmlNamespaceManager);
             (XmlElement appNode, bool appNodeExisted) = GetOrCreateXmlElement(document, xmlNamespaceManager, application, asmv3Prefix, XmlNamespaces.asmv3);

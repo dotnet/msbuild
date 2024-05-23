@@ -258,9 +258,9 @@
     <Compile Include="Move.cs" />
     <Compile Include="MSBuild.cs" />
     <Compile Include="NativeMethods.cs" />
-    <Compile Include="NETMessage.cs" />
+    <Compile Include="MSBuildInternalMessage.cs" />
     <Compile Include="ParserState.cs" />
-    <Compile Include="PopulateSupportedArchitectures.cs" />
+    <Compile Include="AddToWin32Manifest.cs" />
     <Compile Include="RedistList.cs" />
     <Compile Include="RemoveDir.cs" />
     <Compile Include="ResGenDependencies.cs" />

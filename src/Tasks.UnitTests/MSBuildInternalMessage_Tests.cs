@@ -10,11 +10,11 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
-    public class NETMessage_Tests
+    public class MSBuildInternalMessage_Tests
     {
         private readonly ITestOutputHelper _testOutput;
 
-        public NETMessage_Tests(ITestOutputHelper testOutput) => _testOutput = testOutput;
+        public MSBuildInternalMessage_Tests(ITestOutputHelper testOutput) => _testOutput = testOutput;
 
         [Theory]
         [InlineData(true, true, "CommonTarget.Prefer32BitAndPreferNativeArm64Enabled", false)]

@@ -10,14 +10,14 @@ namespace Microsoft.Build.Tasks
     /// Represents a task that produces localized messages based on the specified resource name.
     /// This task is intended to be called from internal targets only.
     /// </summary>
-    public sealed class NETMessage : TaskExtension
+    public sealed class MSBuildInternalMessage : TaskExtension
     {
         private enum BuildMessageSeverity
         {
             /// <summary>
             /// Indicates that the message corresponds to build information.
             /// </summary>
-            Info,
+            Message,
 
             /// <summary>
             /// Indicates that the message corresponds to a build warning.
@@ -60,25 +60,25 @@ namespace Microsoft.Build.Tasks
                 {
                     case BuildMessageSeverity.Error:
                         Log.LogErrorWithCodeFromResources(ResourceName, FormatArguments);
-                        return false;
+                        return !Log.HasLoggedErrors;
 
                     case BuildMessageSeverity.Warning:
                         Log.LogWarningWithCodeFromResources(ResourceName, FormatArguments);
-                        return true;
+                        return !Log.HasLoggedErrors;
 
-                    case BuildMessageSeverity.Info:
+                    case BuildMessageSeverity.Message:
                         MessageImportance importance = (MessageImportance)Enum.Parse(typeof(MessageImportance), MessageImportance, true);
                         Log.LogMessageFromResources(importance, ResourceName, FormatArguments);
-                        return true;
+                        return !Log.HasLoggedErrors;
 
                     default:
-                        return false;
+                        return !Log.HasLoggedErrors;
                 }
             }
 
             Log.LogMessageFromResources("CommonTarget.SpecifiedSeverityDoesNotExist", Severity);
 
-            return true;
+            return !Log.HasLoggedErrors;
         }
     }
 }

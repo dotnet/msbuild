@@ -33,7 +33,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [InlineData(null, true)]
         public void ManifestPopulationCheck(string manifestName, bool expectedResult)
         {
-            PopulateSupportedArchitectures task = new PopulateSupportedArchitectures()
+            AddToWin32Manifest task = new AddToWin32Manifest()
             {
                 BuildEngine = new MockEngine(_testOutput)
             };
@@ -130,10 +130,12 @@ namespace Microsoft.Build.Tasks.UnitTests
                         actualDoc.Load(stream);
                     }
 
-                    expectedDoc.OuterXml.ShouldBe(actualDoc.OuterXml);
-                    expectedDoc.InnerXml.ShouldBe(actualDoc.InnerXml);
+                    NormalizeLineEndings(expectedDoc.OuterXml).ShouldBe(NormalizeLineEndings(actualDoc.OuterXml));
+                    NormalizeLineEndings(expectedDoc.InnerText).ShouldBe(NormalizeLineEndings(actualDoc.InnerText));
                 }
             }
+
+            static string NormalizeLineEndings(string input) => input.Replace("\r\n", "\n").Replace("\r", "\n");
         }
 
         [SupportedOSPlatform("windows")]

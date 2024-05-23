@@ -3015,17 +3015,23 @@
   </data>
 
   <!--
-        MSB4300 - MSB4310   Task: PopulateSupportedArchitectures
+        MSB4300 - MSB4310   Task: AddToWin32Manifest
   -->
-  <data name="PopulateSupportedArchitectures.InvalidValueInSupportedArchitectures">
+  <data name="AddToWin32Manifest.InvalidValueInSupportedArchitectures">
     <value>MSB4300: The specified value: '{0}' for supportedArchitectures element is invalid. Either remove it from manifest or set as 'amd64 arm64'.</value>
     <comment>{StrBegin="MSB4300: "}</comment>
   </data>
-  <data name="PopulateSupportedArchitectures.AssemblyNodeIsMissed">
+  <data name="AddToWin32Manifest.AssemblyNodeIsMissed">
     <value>The assembly element is missing from the application manifest.</value>
   </data>
-  <data name="PopulateSupportedArchitectures.SpecifiedApplicationManifestCanNotBeFound">
+  <data name="AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound">
     <value>The application manifest file cannot be found: '{0}'. Please make sure it exists.</value>
+  </data>
+  <data name="AddToWin32Manifest.ManifestCanNotBeOpenned">
+    <value>The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</value>
+  </data>
+  <data name="AddToWin32Manifest.ManifestCanNotBeOpennedWithException">
+    <value>The manifest file openning has failed with exception: '{0}'. Please make sure it exists and has relevant content.</value>
   </data>
 
   <!--
@@ -3134,7 +3140,7 @@
             MSB3971 - MSB3980   Task: GetReferenceAssemblyPaths overflow
             MSB3981 - MSB3990   Task: GetCompatiblePlatform
             MSB3991 - MSB3999   Task: CombineTargetFrameworkInfoProperties
-            MSB4300 - MSB4310   Task: PopulateSupportedArchitectures
+            MSB4300 - MSB4310   Task: AddToWin32Manifest
 
             MSB4000 - MSB4200   Portable targets & tasks (vsproject\flavors\portable\msbuild)
             MSB9000 - MSB9900   MSBuild targets files (C++)
