@@ -3,12 +3,15 @@
 MSBuild allows to plug inbox and custom loggers - those can be registered via the API or CLI and will be receiving rich tracing information during the build process (here as well referred as `BuildEventArgs`). Detailed article from user point of view can be found on Microsoft Learn: [Build Loggers](https://learn.microsoft.com/en-us/visualstudio/msbuild/build-loggers)
 
 
-Logging architecture allows usage in distributed execution nature of MSBuild (as [MSBuild has multi-process execution modes](Nodes-Orchestration.md#need-for-multiple-processes)) while pluggable logger might decide to be aware of the situation (then we speak about so called '*Distributed Loggers*') or they can operate in a mode where that fact is completely transparent to them (they can be referred to as '*Central Loggers*'). Detailed article from user point of view can be found on Microsoft Learn: [Write multi-processor-aware loggers](https://learn.microsoft.com/en-us/visualstudio/msbuild/writing-multi-processor-aware-loggers) and [Create forwarding loggers](https://learn.microsoft.com/en-us/visualstudio/msbuild/creating-forwarding-loggers)
+Logging architecture allows usage in distributed execution nature of MSBuild (as [MSBuild has multi-process execution modes](Nodes-Orchestration.md#need-for-multiple-processes)) while pluggable logger might decide to be aware of the situation (then we speak about so called '*Distributed Loggers*') or they can operate in a mode where the distributed execution is not visible to them (they can be referred to as '*Central Loggers*'). Detailed article from user point of view can be found on Microsoft Learn: [Write multi-processor-aware loggers](https://learn.microsoft.com/en-us/visualstudio/msbuild/writing-multi-processor-aware-loggers) and [Create forwarding loggers](https://learn.microsoft.com/en-us/visualstudio/msbuild/creating-forwarding-loggers)
 
 In this document we'll be describing mainly the internal design and implementation of the Logging infrastructure. We won't be going into actual implementation of individual loggers or a way to author custom one. So this is mainly targeted to MSBuild project developer or a curious user.
 
 ## Terminology
 
+* **Entrypoint node** - build process that was created to serve the build request (either from CLI, API or from Visual Studio via API).
+* **In-Proc node** - the build executing unit that is running in the 'Entrypoint node'
+* **Out-Of-Proc node** / **OOP node** - the build executing unit that is running in the separate process.
 * **Logger** - an implementor of `ILogger` (or `INodeLogger`) interface. Such a component then can be registered to receive detailed tracing info from the build process and process the info further. The most common use-case is logging the information into the console, file etc. - hence the name 'Logger', but it can be processed for other purposes (e.g. the [ParallelBuildDebuggingLogger](https://github.com/rainersigwald/parallelbuilddebugginglogger) for debugging purposes, or the BuildCheck for diagnostics).
 * **Central Logger** - a logger that runs in the Central node - as well here referred to as the 'Entrypoint Node'. It receives the information from the whole build regardless of if it's executed within single or multiple processes.
 * **Forwarding Logger** - a logger that has a single instance in each logical executing node and is capable of filtering and/or alter the tracing stream formed of the `BuildEventArg`s before it undergoes serialization and remoting into the Entrypoint node. Main built-in implementations are: `CentralForwardingLogger` and `ConfigurableForwardingLogger`.
@@ -18,8 +21,6 @@ In this document we'll be describing mainly the internal design and implementati
   ![Distributed Logger](distnode.png)
 * **EventSource** - source of the tracing events - either from the life build process or replayed post-hoc from the stored source.
 * **Sink** - Consumer of the tracing data that exposes and fires them as events - serving as a 'EventSource' for the consuming Logger
-* **In-Proc node** - the build executing unit that is running in the 'Entrypoint node'
-* **Out-Of-Proc node** / **OOP node** - the build executing unit that is running in the separate process.
 
 ## LoggingService
 
@@ -33,7 +34,7 @@ There is a single instance in the Entrypoint node, single instance within each o
 
 * Registers logger as distributed with a single CentralForwardingLogger (regardless of number of calls to the method - just single forwarder)
 * Called by BuildManager when starting the build (on the entrypoint node)
-* Called by ProjectCollection to register loggers for operations through OM/API. ProjectCollection registers the loggers wrapped by `ReusableLogger` (which demultiplexes separate design time and build time invocation build events into a single registered logger)
+* Called by ProjectCollection to register loggers for operations through OM/API. ProjectCollection registers the loggers wrapped by `ReusableLogger` (which combines separate design time and build time invocation build events into a single registered logger)
 
 
 <a name="RegisterDistributedLogger"></a>**`RegisterDistributedLogger(ILogger centralLogger, LoggerDescription forwardingLogger)`**
@@ -46,7 +47,7 @@ There is a single instance in the Entrypoint node, single instance within each o
 	
 
 <a name="InitializeNodeLoggers"></a>**`InitializeNodeLoggers(ICollection<LoggerDescription> descriptions, IBuildEventSink forwardingLoggerSink, int nodeId)`**
-* Called from OutOfProcNode.HandleNodeConfiguration - which handles NodeConfiguration 'packet' from the node -> node communiction. (This is as well when the environment and various build-wide configurations - like including evaluated properteis in EvaluationFinished events - are received and applied, and as well when LoggingService in OOP node is created)
+* Called from OutOfProcNode.HandleNodeConfiguration - which handles NodeConfiguration 'packet' from the node -> node communiction. (This is as well when the environment and various build-wide configurations - like including evaluated properties in EvaluationFinished events - are received and applied, and as well when LoggingService in OOP node is created)
 * `BuildEventArgTransportSink` is passed to the LoggingService - it is attached to each forwarding logger together with the central logger id, within a `EventRedirectorToSink`
 * `BuildEventArgTransportSink` takes care about bundling the build events together with the target logger id (in some contexts referred as sinkId) and sending them through node -> node communication
 	
