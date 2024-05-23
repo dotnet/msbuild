@@ -149,9 +149,11 @@ namespace Microsoft.Build.Tasks
         private void SaveManifest(XmlDocument document, string manifestName)
         {
             ManifestPath = Path.Combine(OutputDirectory, manifestName);
-            using (XmlWriter xmlWriter = XmlWriter.Create(ManifestPath, new XmlWriterSettings { Indent = true, Encoding = Encoding.UTF8 }))
+            using (var xmlwriter = new XmlTextWriter(ManifestPath, Encoding.UTF8))
             {
-                document.Save(xmlWriter);
+                xmlwriter.Formatting = Formatting.Indented;
+                xmlwriter.Indentation = 4;
+                document.Save(xmlwriter);
             }
         }
 
@@ -167,7 +169,7 @@ namespace Microsoft.Build.Tasks
 
             if (assemblyNode != null)
             {
-                XmlNode? supportedArchitecturesNode = assemblyNode.SelectSingleNode($"//*[local-name()='{supportedArchitectures}']", xmlNamespaceManager);
+                XmlNode? supportedArchitecturesNode = GetNode(assemblyNode, supportedArchitectures, xmlNamespaceManager);
                 if (supportedArchitecturesNode != null)
                 {
                     if (!string.Equals(supportedArchitecturesNode.InnerText.Trim(), SupportedArchitectures, StringComparison.OrdinalIgnoreCase))
@@ -212,22 +214,20 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-        private (XmlElement Element, bool IsExist) GetOrCreateXmlElement(XmlDocument document, XmlNamespaceManager xmlNamespaceManager, string localName, string prefix = "", string namespaceURI = "")
+        private (XmlElement Element, bool NodeExisted) GetOrCreateXmlElement(XmlDocument document, XmlNamespaceManager xmlNamespaceManager, string localName, string prefix = "", string namespaceURI = "")
         {
-            bool isPrefixed = !string.IsNullOrEmpty(prefix);
-
-            XmlNode? existingNode = isPrefixed
-                ? document.SelectSingleNode($"//{prefix}:{localName}", xmlNamespaceManager)
-                : document.SelectSingleNode($"//{localName}", xmlNamespaceManager);
+            XmlNode? existingNode = GetNode(document, localName, xmlNamespaceManager);
 
             if (existingNode is XmlElement element)
             {
                 return (element, true);
             }
 
-            return isPrefixed
+            return !string.IsNullOrEmpty(prefix)
                 ? (document.CreateElement(prefix, localName, namespaceURI), false)
                 : (document.CreateElement(localName, namespaceURI), false);
         }
+
+        private XmlNode? GetNode(XmlNode node, string localName, XmlNamespaceManager xmlNamespaceManager) => node.SelectSingleNode($"//*[local-name()='{localName}']", xmlNamespaceManager);
     }
 }

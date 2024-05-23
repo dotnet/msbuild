@@ -29,6 +29,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [InlineData("testManifestWithInvalidSupportedArchs.manifest", false)]
         [InlineData("testManifestWithApplicationDefined.manifest", true)]
         [InlineData("testManifestSavesTheCurrentNodesPositions.manifest", true)]
+        [InlineData("testManifestNoPrefixes.manifest", true)]
         [InlineData(null, true)]
         public void ManifestPopulationCheck(string manifestName, bool expectedResult)
         {
@@ -128,6 +129,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     {
                         actualDoc.Load(stream);
                     }
+                    actualDoc.Save(Path.Combine("C:\\Users\\ykovalova\\OneDrive - Microsoft\\Documents", "actualManifest.xml"));
 
                     expectedDoc.OuterXml.ShouldBe(actualDoc.OuterXml);
                     expectedDoc.InnerXml.ShouldBe(actualDoc.InnerXml);
