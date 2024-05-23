@@ -76,7 +76,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            Log.LogMessageFromResources("CommonTarget.SpecifiedSeverityDoesNotExist", Severity);
+            Log.LogErrorFromResources("CommonTarget.SpecifiedSeverityDoesNotExist", Severity);
 
             return !Log.HasLoggedErrors;
         }
