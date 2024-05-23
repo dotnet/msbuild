@@ -129,7 +129,6 @@ namespace Microsoft.Build.Tasks.UnitTests
                     {
                         actualDoc.Load(stream);
                     }
-                    actualDoc.Save(Path.Combine("C:\\Users\\ykovalova\\OneDrive - Microsoft\\Documents", "actualManifest.xml"));
 
                     expectedDoc.OuterXml.ShouldBe(actualDoc.OuterXml);
                     expectedDoc.InnerXml.ShouldBe(actualDoc.InnerXml);
