@@ -20,6 +20,7 @@ namespace Microsoft.Build.Tasks
     {
         private const string supportedArchitectures = "supportedArchitectures";
         private const string windowsSettings = "windowsSettings";
+        private const string application = "application";
         private const string asmv3Prefix = "asmv3";
         private const string DefaultManifestName = "default.win32manifest";
         private const string WindowsSettingsNamespace = "http://schemas.microsoft.com/SMI/2024/WindowsSettings";
@@ -110,7 +111,6 @@ namespace Microsoft.Build.Tasks
         {
             using Stream? stream = GetManifestStream();
 
-            // Only if ApplicationManifest was not specified, we can try to load the embedded manifest.
             if (stream is not null)
             {
                 XmlDocument document = LoadManifest(stream);
@@ -162,7 +162,9 @@ namespace Microsoft.Build.Tasks
                 return ManifestValidationResult.Success;
             }
 
-            XmlNode? assemblyNode = document.SelectSingleNode(XPaths.assemblyElement, xmlNamespaceManager);
+            XmlNode assemblyNode = document.SelectSingleNode(XPaths.assemblyElement, xmlNamespaceManager)
+                ?? throw new InvalidOperationException(ResourceUtilities.GetResourceString("PopulateSupportedArchitectures.AssemblyNodeIsMissed"));
+
             if (assemblyNode != null)
             {
                 XmlNode? supportedArchitecturesNode = assemblyNode.SelectSingleNode($"//*[local-name()='{supportedArchitectures}']", xmlNamespaceManager);
@@ -186,24 +188,31 @@ namespace Microsoft.Build.Tasks
 
         private void PopulateSupportedArchitecturesElement(XmlDocument document, XmlNamespaceManager xmlNamespaceManager)
         {
-            XmlNode assemblyNode = document.SelectSingleNode(XPaths.assemblyElement, xmlNamespaceManager)
-                ?? throw new InvalidOperationException(ResourceUtilities.GetResourceString("PopulateSupportedArchitectures.AssemblyNodeIsMissed"));
-
-            XmlElement appNode = GetOrCreateXmlElement(document , xmlNamespaceManager, "application", asmv3Prefix, XmlNamespaces.asmv3);
-            XmlElement winSettingsNode = GetOrCreateXmlElement(document, xmlNamespaceManager, windowsSettings, asmv3Prefix, XmlNamespaces.asmv3);
+            XmlNode? assemblyNode = document.SelectSingleNode(XPaths.assemblyElement, xmlNamespaceManager);
+            (XmlElement appNode, bool appNodeExisted) = GetOrCreateXmlElement(document, xmlNamespaceManager, application, asmv3Prefix, XmlNamespaces.asmv3);
+            (XmlElement winSettingsNode, bool winSettingsNodeExisted) = GetOrCreateXmlElement(document, xmlNamespaceManager, windowsSettings, asmv3Prefix, XmlNamespaces.asmv3);
             if (string.IsNullOrEmpty(winSettingsNode.GetAttribute(XMakeAttributes.xmlns)))
             {
                 winSettingsNode.SetAttribute(XMakeAttributes.xmlns, WindowsSettingsNamespace);
             }
 
-            XmlElement supportedArchitecturesNode = GetOrCreateXmlElement(document, xmlNamespaceManager, supportedArchitectures, namespaceURI: WindowsSettingsNamespace);
+            (XmlElement supportedArchitecturesNode, _) = GetOrCreateXmlElement(document, xmlNamespaceManager, supportedArchitectures, namespaceURI: WindowsSettingsNamespace);
             supportedArchitecturesNode.InnerText = SupportedArchitectures;
             winSettingsNode.AppendChild(supportedArchitecturesNode);
-            appNode.AppendChild(winSettingsNode);
-            assemblyNode.AppendChild(appNode);
+
+            // the null check prevents nodemoving it if already present in manifest. 
+            if (!winSettingsNodeExisted)
+            {
+                appNode.AppendChild(winSettingsNode);
+            }
+
+            if (!appNodeExisted)
+            {
+                assemblyNode!.AppendChild(appNode);
+            }
         }
 
-        private XmlElement GetOrCreateXmlElement(XmlDocument document, XmlNamespaceManager xmlNamespaceManager, string localName, string prefix = "", string namespaceURI = "")
+        private (XmlElement Element, bool IsExist) GetOrCreateXmlElement(XmlDocument document, XmlNamespaceManager xmlNamespaceManager, string localName, string prefix = "", string namespaceURI = "")
         {
             bool isPrefixed = !string.IsNullOrEmpty(prefix);
 
@@ -211,14 +220,14 @@ namespace Microsoft.Build.Tasks
                 ? document.SelectSingleNode($"//{prefix}:{localName}", xmlNamespaceManager)
                 : document.SelectSingleNode($"//{localName}", xmlNamespaceManager);
 
-            if (existingNode is not null and XmlElement element)
+            if (existingNode is XmlElement element)
             {
-                return element;
+                return (element, true);
             }
 
             return isPrefixed
-                ? document.CreateElement(prefix, localName, namespaceURI)
-                : document.CreateElement(localName, namespaceURI);
+                ? (document.CreateElement(prefix, localName, namespaceURI), false)
+                : (document.CreateElement(localName, namespaceURI), false);
         }
     }
 }

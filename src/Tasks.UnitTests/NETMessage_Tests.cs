@@ -18,8 +18,8 @@ namespace Microsoft.Build.Tasks.UnitTests
 
         [Theory]
         [InlineData(true, true, "CommonTarget.Prefer32BitAndPreferNativeArm64Enabled", false)]
-        [InlineData(false, false, "CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled", true)]
-        public void E2EScenarioTests(bool prefer32, bool isPlatformAnyCpu, string expectedResourceName, bool isNetWarningExpected)
+        [InlineData(false, false, "CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled", true, new[] { "Release" })]
+        public void E2EScenarioTests(bool prefer32, bool isPlatformAnyCpu, string expectedResourceName, bool isNetWarningExpected, string[]? formatArgs = null)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
@@ -44,7 +44,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 var projectFile = env.CreateFile(env.CreateFolder(), "test.csproj", projectContent).Path;
                 Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(projectFile, touchProject: false);
 
-                string expectedBuildMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(expectedResourceName);
+                string expectedBuildMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(expectedResourceName, formatArgs);
                 MockLogger logger = new MockLogger(_testOutput);
 
                 project.Build(logger);

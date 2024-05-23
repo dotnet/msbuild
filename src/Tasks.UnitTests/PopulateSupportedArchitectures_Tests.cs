@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Xml;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.UnitTests;
@@ -27,6 +28,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Theory]
         [InlineData("testManifestWithInvalidSupportedArchs.manifest", false)]
         [InlineData("testManifestWithApplicationDefined.manifest", true)]
+        [InlineData("testManifestSavesTheCurrentNodesPositions.manifest", true)]
         [InlineData(null, true)]
         public void ManifestPopulationCheck(string manifestName, bool expectedResult)
         {
@@ -57,8 +59,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                     XmlDocument expectedDoc = new XmlDocument();
                     XmlDocument actualDoc = new XmlDocument();
 
-                    expectedDoc.Load(generatedManifest);
-                    actualDoc.Load(expectedManifest);
+                    expectedDoc.Load(expectedManifest);
+                    actualDoc.Load(generatedManifest);
 
                     expectedDoc.OuterXml.ShouldBe(actualDoc.OuterXml);
                     expectedDoc.InnerXml.ShouldBe(actualDoc.InnerXml);
@@ -66,6 +68,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
+        [SupportedOSPlatform("windows")]
         [WindowsOnlyTheory]
         [InlineData(null, true)]
         [InlineData("buildIn.manifest", true)]
@@ -132,6 +135,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
+        [SupportedOSPlatform("windows")]
         internal sealed class AssemblyNativeResourceManager
         {
             public enum LoadLibraryFlags : uint { LOAD_LIBRARY_AS_DATAFILE = 2 };
@@ -154,22 +158,29 @@ namespace Microsoft.Build.Tasks.UnitTests
             public static byte[]? GetResourceFromExecutable(string assembly, string lpName, string lpType)
             {
                 IntPtr hModule = LoadLibrary(assembly, IntPtr.Zero, LoadLibraryFlags.LOAD_LIBRARY_AS_DATAFILE);
-                if (hModule != IntPtr.Zero)
+                try
                 {
-                    IntPtr hResource = FindResource(hModule, "#2", "#24");
-                    if (hResource != IntPtr.Zero)
+                    if (hModule != IntPtr.Zero)
                     {
-                        uint resSize = SizeofResource(hModule, hResource);
-                        IntPtr resData = LoadResource(hModule, hResource);
-                        if (resData != IntPtr.Zero)
+                        IntPtr hResource = FindResource(hModule, lpName, lpType);
+                        if (hResource != IntPtr.Zero)
                         {
-                            byte[] uiBytes = new byte[resSize];
-                            IntPtr ipMemorySource = LockResource(resData);
-                            Marshal.Copy(ipMemorySource, uiBytes, 0, (int)resSize);
+                            uint resSize = SizeofResource(hModule, hResource);
+                            IntPtr resData = LoadResource(hModule, hResource);
+                            if (resData != IntPtr.Zero)
+                            {
+                                byte[] uiBytes = new byte[resSize];
+                                IntPtr ipMemorySource = LockResource(resData);
+                                Marshal.Copy(ipMemorySource, uiBytes, 0, (int)resSize);
 
-                            return uiBytes;
+                                return uiBytes;
+                            }
                         }
                     }
+                }
+                finally
+                {
+                    NativeMethodsShared.FreeLibrary(hModule);
                 }
 
                 return null;

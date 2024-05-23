@@ -137,8 +137,8 @@
         <note>{StrBegin="MSB9903: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
-        <source>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU.</source>
-        <target state="new">MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU.</target>
+        <source>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</source>
+        <target state="new">MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</target>
         <note>{StrBegin="MSB9904: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled">
@@ -1585,8 +1585,8 @@
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
       </trans-unit>
       <trans-unit id="PopulateSupportedArchitectures.AssemblyNodeIsMissed">
-        <source>The assembly node is missing from the manifest. Check your ApplicationManifest file.</source>
-        <target state="new">The assembly node is missing from the manifest. Check your ApplicationManifest file.</target>
+        <source>The assembly element is missing from the application manifest.</source>
+        <target state="new">The assembly element is missing from the application manifest.</target>
         <note />
       </trans-unit>
       <trans-unit id="PopulateSupportedArchitectures.InvalidValueInSupportedArchitectures">
@@ -1595,8 +1595,8 @@
         <note>{StrBegin="MSB4300: "}</note>
       </trans-unit>
       <trans-unit id="PopulateSupportedArchitectures.SpecifiedApplicationManifestCanNotBeFound">
-        <source>The file specified in ApplicationManifest can not be found: '{0}'. Please make sure it exists.</source>
-        <target state="new">The file specified in ApplicationManifest can not be found: '{0}'. Please make sure it exists.</target>
+        <source>The application manifest file cannot be found: '{0}'. Please make sure it exists.</source>
+        <target state="new">The application manifest file cannot be found: '{0}'. Please make sure it exists.</target>
         <note />
       </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">

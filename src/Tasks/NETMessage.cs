@@ -3,12 +3,33 @@
 
 using System;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Tasks.Deployment.Bootstrapper;
 
 namespace Microsoft.Build.Tasks
 {
+    /// <summary>
+    /// Represents a task that produces localized messages based on the specified resource name.
+    /// This task is intended to be called from internal targets only.
+    /// </summary>
     public sealed class NETMessage : TaskExtension
     {
+        private enum BuildMessageSeverity
+        {
+            /// <summary>
+            /// Indicates that the message corresponds to build information.
+            /// </summary>
+            Info,
+
+            /// <summary>
+            /// Indicates that the message corresponds to a build warning.
+            /// </summary>
+            Warning,
+
+            /// <summary>
+            /// Indicates that the message corresponds to a build error.
+            /// </summary>
+            Error,
+        }
+
         /// <summary>
         /// The name of the resource in Strings.resx that contains the desired error message.
         /// </summary>

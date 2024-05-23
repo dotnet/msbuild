@@ -858,7 +858,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <NETMessage Condition=" '$(NoWin32Manifest)' == 'true' and '$(PreferNativeArm64)' == 'true' " ResourceName="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled" Severity="Error"/>
 
-    <NETMessage Condition=" '$(PreferNativeArm64)' == 'true' and '$(Platform)' != 'AnyCPU' " ResourceName="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled" Severity="Warning" />
+    <NETMessage Condition=" '$(PreferNativeArm64)' == 'true' and '$(Platform)' != 'AnyCPU' " ResourceName="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled" Severity="Warning" FormatArguments="$(Platform)" />
 
     <!--
       Log an error if the user set MSBuildProjectExtensionsPath in the body of a project. In an SDK style project
