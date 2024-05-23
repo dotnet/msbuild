@@ -393,6 +393,11 @@
         <target state="translated">Null または空のターゲット名を含むコレクションを指定してメソッド {0} を呼び出すことはできません。</target>
         <note />
       </trans-unit>
+      <trans-unit id="OutputPropertyLogMessagePrefix">
+        <source>Output Property: </source>
+        <target state="new">Output Property: </target>
+        <note />
+      </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">
         <source>Created an override using task: {0} at {1}</source>
         <target state="translated">タスクを使用してオーバーライドを作成しました: {1} の {0}</target>

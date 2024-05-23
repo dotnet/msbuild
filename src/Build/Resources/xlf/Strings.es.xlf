@@ -393,6 +393,11 @@
         <target state="translated">No se puede llamar al método {0} con una colección que contiene nombres de destino nulos o vacíos.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OutputPropertyLogMessagePrefix">
+        <source>Output Property: </source>
+        <target state="new">Output Property: </target>
+        <note />
+      </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">
         <source>Created an override using task: {0} at {1}</source>
         <target state="translated">Se creó una invalidación mediante la tarea: {0} en {1}</target>

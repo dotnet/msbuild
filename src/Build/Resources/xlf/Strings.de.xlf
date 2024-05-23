@@ -393,6 +393,11 @@
         <target state="translated">Die Methode "{0}" kann nicht mit einer Sammlung aufgerufen werden, die NULL oder leere Zielnamen enthält.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OutputPropertyLogMessagePrefix">
+        <source>Output Property: </source>
+        <target state="new">Output Property: </target>
+        <note />
+      </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">
         <source>Created an override using task: {0} at {1}</source>
         <target state="translated">Außerkraftsetzung mit Task erstellt: {0} bei {1}</target>

@@ -1102,6 +1102,9 @@
   <data name="OutputItemParameterMessagePrefix" xml:space="preserve">
     <value>Output Item(s): </value>
   </data>
+  <data name="OutputPropertyLogMessagePrefix" xml:space="preserve">
+    <value>Output Property: </value>
+  </data>
   <data name="OutputPropertyLogMessage" xml:space="preserve">
     <value>Output Property: {0}={1}</value>
   </data>

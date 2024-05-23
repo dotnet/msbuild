@@ -393,6 +393,11 @@
         <target state="translated">Non è possibile chiamare il metodo {0} con una raccolta contenente nomi di destinazione Null o vuoti.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OutputPropertyLogMessagePrefix">
+        <source>Output Property: </source>
+        <target state="new">Output Property: </target>
+        <note />
+      </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">
         <source>Created an override using task: {0} at {1}</source>
         <target state="translated">È stata creata una sostituzione con l'attività: {0} in {1}</target>
