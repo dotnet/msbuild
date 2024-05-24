@@ -374,7 +374,8 @@ namespace Microsoft.Build.Shared
             }
             
             // Some customers experience exceptions such as 'OutOfMemory' errors when msbuild attempts to log errors to a local file.
-            // This catch helps to prevent the application from crashing.
+            // This catch helps to prevent the application from crashing in this best-effort dump-diagnostics path,
+            // but doesn't prevent the overall crash from going to Watson.
             catch
             {
             }
