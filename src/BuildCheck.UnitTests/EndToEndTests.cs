@@ -136,7 +136,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [DotNetOnlyTheory]
+    [Theory]
     [InlineData("AnalysisCandidate", new[] { "CustomRule1", "CustomRule2" })]
     [InlineData("AnalysisCandidateWithMultipleAnalyzersInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
     public void CustomAnalyzerTest(string analysisCandidate, string[] expectedRegisteredRules, bool expectedRejectedAnalyzers = false)
@@ -174,7 +174,7 @@ public class EndToEndTests : IDisposable
             XmlNode? packageSourcesNode = doc.SelectSingleNode("//packageSources");
 
             // The test packages are generated during the test project build and saved in CustomAnalyzers folder.
-            string analyzersPackagesPath = Path.Combine(Directory.GetParent(AssemblyLocation)?.FullName ?? string.Empty, "CustomAnalyzers");
+            string analyzersPackagesPath = Path.Combine(Directory.GetParent(AssemblyLocation)?.Parent?.FullName ?? string.Empty, "CustomAnalyzers");
             AddPackageSource(doc, packageSourcesNode, "Key", analyzersPackagesPath);
 
             doc.Save(Path.Combine(analysisCandidatePath, "nuget.config"));

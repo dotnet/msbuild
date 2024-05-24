@@ -14,6 +14,12 @@
     <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
   </ItemGroup>
+  
+  <ItemGroup Label="TestAssests">
+    <ProjectReference Include=".\TestAssets\CustomAnalyzer\CustomAnalyzer.csproj" />
+    <ProjectReference Include=".\TestAssets\CustomAnalyzer2\CustomAnalyzer2.csproj" />
+    <ProjectReference Include=".\TestAssets\InvalidCustomAnalyzer\InvalidCustomAnalyzer.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Collections.Immutable" />
@@ -37,19 +43,5 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
-  <!-- Check on .net core only now-->
-  <Target Name="BuildTestAssets" AfterTargets="Build" Condition="'$(TargetFramework)' == '$(LatestDotNetCoreForMSBuild)'">
-    <ItemGroup>
-      <TestAssetProject Include="$(RepoRoot)src\BuildCheck.UnitTests\TestAssets\CustomAnalyzer\CustomAnalyzer.csproj" />
-      <TestAssetProject Include="$(RepoRoot)src\BuildCheck.UnitTests\TestAssets\CustomAnalyzer2\CustomAnalyzer2.csproj" />
-      <TestAssetProject Include="$(RepoRoot)src\BuildCheck.UnitTests\TestAssets\InvalidCustomAnalyzer\InvalidCustomAnalyzer.csproj" />
-    </ItemGroup>
-
-    <MSBuild Projects="@(TestAssetProject)"
-             Properties="PackageOutputPath=$(ArtifactsBinDir)Microsoft.Build.BuildCheck.UnitTests\$(Configuration)\CustomAnalyzers;Version=1.0.0"
-             Targets="Restore;Build;Pack" />
-
-  </Target>
 
 </Project>

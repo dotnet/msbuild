@@ -43,7 +43,7 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
 #endif
 
             IList<Type> availableTypes = assembly.GetExportedTypes();
-            IList<Type> analyzerTypes = availableTypes.Where(t => t.IsInstanceOfType(typeof(BuildAnalyzer))).ToList();
+            IList<Type> analyzerTypes = availableTypes.Where(t => typeof(BuildAnalyzer).IsAssignableFrom(t)).ToArray();
 
             foreach (Type analyzerCandidate in analyzerTypes)
             {
