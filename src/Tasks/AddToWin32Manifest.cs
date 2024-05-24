@@ -115,7 +115,7 @@ namespace Microsoft.Build.Tasks
 
                 if (stream is null)
                 {
-                    Log.LogErrorFromResources("AddToWin32Manifest.ManifestCanNotBeOpenned");
+                    Log.LogErrorFromResources("AddToWin32Manifest.ManifestCanNotBeOpened");
 
                     return !Log.HasLoggedErrors;
                 }
@@ -141,7 +141,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception ex)
             {
-                Log.LogErrorFromResources("AddToWin32Manifest.ManifestCanNotBeOpennedWithException", ex.Message);
+                Log.LogErrorFromResources("AddToWin32Manifest.ManifestCanNotBeOpenedWithException", ex.Message);
 
                 return !Log.HasLoggedErrors;
             }
@@ -204,41 +204,41 @@ namespace Microsoft.Build.Tasks
         private void AddSupportedArchitecturesElement(XmlDocument document, XmlNamespaceManager xmlNamespaceManager)
         {
             XmlNode? assemblyNode = document.SelectSingleNode(XPaths.assemblyElement, xmlNamespaceManager);
-            (XmlElement appNode, bool appNodeExisted) = GetOrCreateXmlElement(document, xmlNamespaceManager, application, asmv3Prefix, XmlNamespaces.asmv3);
-            (XmlElement winSettingsNode, bool winSettingsNodeExisted) = GetOrCreateXmlElement(document, xmlNamespaceManager, windowsSettings, asmv3Prefix, XmlNamespaces.asmv3);
+            XmlElement appNode = GetOrCreateXmlElement(document, xmlNamespaceManager, application, asmv3Prefix, XmlNamespaces.asmv3);
+            XmlElement winSettingsNode = GetOrCreateXmlElement(document, xmlNamespaceManager, windowsSettings, asmv3Prefix, XmlNamespaces.asmv3);
             if (string.IsNullOrEmpty(winSettingsNode.GetAttribute(XMakeAttributes.xmlns)))
             {
                 winSettingsNode.SetAttribute(XMakeAttributes.xmlns, WindowsSettingsNamespace);
             }
 
-            (XmlElement supportedArchitecturesNode, _) = GetOrCreateXmlElement(document, xmlNamespaceManager, supportedArchitectures, namespaceURI: WindowsSettingsNamespace);
+            XmlElement supportedArchitecturesNode = GetOrCreateXmlElement(document, xmlNamespaceManager, supportedArchitectures, namespaceURI: WindowsSettingsNamespace);
             supportedArchitecturesNode.InnerText = SupportedArchitectures;
             winSettingsNode.AppendChild(supportedArchitecturesNode);
 
-            // the null check prevents nodemoving it if already present in manifest. 
-            if (!winSettingsNodeExisted)
+            // If ParentNode is null, this indicates that winSettingsNode was not a part of the manifest.
+            if (winSettingsNode.ParentNode == null)
             {
                 appNode.AppendChild(winSettingsNode);
             }
 
-            if (!appNodeExisted)
+            if (appNode.ParentNode == null)
             {
                 assemblyNode!.AppendChild(appNode);
             }
         }
 
-        private (XmlElement Element, bool NodeExisted) GetOrCreateXmlElement(XmlDocument document, XmlNamespaceManager xmlNamespaceManager, string localName, string prefix = "", string namespaceURI = "")
+        private XmlElement GetOrCreateXmlElement(XmlDocument document, XmlNamespaceManager xmlNamespaceManager, string localName, string prefix = "", string namespaceURI = "")
         {
             XmlNode? existingNode = GetNode(document, localName, xmlNamespaceManager);
 
             if (existingNode is XmlElement element)
             {
-                return (element, true);
+                return element;
             }
 
             return !string.IsNullOrEmpty(prefix)
-                ? (document.CreateElement(prefix, localName, namespaceURI), false)
-                : (document.CreateElement(localName, namespaceURI), false);
+                ? document.CreateElement(prefix, localName, namespaceURI)
+                : document.CreateElement(localName, namespaceURI);
         }
 
         private XmlNode? GetNode(XmlNode node, string localName, XmlNamespaceManager xmlNamespaceManager) => node.SelectSingleNode($"//*[local-name()='{localName}']", xmlNamespaceManager);
