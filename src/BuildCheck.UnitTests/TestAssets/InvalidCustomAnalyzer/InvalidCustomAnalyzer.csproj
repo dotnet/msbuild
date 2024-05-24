@@ -8,10 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="CustomAnalyzer2.props" Pack="true" PackagePath="build\CustomAnalyzer2.props" />
+    <None Include="InvalidCustomAnalyzer.props" Pack="true" PackagePath="build\InvalidCustomAnalyzer.props" />
     <Content Include="README.md" />
   </ItemGroup>
 
   <Import Project="..\Common\CommonTest.targets" />
-  
+
 </Project>

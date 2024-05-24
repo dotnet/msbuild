@@ -2114,6 +2114,10 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</value>
     <comment>The message is emitted when the custom analyzer assembly can not be found.</comment>
   </data>
+  <data name="CustomAnalyzerBaseTypeNotAssignable" xml:space="preserve">
+    <value>Failed to load the custom analyzer type: {0} from the assembly: {1}. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</value>
+    <comment>The message is emitted when the custom analyzer assembly can not be successfully registered.</comment>
+  </data>
   <data name="TaskAssemblyLocationMismatch" xml:space="preserve">
     <value>Task assembly was loaded from '{0}' while the desired location was '{1}'.</value>
   </data>

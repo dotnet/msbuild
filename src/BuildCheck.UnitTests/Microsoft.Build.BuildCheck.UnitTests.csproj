@@ -15,6 +15,12 @@
     <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
   </ItemGroup>
+  
+  <ItemGroup Label="TestAssests">
+    <ProjectReference Include=".\TestAssets\CustomAnalyzer\CustomAnalyzer.csproj" />
+    <ProjectReference Include=".\TestAssets\CustomAnalyzer2\CustomAnalyzer2.csproj" />
+    <ProjectReference Include=".\TestAssets\InvalidCustomAnalyzer\InvalidCustomAnalyzer.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Collections.Immutable" />
