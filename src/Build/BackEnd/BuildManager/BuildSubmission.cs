@@ -52,7 +52,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Constructor
         /// </summary>
-        internal protected BuildSubmission(BuildManager buildManager, int submissionId, TRequestData requestData)
+        protected internal BuildSubmission(BuildManager buildManager, int submissionId, TRequestData requestData)
         {
             ErrorUtilities.VerifyThrowArgumentNull(buildManager, nameof(buildManager));
             ErrorUtilities.VerifyThrowArgumentNull(requestData, nameof(requestData));
@@ -76,12 +76,12 @@ namespace Microsoft.Build.Execution
         public int SubmissionId { get; }
 
         /// <summary>
-        /// The asynchronous context provided to <see cref="BuildSubmission{TRequestData,TResultData}.ExecuteAsync(BuildSubmissionCompleteCallback, object)"/>, if any.
+        /// The asynchronous context provided to <see cref="BuildSubmission{TRequestData,TResultData}.ExecuteAsync(BuildSubmissionCompleteCallback&lt;TRequestData, TResultData&gt;, object)"/>, if any.
         /// </summary>
         public Object AsyncContext { get; private set; }
 
         /// <summary>
-        /// A <see cref="System.Threading.WaitHandle"/> which will be signalled when the build is complete.  Valid after <see cref="BuildSubmission{TRequestData,TResultData}.Execute()"/> or <see cref="BuildSubmission{TRequestData,TResultData}.ExecuteAsync(BuildSubmissionCompleteCallback, object)"/> returns, otherwise null.
+        /// A <see cref="System.Threading.WaitHandle"/> which will be signalled when the build is complete.  Valid after <see cref="BuildSubmission{TRequestData,TResultData}.Execute()"/> or <see cref="BuildSubmission{TRequestData,TResultData}.ExecuteAsync(BuildSubmissionCompleteCallback&lt;TRequestData, TResultData&gt;, object)"/> returns, otherwise null.
         /// </summary>
         public WaitHandle WaitHandle => _completionEvent;
 
@@ -108,13 +108,13 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Starts the request and blocks until results are available.
         /// </summary>
-        /// <exception cref="System.InvalidOperationException">The request has already been started or is already complete.</exception>
+        /// <exception cref="InvalidOperationException">The request has already been started or is already complete.</exception>
         public abstract TResultData Execute();
 
         /// <summary>
         /// Starts the request asynchronously and immediately returns control to the caller.
         /// </summary>
-        /// <exception cref="System.InvalidOperationException">The request has already been started or is already complete.</exception>
+        /// <exception cref="InvalidOperationException">The request has already been started or is already complete.</exception>
         public void ExecuteAsync(BuildSubmissionCompleteCallback<TRequestData, TResultData> callback, object context)
         {
             ExecuteAsync(callback, context, allowMainThreadBuild: false);
