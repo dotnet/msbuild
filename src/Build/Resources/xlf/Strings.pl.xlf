@@ -395,7 +395,7 @@
       </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
         <source>Output Property: </source>
-        <target state="new">Output Property: </target>
+        <target state="translated">Właściwość danych wyjściowych: </target>
         <note />
       </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">
