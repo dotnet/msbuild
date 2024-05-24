@@ -83,7 +83,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <TargetedRuntimeVersion Condition="'$(TargetedRuntimeVersion)' == ''">v$(MSBuildRuntimeVersion)</TargetedRuntimeVersion>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(TargetingClr2Framework)' != 'true' and '$(TargetFrameworkVersion)' != 'v4.0' and ('$(OutputType)' == 'exe' or '$(OutputType)' == 'winexe' or '$(OutputType)' == 'appcontainerexe' or '$(OutputType)' == '')">
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(TargetingClr2Framework)' != 'true' and '$(TargetFrameworkVersion)' != 'v4.0' and ('$(OutputType)' == 'exe' or '$(OutputType)' == 'winexe' or '$(OutputType)' == 'appcontainerexe' or '$(OutputType)' == '') and ('$(PreferNativeArm64) == '' or $(PreferNativeArm64) != 'true')">
     <Prefer32Bit Condition="'$(Prefer32Bit)' == ''">true</Prefer32Bit>
   </PropertyGroup>
 

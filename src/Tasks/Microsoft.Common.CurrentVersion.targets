@@ -4146,12 +4146,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Win32Manifest>$(ApplicationManifest)</Win32Manifest>
     </PropertyGroup>
 
-    <GetFrameworkPath Condition="'$(ApplicationManifest)'=='' and '$(NoWin32Manifest)'!='true'">
+    <!-- If PreferNativeArm64 is enabled, it searches for the same default.win32manifest  -->
+    <GetFrameworkPath Condition="'$(ApplicationManifest)'=='' and '$(NoWin32Manifest)'!='true' and ('$(PreferNativeArm64) == '' or $(PreferNativeArm64) != 'true')">
       <Output TaskParameter="FrameworkVersion40Path"  PropertyName="_FrameworkVersion40Path" />
     </GetFrameworkPath>
 
     <PropertyGroup>
-      <EmbeddedWin32Manifest  Condition="'$(ApplicationManifest)'=='' and '$(NoWin32Manifest)'!='true' and Exists('$(_FrameworkVersion40Path)\default.win32manifest')">$(_FrameworkVersion40Path)\default.win32manifest</EmbeddedWin32Manifest>
+      <EmbeddedWin32Manifest  Condition="'$(ApplicationManifest)'=='' and '$(NoWin32Manifest)'!='true' and Exists('$(_FrameworkVersion40Path)\default.win32manifest') and ('$(PreferNativeArm64) == '' or $(PreferNativeArm64) != 'true')">$(_FrameworkVersion40Path)\default.win32manifest</EmbeddedWin32Manifest>
     </PropertyGroup>
 
   </Target>
