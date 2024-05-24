@@ -922,7 +922,7 @@ namespace Microsoft.Build.Execution
                 {
                     // Project graph can have multiple entry points, for purposes of identifying event for same build project,
                     // we believe that including only one entry point will provide enough precision.
-                    _buildTelemetry.Project ??= requestData.ProjectGraphEntryPoints?.FirstOrDefault().ProjectFile;
+                    _buildTelemetry.Project ??= requestData.EntryProjectsFullPath.FirstOrDefault();
                     _buildTelemetry.Target ??= string.Join(",", requestData.TargetNames);
                 }
 
@@ -1392,6 +1392,22 @@ namespace Microsoft.Build.Execution
                     CompleteSubmissionWithException(cacheRequest.Submission, cacheRequest.Configuration, e);
                 }
             });
+        }
+
+        internal void ExecuteSubmission<TRequestData, TResultData>(
+            BuildSubmission<TRequestData, TResultData> submission, bool allowMainThreadBuild)
+            where TRequestData : BuildRequestDataBase
+            where TResultData : BuildResultBase
+        {
+            // TODO - unify the behavior in BuildManager as well
+            if (submission is BuildSubmission buildSubmission)
+            {
+                ExecuteSubmission(buildSubmission, allowMainThreadBuild);
+            }
+            else if (submission is GraphBuildSubmission graphBuildSubmission)
+            {
+                ExecuteSubmission(graphBuildSubmission);
+            }
         }
 
         /// <summary>
@@ -2011,7 +2027,7 @@ namespace Microsoft.Build.Execution
 
             var blockedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes);
             var finishedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes.Count);
-            var buildingNodes = new Dictionary<BuildSubmission, ProjectGraphNode>();
+            var buildingNodes = new Dictionary<BuildSubmissionBase, ProjectGraphNode>();
             var resultsPerNode = new Dictionary<ProjectGraphNode, BuildResult>(projectGraph.ProjectNodes.Count);
             ExceptionDispatchInfo submissionException = null;
 

@@ -602,6 +602,8 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static void DebuggerLaunchCheck()
         {
+            Debugger.Launch();
+
             if (Debugger.IsAttached)
             {
                 return;

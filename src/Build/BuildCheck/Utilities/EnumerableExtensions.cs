@@ -3,9 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.ObjectModel;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 
@@ -22,6 +20,26 @@ internal static class EnumerableExtensions
     {
         return source == null ? "<NULL>" : string.Join(useSpace ? ", " : ",", source);
     }
+
+    /// <summary>
+    /// Returns the item as and enumerable with single item.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="item"></param>
+    /// <returns></returns>
+    public static IEnumerable<T> AsSingleItemEnumerable<T>(this T item)
+    {
+        yield return item;
+    }
+
+#if !NET
+    /// <summary>
+    /// Returns a read-only <see cref="ReadOnlyDictionary{TKey, TValue}"/> wrapper
+    /// for the current dictionary.
+    /// </summary>
+    public static ReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
+        => new(dictionary);
+#endif
 
     /// <summary>
     /// Adds a content of given dictionary to current dictionary.

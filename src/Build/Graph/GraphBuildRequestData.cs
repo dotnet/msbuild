@@ -2,10 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Shared;
 
 #nullable disable
+#nullable enable
 
 namespace Microsoft.Build.Graph
 {
@@ -20,7 +24,7 @@ namespace Microsoft.Build.Graph
     /// <summary>
     /// GraphBuildRequestData encapsulates all of the data needed to submit a graph build request.
     /// </summary>
-    public sealed class GraphBuildRequestData
+    public sealed class GraphBuildRequestData : BuildRequestDataBase
     {
         /// <summary>
         /// Constructs a GraphBuildRequestData for build requests based on a project graph.
@@ -38,7 +42,7 @@ namespace Microsoft.Build.Graph
         /// <param name="projectGraph">The graph to build.</param>
         /// <param name="targetsToBuild">The targets to build.</param>
         /// <param name="hostServices">The host services to use, if any.  May be null.</param>
-        public GraphBuildRequestData(ProjectGraph projectGraph, ICollection<string> targetsToBuild, HostServices hostServices)
+        public GraphBuildRequestData(ProjectGraph projectGraph, ICollection<string> targetsToBuild, HostServices? hostServices)
             : this(projectGraph, targetsToBuild, hostServices, BuildRequestDataFlags.None)
         {
         }
@@ -50,7 +54,7 @@ namespace Microsoft.Build.Graph
         /// <param name="targetsToBuild">The targets to build.</param>
         /// <param name="hostServices">The host services to use, if any.  May be null.</param>
         /// <param name="flags">Flags controlling this build request.</param>
-        public GraphBuildRequestData(ProjectGraph projectGraph, ICollection<string> targetsToBuild, HostServices hostServices, BuildRequestDataFlags flags)
+        public GraphBuildRequestData(ProjectGraph projectGraph, ICollection<string> targetsToBuild, HostServices? hostServices, BuildRequestDataFlags flags)
             : this(targetsToBuild, hostServices, flags)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectGraph, nameof(projectGraph));
@@ -65,7 +69,7 @@ namespace Microsoft.Build.Graph
         /// <param name="globalProperties">The global properties which should be used during evaluation of the project.  Cannot be null.</param>
         /// <param name="targetsToBuild">The targets to build.</param>
         /// <param name="hostServices">The host services to use.  May be null.</param>
-        public GraphBuildRequestData(string projectFullPath, IDictionary<string, string> globalProperties, ICollection<string> targetsToBuild, HostServices hostServices)
+        public GraphBuildRequestData(string projectFullPath, IDictionary<string, string> globalProperties, ICollection<string> targetsToBuild, HostServices? hostServices)
             : this(new ProjectGraphEntryPoint(projectFullPath, globalProperties).AsEnumerable(), targetsToBuild, hostServices, BuildRequestDataFlags.None)
         {
         }
@@ -78,7 +82,7 @@ namespace Microsoft.Build.Graph
         /// <param name="targetsToBuild">The targets to build.</param>
         /// <param name="hostServices">The host services to use.  May be null.</param>
         /// <param name="flags">The <see cref="BuildRequestDataFlags"/> to use.</param>
-        public GraphBuildRequestData(string projectFullPath, IDictionary<string, string> globalProperties, ICollection<string> targetsToBuild, HostServices hostServices, BuildRequestDataFlags flags)
+        public GraphBuildRequestData(string projectFullPath, IDictionary<string, string> globalProperties, ICollection<string> targetsToBuild, HostServices? hostServices, BuildRequestDataFlags flags)
             : this(new ProjectGraphEntryPoint(projectFullPath, globalProperties).AsEnumerable(), targetsToBuild, hostServices, flags)
         {
         }
@@ -99,7 +103,7 @@ namespace Microsoft.Build.Graph
         /// <param name="projectGraphEntryPoint">The entry point to use in the build.</param>
         /// <param name="targetsToBuild">The targets to build.</param>
         /// <param name="hostServices">The host services to use, if any.  May be null.</param>
-        public GraphBuildRequestData(ProjectGraphEntryPoint projectGraphEntryPoint, ICollection<string> targetsToBuild, HostServices hostServices)
+        public GraphBuildRequestData(ProjectGraphEntryPoint projectGraphEntryPoint, ICollection<string> targetsToBuild, HostServices? hostServices)
             : this(projectGraphEntryPoint.AsEnumerable(), targetsToBuild, hostServices, BuildRequestDataFlags.None)
         {
         }
@@ -111,7 +115,7 @@ namespace Microsoft.Build.Graph
         /// <param name="targetsToBuild">The targets to build.</param>
         /// <param name="hostServices">The host services to use, if any.  May be null.</param>
         /// <param name="flags">Flags controlling this build request.</param>
-        public GraphBuildRequestData(ProjectGraphEntryPoint projectGraphEntryPoint, ICollection<string> targetsToBuild, HostServices hostServices, BuildRequestDataFlags flags)
+        public GraphBuildRequestData(ProjectGraphEntryPoint projectGraphEntryPoint, ICollection<string> targetsToBuild, HostServices? hostServices, BuildRequestDataFlags flags)
             : this(projectGraphEntryPoint.AsEnumerable(), targetsToBuild, hostServices, flags)
         {
         }
@@ -132,7 +136,7 @@ namespace Microsoft.Build.Graph
         /// <param name="projectGraphEntryPoints">The entry points to use in the build.</param>
         /// <param name="targetsToBuild">The targets to build.</param>
         /// <param name="hostServices">The host services to use, if any.  May be null.</param>
-        public GraphBuildRequestData(IEnumerable<ProjectGraphEntryPoint> projectGraphEntryPoints, ICollection<string> targetsToBuild, HostServices hostServices)
+        public GraphBuildRequestData(IEnumerable<ProjectGraphEntryPoint> projectGraphEntryPoints, ICollection<string> targetsToBuild, HostServices? hostServices)
             : this(projectGraphEntryPoints, targetsToBuild, hostServices, BuildRequestDataFlags.None)
         {
         }
@@ -144,7 +148,7 @@ namespace Microsoft.Build.Graph
         /// <param name="targetsToBuild">The targets to build.</param>
         /// <param name="hostServices">The host services to use, if any.  May be null.</param>
         /// <param name="flags">Flags controlling this build request.</param>
-        public GraphBuildRequestData(IEnumerable<ProjectGraphEntryPoint> projectGraphEntryPoints, ICollection<string> targetsToBuild, HostServices hostServices, BuildRequestDataFlags flags)
+        public GraphBuildRequestData(IEnumerable<ProjectGraphEntryPoint> projectGraphEntryPoints, ICollection<string> targetsToBuild, HostServices? hostServices, BuildRequestDataFlags flags)
             : this(targetsToBuild, hostServices, flags)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectGraphEntryPoints, nameof(projectGraphEntryPoints));
@@ -152,27 +156,20 @@ namespace Microsoft.Build.Graph
             ProjectGraphEntryPoints = projectGraphEntryPoints;
         }
 
-        public GraphBuildRequestData(IEnumerable<ProjectGraphEntryPoint> projectGraphEntryPoints, ICollection<string> targetsToBuild, HostServices hostServices, BuildRequestDataFlags flags, GraphBuildOptions graphBuildOptions)
+        public GraphBuildRequestData(IEnumerable<ProjectGraphEntryPoint> projectGraphEntryPoints, ICollection<string> targetsToBuild, HostServices? hostServices, BuildRequestDataFlags flags, GraphBuildOptions graphBuildOptions)
             : this(targetsToBuild, hostServices, flags, graphBuildOptions)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectGraphEntryPoints, nameof(projectGraphEntryPoints));
 
-            ProjectGraphEntryPoints = projectGraphEntryPoints;
+            ProjectGraphEntryPoints = projectGraphEntryPoints.ToList();
         }
 
         /// <summary>
         /// Common constructor.
         /// </summary>
-        private GraphBuildRequestData(ICollection<string> targetsToBuild, HostServices hostServices, BuildRequestDataFlags flags, GraphBuildOptions graphBuildOptions = null)
+        private GraphBuildRequestData(ICollection<string> targetsToBuild, HostServices? hostServices, BuildRequestDataFlags flags, GraphBuildOptions? graphBuildOptions = null)
+        : base(targetsToBuild, flags, hostServices)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(targetsToBuild, nameof(targetsToBuild));
-            foreach (string targetName in targetsToBuild)
-            {
-                ErrorUtilities.VerifyThrowArgumentNull(targetName, "target");
-            }
-
-            HostServices = hostServices;
-            TargetNames = new List<string>(targetsToBuild);
             Flags = flags;
             GraphBuildOptions = graphBuildOptions ?? new GraphBuildOptions();
         }
@@ -182,34 +179,60 @@ namespace Microsoft.Build.Graph
         /// May be null.
         /// </summary>
         /// <value>The project graph.</value>
-        public ProjectGraph ProjectGraph { get; }
+        public ProjectGraph? ProjectGraph { get; }
 
         /// <summary>
         /// The project graph entry points.
         /// May be null.
         /// </summary>
         /// <value>The project graph entry points.</value>
-        public IEnumerable<ProjectGraphEntryPoint> ProjectGraphEntryPoints { get; }
+        public IEnumerable<ProjectGraphEntryPoint>? ProjectGraphEntryPoints { get; }
 
-        /// <summary>
-        /// The name of the targets to build.
-        /// </summary>
-        /// <value>An array of targets in the project to be built.</value>
-        public ICollection<string> TargetNames { get; }
+        public override IEnumerable<string> EntryProjectsFullPath
+        {
+            get
+            {
+                if (ProjectGraph != null)
+                {
+                    foreach (ProjectGraphNode entryPoint in ProjectGraph.EntryPointNodes)
+                    {
+                        yield return entryPoint.ProjectInstance.FullPath;
+                    }
+                }
+                else if (ProjectGraphEntryPoints != null)
+                {
+                    foreach (ProjectGraphEntryPoint entryPoint in ProjectGraphEntryPoints)
+                    {
+                        yield return entryPoint.ProjectFile;
+                    }
+                }
+            }
+        }
 
-        /// <summary>
-        /// Extra flags for this BuildRequest.
-        /// </summary>
-        public BuildRequestDataFlags Flags { get; }
+        public override IReadOnlyDictionary<string, string?> GlobalPropertiesLookup
+        {
+            get
+            {
+                ProjectGraphNode? node = ProjectGraph?.EntryPointNodes.FirstOrDefault();
+                if (node != null)
+                {
+                    return node.ProjectInstance.GlobalProperties.AsReadOnly();
+                }
+
+                ProjectGraphEntryPoint? entryPoint = ProjectGraphEntryPoints?.FirstOrDefault();
+                if (entryPoint != null)
+                {
+                    return entryPoint.Value.GlobalProperties.AsReadOnly();
+                }
+
+                return ImmutableDictionary<string, string?>.Empty;
+            }
+        }
+        public override bool IsGraphRequest => true;
 
         /// <summary>
         /// Options for how the graph should be built.
         /// </summary>
         public GraphBuildOptions GraphBuildOptions { get; }
-
-        /// <summary>
-        /// Gets the HostServices object for this request.
-        /// </summary>
-        public HostServices HostServices { get; }
     }
 }
