@@ -1344,7 +1344,7 @@ namespace Microsoft.Build.CommandLine
                 // This is a hack for now to make sure the perf hit only happens
                 // on diagnostic. This should be changed to pipe it through properly,
                 // perhaps as part of a fuller tracing feature.
-                bool logTaskInputs = verbosity == LoggerVerbosity.Diagnostic;
+                bool logTaskInputs = verbosity == LoggerVerbosity.Diagnostic || isBuildCheckEnabled;
 
                 if (!logTaskInputs)
                 {

@@ -1,6 +1,10 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
+
 namespace Microsoft.Build.Experimental.BuildCheck;
 
 /// <summary>
@@ -42,4 +46,73 @@ public class BuildAnalyzerConfiguration
     /// If some rules are enabled and some are not, the analyzer will be run and reports will be post-filtered.
     /// </summary>
     public bool? IsEnabled { get; internal init; }
+
+    /// <summary>
+    /// Creates a <see cref="BuildAnalyzerConfiguration"/> object based on the provided configuration dictionary.
+    /// If the BuildAnalyzerConfiguration's property name presented in the dictionary, the value of this key-value pair is parsed and assigned to the instance's field.
+    /// If parsing failed the value will be equal to null.
+    /// </summary>
+    /// <param name="configDictionary">The configuration dictionary containing the settings for the build analyzer. The configuration's keys are expected to be in lower case or the EqualityComparer to ignore case.</param>
+    /// <returns>A new instance of <see cref="BuildAnalyzerConfiguration"/> with the specified settings.</returns>
+    internal static BuildAnalyzerConfiguration Create(Dictionary<string, string>? configDictionary)
+    {
+        return new()
+        {
+            EvaluationAnalysisScope = TryExtractValue(nameof(EvaluationAnalysisScope), configDictionary, out EvaluationAnalysisScope evaluationAnalysisScope) ? evaluationAnalysisScope : null,
+            Severity = TryExtractValue(nameof(Severity), configDictionary, out BuildAnalyzerResultSeverity severity) ? severity : null,
+            IsEnabled = TryExtractValue(nameof(IsEnabled), configDictionary, out bool isEnabled) ? isEnabled : null,
+        };
+    }
+
+    private static bool TryExtractValue<T>(string key, Dictionary<string, string>? config, out T value) where T : struct, Enum
+    {
+        value = default;
+
+        if (config == null || !config.TryGetValue(key.ToLower(), out var stringValue) || stringValue is null)
+        {
+            return false;
+        }
+
+        var isParsed = Enum.TryParse(stringValue, true, out value);
+
+        if (!isParsed)
+        {
+            ThrowIncorrectValueException(key, stringValue);
+        }
+
+        return isParsed;
+    }
+
+    private static bool TryExtractValue(string key, Dictionary<string, string>? config, out bool value)
+    {
+        value = default;
+
+        if (config == null || !config.TryGetValue(key.ToLower(), out var stringValue) || stringValue is null)
+        {
+            return false;
+        }
+
+        bool isParsed = false;
+        
+        if (bool.TryParse(stringValue, out bool boolValue))
+        {
+            value = boolValue;
+            isParsed = true;
+        }
+        
+        if (!isParsed)
+        {
+            ThrowIncorrectValueException(key, stringValue);
+        }
+
+        return isParsed;
+    }
+
+    private static void ThrowIncorrectValueException(string key, string value)
+    {
+        // TODO: It will be nice to have the filename where the incorrect configuration was placed. 
+        throw new BuildCheckConfigurationException(
+                $"Incorrect value provided in config for key {key}: '{value}'",
+                buildCheckConfigurationErrorScope: BuildCheckConfigurationErrorScope.EditorConfigParser);
+    }
 }

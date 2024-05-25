@@ -57,7 +57,8 @@ namespace Microsoft.Build.UnitTests.Shared
             out bool successfulExit,
             bool shellExecute = false,
             ITestOutputHelper outputHelper = null,
-            bool attachProcessId = true)
+            bool attachProcessId = true,
+            int timeoutMilliseconds = 30_000)
         {
             BootstrapLocationAttribute attribute = Assembly.GetExecutingAssembly().GetCustomAttribute<BootstrapLocationAttribute>()
                                                    ?? throw new InvalidOperationException("This test assembly does not have the BootstrapLocationAttribute");
@@ -69,7 +70,7 @@ namespace Microsoft.Build.UnitTests.Shared
 #else
             string pathToExecutable = Path.Combine(binaryFolder, "MSBuild.exe");
 #endif
-            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper, attachProcessId);
+            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper, attachProcessId, timeoutMilliseconds);
         }
 
         private static void AdjustForShellExecution(ref string pathToExecutable, ref string arguments)
@@ -97,7 +98,8 @@ namespace Microsoft.Build.UnitTests.Shared
             out bool successfulExit,
             bool shellExecute = false,
             ITestOutputHelper outputHelper = null,
-            bool attachProcessId = true)
+            bool attachProcessId = true,
+            int timeoutMilliseconds = 30_000)
         {
             if (shellExecute)
             {
@@ -138,16 +140,17 @@ namespace Microsoft.Build.UnitTests.Shared
                 p.BeginErrorReadLine();
                 p.StandardInput.Dispose();
 
+                TimeSpan timeout = TimeSpan.FromMilliseconds(timeoutMilliseconds);
                 if (Traits.Instance.DebugUnitTests)
                 {
                     p.WaitForExit();
                 }
-                else if (!p.WaitForExit(30_000))
+                else if (!p.WaitForExit(timeoutMilliseconds))
                 {
-                    // Let's not create a unit test for which we need more than 30 sec to execute.
+                    // Let's not create a unit test for which we need more than requested timeout to execute.
                     // Please consider carefully if you would like to increase the timeout.
                     p.KillTree(1000);
-                    throw new TimeoutException($"Test failed due to timeout: process {p.Id} is active for more than 30 sec.");
+                    throw new TimeoutException($"Test failed due to timeout: process {p.Id} is active for more than {timeout.TotalSeconds} sec.");
                 }
 
                 // We need the WaitForExit call without parameters because our processing of output/error streams is not synchronous.

@@ -1,29 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="..\Common\CommonTest.props" />
+
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
-    <!-- The output structure was modified for msbuild development needs.-->
-    <NoWarn>NU5101;NU5128;MSB3277</NoWarn>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="CustomAnalyzer.props" Pack="true" PackagePath="build\CustomAnalyzer.props" />
+    <Content Include="README.md" />
   </ItemGroup>
 
-  <ItemGroup>
-    <!-- In the real world scenario, the DLLs are added as PackageReference, modified for test purposes only. -->
-    <Reference Include="Microsoft.Build">
-      <HintPath>$(MSBuildProjectDirectory)\..\..\Microsoft.Build.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <Target Name="AddNuGetDlls" BeforeTargets="_GetPackageFiles">
-    <ItemGroup>
-      <!-- Add the DLL produced by the current project to the NuGet package -->
-      <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="build" Visible="false" />
-    </ItemGroup>
-  </Target>
+  <Import Project="..\Common\CommonTest.targets" />
 
 </Project>

@@ -1177,7 +1177,7 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     // Expand out all the metadata, properties, and item vectors in the string.
-                    string expandedParameterValue = _batchBucket.Expander.ExpandIntoStringAndUnescape(parameterValue, ExpanderOptions.ExpandAll, parameterLocation, _targetLoggingContext);
+                    string expandedParameterValue = _batchBucket.Expander.ExpandIntoStringAndUnescape(parameterValue, ExpanderOptions.ExpandAll, parameterLocation);
 
                     if (expandedParameterValue.Length == 0)
                     {
@@ -1317,10 +1317,14 @@ namespace Microsoft.Build.BackEnd
                     // Structured logging for all parameters that have logging enabled and are not empty lists.
                     if (parameterValueAsList?.Count > 0 || (parameterValueAsList == null && !legacyBehavior))
                     {
+                        // Note: We're setting TaskParameterEventArgs.ItemType to parameter name for backward compatibility with
+                        // older loggers and binlog viewers.
                         ItemGroupLoggingHelper.LogTaskParameter(
                             _taskLoggingContext,
                             TaskParameterMessageKind.TaskInput,
-                            parameter.Name,
+                            parameterName: parameter.Name,
+                            propertyName: null,
+                            itemType: parameter.Name,
                             parameterValueAsList ?? new object[] { parameterValue },
                             parameter.LogItemMetadata);
                     }
@@ -1429,7 +1433,9 @@ namespace Microsoft.Build.BackEnd
                         ItemGroupLoggingHelper.LogTaskParameter(
                             _taskLoggingContext,
                             TaskParameterMessageKind.TaskOutput,
-                            outputTargetName,
+                            parameterName: parameter.Name,
+                            propertyName: null,
+                            itemType: outputTargetName,
                             outputs,
                             parameter.LogItemMetadata);
                     }
@@ -1470,7 +1476,23 @@ namespace Microsoft.Build.BackEnd
                         var outputString = joinedOutputs.ToString();
                         if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents)
                         {
-                            _taskLoggingContext.LogComment(MessageImportance.Low, "OutputPropertyLogMessage", outputTargetName, outputString);
+                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
+                            {
+                                // Note: We're setting TaskParameterEventArgs.ItemType to property name for backward compatibility with
+                                // older loggers and binlog viewers.
+                                ItemGroupLoggingHelper.LogTaskParameter(
+                                    _taskLoggingContext,
+                                    TaskParameterMessageKind.TaskOutput,
+                                    parameterName: parameter.Name,
+                                    propertyName: outputTargetName,
+                                    itemType: outputTargetName,
+                                    new object[] { outputString },
+                                    parameter.LogItemMetadata);
+                            }
+                            else
+                            {
+                                _taskLoggingContext.LogComment(MessageImportance.Low, "OutputPropertyLogMessage", outputTargetName, outputString);
+                            }
                         }
 
                         _batchBucket.Lookup.SetProperty(ProjectPropertyInstance.Create(outputTargetName, outputString, parameterLocation, _projectInstance.IsImmutable));
@@ -1505,7 +1527,9 @@ namespace Microsoft.Build.BackEnd
                         ItemGroupLoggingHelper.LogTaskParameter(
                             _taskLoggingContext,
                             TaskParameterMessageKind.TaskOutput,
-                            outputTargetName,
+                            parameterName: parameter.Name,
+                            propertyName: null,
+                            itemType: outputTargetName,
                             outputs,
                             parameter.LogItemMetadata);
                     }
@@ -1539,7 +1563,23 @@ namespace Microsoft.Build.BackEnd
                         var outputString = joinedOutputs.ToString();
                         if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents)
                         {
-                            _taskLoggingContext.LogComment(MessageImportance.Low, "OutputPropertyLogMessage", outputTargetName, outputString);
+                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
+                            {
+                                // Note: We're setting TaskParameterEventArgs.ItemType to property name for backward compatibility with
+                                // older loggers and binlog viewers.
+                                ItemGroupLoggingHelper.LogTaskParameter(
+                                    _taskLoggingContext,
+                                    TaskParameterMessageKind.TaskOutput,
+                                    parameterName: parameter.Name,
+                                    propertyName: outputTargetName,
+                                    itemType: outputTargetName,
+                                    new object[] { outputString },
+                                    parameter.LogItemMetadata);
+                            }
+                            else
+                            {
+                                _taskLoggingContext.LogComment(MessageImportance.Low, "OutputPropertyLogMessage", outputTargetName, outputString);
+                            }
                         }
 
                         _batchBucket.Lookup.SetProperty(ProjectPropertyInstance.Create(outputTargetName, outputString, parameterLocation, _projectInstance.IsImmutable));

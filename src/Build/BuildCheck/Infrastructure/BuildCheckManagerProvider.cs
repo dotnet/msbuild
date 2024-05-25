@@ -64,7 +64,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
     internal sealed class BuildCheckManager : IBuildCheckManager
     {
         private readonly TracingReporter _tracingReporter = new TracingReporter();
-        private readonly BuildCheckCentralContext _buildCheckCentralContext = new();
+        private readonly ConfigurationProvider _configurationProvider = new ConfigurationProvider();
+        private readonly BuildCheckCentralContext _buildCheckCentralContext;
         private readonly ILoggingService _loggingService;
         private readonly List<BuildAnalyzerFactoryContext> _analyzersRegistry;
         private readonly bool[] _enabledDataSources = new bool[(int)BuildCheckDataSource.ValuesCount];
@@ -76,6 +77,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             _analyzersRegistry = new List<BuildAnalyzerFactoryContext>();
             _acquisitionModule = new BuildCheckAcquisitionModule(loggingService);
             _loggingService = loggingService;
+            _buildCheckCentralContext = new(_configurationProvider);
             _buildEventsProcessor = new(_buildCheckCentralContext);
         }
 
@@ -137,11 +139,23 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             []
         ];
 
+        /// <summary>
+        /// For tests only. TODO: Remove when analyzer acquisition is done.
+        /// </summary>
+        internal static (string[] ruleIds, bool defaultEnablement, BuildAnalyzerFactory factory)[][]? s_testFactoriesPerDataSource;
+
         private void RegisterBuiltInAnalyzers(BuildCheckDataSource buildCheckDataSource)
         {
             _analyzersRegistry.AddRange(
                 s_builtInFactoriesPerDataSource[(int)buildCheckDataSource]
                     .Select(v => new BuildAnalyzerFactoryContext(v.factory, v.ruleIds, v.defaultEnablement)));
+
+            if (s_testFactoriesPerDataSource is not null)
+            {
+                _analyzersRegistry.AddRange(
+                    s_testFactoriesPerDataSource[(int)buildCheckDataSource]
+                        .Select(v => new BuildAnalyzerFactoryContext(v.factory, v.ruleIds, v.defaultEnablement)));
+            }
         }
 
         /// <summary>
@@ -201,7 +215,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             if (analyzerFactoryContext.MaterializedAnalyzer == null)
             {
                 BuildAnalyzerConfiguration[] userConfigs =
-                    ConfigurationProvider.GetUserConfigurations(projectFullPath, analyzerFactoryContext.RuleIds);
+                    _configurationProvider.GetUserConfigurations(projectFullPath, analyzerFactoryContext.RuleIds);
 
                 if (userConfigs.All(c => !(c.IsEnabled ?? analyzerFactoryContext.IsEnabledByDefault)))
                 {
@@ -210,7 +224,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 }
 
                 CustomConfigurationData[] customConfigData =
-                    ConfigurationProvider.GetCustomConfigurations(projectFullPath, analyzerFactoryContext.RuleIds);
+                    _configurationProvider.GetCustomConfigurations(projectFullPath, analyzerFactoryContext.RuleIds);
 
                 ConfigurationContext configurationContext = ConfigurationContext.FromDataEnumeration(customConfigData);
 
@@ -234,7 +248,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                         $"The analyzer '{analyzer.FriendlyName}' exposes rules '{analyzer.SupportedRules.Select(r => r.Id).ToCsvString()}', but different rules were declared during registration: '{analyzerFactoryContext.RuleIds.ToCsvString()}'");
                 }
 
-                configurations = ConfigurationProvider.GetMergedConfigurations(userConfigs, analyzer);
+                configurations = _configurationProvider.GetMergedConfigurations(userConfigs, analyzer);
 
                 // technically all analyzers rules could be disabled, but that would mean
                 // that the provided 'IsEnabledByDefault' value wasn't correct - the only
@@ -249,9 +263,9 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             {
                 wrapper = analyzerFactoryContext.MaterializedAnalyzer;
 
-                configurations = ConfigurationProvider.GetMergedConfigurations(projectFullPath, wrapper.BuildAnalyzer);
+                configurations = _configurationProvider.GetMergedConfigurations(projectFullPath, wrapper.BuildAnalyzer);
 
-                ConfigurationProvider.CheckCustomConfigurationDataValidity(projectFullPath,
+                _configurationProvider.CheckCustomConfigurationDataValidity(projectFullPath,
                     analyzerFactoryContext.RuleIds[0]);
 
                 // Update the wrapper
@@ -311,6 +325,24 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
             => _buildEventsProcessor
                 .ProcessEvaluationFinishedEventArgs(buildAnalysisContext, evaluationFinishedEventArgs);
+
+        public void ProcessTaskStartedEventArgs(
+            AnalyzerLoggingContext buildAnalysisContext,
+            TaskStartedEventArgs taskStartedEventArgs)
+            => _buildEventsProcessor
+                .ProcessTaskStartedEventArgs(buildAnalysisContext, taskStartedEventArgs);
+
+        public void ProcessTaskFinishedEventArgs(
+            AnalyzerLoggingContext buildAnalysisContext,
+            TaskFinishedEventArgs taskFinishedEventArgs)
+            => _buildEventsProcessor
+                .ProcessTaskFinishedEventArgs(buildAnalysisContext, taskFinishedEventArgs);
+
+        public void ProcessTaskParameterEventArgs(
+            AnalyzerLoggingContext buildAnalysisContext,
+            TaskParameterEventArgs taskParameterEventArgs)
+            => _buildEventsProcessor
+                .ProcessTaskParameterEventArgs(buildAnalysisContext, taskParameterEventArgs);
 
         public Dictionary<string, TimeSpan> CreateAnalyzerTracingStats()
         {

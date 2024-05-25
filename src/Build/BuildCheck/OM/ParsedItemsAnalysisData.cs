@@ -4,9 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 
@@ -52,4 +49,54 @@ public class ParsedItemsAnalysisData : AnalysisData
         base(projectFilePath) => ItemsHolder = itemsHolder;
 
     public ItemsHolder ItemsHolder { get; }
+}
+
+/// <summary>
+/// BuildCheck OM data representing a task executed by a project.
+/// </summary>
+public sealed class TaskInvocationAnalysisData : AnalysisData
+{
+    /// <summary>
+    /// Represents an input or output parameter of a task.
+    /// </summary>
+    /// <param name="Value">The value passed to (when <paramref name="IsOutput"/> is false) or from
+    /// (when <paramref name="IsOutput"/> is true) a task. This object can be of any type supported
+    /// in task parameters: <see cref="Framework.ITaskItem"/>, <see cref="Framework.ITaskItem"/>[],
+    /// bool, string, or anything else convertible to/from string.</param>
+    /// <param name="IsOutput">True for output parameters, false for input parameters.</param>
+    public record class TaskParameter(object? Value, bool IsOutput);
+
+    internal TaskInvocationAnalysisData(
+        string projectFilePath,
+        ElementLocation taskInvocationLocation,
+        string taskName,
+        string taskAssemblyLocation,
+        IReadOnlyDictionary<string, TaskParameter> parameters)
+        : base(projectFilePath)
+    {
+        TaskInvocationLocation = taskInvocationLocation;
+        TaskName = taskName;
+        TaskAssemblyLocation = taskAssemblyLocation;
+        Parameters = parameters;
+    }
+
+    /// <summary>
+    /// The project file and line/column number where the task is invoked.
+    /// </summary>
+    public ElementLocation TaskInvocationLocation { get; }
+
+    /// <summary>
+    /// Name of the task.
+    /// </summary>
+    public string TaskName { get; }
+
+    /// <summary>
+    /// The location of the assembly containing the implementation of the task.
+    /// </summary>
+    public string TaskAssemblyLocation { get; }
+
+    /// <summary>
+    /// The parameters of the task, keyed by parameter name.
+    /// </summary>
+    public IReadOnlyDictionary<string, TaskParameter> Parameters { get; }
 }

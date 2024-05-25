@@ -27,6 +27,21 @@ internal class NullBuildCheckManager : IBuildCheckManager
     {
     }
 
+    public void ProcessTaskStartedEventArgs(AnalyzerLoggingContext buildAnalysisContext,
+        TaskStartedEventArgs taskStartedEventArgs)
+    {
+    }
+
+    public void ProcessTaskFinishedEventArgs(AnalyzerLoggingContext buildAnalysisContext,
+        TaskFinishedEventArgs taskFinishedEventArgs)
+    {
+    }
+
+    public void ProcessTaskParameterEventArgs(AnalyzerLoggingContext buildAnalysisContext,
+        TaskParameterEventArgs taskParameterEventArgs)
+    {
+    }
+
     public void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, BuildEventContext buildEventContext) 
     {
     }
@@ -60,4 +75,13 @@ internal class NullBuildCheckManager : IBuildCheckManager
     }
 
     public Dictionary<string, TimeSpan> CreateAnalyzerTracingStats() => new Dictionary<string, TimeSpan>();
+
+    public void StartTaskInvocation(BuildCheckDataSource buildCheckDataSource, TaskStartedEventArgs eventArgs)
+    { }
+
+    public void EndTaskInvocation(BuildCheckDataSource buildCheckDataSource, TaskFinishedEventArgs eventArgs)
+    { }
+
+    public void ProcessTaskParameter(BuildCheckDataSource buildCheckDataSource, TaskParameterEventArgs eventArg)
+    { }
 }
