@@ -808,15 +808,26 @@ namespace Microsoft.Build.CommandLine
                     // as if a build is happening
                     if (FileUtilities.IsBinaryLogFilename(projectFile))
                     {
-                        ReplayBinaryLog(
-                            projectFile,
-                            loggers,
-                            distributedLoggerRecords,
-                            cpuCount,
-                            isBuildCheckEnabled,
-                            warningsAsErrors,
-                            warningsNotAsErrors,
-                            warningsAsMessages);
+                        if (isBuildCheckEnabled)
+                        {
+
+                            AnalyzeBinaryLogOnReplay(
+                                projectFile,
+                                loggers,
+                                distributedLoggerRecords,
+                                cpuCount,
+                                warningsAsErrors,
+                                warningsNotAsErrors,
+                                warningsAsMessages);
+                        }
+                        else
+                        {
+                            ReplayBinaryLog(
+                                projectFile,
+                                loggers,
+                                distributedLoggerRecords,
+                                cpuCount);
+                        }
                     }
                     else if (outputPropertiesItemsOrTargetResults && FileUtilities.IsSolutionFilename(projectFile))
                     {
@@ -4410,46 +4421,59 @@ namespace Microsoft.Build.CommandLine
             return true;
         }
 
-        private static void ReplayBinaryLog(
+        private static void AnalyzeBinaryLogOnReplay(
             string binaryLogFilePath,
             ILogger[] loggers,
             IEnumerable<DistributedLoggerRecord> distributedLoggerRecords,
             int cpuCount,
-            bool isBuildCheckEnabled,
             ISet<string> warningsAsErrors,
             ISet<string> warningsNotAsErrors,
             ISet<string> warningsAsMessages)
         {
             var replayEventSource = new BinaryLogReplayEventSource();
 
-            if (isBuildCheckEnabled)
+            var buildParameters = new BuildParameters
             {
-                List<ForwardingLoggerRecord> remoteLoggerRecords = [];
-                foreach (DistributedLoggerRecord distRecord in distributedLoggerRecords)
-                {
-                    remoteLoggerRecords.Add(new ForwardingLoggerRecord(distRecord.CentralLogger, distRecord.ForwardingLoggerDescription));
-                }
+                MaxNodeCount = 1,
+                IsBuildCheckEnabled = true,
+                UseSynchronousLogging = true
+            };
 
-                BuildManager.DefaultBuildManager.AttachBuildCheckForReplay(
-                    replayEventSource,
-                    loggers,
-                    remoteLoggerRecords,
-                    warningsAsErrors,
-                    warningsNotAsErrors,
-                    warningsAsMessages);
-
-                try
-                {
-                    replayEventSource.Replay(binaryLogFilePath, s_buildCancellationSource.Token);
-                }
-                catch (Exception ex)
-                {
-                    var message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidLogFileFormat", ex.Message);
-                    Console.WriteLine(message);
-                }
-
-                return;
+            List<ForwardingLoggerRecord> remoteLoggerRecords = [];
+            foreach (DistributedLoggerRecord distRecord in distributedLoggerRecords)
+            {
+                remoteLoggerRecords.Add(new ForwardingLoggerRecord(distRecord.CentralLogger, distRecord.ForwardingLoggerDescription));
             }
+
+            BuildManager.DefaultBuildManager.InitializeLoggingService(
+                buildParameters,
+                replayEventSource,
+                loggers,
+                remoteLoggerRecords,
+                warningsAsErrors,
+                warningsNotAsErrors,
+                warningsAsMessages);
+
+            // Replaying events to loggingService with registered BuildChecke logger
+            // whitch issues new events and loggingService handles them accordingly similar to what is happenning during build process
+            try
+            {
+                replayEventSource.Replay(binaryLogFilePath, s_buildCancellationSource.Token);
+            }
+            catch (Exception ex)
+            {
+                var message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidLogFileFormat", ex.Message);
+                Console.WriteLine(message);
+            }
+        }
+
+        private static void ReplayBinaryLog(
+            string binaryLogFilePath,
+            ILogger[] loggers,
+            IEnumerable<DistributedLoggerRecord> distributedLoggerRecords,
+            int cpuCount)
+        {
+            var replayEventSource = new BinaryLogReplayEventSource();
 
             foreach (var distributedLoggerRecord in distributedLoggerRecords)
             {

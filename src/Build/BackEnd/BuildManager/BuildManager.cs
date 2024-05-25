@@ -2951,7 +2951,8 @@ namespace Microsoft.Build.Execution
             });
         }
 
-        public void AttachBuildCheckForReplay(
+        public void InitializeLoggingService(
+            BuildParameters buildParameters,
             BinaryLogReplayEventSource replayEventSource,
             IEnumerable<ILogger> loggers,
             IEnumerable<ForwardingLoggerRecord> forwardingLoggers,
@@ -2959,17 +2960,9 @@ namespace Microsoft.Build.Execution
             ISet<string> warningsNotAsErrors,
             ISet<string> warningsAsMessages)
         {
-            _buildParameters = new BuildParameters
-            {
-                MaxNodeCount = 1,
-                IsBuildCheckEnabled = true,
-                UseSynchronousLogging = true
-            };
+            _buildParameters = buildParameters;
 
-            if (_workQueue == null)
-            {
-                _workQueue = new ActionBlock<Action>(action => ProcessWorkQueue(action));
-            }
+            _workQueue ??= new ActionBlock<Action>(action => ProcessWorkQueue(action));
 
             lock (_syncLock)
             {
@@ -2982,14 +2975,14 @@ namespace Microsoft.Build.Execution
                 warningsNotAsErrors,
                 warningsAsMessages);
 
-                replayEventSource.AttachLoggingService(loggingService as LoggingService);
+                loggingService.Initialize(replayEventSource);
             }
         }
 
         /// <summary>
         /// Creates a logging service around the specified set of loggers.
         /// </summary>
-        private ILoggingService CreateLoggingService(
+        private LoggingService CreateLoggingService(
             IEnumerable<ILogger> loggers,
             IEnumerable<ForwardingLoggerRecord> forwardingLoggers,
             ISet<string> warningsAsErrors,
@@ -3004,7 +2997,7 @@ namespace Microsoft.Build.Execution
                                         ? LoggerMode.Synchronous
                                         : LoggerMode.Asynchronous;
 
-            ILoggingService loggingService = LoggingService.CreateLoggingService(loggerMode,
+            LoggingService loggingService = (LoggingService)LoggingService.CreateLoggingService(loggerMode,
                 1 /*This logging service is used for the build manager and the inproc node, therefore it should have the first nodeId*/);
 
             ((IBuildComponent)loggingService).InitializeComponent(this);

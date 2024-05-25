@@ -783,6 +783,11 @@ namespace Microsoft.Build.BackEnd.Logging
             return new LoggingService(mode, node);
         }
 
+        internal void Initialize(IEventSource eventSource)
+        {
+            eventSource.AnyEventRaised += (object sender, BuildEventArgs e) => ProcessLoggingEvent(e);
+        }
+
         /// <summary>
         /// NotThreadSafe, this method should only be called from the component host thread
         /// Called by the build component host when a component is first initialized.
