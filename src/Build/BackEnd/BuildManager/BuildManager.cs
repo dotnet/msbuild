@@ -3057,7 +3057,7 @@ namespace Microsoft.Build.Execution
 
                 // The forwarding loggers that are registered are unknown to us - we cannot make any assumptions.
                 // So to be on a sure side - we need to add ours.
-                if (result.Any(l => l.ForwardingLoggerDescription.Name.Contains(engineAssemblyName)))
+                if (!result.Any(l => l.ForwardingLoggerDescription.Name.Contains(engineAssemblyName)))
                 {
                     result.Add(CreateMinimalForwarder());
                     return result;
