@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 using Microsoft.Build.Framework;
@@ -195,6 +196,21 @@ namespace Microsoft.Build.Evaluation
             appDomainSetup.SetConfigurationBytes(Encoding.UTF8.GetBytes(configuration));
             return appDomainSetup;
         }
+
+        /// <summary>
+        /// Creates an instance of <see cref="NuGetFrameworkWrapper"/> in a new secondary AppDomain.
+        /// </summary>
+        /// <remarks>
+        /// Pulled into a separate non-inlinable method to avoid failing to JIT on platforms without AppDomain support.
+        /// /// </remarks>
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static NuGetFrameworkWrapper CreateRemoteInstance(AssemblyName assemblyName, string assemblyPath)
+        {
+            AppDomainSetup appDomainSetup = CreateAppDomainSetup(assemblyName, assemblyPath);
+
+            AppDomain appDomain = AppDomain.CreateDomain(nameof(NuGetFrameworkWrapper), null, appDomainSetup);
+            return (NuGetFrameworkWrapper)appDomain.CreateInstanceAndUnwrap(Assembly.GetExecutingAssembly().FullName, typeof(NuGetFrameworkWrapper).FullName);
+        }
 #endif
 
         public static NuGetFrameworkWrapper CreateInstance()
@@ -221,12 +237,7 @@ namespace Microsoft.Build.Evaluation
                     assemblyName = AssemblyName.GetAssemblyName(assemblyPath);
                     if (assemblyName != null && BuildEnvironmentHelper.Instance.RunningInMSBuildExe)
                     {
-                        AppDomainSetup appDomainSetup = CreateAppDomainSetup(assemblyName, assemblyPath);
-                        if (appDomainSetup != null)
-                        {
-                            AppDomain appDomain = AppDomain.CreateDomain(nameof(NuGetFrameworkWrapper), null, appDomainSetup);
-                            instance = (NuGetFrameworkWrapper)appDomain.CreateInstanceAndUnwrap(Assembly.GetExecutingAssembly().FullName, typeof(NuGetFrameworkWrapper).FullName);
-                        }
+                        instance = CreateRemoteInstance(assemblyName, assemblyPath);
                     }
                 }
                 catch
