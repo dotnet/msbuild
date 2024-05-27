@@ -427,6 +427,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_WindowsMetadataOutputPath>$(OutDir)$(WinMDExpOutputWindowsMetadataFilename)</_WindowsMetadataOutputPath>
   </PropertyGroup>
 
+  <!-- ARM64-related properties -->
+  <PropertyGroup>
+    <_SupportedArchitectures>amd64 arm64</_SupportedArchitectures>
+  </PropertyGroup>
+
   <ItemGroup>
     <!-- Create an item for entry point of the ClickOnce application (Example: WindowsApplication1.exe) -->
     <_DeploymentManifestEntryPoint Include="@(IntermediateAssembly)">
@@ -4169,10 +4174,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="_SetPreferNativeArm64Win32ManifestProperties"
       Condition=" '$(PreferNativeArm64)'=='true' and '$(NoWin32Manifest)'!='true'"
       DependsOnTargets="SetWin32ManifestProperties">
-
-    <PropertyGroup>
-      <_SupportedArchitectures>amd64 arm64</_SupportedArchitectures>
-    </PropertyGroup>
 
     <AddToWin32Manifest
       ApplicationManifest="$(Win32Manifest)"
