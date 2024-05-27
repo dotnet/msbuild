@@ -400,7 +400,7 @@
       </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
         <source>Output Property: </source>
-        <target state="new">Output Property: </target>
+        <target state="translated">輸出屬性: </target>
         <note />
       </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">
