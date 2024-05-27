@@ -51,9 +51,9 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Path to the existing application manifest.
+        /// Existing application manifest.
         /// </summary>
-        public string? ApplicationManifestPath { get; set; }
+        public ITaskItem? ApplicationManifest { get; set; }
 
         /// <summary>
         /// Intermediate output directory.
@@ -87,15 +87,15 @@ namespace Microsoft.Build.Tasks
 
         private Stream? GetManifestStream()
         {
-            if (!string.IsNullOrEmpty(ApplicationManifestPath))
+            if (ApplicationManifest != null)
             {
-                if (!File.Exists(ApplicationManifestPath))
+                if (string.IsNullOrEmpty(ApplicationManifest.ItemSpec) || !File.Exists(ApplicationManifest?.ItemSpec))
                 {
-                    Log.LogErrorFromResources("AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound", ApplicationManifestPath);
+                    Log.LogErrorFromResources("AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound", ApplicationManifest?.ItemSpec);
                     return null;
                 }
 
-                return File.OpenRead(ApplicationManifestPath);
+                return File.OpenRead(ApplicationManifest!.ItemSpec);
             }
 
             string? defaultManifestPath = ToolLocationHelper.GetPathToDotNetFrameworkFile(DefaultManifestName, TargetDotNetFrameworkVersion.Version46);
@@ -129,7 +129,7 @@ namespace Microsoft.Build.Tasks
                 {
                     case ManifestValidationResult.Success:
                         AddSupportedArchitecturesElement(document, xmlNamespaceManager);
-                        SaveManifest(document, Path.GetFileName(ApplicationManifestPath) ?? DefaultManifestName);
+                        SaveManifest(document, Path.GetFileName(ApplicationManifest?.ItemSpec) ?? DefaultManifestName);
                         return !Log.HasLoggedErrors;
                     case ManifestValidationResult.SupportedArchitecturesExists:
                         return !Log.HasLoggedErrors;
@@ -172,7 +172,7 @@ namespace Microsoft.Build.Tasks
 
         private ManifestValidationResult ValidateManifest(XmlDocument document, XmlNamespaceManager xmlNamespaceManager)
         {
-            if (string.IsNullOrEmpty(ApplicationManifestPath))
+            if (ApplicationManifest == null)
             {
                 return ManifestValidationResult.Success;
             }

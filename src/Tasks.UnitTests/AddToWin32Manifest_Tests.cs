@@ -8,6 +8,7 @@ using System.Runtime.Versioning;
 using System.Xml;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.UnitTests;
+using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -45,7 +46,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 task.SupportedArchitectures = "amd64 arm64";
                 if (!string.IsNullOrEmpty(manifestName))
                 {
-                    task.ApplicationManifestPath = Path.Combine(TestAssetsRootPath, manifestName);
+                    task.ApplicationManifest = new TaskItem(Path.Combine(TestAssetsRootPath, manifestName));
                 }
 
                 var result = task.Execute();

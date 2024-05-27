@@ -4167,7 +4167,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target
       Name="_SetPreferNativeArm64Win32ManifestProperties"
-      Condition=" '$(PreferNativeArm64)'=='true' "
+      Condition=" '$(PreferNativeArm64)'=='true' and '$(NoWin32Manifest)'!='true'"
       DependsOnTargets="SetWin32ManifestProperties">
 
     <PropertyGroup>
@@ -4175,11 +4175,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </PropertyGroup>
 
     <AddToWin32Manifest
-        ApplicationManifestPath="$(Win32Manifest)"
-        OutputDirectory="$(IntermediateOutputPath)"
-        SupportedArchitectures="$(_SupportedArchitectures)">
+      ApplicationManifest="$(Win32Manifest)"
+      OutputDirectory="$(IntermediateOutputPath)"
+      SupportedArchitectures="$(_SupportedArchitectures)">
 
-        <Output TaskParameter="ManifestPath" PropertyName="_Win32Manifest"/>
+      <Output TaskParameter="ManifestPath" PropertyName="_Win32Manifest"/>
     </AddToWin32Manifest>
 
     <PropertyGroup>
@@ -4332,6 +4332,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="OutputManifest" ItemName="FileWrites"/>
 
     </GenerateApplicationManifest>
+
+    <AddToWin32Manifest
+        Condition="'$(PreferNativeArm64)'=='true'"
+        ApplicationManifest="@(ApplicationManifest)"
+        OutputDirectory="$(IntermediateOutputPath)"
+        SupportedArchitectures="$(_SupportedArchitectures)">
+    </AddToWin32Manifest>
 
     <PropertyGroup>
       <_DeploymentCopyApplicationManifest>true</_DeploymentCopyApplicationManifest>
