@@ -6,7 +6,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Threading;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -66,8 +65,6 @@ namespace Microsoft.Build.Logging
         private int? _fileFormatVersion;
         private int? _minimumReaderVersion;
 
-        private LoggingService? _loggingService;
-
         public int FileFormatVersion => _fileFormatVersion ?? throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_Source_VersionUninitialized"));
         public int MinimumReaderVersion => _minimumReaderVersion ?? throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_Source_VersionUninitialized"));
 
@@ -94,11 +91,6 @@ namespace Microsoft.Build.Logging
         public void Replay(string sourceFilePath)
         {
             Replay(sourceFilePath, CancellationToken.None);
-        }
-
-        internal void AttachLoggingService(LoggingService loggingService)
-        {
-            _loggingService = loggingService;
         }
 
         /// <summary>
@@ -253,7 +245,7 @@ namespace Microsoft.Build.Logging
             reader.ArchiveFileEncountered += _archiveFileEncountered;
             reader.StringReadDone += _stringReadDone;
 
-            if (HasStructuredEventsSubscribers || !supportsForwardCompatibility || _loggingService != null)
+            if (HasStructuredEventsSubscribers || !supportsForwardCompatibility)
             {
                 if (this._rawLogRecordReceived != null)
                 {
@@ -266,20 +258,10 @@ namespace Microsoft.Build.Logging
                 reader.SkipUnknownEventParts = supportsForwardCompatibility && AllowForwardCompatibility;
                 reader.RecoverableReadError += RecoverableReadError;
 
-                if (_loggingService != null)
+                while (!cancellationToken.IsCancellationRequested && reader.Read() is { } instance)
                 {
-                    while (!cancellationToken.IsCancellationRequested && reader.Read() is { } instance)
-                    {
-                        _loggingService.ProcessLoggingEvent(instance);
-                    }
+                    Dispatch(instance);
                 }
-                else
-                {
-                    while (!cancellationToken.IsCancellationRequested && reader.Read() is { } instance)
-                    {
-                        Dispatch(instance);
-                    }
-                }           
             }
             else
             {
