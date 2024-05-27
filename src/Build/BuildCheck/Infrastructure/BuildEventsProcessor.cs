@@ -38,13 +38,23 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         public Dictionary<string, TaskInvocationAnalysisData.TaskParameter> TaskParameters;
     }
 
+    /// <summary>
+    /// Uniquely identifies a task.
+    /// </summary>
+    private record struct TaskKey(int ProjectContextId, int TargetId, int TaskId)
+    {
+        public TaskKey(BuildEventContext context)
+            : this(context.ProjectContextId, context.TargetId, context.TaskId)
+        { }
+    }
+
     private readonly SimpleProjectRootElementCache _cache = new SimpleProjectRootElementCache();
     private readonly BuildCheckCentralContext _buildCheckCentralContext = buildCheckCentralContext;
 
     /// <summary>
     /// Keeps track of in-flight tasks. Keyed by task ID as passed in <see cref="BuildEventContext.TaskId"/>.
     /// </summary>
-    private readonly Dictionary<int, ExecutingTaskData> _tasksBeingExecuted = [];
+    private readonly Dictionary<TaskKey, ExecutingTaskData> _tasksBeingExecuted = [];
 
     // This requires MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION set to 1
     internal void ProcessEvaluationFinishedEventArgs(
@@ -105,7 +115,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
                     parameters: taskParameters),
             };
 
-            _tasksBeingExecuted.Add(taskStartedEventArgs.BuildEventContext.TaskId, taskData);
+            _tasksBeingExecuted.Add(new TaskKey(taskStartedEventArgs.BuildEventContext), taskData);
         }
     }
 
@@ -119,12 +129,15 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
             return;
         }
 
-        if (taskFinishedEventArgs.BuildEventContext is not null &&
-            _tasksBeingExecuted.TryGetValue(taskFinishedEventArgs.BuildEventContext.TaskId, out ExecutingTaskData taskData))
+        if (taskFinishedEventArgs?.BuildEventContext is not null)
         {
-            // All task parameters have been recorded by now so remove the task from the dictionary and fire the registered build check actions.
-            _tasksBeingExecuted.Remove(taskFinishedEventArgs.BuildEventContext.TaskId);
-            _buildCheckCentralContext.RunTaskInvocationActions(taskData.AnalysisData, buildAnalysisContext, ReportResult);
+            TaskKey taskKey = new TaskKey(taskFinishedEventArgs.BuildEventContext);
+            if (_tasksBeingExecuted.TryGetValue(taskKey, out ExecutingTaskData taskData))
+            {
+                // All task parameters have been recorded by now so remove the task from the dictionary and fire the registered build check actions.
+                _tasksBeingExecuted.Remove(taskKey);
+                _buildCheckCentralContext.RunTaskInvocationActions(taskData.AnalysisData, buildAnalysisContext, ReportResult);
+            }
         }
     }
 
@@ -147,7 +160,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         }
 
         if (taskParameterEventArgs.BuildEventContext is not null &&
-            _tasksBeingExecuted.TryGetValue(taskParameterEventArgs.BuildEventContext.TaskId, out ExecutingTaskData taskData))
+            _tasksBeingExecuted.TryGetValue(new TaskKey(taskParameterEventArgs.BuildEventContext), out ExecutingTaskData taskData))
         {
             // Add the parameter name and value to the matching entry in _tasksBeingExecuted. Parameters come typed as IList
             // but it's more natural to pass them as scalar values so we unwrap one-element lists.
