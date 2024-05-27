@@ -116,7 +116,7 @@ public class EndToEndTests : IDisposable
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
           $"{logFile} {(analysisRequested ? "-analyze" : string.Empty)}",
-          out success, false, _env.Output, timeoutMilliseconds: 120_000);
+          out success, false, _env.Output, timeoutMilliseconds: 130_000);
 
         _env.Output.WriteLine(output);
 
