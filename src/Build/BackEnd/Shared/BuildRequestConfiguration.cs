@@ -762,7 +762,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="request">The request </param>
         /// <returns>An array of t</returns>
-        public List<string> GetTargetsUsedToBuildRequest(BuildRequest request)
+        public List<(string, TargetBuiltReason)> GetTargetsUsedToBuildRequest(BuildRequest request)
         {
             ErrorUtilities.VerifyThrow(request.ConfigurationId == ConfigurationId, "Request does not match configuration.");
             ErrorUtilities.VerifyThrow(_projectInitialTargets != null, "Initial targets have not been set.");
@@ -775,13 +775,15 @@ namespace Microsoft.Build.BackEnd
                     "Targets must be same as proxy targets");
             }
 
-            List<string> initialTargets = _projectInitialTargets;
-            List<string> nonInitialTargets = (request.Targets.Count == 0) ? _projectDefaultTargets : request.Targets;
+            List<(string, TargetBuiltReason)> initialTargets = _projectInitialTargets.ConvertAll(target => (target, TargetBuiltReason.InitialTargets));
+            List<(string, TargetBuiltReason)> defaultTargets = _projectDefaultTargets.ConvertAll(target => (target, TargetBuiltReason.DefaultTargets)); 
+            List<(string, TargetBuiltReason)> requestTargets = request.Targets.ConvertAll(target => (target, TargetBuiltReason.EntryTargets));
 
-            var allTargets = new List<string>(initialTargets.Count + nonInitialTargets.Count);
+            var allTargets = new List<(string, TargetBuiltReason)>(initialTargets.Count + defaultTargets.Count + requestTargets.Count);
 
             allTargets.AddRange(initialTargets);
-            allTargets.AddRange(nonInitialTargets);
+            allTargets.AddRange(defaultTargets);
+            allTargets.AddRange(requestTargets);
 
             return allTargets;
         }

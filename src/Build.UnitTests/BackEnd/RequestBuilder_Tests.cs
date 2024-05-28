@@ -356,16 +356,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         #region ITargetBuilder Members
 
-        public Task<BuildResult> BuildTargets(ProjectLoggingContext loggingContext, BuildRequestEntry entry, IRequestBuilderCallback callback, string[] targets, Lookup baseLookup, CancellationToken cancellationToken)
+        public Task<BuildResult> BuildTargets(ProjectLoggingContext loggingContext, BuildRequestEntry entry, IRequestBuilderCallback callback, (string, TargetBuiltReason)[] targets, Lookup baseLookup, CancellationToken cancellationToken)
         {
             _requestBuilderCallback = callback;
 
             if (cancellationToken.WaitHandle.WaitOne(1500))
             {
                 BuildResult result = new BuildResult(entry.Request);
-                foreach (string target in targets)
+                foreach ((string, TargetBuiltReason) target in targets)
                 {
-                    result.AddResultsForTarget(target, BuildResultUtilities.GetEmptyFailingTargetResult());
+                    result.AddResultsForTarget(target.Item1, BuildResultUtilities.GetEmptyFailingTargetResult());
                 }
                 return Task<BuildResult>.FromResult(result);
             }
@@ -388,9 +388,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 if (cancellationToken.WaitHandle.WaitOne(1500))
                 {
                     BuildResult result = new BuildResult(entry.Request);
-                    foreach (string target in targets)
+                    foreach ((string, TargetBuiltReason) target in targets)
                     {
-                        result.AddResultsForTarget(target, BuildResultUtilities.GetEmptyFailingTargetResult());
+                        result.AddResultsForTarget(target.Item1, BuildResultUtilities.GetEmptyFailingTargetResult());
                     }
                     return Task<BuildResult>.FromResult(result);
                 }
