@@ -142,8 +142,8 @@
         <note>{StrBegin="MSB3992: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled">
-        <source>MSB9903: NoWin32Manifest and PreferNativeArm64 options are mutually exclusive. Please disable one of those.</source>
-        <target state="new">MSB9903: NoWin32Manifest and PreferNativeArm64 options are mutually exclusive. Please disable one of those.</target>
+        <source>MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</source>
+        <target state="new">MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</target>
         <note>{StrBegin="MSB9903: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
@@ -152,14 +152,14 @@
         <note>{StrBegin="MSB9904: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled">
-        <source>MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please disable one of those.</source>
-        <target state="new">MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please disable one of those.</target>
+        <source>MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</source>
+        <target state="new">MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</target>
         <note>{StrBegin="MSB9902: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.SpecifiedSeverityDoesNotExist">
-        <source>The specified severity is not relevant: '{0}' for the message: '{1}'.</source>
-        <target state="new">The specified severity is not relevant: '{0}' for the message: '{1}'.</target>
-        <note />
+        <source>MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</source>
+        <target state="new">MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</target>
+        <note>{StrBegin="MSB9901: "}</note>
       </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
         <source>MSB3881: Fatal Error: more than {0} command line arguments.</source>
@@ -1595,13 +1595,13 @@
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.AssemblyNodeIsMissed">
-        <source>The assembly element is missing from the application manifest.</source>
-        <target state="new">The assembly element is missing from the application manifest.</target>
+        <source>The assembly element is missing from the application manifest: '{0}'.</source>
+        <target state="new">The assembly element is missing from the application manifest: '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.InvalidValueInSupportedArchitectures">
-        <source>MSB4300: The specified value: '{0}' for supportedArchitectures element is invalid. Either remove it from manifest or set as 'amd64 arm64'.</source>
-        <target state="new">MSB4300: The specified value: '{0}' for supportedArchitectures element is invalid. Either remove it from manifest or set as 'amd64 arm64'.</target>
+        <source>MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'. Path to the source manifest: '{1}'</source>
+        <target state="new">MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'. Path to the source manifest: '{1}'</target>
         <note>{StrBegin="MSB4300: "}</note>
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound">

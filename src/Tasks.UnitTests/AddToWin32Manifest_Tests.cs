@@ -15,16 +15,16 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
-    public class PopulateSupportedArchitectures_Tests
+    public class AddToWin32Manifest_Tests
     {
         private static string TestAssetsRootPath { get; } = Path.Combine(
-            Path.GetDirectoryName(typeof(PopulateSupportedArchitectures_Tests).Assembly.Location) ?? AppContext.BaseDirectory,
+            Path.GetDirectoryName(typeof(AddToWin32Manifest_Tests).Assembly.Location) ?? AppContext.BaseDirectory,
             "TestResources",
             "Manifests");
 
         private readonly ITestOutputHelper _testOutput;
 
-        public PopulateSupportedArchitectures_Tests(ITestOutputHelper testOutput) => _testOutput = testOutput;
+        public AddToWin32Manifest_Tests(ITestOutputHelper testOutput) => _testOutput = testOutput;
 
         [Theory]
         [InlineData("testManifestWithInvalidSupportedArchs.manifest", false)]

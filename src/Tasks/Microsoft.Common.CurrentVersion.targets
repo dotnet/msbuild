@@ -4157,7 +4157,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </GetFrameworkPath>
 
     <PropertyGroup>
-      <EmbeddedWin32Manifest  Condition="'$(ApplicationManifest)'=='' and '$(NoWin32Manifest)'!='true' and Exists('$(_FrameworkVersion40Path)\default.win32manifest') and '$(PreferNativeArm64)' != 'true'">$(_FrameworkVersion40Path)\default.win32manifest</EmbeddedWin32Manifest>
+      <EmbeddedWin32Manifest Condition="'$(ApplicationManifest)'=='' and '$(NoWin32Manifest)'!='true' and '$(PreferNativeArm64)' != 'true' and Exists('$(_FrameworkVersion40Path)\default.win32manifest')">$(_FrameworkVersion40Path)\default.win32manifest</EmbeddedWin32Manifest>
     </PropertyGroup>
 
   </Target>
@@ -4166,7 +4166,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
                                         _SetPreferNativeArm64Win32ManifestProperties
 
-    Populates Manifest with SupportedArchitectures and produces Win32Manifest property to be used later in the build.
+    Populates Manifest with SupportedArchitectures and updates Win32Manifest property to be used later in the build.
     ============================================================
     -->
 

@@ -85,7 +85,7 @@ namespace Microsoft.Build.Tasks
             private set => _generatedManifestFullPath = value;
         }
 
-        private Stream? GetManifestStream()
+        private string? GetManifestPath()
         {
             if (ApplicationManifest != null)
             {
@@ -95,23 +95,29 @@ namespace Microsoft.Build.Tasks
                     return null;
                 }
 
-                return File.OpenRead(ApplicationManifest!.ItemSpec);
+                return ApplicationManifest!.ItemSpec;
             }
 
             string? defaultManifestPath = ToolLocationHelper.GetPathToDotNetFrameworkFile(DefaultManifestName, TargetDotNetFrameworkVersion.Version46);
 
+            return defaultManifestPath;
+        }
+
+        private Stream? GetManifestStream(string? path)
+        {
             // The logic for getting default manifest is similar to the one from Roslyn:
             // If Roslyn logic returns null, we fall back to reading embedded manifest.
-            return defaultManifestPath is null
+            return path is null
                     ? typeof(AddToWin32Manifest).Assembly.GetManifestResourceStream($"Microsoft.Build.Tasks.Resources.{DefaultManifestName}")
-                    : File.OpenRead(defaultManifestPath);
+                    : File.OpenRead(path);
         }
 
         public override bool Execute()
         {
             try
             {
-                using Stream? stream = GetManifestStream();
+                string? manifestPath = GetManifestPath();
+                using Stream? stream = GetManifestStream(manifestPath);
 
                 if (stream is null)
                 {
@@ -123,7 +129,7 @@ namespace Microsoft.Build.Tasks
                 XmlDocument document = LoadManifest(stream);
                 XmlNamespaceManager xmlNamespaceManager = XmlNamespaces.GetNamespaceManager(document.NameTable);
 
-                ManifestValidationResult validationResult = ValidateManifest(document, xmlNamespaceManager);
+                ManifestValidationResult validationResult = ValidateManifest(manifestPath, document, xmlNamespaceManager);
 
                 switch (validationResult)
                 {
@@ -162,15 +168,15 @@ namespace Microsoft.Build.Tasks
         private void SaveManifest(XmlDocument document, string manifestName)
         {
             ManifestPath = Path.Combine(OutputDirectory, manifestName);
-            using (var xmlwriter = new XmlTextWriter(ManifestPath, Encoding.UTF8))
+            using (var xmlWriter = new XmlTextWriter(ManifestPath, Encoding.UTF8))
             {
-                xmlwriter.Formatting = Formatting.Indented;
-                xmlwriter.Indentation = 4;
-                document.Save(xmlwriter);
+                xmlWriter.Formatting = Formatting.Indented;
+                xmlWriter.Indentation = 4;
+                document.Save(xmlWriter);
             }
         }
 
-        private ManifestValidationResult ValidateManifest(XmlDocument document, XmlNamespaceManager xmlNamespaceManager)
+        private ManifestValidationResult ValidateManifest(string? manifestPath, XmlDocument document, XmlNamespaceManager xmlNamespaceManager)
         {
             if (ApplicationManifest == null)
             {
@@ -181,7 +187,7 @@ namespace Microsoft.Build.Tasks
 
             if (assemblyNode is null)
             {
-                Log.LogErrorFromResources("AddToWin32Manifest.AssemblyNodeIsMissed");
+                Log.LogErrorFromResources("AddToWin32Manifest.AssemblyNodeIsMissed", manifestPath);
                 return ManifestValidationResult.Failure;
             }
 
@@ -190,7 +196,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (!string.Equals(supportedArchitecturesNode.InnerText.Trim(), SupportedArchitectures, StringComparison.OrdinalIgnoreCase))
                 {
-                    Log.LogErrorWithCodeFromResources("AddToWin32Manifest.InvalidValueInSupportedArchitectures", supportedArchitecturesNode.InnerText);
+                    Log.LogErrorWithCodeFromResources("AddToWin32Manifest.InvalidValueInSupportedArchitectures", supportedArchitecturesNode.InnerText, manifestPath);
 
                     return ManifestValidationResult.Failure;
                 }
