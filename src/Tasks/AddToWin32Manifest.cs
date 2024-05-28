@@ -114,14 +114,14 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
+            string? manifestPath = GetManifestPath();
             try
             {
-                string? manifestPath = GetManifestPath();
                 using Stream? stream = GetManifestStream(manifestPath);
 
                 if (stream is null)
                 {
-                    Log.LogErrorFromResources("AddToWin32Manifest.ManifestCanNotBeOpened");
+                    Log.LogErrorFromResources("AddToWin32Manifest.ManifestCanNotBeOpened", manifestPath);
 
                     return !Log.HasLoggedErrors;
                 }
@@ -147,7 +147,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception ex)
             {
-                Log.LogErrorFromResources("AddToWin32Manifest.ManifestCanNotBeOpenedWithException", ex.Message);
+                Log.LogErrorFromResources("AddToWin32Manifest.ManifestCanNotBeOpenedWithException", ex.Message, manifestPath);
 
                 return !Log.HasLoggedErrors;
             }

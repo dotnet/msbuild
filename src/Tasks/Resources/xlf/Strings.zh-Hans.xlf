@@ -3,13 +3,13 @@
   <file datatype="xml" source-language="en" target-language="zh-Hans" original="../Strings.resx">
     <body>
       <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpened">
-        <source>The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</source>
-        <target state="new">The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</target>
+        <source>The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content: '{0}'.</source>
+        <target state="new">The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content: '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpenedWithException">
-        <source>The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</source>
-        <target state="new">The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</target>
+        <source>The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content. Path to manifest file: '{1}'.</source>
+        <target state="new">The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content. Path to manifest file: '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppConfig.BindingRedirectMissingOldVersion">

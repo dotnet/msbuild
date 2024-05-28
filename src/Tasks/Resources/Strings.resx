@@ -3028,10 +3028,10 @@
     <value>The application manifest file cannot be found: '{0}'. Please make sure it exists.</value>
   </data>
   <data name="AddToWin32Manifest.ManifestCanNotBeOpened">
-    <value>The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</value>
+    <value>The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content: '{0}'.</value>
   </data>
   <data name="AddToWin32Manifest.ManifestCanNotBeOpenedWithException">
-    <value>The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</value>
+    <value>The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content. Path to manifest file: '{1}'.</value>
   </data>
 
   <!--
