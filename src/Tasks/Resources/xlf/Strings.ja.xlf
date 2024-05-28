@@ -3,13 +3,13 @@
   <file datatype="xml" source-language="en" target-language="ja" original="../Strings.resx">
     <body>
       <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpened">
-        <source>The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content: '{0}'.</source>
-        <target state="new">The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content: '{0}'.</target>
+        <source>The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</source>
+        <target state="new">The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpenedWithException">
-        <source>The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content. Path to manifest file: '{1}'.</source>
-        <target state="new">The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content. Path to manifest file: '{1}'.</target>
+        <source>The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</source>
+        <target state="new">The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppConfig.BindingRedirectMissingOldVersion">
@@ -1595,18 +1595,18 @@
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.AssemblyNodeIsMissed">
-        <source>The assembly element is missing from the application manifest: '{0}'.</source>
-        <target state="new">The assembly element is missing from the application manifest: '{0}'.</target>
+        <source>The assembly element is missing from the application manifest.</source>
+        <target state="new">The assembly element is missing from the application manifest.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.InvalidValueInSupportedArchitectures">
-        <source>MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'. Path to the source manifest: '{1}'</source>
-        <target state="new">MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'. Path to the source manifest: '{1}'</target>
+        <source>MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'.</source>
+        <target state="new">MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'.</target>
         <note>{StrBegin="MSB4300: "}</note>
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound">
-        <source>The application manifest file cannot be found: '{0}'. Please make sure it exists.</source>
-        <target state="new">The application manifest file cannot be found: '{0}'. Please make sure it exists.</target>
+        <source>The application manifest file cannot be found. Please make sure it exists.</source>
+        <target state="new">The application manifest file cannot be found. Please make sure it exists.</target>
         <note />
       </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">

@@ -91,7 +91,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (string.IsNullOrEmpty(ApplicationManifest.ItemSpec) || !File.Exists(ApplicationManifest?.ItemSpec))
                 {
-                    Log.LogErrorFromResources("AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound", ApplicationManifest?.ItemSpec);
+                    Log.LogErrorWithCodeFromResources(null, ApplicationManifest?.ItemSpec, 0, 0, 0, 0, "AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound");
                     return null;
                 }
 
@@ -121,7 +121,7 @@ namespace Microsoft.Build.Tasks
 
                 if (stream is null)
                 {
-                    Log.LogErrorFromResources("AddToWin32Manifest.ManifestCanNotBeOpened", manifestPath);
+                    Log.LogErrorWithCodeFromResources(null, manifestPath, 0, 0, 0, 0, "AddToWin32Manifest.ManifestCanNotBeOpened");
 
                     return !Log.HasLoggedErrors;
                 }
@@ -147,7 +147,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception ex)
             {
-                Log.LogErrorFromResources("AddToWin32Manifest.ManifestCanNotBeOpenedWithException", ex.Message, manifestPath);
+                Log.LogErrorWithCodeFromResources(null, manifestPath, 0, 0, 0, 0, "AddToWin32Manifest.ManifestCanNotBeOpenedWithException", ex.Message);
 
                 return !Log.HasLoggedErrors;
             }
@@ -187,7 +187,7 @@ namespace Microsoft.Build.Tasks
 
             if (assemblyNode is null)
             {
-                Log.LogErrorFromResources("AddToWin32Manifest.AssemblyNodeIsMissed", manifestPath);
+                Log.LogErrorWithCodeFromResources(null, manifestPath, 0, 0, 0, 0, "AddToWin32Manifest.AssemblyNodeIsMissed");
                 return ManifestValidationResult.Failure;
             }
 
@@ -196,7 +196,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (!string.Equals(supportedArchitecturesNode.InnerText.Trim(), SupportedArchitectures, StringComparison.OrdinalIgnoreCase))
                 {
-                    Log.LogErrorWithCodeFromResources("AddToWin32Manifest.InvalidValueInSupportedArchitectures", supportedArchitecturesNode.InnerText, manifestPath);
+                    Log.LogErrorWithCodeFromResources(null, manifestPath, 0, 0, 0, 0, "AddToWin32Manifest.InvalidValueInSupportedArchitectures", supportedArchitecturesNode.InnerText);
 
                     return ManifestValidationResult.Failure;
                 }

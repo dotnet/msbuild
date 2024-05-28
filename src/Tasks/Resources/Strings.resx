@@ -3018,20 +3018,20 @@
         MSB4300 - MSB4310   Task: AddToWin32Manifest
   -->
   <data name="AddToWin32Manifest.InvalidValueInSupportedArchitectures">
-    <value>MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'. Path to the source manifest: '{1}'</value>
+    <value>MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'.</value>
     <comment>{StrBegin="MSB4300: "}</comment>
   </data>
   <data name="AddToWin32Manifest.AssemblyNodeIsMissed">
-    <value>The assembly element is missing from the application manifest: '{0}'.</value>
+    <value>The assembly element is missing from the application manifest.</value>
   </data>
   <data name="AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound">
-    <value>The application manifest file cannot be found: '{0}'. Please make sure it exists.</value>
+    <value>The application manifest file cannot be found. Please make sure it exists.</value>
   </data>
   <data name="AddToWin32Manifest.ManifestCanNotBeOpened">
-    <value>The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content: '{0}'.</value>
+    <value>The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</value>
   </data>
   <data name="AddToWin32Manifest.ManifestCanNotBeOpenedWithException">
-    <value>The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content. Path to manifest file: '{1}'.</value>
+    <value>The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</value>
   </data>
 
   <!--
