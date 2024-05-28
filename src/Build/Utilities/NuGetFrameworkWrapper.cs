@@ -202,7 +202,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <remarks>
         /// Pulled into a separate non-inlinable method to avoid failing to JIT on platforms without AppDomain support.
-        /// /// </remarks>
+        /// </remarks>
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static NuGetFrameworkWrapper CreateRemoteInstance(AssemblyName assemblyName, string assemblyPath)
         {
