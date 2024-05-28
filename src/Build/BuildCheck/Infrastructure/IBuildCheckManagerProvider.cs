@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Experimental.BuildCheck;
 
-namespace Microsoft.Build.BuildCheck.Infrastructure;
+namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 internal interface IBuildCheckManagerProvider : IBuildComponent
 {

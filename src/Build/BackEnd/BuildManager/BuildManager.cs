@@ -21,8 +21,8 @@ using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
-using Microsoft.Build.BuildCheck.Infrastructure;
-using Microsoft.Build.BuildCheck.Logging;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
+using Microsoft.Build.Experimental.BuildCheck.Logging;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
@@ -2989,10 +2989,22 @@ namespace Microsoft.Build.Execution
                     ((IBuildComponentHost)this).GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider;
                 buildCheckManagerProvider!.Instance.SetDataSource(BuildCheckDataSource.EventArgs);
 
-                loggers = (loggers ?? Enumerable.Empty<ILogger>()).Concat(new[]
-                {
-                    new BuildCheckConnectorLogger(new AnalyzerLoggingContextFactory(loggingService), buildCheckManagerProvider.Instance)
-                });
+                // We do want to dictate our own forwarding logger (otherwise CentralForwardingLogger with minimum transferred importance MessageImportnace.Low is used)
+                // In the future we might optimize for single, in-node build scenario - where forwarding logger is not needed (but it's just quick pass-through)
+                LoggerDescription forwardingLoggerDescription = new LoggerDescription(
+                    loggerClassName: typeof(BuildCheckForwardingLogger).FullName,
+                    loggerAssemblyName: typeof(BuildCheckForwardingLogger).GetTypeInfo().Assembly.GetName().FullName,
+                    loggerAssemblyFile: null,
+                    loggerSwitchParameters: null,
+                    verbosity: LoggerVerbosity.Quiet);
+
+                ILogger buildCheckLogger =
+                    new BuildCheckConnectorLogger(new AnalyzerLoggingContextFactory(loggingService),
+                        buildCheckManagerProvider.Instance);
+
+                ForwardingLoggerRecord[] forwardingLogger = { new ForwardingLoggerRecord(buildCheckLogger, forwardingLoggerDescription) };
+
+                forwardingLoggers = forwardingLoggers?.Concat(forwardingLogger) ?? forwardingLogger;
             }
 
             try

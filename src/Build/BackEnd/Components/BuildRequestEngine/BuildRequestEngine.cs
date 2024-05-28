@@ -10,7 +10,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BuildCheck.Infrastructure;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;

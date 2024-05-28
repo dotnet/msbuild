@@ -5,7 +5,7 @@ using System;
 using System.Threading;
 using Microsoft.Build.Experimental.BuildCheck;
 
-namespace Microsoft.Build.BuildCheck.Infrastructure;
+namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 internal sealed class BuildCheckRegistrationContext(BuildAnalyzerWrapper analyzerWrapper, BuildCheckCentralContext buildCheckCentralContext) : IBuildCheckRegistrationContext
 {
@@ -17,5 +17,10 @@ internal sealed class BuildCheckRegistrationContext(BuildAnalyzerWrapper analyze
     public void RegisterParsedItemsAction(Action<BuildCheckDataContext<ParsedItemsAnalysisData>> parsedItemsAction)
     {
         buildCheckCentralContext.RegisterParsedItemsAction(analyzerWrapper, parsedItemsAction);
+    }
+
+    public void RegisterTaskInvocationAction(Action<BuildCheckDataContext<TaskInvocationAnalysisData>> taskInvocationAction)
+    {
+        buildCheckCentralContext.RegisterTaskInvocationAction(analyzerWrapper, taskInvocationAction);
     }
 }

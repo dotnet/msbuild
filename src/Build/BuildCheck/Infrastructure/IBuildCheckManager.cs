@@ -4,8 +4,8 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BuildCheck.Acquisition;
-using Microsoft.Build.BuildCheck.Logging;
+using Microsoft.Build.Experimental.BuildCheck.Acquisition;
+using Microsoft.Build.Experimental.BuildCheck.Logging;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
@@ -40,11 +40,23 @@ internal interface IBuildCheckManager
         AnalyzerLoggingContext buildAnalysisContext,
         ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs);
 
+    void ProcessTaskStartedEventArgs(
+        AnalyzerLoggingContext buildAnalysisContext,
+        TaskStartedEventArgs taskStartedEventArgs);
+
+    void ProcessTaskFinishedEventArgs(
+        AnalyzerLoggingContext buildAnalysisContext,
+        TaskFinishedEventArgs taskFinishedEventArgs);
+
+    void ProcessTaskParameterEventArgs(
+        AnalyzerLoggingContext buildAnalysisContext,
+        TaskParameterEventArgs taskParameterEventArgs);
+
     void SetDataSource(BuildCheckDataSource buildCheckDataSource);
 
     void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, BuildEventContext buildEventContext);
 
-    Dictionary<string, TimeSpan> CreateTracingStats();
+    Dictionary<string, TimeSpan> CreateAnalyzerTracingStats();
 
     void FinalizeProcessing(LoggingContext loggingContext);
 

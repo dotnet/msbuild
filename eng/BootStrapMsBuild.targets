@@ -191,6 +191,15 @@
           DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\arm64\%(RecursiveDir)%(Filename)%(Extension)')"
           SkipUnchangedFiles="true" />
 
+    <!-- Disable workload resolver until we can figure out whether it can work in the bootstrap
+         https://github.com/dotnet/msbuild/issues/6566 -->
+    <MakeDir Directories="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver" />
+    <Touch Files="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\DisableWorkloadResolver.sentinel"
+           AlwaysCreate="true" />
+
+    <MakeDir Directories="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\amd64\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver" />
+    <Touch Files="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\amd64\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\DisableWorkloadResolver.sentinel"
+           AlwaysCreate="true" />
   </Target>
 
   <Target Name="BootstrapNetCore" DependsOnTargets="CleanBootstrapFolder">

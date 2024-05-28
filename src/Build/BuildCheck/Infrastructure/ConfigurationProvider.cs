@@ -3,72 +3,39 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Text.Json;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
 using Microsoft.Build.Experimental.BuildCheck;
-using System.Configuration;
+using System.Collections.Concurrent;
 
-namespace Microsoft.Build.BuildCheck.Infrastructure;
+namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
-
-// Let's flip form statics to instance, with exposed interface (so that we can easily swap implementations)
-// Tracked via: https://github.com/dotnet/msbuild/issues/9828
-internal static class ConfigurationProvider
+internal sealed class ConfigurationProvider
 {
-    // We might want to have a mechanism for removing unneeded configurations
-    //  (disabled rules and analyzers that need to run in different node)
-    private static readonly Dictionary<string, BuildAnalyzerConfiguration> _editorConfig = LoadConfiguration();
+    private readonly EditorConfigParser _editorConfigParser = new EditorConfigParser();
 
-    // This is just a testing implementation for quicker unblock of testing.
-    // Real implementation will use .editorconfig file.
-    // Sample json:
-    /////*lang=json,strict*/
-    ////"""
-    ////    {
-    ////        "ABC123": {
-    ////            "IsEnabled": true,
-    ////            "Severity": "Info"
-    ////        },
-    ////        "COND0543": {
-    ////            "IsEnabled": false,
-    ////            "Severity": "Error",
-    ////    		"EvaluationAnalysisScope": "AnalyzedProjectOnly",
-    ////    		"CustomSwitch": "QWERTY"
-    ////        },
-    ////        "BLA": {
-    ////            "IsEnabled": false
-    ////        }
-    ////    }
-    ////    """
-    //
-    // Plus there will need to be a mechanism of distinguishing different configs in different folders
-    //  - e.g. - what to do if we analyze two projects (not sharing output path) and they have different .editorconfig files?
-    private static Dictionary<string, BuildAnalyzerConfiguration> LoadConfiguration()
-    {
-        const string configFileName = "editorconfig.json";
-        string configPath = configFileName;
+    private const string BuildCheck_ConfigurationKey = "build_check";
 
-        if (!File.Exists(configPath))
-        {
-            // This is just a dummy implementation for testing purposes
-            var dir = Environment.CurrentDirectory;
-            configPath = Path.Combine(dir, configFileName);
+    /// <summary>
+    /// The dictionary used for storing the BuildAnalyzerConfiguration per projectfile and rule id. The key is equal to {projectFullPath}-{ruleId}.
+    /// </summary>
+    private readonly ConcurrentDictionary<string, BuildAnalyzerConfiguration> _buildAnalyzerConfiguration = new ConcurrentDictionary<string, BuildAnalyzerConfiguration>(StringComparer.InvariantCultureIgnoreCase);
 
-            if (!File.Exists(configPath))
-            {
-                return new Dictionary<string, BuildAnalyzerConfiguration>();
-            }
-        }
+    /// <summary>
+    /// The dictionary used for storing the key-value pairs retrieved from the .editorconfigs for specific projectfile. The key is equal to projectFullPath.
+    /// </summary>
+    private readonly ConcurrentDictionary<string, Dictionary<string, string>> _editorConfigData = new ConcurrentDictionary<string, Dictionary<string, string>>(StringComparer.InvariantCultureIgnoreCase);
 
-        var json = File.ReadAllText(configPath);
-        var DeserializationOptions = new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } };
-        return JsonSerializer.Deserialize<Dictionary<string, BuildAnalyzerConfiguration>>(json, DeserializationOptions) ??
-               new Dictionary<string, BuildAnalyzerConfiguration>();
-    }
+    /// <summary>
+    /// The dictionary used for storing the CustomConfigurationData per ruleId. The key is equal to ruleId.
+    /// </summary>
+    private readonly ConcurrentDictionary<string, CustomConfigurationData> _customConfigurationData = new ConcurrentDictionary<string, CustomConfigurationData>(StringComparer.InvariantCultureIgnoreCase);
+
+    private readonly string[] _infrastructureConfigurationKeys = new string[] {
+        nameof(BuildAnalyzerConfiguration.EvaluationAnalysisScope).ToLower(),
+        nameof(BuildAnalyzerConfiguration.IsEnabled).ToLower(),
+        nameof(BuildAnalyzerConfiguration.Severity).ToLower()
+    };
 
     /// <summary>
     /// Gets the user specified unrecognized configuration for the given analyzer rule.
@@ -80,39 +47,82 @@ internal static class ConfigurationProvider
     /// <param name="projectFullPath"></param>
     /// <param name="ruleId"></param>
     /// <returns></returns>
-    public static CustomConfigurationData GetCustomConfiguration(string projectFullPath, string ruleId)
+    public CustomConfigurationData GetCustomConfiguration(string projectFullPath, string ruleId)
     {
-        return CustomConfigurationData.Null;
+        var configuration = GetConfiguration(projectFullPath, ruleId);
+
+        if (configuration is null)
+        {
+            return CustomConfigurationData.Null;
+        }
+
+        // remove the infrastructure owned key names
+        foreach (var infraConfigurationKey in _infrastructureConfigurationKeys)
+        {
+            configuration.Remove(infraConfigurationKey);
+        }
+
+        if (!configuration.Any())
+        {
+            return CustomConfigurationData.Null;
+        }
+
+        var data = new CustomConfigurationData(ruleId, configuration);
+
+        if (!_customConfigurationData.ContainsKey(ruleId))
+        {
+            _customConfigurationData[ruleId] = data;
+        }
+
+        return data;
     }
 
     /// <summary>
-    /// 
+    /// Verifies if previously fetched custom configurations are equal to current one. 
     /// </summary>
     /// <param name="projectFullPath"></param>
     /// <param name="ruleId"></param>
     /// <throws><see cref="BuildCheckConfigurationException"/> If CustomConfigurationData differs in a build for a same ruleId</throws>
     /// <returns></returns>
-    public static void CheckCustomConfigurationDataValidity(string projectFullPath, string ruleId)
+    internal void CheckCustomConfigurationDataValidity(string projectFullPath, string ruleId)
     {
-        // TBD
+        var configuration = GetCustomConfiguration(projectFullPath, ruleId);
+        VerifyCustomConfigurationEquality(ruleId, configuration);
     }
 
-    public static BuildAnalyzerConfigurationInternal[] GetMergedConfigurations(
+    internal void VerifyCustomConfigurationEquality(string ruleId, CustomConfigurationData configurationData)
+    {
+        if (_customConfigurationData.TryGetValue(ruleId, out var storedConfiguration))
+        {
+            if (!storedConfiguration.Equals(configurationData))
+            {
+                throw new BuildCheckConfigurationException("Custom configuration should be equal between projects");
+            }
+        }
+    }
+
+    internal BuildAnalyzerConfigurationInternal[] GetMergedConfigurations(
         string projectFullPath,
         BuildAnalyzer analyzer)
         => FillConfiguration(projectFullPath, analyzer.SupportedRules, GetMergedConfiguration);
 
-    public static BuildAnalyzerConfiguration[] GetUserConfigurations(
+    internal BuildAnalyzerConfiguration[] GetUserConfigurations(
         string projectFullPath,
         IReadOnlyList<string> ruleIds)
         => FillConfiguration(projectFullPath, ruleIds, GetUserConfiguration);
 
-    public static CustomConfigurationData[] GetCustomConfigurations(
+    /// <summary>
+    /// Retrieve array of CustomConfigurationData for a given projectPath and ruleIds
+    /// </summary>
+    /// <param name="projectFullPath"></param>
+    /// <param name="ruleIds"></param>
+    /// <returns></returns>
+    public CustomConfigurationData[] GetCustomConfigurations(
         string projectFullPath,
         IReadOnlyList<string> ruleIds)
         => FillConfiguration(projectFullPath, ruleIds, GetCustomConfiguration);
 
-    public static BuildAnalyzerConfigurationInternal[] GetMergedConfigurations(
+    internal BuildAnalyzerConfigurationInternal[] GetMergedConfigurations(
         BuildAnalyzerConfiguration[] userConfigs,
         BuildAnalyzer analyzer)
     {
@@ -120,7 +130,7 @@ internal static class ConfigurationProvider
 
         for (int idx = 0; idx < userConfigs.Length; idx++)
         {
-            configurations[idx] = ConfigurationProvider.MergeConfiguration(
+            configurations[idx] = MergeConfiguration(
                 analyzer.SupportedRules[idx].Id,
                 analyzer.SupportedRules[idx].DefaultConfiguration,
                 userConfigs[idx]);
@@ -129,7 +139,7 @@ internal static class ConfigurationProvider
         return configurations;
     }
 
-    private static TConfig[] FillConfiguration<TConfig, TRule>(string projectFullPath, IReadOnlyList<TRule> ruleIds, Func<string, TRule, TConfig> configurationProvider)
+    private TConfig[] FillConfiguration<TConfig, TRule>(string projectFullPath, IReadOnlyList<TRule> ruleIds, Func<string, TRule, TConfig> configurationProvider)
     {
         TConfig[] configurations = new TConfig[ruleIds.Count];
         for (int i = 0; i < ruleIds.Count; i++)
@@ -138,6 +148,72 @@ internal static class ConfigurationProvider
         }
 
         return configurations;
+    }
+
+
+    /// <summary>
+    /// Generates a new dictionary that contains the key-value pairs from the original dictionary if the key starts with 'keyFilter'.
+    /// If updateKey is set to 'true', the keys of the new dictionary will not include keyFilter.
+    /// </summary>
+    /// <param name="keyFilter"></param>
+    /// <param name="originalConfiguration"></param>
+    /// <param name="updateKey"></param>
+    /// <returns></returns>
+    private Dictionary<string, string> FilterDictionaryByKeys(string keyFilter, Dictionary<string, string> originalConfiguration, bool updateKey = false)
+    {
+        var filteredConfig = new Dictionary<string, string>();
+
+        foreach (var kv in originalConfiguration)
+        {
+            if (kv.Key.StartsWith(keyFilter, StringComparison.OrdinalIgnoreCase))
+            {
+                var newKey = kv.Key;
+                if (updateKey)
+                {
+                    newKey = kv.Key.Substring(keyFilter.Length);
+                }
+
+                filteredConfig[newKey] = kv.Value;
+            }
+        }
+
+        return filteredConfig;
+    }
+
+    /// <summary>
+    /// Fetches the .editorconfig data in form of Key-Value pair.
+    /// Resulted dictionary will contain only BuildCheck related rules.
+    /// </summary>
+    /// <param name="projectFullPath"></param>
+    /// <returns></returns>
+    /// <exception cref="BuildCheckConfigurationException"></exception>
+    private Dictionary<string, string> FetchEditorConfigRules(string projectFullPath)
+    {
+        var editorConfigRules = _editorConfigData.GetOrAdd(projectFullPath, (key) =>
+        {
+            Dictionary<string, string> config;
+            try
+            {
+                config = _editorConfigParser.Parse(projectFullPath);
+            }
+            catch (Exception exception)
+            {
+                throw new BuildCheckConfigurationException($"Parsing editorConfig data failed", exception, BuildCheckConfigurationErrorScope.EditorConfigParser);
+            }
+
+            // clear the dictionary from the key-value pairs not BuildCheck related and
+            // store the data so there is no need to parse the .editorconfigs all over again
+            Dictionary<string, string> filteredData = FilterDictionaryByKeys($"{BuildCheck_ConfigurationKey}.", config);
+            return filteredData;
+        });
+        
+        return editorConfigRules;
+    }
+
+    internal Dictionary<string, string> GetConfiguration(string projectFullPath, string ruleId)
+    {
+        var config = FetchEditorConfigRules(projectFullPath);
+        return FilterDictionaryByKeys($"{BuildCheck_ConfigurationKey}.{ruleId}.", config, updateKey: true);
     }
 
     /// <summary>
@@ -150,14 +226,24 @@ internal static class ConfigurationProvider
     /// <param name="projectFullPath"></param>
     /// <param name="ruleId"></param>
     /// <returns></returns>
-    public static BuildAnalyzerConfiguration GetUserConfiguration(string projectFullPath, string ruleId)
+    internal BuildAnalyzerConfiguration GetUserConfiguration(string projectFullPath, string ruleId)
     {
-        if (!_editorConfig.TryGetValue(ruleId, out BuildAnalyzerConfiguration? editorConfig))
-        {
-            editorConfig = BuildAnalyzerConfiguration.Null;
-        }
+        var cacheKey = $"{ruleId}-{projectFullPath}";
 
-        return editorConfig;
+        var editorConfigValue = _buildAnalyzerConfiguration.GetOrAdd(cacheKey, (key) =>
+        {
+            BuildAnalyzerConfiguration? editorConfig = BuildAnalyzerConfiguration.Null;
+            var config = GetConfiguration(projectFullPath, ruleId);
+
+            if (config.Any())
+            {
+                editorConfig = BuildAnalyzerConfiguration.Create(config);
+            }
+
+            return editorConfig;
+        });
+
+        return editorConfigValue;
     }
 
     /// <summary>
@@ -167,10 +253,10 @@ internal static class ConfigurationProvider
     /// <param name="projectFullPath"></param>
     /// <param name="analyzerRule"></param>
     /// <returns></returns>
-    public static BuildAnalyzerConfigurationInternal GetMergedConfiguration(string projectFullPath, BuildAnalyzerRule analyzerRule)
+    internal BuildAnalyzerConfigurationInternal GetMergedConfiguration(string projectFullPath, BuildAnalyzerRule analyzerRule)
         => GetMergedConfiguration(projectFullPath, analyzerRule.Id, analyzerRule.DefaultConfiguration);
 
-    public static BuildAnalyzerConfigurationInternal MergeConfiguration(
+    internal BuildAnalyzerConfigurationInternal MergeConfiguration(
         string ruleId,
         BuildAnalyzerConfiguration defaultConfig,
         BuildAnalyzerConfiguration editorConfig)
@@ -180,13 +266,13 @@ internal static class ConfigurationProvider
             isEnabled: GetConfigValue(editorConfig, defaultConfig, cfg => cfg.IsEnabled),
             severity: GetConfigValue(editorConfig, defaultConfig, cfg => cfg.Severity));
 
-    private static BuildAnalyzerConfigurationInternal GetMergedConfiguration(
+    private BuildAnalyzerConfigurationInternal GetMergedConfiguration(
         string projectFullPath,
         string ruleId,
         BuildAnalyzerConfiguration defaultConfig)
         => MergeConfiguration(ruleId, defaultConfig, GetUserConfiguration(projectFullPath, ruleId));
 
-    private static T GetConfigValue<T>(
+    private T GetConfigValue<T>(
         BuildAnalyzerConfiguration editorConfigValue,
         BuildAnalyzerConfiguration defaultValue,
         Func<BuildAnalyzerConfiguration, T?> propertyGetter) where T : struct

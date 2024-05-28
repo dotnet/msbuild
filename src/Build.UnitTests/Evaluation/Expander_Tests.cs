@@ -95,7 +95,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
             itemsByType.ImportItems(ig);
             itemsByType.ImportItems(ig2);
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, itemsByType, FileSystems.Default);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(
+                pg,
+                itemsByType,
+                FileSystems.Default,
+                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
 
             IList<TaskItem> itemsOut = expander.ExpandIntoTaskItemsLeaveEscaped("foo;bar;@(compile);@(resource)", ExpanderOptions.ExpandPropertiesAndItems, MockElementLocation.Instance);
 
@@ -802,7 +806,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
             ig.Add(i0);
             ig.Add(i1);
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, ig, FileSystems.Default);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(
+                pg,
+                ig,
+                FileSystems.Default,
+                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
 
             return expander;
         }
@@ -2271,9 +2279,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     ExpanderOptions.ExpandProperties,
                     Directory.GetCurrentDirectory(),
                     MockElementLocation.Instance,
-                    null,
-                    new BuildEventContext(1, 2, 3, 4),
-                    FileSystems.Default));
+                    FileSystems.Default,
+                    new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4))));
             Assert.True(
                 ConditionEvaluator.EvaluateCondition(
                     @"'$(PathRoot.EndsWith(" + Path.DirectorySeparatorChar + "))' == 'false'",
@@ -2282,9 +2289,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     ExpanderOptions.ExpandProperties,
                     Directory.GetCurrentDirectory(),
                     MockElementLocation.Instance,
-                    null,
-                    new BuildEventContext(1, 2, 3, 4),
-                    FileSystems.Default));
+                    FileSystems.Default,
+                    new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4))));
         }
 
         /// <summary>
@@ -4383,13 +4389,13 @@ $(
         }
 
         [Theory]
-        [InlineData("\u3407\ud840\udc60\ud86a\ude30\ud86e\udc0a\ud86e\udda0\ud879\udeae\u2fd5\u0023", 0, 3, "\u3407\ud840\udc60\ud86a\ude30")]
-        [InlineData("\u3407\ud840\udc60\ud86a\ude30\ud86e\udc0a\ud86e\udda0\ud879\udeae\u2fd5\u0023", 2, 5, "\ud86a\ude30\ud86e\udc0a\ud86e\udda0\ud879\udeae\u2fd5")]
-        public void SubstringByTextElements(string featureName, int start, int length, string expected)
+        [InlineData("\u0074\u0068\u0069\u0073\u002a\u3407\ud840\udc60\ud86a\ude30\ud86e\udc0a\ud86e\udda0\ud879\udeae\u2fd5\u0023", 2, 10, "is________")]
+        [InlineData("\ud83d\udc68\u200d\ud83d\udc68\u200d\ud83d\udc66\u200d\ud83d\udc66\ud83d\udc68\u200d\ud83d\udc68\u200d\ud83d\udc66\u200d\ud83d\udc66\u002e\u0070\u0072\u006f\u006a", 0, 8, "________")]
+        public void SubstringByAsciiChars(string featureName, int start, int length, string expected)
         {
             var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default);
 
-            var result = expander.ExpandIntoStringLeaveEscaped($"$([MSBuild]::SubstringByTextElements({featureName}, {start}, {length}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+            var result = expander.ExpandIntoStringLeaveEscaped($"$([MSBuild]::SubstringByAsciiChars({featureName}, {start}, {length}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
             Assert.Equal(expected, result);
         }
@@ -5071,7 +5077,7 @@ $(
         }
 
         [Fact]
-        public void PropertyFunctionRegisterAnalyzer()
+        public void PropertyFunctionRegisterBuildCheck()
         {
             using (var env = TestEnvironment.Create())
             {
@@ -5083,8 +5089,8 @@ $(
                     new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0, 0));
                 var dummyAssemblyFile = env.CreateFile(env.CreateFolder(), "test.dll");
 
-                var result = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default)
-                    .ExpandIntoStringLeaveEscaped($"$([MSBuild]::RegisterAnalyzer({dummyAssemblyFile.Path}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance, loggingContext);
+                var result = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default, loggingContext)
+                    .ExpandIntoStringLeaveEscaped($"$([MSBuild]::RegisterBuildCheck({dummyAssemblyFile.Path}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
                 result.ShouldBe(Boolean.TrueString);
                 _ = logger.AllBuildEvents.Select(be => be.ShouldBeOfType<BuildCheckAcquisitionEventArgs>());

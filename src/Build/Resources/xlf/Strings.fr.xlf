@@ -209,22 +209,27 @@
       </trans-unit>
       <trans-unit id="CustomAnalyzerAssemblyNotExist">
         <source>Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</source>
-        <target state="new">Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</target>
+        <target state="translated">Impossible de trouver l’assemblée d'analyseur personnalisé spécifié : {0}. Vérifiez s’il existe.</target>
         <note>The message is emitted when the custom analyzer assembly can not be found.</note>
+      </trans-unit>
+      <trans-unit id="CustomAnalyzerBaseTypeNotAssignable">
+        <source>Failed to load the custom analyzer type: {0} from the assembly: {1}. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
+        <target state="translated">Échec du chargement du type d’analyseur personnalisé : {0} à partir de l’assembly : {1}. Assurez-vous qu’il hérite de la classe de base Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer. S’il ne doit pas être un analyseur personnalisé, il ne doit pas être exposé. Plus d’informations : https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <note>The message is emitted when the custom analyzer assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedAcquisition">
         <source>Failed to register the custom analyzer: {0}.</source>
-        <target state="new">Failed to register the custom analyzer: {0}.</target>
+        <target state="translated">Échec de l’inscription de l’analyseur personnalisé : {0}.</target>
         <note>The message is emitted on failed loading of the custom analyzer in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedRuleLoading">
         <source>Failed to instantiate the custom analyzer rule with the following exception: {0}.</source>
-        <target state="new">Failed to instantiate the custom analyzer rule with the following exception: {0}.</target>
+        <target state="translated">Échec de l’instanciation de la règle d’analyseur personnalisé avec l’exception suivante : {0}.</target>
         <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
         <source>Custom analyzer rule: {0} has been registered successfully.</source>
-        <target state="new">Custom analyzer rule: {0} has been registered successfully.</target>
+        <target state="translated">Règle de l’analyseur personnalisé : {0} a été correctement inscrit.</target>
         <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
@@ -391,6 +396,11 @@
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">Impossible d'appeler la méthode {0} avec une collection contenant des noms de cibles qui ont une valeur null ou qui sont vides.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutputPropertyLogMessagePrefix">
+        <source>Output Property: </source>
+        <target state="translated">Propriété de sortie : </target>
         <note />
       </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">
@@ -618,7 +628,7 @@ Erreurs : {3}</target>
       </trans-unit>
       <trans-unit id="TaskAssemblyLocationMismatch">
         <source>Task assembly was loaded from '{0}' while the desired location was '{1}'.</source>
-        <target state="new">Task assembly was loaded from '{0}' while the desired location was '{1}'.</target>
+        <target state="translated">L’assembly de tâche a été chargé à partir de « {0} » alors que l’emplacement souhaité était « {1} ».</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">

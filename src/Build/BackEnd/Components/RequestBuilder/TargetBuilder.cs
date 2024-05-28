@@ -740,11 +740,11 @@ namespace Microsoft.Build.BackEnd
                 TargetEntry newEntry;
                 if (buildReason == TargetBuiltReason.None)
                 {
-                    newEntry = new TargetEntry(_requestEntry, this as ITargetBuilderCallback, targetSpecification, baseLookup, parentTargetEntry, targetSpecification._targetBuiltReason, _componentHost, stopProcessingOnCompletion);
+                    newEntry = new TargetEntry(_requestEntry, this as ITargetBuilderCallback, targetSpecification, baseLookup, parentTargetEntry, targetSpecification._targetBuiltReason, _componentHost, _projectLoggingContext, stopProcessingOnCompletion);
                 }
                 else
                 {
-                    newEntry = new TargetEntry(_requestEntry, this as ITargetBuilderCallback, targetSpecification, baseLookup, parentTargetEntry, buildReason, _componentHost, stopProcessingOnCompletion);
+                    newEntry = new TargetEntry(_requestEntry, this as ITargetBuilderCallback, targetSpecification, baseLookup, parentTargetEntry, buildReason, _componentHost, _projectLoggingContext, stopProcessingOnCompletion);
                 }
                 newEntry.ErrorTarget = addAsErrorTarget;
                 targetsToPush.Add(newEntry);
