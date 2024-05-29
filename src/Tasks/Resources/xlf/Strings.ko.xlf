@@ -2,6 +2,16 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../Strings.resx">
     <body>
+      <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpened">
+        <source>The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</source>
+        <target state="new">The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpenedWithException">
+        <source>The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</source>
+        <target state="new">The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AppConfig.BindingRedirectMissingOldVersion">
         <source>BindingRedirect is missing required field 'oldVersion'.</source>
         <target state="translated">BindingRedirect에 필수 필드인 'oldVersion'이 없습니다.</target>
@@ -130,6 +140,26 @@
         <source>MSB3992: '{0}' is not set. When {1} is true, make sure to set a value for '{0}'.</source>
         <target state="translated">MSB3992: '{0}'이(가) 설정되지 않았습니다. {1}이(가) true인 경우 '{0}'에 값을 설정해야 합니다.</target>
         <note>{StrBegin="MSB3992: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled">
+        <source>MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</source>
+        <target state="new">MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</target>
+        <note>{StrBegin="MSB9903: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
+        <source>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</source>
+        <target state="new">MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</target>
+        <note>{StrBegin="MSB9904: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled">
+        <source>MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</source>
+        <target state="new">MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</target>
+        <note>{StrBegin="MSB9902: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonTarget.SpecifiedSeverityDoesNotExist">
+        <source>MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</source>
+        <target state="new">MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</target>
+        <note>{StrBegin="MSB9901: "}</note>
       </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
         <source>MSB3881: Fatal Error: more than {0} command line arguments.</source>
@@ -1563,6 +1593,21 @@
         <source>StopOnFirstFailure will have no effect when the following conditions are all present: 1) The system is running in multiple process mode 2) The BuildInParallel property is true. 3) The RunEachTargetSeparately property is false.</source>
         <target state="translated">다음 조건이 모두 충족되면 StopOnFirstFailure가 효과가 없습니다. 1) 시스템이 다중 프로세스 모드에서 실행 중입니다. 2) BuildInParallel 속성이 true입니다. 3) RunEachTargetSeparately 속성이 false입니다.</target>
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
+      </trans-unit>
+      <trans-unit id="AddToWin32Manifest.AssemblyNodeIsMissed">
+        <source>The assembly element is missing from the application manifest.</source>
+        <target state="new">The assembly element is missing from the application manifest.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddToWin32Manifest.InvalidValueInSupportedArchitectures">
+        <source>MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'.</source>
+        <target state="new">MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'.</target>
+        <note>{StrBegin="MSB4300: "}</note>
+      </trans-unit>
+      <trans-unit id="AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound">
+        <source>The application manifest file cannot be found. Please make sure it exists.</source>
+        <target state="new">The application manifest file cannot be found. Please make sure it exists.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>

@@ -427,6 +427,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_WindowsMetadataOutputPath>$(OutDir)$(WinMDExpOutputWindowsMetadataFilename)</_WindowsMetadataOutputPath>
   </PropertyGroup>
 
+  <!-- ARM64-related properties -->
+  <PropertyGroup>
+    <_SupportedArchitectures>amd64 arm64</_SupportedArchitectures>
+  </PropertyGroup>
+
   <ItemGroup>
     <!-- Create an item for entry point of the ClickOnce application (Example: WindowsApplication1.exe) -->
     <_DeploymentManifestEntryPoint Include="@(IntermediateAssembly)">
@@ -853,6 +858,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyGroup Condition="'$(Prefer32Bit)' == 'true' and ('$(PlatformTarget)' == 'AnyCPU' or '$(PlatformTarget)' == '') and '$(PlatformTargetAsMSBuildArchitectureExplicitlySet)' != 'true'">
       <PlatformTargetAsMSBuildArchitecture>x86</PlatformTargetAsMSBuildArchitecture>
     </PropertyGroup>
+
+    <MSBuildInternalMessage Condition=" '$(Prefer32Bit)' == 'true' and '$(PreferNativeArm64)' == 'true' " ResourceName="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled" Severity="Error"/>
+
+    <MSBuildInternalMessage Condition=" '$(NoWin32Manifest)' == 'true' and '$(PreferNativeArm64)' == 'true' " ResourceName="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled" Severity="Error"/>
+
+    <MSBuildInternalMessage Condition=" '$(PreferNativeArm64)' == 'true' and '$(Platform)' != 'AnyCPU' " ResourceName="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled" Severity="Warning" FormatArguments="$(Platform)" />
 
     <!--
       Log an error if the user set MSBuildProjectExtensionsPath in the body of a project. In an SDK style project
@@ -3600,6 +3611,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       ResolveReferences;
       ResolveKeySource;
       SetWin32ManifestProperties;
+      _SetPreferNativeArm64Win32ManifestProperties;
       FindReferenceAssembliesForReferences;
       _GenerateCompileInputs;
       BeforeCompile;
@@ -4139,12 +4151,40 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Win32Manifest>$(ApplicationManifest)</Win32Manifest>
     </PropertyGroup>
 
-    <GetFrameworkPath Condition="'$(ApplicationManifest)'=='' and '$(NoWin32Manifest)'!='true'">
+    <!-- If PreferNativeArm64 is enabled, it searches for the same default.win32manifest  -->
+    <GetFrameworkPath Condition="'$(ApplicationManifest)'=='' and '$(NoWin32Manifest)'!='true' and '$(PreferNativeArm64)' != 'true'">
       <Output TaskParameter="FrameworkVersion40Path"  PropertyName="_FrameworkVersion40Path" />
     </GetFrameworkPath>
 
     <PropertyGroup>
-      <EmbeddedWin32Manifest  Condition="'$(ApplicationManifest)'=='' and '$(NoWin32Manifest)'!='true' and Exists('$(_FrameworkVersion40Path)\default.win32manifest')">$(_FrameworkVersion40Path)\default.win32manifest</EmbeddedWin32Manifest>
+      <EmbeddedWin32Manifest Condition="'$(ApplicationManifest)'=='' and '$(NoWin32Manifest)'!='true' and '$(PreferNativeArm64)' != 'true' and Exists('$(_FrameworkVersion40Path)\default.win32manifest')">$(_FrameworkVersion40Path)\default.win32manifest</EmbeddedWin32Manifest>
+    </PropertyGroup>
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        _SetPreferNativeArm64Win32ManifestProperties
+
+    Populates Manifest with SupportedArchitectures and updates Win32Manifest property to be used later in the build.
+    ============================================================
+    -->
+
+  <Target
+      Name="_SetPreferNativeArm64Win32ManifestProperties"
+      Condition=" '$(PreferNativeArm64)'=='true' and '$(NoWin32Manifest)'!='true'"
+      DependsOnTargets="SetWin32ManifestProperties">
+
+    <AddToWin32Manifest
+      ApplicationManifest="$(Win32Manifest)"
+      OutputDirectory="$(IntermediateOutputPath)"
+      SupportedArchitectures="$(_SupportedArchitectures)">
+
+      <Output TaskParameter="ManifestPath" PropertyName="_Win32Manifest"/>
+    </AddToWin32Manifest>
+
+    <PropertyGroup>
+      <Win32Manifest Condition="'$(_Win32Manifest)' != ''">$(_Win32Manifest)</Win32Manifest>
     </PropertyGroup>
 
   </Target>
@@ -4293,6 +4333,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="OutputManifest" ItemName="FileWrites"/>
 
     </GenerateApplicationManifest>
+
+    <AddToWin32Manifest
+        Condition="'$(PreferNativeArm64)'=='true'"
+        ApplicationManifest="@(ApplicationManifest)"
+        OutputDirectory="$(IntermediateOutputPath)"
+        SupportedArchitectures="$(_SupportedArchitectures)">
+    </AddToWin32Manifest>
 
     <PropertyGroup>
       <_DeploymentCopyApplicationManifest>true</_DeploymentCopyApplicationManifest>
