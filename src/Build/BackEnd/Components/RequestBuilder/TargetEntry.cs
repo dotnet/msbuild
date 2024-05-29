@@ -452,6 +452,10 @@ namespace Microsoft.Build.BackEnd
                         break;
                     }
 
+                    // Don't log the last target finished event until we can process the target outputs as we want to attach them to the
+                    // last target batch. The following statement logs the event for the bucket processed in the previous iteration.
+                    targetLoggingContext?.LogTargetBatchFinished(projectFullPath, targetSuccess, null);
+
                     targetLoggingContext = projectLoggingContext.LogTargetBatchStarted(projectFullPath, _target, parentTargetName, _buildReason);
                     bucket.Initialize(targetLoggingContext);
                     WorkUnitResult bucketResult = null;
@@ -564,16 +568,6 @@ namespace Microsoft.Build.BackEnd
                         entryForInference?.LeaveScope();
                         entryForExecution?.LeaveScope();
                         aggregateResult = aggregateResult.AggregateResult(new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null));
-                    }
-                    finally
-                    {
-                        // Don't log the last target finished event until we can process the target outputs as we want to attach them to the
-                        // last target batch.
-                        if (targetLoggingContext != null && i < numberOfBuckets - 1)
-                        {
-                            targetLoggingContext.LogTargetBatchFinished(projectFullPath, targetSuccess, null);
-                            targetLoggingContext = null;
-                        }
                     }
                 }
 
