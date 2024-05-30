@@ -128,93 +128,93 @@ jobs:
     displayName: Publish crank assests artifacts
 
 
-- job: CreateExpMSBuild
-  displayName: "Create Experimental MSBuild"
-  condition: ne('${{ parameters.VSVersionName }}', 'none')
-  steps:
-  - powershell: |
-      $token = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes("PAT:$env:ACCESSTOKEN"))
-      $headers = @{ Authorization = "Basic $token" };
-      $response = Invoke-RestMethod -Uri "$(_MSBuildConfigFilePathRequestURL)" -Headers $headers -Method Get
-      $MSBuildDropPath = $response.Tools.MSBuild.Locations
-      Write-Host "##vso[task.setvariable variable=MSBuildDropPath]$MSBuildDropPath"
-      Write-Host "MSBuild Drop Path directory: $MSBuildDropPath"
-    displayName: Get Retail MSBuild Drop Path
-    env:
-      ACCESSTOKEN: $(cloudbuild-token)
+# - job: CreateExpMSBuild
+#   displayName: "Create Experimental MSBuild"
+#   condition: ne('${{ parameters.VSVersionName }}', 'none')
+#   steps:
+#   - powershell: |
+#       $token = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes("PAT:$env:ACCESSTOKEN"))
+#       $headers = @{ Authorization = "Basic $token" };
+#       $response = Invoke-RestMethod -Uri "$(_MSBuildConfigFilePathRequestURL)" -Headers $headers -Method Get
+#       $MSBuildDropPath = $response.Tools.MSBuild.Locations
+#       Write-Host "##vso[task.setvariable variable=MSBuildDropPath]$MSBuildDropPath"
+#       Write-Host "MSBuild Drop Path directory: $MSBuildDropPath"
+#     displayName: Get Retail MSBuild Drop Path
+#     env:
+#       ACCESSTOKEN: $(cloudbuild-token)
 
-  - task: NuGetToolInstaller@1
-    displayName: 'Install NuGet.exe'
+#   - task: NuGetToolInstaller@1
+#     displayName: 'Install NuGet.exe'
 
-  - task: NuGetCommand@2
-    displayName: Restore internal tools
-    inputs:
-      command: restore
-      feedsToUse: config
-      restoreSolution: '$(Build.SourcesDirectory)\eng\common\internal\Tools.csproj'
-      nugetConfigPath: '$(Build.SourcesDirectory)\NuGet.config'
-      restoreDirectory: '$(Build.SourcesDirectory)\.packages'
+#   - task: NuGetCommand@2
+#     displayName: Restore internal tools
+#     inputs:
+#       command: restore
+#       feedsToUse: config
+#       restoreSolution: '$(Build.SourcesDirectory)\eng\common\internal\Tools.csproj'
+#       nugetConfigPath: '$(Build.SourcesDirectory)\NuGet.config'
+#       restoreDirectory: '$(Build.SourcesDirectory)\.packages'
 
-  - powershell: |
-      mkdir "$(Pipeline.Workspace)/artifacts"
+#   - powershell: |
+#       mkdir "$(Pipeline.Workspace)/artifacts"
 
-      $dropAppDirectory = Get-ChildItem -Directory -Path "$(Build.SourcesDirectory)/.packages/drop.app"
-      $dropAppVersion = $dropAppDirectory.Name
-      Write-Host "Detected drop.exe version: $dropAppVersion"
+#       $dropAppDirectory = Get-ChildItem -Directory -Path "$(Build.SourcesDirectory)/.packages/drop.app"
+#       $dropAppVersion = $dropAppDirectory.Name
+#       Write-Host "Detected drop.exe version: $dropAppVersion"
 
-      $dropExePath = "$(Build.SourcesDirectory)/.packages/drop.app/$dropAppVersion/lib/net45/drop.exe"
-      Write-Host "Detected drop.exe path: $dropExePath"
+#       $dropExePath = "$(Build.SourcesDirectory)/.packages/drop.app/$dropAppVersion/lib/net45/drop.exe"
+#       Write-Host "Detected drop.exe path: $dropExePath"
 
-      Write-Host "Downloading VS msbuild"
-      & "$dropExePath" get --patAuthEnvVar 'cloudbuild-token' -u "$(MSBuildDropPath)\$(VSVersion)" -d "$(System.ArtifactsDirectory)/VSMSBuildDrop"
-      Write-Host "Download of VS msbuild finished"
+#       Write-Host "Downloading VS msbuild"
+#       & "$dropExePath" get --patAuthEnvVar 'cloudbuild-token' -u "$(MSBuildDropPath)\$(VSVersion)" -d "$(System.ArtifactsDirectory)/VSMSBuildDrop"
+#       Write-Host "Download of VS msbuild finished"
 
-      Write-Host "Copying VS msbuild to $(Pipeline.Workspace)/VSMSBuild"
-      Copy-Item -Path "$(System.ArtifactsDirectory)/VSMSBuildDrop/*" -Destination "$(Pipeline.Workspace)/VSMSBuild" -Recurse
-      Write-Host "Copy of VS msbuild finished"
-    displayName: Download msbuild vs drop
-    env:
-      cloudbuild-token: $(cloudbuild-token)
+#       Write-Host "Copying VS msbuild to $(Pipeline.Workspace)/VSMSBuild"
+#       Copy-Item -Path "$(System.ArtifactsDirectory)/VSMSBuildDrop/*" -Destination "$(Pipeline.Workspace)/VSMSBuild" -Recurse
+#       Write-Host "Copy of VS msbuild finished"
+#     displayName: Download msbuild vs drop
+#     env:
+#       cloudbuild-token: $(cloudbuild-token)
 
-  - task: DownloadBuildArtifacts@1
-    inputs:
-      buildType: specific
-      project: DevDiv
-      pipeline: $(_MsBuildCiPipelineId)
-      ${{ if eq(parameters.MSBuildBuildID, 'default') }}:
-        buildVersionToDownload: latestFromBranch
-        branchName: '${{parameters.MSBuildBranch}}'
-      ${{ else }}:
-        buildVersionToDownload: specific
-        buildId: ${{parameters.MSBuildBuildID}}
-      artifactName: bin
-      itemPattern: |
-        MSBuild.Bootstrap/*/net472/**
-        Microsoft.Build.Conversion/*/net472/Microsoft.Build.Conversion.Core.dll
-        Microsoft.Build.Engine/*/net472/Microsoft.Build.Engine.dll
-        MSBuildTaskHost/**/MSBuildTaskHost.exe
-        MSBuildTaskHost/**/MSBuildTaskHost.pdb
-        MSBuild/*/*/net472/MSBuild.exe*
-      downloadPath: '$(System.ArtifactsDirectory)/msbuild/artifacts/bin'
-    displayName: Download msbuild artifacts
+#   - task: DownloadBuildArtifacts@1
+#     inputs:
+#       buildType: specific
+#       project: DevDiv
+#       pipeline: $(_MsBuildCiPipelineId)
+#       ${{ if eq(parameters.MSBuildBuildID, 'default') }}:
+#         buildVersionToDownload: latestFromBranch
+#         branchName: '${{parameters.MSBuildBranch}}'
+#       ${{ else }}:
+#         buildVersionToDownload: specific
+#         buildId: ${{parameters.MSBuildBuildID}}
+#       artifactName: bin
+#       itemPattern: |
+#         MSBuild.Bootstrap/*/net472/**
+#         Microsoft.Build.Conversion/*/net472/Microsoft.Build.Conversion.Core.dll
+#         Microsoft.Build.Engine/*/net472/Microsoft.Build.Engine.dll
+#         MSBuildTaskHost/**/MSBuildTaskHost.exe
+#         MSBuildTaskHost/**/MSBuildTaskHost.pdb
+#         MSBuild/*/*/net472/MSBuild.exe*
+#       downloadPath: '$(System.ArtifactsDirectory)/msbuild/artifacts/bin'
+#     displayName: Download msbuild artifacts
 
-  - powershell: |
-      Write-Host "Updating MSBuild dlls."
-      $(Build.SourcesDirectory)/scripts/Deploy-MSBuild.ps1 `
-        -destination "$(Pipeline.Workspace)/VSMSBuild/$(VSVersion)/MSBuild/Current/Bin" `
-        -binDirectory "$(System.ArtifactsDirectory)/msbuild/artifacts/bin" `
-        -configuration Release `
-        -makeBackup $false
+#   - powershell: |
+#       Write-Host "Updating MSBuild dlls."
+#       $(Build.SourcesDirectory)/scripts/Deploy-MSBuild.ps1 `
+#         -destination "$(Pipeline.Workspace)/VSMSBuild/$(VSVersion)/MSBuild/Current/Bin" `
+#         -binDirectory "$(System.ArtifactsDirectory)/msbuild/artifacts/bin" `
+#         -configuration Release `
+#         -makeBackup $false
 
-      ls "$(Pipeline.Workspace)/VSMSBuild/$(VSVersion)"
-      Write-Host "Compressing msbuild files"
-      Get-ChildItem -Path "$(Pipeline.Workspace)/VSMSBuild/$(VSVersion)" | Compress-Archive -DestinationPath "$(Pipeline.Workspace)/artifacts/MSBuild.zip"
-    displayName: Dogfood msbuild dlls
+#       ls "$(Pipeline.Workspace)/VSMSBuild/$(VSVersion)"
+#       Write-Host "Compressing msbuild files"
+#       Get-ChildItem -Path "$(Pipeline.Workspace)/VSMSBuild/$(VSVersion)" | Compress-Archive -DestinationPath "$(Pipeline.Workspace)/artifacts/MSBuild.zip"
+#     displayName: Dogfood msbuild dlls
 
-  - task: PublishPipelineArtifact@1
-    inputs:
-      targetPath: '$(Pipeline.Workspace)/artifacts'
-      artifactName: ExperimentalMSBuild
-      parallel: true
-    condition: always()
-    displayName: Publish crank assests artifacts
+#   - task: PublishPipelineArtifact@1
+#     inputs:
+#       targetPath: '$(Pipeline.Workspace)/artifacts'
+#       artifactName: ExperimentalMSBuild
+#       parallel: true
+#     condition: always()
+#     displayName: Publish crank assests artifacts
