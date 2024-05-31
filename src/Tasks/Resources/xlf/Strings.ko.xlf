@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpened">
         <source>The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</source>
-        <target state="new">The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</target>
+        <target state="translated">매니페스트 파일이 없거나 읽을 수 없습니다. 해당 콘텐츠가 존재하고 관련 콘텐츠가 있는지 확인하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpenedWithException">
         <source>The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</source>
-        <target state="new">The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</target>
+        <target state="translated">'{0}' 예외로 인해 매니페스트 파일을 열지 못했습니다. 해당 콘텐츠가 존재하고 관련 콘텐츠가 있는지 확인하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppConfig.BindingRedirectMissingOldVersion">
@@ -143,22 +143,22 @@
       </trans-unit>
       <trans-unit id="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled">
         <source>MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</source>
-        <target state="new">MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</target>
+        <target state="translated">MSB9903: PreferNativeArm64에는 Win32 애플리케이션 매니페스트가 필요하며 NoWin32Manifest와 함께 사용할 수 없습니다.</target>
         <note>{StrBegin="MSB9903: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
         <source>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</source>
-        <target state="new">MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</target>
+        <target state="translated">MSB9904: PreferNativeArm64를 사용하도록 설정한 경우 플랫폼이 AnyCPU로 설정되어 있는지 확인합니다. 현재 플랫폼: {0}.</target>
         <note>{StrBegin="MSB9904: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled">
         <source>MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</source>
-        <target state="new">MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</target>
+        <target state="translated">MSB9902: Prefer32Bit 및 PreferNativeArm64 옵션은 함께 사용할 수 없습니다. 하나만 사용하도록 설정하세요.</target>
         <note>{StrBegin="MSB9902: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.SpecifiedSeverityDoesNotExist">
         <source>MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</source>
-        <target state="new">MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</target>
+        <target state="translated">MSB9901: 지정한 심각도가 관련되지 않습니다. '{1}' 메시지의 '{0}'.</target>
         <note>{StrBegin="MSB9901: "}</note>
       </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
@@ -1596,17 +1596,17 @@
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.AssemblyNodeIsMissed">
         <source>The assembly element is missing from the application manifest.</source>
-        <target state="new">The assembly element is missing from the application manifest.</target>
+        <target state="translated">어셈블리 요소가 애플리케이션 매니페스트에 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.InvalidValueInSupportedArchitectures">
         <source>MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'.</source>
-        <target state="new">MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'.</target>
+        <target state="translated">MSB4300: supportedArchitectures 요소에 대해 지정된 값 '{0}'이(가) 잘못되었습니다. 매니페스트에서 제거하거나 'amd64 arm64'로 설정합니다.</target>
         <note>{StrBegin="MSB4300: "}</note>
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound">
         <source>The application manifest file cannot be found. Please make sure it exists.</source>
-        <target state="new">The application manifest file cannot be found. Please make sure it exists.</target>
+        <target state="translated">애플리케이션 매니페스트 파일을 찾을 수 없습니다. 존재하는지 확인하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">

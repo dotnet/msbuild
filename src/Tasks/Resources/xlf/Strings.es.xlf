@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpened">
         <source>The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</source>
-        <target state="new">The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</target>
+        <target state="translated">El archivo de manifiesto no existe o no se puede leer. Asegúrese de que existe y de que tiene contenido relevante.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpenedWithException">
         <source>The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</source>
-        <target state="new">The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</target>
+        <target state="translated">Error al abrir el archivo de manifiesto con la excepción: '{0}'. Asegúrese de que existe y de que tiene contenido relevante.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppConfig.BindingRedirectMissingOldVersion">
@@ -143,22 +143,22 @@
       </trans-unit>
       <trans-unit id="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled">
         <source>MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</source>
-        <target state="new">MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</target>
+        <target state="translated">MSB9903: PreferNativeArm64 requiere un manifiesto de aplicación Win32 y se excluye mutuamente con NoWin32Manifest.</target>
         <note>{StrBegin="MSB9903: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
         <source>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</source>
-        <target state="new">MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</target>
+        <target state="translated">MSB9904: cuando PreferNativeArm64 esté habilitado, asegúrese de que la plataforma está establecida en AnyCPU. Plataforma actual: {0}.</target>
         <note>{StrBegin="MSB9904: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled">
         <source>MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</source>
-        <target state="new">MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</target>
+        <target state="translated">MSB9902: las opciones Prefer32Bit y PreferNativeArm64 se excluyen mutuamente. Habilite solo una.</target>
         <note>{StrBegin="MSB9902: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.SpecifiedSeverityDoesNotExist">
         <source>MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</source>
-        <target state="new">MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</target>
+        <target state="translated">MSB9901: la gravedad especificada no es relevante: '{0}' para el mensaje: '{1}'.</target>
         <note>{StrBegin="MSB9901: "}</note>
       </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
@@ -1596,17 +1596,17 @@
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.AssemblyNodeIsMissed">
         <source>The assembly element is missing from the application manifest.</source>
-        <target state="new">The assembly element is missing from the application manifest.</target>
+        <target state="translated">Falta el elemento de ensamblado en el manifiesto de aplicación.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.InvalidValueInSupportedArchitectures">
         <source>MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'.</source>
-        <target state="new">MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'.</target>
+        <target state="translated">MSB4300: el valor especificado '{0}' para el elemento supportedArchitectures no es válido. Quítelo del manifiesto o establézcalo en "amd64 arm64".</target>
         <note>{StrBegin="MSB4300: "}</note>
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound">
         <source>The application manifest file cannot be found. Please make sure it exists.</source>
-        <target state="new">The application manifest file cannot be found. Please make sure it exists.</target>
+        <target state="translated">No se encuentra el archivo de manifiesto de aplicación. Asegúrese de que existe.</target>
         <note />
       </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">

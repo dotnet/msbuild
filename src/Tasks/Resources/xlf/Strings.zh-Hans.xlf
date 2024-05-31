@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpened">
         <source>The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</source>
-        <target state="new">The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</target>
+        <target state="translated">清单文件不存在或无法读取。请确保它存在并具有相关内容。</target>
         <note />
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpenedWithException">
         <source>The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</source>
-        <target state="new">The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</target>
+        <target state="translated">清单文件打开失败，出现异常:“{0}”。请确保它存在并具有相关内容。</target>
         <note />
       </trans-unit>
       <trans-unit id="AppConfig.BindingRedirectMissingOldVersion">
@@ -143,22 +143,22 @@
       </trans-unit>
       <trans-unit id="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled">
         <source>MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</source>
-        <target state="new">MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</target>
+        <target state="translated">MSB9903: PreferNativeArm64 需要 Win32 应用程序清单，并且与 NoWin32Manifest 互斥。</target>
         <note>{StrBegin="MSB9903: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
         <source>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</source>
-        <target state="new">MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</target>
+        <target state="translated">MSB9904: 启用 PreferNativeArm64 时，请确保平台设置为 AnyCPU。当前平台: {0}。</target>
         <note>{StrBegin="MSB9904: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled">
         <source>MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</source>
-        <target state="new">MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</target>
+        <target state="translated">MSB9902: Prefer32Bit 和 PreferNativeArm64 选项互斥。请仅启用一个。</target>
         <note>{StrBegin="MSB9902: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.SpecifiedSeverityDoesNotExist">
         <source>MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</source>
-        <target state="new">MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</target>
+        <target state="translated">MSB9901: 指定的严重性不相关: 消息“{1}”的“{0}”。</target>
         <note>{StrBegin="MSB9901: "}</note>
       </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
@@ -1596,17 +1596,17 @@
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.AssemblyNodeIsMissed">
         <source>The assembly element is missing from the application manifest.</source>
-        <target state="new">The assembly element is missing from the application manifest.</target>
+        <target state="translated">应用程序清单中缺少程序集元素。</target>
         <note />
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.InvalidValueInSupportedArchitectures">
         <source>MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'.</source>
-        <target state="new">MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'.</target>
+        <target state="translated">MSB4300: supportedArchitectures 元素的指定值“{0}”无效。将其从清单中移除或设置为 "amd64 arm64"。</target>
         <note>{StrBegin="MSB4300: "}</note>
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound">
         <source>The application manifest file cannot be found. Please make sure it exists.</source>
-        <target state="new">The application manifest file cannot be found. Please make sure it exists.</target>
+        <target state="translated">找不到应用程序清单文件。请确保它存在。</target>
         <note />
       </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">

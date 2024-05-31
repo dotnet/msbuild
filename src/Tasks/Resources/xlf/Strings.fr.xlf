@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpened">
         <source>The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</source>
-        <target state="new">The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</target>
+        <target state="translated">Le fichier manifeste n’existe pas ou ne peut pas être lu. Vérifiez qu’il existe et qu’il contient du contenu pertinent.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpenedWithException">
         <source>The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</source>
-        <target state="new">The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</target>
+        <target state="translated">L’ouverture du fichier manifeste a échoué avec l’exception : «{0}». Vérifiez qu’il existe et qu’il contient du contenu pertinent.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppConfig.BindingRedirectMissingOldVersion">
@@ -1596,7 +1596,7 @@
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.AssemblyNodeIsMissed">
         <source>The assembly element is missing from the application manifest.</source>
-        <target state="new">The assembly element is missing from the application manifest.</target>
+        <target state="translated">L’élément assembly est manquant dans le manifeste de l’application.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.InvalidValueInSupportedArchitectures">
@@ -1606,7 +1606,7 @@
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound">
         <source>The application manifest file cannot be found. Please make sure it exists.</source>
-        <target state="new">The application manifest file cannot be found. Please make sure it exists.</target>
+        <target state="translated">Le fichier manifeste de l’application est introuvable. Assurez-vous qu’il existe.</target>
         <note />
       </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
