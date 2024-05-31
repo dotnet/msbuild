@@ -116,6 +116,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private BinaryWriter _binaryWriter;
 
+        /// <summary>
+        /// The time when a node in this process was first created.
+        /// </summary>
+        private readonly DateTime _nodeHostStartTime;
+
         #endregion
 
         #region INodeEndpoint Events
@@ -140,6 +145,20 @@ namespace Microsoft.Build.BackEnd
         #endregion
 
         #region Properties
+
+        #endregion
+
+        #region Constructors
+
+        protected NodeEndpointOutOfProcBase()
+            : this(DateTime.UtcNow)
+        {
+        }
+
+        protected NodeEndpointOutOfProcBase(DateTime nodeHostStartTime)
+        {
+            _nodeHostStartTime = nodeHostStartTime;
+        }
 
         #endregion
 
@@ -339,6 +358,18 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        private int GetConnectionTimeout(DateTime currentTime)
+        {
+            // Use the current node process up time to estimate for how long it should be kept alive. E.g. if the node process
+            // was started 5 minutes ago, then wait 5 more minutes for new connections before shutting down.
+            int upTimeMs = (int)(currentTime - _nodeHostStartTime).TotalMilliseconds;
+
+            // Clamp to [MinimumNodeConnectionTimeout, MaximumNodeConnectionTimeout].
+            upTimeMs = Math.Max(upTimeMs, CommunicationsUtilities.MinimumNodeConnectionTimeout);
+            upTimeMs = Math.Min(upTimeMs, CommunicationsUtilities.MaximumNodeConnectionTimeout);
+            return upTimeMs;
+        }
+
         /// <summary>
         /// This method handles the asynchronous message pump.  It waits for messages to show up on the queue
         /// and calls FireDataAvailable for each such packet.  It will terminate when the terminate event is
@@ -359,10 +390,10 @@ namespace Microsoft.Build.BackEnd
                 gotValidConnection = true;
                 DateTime restartWaitTime = DateTime.UtcNow;
 
-                // We only wait to wait the difference between now and the last original start time, in case we have multiple hosts attempting
+                // We only want to wait the difference between now and the last original start time, in case we have multiple hosts attempting
                 // to attach.  This prevents each attempt from resetting the timer.
                 TimeSpan usedWaitTime = restartWaitTime - originalWaitStartTime;
-                int waitTimeRemaining = Math.Max(0, CommunicationsUtilities.NodeConnectionTimeout - (int)usedWaitTime.TotalMilliseconds);
+                int waitTimeRemaining = Math.Max(0, GetConnectionTimeout(originalWaitStartTime) - (int)usedWaitTime.TotalMilliseconds);
 
                 try
                 {

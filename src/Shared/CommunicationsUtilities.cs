@@ -203,9 +203,14 @@ namespace Microsoft.Build.Internal
         internal const byte handshakeVersion = 0x01;
 
         /// <summary>
-        /// The timeout to connect to a node.
+        /// The timeout to connect to a node. Also the timeout to wait before shutting down an idle node (upper bound).
         /// </summary>
-        private const int DefaultNodeConnectionTimeout = 900 * 1000; // 15 minutes; enough time that a dev will typically do another build in this time
+        private const int DefaultMaximumNodeConnectionTimeout = 900 * 1000; // 15 minutes; enough time that a dev will typically do another build in this time
+
+        /// <summary>
+        /// The timeout to wait before shutting down an idle node (lower bound).
+        /// </summary>
+        private const int DefaultMinimumNodeConnectionTimeout = 60 * 1000; // 1 minute; to not make the process linger for too long after an isolated build
 
         /// <summary>
         /// Whether to trace communications
@@ -233,11 +238,19 @@ namespace Microsoft.Build.Internal
         internal delegate void LogDebugCommunications(string format, params object[] stuff);
 
         /// <summary>
-        /// Gets or sets the node connection timeout.
+        /// Gets the maximum node connection timeout.
         /// </summary>
-        internal static int NodeConnectionTimeout
+        internal static int MaximumNodeConnectionTimeout
         {
-            get { return GetIntegerVariableOrDefault("MSBUILDNODECONNECTIONTIMEOUT", DefaultNodeConnectionTimeout); }
+            get { return GetIntegerVariableOrDefault("MSBUILDNODECONNECTIONTIMEOUT", DefaultMaximumNodeConnectionTimeout); }
+        }
+
+        /// <summary>
+        /// Gets the minimum node connection timeout.
+        /// </summary>
+        internal static int MinimumNodeConnectionTimeout
+        {
+            get { return GetIntegerVariableOrDefault("MSBUILDMINNODECONNECTIONTIMEOUT", DefaultMinimumNodeConnectionTimeout); }
         }
 
 #if NETFRAMEWORK

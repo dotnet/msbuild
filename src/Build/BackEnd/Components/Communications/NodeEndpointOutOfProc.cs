@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
@@ -18,9 +19,11 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Instantiates an endpoint to act as a client.
         /// </summary>
+        /// <param name="nodeHostStartTime">The time when a node in this process first started.</param>
         /// <param name="enableReuse">Whether this node may be reused for a later build.</param>
         /// <param name="lowPriority">Whether this node is low priority.</param>
-        internal NodeEndpointOutOfProc(bool enableReuse, bool lowPriority)
+        internal NodeEndpointOutOfProc(DateTime nodeHostStartTime, bool enableReuse, bool lowPriority)
+            : base(nodeHostStartTime)
         {
             _enableReuse = enableReuse;
             LowPriority = lowPriority;
