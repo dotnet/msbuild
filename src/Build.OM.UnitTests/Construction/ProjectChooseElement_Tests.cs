@@ -193,9 +193,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </Choose>
                     </Project>
                 ";
-
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectChooseElement choose = (ProjectChooseElement)Helpers.GetFirst(project.Children);
 
             Assert.Equal(1, Helpers.Count(choose.WhenElements));
@@ -218,8 +217,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectChooseElement choose = (ProjectChooseElement)Helpers.GetFirst(project.Children);
 
             List<ProjectWhenElement> whens = Helpers.MakeList(choose.WhenElements);
@@ -272,8 +271,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
             ProjectChooseElement choose = Helpers.GetFirst(project.Xml.ChooseElements);
             ProjectWhenElement when = Helpers.GetFirst(choose.WhenElements);
             when.Condition = "false";

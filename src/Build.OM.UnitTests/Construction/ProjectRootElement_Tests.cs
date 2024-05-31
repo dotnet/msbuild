@@ -220,8 +220,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             string content = "<Project ToolsVersion=\"4.0\">\r\n</Project>";
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement projectXml1 = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement projectXml1 = projectRootElementFromString.Project;
+
 
             projectXml1.FullPath = @"xyz\abc";
 
@@ -238,8 +239,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             string content = "<Project ToolsVersion=\"4.0\">\r\n</Project>";
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement projectXml1 = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement projectXml1 = projectRootElementFromString.Project;
+
 
             projectXml1.FullPath = Path.Combine(Directory.GetCurrentDirectory(), @"xyz\abc");
 
@@ -368,8 +370,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             bool exceptionThrown = false;
             try
             {
-                using var xmlReader = XmlReader.Create(new StringReader(content));
-                Project project = new Project(xmlReader);
+                using ProjectRootElementFromString projectRootElementFromString = new(content);
+                ProjectRootElement project = projectRootElementFromString.Project;
             }
             catch (InvalidProjectFileException ex)
             {
@@ -702,22 +704,22 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void EncodingGetterBasedOnXmlDeclaration()
         {
-            using var projectUTF16 = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-16""?>
+            using ProjectRootElementFromString projectRootElementFromStringUTF16 = new(ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-16""?>
 <Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
-</Project>")));
-            ProjectRootElement project = ProjectRootElement.Create(projectUTF16);
+</Project>"));
+            ProjectRootElement project = projectRootElementFromStringUTF16.Project;
             Assert.Equal(Encoding.Unicode, project.Encoding);
 
-            using var projectUTF8 = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            using ProjectRootElementFromString projectRootElementFromStringUTF8 = new(ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
-</Project>")));
-            project = ProjectRootElement.Create(projectUTF8);
+</Project>"));
+            project = projectRootElementFromStringUTF8.Project;
             Assert.Equal(Encoding.UTF8, project.Encoding);
 
-            using var projectASCII = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""us-ascii""?>
+            using ProjectRootElementFromString projectRootElementFromStringASCII = new(ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""us-ascii""?>
 <Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
-</Project>")));
-            project = ProjectRootElement.Create(projectASCII);
+</Project>"));
+            project = projectRootElementFromStringASCII.Project;
             Assert.Equal(Encoding.ASCII, project.Encoding);
         }
 
@@ -753,10 +755,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void SaveUnmodifiedWithNewEncoding()
         {
-            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using ProjectRootElementFromString projectRootElementFromString = new(ObjectModelHelpers.CleanupFileContents(@"
 <Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
-</Project>")));
-            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
+</Project>"));
+            ProjectRootElement project = projectRootElementFromString.Project;
+
             project.FullPath = FileUtilities.GetTemporaryFile();
             string projectFullPath = project.FullPath;
             try
@@ -821,8 +824,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </Choose>
                     </Project>");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
 
             List<ProjectPropertyElement> properties = Helpers.MakeList(project.Properties);
 
@@ -879,8 +882,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </Choose>
                     </Project>");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
 
             List<ProjectItemElement> items = Helpers.MakeList(project.Items);
 
@@ -1267,8 +1270,8 @@ Project(""{";
 
   </Project>";
 
-            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(project)));
-            var pre = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(ObjectModelHelpers.CleanupFileContents(project));
+            ProjectRootElement pre = projectRootElementFromString.Project;
 
             ValidateDeepCloneAndCopyFrom(pre);
         }
@@ -1289,12 +1292,11 @@ Project(""{";
             {
                 var projectFiles = env.CreateTestProjectWithFiles("", new[] { "build.proj" });
                 var projectFile = projectFiles.CreatedFiles.First();
-
-                using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(project)));
-                var projectXml = ProjectRootElement.Create(
-                    xmlReader,
-                    projectCollection,
-                    preserveFormatting: true);
+                using ProjectRootElementFromString projectRootElementFromString = new(
+                ObjectModelHelpers.CleanupFileContents(project),
+                projectCollection,
+                preserveFormatting: true);
+                ProjectRootElement projectXml = projectRootElementFromString.Project;
 
                 projectXml.Save(projectFile);
 
@@ -2003,8 +2005,8 @@ true, true, true)]
         {
             string content = ObjectModelHelpers.CleanupFileContents(ComplexProject);
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
 
             return project;
         }

@@ -38,8 +38,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
+                  using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectPropertyGroupElement group = (ProjectPropertyGroupElement)Helpers.GetFirst(project.Children);
 
             Assert.Equal(0, Helpers.Count(group.Properties));
@@ -60,8 +60,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
+                  using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectPropertyGroupElement group = (ProjectPropertyGroupElement)Helpers.GetFirst(project.Children);
 
             var properties = Helpers.MakeList(group.Properties);

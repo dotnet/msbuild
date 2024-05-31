@@ -31,8 +31,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
+                  using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectItemDefinitionGroupElement itemDefinitionGroup = (ProjectItemDefinitionGroupElement)Helpers.GetFirst(project.Children);
             ProjectItemDefinitionElement itemDefinition = Helpers.GetFirst(itemDefinitionGroup.ItemDefinitions);
 
@@ -55,8 +55,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
+                  using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectItemDefinitionGroupElement itemDefinitionGroup = (ProjectItemDefinitionGroupElement)Helpers.GetFirst(project.Children);
             ProjectItemDefinitionElement definition = Helpers.GetFirst(itemDefinitionGroup.ItemDefinitions);
 
@@ -84,8 +84,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement.Create(xmlReader);
+            using ProjectFromString projectFromString = new(content);
         }
 
         /// <summary>
@@ -105,8 +104,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
+                  using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectItemDefinitionGroupElement itemDefinitionGroup = (ProjectItemDefinitionGroupElement)Helpers.GetFirst(project.Children);
             ProjectItemDefinitionElement itemDefinition = Helpers.GetFirst(itemDefinitionGroup.ItemDefinitions);
 

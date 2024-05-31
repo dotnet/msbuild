@@ -1027,8 +1027,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             var globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             globalProperties["g"] = "gv";
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion);
+            using ProjectFromString projectFromString = new(content, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, ProjectCollection.GlobalProjectCollection);
+            Project project = projectFromString.Project;
             ProjectInstance instance = immutable ? project.CreateProjectInstance(ProjectInstanceSettings.Immutable) : project.CreateProjectInstance();
 
             return instance;

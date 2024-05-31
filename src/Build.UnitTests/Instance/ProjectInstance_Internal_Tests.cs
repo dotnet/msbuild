@@ -67,8 +67,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 string importPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("import.targets", importContent);
                 projectFileContent = String.Format(projectFileContent, importPath);
 
-                using var xmlReader = XmlReader.Create(new StringReader(projectFileContent));
-                ProjectInstance project = new Project(ProjectRootElement.Create(xmlReader)).CreateProjectInstance();
+                using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+                ProjectInstance project = new Project(projectRootElementFromString.Project).CreateProjectInstance();
 
                 project.TaskRegistry.TaskRegistrations.Count.ShouldBe(3);
                 project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t0", null)][0].TaskFactoryAssemblyLoadInfo.AssemblyFile.ShouldBe(Path.Combine(Directory.GetCurrentDirectory(), "af0"));
@@ -115,8 +115,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
                 projectFileContent = String.Format(projectFileContent, import1Path, import2Path);
 
-                using var xmlReader = XmlReader.Create(new StringReader(projectFileContent));
-                ProjectInstance project = new Project(ProjectRootElement.Create(xmlReader)).CreateProjectInstance();
+                using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+                ProjectInstance project = new Project(projectRootElementFromString.Project).CreateProjectInstance();
 
                 project.DefaultTargets.ShouldBe(new string[] { "d0a", "d0b" });
                 project.InitialTargets.ShouldBe(new string[] { "i0a", "i0b", "i1a", "i1b", "i3a", "i3b", "i2a", "i2b" });
@@ -141,8 +141,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                     <Project DefaultTargets='d0a%3bd0b' InitialTargets='i0a%3bi0b'>
                     </Project>";
 
-                using var xmlReader = XmlReader.Create(new StringReader(projectFileContent));
-                ProjectInstance project = new Project(ProjectRootElement.Create(xmlReader)).CreateProjectInstance();
+                using ProjectFromString projectFromString = new(projectFileContent);
+                ProjectInstance project = projectFromString.Project.CreateProjectInstance();
 
                 project.DefaultTargets.ShouldBe(new string[] { "d0a;d0b" });
                 project.InitialTargets.ShouldBe(new string[] { "i0a;i0b" });
@@ -285,10 +285,9 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         [Fact]
         public void UsingExplicitToolsVersionShouldBeFalseWhenNoToolsetIsReferencedInProject()
         {
-            using var xmlReader = XmlReader.Create(new StringReader("<Project></Project>"));
+            using ProjectRootElementFromString projectRootElementFromString = new("<Project></Project>", ProjectCollection.GlobalProjectCollection, false, false);
             var projectInstance = new ProjectInstance(
-                new ProjectRootElement(
-                    xmlReader, ProjectCollection.GlobalProjectCollection.ProjectRootElementCache, false, false));
+                projectRootElementFromString.Project);
 
             projectInstance.UsingDifferentToolsVersionFromProjectFile.ShouldBeFalse();
         }
@@ -414,8 +413,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                         </Target>
                     </Project>";
 
-                using var xmlReader = XmlReader.Create(new StringReader(projectContent));
-                ProjectRootElement xml = ProjectRootElement.Create(xmlReader);
+                using ProjectRootElementFromString projectRootElementFromString = new(projectContent);
+                ProjectRootElement xml = projectRootElementFromString.Project;
 
                 IDictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 globalProperties.Add("VisualStudioVersion", "ABCD");
@@ -688,8 +687,9 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             projectContents = string.Format(projectContents, MSBuildConstants.CurrentToolsVersion);
 
-            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(projectContents)));
-            var original = new ProjectInstance(ProjectRootElement.Create(xmlReader));
+            using ProjectRootElementFromString projectRootElementFromString = new(ObjectModelHelpers.CleanupFileContents(projectContents));
+            ProjectRootElement rootElement = projectRootElementFromString.Project;
+            var original = new ProjectInstance(rootElement);
 
             original.TranslateEntireState = true;
 
@@ -780,8 +780,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                     <Project>
                         <Target Name='a' />
                     </Project>";
-            using var xmlReader = XmlReader.Create(new StringReader(projectFileContent));
-            ProjectRootElement rootElement = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+            ProjectRootElement rootElement = projectRootElementFromString.Project;
             ProjectInstance projectInstance = new ProjectInstance(rootElement);
 
             ProjectTargetInstance targetInstance = projectInstance.AddTarget("b", "1==1", "inputs", "outputs", "returns", "keepDuplicateOutputs", "dependsOnTargets", "beforeTargets", "afterTargets", true);
@@ -816,8 +816,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                     <Project>
                         <Target Name='a' />
                     </Project>";
-            using var xmlReader = XmlReader.Create(new StringReader(projectFileContent));
-            ProjectRootElement rootElement = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+            ProjectRootElement rootElement = projectRootElementFromString.Project;
             ProjectInstance projectInstance = new ProjectInstance(rootElement);
 
             Should.Throw<InternalErrorException>(() => projectInstance.AddTarget("a", "1==1", "inputs", "outputs", "returns", "keepDuplicateOutputs", "dependsOnTargets", "beforeTargets", "afterTargets", true));
@@ -860,8 +860,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 BuildParameters buildParameters = new BuildParameters(projectCollection) { ProjectLoadSettings = projectLoadSettings };
                 BuildEventContext buildEventContext = new BuildEventContext(0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
 
-                using var xmlReader = XmlReader.Create(new StringReader(projectFileContent));
-                ProjectRootElement rootElement = ProjectRootElement.Create(xmlReader);
+                using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+                ProjectRootElement rootElement = projectRootElementFromString.Project;
                 ProjectInstance projectInstance = useDirectConstruction
                     ? new ProjectInstance(rootElement, globalProperties: null, toolsVersion: null, buildParameters, projectCollection.LoggingService, buildEventContext, sdkResolverService: null, 0)
                     : new Project(rootElement, globalProperties: null, toolsVersion: null, projectCollection, projectLoadSettings).CreateProjectInstance();
@@ -957,8 +957,6 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// </summary>
         private static ProjectInstance GetProjectInstance(string content, HostServices hostServices, IDictionary<string, string> globalProperties, ProjectCollection projectCollection, string toolsVersion = null)
         {
-            using XmlReader reader = XmlReader.Create(new StringReader(content));
-
             if (globalProperties == null)
             {
                 // choose some interesting defaults if we weren't explicitly asked to use a set.
@@ -967,7 +965,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 globalProperties.Add("g2", "v2");
             }
 
-            Project project = new Project(reader, globalProperties, toolsVersion ?? ObjectModelHelpers.MSBuildDefaultToolsVersion, projectCollection ?? ProjectCollection.GlobalProjectCollection);
+            using ProjectFromString projectFromString = new(content, globalProperties, toolsVersion ?? ObjectModelHelpers.MSBuildDefaultToolsVersion, projectCollection ?? ProjectCollection.GlobalProjectCollection);
+            Project project = projectFromString.Project;
 
             ProjectInstance instance = project.CreateProjectInstance();
 

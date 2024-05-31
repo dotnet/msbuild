@@ -356,8 +356,8 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     <p>v1</p>
   </PropertyGroup>
 </Project>");
-            using var xmlReader = XmlReader.Create(new StringReader(two));
-            ProjectRootElement twoXml = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(two);
+            ProjectRootElement twoXml = projectRootElementFromString.Project;
             twoXml.FullPath = "p2";
 
             Project project;
@@ -821,8 +821,8 @@ namespace Microsoft.Build.UnitTests.Preprocessor
   </ItemGroup>
 </Project>");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement xml = ProjectRootElement.Create(xmlReader);
+           using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement xml = projectRootElementFromString.Project;
             Project project = new Project(xml);
 
             using StringWriter writer = new StringWriter();
@@ -876,9 +876,9 @@ namespace Microsoft.Build.UnitTests.Preprocessor
   </PropertyGroup>
 </Project>";
 
-                using var xmlReader = XmlReader.Create(new StringReader(content));
+                using ProjectRootElementFromString projectRootElementFromString = new(content);
                 Project project = Project.FromProjectRootElement(
-                    ProjectRootElement.Create(xmlReader),
+                    projectRootElementFromString.Project,
                     projectOptions);
 
                 using StringWriter writer = new StringWriter();
@@ -1103,9 +1103,9 @@ namespace Microsoft.Build.UnitTests.Preprocessor
   </PropertyGroup>
 </Project>";
 
-                using var xmlReader = XmlReader.Create(new StringReader(content));
+                using ProjectRootElementFromString projectRootElementFromString = new(content);
                 Project project = Project.FromProjectRootElement(
-                    ProjectRootElement.Create(xmlReader),
+                    projectRootElementFromString.Project,
                     projectOptions);
 
                 using StringWriter writer = new StringWriter();

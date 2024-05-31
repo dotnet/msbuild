@@ -1096,8 +1096,8 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public static IList<ProjectItem> GetItems(string content, bool allItems = false, bool ignoreCondition = false)
         {
-            using var xmlReader = XmlReader.Create(new StringReader(CleanupFileContents(content)));
-            var projectXml = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(CleanupFileContents(content));
+            ProjectRootElement projectXml = projectRootElementFromString.Project;
             Project project = new Project(projectXml);
             IList<ProjectItem> item = Helpers.MakeList(
                 ignoreCondition ?
@@ -1354,9 +1354,8 @@ namespace Microsoft.Build.UnitTests
         {
             // Replace the nonstandard quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
-
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader, globalProperties, toolsVersion: null);
+            using ProjectFromString projectFromString = new(content, globalProperties, toolsVersion: null);
+            Project project = projectFromString.Project;
             logger ??= new MockLogger
             {
                 AllowTaskCrashes = allowTaskCrash
@@ -1371,8 +1370,8 @@ namespace Microsoft.Build.UnitTests
             // Replace the nonstandard quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader, null, toolsVersion: null);
+            using ProjectFromString projectFromString = new(content, null, toolsVersion: null);
+            Project project = projectFromString.Project;
 
             List<ILogger> loggers = new List<ILogger>() { binaryLogger };
 

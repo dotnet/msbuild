@@ -710,8 +710,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 ");
 
             _parameters.DetailedSummary = true;
-            using var xmlReader = new XmlTextReader(new StringReader(contents));
-            Project project = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(contents);
+            Project project = projectFromString.Project;
             BuildRequestData data = new BuildRequestData(project.CreateProjectInstance(), new string[] { "test" });
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);

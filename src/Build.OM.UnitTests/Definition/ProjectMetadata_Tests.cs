@@ -50,8 +50,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement projectXml = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement projectXml = projectRootElementFromString.Project;
+
             Project project = new Project(projectXml);
 
             Assert.False(project.IsDirty);
@@ -155,8 +156,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+          using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("j")).GetMetadata("m1");
             metadatum.UnevaluatedValue = "%(i.m1)";
@@ -182,8 +183,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+          using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("i")).GetMetadata("m1");
             metadatum.UnevaluatedValue = "%(i.m0)";
@@ -208,8 +209,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+          using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("i")).GetMetadata("m1");
             metadatum.UnevaluatedValue = "%(i.m1)";
@@ -235,8 +236,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+          using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("i")).GetMetadata("m1");
             metadatum.UnevaluatedValue = "%(m0)";
@@ -267,8 +268,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+          using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("i")).GetMetadata("m1");
             metadatum.UnevaluatedValue = "%(m0)";
@@ -299,8 +300,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+          using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("i")).GetMetadata("m1");
             metadatum.UnevaluatedValue = "%(i.m0)";
@@ -331,8 +332,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+          using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("i")).GetMetadata("m1");
             metadatum.UnevaluatedValue = "%(j.m0)";
@@ -362,8 +363,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+          using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItemDefinition itemDefinition;
             project.ItemDefinitions.TryGetValue("i", out itemDefinition);
@@ -391,8 +392,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+          using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItemDefinition itemDefinition;
             project.ItemDefinitions.TryGetValue("i", out itemDefinition);
@@ -425,8 +426,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+          using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItemDefinition itemDefinition;
             project.ItemDefinitions.TryGetValue("i", out itemDefinition);
@@ -488,9 +489,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         </None>
     </ItemGroup>
 </Project>");
-            using System.Xml.XmlReader reader = XmlReader.Create(new StringReader(projectString));
-            Microsoft.Build.Evaluation.Project project = new Microsoft.Build.Evaluation.Project(reader);
-            Microsoft.Build.Evaluation.ProjectItem item = project.GetItems("None").Single();
+            using ProjectFromString projectFromString = new(projectString);
+            Project project = projectFromString.Project;
+            ProjectItem item = project.GetItems("None").Single();
 
             SpecialCharactersInMetadataValueTests(item);
         }

@@ -293,11 +293,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
 ");
 
-            using var xmlReader = XmlReader.Create(new StringReader(contents1));
-            var project = new Project(xmlReader, null, null, _projectCollection)
-            {
-                FullPath = _env.CreateFile(".proj").Path
-            };
+            using ProjectFromString projectFromString = new(contents1, null, null, _projectCollection);
+            Project project = projectFromString.Project;
+            project.FullPath = _env.CreateFile(".proj").Path;
 
             project.Save();
 
@@ -3529,11 +3527,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private Project CreateProject(string contents, string toolsVersion, ProjectCollection projectCollection, bool deleteTempProject)
         {
-            using var xmlReader = XmlReader.Create(new StringReader(contents));
-            var project = new Project(xmlReader, null, toolsVersion, projectCollection)
-            {
-                FullPath = _env.CreateFile().Path
-            };
+            using ProjectFromString projectFromString = new(contents, null, toolsVersion, projectCollection);
+            Project project = projectFromString.Project;
+            project.FullPath = _env.CreateFile().Path;
 
             if (!deleteTempProject)
             {
@@ -3631,8 +3627,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     var p2pProjectPath = testFiles.CreatedFiles[0];
                     File.WriteAllText(p2pProjectPath, p2pProjectContents);
 
-                    using var xmlReader = XmlReader.Create(new StringReader(string.Format(mainProjectContents, p2pProjectPath)));
-                    var mainRootElement = ProjectRootElement.Create(xmlReader, collection);
+                    using ProjectRootElementFromString projectRootElementFromString = new(string.Format(mainProjectContents, p2pProjectPath), collection);
+                    ProjectRootElement mainRootElement = projectRootElementFromString.Project;
 
                     mainRootElement.FullPath = testFiles.CreatedFiles[1];
                     mainRootElement.Save();
@@ -3783,9 +3779,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var importPath = testFiles.CreatedFiles[1];
             File.WriteAllText(importPath, CleanupFileContents(importProject));
 
-            using var xmlReader = XmlReader.Create(new StringReader(string.Format(mainProject, importPath)));
-            var root = ProjectRootElement.Create(
-                xmlReader, _projectCollection);
+            using ProjectRootElementFromString projectRootElementFromString = new(string.Format(mainProject, importPath), _projectCollection);
+            ProjectRootElement root = projectRootElementFromString.Project;
             root.FullPath = Path.GetTempFileName();
             root.Save();
 

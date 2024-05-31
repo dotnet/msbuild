@@ -45,7 +45,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void EmptyItemSpecInTargetInputs()
         {
             MockLogger ml = new MockLogger();
-            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            var content = ObjectModelHelpers.CleanupFileContents(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
 	                <ItemGroup>
 	                    <MyFile Include='a.cs; b.cs; c.cs'/>
@@ -55,8 +55,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 	                        Outputs='foo.exe'>
 	                        <Message Text='Running Build target' Importance='High'/>
 	                </Target>
-	            </Project>")));
-            Project p = new Project(xmlReader);
+	            </Project>");
+            using ProjectFromString projectFromString = new(content);
+            Project p = projectFromString.Project;
 
             bool success = p.Build(new string[] { "Build" }, new ILogger[] { ml });
 
@@ -73,7 +74,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void EmptyItemSpecInTargetOutputs()
         {
             MockLogger ml = new MockLogger();
-            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            var content = ObjectModelHelpers.CleanupFileContents(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
       	        <Target Name='Build'
 		            Inputs='@(TASKXML)'
@@ -88,8 +89,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         <PasFile>ccc32task.pas</PasFile>
 		            </TASKXML>
 	            </ItemGroup>
-              </Project>")));
-            Project p = new Project(xmlReader);
+              </Project>");
+            using ProjectFromString projectFromString = new(content);
+            Project p = projectFromString.Project;
 
             bool success = p.Build("Build", new ILogger[] { ml });
 
@@ -99,7 +101,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ml.AssertLogContains("Running Build target");
 
             ml = new MockLogger();
-            using var projectReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            content = ObjectModelHelpers.CleanupFileContents(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
       	        <Target Name='Build'
 		            Inputs='@(TASKXML)'
@@ -112,8 +114,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
       		        <TASKXML Include='ccc32task.xml'>
 		            </TASKXML>
 	            </ItemGroup>
-              </Project>")));
-            p = new Project(projectReader);
+              </Project>");
+            using ProjectFromString projectFromString1 = new(content);
+            p = projectFromString1.Project;
 
             success = p.Build("Build", new ILogger[] { ml });
 
@@ -286,8 +289,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
     </Target>
 </Project>
             ");
-            using var xmlReader = XmlReader.Create(new StringReader(projectText.Replace("`", "\"")));
-            Project p = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(projectText.Replace("`", "\""));
+            Project p = projectFromString.Project;
 
             Assert.True(p.Build(new string[] { "Build" }, new ILogger[] { logger }));
 
@@ -315,8 +318,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
     </Target>
 </Project>
             ");
-            using var xmlReader = XmlReader.Create(new StringReader(projectText.Replace("`", "\"")));
-            Project p = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(projectText.Replace("`", "\""));
+            Project p = projectFromString.Project;
 
             Assert.True(p.Build(new string[] { "Build" }, new ILogger[] { logger }));
 
@@ -344,8 +347,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
     </Target>
 </Project>
             ");
-            using var xmlReader = XmlReader.Create(new StringReader(projectText.Replace("`", "\"")));
-            Project p = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(projectText.Replace("`", "\""));
+            Project p = projectFromString.Project;
 
             Assert.True(p.Build(new string[] { "Build" }, new ILogger[] { logger }));
 
@@ -374,8 +377,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
     </Target>
 </Project>
             ");
-            using var xmlReader = XmlReader.Create(new StringReader(projectText.Replace("`", "\"")));
-            Project p = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(projectText.Replace("`", "\""));
+            Project p = projectFromString.Project;
 
             Assert.True(p.Build(new string[] { "Build" }, new ILogger[] { logger }));
 
@@ -409,8 +412,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
     </Target>
 </Project>
             ");
-            using var xmlReader = XmlReader.Create(new StringReader(projectText.Replace("`", "\"")));
-            Project p = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(projectText.Replace("`", "\""));
+            Project p = projectFromString.Project;
 
             Assert.True(p.Build(new string[] { "Build" }, new ILogger[] { logger }));
 
@@ -436,7 +439,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 Directory.SetCurrentDirectory(ObjectModelHelpers.TempProjectDir);
                 MockLogger logger = new MockLogger();
-                using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+                var content = ObjectModelHelpers.CleanupFileContents(@"
 <Project InitialTargets='Setup' xmlns='msbuildnamespace'>
 
   <ItemGroup>
@@ -486,8 +489,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         <Message Text='GAFT B:@(B)' />
   </Target>
 </Project>
-                ")));
-                Project p = new Project(xmlReader);
+                ");
+                using ProjectFromString projectFromString = new(content);
+                Project p = projectFromString.Project;
 
                 p.Build(new string[] { "Build" }, new ILogger[] { logger });
 

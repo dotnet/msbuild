@@ -158,8 +158,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+          using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item = Helpers.GetFirst(project.GetItems("i"));
             ProjectMetadata m0 = item.GetMetadata("m0");
@@ -1193,8 +1193,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+          using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             project.GetItems("i").First().SetMetadataValue("m", "m2");
 
@@ -1236,8 +1236,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+          using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item1 = project.GetItems("i").First();
             ProjectItem item1b = project.GetItems("i").ElementAt(1);
@@ -1287,8 +1287,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+          using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item1 = project.GetItems("i").First();
             ProjectItem item1b = project.GetItems("i").ElementAt(1);
@@ -1357,8 +1357,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+          using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             Assert.Equal("l0", project.GetItems("i").First().GetMetadataValue("l"));
             Assert.Equal("m1", project.GetItems("i").First().GetMetadataValue("m"));
@@ -1455,8 +1455,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+          using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             Assert.Equal("l0", project.GetItems("i").First().GetMetadataValue("l"));
             Assert.Equal("m1", project.GetItems("i").First().GetMetadataValue("m"));

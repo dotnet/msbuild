@@ -108,10 +108,12 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
   </ItemGroup>
 </Project>");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement xml = ProjectRootElement.Create(xmlReader,
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                content,
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
+            ProjectRootElement xml = projectRootElementFromString.Project;
+
             Project project = new Project(xml);
             project.AddItem("Compile", "Class1.cs");
             using StringWriter writer = new StringWriter();
@@ -142,10 +144,12 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
   </ItemGroup>
 </Project>");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement xml = ProjectRootElement.Create(xmlReader,
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                content,
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
+            ProjectRootElement xml = projectRootElementFromString.Project;
+
             Project project = new Project(xml);
             project.AddItem("Compile", "Class2.cs");
             using StringWriter writer = new StringWriter();
@@ -176,10 +180,11 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
   </ItemGroup>
 </Project>");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement xml = ProjectRootElement.Create(xmlReader,
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                content,
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
+            ProjectRootElement xml = projectRootElementFromString.Project;
             Project project = new Project(xml);
             project.AddItem("Compile", "Program.cs");
             using StringWriter writer = new StringWriter();
@@ -195,7 +200,6 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
 </Project>");
 
             string actual = writer.ToString();
-
             VerifyAssertLineByLine(expected, actual);
         }
 
@@ -207,10 +211,12 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
   <ItemGroup>
   </ItemGroup>
 </Project>");
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement xml = ProjectRootElement.Create(xmlReader,
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                content,
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
+            ProjectRootElement xml = projectRootElementFromString.Project;
+
             Project project = new Project(xml);
             project.AddItem("Compile", "Program.cs");
             using StringWriter writer = new EncodingStringWriter();
@@ -235,10 +241,11 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
 <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 </Project>");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement xml = ProjectRootElement.Create(xmlReader,
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                content,
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
+            ProjectRootElement xml = projectRootElementFromString.Project;
             Project project = new Project(xml);
             project.AddItem("Compile", "Program.cs");
             using StringWriter writer = new StringWriter();
@@ -268,10 +275,12 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
   </ItemGroup>
 </Project>");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement xml = ProjectRootElement.Create(xmlReader,
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                content,
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
+            ProjectRootElement xml = projectRootElementFromString.Project;
+
             Project project = new Project(xml);
 
             var itemToRemove = project.GetItems("Compile").Single(item => item.EvaluatedInclude == "Class2.cs");
@@ -305,10 +314,12 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
   </ItemGroup>
 </Project>");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement xml = ProjectRootElement.Create(xmlReader,
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                content,
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
+            ProjectRootElement xml = projectRootElementFromString.Project;
+
             Project project = new Project(xml);
 
             var itemToEdit = project.GetItems("Compile").Single(item => item.EvaluatedInclude == "Class2.cs");
@@ -346,9 +357,12 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
   />
 </Project>");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement xml = ProjectRootElement.Create(xmlReader, ProjectCollection.GlobalProjectCollection,
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                content,
+                ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
+            ProjectRootElement xml = projectRootElementFromString.Project;
+
             Project project = new Project(xml);
 
             using StringWriter writer = new StringWriter();
@@ -370,10 +384,12 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
 
         private void VerifyFormattingPreservedFromString(string projectContents)
         {
-            using var xmlReader = XmlReader.Create(new StringReader(projectContents));
-            ProjectRootElement xml = ProjectRootElement.Create(xmlReader,
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                projectContents,
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
+            ProjectRootElement xml = projectRootElementFromString.Project;
+
             Project project = new Project(xml);
             using StringWriter writer = new StringWriter();
             project.Save(writer);
@@ -423,10 +439,12 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
 
         private void VerifyProjectReformattingFromString(string originalContents, string expectedContents)
         {
-            using var xmlReader = XmlReader.Create(new StringReader(originalContents));
-            ProjectRootElement xml = ProjectRootElement.Create(xmlReader,
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                originalContents,
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: false);
+            ProjectRootElement xml = projectRootElementFromString.Project;
+
             Project project = new Project(xml);
             using StringWriter writer = new StringWriter();
             project.Save(writer);

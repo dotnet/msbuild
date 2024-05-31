@@ -105,8 +105,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                        </Target>
                     </Project>");
 
-            using var xmlReader = XmlReader.Create(new StringReader(projectFileContent));
-            ProjectRootElement xml = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+            ProjectRootElement xml = projectRootElementFromString.Project;
             Project project = new Project(xml);
             bool result = project.Build(new ILogger[] { mockLogger });
             result.ShouldBeTrue();
@@ -131,8 +131,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                        </Target>
                     </Project>");
 
-            using var xmlReader = XmlReader.Create(new StringReader(projectFileContent));
-            ProjectRootElement xml = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+            ProjectRootElement xml = projectRootElementFromString.Project;
             using ProjectCollection collection = new ProjectCollection();
             collection.RegisterLogger(mockLogger);
             Project project = new Project(xml, null, null, collection);
@@ -159,8 +159,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                        </Target>
                     </Project>");
 
-            using var xmlReader = XmlReader.Create(new StringReader(projectFileContent));
-            ProjectRootElement xml = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+            ProjectRootElement xml = projectRootElementFromString.Project;
             using ProjectCollection collection = new ProjectCollection();
             collection.RegisterLogger(mockLogger2);
             Project project = new Project(xml, null, null, collection);
@@ -594,8 +594,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             projectFileContent = string.Format(projectFileContent, importPath);
 
-            using var xmlReader = XmlReader.Create(new StringReader(projectFileContent));
-            ProjectRootElement xml = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+            ProjectRootElement xml = projectRootElementFromString.Project;
             Project project = new Project(xml);
 
             project.GetPropertyValue("p2").ShouldBe("v3");
@@ -639,8 +639,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                          </ItemGroup>
                      </Project>");
 
-            using var xmlReader = XmlReader.Create(new StringReader(projectFileContent));
-            ProjectRootElement xml = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             Project project = new Project(xml);
 
@@ -674,8 +674,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                         </ItemGroup>
                     </Project>");
 
-            using var xmlReader = XmlReader.Create(new StringReader(projectFileContent));
-            ProjectRootElement xml = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             Project project = new Project(xml);
             ProjectInstance projectInstance = new ProjectInstance(xml);
@@ -707,8 +707,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                         </ItemGroup>
                     </Project>");
 
-            using var xmlReader = XmlReader.Create(new StringReader(projectFileContent));
-            ProjectRootElement xml = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             try
             {
@@ -743,8 +743,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                         </ItemGroup>
                     </Project>");
 
-            using var xmlReader = XmlReader.Create(new StringReader(projectFileContent));
-            ProjectRootElement xml = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             try
             {
@@ -781,8 +781,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                         </ItemGroup>
                     </Project>");
 
-            using var xmlReader = XmlReader.Create(new StringReader(projectFileContent));
-            ProjectRootElement xml = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             try
             {
@@ -1445,13 +1445,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 var projectFiles = env.CreateTestProjectWithFiles("", new[] { "import.proj" });
                 var importFile = projectFiles.CreatedFiles.First();
-                using var xmlReader = XmlReader.Create(new StringReader(importProjectContents));
-                ProjectRootElement import =
-                    ProjectRootElement.Create(
-                        xmlReader,
-                        projectCollection,
-                        // preserve formatting to simulate IDE usage
-                        preserveFormatting: true);
+                using ProjectRootElementFromString projectRootElementFromString = new(
+                importProjectContents,
+                projectCollection,
+                // preserve formatting to simulate IDE usage
+                preserveFormatting: true);
+
+                ProjectRootElement import = projectRootElementFromString.Project;
 
                 // puts the import in the PRE cache
                 import.Save(importFile);
@@ -1511,12 +1511,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var projectFiles = env.CreateTestProjectWithFiles("", new[] { "import.proj" });
                 var importFile = projectFiles.CreatedFiles.First();
 
-                using var xmlReader = XmlReader.Create(new StringReader(importProjectContents));
-                var import = ProjectRootElement.Create(
-                    xmlReader,
-                    projectCollection,
-                    // preserve formatting to simulate IDE usage
-                    preserveFormatting: true);
+                using ProjectRootElementFromString projectRootElementFromString = new(
+                importProjectContents,
+                projectCollection,
+                // preserve formatting to simulate IDE usage
+                preserveFormatting: true);
+                ProjectRootElement import = projectRootElementFromString.Project;
 
                 // add to cache by saving
                 import.Save(importFile);
@@ -1593,18 +1593,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             using (var env = TestEnvironment.Create())
             using (var projectCollection = new ProjectCollection())
-            using (var xmlReaderContents  = XmlReader.Create(new StringReader(projectContents)))
+            using (var projectRootElementFromString = new ProjectRootElementFromString(projectContents, projectCollection, preserveFormatting: true))
             using (var xmlReaderChangedContents = XmlReader.Create(new StringReader(changedProjectContents)))
             {
                 var projectFiles = env.CreateTestProjectWithFiles("", new[] { "build.proj" });
                 var projectFile = projectFiles.CreatedFiles.First();
 
 
-                var projectRootElement = ProjectRootElement.Create(
-                    xmlReaderContents,
-                    projectCollection,
-                    // preserve formatting to simulate IDE usage
-                    preserveFormatting: true);
+                var projectRootElement = projectRootElementFromString.Project;
 
                 // add to cache by saving
                 projectRootElement.Save(projectFile);
@@ -1855,8 +1851,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             project.GetPropertyValue("p").ShouldBe("v1");
             Helpers.MakeList(project.GetItems("i"))[0].EvaluatedInclude.ShouldBe("i1");
@@ -1891,8 +1887,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             project.GetPropertyValue("p").ShouldBe("v2");
             Helpers.MakeList(project.GetItems("i"))[0].EvaluatedInclude.ShouldBe("i2");
@@ -1927,8 +1923,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             project.GetPropertyValue("p").ShouldBe("v2");
             Helpers.MakeList(project.GetItems("i"))[0].EvaluatedInclude.ShouldBe("i2");
@@ -1976,8 +1972,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             project.GetPropertyValue("p").ShouldBe("@(i);v1");
             project.GetPropertyValue("q").ShouldBe("@(j);v1");
@@ -2010,8 +2006,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             project.GetItems("i").ShouldBeEmpty();
         }
@@ -2043,8 +2039,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            Project project = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             project.GetItems("i").ElementAt(0).GetMetadataValue("m").ShouldBe("m0;m1");
         }
@@ -2106,8 +2102,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     <Target Name=""Build"" />
                 </Project>");
 
-            using var xmlReader = XmlReader.Create(new StringReader(projectContent));
-            Project project = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(projectContent);
+            Project project = projectFromString.Project;
             project.MarkDirty();
 
             MockLogger collectionLogger = new MockLogger();
@@ -2183,8 +2179,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void SavingProjectClearsDirtyBit()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"<Project xmlns='msbuildnamespace'/>");
-            using var xmlReader = XmlReader.Create(new StringReader(contents));
-            Project project = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(contents);
+            Project project = projectFromString.Project;
 
             project.Xml.HasUnsavedChanges.ShouldBeTrue(); // Not dirty for saving
             project.IsDirty.ShouldBeFalse(); // "1" // was evaluated on load
@@ -2220,8 +2216,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </ItemGroup>
                 </Project>
                 ");
-            using var xmlReader = XmlReader.Create(new StringReader(projectOriginalContents));
-            Project project = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(projectOriginalContents);
+            Project project = projectFromString.Project;
+
             ProjectItem itemToRemove = Helpers.GetFirst(project.GetItems("Compile"));
             project.RemoveItem(itemToRemove);
             project.RemoveItem(itemToRemove); // should not throw
@@ -2242,8 +2239,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </ItemGroup>
                 </Project>
                 ");
-            using var xmlReader = XmlReader.Create(new StringReader(projectOriginalContents));
-            Project project = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(projectOriginalContents);
+            Project project = projectFromString.Project;
             ProjectItem itemToRemove = Helpers.GetFirst(project.GetItems("Compile"));
             itemToRemove.UnevaluatedInclude = "b.cs";
             project.RemoveItem(itemToRemove); // should not throw
@@ -2265,8 +2262,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </ItemGroup>
                 </Project>
                 ");
-            using var xmlReader = XmlReader.Create(new StringReader(projectOriginalContents));
-            Project project = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(projectOriginalContents);
+            Project project = projectFromString.Project;
 
             project.RemoveItems(project.GetItems("i"));
 
@@ -2289,8 +2286,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </ItemGroup>
                 </Project>
                 ");
-            using var xmlReader = XmlReader.Create(new StringReader(projectOriginalContents));
-            Project project = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(projectOriginalContents);
+            Project project = projectFromString.Project;
+
 
             List<ProjectItem> list = new List<ProjectItem>() { project.GetItems("i").FirstOrDefault(), project.GetItems("j").FirstOrDefault() };
 
@@ -2313,8 +2311,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </ItemGroup>
                 </Project>
                 ");
-            using var xmlReader = XmlReader.Create(new StringReader(projectOriginalContents));
-            Project project = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(projectOriginalContents);
+            Project project = projectFromString.Project;
 
             project.RemoveItems(project.GetItems("j").Take(2));
             project.Items.Count.ShouldBe(3);
@@ -2348,8 +2346,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </ItemGroup>
                 </Project>
                 ");
-            using var xmlReader = XmlReader.Create(new StringReader(projectOriginalContents));
-            Project project = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(projectOriginalContents);
+            Project project = projectFromString.Project;
 
             project.RemoveItems(project.GetItems("i"));
 
@@ -2401,8 +2399,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </ItemGroup>
                 </Project>
                 ");
-            using var xmlReader = XmlReader.Create(new StringReader(projectOriginalContents));
-            Project project = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(projectOriginalContents);
+            Project project = projectFromString.Project;
             ProjectItem item = project.GetItems("i").FirstOrDefault();
 
             project.RemoveItems(new List<ProjectItem>() { item });
@@ -4329,8 +4327,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             string projectFileContent = GetSampleProjectContent();
 
-            using var xmlReader = XmlReader.Create(new StringReader(projectFileContent));
-            ProjectRootElement xml = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             return xml;
         }

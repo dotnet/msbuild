@@ -52,8 +52,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     </Project>
                 ";
 
-                using var xmlReader = XmlReader.Create(new StringReader(content));
-                Project project = new Project(xmlReader, null, null, collection);
+                using ProjectFromString projectFromString = new(content, null, null, collection);
+                Project project = projectFromString.Project;
 
                 Assert.Equal("x", project.ToolsVersion);
             }
@@ -89,8 +89,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     </Project>
                 ";
 
-                using var xmlReader = XmlReader.Create(new StringReader(content));
-                Project project = new Project(xmlReader);
+                using ProjectFromString projectFromString = new(content);
+                Project project = projectFromString.Project;
                 project.FullPath = "c:\\123.proj";
 
                 Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject("c:\\123.proj", null, null);
@@ -235,9 +235,8 @@ namespace Microsoft.Build.UnitTests.Definition
             {
                 var projectCollection = env.CreateProjectCollection().Collection;
 
-                using var xmlReader = XmlReader.Create(new StringReader(projectContents));
-                var project = new Project(xmlReader, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection, ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition);
-
+                using ProjectFromString projectFromString = new(projectContents, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection, ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition);
+                Project project = projectFromString.Project;
                 var data = project.TestOnlyGetPrivateData;
 
                 project.GetProperty("P1").ShouldBeNull();

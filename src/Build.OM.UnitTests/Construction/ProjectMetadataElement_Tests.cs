@@ -296,8 +296,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         public void AddMetadataAsAttributeIllegalName(string project)
         {
-            using var xmlReader = XmlReader.Create(new StringReader(project));
-            ProjectRootElement projectElement = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(project);
+            ProjectRootElement projectElement = projectRootElementFromString.Project;
             ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
 
             var items = Helpers.MakeList(itemGroup.Items);
@@ -323,8 +323,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            using var xmlReader = XmlReader.Create(new StringReader(project));
-            ProjectRootElement projectElement = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(project);
+            ProjectRootElement projectElement = projectRootElementFromString.Project;
             ProjectItemDefinitionGroupElement itemDefinitionGroup = (ProjectItemDefinitionGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemDefinitionGroupElement);
 
             var itemDefinitions = Helpers.MakeList(itemDefinitionGroup.ItemDefinitions);
@@ -402,8 +402,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
             // Should not throw
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
         }
 
         [Theory]
@@ -425,8 +424,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         public void ReadMetadataAsAttribute(string project)
         {
-            using var xmlReader = XmlReader.Create(new StringReader(project));
-            ProjectRootElement projectElement = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(project);
+            ProjectRootElement projectElement = projectRootElementFromString.Project;
             ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
 
             var items = Helpers.MakeList(itemGroup.Items);
@@ -450,8 +449,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </ItemDefinitionGroup>
                     </Project>
                 ";
-            using var xmlReader = XmlReader.Create(new StringReader(project));
-            ProjectRootElement projectElement = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(project);
+            ProjectRootElement projectElement = projectRootElementFromString.Project;
             ProjectItemDefinitionGroupElement itemDefinitionGroup = (ProjectItemDefinitionGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemDefinitionGroupElement);
 
             var itemDefinitions = Helpers.MakeList(itemDefinitionGroup.ItemDefinitions);
@@ -484,8 +483,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         public void ReadMetadataAsAttributeWithSpecialCharacters(string project)
         {
-            using var xmlReader = XmlReader.Create(new StringReader(project));
-            ProjectRootElement projectElement = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(project);
+            ProjectRootElement projectElement = projectRootElementFromString.Project;
             ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
 
             var items = Helpers.MakeList(itemGroup.Items);
@@ -509,8 +508,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </ItemDefinitionGroup>
                     </Project>
                 ";
-            using var xmlReader = XmlReader.Create(new StringReader(project));
-            ProjectRootElement projectElement = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(project);
+            ProjectRootElement projectElement = projectRootElementFromString.Project;
             ProjectItemDefinitionGroupElement itemDefinitionGroup = (ProjectItemDefinitionGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemDefinitionGroupElement);
 
             var itemDefinitions = Helpers.MakeList(itemDefinitionGroup.ItemDefinitions);
@@ -555,12 +554,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>")]
         public void UpdateMetadataValueAsAttribute(string projectContents, string updatedProject)
         {
-            using var xmlReader = XmlReader.Create(
-                new StringReader(ObjectModelHelpers.CleanupFileContents(projectContents)));
-            ProjectRootElement projectElement = ProjectRootElement.Create(
-                xmlReader,
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                ObjectModelHelpers.CleanupFileContents(projectContents),
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
+            ProjectRootElement projectElement = projectRootElementFromString.Project;
+
             ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
 
             var project = new Project(projectElement);
@@ -599,12 +598,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                             <i1 m1=`v1` />
                         </ItemDefinitionGroup>
                     </Project>";
-            using var xmlReader = XmlReader.Create(
-                    new StringReader(ObjectModelHelpers.CleanupFileContents(projectContents)));
-            ProjectRootElement projectElement = ProjectRootElement.Create(
-                xmlReader,
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                ObjectModelHelpers.CleanupFileContents(projectContents),
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
+            ProjectRootElement projectElement = projectRootElementFromString.Project;
             ProjectItemDefinitionGroupElement itemDefinitionGroup = (ProjectItemDefinitionGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemDefinitionGroupElement);
 
             var project = new Project(projectElement);
@@ -674,12 +672,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>")]
         public void UpdateMetadataValueAsAttributeWithSpecialCharacters(string projectContents, string updatedProject)
         {
-            using var xmlReader = XmlReader.Create(
-                new StringReader(ObjectModelHelpers.CleanupFileContents(projectContents)));
-            ProjectRootElement projectElement = ProjectRootElement.Create(
-                xmlReader,
-                ProjectCollection.GlobalProjectCollection,
-                preserveFormatting: true);
+            using ProjectRootElementFromString projectRootElementFromString = new(
+               ObjectModelHelpers.CleanupFileContents(projectContents),
+               ProjectCollection.GlobalProjectCollection,
+               preserveFormatting: true);
+            ProjectRootElement projectElement = projectRootElementFromString.Project;
             ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
 
             var project = new Project(projectElement);
@@ -718,12 +715,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                             <i1 m1=`v1` />
                         </ItemDefinitionGroup>
                     </Project>";
-            using var xmlReader = XmlReader.Create(
-                    new StringReader(ObjectModelHelpers.CleanupFileContents(projectContents)));
-            ProjectRootElement projectElement = ProjectRootElement.Create(
-                xmlReader,
-                ProjectCollection.GlobalProjectCollection,
-                preserveFormatting: true);
+            using ProjectRootElementFromString projectRootElementFromString = new(
+               ObjectModelHelpers.CleanupFileContents(projectContents),
+               ProjectCollection.GlobalProjectCollection,
+               preserveFormatting: true);
+            ProjectRootElement projectElement = projectRootElementFromString.Project;
             ProjectItemDefinitionGroupElement itemDefinitionGroup = (ProjectItemDefinitionGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemDefinitionGroupElement);
 
             var project = new Project(projectElement);
@@ -805,10 +801,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>")]
         public void ChangeMetadataToAttribute(string projectContents, string updatedProject)
         {
-            using var xmlReader = XmlReader.Create(new StringReader(projectContents));
-            ProjectRootElement projectElement = ProjectRootElement.Create(xmlReader,
-                ProjectCollection.GlobalProjectCollection,
-                preserveFormatting: true);
+            using ProjectRootElementFromString projectRootElementFromString = new(
+               projectContents,
+               ProjectCollection.GlobalProjectCollection,
+               preserveFormatting: true);
+            ProjectRootElement projectElement = projectRootElementFromString.Project;
             ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
 
             var project = new Project(projectElement);
@@ -867,10 +864,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>")]
         public void ChangeMetadataToAttributeOnItemDefinition(string projectContents, string updatedProject)
         {
-            using var xmlReader = XmlReader.Create(new StringReader(projectContents));
-            ProjectRootElement projectElement = ProjectRootElement.Create(xmlReader,
-                ProjectCollection.GlobalProjectCollection,
-                preserveFormatting: true);
+            using ProjectRootElementFromString projectRootElementFromString = new(
+               projectContents,
+               ProjectCollection.GlobalProjectCollection,
+               preserveFormatting: true);
+            ProjectRootElement projectElement = projectRootElementFromString.Project;
             ProjectItemDefinitionGroupElement itemDefinitionGroup = (ProjectItemDefinitionGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemDefinitionGroupElement);
 
             var project = new Project(projectElement);
@@ -935,10 +933,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>")]
         public void ChangeAttributeToMetadata(string projectContents, string updatedProject)
         {
-            using var xmlReader = XmlReader.Create(new StringReader(projectContents));
-            ProjectRootElement projectElement = ProjectRootElement.Create(xmlReader,
-                ProjectCollection.GlobalProjectCollection,
-                preserveFormatting: true);
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                 projectContents,
+                 ProjectCollection.GlobalProjectCollection,
+                 preserveFormatting: true);
+            ProjectRootElement projectElement = projectRootElementFromString.Project;
             ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
 
             var project = new Project(projectElement);
@@ -977,10 +976,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                             <i1 m1='v1'/>
                         </ItemDefinitionGroup>
                     </Project>";
-            using var xmlReader = XmlReader.Create(new StringReader(projectContents));
-            ProjectRootElement projectElement = ProjectRootElement.Create(xmlReader,
-                ProjectCollection.GlobalProjectCollection,
-                preserveFormatting: true);
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                 projectContents,
+                 ProjectCollection.GlobalProjectCollection,
+                 preserveFormatting: true);
+            ProjectRootElement projectElement = projectRootElementFromString.Project;
             ProjectItemDefinitionGroupElement itemDefinitionGroup = (ProjectItemDefinitionGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemDefinitionGroupElement);
 
             var project = new Project(projectElement);
@@ -1048,10 +1048,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>")]
         public void AddMetadataAsAttribute(string projectContents, string updatedProject)
         {
-            using var xmlReader = XmlReader.Create(new StringReader(projectContents));
-            ProjectRootElement projectElement = ProjectRootElement.Create(xmlReader,
-                ProjectCollection.GlobalProjectCollection,
-                preserveFormatting: true);
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                 projectContents,
+                 ProjectCollection.GlobalProjectCollection,
+                 preserveFormatting: true);
+            ProjectRootElement projectElement = projectRootElementFromString.Project;
             ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
 
             var project = new Project(projectElement);
@@ -1087,10 +1088,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                             <i1/>
                         </ItemDefinitionGroup>
                     </Project>";
-            using var xmlReader = XmlReader.Create(new StringReader(projectContents));
-            ProjectRootElement projectElement = ProjectRootElement.Create(xmlReader,
-                ProjectCollection.GlobalProjectCollection,
-                preserveFormatting: true);
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                 projectContents,
+                 ProjectCollection.GlobalProjectCollection,
+                 preserveFormatting: true);
+            ProjectRootElement projectElement = projectRootElementFromString.Project;
             ProjectItemDefinitionGroupElement itemDefinitionGroup = (ProjectItemDefinitionGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemDefinitionGroupElement);
 
             var project = new Project(projectElement);
@@ -1157,10 +1159,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>")]
         public void AddMetadataAsAttributeAndAsElement(string projectContents, string updatedProject)
         {
-            using var xmlReader = XmlReader.Create(new StringReader(projectContents));
-            ProjectRootElement projectElement = ProjectRootElement.Create(xmlReader,
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                projectContents,
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
+            ProjectRootElement projectElement = projectRootElementFromString.Project;
             ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
 
             var project = new Project(projectElement);
@@ -1203,10 +1206,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                             <i1/>
                         </ItemDefinitionGroup>
                     </Project>";
-            using var xmlReader = XmlReader.Create(new StringReader(projectContents));
-            ProjectRootElement projectElement = ProjectRootElement.Create(xmlReader,
-                ProjectCollection.GlobalProjectCollection,
-                preserveFormatting: true);
+            using ProjectRootElementFromString projectRootElementFromString = new(
+               projectContents,
+               ProjectCollection.GlobalProjectCollection,
+               preserveFormatting: true);
+            ProjectRootElement projectElement = projectRootElementFromString.Project;
             ProjectItemDefinitionGroupElement itemDefinitionGroup = (ProjectItemDefinitionGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemDefinitionGroupElement);
 
             var project = new Project(projectElement);
@@ -1262,8 +1266,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)Helpers.GetFirst(project.Children);
             ProjectItemElement item = Helpers.GetFirst(itemGroup.Items);
             ProjectMetadataElement metadata = Helpers.GetFirst(item.Metadata);

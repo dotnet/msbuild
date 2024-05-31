@@ -299,8 +299,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         private static ProjectTaskElement GetTaskFromContent(string content)
         {
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
+                  using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectTargetElement target = (ProjectTargetElement)Helpers.GetFirst(project.Children);
             return (ProjectTaskElement)Helpers.GetFirst(target.Children);
         }

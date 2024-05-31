@@ -354,8 +354,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         public void ReadBasic(string project)
         {
-            using var xmlReader = XmlReader.Create(new StringReader(project));
-            ProjectRootElement projectElement = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(project);
+            ProjectRootElement projectElement = projectRootElementFromString.Project;
             ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
 
             var items = Helpers.MakeList(itemGroup.Items);
@@ -407,8 +407,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         public void ReadMetadata(string project)
         {
-            using var xmlReader = XmlReader.Create(new StringReader(project));
-            ProjectRootElement projectElement = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(project);
+            ProjectRootElement projectElement = projectRootElementFromString.Project;
             ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
             ProjectItemElement item = Helpers.GetFirst(itemGroup.Items);
 
@@ -1038,8 +1038,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         private static ProjectItemElement GetItemFromContent(string content)
         {
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            var project = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
+
             return Helpers.GetFirst(project.Items);
         }
     }

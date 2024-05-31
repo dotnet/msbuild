@@ -527,8 +527,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            var project = new Project(xmlReader) { FullPath = "c:\\123.proj" };
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
+            project.FullPath="c:\\123.proj";
 
             Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject("c:\\123.proj", null, null);
 
@@ -548,8 +549,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            var project = new Project(xmlReader) { FullPath = "c:\\123.proj" };
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
+            project.FullPath = "c:\\123.proj";
 
             Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject("c:\\123.proj", null, null);
 
@@ -1153,8 +1155,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            var project = new Project(xmlReader, null, null, collection);
+            using ProjectFromString projectFromString = new(content, null, null, collection);
+            Project project = projectFromString.Project;
 
             // ... and after all that, we end up defaulting to the current ToolsVersion instead.  There's a way
             // to turn this behavior (new in Dev12) off, but it requires setting an environment variable and

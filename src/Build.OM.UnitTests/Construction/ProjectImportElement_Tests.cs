@@ -95,8 +95,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
 
             List<ProjectImportElement> imports = Helpers.MakeList(project.Imports);
 
@@ -118,8 +118,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            using var xmlReader = XmlReader.Create(new StringReader(content));
-            ProjectRootElement project = ProjectRootElement.Create(xmlReader);
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
 
             ProjectImportElement import = (ProjectImportElement)Helpers.GetFirst(project.Children);
 
@@ -175,8 +175,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 </Project>",
                     file1);
 
-                using var xmlReader = XmlReader.Create(new StringReader(content));
-                Project project = new Project(xmlReader);
+                using ProjectFromString projectFromString = new(content);
+                Project project = projectFromString.Project;
                 ProjectImportElement import = Helpers.GetFirst(project.Xml.Imports);
                 import.Project = file2;
 
@@ -214,8 +214,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 </Project>",
                     file);
 
-                using var xmlReader = XmlReader.Create(new StringReader(content));
-                Project project = new Project(xmlReader);
+                using ProjectFromString projectFromString = new(content);
+                Project project = projectFromString.Project;
                 ProjectImportElement import = Helpers.GetFirst(project.Xml.Imports);
                 import.Condition = "false";
 
@@ -255,11 +255,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             try
             {
                 Directory.CreateDirectory(testTempPath);
-                using var projectfileReader = XmlReader.Create(new StringReader(projectfileContent));
-                ProjectRootElement project = ProjectRootElement.Create(projectfileReader);
+                using ProjectRootElementFromString projectFileProject = new(projectfileContent);
+                ProjectRootElement project = projectFileProject.Project;
                 project.Save(projectfile);
-                using var targetsfileReader = XmlReader.Create(new StringReader(targetsfileContent));
-                project = ProjectRootElement.Create(targetsfileReader);
+                using ProjectRootElementFromString targetsFileProject = new(targetsfileContent);
+                project = targetsFileProject.Project;
                 project.Save(targetsFile);
                 Project msbuildProject = new Project(projectfile);
             }

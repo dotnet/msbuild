@@ -854,13 +854,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 loggers.Add(logger);
 
                 using ProjectCollection collection = new ProjectCollection();
-                using var xmlReader = XmlReader.Create(new StringReader(content));
-                Project project = new Project(
-                    xmlReader,
+                using ProjectFromString projectFromString = new(
+                    content,
                     (IDictionary<string, string>)null,
                     ObjectModelHelpers.MSBuildDefaultToolsVersion,
-                    collection)
-                { FullPath = FileUtilities.GetTemporaryFile() };
+                    collection);
+                Project project = projectFromString.Project;
+
+                project.FullPath = FileUtilities.GetTemporaryFile();
                 project.Save();
                 File.Delete(project.FullPath);
 
@@ -1177,9 +1178,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             FileStream stream = File.Create("testProject.proj");
             stream.Dispose();
-
-            using var xmlReader = XmlReader.Create(new StringReader(projectFileContents));
-            Project project = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             return project.CreateProjectInstance();
         }
 

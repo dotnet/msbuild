@@ -306,11 +306,11 @@ namespace Microsoft.Build.UnitTests.Definition
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                using var collection = XmlReader.Create(new StringReader(@"<Project ToolsVersion='98.6'>
+                var content = @"<Project ToolsVersion='98.6'>
                         <Target Name='Foo'>
-                        </Target>
-                       </Project>"));
-                Project project = new Project(collection, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                        </Target>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                Project project = projectFromString.Project;
                 success = project.Build(mockLogger);
 
                 Assert.True(success);
@@ -342,11 +342,13 @@ namespace Microsoft.Build.UnitTests.Definition
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                using var xmlReader = XmlReader.Create(new StringReader(@"<Project ToolsVersion='0.1'>
+                var content = @"<Project ToolsVersion='98.6'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>"));
-                Project project = new Project(xmlReader, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                Project project = projectFromString.Project;
+
                 success = project.Build(mockLogger);
 
                 Assert.True(success);
@@ -376,12 +378,12 @@ namespace Microsoft.Build.UnitTests.Definition
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                using var xmlReader = XmlReader.Create(new StringReader(@"<Project ToolsVersion='invalidToolsVersion'>
+                var content = @"<Project ToolsVersion='invalidToolsVersion'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>"));
-                Project project = new Project(xmlReader, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-                success = project.Build(mockLogger);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                Project project = projectFromString.Project;
 
                 Assert.True(success);
                 mockLogger.AssertLogContains("ToolsVersion=\"invalidToolsVersion\"");
@@ -405,10 +407,12 @@ namespace Microsoft.Build.UnitTests.Definition
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='invalidToolsVersion'>
+                var content = @"<Project ToolsVersion='invalidToolsVersion'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>")), null /* no global properties */, "goober", p);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, "goober", p);
+                Project project = projectFromString.Project;
                 success = project.Build(mockLogger);
                 // BANG!
             });
@@ -435,11 +439,12 @@ namespace Microsoft.Build.UnitTests.Definition
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                using var xmlReader = XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+                var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>"));
-                Project project = new Project(xmlReader, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                Project project = projectFromString.Project;
                 success = project.Build(mockLogger);
 
                 Assert.True(success);
@@ -505,11 +510,12 @@ namespace Microsoft.Build.UnitTests.Definition
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
-            using var xmlReader = XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+            var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>"));
-            Project project = new Project(xmlReader, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+            using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+            Project project = projectFromString.Project;
 
             Assert.Equal("4.0", project.ToolsVersion);
             bool success = project.Build(mockLogger);
@@ -541,12 +547,12 @@ namespace Microsoft.Build.UnitTests.Definition
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                using var xmlReader = XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+                var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>"));
-                Project project = new Project(xmlReader, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-                success = project.Build(mockLogger);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                success = projectFromString.Project.Build(mockLogger);
 
                 Assert.True(success);
                 mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
@@ -579,12 +585,12 @@ namespace Microsoft.Build.UnitTests.Definition
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                using var xmlReader = XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+                var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>"));
-                Project project = new Project(xmlReader, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-                success = project.Build(mockLogger);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                success = projectFromString.Project.Build(mockLogger);
 
                 Assert.True(success);
                 mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
@@ -620,13 +626,13 @@ namespace Microsoft.Build.UnitTests.Definition
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                using var xmlReader = XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+                var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>"));
-                Project project = new Project(xmlReader, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
 
-                ProjectInstance pi = project.CreateProjectInstance();
+                ProjectInstance pi = projectFromString.Project.CreateProjectInstance();
                 success = pi.Build(new ILogger[] { mockLogger });
 
                 Assert.True(success);
@@ -654,13 +660,13 @@ namespace Microsoft.Build.UnitTests.Definition
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
-            using var xmlReader = XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+            var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>"));
-            Project project = new Project(xmlReader, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+            using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
 
-            ProjectInstance pi = project.CreateProjectInstance();
+            ProjectInstance pi = projectFromString.Project.CreateProjectInstance();
             Assert.Equal("4.0", pi.ToolsVersion);
             bool success = pi.Build(new ILogger[] { mockLogger });
 
@@ -691,13 +697,13 @@ namespace Microsoft.Build.UnitTests.Definition
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                using var xmlReader = XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+                var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>"));
-                Project project = new Project(xmlReader, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
 
-                ProjectInstance pi = project.CreateProjectInstance();
+                ProjectInstance pi = projectFromString.Project.CreateProjectInstance();
                 success = pi.Build(new ILogger[] { mockLogger });
 
                 Assert.True(success);
@@ -732,13 +738,13 @@ namespace Microsoft.Build.UnitTests.Definition
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                using var xmlReader = XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+                var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>"));
-                Project project = new Project(xmlReader, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
 
-                ProjectInstance pi = project.CreateProjectInstance();
+                ProjectInstance pi = projectFromString.Project.CreateProjectInstance();
                 success = pi.Build(new ILogger[] { mockLogger });
 
                 Assert.True(success);
@@ -776,13 +782,13 @@ namespace Microsoft.Build.UnitTests.Definition
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                using var xmlReader = XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+                var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>"));
-                Project project = new Project(xmlReader, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
 
-                ProjectInstance pi = new ProjectInstance(project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                ProjectInstance pi = new ProjectInstance(projectFromString.Project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
                 success = pi.Build(new ILogger[] { mockLogger });
 
                 Assert.True(success);
@@ -810,13 +816,13 @@ namespace Microsoft.Build.UnitTests.Definition
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
-            using var xmlReader = XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+            var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>"));
-            Project project = new Project(xmlReader, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+            using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
 
-            ProjectInstance pi = new ProjectInstance(project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+            ProjectInstance pi = new ProjectInstance(projectFromString.Project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
             Assert.Equal("4.0", pi.ToolsVersion);
             bool success = pi.Build(new ILogger[] { mockLogger });
 
@@ -846,13 +852,13 @@ namespace Microsoft.Build.UnitTests.Definition
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                using var xmlReader = XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+                var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>"));
-                Project project = new Project(xmlReader, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
 
-                ProjectInstance pi = new ProjectInstance(project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                ProjectInstance pi = new ProjectInstance(projectFromString.Project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
                 success = pi.Build(new ILogger[] { mockLogger });
 
                 Assert.True(success);
@@ -887,13 +893,12 @@ namespace Microsoft.Build.UnitTests.Definition
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                using var xmlReader = XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+                var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>"));
-                Project project = new Project(xmlReader, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-
-                ProjectInstance pi = new ProjectInstance(project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                ProjectInstance pi = new ProjectInstance(projectFromString.Project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
                 success = pi.Build(new ILogger[] { mockLogger });
 
                 Assert.True(success);

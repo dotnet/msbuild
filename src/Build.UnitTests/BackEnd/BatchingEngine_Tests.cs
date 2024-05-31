@@ -484,8 +484,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </Project>
                 ";
 
-            using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(content)));
-            Project project = new Project(xmlReader);
+            using ProjectFromString projectFromString = new(ObjectModelHelpers.CleanupFileContents(content));
+            Project project = projectFromString.Project;
             MockLogger logger = new MockLogger();
             project.Build(logger);
 

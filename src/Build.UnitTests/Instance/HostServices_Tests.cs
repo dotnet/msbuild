@@ -480,9 +480,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
  </Target>
 </Project>
 ");
-
-            using var xmlReader = new XmlTextReader(new StringReader(contents));
-            Project project = new Project(xmlReader, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion);
+            using ProjectFromString projectFromString = new(contents, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion);
+            Project project = projectFromString.Project;
             project.FullPath = fileName;
             ProjectInstance instance = project.CreateProjectInstance();
 
