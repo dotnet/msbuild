@@ -10,11 +10,12 @@ In this document we'll be describing mainly the internal design and implementati
 ## Terminology
 
 * **Entrypoint node** - build process that was created to serve the build request (either from CLI, API or from Visual Studio via API).
-* **In-Proc node** - the build executing unit that is running in the 'Entrypoint node'
+* **Scheduler node** - the process that runs the orchestration of the build. Currently it is the same process as the **Entrypoint node**, but possibly those can be separate (e.g. if a thing build client is provided).
+* **In-Proc node** - the build executing unit that is running in the 'Scheduler node'
 * **Out-Of-Proc node** / **OOP node** - the build executing unit that is running in the separate process.
 * **Logger** - an implementor of `ILogger` (or `INodeLogger`) interface. Such a component then can be registered to receive detailed tracing info from the build process and process the info further. The most common use-case is logging the information into the console, file etc. - hence the name 'Logger', but it can be processed for other purposes (e.g. the [ParallelBuildDebuggingLogger](https://github.com/rainersigwald/parallelbuilddebugginglogger) for debugging purposes, or the BuildCheck for diagnostics).
-* **Central Logger** - a logger that runs in the Central node - as well here referred to as the 'Entrypoint Node'. It receives the information from the whole build regardless of if it's executed within single or multiple processes.
-* **Forwarding Logger** - a logger that has a single instance in each logical executing node and is capable of filtering and/or alter the tracing stream formed of the `BuildEventArg`s before it undergoes serialization and remoting into the Entrypoint node. Main built-in implementations are: `CentralForwardingLogger` and `ConfigurableForwardingLogger`.
+* **Central Logger** - a logger that runs in the Central node - as well here referred to as the 'Scheduler Node'. It receives the information from the whole build regardless of if it's executed within single or multiple processes.
+* **Forwarding Logger** - a logger that has a single instance in each logical executing node and is capable of filtering and/or alter the tracing stream formed of the `BuildEventArg`s before it undergoes serialization and remoting into the Scheduler node. Main built-in implementations are: `CentralForwardingLogger` and `ConfigurableForwardingLogger`.
 * **Distributed Logger** - It is a pair of a Central Logger and a Forwarding Logger.
 * <a name="LoggerDescription"></a>**LoggerDescription** - Serializable information describing the Forwarding Logger - so that the forwarding logger can be constructed in the OOP node. It also holds the 'LoggerId' (AKA 'SinkId') - so that the remote data can be properly routed to the Central Logger. Other notable datapoints are `Verbosity` and `LoggerSwitchParameters` - which both serves for proper initialization of the forwarder after it's constructed in OOP node.
 
@@ -26,22 +27,22 @@ In this document we'll be describing mainly the internal design and implementati
 
 `LoggingService` is the backbone of the Logging Infrastructure - it serves as the consumer of the logging from the build process and as a dispatcher to the individual distributed and central loggers (and internally as well as x-process transmission channel for the tracing in OOP nodes).
 
-There is a single instance in the Entrypoint node, single instance within each out-of-proc node and one in ProjectCollection (for standalone API driven evaluation). So, we can technically treat `LoggingService` as a singleton.
+There is a single instance in the Scheduler node, single instance within each out-of-proc node and one in ProjectCollection (for standalone API driven evaluation). So, we can technically treat `LoggingService` as a singleton.
 
 ### Methods overview
 
 <a name="RegisterLogger"></a>**`RegisterLogger(ILogger logger)`**
 
 * Registers logger as distributed with a single CentralForwardingLogger (regardless of number of calls to the method - just single forwarder)
-* Called by BuildManager when starting the build (on the entrypoint node)
+* Called by BuildManager when starting the build (on the Scheduler node)
 * Called by ProjectCollection to register loggers for operations through OM/API. ProjectCollection registers the loggers wrapped by `ReusableLogger` (which combines separate design time and build time invocation build events into a single registered logger)
 
 
 <a name="RegisterDistributedLogger"></a>**`RegisterDistributedLogger(ILogger centralLogger, LoggerDescription forwardingLogger)`**
 
-* The central logger runs in the Entrypoint node and the forwarding logger in the out-of-proc worker node
-* It creates (1 for each distributed logger) `EventSourceSink` (to be run on the EntrypointNode, where it serves as the `IEventSource` for the registered central loggers (pumping events into them). `LoggingService` in the EntrypointNode multiplexes the build events to the appropriate `EventSourceSink` based on source forwarding logger the event went through in the OOP node)
-* It creates (1 for each distributed logger) `EventRedirectorToSink` (to be run on OOP node and to wrap the BuildEvent with the proper LoggerId - so that it can then be multiplexed by the `LoggingService` in the EntrypointNode to the proper `EventSourceSink` and by extension to the proper logger)
+* The central logger runs in the Scheduler node and the forwarding logger in the out-of-proc worker node
+* It creates (1 for each distributed logger) `EventSourceSink` (to be run on the Scheduler Node, where it serves as the `IEventSource` for the registered central loggers (pumping events into them). `LoggingService` in the Scheduler Node multiplexes the build events to the appropriate `EventSourceSink` based on source forwarding logger the event went through in the OOP node)
+* It creates (1 for each distributed logger) `EventRedirectorToSink` (to be run on OOP node and to wrap the BuildEvent with the proper LoggerId - so that it can then be multiplexed by the `LoggingService` in the Scheduler Node to the proper `EventSourceSink` and by extension to the proper logger)
 * It maintains incrementing counter of registered distributed loggers, and each additional logger is assigned next id - to be used as identification for sinks (`EventSourceSink` and `EventRedirectorToSink`) and it adds the id into passed `LoggerDescription` - so that this can be remoted to the OOP node and proper forwarding is initialized.
 * It creates a single `EventSourceSink` in the LoggingService - this is used by all the forwarders as a source of events.
 	
@@ -80,7 +81,7 @@ The above diagram is simplified (it doesn't capture the calls within a single co
 
  ### Delivery of events in a distributed build
 
- In case of distributed execution of build, NodeManager is requesting execution of additional Out Of Process (OOP) Nodes. Logging events from those nodes are transferred to the Entrypoint node, where they are eventually consumed by the Central Loggers. In addition to the OOP Nodes, build can have a single 'In Proc Node' - an execution node sharing the same process with the Entrypoint Node. For this reason the described process and diagram for the [Delivery of events in a single node build](#delivery-of-events-in-a-single-node-build) can apply fully for the distributed build as well (in addition to the following).
+ In case of distributed execution of build, NodeManager is requesting execution of additional Out Of Process (OOP) Nodes. Logging events from those nodes are transferred to the Scheduler node, where they are eventually consumed by the Central Loggers. In addition to the OOP Nodes, build can have a single 'In Proc Node' - an execution node sharing the same process with the Scheduler Node. For this reason the described process and diagram for the [Delivery of events in a single node build](#delivery-of-events-in-a-single-node-build) can apply fully for the distributed build as well (in addition to the following).
 
  #### OOP Node 
 
@@ -97,7 +98,7 @@ Example of forwarders:
 Processing from `EventRedirectorToSink` differs. This is given by injection of a single sink `BuildEventArgTransportSink` (injected via [`InitializeNodeLoggers`](#InitializeNodeLoggers)) as a consumer of `EventRedirectorToSink` data:
 
 * There is single `BuildEventArgTransportSink` per build, that consumes data from all `EventRedirectorToSink`. The data are enriched with the SinkId (AKA LoggerId) - the Id was created during the Logger registration and remoted to the OOP node together with the [`LoggerDescription`](#LoggerDescription).
-* `BuildEventArgTransportSink` bundles the tracing data (instance of `BuildEventArgs`) together with the SinkId and passes it down the pipeline that enqueues data for remoting to the Entrypoint Node.
+* `BuildEventArgTransportSink` bundles the tracing data (instance of `BuildEventArgs`) together with the SinkId and passes it down the pipeline that enqueues data for remoting to the Scheduler Node.
 
 Simplified diagram of the flow (calls within the single component are omitted):
 
@@ -115,11 +116,11 @@ Illustrative stack of the sequence of the calls:
 
  Simplified diagram of the flow (calls within the single component are omitted):
 
-![EntryPoint Node Logging](EntryPointNodeLoggingFlow.png)
+![Scheduler Node Logging](SchedulerNodeLoggingFlow.png)
 
 Illustrative stack of the sequence of the calls:
 
-![EntryPoint Node Logging - stack](RemotedLoggingStack.png)
+![Worker Node Logging - stack](RemotedLoggingStack.png)
 
 ### Synchronous and Asynchronous events processing
 
@@ -127,10 +128,10 @@ As was mentioned in the [`ProcessLoggingEvent`](#ProcessLoggingEvent) descriptio
 
 The logging mode is dictated by the `LoggerMode` that is injected into the `LoggingService` as such:
  * In the Out Of Proc node the mode is always **asynchronous**.
- * In the Entrypoint node the mode is by default **synchronous**, unless the `MSBUILDLOGASYNC` environment variable is set to `"1"`
+ * In the Scheduler node the mode is by default **synchronous**, unless the `MSBUILDLOGASYNC` environment variable is set to `"1"`
  * For `ProjectCollection` the mode depends on the construction argument `useAsynchronousLogging`. In signatures that do not ask this argument - it defaults to **synchronous**.
 
-Regardless of the mode used - sequential and isolated delivery of events is always guaranteed (single logger will not receive next event before returning from the previous, any logger will not receive an event while it's being processed by a different logger). This behavior is of course only in the current state - it can be subject to change.
+Regardless of the mode used - sequential and isolated delivery of events is always guaranteed (single logger will not receive next event before returning from the previous, any logger will not receive an event while it's being processed by a different logger). The future versions might decide to deliver messages to separate loggers in independent mode - where a processing event by a single logger won't block other loggers.
 
 
 ## Notable Loggers

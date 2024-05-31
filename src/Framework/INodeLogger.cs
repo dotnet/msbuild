@@ -10,10 +10,12 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// This interface defines a logger that will receive information about number of logical execution
     /// nodes that will be executing the build requests and producing the build events.
+    /// </summary>
+    /// <remarks>
     /// Implementing loggers (same as loggers implementing ILogger) will be registered as so called 'central logger',
     /// which means that they will be receiving all events in the serialized order (either via locking or via delivery via single thread).
     /// This means that the implementation doesn't need to be thread safe.
-    /// </summary>
+    /// </remarks>
     [ComVisible(true)]
     public interface INodeLogger : ILogger
     {

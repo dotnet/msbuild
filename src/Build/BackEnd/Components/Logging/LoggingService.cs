@@ -1233,7 +1233,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="buildEvent">BuildEventArgs to process</param>
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
-        protected virtual void ProcessLoggingEvent(object buildEvent)
+        protected internal virtual void ProcessLoggingEvent(object buildEvent)
         {
             ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
             if (_logMode == LoggerMode.Asynchronous)
