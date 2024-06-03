@@ -18,12 +18,25 @@ using error = Microsoft.Build.BuildEngine.Shared.ErrorUtilities;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
+    /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// <xref:Microsoft.Build.Construction>
+    /// <xref:Microsoft.Build.Evaluation>
+    /// <xref:Microsoft.Build.Execution>
+    /// 
     /// A BuildPropertyGroup is a collection of BuildProperty objects. This could be represented by a persisted &lt;PropertyGroup&gt;
     /// element in the project file, or it could be a virtual collection of properties, such as in the case of global properties,
     /// environment variable properties, or the final evaluated properties of a project. These two types of PropertyGroups
     /// (persisted and virtual) are handled differently by many of the methods in this class, but in order to reduce the number of
     /// concepts for the consumer of the OM, we've merged them into a single class.
     /// </summary>
+    /// <format type="text/markdown"><![CDATA[
+    /// ## Remarks
+    /// > [!WARNING]
+    /// > This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// > <xref:Microsoft.Build.Construction>
+    /// > <xref:Microsoft.Build.Evaluation>
+    /// > <xref:Microsoft.Build.Execution>
+    /// ]]></format>
     /// <owner>RGoel</owner>
     [DebuggerDisplay("BuildPropertyGroup (Count = { Count }, Condition = { Condition })")]
     public class BuildPropertyGroup : IItemPropertyGrouping, IEnumerable

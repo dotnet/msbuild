@@ -14,9 +14,22 @@ using Microsoft.Build.BuildEngine.Shared;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
+    /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// <xref:Microsoft.Build.Construction>
+    /// <xref:Microsoft.Build.Evaluation>
+    /// <xref:Microsoft.Build.Execution>
+    /// 
     /// Logger that forwards events to a central logger (e.g ConsoleLogger)
     /// residing on the parent node.
     /// </summary>
+    /// <format type="text/markdown"><![CDATA[
+    /// ## Remarks
+    /// > [!WARNING]
+    /// > This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// > <xref:Microsoft.Build.Construction>
+    /// > <xref:Microsoft.Build.Evaluation>
+    /// > <xref:Microsoft.Build.Execution>
+    /// ]]></format>
     public class ConfigurableForwardingLogger : IForwardingLogger
     {
         #region Constructors

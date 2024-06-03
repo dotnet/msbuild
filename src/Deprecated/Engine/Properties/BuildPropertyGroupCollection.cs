@@ -11,6 +11,11 @@ using System.Collections;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
+    /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// <xref:Microsoft.Build.Construction>
+    /// <xref:Microsoft.Build.Evaluation>
+    /// <xref:Microsoft.Build.Execution>
+    /// 
     /// This class represents a collection of persisted &lt;PropertyGroup&gt;'s.  Each
     /// MSBuild project has exactly one BuildPropertyGroupCollection, which includes
     /// all the imported PropertyGroups as well as the ones in the main project file.
@@ -19,6 +24,14 @@ namespace Microsoft.Build.BuildEngine
     /// calls into the GroupingCollection within the Project to do it's work.  It
     /// doesn't maintain any BuildPropertyGroup state on its own.
     /// </summary>
+    /// <format type="text/markdown"><![CDATA[
+    /// ## Remarks
+    /// > [!WARNING]
+    /// > This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// > <xref:Microsoft.Build.Construction>
+    /// > <xref:Microsoft.Build.Evaluation>
+    /// > <xref:Microsoft.Build.Execution>
+    /// ]]></format>
     /// <owner>DavidLe</owner>
     public class BuildPropertyGroupCollection : ICollection, IEnumerable
     {

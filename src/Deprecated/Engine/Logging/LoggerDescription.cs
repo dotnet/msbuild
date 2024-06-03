@@ -15,10 +15,23 @@ using Microsoft.Build.BuildEngine.Shared;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
+    /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// <xref:Microsoft.Build.Construction>
+    /// <xref:Microsoft.Build.Evaluation>
+    /// <xref:Microsoft.Build.Execution>
+    /// 
     /// This class is used to contain information about a logger as a collection of values that
     /// can be used to instantiate the logger and can be serialized to be passed between different
     /// processes.
     /// </summary>
+    /// <format type="text/markdown"><![CDATA[
+    /// ## Remarks
+    /// > [!WARNING]
+    /// > This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// > <xref:Microsoft.Build.Construction>
+    /// > <xref:Microsoft.Build.Evaluation>
+    /// > <xref:Microsoft.Build.Execution>
+    /// ]]></format>
     public class LoggerDescription
     {
         #region Constructor

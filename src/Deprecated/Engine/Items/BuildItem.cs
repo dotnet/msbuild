@@ -19,11 +19,24 @@ using Microsoft.Build.BuildEngine.Shared;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
+    /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// <xref:Microsoft.Build.Construction>
+    /// <xref:Microsoft.Build.Evaluation>
+    /// <xref:Microsoft.Build.Execution>
+    /// 
     /// This class represents a single item of the project. An item is usually a file on disk, with a type associated with it, and
     /// its own item-specific attributes. The list of items is initially specified via XML tags in the project file, although a
     /// single item tag can represent multiple items through the use of standard wilcards * and ?. Also, tasks can add new items
     /// of various types to the project's item list -- these items don't have any XML representation.
     /// </summary>
+    /// <format type="text/markdown"><![CDATA[
+    /// ## Remarks
+    /// > [!WARNING]
+    /// > This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// > <xref:Microsoft.Build.Construction>
+    /// > <xref:Microsoft.Build.Evaluation>
+    /// > <xref:Microsoft.Build.Execution>
+    /// ]]></format>
     /// <owner>RGoel</owner>
     [DebuggerDisplay("BuildItem (Name = { Name }, Include = { Include }, FinalItemSpec = { FinalItemSpec }, Condition = { Condition } )")]
     public class BuildItem

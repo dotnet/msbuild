@@ -15,9 +15,22 @@ using Microsoft.Build.BuildEngine.Shared;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
+    /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// <xref:Microsoft.Build.Construction>
+    /// <xref:Microsoft.Build.Evaluation>
+    /// <xref:Microsoft.Build.Execution>
+    /// 
     /// This exception is thrown whenever there is a problem with the user's XML project file. The problem might be semantic or
     /// syntactical. The latter would be of a type typically caught by XSD validation (if it was performed by the project writer).
     /// </summary>
+    /// <format type="text/markdown"><![CDATA[
+    /// ## Remarks
+    /// > [!WARNING]
+    /// > This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// > <xref:Microsoft.Build.Construction>
+    /// > <xref:Microsoft.Build.Evaluation>
+    /// > <xref:Microsoft.Build.Execution>
+    /// ]]></format>
     /// <owner>RGoel</owner>
     // WARNING: marking a type [Serializable] without implementing ISerializable imposes a serialization contract -- it is a
     // promise to never change the type's fields i.e. the type is immutable; adding new fields in the next version of the type

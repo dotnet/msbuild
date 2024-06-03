@@ -13,12 +13,25 @@ using Microsoft.Build.BuildEngine.Shared;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
+    /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// <xref:Microsoft.Build.Construction>
+    /// <xref:Microsoft.Build.Evaluation>
+    /// <xref:Microsoft.Build.Execution>
+    /// 
     /// Implementation of ICollection&lt;Toolset&gt; that also supports
     /// key-based retrieval by passing the string value of the tools version
     /// corresponding with the desired Toolset.
     /// NOTE: This collection does not support ICollection&lt;Toolset&gt;'s
     /// Remove or Clear methods, and calls to these will generate exceptions.
     /// </summary>
+    /// <format type="text/markdown"><![CDATA[
+    /// ## Remarks
+    /// > [!WARNING]
+    /// > This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// > <xref:Microsoft.Build.Construction>
+    /// > <xref:Microsoft.Build.Evaluation>
+    /// > <xref:Microsoft.Build.Execution>
+    /// ]]></format>
     public class ToolsetCollection : ICollection<Toolset>
     {
         // the parent engine

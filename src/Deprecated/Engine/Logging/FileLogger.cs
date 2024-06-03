@@ -15,6 +15,11 @@ using Microsoft.Build.BuildEngine.Shared;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
+    /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// <xref:Microsoft.Build.Construction>
+    /// <xref:Microsoft.Build.Evaluation>
+    /// <xref:Microsoft.Build.Execution>
+    /// 
     /// A specialization of the ConsoleLogger that logs to a file instead of the console.
     /// The output in terms of what is written and how it looks is identical. For example you can
     /// log verbosely to a file using the FileLogger while simultaneously logging only high priority events
@@ -25,6 +30,14 @@ namespace Microsoft.Build.BuildEngine
     /// complex -- for example, there is parameter parsing in this class, plus in BaseConsoleLogger. However we have
     /// to derive FileLogger from ConsoleLogger because it shipped that way in Whidbey.
     /// </remarks>
+    /// <format type="text/markdown"><![CDATA[
+    /// ## Remarks
+    /// > [!WARNING]
+    /// > This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// > <xref:Microsoft.Build.Construction>
+    /// > <xref:Microsoft.Build.Evaluation>
+    /// > <xref:Microsoft.Build.Execution>
+    /// ]]></format>
     public class FileLogger : ConsoleLogger
     {
         #region Constructors
