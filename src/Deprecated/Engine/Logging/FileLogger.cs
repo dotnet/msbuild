@@ -26,10 +26,6 @@ namespace Microsoft.Build.BuildEngine
     /// to the console using a ConsoleLogger.
     /// </summary>
     /// <remarks>
-    /// It's unfortunate that this is derived from ConsoleLogger, which is itself a facade; it makes things more
-    /// complex -- for example, there is parameter parsing in this class, plus in BaseConsoleLogger. However we have
-    /// to derive FileLogger from ConsoleLogger because it shipped that way in Whidbey.
-    /// </remarks>
     /// <format type="text/markdown"><![CDATA[
     /// ## Remarks
     /// > [!WARNING]
@@ -38,13 +34,33 @@ namespace Microsoft.Build.BuildEngine
     /// > <xref:Microsoft.Build.Evaluation>
     /// > <xref:Microsoft.Build.Execution>
     /// ]]></format>
+    /// 
+    /// It's unfortunate that this is derived from ConsoleLogger, which is itself a facade; it makes things more
+    /// complex -- for example, there is parameter parsing in this class, plus in BaseConsoleLogger. However we have
+    /// to derive FileLogger from ConsoleLogger because it shipped that way in Whidbey.
+    /// </remarks>
     public class FileLogger : ConsoleLogger
     {
         #region Constructors
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Default constructor.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>KieranMo</owner>
         public FileLogger() : base(LoggerVerbosity.Normal)
         {
@@ -54,9 +70,24 @@ namespace Microsoft.Build.BuildEngine
         #endregion
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// 
+        /// <xref:Microsoft.Build.Execution>
         /// Signs up the console file logger for all build events.
         /// This is the backward-compatible overload.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <param name="eventSource">Available events.</param>
         public override void Initialize(IEventSource eventSource)
         {
@@ -120,8 +151,23 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// 
+        /// <xref:Microsoft.Build.Execution>
         /// Multiproc aware initialization
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public override void Initialize(IEventSource eventSource, int nodeCount)
         {
             InitializeFileLogger(eventSource, nodeCount);
@@ -153,8 +199,23 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Shutdown method implementation of ILogger - we need to flush and close our logfile.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public override void Shutdown()
         {
             fileWriter?.Close();

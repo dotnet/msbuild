@@ -29,6 +29,7 @@ namespace Microsoft.Build.BuildEngine
     /// single item tag can represent multiple items through the use of standard wilcards * and ?. Also, tasks can add new items
     /// of various types to the project's item list -- these items don't have any XML representation.
     /// </summary>
+    /// <remarks>
     /// <format type="text/markdown"><![CDATA[
     /// ## Remarks
     /// > [!WARNING]
@@ -37,6 +38,7 @@ namespace Microsoft.Build.BuildEngine
     /// > <xref:Microsoft.Build.Evaluation>
     /// > <xref:Microsoft.Build.Execution>
     /// ]]></format>
+    /// </remarks>
     /// <owner>RGoel</owner>
     [DebuggerDisplay("BuildItem (Name = { Name }, Include = { Include }, FinalItemSpec = { FinalItemSpec }, Condition = { Condition } )")]
     public class BuildItem
@@ -475,9 +477,24 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// This constructor creates a new virtual (non-persisted) item with the
         /// specified type and include.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public BuildItem(string itemName, string itemInclude) :
             this(null /* no XML */, itemName, itemInclude, null /* no item definition library */)
         {
@@ -510,9 +527,24 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// This constructor creates a new virtual (non-persisted) item based
         /// on a ITaskItem object that was emitted by a task.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public BuildItem(string itemName, ITaskItem taskItem)
         {
             ErrorUtilities.VerifyThrowArgumentNull(taskItem, nameof(taskItem));
@@ -550,17 +582,37 @@ namespace Microsoft.Build.BuildEngine
         #region Properties
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// This returns a boolean telling you whether this particular item
         /// was imported from another project, or whether it was defined
         /// in the main project.  For virtual items which have no
         /// persistence, this is false.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public bool IsImported
         {
             get { return importedFromAnotherProject; }
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Accessor for the item's "type" string.  Note that changing the "Type"
         /// of an BuildItem requires the whole project to be re-evalauted.  This is because
         /// items are frequently stored in hash tables based on their item types,
@@ -568,6 +620,16 @@ namespace Microsoft.Build.BuildEngine
         /// implementation the caller who changes the item type is responsible
         /// for calling Project.MarkAsDirty().
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public string Name
         {
             get
@@ -626,8 +688,24 @@ namespace Microsoft.Build.BuildEngine
             set { itemDefinitionLibrary = value; }
         }
 
+        /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Accessor for the item's "include" string.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public string Include
         {
@@ -687,8 +765,23 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Gets the names of metadata on the item -- also includes the pre-defined/reserved item-spec modifiers.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>SumedhK, JomoF</owner>
         /// <value>Collection of name strings.</value>
         public ICollection MetadataNames
@@ -706,8 +799,23 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Gets the number of metadata set on the item.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>SumedhK</owner>
         /// <value>Count of metadata.</value>
         public int MetadataCount
@@ -719,8 +827,23 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Gets the names of metadata on the item -- also includes the pre-defined/reserved item-spec modifiers.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>SumedhK, JomoF</owner>
         /// <value>Collection of name strings.</value>
         public ICollection CustomMetadataNames
@@ -733,8 +856,23 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Gets the number of metadata set on the item.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>SumedhK</owner>
         /// <value>Count of metadata.</value>
         public int CustomMetadataCount
@@ -755,8 +893,23 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Accessor for the item's "exclude" string.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public string Exclude
         {
@@ -786,8 +939,23 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Accessor for the item's "condition".
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public string Condition
         {
@@ -1210,9 +1378,23 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Indicates if the given metadata is set on the item.
         /// </summary>
-        /// <remarks>BuildItem-spec modifiers are treated as metadata.</remarks>
+        /// <remarks>BuildItem-spec modifiers are treated as metadata.
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public bool HasMetadata(string metadataName)
         {
             ErrorUtilities.VerifyThrowArgumentLength(metadataName, nameof(metadataName));
@@ -1247,6 +1429,11 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Retrieves an arbitrary unevaluated metadata value from the item element. These are pieces of metadata that the project author has
         /// placed on the item element that have no meaning to MSBuild. They are just arbitrary metadata that travel around with
         /// the BuildItem wherever it goes.
@@ -1254,6 +1441,16 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="metadataName">The name of the metadata to retrieve.</param>
         /// <returns>The value of the requested metadata.</returns>
         /// <exception cref="InvalidOperationException">Thrown when the requested metadata is not applicable to the item.</exception>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public string GetMetadata(string metadataName)
         {
             string metadataValue;
@@ -1285,6 +1482,11 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Retrieves an arbitrary metadata from the item element, expands any property and item references within it, and
         /// unescapes it.
         /// </summary>
@@ -1292,6 +1494,16 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="metadataName">The name of the attribute to retrieve.</param>
         /// <returns>The evaluated value of the requested attribute.</returns>
         /// <exception cref="InvalidOperationException">Thrown when the requested attribute is not applicable to the item.</exception>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public string GetEvaluatedMetadata(string metadataName)
         {
             return EscapingUtilities.UnescapeAll(this.GetEvaluatedMetadataEscaped(metadataName));
@@ -1381,9 +1593,24 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Copies all custom attributes to given item.
         /// </summary>
         /// <param name="destinationItem">BuildItem to copy custom attributes to</param>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public void CopyCustomMetadataTo(BuildItem destinationItem)
         {
             ErrorUtilities.VerifyThrowArgumentNull(destinationItem, nameof(destinationItem));
@@ -1514,10 +1741,25 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Sets custom metadata on this item, with the option of treating the metadata value
         /// literally, meaning that special sharacters will be escaped.
         /// Does not backup metadata before making changes.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public void SetMetadata(string metadataName, string metadataValue, bool treatMetadataValueAsLiteral)
         {
             SetMetadata(metadataName, treatMetadataValueAsLiteral ? EscapingUtilities.Escape(metadataValue) : metadataValue);
@@ -1583,10 +1825,25 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Sets an arbitrary metadata on the item element. These are metadata that the project author has placed on the item
         /// element that have no meaning to MSBuild. They are just arbitrary metadata that travel around with the BuildItem.
         /// Does not backup metadata before making changes.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public void SetMetadata(string metadataName, string metadataValue)
         {
             MustNotBeImported();
@@ -1615,9 +1872,24 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// 
+        /// <xref:Microsoft.Build.Execution>
         /// Removes the specified metadata on the item.
         /// </summary>
         /// <remarks>Removal of well-known metadata is not allowed.</remarks>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public void RemoveMetadata(string metadataName)
         {
             ErrorUtilities.VerifyThrowArgument(!FileUtilities.IsItemSpecModifier(metadataName), "Shared.CannotChangeItemSpecModifiers", metadataName);
@@ -1880,11 +2152,26 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// This creates a shallow clone of the BuildItem.  If this is an xml-backed item,
         /// then the clone references the same XML element as the original, meaning
         /// that modifications to the clone will affect the original.
         /// </summary>
         /// <returns></returns>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>rgoel</owner>
         public BuildItem Clone()
         {

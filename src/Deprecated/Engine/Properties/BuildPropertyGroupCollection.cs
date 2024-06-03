@@ -24,6 +24,7 @@ namespace Microsoft.Build.BuildEngine
     /// calls into the GroupingCollection within the Project to do it's work.  It
     /// doesn't maintain any BuildPropertyGroup state on its own.
     /// </summary>
+    /// <remarks>
     /// <format type="text/markdown"><![CDATA[
     /// ## Remarks
     /// > [!WARNING]
@@ -32,6 +33,7 @@ namespace Microsoft.Build.BuildEngine
     /// > <xref:Microsoft.Build.Evaluation>
     /// > <xref:Microsoft.Build.Execution>
     /// ]]></format>
+    /// </remarks>
     /// <owner>DavidLe</owner>
     public class BuildPropertyGroupCollection : ICollection, IEnumerable
     {
@@ -72,9 +74,24 @@ namespace Microsoft.Build.BuildEngine
         #region Properties
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Read-only property which returns the number of PropertyGroups contained
         /// in our collection.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public int Count
         {
@@ -85,8 +102,23 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// This ICollection property tells whether this object is thread-safe.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public bool IsSynchronized
         {
@@ -97,9 +129,24 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// This ICollection property returns the object to be used to synchronize
         /// access to the class.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public object SyncRoot
         {
@@ -147,9 +194,24 @@ namespace Microsoft.Build.BuildEngine
         #region Methods
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// This ICollection method copies the contents of this collection to an
         /// array.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public void CopyTo
         (
@@ -161,10 +223,25 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// This IEnumerable method returns an IEnumerator object, which allows
         /// the caller to enumerate through the BuildPropertyGroup objects contained in
         /// this BuildPropertyGroupCollection.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public IEnumerator GetEnumerator
             (

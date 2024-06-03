@@ -66,6 +66,7 @@ namespace Microsoft.Build.BuildEngine
     /// may not be represented in any real XML file (e.g., global properties,
     /// environment properties, etc.)
     /// </summary>
+    /// <remarks>
     /// <format type="text/markdown"><![CDATA[
     /// ## Remarks
     /// > [!WARNING]
@@ -74,6 +75,7 @@ namespace Microsoft.Build.BuildEngine
     /// > <xref:Microsoft.Build.Evaluation>
     /// > <xref:Microsoft.Build.Execution>
     /// ]]></format>
+    /// </remarks>
     /// <owner>rgoel</owner>
     [DebuggerDisplay("BuildProperty (Name = { Name }, Value = { Value }, FinalValue = { FinalValue }, Condition = { Condition })")]
     public class BuildProperty
@@ -345,12 +347,27 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Constructor, which initializes the property from just the property
         /// name and value, creating it as a "normal" property.  This ends up
         /// creating a new XML element for the property under a dummy XML document.
         /// </summary>
         /// <param name="propertyName"></param>
         /// <param name="propertyValue"></param>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>rgoel</owner>
         public BuildProperty
         (
@@ -366,6 +383,11 @@ namespace Microsoft.Build.BuildEngine
         #region Properties
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Accessor for the property name.  This is read-only, so one cannot
         /// change the property name once it's set ... your only option is
         /// to create a new BuildProperty object.  The reason is that BuildProperty objects
@@ -373,6 +395,16 @@ namespace Microsoft.Build.BuildEngine
         /// on the property name.  Modifying the property name of an existing
         /// BuildProperty object would make the hash table incorrect.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public string Name
         {
@@ -396,9 +428,24 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Accessor for the property value.  Normal properties can be modified;
         /// other property types cannot.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public string Value
         {
@@ -483,8 +530,23 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Returns the unescaped value of the property.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public string FinalValue
         {
@@ -516,8 +578,23 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Did this property originate from an imported project file?
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public bool IsImported
         {
@@ -528,8 +605,23 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Accessor for the condition on the property.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public string Condition
         {
@@ -639,6 +731,11 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Creates a shallow or deep clone of this BuildProperty object.
         ///
         /// A shallow clone points at the same XML element as the original, so
@@ -650,6 +747,16 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="deepClone"></param>
         /// <returns></returns>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>rgoel</owner>
         public BuildProperty Clone
         (
@@ -722,8 +829,23 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// Returns the property value.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public override string ToString
             (
@@ -737,11 +859,26 @@ namespace Microsoft.Build.BuildEngine
         #region Operators
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <xref:Microsoft.Build.Construction>
+        /// <xref:Microsoft.Build.Evaluation>
+        /// <xref:Microsoft.Build.Execution>
+        /// 
         /// This allows an implicit typecast from a "BuildProperty" to a "string"
         /// when trying to access the property's value.
         /// </summary>
         /// <param name="propertyToCast"></param>
         /// <returns></returns>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>rgoel</owner>
         public static explicit operator string
         (
