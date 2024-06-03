@@ -737,15 +737,9 @@ namespace Microsoft.Build.BackEnd
 
                 // Add to the list of targets to push.  We don't actually put it on the stack here because we could run into a circular dependency
                 // during this loop, in which case the target stack would be out of whack.
-                TargetEntry newEntry;
-                if (buildReason == TargetBuiltReason.None)
-                {
-                    newEntry = new TargetEntry(_requestEntry, this as ITargetBuilderCallback, targetSpecification, baseLookup, parentTargetEntry, targetSpecification._targetBuiltReason, _componentHost, _projectLoggingContext, stopProcessingOnCompletion);
-                }
-                else
-                {
-                    newEntry = new TargetEntry(_requestEntry, this as ITargetBuilderCallback, targetSpecification, baseLookup, parentTargetEntry, buildReason, _componentHost, _projectLoggingContext, stopProcessingOnCompletion);
-                }
+                TargetBuiltReason entryReason = buildReason == TargetBuiltReason.None ? targetSpecification._targetBuiltReason : buildReason;
+                TargetEntry newEntry = new TargetEntry(_requestEntry, this as ITargetBuilderCallback, targetSpecification, baseLookup, parentTargetEntry, entryReason, _componentHost, _projectLoggingContext, stopProcessingOnCompletion);
+
                 newEntry.ErrorTarget = addAsErrorTarget;
                 targetsToPush.Add(newEntry);
                 stopProcessingOnCompletion = false; // The first target on the stack (the last one to be run) always inherits the stopProcessing flag.
