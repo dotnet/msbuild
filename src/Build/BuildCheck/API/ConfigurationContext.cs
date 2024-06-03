@@ -9,7 +9,7 @@ using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 namespace Microsoft.Build.Experimental.BuildCheck;
 
 /// <summary>
-/// Holder of an optional configuration from .editorconfig file (not recognized by the infrastructure)
+/// Holder of configuration from .editorconfig file (not recognized by the infrastructure)
 /// </summary>
 public class ConfigurationContext
 {
@@ -29,7 +29,8 @@ public class ConfigurationContext
     /// </summary>
     public IReadOnlyList<CustomConfigurationData> CustomConfigurationData { get; init; }
 
-    // TODO: severity / enablement
-    // Severiy model item is connected to this
-    public BuildAnalyzerConfiguration[] BuildAnalyzerConfig { get; init; }
+    /// <summary>
+    /// Configuration data from standard declarations
+    /// </summary>
+    public IReadOnlyList<BuildAnalyzerConfiguration> BuildAnalyzerConfig { get; init; }
 }
