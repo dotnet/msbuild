@@ -308,7 +308,8 @@ namespace Microsoft.Build.UnitTests.Definition
                 bool success = false;
                 var content = @"<Project ToolsVersion='98.6'>
                         <Target Name='Foo'>
-                        </Target>";
+                        </Target>
+                       </Project>";
                 using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
                 Project project = projectFromString.Project;
                 success = project.Build(mockLogger);
@@ -342,7 +343,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                var content = @"<Project ToolsVersion='98.6'>
+                var content = @"<Project ToolsVersion='0.1'>
                     <Target Name='Foo'>
                     </Target>
                    </Project>";
@@ -384,6 +385,7 @@ namespace Microsoft.Build.UnitTests.Definition
                    </Project>";
                 using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
                 Project project = projectFromString.Project;
+                success = project.Build(mockLogger);
 
                 Assert.True(success);
                 mockLogger.AssertLogContains("ToolsVersion=\"invalidToolsVersion\"");
