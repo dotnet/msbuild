@@ -212,6 +212,11 @@
         <target state="translated">No se ha podido encontrar el ensamblado del analizador personalizado especificado: {0}. Compruebe si existe.</target>
         <note>The message is emitted when the custom analyzer assembly can not be found.</note>
       </trans-unit>
+      <trans-unit id="CustomAnalyzerBaseTypeNotAssignable">
+        <source>Failed to load the custom analyzer type: {0} from the assembly: {1}. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
+        <target state="translated">No se pudo cargar el tipo de analizador personalizado: {0} del ensamblado: {1}. Asegúrese de que hereda la clase base Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer. Si no está pensado para ser un analizador personalizado, entonces no debería exponerse. Más información: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <note>The message is emitted when the custom analyzer assembly can not be successfully registered.</note>
+      </trans-unit>
       <trans-unit id="CustomAnalyzerFailedAcquisition">
         <source>Failed to register the custom analyzer: {0}.</source>
         <target state="translated">No se ha podido registrar el analizador personalizado: {0}.</target>
@@ -391,6 +396,11 @@
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">No se puede llamar al método {0} con una colección que contiene nombres de destino nulos o vacíos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutputPropertyLogMessagePrefix">
+        <source>Output Property: </source>
+        <target state="translated">Propiedad de salida: </target>
         <note />
       </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">

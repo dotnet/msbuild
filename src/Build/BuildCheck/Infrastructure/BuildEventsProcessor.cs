@@ -151,7 +151,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         {
             // Add the parameter name and value to the matching entry in _tasksBeingExecuted. Parameters come typed as IList
             // but it's more natural to pass them as scalar values so we unwrap one-element lists.
-            string parameterName = taskParameterEventArgs.ItemType;
+            string parameterName = taskParameterEventArgs.ParameterName;
             object? parameterValue = taskParameterEventArgs.Items?.Count switch
             {
                 1 => taskParameterEventArgs.Items[0],

@@ -221,6 +221,8 @@ namespace Microsoft.Build.BackEnd
                 ItemGroupLoggingHelper.LogTaskParameter(
                     LoggingContext,
                     TaskParameterMessageKind.AddItem,
+                    parameterName: null,
+                    propertyName: null,
                     child.ItemType,
                     itemsToAdd,
                     logItemMetadata: true,
@@ -265,6 +267,8 @@ namespace Microsoft.Build.BackEnd
                     ItemGroupLoggingHelper.LogTaskParameter(
                         LoggingContext,
                         TaskParameterMessageKind.RemoveItem,
+                        parameterName: null,
+                        propertyName: null,
                         child.ItemType,
                         itemsToRemove,
                         logItemMetadata: true,
@@ -453,7 +457,8 @@ namespace Microsoft.Build.BackEnd
                             includeSplit /* before wildcard expansion */,
                             null,
                             null,
-                            originalItem.Location.File));
+                            originalItem.Location.File,
+                            useItemDefinitionsWithoutModification: false));
                     }
                 }
             }

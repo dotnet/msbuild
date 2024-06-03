@@ -114,15 +114,17 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             data.Parameters["Text"].Value.ShouldBe("Hello");
         }
 
-        [Fact]
-        public void ReportsComplexTaskParameters()
+        [Theory]
+        [InlineData("<Output TaskParameter='CombinedPaths' ItemName='OutputDirectories' />")]
+        [InlineData("<Output TaskParameter='CombinedPaths' PropertyName='OutputDirectories' />")]
+        public void ReportsComplexTaskParameters(string outputElement)
         {
-            BuildProject("""
+            BuildProject($"""
                 <ItemGroup>
                   <TestItem Include='item1;item2'/>
                 </ItemGroup>
                 <CombinePath BasePath='base' Paths='@(TestItem)'>
-                    <Output TaskParameter='CombinedPaths' ItemName='OutputDirectories' />
+                    {outputElement}
                 </CombinePath>
             """);
 
@@ -139,9 +141,8 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             listValue[1]!.ShouldBeAssignableTo(typeof(ITaskItem));
             ((ITaskItem)listValue[0]!).ItemSpec.ShouldBe("item1");
             ((ITaskItem)listValue[1]!).ItemSpec.ShouldBe("item2");
-
-            // The name of the parameter would ideally be "CombinedPaths" but we don't seem to be currently logging it.
-            data.Parameters["OutputDirectories"].IsOutput.ShouldBe(true);
+            data.Parameters["CombinedPaths"].IsOutput.ShouldBe(true);
+            data.Parameters["CombinedPaths"].Value.ShouldNotBeNull();
         }
     }
 }

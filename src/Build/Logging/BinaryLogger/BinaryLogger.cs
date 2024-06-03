@@ -71,6 +71,8 @@ namespace Microsoft.Build.Logging
         //   - GeneratedFileUsedEventArgs exposed for brief period of time (so let's continue with 20)
         // version 20:
         //   - TaskStartedEventArgs: Added TaskAssemblyLocation property
+        // version 21:
+        //   - TaskParameterEventArgs: Added ParameterName and PropertyName properties
 
         // This should be never changed.
         // The minimum version of the binary log reader that can read log of above version.
@@ -78,7 +80,7 @@ namespace Microsoft.Build.Logging
 
         // The current version of the binary log representation.
         // Changes with each update of the binary log format.
-        internal const int FileFormatVersion = 20;
+        internal const int FileFormatVersion = 21;
 
         // The minimum version of the binary log reader that can read log of above version.
         // This should be changed only when the binary log format is changed in a way that would prevent it from being
