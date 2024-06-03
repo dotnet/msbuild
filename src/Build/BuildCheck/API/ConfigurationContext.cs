@@ -30,7 +30,7 @@ public class ConfigurationContext
     public IReadOnlyList<CustomConfigurationData> CustomConfigurationData { get; init; }
 
     /// <summary>
-    /// Configuration data from standard declarations
+    /// Infrastructure configuration data
     /// </summary>
     public IReadOnlyList<BuildAnalyzerConfiguration> BuildAnalyzerConfig { get; init; }
 }
