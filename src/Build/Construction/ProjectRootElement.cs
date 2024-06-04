@@ -1963,6 +1963,8 @@ namespace Microsoft.Build.Construction
             {
                 FileInfo fileInfo = new FileInfo(path);
 
+                // If file does not exist it will throw a FileNotFoundException
+                // which will be caught below and we'll end up returning false.
                 if (fileInfo.Length == 0)
                 {
                     // Zero length files are empty
