@@ -36,18 +36,18 @@ namespace Microsoft.Build.Collections
     /// </remarks>
     /// <typeparam name="T">Property or Metadata class type to store</typeparam>
     [DebuggerDisplay("#Entries={Count}")]
-    internal sealed class CopyOnWritePropertyDictionary<T> : ICopyOnWritePropertyDictionary<T>, IEquatable<CopyOnWritePropertyDictionary<T>>
+    internal sealed class CopyOnWritePropertyDictionary<T> : IEnumerable<T>, IEquatable<CopyOnWritePropertyDictionary<T>>, IDictionary<string, T>
         where T : class, IKeyed, IValued, IEquatable<T>, IImmutable
     {
         private static readonly ImmutableDictionary<string, T> NameComparerDictionaryPrototype = ImmutableDictionary.Create<string, T>(MSBuildNameIgnoreCaseComparer.Default);
 
         /// <summary>
-        /// Backing dictionary.
+        /// Backing dictionary
         /// </summary>
         private ImmutableDictionary<string, T> _backing;
 
         /// <summary>
-        /// Creates empty dictionary.
+        /// Creates empty dictionary
         /// </summary>
         public CopyOnWritePropertyDictionary()
         {
@@ -55,7 +55,7 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
-        /// Cloning constructor, with deferred cloning semantics.
+        /// Cloning constructor, with deferred cloning semantics
         /// </summary>
         private CopyOnWritePropertyDictionary(CopyOnWritePropertyDictionary<T> that)
         {
@@ -63,12 +63,12 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
-        /// Accessor for the list of property names.
+        /// Accessor for the list of property names
         /// </summary>
         ICollection<string> IDictionary<string, T>.Keys => ((IDictionary<string, T>)_backing).Keys;
 
         /// <summary>
-        /// Accessor for the list of properties.
+        /// Accessor for the list of properties
         /// </summary>
         ICollection<T> IDictionary<string, T>.Values => ((IDictionary<string, T>)_backing).Values;
 
@@ -115,16 +115,6 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Contains(string name) => _backing.ContainsKey(name);
 
-        public string GetEscapedValue(string name)
-        {
-            if (_backing.TryGetValue(name, out T value))
-            {
-                return value?.EscapedValue;
-            }
-
-            return null;
-        }
-
         /// <summary>
         /// Empties the collection
         /// </summary>
@@ -144,7 +134,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        #region IEquatable<CopyOnWritePropertyDictionary<T>> Members
+        #region IEquatable<PropertyDictionary<T>> Members
 
         /// <summary>
         /// Compares two property dictionaries for equivalence.  They are equal if each contains the same properties with the
@@ -179,56 +169,6 @@ namespace Microsoft.Build.Collections
             foreach (T thisProp in thisBacking.Values)
             {
                 if (!thatBacking.TryGetValue(thisProp.Key, out T thatProp) ||
-                    !EqualityComparer<T>.Default.Equals(thisProp, thatProp))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        #endregion
-
-        #region IEquatable<CopyOnWritePropertyDictionary<T>> Members
-
-        /// <summary>
-        /// Compares two property dictionaries for equivalence.  They are equal if each contains the same properties with the
-        /// same values as the other, unequal otherwise.
-        /// </summary>
-        /// <param name="other">The dictionary to which this should be compared</param>
-        /// <returns>True if they are equivalent, false otherwise.</returns>
-        public bool Equals(ICopyOnWritePropertyDictionary<T> other)
-        {
-            if (other == null)
-            {
-                return false;
-            }
-
-            ImmutableDictionary<string, T> thisBacking = _backing;
-            IDictionary<string, T> otherDict = other;
-
-            if (other is CopyOnWritePropertyDictionary<T> otherCopyOnWritePropertyDictionary)
-            {
-                // If the backing collections are the same, we are equal.
-                // Note that with this check, we intentionally avoid the common reference
-                // comparison between 'this' and 'other'.
-                if (ReferenceEquals(thisBacking, otherCopyOnWritePropertyDictionary._backing))
-                {
-                    return true;
-                }
-
-                otherDict = otherCopyOnWritePropertyDictionary._backing;
-            }
-
-            if (thisBacking.Count != otherDict.Count)
-            {
-                return false;
-            }
-
-            foreach (T thisProp in thisBacking.Values)
-            {
-                if (!otherDict.TryGetValue(thisProp.Key, out T thatProp) ||
                     !EqualityComparer<T>.Default.Equals(thisProp, thatProp))
                 {
                     return false;
@@ -334,7 +274,7 @@ namespace Microsoft.Build.Collections
         /// Overwrites any property with the same name already in the collection.
         /// To remove a property, use Remove(...) instead.
         /// </summary>
-        public void Set(T projectProperty)
+        internal void Set(T projectProperty)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectProperty, nameof(projectProperty));
 
@@ -345,7 +285,7 @@ namespace Microsoft.Build.Collections
         /// Adds the specified properties to this dictionary.
         /// </summary>
         /// <param name="other">An enumerator over the properties to add.</param>
-        public void ImportProperties(IEnumerable<T> other)
+        internal void ImportProperties(IEnumerable<T> other)
         {
             _backing = _backing.SetItems(Items());
 
@@ -362,7 +302,7 @@ namespace Microsoft.Build.Collections
         /// Clone. As we're copy on write, this
         /// should be cheap.
         /// </summary>
-        public ICopyOnWritePropertyDictionary<T> DeepClone()
+        internal CopyOnWritePropertyDictionary<T> DeepClone()
         {
             return new CopyOnWritePropertyDictionary<T>(this);
         }

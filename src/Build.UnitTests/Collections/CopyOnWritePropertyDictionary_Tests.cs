@@ -180,7 +180,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         public void DeepClone()
         {
             CopyOnWritePropertyDictionary<MockValue> source = CreateInstance("a", "b", "c");
-            CopyOnWritePropertyDictionary<MockValue> clone = (CopyOnWritePropertyDictionary<MockValue>)source.DeepClone();
+            CopyOnWritePropertyDictionary<MockValue> clone = source.DeepClone();
 
             source.ShouldBe(clone);
             source.ShouldNotBeSameAs(clone);

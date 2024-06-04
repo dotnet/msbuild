@@ -42,14 +42,14 @@ namespace Microsoft.Build.Collections
         /// Backing dictionary
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        private readonly IRetrievableValuedEntryHashSet<T> _properties;
+        private readonly IRetrievableEntryHashSet<T> _properties;
 
         /// <summary>
         /// Creates empty dictionary
         /// </summary>
         public PropertyDictionary()
         {
-            _properties = new RetrievableValuedEntryHashSet<T>(MSBuildNameIgnoreCaseComparer.Default);
+            _properties = new RetrievableEntryHashSet<T>(MSBuildNameIgnoreCaseComparer.Default);
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal PropertyDictionary(int capacity)
         {
-            _properties = new RetrievableValuedEntryHashSet<T>(capacity, MSBuildNameIgnoreCaseComparer.Default);
+            _properties = new RetrievableEntryHashSet<T>(capacity, MSBuildNameIgnoreCaseComparer.Default);
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal PropertyDictionary(MSBuildNameIgnoreCaseComparer comparer)
         {
-            _properties = new RetrievableValuedEntryHashSet<T>(comparer);
+            _properties = new RetrievableEntryHashSet<T>(comparer);
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace Microsoft.Build.Collections
         /// Initializes a new instance of the <see cref="PropertyDictionary{T}"/> class.
         /// </summary>
         /// <param name="propertiesHashSet">The collection of properties to use.</param>
-        internal PropertyDictionary(IRetrievableValuedEntryHashSet<T> propertiesHashSet)
+        internal PropertyDictionary(IRetrievableEntryHashSet<T> propertiesHashSet)
         {
             _properties = propertiesHashSet;
         }
@@ -322,24 +322,6 @@ namespace Microsoft.Build.Collections
         public T Get(string keyString, int startIndex, int endIndex)
         {
             return GetProperty(keyString, startIndex, endIndex);
-        }
-
-        /// <summary>
-        /// Gets the unescaped value of a particular property.
-        /// </summary>
-        /// <param name="propertyName">The name of the property whose value is sought.</param>
-        /// <param name="unescapedValue">The out parameter by which a successfully retrieved value is returned.</param>
-        /// <returns>True if a property with a matching name was found. False otherwise.</returns>
-        public bool TryGetPropertyUnescapedValue(string propertyName, out string unescapedValue)
-        {
-            if (_properties.TryGetEscapedValue(propertyName, out string escapedValue) && escapedValue != null)
-            {
-                unescapedValue = EscapingUtilities.UnescapeAll(escapedValue);
-                return true;
-            }
-
-            unescapedValue = null;
-            return false;
         }
 
         #region IDictionary<string,T> Members
