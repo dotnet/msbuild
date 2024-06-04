@@ -209,27 +209,27 @@
       </trans-unit>
       <trans-unit id="CustomAnalyzerAssemblyNotExist">
         <source>Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</source>
-        <target state="translated">지정한 사용자 지정 분석기 어셈블리를 찾지 못했습니다. {0}. 존재하는지 확인하세요.</target>
+        <target state="new">Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</target>
         <note>The message is emitted when the custom analyzer assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerBaseTypeNotAssignable">
         <source>Failed to load the custom analyzer type: {0} from the assembly: {1}. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">사용자 지정 분석기 형식을 로드하지 못했습니다. 어셈블리에서 {0} : {1}. Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer 기본 클래스를 상속해야 합니다. 사용자 지정 분석기가 아닌 경우 노출되지 않아야 합니다. 추가 정보: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="new">Failed to load the custom analyzer type: {0} from the assembly: {1}. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom analyzer assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedAcquisition">
         <source>Failed to register the custom analyzer: {0}.</source>
-        <target state="translated">사용자 지정 분석기를 등록하지 못했습니다. {0}.</target>
+        <target state="new">Failed to register the custom analyzer: {0}.</target>
         <note>The message is emitted on failed loading of the custom analyzer in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedRuleLoading">
         <source>Failed to instantiate the custom analyzer rule with the following exception: {0}.</source>
-        <target state="translated">다음 예외로 인해 사용자 지정 분석기 규칙을 인스턴스화하지 못했습니다. {0}.</target>
+        <target state="new">Failed to instantiate the custom analyzer rule with the following exception: {0}.</target>
         <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
         <source>Custom analyzer rule: {0} has been registered successfully.</source>
-        <target state="translated">사용자 지정 분석기 규칙: {0}이(가) 등록되었습니다.</target>
+        <target state="new">Custom analyzer rule: {0} has been registered successfully.</target>
         <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
@@ -400,7 +400,7 @@
       </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
         <source>Output Property: </source>
-        <target state="translated">출력 속성: </target>
+        <target state="new">Output Property: </target>
         <note />
       </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">
@@ -628,7 +628,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="TaskAssemblyLocationMismatch">
         <source>Task assembly was loaded from '{0}' while the desired location was '{1}'.</source>
-        <target state="translated">원하는 위치가 '{1}'인 동안 '{0}'에서 작업 어셈블리를 로드했습니다.</target>
+        <target state="new">Task assembly was loaded from '{0}' while the desired location was '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
