@@ -23,7 +23,6 @@ using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Instance;
-using Microsoft.Build.Instance.ImmutableProjectCollections;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -94,9 +93,9 @@ namespace Microsoft.Build.Execution
 
         private List<string> _initialTargets;
 
-        private IList<string> _importPaths;
+        private List<string> _importPaths;
 
-        private IList<string> _importPathsIncludingDuplicates;
+        private List<string> _importPathsIncludingDuplicates;
 
         /// <summary>
         /// The global properties evaluation occurred with.
@@ -133,7 +132,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Items organized by evaluatedInclude value
         /// </summary>
-        private IMultiDictionary<string, ProjectItemInstance> _itemsByEvaluatedInclude;
+        private MultiDictionary<string, ProjectItemInstance> _itemsByEvaluatedInclude;
 
         /// <summary>
         /// The project's root directory, for evaluation of relative paths and
@@ -436,41 +435,41 @@ namespace Microsoft.Build.Execution
             EvaluationId = linkedProject.EvaluationCounter;
 
             // ProjectProperties
-            _properties = GetImmutablePropertyDictionaryFromImmutableProject(linkedProject);
+            InitializeImmutableProjectPropertyInstances(linkedProject.Properties);
+            var projectPropertiesConverter = GetImmutableElementCollectionConverter<ProjectProperty, ProjectPropertyInstance>(linkedProject.Properties);
+            _properties = new PropertyDictionary<ProjectPropertyInstance>(projectPropertiesConverter);
 
             // ProjectItemDefinitions
-            _itemDefinitions = GetImmutableItemDefinitionsHashSetFromImmutableProject(linkedProject);
+            InitializeImmutableProjectItemDefinitionInstances(linkedProject.ItemDefinitions);
+            _itemDefinitions = GetImmutableElementCollectionConverter<ProjectItemDefinition, ProjectItemDefinitionInstance>(linkedProject.ItemDefinitions);
 
             // ProjectItems
-            _items = GetImmutableItemsDictionaryFromImmutableProject(linkedProject, this);
+            InitializeImmutableProjectItemInstances(linkedProject.Items);
+            var itemsByType = linkedProject.Items as IDictionary<string, ICollection<ProjectItem>>;
+            _items = new ImmutableItemDictionary<ProjectItem, ProjectItemInstance>(itemsByType, linkedProject.Items);
 
             // ItemsByEvaluatedInclude
             if (fastItemLookupNeeded)
             {
-                _itemsByEvaluatedInclude = new ImmutableLinkedMultiDictionaryConverter<string, ProjectItem, ProjectItemInstance>(
-                                                linkedProject.GetItemsByEvaluatedInclude,
-                                                item => ConvertCachedProjectItemToInstance(linkedProject, this, item));
+                _itemsByEvaluatedInclude = new MultiDictionary<string, ProjectItemInstance>(StringComparer.OrdinalIgnoreCase);
+                foreach (var item in linkedProject.Items)
+                {
+                    if (item is IImmutableInstanceProvider<ProjectItemInstance> immutableInstanceProvider)
+                    {
+                        _itemsByEvaluatedInclude.Add(item.EvaluatedInclude, immutableInstanceProvider.ImmutableInstance);
+                    }
+                }
             }
 
-            // GlobalProperties
-            var globalPropertiesRetrievableHashSet = new ImmutableGlobalPropertiesCollectionConverter(linkedProject.GlobalProperties, _properties);
-            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(globalPropertiesRetrievableHashSet);
+            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(linkedProject.GlobalPropertiesCount);
+            foreach (var property in linkedProject.GlobalPropertiesEnumerable)
+            {
+                _globalProperties.Set(ProjectPropertyInstance.Create(property.Key, property.Value));
+            }
 
-            // EnvironmentVariableProperties
-            _environmentVariableProperties = linkedProject.ProjectCollection.SharedReadOnlyEnvironmentProperties;
-
-            // Targets
-            _targets = linkedProject.Targets;
-            InitializeTargetsData(null, null, null, null);
-
-            // Imports
-            var importsListConverter = new ImmutableStringValuedListConverter<ResolvedImport>(linkedProject.Imports, GetImportFullPath);
-            _importPaths = importsListConverter;
-            ImportPaths = importsListConverter;
-
-            importsListConverter = new ImmutableStringValuedListConverter<ResolvedImport>(linkedProject.ImportsIncludingDuplicates, GetImportFullPath);
-            _importPathsIncludingDuplicates = importsListConverter;
-            ImportPathsIncludingDuplicates = importsListConverter;
+            CreateEnvironmentVariablePropertiesSnapshot(linkedProject.ProjectCollection.EnvironmentProperties);
+            CreateTargetsSnapshot(linkedProject.Targets, null, null, null, null);
+            CreateImportsSnapshot(linkedProject.Imports, linkedProject.ImportsIncludingDuplicates);
 
             Toolset = linkedProject.ProjectCollection.GetToolset(linkedProject.ToolsVersion);
             SubToolsetVersion = linkedProject.SubToolsetVersion;
@@ -551,9 +550,9 @@ namespace Microsoft.Build.Execution
             this.TaskRegistry = projectToInheritFrom.TaskRegistry;
             _isImmutable = projectToInheritFrom._isImmutable;
             _importPaths = projectToInheritFrom._importPaths;
-            ImportPaths = new ObjectModel.ReadOnlyCollection<string>(_importPaths);
+            ImportPaths = _importPaths.AsReadOnly();
             _importPathsIncludingDuplicates = projectToInheritFrom._importPathsIncludingDuplicates;
-            ImportPathsIncludingDuplicates = new ObjectModel.ReadOnlyCollection<string>(_importPathsIncludingDuplicates);
+            ImportPathsIncludingDuplicates = _importPathsIncludingDuplicates.AsReadOnly();
 
             this.EvaluatedItemElements = new List<ProjectItemElement>();
 
@@ -755,9 +754,9 @@ namespace Microsoft.Build.Execution
                 _itemDefinitions = that._itemDefinitions;
                 _explicitToolsVersionSpecified = that._explicitToolsVersionSpecified;
                 _importPaths = that._importPaths;
-                ImportPaths = new ObjectModel.ReadOnlyCollection<string>(_importPaths);
+                ImportPaths = _importPaths.AsReadOnly();
                 _importPathsIncludingDuplicates = that._importPathsIncludingDuplicates;
-                ImportPathsIncludingDuplicates = new ObjectModel.ReadOnlyCollection<string>(_importPathsIncludingDuplicates);
+                ImportPathsIncludingDuplicates = _importPathsIncludingDuplicates.AsReadOnly();
 
                 this.EvaluatedItemElements = that.EvaluatedItemElements;
 
@@ -900,145 +899,9 @@ namespace Microsoft.Build.Execution
             return new ProjectInstance(project, fastItemLookupNeeded);
         }
 
-        private static IRetrievableEntryHashSet<ProjectItemDefinitionInstance> GetImmutableItemDefinitionsHashSetFromImmutableProject(Project linkedProject)
-        {
-            IDictionary<string, ProjectItemDefinition> linkedProjectItemDefinitions = linkedProject.ItemDefinitions;
-            VerifyCollectionImplementsRequiredDictionaryInterfaces(
-                linkedProjectItemDefinitions,
-                out IDictionary<string, ProjectItemDefinition> elementsDictionary,
-                out IDictionary<(string, int, int), ProjectItemDefinition> constrainedElementsDictionary);
-
-            var hashSet = new ImmutableElementCollectionConverter<ProjectItemDefinition, ProjectItemDefinitionInstance>(
-                                elementsDictionary,
-                                constrainedElementsDictionary,
-                                ConvertCachedItemDefinitionToInstance);
-
-            return hashSet;
-        }
-
-        private static ImmutableItemDictionary<ProjectItem, ProjectItemInstance> GetImmutableItemsDictionaryFromImmutableProject(
-            Project linkedProject,
-            ProjectInstance owningProjectInstance)
-        {
-            var itemsByType = linkedProject.Items as IDictionary<string, ICollection<ProjectItem>>;
-            if (itemsByType == null)
-            {
-                throw new ArgumentException(nameof(linkedProject));
-            }
-
-            Func<ProjectItem, ProjectItemInstance> convertCachedItemToInstance =
-                projectItem => ConvertCachedProjectItemToInstance(linkedProject, owningProjectInstance, projectItem);
-
-            var itemDictionary = new ImmutableItemDictionary<ProjectItem, ProjectItemInstance>(
-                linkedProject.Items,
-                itemsByType,
-                convertCachedItemToInstance,
-                projectItemInstance => projectItemInstance.ItemType);
-
-            return itemDictionary;
-        }
-
-        private static ProjectItemInstance ConvertCachedProjectItemToInstance(
-            Project linkedProject,
-            ProjectInstance owningProjectInstance,
-            ProjectItem projectItem)
-        {
-            ProjectItemInstance result = null;
-            if (projectItem is IImmutableInstanceProvider<ProjectItemInstance> instanceProvider)
-            {
-                result = instanceProvider.ImmutableInstance;
-                if (result == null)
-                {
-                    var newInstance = InstantiateProjectItemInstanceFromImmutableProjectSource(
-                        linkedProject,
-                        owningProjectInstance,
-                        projectItem);
-
-                    result = instanceProvider.GetOrSetImmutableInstance(newInstance);
-                }
-            }
-
-            return result;
-        }
-
-        private static ProjectItemDefinitionInstance ConvertCachedItemDefinitionToInstance(ProjectItemDefinition projectItemDefinition)
-        {
-            ProjectItemDefinitionInstance result = null;
-
-            if (projectItemDefinition is IImmutableInstanceProvider<ProjectItemDefinitionInstance> instanceProvider)
-            {
-                result = instanceProvider.ImmutableInstance;
-                if (result == null)
-                {
-                    IDictionary<string, ProjectMetadataInstance> metadata = null;
-                    if (projectItemDefinition.Metadata is IDictionary<string, ProjectMetadata> linkedMetadataDict)
-                    {
-                        metadata = new ImmutableElementCollectionConverter<ProjectMetadata, ProjectMetadataInstance>(
-                                        linkedMetadataDict,
-                                        constrainedProjectElements: null,
-                                        ConvertCachedProjectMetadataToInstance);
-                    }
-
-                    result = instanceProvider.GetOrSetImmutableInstance(
-                        new ProjectItemDefinitionInstance(projectItemDefinition.ItemType, metadata));
-                }
-            }
-
-            return result;
-        }
-
-        private static ProjectMetadataInstance ConvertCachedProjectMetadataToInstance(ProjectMetadata projectMetadata)
-        {
-            ProjectMetadataInstance result = null;
-
-            if (projectMetadata is IImmutableInstanceProvider<ProjectMetadataInstance> instanceProvider)
-            {
-                result = instanceProvider.ImmutableInstance;
-                if (result == null)
-                {
-                    result = instanceProvider.GetOrSetImmutableInstance(new ProjectMetadataInstance(projectMetadata));
-                }
-            }
-
-            return result;
-        }
-
-        private static PropertyDictionary<ProjectPropertyInstance> GetImmutablePropertyDictionaryFromImmutableProject(Project linkedProject)
-        {
-            ICollection<ProjectProperty> linkedProjectProperties = linkedProject.Properties;
-            VerifyCollectionImplementsRequiredDictionaryInterfaces(
-                linkedProjectProperties,
-                out IDictionary<string, ProjectProperty> elementsDictionary,
-                out IDictionary<(string, int, int), ProjectProperty> constrainedElementsDictionary);
-
-            var hashSet = new ImmutableValuedElementCollectionConverter<ProjectProperty, ProjectPropertyInstance>(
-                                elementsDictionary,
-                                constrainedElementsDictionary,
-                                ConvertCachedPropertyToInstance);
-
-            return new PropertyDictionary<ProjectPropertyInstance>(hashSet);
-        }
-
-        private static ProjectPropertyInstance ConvertCachedPropertyToInstance(ProjectProperty property)
-        {
-            ProjectPropertyInstance result = null;
-
-            if (property is IImmutableInstanceProvider<ProjectPropertyInstance> instanceProvider)
-            {
-                result = instanceProvider.ImmutableInstance;
-                if (result == null)
-                {
-                    result = instanceProvider.GetOrSetImmutableInstance(InstantiateProjectPropertyInstance(property, isImmutable: true));
-                }
-            }
-
-            return result;
-        }
-
-        private static void VerifyCollectionImplementsRequiredDictionaryInterfaces<TCached>(
-            object elementsCollection,
-            out IDictionary<string, TCached> elementsDictionary,
-            out IDictionary<(string, int, int), TCached> constrainedElementsDictionary)
+        private static ImmutableElementCollectionConverter<TCached, T> GetImmutableElementCollectionConverter<TCached, T>(
+            ICollection<TCached> elementsCollection)
+            where T : class, IKeyed
         {
             // The elementsCollection we receive here is implemented in CPS as a special collection
             // that is both IDictionary<string, TCached> and also IDictionary<(string, int, int), TCached>.
@@ -1049,14 +912,25 @@ namespace Microsoft.Build.Execution
             // represents the elementsCollection as an IRetrievableEntryHashSet<T>.
             // That IRetrievableEntryHashSet is then used either directly or as a backing source for
             // another collection wrapper (e.g. PropertyDictionary).
-            if (elementsCollection is not IDictionary<string, TCached> elementsDict ||
-                elementsCollection is not IDictionary<(string, int, int), TCached> constrainedElementsDict)
+            if (elementsCollection is not IDictionary<string, TCached> elementsDictionary ||
+                elementsCollection is not IDictionary<(string, int, int), TCached> constrainedElementsDictionary)
             {
                 throw new ArgumentException(nameof(elementsCollection));
             }
 
-            elementsDictionary = elementsDict;
-            constrainedElementsDictionary = constrainedElementsDict;
+            return new ImmutableElementCollectionConverter<TCached, T>(elementsDictionary, constrainedElementsDictionary);
+        }
+
+        private static ImmutableElementCollectionConverter<TCached, T> GetImmutableElementCollectionConverter<TCached, T>(
+            IDictionary<string, TCached> elementsDictionary)
+            where T : class, IKeyed
+        {
+            if (elementsDictionary is not IDictionary<(string, int, int), TCached> constrainedElementsDictionary)
+            {
+                throw new ArgumentException(nameof(elementsDictionary));
+            }
+
+            return new ImmutableElementCollectionConverter<TCached, T>(elementsDictionary, constrainedElementsDictionary);
         }
 
         /// <summary>
@@ -1891,12 +1765,10 @@ namespace Microsoft.Build.Execution
         /// </remarks>
         public string GetPropertyValue(string name)
         {
-            if (!_properties.TryGetPropertyUnescapedValue(name, out string unescapedValue))
-            {
-                unescapedValue = String.Empty;
-            }
+            ProjectPropertyInstance property = _properties[name];
+            string value = (property == null) ? String.Empty : property.EvaluatedValue;
 
-            return unescapedValue;
+            return value;
         }
 
         /// <summary>
@@ -2987,6 +2859,28 @@ namespace Microsoft.Build.Execution
             }
         }
 
+        private static void InitializeImmutableProjectItemDefinitionInstances(IDictionary<string, ProjectItemDefinition> projectItemDefinitions)
+        {
+            foreach (var projectItemDefinition in projectItemDefinitions.Values)
+            {
+                if (projectItemDefinition is IImmutableInstanceProvider<ProjectItemDefinitionInstance> immutableInstanceProvider)
+                {
+                    immutableInstanceProvider.ImmutableInstance = new ProjectItemDefinitionInstance(projectItemDefinition);
+                }
+            }
+        }
+
+        private static void InitializeImmutableProjectPropertyInstances(ICollection<ProjectProperty> projectProperties)
+        {
+            foreach (var projectProperty in projectProperties)
+            {
+                if (projectProperty is IImmutableInstanceProvider<ProjectPropertyInstance> immutableInstanceProvider)
+                {
+                    immutableInstanceProvider.ImmutableInstance = InstantiateProjectPropertyInstance(projectProperty, isImmutable: true);
+                }
+            }
+        }
+
         private static ProjectPropertyInstance InstantiateProjectPropertyInstance(ProjectProperty property, bool isImmutable)
         {
             // Allow reserved property names, since this is how they are added to the project instance.
@@ -3038,9 +2932,9 @@ namespace Microsoft.Build.Execution
             _actualTargets = new RetrievableEntryHashSet<ProjectTargetInstance>(StringComparer.OrdinalIgnoreCase);
             _targets = new ObjectModel.ReadOnlyDictionary<string, ProjectTargetInstance>(_actualTargets);
             _importPaths = new List<string>();
-            ImportPaths = new ObjectModel.ReadOnlyCollection<string>(_importPaths);
+            ImportPaths = _importPaths.AsReadOnly();
             _importPathsIncludingDuplicates = new List<string>();
-            ImportPathsIncludingDuplicates = new ObjectModel.ReadOnlyCollection<string>(_importPathsIncludingDuplicates);
+            ImportPathsIncludingDuplicates = _importPathsIncludingDuplicates.AsReadOnly();
             _globalProperties = new PropertyDictionary<ProjectPropertyInstance>((globalProperties == null) ? 0 : globalProperties.Count);
             _environmentVariableProperties = buildParameters.EnvironmentPropertiesInternal;
             _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(MSBuildNameIgnoreCaseComparer.Default);
@@ -3157,16 +3051,8 @@ namespace Microsoft.Build.Execution
             // ProjectTargetInstances are immutable so only the dictionary must be cloned
             _targets = CreateCloneDictionary(targets);
 
-            InitializeTargetsData(defaultTargets, initialTargets, beforeTargets, afterTargets);
-        }
-
-        private void InitializeTargetsData(List<string> defaultTargets,
-            List<string> initialTargets,
-            IDictionary<string, List<TargetSpecification>> beforeTargets,
-            IDictionary<string, List<TargetSpecification>> afterTargets)
-        {
-            DefaultTargets = defaultTargets == null ? new List<string>(0) : new List<string>(defaultTargets);
-            InitialTargets = initialTargets == null ? new List<string>(0) : new List<string>(initialTargets);
+            this.DefaultTargets = defaultTargets == null ? new List<string>(0) : new List<string>(defaultTargets);
+            this.InitialTargets = defaultTargets == null ? new List<string>(0) : new List<string>(initialTargets);
             ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this).BeforeTargets = CreateCloneDictionary(beforeTargets, StringComparer.OrdinalIgnoreCase);
             ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this).AfterTargets = CreateCloneDictionary(afterTargets, StringComparer.OrdinalIgnoreCase);
         }
@@ -3176,31 +3062,29 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void CreateImportsSnapshot(IList<ResolvedImport> importClosure, IList<ResolvedImport> importClosureWithDuplicates)
         {
-            var importPaths = new List<string>(Math.Max(0, importClosure.Count - 1) /* outer project */);
+            _importPaths = new List<string>(Math.Max(0, importClosure.Count - 1) /* outer project */);
             foreach (var resolvedImport in importClosure)
             {
                 // Exclude outer project itself
                 if (resolvedImport.ImportingElement != null)
                 {
-                    importPaths.Add(resolvedImport.ImportedProject.FullPath);
+                    _importPaths.Add(resolvedImport.ImportedProject.FullPath);
                 }
             }
 
-            _importPaths = importPaths;
-            ImportPaths = importPaths.AsReadOnly();
+            ImportPaths = _importPaths.AsReadOnly();
 
-            var importPathsIncludingDuplicates = new List<string>(Math.Max(0, importClosureWithDuplicates.Count - 1) /* outer project */);
+            _importPathsIncludingDuplicates = new List<string>(Math.Max(0, importClosureWithDuplicates.Count - 1) /* outer project */);
             foreach (var resolvedImport in importClosureWithDuplicates)
             {
                 // Exclude outer project itself
                 if (resolvedImport.ImportingElement != null)
                 {
-                    importPathsIncludingDuplicates.Add(resolvedImport.ImportedProject.FullPath);
+                    _importPathsIncludingDuplicates.Add(resolvedImport.ImportedProject.FullPath);
                 }
             }
 
-            _importPathsIncludingDuplicates = importPathsIncludingDuplicates;
-            ImportPathsIncludingDuplicates = importPathsIncludingDuplicates.AsReadOnly();
+            ImportPathsIncludingDuplicates = _importPathsIncludingDuplicates.AsReadOnly();
         }
 
         /// <summary>
@@ -3239,13 +3123,11 @@ namespace Microsoft.Build.Execution
                 return;
             }
 
-            var multiDictionary = new MultiDictionary<string, ProjectItemInstance>(StringComparer.OrdinalIgnoreCase);
+            _itemsByEvaluatedInclude = new MultiDictionary<string, ProjectItemInstance>(StringComparer.OrdinalIgnoreCase);
             foreach (var item in items)
             {
-                multiDictionary.Add(item.EvaluatedInclude, projectItemToInstanceMap[item]);
+                _itemsByEvaluatedInclude.Add(item.EvaluatedInclude, projectItemToInstanceMap[item]);
             }
-
-            _itemsByEvaluatedInclude = multiDictionary;
         }
 
         /// <summary>
@@ -3267,9 +3149,22 @@ namespace Microsoft.Build.Execution
             return projectItemToInstanceMap;
         }
 
+        private void InitializeImmutableProjectItemInstances(ICollection<ProjectItem> projectItems)
+        {
+            foreach (var projectItem in projectItems)
+            {
+                if (projectItem is IImmutableInstanceProvider<ProjectItemInstance> immutableInstanceProvider)
+                {
+                    ProjectItemInstance instance = InstantiateProjectItemInstance(projectItem);
+                    immutableInstanceProvider.ImmutableInstance = instance;
+                }
+            }
+        }
+
         private ProjectItemInstance InstantiateProjectItemInstance(ProjectItem item)
         {
             List<ProjectItemDefinitionInstance> inheritedItemDefinitions = null;
+
             if (item.InheritedItemDefinitions != null)
             {
                 inheritedItemDefinitions = new List<ProjectItemDefinitionInstance>(item.InheritedItemDefinitions.Count);
@@ -3283,6 +3178,7 @@ namespace Microsoft.Build.Execution
             }
 
             CopyOnWritePropertyDictionary<ProjectMetadataInstance> directMetadata = null;
+
             if (item.DirectMetadata != null)
             {
                 directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
@@ -3291,85 +3187,14 @@ namespace Microsoft.Build.Execution
                 directMetadata.ImportProperties(projectMetadataInstances);
             }
 
-            GetEvaluatedIncludesFromProjectItem(
-                item,
-                out string evaluatedIncludeEscaped,
-                out string evaluatedIncludeBeforeWildcardExpansionEscaped);
-
-            var instance = new ProjectItemInstance(
-                this,
-                item.ItemType,
-                evaluatedIncludeEscaped,
-                evaluatedIncludeBeforeWildcardExpansionEscaped,
-                directMetadata,
-                inheritedItemDefinitions,
-                item.Xml.ContainingProject.EscapedFullPath,
-                useItemDefinitionsWithoutModification: false);
-
-            return instance;
-        }
-
-        private static void GetEvaluatedIncludesFromProjectItem(
-            ProjectItem item,
-            out string evaluatedIncludeEscaped,
-            out string evaluatedIncludeBeforeWildcardExpansionEscaped)
-        {
             // For externally constructed ProjectItem, fall back to the publicly available EvaluateInclude
-            evaluatedIncludeEscaped = ((IItem)item).EvaluatedIncludeEscaped;
+            var evaluatedIncludeEscaped = ((IItem)item).EvaluatedIncludeEscaped;
             evaluatedIncludeEscaped ??= item.EvaluatedInclude;
-            evaluatedIncludeBeforeWildcardExpansionEscaped = item.EvaluatedIncludeBeforeWildcardExpansionEscaped;
+            var evaluatedIncludeBeforeWildcardExpansionEscaped = item.EvaluatedIncludeBeforeWildcardExpansionEscaped;
             evaluatedIncludeBeforeWildcardExpansionEscaped ??= item.EvaluatedInclude;
-        }
 
-        private static ProjectItemInstance InstantiateProjectItemInstanceFromImmutableProjectSource(
-            Project linkedProject,
-            ProjectInstance projectInstance,
-            ProjectItem item)
-        {
-            linkedProject.ItemDefinitions.TryGetValue(item.ItemType, out ProjectItemDefinition itemTypeDefinition);
-
-            IList<ProjectItemDefinitionInstance> inheritedItemDefinitions =
-                new ImmutableItemDefinitionsListConverter<ProjectItemDefinition, ProjectItemDefinitionInstance>(
-                    item.InheritedItemDefinitions,
-                    itemTypeDefinition,
-                    ConvertCachedItemDefinitionToInstance);
-
-            ICopyOnWritePropertyDictionary<ProjectMetadataInstance> directMetadata = null;
-            if (item.DirectMetadata is not null)
-            {
-                if (item.DirectMetadata is IDictionary<string, ProjectMetadata> metadataDict)
-                {
-                    directMetadata = new ImmutablePropertyCollectionConverter<ProjectMetadata, ProjectMetadataInstance>(metadataDict, ConvertCachedProjectMetadataToInstance);
-                }
-                else
-                {
-                    directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
-
-                    IEnumerable<ProjectMetadataInstance> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum => new ProjectMetadataInstance(directMetadatum));
-                    directMetadata.ImportProperties(projectMetadataInstances);
-                }
-            }
-
-            GetEvaluatedIncludesFromProjectItem(
-                item,
-                out string evaluatedIncludeEscaped,
-                out string evaluatedIncludeBeforeWildcardExpansionEscaped);
-
-            ProjectItemInstance instance = new ProjectItemInstance(
-                projectInstance,
-                item.ItemType,
-                evaluatedIncludeEscaped,
-                evaluatedIncludeBeforeWildcardExpansionEscaped,
-                directMetadata,
-                inheritedItemDefinitions,
-                item.Xml.ContainingProject.EscapedFullPath,
-                useItemDefinitionsWithoutModification: true);
+            ProjectItemInstance instance = new ProjectItemInstance(this, item.ItemType, evaluatedIncludeEscaped, evaluatedIncludeBeforeWildcardExpansionEscaped, directMetadata, inheritedItemDefinitions, item.Xml.ContainingProject.EscapedFullPath);
             return instance;
-        }
-
-        private static string GetImportFullPath(ResolvedImport import)
-        {
-            return import.ImportedProject.FullPath;
         }
 
         /// <summary>

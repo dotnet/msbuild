@@ -8,12 +8,6 @@ using System.Runtime.Serialization;
 
 namespace Microsoft.Build.Collections
 {
-    /// <summary>
-    /// Represents a hash set mapping string to <typeparamref name="T"/>, with the specialization that
-    /// value lookup supports using substrings of a provided key without requiring instantiating the substring
-    /// (in order to avoid the memory usage of string allocation).
-    /// </summary>
-    /// <typeparam name="T">The type of data the hash set contains (which must be <see cref="IKeyed"/>).</typeparam>
     internal interface IRetrievableEntryHashSet<T> :
         ICollection<T>,
         ISerializable,
