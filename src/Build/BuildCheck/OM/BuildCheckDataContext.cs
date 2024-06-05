@@ -10,6 +10,7 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework;
+using System.IO;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 
@@ -19,10 +20,18 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// <param name="projectFilePath">Currently built project.</param>
 public abstract class AnalysisData(string projectFilePath)
 {
+    private string? _projectFileDirectory;
+
     /// <summary>
     /// Full path to the project file being built.
     /// </summary>
     public string ProjectFilePath { get; } = projectFilePath;
+
+    /// <summary>
+    /// Directory path of the file being built (the containing directory of <see cref="ProjectFilePath"/>).
+    /// </summary>
+    public string ProjectFileDirectory =>
+        _projectFileDirectory ??= Path.GetDirectoryName(ProjectFilePath)!;
 }
 
 /// <summary>

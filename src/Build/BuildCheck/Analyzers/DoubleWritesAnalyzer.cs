@@ -103,8 +103,9 @@ internal sealed class DoubleWritesAnalyzer : BuildAnalyzer
     {
         if (!string.IsNullOrEmpty(fileBeingWritten))
         {
-            // Absolutize the path.
-            fileBeingWritten = Path.GetFullPath(fileBeingWritten, context.Data.ProjectFilePath);
+            // Absolutize the path. Note that if a path used during a build is relative, it is relative to the directory
+            // of the project being built, regardless of the project/import in which it occurs.
+            fileBeingWritten = Path.GetFullPath(fileBeingWritten, context.Data.ProjectFileDirectory);
 
             if (_filesWritten.TryGetValue(fileBeingWritten, out (string projectFilePath, string taskName) existingEntry))
             {
