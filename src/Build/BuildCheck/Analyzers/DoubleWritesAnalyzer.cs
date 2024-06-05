@@ -111,7 +111,7 @@ internal sealed class DoubleWritesAnalyzer : BuildAnalyzer
             {
                 context.ReportResult(BuildCheckResult.Create(
                     SupportedRule,
-                    ElementLocation.EmptyLocation,
+                    context.Data.TaskInvocationLocation,
                     context.Data.TaskName,
                     existingEntry.taskName,
                     Path.GetFileName(context.Data.ProjectFilePath),
