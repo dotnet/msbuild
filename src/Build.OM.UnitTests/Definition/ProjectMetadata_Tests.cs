@@ -156,7 +156,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("j")).GetMetadata("m1");
@@ -183,7 +183,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("i")).GetMetadata("m1");
@@ -209,7 +209,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("i")).GetMetadata("m1");
@@ -236,7 +236,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("i")).GetMetadata("m1");
@@ -268,7 +268,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("i")).GetMetadata("m1");
@@ -300,7 +300,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("i")).GetMetadata("m1");
@@ -332,7 +332,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("i")).GetMetadata("m1");
@@ -363,7 +363,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             ProjectItemDefinition itemDefinition;
@@ -392,7 +392,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             ProjectItemDefinition itemDefinition;
@@ -426,7 +426,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             ProjectItemDefinition itemDefinition;

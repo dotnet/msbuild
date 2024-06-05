@@ -158,7 +158,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             ProjectItem item = Helpers.GetFirst(project.GetItems("i"));
@@ -1193,7 +1193,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             project.GetItems("i").First().SetMetadataValue("m", "m2");
@@ -1236,7 +1236,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             ProjectItem item1 = project.GetItems("i").First();
@@ -1287,7 +1287,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             ProjectItem item1 = project.GetItems("i").First();
@@ -1357,7 +1357,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             Assert.Equal("l0", project.GetItems("i").First().GetMetadataValue("l"));
@@ -1455,7 +1455,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             Assert.Equal("l0", project.GetItems("i").First().GetMetadataValue("l"));
@@ -3764,10 +3764,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
     public class ProjectItemWithOptimizations_Tests : ProjectItem_Tests
     {
-       public ProjectItemWithOptimizations_Tests()
-       {
-           // Make sure we always use the dictionary-based Remove logic.
-           _env.SetEnvironmentVariable("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", "0");
-       }
+        public ProjectItemWithOptimizations_Tests()
+        {
+            // Make sure we always use the dictionary-based Remove logic.
+            _env.SetEnvironmentVariable("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", "0");
+        }
     }
 }

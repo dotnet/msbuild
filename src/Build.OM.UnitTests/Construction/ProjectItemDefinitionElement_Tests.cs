@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-                  using ProjectRootElementFromString projectRootElementFromString = new(content);
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
             ProjectRootElement project = projectRootElementFromString.Project;
             ProjectItemDefinitionGroupElement itemDefinitionGroup = (ProjectItemDefinitionGroupElement)Helpers.GetFirst(project.Children);
             ProjectItemDefinitionElement itemDefinition = Helpers.GetFirst(itemDefinitionGroup.ItemDefinitions);
@@ -55,7 +55,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-                  using ProjectRootElementFromString projectRootElementFromString = new(content);
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
             ProjectRootElement project = projectRootElementFromString.Project;
             ProjectItemDefinitionGroupElement itemDefinitionGroup = (ProjectItemDefinitionGroupElement)Helpers.GetFirst(project.Children);
             ProjectItemDefinitionElement definition = Helpers.GetFirst(itemDefinitionGroup.ItemDefinitions);
@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-                  using ProjectRootElementFromString projectRootElementFromString = new(content);
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
             ProjectRootElement project = projectRootElementFromString.Project;
             ProjectItemDefinitionGroupElement itemDefinitionGroup = (ProjectItemDefinitionGroupElement)Helpers.GetFirst(project.Children);
             ProjectItemDefinitionElement itemDefinition = Helpers.GetFirst(itemDefinitionGroup.ItemDefinitions);

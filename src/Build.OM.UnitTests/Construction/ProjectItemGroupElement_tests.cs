@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-                  using ProjectRootElementFromString projectRootElementFromString = new(content);
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
             ProjectRootElement project = projectRootElementFromString.Project;
             ProjectItemGroupElement group = (ProjectItemGroupElement)Helpers.GetFirst(project.Children);
 
@@ -61,7 +61,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-                  using ProjectRootElementFromString projectRootElementFromString = new(content);
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
             ProjectRootElement project = projectRootElementFromString.Project;
             ProjectItemGroupElement group = (ProjectItemGroupElement)Helpers.GetFirst(project.Children);
 

@@ -135,7 +135,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-                  using ProjectRootElementFromString projectRootElementFromString = new(content);
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
             ProjectRootElement project = projectRootElementFromString.Project;
             ProjectUsingTaskElement usingTask = (ProjectUsingTaskElement)Helpers.GetFirst(project.Children);
             ProjectUsingTaskBodyElement body = usingTask.TaskBody;

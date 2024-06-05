@@ -211,7 +211,7 @@ ObjectModelHelpers.CleanupFileContents(
   </Target>
 </Project>");
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             MockLogger logger = new MockLogger();
@@ -242,7 +242,7 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemGroup>
 </Project>");
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
@@ -269,7 +269,7 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemGroup>
 </Project>");
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
@@ -296,7 +296,7 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemGroup>
 </Project>");
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
@@ -327,7 +327,7 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemGroup>
 </Project>");
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
@@ -355,7 +355,7 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemGroup>
 </Project>");
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
@@ -385,7 +385,7 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemGroup>
 </Project>");
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
@@ -413,7 +413,7 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemGroup>
 </Project>");
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
@@ -448,7 +448,7 @@ ObjectModelHelpers.CleanupFileContents(
   </Target>
 </Project>");
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
             ProjectInstance instance = project.CreateProjectInstance();
@@ -655,7 +655,7 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemDefinitionGroup>
 </Project>");
 
-          using ProjectFromString projectFromString = new(content);
+            using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;  // No exception
         }
     }

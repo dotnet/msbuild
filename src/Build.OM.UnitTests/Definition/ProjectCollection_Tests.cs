@@ -529,7 +529,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
-            project.FullPath="c:\\123.proj";
+            project.FullPath = "c:\\123.proj";
 
             Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject("c:\\123.proj", null, null);
 

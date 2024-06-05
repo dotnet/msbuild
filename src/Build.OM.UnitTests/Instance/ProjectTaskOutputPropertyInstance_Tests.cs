@@ -45,7 +45,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                     </Project>
                 ";
 
-           using ProjectRootElementFromString projectRootElementFromString = new(content);
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
             ProjectRootElement xml = projectRootElementFromString.Project;
             Project project = new Project(xml);
             ProjectInstance instance = project.CreateProjectInstance();
