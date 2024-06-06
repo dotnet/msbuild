@@ -302,7 +302,7 @@ namespace Microsoft.Build.Construction
                 var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
                 var projectDocument = new XmlDocument();
 
-                FileStream fs = File.OpenRead(AbsolutePath);
+                using (FileStream fs = File.OpenRead(AbsolutePath))
                 using (XmlReader xmlReader = XmlReader.Create(fs, xrSettings))
                 {
                     // Load the project file and get the first node

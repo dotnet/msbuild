@@ -891,7 +891,7 @@ namespace Microsoft.Build.Construction
                 var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
 
                 // Load the .etp project file thru the XML reader
-                FileStream fs = File.OpenRead(fullPathToEtpProj);
+                using (FileStream fs = File.OpenRead(fullPathToEtpProj))
                 using (XmlReader xmlReader = XmlReader.Create(fs, readerSettings))
                 {
                     etpProjectDocument.Load(xmlReader);
