@@ -8,10 +8,23 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
-#nullable disable
-
 namespace Microsoft.Build.Graph
 {
+    /// <summary>
+    /// A callback used to receive notification that a build has completed.
+    /// </summary>
+    /// <remarks>
+    /// When this delegate is invoked, the WaitHandle on the BuildSubmission will have been be signalled and the OverallBuildResult will be valid.
+    /// </remarks>
+    public delegate void GraphBuildSubmissionCompleteCallback(GraphBuildSubmission submission);
+
+    /// <summary>
+    /// A GraphBuildSubmission represents a graph build request which has been submitted to the BuildManager for processing.  It may be used to
+    /// execute synchronous or asynchronous graph build requests and provides access to the results upon completion.
+    /// </summary>
+    /// <remarks>
+    /// This class is thread-safe.
+    /// </remarks>
     public class GraphBuildSubmission : BuildSubmission<GraphBuildRequestData, GraphBuildResult>
     {
         internal GraphBuildSubmission(BuildManager buildManager, int submissionId, GraphBuildRequestData requestData) :
@@ -29,15 +42,13 @@ namespace Microsoft.Build.Graph
             ExecuteAsync(null, null);
             WaitHandle.WaitOne();
 
-            return BuildResult;
-        }
-    }
+            ErrorUtilities.VerifyThrow(BuildResult != null,
+                "BuildResult is not populated after Execute is done.");
 
-    /// <summary>
-    /// A callback used to receive notification that a build has completed.
-    /// </summary>
-    /// <remarks>
-    /// When this delegate is invoked, the WaitHandle on the BuildSubmission will have been be signalled and the OverallBuildResult will be valid.
-    /// </remarks>
-    public delegate void GraphBuildSubmissionCompleteCallback(GraphBuildSubmission submission);
+            return BuildResult!;
+        }
+
+        protected internal override GraphBuildResult CreateFailedResult(Exception exception)
+            => new(SubmissionId, exception);
+    }
 }

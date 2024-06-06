@@ -454,7 +454,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
                 BuildRequestData buildRequest = new BuildRequestData(
                     cacheRequest.Configuration.Project,
-                    cacheRequest.Submission.BuildRequestData.TargetNames.ToArray());
+                    cacheRequest.Submission.BuildRequestData?.TargetNames.ToArray() ?? Array.Empty<string>());
                 BuildEventContext buildEventContext = _loggingService.CreateProjectCacheBuildEventContext(
                     cacheRequest.Submission.SubmissionId,
                     evaluationId: cacheRequest.Configuration.Project.EvaluationId,
@@ -477,13 +477,16 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             void EvaluateProjectIfNecessary(BuildSubmission submission, BuildRequestConfiguration configuration)
             {
+                ErrorUtilities.VerifyThrow(submission.BuildRequestData != null,
+                    "Submission BuildRequestData is not populated.");
+
                 lock (configuration)
                 {
                     if (!configuration.IsLoaded)
                     {
                         configuration.LoadProjectIntoConfiguration(
                             _buildManager,
-                            submission.BuildRequestData.Flags,
+                            submission.BuildRequestData!.Flags,
                             submission.SubmissionId,
                             Scheduler.InProcNodeId);
 

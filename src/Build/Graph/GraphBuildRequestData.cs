@@ -8,9 +8,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Shared;
 
-#nullable disable
-#nullable enable
-
 namespace Microsoft.Build.Graph
 {
     public record GraphBuildOptions
@@ -24,7 +21,7 @@ namespace Microsoft.Build.Graph
     /// <summary>
     /// GraphBuildRequestData encapsulates all of the data needed to submit a graph build request.
     /// </summary>
-    public sealed class GraphBuildRequestData : BuildRequestDataBase
+    public sealed class GraphBuildRequestData : BuildRequestData<GraphBuildRequestData, GraphBuildResult>
     {
         /// <summary>
         /// Constructs a GraphBuildRequestData for build requests based on a project graph.
@@ -187,6 +184,10 @@ namespace Microsoft.Build.Graph
         /// </summary>
         /// <value>The project graph entry points.</value>
         public IEnumerable<ProjectGraphEntryPoint>? ProjectGraphEntryPoints { get; }
+
+        internal override BuildSubmission<GraphBuildRequestData, GraphBuildResult> CreateSubmission(BuildManager buildManager, int submissionId, GraphBuildRequestData requestData,
+            bool legacyThreadingSemantics) =>
+            new GraphBuildSubmission(buildManager, submissionId, requestData);
 
         public override IEnumerable<string> EntryProjectsFullPath
         {

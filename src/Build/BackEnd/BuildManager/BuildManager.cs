@@ -164,15 +164,7 @@ namespace Microsoft.Build.Execution
         /// <remarks>
         /// { submissionId, BuildSubmission }
         /// </remarks>
-        private readonly Dictionary<int, BuildSubmission> _buildSubmissions;
-
-        /// <summary>
-        /// The current pending and active graph build submissions.
-        /// </summary>
-        /// <remarks>
-        /// { submissionId, GraphBuildSubmission }
-        /// </remarks>
-        private readonly Dictionary<int, GraphBuildSubmission> _graphBuildSubmissions;
+        private readonly Dictionary<int, BuildSubmissionBase> _buildSubmissions;
 
         /// <summary>
         /// Event signalled when all build submissions are complete.
@@ -301,8 +293,7 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(hostName, nameof(hostName));
             _hostName = hostName;
             _buildManagerState = BuildManagerState.Idle;
-            _buildSubmissions = new Dictionary<int, BuildSubmission>();
-            _graphBuildSubmissions = new Dictionary<int, GraphBuildSubmission>();
+            _buildSubmissions = new Dictionary<int, BuildSubmissionBase>();
             _noActiveSubmissionsEvent = new AutoResetEvent(true);
             _activeNodes = new HashSet<int>();
             _noNodesActiveEvent = new AutoResetEvent(true);
@@ -807,21 +798,15 @@ namespace Microsoft.Build.Execution
 
                     _overallBuildSuccess = false;
 
-                    foreach (BuildSubmission submission in _buildSubmissions.Values)
-                    {
-                        if (submission.BuildRequest != null)
-                        {
-                            BuildResult result = new BuildResult(submission.BuildRequest, new BuildAbortedException());
-                            _resultsCache.AddResult(result);
-                            submission.CompleteResults(result);
-                        }
-                    }
-
-                    foreach (GraphBuildSubmission submission in _graphBuildSubmissions.Values)
+                    foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
                     {
                         if (submission.IsStarted)
                         {
-                            submission.CompleteResults(new GraphBuildResult(submission.SubmissionId, new BuildAbortedException()));
+                            BuildResultBase buildResult = submission.CompleteResultsWithException(new BuildAbortedException());
+                            if (buildResult is BuildResult result)
+                            {
+                                _resultsCache.AddResult(result);
+                            }
                         }
                     }
 
@@ -880,6 +865,25 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if StartBuild has not been called or if EndBuild has been called.</exception>
         public BuildSubmission PendBuildRequest(BuildRequestData requestData)
+            => (BuildSubmission) PendBuildRequest<BuildRequestData, BuildResult>(requestData);
+
+        /// <summary>
+        /// Submits a graph build request to the current build but does not start it immediately.  Allows the user to
+        /// perform asynchronous execution or access the submission ID prior to executing the request.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown if StartBuild has not been called or if EndBuild has been called.</exception>
+        public GraphBuildSubmission PendBuildRequest(GraphBuildRequestData requestData)
+            => (GraphBuildSubmission) PendBuildRequest<GraphBuildRequestData, GraphBuildResult>(requestData);
+
+        /// <summary>
+        /// Submits a build request to the current build but does not start it immediately.  Allows the user to
+        /// perform asynchronous execution or access the submission ID prior to executing the request.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown if StartBuild has not been called or if EndBuild has been called.</exception>
+        private BuildSubmission<TRequestData, TResultData> PendBuildRequest<TRequestData, TResultData>(
+            TRequestData requestData)
+            where TRequestData : BuildRequestData<TRequestData, TResultData>
+            where TResultData : BuildResultBase
         {
             lock (_syncLock)
             {
@@ -888,11 +892,14 @@ namespace Microsoft.Build.Execution
                 ErrorIfState(BuildManagerState.Idle, "NoBuildInProgress");
                 VerifyStateInternal(BuildManagerState.Building);
 
-                var newSubmission = new BuildSubmission(this, GetNextSubmissionId(), requestData, _buildParameters.LegacyThreadingSemantics);
+                var newSubmission = requestData.CreateSubmission(this, GetNextSubmissionId(), requestData,
+                    _buildParameters.LegacyThreadingSemantics);
 
                 if (_buildTelemetry != null)
                 {
-                    _buildTelemetry.Project ??= requestData.ProjectFullPath;
+                    // Project graph can have multiple entry points, for purposes of identifying event for same build project,
+                    // we believe that including only one entry point will provide enough precision.
+                    _buildTelemetry.Project ??= requestData.EntryProjectsFullPath.First();
                     _buildTelemetry.Target ??= string.Join(",", requestData.TargetNames);
                 }
 
@@ -902,53 +909,24 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        /// <summary>
-        /// Submits a graph build request to the current build but does not start it immediately.  Allows the user to
-        /// perform asynchronous execution or access the submission ID prior to executing the request.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">Thrown if StartBuild has not been called or if EndBuild has been called.</exception>
-        public GraphBuildSubmission PendBuildRequest(GraphBuildRequestData requestData)
-        {
-            lock (_syncLock)
-            {
-                ErrorUtilities.VerifyThrowArgumentNull(requestData, nameof(requestData));
-                ErrorIfState(BuildManagerState.WaitingForBuildToComplete, "WaitingForEndOfBuild");
-                ErrorIfState(BuildManagerState.Idle, "NoBuildInProgress");
-                VerifyStateInternal(BuildManagerState.Building);
-
-                var newSubmission = new GraphBuildSubmission(this, GetNextSubmissionId(), requestData);
-
-                if (_buildTelemetry != null)
-                {
-                    // Project graph can have multiple entry points, for purposes of identifying event for same build project,
-                    // we believe that including only one entry point will provide enough precision.
-                    _buildTelemetry.Project ??= requestData.EntryProjectsFullPath.FirstOrDefault();
-                    _buildTelemetry.Target ??= string.Join(",", requestData.TargetNames);
-                }
-
-                _graphBuildSubmissions.Add(newSubmission.SubmissionId, newSubmission);
-                _noActiveSubmissionsEvent.Reset();
-                return newSubmission;
-            }
-        }
+        private TResultData BuildRequest<TRequestData, TResultData>(TRequestData requestData)
+            where TRequestData : BuildRequestData<TRequestData, TResultData>
+            where TResultData : BuildResultBase
+            => PendBuildRequest<TRequestData, TResultData>(requestData).Execute();
 
         /// <summary>
         /// Convenience method. Submits a build request and blocks until the results are available.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if StartBuild has not been called or if EndBuild has been called.</exception>
         public BuildResult BuildRequest(BuildRequestData requestData)
-        {
-            BuildSubmission submission = PendBuildRequest(requestData);
-            BuildResult result = submission.Execute();
-
-            return result;
-        }
+            => BuildRequest<BuildRequestData, BuildResult>(requestData);
 
         /// <summary>
         /// Convenience method. Submits a graph build request and blocks until the results are available.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if StartBuild has not been called or if EndBuild has been called.</exception>
-        public GraphBuildResult BuildRequest(GraphBuildRequestData requestData) => PendBuildRequest(requestData).Execute();
+        public GraphBuildResult BuildRequest(GraphBuildRequestData requestData)
+            => BuildRequest<GraphBuildRequestData, GraphBuildResult>(requestData);
 
         /// <summary>
         /// Signals that no more build requests are expected (or allowed) and the BuildManager may clean up.
@@ -975,14 +953,8 @@ namespace Microsoft.Build.Execution
                 lock (_syncLock)
                 {
                     // If there are any submissions which never started, remove them now.
-                    var submissionsToCheck = new List<BuildSubmission>(_buildSubmissions.Values);
-                    foreach (BuildSubmission submission in submissionsToCheck)
-                    {
-                        CheckSubmissionCompletenessAndRemove(submission);
-                    }
-
-                    var graphSubmissionsToCheck = new List<GraphBuildSubmission>(_graphBuildSubmissions.Values);
-                    foreach (GraphBuildSubmission submission in graphSubmissionsToCheck)
+                    var submissionsToCheck = new List<BuildSubmissionBase>(_buildSubmissions.Values);
+                    foreach (BuildSubmissionBase submission in submissionsToCheck)
                     {
                         CheckSubmissionCompletenessAndRemove(submission);
                     }
@@ -1001,7 +973,7 @@ namespace Microsoft.Build.Execution
 
                 Task projectCacheDispose = _projectCacheService.DisposeAsync().AsTask();
 
-                ErrorUtilities.VerifyThrow(_buildSubmissions.Count == 0 && _graphBuildSubmissions.Count == 0, "All submissions not yet complete.");
+                ErrorUtilities.VerifyThrow(_buildSubmissions.Count == 0, "All submissions not yet complete.");
                 ErrorUtilities.VerifyThrow(_activeNodes.Count == 0, "All nodes not yet shut down.");
 
                 if (_buildParameters.UsesOutputCache())
@@ -1139,13 +1111,15 @@ namespace Microsoft.Build.Execution
         /// Convenience method.  Submits a lone build request and blocks until results are available.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
-        public BuildResult Build(BuildParameters parameters, BuildRequestData requestData)
+        private TResultData Build<TRequestData, TResultData>(BuildParameters parameters, TRequestData requestData)
+            where TRequestData : BuildRequestData<TRequestData, TResultData>
+            where TResultData : BuildResultBase
         {
-            BuildResult result;
+            TResultData result;
             BeginBuild(parameters);
             try
             {
-                result = BuildRequest(requestData);
+                result = BuildRequest<TRequestData, TResultData>(requestData);
                 if (result.Exception == null && _threadException != null)
                 {
                     result.Exception = _threadException.SourceException;
@@ -1161,29 +1135,18 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Convenience method.  Submits a lone build request and blocks until results are available.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
+        public BuildResult Build(BuildParameters parameters, BuildRequestData requestData)
+            => Build<BuildRequestData, BuildResult>(parameters, requestData);
+
+        /// <summary>
         /// Convenience method.  Submits a lone graph build request and blocks until results are available.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
         public GraphBuildResult Build(BuildParameters parameters, GraphBuildRequestData requestData)
-        {
-            GraphBuildResult result;
-            BeginBuild(parameters);
-            try
-            {
-                result = BuildRequest(requestData);
-                if (result.Exception == null && _threadException != null)
-                {
-                    result.Exception = _threadException.SourceException;
-                    _threadException = null;
-                }
-            }
-            finally
-            {
-                EndBuild();
-            }
-
-            return result;
-        }
+            => Build<GraphBuildRequestData, GraphBuildResult>(parameters, requestData);
 
         /// <summary>
         /// Shuts down all idle MSBuild nodes on the machine
@@ -1254,7 +1217,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Standard ExpectedException pattern used")]
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Complex class might need refactoring to separate scheduling elements from submission elements.")]
-        internal void ExecuteSubmission(BuildSubmission submission, bool allowMainThreadBuild)
+        private void ExecuteSubmission(BuildSubmission submission, bool allowMainThreadBuild)
         {
             ErrorUtilities.VerifyThrowArgumentNull(submission, nameof(submission));
             ErrorUtilities.VerifyThrow(!submission.IsCompleted, "Submission already complete.");
@@ -1266,6 +1229,8 @@ namespace Microsoft.Build.Execution
             {
                 lock (_syncLock)
                 {
+                    submission.IsStarted = true;
+
                     ProjectInstance projectInstance = submission.BuildRequestData.ProjectInstance;
                     if (projectInstance != null)
                     {
@@ -1399,7 +1364,11 @@ namespace Microsoft.Build.Execution
             where TRequestData : BuildRequestDataBase
             where TResultData : BuildResultBase
         {
-            // TODO - unify the behavior in BuildManager as well
+            // TODO: here we should add BuildRequestStarted https://github.com/dotnet/msbuild/issues/10145
+            // BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+            // ((IBuildComponentHost)this).LoggingService.LogBuildEvent()
+
+
             if (submission is BuildSubmission buildSubmission)
             {
                 ExecuteSubmission(buildSubmission, allowMainThreadBuild);
@@ -1413,13 +1382,13 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// This method adds the graph build request in the specified submission to the set of requests being handled by the scheduler.
         /// </summary>
-        internal void ExecuteSubmission(GraphBuildSubmission submission)
+        private void ExecuteSubmission(GraphBuildSubmission submission)
         {
-            lock (_syncLock)
-            {
-                VerifyStateInternal(BuildManagerState.Building);
+            VerifyStateInternal(BuildManagerState.Building);
 
-                try
+            try
+            {
+                lock (_syncLock)
                 {
                     submission.IsStarted = true;
 
@@ -1449,11 +1418,12 @@ namespace Microsoft.Build.Execution
                         TaskCreationOptions.LongRunning,
                         TaskScheduler.Default);
                 }
-                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-                {
-                    HandleSubmissionException(submission, ex);
-                    throw;
-                }
+            }
+            // The handling of submission exception needs to be done outside of the lock
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            {
+                HandleSubmissionException(submission, ex);
+                throw;
             }
         }
 
@@ -1672,73 +1642,10 @@ namespace Microsoft.Build.Execution
         /// <remarks>
         /// To avoid deadlock possibility, this method MUST NOT be called inside of 'lock (_syncLock)'
         /// </remarks>
-        private void HandleSubmissionException(BuildSubmission submission, Exception ex)
+        private void HandleSubmissionException(BuildSubmissionBase submission, Exception ex)
         {
             Debug.Assert(!Monitor.IsEntered(_syncLock));
 
-            if (ex is AggregateException ae && ae.InnerExceptions.Count == 1)
-            {
-                ex = ae.InnerExceptions.First();
-            }
-            if (ex is InvalidProjectFileException projectException)
-            {
-                if (!projectException.HasBeenLogged)
-                {
-                    BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-                    ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(buildEventContext, projectException);
-                    projectException.HasBeenLogged = true;
-                }
-            }
-
-            bool submissionNeedsCompletion;
-            lock (_syncLock)
-            {
-                // BuildRequest may be null if the submission fails early on.
-                submissionNeedsCompletion = submission.BuildRequest != null;
-                if (submissionNeedsCompletion)
-                {
-                    var result = new BuildResult(submission.BuildRequest, ex);
-                    submission.CompleteResults(result);
-                }
-            }
-
-            if (submissionNeedsCompletion)
-            {
-                WaitForAllLoggingServiceEventsToBeProcessed();
-            }
-
-            lock (_syncLock)
-            {
-                if (submissionNeedsCompletion)
-                {
-                    submission.CompleteLogging();
-                }
-
-                _overallBuildSuccess = false;
-                CheckSubmissionCompletenessAndRemove(submission);
-            }
-        }
-
-        /// <summary>
-        /// Waits to drain all events of logging service.
-        /// This method shall be used carefully because during draining, LoggingService will block all incoming events.
-        /// </summary>
-        /// <remarks>
-        /// To avoid deadlock possibility, this method MUST NOT be called inside of 'lock (_syncLock)'
-        /// </remarks>
-        private void WaitForAllLoggingServiceEventsToBeProcessed()
-        {
-            // this has to be called out of the lock (_syncLock)
-            // because processing events can callback to 'this' instance and cause deadlock
-            Debug.Assert(!Monitor.IsEntered(_syncLock));
-            ((LoggingService)((IBuildComponentHost)this).LoggingService).WaitForLoggingToProcessEvents();
-        }
-
-        /// <summary>
-        /// Deals with exceptions that may be thrown as a result of ExecuteSubmission.
-        /// </summary>
-        private void HandleSubmissionException(GraphBuildSubmission submission, Exception ex)
-        {
             if (ex is AggregateException ae)
             {
                 // If there's exactly 1, just flatten it
@@ -1748,7 +1655,7 @@ namespace Microsoft.Build.Execution
                 }
                 else
                 {
-                    // Log each InvalidProjectFileException encountered during ProjectGraph creation
+                    // Log each InvalidProjectFileException encountered
                     foreach (Exception innerException in ae.InnerExceptions)
                     {
                         if (innerException is InvalidProjectFileException innerProjectException)
@@ -1769,11 +1676,27 @@ namespace Microsoft.Build.Execution
                 LogInvalidProjectFileError(new InvalidProjectFileException(ex.Message, ex));
             }
 
+            bool submissionNeedsCompletion;
             lock (_syncLock)
             {
-                if (submission.IsStarted)
+                // BuildRequest may be null if the submission fails early on.
+                submissionNeedsCompletion = submission.IsStarted;
+                if (submissionNeedsCompletion)
                 {
-                    submission.CompleteResults(new GraphBuildResult(submission.SubmissionId, ex));
+                    submission.CompleteResultsWithException(ex);
+                }
+            }
+
+            if (submissionNeedsCompletion)
+            {
+                WaitForAllLoggingServiceEventsToBeProcessed();
+            }
+
+            lock (_syncLock)
+            {
+                if (submissionNeedsCompletion)
+                {
+                    submission.CompleteLogging();
                 }
 
                 _overallBuildSuccess = false;
@@ -1789,6 +1712,21 @@ namespace Microsoft.Build.Execution
                     projectException.HasBeenLogged = true;
                 }
             }
+        }
+
+        /// <summary>
+        /// Waits to drain all events of logging service.
+        /// This method shall be used carefully because during draining, LoggingService will block all incoming events.
+        /// </summary>
+        /// <remarks>
+        /// To avoid deadlock possibility, this method MUST NOT be called inside of 'lock (_syncLock)'
+        /// </remarks>
+        private void WaitForAllLoggingServiceEventsToBeProcessed()
+        {
+            // this has to be called out of the lock (_syncLock)
+            // because processing events can callback to 'this' instance and cause deadlock
+            Debug.Assert(!Monitor.IsEntered(_syncLock));
+            ((LoggingService)((IBuildComponentHost)this).LoggingService).WaitForLoggingToProcessEvents();
         }
 
         private static void AddBuildRequestToSubmission(BuildSubmission submission, int configurationId, int projectContextId = BuildEventContext.InvalidProjectContextId)
@@ -1904,7 +1842,7 @@ namespace Microsoft.Build.Execution
                     lock (_syncLock)
                     {
                         submission.CompleteLogging();
-                        ReportResultsToSubmission(new BuildResult(submission.BuildRequest, ex));
+                        ReportResultsToSubmission<BuildRequestData, BuildResult>(new BuildResult(submission.BuildRequest, ex));
                         _overallBuildSuccess = false;
                     }
                 }
@@ -1999,7 +1937,7 @@ namespace Microsoft.Build.Execution
                 "Exceptions only get set when the graph submission gets completed with an exception in OnThreadException. That should not happen during graph builds.");
 
             // The overall submission is complete, so report it as complete
-            ReportResultsToSubmission(
+            ReportResultsToSubmission<GraphBuildRequestData, GraphBuildResult>(
                 new GraphBuildResult(
                     submission.SubmissionId,
                     new ReadOnlyDictionary<ProjectGraphNode, BuildResult>(resultsPerNode ?? new Dictionary<ProjectGraphNode, BuildResult>())));
@@ -2182,7 +2120,6 @@ namespace Microsoft.Build.Execution
             _executionCancellationTokenSource = null;
             _nodeConfiguration = null;
             _buildSubmissions.Clear();
-            _graphBuildSubmissions.Clear();
 
             _scheduler.Reset();
             _scheduler = null;
@@ -2345,7 +2282,7 @@ namespace Microsoft.Build.Execution
 
                             _resultsCache.AddResult(result);
                             submission.CompleteLogging();
-                            ReportResultsToSubmission(result);
+                            ReportResultsToSubmission<BuildRequestData, BuildResult>(result);
                         }
                     }
                     catch (Exception e)
@@ -2461,7 +2398,7 @@ namespace Microsoft.Build.Execution
             // handled here. This intentionally mirrors the behavior for cache requests, as it doesn't make sense to
             // report for projects which aren't going to be requested. Ideally, *any* request could be handled, but that
             // would require moving the cache service interactions to the Scheduler.
-            if (_buildSubmissions.TryGetValue(result.SubmissionId, out BuildSubmission buildSubmission))
+            if (_buildSubmissions.TryGetValue(result.SubmissionId, out BuildSubmissionBase buildSubmissionBase) && buildSubmissionBase is BuildSubmission buildSubmission)
             {
                 // The result may be associated with the build submission due to it being the submission which
                 // caused the build, but not the actual request which was originally used with the build submission.
@@ -2510,27 +2447,20 @@ namespace Microsoft.Build.Execution
                 if (shutdownPacket.Reason == NodeShutdownReason.ConnectionFailed)
                 {
                     ILoggingService loggingService = ((IBuildComponentHost)this).GetComponent(BuildComponentType.LoggingService) as ILoggingService;
-                    foreach (BuildSubmission submission in _buildSubmissions.Values)
+                    foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
                     {
                         BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, BuildEventContext.InvalidNodeId, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
                         string exception = ExceptionHandling.ReadAnyExceptionFromFile(_instantiationTimeUtc);
-                        loggingService.LogError(buildEventContext, new BuildEventFileInfo(String.Empty) /* no project file */, "ChildExitedPrematurely", node, ExceptionHandling.DebugDumpPath, exception);
-                    }
-
-                    foreach (GraphBuildSubmission submission in _graphBuildSubmissions.Values)
-                    {
-                        BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, BuildEventContext.InvalidNodeId, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-                        string exception = ExceptionHandling.ReadAnyExceptionFromFile(_instantiationTimeUtc);
-                        loggingService.LogError(buildEventContext, new BuildEventFileInfo(String.Empty) /* no project file */, "ChildExitedPrematurely", node, ExceptionHandling.DebugDumpPath, exception);
+                        loggingService?.LogError(buildEventContext, new BuildEventFileInfo(string.Empty) /* no project file */, "ChildExitedPrematurely", node, ExceptionHandling.DebugDumpPath, exception);
                     }
                 }
-                else if (shutdownPacket.Reason == NodeShutdownReason.Error && _buildSubmissions.Values.Count == 0 && _graphBuildSubmissions.Values.Count == 0)
+                else if (shutdownPacket.Reason == NodeShutdownReason.Error && _buildSubmissions.Values.Count == 0)
                 {
                     // We have no submissions to attach any exceptions to, lets just log it here.
                     if (shutdownPacket.Exception != null)
                     {
                         ILoggingService loggingService = ((IBuildComponentHost)this).GetComponent(BuildComponentType.LoggingService) as ILoggingService;
-                        loggingService.LogError(BuildEventContext.Invalid, new BuildEventFileInfo(String.Empty) /* no project file */, "ChildExitedPrematurely", node, ExceptionHandling.DebugDumpPath, shutdownPacket.Exception.ToString());
+                        loggingService?.LogError(BuildEventContext.Invalid, new BuildEventFileInfo(string.Empty) /* no project file */, "ChildExitedPrematurely", node, ExceptionHandling.DebugDumpPath, shutdownPacket.Exception.ToString());
                         OnThreadException(shutdownPacket.Exception);
                     }
                 }
@@ -2538,15 +2468,19 @@ namespace Microsoft.Build.Execution
                 _nodeManager.ShutdownConnectedNodes(_buildParameters.EnableNodeReuse);
                 _taskHostNodeManager.ShutdownConnectedNodes(_buildParameters.EnableNodeReuse);
 
-                foreach (BuildSubmission submission in _buildSubmissions.Values)
+                foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
                 {
                     // The submission has not started
-                    if (submission.BuildRequest == null)
+                    if (!submission.IsStarted)
                     {
                         continue;
                     }
 
-                    _resultsCache.AddResult(new BuildResult(submission.BuildRequest, shutdownPacket.Exception ?? new BuildAbortedException()));
+                    if (submission is BuildSubmission buildSubmission)
+                    {
+                        _resultsCache.AddResult(new BuildResult(buildSubmission.BuildRequest,
+                            shutdownPacket.Exception ?? new BuildAbortedException()));
+                    }
                 }
 
                 _scheduler.ReportBuildAborted(node);
@@ -2597,22 +2531,19 @@ namespace Microsoft.Build.Execution
 
             if (_activeNodes.Count == 0)
             {
-                var submissions = new List<BuildSubmission>(_buildSubmissions.Values);
-                foreach (BuildSubmission submission in submissions)
+                var submissions = new List<BuildSubmissionBase>(_buildSubmissions.Values);
+                foreach (BuildSubmissionBase submission in submissions)
                 {
                     // The submission has not started do not add it to the results cache
-                    if (submission.BuildRequest == null)
+                    if (!submission.IsStarted)
                     {
                         continue;
                     }
 
-                    // UNDONE: (stability) It might be best to trigger the logging service to shut down here,
-                    //         since the full build is complete.  This would allow us to ensure all logging messages have been
-                    //         drained and all submissions can complete their logging requirements.
-                    BuildResult result = _resultsCache.GetResultsForConfiguration(submission.BuildRequest.ConfigurationId) ??
-                                         new BuildResult(submission.BuildRequest, new BuildAbortedException());
-
-                    submission.CompleteResults(result);
+                    if (!CompleteSubmissionFromCache(submission))
+                    {
+                        submission.CompleteResultsWithException(new BuildAbortedException());
+                    }
 
                     // If we never received a project started event, consider logging complete anyhow, since the nodes have
                     // shut down.
@@ -2621,21 +2552,23 @@ namespace Microsoft.Build.Execution
                     CheckSubmissionCompletenessAndRemove(submission);
                 }
 
-                var graphSubmissions = new List<GraphBuildSubmission>(_graphBuildSubmissions.Values);
-                foreach (GraphBuildSubmission submission in graphSubmissions)
-                {
-                    if (submission.IsStarted)
-                    {
-                        continue;
-                    }
-
-                    submission.CompleteResults(new GraphBuildResult(submission.SubmissionId, new BuildAbortedException()));
-
-                    CheckSubmissionCompletenessAndRemove(submission);
-                }
-
                 _noNodesActiveEvent.Set();
             }
+        }
+
+        private bool CompleteSubmissionFromCache(BuildSubmissionBase submissionBase)
+        {
+            if (submissionBase is BuildSubmission submission)
+            {
+                BuildResult result = _resultsCache.GetResultsForConfiguration(submission.BuildRequest.ConfigurationId);
+                if (result != null)
+                {
+                    submission.CompleteResults(result);
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -2658,7 +2591,7 @@ namespace Microsoft.Build.Execution
                             _scheduler.WriteDetailedSummary(response.BuildResult.SubmissionId);
                         }
 
-                        ReportResultsToSubmission(response.BuildResult);
+                        ReportResultsToSubmission<BuildRequestData, BuildResult>(response.BuildResult);
                         break;
 
                     case ScheduleActionType.CircularDependency:
@@ -2715,15 +2648,15 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        /// <summary>
-        /// Completes a submission using the specified overall results.
-        /// </summary>
-        private void ReportResultsToSubmission(BuildResult result)
+        internal void ReportResultsToSubmission<TRequestData, TResultData>(TResultData result)
+            where TRequestData : BuildRequestDataBase
+            where TResultData : BuildResultBase
         {
             lock (_syncLock)
             {
                 // The build submission has not already been completed.
-                if (_buildSubmissions.TryGetValue(result.SubmissionId, out BuildSubmission submission))
+                if (_buildSubmissions.TryGetValue(result.SubmissionId, out BuildSubmissionBase submissionBase) &&
+                    submissionBase is BuildSubmission<TRequestData, TResultData> submission)
                 {
                     /* If the request failed because we caught an exception from the loggers, we can assume we will receive no more logging messages for
                      * this submission, therefore set the logging as complete. InternalLoggerExceptions are unhandled exceptions from the logger. If the logger author does
@@ -2734,31 +2667,13 @@ namespace Microsoft.Build.Execution
                      *
                      * If any other exception happened and logging is not completed, then go ahead and complete it now since this is the last place to do it.
                      * Otherwise the submission would remain uncompleted, potentially causing hangs (EndBuild waiting on all BuildSubmissions, users waiting on BuildSubmission, or expecting a callback, etc)
-                    */
+                     */
                     if (!submission.LoggingCompleted && result.Exception != null)
                     {
                         submission.CompleteLogging();
                     }
 
                     submission.CompleteResults(result);
-
-                    CheckSubmissionCompletenessAndRemove(submission);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Completes a submission using the specified overall results.
-        /// </summary>
-        private void ReportResultsToSubmission(GraphBuildResult result)
-        {
-            lock (_syncLock)
-            {
-                // The build submission has not already been completed.
-                if (_graphBuildSubmissions.TryGetValue(result.SubmissionId, out GraphBuildSubmission submission))
-                {
-                    submission.CompleteResults(result);
-
                     CheckSubmissionCompletenessAndRemove(submission);
                 }
             }
@@ -2767,42 +2682,21 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Determines if the submission is fully completed.
         /// </summary>
-        private void CheckSubmissionCompletenessAndRemove(BuildSubmission submission)
-        {
-            lock (_syncLock)
-            {
-                // If the submission has completed or never started, remove it.
-                if (submission.IsCompleted || submission.BuildRequest == null)
-                {
-                    _overallBuildSuccess &= (submission.BuildResult?.OverallResult == BuildResultCode.Success);
-                    _buildSubmissions.Remove(submission.SubmissionId);
-
-                    // Clear all cached SDKs for the submission
-                    SdkResolverService.ClearCache(submission.SubmissionId);
-                }
-
-                CheckAllSubmissionsComplete(submission.BuildRequestData?.Flags);
-            }
-        }
-
-        /// <summary>
-        /// Determines if the submission is fully completed.
-        /// </summary>
-        private void CheckSubmissionCompletenessAndRemove(GraphBuildSubmission submission)
+        private void CheckSubmissionCompletenessAndRemove(BuildSubmissionBase submission)
         {
             lock (_syncLock)
             {
                 // If the submission has completed or never started, remove it.
                 if (submission.IsCompleted || !submission.IsStarted)
                 {
-                    _overallBuildSuccess &= submission.BuildResult?.OverallResult == BuildResultCode.Success;
-                    _graphBuildSubmissions.Remove(submission.SubmissionId);
+                    _overallBuildSuccess &= (submission.BuildResultBase?.OverallResult == BuildResultCode.Success);
+                    _buildSubmissions.Remove(submission.SubmissionId);
 
                     // Clear all cached SDKs for the submission
                     SdkResolverService.ClearCache(submission.SubmissionId);
                 }
 
-                CheckAllSubmissionsComplete(submission.BuildRequestData?.Flags);
+                CheckAllSubmissionsComplete(submission.BuildRequestDataBase?.Flags);
             }
         }
 
@@ -2810,7 +2704,7 @@ namespace Microsoft.Build.Execution
         {
             Debug.Assert(Monitor.IsEntered(_syncLock));
 
-            if (_buildSubmissions.Count == 0 && _graphBuildSubmissions.Count == 0)
+            if (_buildSubmissions.Count == 0)
             {
                 if (flags.HasValue && flags.Value.HasFlag(BuildRequestDataFlags.ClearCachesAfterBuild))
                 {
@@ -2876,40 +2770,30 @@ namespace Microsoft.Build.Execution
                     }
 
                     _threadException = ExceptionDispatchInfo.Capture(e);
-                    var submissions = new List<BuildSubmission>(_buildSubmissions.Values);
-                    foreach (BuildSubmission submission in submissions)
+                    var submissions = new List<BuildSubmissionBase>(_buildSubmissions.Values);
+                    foreach (BuildSubmissionBase submission in submissions)
                     {
                         // Submission has not started
-                        if (submission.BuildRequest == null)
-                        {
-                            continue;
-                        }
-
-                        // Attach the exception to this submission if it does not already have an exception associated with it
-                        if (!submission.IsCompleted && submission.BuildResult != null && submission.BuildResult.Exception == null)
-                        {
-                            submission.BuildResult.Exception = e;
-                        }
-                        submission.CompleteLogging();
-                        submission.CompleteResults(new BuildResult(submission.BuildRequest, e));
-
-                        CheckSubmissionCompletenessAndRemove(submission);
-                    }
-
-                    var graphSubmissions = new List<GraphBuildSubmission>(_graphBuildSubmissions.Values);
-                    foreach (GraphBuildSubmission submission in graphSubmissions)
-                    {
                         if (!submission.IsStarted)
                         {
                             continue;
                         }
 
                         // Attach the exception to this submission if it does not already have an exception associated with it
-                        if (!submission.IsCompleted && submission.BuildResult != null && submission.BuildResult.Exception == null)
+                        if (!submission.IsCompleted && submission.BuildResultBase != null && submission.BuildResultBase.Exception == null)
                         {
-                            submission.BuildResult.Exception = e;
+                            submission.BuildResultBase.Exception = e;
                         }
-                        submission.CompleteResults(submission.BuildResult ?? new GraphBuildResult(submission.SubmissionId, e));
+                        submission.CompleteLogging();
+
+                        if (submission.BuildResultBase != null)
+                        {
+                            submission.CheckForCompletion();
+                        }
+                        else
+                        {
+                            submission.CompleteResultsWithException(e);
+                        }
 
                         CheckSubmissionCompletenessAndRemove(submission);
                     }

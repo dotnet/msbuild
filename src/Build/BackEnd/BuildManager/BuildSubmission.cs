@@ -5,10 +5,7 @@ using System;
 using System.Globalization;
 using System.Threading;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
-#nullable disable
 
 namespace Microsoft.Build.Execution
 {
@@ -23,21 +20,12 @@ namespace Microsoft.Build.Execution
         where TRequestData : BuildRequestDataBase
         where TResultData : BuildResultBase;
 
-    public abstract class BuildSubmissionBase { }
-
-    public abstract class BuildSubmission<TRequestData, TResultData> : BuildSubmissionBase
-        where TRequestData : BuildRequestDataBase
-        where TResultData : BuildResultBase
+    public abstract class BuildSubmissionBase
     {
-        /// <summary>
-        /// The callback to invoke when the submission is complete.
-        /// </summary>
-        private BuildSubmissionCompleteCallback<TRequestData, TResultData> _completionCallback;
-
         /// <summary>
         /// The completion event.
         /// </summary>
-        private readonly ManualResetEvent _completionEvent;
+        protected readonly ManualResetEvent CompletionEvent;
 
         /// <summary>
         /// Flag indicating if logging is done.
@@ -47,22 +35,27 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// True if it has been invoked
         /// </summary>
-        private int _completionInvoked;
+        protected int CompletionInvoked;
+
+        //
+        // Unfortunately covariant overrides are not available for .NET 472,
+        //  so we have to use two set of properties for derived classes.
+        internal abstract BuildRequestDataBase? BuildRequestDataBase { get; }
+
+        internal abstract BuildResultBase? BuildResultBase { get; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        protected internal BuildSubmission(BuildManager buildManager, int submissionId, TRequestData requestData)
+        protected internal BuildSubmissionBase(BuildManager buildManager, int submissionId)
         {
             ErrorUtilities.VerifyThrowArgumentNull(buildManager, nameof(buildManager));
-            ErrorUtilities.VerifyThrowArgumentNull(requestData, nameof(requestData));
 
             BuildManager = buildManager;
             SubmissionId = submissionId;
-            BuildRequestData = requestData;
-            _completionEvent = new ManualResetEvent(false);
+            CompletionEvent = new ManualResetEvent(false);
             LoggingCompleted = false;
-            _completionInvoked = 0;
+            CompletionInvoked = 0;
         }
 
         /// <summary>
@@ -78,12 +71,12 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The asynchronous context provided to <see cref="BuildSubmission{TRequestData,TResultData}.ExecuteAsync(BuildSubmissionCompleteCallback&lt;TRequestData, TResultData&gt;, object)"/>, if any.
         /// </summary>
-        public Object AsyncContext { get; private set; }
+        public object? AsyncContext { get; protected set; }
 
         /// <summary>
         /// A <see cref="System.Threading.WaitHandle"/> which will be signalled when the build is complete.  Valid after <see cref="BuildSubmission{TRequestData,TResultData}.Execute()"/> or <see cref="BuildSubmission{TRequestData,TResultData}.ExecuteAsync(BuildSubmissionCompleteCallback&lt;TRequestData, TResultData&gt;, object)"/> returns, otherwise null.
         /// </summary>
-        public WaitHandle WaitHandle => _completionEvent;
+        public WaitHandle WaitHandle => CompletionEvent;
 
         /// <summary>
         /// Returns true if this submission is complete.
@@ -91,19 +84,59 @@ namespace Microsoft.Build.Execution
         public bool IsCompleted => WaitHandle.WaitOne(new TimeSpan(0));
 
         /// <summary>
+        /// Whether the build has started.
+        /// </summary>
+        internal bool IsStarted { get; set; }
+
+        /// <summary>
+        /// Indicates that all logging events for this submission are complete.
+        /// </summary>
+        internal void CompleteLogging()
+        {
+            LoggingCompleted = true;
+            CheckForCompletion();
+        }
+
+        protected internal virtual void OnCompletition() { }
+        protected internal abstract void CheckForCompletion();
+
+        internal abstract BuildResultBase CompleteResultsWithException(Exception exception);
+    }
+
+    public abstract class BuildSubmission<TRequestData, TResultData> : BuildSubmissionBase
+        where TRequestData : BuildRequestDataBase
+        where TResultData : BuildResultBase
+    {
+        /// <summary>
+        /// The callback to invoke when the submission is complete.
+        /// </summary>
+        private BuildSubmissionCompleteCallback<TRequestData, TResultData>? _completionCallback;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        protected internal BuildSubmission(BuildManager buildManager, int submissionId, TRequestData requestData)
+            : base(buildManager, submissionId)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(requestData, nameof(requestData));
+            BuildRequestData = requestData;
+        }
+
+        //
+        // Unfortunately covariant overrides are not available for .NET 472,
+        //  so we have to use two set of properties for derived classes.
+        internal override BuildResultBase? BuildResultBase => BuildResult;
+        internal override BuildRequestDataBase? BuildRequestDataBase => BuildRequestData;
+
+        /// <summary>
         /// The results of the build per graph node.  Valid only after WaitHandle has become signalled.
         /// </summary>
-        public TResultData BuildResult { get; internal set; }
+        public TResultData? BuildResult { get; private set; }
 
         /// <summary>
         /// The BuildRequestData being used for this submission.
         /// </summary>
-        internal TRequestData BuildRequestData { get; }
-
-        /// <summary>
-        /// Whether the graph build has started.
-        /// </summary>
-        internal bool IsStarted { get; set; }
+        internal TRequestData? BuildRequestData { get; }
 
         /// <summary>
         /// Starts the request and blocks until results are available.
@@ -115,29 +148,20 @@ namespace Microsoft.Build.Execution
         /// Starts the request asynchronously and immediately returns control to the caller.
         /// </summary>
         /// <exception cref="InvalidOperationException">The request has already been started or is already complete.</exception>
-        public void ExecuteAsync(BuildSubmissionCompleteCallback<TRequestData, TResultData> callback, object context)
+        public void ExecuteAsync(BuildSubmissionCompleteCallback<TRequestData, TResultData>? callback, object? context)
         {
             ExecuteAsync(callback, context, allowMainThreadBuild: false);
         }
 
         protected void ExecuteAsync(
-            BuildSubmissionCompleteCallback<TRequestData, TResultData> callback,
-            object context,
+            BuildSubmissionCompleteCallback<TRequestData, TResultData>? callback,
+            object? context,
             bool allowMainThreadBuild)
         {
             ErrorUtilities.VerifyThrowInvalidOperation(!IsCompleted, "SubmissionAlreadyComplete");
             _completionCallback = callback;
             AsyncContext = context;
             BuildManager.ExecuteSubmission(this, allowMainThreadBuild);
-        }
-
-        /// <summary>
-        /// Indicates that all logging events for this submission are complete.
-        /// </summary>
-        internal void CompleteLogging()
-        {
-            LoggingCompleted = true;
-            CheckForCompletion();
         }
 
         /// <summary>
@@ -154,31 +178,35 @@ namespace Microsoft.Build.Execution
             CheckForCompletion();
         }
 
-        protected internal virtual void OnCompletition() { }
+        protected internal abstract TResultData CreateFailedResult(Exception exception);
+
+        internal override BuildResultBase CompleteResultsWithException(Exception exception)
+            => CompleteResults(exception);
+
+        private TResultData CompleteResults(Exception exception)
+        {
+            TResultData result = CreateFailedResult(exception);
+            CompleteResults(result);
+            return result;
+        }
 
         /// <summary>
         /// Determines if we are completely done with this submission and can complete it so the user may access results.
         /// </summary>
-        private void CheckForCompletion()
+        protected internal override void CheckForCompletion()
         {
             if (BuildResult != null && LoggingCompleted)
             {
-                bool hasCompleted = (Interlocked.Exchange(ref _completionInvoked, 1) == 1);
+                bool hasCompleted = (Interlocked.Exchange(ref CompletionInvoked, 1) == 1);
                 if (!hasCompleted)
                 {
                     OnCompletition();
-                    ////// Did this submission have warnings elevated to errors? If so, mark it as
-                    ////// failed even though it succeeded (with warnings--but they're errors).
-                    ////if (((IBuildComponentHost)BuildManager).LoggingService.HasBuildSubmissionLoggedErrors(BuildResult.SubmissionId))
-                    ////{
-                    ////    BuildResult.SetOverallResult(overallResult: false);
-                    ////}
 
-                    _completionEvent.Set();
+                    CompletionEvent.Set();
 
                     if (_completionCallback != null)
                     {
-                        void Callback(object state)
+                        void Callback(object? state)
                         {
                             _completionCallback(this);
                         }
@@ -199,6 +227,13 @@ namespace Microsoft.Build.Execution
     /// </remarks>
     public delegate void BuildSubmissionCompleteCallback(BuildSubmission submission);
 
+    /// <summary>
+    /// A BuildSubmission represents a build request which has been submitted to the BuildManager for processing.  It may be used to
+    /// execute synchronous or asynchronous build requests and provides access to the results upon completion.
+    /// </summary>
+    /// <remarks>
+    /// This class is thread-safe.
+    /// </remarks>
     public sealed class BuildSubmission : BuildSubmission<BuildRequestData, BuildResult>
     {
         /// <summary>
@@ -209,7 +244,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The build request for execution.
         /// </summary>
-        internal BuildRequest BuildRequest { get; set; }
+        internal BuildRequest? BuildRequest { get; set; }
 
         internal BuildSubmission(BuildManager buildManager, int submissionId, BuildRequestData requestData, bool legacyThreadingSemantics)
             : base(buildManager, submissionId, requestData)
@@ -223,12 +258,6 @@ namespace Microsoft.Build.Execution
         /// <exception cref="System.InvalidOperationException">The request has already been started or is already complete.</exception>
         public override BuildResult Execute()
         {
-            // TODO: here
-            // ((IBuildComponentHost)BuildManager).LoggingService.LogBuildEvent()
-            // BuildEventContext buildEventContext = new BuildEventContext(this.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-
-            // async as well !!
-
             LegacyThreadingData legacyThreadingData = ((IBuildComponentHost)BuildManager).LegacyThreadingData;
             legacyThreadingData.RegisterSubmissionForLegacyThread(SubmissionId);
 
@@ -244,14 +273,26 @@ namespace Microsoft.Build.Execution
 
             legacyThreadingData.UnregisterSubmissionForLegacyThread(SubmissionId);
 
-            return BuildResult;
+            ErrorUtilities.VerifyThrow(BuildResult != null,
+                "BuildResult is not populated after Execute is done.");
+
+            return BuildResult!;
         }
+
+        protected internal override BuildResult CreateFailedResult(Exception exception)
+        {
+            ErrorUtilities.VerifyThrow(BuildResult != null,
+                "BuildResult is not populated after Execute is done.");
+            return new(BuildRequest!, exception);
+        }
+        
 
         protected internal override void OnCompletition()
         {
             // Did this submission have warnings elevated to errors? If so, mark it as
             // failed even though it succeeded (with warnings--but they're errors).
-            if (((IBuildComponentHost)BuildManager).LoggingService.HasBuildSubmissionLoggedErrors(BuildResult.SubmissionId))
+            if (BuildResult != null &&
+                ((IBuildComponentHost)BuildManager).LoggingService.HasBuildSubmissionLoggedErrors(BuildResult.SubmissionId))
             {
                 BuildResult.SetOverallResult(overallResult: false);
             }

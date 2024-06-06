@@ -49,4 +49,19 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public HostServices? HostServices { get; }
     }
+
+    public abstract class BuildRequestData<TRequestData, TResultData> : BuildRequestDataBase
+        where TRequestData : BuildRequestData<TRequestData, TResultData>
+        where TResultData : BuildResultBase
+    {
+        protected BuildRequestData(
+            ICollection<string> targetNames,
+            BuildRequestDataFlags flags,
+            HostServices? hostServices)
+            : base(targetNames, flags, hostServices)
+        { }
+
+        internal abstract BuildSubmission<TRequestData, TResultData> CreateSubmission(
+            BuildManager buildManager, int submissionId, TRequestData requestData, bool legacyThreadingSemantics);
+    }
 }

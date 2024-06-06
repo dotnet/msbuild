@@ -89,9 +89,9 @@ namespace Microsoft.Build.Execution
     }
 
     /// <summary>
-    /// BuildRequestData encapsulates all of the data needed to submit a build request.
+    /// BuildRequestData encapsulates all the data needed to submit a build request.
     /// </summary>
-    public sealed class BuildRequestData : BuildRequestDataBase
+    public sealed class BuildRequestData : BuildRequestData<BuildRequestData, BuildResult>
     {
         /// <summary>
         /// Constructs a BuildRequestData for build requests based on project instances.
@@ -251,6 +251,11 @@ namespace Microsoft.Build.Execution
         /// <summary>The project file.</summary>
         /// <value>The project file to be built.</value>
         public string ProjectFullPath { get; internal set; }
+
+        internal override BuildSubmission<BuildRequestData, BuildResult> CreateSubmission(BuildManager buildManager,
+            int submissionId, BuildRequestData requestData,
+            bool legacyThreadingSemantics) =>
+            new BuildSubmission(buildManager, submissionId, requestData, legacyThreadingSemantics);
 
         public override IEnumerable<string> EntryProjectsFullPath => ProjectFullPath.AsSingleItemEnumerable();
 
