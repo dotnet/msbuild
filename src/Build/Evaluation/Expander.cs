@@ -3594,6 +3594,16 @@ namespace Microsoft.Build.Evaluation
                             try
                             {
                                 // First use InvokeMember using the standard binder - this will match and coerce as needed
+                                for (int i = 0; i < args.Length; i++)
+                                {
+                                    object s = args[i];
+                                    if (s is not null && s.ToString().StartsWith("outParam", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        Type t = Type.GetType(s.ToString().Substring("outParam".Length));
+                                        args[i] = t.IsValueType ? Activator.CreateInstance(t) : null;
+                                    }
+                                }
+
                                 functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
                             }
                             // If we're invoking a method, then there are deeper attempts that can be made to invoke the method.
