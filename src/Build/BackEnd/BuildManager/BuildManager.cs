@@ -2945,11 +2945,11 @@ namespace Microsoft.Build.Execution
 
             // We need to register SOME logger if we don't have any. This ensures the out of proc nodes will still send us message,
             // ensuring we receive project started and finished events.
-            static List<ForwardingLoggerRecord> ProcessForwardingLoggers(IEnumerable<ForwardingLoggerRecord> forwarders)
+            static List<ForwardingLoggerRecord> ProcessForwardingLoggers(IEnumerable<ForwardingLoggerRecord>? forwarders)
             {
                 Type configurableLoggerType = typeof(ConfigurableForwardingLogger);
                 string engineAssemblyName = configurableLoggerType.GetTypeInfo().Assembly.GetName().FullName;
-                string configurableLoggerName = configurableLoggerType.FullName;
+                string configurableLoggerName = configurableLoggerType.FullName!;
 
                 if (forwarders == null)
                 {
@@ -2968,7 +2968,7 @@ namespace Microsoft.Build.Execution
 
                 // Those are the cases where we are sure that we have the forwarding setup as need.
                 if (result.Any(l =>
-                        l.ForwardingLoggerDescription.Name.Contains(typeof(CentralForwardingLogger).FullName)
+                        l.ForwardingLoggerDescription.Name.Contains(typeof(CentralForwardingLogger).FullName!)
                         ||
                         (l.ForwardingLoggerDescription.Name.Contains(configurableLoggerName)
                          &&
@@ -2983,7 +2983,7 @@ namespace Microsoft.Build.Execution
                 }
 
                 // In case there is a ConfigurableForwardingLogger, that is not configured as we'd need - we can adjust the config
-                ForwardingLoggerRecord configurableLogger = result.FirstOrDefault(l =>
+                ForwardingLoggerRecord? configurableLogger = result.FirstOrDefault(l =>
                     l.ForwardingLoggerDescription.Name.Contains(configurableLoggerName));
 
                 // If there is not - we need to add our own.
