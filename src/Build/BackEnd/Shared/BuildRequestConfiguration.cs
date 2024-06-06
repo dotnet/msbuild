@@ -776,14 +776,14 @@ namespace Microsoft.Build.BackEnd
             }
 
             List<(string, TargetBuiltReason)> initialTargets = _projectInitialTargets.ConvertAll(target => (target, TargetBuiltReason.InitialTargets));
-            List<(string, TargetBuiltReason)> defaultTargets = _projectDefaultTargets.ConvertAll(target => (target, TargetBuiltReason.DefaultTargets)); 
-            List<(string, TargetBuiltReason)> requestTargets = request.Targets.ConvertAll(target => (target, TargetBuiltReason.EntryTargets));
+            List<(string, TargetBuiltReason)> nonInitialTargets = (request.Targets.Count == 0)
+            ? _projectDefaultTargets.ConvertAll(target => (target, TargetBuiltReason.DefaultTargets))
+            : request.Targets.ConvertAll(target => (target, TargetBuiltReason.EntryTargets));
 
-            var allTargets = new List<(string, TargetBuiltReason)>(initialTargets.Count + defaultTargets.Count + requestTargets.Count);
+            var allTargets = new List<(string, TargetBuiltReason)>(initialTargets.Count + nonInitialTargets.Count);
 
             allTargets.AddRange(initialTargets);
-            allTargets.AddRange(defaultTargets);
-            allTargets.AddRange(requestTargets);
+            allTargets.AddRange(nonInitialTargets);
 
             return allTargets;
         }
