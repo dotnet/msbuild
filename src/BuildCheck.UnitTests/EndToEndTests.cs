@@ -31,7 +31,7 @@ public class EndToEndTests : IDisposable
 
     public void Dispose() => _env.Dispose();
 
-    [Theory]
+    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10036")]
     [InlineData(true, true)]
     [InlineData(false, true)]
     [InlineData(false, false)]
