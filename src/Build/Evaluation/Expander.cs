@@ -3594,7 +3594,7 @@ namespace Microsoft.Build.Evaluation
                             try
                             {
                                 // If there are any out parameters, try to figure out their type and create defaults for them as appropriate before calling the method.
-                                if (args.Any(a => a.Equals("_")))
+                                if (args?.Any(a => a.Equals("_")) == true)
                                 {
                                     IEnumerable<MethodInfo> methods = _receiverType.GetMethods(_bindingFlags).Where(m => m.Name.Equals(_methodMethodName) && m.GetParameters().Length == args.Length);
                                     MethodInfo method = methods.SingleOrDefault();
