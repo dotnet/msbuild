@@ -40,7 +40,7 @@ namespace Microsoft.Build.Execution
         //
         // Unfortunately covariant overrides are not available for .NET 472,
         //  so we have to use two set of properties for derived classes.
-        internal abstract BuildRequestDataBase? BuildRequestDataBase { get; }
+        internal abstract BuildRequestDataBase BuildRequestDataBase { get; }
 
         internal abstract BuildResultBase? BuildResultBase { get; }
 
@@ -126,7 +126,7 @@ namespace Microsoft.Build.Execution
         // Unfortunately covariant overrides are not available for .NET 472,
         //  so we have to use two set of properties for derived classes.
         internal override BuildResultBase? BuildResultBase => BuildResult;
-        internal override BuildRequestDataBase? BuildRequestDataBase => BuildRequestData;
+        internal override BuildRequestDataBase BuildRequestDataBase => BuildRequestData;
 
         /// <summary>
         /// The results of the build per graph node.  Valid only after WaitHandle has become signalled.
@@ -136,7 +136,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The BuildRequestData being used for this submission.
         /// </summary>
-        internal TRequestData? BuildRequestData { get; }
+        internal TRequestData BuildRequestData { get; }
 
         /// <summary>
         /// Starts the request and blocks until results are available.

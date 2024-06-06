@@ -81,6 +81,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 throw new NotImplementedException();
             }
 
+            public TComponent GetComponent<TComponent>(BuildComponentType type) where TComponent : IBuildComponent => throw new NotImplementedException();
+
             public void RegisterFactory(BuildComponentType type, BuildComponentFactoryDelegate factory)
             {
             }
