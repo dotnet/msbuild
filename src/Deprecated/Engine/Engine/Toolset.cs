@@ -12,8 +12,23 @@ using Microsoft.Build.BuildEngine.Shared;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
+    /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// <xref:Microsoft.Build.Construction>
+    /// <xref:Microsoft.Build.Evaluation>
+    /// <xref:Microsoft.Build.Execution>
+    /// 
     /// Aggregation of a toolset version (eg. "2.0"), tools path, and optional set of associated properties
     /// </summary>
+    /// <remarks>
+    /// <format type="text/markdown"><![CDATA[
+    /// ## Remarks
+    /// > [!WARNING]
+    /// > This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// > <xref:Microsoft.Build.Construction>
+    /// > <xref:Microsoft.Build.Evaluation>
+    /// > <xref:Microsoft.Build.Execution>
+    /// ]]></format>
+    /// </remarks>
     public class Toolset
     {
         // Name of the tools version
@@ -30,6 +45,17 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="toolsVersion">Name of the toolset</param>
         /// <param name="toolsPath">Path to this toolset's tasks and targets</param>
+        /// <remarks>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public Toolset(string toolsVersion, string toolsPath)
             : this(toolsVersion, toolsPath, null)
         {
@@ -42,6 +68,16 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="toolsPath">Path to this toolset's tasks and targets</param>
         /// <param name="buildProperties">Properties that should be associated with the Toolset.
         /// May be null, in which case an empty property group will be used.</param>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public Toolset(string toolsVersion, string toolsPath, BuildPropertyGroup buildProperties)
         {
             ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, nameof(toolsVersion));
@@ -60,6 +96,16 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Name of this toolset
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public string ToolsVersion
         {
             get
@@ -71,6 +117,16 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Path to this toolset's tasks and targets. Corresponds to $(MSBuildToolsPath) in a project or targets file.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public string ToolsPath
         {
             get
@@ -104,6 +160,16 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Properties associated with the toolset
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public BuildPropertyGroup BuildProperties
         {
             get
@@ -115,6 +181,16 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Make a deep copy of the Toolset
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public Toolset Clone()
         {
             // Can't use BuildPropertyGroupProxy as it's not a BuildPropertyGroup,

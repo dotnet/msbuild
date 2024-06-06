@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -30,10 +30,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
-
-    <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
-    <PackageReference Include="System.Threading.Tasks.Dataflow" />
 
     <PackageReference Include="System.Reflection.MetadataLoadContext" />
 
@@ -50,6 +47,8 @@
     <PackageReference Include="System.Memory" />
     <PackageReference Include="System.Security.Principal.Windows" />
     <PackageReference Include="System.Text.Json" />
+    <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="System.Threading.Tasks.Dataflow" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
@@ -167,6 +166,10 @@
     <Compile Include="BuildCheck\Infrastructure\NullBuildCheckManager.cs" />
     <Compile Include="BuildCheck\Infrastructure\NullBuildCheckManagerProvider.cs" />
     <Compile Include="BuildCheck\Infrastructure\TracingReporter.cs" />
+    <Compile Include="BuildCheck\Infrastructure\EditorConfig\EditorConfigFile.cs" />
+    <Compile Include="BuildCheck\Infrastructure\EditorConfig\EditorConfigGlobsMatcher.cs" />
+    <Compile Include="BuildCheck\Infrastructure\EditorConfig\EditorConfigParser.cs" />
+    <Compile Include="BuildCheck\Infrastructure\BuildCheckConfigurationErrorScope.cs" />
     <Compile Include="BuildCheck\OM\BuildCheckDataContext.cs" />
     <Compile Include="BuildCheck\API\BuildAnalyzer.cs" />
     <Compile Include="BuildCheck\API\BuildAnalyzerConfiguration.cs" />
@@ -191,6 +194,7 @@
     <Compile Include="BuildCheck\Utilities\Constants.cs" />
     <Compile Include="BuildCheck\Utilities\EnumerableExtensions.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
+    <Compile Include="Evaluation\PropertiesUseTracker.cs" />
     <Compile Include="FileAccess\DesiredAccess.cs" />
     <Compile Include="FileAccess\FileAccessData.cs" />
     <Compile Include="FileAccess\FlagsAndAttributes.cs" />
@@ -199,6 +203,7 @@
     <Compile Include="FileAccess\RequestedAccess.cs" />
     <Compile Include="BuildCheck\Logging\AnalyzerLoggingContext.cs" />
     <Compile Include="BuildCheck\Logging\AnalyzerLoggingContextFactory.cs" />
+    <Compile Include="Instance\IPropertyElementWithLocation.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />

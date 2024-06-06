@@ -2,6 +2,16 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pl" original="../Strings.resx">
     <body>
+      <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpened">
+        <source>The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</source>
+        <target state="translated">Plik manifestu nie istnieje lub nie można go odczytać. Upewnij się, że istnieje i ma odpowiednią zawartość.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpenedWithException">
+        <source>The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</source>
+        <target state="translated">Otwieranie pliku manifestu nie powiodło się. Wyjątek: „{0}”. Upewnij się, że istnieje i ma odpowiednią zawartość.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AppConfig.BindingRedirectMissingOldVersion">
         <source>BindingRedirect is missing required field 'oldVersion'.</source>
         <target state="translated">W parametrze BindingRedirect brakuje wymaganego pola 'oldVersion'.</target>
@@ -130,6 +140,26 @@
         <source>MSB3992: '{0}' is not set. When {1} is true, make sure to set a value for '{0}'.</source>
         <target state="translated">MSB3992: nie ustawiono „{0}”. Jeśli {1} ma wartość true, upewnij się, że ustawiono wartość dla „{0}”.</target>
         <note>{StrBegin="MSB3992: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled">
+        <source>MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</source>
+        <target state="translated">MSB9903: element PreferNativeArm64 wymaga manifestu aplikacji Win32 i wzajemnie się wyklucza z elementem NoWin32Manifest.</target>
+        <note>{StrBegin="MSB9903: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
+        <source>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</source>
+        <target state="translated">MSB9904: po włączeniu elementu PreferNativeArm64 upewnij się, że platforma ma wartość AnyCPU. Bieżąca platforma: {0}.</target>
+        <note>{StrBegin="MSB9904: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled">
+        <source>MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</source>
+        <target state="translated">MSB9902: opcje Prefer32Bit i PreferNativeArm64 wykluczają się wzajemnie. Włącz tylko jedną.</target>
+        <note>{StrBegin="MSB9902: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonTarget.SpecifiedSeverityDoesNotExist">
+        <source>MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</source>
+        <target state="translated">MSB9901: określona ważność nie jest istotna: „{0}” dla komunikatu: „{1}”.</target>
+        <note>{StrBegin="MSB9901: "}</note>
       </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
         <source>MSB3881: Fatal Error: more than {0} command line arguments.</source>
@@ -1563,6 +1593,21 @@
         <source>StopOnFirstFailure will have no effect when the following conditions are all present: 1) The system is running in multiple process mode 2) The BuildInParallel property is true. 3) The RunEachTargetSeparately property is false.</source>
         <target state="translated">Działanie funkcji StopOnFirstFailure nie przyniesie efektu, jeśli będą spełnione wszystkie następujące warunki: 1) System działa w trybie wieloprocesowym. 2) Właściwość BuildInParallel ma wartość true. 3) Właściwość RunEachTargetSeparately ma wartość false.</target>
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
+      </trans-unit>
+      <trans-unit id="AddToWin32Manifest.AssemblyNodeIsMissed">
+        <source>The assembly element is missing from the application manifest.</source>
+        <target state="translated">Brak elementu zestawu w manifeście aplikacji.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddToWin32Manifest.InvalidValueInSupportedArchitectures">
+        <source>MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'.</source>
+        <target state="translated">MSB4300: określona wartość „{0}” dla elementu supportedArchitectures jest nieprawidłowa. Usuń ją z manifestu lub ustaw na wartość „amd64 arm64”.</target>
+        <note>{StrBegin="MSB4300: "}</note>
+      </trans-unit>
+      <trans-unit id="AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound">
+        <source>The application manifest file cannot be found. Please make sure it exists.</source>
+        <target state="translated">Nie można odnaleźć pliku manifestu aplikacji. Upewnij się, że istnieje.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>

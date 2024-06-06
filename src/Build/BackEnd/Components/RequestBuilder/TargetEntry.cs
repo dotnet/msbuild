@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
@@ -162,8 +163,17 @@ namespace Microsoft.Build.BackEnd
         /// <param name="parentTarget">The parent of this entry, if any.</param>
         /// <param name="buildReason">The reason the parent built this target.</param>
         /// <param name="host">The Build Component Host to use.</param>
+        /// <param name="loggingContext"></param>
         /// <param name="stopProcessingOnCompletion">True if the target builder should stop processing the current target stack when this target is complete.</param>
-        internal TargetEntry(BuildRequestEntry requestEntry, ITargetBuilderCallback targetBuilderCallback, TargetSpecification targetSpecification, Lookup baseLookup, TargetEntry parentTarget, TargetBuiltReason buildReason, IBuildComponentHost host, bool stopProcessingOnCompletion)
+        internal TargetEntry(
+            BuildRequestEntry requestEntry,
+            ITargetBuilderCallback targetBuilderCallback,
+            TargetSpecification targetSpecification,
+            Lookup baseLookup, TargetEntry parentTarget,
+            TargetBuiltReason buildReason,
+            IBuildComponentHost host,
+            LoggingContext loggingContext,
+            bool stopProcessingOnCompletion)
         {
             ErrorUtilities.VerifyThrowArgumentNull(requestEntry, nameof(requestEntry));
             ErrorUtilities.VerifyThrowArgumentNull(targetBuilderCallback, nameof(targetBuilderCallback));
@@ -176,7 +186,7 @@ namespace Microsoft.Build.BackEnd
             _targetSpecification = targetSpecification;
             _parentTarget = parentTarget;
             _buildReason = buildReason;
-            _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(baseLookup, baseLookup, FileSystems.Default);
+            _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(baseLookup, baseLookup, FileSystems.Default, loggingContext);
             _state = TargetEntryState.Dependencies;
             _baseLookup = baseLookup;
             _host = host;
@@ -351,8 +361,6 @@ namespace Microsoft.Build.BackEnd
                 ExpanderOptions.ExpandPropertiesAndItems,
                 _requestEntry.ProjectRootDirectory,
                 _target.ConditionLocation,
-                projectLoggingContext.LoggingService,
-                projectLoggingContext.BuildEventContext,
                 FileSystems.Default,
                 loggingContext: projectLoggingContext);
 
@@ -393,7 +401,7 @@ namespace Microsoft.Build.BackEnd
                 return new List<TargetSpecification>();
             }
 
-            var dependencies = _expander.ExpandIntoStringListLeaveEscaped(_target.DependsOnTargets, ExpanderOptions.ExpandPropertiesAndItems, _target.DependsOnTargetsLocation, projectLoggingContext);
+            var dependencies = _expander.ExpandIntoStringListLeaveEscaped(_target.DependsOnTargets, ExpanderOptions.ExpandPropertiesAndItems, _target.DependsOnTargetsLocation);
             List<TargetSpecification> dependencyTargets = new List<TargetSpecification>();
             foreach (string escapedDependency in dependencies)
             {
@@ -420,7 +428,7 @@ namespace Microsoft.Build.BackEnd
 
                 // Generate the batching buckets.  Note that each bucket will get a lookup based on the baseLookup.  This lookup will be in its
                 // own scope, which we will collapse back down into the baseLookup at the bottom of the function.
-                List<ItemBucket> buckets = BatchingEngine.PrepareBatchingBuckets(GetBatchableParametersForTarget(), _baseLookup, _target.Location);
+                List<ItemBucket> buckets = BatchingEngine.PrepareBatchingBuckets(GetBatchableParametersForTarget(), _baseLookup, _target.Location, null);
 
                 WorkUnitResult aggregateResult = new WorkUnitResult();
                 TargetLoggingContext targetLoggingContext = null;
@@ -444,7 +452,15 @@ namespace Microsoft.Build.BackEnd
                         break;
                     }
 
+                    if (i > 0)
+                    {
+                        // Don't log the last target finished event until we can process the target outputs as we want to attach them to the
+                        // last target batch. The following statement logs the event for the bucket processed in the previous iteration.
+                        targetLoggingContext.LogTargetBatchFinished(projectFullPath, targetSuccess, null);
+                    }
+
                     targetLoggingContext = projectLoggingContext.LogTargetBatchStarted(projectFullPath, _target, parentTargetName, _buildReason);
+                    bucket.Initialize(targetLoggingContext);
                     WorkUnitResult bucketResult = null;
                     targetSuccess = false;
 
@@ -556,16 +572,6 @@ namespace Microsoft.Build.BackEnd
                         entryForExecution?.LeaveScope();
                         aggregateResult = aggregateResult.AggregateResult(new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null));
                     }
-                    finally
-                    {
-                        // Don't log the last target finished event until we can process the target outputs as we want to attach them to the
-                        // last target batch.
-                        if (targetLoggingContext != null && i < numberOfBuckets - 1)
-                        {
-                            targetLoggingContext.LogTargetBatchFinished(projectFullPath, targetSuccess, null);
-                            targetLoggingContext = null;
-                        }
-                    }
                 }
 
                 // Produce the final results.
@@ -612,14 +618,14 @@ namespace Microsoft.Build.BackEnd
                                  ExpanderOptions.ExpandPropertiesAndItems,
                                  requestEntry.ProjectRootDirectory,
                                  _target.KeepDuplicateOutputsLocation,
-                                 projectLoggingContext.LoggingService,
-                                 projectLoggingContext.BuildEventContext, FileSystems.Default);
+                                 FileSystems.Default,
+                                 projectLoggingContext);
 
                         // NOTE: we need to gather the outputs in batches, because the output specification may reference item metadata
                         // Also, we are using the baseLookup, which has possibly had changes made to it since the project started.  Because of this, the
                         // set of outputs calculated here may differ from those which would have been calculated at the beginning of the target.  It is
                         // assumed the user intended this.
-                        List<ItemBucket> batchingBuckets = BatchingEngine.PrepareBatchingBuckets(GetBatchableParametersForTarget(), _baseLookup, _target.Location);
+                        List<ItemBucket> batchingBuckets = BatchingEngine.PrepareBatchingBuckets(GetBatchableParametersForTarget(), _baseLookup, _target.Location, targetLoggingContext);
 
                         if (keepDupes)
                         {
@@ -704,8 +710,8 @@ namespace Microsoft.Build.BackEnd
                     ExpanderOptions.ExpandPropertiesAndItems,
                     _requestEntry.ProjectRootDirectory,
                     errorTargetInstance.ConditionLocation,
-                    projectLoggingContext.LoggingService,
-                    projectLoggingContext.BuildEventContext, FileSystems.Default);
+                    FileSystems.Default,
+                    projectLoggingContext);
 
                 if (condition)
                 {

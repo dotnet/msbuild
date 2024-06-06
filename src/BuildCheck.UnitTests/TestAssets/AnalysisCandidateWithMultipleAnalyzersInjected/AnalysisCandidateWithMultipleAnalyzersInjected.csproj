@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageReference Include="CustomAnalyzer" Version="1.0.0"/>
     <PackageReference Include="CustomAnalyzer2" Version="1.0.0"/>
+    <PackageReference Include="InvalidCustomAnalyzer" Version="1.0.0"/>
   </ItemGroup>
 
   <ItemGroup>

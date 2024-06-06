@@ -1869,6 +1869,7 @@ elementFormDefault="qualified">
     <xs:element name="LangVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="VBRuntime" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="Prefer32Bit" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="PreferNativeArm64" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="HighEntropyVA" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="LinkIncremental" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ManifestCertificateThumbprint" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>

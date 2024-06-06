@@ -1458,7 +1458,7 @@ namespace Microsoft.Build.Shared
             while (lookInDirectory != null);
 
             // When we didn't find the location, then return an empty string
-            return String.Empty;
+            return string.Empty;
         }
 
         /// <summary>
