@@ -147,7 +147,7 @@ namespace Microsoft.Build.Logging
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    InvokeFileIOErrorEvent(filePath, e.Message);
+                    InvokeFileIOErrorEvent(filePath, e.ToString());
                 }
 
                 return false;
