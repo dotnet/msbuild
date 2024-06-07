@@ -3614,7 +3614,7 @@ namespace Microsoft.Build.Evaluation
                                     else
                                     {
                                         // There were multiple methods that seemed viable. We can't differentiate between them so throw.
-                                        ErrorUtilities.ThrowArgument("foo", _methodMethodName, args.Length);
+                                        ErrorUtilities.ThrowArgument("CouldNotDifferentiateBetweenCompatibleMethods", _methodMethodName, args.Length);
                                     }
                                 }
                                 else

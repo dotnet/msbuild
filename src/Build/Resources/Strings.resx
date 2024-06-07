@@ -601,6 +601,9 @@
       LOCALIZATION: "{0}" is the expression that was bad. "{1}" is a message from an FX exception that describes why the expression is bad.
     </comment>
   </data>
+  <data name="CouldNotDifferentiateBetweenCompatibleMethods">
+    <value>Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</value>
+  </data>
   <data name="InvalidFunctionPropertyExpression" xml:space="preserve">
     <value>MSB4184: The expression "{0}" cannot be evaluated. {1}</value>
     <comment>{StrBegin="MSB4184: "}
