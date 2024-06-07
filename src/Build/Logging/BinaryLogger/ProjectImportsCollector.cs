@@ -142,10 +142,10 @@ namespace Microsoft.Build.Logging
             {
                 try
                 {
-                    addFileWorker(filePath); 
+                    addFileWorker(filePath);
                     return true;
                 }
-                catch (Exception e)
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
                     InvokeFileIOErrorEvent(filePath, e.Message);
                 }
@@ -169,7 +169,8 @@ namespace Microsoft.Build.Logging
             using FileStream content = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
             AddFileData(filePath, content, null);
         }
-        private void InvokeFileIOErrorEvent( string filePath,string message)
+
+        private void InvokeFileIOErrorEvent(string filePath, string message)
         {
             BuildEventArgs args = new BuildMessageEventArgs(
                 ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectImportsCollectorFileIOFail", filePath, message),

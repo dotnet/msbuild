@@ -2122,7 +2122,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Task assembly was loaded from '{0}' while the desired location was '{1}'.</value>
   </data>
   <data name="ProjectImportsCollectorFileIOFail" xml:space="preserve">
-    <value>An exception occured when reading file {0}, message: {1}</value>
+    <value>An exception occurred when adding the file '{0}', Exception: '{1}'</value>
   </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999

@@ -515,8 +515,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ProjectImportsCollectorFileIOFail">
-        <source>An exception occured when reading file {0}, message: {1}</source>
-        <target state="new">An exception occured when reading file {0}, message: {1}</target>
+        <source>An exception occurred when adding the file '{0}', Exception: '{1}'</source>
+        <target state="new">An exception occurred when adding the file '{0}', Exception: '{1}'</target>
         <note />
       </trans-unit>
       <trans-unit id="PropertyAssignment">
