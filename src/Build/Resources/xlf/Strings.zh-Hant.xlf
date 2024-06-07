@@ -514,6 +514,11 @@
         <target state="translated">因為運算式評估為空字串，所以專案 "{0}" 未在 ({2},{3}) 由 "{1}" 匯入。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectImportsCollectorFileIOFail">
+        <source>An exception occured when reading file {0}, message: {1}</source>
+        <target state="new">An exception occured when reading file {0}, message: {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">屬性初始值: $({0})="{1}" 來源: {2}</target>

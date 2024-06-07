@@ -514,6 +514,11 @@
         <target state="translated">"{0}" adlı proje, ifadenin boş dize olarak değerlendirilmesi nedeniyle ({2},{3}) konumundaki "{1}" tarafından içeri aktarılmadı.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectImportsCollectorFileIOFail">
+        <source>An exception occured when reading file {0}, message: {1}</source>
+        <target state="new">An exception occured when reading file {0}, message: {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">Özellik başlangıç değeri: $({0})="{1}" Kaynak: {2}</target>

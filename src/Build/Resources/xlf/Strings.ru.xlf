@@ -514,6 +514,11 @@
         <target state="translated">Проект "{0}" не был импортирован "{1}" в ({2},{3}), так как результатом вычисления выражения была пустая строка.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectImportsCollectorFileIOFail">
+        <source>An exception occured when reading file {0}, message: {1}</source>
+        <target state="new">An exception occured when reading file {0}, message: {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">Начальное значение свойства: $({0})="{1}" Источник: {2}</target>
