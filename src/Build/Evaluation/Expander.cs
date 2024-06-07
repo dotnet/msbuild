@@ -3597,25 +3597,7 @@ namespace Microsoft.Build.Evaluation
                                 if (args.Any(a => "_".Equals(a)))
                                 {
                                     IEnumerable<MethodInfo> methods = _receiverType.GetMethods(_bindingFlags).Where(m => m.Name.Equals(_methodMethodName) && m.GetParameters().Length == args.Length);
-                                    MethodInfo method = methods.SingleOrDefault();
-                                    if (method is not null)
-                                    {
-                                        for (int i = 0; i < args.Length; i++)
-                                        {
-                                            if ("_".Equals(args[i]))
-                                            {
-                                                Type t = method.GetParameters()[i].ParameterType;
-                                                args[i] = t.IsValueType ? Activator.CreateInstance(t) : null;
-                                            }
-                                        }
-
-                                        functionResult = method.Invoke(objectInstance, _bindingFlags, Type.DefaultBinder, args, CultureInfo.InvariantCulture);
-                                    }
-                                    else
-                                    {
-                                        // There were multiple methods that seemed viable. We can't differentiate between them so throw.
-                                        ErrorUtilities.ThrowArgument("CouldNotDifferentiateBetweenCompatibleMethods", _methodMethodName, args.Length);
-                                    }
+                                    functionResult = GetMethodResult(objectInstance, methods, args, 0);
                                 }
                                 else
                                 {
@@ -3692,6 +3674,48 @@ namespace Microsoft.Build.Evaluation
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", partiallyEvaluated, ex.Message);
                     }
 
+                    return null;
+                }
+            }
+
+            private object GetMethodResult(object objectInstance, IEnumerable<MethodInfo> methods, object[] args, int index)
+            {
+                for (int i = index; i < args.Length; i++)
+                {
+                    if (args[i].Equals("_"))
+                    {
+                        object toReturn = null;
+                        foreach (MethodInfo method in methods)
+                        {
+                            Type t = method.GetParameters()[i].ParameterType;
+                            args[i] = t.IsValueType ? Activator.CreateInstance(t) : null;
+                            object currentReturnValue = GetMethodResult(objectInstance, methods, args, i + 1);
+                            if (currentReturnValue is not null)
+                            {
+                                if (toReturn is null)
+                                {
+                                    toReturn = currentReturnValue;
+                                }
+                                else if (!toReturn.Equals(currentReturnValue))
+                                {
+                                    // There were multiple methods that seemed viable and gave different results. We can't differentiate between them so throw.
+                                    ErrorUtilities.ThrowArgument("CouldNotDifferentiateBetweenCompatibleMethods", _methodMethodName, args.Length);
+                                    return null;
+                                }
+                            }
+                        }
+
+                        return toReturn;
+                    }
+                }
+
+                try
+                {
+                    return _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
+                }
+                catch (Exception)
+                {
+                    // This isn't a viable option, but perhaps another set of parameters will work.
                     return null;
                 }
             }
