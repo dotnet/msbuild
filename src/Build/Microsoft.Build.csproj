@@ -159,6 +159,7 @@
     <Compile Include="BuildCheck\Acquisition\BuildCheckAcquisitionModule.cs" />
     <Compile Include="BuildCheck\Acquisition\IBuildCheckAcquisitionModule.cs" />
     <Compile Include="BuildCheck\Analyzers\SharedOutputPathAnalyzer.cs" />
+    <Compile Include="BuildCheck\Analyzers\DoubleWritesAnalyzer.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildCheckConfigurationException.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildCheckForwardingLogger.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildEventsProcessor.cs" />

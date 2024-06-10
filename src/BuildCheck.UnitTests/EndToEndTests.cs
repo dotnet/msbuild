@@ -37,26 +37,27 @@ public class EndToEndTests : IDisposable
     [InlineData(false, false)]
     public void SampleAnalyzerIntegrationTest(bool buildInOutOfProcessNode, bool analysisRequested)
     {
+        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
+        TransientTestFile testFile = _env.CreateFile(workFolder, "somefile");
+
         string contents = $"""
             <Project Sdk="Microsoft.NET.Sdk" DefaultTargets="Hello">
                 
                 <PropertyGroup>
-                <OutputType>Exe</OutputType>
-                <TargetFramework>net8.0</TargetFramework>
-                <ImplicitUsings>enable</ImplicitUsings>
-                <Nullable>enable</Nullable>
+                    <OutputType>Exe</OutputType>
+                    <TargetFramework>net8.0</TargetFramework>
+                    <ImplicitUsings>enable</ImplicitUsings>
+                    <Nullable>enable</Nullable>
                 </PropertyGroup>
                   
                 <PropertyGroup Condition="$(Test) == true">
-                <TestProperty>Test</TestProperty>
+                    <TestProperty>Test</TestProperty>
                 </PropertyGroup>
                  
-                <ItemGroup>
-                <ProjectReference Include=".\FooBar-Copy.csproj" />
-                </ItemGroup>
-                  
                 <Target Name="Hello">
-                <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
+                    <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
+                    <Copy SourceFiles="{testFile.Path}" DestinationFolder="{workFolder.Path}" />
+                    <MSBuild Projects=".\FooBar-Copy.csproj" Targets="Hello" />
                 </Target>
                 
             </Project>
@@ -65,27 +66,27 @@ public class EndToEndTests : IDisposable
         string contents2 = $"""
             <Project Sdk="Microsoft.NET.Sdk">
                 <PropertyGroup>
-                <OutputType>Exe</OutputType>
-                <TargetFramework>net8.0</TargetFramework>
-                <ImplicitUsings>enable</ImplicitUsings>
-                <Nullable>enable</Nullable>
+                    <OutputType>Exe</OutputType>
+                    <TargetFramework>net8.0</TargetFramework>
+                    <ImplicitUsings>enable</ImplicitUsings>
+                    <Nullable>enable</Nullable>
                 </PropertyGroup>
                                  
                 <PropertyGroup Condition="$(Test) == true">
-                <TestProperty>Test</TestProperty>
+                    <TestProperty>Test</TestProperty>
                 </PropertyGroup>
                                 
                 <ItemGroup>
-                <Reference Include="bin/foo.dll" />
+                    <Reference Include="bin/foo.dll" />
                 </ItemGroup>
                                 
                 <Target Name="Hello">
-                <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
+                    <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
+                    <Copy SourceFiles="{testFile.Path}" DestinationFolder="{workFolder.Path}" />
                 </Target>
                                
             </Project>
             """;
-        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
         TransientTestFile projectFile = _env.CreateFile(workFolder, "FooBar.csproj", contents);
         TransientTestFile projectFile2 = _env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
 
@@ -96,6 +97,9 @@ public class EndToEndTests : IDisposable
             [*.csproj]
             build_check.BC0101.IsEnabled=true
             build_check.BC0101.Severity=warning
+
+            build_check.BC0102.IsEnabled=true
+            build_check.BC0102.Severity=warning
 
             build_check.COND0543.IsEnabled=false
             build_check.COND0543.Severity=Error
@@ -117,14 +121,16 @@ public class EndToEndTests : IDisposable
             (analysisRequested ? " -analyze" : string.Empty), out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
         _env.Output.WriteLine(output);
         success.ShouldBeTrue();
-        // The conflicting outputs warning appears - but only if analysis was requested
+        // The analyzer warnings should appear - but only if analysis was requested.
         if (analysisRequested)
         {
             output.ShouldContain("BC0101");
+            output.ShouldContain("BC0102");
         }
         else
         {
             output.ShouldNotContain("BC0101");
+            output.ShouldNotContain("BC0102");
         }
     }
 

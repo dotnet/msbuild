@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 
@@ -64,7 +65,46 @@ public sealed class TaskInvocationAnalysisData : AnalysisData
     /// in task parameters: <see cref="Framework.ITaskItem"/>, <see cref="Framework.ITaskItem"/>[],
     /// bool, string, or anything else convertible to/from string.</param>
     /// <param name="IsOutput">True for output parameters, false for input parameters.</param>
-    public record class TaskParameter(object? Value, bool IsOutput);
+    public record class TaskParameter(object? Value, bool IsOutput)
+    {
+        /// <summary>
+        /// Enumerates all values passed in this parameter. E.g. for Param="@(Compile)", this will return
+        /// all Compile items.
+        /// </summary>
+        public IEnumerable<object> EnumerateValues()
+        {
+            if (Value is System.Collections.IList list)
+            {
+                foreach (object obj in list)
+                {
+                    yield return obj;
+                }
+            }
+            else if (Value is object obj)
+            {
+                yield return obj;
+            }
+        }
+
+        /// <summary>
+        /// Enumerates all values passed in this parameter, converted to strings. E.g. for Param="@(Compile)",
+        /// this will return all Compile item specs.
+        /// </summary>
+        public IEnumerable<string> EnumerateStringValues()
+        {
+            foreach (object obj in EnumerateValues())
+            {
+                if (obj is ITaskItem taskItem)
+                {
+                    yield return taskItem.ItemSpec;
+                }
+                else
+                {
+                    yield return obj.ToString() ?? "";
+                }
+            }
+        }
+    }
 
     internal TaskInvocationAnalysisData(
         string projectFilePath,
