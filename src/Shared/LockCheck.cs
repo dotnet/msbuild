@@ -12,10 +12,10 @@ using Microsoft.Build.Shared;
 
 #nullable disable
 
-namespace Microsoft.Build.Tasks
+namespace Microsoft.Build.Utilities
 {
     [SupportedOSPlatform("windows")]
-    internal class LockCheck
+    public class LockCheck
     {
         [Flags]
         internal enum ApplicationStatus
@@ -111,7 +111,7 @@ namespace Microsoft.Build.Tasks
         private static extern int RmEndSession(uint pSessionHandle);
 
         [DllImport(RestartManagerDll, CharSet = CharSet.Unicode)]
-        public static extern int RmGetList(uint dwSessionHandle,
+        internal static extern int RmGetList(uint dwSessionHandle,
             out uint pnProcInfoNeeded,
             ref uint pnProcInfo,
             [In, Out] RM_PROCESS_INFO[] rgAffectedApps,
@@ -249,7 +249,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Try to get a message to inform the user which processes have a lock on a given file.
         /// </summary>
-        internal static string GetLockedFileMessage(string file)
+        public static string GetLockedFileMessage(string file)
         {
             string message = string.Empty;
 
@@ -259,7 +259,7 @@ namespace Microsoft.Build.Tasks
                 {
                     var processes = GetProcessesLockingFile(file);
                     message = !string.IsNullOrEmpty(processes)
-                        ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("Task.FileLocked", processes)
+                        ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("FileLocked", processes)
                         : String.Empty;
                 }
             }

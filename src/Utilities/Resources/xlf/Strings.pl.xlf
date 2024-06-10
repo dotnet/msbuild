@@ -7,6 +7,11 @@
         <target state="translated">MSB6012: Ścieżka „{0}” używana w dziennikach debugowania jest za długa. Ustaw ją na krótszą wartość przy użyciu zmiennej środowiskowej MSBUILDEBUGPATH lub zmień konfigurację systemu, aby zezwolić na długie ścieżki.</target>
         <note>{StrBegin="MSB6012: "}</note>
       </trans-unit>
+      <trans-unit id="FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="new">The file is locked by: "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="General.InvalidToolSwitch">
         <source>MSB6001: Invalid command line switch for "{0}". {1}</source>
         <target state="translated">MSB6001: Nieprawidłowy przełącznik wiersza polecenia dla „{0}”. {1}</target>

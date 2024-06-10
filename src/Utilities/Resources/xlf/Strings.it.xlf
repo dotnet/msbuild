@@ -7,6 +7,11 @@
         <target state="translated">MSB6012: il percorso "{0}" usato per i log di debug è troppo lungo. Impostarlo su un valore più breve usando la variabile dell'ambiente MSBUILDDEBUGPATH o modificare la configurazione del sistema per consentire percorsi lunghi.</target>
         <note>{StrBegin="MSB6012: "}</note>
       </trans-unit>
+      <trans-unit id="FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="new">The file is locked by: "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="General.InvalidToolSwitch">
         <source>MSB6001: Invalid command line switch for "{0}". {1}</source>
         <target state="translated">MSB6001: opzione della riga di comando non valida per "{0}". {1}</target>

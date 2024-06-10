@@ -7,6 +7,11 @@
         <target state="translated">MSB6012: 用於偵錯記錄檔 "{0}" 的路徑太長。使用 MSBUILDDEBUGPATH 環境變數將它設定為較短的值，或變更您的系統設定以允許長路徑。</target>
         <note>{StrBegin="MSB6012: "}</note>
       </trans-unit>
+      <trans-unit id="FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="new">The file is locked by: "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="General.InvalidToolSwitch">
         <source>MSB6001: Invalid command line switch for "{0}". {1}</source>
         <target state="translated">MSB6001: "{0}" 的命令列參數無效。{1}</target>

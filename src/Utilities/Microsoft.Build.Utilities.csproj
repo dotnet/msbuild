@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -104,6 +104,9 @@
     </Compile>
     <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
       <Link>Shared\InprocTrackingNativeMethods.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\LockCheck.cs">
+      <Link>Shared\LockCheck.cs</Link>
     </Compile>
     <Compile Include="..\Shared\ProcessExtensions.cs">
       <Link>Shared\ProcessExtensions.cs</Link>

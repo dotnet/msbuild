@@ -7,6 +7,11 @@
         <target state="translated">MSB6012: слишком длинный путь "{0}" для журналов отладки. Установите более короткое значение, используя переменную среду MSBUILDDEBUGPATH, или измените конфигурацию системы, чтобы разрешить длинные пути.</target>
         <note>{StrBegin="MSB6012: "}</note>
       </trans-unit>
+      <trans-unit id="FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="new">The file is locked by: "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="General.InvalidToolSwitch">
         <source>MSB6001: Invalid command line switch for "{0}". {1}</source>
         <target state="translated">MSB6001: Недопустимый переключатель командной строки для "{0}". {1}</target>

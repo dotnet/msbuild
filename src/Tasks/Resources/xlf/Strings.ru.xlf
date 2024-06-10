@@ -273,13 +273,13 @@
       </trans-unit>
       <trans-unit id="Copy.Retrying">
         <source>MSB3026: Could not copy "{0}" to "{1}". Beginning retry {2} in {3}ms. {4} {5}</source>
-        <target state="translated">MSB3026: не удалось скопировать "{0}" в "{1}". Повторная попытка {2} начнется через {3} мс. {4} {5}</target>
-        <note>{StrBegin="MSB3026: "} LOCALIZATION: {0} and {1} are paths. {2} and {3} are numbers. {4} is an optional localized message. {5} is either empty or a string from Copy.FileLocked ("The file is locked by: "{0}"")</note>
+        <target state="needs-review-translation">MSB3026: не удалось скопировать "{0}" в "{1}". Повторная попытка {2} начнется через {3} мс. {4} {5}</target>
+        <note>{StrBegin="MSB3026: "} LOCALIZATION: {0} and {1} are paths. {2} and {3} are numbers. {4} is an optional localized message. {5} is either empty or a string from FileLocked ("The file is locked by: "{0}"")</note>
       </trans-unit>
       <trans-unit id="Copy.ExceededRetries">
         <source>MSB3027: Could not copy "{0}" to "{1}". Exceeded retry count of {2}. Failed. {3}</source>
-        <target state="translated">MSB3027: не удалось скопировать "{0}" в "{1}". Превышено допустимое число повторных попыток ({2}). Произошел сбой. {3}</target>
-        <note>{StrBegin="MSB3027: "} LOCALIZATION: {0} and {1} are paths. {2} is a number. {3} is either empty or a string from Copy.FileLocked ("The file is locked by: "{0}"")</note>
+        <target state="needs-review-translation">MSB3027: не удалось скопировать "{0}" в "{1}". Превышено допустимое число повторных попыток ({2}). Произошел сбой. {3}</target>
+        <note>{StrBegin="MSB3027: "} LOCALIZATION: {0} and {1} are paths. {2} is a number. {3} is either empty or a string from Utilities FileLocked ("The file is locked by: "{0}"")</note>
       </trans-unit>
       <trans-unit id="Copy.InvalidRetryCount">
         <source>MSB3028: {0} is an invalid retry count. Value must not be negative.</source>
