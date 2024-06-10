@@ -139,6 +139,9 @@
   <data name="NoBuildInProgress" xml:space="preserve">
     <value>The operation cannot be completed because BeginBuild has not yet been called.</value>
   </data>
+  <data name="AbortingBuild" xml:space="preserve">
+    <value>Attempting to cancel the build...</value>
+  </data>
   <data name="WaitingForEndOfBuild" xml:space="preserve">
     <value>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</value>
   </data>

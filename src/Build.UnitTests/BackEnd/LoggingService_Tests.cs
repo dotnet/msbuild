@@ -411,17 +411,28 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Equal(1, regularILoggerB.BuildFinishedCount);
             Assert.Equal(1, regularILoggerC.BuildFinishedCount);
 
+            _initializedService.LogBuildCanceled();
+            Assert.Equal(1, regularILoggerA.BuildCanceledCount);
+            Assert.Equal(1, regularILoggerB.BuildCanceledCount);
+            Assert.Equal(1, regularILoggerC.BuildCanceledCount);
+
             // Make sure if we call build started again we only get one other build started event.
             _initializedService.LogBuildStarted();
             Assert.Equal(2, regularILoggerA.BuildStartedCount);
             Assert.Equal(2, regularILoggerB.BuildStartedCount);
             Assert.Equal(2, regularILoggerC.BuildStartedCount);
 
-            // Make sure if we call build started again we only get one other build started event.
+            // Make sure if we call build finished again we only get one other build finished event.
             _initializedService.LogBuildFinished(true);
             Assert.Equal(2, regularILoggerA.BuildFinishedCount);
             Assert.Equal(2, regularILoggerB.BuildFinishedCount);
             Assert.Equal(2, regularILoggerC.BuildFinishedCount);
+
+            // Make sure if we call build canceled again we only get one other build canceled event.
+            _initializedService.LogBuildCanceled();
+            Assert.Equal(2, regularILoggerA.BuildCanceledCount);
+            Assert.Equal(2, regularILoggerB.BuildCanceledCount);
+            Assert.Equal(2, regularILoggerC.BuildCanceledCount);
         }
 
         /// <summary>
@@ -1422,6 +1433,15 @@ namespace Microsoft.Build.UnitTests.Logging
             }
 
             /// <summary>
+            /// Number of times build finished was logged
+            /// </summary>
+            internal int BuildCanceledCount
+            {
+                get;
+                set;
+            }
+
+            /// <summary>
             /// Initialize
             /// </summary>
             public void Initialize(IEventSource eventSource)
@@ -1451,6 +1471,11 @@ namespace Microsoft.Build.UnitTests.Logging
                 if (eventArgs is BuildFinishedEventArgs)
                 {
                     ++BuildFinishedCount;
+                }
+
+                if (eventArgs is BuildCanceledEventArgs)
+                {
+                    ++BuildCanceledCount;
                 }
             }
         }

@@ -421,6 +421,25 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <inheritdoc />
+        public void LogBuildCanceled()
+        {
+            // If we're only logging critical events, don't risk causing all the resources to load by formatting
+            // a string that won't get emitted anyway.
+            string message = String.Empty;
+            if (!OnlyLogCriticalEvents)
+            {
+                message = ResourceUtilities.GetResourceString("AbortingBuild");
+            }            
+            
+            BuildCanceledEventArgs buildEvent = new BuildCanceledEventArgs(message, null);
+
+            ProcessLoggingEvent(buildEvent);
+
+            // Make sure we process this event before going any further
+            WaitForLoggingToProcessEvents();
+        }
+
+        /// <inheritdoc />
         public BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId)
             => new BuildEventContext(submissionId, nodeId, NextEvaluationId, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
 

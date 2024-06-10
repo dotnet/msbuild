@@ -1831,7 +1831,7 @@ namespace Microsoft.Build.Evaluation
         /// The ReusableLogger wraps a logger and allows it to be used for both design-time and build-time.  It internally swaps
         /// between the design-time and build-time event sources in response to Initialize and Shutdown events.
         /// </summary>
-        internal class ReusableLogger : INodeLogger, IEventSource4
+        internal class ReusableLogger : INodeLogger, IEventSource5
         {
             /// <summary>
             /// The logger we are wrapping.
@@ -1862,6 +1862,11 @@ namespace Microsoft.Build.Evaluation
             /// The BuildFinished event handler
             /// </summary>
             private BuildFinishedEventHandler _buildFinishedEventHandler;
+
+            /// <summary>
+            /// The BuildCanceled event handler
+            /// </summary>
+            private BuildCanceledEventHandler _buildCanceledEventHandler;
 
             /// <summary>
             /// The BuildStarted event handler
@@ -1973,6 +1978,11 @@ namespace Microsoft.Build.Evaluation
             public event BuildFinishedEventHandler BuildFinished;
 
             /// <summary>
+            /// The BuildCanceled logging event
+            /// </summary>
+            public event BuildCanceledEventHandler BuildCanceled;
+
+            /// <summary>
             /// The ProjectStarted logging event
             /// </summary>
             public event ProjectStartedEventHandler ProjectStarted;
@@ -2021,7 +2031,7 @@ namespace Microsoft.Build.Evaluation
             /// The telemetry sent event.
             /// </summary>
             public event TelemetryEventHandler TelemetryLogged;
-
+            
             /// <summary>
             /// Should evaluation events include generated metaprojects?
             /// </summary>
@@ -2183,6 +2193,7 @@ namespace Microsoft.Build.Evaluation
                 _anyEventHandler = AnyEventRaisedHandler;
                 _buildFinishedEventHandler = BuildFinishedHandler;
                 _buildStartedEventHandler = BuildStartedHandler;
+                _buildCanceledEventHandler = BuildCanceledHandler;
                 _customBuildEventHandler = CustomEventRaisedHandler;
                 _buildErrorEventHandler = ErrorRaisedHandler;
                 _buildMessageEventHandler = MessageRaisedHandler;
@@ -2242,6 +2253,11 @@ namespace Microsoft.Build.Evaluation
                         eventSource4.IncludeEvaluationPropertiesAndItems();
                     }
                 }
+
+                if (eventSource is IEventSource5 eventSource5)
+                {
+                    eventSource5.BuildCanceled += _buildCanceledEventHandler;
+                }
             }
 
             /// <summary>
@@ -2270,10 +2286,16 @@ namespace Microsoft.Build.Evaluation
                     eventSource2.TelemetryLogged -= _telemetryEventHandler;
                 }
 
+                if (eventSource is IEventSource5 eventSource5)
+                {
+                    eventSource5.BuildCanceled -= _buildCanceledEventHandler;
+                }
+
                 // Null out the handlers.
                 _anyEventHandler = null;
                 _buildFinishedEventHandler = null;
                 _buildStartedEventHandler = null;
+                _buildCanceledEventHandler = null;
                 _customBuildEventHandler = null;
                 _buildErrorEventHandler = null;
                 _buildMessageEventHandler = null;
@@ -2390,6 +2412,14 @@ namespace Microsoft.Build.Evaluation
             private void BuildFinishedHandler(object sender, BuildFinishedEventArgs e)
             {
                 BuildFinished?.Invoke(sender, e);
+            }
+
+            /// <summary>
+            /// Handler for BuildCanceled events.
+            /// </summary>
+            private void BuildCanceledHandler(object sender, BuildCanceledEventArgs e)
+            {
+                BuildCanceled?.Invoke(sender, e);
             }
 
             /// <summary>

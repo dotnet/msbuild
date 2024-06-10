@@ -486,6 +486,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
         }
 
+        /// <inheritdoc />
+        public void LogBuildCanceled()
+        {
+        }
 
         /// <inheritdoc />
         public BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId)

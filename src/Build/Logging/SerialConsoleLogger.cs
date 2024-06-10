@@ -182,6 +182,16 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Handler for build canceled event
+        /// </summary>
+        /// <param name="sender">sender (should be null)</param>
+        /// <param name="e">event arguments</param>
+        public override void BuildCanceledHanlder(object sender, BuildCanceledEventArgs e)
+        {
+            Console.WriteLine(e.Message ?? string.Empty);
+        }
+
+        /// <summary>
         /// At the end of the build, repeats the errors and warnings that occurred
         /// during the build, and displays the error count and warning count.
         /// </summary>

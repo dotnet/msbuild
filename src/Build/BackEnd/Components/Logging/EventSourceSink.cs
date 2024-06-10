@@ -20,7 +20,7 @@ namespace Microsoft.Build.BackEnd.Logging
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IEventSource4, IBuildEventSink
+        IEventSource5, IBuildEventSink
     {
         #region Events
 
@@ -48,6 +48,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// this event is raised to log the end of a build
         /// </summary>
         public event BuildFinishedEventHandler BuildFinished;
+
+        /// <summary>
+        /// this event is raised to log the cancellation of a build
+        /// </summary>
+        public event BuildCanceledEventHandler BuildCanceled;
 
         /// <summary>
         /// this event is raised to log the start of a project build
@@ -131,6 +136,13 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Has the sink logged the BuildFinishedEvent. This is important to know because we only want to log the build finished event once
         /// </summary>
         public bool HaveLoggedBuildFinishedEvent
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc />
+        public bool HaveLoggedBuildCanceledEvent
         {
             get;
             set;
@@ -255,6 +267,10 @@ namespace Microsoft.Build.BackEnd.Logging
                     HaveLoggedBuildFinishedEvent = true;
                     RaiseBuildFinishedEvent(null, buildFinishedEvent);
                     break;
+                case BuildCanceledEventArgs buildCanceledEvent:
+                    HaveLoggedBuildCanceledEvent = true;
+                    RaiseBuildCanceledEvent(null, buildCanceledEvent);
+                    break;
                 case CustomBuildEventArgs customBuildEvent:
                     RaiseCustomEvent(null, customBuildEvent);
                     break;
@@ -301,6 +317,7 @@ namespace Microsoft.Build.BackEnd.Logging
             WarningRaised = null;
             BuildStarted = null;
             BuildFinished = null;
+            BuildCanceled = null;
             ProjectStarted = null;
             ProjectFinished = null;
             TargetStarted = null;
@@ -500,6 +517,48 @@ namespace Microsoft.Build.BackEnd.Logging
                 try
                 {
                     BuildFinished(sender, buildEvent);
+                }
+                catch (LoggerException)
+                {
+                    // if a logger has failed politely, abort immediately
+                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
+                    // if a fellow logger is throwing in an event handler.
+                    this.UnregisterAllEventHandlers();
+                    throw;
+                }
+                catch (Exception exception)
+                {
+                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
+                    // if a fellow logger is throwing in an event handler.
+                    this.UnregisterAllEventHandlers();
+
+                    if (ExceptionHandling.IsCriticalException(exception))
+                    {
+                        throw;
+                    }
+
+                    InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
+                }
+            }
+
+            RaiseStatusEvent(sender, buildEvent);
+        }
+
+        /// <summary>
+        /// Raises a "build canceled" event to all registered loggers.
+        /// </summary>
+        /// <param name="sender">sender of the event</param>
+        /// <param name="buildEvent">BuildCanceledEventArgs</param>
+        /// <exception cref="LoggerException">When EventHandler raises an logger exception the LoggerException is rethrown</exception>
+        /// <exception cref="InternalLoggerException">Any exceptions which are not LoggerExceptions are wrapped in an InternalLoggerException</exception>
+        /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception>
+        private void RaiseBuildCanceledEvent(object sender, BuildCanceledEventArgs buildEvent)
+        {
+            if (BuildCanceled != null)
+            {
+                try
+                {
+                    BuildCanceled(sender, buildEvent);
                 }
                 catch (LoggerException)
                 {

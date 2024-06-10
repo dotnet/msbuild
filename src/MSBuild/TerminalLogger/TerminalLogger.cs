@@ -207,21 +207,19 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private bool _showCommandLine = false;
 
-    private CancellationToken _buildCancellationToken;
+    private BuildCanceledEventArgs? _buildCanceledEvetnAgrs;
 
     private bool _cancellationMessageRendered;
 
     /// <summary>
     /// Default constructor, used by the MSBuild logger infra.
     /// </summary>
-    public TerminalLogger(CancellationToken buildCancellationToken)
+    public TerminalLogger()
     {
-        _buildCancellationToken = buildCancellationToken;
         Terminal = new Terminal();
     }
 
-    public TerminalLogger(LoggerVerbosity verbosity, CancellationToken buildCancellationToken)
-        : this(buildCancellationToken)
+    public TerminalLogger(LoggerVerbosity verbosity) : this()
     {
         Verbosity = verbosity;
     }
@@ -272,6 +270,11 @@ internal sealed partial class TerminalLogger : INodeLogger
         if (eventSource is IEventSource4 eventSource4)
         {
             eventSource4.IncludeEvaluationPropertiesAndItems();
+        }
+
+        if (eventSource is IEventSource5 eventSource5)
+        {
+            eventSource5.BuildCanceled += BuildCanceled;
         }
     }
 
@@ -451,6 +454,11 @@ internal sealed partial class TerminalLogger : INodeLogger
         _restoreFailed = false;
         _testStartTime = null;
         _testEndTime = null;
+    }
+
+    private void BuildCanceled(object sender, BuildCanceledEventArgs e)
+    {
+        _buildCanceledEvetnAgrs = e;
     }
 
     /// <summary>
@@ -949,11 +957,12 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     internal void DisplayNodes()
     {
-        if (_buildCancellationToken.IsCancellationRequested)
+        if (_buildCanceledEvetnAgrs != null)
         {
             if (!_cancellationMessageRendered)
             {
-                Terminal.WriteLine(ResourceUtilities.GetResourceString("AbortingBuild"));
+                string message = _buildCanceledEvetnAgrs.Message ?? string.Empty;
+                Terminal.WriteLine(message);
                 _cancellationMessageRendered = true;
             }
 
