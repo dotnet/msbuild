@@ -897,7 +897,7 @@ namespace Microsoft.Build.Execution
                 {
                     // Project graph can have multiple entry points, for purposes of identifying event for same build project,
                     // we believe that including only one entry point will provide enough precision.
-                    _buildTelemetry.Project ??= requestData.EntryProjectsFullPath.First();
+                    _buildTelemetry.Project ??= requestData.EntryProjectsFullPath.FirstOrDefault();
                     _buildTelemetry.Target ??= string.Join(",", requestData.TargetNames);
                 }
 
