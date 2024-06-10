@@ -174,8 +174,8 @@ namespace Microsoft.Build.Logging
         {
             BuildEventArgs args = new BuildMessageEventArgs(
                 ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectImportsCollectorFileIOFail", filePath, message),
-                null,
-                nameof(ProjectImportsCollector),
+                helpKeyword: null,
+                senderName: nameof(ProjectImportsCollector),
                 MessageImportance.Low);
             FileIOExceptionEvent?.Invoke(this, args);
         }
