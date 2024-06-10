@@ -281,8 +281,8 @@ namespace Microsoft.Build.Execution
 
         protected internal override BuildResult CreateFailedResult(Exception exception)
         {
-            ErrorUtilities.VerifyThrow(BuildResult != null,
-                "BuildResult is not populated after Execute is done.");
+            ErrorUtilities.VerifyThrow(BuildRequest != null,
+                "BuildRequest is not populated while reporting failed result.");
             return new(BuildRequest!, exception);
         }
         
