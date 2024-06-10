@@ -14,8 +14,13 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Utilities
 {
+    /// <summary>
+    /// This class implements checking what processes are locking a file on Windows.
+    /// It uses the Restart Manager API to do this.
+    /// Use the method <see cref="GetLockedFileMessage"/> to get a message to inform the user which processes have a lock on a given file.
+    /// </summary>
     [SupportedOSPlatform("windows")]
-    public class LockCheck
+    public static class LockCheck
     {
         [Flags]
         internal enum ApplicationStatus
@@ -249,7 +254,9 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Try to get a message to inform the user which processes have a lock on a given file.
         /// </summary>
-        public static string GetLockedFileMessage(string file)
+        /// <param name="filePath">The path of the file to check.</param>
+        /// <returns>A message to inform the user which processes have a lock on the file.</returns>
+        public static string GetLockedFileMessage(string filePath)
         {
             string message = string.Empty;
 
@@ -257,7 +264,7 @@ namespace Microsoft.Build.Utilities
             {
                 if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
                 {
-                    var processes = GetProcessesLockingFile(file);
+                    var processes = GetProcessesLockingFile(filePath);
                     message = !string.IsNullOrEmpty(processes)
                         ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LockCheck.FileLocked", processes)
                         : String.Empty;
