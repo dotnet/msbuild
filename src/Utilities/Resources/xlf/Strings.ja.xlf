@@ -7,11 +7,6 @@
         <target state="translated">MSB6012: デバッグ ログに使用されるパス "{0}" が長すぎます。MSBUILDDEBUGPATH 環境変数を使用して短い値に設定するか、長いパスを許可するようにシステム構成を変更してください。</target>
         <note>{StrBegin="MSB6012: "}</note>
       </trans-unit>
-      <trans-unit id="FileLocked">
-        <source>The file is locked by: "{0}"</source>
-        <target state="new">The file is locked by: "{0}"</target>
-        <note />
-      </trans-unit>
       <trans-unit id="General.InvalidToolSwitch">
         <source>MSB6001: Invalid command line switch for "{0}". {1}</source>
         <target state="translated">MSB6001: "{0}" のコマンド ライン スイッチが無効です。{1}</target>
@@ -30,6 +25,11 @@
       <trans-unit id="General.ToolCommandFailedNoErrorCode">
         <source>The command exited with code {0}.</source>
         <target state="translated">コマンドはコード {0} で終了しました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LockCheck.FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="new">The file is locked by: "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">

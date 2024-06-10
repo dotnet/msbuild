@@ -7,11 +7,6 @@
         <target state="translated">MSB6012: 디버그 로그에 사용된 경로 "{0}"이(가) 너무 깁니다. MSBUILDDEBUGPATH 환경 변수를 사용하여 값을 더 짧게 설정하거나 긴 경로를 허용하도록 시스템 구성을 변경합니다.</target>
         <note>{StrBegin="MSB6012: "}</note>
       </trans-unit>
-      <trans-unit id="FileLocked">
-        <source>The file is locked by: "{0}"</source>
-        <target state="new">The file is locked by: "{0}"</target>
-        <note />
-      </trans-unit>
       <trans-unit id="General.InvalidToolSwitch">
         <source>MSB6001: Invalid command line switch for "{0}". {1}</source>
         <target state="translated">MSB6001: "{0}"의 명령줄 스위치가 잘못되었습니다. {1}</target>
@@ -30,6 +25,11 @@
       <trans-unit id="General.ToolCommandFailedNoErrorCode">
         <source>The command exited with code {0}.</source>
         <target state="translated">명령이 종료되었습니다(코드: {0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LockCheck.FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="new">The file is locked by: "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">

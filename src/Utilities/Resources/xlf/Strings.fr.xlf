@@ -7,11 +7,6 @@
         <target state="translated">MSB6012: Le chemin d’accès "{0}" utilisé pour les journaux de débogage est trop long. Définissez-la sur une valeur plus courte à l’aide de la variable d’environnement MSBUILDDEBUGPATH ou modifiez votre configuration système pour autoriser les chemins longs.</target>
         <note>{StrBegin="MSB6012: "}</note>
       </trans-unit>
-      <trans-unit id="FileLocked">
-        <source>The file is locked by: "{0}"</source>
-        <target state="new">The file is locked by: "{0}"</target>
-        <note />
-      </trans-unit>
       <trans-unit id="General.InvalidToolSwitch">
         <source>MSB6001: Invalid command line switch for "{0}". {1}</source>
         <target state="translated">MSB6001: Commutateur de ligne de commande non valide pour "{0}". {1}</target>
@@ -30,6 +25,11 @@
       <trans-unit id="General.ToolCommandFailedNoErrorCode">
         <source>The command exited with code {0}.</source>
         <target state="translated">La commande s'est arrêtée avec le code {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LockCheck.FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="new">The file is locked by: "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">

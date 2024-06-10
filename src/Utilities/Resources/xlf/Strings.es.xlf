@@ -7,11 +7,6 @@
         <target state="translated">MSB6012: La ruta de acceso "{0}" usada para los registros de depuración es demasiado larga. Establézcalo en un valor más corto con la variable de entorno MSBUILDDEBUGPATH o cambie la configuración del sistema para permitir rutas de acceso largas.</target>
         <note>{StrBegin="MSB6012: "}</note>
       </trans-unit>
-      <trans-unit id="FileLocked">
-        <source>The file is locked by: "{0}"</source>
-        <target state="new">The file is locked by: "{0}"</target>
-        <note />
-      </trans-unit>
       <trans-unit id="General.InvalidToolSwitch">
         <source>MSB6001: Invalid command line switch for "{0}". {1}</source>
         <target state="translated">MSB6001: Modificador de línea de comandos no válido para "{0}". {1}</target>
@@ -30,6 +25,11 @@
       <trans-unit id="General.ToolCommandFailedNoErrorCode">
         <source>The command exited with code {0}.</source>
         <target state="translated">El comando salió con el código {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LockCheck.FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="new">The file is locked by: "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">

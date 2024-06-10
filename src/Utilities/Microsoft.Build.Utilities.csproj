@@ -105,9 +105,6 @@
     <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
       <Link>Shared\InprocTrackingNativeMethods.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\LockCheck.cs">
-      <Link>Shared\LockCheck.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\ProcessExtensions.cs">
       <Link>Shared\ProcessExtensions.cs</Link>
     </Compile>

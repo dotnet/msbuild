@@ -259,7 +259,7 @@ namespace Microsoft.Build.Utilities
                 {
                     var processes = GetProcessesLockingFile(file);
                     message = !string.IsNullOrEmpty(processes)
-                        ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("FileLocked", processes)
+                        ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LockCheck.FileLocked", processes)
                         : String.Empty;
                 }
             }
