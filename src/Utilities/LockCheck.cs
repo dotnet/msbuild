@@ -16,10 +16,9 @@ namespace Microsoft.Build.Utilities
 {
     /// <summary>
     /// This class implements checking what processes are locking a file on Windows.
-    /// It uses the Restart Manager API to do this.
+    /// It uses the Restart Manager API to do this. Other platforms are skipped.
     /// Use the method <see cref="GetLockedFileMessage"/> to get a message to inform the user which processes have a lock on a given file.
     /// </summary>
-    [SupportedOSPlatform("windows")]
     public static class LockCheck
     {
         [Flags]
@@ -252,11 +251,21 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Try to get a message to inform the user which processes have a lock on a given file.
+        /// Try to get a message to inform the user which processes have a lock on a given file. On Windows it uses the Restart Manager API.
         /// </summary>
         /// <param name="filePath">The path of the file to check.</param>
-        /// <returns>A message to inform the user which processes have a lock on the file.</returns>
+        /// <returns>A message to inform the user which processes have a lock on the file on Window if available, string.Empty on other platforms.</returns>
         public static string GetLockedFileMessage(string filePath)
+        {
+            if (NativeMethodsShared.IsWindows)
+            {
+                return GetLockedFileMessageWindows(filePath);
+            }
+            return string.Empty;
+        }
+
+        [SupportedOSPlatform("windows")]
+        private static string GetLockedFileMessageWindows(string filePath)
         {
             string message = string.Empty;
 
