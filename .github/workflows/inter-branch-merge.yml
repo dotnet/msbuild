@@ -1,4 +1,4 @@
-name: Usage of Inter-branch merge workflow
+name: Inter-branch merge workflow
 on:
   push:
     branches:
@@ -7,7 +7,6 @@ on:
       # TODO - vs17.3
       # TODO - vs17.4
       # TODO - vs17.6
-      # TODO - vs17.7
       # TODO - vs17.8
       # TODO - vs17.9
       - vs17.10
@@ -23,22 +22,28 @@ jobs:
         source: []
         target: []
         include:
+          # VS until 4/2029 -> SDK 6.0.1xx
           - source: 'vs16.11'
             target: 'vs17.0'
+          # SDK 6.0.1xx -> SDK 6.0.4xx
           - source: 'vs17.0'
             target: 'vs17.3'
+          # SDK 6.0.4xx -> SDK 7.0.1xx until 5/2024, VS until 7/2024
           - source: 'vs17.3'
             target: 'vs17.4'
+          # VS until 1/2025
           - source: 'vs17.4'
             target: 'vs17.6'
+          # VS until 7/2025
           - source: 'vs17.6'
             target: 'vs17.8'
-          - source: 'vs17.7'
-            target: 'vs17.8'
+          # SDK 8.0.1xx -> SDK 8.0.2xx
           - source: 'vs17.8'
             target: 'vs17.9'
+          # SDK 8.0.2xx -> SDK 8.0.3xx
           - source: 'vs17.9'
             target: 'vs17.10'
+          # latest release -> main
           - source: 'vs17.10'
             target: 'main'
 
