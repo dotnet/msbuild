@@ -133,6 +133,7 @@
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />
     <Compile Include="BackEnd\BuildManager\BuildParameters.cs" />
     <Compile Include="BackEnd\BuildManager\BuildRequestDataBase.cs" />
+    <Compile Include="BackEnd\BuildManager\BuildSubmissionBase.cs" />
     <Compile Include="BackEnd\BuildManager\CacheSerialization.cs" />
     <Compile Include="BackEnd\BuildManager\CacheAggregator.cs" />
     <Compile Include="BackEnd\BuildManager\GlobalPropertiesLookup.cs" />
