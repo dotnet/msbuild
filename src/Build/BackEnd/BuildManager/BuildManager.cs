@@ -2951,6 +2951,25 @@ namespace Microsoft.Build.Execution
             });
         }
 
+        public void AttachBuildCheckForBinaryLogReplay(List<ILogger> loggers, EventArgsDispatcher eventDispatcher)
+        {
+            _buildParameters = new BuildParameters
+            {
+                IsBuildCheckEnabled = true,
+            };
+
+            var buildCheckManagerProvider =
+                    ((IBuildComponentHost)this).GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider;
+
+            buildCheckManagerProvider!.Instance.SetDataSource(BuildCheckDataSource.EventArgs);
+
+            var buildCheckLogger = new BuildCheckConnectorLogger(
+                new AnalysisDispatchingContextFactory(eventDispatcher),
+                buildCheckManagerProvider.Instance);
+
+            loggers.Add(buildCheckLogger);
+        }
+
         /// <summary>
         /// Creates a logging service around the specified set of loggers.
         /// </summary>

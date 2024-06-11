@@ -808,7 +808,7 @@ namespace Microsoft.Build.CommandLine
                     // as if a build is happening
                     if (FileUtilities.IsBinaryLogFilename(projectFile))
                     {
-                        ReplayBinaryLog(projectFile, loggers, distributedLoggerRecords, cpuCount);
+                        ReplayBinaryLog(projectFile, loggers.ToList(), distributedLoggerRecords, cpuCount, isBuildCheckEnabled);
                     }
                     else if (outputPropertiesItemsOrTargetResults && FileUtilities.IsSolutionFilename(projectFile))
                     {
@@ -4404,11 +4404,17 @@ namespace Microsoft.Build.CommandLine
 
         private static void ReplayBinaryLog(
             string binaryLogFilePath,
-            ILogger[] loggers,
+            List<ILogger> loggers,
             IEnumerable<DistributedLoggerRecord> distributedLoggerRecords,
-            int cpuCount)
+            int cpuCount,
+            bool isBuildCheckEnabled)
         {
             var replayEventSource = new BinaryLogReplayEventSource();
+
+            if (isBuildCheckEnabled)
+            {
+                BuildManager.DefaultBuildManager.AttachBuildCheckForBinaryLogReplay(loggers, replayEventSource);
+            }
 
             foreach (var distributedLoggerRecord in distributedLoggerRecords)
             {
