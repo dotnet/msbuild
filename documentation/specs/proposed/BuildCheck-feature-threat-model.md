@@ -41,11 +41,7 @@ Users should not add untrusted build analyzers to their projects. The use of unt
 To ensure a secure and reliable build environment, the following steps should be taken:
 
 #### Use Dedicated Security Tools:
-Utilize specialized security tools and services to scan and monitor 3rd party analyzer packages and their dependencies. Some widely used tools include:
-
-- OWASP Dependency-Check: An open-source tool that identifies project dependencies and checks if there are any known, publicly disclosed vulnerabilities.
-- Snyk: A tool that continuously monitors for vulnerabilities in open-source libraries and dependencies.
-- WhiteSource: Provides comprehensive analysis and detection of vulnerabilities in open-source components.
+Utilize specialized security tools and services to scan and monitor 3rd party analyzer packages and their dependencies. 
 #### Regular Updates:
 Ensure that all 3rd party packages and dependencies are regularly updated to the latest versions, which often include security patches and vulnerability fixes.
 
