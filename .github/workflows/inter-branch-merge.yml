@@ -2,14 +2,14 @@ name: Usage of Inter-branch merge workflow
 on:
   push:
     branches:
-      - vs16.11
-      - vs17.0
-      - vs17.3
-      - vs17.4
-      - vs17.6
-      - vs17.7
-      - vs17.8
-      - vs17.9
+      # TODO - vs16.11
+      # TODO - vs17.0
+      # TODO - vs17.3
+      # TODO - vs17.4
+      # TODO - vs17.6
+      # TODO - vs17.7
+      # TODO - vs17.8
+      # TODO - vs17.9
       - vs17.10
 permissions:
   contents: write
@@ -50,7 +50,7 @@ jobs:
     uses: dotnet/arcade/.github/workflows/inter-branch-merge-base.yml@main
     with:
       # this is the branch which will receive the new PR when there are changes in the trigger branches
-      base_branch: ${{ github.ref_name == 'vs17.9' && 'vs17.10' || 'main' }}
+      base_branch: ${{ matrix.target }}
 
       # Don't allow the commits made by the dotnet-maestro[bot].
       # allowAutomatedCommits: false
