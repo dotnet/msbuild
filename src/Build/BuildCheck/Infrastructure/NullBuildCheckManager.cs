@@ -42,7 +42,7 @@ internal class NullBuildCheckManager : IBuildCheckManager
     {
     }
 
-    public void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, BuildEventContext buildEventContext) 
+    public void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, AnalyzerLoggingContext loggingContext)
     {
     }
 

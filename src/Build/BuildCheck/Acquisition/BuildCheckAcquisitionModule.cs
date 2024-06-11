@@ -10,15 +10,12 @@ using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Experimental.BuildCheck.Logging;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Acquisition;
 
 internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
 {
-    private readonly ILoggingService _loggingService;
-
-    internal BuildCheckAcquisitionModule(ILoggingService loggingService) => _loggingService = loggingService;
-
 #if FEATURE_ASSEMBLYLOADCONTEXT
     /// <summary>
     /// AssemblyContextLoader used to load DLLs outside of msbuild.exe directory.
@@ -29,7 +26,7 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
     /// <summary>
     /// Creates a list of factory delegates for building analyzer rules instances from a given assembly path.
     /// </summary>
-    public List<BuildAnalyzerFactory> CreateBuildAnalyzerFactories(AnalyzerAcquisitionData analyzerAcquisitionData, BuildEventContext buildEventContext)
+    public List<BuildAnalyzerFactory> CreateBuildAnalyzerFactories(AnalyzerAcquisitionData analyzerAcquisitionData, AnalyzerLoggingContext loggingContext)
     {
         var analyzersFactories = new List<BuildAnalyzerFactory>();
 
@@ -52,7 +49,7 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
 
             if (availableTypes.Count != analyzerTypes.Count)
             {
-                availableTypes.Except(analyzerTypes).ToList().ForEach(t => _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerBaseTypeNotAssignable", t.Name, t.Assembly));
+                availableTypes.Except(analyzerTypes).ToList().ForEach(t => loggingContext.LogComment(MessageImportance.Normal, "CustomAnalyzerBaseTypeNotAssignable", t.Name, t.Assembly));
             }
         }
         catch (ReflectionTypeLoadException ex)
@@ -61,13 +58,13 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
             {
                 foreach (Exception? loaderException in ex.LoaderExceptions)
                 {
-                    _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerFailedRuleLoading", loaderException?.Message);
+                    loggingContext.LogComment(MessageImportance.Normal, "CustomAnalyzerFailedRuleLoading", loaderException?.Message);
                 }
             }
         }
         catch (Exception ex)
         {
-            _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerFailedRuleLoading", ex?.Message);
+            loggingContext.LogComment(MessageImportance.Normal, "CustomAnalyzerFailedRuleLoading", ex?.Message);
         }
 
         return analyzersFactories;

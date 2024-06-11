@@ -75,7 +75,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         internal BuildCheckManager(ILoggingService loggingService)
         {
             _analyzersRegistry = new List<BuildAnalyzerFactoryContext>();
-            _acquisitionModule = new BuildCheckAcquisitionModule(loggingService);
+            _acquisitionModule = new BuildCheckAcquisitionModule();
             _loggingService = loggingService;
             _buildCheckCentralContext = new(_configurationProvider);
             _buildEventsProcessor = new(_buildCheckCentralContext);
@@ -101,28 +101,29 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             _tracingReporter.AddSetDataSourceStats(stopwatch.Elapsed);
         }
 
-        public void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, BuildEventContext buildEventContext)
+        public void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, AnalyzerLoggingContext loggingContext)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
             if (IsInProcNode)
             {
-                var analyzersFactories = _acquisitionModule.CreateBuildAnalyzerFactories(acquisitionData, buildEventContext);
+                var analyzersFactories = _acquisitionModule.CreateBuildAnalyzerFactories(acquisitionData, loggingContext);
                 if (analyzersFactories.Count != 0)
                 {
-                    RegisterCustomAnalyzer(BuildCheckDataSource.EventArgs, analyzersFactories, buildEventContext);
+                    RegisterCustomAnalyzer(BuildCheckDataSource.EventArgs, analyzersFactories, loggingContext);
                 }
                 else
                 {
-                    _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerFailedAcquisition", acquisitionData.AssemblyPath);
+                    loggingContext.LogComment(MessageImportance.Normal, "CustomAnalyzerFailedAcquisition", acquisitionData.AssemblyPath);
                 }
             }
             else
             {
                 BuildCheckAcquisitionEventArgs eventArgs = acquisitionData.ToBuildEventArgs();
-                eventArgs.BuildEventContext = buildEventContext;
+                eventArgs.BuildEventContext = loggingContext.BuildEventContext!;
 
-                _loggingService.LogBuildEvent(eventArgs);
+                loggingContext.LogBuildEvent(eventArgs);
             }
+
             stopwatch.Stop();
             _tracingReporter.AddAcquisitionStats(stopwatch.Elapsed);
         }
@@ -184,11 +185,11 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         /// </summary>
         /// <param name="buildCheckDataSource">Represents different data sources used in build check operations.</param>
         /// <param name="factories">A collection of build analyzer factories for rules instantiation.</param>
-        /// <param name="buildEventContext">The context of the build event.</param>
+        /// <param name="loggingContext">The logging context of the build event.</param>
         internal void RegisterCustomAnalyzer(
             BuildCheckDataSource buildCheckDataSource,
             IEnumerable<BuildAnalyzerFactory> factories,
-            BuildEventContext buildEventContext)
+            AnalyzerLoggingContext loggingContext)
         {
             if (_enabledDataSources[(int)buildCheckDataSource])
             {
@@ -199,8 +200,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                         factory,
                         instance.SupportedRules.Select(r => r.Id).ToArray(),
                         instance.SupportedRules.Any(r => r.DefaultConfiguration.IsEnabled == true)));
-                    _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerSuccessfulAcquisition", instance.FriendlyName);
-                }     
+                    loggingContext.LogComment(MessageImportance.Normal, "CustomAnalyzerSuccessfulAcquisition", instance.FriendlyName);
+                }
             }
         }
 

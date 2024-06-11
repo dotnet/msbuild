@@ -54,7 +54,7 @@ internal interface IBuildCheckManager
 
     void SetDataSource(BuildCheckDataSource buildCheckDataSource);
 
-    void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, BuildEventContext buildEventContext);
+    void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, AnalyzerLoggingContext loggingContext);
 
     Dictionary<string, TimeSpan> CreateAnalyzerTracingStats();
 
