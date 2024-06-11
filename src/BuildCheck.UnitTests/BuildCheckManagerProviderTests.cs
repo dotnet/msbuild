@@ -30,7 +30,7 @@ public class BuildCheckManagerTests
         _loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
         _logger = new MockLogger();
         _loggingService.RegisterLogger(_logger);
-        _testedInstance = new BuildCheckManager(_loggingService);
+        _testedInstance = new BuildCheckManager();
     }
 
     [Theory]

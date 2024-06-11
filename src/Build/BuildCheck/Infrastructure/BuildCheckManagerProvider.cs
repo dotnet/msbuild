@@ -8,10 +8,10 @@ using System.Linq;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
 using Microsoft.Build.Experimental.BuildCheck.Analyzers;
 using Microsoft.Build.Experimental.BuildCheck.Logging;
-using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -46,7 +46,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             IBuildCheckManager instance;
             if (host!.BuildParameters.IsBuildCheckEnabled)
             {
-                instance = new BuildCheckManager(host.LoggingService);
+                instance = new BuildCheckManager();
             }
             else
             {
@@ -66,17 +66,15 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         private readonly TracingReporter _tracingReporter = new TracingReporter();
         private readonly ConfigurationProvider _configurationProvider = new ConfigurationProvider();
         private readonly BuildCheckCentralContext _buildCheckCentralContext;
-        private readonly ILoggingService _loggingService;
         private readonly List<BuildAnalyzerFactoryContext> _analyzersRegistry;
         private readonly bool[] _enabledDataSources = new bool[(int)BuildCheckDataSource.ValuesCount];
         private readonly BuildEventsProcessor _buildEventsProcessor;
         private readonly IBuildCheckAcquisitionModule _acquisitionModule;
 
-        internal BuildCheckManager(ILoggingService loggingService)
+        internal BuildCheckManager()
         {
             _analyzersRegistry = new List<BuildAnalyzerFactoryContext>();
             _acquisitionModule = new BuildCheckAcquisitionModule();
-            _loggingService = loggingService;
             _buildCheckCentralContext = new(_configurationProvider);
             _buildEventsProcessor = new(_buildCheckCentralContext);
         }
@@ -205,7 +203,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             }
         }
 
-        private void SetupSingleAnalyzer(BuildAnalyzerFactoryContext analyzerFactoryContext, string projectFullPath, BuildEventContext buildEventContext)
+        private void SetupSingleAnalyzer(BuildAnalyzerFactoryContext analyzerFactoryContext, string projectFullPath)
         {
             // For custom analyzers - it should run only on projects where referenced
             //  (otherwise error out - https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=57849480)
@@ -283,7 +281,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             }
         }
 
-        private void SetupAnalyzersForNewProject(string projectFullPath, BuildEventContext buildEventContext)
+        private void SetupAnalyzersForNewProject(string projectFullPath, AnalyzerLoggingContext loggingContext)
         {
             // Only add analyzers here
             // On an execution node - we might remove and dispose the analyzers once project is done
@@ -295,11 +293,11 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             {
                 try
                 {
-                    SetupSingleAnalyzer(analyzerFactoryContext, projectFullPath, buildEventContext);
+                    SetupSingleAnalyzer(analyzerFactoryContext, projectFullPath);
                 }
                 catch (BuildCheckConfigurationException e)
                 {
-                    _loggingService.LogErrorFromText(buildEventContext, null, null, null,
+                    loggingContext.LogErrorFromText(null, null, null,
                         new BuildEventFileInfo(projectFullPath),
                         e.Message);
                     analyzersToRemove.Add(analyzerFactoryContext);
@@ -309,7 +307,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             analyzersToRemove.ForEach(c =>
             {
                 _analyzersRegistry.Remove(c);
-                _loggingService.LogCommentFromText(buildEventContext, MessageImportance.High, $"Dismounting analyzer '{c.FriendlyName}'");
+                loggingContext.LogCommentFromText(MessageImportance.High, $"Dismounting analyzer '{c.FriendlyName}'");
             });
             foreach (var analyzerToRemove in analyzersToRemove.Select(a => a.MaterializedAnalyzer).Where(a => a != null))
             {
@@ -377,7 +375,9 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             loggingContext.LogBuildEvent(analyzerEventArg);
         }
 
-        public void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext,
+        public void StartProjectEvaluation(
+            BuildCheckDataSource buildCheckDataSource,
+            AnalyzerLoggingContext loggingContext,
             string fullPath)
         {
             if (buildCheckDataSource == BuildCheckDataSource.EventArgs && IsInProcNode)
@@ -388,7 +388,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 return;
             }
 
-            SetupAnalyzersForNewProject(fullPath, buildEventContext);
+            SetupAnalyzersForNewProject(fullPath, loggingContext);
         }
 
         /*

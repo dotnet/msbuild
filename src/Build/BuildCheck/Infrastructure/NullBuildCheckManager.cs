@@ -50,7 +50,7 @@ internal class NullBuildCheckManager : IBuildCheckManager
     {
     }
 
-    public void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext, string fullPath)
+    public void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, AnalyzerLoggingContext loggingContext, string fullPath)
     {
     }
 

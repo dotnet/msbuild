@@ -64,7 +64,7 @@ internal interface IBuildCheckManager
     //  but as well from the ConnectorLogger - as even if interleaved, it gives the info
     //  to manager about what analyzers need to be materialized and configuration fetched.
     // No unloading of analyzers is yet considered - once loaded it stays for whole build.
-    void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext, string fullPath);
+    void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, AnalyzerLoggingContext loggingContext, string fullPath);
 
     void EndProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext);
 

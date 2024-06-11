@@ -66,7 +66,10 @@ internal sealed class BuildCheckConnectorLogger : ILogger
     {
         if (!IsMetaProjFile(eventArgs.ProjectFile))
         {
-            _buildCheckManager.StartProjectEvaluation(BuildCheckDataSource.EventArgs, eventArgs.BuildEventContext!, eventArgs.ProjectFile!);
+            _buildCheckManager.StartProjectEvaluation(
+                BuildCheckDataSource.EventArgs,
+                _loggingContextFactory.CreateLoggingContext(eventArgs.BuildEventContext!),
+                eventArgs.ProjectFile!);
         }
     }
 
