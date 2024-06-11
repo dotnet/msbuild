@@ -1,0 +1,62 @@
+name: Usage of Inter-branch merge workflow
+on:
+  push:
+    branches:
+      - vs16.11
+      - vs17.0
+      - vs17.3
+      - vs17.4
+      - vs17.6
+      - vs17.7
+      - vs17.8
+      - vs17.9
+      - vs17.10
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  merge-from-to:
+    # strategy here helps with mapping the source and target branches
+    strategy:
+      matrix:
+        source: []
+        target: []
+        include:
+          - source: 'vs16.11'
+            target: 'vs17.0'
+          - source: 'vs17.0'
+            target: 'vs17.3'
+          - source: 'vs17.3'
+            target: 'vs17.4'
+          - source: 'vs17.4'
+            target: 'vs17.6'
+          - source: 'vs17.6'
+            target: 'vs17.8'
+          - source: 'vs17.7'
+            target: 'vs17.8'
+          - source: 'vs17.8'
+            target: 'vs17.9'
+          - source: 'vs17.9'
+            target: 'vs17.10'
+          - source: 'vs17.10'
+            target: 'main'
+
+    # we only run the line(s) of the matrix that matches the trigger branch
+    runs-on: ${{ matrix.source }}
+    if: ${{ github.ref_name == matrix.source }}
+
+    # use the latest version of the script from the main branch of arcade repo
+    uses: dotnet/arcade/.github/workflows/inter-branch-merge-base.yml@main
+    with:
+      # this is the branch which will receive the new PR when there are changes in the trigger branches
+      base_branch: ${{ github.ref_name == 'vs17.9' && 'vs17.10' || 'main' }}
+
+      # Don't allow the commits made by the dotnet-maestro[bot].
+      # allowAutomatedCommits: false
+      
+      # Do not tag authors of the original PRs and do produce comments when existing PR is updated. Reduces GitHub notifications noise on the new (automated) PR
+      # quietComments: true
+
+      # use the latest version of the script from the main branch of arcade repo
+      # script_version: 'main' 
