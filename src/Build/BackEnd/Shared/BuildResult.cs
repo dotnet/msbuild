@@ -31,7 +31,7 @@ namespace Microsoft.Build.Execution
     /// <summary>
     /// Contains the current results for all of the targets which have produced results for a particular configuration.
     /// </summary>
-    public sealed class BuildResult : BuildResultBase, INodePacket, IBuildResults
+    public class BuildResult : BuildResultBase, INodePacket, IBuildResults
     {
         /// <summary>
         /// The submission with which this result is associated.

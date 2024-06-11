@@ -91,7 +91,7 @@ namespace Microsoft.Build.Execution
     /// <summary>
     /// BuildRequestData encapsulates all the data needed to submit a build request.
     /// </summary>
-    public sealed class BuildRequestData : BuildRequestData<BuildRequestData, BuildResult>
+    public class BuildRequestData : BuildRequestData<BuildRequestData, BuildResult>
     {
         /// <summary>
         /// Constructs a BuildRequestData for build requests based on project instances.

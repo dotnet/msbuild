@@ -151,7 +151,7 @@ namespace Microsoft.Build.Execution
     /// <remarks>
     /// This class is thread-safe.
     /// </remarks>
-    public sealed class BuildSubmission : BuildSubmission<BuildRequestData, BuildResult>
+    public class BuildSubmission : BuildSubmission<BuildRequestData, BuildResult>
     {
         /// <summary>
         /// Flag indicating whether synchronous wait should support legacy threading semantics.
