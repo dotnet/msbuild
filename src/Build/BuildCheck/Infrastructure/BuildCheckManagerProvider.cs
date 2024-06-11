@@ -99,27 +99,29 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             _tracingReporter.AddSetDataSourceStats(stopwatch.Elapsed);
         }
 
-        public void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, AnalyzerLoggingContext loggingContext)
+        public void ProcessAnalyzerAcquisition(
+            AnalyzerAcquisitionData acquisitionData,
+            IAnalysisContext analysisContext)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
             if (IsInProcNode)
             {
-                var analyzersFactories = _acquisitionModule.CreateBuildAnalyzerFactories(acquisitionData, loggingContext);
+                var analyzersFactories = _acquisitionModule.CreateBuildAnalyzerFactories(acquisitionData, analysisContext);
                 if (analyzersFactories.Count != 0)
                 {
-                    RegisterCustomAnalyzer(BuildCheckDataSource.EventArgs, analyzersFactories, loggingContext);
+                    RegisterCustomAnalyzer(BuildCheckDataSource.EventArgs, analyzersFactories, analysisContext);
                 }
                 else
                 {
-                    loggingContext.LogComment(MessageImportance.Normal, "CustomAnalyzerFailedAcquisition", acquisitionData.AssemblyPath);
+                    analysisContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerFailedAcquisition", acquisitionData.AssemblyPath);
                 }
             }
             else
             {
                 BuildCheckAcquisitionEventArgs eventArgs = acquisitionData.ToBuildEventArgs();
-                eventArgs.BuildEventContext = loggingContext.BuildEventContext!;
+                eventArgs.BuildEventContext = analysisContext.BuildEventContext!;
 
-                loggingContext.LogBuildEvent(eventArgs);
+                analysisContext.DispatchBuildEvent(eventArgs);
             }
 
             stopwatch.Stop();
@@ -183,11 +185,11 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         /// </summary>
         /// <param name="buildCheckDataSource">Represents different data sources used in build check operations.</param>
         /// <param name="factories">A collection of build analyzer factories for rules instantiation.</param>
-        /// <param name="loggingContext">The logging context of the build event.</param>
+        /// <param name="analysisContext">The logging context of the build event.</param>
         internal void RegisterCustomAnalyzer(
             BuildCheckDataSource buildCheckDataSource,
             IEnumerable<BuildAnalyzerFactory> factories,
-            AnalyzerLoggingContext loggingContext)
+            IAnalysisContext analysisContext)
         {
             if (_enabledDataSources[(int)buildCheckDataSource])
             {
@@ -198,7 +200,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                         factory,
                         instance.SupportedRules.Select(r => r.Id).ToArray(),
                         instance.SupportedRules.Any(r => r.DefaultConfiguration.IsEnabled == true)));
-                    loggingContext.LogComment(MessageImportance.Normal, "CustomAnalyzerSuccessfulAcquisition", instance.FriendlyName);
+                    analysisContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerSuccessfulAcquisition", instance.FriendlyName);
                 }
             }
         }
@@ -281,7 +283,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             }
         }
 
-        private void SetupAnalyzersForNewProject(string projectFullPath, AnalyzerLoggingContext loggingContext)
+        private void SetupAnalyzersForNewProject(string projectFullPath, IAnalysisContext analysisContext)
         {
             // Only add analyzers here
             // On an execution node - we might remove and dispose the analyzers once project is done
@@ -297,7 +299,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 }
                 catch (BuildCheckConfigurationException e)
                 {
-                    loggingContext.LogErrorFromText(null, null, null,
+                    analysisContext.DispatchAsErrorFromText(null, null, null,
                         new BuildEventFileInfo(projectFullPath),
                         e.Message);
                     analyzersToRemove.Add(analyzerFactoryContext);
@@ -307,7 +309,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             analyzersToRemove.ForEach(c =>
             {
                 _analyzersRegistry.Remove(c);
-                loggingContext.LogCommentFromText(MessageImportance.High, $"Dismounting analyzer '{c.FriendlyName}'");
+                analysisContext.DispatchAsCommentFromText(MessageImportance.High, $"Dismounting analyzer '{c.FriendlyName}'");
             });
             foreach (var analyzerToRemove in analyzersToRemove.Select(a => a.MaterializedAnalyzer).Where(a => a != null))
             {
@@ -321,28 +323,28 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         }
 
         public void ProcessEvaluationFinishedEventArgs(
-            AnalyzerLoggingContext buildAnalysisContext,
+            IAnalysisContext analysisContext,
             ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
             => _buildEventsProcessor
-                .ProcessEvaluationFinishedEventArgs(buildAnalysisContext, evaluationFinishedEventArgs);
+                .ProcessEvaluationFinishedEventArgs(analysisContext, evaluationFinishedEventArgs);
 
         public void ProcessTaskStartedEventArgs(
-            AnalyzerLoggingContext buildAnalysisContext,
+            IAnalysisContext analysisContext,
             TaskStartedEventArgs taskStartedEventArgs)
             => _buildEventsProcessor
-                .ProcessTaskStartedEventArgs(buildAnalysisContext, taskStartedEventArgs);
+                .ProcessTaskStartedEventArgs(analysisContext, taskStartedEventArgs);
 
         public void ProcessTaskFinishedEventArgs(
-            AnalyzerLoggingContext buildAnalysisContext,
+            IAnalysisContext analysisContext,
             TaskFinishedEventArgs taskFinishedEventArgs)
             => _buildEventsProcessor
-                .ProcessTaskFinishedEventArgs(buildAnalysisContext, taskFinishedEventArgs);
+                .ProcessTaskFinishedEventArgs(analysisContext, taskFinishedEventArgs);
 
         public void ProcessTaskParameterEventArgs(
-            AnalyzerLoggingContext buildAnalysisContext,
+            IAnalysisContext analysisContext,
             TaskParameterEventArgs taskParameterEventArgs)
             => _buildEventsProcessor
-                .ProcessTaskParameterEventArgs(buildAnalysisContext, taskParameterEventArgs);
+                .ProcessTaskParameterEventArgs(analysisContext, taskParameterEventArgs);
 
         public Dictionary<string, TimeSpan> CreateAnalyzerTracingStats()
         {
@@ -377,7 +379,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         public void StartProjectEvaluation(
             BuildCheckDataSource buildCheckDataSource,
-            AnalyzerLoggingContext loggingContext,
+            IAnalysisContext analysisContext,
             string fullPath)
         {
             if (buildCheckDataSource == BuildCheckDataSource.EventArgs && IsInProcNode)
@@ -388,7 +390,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 return;
             }
 
-            SetupAnalyzersForNewProject(fullPath, loggingContext);
+            SetupAnalyzersForNewProject(fullPath, analysisContext);
         }
 
         /*

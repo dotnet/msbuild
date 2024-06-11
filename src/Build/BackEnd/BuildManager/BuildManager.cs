@@ -2999,7 +2999,7 @@ namespace Microsoft.Build.Execution
                     verbosity: LoggerVerbosity.Quiet);
 
                 ILogger buildCheckLogger =
-                    new BuildCheckConnectorLogger(new AnalyzerLoggingContextFactory(loggingService),
+                    new BuildCheckConnectorLogger(new AnalysisLoggingContextFactory(loggingService),
                         buildCheckManagerProvider.Instance);
 
                 ForwardingLoggerRecord[] forwardingLogger = { new ForwardingLoggerRecord(buildCheckLogger, forwardingLoggerDescription) };

@@ -26,7 +26,9 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
     /// <summary>
     /// Creates a list of factory delegates for building analyzer rules instances from a given assembly path.
     /// </summary>
-    public List<BuildAnalyzerFactory> CreateBuildAnalyzerFactories(AnalyzerAcquisitionData analyzerAcquisitionData, AnalyzerLoggingContext loggingContext)
+    public List<BuildAnalyzerFactory> CreateBuildAnalyzerFactories(
+        AnalyzerAcquisitionData analyzerAcquisitionData,
+        IAnalysisContext analysisContext)
     {
         var analyzersFactories = new List<BuildAnalyzerFactory>();
 
@@ -49,7 +51,7 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
 
             if (availableTypes.Count != analyzerTypes.Count)
             {
-                availableTypes.Except(analyzerTypes).ToList().ForEach(t => loggingContext.LogComment(MessageImportance.Normal, "CustomAnalyzerBaseTypeNotAssignable", t.Name, t.Assembly));
+                availableTypes.Except(analyzerTypes).ToList().ForEach(t => analysisContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerBaseTypeNotAssignable", t.Name, t.Assembly));
             }
         }
         catch (ReflectionTypeLoadException ex)
@@ -58,13 +60,13 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
             {
                 foreach (Exception? loaderException in ex.LoaderExceptions)
                 {
-                    loggingContext.LogComment(MessageImportance.Normal, "CustomAnalyzerFailedRuleLoading", loaderException?.Message);
+                    analysisContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerFailedRuleLoading", loaderException?.Message);
                 }
             }
         }
         catch (Exception ex)
         {
-            loggingContext.LogComment(MessageImportance.Normal, "CustomAnalyzerFailedRuleLoading", ex?.Message);
+            analysisContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerFailedRuleLoading", ex?.Message);
         }
 
         return analyzersFactories;

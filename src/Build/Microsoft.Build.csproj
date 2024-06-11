@@ -160,9 +160,13 @@
     <Compile Include="BuildCheck\Acquisition\IBuildCheckAcquisitionModule.cs" />
     <Compile Include="BuildCheck\Analyzers\SharedOutputPathAnalyzer.cs" />
     <Compile Include="BuildCheck\Analyzers\DoubleWritesAnalyzer.cs" />
+    <Compile Include="BuildCheck\Infrastructure\AnalyzerContext\AnalysisLoggingContextFactory.cs" />
+    <Compile Include="BuildCheck\Infrastructure\AnalyzerContext\IAnalysisContext.cs" />
+    <Compile Include="BuildCheck\Infrastructure\AnalyzerContext\AnalysisLoggingContext.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildCheckConfigurationException.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildCheckForwardingLogger.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildEventsProcessor.cs" />
+    <Compile Include="BuildCheck\Infrastructure\AnalyzerContext\IAnalysisContextFactory.cs" />
     <Compile Include="BuildCheck\Infrastructure\IBuildCheckManagerProvider.cs" />
     <Compile Include="BuildCheck\Infrastructure\NullBuildCheckManager.cs" />
     <Compile Include="BuildCheck\Infrastructure\NullBuildCheckManagerProvider.cs" />
@@ -202,8 +206,8 @@
     <Compile Include="FileAccess\ProcessData.cs" />
     <Compile Include="FileAccess\ReportedFileOperation.cs" />
     <Compile Include="FileAccess\RequestedAccess.cs" />
-    <Compile Include="BuildCheck\Logging\AnalyzerLoggingContext.cs" />
-    <Compile Include="BuildCheck\Logging\AnalyzerLoggingContextFactory.cs" />
+    <Compile Include="BuildCheck\Logging\AnalyzerLoggingContext22.cs" />
+    <Compile Include="BuildCheck\Logging\AnalyzerLoggingContextFactory22.cs" />
     <Compile Include="Instance\IPropertyElementWithLocation.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />

@@ -7,8 +7,8 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Logging;
 
-internal class AnalyzerLoggingContextFactory(ILoggingService loggingService) : IBuildAnalysisLoggingContextFactory
+internal class AnalyzerLoggingContextFactory22(ILoggingService loggingService) : IBuildAnalysisLoggingContextFactory
 {
-    public AnalyzerLoggingContext CreateLoggingContext(BuildEventContext eventContext) =>
-        new AnalyzerLoggingContext(loggingService, eventContext);
+    public AnalyzerLoggingContext22 CreateLoggingContext(BuildEventContext eventContext) =>
+        new AnalyzerLoggingContext22(loggingService, eventContext);
 }

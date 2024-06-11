@@ -2940,7 +2940,7 @@ namespace Microsoft.Build.Execution
             _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(MSBuildNameIgnoreCaseComparer.Default);
             _hostServices = buildParameters.HostServices;
             this.ProjectRootElementCache = buildParameters.ProjectRootElementCache;
-            _loggingContext = new AnalyzerLoggingContext(loggingService, buildEventContext);
+            _loggingContext = new AnalyzerLoggingContext22(loggingService, buildEventContext);
             this.EvaluatedItemElements = new List<ProjectItemElement>();
 
             _explicitToolsVersionSpecified = (explicitToolsVersion != null);

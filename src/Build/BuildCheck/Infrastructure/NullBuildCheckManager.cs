@@ -18,7 +18,7 @@ internal class NullBuildCheckManager : IBuildCheckManager
     }
 
     public void ProcessEvaluationFinishedEventArgs(
-        AnalyzerLoggingContext buildAnalysisContext,
+        IAnalysisContext analysisContext,
         ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs)
     {
     }
@@ -27,22 +27,27 @@ internal class NullBuildCheckManager : IBuildCheckManager
     {
     }
 
-    public void ProcessTaskStartedEventArgs(AnalyzerLoggingContext buildAnalysisContext,
+    public void ProcessTaskStartedEventArgs(
+        IAnalysisContext analysisContext,
         TaskStartedEventArgs taskStartedEventArgs)
     {
     }
 
-    public void ProcessTaskFinishedEventArgs(AnalyzerLoggingContext buildAnalysisContext,
+    public void ProcessTaskFinishedEventArgs(
+        IAnalysisContext analysisContext,
         TaskFinishedEventArgs taskFinishedEventArgs)
     {
     }
 
-    public void ProcessTaskParameterEventArgs(AnalyzerLoggingContext buildAnalysisContext,
+    public void ProcessTaskParameterEventArgs(
+        IAnalysisContext analysisContext,
         TaskParameterEventArgs taskParameterEventArgs)
     {
     }
 
-    public void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, AnalyzerLoggingContext loggingContext)
+    public void ProcessAnalyzerAcquisition(
+        AnalyzerAcquisitionData acquisitionData,
+        IAnalysisContext analysisContext)
     {
     }
 
@@ -50,7 +55,7 @@ internal class NullBuildCheckManager : IBuildCheckManager
     {
     }
 
-    public void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, AnalyzerLoggingContext loggingContext, string fullPath)
+    public void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, IAnalysisContext analysisContext, string fullPath)
     {
     }
 

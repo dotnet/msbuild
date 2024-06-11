@@ -1124,7 +1124,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     buildCheckManager.StartProjectEvaluation(
                         BuildCheckDataSource.BuildExecution,
-                        new AnalyzerLoggingContext(_nodeLoggingContext.LoggingService, _requestEntry.Request.ParentBuildEventContext),
+                        new AnalysisLoggingContext(_nodeLoggingContext.LoggingService, _requestEntry.Request.ParentBuildEventContext),
                         _requestEntry.RequestConfiguration.ProjectFullPath);
 
                     _requestEntry.RequestConfiguration.LoadProjectIntoConfiguration(

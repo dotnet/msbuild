@@ -41,7 +41,7 @@ public class BuildCheckManagerTests
         MockBuildCheckAcquisition(isAnalyzerRuleExist);
         MockEnabledDataSourcesDefinition();
 
-        _testedInstance.ProcessAnalyzerAcquisition(new AnalyzerAcquisitionData("DummyPath"), new AnalyzerLoggingContext(_loggingService, new BuildEventContext(1, 2, 3, 4, 5, 6, 7)));
+        _testedInstance.ProcessAnalyzerAcquisition(new AnalyzerAcquisitionData("DummyPath"), new AnalysisLoggingContext(_loggingService, new BuildEventContext(1, 2, 3, 4, 5, 6, 7)));
 
         _logger.AllBuildEvents.Where(be => be.GetType() == typeof(BuildMessageEventArgs)).Select(be => be.Message).ToArray()
             .ShouldBeEquivalentTo(expectedMessages);
@@ -67,7 +67,7 @@ internal sealed class BuildCheckAcquisitionModuleMock : IBuildCheckAcquisitionMo
 
     internal BuildCheckAcquisitionModuleMock(bool isAnalyzerRuleExistForTest) => _isAnalyzerRuleExistForTest = isAnalyzerRuleExistForTest;
 
-    public List<BuildAnalyzerFactory> CreateBuildAnalyzerFactories(AnalyzerAcquisitionData analyzerAcquisitionData, AnalyzerLoggingContext loggingContext)
+    public List<BuildAnalyzerFactory> CreateBuildAnalyzerFactories(AnalyzerAcquisitionData analyzerAcquisitionData, IAnalysisContext analysisContext)
         => _isAnalyzerRuleExistForTest
         ? new List<BuildAnalyzerFactory>() { () => new BuildAnalyzerRuleMock("Rule1"), () => new BuildAnalyzerRuleMock("Rule2") }
         : new List<BuildAnalyzerFactory>();
