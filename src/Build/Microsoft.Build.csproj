@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -195,7 +195,6 @@
     <Compile Include="BuildCheck\Infrastructure\CustomConfigurationData.cs" />
     <Compile Include="BuildCheck\API\IBuildCheckRegistrationContext.cs" />
     <Compile Include="BuildCheck\Infrastructure\IBuildCheckManager.cs" />
-    <Compile Include="BuildCheck\Logging\IBuildAnalysisLoggingContextFactory.cs" />
     <Compile Include="BuildCheck\OM\EvaluatedPropertiesAnalysisData.cs" />
     <Compile Include="BuildCheck\OM\ParsedItemsAnalysisData.cs" />
     <Compile Include="BuildCheck\Utilities\Constants.cs" />
@@ -208,8 +207,7 @@
     <Compile Include="FileAccess\ProcessData.cs" />
     <Compile Include="FileAccess\ReportedFileOperation.cs" />
     <Compile Include="FileAccess\RequestedAccess.cs" />
-    <Compile Include="BuildCheck\Logging\AnalyzerLoggingContext22.cs" />
-    <Compile Include="BuildCheck\Logging\AnalyzerLoggingContextFactory22.cs" />
+    <Compile Include="BuildCheck\Logging\AlwaysValidLoggingContext.cs" />
     <Compile Include="Instance\IPropertyElementWithLocation.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />

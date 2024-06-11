@@ -7,15 +7,15 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Logging;
 
-internal class AnalyzerLoggingContext22 : LoggingContext
+internal class AlwaysValidLoggingContext : LoggingContext
 {
-    public AnalyzerLoggingContext22(ILoggingService loggingService, BuildEventContext eventContext)
+    public AlwaysValidLoggingContext(ILoggingService loggingService, BuildEventContext eventContext)
         : base(loggingService, eventContext)
     {
         IsValid = true;
     }
 
-    public AnalyzerLoggingContext22(LoggingContext baseContext) : base(baseContext)
+    public AlwaysValidLoggingContext(LoggingContext baseContext) : base(baseContext)
     {
         IsValid = true;
     }
