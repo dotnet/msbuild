@@ -555,6 +555,13 @@ Chyby: {3}</target>
         <target state="translated">Překladač sady SDK {0} selhal při pokusu o překlad sady SDK {1}. Výjimka: {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="SDKResolverNullMessage">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</source>
+        <target state="new">The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</target>
+        <note>
+      LOCALIZATION: Do not localize the word SDK.
+    </note>
+      </trans-unit>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>
         <target state="translated">Překladač sady SDK „{0}“ vrátil hodnotu null.</target>

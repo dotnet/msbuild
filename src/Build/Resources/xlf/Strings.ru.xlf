@@ -555,6 +555,13 @@ Errors: {3}</source>
         <target state="translated">Сбой сопоставителя SDK "{0}" при попытке сопоставить пакет SDK "{1}". Исключение: "{2}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="SDKResolverNullMessage">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</source>
+        <target state="new">The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</target>
+        <note>
+      LOCALIZATION: Do not localize the word SDK.
+    </note>
+      </trans-unit>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>
         <target state="translated">Сопоставитель пакетов SDK "{0}" вернул значение null.</target>
