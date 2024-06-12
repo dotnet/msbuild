@@ -14,11 +14,6 @@
                       Private="false"
                       ReferenceOutputAssembly="false"
                       OutputItemType="FrameworkResolvedProjectReferencePath" />
-
-    <Arm64ProjectReference Include="$(MSBuildThisFileDirectory)\..\MSBuildTaskHost\MSBuildTaskHost.csproj"
-                      SetPlatform="Platform=arm64"
-                      OutputItemType="MSBuildTaskHostArm64ResolvedProjectReferencePath"
-                      GlobalPropertiesToRemove="TargetFramework" />
   </ItemGroup>
 
   <Target Name="SetBinPathsArm64" DependsOnTargets="ResolveProjectReferences">
