@@ -1881,7 +1881,7 @@ EndGlobal
                 ";
 
             SolutionFile solution = null;
-            ProjectCollection collection = new ProjectCollection();
+            using ProjectCollection collection = new ProjectCollection();
 
             try
             {
@@ -2076,6 +2076,7 @@ EndGlobal
                 {
                     NodeProviderInProc nodeProviderInProc = ((IBuildComponentHost)buildManager).GetComponent(BuildComponentType.InProcNodeProvider) as NodeProviderInProc;
                     nodeProviderInProc.Dispose();
+                    buildManager.Dispose();
                 }
             }
         }
@@ -2163,6 +2164,7 @@ EndGlobal
                 {
                     NodeProviderInProc nodeProviderInProc = ((IBuildComponentHost)buildManager).GetComponent(BuildComponentType.InProcNodeProvider) as NodeProviderInProc;
                     nodeProviderInProc.Dispose();
+                    buildManager.Dispose();
                 }
             }
         }
@@ -2225,7 +2227,7 @@ EndGlobal
                 globalProperties["SkipInvalidConfigurations"] = "true";
 
                 SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents.Replace('\'', '"'));
-                ProjectCollection collection = new ProjectCollection();
+                using ProjectCollection collection = new ProjectCollection();
                 collection.RegisterLogger(logger);
 
 #pragma warning disable format
