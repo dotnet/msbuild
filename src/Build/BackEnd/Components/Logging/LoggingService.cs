@@ -15,6 +15,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
+using Microsoft.Build.Experimental.BuildCheck;
 
 #nullable disable
 
@@ -1590,6 +1591,12 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
                 _buildSubmissionIdsThatHaveLoggedErrors.Add(errorEvent.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
+            }
+
+            if (buildEventArgs is BuildCheckResultError checkResultError)
+            {
+                // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
+                _buildSubmissionIdsThatHaveLoggedErrors.Add(checkResultError.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
             }
 
             if (buildEventArgs is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
