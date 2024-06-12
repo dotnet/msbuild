@@ -1749,13 +1749,14 @@ namespace Microsoft.Build.CommandLine
                     MessageImportance.Low),
             };
 
-            if (NativeMethodsShared.IsWindows)
+            NativeMethodsShared.LongPathsStatus longPaths = NativeMethodsShared.IsLongPathsEnabled();
+            if (longPaths != NativeMethodsShared.LongPathsStatus.NotApplicable)
             {
                 messages.Add(
                     new BuildManager.DeferredBuildMessage(
                         ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                         "LongPathsEnabled",
-                        NativeMethodsShared.TryIsLongPathsEnabledRegistry() ? 1 : 0),
+                        longPaths == NativeMethodsShared.LongPathsStatus.Enabled),
                         MessageImportance.Low));
             }
 
