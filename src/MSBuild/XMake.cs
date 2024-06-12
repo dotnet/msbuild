@@ -1749,6 +1749,16 @@ namespace Microsoft.Build.CommandLine
                     MessageImportance.Low),
             };
 
+            if (NativeMethodsShared.IsWindows)
+            {
+                messages.Add(
+                    new BuildManager.DeferredBuildMessage(
+                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "LongPathsEnabled",
+                        NativeMethodsShared.TryIsLongPathsEnabledRegistry() ? 1 : 0),
+                        MessageImportance.Low));
+            }
+
             if (Traits.Instance.DebugEngine)
             {
                 messages.Add(
@@ -3013,7 +3023,7 @@ namespace Microsoft.Build.CommandLine
         private static bool CheckAndGatherProjectAutoResponseFile(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches commandLineSwitches, bool recursing, string commandLine)
         {
             bool found = false;
-           
+
             var projectDirectory = GetProjectDirectory(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project]);
 
             if (!recursing && !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])

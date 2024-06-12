@@ -594,17 +594,19 @@ internal static class NativeMethods
         }
     }
 
-    internal static bool IsMaxPathLegacyWindows()
+    internal static bool TryIsLongPathsEnabledRegistry()
     {
         try
         {
-            return IsWindows && !IsLongPathsEnabledRegistry();
+            return IsWindows && IsLongPathsEnabledRegistry();
         }
         catch
         {
-            return true;
+            return false;
         }
     }
+    internal static bool IsMaxPathLegacyWindows() =>
+            IsWindows && !TryIsLongPathsEnabledRegistry();
 
     [SupportedOSPlatform("windows")]
     private static bool IsLongPathsEnabledRegistry()

@@ -1661,6 +1661,9 @@
     <value>succeeded: {0}</value>
     <comment>{0} whole number</comment>
   </data>
+  <data name="LongPathsEnabled" xml:space="preserve">
+    <value>LongPathsEnabled = {0}</value>
+  </data>
   <!-- **** TerminalLogger strings end **** -->
     <!--
         The command line message bucket is: MSB1001 - MSB1999

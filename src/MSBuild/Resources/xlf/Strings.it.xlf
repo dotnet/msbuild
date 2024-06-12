@@ -160,6 +160,11 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="LongPathsEnabled">
+        <source>LongPathsEnabled = {0}</source>
+        <target state="new">LongPathsEnabled = {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
         <target state="translated">Versione di MSBuild {0} per {1}</target>
