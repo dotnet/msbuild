@@ -40,6 +40,9 @@ namespace Microsoft.Build.Utilities
         // This is the final evaluated item specification.  Stored in escaped form.
         private string _itemSpec;
 
+        // The original, un-touched item-spec, we need this to be able to fix the paths correctly
+        private string _originalItemSpec;
+
         // These are the user-defined metadata on the item, specified in the
         // project file via XML child elements of the item element.  These have
         // no meaning to MSBuild, but tasks may use them.
@@ -64,6 +67,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public TaskItem()
         {
+            _originalItemSpec = string.Empty;
             _itemSpec = string.Empty;
         }
 
@@ -77,8 +81,45 @@ namespace Microsoft.Build.Utilities
         {
             ErrorUtilities.VerifyThrowArgumentNull(itemSpec, nameof(itemSpec));
 
+            _originalItemSpec = itemSpec;
             _itemSpec = FileUtilities.FixFilePath(itemSpec);
+
+            FixPathsAccordingToMetadata();
         }
+
+        private const string FixFilePath = nameof(FixFilePath);
+        private const string TargetOs = nameof(TargetOs);
+
+        private void FixPathsAccordingToMetadata()
+        {
+            bool fixFilePath = true;
+            string targetOs = null;
+
+            foreach (string key in _metadata.Keys)
+            {
+                // Check if the special metadata FixFilePath is set to false - if so, don't fix the file path
+                if (FixFilePath.Equals(key, StringComparison.OrdinalIgnoreCase) && bool.TryParse(_metadata[key], out bool fixFilePathValue))
+                {
+                    fixFilePath = fixFilePathValue;
+                }
+
+                // Check if the special metadata TargetPlatform is set - if it is, use that when fixing the paths
+                if (TargetOs.Equals(key, StringComparison.OrdinalIgnoreCase))
+                {
+                    targetOs = _metadata[key];
+                }
+            }
+
+            if (!fixFilePath)
+            {
+                _itemSpec = _originalItemSpec;
+            }
+            else if (targetOs != null)
+            {
+                _itemSpec = FileUtilities.FixFilePath(_originalItemSpec, targetOs);
+            }
+        }
+
 
         /// <summary>
         /// This constructor creates a new TaskItem, using the given item spec and metadata.
@@ -106,10 +147,13 @@ namespace Microsoft.Build.Utilities
                     string key = (string)singleMetadata.Key;
                     if (!FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(key))
                     {
-                        _metadata[key] = (string)singleMetadata.Value ?? string.Empty;
+                        string value = (string)singleMetadata.Value;
+                        _metadata[key] = value ?? string.Empty;
                     }
                 }
             }
+
+            FixPathsAccordingToMetadata();
         }
 
         /// <summary>
@@ -134,6 +178,7 @@ namespace Microsoft.Build.Utilities
             }
 
             sourceItem.CopyMetadataTo(this);
+            FixPathsAccordingToMetadata();
         }
 
         #endregion
@@ -157,7 +202,9 @@ namespace Microsoft.Build.Utilities
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, nameof(ItemSpec));
 
+                _originalItemSpec = value;
                 _itemSpec = FileUtilities.FixFilePath(value);
+                FixPathsAccordingToMetadata();
                 _fullPath = null;
             }
         }
@@ -177,6 +224,7 @@ namespace Microsoft.Build.Utilities
             set
             {
                 _itemSpec = FileUtilities.FixFilePath(value);
+                FixPathsAccordingToMetadata();
                 _fullPath = null;
             }
         }
@@ -225,6 +273,7 @@ namespace Microsoft.Build.Utilities
             set
             {
                 _metadata = value;
+                FixPathsAccordingToMetadata();
             }
         }
 
@@ -243,6 +292,7 @@ namespace Microsoft.Build.Utilities
                 "Shared.CannotChangeItemSpecModifiers", metadataName);
 
             _metadata?.Remove(metadataName);
+            FixPathsAccordingToMetadata();
         }
 
         /// <summary>
@@ -267,6 +317,7 @@ namespace Microsoft.Build.Utilities
             _metadata ??= new CopyOnWriteDictionary<string>(MSBuildNameIgnoreCaseComparer.Default);
 
             _metadata[metadataName] = metadataValue ?? string.Empty;
+            FixPathsAccordingToMetadata();
         }
 
         /// <summary>

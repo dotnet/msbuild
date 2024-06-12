@@ -545,6 +545,23 @@ namespace Microsoft.Build.Shared
             return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == '\\' ? path : path.Replace('\\', '/'); // .Replace("//", "/");
         }
 
+        internal static string FixFilePath(string path, string targetOs)
+        {
+            char targetSeparator = targetOs switch
+            {
+                "windows" => '\\',
+                "unix" => '/',
+                "current" => Path.DirectorySeparatorChar,
+                _ => Path.DirectorySeparatorChar,
+            };
+
+            return path switch
+            {
+                { } when string.IsNullOrEmpty(path) => path,
+                _ => path.Replace('\\', targetSeparator).Replace('/', targetSeparator),
+            };
+        }
+
 #if !CLR2COMPATIBILITY
         /// <summary>
         /// If on Unix, convert backslashes to slashes for strings that resemble paths.
