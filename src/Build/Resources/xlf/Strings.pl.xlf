@@ -514,6 +514,11 @@
         <target state="translated">Projekt „{0}” nie został zaimportowany przez projekt „{1}” o ({2},{3}) z powodu wyrażenia ocenianego jako pusty ciąg.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectImportsCollectorFileIOFail">
+        <source>An exception occurred when adding the file '{0}', Exception: '{1}'</source>
+        <target state="new">An exception occurred when adding the file '{0}', Exception: '{1}'</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">Wartość początkowa właściwości: $({0})=„{1}” Źródło: {2}</target>

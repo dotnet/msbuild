@@ -514,6 +514,11 @@
         <target state="translated">빈 문자열로 평가되는 식 때문에 ({2},{3})의 "{1}"이(가) 프로젝트 "{0}"을(를) 가져오지 않았습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectImportsCollectorFileIOFail">
+        <source>An exception occurred when adding the file '{0}', Exception: '{1}'</source>
+        <target state="new">An exception occurred when adding the file '{0}', Exception: '{1}'</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">속성 초기 값: $({0})="{1}" 소스: {2}</target>

@@ -514,6 +514,11 @@
         <target state="translated">{1} neimportoval projekt {0} v ({2},{3}), protože se výraz vyhodnocuje na prázdný řetězec.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectImportsCollectorFileIOFail">
+        <source>An exception occurred when adding the file '{0}', Exception: '{1}'</source>
+        <target state="new">An exception occurred when adding the file '{0}', Exception: '{1}'</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">Počáteční hodnota vlastnosti: $({0})={1} Zdroj: {2}</target>

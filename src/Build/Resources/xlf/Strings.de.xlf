@@ -514,6 +514,11 @@
         <target state="translated">Das Projekt "{0}" wurde nicht von "{1}" bei ({2},{3}) importiert, weil der Ausdruck in eine leere Zeichenfolge ausgewertet wurde.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectImportsCollectorFileIOFail">
+        <source>An exception occurred when adding the file '{0}', Exception: '{1}'</source>
+        <target state="new">An exception occurred when adding the file '{0}', Exception: '{1}'</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">Anfangswert der Eigenschaft: $({0})="{1}", Quelle: {2}</target>

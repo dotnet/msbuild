@@ -514,6 +514,11 @@
         <target state="translated">Il progetto "{0}" non è stato importato da "{1}" alla posizione ({2},{3}) perché l'espressione restituisce una stringa vuota.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectImportsCollectorFileIOFail">
+        <source>An exception occurred when adding the file '{0}', Exception: '{1}'</source>
+        <target state="new">An exception occurred when adding the file '{0}', Exception: '{1}'</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">Valore iniziale della proprietà: $({0})="{1}". Origine: {2}</target>
