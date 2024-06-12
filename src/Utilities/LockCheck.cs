@@ -254,7 +254,7 @@ namespace Microsoft.Build.Utilities
         /// Try to get a message to inform the user which processes have a lock on a given file. On Windows it uses the Restart Manager API.
         /// </summary>
         /// <param name="filePath">The path of the file to check.</param>
-        /// <returns>A message to inform the user which processes have a lock on the file on Window if available, string.Empty on other platforms.</returns>
+        /// <returns>A message to inform the user which processes have a lock on the file if known, <see cref="string.Empty"/> otherwise. Always returns <see cref="string.Empty"/> on operating systems other than Windows.</returns>
         public static string GetLockedFileMessage(string filePath)
         {
             if (NativeMethodsShared.IsWindows)
