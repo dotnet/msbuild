@@ -16,14 +16,14 @@ internal sealed class BuildCheckConnectorLogger : ILogger
 {
     private readonly BuildCheckBuildEventHandler _eventHandler;
     private readonly IBuildCheckManager _buildCheckManager;
-    private readonly IAnalysisContextFactory _analyzerContextFactory;
+    private readonly IAnalysisContextFactory _analysisContextFactory;
 
     internal BuildCheckConnectorLogger(
         IAnalysisContextFactory analyzerContextFactory,
         IBuildCheckManager buildCheckManager)
     {
         _buildCheckManager = buildCheckManager;
-        _analyzerContextFactory = analyzerContextFactory;
+        _analysisContextFactory = analyzerContextFactory;
         _eventHandler = new BuildCheckBuildEventHandler(analyzerContextFactory, buildCheckManager);
     }
 
