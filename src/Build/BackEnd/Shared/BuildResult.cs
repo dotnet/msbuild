@@ -9,6 +9,7 @@ using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -33,6 +34,9 @@ namespace Microsoft.Build.Execution
     /// <summary>
     /// Contains the current results for all of the targets which have produced results for a particular configuration.
     /// </summary>
+    /// <remarks>
+    /// When modifying serialization/deserialization, bump the version and support previous versions in order to keep <see cref="ResultsCache"/> backwards compatible.
+    /// </remarks>
     public class BuildResult : INodePacket, IBuildResults
     {
         /// <summary>
@@ -78,6 +82,14 @@ namespace Microsoft.Build.Execution
         private ConcurrentDictionary<string, TargetResult> _resultsByTarget;
 
         /// <summary>
+        /// Version of the build result.
+        /// </summary>
+        /// <remarks>
+        /// Allows to serialize and deserialize different versions of the build result.
+        /// </remarks>
+        private int _version = 1;
+
+        /// <summary>
         /// The request caused a circular dependency in scheduling.
         /// </summary>
         private bool _circularDependency;
@@ -101,6 +113,24 @@ namespace Microsoft.Build.Execution
         private Dictionary<string, string> _savedEnvironmentVariables;
 
         /// <summary>
+        /// Lock object for the dictionary <see cref="_savedEnvironmentVariables"/>.
+        /// </summary>
+        private readonly object _lock = new object();
+
+        /// <summary>
+        /// When this key is in the dictionary <see cref="_savedEnvironmentVariables"/>, serialize the build result version.
+        /// </summary>
+        private const string VersionKeyName = "MSBUILDFEATUREBUILDRESULTHASVERSION";
+
+        /// <summary>
+        /// Presence of this key is in the dictionary <see cref="_savedEnvironmentVariables"/> indicates that it was empty.
+        /// </summary>
+        /// <remarks>
+        /// There is a behavioral difference between dictionary <see cref="_savedEnvironmentVariables"/> being empty and being null. Adding a magic key to distinguish these situations on deserialization. 
+        /// </remarks>
+        private const string SavedEnvironmentVariablesDictionaryWasNull = "MSBUILDSAVEDENVIRONMENTVARIABLESWASNULL";
+
+        /// <summary>
         /// Snapshot of the current directory from the configuration this result comes from.
         /// This should only be populated when the configuration for this result is moved between nodes.
         /// </summary>
@@ -119,6 +149,9 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The flags provide additional control over the build results and may affect the cached value.
         /// </summary>
+        /// <remarks>
+        /// Is optional.
+        /// </remarks>
         private BuildRequestDataFlags _buildRequestDataFlags;
 
         private string _schedulerInducedError;
@@ -396,7 +429,10 @@ namespace Microsoft.Build.Execution
         /// Gets the flags that were used in the build request to which these results are associated.
         /// See <see cref="Execution.BuildRequestDataFlags"/> for examples of the available flags.
         /// </summary>
-        public BuildRequestDataFlags BuildRequestDataFlags => _buildRequestDataFlags;
+        /// <remarks>
+        /// Is optional, exists starting version 1.
+        /// </remarks>
+        public BuildRequestDataFlags? BuildRequestDataFlags => (_version > 0) ? _buildRequestDataFlags : null;
 
         /// <summary>
         /// Returns the node packet type.
@@ -598,8 +634,83 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _projectStateAfterBuild, ProjectInstance.FactoryForDeserialization);
             translator.Translate(ref _savedCurrentDirectory);
             translator.Translate(ref _schedulerInducedError);
-            translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
-            translator.TranslateEnum(ref _buildRequestDataFlags, (int)_buildRequestDataFlags);
+
+            // This is a work-around for the bug https://github.com/dotnet/msbuild/issues/10208
+            // We are adding a version field to this class to make the ResultsCache backwards compatible with at least 2 previous releases.
+            // The adding of a version field is done without a breaking change in 3 steps, each separated with at least 1 intermediate release.
+            // 1st step (done): Add a special key to the dictionary. The presence of this key indicates that the version is serialized next.
+            // When serializing, add a key to the dictionary and a version field. Delete the special key from the dictionary during the deserialization and read a version if it presents.
+            // 2nd step: Stop writing a special key to the dictionary. Always serialize and de-serialize the version field. Remove the special keys if they present in the dictionary.
+            // 3rd step: Stop removing the special keys from the dictionary.
+            if (Traits.Instance.EscapeHatches.DoNotVersionBuildResult)
+            {
+                // Escape hatch: serialize/deserialize without version field.
+                translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
+                _version = 0;
+            }
+            else
+            {
+                lock (_lock)
+                {
+                    if (translator.Mode == TranslationDirection.WriteToStream)
+                    {
+                        // Add the special key VersionKeyName indicating the presence of a version to the _savedEnvironmentVariables dictionary.
+                        // If the dictionary was null, add another special key SavedEnvironmentVariablesDictionaryWasNull to the dictionary:
+                        // the behavior is different whether the dictionary was null or empty and we would like to preserve this information.
+                        if (_savedEnvironmentVariables is null)
+                        {
+                            _savedEnvironmentVariables = new Dictionary<string, string>
+                            {
+                                { SavedEnvironmentVariablesDictionaryWasNull, String.Empty }
+                            };
+                        }
+
+                        _savedEnvironmentVariables.Add(VersionKeyName, String.Empty);
+                        translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
+                        translator.Translate(ref _version);
+
+                        // Remove the added keys from the dictionary.
+                        if (_savedEnvironmentVariables.ContainsKey(SavedEnvironmentVariablesDictionaryWasNull))
+                        {
+                            _savedEnvironmentVariables = null;
+                        }
+                        else
+                        {
+                            _savedEnvironmentVariables.Remove(VersionKeyName);
+                        }
+                    }
+                    else
+                    {
+                        // Read the dictionary. If the special key VersionKeyName present there, also read a version and remove the special keys.
+                        // Presence of special key SavedEnvironmentVariablesDictionaryWasNull indicates that the dictionary was null.
+                        translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
+
+                        if ((_savedEnvironmentVariables is not null) && _savedEnvironmentVariables.ContainsKey(VersionKeyName))
+                        {
+                            if (_savedEnvironmentVariables.ContainsKey(SavedEnvironmentVariablesDictionaryWasNull))
+                            {
+                                _savedEnvironmentVariables = null;
+                            }
+                            else
+                            {
+                                _savedEnvironmentVariables.Remove(VersionKeyName);
+                            }
+
+                            translator.Translate(ref _version);
+                        }
+                        else
+                        {
+                            _version = 0;
+                        }
+                    }
+                }
+            }
+
+            // Starting version 1 this _buildRequestDataFlags field is present.
+            if (_version > 0)
+            {
+                translator.TranslateEnum(ref _buildRequestDataFlags, (int)_buildRequestDataFlags);
+            }
         }
 
         /// <summary>
