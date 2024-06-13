@@ -64,7 +64,7 @@ public class EndToEndTests : IDisposable
     [InlineData(true, true)]
     [InlineData(false, true)]
     [InlineData(false, false)]
-    public void SampleAnalyzerIntegrationTest_AnalyzeOnBunaryLogReplay(bool buildInOutOfProcessNode, bool analysisRequested)
+    public void SampleAnalyzerIntegrationTest_AnalyzeOnBinaryLogReplay(bool buildInOutOfProcessNode, bool analysisRequested)
     {
         PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile);
 
@@ -76,8 +76,6 @@ public class EndToEndTests : IDisposable
             out bool success);
 
         success.ShouldBeTrue();
-
-        // _env.SetEnvironmentVariable("MSBUILDDEBUGONSTART", "1");
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
          $"{logFile} -flp:logfile={Path.Combine(projectDirectory!, "logFile.log")};verbosity=diagnostic {(analysisRequested ? "-analyze" : string.Empty)}",

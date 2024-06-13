@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 
@@ -15,10 +14,10 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 
 internal class AnalysisDispatchingContextFactory : IAnalysisContextFactory
 {
-    private readonly EventArgsDispatcher _eventDispatcher;
+    private readonly Action<BuildEventArgs> _dispatch;
 
-    public AnalysisDispatchingContextFactory(EventArgsDispatcher eventDispatcher) => _eventDispatcher = eventDispatcher;
+    public AnalysisDispatchingContextFactory(Action<BuildEventArgs> dispatch) => _dispatch = dispatch;
 
     public IAnalysisContext CreateAnalysisContext(BuildEventContext eventContext)
-        => new AnalysisDispatchingContext(_eventDispatcher, eventContext);
+        => new AnalysisDispatchingContext(_dispatch, eventContext);
 }

@@ -19,7 +19,7 @@ public class BuildCheckEventArgsDispatcher : EventArgsDispatcher
 
     internal BuildCheckEventArgsDispatcher(IBuildCheckManager buildCheckManager)
         => _buildCheckEventHandler = new BuildCheckBuildEventHandler(
-            new AnalysisDispatchingContextFactory(this),
+            new AnalysisDispatchingContextFactory(base.Dispatch),
             buildCheckManager);
 
     public override void Dispatch(BuildEventArgs buildEvent)
