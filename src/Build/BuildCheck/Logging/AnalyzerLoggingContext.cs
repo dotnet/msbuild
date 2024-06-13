@@ -14,9 +14,4 @@ internal class AnalyzerLoggingContext : LoggingContext
     {
         IsValid = true;
     }
-
-    public AnalyzerLoggingContext(LoggingContext baseContext) : base(baseContext)
-    {
-        IsValid = true;
-    }
 }

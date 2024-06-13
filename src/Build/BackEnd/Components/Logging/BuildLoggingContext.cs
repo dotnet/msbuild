@@ -36,7 +36,7 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <inheritdoc cref="LoggingContext"/>
-        protected BuildLoggingContext(BuildLoggingContext baseContext) : base(baseContext)
+        protected BuildLoggingContext(BuildLoggingContext baseContext, BuildEventContext newEventContext) : base(baseContext, newEventContext)
         {
             _isInProcNode = baseContext._isInProcNode;
         }

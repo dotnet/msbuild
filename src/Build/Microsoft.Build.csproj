@@ -164,6 +164,7 @@
     <Compile Include="BuildCheck\Infrastructure\BuildCheckForwardingLogger.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildEventsProcessor.cs" />
     <Compile Include="BuildCheck\Infrastructure\IBuildCheckManagerProvider.cs" />
+    <Compile Include="BuildCheck\Infrastructure\IBuildEngineDataConsumer.cs" />
     <Compile Include="BuildCheck\Infrastructure\NullBuildCheckManager.cs" />
     <Compile Include="BuildCheck\Infrastructure\NullBuildCheckManagerProvider.cs" />
     <Compile Include="BuildCheck\Infrastructure\TracingReporter.cs" />
@@ -192,6 +193,9 @@
     <Compile Include="BuildCheck\Logging\IBuildAnalysisLoggingContextFactory.cs" />
     <Compile Include="BuildCheck\OM\EvaluatedPropertiesAnalysisData.cs" />
     <Compile Include="BuildCheck\OM\ParsedItemsAnalysisData.cs" />
+    <Compile Include="BuildCheck\OM\ProjectProcessingDoneData.cs" />
+    <Compile Include="BuildCheck\OM\PropertyReadData.cs" />
+    <Compile Include="BuildCheck\OM\PropertyWriteData.cs" />
     <Compile Include="BuildCheck\Utilities\Constants.cs" />
     <Compile Include="BuildCheck\Utilities\EnumerableExtensions.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />

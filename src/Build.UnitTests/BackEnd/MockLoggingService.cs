@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Logging;
@@ -29,6 +30,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         #region ILoggingService Members
+
+        /// <summary>
+        /// Router of the build engine runtime execution information.
+        /// </summary>
+        public IBuildEngineDataRouter BuildEngineDataRouter => this;
 
         /// <summary>
         /// The event to raise when there is a logging exception
@@ -640,5 +646,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         #endregion
+
+        public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, BuildEventContext buildEventContext)
+        { /* Ignore the data */ }
+
+        public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, BuildEventContext buildEventContext)
+        { /* Ignore the data */ }
     }
 }

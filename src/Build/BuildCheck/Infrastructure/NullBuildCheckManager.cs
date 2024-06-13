@@ -8,10 +8,11 @@ using Microsoft.Build.Experimental.BuildCheck.Acquisition;
 using Microsoft.Build.Experimental.BuildCheck.Logging;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
+using Microsoft.Build.BuildCheck.Infrastructure;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
-internal class NullBuildCheckManager : IBuildCheckManager
+internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRouter
 {
     public void Shutdown()
     {
@@ -62,7 +63,8 @@ internal class NullBuildCheckManager : IBuildCheckManager
     {
     }
 
-    public void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
+    public void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext,
+        string projectFullPath)
     {
     }
 
@@ -83,5 +85,11 @@ internal class NullBuildCheckManager : IBuildCheckManager
     { }
 
     public void ProcessTaskParameter(BuildCheckDataSource buildCheckDataSource, TaskParameterEventArgs eventArg)
+    { }
+
+    public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, BuildEventContext buildEventContext)
+    { }
+
+    public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, BuildEventContext buildEventContext)
     { }
 }

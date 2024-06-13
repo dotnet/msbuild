@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
@@ -27,7 +28,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// Interface representing logging services in the build system.
     /// Implementations should be thread-safe.
     /// </summary>
-    internal interface ILoggingService
+    internal interface ILoggingService : IBuildEngineDataRouter
     {
         #region Events
         /// <summary>
@@ -51,6 +52,11 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Router of the build engine runtime execution information.
+        /// </summary>
+        IBuildEngineDataRouter BuildEngineDataRouter { get; }
 
         /// <summary>
         /// Provide the current state of the loggingService.

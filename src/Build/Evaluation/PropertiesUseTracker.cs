@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -38,7 +39,15 @@ internal sealed class PropertiesUseTracker
 
     internal void TrackRead(string propertyName, int startIndex, int endIndex, IElementLocation elementLocation, bool isUninitialized, bool isArtificial)
     {
-        if (isArtificial || !isUninitialized)
+        if (isArtificial)
+        {
+            return;
+        }
+
+        LoggingContext.ProcessPropertyRead(new PropertyReadInfo(propertyName, startIndex, endIndex,
+            elementLocation, isUninitialized, GetPropertyReadContext(propertyName, startIndex, endIndex)));
+
+        if (!isUninitialized)
         {
             return;
         }
@@ -62,6 +71,19 @@ internal sealed class PropertiesUseTracker
                     elementLocation);
             }
         }
+    }
+
+    private PropertyReadContext GetPropertyReadContext(string propertyName, int startIndex, int endIndex)
+    {
+        if (PropertyReadContext == PropertyReadContext.PropertyEvaluation &&
+            !string.IsNullOrEmpty(CurrentlyEvaluatingPropertyElementName) &&
+            MSBuildNameIgnoreCaseComparer.Default.Equals(CurrentlyEvaluatingPropertyElementName, propertyName,
+                startIndex, endIndex - startIndex + 1))
+        {
+            return PropertyReadContext.PropertyEvaluationSelf;
+        }
+
+        return PropertyReadContext;
     }
 
     internal void TryAdd(string propertyName, IElementLocation elementLocation)
