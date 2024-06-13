@@ -598,10 +598,9 @@ namespace Microsoft.Build.Evaluation
             using (AssemblyLoadsTracker.StartTracking(_evaluationLoggingContext, AssemblyLoadingContext.Evaluation))
             using (_evaluationProfiler.TrackPass(EvaluationPass.TotalEvaluation))
             {
-                _evaluationLoggingContext.LogProjectEvaluationStarted();
-
                 ErrorUtilities.VerifyThrow(_data.EvaluationId == BuildEventContext.InvalidEvaluationId, "There is no prior evaluation ID. The evaluator data needs to be reset at this point");
                 _data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
+                _evaluationLoggingContext.LogProjectEvaluationStarted();
 
                 _logProjectImportedEvents = Traits.Instance.EscapeHatches.LogProjectImports;
 
