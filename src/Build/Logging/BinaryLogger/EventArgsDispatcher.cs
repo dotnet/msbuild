@@ -106,6 +106,24 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public void Dispatch(BuildEventArgs buildEvent)
         {
+            BuildWarningEventArgs warningEvent = null;
+            BuildErrorEventArgs errorEvent = null;
+            BuildMessageEventArgs messageEvent = null;
+
+            if ((warningEvent = buildEvent as BuildWarningEventArgs) != null &&
+                warningEvent.ProjectFile == null)
+            {
+            }
+            else if ((errorEvent = buildEvent as BuildErrorEventArgs) != null &&
+                errorEvent.ProjectFile == null)
+            {
+            }
+            else if ((messageEvent = buildEvent as BuildMessageEventArgs) != null &&
+                messageEvent.ProjectFile == null)
+            {
+            }
+
+
             if (buildEvent is BuildMessageEventArgs buildMessageEventArgs)
             {
                 MessageRaised?.Invoke(null, buildMessageEventArgs);
