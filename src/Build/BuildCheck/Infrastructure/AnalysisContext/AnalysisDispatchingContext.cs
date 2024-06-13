@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.BackEnd.Shared;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
@@ -32,9 +33,6 @@ internal class AnalysisDispatchingContext : IAnalysisContext
     {
         ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
 
-        BuildWarningEventArgs? warningEvent = buildEvent as BuildWarningEventArgs;
-        BuildErrorEventArgs? errorEvent = buildEvent as BuildErrorEventArgs;
-
         _eventDispatcher.Dispatch(buildEvent);
     }
 
@@ -50,47 +48,14 @@ internal class AnalysisDispatchingContext : IAnalysisContext
 
     private void DispatchAsCommentFromText(BuildEventContext buildEventContext, MessageImportance importance, string message, params object?[]? messageArgs)
     {
-        ErrorUtilities.VerifyThrow(buildEventContext != null, "buildEventContext was null");
-        ErrorUtilities.VerifyThrow(message != null, "message was null");
+        BuildMessageEventArgs buildEvent = EventsCreatorHelper.CreateMessageEventFromText(buildEventContext, importance, message, messageArgs);
 
-        BuildMessageEventArgs buildEvent = new BuildMessageEventArgs(
-                message,
-                helpKeyword: null,
-                senderName: "MSBuild",
-                importance,
-                DateTime.UtcNow,
-                messageArgs);
-        buildEvent.BuildEventContext = buildEventContext;
         _eventDispatcher.Dispatch(buildEvent);
     }
 
     public void DispatchAsErrorFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
     {
-        ErrorUtilities.VerifyThrow(_eventContext != null, "Must specify the buildEventContext");
-        ErrorUtilities.VerifyThrow(file != null, "Must specify the associated file.");
-        ErrorUtilities.VerifyThrow(message != null, "Need error message.");
-
-        string? subcategory = null;
-
-        if (subcategoryResourceName != null)
-        {
-            subcategory = AssemblyResources.GetString(subcategoryResourceName);
-        }
-
-        BuildErrorEventArgs buildEvent =
-        new BuildErrorEventArgs(
-            subcategory,
-            errorCode,
-            file!.File,
-            file.Line,
-            file.Column,
-            file.EndLine,
-            file.EndColumn,
-            message,
-            helpKeyword,
-            "MSBuild");
-
-        buildEvent.BuildEventContext = _eventContext;
+        BuildErrorEventArgs buildEvent = EventsCreatorHelper.CreateErrorEventFromText(_eventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
 
         _eventDispatcher.Dispatch(buildEvent);
     }
