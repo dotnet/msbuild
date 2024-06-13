@@ -10,7 +10,6 @@ using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Experimental.BuildCheck.Logging;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Acquisition;
 
