@@ -4409,12 +4409,9 @@ namespace Microsoft.Build.CommandLine
             int cpuCount,
             bool isBuildCheckEnabled)
         {
-            var replayEventSource = new BinaryLogReplayEventSource();
-
-            if (isBuildCheckEnabled)
-            {
-                BuildManager.DefaultBuildManager.AttachBuildCheckForBinaryLogReplay(loggers, replayEventSource);
-            }
+            var replayEventSource = isBuildCheckEnabled ?
+                BuildManager.DefaultBuildManager.GetBinaryLogReplayEventSourceWithAttachedBuildCheck() :
+                new BinaryLogReplayEventSource();
 
             foreach (var distributedLoggerRecord in distributedLoggerRecords)
             {

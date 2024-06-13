@@ -104,25 +104,24 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Raise one of the events that is appropriate for the type of the BuildEventArgs
         /// </summary>
-        public void Dispatch(BuildEventArgs buildEvent)
+        public virtual void Dispatch(BuildEventArgs buildEvent)
         {
-            BuildWarningEventArgs warningEvent = null;
-            BuildErrorEventArgs errorEvent = null;
-            BuildMessageEventArgs messageEvent = null;
+            // BuildWarningEventArgs? warningEvent = null;
+            // BuildErrorEventArgs? errorEvent = null;
+            // BuildMessageEventArgs? messageEvent = null;
 
-            if ((warningEvent = buildEvent as BuildWarningEventArgs) != null &&
-                warningEvent.ProjectFile == null)
-            {
-            }
-            else if ((errorEvent = buildEvent as BuildErrorEventArgs) != null &&
-                errorEvent.ProjectFile == null)
-            {
-            }
-            else if ((messageEvent = buildEvent as BuildMessageEventArgs) != null &&
-                messageEvent.ProjectFile == null)
-            {
-            }
-
+            // if ((warningEvent = buildEvent as BuildWarningEventArgs) != null &&
+            //    warningEvent.ProjectFile == null)
+            // {
+            // }
+            // else if ((errorEvent = buildEvent as BuildErrorEventArgs) != null &&
+            //    errorEvent.ProjectFile == null)
+            // {
+            // }
+            // else if ((messageEvent = buildEvent as BuildMessageEventArgs) != null &&
+            //    messageEvent.ProjectFile == null)
+            // {
+            // }
 
             if (buildEvent is BuildMessageEventArgs buildMessageEventArgs)
             {

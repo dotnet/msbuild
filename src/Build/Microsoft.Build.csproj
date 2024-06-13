@@ -167,6 +167,8 @@
     <Compile Include="BuildCheck\Infrastructure\AnalysisContext\IAnalysisContext.cs" />
     <Compile Include="BuildCheck\Infrastructure\AnalysisContext\AnalysisLoggingContext.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildCheckConfigurationException.cs" />
+    <Compile Include="BuildCheck\Infrastructure\BuildCheckBuildEventHandler.cs" />
+    <Compile Include="BuildCheck\Infrastructure\BuildCheckEventArgsDispatcher.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildCheckForwardingLogger.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildEventsProcessor.cs" />
     <Compile Include="BuildCheck\Infrastructure\AnalysisContext\IAnalysisContextFactory.cs" />

@@ -2950,7 +2950,7 @@ namespace Microsoft.Build.Execution
             });
         }
 
-        public void AttachBuildCheckForBinaryLogReplay(List<ILogger> loggers, EventArgsDispatcher eventDispatcher)
+        public BinaryLogReplayEventSource GetBinaryLogReplayEventSourceWithAttachedBuildCheck()
         {
             _buildParameters = new BuildParameters
             {
@@ -2962,11 +2962,9 @@ namespace Microsoft.Build.Execution
 
             buildCheckManagerProvider!.Instance.SetDataSource(BuildCheckDataSource.EventArgs);
 
-            var buildCheckLogger = new BuildCheckConnectorLogger(
-                new AnalysisDispatchingContextFactory(eventDispatcher),
-                buildCheckManagerProvider.Instance);
+            var eventDispatcher = new BuildCheckEventArgsDispatcher(buildCheckManagerProvider.Instance);
 
-            loggers.Add(buildCheckLogger);
+            return new BinaryLogReplayEventSource(eventDispatcher);
         }
 
         /// <summary>

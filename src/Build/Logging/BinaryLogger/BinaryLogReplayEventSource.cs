@@ -59,14 +59,29 @@ namespace Microsoft.Build.Logging
     /// by implementing IEventSource and raising corresponding events.
     /// </summary>
     /// <remarks>The class is public so that we can call it from MSBuild.exe when replaying a log file.</remarks>
-    public sealed class BinaryLogReplayEventSource : EventArgsDispatcher,
-        IBinaryLogReplaySource
+    public sealed class BinaryLogReplayEventSource : IBinaryLogReplaySource
     {
         private int? _fileFormatVersion;
         private int? _minimumReaderVersion;
 
+        private readonly EventArgsDispatcher _eventDispatcher;
+
         public int FileFormatVersion => _fileFormatVersion ?? throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_Source_VersionUninitialized"));
         public int MinimumReaderVersion => _minimumReaderVersion ?? throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_Source_VersionUninitialized"));
+
+        public BinaryLogReplayEventSource()
+        {
+            _eventDispatcher = new EventArgsDispatcher();
+
+            InitializeEventHandlers();
+        }
+
+        public BinaryLogReplayEventSource(EventArgsDispatcher eventDispatcher)
+        {
+            _eventDispatcher = eventDispatcher;
+
+            InitializeEventHandlers();
+        }
 
         /// Touches the <see cref="ItemGroupLoggingHelper"/> static constructor
         /// to ensure it initializes <see cref="TaskParameterEventArgs.MessageGetter"/>
@@ -81,9 +96,43 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public bool AllowForwardCompatibility { private get; init; }
 
+#region EventHandlers
         /// <inheritdoc cref="IBuildEventArgsReaderNotifications.RecoverableReadError"/>
         public event Action<BinaryLogReaderErrorEventArgs>? RecoverableReadError;
 
+        public event BuildMessageEventHandler? MessageRaised;
+        public event BuildErrorEventHandler? ErrorRaised;
+        public event BuildWarningEventHandler? WarningRaised;
+        public event BuildStartedEventHandler? BuildStarted;
+        public event BuildFinishedEventHandler? BuildFinished;
+        public event ProjectStartedEventHandler? ProjectStarted;
+        public event ProjectFinishedEventHandler? ProjectFinished;
+        public event TargetStartedEventHandler? TargetStarted;
+        public event TargetFinishedEventHandler? TargetFinished;
+        public event TaskStartedEventHandler? TaskStarted;
+        public event TaskFinishedEventHandler? TaskFinished;
+        public event CustomBuildEventHandler? CustomEventRaised;
+        public event BuildStatusEventHandler? StatusEventRaised;
+        public event AnyEventHandler? AnyEventRaised;
+
+        private void InitializeEventHandlers()
+        {
+            _eventDispatcher.MessageRaised += (sender, e) => MessageRaised?.Invoke(sender, e);
+            _eventDispatcher.ErrorRaised += (sender, e) => ErrorRaised?.Invoke(sender, e);
+            _eventDispatcher.WarningRaised += (sender, e) => WarningRaised?.Invoke(sender, e);
+            _eventDispatcher.BuildStarted += (sender, e) => BuildStarted?.Invoke(sender, e);
+            _eventDispatcher.BuildFinished += (sender, e) => BuildFinished?.Invoke(sender, e);
+            _eventDispatcher.ProjectStarted += (sender, e) => ProjectStarted?.Invoke(sender, e);
+            _eventDispatcher.ProjectFinished += (sender, e) => ProjectFinished?.Invoke(sender, e);
+            _eventDispatcher.TargetStarted += (sender, e) => TargetStarted?.Invoke(sender, e);
+            _eventDispatcher.TargetFinished += (sender, e) => TargetFinished?.Invoke(sender, e);
+            _eventDispatcher.TaskStarted += (sender, e) => TaskStarted?.Invoke(sender, e);
+            _eventDispatcher.TaskFinished += (sender, e) => TaskFinished?.Invoke(sender, e);
+            _eventDispatcher.CustomEventRaised += (sender, e) => CustomEventRaised?.Invoke(sender, e);
+            _eventDispatcher.StatusEventRaised += (sender, e) => StatusEventRaised?.Invoke(sender, e);
+            _eventDispatcher.AnyEventRaised += (sender, e) => AnyEventRaised?.Invoke(sender, e);
+        }
+#endregion
         /// <summary>
         /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
         /// </summary>
@@ -232,7 +281,7 @@ namespace Microsoft.Build.Logging
             bool supportsForwardCompatibility = reader.FileFormatVersion >= BinaryLogger.ForwardCompatibilityMinimalVersion;
 
             // Allow any possible deferred subscriptions to be registered
-            if (HasStructuredEventsSubscribers || !supportsForwardCompatibility)
+            if (_eventDispatcher.HasStructuredEventsSubscribers || !supportsForwardCompatibility)
             {
                 _onStructuredReadingOnly?.Invoke();
             }
@@ -245,7 +294,7 @@ namespace Microsoft.Build.Logging
             reader.ArchiveFileEncountered += _archiveFileEncountered;
             reader.StringReadDone += _stringReadDone;
 
-            if (HasStructuredEventsSubscribers || !supportsForwardCompatibility)
+            if (_eventDispatcher.HasStructuredEventsSubscribers || !supportsForwardCompatibility)
             {
                 if (this._rawLogRecordReceived != null)
                 {
@@ -260,7 +309,7 @@ namespace Microsoft.Build.Logging
 
                 while (!cancellationToken.IsCancellationRequested && reader.Read() is { } instance)
                 {
-                    Dispatch(instance);
+                    _eventDispatcher.Dispatch(instance);
                 }
             }
             else

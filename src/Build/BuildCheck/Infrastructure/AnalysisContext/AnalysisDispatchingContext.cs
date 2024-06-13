@@ -33,6 +33,23 @@ internal class AnalysisDispatchingContext : IAnalysisContext
     {
         ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
 
+        // BuildWarningEventArgs? warningEvent = null;
+        // BuildErrorEventArgs? errorEvent = null;
+        // BuildMessageEventArgs? messageEvent = null;
+
+        // if ((warningEvent = buildEvent as BuildWarningEventArgs) != null &&
+        //    warningEvent.ProjectFile == null)
+        // {
+        // }
+        // else if ((errorEvent = buildEvent as BuildErrorEventArgs) != null &&
+        //    errorEvent.ProjectFile == null)
+        // {
+        // }
+        // else if ((messageEvent = buildEvent as BuildMessageEventArgs) != null &&
+        //    messageEvent.ProjectFile == null)
+        // {
+        // }
+
         _eventDispatcher.Dispatch(buildEvent);
     }
 
@@ -56,6 +73,11 @@ internal class AnalysisDispatchingContext : IAnalysisContext
     public void DispatchAsErrorFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
     {
         BuildErrorEventArgs buildEvent = EventsCreatorHelper.CreateErrorEventFromText(_eventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
+
+        // if (buildEvent.ProjectFile == null &&
+        //    _eventContext!.ProjectContextId != BuildEventContext.InvalidProjectContextId)
+        // {
+        // }
 
         _eventDispatcher.Dispatch(buildEvent);
     }
