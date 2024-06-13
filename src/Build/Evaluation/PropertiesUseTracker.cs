@@ -21,9 +21,9 @@ namespace Microsoft.Build.Evaluation;
 /// </summary>
 internal sealed class PropertiesUseTracker
 {
-    internal LoggingContext LoggingContext { get; init; }
+    internal LoggingContext? LoggingContext { get; init; }
 
-    public PropertiesUseTracker(LoggingContext loggingContext) => LoggingContext = loggingContext;
+    public PropertiesUseTracker(LoggingContext? loggingContext) => LoggingContext = loggingContext;
 
     /// <summary>
     /// Whether to warn when we set a property for the first time, after it was previously used.
@@ -44,7 +44,8 @@ internal sealed class PropertiesUseTracker
             return;
         }
 
-        LoggingContext.ProcessPropertyRead(new PropertyReadInfo(propertyName, startIndex, endIndex,
+        // LoggingContext can be null e.g. for initial toolset resolving and reading - we'll miss those expansions in our tracking
+        LoggingContext?.ProcessPropertyRead(new PropertyReadInfo(propertyName, startIndex, endIndex,
             elementLocation, isUninitialized, GetPropertyReadContext(propertyName, startIndex, endIndex)));
 
         if (!isUninitialized)
