@@ -516,7 +516,7 @@
       </trans-unit>
       <trans-unit id="ProjectImportsCollectorFileIOFail">
         <source>An exception occurred when adding the file '{0}', Exception: '{1}'</source>
-        <target state="new">An exception occurred when adding the file '{0}', Exception: '{1}'</target>
+        <target state="translated">'{0}' 파일을 추가하는 동안 예외가 발생했습니다. 예외: '{1}'</target>
         <note />
       </trans-unit>
       <trans-unit id="PropertyAssignment">
@@ -562,7 +562,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="SDKResolverNullMessage">
         <source>The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</source>
-        <target state="new">The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</target>
+        <target state="translated">"{0}" 확인자가 SDK "{1}" 해결을 시도했으며 경고 또는 오류 목록에서 null을 문자열로 반환했습니다.</target>
         <note>
       LOCALIZATION: Do not localize the word SDK.
     </note>
