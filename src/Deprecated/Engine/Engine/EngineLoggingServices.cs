@@ -21,7 +21,7 @@ namespace Microsoft.Build.BuildEngine
     /// services for tasks. This class allows for better encapsulation by making it clear when only
     /// logging services are needed and not the rest of the engine data and methods. This class allows
     /// us to provide different implementations of logging services for engine components that are
-    /// either in-proc (engine process) or out-of-proc (node process). 
+    /// either in-proc (engine process) or out-of-proc (node process).
     /// </summary>
     /// <remarks>
     /// We have made this an abstract class and not an interface to avoid forcing the "public" access
