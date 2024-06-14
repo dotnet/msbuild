@@ -736,7 +736,7 @@ namespace Microsoft.Build.UnitTests.Logging
             /// <summary>
             /// Build Canceled Event
             /// </summary>
-            private static BuildCanceledEventArgs s_buildCanceled = new BuildCanceledEventArgs("Message", "Keyword");
+            private static BuildCanceledEventArgs s_buildCanceled = new BuildCanceledEventArgs("Message");
 
             /// <summary>
             /// Build Message Event

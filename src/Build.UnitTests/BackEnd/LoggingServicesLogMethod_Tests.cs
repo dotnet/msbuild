@@ -1061,7 +1061,6 @@ namespace Microsoft.Build.UnitTests.Logging
             BuildCanceledEventArgs buildEvent =
                 new BuildCanceledEventArgs(
                     message,
-                    null /* no help keyword */,
                     service.ProcessedBuildEvent.Timestamp);
 
             Assert.IsType<BuildCanceledEventArgs>(service.ProcessedBuildEvent);

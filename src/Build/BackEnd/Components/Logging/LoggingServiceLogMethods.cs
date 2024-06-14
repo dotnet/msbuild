@@ -424,8 +424,7 @@ namespace Microsoft.Build.BackEnd.Logging
         public void LogBuildCanceled()
         {
             string message = ResourceUtilities.GetResourceString("AbortingBuild"); 
-            
-            BuildCanceledEventArgs buildEvent = new BuildCanceledEventArgs(message, null);
+            BuildCanceledEventArgs buildEvent = new BuildCanceledEventArgs(message);
 
             ProcessLoggingEvent(buildEvent);
 

@@ -16,11 +16,8 @@ namespace Microsoft.Build.Framework
         /// Sender field cannot be set here and is assumed to be "MSBuild"
         /// </summary>
         /// <param name="message">text message</param>
-        /// <param name="helpKeyword">help keyword </param>
-        public BuildCanceledEventArgs(
-            string? message,
-            string? helpKeyword)
-            : this(message, helpKeyword, DateTime.UtcNow)
+        public BuildCanceledEventArgs(string? message)
+            : this(message, DateTime.UtcNow)
         {
         }
 
@@ -28,32 +25,26 @@ namespace Microsoft.Build.Framework
         /// Constructor which allows the timestamp to be set
         /// </summary>
         /// <param name="message">text message</param>
-        /// <param name="helpKeyword">help keyword </param>
         /// <param name="eventTimestamp">Timestamp when the event was created</param>
         public BuildCanceledEventArgs(
             string? message,
-            string? helpKeyword,
             DateTime eventTimestamp)
-            : this(message, helpKeyword, eventTimestamp, null)
+            : this(message, eventTimestamp, null)
         {
-            // do nothing
         }
 
         /// <summary>
         /// Constructor which allows the timestamp to be set
         /// </summary>
         /// <param name="message">text message</param>
-        /// <param name="helpKeyword">help keyword </param>
         /// <param name="eventTimestamp">Timestamp when the event was created</param>
         /// <param name="messageArgs">message arguments</param>
         public BuildCanceledEventArgs(
             string? message,
-            string? helpKeyword,
             DateTime eventTimestamp,
             params object[]? messageArgs)
-            : base(message, helpKeyword, "MSBuild", eventTimestamp, messageArgs)
+            : base(message, null, "MSBuild", eventTimestamp, messageArgs)
         {
-            // do nothing
         }
     }
 }
