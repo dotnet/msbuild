@@ -13,7 +13,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
-internal class BuildCheckBuildEventHandler
+internal class BuildCheckBuildEventHandler : IBuildEventHandler
 {
     private readonly IBuildCheckManager _buildCheckManager;
     private readonly IAnalysisContextFactory _analyzerContextFactory;

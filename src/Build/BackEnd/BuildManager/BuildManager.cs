@@ -21,12 +21,12 @@ using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
-using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
@@ -2950,7 +2950,8 @@ namespace Microsoft.Build.Execution
             });
         }
 
-        public BinaryLogReplayEventSource GetBinaryLogReplayEventSourceWithAttachedBuildCheck()
+        public BuildCheckBinaryLogReplaySourcerWrapper GetBuildCheckBinaryLogReplayEventSourceWrapper(
+            BinaryLogReplayEventSource replayEventSource)
         {
             _buildParameters = new BuildParameters
             {
@@ -2962,9 +2963,11 @@ namespace Microsoft.Build.Execution
 
             buildCheckManagerProvider!.Instance.SetDataSource(BuildCheckDataSource.EventArgs);
 
-            var eventDispatcher = new BuildCheckEventArgsDispatcher(buildCheckManagerProvider.Instance);
+            var buildCheckEventHandler = new BuildCheckBuildEventHandler(
+                new AnalysisDispatchingContextFactory(replayEventSource.Dispatch),
+                buildCheckManagerProvider.Instance);
 
-            return new BinaryLogReplayEventSource(eventDispatcher);
+            return new BuildCheckBinaryLogReplaySourcerWrapper(replayEventSource, buildCheckEventHandler);
         }
 
         /// <summary>

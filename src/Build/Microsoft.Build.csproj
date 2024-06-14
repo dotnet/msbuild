@@ -166,13 +166,14 @@
     <Compile Include="BuildCheck\Infrastructure\AnalysisContext\AnalysisLoggingContextFactory.cs" />
     <Compile Include="BuildCheck\Infrastructure\AnalysisContext\IAnalysisContext.cs" />
     <Compile Include="BuildCheck\Infrastructure\AnalysisContext\AnalysisLoggingContext.cs" />
+    <Compile Include="BuildCheck\Infrastructure\BuildCheckBinaryLogReplaySourcerWrapper.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildCheckConfigurationException.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildCheckBuildEventHandler.cs" />
-    <Compile Include="BuildCheck\Infrastructure\BuildCheckEventArgsDispatcher.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildCheckForwardingLogger.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildEventsProcessor.cs" />
     <Compile Include="BuildCheck\Infrastructure\AnalysisContext\IAnalysisContextFactory.cs" />
     <Compile Include="BuildCheck\Infrastructure\IBuildCheckManagerProvider.cs" />
+    <Compile Include="BuildCheck\Infrastructure\IBuildEventHandler.cs" />
     <Compile Include="BuildCheck\Infrastructure\NullBuildCheckManager.cs" />
     <Compile Include="BuildCheck\Infrastructure\NullBuildCheckManagerProvider.cs" />
     <Compile Include="BuildCheck\Infrastructure\TracingReporter.cs" />

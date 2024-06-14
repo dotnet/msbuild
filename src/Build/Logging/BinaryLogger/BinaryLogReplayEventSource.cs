@@ -11,10 +11,15 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging
 {
+    public interface IBinaryLogReplaySource : IEventSource
+    {
+        void Replay(string sourceFilePath, CancellationToken cancellationToken);
+    }
+
     /// <summary>
     /// Interface for replaying a binary log file (*.binlog)
     /// </summary>
-    internal interface IBinaryLogReplaySource :
+    internal interface IBinaryLogEventReaderNotificationsReplaySource :
         IEventSource,
         IBuildEventArgsReaderNotifications
     {
@@ -59,29 +64,16 @@ namespace Microsoft.Build.Logging
     /// by implementing IEventSource and raising corresponding events.
     /// </summary>
     /// <remarks>The class is public so that we can call it from MSBuild.exe when replaying a log file.</remarks>
-    public sealed class BinaryLogReplayEventSource : IBinaryLogReplaySource
+    public sealed class BinaryLogReplayEventSource :
+        EventArgsDispatcher,
+        IBinaryLogEventReaderNotificationsReplaySource,
+        IBinaryLogReplaySource
     {
         private int? _fileFormatVersion;
         private int? _minimumReaderVersion;
 
-        private readonly EventArgsDispatcher _eventDispatcher;
-
         public int FileFormatVersion => _fileFormatVersion ?? throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_Source_VersionUninitialized"));
         public int MinimumReaderVersion => _minimumReaderVersion ?? throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_Source_VersionUninitialized"));
-
-        public BinaryLogReplayEventSource()
-        {
-            _eventDispatcher = new EventArgsDispatcher();
-
-            InitializeEventHandlers();
-        }
-
-        public BinaryLogReplayEventSource(EventArgsDispatcher eventDispatcher)
-        {
-            _eventDispatcher = eventDispatcher;
-
-            InitializeEventHandlers();
-        }
 
         /// Touches the <see cref="ItemGroupLoggingHelper"/> static constructor
         /// to ensure it initializes <see cref="TaskParameterEventArgs.MessageGetter"/>
@@ -96,43 +88,9 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public bool AllowForwardCompatibility { private get; init; }
 
-#region EventHandlers
         /// <inheritdoc cref="IBuildEventArgsReaderNotifications.RecoverableReadError"/>
         public event Action<BinaryLogReaderErrorEventArgs>? RecoverableReadError;
 
-        public event BuildMessageEventHandler? MessageRaised;
-        public event BuildErrorEventHandler? ErrorRaised;
-        public event BuildWarningEventHandler? WarningRaised;
-        public event BuildStartedEventHandler? BuildStarted;
-        public event BuildFinishedEventHandler? BuildFinished;
-        public event ProjectStartedEventHandler? ProjectStarted;
-        public event ProjectFinishedEventHandler? ProjectFinished;
-        public event TargetStartedEventHandler? TargetStarted;
-        public event TargetFinishedEventHandler? TargetFinished;
-        public event TaskStartedEventHandler? TaskStarted;
-        public event TaskFinishedEventHandler? TaskFinished;
-        public event CustomBuildEventHandler? CustomEventRaised;
-        public event BuildStatusEventHandler? StatusEventRaised;
-        public event AnyEventHandler? AnyEventRaised;
-
-        private void InitializeEventHandlers()
-        {
-            _eventDispatcher.MessageRaised += (sender, e) => MessageRaised?.Invoke(sender, e);
-            _eventDispatcher.ErrorRaised += (sender, e) => ErrorRaised?.Invoke(sender, e);
-            _eventDispatcher.WarningRaised += (sender, e) => WarningRaised?.Invoke(sender, e);
-            _eventDispatcher.BuildStarted += (sender, e) => BuildStarted?.Invoke(sender, e);
-            _eventDispatcher.BuildFinished += (sender, e) => BuildFinished?.Invoke(sender, e);
-            _eventDispatcher.ProjectStarted += (sender, e) => ProjectStarted?.Invoke(sender, e);
-            _eventDispatcher.ProjectFinished += (sender, e) => ProjectFinished?.Invoke(sender, e);
-            _eventDispatcher.TargetStarted += (sender, e) => TargetStarted?.Invoke(sender, e);
-            _eventDispatcher.TargetFinished += (sender, e) => TargetFinished?.Invoke(sender, e);
-            _eventDispatcher.TaskStarted += (sender, e) => TaskStarted?.Invoke(sender, e);
-            _eventDispatcher.TaskFinished += (sender, e) => TaskFinished?.Invoke(sender, e);
-            _eventDispatcher.CustomEventRaised += (sender, e) => CustomEventRaised?.Invoke(sender, e);
-            _eventDispatcher.StatusEventRaised += (sender, e) => StatusEventRaised?.Invoke(sender, e);
-            _eventDispatcher.AnyEventRaised += (sender, e) => AnyEventRaised?.Invoke(sender, e);
-        }
-#endregion
         /// <summary>
         /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
         /// </summary>
@@ -238,6 +196,12 @@ namespace Microsoft.Build.Logging
         public static BuildEventArgsReader OpenBuildEventsReader(string sourceFilePath)
             => OpenBuildEventsReader(OpenReader(sourceFilePath), true);
 
+        public void Replay(string sourceFilePath, CancellationToken cancellationToken, Action<BuildEventArgs> dispatchBuildEvent)
+        {
+            using var eventsReader = OpenBuildEventsReader(sourceFilePath);
+            Replay(eventsReader, cancellationToken, dispatchBuildEvent);
+        }
+
         /// <summary>
         /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
         /// </summary>
@@ -275,13 +239,22 @@ namespace Microsoft.Build.Logging
         /// <param name="reader">The build events reader - caller is responsible for disposing.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
         public void Replay(BuildEventArgsReader reader, CancellationToken cancellationToken)
+            => Replay(reader, cancellationToken, Dispatch);
+
+        /// <summary>
+        /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
+        /// </summary>
+        /// <param name="reader">The build events reader - caller is responsible for disposing.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
+        /// <param name="dispatchBuildEvent">Dispatcher of the <see cref="BuildEventArgs"/></param>
+        private void Replay(BuildEventArgsReader reader, CancellationToken cancellationToken, Action<BuildEventArgs> dispatchBuildEvent)
         {
             _fileFormatVersion = reader.FileFormatVersion;
             _minimumReaderVersion = reader.MinimumReaderVersion;
             bool supportsForwardCompatibility = reader.FileFormatVersion >= BinaryLogger.ForwardCompatibilityMinimalVersion;
 
             // Allow any possible deferred subscriptions to be registered
-            if (_eventDispatcher.HasStructuredEventsSubscribers || !supportsForwardCompatibility)
+            if (HasStructuredEventsSubscribers || !supportsForwardCompatibility)
             {
                 _onStructuredReadingOnly?.Invoke();
             }
@@ -294,7 +267,7 @@ namespace Microsoft.Build.Logging
             reader.ArchiveFileEncountered += _archiveFileEncountered;
             reader.StringReadDone += _stringReadDone;
 
-            if (_eventDispatcher.HasStructuredEventsSubscribers || !supportsForwardCompatibility)
+            if (HasStructuredEventsSubscribers || !supportsForwardCompatibility)
             {
                 if (this._rawLogRecordReceived != null)
                 {
@@ -309,7 +282,7 @@ namespace Microsoft.Build.Logging
 
                 while (!cancellationToken.IsCancellationRequested && reader.Read() is { } instance)
                 {
-                    _eventDispatcher.Dispatch(instance);
+                    dispatchBuildEvent(instance);
                 }
             }
             else
@@ -345,8 +318,8 @@ namespace Microsoft.Build.Logging
 
         private Action? _onRawReadingPossible;
         private Action? _onStructuredReadingOnly;
-        /// <inheritdoc cref="IBinaryLogReplaySource.DeferredInitialize"/>
-        void IBinaryLogReplaySource.DeferredInitialize(
+        /// <inheritdoc cref="IBinaryLogEventReaderNotificationsReplaySource.DeferredInitialize"/>
+        void IBinaryLogEventReaderNotificationsReplaySource.DeferredInitialize(
             Action onRawReadingPossible,
             Action onStructuredReadingOnly)
         {
@@ -355,8 +328,8 @@ namespace Microsoft.Build.Logging
         }
 
         private Action<EmbeddedContentEventArgs>? _embeddedContentRead;
-        /// <inheritdoc cref="IBinaryLogReplaySource.EmbeddedContentRead"/>
-        event Action<EmbeddedContentEventArgs>? IBinaryLogReplaySource.EmbeddedContentRead
+        /// <inheritdoc cref="IBinaryLogEventReaderNotificationsReplaySource.EmbeddedContentRead"/>
+        event Action<EmbeddedContentEventArgs>? IBinaryLogEventReaderNotificationsReplaySource.EmbeddedContentRead
         {
             // Explicitly implemented event has to declare explicit add/remove accessors
             //  https://stackoverflow.com/a/2268472/2308106
@@ -381,8 +354,8 @@ namespace Microsoft.Build.Logging
         }
 
         private Action<BinaryLogRecordKind, Stream>? _rawLogRecordReceived;
-        /// <inheritdoc cref="IBinaryLogReplaySource.RawLogRecordReceived"/>
-        event Action<BinaryLogRecordKind, Stream>? IBinaryLogReplaySource.RawLogRecordReceived
+        /// <inheritdoc cref="IBinaryLogEventReaderNotificationsReplaySource.RawLogRecordReceived"/>
+        event Action<BinaryLogRecordKind, Stream>? IBinaryLogEventReaderNotificationsReplaySource.RawLogRecordReceived
         {
             add => _rawLogRecordReceived += value;
             remove => _rawLogRecordReceived -= value;

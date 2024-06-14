@@ -163,7 +163,7 @@ namespace Microsoft.Build.Logging
             bool logPropertiesAndItemsAfterEvaluation = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation ?? true;
 
             ProcessParameters(out bool omitInitialInfo);
-            var replayEventSource = eventSource as IBinaryLogReplaySource;
+            var replayEventSource = eventSource as IBinaryLogEventReaderNotificationsReplaySource;
 
             try
             {

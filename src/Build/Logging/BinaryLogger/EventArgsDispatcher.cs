@@ -104,7 +104,7 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Raise one of the events that is appropriate for the type of the BuildEventArgs
         /// </summary>
-        public virtual void Dispatch(BuildEventArgs buildEvent)
+        public void Dispatch(BuildEventArgs buildEvent)
         {
             if (buildEvent is BuildMessageEventArgs buildMessageEventArgs)
             {
