@@ -161,9 +161,9 @@ Esta marca es experimental y puede que no funcione según lo previsto.
     </note>
       </trans-unit>
       <trans-unit id="LongPathsEnabled">
-        <source>LongPathsEnabled = {0}</source>
-        <target state="new">LongPathsEnabled = {0}</target>
-        <note />
+        <source>Windows LongPathsEnabled registry key = {0}</source>
+        <target state="new">Windows LongPathsEnabled registry key = {0}</target>
+        <note>"Windows" is the OS, "LongPathsEnabled" should not be localized, and {0} will be boolean true/false</note>
       </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
