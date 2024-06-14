@@ -559,8 +559,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     else
                     {
                         var sinks = _eventSinkDictionary.Values.OfType<EventSourceSink>();
-                        // .All() on an empty list defaults to true, we want to default to false
-                        _includeEvaluationPropertiesAndItems = sinks.Any() && sinks.All(sink => sink.IncludeEvaluationPropertiesAndItems);
+                        // If any sink requested the data - we need to emit them
+                        _includeEvaluationPropertiesAndItems = sinks.Any(sink => sink.IncludeEvaluationPropertiesAndItems);
                     }
                 }
 
