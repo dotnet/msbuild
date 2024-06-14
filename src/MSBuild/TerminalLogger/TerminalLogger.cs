@@ -207,7 +207,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private bool _showCommandLine = false;
 
-    private BuildCanceledEventArgs? _buildCanceledEvetnAgrs;
+    private BuildCanceledEventArgs? _buildCanceledEventAgrs;
 
     private bool _cancellationMessageRendered;
 
@@ -458,7 +458,7 @@ internal sealed partial class TerminalLogger : INodeLogger
 
     private void BuildCanceled(object sender, BuildCanceledEventArgs e)
     {
-        _buildCanceledEvetnAgrs = e;
+        _buildCanceledEventAgrs = e;
     }
 
     /// <summary>
@@ -957,11 +957,11 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     internal void DisplayNodes()
     {
-        if (_buildCanceledEvetnAgrs != null)
+        if (_buildCanceledEventAgrs != null)
         {
             if (!_cancellationMessageRendered)
             {
-                string message = _buildCanceledEvetnAgrs.Message ?? string.Empty;
+                string message = _buildCanceledEventAgrs.Message ?? string.Empty;
                 Terminal.WriteLine(message);
                 _cancellationMessageRendered = true;
             }
@@ -1077,7 +1077,7 @@ internal sealed partial class TerminalLogger : INodeLogger
 
         int index = path.LastIndexOfAny(PathSeparators);
         return index >= 0
-            ? $"{path.Substring(0, index + 1)}{AnsiCodes.MakeBold(path.Substring(index + 1))}"
+            ? $"{path.Substring(0)}{AnsiCodes.MakeBold(path.Substring(index + 1))}"
             : path;
     }
 
