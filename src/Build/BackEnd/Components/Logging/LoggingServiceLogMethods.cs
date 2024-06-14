@@ -423,13 +423,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <inheritdoc />
         public void LogBuildCanceled()
         {
-            // If we're only logging critical events, don't risk causing all the resources to load by formatting
-            // a string that won't get emitted anyway.
-            string message = String.Empty;
-            if (!OnlyLogCriticalEvents)
-            {
-                message = ResourceUtilities.GetResourceString("AbortingBuild");
-            }            
+            string message = ResourceUtilities.GetResourceString("AbortingBuild"); 
             
             BuildCanceledEventArgs buildEvent = new BuildCanceledEventArgs(message, null);
 
