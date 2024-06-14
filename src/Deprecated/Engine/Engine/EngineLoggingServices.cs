@@ -26,7 +26,7 @@ namespace Microsoft.Build.BuildEngine
     /// <remarks>
     /// We have made this an abstract class and not an interface to avoid forcing the "public" access
     /// modifier on the implementation of the internal logging services.
-    /// </remarks> 
+    /// </remarks>
     internal abstract class EngineLoggingServices
     {
         #region Initialization/Shutdown methods
