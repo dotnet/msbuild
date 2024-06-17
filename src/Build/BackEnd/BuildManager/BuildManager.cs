@@ -2950,7 +2950,7 @@ namespace Microsoft.Build.Execution
             });
         }
 
-        public BuildCheckBinaryLogReplaySourcerWrapper GetBuildCheckBinaryLogReplayEventSourceWrapper(
+        public IBinaryLogReplaySource GetBuildCheckBinaryLogReplayEventSourceWrapper(
             BinaryLogReplayEventSource replayEventSource)
         {
             _buildParameters = new BuildParameters

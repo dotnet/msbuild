@@ -12,7 +12,7 @@ using Microsoft.Build.Logging;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
-public class BuildCheckBinaryLogReplaySourcerWrapper : IBinaryLogReplaySource
+internal class BuildCheckBinaryLogReplaySourcerWrapper : IBinaryLogReplaySource
 {
     private readonly BinaryLogReplayEventSource _replayEventSource;
     private readonly IBuildEventHandler _buildCheckEventHandler;
