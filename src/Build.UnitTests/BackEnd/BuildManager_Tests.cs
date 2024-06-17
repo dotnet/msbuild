@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 EnableNodeReuse = false
             };
             _buildManager = new BuildManager();
-            _projectCollection = new ProjectCollection();
+            _projectCollection = new ProjectCollection(null, _parameters.Loggers, ToolsetDefinitionLocations.Default);
 
             _env = TestEnvironment.Create(output);
             _inProcEnvCheckTransientEnvironmentVariable = _env.SetEnvironmentVariable("MSBUILDINPROCENVCHECK", "1");
@@ -137,8 +137,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[success]");
             Assert.Single(_logger.ProjectStartedEvents);
 
-            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
-            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            ProjectEvaluationFinishedEventArgs evalFinishedEvent = _logger.EvaluationFinishedEvents[0];
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(evalFinishedEvent.Properties);
 
             Assert.True(properties.TryGetValue("InitialProperty1", out string propertyValue));
             Assert.Equal("InitialProperty1", propertyValue);
@@ -254,8 +254,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[success]");
             _logger.ProjectStartedEvents.Count.ShouldBe(1);
 
-            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
-            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            ProjectEvaluationFinishedEventArgs evalFinishedEvent = _logger.EvaluationFinishedEvents[0];
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(evalFinishedEvent.Properties);
 
             properties.TryGetValue("InitialProperty1", out string propertyValue).ShouldBeTrue();
             propertyValue.ShouldBe("InitialProperty1", StringCompareShould.IgnoreCase);
@@ -571,8 +571,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[success]");
             Assert.Single(_logger.ProjectStartedEvents);
 
-            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
-            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            ProjectEvaluationFinishedEventArgs evalFinishedEvent = _logger.EvaluationFinishedEvents[0];
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(evalFinishedEvent.Properties);
 
             Assert.True(properties.TryGetValue("InitialProperty1", out string propertyValue));
             Assert.Equal("InitialProperty1", propertyValue);
@@ -611,8 +611,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[success]");
             Assert.Single(_logger.ProjectStartedEvents);
 
-            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
-            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            ProjectEvaluationFinishedEventArgs evalFinishedEvent = _logger.EvaluationFinishedEvents[0];
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(evalFinishedEvent.Properties);
 
             Assert.True(properties.TryGetValue("InitialProperty1", out string propertyValue));
             Assert.Equal("InitialProperty1", propertyValue);
@@ -655,8 +655,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[success]");
             Assert.Single(_logger.ProjectStartedEvents);
 
-            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
-            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            ProjectEvaluationFinishedEventArgs evalFinishedEvent = _logger.EvaluationFinishedEvents[0];
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(evalFinishedEvent.Properties);
 
             Assert.True(properties.TryGetValue("InitialProperty1", out string propertyValue));
             Assert.Equal("InitialProperty1", propertyValue);
@@ -767,16 +767,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("[success]");
-            Assert.Equal(3, _logger.ProjectStartedEvents.Count);
+            Assert.Equal(3, _logger.EvaluationFinishedEvents.Count);
 
-            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[1];
+            ProjectEvaluationFinishedEventArgs evalFinishedEvent = _logger.EvaluationFinishedEvents[1];
 
             // After conversion to xunit, this test sometimes fails at this assertion.
             // Related to shared state that the test touches that's getting handled
             // differently in xunit?
-            Assert.NotNull(projectStartedEvent.Properties);
+            Assert.NotNull(evalFinishedEvent.Properties);
 
-            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(evalFinishedEvent.Properties);
 
             Assert.NotNull(properties);
             Assert.Single(properties);
@@ -784,8 +784,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.True(properties.TryGetValue("InitialProperty3", out string propertyValue));
             Assert.Equal("InitialProperty3", propertyValue);
 
-            projectStartedEvent = _logger.ProjectStartedEvents[2];
-            Assert.Null(projectStartedEvent.Properties);
+            evalFinishedEvent = _logger.EvaluationFinishedEvents[2];
+            Assert.Null(evalFinishedEvent.Properties);
         }
 
         /// <summary>
@@ -822,7 +822,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
             Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
-            Assert.Null(properties);
+            (properties == null || properties.Count == 0).ShouldBeTrue();
         }
 
         /// <summary>
@@ -919,7 +919,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
             Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
-            Assert.Null(properties);
+            (properties == null || properties.Count == 0).ShouldBeTrue();
         }
 
         /// <summary>
@@ -3475,9 +3475,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private static Dictionary<string, string> ExtractProjectStartedPropertyList(IEnumerable properties)
         {
-            // Gather a sorted list of all the properties.
-            return properties?.Cast<DictionaryEntry>()
-                .ToDictionary(prop => (string)prop.Key, prop => (string)prop.Value, StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> propertiesLookup = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            Internal.Utilities.EnumerateProperties(properties, propertiesLookup,
+                static (dict, kvp) => dict.Add(kvp.Key, kvp.Value));
+
+            return propertiesLookup;
         }
 
         /// <summary>
