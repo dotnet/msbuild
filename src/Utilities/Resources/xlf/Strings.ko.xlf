@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="LockCheck.FileLocked">
         <source>The file is locked by: "{0}"</source>
-        <target state="new">The file is locked by: "{0}"</target>
+        <target state="translated">파일이 "{0}"에 의해 잠겨 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">
