@@ -955,11 +955,6 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     eventSource4.IncludeEvaluationPropertiesAndItems();
                 }
-
-                if (eventSource is IEventSource5 eventSource5)
-                {
-                    eventSource5.BuildCanceled += BuildCanceledHanlder;
-                }
             }
         }
 
@@ -1050,8 +1045,6 @@ namespace Microsoft.Build.BackEnd.Logging
         public abstract void BuildStartedHandler(object sender, BuildStartedEventArgs e);
 
         public abstract void BuildFinishedHandler(object sender, BuildFinishedEventArgs e);
-
-        public abstract void BuildCanceledHanlder(object sender, BuildCanceledEventArgs e);
 
         public abstract void ProjectStartedHandler(object sender, ProjectStartedEventArgs e);
 

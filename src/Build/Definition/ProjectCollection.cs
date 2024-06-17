@@ -1831,7 +1831,7 @@ namespace Microsoft.Build.Evaluation
         /// The ReusableLogger wraps a logger and allows it to be used for both design-time and build-time.  It internally swaps
         /// between the design-time and build-time event sources in response to Initialize and Shutdown events.
         /// </summary>
-        internal class ReusableLogger : INodeLogger, IEventSource5
+        internal class ReusableLogger : INodeLogger, IEventSource4
         {
             /// <summary>
             /// The logger we are wrapping.
@@ -1862,11 +1862,6 @@ namespace Microsoft.Build.Evaluation
             /// The BuildFinished event handler
             /// </summary>
             private BuildFinishedEventHandler _buildFinishedEventHandler;
-
-            /// <summary>
-            /// The BuildCanceled event handler
-            /// </summary>
-            private BuildCanceledEventHandler _buildCanceledEventHandler;
 
             /// <summary>
             /// The BuildStarted event handler
@@ -2193,7 +2188,6 @@ namespace Microsoft.Build.Evaluation
                 _anyEventHandler = AnyEventRaisedHandler;
                 _buildFinishedEventHandler = BuildFinishedHandler;
                 _buildStartedEventHandler = BuildStartedHandler;
-                _buildCanceledEventHandler = BuildCanceledHandler;
                 _customBuildEventHandler = CustomEventRaisedHandler;
                 _buildErrorEventHandler = ErrorRaisedHandler;
                 _buildMessageEventHandler = MessageRaisedHandler;
@@ -2253,11 +2247,6 @@ namespace Microsoft.Build.Evaluation
                         eventSource4.IncludeEvaluationPropertiesAndItems();
                     }
                 }
-
-                if (eventSource is IEventSource5 eventSource5)
-                {
-                    eventSource5.BuildCanceled += _buildCanceledEventHandler;
-                }
             }
 
             /// <summary>
@@ -2286,16 +2275,10 @@ namespace Microsoft.Build.Evaluation
                     eventSource2.TelemetryLogged -= _telemetryEventHandler;
                 }
 
-                if (eventSource is IEventSource5 eventSource5)
-                {
-                    eventSource5.BuildCanceled -= _buildCanceledEventHandler;
-                }
-
                 // Null out the handlers.
                 _anyEventHandler = null;
                 _buildFinishedEventHandler = null;
                 _buildStartedEventHandler = null;
-                _buildCanceledEventHandler = null;
                 _customBuildEventHandler = null;
                 _buildErrorEventHandler = null;
                 _buildMessageEventHandler = null;

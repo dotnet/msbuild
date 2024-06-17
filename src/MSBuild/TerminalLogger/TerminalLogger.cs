@@ -262,6 +262,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         eventSource.TargetStarted += TargetStarted;
         eventSource.TargetFinished += TargetFinished;
         eventSource.TaskStarted += TaskStarted;
+        eventSource.StatusEventRaised += StatusEventRaised;
 
         eventSource.MessageRaised += MessageRaised;
         eventSource.WarningRaised += WarningRaised;
@@ -271,12 +272,8 @@ internal sealed partial class TerminalLogger : INodeLogger
         {
             eventSource4.IncludeEvaluationPropertiesAndItems();
         }
-
-        if (eventSource is IEventSource5 eventSource5)
-        {
-            eventSource5.BuildCanceled += BuildCanceled;
-        }
     }
+
 
     /// <summary>
     /// Parses out the logger parameters from the Parameters string.
@@ -456,9 +453,12 @@ internal sealed partial class TerminalLogger : INodeLogger
         _testEndTime = null;
     }
 
-    private void BuildCanceled(object sender, BuildCanceledEventArgs e)
+    private void StatusEventRaised(object sender, BuildStatusEventArgs e)
     {
-        _buildCanceledEventAgrs = e;
+        if (e is BuildCanceledEventArgs buildCanceledEventArgs)
+        {
+            _buildCanceledEventAgrs = buildCanceledEventArgs;
+        }
     }
 
     /// <summary>

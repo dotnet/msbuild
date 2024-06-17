@@ -434,11 +434,6 @@ namespace Microsoft.Build.UnitTests.Logging
                 source.TaskFinished += Source_TaskFinished;
                 source.TaskStarted += Source_TaskStarted;
                 source.WarningRaised += Source_WarningRaised;
-
-                if (source is IEventSource5 eventSource5)
-                {
-                    eventSource5.BuildCanceled += Source_BuildCanceled;
-                }
             }
             #endregion
 
@@ -675,16 +670,6 @@ namespace Microsoft.Build.UnitTests.Logging
             /// <param name="sender">Who sent the event</param>
             /// <param name="e">Event raised on the event source</param>
             private void Source_BuildFinished(object sender, BuildFinishedEventArgs e)
-            {
-                HandleEvent(e);
-            }
-
-            /// <summary>
-            /// Handle a build canceled event
-            /// </summary>
-            /// <param name="sender">Who sent the event</param>
-            /// <param name="e">Event raised on the event source</param>
-            private void Source_BuildCanceled(object sender, BuildCanceledEventArgs e)
             {
                 HandleEvent(e);
             }
