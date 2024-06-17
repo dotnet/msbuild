@@ -11,15 +11,10 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging
 {
-    public interface IBinaryLogReplaySource : IEventSource
-    {
-        void Replay(string sourceFilePath, CancellationToken cancellationToken);
-    }
-
     /// <summary>
     /// Interface for replaying a binary log file (*.binlog)
     /// </summary>
-    internal interface IBinaryLogEventReaderNotificationsReplaySource :
+    internal interface IBinaryLogReplaySource :
         IEventSource,
         IBuildEventArgsReaderNotifications
     {
@@ -66,7 +61,6 @@ namespace Microsoft.Build.Logging
     /// <remarks>The class is public so that we can call it from MSBuild.exe when replaying a log file.</remarks>
     public sealed class BinaryLogReplayEventSource :
         EventArgsDispatcher,
-        IBinaryLogEventReaderNotificationsReplaySource,
         IBinaryLogReplaySource
     {
         private int? _fileFormatVersion;
@@ -196,12 +190,6 @@ namespace Microsoft.Build.Logging
         public static BuildEventArgsReader OpenBuildEventsReader(string sourceFilePath)
             => OpenBuildEventsReader(OpenReader(sourceFilePath), true);
 
-        public void Replay(string sourceFilePath, CancellationToken cancellationToken, Action<BuildEventArgs> dispatchBuildEvent)
-        {
-            using var eventsReader = OpenBuildEventsReader(sourceFilePath);
-            Replay(eventsReader, cancellationToken, dispatchBuildEvent);
-        }
-
         /// <summary>
         /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
         /// </summary>
@@ -239,15 +227,6 @@ namespace Microsoft.Build.Logging
         /// <param name="reader">The build events reader - caller is responsible for disposing.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
         public void Replay(BuildEventArgsReader reader, CancellationToken cancellationToken)
-            => Replay(reader, cancellationToken, Dispatch);
-
-        /// <summary>
-        /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
-        /// </summary>
-        /// <param name="reader">The build events reader - caller is responsible for disposing.</param>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
-        /// <param name="dispatchBuildEvent">Dispatcher of the <see cref="BuildEventArgs"/></param>
-        private void Replay(BuildEventArgsReader reader, CancellationToken cancellationToken, Action<BuildEventArgs> dispatchBuildEvent)
         {
             _fileFormatVersion = reader.FileFormatVersion;
             _minimumReaderVersion = reader.MinimumReaderVersion;
@@ -282,7 +261,7 @@ namespace Microsoft.Build.Logging
 
                 while (!cancellationToken.IsCancellationRequested && reader.Read() is { } instance)
                 {
-                    dispatchBuildEvent(instance);
+                    Dispatch(instance);
                 }
             }
             else
@@ -318,8 +297,8 @@ namespace Microsoft.Build.Logging
 
         private Action? _onRawReadingPossible;
         private Action? _onStructuredReadingOnly;
-        /// <inheritdoc cref="IBinaryLogEventReaderNotificationsReplaySource.DeferredInitialize"/>
-        void IBinaryLogEventReaderNotificationsReplaySource.DeferredInitialize(
+        /// <inheritdoc cref="IBinaryLogReplaySource.DeferredInitialize"/>
+        void IBinaryLogReplaySource.DeferredInitialize(
             Action onRawReadingPossible,
             Action onStructuredReadingOnly)
         {
@@ -328,8 +307,8 @@ namespace Microsoft.Build.Logging
         }
 
         private Action<EmbeddedContentEventArgs>? _embeddedContentRead;
-        /// <inheritdoc cref="IBinaryLogEventReaderNotificationsReplaySource.EmbeddedContentRead"/>
-        event Action<EmbeddedContentEventArgs>? IBinaryLogEventReaderNotificationsReplaySource.EmbeddedContentRead
+        /// <inheritdoc cref="IBinaryLogReplaySource.EmbeddedContentRead"/>
+        event Action<EmbeddedContentEventArgs>? IBinaryLogReplaySource.EmbeddedContentRead
         {
             // Explicitly implemented event has to declare explicit add/remove accessors
             //  https://stackoverflow.com/a/2268472/2308106
@@ -354,8 +333,8 @@ namespace Microsoft.Build.Logging
         }
 
         private Action<BinaryLogRecordKind, Stream>? _rawLogRecordReceived;
-        /// <inheritdoc cref="IBinaryLogEventReaderNotificationsReplaySource.RawLogRecordReceived"/>
-        event Action<BinaryLogRecordKind, Stream>? IBinaryLogEventReaderNotificationsReplaySource.RawLogRecordReceived
+        /// <inheritdoc cref="IBinaryLogReplaySource.RawLogRecordReceived"/>
+        event Action<BinaryLogRecordKind, Stream>? IBinaryLogReplaySource.RawLogRecordReceived
         {
             add => _rawLogRecordReceived += value;
             remove => _rawLogRecordReceived -= value;

@@ -2950,8 +2950,7 @@ namespace Microsoft.Build.Execution
             });
         }
 
-        public IBinaryLogReplaySource GetBuildCheckBinaryLogReplayEventSourceWrapper(
-            BinaryLogReplayEventSource replayEventSource)
+        public void AttachBuildCheckForBinaryLogReplay(BinaryLogReplayEventSource replayEventSource)
         {
             _buildParameters = new BuildParameters
             {
@@ -2967,7 +2966,7 @@ namespace Microsoft.Build.Execution
                 new AnalysisDispatchingContextFactory(replayEventSource.Dispatch),
                 buildCheckManagerProvider.Instance);
 
-            return new BuildCheckBinaryLogReplaySourcerWrapper(replayEventSource, buildCheckEventHandler);
+            replayEventSource.AnyEventRaised += (sender, e) => buildCheckEventHandler.HandleBuildEvent(e);
         }
 
         /// <summary>

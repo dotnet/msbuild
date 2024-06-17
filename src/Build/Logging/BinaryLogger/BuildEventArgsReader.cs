@@ -145,7 +145,7 @@ namespace Microsoft.Build.Logging
         internal int FileFormatVersion => _fileFormatVersion;
         internal int MinimumReaderVersion { get; set; } = BinaryLogger.ForwardCompatibilityMinimalVersion;
 
-        /// <inheritdoc cref="IBinaryLogEventReaderNotificationsReplaySource.EmbeddedContentRead"/>
+        /// <inheritdoc cref="IBinaryLogReplaySource.EmbeddedContentRead"/>
         internal event Action<EmbeddedContentEventArgs>? EmbeddedContentRead;
 
         /// <inheritdoc cref="IBuildEventArgsReaderNotifications.ArchiveFileEncountered"/>

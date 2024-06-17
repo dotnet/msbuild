@@ -4410,12 +4410,11 @@ namespace Microsoft.Build.CommandLine
             bool isBuildCheckEnabled)
         {
 
-            IBinaryLogReplaySource replayEventSource = new BinaryLogReplayEventSource();
+            var replayEventSource = new BinaryLogReplayEventSource();
 
             if (isBuildCheckEnabled)
             {
-                replayEventSource = BuildManager.DefaultBuildManager
-                    .GetBuildCheckBinaryLogReplayEventSourceWrapper((BinaryLogReplayEventSource)replayEventSource);
+                BuildManager.DefaultBuildManager.AttachBuildCheckForBinaryLogReplay(replayEventSource);
             }
 
             foreach (var distributedLoggerRecord in distributedLoggerRecords)
