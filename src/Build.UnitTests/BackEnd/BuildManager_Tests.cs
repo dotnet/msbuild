@@ -769,14 +769,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[success]");
             Assert.Equal(3, _logger.EvaluationFinishedEvents.Count);
 
-            ProjectEvaluationFinishedEventArgs evalFinishedEvent = _logger.EvaluationFinishedEvents[1];
+            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[1];
 
             // After conversion to xunit, this test sometimes fails at this assertion.
             // Related to shared state that the test touches that's getting handled
             // differently in xunit?
-            Assert.NotNull(evalFinishedEvent.Properties);
+            Assert.NotNull(projectStartedEvent.Properties);
 
-            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(evalFinishedEvent.Properties);
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
 
             Assert.NotNull(properties);
             Assert.Single(properties);
@@ -784,8 +784,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.True(properties.TryGetValue("InitialProperty3", out string propertyValue));
             Assert.Equal("InitialProperty3", propertyValue);
 
-            evalFinishedEvent = _logger.EvaluationFinishedEvents[2];
-            Assert.Null(evalFinishedEvent.Properties);
+            projectStartedEvent = _logger.ProjectStartedEvents[2];
+            Assert.Null(projectStartedEvent.Properties);
         }
 
         /// <summary>
