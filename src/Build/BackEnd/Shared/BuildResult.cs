@@ -87,7 +87,7 @@ namespace Microsoft.Build.Execution
         /// <remarks>
         /// Allows to serialize and deserialize different versions of the build result.
         /// </remarks>
-        private int _version = 1;
+        private int _version = Traits.Instance.EscapeHatches.DoNotVersionBuildResult ? 0 : 1;
 
         /// <summary>
         /// The request caused a circular dependency in scheduling.
@@ -426,6 +426,11 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// BuildResult schema version.
+        /// </summary>
+        public int Version => _version;
+
+        /// <summary>
         /// Gets the flags that were used in the build request to which these results are associated.
         /// See <see cref="Execution.BuildRequestDataFlags"/> for examples of the available flags.
         /// </summary>
@@ -642,11 +647,10 @@ namespace Microsoft.Build.Execution
             // When serializing, add a key to the dictionary and a version field. Delete the special key from the dictionary during the deserialization and read a version if it presents.
             // 2nd step: Stop writing a special key to the dictionary. Always serialize and de-serialize the version field. Remove the special keys if they present in the dictionary.
             // 3rd step: Stop removing the special keys from the dictionary.
-            if (Traits.Instance.EscapeHatches.DoNotVersionBuildResult)
+            if (_version == 0)
             {
                 // Escape hatch: serialize/deserialize without version field.
                 translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
-                _version = 0;
             }
             else
             {
