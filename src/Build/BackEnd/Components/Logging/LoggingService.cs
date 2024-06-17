@@ -560,7 +560,10 @@ namespace Microsoft.Build.BackEnd.Logging
                     {
                         var sinks = _eventSinkDictionary.Values.OfType<EventSourceSink>();
                         // If any sink requested the data - we need to emit them
-                        _includeEvaluationPropertiesAndItems = sinks.Any(sink => sink.IncludeEvaluationPropertiesAndItems);
+                        _includeEvaluationPropertiesAndItems =
+                            ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12)
+                                ? sinks.Any(sink => sink.IncludeEvaluationPropertiesAndItems)
+                                : sinks.Any() && sinks.All(sink => sink.IncludeEvaluationPropertiesAndItems);
                     }
                 }
 
