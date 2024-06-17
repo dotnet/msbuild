@@ -273,12 +273,12 @@
       </trans-unit>
       <trans-unit id="Copy.Retrying">
         <source>MSB3026: Could not copy "{0}" to "{1}". Beginning retry {2} in {3}ms. {4} {5}</source>
-        <target state="needs-review-translation">MSB3026: Soubor {0} nelze zkopírovat do umístění {1}. Za {3} ms bude zahájeno opakování {2}. {4} {5}</target>
+        <target state="translated">MSB3026: Soubor {0} nelze zkopírovat do umístění {1}. Za {3} ms bude zahájeno opakování {2}. {4} {5}</target>
         <note>{StrBegin="MSB3026: "} LOCALIZATION: {0} and {1} are paths. {2} and {3} are numbers. {4} is an optional localized message. {5} is either empty or a string from Utilities LockCheck.FileLocked ("The file is locked by: "{0}"")</note>
       </trans-unit>
       <trans-unit id="Copy.ExceededRetries">
         <source>MSB3027: Could not copy "{0}" to "{1}". Exceeded retry count of {2}. Failed. {3}</source>
-        <target state="needs-review-translation">MSB3027: Soubor {0} nelze zkopírovat do umístění {1}. Byl překročen počet opakování {2}. Nezdařilo se. {3}</target>
+        <target state="translated">MSB3027: Soubor {0} nelze zkopírovat do umístění {1}. Byl překročen počet opakování {2}. Nezdařilo se. {3}</target>
         <note>{StrBegin="MSB3027: "} LOCALIZATION: {0} and {1} are paths. {2} is a number. {3} is either empty or a string from Utilities LockCheck.FileLocked ("The file is locked by: "{0}"")</note>
       </trans-unit>
       <trans-unit id="Copy.InvalidRetryCount">
@@ -358,7 +358,7 @@
       </trans-unit>
       <trans-unit id="Delete.Error">
         <source>MSB3061: Unable to delete file "{0}". {1} {2}</source>
-        <target state="new">MSB3061: Unable to delete file "{0}". {1} {2}</target>
+        <target state="translated">MSB3061: Nelze odstranit soubor {0}. {1} {2}</target>
         <note>{StrBegin="MSB3061: "}</note>
       </trans-unit>
       <trans-unit id="Delete.InvalidRetryCount">
@@ -373,7 +373,7 @@
       </trans-unit>
       <trans-unit id="Delete.Retrying">
         <source>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3} {4}</source>
-        <target state="new">MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3} {4}</target>
+        <target state="translated">MSB3062: Nelze odstranit soubor {0}. Začátek opakování {1} za {2} ms. {3} {4}</target>
         <note>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message, {4} is message from LockCheck.</note>
       </trans-unit>
       <trans-unit id="Delete.SkippingNonexistentFile">
@@ -1520,7 +1520,7 @@
       </trans-unit>
       <trans-unit id="Move.Error">
         <source>MSB3677: Unable to move file "{0}" to "{1}". {2} {3}</source>
-        <target state="new">MSB3677: Unable to move file "{0}" to "{1}". {2} {3}</target>
+        <target state="translated">MSB3677: Soubor {0} nelze přesunout do umístění {1}. {2} {3}</target>
         <note>{StrBegin="MSB3677: "}</note>
       </trans-unit>
       <trans-unit id="Move.ExactlyOneTypeOfDestination">
@@ -2586,7 +2586,7 @@
       </trans-unit>
       <trans-unit id="Touch.CannotMakeFileWritable">
         <source>MSB3372: The file "{0}" cannot be made writable. {1} {2}</source>
-        <target state="new">MSB3372: The file "{0}" cannot be made writable. {1} {2}</target>
+        <target state="translated">MSB3372: Soubor {0} nelze nastavit pro zápis. {1} {2}</target>
         <note>{StrBegin="MSB3372: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotRestoreAttributes">
@@ -2596,7 +2596,7 @@
       </trans-unit>
       <trans-unit id="Touch.CannotTouch">
         <source>MSB3374: The last access/last write time on file "{0}" cannot be set. {1} {2}</source>
-        <target state="new">MSB3374: The last access/last write time on file "{0}" cannot be set. {1} {2}</target>
+        <target state="translated">MSB3374: Nelze nastavit čas posledního otevření či zápisu u souboru {0}. {1} {2}</target>
         <note>{StrBegin="MSB3374: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CreatingFile">
@@ -2691,7 +2691,7 @@
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotMakeFileWriteable">
         <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</source>
-        <target state="new">MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</target>
+        <target state="translated">MSB3935: Soubor {0} se nepodařilo rozzipovat, protože cílový soubor {1} je jen pro čtení a nebylo možné ho nastavit jako zapisovatelný.  {2} {3}</target>
         <note>{StrBegin="MSB3935: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotOpenFile">
@@ -2776,7 +2776,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
         <source>MSB3491: Could not write lines to file "{0}". {1} {2}</source>
-        <target state="new">MSB3491: Could not write lines to file "{0}". {1} {2}</target>
+        <target state="translated">MSB3491: Nelze zapsat řádky do souboru {0}. {1} {2}</target>
         <note>{StrBegin="MSB3491: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.InvalidTargetFrameworkMoniker">
@@ -3046,7 +3046,7 @@
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotWriteOutput">
         <source>MSB3713: The file "{0}" could not be created. {1} {2}</source>
-        <target state="new">MSB3713: The file "{0}" could not be created. {1} {2}</target>
+        <target state="translated">MSB3713: Soubor {0} nelze vytvořit. {1} {2}</target>
         <note>{StrBegin="MSB3713: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.SkippedNumberedParameter">
@@ -3496,7 +3496,7 @@
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFailed">
         <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2} {3}</source>
-        <target state="new">MSB3943: Failed to zip directory "{0}" to file "{1}".  {2} {3}</target>
+        <target state="translated">MSB3943: Adresář {0} se nepodařilo zazipovat do souboru {1}.  {2} {3}</target>
         <note>{StrBegin="MSB3943: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFileExists">

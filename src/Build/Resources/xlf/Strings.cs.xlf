@@ -516,7 +516,7 @@
       </trans-unit>
       <trans-unit id="ProjectImportsCollectorFileIOFail">
         <source>An exception occurred when adding the file '{0}', Exception: '{1}'</source>
-        <target state="new">An exception occurred when adding the file '{0}', Exception: '{1}'</target>
+        <target state="translated">Při přidávání souboru {0} došlo k výjimce. Výjimka:{1}</target>
         <note />
       </trans-unit>
       <trans-unit id="PropertyAssignment">
@@ -562,7 +562,7 @@ Chyby: {3}</target>
       </trans-unit>
       <trans-unit id="SDKResolverNullMessage">
         <source>The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</source>
-        <target state="new">The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</target>
+        <target state="translated">Překladač {0} se pokusil přeložit sadu SDK {1} a vrátil hodnotu null jako řetězec v seznamu upozornění nebo chyb.</target>
         <note>
       LOCALIZATION: Do not localize the word SDK.
     </note>

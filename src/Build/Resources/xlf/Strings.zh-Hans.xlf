@@ -516,7 +516,7 @@
       </trans-unit>
       <trans-unit id="ProjectImportsCollectorFileIOFail">
         <source>An exception occurred when adding the file '{0}', Exception: '{1}'</source>
-        <target state="new">An exception occurred when adding the file '{0}', Exception: '{1}'</target>
+        <target state="translated">添加文件“{0}”时发生异常，异常:“{1}”</target>
         <note />
       </trans-unit>
       <trans-unit id="PropertyAssignment">
@@ -562,7 +562,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="SDKResolverNullMessage">
         <source>The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</source>
-        <target state="new">The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</target>
+        <target state="translated">“{0}”解析程序已尝试解析 SDK“{1}”，并在警告或错误列表中以字符串形式返回 null。</target>
         <note>
       LOCALIZATION: Do not localize the word SDK.
     </note>
