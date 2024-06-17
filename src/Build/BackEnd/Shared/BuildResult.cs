@@ -123,7 +123,7 @@ namespace Microsoft.Build.Execution
         private const string VersionKeyName = "MSBUILDFEATUREBUILDRESULTHASVERSION";
 
         /// <summary>
-        /// Presence of this key is in the dictionary <see cref="_savedEnvironmentVariables"/> indicates that it was empty.
+        /// Presence of this key is in the dictionary <see cref="_savedEnvironmentVariables"/> indicates that it was null.
         /// </summary>
         /// <remarks>
         /// There is a behavioral difference between dictionary <see cref="_savedEnvironmentVariables"/> being empty and being null. Adding a magic key to distinguish these situations on deserialization. 
@@ -655,8 +655,7 @@ namespace Microsoft.Build.Execution
                     if (translator.Mode == TranslationDirection.WriteToStream)
                     {
                         // Add the special key VersionKeyName indicating the presence of a version to the _savedEnvironmentVariables dictionary.
-                        // If the dictionary was null, add another special key SavedEnvironmentVariablesDictionaryWasNull to the dictionary:
-                        // the behavior is different whether the dictionary was null or empty and we would like to preserve this information.
+                        // If the dictionary was null, add another special key SavedEnvironmentVariablesDictionaryWasNull to the dictionary.
                         if (_savedEnvironmentVariables is null)
                         {
                             _savedEnvironmentVariables = new Dictionary<string, string>
