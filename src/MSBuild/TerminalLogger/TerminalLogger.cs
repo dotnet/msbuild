@@ -1077,7 +1077,7 @@ internal sealed partial class TerminalLogger : INodeLogger
 
         int index = path.LastIndexOfAny(PathSeparators);
         return index >= 0
-            ? $"{path.Substring(0)}{AnsiCodes.MakeBold(path.Substring(index + 1))}"
+            ? $"{path.Substring(0, index + 1)}{AnsiCodes.MakeBold(path.Substring(index + 1))}"
             : path;
     }
 

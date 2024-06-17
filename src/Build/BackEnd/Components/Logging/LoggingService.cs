@@ -1702,7 +1702,7 @@ namespace Microsoft.Build.BackEnd.Logging
                                 sink.Consume(eventArg, (int)pair.Key);
                             }
 
-                            // Reset the HaveLoggedBuildFinished event because no one else will be sending a build canceled event to any loggers at this time.
+                            // Reset the HaveLoggedBuildCanceled event because no one else will be sending a build canceled event to any loggers at this time.
                             sink.HaveLoggedBuildCanceledEvent = false;
                         }
                     }
