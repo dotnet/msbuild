@@ -297,7 +297,10 @@ namespace Microsoft.Build.UnitTests.Logging
             try
             {
                 eventHelper.RaiseBuildEvent(buildEventToRaise);
-                if (buildEventToRaise.GetType() != typeof(GenericBuildStatusEventArgs))
+                Type eventType = buildEventToRaise.GetType();
+
+                if (eventType != typeof(GenericBuildStatusEventArgs) &&
+                    eventType != typeof(BuildCanceledEventArgs))
                 {
                     Assert.Equal(testHandlers.RaisedEvent, buildEventToRaise); // "Expected buildevent in handler to match buildevent raised on event source"
                     Assert.Equal(testHandlers.RaisedEvent, testHandlers.RaisedAnyEvent); // "Expected RaisedEvent and RaisedAnyEvent to match"
@@ -1009,6 +1012,12 @@ namespace Microsoft.Build.UnitTests.Logging
                     Assert.True(_sourceForEvents.HaveLoggedBuildFinishedEvent);
                     _sourceForEvents.HaveLoggedBuildFinishedEvent = false;
                     Assert.False(_sourceForEvents.HaveLoggedBuildFinishedEvent);
+                }
+                else if (buildEvent is BuildCanceledEventArgs)
+                {
+                    Assert.True(_sourceForEvents.HaveLoggedBuildCanceledEvent);
+                    _sourceForEvents.HaveLoggedBuildCanceledEvent = false;
+                    Assert.False(_sourceForEvents.HaveLoggedBuildCanceledEvent);
                 }
             }
         }

@@ -50,11 +50,6 @@ namespace Microsoft.Build.BackEnd.Logging
         public event BuildFinishedEventHandler BuildFinished;
 
         /// <summary>
-        /// this event is raised to log the cancellation of a build
-        /// </summary>
-        public event BuildCanceledEventHandler BuildCanceled;
-
-        /// <summary>
         /// this event is raised to log the start of a project build
         /// </summary>
         public event ProjectStartedEventHandler ProjectStarted;
@@ -317,7 +312,6 @@ namespace Microsoft.Build.BackEnd.Logging
             WarningRaised = null;
             BuildStarted = null;
             BuildFinished = null;
-            BuildCanceled = null;
             ProjectStarted = null;
             ProjectFinished = null;
             TargetStarted = null;
@@ -554,11 +548,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception>
         private void RaiseBuildCanceledEvent(object sender, BuildCanceledEventArgs buildEvent)
         {
-            if (BuildCanceled != null)
+            if (StatusEventRaised != null)
             {
                 try
                 {
-                    BuildCanceled(sender, buildEvent);
+                    StatusEventRaised(sender, buildEvent);
                 }
                 catch (LoggerException)
                 {
