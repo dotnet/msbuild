@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 EnableNodeReuse = false
             };
             _buildManager = new BuildManager();
-            _projectCollection = new ProjectCollection(null, _parameters.Loggers, ToolsetDefinitionLocations.Default);
+            _projectCollection = new ProjectCollection(globalProperties:null, _parameters.Loggers, ToolsetDefinitionLocations.Default);
 
             _env = TestEnvironment.Create(output);
             _inProcEnvCheckTransientEnvironmentVariable = _env.SetEnvironmentVariable("MSBUILDINPROCENVCHECK", "1");
