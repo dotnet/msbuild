@@ -475,7 +475,6 @@ namespace Microsoft.Build.UnitTests
             es.Consume(new BuildFinishedEventArgs(null, null, true));
             es.Consume(new BuildFinishedEventArgs(null, null, true));
             es.Consume(new MyCustomBuildEventArgs2());
-            es.Consume(new BuildCanceledEventArgs(null));
             // No exception raised
         }
 
@@ -512,8 +511,6 @@ namespace Microsoft.Build.UnitTests
             pfea.BuildEventContext = buildEventContext;
             BuildFinishedEventArgs bfea = new BuildFinishedEventArgs(null, null, true);
             bfea.BuildEventContext = buildEventContext;
-            BuildCanceledEventArgs bcea = new BuildCanceledEventArgs(null);
-            bcea.BuildEventContext = buildEventContext;
             MyCustomBuildEventArgs2 mcea = new MyCustomBuildEventArgs2();
             mcea.BuildEventContext = buildEventContext;
 
@@ -533,7 +530,6 @@ namespace Microsoft.Build.UnitTests
             es.Consume(bfea);
             es.Consume(bfea);
             es.Consume(bfea);
-            es.Consume(bcea);
             es.Consume(mcea);
             // No exception raised
         }
