@@ -427,9 +427,6 @@ namespace Microsoft.Build.BackEnd.Logging
             BuildCanceledEventArgs buildEvent = new BuildCanceledEventArgs(message);
 
             ProcessLoggingEvent(buildEvent);
-
-            // Make sure we process this event before going any further
-            WaitForLoggingToProcessEvents();
         }
 
         /// <inheritdoc />
