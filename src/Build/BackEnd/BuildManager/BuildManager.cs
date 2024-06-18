@@ -2962,21 +2962,18 @@ namespace Microsoft.Build.Execution
 
             buildCheckManagerProvider!.Instance.SetDataSource(BuildCheckDataSource.EventArgs);
 
-            // Create BuildCheckBuildEventHandler that uses the mergedEventSource to invoke new events
-            var analysisContextFactory = new AnalysisDispatchingContextFactory();
-
-            var buildCheckEventHandler = new BuildCheckBuildEventHandler(
-                analysisContextFactory,
-                buildCheckManagerProvider.Instance);
-
             var mergedEventSource = new EventArgsDispatcher();
+
             // Pass the events from replayEventSource to the mergedEventSource
             replayEventSource.AnyEventRaised += (sender, e) => mergedEventSource.Dispatch(e);
 
+            // Create BuildCheckBuildEventHandler that passes new events to the mergedEventSource
+            var buildCheckEventHandler = new BuildCheckBuildEventHandler(
+                new AnalysisDispatchingContextFactory(mergedEventSource),
+                buildCheckManagerProvider.Instance);
+
             // Pass the events from replayEventSource to the BuildCheckBuildEventHandler to produce new events
             replayEventSource.AnyEventRaised += (sender, e) => buildCheckEventHandler.HandleBuildEvent(e);
-            // Pass the events produced by BuildCheck to the mergedEventSource
-            analysisContextFactory.AnyEventRaised += (sender, e) => mergedEventSource.Dispatch(e);
 
             return mergedEventSource;
         }

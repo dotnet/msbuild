@@ -8,17 +8,17 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 
 internal class AnalysisDispatchingContextFactory : IAnalysisContextFactory
 {
-    private readonly EventArgsDispatcher _dispatcher;
+    private readonly EventArgsDispatcher _eventDispatcher;
 
     public event AnyEventHandler? AnyEventRaised;
 
-    public AnalysisDispatchingContextFactory()
+    public AnalysisDispatchingContextFactory(EventArgsDispatcher eventDispatcher)
     {
-        _dispatcher = new EventArgsDispatcher();
+        _eventDispatcher = eventDispatcher;
 
-        _dispatcher.AnyEventRaised += (sender, e) => AnyEventRaised?.Invoke(sender, e);
+        _eventDispatcher.AnyEventRaised += (sender, e) => AnyEventRaised?.Invoke(sender, e);
     }
 
     public IAnalysisContext CreateAnalysisContext(BuildEventContext eventContext)
-        => new AnalysisDispatchingContext(_dispatcher, eventContext);
+        => new AnalysisDispatchingContext(_eventDispatcher, eventContext);
 }
