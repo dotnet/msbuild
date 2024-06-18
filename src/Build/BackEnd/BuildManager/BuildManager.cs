@@ -2950,7 +2950,7 @@ namespace Microsoft.Build.Execution
             });
         }
 
-        public IEventSource GetMergedEventSource(BinaryLogReplayEventSource replayEventSource)
+        public void AttachBuildCheckForBinaryLogReplay(BinaryLogReplayEventSource replayEventSource)
         {
             _buildParameters = new BuildParameters
             {
@@ -2962,23 +2962,11 @@ namespace Microsoft.Build.Execution
 
             buildCheckManagerProvider!.Instance.SetDataSource(BuildCheckDataSource.EventArgs);
 
-            // Create BuildCheckBuildEventHandler that uses the mergedEventSource to invoke new events
-            var analysisContextFactory = new AnalysisDispatchingContextFactory();
-
             var buildCheckEventHandler = new BuildCheckBuildEventHandler(
-                analysisContextFactory,
+                new AnalysisDispatchingContextFactory(replayEventSource.Dispatch),
                 buildCheckManagerProvider.Instance);
 
-            var mergedEventSource = new EventArgsDispatcher();
-            // Pass the events from replayEventSource to the mergedEventSource
-            replayEventSource.AnyEventRaised += (sender, e) => mergedEventSource.Dispatch(e);
-
-            // Pass the events from replayEventSource to the BuildCheckBuildEventHandler to produce new events
             replayEventSource.AnyEventRaised += (sender, e) => buildCheckEventHandler.HandleBuildEvent(e);
-            // Pass the events produced by BuildCheck to the mergedEventSource
-            analysisContextFactory.AnyEventRaised += (sender, e) => mergedEventSource.Dispatch(e);
-
-            return mergedEventSource;
         }
 
         /// <summary>

@@ -9,21 +9,20 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.Shared;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 
 internal class AnalysisDispatchingContext : IAnalysisContext
 {
-    private readonly EventArgsDispatcher _eventDispatcher;
+    private readonly Action<BuildEventArgs> _dispatch;
     private readonly BuildEventContext _eventContext;
 
     public AnalysisDispatchingContext(
-        EventArgsDispatcher dispatch,
+        Action<BuildEventArgs> dispatch,
         BuildEventContext eventContext)
     {
-        _eventDispatcher = dispatch;
+        _dispatch = dispatch;
         _eventContext = eventContext;
     }
 
@@ -33,7 +32,7 @@ internal class AnalysisDispatchingContext : IAnalysisContext
     {
         ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
 
-        _eventDispatcher.Dispatch(buildEvent);
+        _dispatch!(buildEvent!);
     }
 
     public void DispatchAsComment(MessageImportance importance, string messageResourceName, params object?[] messageArgs)
@@ -50,13 +49,13 @@ internal class AnalysisDispatchingContext : IAnalysisContext
     {
         BuildMessageEventArgs buildEvent = EventsCreatorHelper.CreateMessageEventFromText(buildEventContext, importance, message, messageArgs);
 
-        _eventDispatcher.Dispatch(buildEvent);
+        _dispatch!(buildEvent!);
     }
 
     public void DispatchAsErrorFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
     {
         BuildErrorEventArgs buildEvent = EventsCreatorHelper.CreateErrorEventFromText(_eventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
 
-        _eventDispatcher.Dispatch(buildEvent);
+        _dispatch!(buildEvent!);
     }
 }
