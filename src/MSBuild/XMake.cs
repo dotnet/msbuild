@@ -4412,21 +4412,20 @@ namespace Microsoft.Build.CommandLine
 
             var replayEventSource = new BinaryLogReplayEventSource();
 
-            if (isBuildCheckEnabled)
-            {
-                BuildManager.DefaultBuildManager.AttachBuildCheckForBinaryLogReplay(replayEventSource);
-            }
+            var eventSource = isBuildCheckEnabled ?
+                BuildManager.DefaultBuildManager.GetMergedEventSource(replayEventSource) :
+                replayEventSource;
 
             foreach (var distributedLoggerRecord in distributedLoggerRecords)
             {
                 ILogger centralLogger = distributedLoggerRecord.CentralLogger;
                 if (centralLogger is INodeLogger nodeLogger)
                 {
-                    nodeLogger.Initialize(replayEventSource, cpuCount);
+                    nodeLogger.Initialize(eventSource, cpuCount);
                 }
                 else
                 {
-                    centralLogger?.Initialize(replayEventSource);
+                    centralLogger?.Initialize(eventSource);
                 }
             }
 
@@ -4434,11 +4433,11 @@ namespace Microsoft.Build.CommandLine
             {
                 if (logger is INodeLogger nodeLogger)
                 {
-                    nodeLogger.Initialize(replayEventSource, cpuCount);
+                    nodeLogger.Initialize(eventSource, cpuCount);
                 }
                 else
                 {
-                    logger.Initialize(replayEventSource);
+                    logger.Initialize(eventSource);
                 }
             }
 
