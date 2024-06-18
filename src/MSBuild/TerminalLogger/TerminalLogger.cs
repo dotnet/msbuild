@@ -207,8 +207,6 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private bool _showCommandLine = false;
 
-    private BuildCanceledEventArgs? _buildCanceledEventAgrs;
-
     private bool _cancellationMessageRendered;
 
     /// <summary>
@@ -455,9 +453,10 @@ internal sealed partial class TerminalLogger : INodeLogger
 
     private void StatusEventRaised(object sender, BuildStatusEventArgs e)
     {
-        if (e is BuildCanceledEventArgs buildCanceledEventArgs)
+        if (e is BuildCanceledEventArgs buildCanceledEventArgs && !_cancellationMessageRendered)
         {
-            _buildCanceledEventAgrs = buildCanceledEventArgs;
+            _cancellationMessageRendered = true;
+            RenderImmediateMessage(e.Message!);
         }
     }
 
@@ -957,18 +956,6 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     internal void DisplayNodes()
     {
-        if (_buildCanceledEventAgrs != null)
-        {
-            if (!_cancellationMessageRendered)
-            {
-                string message = _buildCanceledEventAgrs.Message ?? string.Empty;
-                Terminal.WriteLine(message);
-                _cancellationMessageRendered = true;
-            }
-
-            return;
-        }
-
         NodesFrame newFrame = new NodesFrame(_nodes, width: Terminal.Width, height: Terminal.Height);
 
         // Do not render delta but clear everything if Terminal width or height have changed.

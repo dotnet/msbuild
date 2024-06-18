@@ -1013,12 +1013,6 @@ namespace Microsoft.Build.UnitTests.Logging
                     _sourceForEvents.HaveLoggedBuildFinishedEvent = false;
                     Assert.False(_sourceForEvents.HaveLoggedBuildFinishedEvent);
                 }
-                else if (buildEvent is BuildCanceledEventArgs)
-                {
-                    Assert.True(_sourceForEvents.HaveLoggedBuildCanceledEvent);
-                    _sourceForEvents.HaveLoggedBuildCanceledEvent = false;
-                    Assert.False(_sourceForEvents.HaveLoggedBuildCanceledEvent);
-                }
             }
         }
         #endregion

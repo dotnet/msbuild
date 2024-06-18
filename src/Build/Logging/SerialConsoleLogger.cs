@@ -17,6 +17,8 @@ namespace Microsoft.Build.BackEnd.Logging
 {
     internal class SerialConsoleLogger : BaseConsoleLogger
     {
+        private bool _cancellationMessageRendered;
+
         #region Constructors
 
         /// <summary>
@@ -587,9 +589,10 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
                 }
             }
-            else if (e is BuildCanceledEventArgs buildCanceled)
+            else if (e is BuildCanceledEventArgs buildCanceled && !_cancellationMessageRendered)
             {
-                Console.WriteLine(e.Message ?? string.Empty);
+                _cancellationMessageRendered = true;
+                Console.WriteLine(e.Message);
             }
         }
 

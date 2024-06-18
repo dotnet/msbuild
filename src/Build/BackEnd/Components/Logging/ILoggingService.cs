@@ -656,15 +656,6 @@ namespace Microsoft.Build.BackEnd.Logging
             set;
         }
 
-        /// <summary>
-        /// Has the sink logged the BuildCanceledEvent. This is important to know because we only want to log the build canceled event once
-        /// </summary>
-        bool HaveLoggedBuildCanceledEvent
-        {
-            get;
-            set;
-        }
-
         #endregion
         /// <summary>
         /// Entry point for a sink to consume an event.

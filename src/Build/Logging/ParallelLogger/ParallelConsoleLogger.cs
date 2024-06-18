@@ -24,6 +24,8 @@ namespace Microsoft.Build.BackEnd.Logging
     /// <remarks>This class is not thread safe.</remarks>
     internal class ParallelConsoleLogger : BaseConsoleLogger
     {
+        private bool _cancellationMessageRendered;
+
         /// <summary>
         /// Associate a (nodeID and project_context_id) to a target framework.
         /// </summary>
@@ -1212,9 +1214,10 @@ namespace Microsoft.Build.BackEnd.Logging
                     propertyOutputMap[evaluationKey] = value;
                 }
             }
-            else if (e is BuildCanceledEventArgs buildCanceled)
+            else if (e is BuildCanceledEventArgs buildCanceled && !_cancellationMessageRendered)
             {
-                Console.WriteLine(e.Message ?? string.Empty);
+                _cancellationMessageRendered = true;
+                Console.WriteLine(e.Message);
             }
         }
 

@@ -74,13 +74,6 @@ namespace Microsoft.Build.BackEnd.Logging
             set;
         }
 
-        /// <inheritdoc />
-        public bool HaveLoggedBuildCanceledEvent
-        {
-            get;
-            set;
-        }
-
         /// <summary>
         /// This property is ignored by this event sink and relies on the receiver to treat warnings as errors.
         /// </summary>
@@ -149,11 +142,6 @@ namespace Microsoft.Build.BackEnd.Logging
                 return;
             }
             else if (buildEvent is BuildFinishedEventArgs)
-            {
-                HaveLoggedBuildFinishedEvent = true;
-                return;
-            }
-            else if (buildEvent is BuildCanceledEventArgs)
             {
                 HaveLoggedBuildFinishedEvent = true;
                 return;

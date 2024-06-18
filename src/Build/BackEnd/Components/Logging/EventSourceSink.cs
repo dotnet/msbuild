@@ -136,13 +136,6 @@ namespace Microsoft.Build.BackEnd.Logging
             set;
         }
 
-        /// <inheritdoc />
-        public bool HaveLoggedBuildCanceledEvent
-        {
-            get;
-            set;
-        }
-
         /// <summary>
         /// Should evaluation events include generated metaprojects?
         /// </summary>
@@ -263,8 +256,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     RaiseBuildFinishedEvent(null, buildFinishedEvent);
                     break;
                 case BuildCanceledEventArgs buildCanceledEvent:
-                    HaveLoggedBuildCanceledEvent = true;
-                    RaiseBuildCanceledEvent(null, buildCanceledEvent);
+                    RaiseStatusEvent(null, buildCanceledEvent);
                     break;
                 case CustomBuildEventArgs customBuildEvent:
                     RaiseCustomEvent(null, customBuildEvent);
@@ -511,48 +503,6 @@ namespace Microsoft.Build.BackEnd.Logging
                 try
                 {
                     BuildFinished(sender, buildEvent);
-                }
-                catch (LoggerException)
-                {
-                    // if a logger has failed politely, abort immediately
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-                    throw;
-                }
-                catch (Exception exception)
-                {
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-
-                    if (ExceptionHandling.IsCriticalException(exception))
-                    {
-                        throw;
-                    }
-
-                    InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
-                }
-            }
-
-            RaiseStatusEvent(sender, buildEvent);
-        }
-
-        /// <summary>
-        /// Raises a "build canceled" event to all registered loggers.
-        /// </summary>
-        /// <param name="sender">sender of the event</param>
-        /// <param name="buildEvent">BuildCanceledEventArgs</param>
-        /// <exception cref="LoggerException">When EventHandler raises an logger exception the LoggerException is rethrown</exception>
-        /// <exception cref="InternalLoggerException">Any exceptions which are not LoggerExceptions are wrapped in an InternalLoggerException</exception>
-        /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception>
-        private void RaiseBuildCanceledEvent(object sender, BuildCanceledEventArgs buildEvent)
-        {
-            if (StatusEventRaised != null)
-            {
-                try
-                {
-                    StatusEventRaised(sender, buildEvent);
                 }
                 catch (LoggerException)
                 {

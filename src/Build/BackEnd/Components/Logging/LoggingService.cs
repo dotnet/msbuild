@@ -1689,24 +1689,6 @@ namespace Microsoft.Build.BackEnd.Logging
                         }
                     }
                 }
-                else if (eventArg is BuildCanceledEventArgs)
-                {
-                    foreach (KeyValuePair<int, IBuildEventSink> pair in _eventSinkDictionary)
-                    {
-                        IBuildEventSink sink = pair.Value;
-
-                        if (sink != null)
-                        {
-                            if (!sink.HaveLoggedBuildCanceledEvent)
-                            {
-                                sink.Consume(eventArg, (int)pair.Key);
-                            }
-
-                            // Reset the HaveLoggedBuildCanceled event because no one else will be sending a build canceled event to any loggers at this time.
-                            sink.HaveLoggedBuildCanceledEvent = false;
-                        }
-                    }
-                }
             }
 
             TryRaiseProjectFinishedEvent(eventArg);
