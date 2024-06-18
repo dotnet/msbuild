@@ -760,6 +760,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _env.SetEnvironmentVariable("MsBuildForwardPropertiesFromChild", "InitialProperty3;IAMNOTREAL");
             _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
 
+            _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "0");
+
             var project = CreateProject(contents, null, _projectCollection, false);
             var data = new BuildRequestData(project.FullPath, new Dictionary<string, string>(),
                 MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
@@ -767,7 +769,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("[success]");
-            Assert.Equal(3, _logger.EvaluationFinishedEvents.Count);
+            Assert.Equal(3, _logger.ProjectStartedEvents.Count);
 
             ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[1];
 
@@ -785,7 +787,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal("InitialProperty3", propertyValue);
 
             projectStartedEvent = _logger.ProjectStartedEvents[2];
-            Assert.Null(projectStartedEvent.Properties);
+            properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            (properties == null || properties.Count == 0).ShouldBeTrue();
         }
 
         /// <summary>
