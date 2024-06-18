@@ -126,6 +126,11 @@
         <target state="translated">Não há suporte para gravação.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheckEnabled">
+        <source>The build check has been enabled for this current build.</source>
+        <target state="new">The build check has been enabled for this current build.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
         <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
         <target state="translated">FALHA na compilação da pergunta. A compilação foi encerrada antecipadamente ao se deparar com um alvo ou tarefa que não estava atualizado.</target>

@@ -126,6 +126,11 @@
         <target state="translated">No se admite la escritura.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheckEnabled">
+        <source>The build check has been enabled for this current build.</source>
+        <target state="new">The build check has been enabled for this current build.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
         <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
         <target state="translated">La creación de la pregunta ha FALLADO. La creación finalizó antes de tiempo al encontrar un objetivo o tarea que no estaba actualizado.</target>

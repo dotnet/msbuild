@@ -11,7 +11,6 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
 using Microsoft.Build.Experimental.BuildCheck.Analyzers;
 using Microsoft.Build.Experimental.BuildCheck.Logging;
-using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -200,7 +199,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                         instance.SupportedRules.Select(r => r.Id).ToArray(),
                         instance.SupportedRules.Any(r => r.DefaultConfiguration.IsEnabled == true)));
                     _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerSuccessfulAcquisition", instance.FriendlyName);
-                }     
+                }    
             }
         }
 
@@ -298,7 +297,11 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 }
                 catch (BuildCheckConfigurationException e)
                 {
-                    _loggingService.LogErrorFromText(buildEventContext, null, null, null,
+                    _loggingService.LogErrorFromText(
+                        buildEventContext,
+                        null,
+                        null,
+                        null,
                         new BuildEventFileInfo(projectFullPath),
                         e.Message);
                     analyzersToRemove.Add(analyzerFactoryContext);
@@ -376,7 +379,9 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             loggingContext.LogBuildEvent(analyzerEventArg);
         }
 
-        public void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext,
+        public void StartProjectEvaluation(
+            BuildCheckDataSource buildCheckDataSource,
+            BuildEventContext buildEventContext,
             string fullPath)
         {
             if (buildCheckDataSource == BuildCheckDataSource.EventArgs && IsInProcNode)

@@ -126,6 +126,11 @@
         <target state="translated">Schreibvorgänge werden nicht unterstützt.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheckEnabled">
+        <source>The build check has been enabled for this current build.</source>
+        <target state="new">The build check has been enabled for this current build.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
         <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
         <target state="translated">Fehler beim Erstellen der Frage. Der Build wurde früh beendet, da ein Ziel oder eine Aufgabe gefunden wurde, die nicht aktuell war.</target>

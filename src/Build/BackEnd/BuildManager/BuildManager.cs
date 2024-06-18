@@ -578,6 +578,12 @@ namespace Microsoft.Build.Execution
                 // Log deferred messages and response files
                 LogDeferredMessages(loggingService, _deferredBuildMessages);
 
+                // Log if BuildCheck is enabled
+                if (_buildParameters.IsBuildCheckEnabled)
+                {
+                    loggingService.LogComment(buildEventContext: BuildEventContext.Invalid, MessageImportance.Low, "BuildCheckEnabled");
+                }
+
                 // Log known deferred telemetry
                 loggingService.LogTelemetry(buildEventContext: null, KnownTelemetry.LoggingConfigurationTelemetry.EventName, KnownTelemetry.LoggingConfigurationTelemetry.GetProperties());
 
