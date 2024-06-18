@@ -1752,11 +1752,13 @@ namespace Microsoft.Build.CommandLine
             NativeMethodsShared.LongPathsStatus longPaths = NativeMethodsShared.IsLongPathsEnabled();
             if (longPaths != NativeMethodsShared.LongPathsStatus.NotApplicable)
             {
+                string resourceString = "LongPaths_" + longPaths.ToString();
                 messages.Add(
                     new BuildManager.DeferredBuildMessage(
                         ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                        "LongPathsEnabled",
-                        longPaths == NativeMethodsShared.LongPathsStatus.Enabled),
+                            "LongPaths",
+                            ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                "LongPaths_" + longPaths.ToString())),
                         MessageImportance.Low));
             }
 

@@ -602,6 +602,11 @@ internal static class NativeMethods
         Disabled,
 
         /// <summary>
+        /// The registry key does not exist.
+        /// </summary>
+        Missing,
+
+        /// <summary>
         /// The registry key is set to 1.
         /// </summary>
         Enabled,
@@ -629,16 +634,23 @@ internal static class NativeMethods
         }
     }
 
-    internal static bool IsMaxPathLegacyWindows() =>
-            IsLongPathsEnabled() == LongPathsStatus.Disabled;
+    internal static bool IsMaxPathLegacyWindows()
+    {
+        var longPathsStatus = IsLongPathsEnabled();
+        return longPathsStatus == LongPathsStatus.Disabled || longPathsStatus == LongPathsStatus.Missing;
+    }
 
     [SupportedOSPlatform("windows")]
     private static LongPathsStatus IsLongPathsEnabledRegistry()
     {
         using (RegistryKey fileSystemKey = Registry.LocalMachine.OpenSubKey(WINDOWS_FILE_SYSTEM_REGISTRY_KEY))
         {
-            object longPathsEnabledValue = fileSystemKey?.GetValue(WINDOWS_LONG_PATHS_ENABLED_VALUE_NAME, 0);
-            if (fileSystemKey != null && Convert.ToInt32(longPathsEnabledValue) == 1)
+            object longPathsEnabledValue = fileSystemKey?.GetValue(WINDOWS_LONG_PATHS_ENABLED_VALUE_NAME, -1);
+            if (fileSystemKey != null && Convert.ToInt32(longPathsEnabledValue) == -1)
+            {
+                return LongPathsStatus.Missing;
+            }
+            else if (fileSystemKey != null && Convert.ToInt32(longPathsEnabledValue) == 1)
             {
                 return LongPathsStatus.Enabled;
             }

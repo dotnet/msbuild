@@ -1661,10 +1661,18 @@
     <value>succeeded: {0}</value>
     <comment>{0} whole number</comment>
   </data>
-  <data name="LongPathsEnabled" xml:space="preserve">
-    <value>Windows LongPathsEnabled registry key = {0}</value>
-    
-    <comment>"Windows" is the OS, "LongPathsEnabled" should not be localized, and {0} will be boolean true/false</comment>
+  <data name="LongPaths" xml:space="preserve">
+    <value>Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</value>
+    <comment>"Windows" is the OS, "LongPathsEnabled" should not be localized, and {0} will be "enabled"/"disabled"/"not set"</comment>
+  </data>
+  <data name="LongPaths_Enabled" xml:space="preserve">
+    <value>enabled</value>
+  </data>
+  <data name="LongPaths_Disabled" xml:space="preserve">
+    <value>disabled</value>
+  </data>
+  <data name="LongPaths_Missing" xml:space="preserve">
+    <value>not set</value>
   </data>
   <!-- **** TerminalLogger strings end **** -->
     <!--
