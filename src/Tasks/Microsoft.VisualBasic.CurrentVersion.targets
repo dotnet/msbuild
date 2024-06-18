@@ -82,11 +82,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     For other project systems, this transformation may be different.
     -->
-
-    <PropertyGroup>
-        <CreateManifestResourceNamesDependsOn>$(CreateManifestResourceNamesDependsOn)</CreateManifestResourceNamesDependsOn>
-    </PropertyGroup>
-
+	
     <Target
         Name="CreateManifestResourceNames"
         Condition="'@(EmbeddedResource)' != ''"
@@ -158,7 +154,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ItemGroup>
 
     <PropertyGroup>
-        <CoreCompileDependsOn>$(CoreCompileDependsOn);_ComputeNonExistentFileProperty;ResolveCodeAnalysisRuleSet</CoreCompileDependsOn>
+        <CoreCompileDependsOn>_ComputeNonExistentFileProperty;ResolveCodeAnalysisRuleSet;$(CoreCompileDependsOn)</CoreCompileDependsOn>
         <ExportWinMDFile Condition="'$(ExportWinMDFile)' == '' and '$(OutputType)' == 'WinMDObj'">true</ExportWinMDFile>
     </PropertyGroup>
 
