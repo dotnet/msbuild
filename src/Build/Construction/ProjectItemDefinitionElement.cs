@@ -72,7 +72,7 @@ namespace Microsoft.Build.Construction
         /// </param>
         public ProjectMetadataElement AddMetadata(string name, string unevaluatedValue, bool expressAsAttribute)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
             ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue);
 
             if (expressAsAttribute)

@@ -229,8 +229,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectOutputElement AddOutputItem(string taskParameter, string itemType)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(taskParameter, nameof(taskParameter));
-            ErrorUtilities.VerifyThrowArgumentLength(itemType, nameof(itemType));
+            ErrorUtilities.VerifyThrowArgumentLength(taskParameter);
+            ErrorUtilities.VerifyThrowArgumentLength(itemType);
 
             return AddOutputItem(taskParameter, itemType, null);
         }
@@ -259,8 +259,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectOutputElement AddOutputProperty(string taskParameter, string propertyName)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(taskParameter, nameof(taskParameter));
-            ErrorUtilities.VerifyThrowArgumentLength(propertyName, nameof(propertyName));
+            ErrorUtilities.VerifyThrowArgumentLength(taskParameter);
+            ErrorUtilities.VerifyThrowArgumentLength(propertyName);
 
             return AddOutputProperty(taskParameter, propertyName, null);
         }
@@ -296,7 +296,7 @@ namespace Microsoft.Build.Construction
 
             lock (_locker)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+                ErrorUtilities.VerifyThrowArgumentLength(name);
 
                 EnsureParametersInitialized();
 
@@ -322,7 +322,7 @@ namespace Microsoft.Build.Construction
 
             lock (_locker)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+                ErrorUtilities.VerifyThrowArgumentLength(name);
                 ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue);
                 ErrorUtilities.VerifyThrowArgument(!XMakeAttributes.IsSpecialTaskAttribute(name), "CannotAccessKnownAttributes", name);
 
@@ -411,7 +411,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal static ProjectTaskElement CreateDisconnected(string name, ProjectRootElement containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
 
             XmlElementWithLocation element = containingProject.CreateElement(name);
 

@@ -161,7 +161,7 @@ namespace Microsoft.Build.Execution
             ElementLocation msbuildRuntimeLocation,
             ElementLocation msbuildArchitectureLocation)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
             ErrorUtilities.VerifyThrowArgumentNull(condition);
             ErrorUtilities.VerifyThrowArgumentNull(continueOnError);
 
@@ -337,8 +337,8 @@ namespace Microsoft.Build.Execution
         /// <param name="condition">The condition.</param>
         internal void AddOutputItem(string taskOutputParameterName, string itemName, string condition)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(taskOutputParameterName, nameof(taskOutputParameterName));
-            ErrorUtilities.VerifyThrowArgumentLength(itemName, nameof(itemName));
+            ErrorUtilities.VerifyThrowArgumentLength(taskOutputParameterName);
+            ErrorUtilities.VerifyThrowArgumentLength(itemName);
             _outputs.Add(new ProjectTaskOutputItemInstance(itemName, taskOutputParameterName, condition ?? String.Empty, ElementLocation.EmptyLocation, ElementLocation.EmptyLocation, ElementLocation.EmptyLocation, condition == null ? null : ElementLocation.EmptyLocation));
         }
 
@@ -350,8 +350,8 @@ namespace Microsoft.Build.Execution
         /// <param name="condition">The condition.</param>
         internal void AddOutputProperty(string taskOutputParameterName, string propertyName, string condition)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(taskOutputParameterName, nameof(taskOutputParameterName));
-            ErrorUtilities.VerifyThrowArgumentLength(propertyName, nameof(propertyName));
+            ErrorUtilities.VerifyThrowArgumentLength(taskOutputParameterName);
+            ErrorUtilities.VerifyThrowArgumentLength(propertyName);
             _outputs.Add(new ProjectTaskOutputPropertyInstance(propertyName, taskOutputParameterName, condition ?? String.Empty, ElementLocation.EmptyLocation, ElementLocation.EmptyLocation, ElementLocation.EmptyLocation, condition == null ? null : ElementLocation.EmptyLocation));
         }
 

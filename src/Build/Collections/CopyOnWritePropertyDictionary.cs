@@ -324,7 +324,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Remove(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
 
             return ImmutableInterlocked.TryRemove(ref _backing, name, out _);
         }

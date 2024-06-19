@@ -29,7 +29,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="targetBuiltReason">Reason the target is being built</param>
         internal TargetSpecification(string targetName, ElementLocation referenceLocation, TargetBuiltReason targetBuiltReason = TargetBuiltReason.None)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(targetName, nameof(targetName));
+            ErrorUtilities.VerifyThrowArgumentLength(targetName);
             ErrorUtilities.VerifyThrowArgumentNull(referenceLocation);
 
             this._targetName = targetName;

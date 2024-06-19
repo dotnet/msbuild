@@ -83,7 +83,7 @@ namespace Microsoft.Build.Execution
         internal TaskFactoryWrapper(ITaskFactory taskFactory, LoadedType taskFactoryLoadInfo, string taskName, IDictionary<string, string> factoryIdentityParameters)
         {
             ErrorUtilities.VerifyThrowArgumentNull(taskFactory);
-            ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
+            ErrorUtilities.VerifyThrowArgumentLength(taskName);
             _taskFactory = taskFactory;
             _taskName = taskName;
             TaskFactoryLoadedType = taskFactoryLoadInfo;

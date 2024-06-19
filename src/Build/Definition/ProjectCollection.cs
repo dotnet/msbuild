@@ -1026,7 +1026,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public bool RemoveToolset(string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, nameof(toolsVersion));
+            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion);
 
             bool changed;
             using (_locker.EnterDisposableWriteLock())
@@ -1070,7 +1070,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public Toolset GetToolset(string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, nameof(toolsVersion));
+            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion);
             using (_locker.EnterDisposableWriteLock())
             {
                 _toolsets.TryGetValue(toolsVersion, out var toolset);
@@ -1157,7 +1157,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>A loaded project.</returns>
         public Project LoadProject(string fileName, IDictionary<string, string> globalProperties, string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(fileName, nameof(fileName));
+            ErrorUtilities.VerifyThrowArgumentLength(fileName);
             fileName = FileUtilities.NormalizePath(fileName);
 
             using (_locker.EnterDisposableWriteLock())

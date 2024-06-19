@@ -389,7 +389,7 @@ namespace Microsoft.Build.Construction
         /// </param>
         public ProjectMetadataElement AddMetadata(string name, string unevaluatedValue, bool expressAsAttribute)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
             ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue);
 
             if (expressAsAttribute)
@@ -439,7 +439,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void ChangeItemType(string newItemType)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(newItemType, nameof(newItemType));
+            ErrorUtilities.VerifyThrowArgumentLength(newItemType);
             XmlUtilities.VerifyThrowArgumentValidElementName(newItemType);
             ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(newItemType), "CannotModifyReservedItem", newItemType);
             if (Link != null)
