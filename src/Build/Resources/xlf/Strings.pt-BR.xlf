@@ -127,8 +127,8 @@
         <note />
       </trans-unit>
       <trans-unit id="BuildCheckEnabled">
-        <source>The build check has been enabled for this current build.</source>
-        <target state="new">The build check has been enabled for this current build.</target>
+        <source>The BuildCheck is enabled for this build.</source>
+        <target state="new">The BuildCheck is enabled for this build.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
@@ -213,28 +213,33 @@
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerAssemblyNotExist">
-        <source>Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</source>
-        <target state="translated">Falha ao localizar o assembly do analisador personalizado especificado: {0}. Verifique se existe.</target>
+        <source>Failed to find the specified custom analyzer assembly: '{0}'. Please check if it exists.</source>
+        <target state="needs-review-translation">Falha ao localizar o assembly do analisador personalizado especificado: {0}. Verifique se existe.</target>
         <note>The message is emitted when the custom analyzer assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerBaseTypeNotAssignable">
-        <source>Failed to load the custom analyzer type: {0} from the assembly: {1}. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">Falha ao carregar o tipo de analisador personalizado: {0} do assembly: {1}. Certifique-se de que ele herde a classe base Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer. Se não se destina a ser um analisador personalizado, ele não deve ser exposto. Mais informações: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <source>Failed to load the custom analyzer type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
+        <target state="needs-review-translation">Falha ao carregar o tipo de analisador personalizado: {0} do assembly: {1}. Certifique-se de que ele herde a classe base Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer. Se não se destina a ser um analisador personalizado, ele não deve ser exposto. Mais informações: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom analyzer assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedAcquisition">
-        <source>Failed to register the custom analyzer: {0}.</source>
-        <target state="translated">Falha ao registrar o analisador personalizado: {0}.</target>
+        <source>Failed to register the custom analyzer: '{0}'.</source>
+        <target state="needs-review-translation">Falha ao registrar o analisador personalizado: {0}.</target>
         <note>The message is emitted on failed loading of the custom analyzer in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedRuleLoading">
-        <source>Failed to instantiate the custom analyzer rule with the following exception: {0}.</source>
-        <target state="translated">Falha ao criar uma instância da regra do analisador personalizado com a seguinte exceção: {0}.</target>
+        <source>Failed to instantiate the custom analyzer rule with the following exception: '{0}'.</source>
+        <target state="needs-review-translation">Falha ao criar uma instância da regra do analisador personalizado com a seguinte exceção: {0}.</target>
         <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
       </trans-unit>
+      <trans-unit id="CustomAnalyzerRegistered">
+        <source>The custom analyzer is registered for the build: '{0}' from the location: '{1}'.</source>
+        <target state="new">The custom analyzer is registered for the build: '{0}' from the location: '{1}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
-        <source>Custom analyzer rule: {0} has been registered successfully.</source>
-        <target state="translated">Regra do analisador personalizado: {0} foi registrado com sucesso.</target>
+        <source>Custom analyzer rule: '{0}' has been registered successfully.</source>
+        <target state="needs-review-translation">Regra do analisador personalizado: {0} foi registrado com sucesso.</target>
         <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">

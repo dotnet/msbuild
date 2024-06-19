@@ -581,7 +581,7 @@ namespace Microsoft.Build.Execution
                 // Log if BuildCheck is enabled
                 if (_buildParameters.IsBuildCheckEnabled)
                 {
-                    loggingService.LogComment(buildEventContext: BuildEventContext.Invalid, MessageImportance.Low, "BuildCheckEnabled");
+                    loggingService.LogComment(buildEventContext: BuildEventContext.Invalid, MessageImportance.Normal, "BuildCheckEnabled");
                 }
 
                 // Log known deferred telemetry

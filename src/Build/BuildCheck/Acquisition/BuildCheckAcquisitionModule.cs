@@ -52,7 +52,8 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
 
             if (availableTypes.Count != analyzerTypes.Count)
             {
-                availableTypes.Except(analyzerTypes).ToList().ForEach(t => _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerBaseTypeNotAssignable", t.Name, t.Assembly));
+                availableTypes.Except(analyzerTypes).ToList()
+                    .ForEach(t => _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerBaseTypeNotAssignable", t.Name, t.Assembly));
             }
         }
         catch (ReflectionTypeLoadException ex)
