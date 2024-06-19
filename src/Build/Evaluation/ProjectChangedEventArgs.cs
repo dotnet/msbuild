@@ -19,7 +19,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="project">The changed project.</param>
         internal ProjectChangedEventArgs(Project project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(project, nameof(project));
+            ErrorUtilities.VerifyThrowArgumentNull(project);
 
             Project = project;
         }

@@ -461,7 +461,7 @@ namespace Microsoft.Build.Utilities
         private static IEnumerable<TargetPlatformSDK> GetTargetPlatformMonikers(string[] diskRoots, string[] extensionDiskRoots, string registryRoot, string targetPlatformIdentifier, Version targetPlatformVersion)
         {
             ErrorUtilities.VerifyThrowArgumentLength(targetPlatformIdentifier, nameof(targetPlatformIdentifier));
-            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion, nameof(targetPlatformVersion));
+            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion);
 
             string targetPlatformVersionString = targetPlatformVersion.ToString();
 
@@ -519,7 +519,7 @@ namespace Microsoft.Build.Utilities
         public static string GetPlatformExtensionSDKLocation(string sdkMoniker, string targetPlatformIdentifier, Version targetPlatformVersion, string[] diskRoots, string[] extensionDiskRoots, string registryRoot)
         {
             ErrorUtilities.VerifyThrowArgumentLength(targetPlatformIdentifier, nameof(targetPlatformIdentifier));
-            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion, nameof(targetPlatformVersion));
+            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion);
             ErrorUtilities.VerifyThrowArgumentLength(sdkMoniker, nameof(sdkMoniker));
 
             IEnumerable<TargetPlatformSDK> targetPlatforms = RetrieveTargetPlatformList(diskRoots, extensionDiskRoots, registryRoot);
@@ -583,7 +583,7 @@ namespace Microsoft.Build.Utilities
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static string GetPlatformExtensionSDKLocation(string sdkMoniker, string targetPlatformIdentifier, string targetPlatformVersion, string diskRoots, string extensionDiskRoots, string registryRoot)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion, nameof(targetPlatformVersion));
+            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion);
 
             string[] sdkDiskRoots = null;
             if (!string.IsNullOrEmpty(diskRoots))
@@ -1282,7 +1282,7 @@ namespace Microsoft.Build.Utilities
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         public static string GetPlatformSDKLocation(string targetPlatformIdentifier, string targetPlatformVersion, string diskRoots, string registryRoot)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion, nameof(targetPlatformVersion));
+            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion);
 
             string[] sdkDiskRoots = null;
             if (!string.IsNullOrEmpty(diskRoots))
@@ -1331,8 +1331,8 @@ namespace Microsoft.Build.Utilities
         /// <returns>A list of keys for the installed platforms for the given SDK</returns>
         public static IEnumerable<string> GetPlatformsForSDK(string sdkIdentifier, Version sdkVersion, string[] diskRoots, string registryRoot)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(sdkIdentifier, nameof(sdkIdentifier));
-            ErrorUtilities.VerifyThrowArgumentNull(sdkVersion, nameof(sdkVersion));
+            ErrorUtilities.VerifyThrowArgumentNull(sdkIdentifier);
+            ErrorUtilities.VerifyThrowArgumentNull(sdkVersion);
 
             IEnumerable<TargetPlatformSDK> targetPlatformSDKs = RetrieveTargetPlatformList(diskRoots, null, registryRoot);
 
@@ -1370,8 +1370,8 @@ namespace Microsoft.Build.Utilities
         /// <returns>The latest installed version for the given SDK</returns>
         public static string GetLatestSDKTargetPlatformVersion(string sdkIdentifier, string sdkVersion, string[] sdkRoots)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(sdkIdentifier, nameof(sdkIdentifier));
-            ErrorUtilities.VerifyThrowArgumentNull(sdkVersion, nameof(sdkVersion));
+            ErrorUtilities.VerifyThrowArgumentNull(sdkIdentifier);
+            ErrorUtilities.VerifyThrowArgumentNull(sdkVersion);
 
             var availablePlatformVersions = new List<Version>();
             IEnumerable<string> platformMonikerList = GetPlatformsForSDK(sdkIdentifier, new Version(sdkVersion), sdkRoots, null);
@@ -1554,7 +1554,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         private static TargetPlatformSDK GetMatchingPlatformSDK(string targetPlatformIdentifier, string targetPlatformVersion, string diskRoots, string multiPlatformDiskRoots, string registryRoot)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion, nameof(targetPlatformVersion));
+            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion);
 
             string[] sdkDiskRoots = null;
             if (!string.IsNullOrEmpty(diskRoots))
@@ -1583,7 +1583,7 @@ namespace Microsoft.Build.Utilities
         private static TargetPlatformSDK GetMatchingPlatformSDK(string targetPlatformIdentifier, Version targetPlatformVersion, string[] diskRoots, string[] multiPlatformDiskRoots, string registryRoot)
         {
             ErrorUtilities.VerifyThrowArgumentLength(targetPlatformIdentifier, nameof(targetPlatformIdentifier));
-            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion, nameof(targetPlatformVersion));
+            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion);
 
             IEnumerable<TargetPlatformSDK> targetPlatforms = RetrieveTargetPlatformList(diskRoots, multiPlatformDiskRoots, registryRoot);
 
@@ -1913,7 +1913,7 @@ namespace Microsoft.Build.Utilities
         {
             ErrorUtilities.VerifyThrowArgumentLength(targetFrameworkVersion, nameof(targetFrameworkVersion));
             ErrorUtilities.VerifyThrowArgumentLength(targetFrameworkIdentifier, nameof(targetFrameworkIdentifier));
-            ErrorUtilities.VerifyThrowArgumentNull(targetFrameworkProfile, nameof(targetFrameworkProfile));
+            ErrorUtilities.VerifyThrowArgumentNull(targetFrameworkProfile);
 
             Version frameworkVersion = ConvertTargetFrameworkVersionToVersion(targetFrameworkVersion);
             FrameworkNameVersioning targetFrameworkName = new FrameworkNameVersioning(targetFrameworkIdentifier, frameworkVersion, targetFrameworkProfile);
@@ -1933,7 +1933,7 @@ namespace Microsoft.Build.Utilities
         public static IList<string> GetPathToReferenceAssemblies(FrameworkNameVersioning frameworkName)
         {
             // Verify the framework class passed in is not null. Other than being null the class will ensure the framework moniker is correct
-            ErrorUtilities.VerifyThrowArgumentNull(frameworkName, nameof(frameworkName));
+            ErrorUtilities.VerifyThrowArgumentNull(frameworkName);
             IList<string> paths =
                 GetPathToReferenceAssemblies(
                     FrameworkLocationHelper.programFilesReferenceAssemblyLocation,
@@ -2213,7 +2213,7 @@ namespace Microsoft.Build.Utilities
             // Verify the root path is not null throw an ArgumentNullException if the given string parameter is null and ArgumentException if it has zero length.
             ErrorUtilities.VerifyThrowArgumentLength(targetFrameworkRootPath, nameof(targetFrameworkRootPath));
             // Verify the framework class passed in is not null. Other than being null the class will ensure it is consistent and the internal state is correct
-            ErrorUtilities.VerifyThrowArgumentNull(frameworkName, nameof(frameworkName));
+            ErrorUtilities.VerifyThrowArgumentNull(frameworkName);
 
             string referenceAssemblyCacheKey = GenerateReferenceAssemblyCacheKey(targetFrameworkRootPath, frameworkName);
             CreateReferenceAssemblyPathsCache();

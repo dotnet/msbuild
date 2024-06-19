@@ -47,7 +47,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <param name="sendPacket">A <see cref="Action{INodePacket}"/> to use when sending packets to the main node.</param>
         public OutOfProcNodeSdkResolverService(Action<INodePacket> sendPacket)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(sendPacket, nameof(sendPacket));
+            ErrorUtilities.VerifyThrowArgumentNull(sendPacket);
 
             SendPacket = sendPacket;
         }

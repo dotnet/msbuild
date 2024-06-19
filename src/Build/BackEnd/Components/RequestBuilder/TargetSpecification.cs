@@ -30,7 +30,7 @@ namespace Microsoft.Build.BackEnd
         internal TargetSpecification(string targetName, ElementLocation referenceLocation, TargetBuiltReason targetBuiltReason = TargetBuiltReason.None)
         {
             ErrorUtilities.VerifyThrowArgumentLength(targetName, nameof(targetName));
-            ErrorUtilities.VerifyThrowArgumentNull(referenceLocation, nameof(referenceLocation));
+            ErrorUtilities.VerifyThrowArgumentNull(referenceLocation);
 
             this._targetName = targetName;
             this._referenceLocation = referenceLocation;

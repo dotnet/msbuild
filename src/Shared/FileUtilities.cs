@@ -1125,7 +1125,7 @@ namespace Microsoft.Build.Shared
         /// <returns>relative path (can be the full path)</returns>
         internal static string MakeRelative(string basePath, string path)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(basePath, nameof(basePath));
+            ErrorUtilities.VerifyThrowArgumentNull(basePath);
             ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
 
             string fullBase = Path.GetFullPath(basePath);
@@ -1263,8 +1263,8 @@ namespace Microsoft.Build.Shared
         /// <returns>Combined path.</returns>
         internal static string CombinePaths(string root, params string[] paths)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(root, nameof(root));
-            ErrorUtilities.VerifyThrowArgumentNull(paths, nameof(paths));
+            ErrorUtilities.VerifyThrowArgumentNull(root);
+            ErrorUtilities.VerifyThrowArgumentNull(paths);
 
             return paths.Aggregate(root, Path.Combine);
         }

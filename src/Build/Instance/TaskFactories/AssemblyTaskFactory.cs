@@ -202,7 +202,7 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         public void CleanupTask(ITask task)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task, nameof(task));
+            ErrorUtilities.VerifyThrowArgumentNull(task);
 #if FEATURE_APPDOMAIN
             AppDomain appDomain;
             if (_tasksAndAppDomains.TryGetValue(task, out appDomain))
@@ -257,7 +257,7 @@ namespace Microsoft.Build.BackEnd
                 ElementLocation elementLocation,
                 string taskProjectFile)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loadInfo, nameof(loadInfo));
+            ErrorUtilities.VerifyThrowArgumentNull(loadInfo);
             VerifyThrowIdentityParametersValid(taskFactoryIdentityParameters, elementLocation, taskName, "Runtime", "Architecture");
 
             if (taskFactoryIdentityParameters != null)

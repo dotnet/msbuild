@@ -162,8 +162,8 @@ namespace Microsoft.Build.Execution
             ElementLocation msbuildArchitectureLocation)
         {
             ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
-            ErrorUtilities.VerifyThrowArgumentNull(condition, nameof(condition));
-            ErrorUtilities.VerifyThrowArgumentNull(continueOnError, nameof(continueOnError));
+            ErrorUtilities.VerifyThrowArgumentNull(condition);
+            ErrorUtilities.VerifyThrowArgumentNull(continueOnError);
 
             _name = name;
             _condition = condition;

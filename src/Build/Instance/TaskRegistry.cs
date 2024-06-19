@@ -1613,8 +1613,8 @@ namespace Microsoft.Build.Execution
                     where P : class, IProperty
                     where I : class, IItem
                 {
-                    ErrorUtilities.VerifyThrowArgumentNull(projectUsingTaskXml, nameof(projectUsingTaskXml));
-                    ErrorUtilities.VerifyThrowArgumentNull(expander, nameof(expander));
+                    ErrorUtilities.VerifyThrowArgumentNull(projectUsingTaskXml);
+                    ErrorUtilities.VerifyThrowArgumentNull(expander);
 
                     ProjectUsingTaskBodyElement taskElement = projectUsingTaskXml.TaskBody;
                     if (taskElement != null)

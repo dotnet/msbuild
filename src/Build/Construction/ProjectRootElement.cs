@@ -163,8 +163,8 @@ namespace Microsoft.Build.Construction
         internal ProjectRootElement(XmlReader xmlReader, ProjectRootElementCacheBase projectRootElementCache, bool isExplicitlyLoaded,
             bool preserveFormatting)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(xmlReader, nameof(xmlReader));
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache, nameof(projectRootElementCache));
+            ErrorUtilities.VerifyThrowArgumentNull(xmlReader);
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache);
 
             IsExplicitlyLoaded = isExplicitlyLoaded;
             ProjectRootElementCache = projectRootElementCache;
@@ -182,7 +182,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectRootElement(ProjectRootElementCacheBase projectRootElementCache, NewProjectFileOptions projectFileOptions)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache, nameof(projectRootElementCache));
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache);
 
             ProjectRootElementCache = projectRootElementCache;
             _directory = NativeMethodsShared.GetCurrentDirectory();
@@ -216,7 +216,7 @@ namespace Microsoft.Build.Construction
         {
             ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
             ErrorUtilities.VerifyThrowInternalRooted(path);
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache, nameof(projectRootElementCache));
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache);
             ProjectRootElementCache = projectRootElementCache;
 
             IncrementVersion();
@@ -238,8 +238,8 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         private ProjectRootElement(XmlDocumentWithLocation document, ProjectRootElementCacheBase projectRootElementCache)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(document, nameof(document));
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache, nameof(projectRootElementCache));
+            ErrorUtilities.VerifyThrowArgumentNull(document);
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache);
 
             ProjectRootElementCache = projectRootElementCache;
             _directory = NativeMethodsShared.GetCurrentDirectory();
@@ -744,7 +744,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public static ProjectRootElement Create(ProjectCollection projectCollection, NewProjectFileOptions projectFileOptions)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
 
             return Create(projectCollection.ProjectRootElementCache, projectFileOptions);
         }
@@ -783,7 +783,7 @@ namespace Microsoft.Build.Construction
         public static ProjectRootElement Create(string path, ProjectCollection projectCollection, NewProjectFileOptions newProjectFileOptions)
         {
             ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
 
             var projectRootElement = new ProjectRootElement(
                 projectCollection.ProjectRootElementCache,
@@ -820,7 +820,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public static ProjectRootElement Create(XmlReader xmlReader, ProjectCollection projectCollection, bool preserveFormatting)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
 
             return new ProjectRootElement(xmlReader, projectCollection.ProjectRootElementCache, true /*Explicitly loaded*/,
                 preserveFormatting);
@@ -854,7 +854,7 @@ namespace Microsoft.Build.Construction
         public static ProjectRootElement Open(string path, ProjectCollection projectCollection, bool? preserveFormatting)
         {
             ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
 
             path = FileUtilities.NormalizePath(path);
 
@@ -911,7 +911,7 @@ namespace Microsoft.Build.Construction
         public static ProjectRootElement TryOpen(string path, ProjectCollection projectCollection, bool? preserveFormatting)
         {
             ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
 
             path = FileUtilities.NormalizePath(path);
 
@@ -1847,7 +1847,7 @@ namespace Microsoft.Build.Construction
         /// <param name="project">The dirtied project.</param>
         internal void MarkProjectDirty(Project project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(project, nameof(project));
+            ErrorUtilities.VerifyThrowArgumentNull(project);
             ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             // Only bubble this event up if the cache knows about this PRE, which is equivalent to

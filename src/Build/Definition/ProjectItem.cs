@@ -127,11 +127,11 @@ namespace Microsoft.Build.Evaluation
                              List<ProjectItemDefinition> inheritedItemDefinitionsCloned)
         {
             ErrorUtilities.VerifyThrowInternalNull(project, nameof(project));
-            ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));
+            ErrorUtilities.VerifyThrowArgumentNull(xml);
 
             // Orcas accidentally allowed empty includes if they resulted from expansion: we preserve that bug
-            ErrorUtilities.VerifyThrowArgumentNull(evaluatedIncludeEscaped, nameof(evaluatedIncludeEscaped));
-            ErrorUtilities.VerifyThrowArgumentNull(evaluatedIncludeBeforeWildcardExpansionEscaped, nameof(evaluatedIncludeBeforeWildcardExpansionEscaped));
+            ErrorUtilities.VerifyThrowArgumentNull(evaluatedIncludeEscaped);
+            ErrorUtilities.VerifyThrowArgumentNull(evaluatedIncludeBeforeWildcardExpansionEscaped);
 
             _xml = xml;
             _project = project;

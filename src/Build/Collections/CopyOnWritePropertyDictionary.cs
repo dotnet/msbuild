@@ -336,7 +336,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Set(T projectProperty)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectProperty, nameof(projectProperty));
+            ErrorUtilities.VerifyThrowArgumentNull(projectProperty);
 
             _backing = _backing.SetItem(projectProperty.Key, projectProperty);
         }

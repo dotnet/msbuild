@@ -35,7 +35,7 @@ namespace Microsoft.Build.Construction
         internal ProjectExtensionsElement(XmlElement xmlElement, ProjectRootElement parent, ProjectRootElement project)
             : base(xmlElement, parent, project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
         }
 
         /// <summary>
@@ -161,7 +161,7 @@ namespace Microsoft.Build.Construction
         /// <inheritdoc/>
         public override void CopyFrom(ProjectElement element)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(element, nameof(element));
+            ErrorUtilities.VerifyThrowArgumentNull(element);
             ErrorUtilities.VerifyThrowArgument(GetType().IsEquivalentTo(element.GetType()), "CannotCopyFromElementOfThatType");
 
             if (this == element)
