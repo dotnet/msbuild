@@ -12,6 +12,7 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
@@ -597,7 +598,14 @@ namespace Microsoft.Build.Logging
         {
             if ((flags & BuildEventArgsFieldFlags.Message) != 0)
             {
-                WriteDeduplicatedString(e.RawMessage);
+                if (e is BuildCheckResultWarning)
+                {
+                    WriteDeduplicatedString(e.Message);
+                }
+                else
+                {
+                    WriteDeduplicatedString(e.RawMessage);
+                }
             }
 
             if ((flags & BuildEventArgsFieldFlags.BuildEventContext) != 0)
