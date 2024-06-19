@@ -2950,10 +2950,7 @@ namespace Microsoft.Build.Execution
             });
         }
 
-        /// <summary>
-        /// Enables BuildCheck.
-        /// </summary>
-        public void EnableBuildCheck()
+        internal void EnableBuildCheck()
         {
             _buildParameters ??= new BuildParameters();
 
