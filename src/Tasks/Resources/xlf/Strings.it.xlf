@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpened">
         <source>The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</source>
-        <target state="translated">Il file manifesto non esiste o non può essere letto. Assicurarsi che esista e che contenga contenuto pertinente.</target>
+        <target state="new">The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpenedWithException">
         <source>The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</source>
-        <target state="translated">Apertura del file manifesto non riuscita con eccezione: "{0}". Assicurarsi che esista e che contenga contenuto pertinente.</target>
+        <target state="new">The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppConfig.BindingRedirectMissingOldVersion">
@@ -133,32 +133,32 @@
       </trans-unit>
       <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
         <source>MSB3991: '{0}' is not set or empty. When {1} is false, make sure to set a non-empty value for '{0}'.</source>
-        <target state="translated">MSB3991: '{0}' non è impostato o è vuoto. Quando {1} è false, assicurarsi di impostare un valore non vuoto per '{0}'.</target>
+        <target state="translated">MSB3991: “{0}” non è impostato o è vuoto. Quando {1} è false, assicurarsi di impostare un valore non vuoto per "{0}".</target>
         <note>{StrBegin="MSB3991: "}</note>
       </trans-unit>
       <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullRootElementName">
         <source>MSB3992: '{0}' is not set. When {1} is true, make sure to set a value for '{0}'.</source>
-        <target state="translated">MSB3992: '{0}' non è impostato. Quando {1} è true, assicurarsi di impostare un valore per '{0}'.</target>
+        <target state="translated">MSB3992: "{0}" non impostato. Quando {1} è true, assicurarsi di impostare un valore per "{0}".</target>
         <note>{StrBegin="MSB3992: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled">
         <source>MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</source>
-        <target state="translated">MSB9903: PreferNativeArm64 richiede un manifesto dell'applicazione Win32 e si esclude a vicenda con NoWin32Manifest.</target>
+        <target state="new">MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</target>
         <note>{StrBegin="MSB9903: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
         <source>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</source>
-        <target state="translated">MSB9904: quando l'opzione PreferNativeArm64 è abilitata, assicurarsi che la piattaforma sia impostata su AnyCPU. Piattaforma corrente: {0}.</target>
+        <target state="new">MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</target>
         <note>{StrBegin="MSB9904: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled">
         <source>MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</source>
-        <target state="translated">MSB9902: le opzioni Prefer32Bit e PreferNativeArm64 si escludono a vicenda. Abilitarne solo una.</target>
+        <target state="new">MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</target>
         <note>{StrBegin="MSB9902: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.SpecifiedSeverityDoesNotExist">
         <source>MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</source>
-        <target state="translated">MSB9901: la gravità specificata non è rilevante: "{0}" per il messaggio: "{1}".</target>
+        <target state="new">MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</target>
         <note>{StrBegin="MSB9901: "}</note>
       </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
@@ -358,7 +358,7 @@
       </trans-unit>
       <trans-unit id="Delete.Error">
         <source>MSB3061: Unable to delete file "{0}". {1} {2}</source>
-        <target state="translated">MSB3061: non è possibile eliminare il file "{0}". {1} {2}</target>
+        <target state="new">MSB3061: Unable to delete file "{0}". {1} {2}</target>
         <note>{StrBegin="MSB3061: "}</note>
       </trans-unit>
       <trans-unit id="Delete.InvalidRetryCount">
@@ -373,7 +373,7 @@
       </trans-unit>
       <trans-unit id="Delete.Retrying">
         <source>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3} {4}</source>
-        <target state="translated">MSB3062: non è stato possibile eliminare il file "{0}". Inizio dei tentativi {1} in {2}ms. {3} {4}</target>
+        <target state="new">MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3} {4}</target>
         <note>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message, {4} is message from LockCheck.</note>
       </trans-unit>
       <trans-unit id="Delete.SkippingNonexistentFile">
@@ -1520,7 +1520,7 @@
       </trans-unit>
       <trans-unit id="Move.Error">
         <source>MSB3677: Unable to move file "{0}" to "{1}". {2} {3}</source>
-        <target state="translated">MSB3677: non è possibile spostare il file "{0}" in "{1}". {2} {3}</target>
+        <target state="new">MSB3677: Unable to move file "{0}" to "{1}". {2} {3}</target>
         <note>{StrBegin="MSB3677: "}</note>
       </trans-unit>
       <trans-unit id="Move.ExactlyOneTypeOfDestination">
@@ -1596,17 +1596,17 @@
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.AssemblyNodeIsMissed">
         <source>The assembly element is missing from the application manifest.</source>
-        <target state="translated">Manca l'elemento dell'assembly dal manifesto dell'applicazione.</target>
+        <target state="new">The assembly element is missing from the application manifest.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.InvalidValueInSupportedArchitectures">
         <source>MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'.</source>
-        <target state="translated">MSB4300: il valore specificato "{0}" per l'elemento supportedArchitectures non è valido. Rimuoverlo dal manifesto o impostarlo su "amd64 arm64".</target>
+        <target state="new">MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'.</target>
         <note>{StrBegin="MSB4300: "}</note>
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound">
         <source>The application manifest file cannot be found. Please make sure it exists.</source>
-        <target state="translated">Non è possibile trovare il file manifesto dell'applicazione. Assicurarsi che esista.</target>
+        <target state="new">The application manifest file cannot be found. Please make sure it exists.</target>
         <note />
       </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
@@ -2586,7 +2586,7 @@
       </trans-unit>
       <trans-unit id="Touch.CannotMakeFileWritable">
         <source>MSB3372: The file "{0}" cannot be made writable. {1} {2}</source>
-        <target state="translated">MSB3372: non è possibile rendere accessibile in scrittura il file "{0}". {1} {2}</target>
+        <target state="new">MSB3372: The file "{0}" cannot be made writable. {1} {2}</target>
         <note>{StrBegin="MSB3372: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotRestoreAttributes">
@@ -2596,7 +2596,7 @@
       </trans-unit>
       <trans-unit id="Touch.CannotTouch">
         <source>MSB3374: The last access/last write time on file "{0}" cannot be set. {1} {2}</source>
-        <target state="translated">MSB3374: non è possibile impostare l'ora dell'ultimo accesso o dell'ultima scrittura per il file "{0}". {1} {2}</target>
+        <target state="new">MSB3374: The last access/last write time on file "{0}" cannot be set. {1} {2}</target>
         <note>{StrBegin="MSB3374: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CreatingFile">
@@ -2691,7 +2691,7 @@
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotMakeFileWriteable">
         <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</source>
-        <target state="translated">MSB3935: non è  possibile decomprimere il file "{0}" perché il file di destinazione "{1}" è di sola lettura e non è possibile impostarlo come scrivibile. {2} {3}</target>
+        <target state="new">MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</target>
         <note>{StrBegin="MSB3935: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotOpenFile">
@@ -2776,7 +2776,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
         <source>MSB3491: Could not write lines to file "{0}". {1} {2}</source>
-        <target state="translated">MSB3491: non è possibile scrivere righe nel file "{0}". {1} {2}</target>
+        <target state="new">MSB3491: Could not write lines to file "{0}". {1} {2}</target>
         <note>{StrBegin="MSB3491: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.InvalidTargetFrameworkMoniker">
@@ -3046,7 +3046,7 @@
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotWriteOutput">
         <source>MSB3713: The file "{0}" could not be created. {1} {2}</source>
-        <target state="translated">MSB3713: non è possibile creare il file "{0}". {1} {2}</target>
+        <target state="new">MSB3713: The file "{0}" could not be created. {1} {2}</target>
         <note>{StrBegin="MSB3713: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.SkippedNumberedParameter">
@@ -3496,7 +3496,7 @@
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFailed">
         <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2} {3}</source>
-        <target state="translated">MSB3943: non è possibile comprimere la directory "{0}" nel file "{1}". {2} {3}</target>
+        <target state="new">MSB3943: Failed to zip directory "{0}" to file "{1}".  {2} {3}</target>
         <note>{StrBegin="MSB3943: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFileExists">
