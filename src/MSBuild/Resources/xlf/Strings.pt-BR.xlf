@@ -120,8 +120,9 @@
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
-                     Faz com que o MSBuild relate acessos a arquivos para qualquer plug-in
-                     de cache de projeto configurado.
+                     Faz com que o MSBuild relate acessos a arquivos a qualquer
+ configurado
+                     plug-ins de cache do projeto.
 
                      Este sinalizador é experimental e pode não funcionar conforme o esperado.
     </target>
@@ -1712,27 +1713,27 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="TestSummary_BannerAndTotal">
         <source>Test summary: total: {0}</source>
-        <target state="translated">Resumo do teste: total: {0}</target>
+        <target state="new">Test summary: total: {0}</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="TestSummary_Duration">
         <source>duration: {0}s</source>
-        <target state="translated">duração: {0}s</target>
+        <target state="new">duration: {0}s</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="TestSummary_Failed">
         <source>failed: {0}</source>
-        <target state="translated">falhou: {0}</target>
+        <target state="new">failed: {0}</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="TestSummary_Skipped">
         <source>skipped: {0}</source>
-        <target state="translated">ignorado: {0}</target>
+        <target state="new">skipped: {0}</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="TestSummary_Succeeded">
         <source>succeeded: {0}</source>
-        <target state="translated">bem-sucedido: {0}</target>
+        <target state="new">succeeded: {0}</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
