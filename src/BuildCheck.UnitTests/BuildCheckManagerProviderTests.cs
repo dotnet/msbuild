@@ -33,8 +33,8 @@ public class BuildCheckManagerTests
     }
 
     [Theory]
-    [InlineData(true, new[] { "Custom analyzer rule: Rule1 has been registered successfully.", "Custom analyzer rule: Rule2 has been registered successfully." })]
-    [InlineData(false, new[] { "Failed to register the custom analyzer: DummyPath." })]
+    [InlineData(true, new[] { "Custom analyzer rule: 'Rule1' has been registered successfully.", "Custom analyzer rule: 'Rule2' has been registered successfully." })]
+    [InlineData(false, new[] { "Failed to register the custom analyzer: 'DummyPath'." })]
     public void ProcessAnalyzerAcquisitionTest(bool isAnalyzerRuleExist, string[] expectedMessages)
     {
         MockBuildCheckAcquisition(isAnalyzerRuleExist);

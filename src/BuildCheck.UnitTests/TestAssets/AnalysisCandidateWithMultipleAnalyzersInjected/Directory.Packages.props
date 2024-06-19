@@ -1,7 +1,0 @@
-<Project>
-  <ItemGroup>
-    <PackageVersion Include="CustomAnalyzer" Version="1.0.0" />
-    <PackageVersion Include="CustomAnalyzer2" Version="1.0.0" />
-    <PackageVersion Include="InvalidCustomAnalyzer" Version="1.0.0" />
-  </ItemGroup>
-</Project>
