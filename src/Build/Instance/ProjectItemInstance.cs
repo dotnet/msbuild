@@ -1406,7 +1406,7 @@ namespace Microsoft.Build.Execution
             /// </param>
             public void CopyMetadataTo(ITaskItem destinationItem, bool addOriginalItemSpec)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(destinationItem, nameof(destinationItem));
+                ErrorUtilities.VerifyThrowArgumentNull(destinationItem);
 
                 string originalItemSpec = null;
                 if (addOriginalItemSpec)

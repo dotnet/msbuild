@@ -215,7 +215,7 @@ namespace Microsoft.Build.Exceptions
             string helpKeyword,
             Exception innerException) : base(message, innerException)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
+            ErrorUtilities.VerifyThrowArgumentNull(projectFile);
             ErrorUtilities.VerifyThrowArgumentLength(message, nameof(message));
 
             // Try to helpfully provide a full path if possible, but do so robustly.

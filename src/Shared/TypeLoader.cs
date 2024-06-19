@@ -307,7 +307,7 @@ namespace Microsoft.Build.Shared
             internal AssemblyInfoToLoadedTypes(Func<Type, object, bool> typeFilter, AssemblyLoadInfo loadInfo)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(typeFilter, "typefilter");
-                ErrorUtilities.VerifyThrowArgumentNull(loadInfo, nameof(loadInfo));
+                ErrorUtilities.VerifyThrowArgumentNull(loadInfo);
 
                 _isDesiredType = typeFilter;
                 _assemblyLoadInfo = loadInfo;
@@ -321,7 +321,7 @@ namespace Microsoft.Build.Shared
             /// </summary>
             internal LoadedType GetLoadedTypeByTypeName(string typeName, bool useTaskHost)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(typeName, nameof(typeName));
+                ErrorUtilities.VerifyThrowArgumentNull(typeName);
 
                 if (useTaskHost && _assemblyLoadInfo.AssemblyFile is not null)
                 {

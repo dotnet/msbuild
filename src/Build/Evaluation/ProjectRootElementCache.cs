@@ -515,7 +515,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal override void DiscardAnyWeakReference(ProjectRootElement projectRootElement)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, nameof(projectRootElement));
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement);
 
             // A PRE may be unnamed if it was only used in memory.
             if (projectRootElement.FullPath != null)

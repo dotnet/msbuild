@@ -39,7 +39,7 @@ namespace Microsoft.Build.Construction
         internal ProjectPropertyElement(XmlElementWithLocation xmlElement, ProjectPropertyGroupElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(Value));
+                ErrorUtilities.VerifyThrowArgumentNull(value);
                 if (Link != null)
                 {
                     PropertyLink.Value = value;

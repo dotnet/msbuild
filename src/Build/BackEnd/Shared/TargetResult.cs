@@ -65,8 +65,8 @@ namespace Microsoft.Build.Execution
         /// </param>
         internal TargetResult(TaskItem[] items, WorkUnitResult result, BuildEventContext originalBuildEventContext = null)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(items, nameof(items));
-            ErrorUtilities.VerifyThrowArgumentNull(result, nameof(result));
+            ErrorUtilities.VerifyThrowArgumentNull(items);
+            ErrorUtilities.VerifyThrowArgumentNull(result);
             _items = items;
             _result = result;
             _originalBuildEventContext = originalBuildEventContext;

@@ -196,8 +196,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="entry">The entry to build.</param>
         public void BuildRequest(NodeLoggingContext loggingContext, BuildRequestEntry entry)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loggingContext, nameof(loggingContext));
-            ErrorUtilities.VerifyThrowArgumentNull(entry, nameof(entry));
+            ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
+            ErrorUtilities.VerifyThrowArgumentNull(entry);
             ErrorUtilities.VerifyThrow(_componentHost != null, "Host not set.");
             ErrorUtilities.VerifyThrow(_targetBuilder == null, "targetBuilder not null");
             ErrorUtilities.VerifyThrow(_nodeLoggingContext == null, "nodeLoggingContext not null");
@@ -332,10 +332,10 @@ namespace Microsoft.Build.BackEnd
         public async Task<BuildResult[]> BuildProjects(string[] projectFiles, PropertyDictionary<ProjectPropertyInstance>[] properties, string[] toolsVersions, string[] targets, bool waitForResults, bool skipNonexistentTargets = false)
         {
             VerifyIsNotZombie();
-            ErrorUtilities.VerifyThrowArgumentNull(projectFiles, nameof(projectFiles));
-            ErrorUtilities.VerifyThrowArgumentNull(properties, nameof(properties));
-            ErrorUtilities.VerifyThrowArgumentNull(targets, nameof(targets));
-            ErrorUtilities.VerifyThrowArgumentNull(toolsVersions, nameof(toolsVersions));
+            ErrorUtilities.VerifyThrowArgumentNull(projectFiles);
+            ErrorUtilities.VerifyThrowArgumentNull(properties);
+            ErrorUtilities.VerifyThrowArgumentNull(targets);
+            ErrorUtilities.VerifyThrowArgumentNull(toolsVersions);
             ErrorUtilities.VerifyThrow(_componentHost != null, "No host object set");
             ErrorUtilities.VerifyThrow(projectFiles.Length == properties.Length, "Properties and project counts not the same");
             ErrorUtilities.VerifyThrow(projectFiles.Length == toolsVersions.Length, "Tools versions and project counts not the same");
@@ -550,7 +550,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
+            ErrorUtilities.VerifyThrowArgumentNull(host);
             ErrorUtilities.VerifyThrow(_componentHost == null, "RequestBuilder already initialized.");
             _componentHost = host;
         }
@@ -1105,7 +1105,7 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrow(_targetBuilder != null, "Target builder is null");
 
-            // We consider this the entrypoint for the project build for purposes of BuildCheck processing 
+            // We consider this the entrypoint for the project build for purposes of BuildCheck processing
             bool isRestoring = _requestEntry.RequestConfiguration.GlobalProperties[MSBuildConstants.MSBuildIsRestoring] is not null;
 
             var buildCheckManager = isRestoring
@@ -1155,7 +1155,7 @@ namespace Microsoft.Build.BackEnd
                     _requestEntry.Request.BuildEventContext);
             }
 
-            
+
             try
             {
                 HandleProjectStarted(buildCheckManager);
