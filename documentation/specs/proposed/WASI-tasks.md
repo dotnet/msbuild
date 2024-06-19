@@ -1,5 +1,8 @@
 # WASI tasks in MSBuild (WasiBuild)
-Abstract
+We want to make it easier to work with the WebAssembly ecosystem in MSBuild.
+MSBuild Tasks are the point where this makes sense. 
+
+*...*
 
 ## Terminology and context
 -  **WebAssembly (abbreviated Wasm)**
@@ -10,10 +13,10 @@ Abstract
 
 The WebAssembly standard defines an intermediate language for a WASM runtime that can be implemented in a browser or as a standalone program. 
 We can compile programs to this intermediate language and run them on any platform with this interpreter. 
-- Note that .NET usually still runs as the runtime which JITs the Common Intermediate Language (CIL) as usual.
+- Note that .NET programs usually still run as the runtime bundled with CIL of the program.
 
 ### Current state
-We can use the Exec task in this manner (.NET example):
+We can use the Exec task in this manner to run an executable .wasm file (.NET example):
 
 1. install [wasi-sdk](https://github.com/WebAssembly/wasi-sdk), [wasmtime](https://wasmtime.dev)
 1. `dotnet add workflow wasi-experimental`
@@ -40,7 +43,7 @@ We can use the Exec task in this manner (.NET example):
 Rust example:
 1. install wasmtime
 2. compile Rust to .wasm (won't elaborate here, GPT can explain without problems)
-3. .csproj
+3. .proj
 ```xml
   <Target Name="RunWasmtime" AfterTargets="Build">
     <Exec Command="wasmtime path_to_compiled_rust_program.wasm" />
@@ -49,16 +52,21 @@ Rust example:
 4. dotnet build
 - In principle it's possible to compile to .wasm with a few Exec tasks too.
 
-### Utility
+We can make this more user friendly.
+
+### Utility for MSBuild
 - WASI tasks are sandboxed
 - Easier interoperability outside of C#
 - WASI executables are packaged with no outside dependencies 
+- Users from other languages
 
-## Goals
-TBD
+## Goals for the WASI task feature
+1. specify interface for writing tasks in other languages
+2. running Wasm 
+3. Rust demo task
 
 
-### Steps
+### Steps (???)
 1. figure out the best options for hosting a WASI sandbox from .NET (probably p/invoke into some Rust thing)
 2. write a TaskHost that uses it
 3. write a WASM interface spec to map to the task model
@@ -66,32 +74,70 @@ TBD
 5. demos
 
 ### Prototype features
-TBD
-
-[ ] WASM task 
+- [ ] WasmExec class extending ToolTask taking a .wasm file as a parameter - just runs the file with wasmtime
+- [ ] WasmTask class extending ToolTask taking a .wasm file as a parameter
+    - [ ] Specification for what should this .wasm file export and how it will be ran
+    - [ ] Rust example
+    - [ ] Possibly needs a TaskHost TBD
 
 ### Advanced features
-TBD
+- [ ] RunWasmCode task which takes a .wasm file which exports a function and parameterized to which function to run
+- [ ] Wasm code inside XML 
+    - [ ] WasmCodeFactory 
+- [ ] C# code using wasm exported functions inside xml
+- [ ] Wasm-supported language code inside XML (possibly too ambitious/flaky) [open question](#open-questions-and-considerations)
+    - would need to include the tooling for getting wasm out of the languages which is under heavy development 
 
-[ ] Wasm code inside XML 
-<!-- [] Wasm-supported language code inside XML -->
+
 
 ## Design
-### Choosing WASI runtime
+### diagram
+
+![diagram](wasi-diagram.svg)
+
+### Choosing WASI runtime [(open questions)](#open-questions-and-considerations)
 https://wasi.dev/ mentions several possible runtimes: Wasmtime, WAMR, WasmEdge, wazero, Wasmer, wasmi, and wasm3.
-An important criterion is popularity/activity in development as the WASM standard is new and needs a lot of developers to implement it.
+An important criterion is popularity/activity in development as the WASM standard is evolving and needs a lot of developers to implement it.
 This leads to considering [Wasmtime](https://wasmtime.dev/) or [Wasmer](https://wasmer.io/).
-Interaction with C# is especially important for us so we will use **Wasmtime** because the integration via a NuGet package is more up to date and there is more active development in tooling. 
+Interaction with C# is especially important for us so we will use **Wasmtime** because the integration via a NuGet package is more up to date and there is more active development in tooling and other dotnet projects use it. 
 
 ### Testing
-E2E tests - building projects in different languages most important
-Integration tests for logging
-mirror MSBuild\src\Build.UnitTests\BackEnd\TaskHost_Tests.cs
+- **TBD**
+- E2E tests - building projects in different languages most important
+
+<!-- Integration tests for logging -->
+<!-- mirror MSBuild\src\Build.UnitTests\BackEnd\TaskHost_Tests.cs --> 
 
 ## User Experience
-TBD
+API should be clear and the Rust task provide an example of how to implement it.
+Then the user adds the task to their .proj file and it runs and logs as if it were a C# task.
 
 ## Development remarks (in-progress)
+
+### TODO for this doc
+- create in depth explanations for Wasm/WASI and how its concepts map to MSBuild concepts
+- discuss with people who understand MSBuild internals, WASI and dotnet interaction, users of MSBuild
+
+### Open questions and considerations 
+- **implementing WASI api on our own like [wasm in vscode](https://github.com/microsoft/vscode-wasm)?**
+    - security👍 we don't have control over external runtime
+    - customizable👍
+    - hard to maintain👎, wasi is constantly changing
+    - lot of work 👎
+
+
+- **Interacting with the tooling for creating .wasi files**
+    - hard, unstable
+    - separate project?
+    - out of scope?
+    - if yes - inclusion in msbuild? how to handle missing?
+
+- **bundling wasm runtime with MSBuild?**
+    - compatibility👍
+    - ease of use 👍
+    - size👎
+    - maintenance👎
+    - if no how to handle missing?
 
 #### Related issues making other environments for running tasks:
 https://github.com/dotnet/msbuild/issues/711
@@ -100,7 +146,7 @@ https://github.com/dotnet/msbuild/issues/7257
 
 ### Requirements gathering
 What are the needs that WASI tasks would address?
-WASI task host?
+WASI task host? security?
 
 
 ### Related projects
@@ -112,45 +158,25 @@ WASI task host?
 [wasmtime-dotnet](https://github.com/bytecodealliance/wasmtime-dotnet)
 
 [dotnet-wasi-sdk](https://github.com/dotnet/dotnet-wasi-sdk) - compile dotnet to Wasm - likely stale
-
+- copy their properties as those would be similar
 
 [wasm in dotnet runtime](https://github.com/dotnet/runtime/tree/main/src/mono/wasm)
 https://github.com/dotnet/runtime/discussions/98538#discussioncomment-8499105
+https://github.com/dotnet/runtime/issues/65895#issuecomment-1511265657
 
-[componentize-dotnet](https://github.com/bytecodealliance/componentize-dotnet) nuget package to make Wasi bundle from c#, active recently
+[componentize-dotnet](https://github.com/bytecodealliance/componentize-dotnet) nuget package to make Wasi bundle from c#, released a week ago
 
 ### Random
-What to put in scope? 
-supporting WASM-compatible-lang -> WASM seems super hard - every workflow is changing constantly
-- maybe do it somehow extensibly so they can be plug in libraries?
-
-UsingTask runtime: CLR2, CLR4, CurrentRuntime, \*, **WASI** 🤔
-
 System.Runtime.InteropServices
 
 windows/linux/mac all seem like they will have some specifics
 
 threadsafety?
 
-https://learn.microsoft.com/en-us/visualstudio/msbuild/configure-tasks?view=vs-2022
-- configuring tasks to run outside the env of the rest of the project
+<!-- https://learn.microsoft.com/en-us/visualstudio/msbuild/configure-tasks?view=vs-2022 -->
+<!-- - configuring tasks to run outside the env of the rest of the project, probably not relevant because wasi is too specific-->
 
 
-would implementing this mean that msbuild is bundled with a wasi runtime (wasmtime)?
+named Conditions in xml to test if wasmtime is present?
 
 [documentation/wiki/Nodes-Orchestration.md](documentation/wiki/Nodes-Orchestration.md)
-
-https://github.com/dotnet/msbuild/blob/main/documentation/specs/task-isolation-and-dependencies.md
-- Wasi tasks might help?
-
-
-
-named Conditions in xml to test if wasmtime is present
-
-
-
-## TODO
-
-make a diagram
-
-create explanations how Wasm/WASI concepts map to MSBuild concepts
