@@ -29,7 +29,7 @@ public static class BuildCheckReplayModeConnector
         BuildManager buildManager,
         IEventSource replayEventSource)
     {
-        buildManager.EnableBuildCheckForBinaryLogReplay();
+        buildManager.EnableBuildCheck();
 
         var buildCheckManagerProvider = ((IBuildComponentHost)buildManager)
             .GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider;

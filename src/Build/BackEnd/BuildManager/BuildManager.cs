@@ -2951,12 +2951,14 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Enables BuildCheck for binary log replay.
+        /// Enables BuildCheck.
         /// </summary>
-        public void EnableBuildCheckForBinaryLogReplay() => _buildParameters = new BuildParameters
+        public void EnableBuildCheck()
         {
-            IsBuildCheckEnabled = true,
-        };
+            _buildParameters ??= new BuildParameters();
+
+            _buildParameters.IsBuildCheckEnabled = true;
+        }
 
         /// <summary>
         /// Creates a logging service around the specified set of loggers.
