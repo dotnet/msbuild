@@ -11,6 +11,9 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 
+/// <summary>
+/// Interface for dispatching <see cref="BuildEventContext"/>.
+/// </summary>
 internal interface IAnalysisContext
 {
     BuildEventContext BuildEventContext { get; }

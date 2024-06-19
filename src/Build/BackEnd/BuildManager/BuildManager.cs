@@ -2950,7 +2950,10 @@ namespace Microsoft.Build.Execution
             });
         }
 
-        public void EnableBuildCheck() => _buildParameters = new BuildParameters
+        /// <summary>
+        /// Enables BuildCheck for binary log replay.
+        /// </summary>
+        public void EnableBuildCheckForBinaryLogReplay() => _buildParameters = new BuildParameters
         {
             IsBuildCheckEnabled = true,
         };

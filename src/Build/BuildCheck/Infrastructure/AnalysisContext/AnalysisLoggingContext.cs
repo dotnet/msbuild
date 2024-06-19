@@ -12,6 +12,9 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 
+/// <summary>
+/// <see cref="IAnalysisContext"/> that uses <see cref="LoggingService"/> to dispatch.
+/// </summary>
 internal class AnalysisLoggingContext : IAnalysisContext
 {
     private readonly ILoggingService _loggingService;
