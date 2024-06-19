@@ -63,8 +63,10 @@ public class EndToEndTests : IDisposable
     [Theory]
     [InlineData(true, true, "warning")]
     [InlineData(true, true, "error")]
+    [InlineData(true, true, "info")]
     [InlineData(false, true, "warning")]
     [InlineData(false, true, "error")]
+    [InlineData(false, true, "info")]
     [InlineData(false, false, "warning")]
     public void SampleAnalyzerIntegrationTest_ReplayBinaryLogOfAnalyzedBuild(bool buildInOutOfProcessNode, bool analysisRequested, string BC0101Severity)
     {
@@ -91,10 +93,12 @@ public class EndToEndTests : IDisposable
         if (analysisRequested)
         {
             output.ShouldContain("BC0101");
+            output.ShouldContain("BC0102");
         }
         else
         {
             output.ShouldNotContain("BC0101");
+            output.ShouldNotContain("BC0102");
         }
     }
 
