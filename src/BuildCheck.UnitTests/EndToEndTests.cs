@@ -61,12 +61,14 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
-    [InlineData(true, true)]
-    [InlineData(false, true)]
-    [InlineData(false, false)]
-    public void SampleAnalyzerIntegrationTest_ReplayBinaryLogOfAnalyzedBuild(bool buildInOutOfProcessNode, bool analysisRequested)
+    [InlineData(true, true, "warning")]
+    [InlineData(true, true, "error")]
+    [InlineData(false, true, "warning")]
+    [InlineData(false, true, "error")]
+    [InlineData(false, false, "warning")]
+    public void SampleAnalyzerIntegrationTest_ReplayBinaryLogOfAnalyzedBuild(bool buildInOutOfProcessNode, bool analysisRequested, string BC0101Severity)
     {
-        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile);
+        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile, BC0101Severity);
 
         var projectDirectory = Path.GetDirectoryName(projectFile.Path);
         string logFile = _env.ExpectFile(".binlog").Path;
@@ -96,7 +98,10 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    private void PrepareSampleProjectsAndConfig(bool buildInOutOfProcessNode, out TransientTestFile projectFile)
+    private void PrepareSampleProjectsAndConfig(
+        bool buildInOutOfProcessNode,
+        out TransientTestFile projectFile,
+        string BC0101Severity = "warning")
     {
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
         TransientTestFile testFile = _env.CreateFile(workFolder, "somefile");
@@ -152,12 +157,12 @@ public class EndToEndTests : IDisposable
         TransientTestFile projectFile2 = _env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
 
         TransientTestFile config = _env.CreateFile(workFolder, ".editorconfig",
-            """
+            $"""
             root=true
 
             [*.csproj]
             build_check.BC0101.IsEnabled=true
-            build_check.BC0101.Severity=warning
+            build_check.BC0101.Severity={BC0101Severity}
 
             build_check.BC0102.IsEnabled=true
             build_check.BC0102.Severity=warning
