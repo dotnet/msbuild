@@ -168,7 +168,8 @@ namespace Microsoft.Build.Shared
 
             var cultures = s_cultureInfoGetCultureMethod.Invoke(null, [allCulturesEnumValue]) as CultureInfo[];
 
-            FrameworkErrorUtilities.VerifyThrowInternalNull(cultures, "CultureInfo.GetCultures should work if all reflection checks pass");
+            // CultureInfo.GetCultures should work if all reflection checks pass
+            FrameworkErrorUtilities.VerifyThrowInternalNull(cultures);
 
             return cultures;
         }
