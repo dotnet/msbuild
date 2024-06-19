@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="LockCheck.FileLocked">
         <source>The file is locked by: "{0}"</source>
-        <target state="translated">"{0}" блокирует этот файл</target>
+        <target state="new">The file is locked by: "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">
