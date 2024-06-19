@@ -216,7 +216,7 @@ namespace Microsoft.Build.Exceptions
             Exception innerException) : base(message, innerException)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectFile);
-            ErrorUtilities.VerifyThrowArgumentLength(message, nameof(message));
+            ErrorUtilities.VerifyThrowArgumentLength(message);
 
             // Try to helpfully provide a full path if possible, but do so robustly.
             // This exception might be because the path was invalid!

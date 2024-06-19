@@ -214,7 +214,7 @@ namespace Microsoft.Build.Construction
                 ProjectRootElementCacheBase projectRootElementCache,
                 bool preserveFormatting)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
+            ErrorUtilities.VerifyThrowArgumentLength(path);
             ErrorUtilities.VerifyThrowInternalRooted(path);
             ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache);
             ProjectRootElementCache = projectRootElementCache;
@@ -397,7 +397,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, nameof(value));
+                ErrorUtilities.VerifyThrowArgumentLength(value);
                 if (Link != null)
                 {
                     RootLink.FullPath = value;
@@ -782,7 +782,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public static ProjectRootElement Create(string path, ProjectCollection projectCollection, NewProjectFileOptions newProjectFileOptions)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
+            ErrorUtilities.VerifyThrowArgumentLength(path);
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
 
             var projectRootElement = new ProjectRootElement(
@@ -853,7 +853,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public static ProjectRootElement Open(string path, ProjectCollection projectCollection, bool? preserveFormatting)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
+            ErrorUtilities.VerifyThrowArgumentLength(path);
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
 
             path = FileUtilities.NormalizePath(path);
@@ -873,7 +873,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public static ProjectRootElement TryOpen(string path)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
+            ErrorUtilities.VerifyThrowArgumentLength(path);
 
             return TryOpen(path, ProjectCollection.GlobalProjectCollection);
         }
@@ -910,7 +910,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public static ProjectRootElement TryOpen(string path, ProjectCollection projectCollection, bool? preserveFormatting)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
+            ErrorUtilities.VerifyThrowArgumentLength(path);
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
 
             path = FileUtilities.NormalizePath(path);
@@ -927,7 +927,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectImportElement AddImport(string project)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(project, nameof(project));
+            ErrorUtilities.VerifyThrowArgumentLength(project);
 
             ProjectImportGroupElement importGroupToAddTo =
                 ImportGroupsReversed.FirstOrDefault(importGroup => importGroup.Condition.Length <= 0);
@@ -984,8 +984,8 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public ProjectItemElement AddItem(string itemType, string include, IEnumerable<KeyValuePair<string, string>> metadata)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(itemType, nameof(itemType));
-            ErrorUtilities.VerifyThrowArgumentLength(include, nameof(include));
+            ErrorUtilities.VerifyThrowArgumentLength(itemType);
+            ErrorUtilities.VerifyThrowArgumentLength(include);
 
             ProjectItemGroupElement itemGroupToAddTo = null;
 
@@ -1061,7 +1061,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectItemDefinitionElement AddItemDefinition(string itemType)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(itemType, nameof(itemType));
+            ErrorUtilities.VerifyThrowArgumentLength(itemType);
 
             ProjectItemDefinitionGroupElement itemDefinitionGroupToAddTo = null;
 

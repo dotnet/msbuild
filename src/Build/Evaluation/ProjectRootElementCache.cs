@@ -395,7 +395,7 @@ namespace Microsoft.Build.Evaluation
         {
             lock (_locker)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(oldFullPath, nameof(oldFullPath));
+                ErrorUtilities.VerifyThrowArgumentLength(oldFullPath);
                 RenameEntryInternal(oldFullPath, projectRootElement);
             }
         }

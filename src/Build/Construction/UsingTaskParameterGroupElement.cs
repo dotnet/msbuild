@@ -77,7 +77,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectUsingTaskParameterElement AddParameter(string name, string output, string required, string parameterType)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
 
             ProjectUsingTaskParameterElement newParameter = ContainingProject.CreateUsingTaskParameterElement(name, output, required, parameterType);
             AppendChild(newParameter);

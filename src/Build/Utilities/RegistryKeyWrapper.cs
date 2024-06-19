@@ -160,7 +160,7 @@ namespace Microsoft.Build.Internal
         /// <returns></returns>
         public virtual RegistryKeyWrapper OpenSubKey(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
 
             RegistryKeyWrapper wrapper = this;
             string[] keyNames = name.Split(MSBuildConstants.BackslashChar, StringSplitOptions.RemoveEmptyEntries);

@@ -269,7 +269,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
+                ErrorUtilities.VerifyThrowArgumentLength(taskName);
                 _taskName = taskName;
 
                 string assemblyName = loadInfo.AssemblyName ?? Path.GetFileName(loadInfo.AssemblyFile);

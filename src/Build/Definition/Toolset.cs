@@ -270,8 +270,8 @@ namespace Microsoft.Build.Evaluation
         /// <param name="defaultOverrideToolsVersion">ToolsVersion to use as the default ToolsVersion for this version of MSBuild.</param>
         internal Toolset(string toolsVersion, string toolsPath, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, string msbuildOverrideTasksPath, string defaultOverrideToolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, nameof(toolsVersion));
-            ErrorUtilities.VerifyThrowArgumentLength(toolsPath, nameof(toolsPath));
+            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion);
+            ErrorUtilities.VerifyThrowArgumentLength(toolsPath);
             ErrorUtilities.VerifyThrowArgumentNull(environmentProperties);
             ErrorUtilities.VerifyThrowArgumentNull(globalProperties);
 

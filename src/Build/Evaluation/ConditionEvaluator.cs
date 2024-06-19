@@ -228,7 +228,7 @@ namespace Microsoft.Build.Evaluation
         {
             ErrorUtilities.VerifyThrowArgumentNull(condition);
             ErrorUtilities.VerifyThrowArgumentNull(expander);
-            ErrorUtilities.VerifyThrowArgumentLength(evaluationDirectory, nameof(evaluationDirectory));
+            ErrorUtilities.VerifyThrowArgumentLength(evaluationDirectory);
 
             // An empty condition is equivalent to a "true" condition.
             if (condition.Length == 0)

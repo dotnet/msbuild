@@ -362,7 +362,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal static List<I> CreateItemsFromInclude(string rootDirectory, ProjectItemElement itemElement, IItemFactory<I, I> itemFactory, string unevaluatedIncludeEscaped, Expander<P, I> expander, ILoggingService loggingService, string buildEventFileInfoFullPath, BuildEventContext buildEventContext)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(unevaluatedIncludeEscaped, nameof(unevaluatedIncludeEscaped));
+            ErrorUtilities.VerifyThrowArgumentLength(unevaluatedIncludeEscaped);
 
             List<I> items = new List<I>();
             itemFactory.ItemElement = itemElement;

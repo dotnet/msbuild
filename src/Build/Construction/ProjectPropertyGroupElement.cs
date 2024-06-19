@@ -58,7 +58,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectPropertyElement AddProperty(string name, string unevaluatedValue)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
             ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue);
 
             ProjectPropertyElement newProperty = ContainingProject.CreatePropertyElement(name);
@@ -75,7 +75,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectPropertyElement SetProperty(string name, string unevaluatedValue)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
             ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue);
 
             foreach (ProjectPropertyElement property in Properties)

@@ -828,8 +828,8 @@ namespace Microsoft.Build.Execution
                               bool immutable,
                               string definingFileEscaped) // the actual project file (or import) that defines this item.
             {
-                ErrorUtilities.VerifyThrowArgumentLength(includeEscaped, nameof(includeEscaped));
-                ErrorUtilities.VerifyThrowArgumentLength(includeBeforeWildcardExpansionEscaped, nameof(includeBeforeWildcardExpansionEscaped));
+                ErrorUtilities.VerifyThrowArgumentLength(includeEscaped);
+                ErrorUtilities.VerifyThrowArgumentLength(includeBeforeWildcardExpansionEscaped);
 
                 _includeEscaped = FileUtilities.FixFilePath(includeEscaped);
                 _includeBeforeWildcardExpansionEscaped = FileUtilities.FixFilePath(includeBeforeWildcardExpansionEscaped);
@@ -1312,7 +1312,7 @@ namespace Microsoft.Build.Execution
             {
                 if (string.IsNullOrEmpty(metadataName))
                 {
-                    ErrorUtilities.VerifyThrowArgumentLength(metadataName, nameof(metadataName));
+                    ErrorUtilities.VerifyThrowArgumentLength(metadataName);
                 }
 
                 if (_directMetadata != null)

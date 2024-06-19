@@ -59,7 +59,7 @@ namespace Microsoft.Build.Utilities
         public TaskLoggingHelper(IBuildEngine buildEngine, string taskName)
         {
             ErrorUtilities.VerifyThrowArgumentNull(buildEngine);
-            ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
+            ErrorUtilities.VerifyThrowArgumentLength(taskName);
             TaskName = taskName;
             _buildEngine = buildEngine;
         }

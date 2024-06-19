@@ -17,7 +17,7 @@ namespace Microsoft.Build.Shared
         {
             ErrorUtilities.VerifyThrowArgumentNull(aString);
             ErrorUtilities.VerifyThrowArgumentNull(oldValue);
-            ErrorUtilities.VerifyThrowArgumentLength(oldValue, nameof(oldValue));
+            ErrorUtilities.VerifyThrowArgumentLength(oldValue);
 
             if (newValue == null)
             {

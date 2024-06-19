@@ -407,7 +407,7 @@ namespace Microsoft.Build.Evaluation
                 return Link.GetMetadata(name);
             }
 
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
 
             ProjectMetadata result = null;
 
@@ -473,7 +473,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         string IItem.GetMetadataValueEscaped(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
 
             string value = null;
 
@@ -635,7 +635,7 @@ namespace Microsoft.Build.Evaluation
                 return Link.RemoveMetadata(name);
             }
 
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
             ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name), "ItemSpecModifierCannotBeCustomMetadata", name);
             Project.VerifyThrowInvalidOperationNotImported(_xml.ContainingProject);
             ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent?.Parent != null, "OM_ObjectIsNoLongerActive");
