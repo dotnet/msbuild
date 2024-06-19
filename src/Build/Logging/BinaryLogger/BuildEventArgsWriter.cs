@@ -598,7 +598,7 @@ namespace Microsoft.Build.Logging
         {
             if ((flags & BuildEventArgsFieldFlags.Message) != 0)
             {
-                if (e is BuildCheckResultWarning)
+                if (e is BuildCheckResultWarning || e is BuildCheckResultError)
                 {
                     WriteDeduplicatedString(e.Message);
                 }
