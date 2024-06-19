@@ -169,6 +169,7 @@
     <Compile Include="BuildCheck\Infrastructure\BuildCheckConfigurationException.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildCheckBuildEventHandler.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildCheckForwardingLogger.cs" />
+    <Compile Include="BuildCheck\Infrastructure\BuildCheckReplayModeConnector.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildEventsProcessor.cs" />
     <Compile Include="BuildCheck\Infrastructure\AnalysisContext\IAnalysisContextFactory.cs" />
     <Compile Include="BuildCheck\Infrastructure\IBuildCheckManagerProvider.cs" />

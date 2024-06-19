@@ -2950,33 +2950,10 @@ namespace Microsoft.Build.Execution
             });
         }
 
-        public IEventSource GetMergedEventSource(BinaryLogReplayEventSource replayEventSource)
+        public void EnableBuildCheck() => _buildParameters = new BuildParameters
         {
-            _buildParameters = new BuildParameters
-            {
-                IsBuildCheckEnabled = true,
-            };
-
-            var buildCheckManagerProvider =
-                    ((IBuildComponentHost)this).GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider;
-
-            buildCheckManagerProvider!.Instance.SetDataSource(BuildCheckDataSource.EventArgs);
-
-            var mergedEventSource = new EventArgsDispatcher();
-
-            // Pass the events from replayEventSource to the mergedEventSource
-            replayEventSource.AnyEventRaised += (sender, e) => mergedEventSource.Dispatch(e);
-
-            // Create BuildCheckBuildEventHandler that passes new events to the mergedEventSource
-            var buildCheckEventHandler = new BuildCheckBuildEventHandler(
-                new AnalysisDispatchingContextFactory(mergedEventSource),
-                buildCheckManagerProvider.Instance);
-
-            // Pass the events from replayEventSource to the BuildCheckBuildEventHandler to produce new events
-            replayEventSource.AnyEventRaised += (sender, e) => buildCheckEventHandler.HandleBuildEvent(e);
-
-            return mergedEventSource;
-        }
+            IsBuildCheckEnabled = true,
+        };
 
         /// <summary>
         /// Creates a logging service around the specified set of loggers.

@@ -25,6 +25,7 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
@@ -4413,7 +4414,7 @@ namespace Microsoft.Build.CommandLine
             var replayEventSource = new BinaryLogReplayEventSource();
 
             var eventSource = isBuildCheckEnabled ?
-                BuildManager.DefaultBuildManager.GetMergedEventSource(replayEventSource) :
+                BuildCheckReplayModeConnector.GetMergedEventSource(BuildManager.DefaultBuildManager, replayEventSource) :
                 replayEventSource;
 
             foreach (var distributedLoggerRecord in distributedLoggerRecords)
