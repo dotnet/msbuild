@@ -34,7 +34,7 @@ internal class AnalysisDispatchingContext : IAnalysisContext
 
     public void DispatchBuildEvent(BuildEventArgs buildEvent)
     {
-        ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
+        ErrorUtilities.VerifyThrowArgumentNull(buildEvent, nameof(buildEvent));
 
         _eventDispatcher.Dispatch(buildEvent);
     }
