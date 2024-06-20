@@ -109,7 +109,7 @@ internal sealed class BuildCheckResultWarning : BuildWarningEventArgs
 {
     public BuildCheckResultWarning(IBuildCheckResult result)
     {
-        this.Message = result.FormatMessage();
+        RawMessage = result.FormatMessage();
     }
 
     internal BuildCheckResultWarning() { }
@@ -118,24 +118,22 @@ internal sealed class BuildCheckResultWarning : BuildWarningEventArgs
     {
         base.WriteToStream(writer);
 
-        writer.Write(Message!);
+        writer.Write(RawMessage!);
     }
 
     internal override void CreateFromStream(BinaryReader reader, int version)
     {
         base.CreateFromStream(reader, version);
 
-        Message = reader.ReadString();
+        RawMessage = reader.ReadString();
     }
-
-    public override string? Message { get; protected set; }
 }
 
 internal sealed class BuildCheckResultError : BuildErrorEventArgs
 {
     public BuildCheckResultError(IBuildCheckResult result)
     {
-        this.Message = result.FormatMessage();
+        RawMessage = result.FormatMessage();
     }
 
     internal BuildCheckResultError() { }
@@ -144,24 +142,22 @@ internal sealed class BuildCheckResultError : BuildErrorEventArgs
     {
         base.WriteToStream(writer);
 
-        writer.Write(Message!);
+        writer.Write(RawMessage!);
     }
 
     internal override void CreateFromStream(BinaryReader reader, int version)
     {
         base.CreateFromStream(reader, version);
 
-        Message = reader.ReadString();
+        RawMessage = reader.ReadString();
     }
-
-    public override string? Message { get; protected set; }
 }
 
 internal sealed class BuildCheckResultMessage : BuildMessageEventArgs
 {
     public BuildCheckResultMessage(IBuildCheckResult result)
     {
-        this.Message = result.FormatMessage();
+        RawMessage = result.FormatMessage();
     }
 
     internal BuildCheckResultMessage() { }
@@ -170,15 +166,13 @@ internal sealed class BuildCheckResultMessage : BuildMessageEventArgs
     {
         base.WriteToStream(writer);
 
-        writer.Write(Message!);
+        writer.Write(RawMessage!);
     }
 
     internal override void CreateFromStream(BinaryReader reader, int version)
     {
         base.CreateFromStream(reader, version);
 
-        Message = reader.ReadString();
+        RawMessage = reader.ReadString();
     }
-
-    public override string? Message { get; protected set; }
 }
