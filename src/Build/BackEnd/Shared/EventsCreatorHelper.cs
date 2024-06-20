@@ -15,8 +15,8 @@ internal static class EventsCreatorHelper
 {
     public static BuildMessageEventArgs CreateMessageEventFromText(BuildEventContext buildEventContext, MessageImportance importance, string message, params object?[]? messageArgs)
     {
-        ErrorUtilities.VerifyThrow(buildEventContext != null, "buildEventContext was null");
-        ErrorUtilities.VerifyThrow(message != null, "message was null");
+        ErrorUtilities.VerifyThrowArgumentNull(buildEventContext);
+        ErrorUtilities.VerifyThrowArgumentNull(message);
 
         BuildMessageEventArgs buildEvent = new BuildMessageEventArgs(
                 message,
