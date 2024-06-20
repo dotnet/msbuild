@@ -73,13 +73,13 @@ public class EndToEndTests : IDisposable
 
         RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -bl:{logFile}",
-            out bool success);
+            out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
 
         success.ShouldBeTrue();
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
          $"{logFile} -flp:logfile={Path.Combine(projectDirectory!, "logFile.log")};verbosity=diagnostic {(analysisRequested ? "-analyze" : string.Empty)}",
-         out success, false, _env.Output, timeoutMilliseconds: 130_000);
+         out success, false, _env.Output, timeoutMilliseconds: 120_000);
 
         _env.Output.WriteLine(output);
 
@@ -89,10 +89,12 @@ public class EndToEndTests : IDisposable
         if (analysisRequested)
         {
             output.ShouldContain("BC0101");
+            output.ShouldContain("BC0102");
         }
         else
         {
             output.ShouldNotContain("BC0101");
+            output.ShouldNotContain("BC0102");
         }
     }
 
