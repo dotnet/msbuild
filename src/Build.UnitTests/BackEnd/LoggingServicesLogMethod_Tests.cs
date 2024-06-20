@@ -1046,21 +1046,17 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.True(((BuildFinishedEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildEvent));
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void LogBuildCanceled(bool onlyLogCriticalEvents)
+        [Fact]
+        public void LogBuildCanceled()
         {
             ProcessBuildEventHelper service =
                 (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.OnlyLogCriticalEvents = onlyLogCriticalEvents;
             service.LogBuildCanceled();
 
-            string message = onlyLogCriticalEvents ? string.Empty : ResourceUtilities.GetResourceString("AbortingBuild");
 
             BuildCanceledEventArgs buildEvent =
                 new BuildCanceledEventArgs(
-                    message,
+                    ResourceUtilities.GetResourceString("AbortingBuild"),
                     service.ProcessedBuildEvent.Timestamp);
 
             Assert.IsType<BuildCanceledEventArgs>(service.ProcessedBuildEvent);
