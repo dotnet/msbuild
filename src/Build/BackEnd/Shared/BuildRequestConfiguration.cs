@@ -762,7 +762,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="request">The request </param>
         /// <returns>An array of t</returns>
-        public List<(string, TargetBuiltReason)> GetTargetsUsedToBuildRequest(BuildRequest request)
+        public List<(string name, TargetBuiltReason reason)> GetTargetsUsedToBuildRequest(BuildRequest request)
         {
             ErrorUtilities.VerifyThrow(request.ConfigurationId == ConfigurationId, "Request does not match configuration.");
             ErrorUtilities.VerifyThrow(_projectInitialTargets != null, "Initial targets have not been set.");
@@ -775,12 +775,12 @@ namespace Microsoft.Build.BackEnd
                     "Targets must be same as proxy targets");
             }
 
-            List<(string, TargetBuiltReason)> initialTargets = _projectInitialTargets.ConvertAll(target => (target, TargetBuiltReason.InitialTargets));
-            List<(string, TargetBuiltReason)> nonInitialTargets = (request.Targets.Count == 0)
-            ? _projectDefaultTargets.ConvertAll(target => (target, TargetBuiltReason.DefaultTargets))
-            : request.Targets.ConvertAll(target => (target, TargetBuiltReason.EntryTargets));
+            List<(string name, TargetBuiltReason reason)> initialTargets = _projectInitialTargets.ConvertAll(target => (target, TargetBuiltReason.InitialTargets));
+            List<(string name, TargetBuiltReason reason)> nonInitialTargets = (request.Targets.Count == 0)
+                ? _projectDefaultTargets.ConvertAll(target => (target, TargetBuiltReason.DefaultTargets))
+                : request.Targets.ConvertAll(target => (target, TargetBuiltReason.EntryTargets));
 
-            var allTargets = new List<(string, TargetBuiltReason)>(initialTargets.Count + nonInitialTargets.Count);
+            var allTargets = new List<(string name, TargetBuiltReason reason)>(initialTargets.Count + nonInitialTargets.Count);
 
             allTargets.AddRange(initialTargets);
             allTargets.AddRange(nonInitialTargets);

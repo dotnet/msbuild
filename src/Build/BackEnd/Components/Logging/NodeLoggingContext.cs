@@ -90,16 +90,16 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // When pulling a request from the cache, we want to make sure we log a target skipped event for any targets which
             // were used to build the request including default and initial targets.
-            foreach ((string, TargetBuiltReason) target in configuration.GetTargetsUsedToBuildRequest(request))
+            foreach ((string name, TargetBuiltReason reason) target in configuration.GetTargetsUsedToBuildRequest(request))
             {
-                var targetResult = result[target.Item1];
+                var targetResult = result[target.name];
                 bool isFailure = targetResult.ResultCode == TargetResultCode.Failure;
 
                 var skippedTargetEventArgs = new TargetSkippedEventArgs(message: null)
                 {
                     BuildEventContext = projectLoggingContext.BuildEventContext,
-                    TargetName = target.Item1,
-                    BuildReason = target.Item2,
+                    TargetName = target.name,
+                    BuildReason = target.reason,
                     SkipReason = isFailure ? TargetSkipReason.PreviouslyBuiltUnsuccessfully : TargetSkipReason.PreviouslyBuiltSuccessfully,
                     OriginallySucceeded = !isFailure,
                     OriginalBuildEventContext = (targetResult as TargetResult)?.OriginalBuildEventContext

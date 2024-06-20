@@ -26,6 +26,6 @@ namespace Microsoft.Build.BackEnd
         /// <param name="baseLookup">The Lookup containing all current items and properties for this target.</param>
         /// <param name="cancellationToken">The cancellation token used to cancel processing of targets.</param>
         /// <returns>A Task representing the work to be done.</returns>
-        Task<BuildResult> BuildTargets(ProjectLoggingContext projectLoggingContext, BuildRequestEntry entry, IRequestBuilderCallback callback, (string, TargetBuiltReason)[] targets, Lookup baseLookup, CancellationToken cancellationToken);
+        Task<BuildResult> BuildTargets(ProjectLoggingContext projectLoggingContext, BuildRequestEntry entry, IRequestBuilderCallback callback, (string name, TargetBuiltReason reason)[] targets, Lookup baseLookup, CancellationToken cancellationToken);
     }
 }

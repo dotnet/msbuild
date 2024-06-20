@@ -100,7 +100,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="baseLookup">The Lookup containing all current items and properties for this target.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> to use when building the targets.</param>
         /// <returns>The target's outputs and result codes</returns>
-        public async Task<BuildResult> BuildTargets(ProjectLoggingContext loggingContext, BuildRequestEntry entry, IRequestBuilderCallback callback, (string, TargetBuiltReason)[] targetNames, Lookup baseLookup, CancellationToken cancellationToken)
+        public async Task<BuildResult> BuildTargets(ProjectLoggingContext loggingContext, BuildRequestEntry entry, IRequestBuilderCallback callback, (string name, TargetBuiltReason reason)[] targetNames, Lookup baseLookup, CancellationToken cancellationToken)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingContext, "projectLoggingContext");
             ErrorUtilities.VerifyThrowArgumentNull(entry, nameof(entry));
@@ -143,17 +143,17 @@ namespace Microsoft.Build.BackEnd
 
             List<TargetSpecification> targets = new List<TargetSpecification>(targetNames.Length);
 
-            foreach ((string, TargetBuiltReason) targetName in targetNames)
+            foreach ((string name, TargetBuiltReason reason) targetName in targetNames)
             {
-                var targetExists = _projectInstance.Targets.TryGetValue(targetName.Item1, out ProjectTargetInstance targetInstance);
+                var targetExists = _projectInstance.Targets.TryGetValue(targetName.name, out ProjectTargetInstance targetInstance);
                 if (!targetExists && entry.Request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.SkipNonexistentTargets))
                 {
                     _projectLoggingContext.LogComment(Framework.MessageImportance.Low,
-                        "TargetSkippedWhenSkipNonexistentTargets", targetName.Item1);
+                        "TargetSkippedWhenSkipNonexistentTargets", targetName.name);
                 }
                 else
                 {
-                    targets.Add(new TargetSpecification(targetName.Item1, targetExists ? targetInstance.Location : _projectInstance.ProjectFileLocation, targetName.Item2));
+                    targets.Add(new TargetSpecification(targetName.name, targetExists ? targetInstance.Location : _projectInstance.ProjectFileLocation, targetName.reason));
                 }
             }
 
@@ -185,7 +185,7 @@ namespace Microsoft.Build.BackEnd
 
             // Gather up outputs for the requested targets and return those.  All of our information should be in the base lookup now.
             ComputeAfterTargetFailures(targetNames);
-            BuildResult resultsToReport = new BuildResult(_buildResult, targetNames.Select(target => target.Item1).ToArray());
+            BuildResult resultsToReport = new BuildResult(_buildResult, targetNames.Select(target => target.name).ToArray());
 
             // Return after-build project state if requested.
             if (_requestEntry.Request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.ProvideProjectStateAfterBuild))
@@ -774,15 +774,15 @@ namespace Microsoft.Build.BackEnd
             return false;
         }
 
-        private void ComputeAfterTargetFailures((string, TargetBuiltReason)[] targetNames)
+        private void ComputeAfterTargetFailures((string name, TargetBuiltReason reason)[] targetNames)
         {
-            foreach ((string, TargetBuiltReason) targetName in targetNames)
+            foreach ((string name, TargetBuiltReason reason) targetName in targetNames)
             {
-                if (_buildResult.ResultsByTarget.TryGetValue(targetName.Item1, out TargetResult targetBuildResult))
+                if (_buildResult.ResultsByTarget.TryGetValue(targetName.name, out TargetResult targetBuildResult))
                 {
                     // Queue of targets waiting to be processed, seeded with the specific target for which we're computing AfterTargetsHaveFailed.
                     var targetsToCheckForAfterTargets = new Queue<string>();
-                    targetsToCheckForAfterTargets.Enqueue(targetName.Item1);
+                    targetsToCheckForAfterTargets.Enqueue(targetName.name);
 
                     // Set of targets already processed, to break cycles of AfterTargets.
                     // Initialized lazily when needed below.
@@ -806,7 +806,7 @@ namespace Microsoft.Build.BackEnd
 
                             targetsChecked ??= new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default)
                                 {
-                                    targetName.Item1
+                                    targetName.name
                                 };
 
                             // If we haven't seen this target yet, add it to the list to check.

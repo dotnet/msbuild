@@ -1177,7 +1177,7 @@ namespace Microsoft.Build.BackEnd
                 _requestEntry.Request.BuildEventContext = _projectLoggingContext.BuildEventContext;
 
                 // Determine the set of targets we need to build
-                (string, TargetBuiltReason)[] allTargets = _requestEntry.RequestConfiguration
+                (string name, TargetBuiltReason reason)[] allTargets = _requestEntry.RequestConfiguration
                     .GetTargetsUsedToBuildRequest(_requestEntry.Request).ToArray();
 
                 ProjectErrorUtilities.VerifyThrowInvalidProject(allTargets.Length > 0,
