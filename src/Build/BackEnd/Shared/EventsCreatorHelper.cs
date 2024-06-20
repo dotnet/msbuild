@@ -32,9 +32,9 @@ internal static class EventsCreatorHelper
 
     public static BuildErrorEventArgs CreateErrorEventFromText(BuildEventContext buildEventContext, string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
     {
-        ErrorUtilities.VerifyThrow(buildEventContext != null, "Must specify the buildEventContext");
-        ErrorUtilities.VerifyThrow(file != null, "Must specify the associated file.");
-        ErrorUtilities.VerifyThrow(message != null, "Need error message.");
+        ErrorUtilities.VerifyThrowArgumentNull(buildEventContext);
+        ErrorUtilities.VerifyThrowArgumentNull(file);
+        ErrorUtilities.VerifyThrowArgumentNull(message);
 
         string? subcategory = null;
 
