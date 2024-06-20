@@ -60,7 +60,8 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10036")]
+    // [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10036")]
+    [Theory]
     [InlineData(true, true, "warning")]
     [InlineData(true, true, "error")]
     [InlineData(true, true, "info")]
