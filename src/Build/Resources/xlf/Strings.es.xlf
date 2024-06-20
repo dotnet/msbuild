@@ -514,6 +514,11 @@
         <target state="translated">"{1}" no importó el proyecto "{0}" en ({2},{3}) porque la expresión se evalúa en una cadena vacía.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectImportsCollectorFileIOFail">
+        <source>An exception occurred when adding the file '{0}', Exception: '{1}'</source>
+        <target state="translated">Se ha producido una excepción al agregar el archivo '{0}'. Excepción: '{1}'</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">Valor inicial de la propiedad: $({0})="{1}" Origen: {2}</target>
@@ -554,6 +559,13 @@ Errores: {3}</target>
         <source>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</source>
         <target state="translated">Error en el solucionador del SDK "{0}" al intentar resolver el SDK "{1}". Excepción: "{2}".</target>
         <note />
+      </trans-unit>
+      <trans-unit id="SDKResolverNullMessage">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</source>
+        <target state="translated">El solucionador de "{0}" ha intentado resolver el SDK "{1}" y ha devuelto null como cadena en la lista de advertencias o errores.</target>
+        <note>
+      LOCALIZATION: Do not localize the word SDK.
+    </note>
       </trans-unit>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>

@@ -948,7 +948,7 @@ echo line 3"" />
                         Loggers = new[] { logger },
                     };
 
-                    var collection = new ProjectCollection(
+                    using var collection = new ProjectCollection(
                         new Dictionary<string, string>(),
                         new[] { logger },
                         remoteLoggers: null,
@@ -1005,7 +1005,7 @@ echo line 3"" />
                         Loggers = new[] { logger },
                     };
 
-                    var collection = new ProjectCollection(
+                    using var collection = new ProjectCollection(
                         new Dictionary<string, string>(),
                         new[] { logger },
                         remoteLoggers: null,

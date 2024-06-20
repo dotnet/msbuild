@@ -1750,6 +1750,18 @@ namespace Microsoft.Build.CommandLine
                     MessageImportance.Low),
             };
 
+            NativeMethodsShared.LongPathsStatus longPaths = NativeMethodsShared.IsLongPathsEnabled();
+            if (longPaths != NativeMethodsShared.LongPathsStatus.NotApplicable)
+            {
+                messages.Add(
+                    new BuildManager.DeferredBuildMessage(
+                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                            "LongPaths",
+                            ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                "LongPaths_" + longPaths.ToString())),
+                        MessageImportance.Low));
+            }
+
             if (Traits.Instance.DebugEngine)
             {
                 messages.Add(
@@ -3014,7 +3026,7 @@ namespace Microsoft.Build.CommandLine
         private static bool CheckAndGatherProjectAutoResponseFile(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches commandLineSwitches, bool recursing, string commandLine)
         {
             bool found = false;
-           
+
             var projectDirectory = GetProjectDirectory(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project]);
 
             if (!recursing && !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
