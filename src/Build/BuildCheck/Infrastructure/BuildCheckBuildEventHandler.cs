@@ -101,7 +101,7 @@ internal class BuildCheckBuildEventHandler
                 eventArgs.ToAnalyzerAcquisitionData(),
                 _analyzerContextFactory.CreateAnalysisContext(GetBuildEventContext(eventArgs)));
 
-    private bool IsMetaProjFile(string? projectFile) => !string.IsNullOrEmpty(projectFile) && projectFile!.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
+    private bool IsMetaProjFile(string? projectFile) => projectFile?.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase) == true;
 
     private readonly Dictionary<string, TimeSpan> _stats = new Dictionary<string, TimeSpan>();
 
