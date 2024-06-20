@@ -41,7 +41,7 @@ internal class AnalysisDispatchingContext : IAnalysisContext
 
     public void DispatchAsComment(MessageImportance importance, string messageResourceName, params object?[] messageArgs)
     {
-        ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(messageResourceName), "Need resource string for comment message.");
+        ErrorUtilities.VerifyThrowArgumentLength(messageResourceName);
 
         DispatchAsCommentFromText(_eventContext, importance, ResourceUtilities.GetResourceString(messageResourceName), messageArgs);
     }
