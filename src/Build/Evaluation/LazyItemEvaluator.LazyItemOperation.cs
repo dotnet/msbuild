@@ -18,7 +18,6 @@ namespace Microsoft.Build.Evaluation
     {
         private abstract class LazyItemOperation : IItemOperation
         {
-            private readonly string _itemType;
             private readonly ImmutableDictionary<string, LazyItemList> _referencedItemLists;
 
             protected readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
@@ -36,7 +35,6 @@ namespace Microsoft.Build.Evaluation
             protected LazyItemOperation(OperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
             {
                 _itemElement = builder.ItemElement;
-                _itemType = builder.ItemType;
                 _itemSpec = builder.ItemSpec;
                 _referencedItemLists = builder.ReferencedItemLists.ToImmutable();
                 _conditionResult = builder.ConditionResult;
@@ -162,7 +160,41 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            protected void DecorateItemsWithMetadata(IEnumerable<ItemBatchingContext> itemBatchingContexts, ImmutableArray<ProjectMetadataElement> metadata, bool? needToExpandMetadata = null)
+            private IEnumerable<(I, IMetadataTable)> GetItemsFromItemBatchingContexts(ImmutableArray<ItemBatchingContext> itemBatchingContexts)
+            {
+                foreach (ItemBatchingContext context in itemBatchingContexts)
+                {
+                    yield return (context.OperationItem, context.GetMetadataTable());
+                }
+            }
+
+            private IEnumerable<(I, IMetadataTable)> GetItemsFromItems(ImmutableArray<I> items)
+            {
+                foreach (I item in items)
+                {
+                    yield return (item, item);
+                }
+            }
+
+            private IEnumerable<I> GetItemsFromItemTuple(IEnumerable<(I item, IMetadataTable)> tuples)
+            {
+                foreach (var tuple in tuples)
+                {
+                    yield return tuple.item;
+                }
+            }
+
+            protected void DecorateItemsWithMetadata(ImmutableArray<ItemBatchingContext> itemBatchingContexts, ImmutableArray<ProjectMetadataElement> metadata, bool? needToExpandMetadata = null)
+            {
+                DecorateItemsWithMetadata(GetItemsFromItemBatchingContexts(itemBatchingContexts), metadata, needToExpandMetadata);
+            }
+
+            protected void DecorateItemsWithMetadata(ImmutableArray<I> items, ImmutableArray<ProjectMetadataElement> metadata, bool? needToExpandMetadata = null)
+            {
+                DecorateItemsWithMetadata(GetItemsFromItems(items), metadata, needToExpandMetadata);
+            }
+
+            private void DecorateItemsWithMetadata(IEnumerable<(I item, IMetadataTable metadataTable)> itemBatchingContexts, ImmutableArray<ProjectMetadataElement> metadata, bool? needToExpandMetadata = null)
             {
                 if (metadata.Length > 0)
                 {
@@ -201,7 +233,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         foreach (var itemContext in itemBatchingContexts)
                         {
-                            _expander.Metadata = itemContext.GetMetadataTable();
+                            _expander.Metadata = itemContext.metadataTable;
 
                             foreach (var metadataElement in metadata)
                             {
@@ -212,7 +244,7 @@ namespace Microsoft.Build.Evaluation
 
                                 string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, metadataExpansionOptions, metadataElement.Location);
 
-                                itemContext.OperationItem.SetMetadata(metadataElement, FileUtilities.MaybeAdjustFilePath(evaluatedValue, metadataElement.ContainingProject.DirectoryPath));
+                                itemContext.item.SetMetadata(metadataElement, FileUtilities.MaybeAdjustFilePath(evaluatedValue, metadataElement.ContainingProject.DirectoryPath));
                             }
                         }
 
@@ -226,7 +258,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         // Metadata expressions are allowed here.
                         // Temporarily gather and expand these in a table so they can reference other metadata elements above.
-                        EvaluatorMetadataTable metadataTable = new EvaluatorMetadataTable(_itemType, capacity: metadata.Length);
+                        EvaluatorMetadataTable metadataTable = new EvaluatorMetadataTable(_itemElement.ItemType, capacity: metadata.Length);
                         _expander.Metadata = metadataTable;
 
                         // Also keep a list of everything so we can get the predecessor objects correct.
@@ -262,7 +294,7 @@ namespace Microsoft.Build.Evaluation
                         // This is valuable in the case where one item element evaluates to
                         // many items (either by semicolon or wildcards)
                         // and that item also has the same piece/s of metadata for each item.
-                        _itemFactory.SetMetadata(metadataList, itemBatchingContexts.Select(i => i.OperationItem));
+                        _itemFactory.SetMetadata(metadataList, GetItemsFromItemTuple(itemBatchingContexts));
 
                         // End of legal area for metadata expressions.
                         _expander.Metadata = null;
@@ -283,32 +315,15 @@ namespace Microsoft.Build.Evaluation
             {
                 itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(GetMetadataValuesAndConditions(metadata));
 
-                bool needToExpandMetadataForEachItem = false;
+                // If there is bare metadata of any kind, and the Include involved an item list, we should
+                // run items individually, as even non-built-in metadata might differ between items
 
-                if (itemsAndMetadataFound.Metadata?.Values.Count > 0)
-                {
-                    // If there is bare metadata of any kind, and the Include involved an item list, we should
-                    // run items individually, as even non-built-in metadata might differ between items
+                // If there is bare built-in metadata, we must always run items individually, as that almost
+                // always differs between items.
 
-                    if (_referencedItemLists.Count >= 0)
-                    {
-                        needToExpandMetadataForEachItem = true;
-                    }
-                    else
-                    {
-                        // If there is bare built-in metadata, we must always run items individually, as that almost
-                        // always differs between items.
-
-                        // UNDONE: When batching is implemented for real, we need to make sure that
-                        // item definition metadata is included in all metadata operations during evaluation
-                        if (itemsAndMetadataFound.Metadata.Values.Count > 0)
-                        {
-                            needToExpandMetadataForEachItem = true;
-                        }
-                    }
-                }
-
-                return needToExpandMetadataForEachItem;
+                // UNDONE: When batching is implemented for real, we need to make sure that
+                // item definition metadata is included in all metadata operations during evaluation
+                return itemsAndMetadataFound.Metadata?.Values.Count > 0;
             }
 
             /// <summary>

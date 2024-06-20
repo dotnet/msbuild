@@ -66,7 +66,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal static ItemsAndMetadataPair GetReferencedItemNamesAndMetadata(IEnumerable<string> expressions)
         {
-            ItemsAndMetadataPair pair = new ItemsAndMetadataPair(null, null);
+            ItemsAndMetadataPair pair = default;
 
             foreach (string expression in expressions)
             {
