@@ -537,17 +537,19 @@ namespace Microsoft.Build.Shared
             }
         }
 
+#nullable enable
         /// <summary>
         /// Throws an ArgumentException if the string has zero length, unless it is
         /// null, in which case no exception is thrown.
         /// </summary>
-        internal static void VerifyThrowArgumentLengthIfNotNull(string parameter, string parameterName)
+        internal static void VerifyThrowArgumentLengthIfNotNull(string? parameter, string parameterName)
         {
             if (parameter?.Length == 0)
             {
                 ThrowArgumentLength(parameterName);
             }
         }
+#nullable disable
 
         /// <summary>
         /// Throws an ArgumentNullException if the given parameter is null.
