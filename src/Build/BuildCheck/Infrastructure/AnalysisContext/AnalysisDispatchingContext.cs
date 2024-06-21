@@ -41,7 +41,7 @@ internal class AnalysisDispatchingContext : IAnalysisContext
 
     public void DispatchAsComment(MessageImportance importance, string messageResourceName, params object?[] messageArgs)
     {
-        ErrorUtilities.VerifyThrowArgumentLength(messageResourceName);
+        ErrorUtilities.VerifyThrowInternalLength(messageResourceName,nameof(messageResourceName));
 
         DispatchAsCommentFromText(_eventContext, importance, ResourceUtilities.GetResourceString(messageResourceName), messageArgs);
     }
