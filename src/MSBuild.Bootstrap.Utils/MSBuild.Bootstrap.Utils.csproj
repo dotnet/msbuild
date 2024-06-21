@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- Don't build a netfx version of this unit with dotnet, as the netfx bootstrap layout created with 'dotnet build' is incomplete. -->
+    <TargetFrameworks>$(LatestDotNetCoreForMSBuild)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(MSBuildRuntimeType)' == 'Full'">$(FullFrameworkTFM);$(TargetFrameworks)</TargetFrameworks>
+
+    <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
+    <IsPackable>false</IsPackable>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
+    <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
+    <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
+  </ItemGroup>
+  
+</Project>
