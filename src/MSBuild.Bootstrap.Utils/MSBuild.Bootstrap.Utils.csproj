@@ -7,8 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
-    <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" VersionOverride="16.11.0" ExcludeAssets="runtime" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>
