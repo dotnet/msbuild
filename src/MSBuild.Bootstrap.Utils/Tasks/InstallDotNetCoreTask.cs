@@ -3,13 +3,11 @@
 
 #if RUNTIME_TYPE_NETCORE
 
-using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 
 namespace MSBuild.Bootstrap.Utils.Tasks

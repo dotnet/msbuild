@@ -84,8 +84,8 @@ try {
   }
   else
   {
-    $buildToolPath = $dotnetExePath
-    $buildToolCommand = Join-Path $bootstrapRoot "net8.0\MSBuild\MSBuild.dll"
+    $buildToolPath = Join-Path $bootstrapRoot "net8.0\dotnet.exe"
+    $buildToolCommand = "";
     $buildToolFramework = "net8.0"
   }
 
