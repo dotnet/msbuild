@@ -27,6 +27,11 @@
         <target state="translated">Komuttan {0} koduyla çıkıldı.</target>
         <note />
       </trans-unit>
+      <trans-unit id="LockCheck.FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="translated">Dosya şunun tarafından kilitlendi: "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">
         <source>MSB6010: Could not find platform manifest file at "{0}".</source>
         <target state="translated">MSB6010: Platform bildirim dosyası, "{0}" konumunda bulunamadı.</target>

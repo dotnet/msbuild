@@ -57,9 +57,9 @@ namespace Microsoft.Build.BuildEngine
 
     /// <summary>
     /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-    /// <xref:Microsoft.Build.Construction>
-    /// <xref:Microsoft.Build.Evaluation>
-    /// <xref:Microsoft.Build.Execution>
+    /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+    /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+    /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
     /// 
     /// This class holds an MSBuild property.  This may be a property that is
     /// represented in the MSBuild project file by an XML element, or it
@@ -348,9 +348,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Constructor, which initializes the property from just the property
         /// name and value, creating it as a "normal" property.  This ends up
@@ -384,9 +384,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Accessor for the property name.  This is read-only, so one cannot
         /// change the property name once it's set ... your only option is
@@ -429,9 +429,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Accessor for the property value.  Normal properties can be modified;
         /// other property types cannot.
@@ -531,9 +531,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Returns the unescaped value of the property.
         /// </summary>
@@ -579,9 +579,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Did this property originate from an imported project file?
         /// </summary>
@@ -606,9 +606,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Accessor for the condition on the property.
         /// </summary>
@@ -732,9 +732,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Creates a shallow or deep clone of this BuildProperty object.
         ///
@@ -830,9 +830,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Returns the property value.
         /// </summary>
@@ -860,9 +860,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// This allows an implicit typecast from a "BuildProperty" to a "string"
         /// when trying to access the property's value.

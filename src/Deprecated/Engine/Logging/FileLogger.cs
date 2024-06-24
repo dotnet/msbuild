@@ -16,9 +16,9 @@ namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
     /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-    /// <xref:Microsoft.Build.Construction>
-    /// <xref:Microsoft.Build.Evaluation>
-    /// <xref:Microsoft.Build.Execution>
+    /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+    /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+    /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
     /// 
     /// A specialization of the ConsoleLogger that logs to a file instead of the console.
     /// The output in terms of what is written and how it looks is identical. For example you can
@@ -45,9 +45,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Default constructor.
         /// </summary>
@@ -71,10 +71,10 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
         /// 
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// Signs up the console file logger for all build events.
         /// This is the backward-compatible overload.
         /// </summary>
@@ -152,10 +152,10 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
         /// 
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// Multiproc aware initialization
         /// </summary>
         /// <remarks>
@@ -200,9 +200,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Shutdown method implementation of ILogger - we need to flush and close our logfile.
         /// </summary>

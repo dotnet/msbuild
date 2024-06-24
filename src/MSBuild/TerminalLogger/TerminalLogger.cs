@@ -398,14 +398,14 @@ internal sealed partial class TerminalLogger : INodeLogger
 
         Terminal.BeginUpdate();
         try
-        { 
+        {
             if (Verbosity > LoggerVerbosity.Quiet)
             {
                 string duration = (e.Timestamp - _buildStartTime).TotalSeconds.ToString("F1");
                 string buildResult = RenderBuildResult(e.Succeeded, _buildErrorsCount, _buildWarningsCount);
 
                 Terminal.WriteLine("");
-                if(_testRunSummaries.Any())
+                if (_testRunSummaries.Any())
                 {
                     var total = _testRunSummaries.Sum(t => t.Total);
                     var failed = _testRunSummaries.Sum(t => t.Failed);
@@ -864,7 +864,16 @@ internal sealed partial class TerminalLogger : INodeLogger
                                             : e.Timestamp > _testEndTime
                                                 ? e.Timestamp : _testEndTime;
                                 }
-                                
+
+                                break;
+                            }
+
+                        case "TLTESTOUTPUT":
+                            {
+                                if (e.Message != null && Verbosity > LoggerVerbosity.Quiet)
+                                {
+                                    RenderImmediateMessage(e.Message);
+                                }
                                 break;
                             }
                     }
@@ -936,7 +945,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     private void ErrorRaised(object sender, BuildErrorEventArgs e)
     {
         BuildEventContext? buildEventContext = e.BuildEventContext;
-        
+
         if (buildEventContext is not null
             && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project)
             && Verbosity > LoggerVerbosity.Quiet)
@@ -951,7 +960,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         }
     }
 
-#endregion
+    #endregion
 
     #region Refresher thread implementation
 
