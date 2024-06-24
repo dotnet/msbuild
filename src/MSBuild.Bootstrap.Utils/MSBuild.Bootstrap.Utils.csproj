@@ -4,7 +4,6 @@
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
     <IsPackable>false</IsPackable>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-    <BootstrapUtilsOutputPath>$(OutputPath)$(TargetFramework)\$(AssemblyName).dll</BootstrapUtilsOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,7 +12,5 @@
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
   </ItemGroup>
-
-  <Import Project="$(RepoRoot)eng\BootStrapMsBuild.targets" />
 
 </Project>

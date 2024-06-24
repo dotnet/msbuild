@@ -202,16 +202,15 @@
            AlwaysCreate="true" />
   </Target>
 
-  <UsingTask TaskName="InstallDotNetCoreTask" AssemblyFile="$(BootstrapUtilsOutputPath)"/>
+  <UsingTask TaskName="MSBuild.Bootstrap.Utils.Tasks.InstallDotNetCoreTask" AssemblyFile="$(ArtifactsBinDir)MSBuild.Bootstrap.Utils\$(Configuration)\$(TargetFramework)\MSBuild.Bootstrap.Utils.dll" Condition="!$(TargetFramework.StartsWith('net4'))" />
   <Target Name="BootstrapNetCore" DependsOnTargets="CleanBootstrapFolder">
 
     <PropertyGroup>
       <NetVersion>8.0.302</NetVersion>
       <InstallDir>$(ArtifactsBinDir)bootstrap\$(TargetFramework)\</InstallDir>
     </PropertyGroup>
-
+   
     <InstallDotNetCoreTask DotNetInstallScriptRootPath="$(DotNetRoot)" InstallDir="$(InstallDir)" Version="$(NetVersion)"/>
-
   </Target>
 
   <Target Name="BootstrapNetCorePatch" AfterTargets="BootstrapNetCore">
