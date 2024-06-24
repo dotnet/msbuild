@@ -1,49 +1,49 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if RUNTIME_TYPE_NETCORE
+
+using System;
 using System.Diagnostics;
+using System.IO;
+using System.Net.Http;
+using System.Runtime.InteropServices;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
 
 namespace MSBuild.Bootstrap.Utils.Tasks
 {
-    public sealed class InstallDotNetCoreTask : TaskExtension
+    public sealed class InstallDotNetCoreTask : Task
     {
+        private const string ScriptName = "dotnet-install";
         private const string DotNetInstallBaseUrl = "https://dot.net/v1/";
 
         public InstallDotNetCoreTask()
         {
             InstallDir = string.Empty;
-            DotNetInstallScript = string.Empty;
-            Channel = string.Empty;
+            DotNetInstallScriptRootPath = string.Empty;
+            Version = string.Empty;
         }
 
         [Required]
         public string InstallDir { get; set; }
 
         [Required]
-        public string DotNetInstallScript { get; set; }
+        public string DotNetInstallScriptRootPath { get; set; }
 
-        public string Channel { get; set; }
+        [Required]
+        public string Version { get; set; }
 
         public override bool Execute()
         {
-            string scriptName = GetScriptName();
-            string scriptPath = Path.Combine(DotNetInstallScript, scriptName);
-
-            if (!File.Exists(scriptPath))
+            ScriptExecutionSettings executionSettings = SetupScriptsExecutionSettings();
+            if (!File.Exists(executionSettings.ScriptsFullPath))
             {
-                DownloadScript(scriptName, scriptPath);
+                DownloadScript(executionSettings.ScriptName, executionSettings.ScriptsFullPath);
             }
 
-            string scriptArgs = GetScriptArgs();
-            Log.LogMessage(MessageImportance.Low, $"Executing: {scriptPath} {scriptArgs}");
-
-            if (!NativeMethods.IsWindows)
-            {
-                MakeScriptExecutable(scriptPath);
-            }
-
-            return RunScript(scriptPath, scriptArgs);
+            return RunScript(executionSettings);
         }
 
         private void DownloadScript(string scriptName, string scriptPath)
@@ -58,39 +58,11 @@ namespace MSBuild.Bootstrap.Utils.Tasks
             }
         }
 
-        private void MakeScriptExecutable(string scriptPath)
+        private bool RunScript(ScriptExecutionSettings executionSettings)
         {
-            using (Process chmodProcess = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = "chmod",
-                    Arguments = $"+x {scriptPath}",
-                    UseShellExecute = false
-                },
-            })
-            {
-                chmodProcess.Start();
-                chmodProcess.WaitForExit();
-            }
-        }
-
-        private bool RunScript(string scriptPath, string scriptArgs)
-        {
-            ProcessStartInfo startInfo = new ProcessStartInfo
-            {
-                FileName = GetProcessName(),
-                Arguments = GetProcessArguments(scriptPath, scriptArgs),
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-
-            using (Process process = new Process { StartInfo = startInfo })
+            using (Process process = new Process { StartInfo = executionSettings.StartInfo })
             {
                 process.Start();
-
                 string output = process.StandardOutput.ReadToEnd();
                 Log.LogMessage(output);
 
@@ -103,24 +75,47 @@ namespace MSBuild.Bootstrap.Utils.Tasks
                     {
                         Log.LogError("Errors: " + errors);
                     }
-
-                    Log.LogError("dotnet-install failed");
                 }
             }
 
             return !Log.HasLoggedErrors;
         }
 
-        private string GetScriptName() => NativeMethodsShared.IsWindows ? "dotnet-install.ps1" : "dotnet-install.sh";
+        private bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
-        private string GetProcessName() => NativeMethodsShared.IsWindows ? "powershell.exe" : @"/bin/bash";
+        private struct ScriptExecutionSettings(string executableName, ProcessStartInfo startInfo, string scriptName, string scriptsFullPath)
+        {
+            public string ExecutableName { get; } = executableName;
 
-        private string GetProcessArguments(string scriptPath, string scriptArgs) => NativeMethodsShared.IsWindows
-            ? $"-NoProfile -ExecutionPolicy Bypass -File \"{scriptPath}\" {scriptArgs}"
-            : $"{scriptPath} {scriptArgs}";
+            public ProcessStartInfo StartInfo { get; } = startInfo;
 
-        private string GetScriptArgs() => NativeMethodsShared.IsWindows
-            ? $"{(string.IsNullOrEmpty(Channel) ? "-Quality preview" : $"-Channel {Channel}")} -InstallDir {InstallDir}"
-            : $"{(string.IsNullOrEmpty(Channel) ? "--quality preview" : $"--channel {Channel}")} --install-dir {InstallDir}";
+            public string ScriptName { get; } = scriptName;
+
+            public string ScriptsFullPath { get; } = scriptsFullPath;
+        }
+
+        private ScriptExecutionSettings SetupScriptsExecutionSettings()
+        {
+            string scriptExtension = IsWindows ? "ps1" : "sh";
+            string executableName = IsWindows ? "powershell.exe" : "/bin/bash";
+            string scriptPath = Path.Combine(DotNetInstallScriptRootPath, $"{ScriptName}.{scriptExtension}");
+            string scriptArgs = IsWindows
+                ? $"-NoProfile -ExecutionPolicy Bypass -File {scriptPath} -Version {Version} -InstallDir {InstallDir}"
+                : $"--version {Version} --install-dir {InstallDir}";
+
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = IsWindows ? executableName : "chmod",
+                Arguments = IsWindows ? scriptArgs : $"+x {scriptPath} {scriptArgs}",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+
+            return new ScriptExecutionSettings(executableName, startInfo, $"{ScriptName}.{scriptExtension}", scriptPath);
+        }
     }
 }
+
+#endif

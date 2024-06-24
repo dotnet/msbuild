@@ -202,12 +202,14 @@
            AlwaysCreate="true" />
   </Target>
 
-  <!-- <UsingTask TaskName="InstallDotNetCoreTask" AssemblyFile="$(AssemblyPath)"/> -->
+  <UsingTask TaskName="InstallDotNetCoreTask" AssemblyFile="$(BootstrapUtilsOutputPath)"/>
   <Target Name="BootstrapNetCore" DependsOnTargets="CleanBootstrapFolder">
 
-    <InstallDotNetCoreTask DotNetInstallScript="$(DotNetRoot)" InstallDir="$(BootstrapDestination)">
-      <Output TaskParameter="ExtractedVersion" PropertyName="ExtractedVersion" />
-    </InstallDotNetCoreTask>
+    <PropertyGroup>
+      <NetVersion>8.0.302</NetVersion>
+    </PropertyGroup>
+
+    <InstallDotNetCoreTask DotNetInstallScriptRootPath="$(DotNetRoot)" InstallDir="$(ArtifactsBinDir)bootstrap\$(TargetFramework)" Version="$(NetVersion)"/>
 
   </Target>
 
@@ -218,7 +220,7 @@
     </ItemGroup>
 
     <Copy SourceFiles="@(FreshlyBuiltNetBinaries)"
-          DestinationFolder="$(BootstrapDestination)sdk\8.0.302\%(RecursiveDir)" />
+          DestinationFolder="$(BootstrapDestination)sdk\$(NetVersion)\%(RecursiveDir)" />
 
   </Target>
 
