@@ -250,33 +250,45 @@
       </trans-unit>
       <trans-unit id="HelpMessage_48_TerminalLoggerParametersSwitch">
         <source>  -terminalLoggerParameters: &lt;parameters&gt;
-                      Parameters for the TerminalLogger. (Short form: -tlp)
-                      default parameter.
-                      - `on`, `true`  forces TerminalLogger to be used even when
-                      it would be disabled.
-                      - `off`, `false` forces TerminalLogger to not be used even
-                      when it would be enabled.
-                      - `auto` enables TerminalLogger when the terminal supports
-                      it and the session doesn't have redirected stdout/stderr
+                     Parameters to terminal logger. (Short form: -tlp)
+                     The available parameters.
+                        default--Specifies the default behavior of the terminal
+                        logger. It requires one of the following values:
+                           - `on`, `true`  forces TerminalLogger to be used even
+                            when it would be disabled.
+                           - `off`, `false` forces TerminalLogger to not be used
+                            even when it would be enabled.
+                           - `auto` enables TerminalLogger when the terminal
+                            supports it and the session doesn't have redirected
+                            stdout/stderr
+                        verbosity--Override the -verbosity setting for this
+                        logger
+                        showCommandLine--Show TaskCommandLineEvent messages
 
                       Example:
-                        -terminalLoggerParameters:default=auto
+                        -tlp:default=auto;verbosity=diag;shownCommandLine
     </source>
         <target state="new">  -terminalLoggerParameters: &lt;parameters&gt;
-                      Parameters for the TerminalLogger. (Short form: -tlp)
-                      default parameter.
-                      - `on`, `true`  forces TerminalLogger to be used even when
-                      it would be disabled.
-                      - `off`, `false` forces TerminalLogger to not be used even
-                      when it would be enabled.
-                      - `auto` enables TerminalLogger when the terminal supports
-                      it and the session doesn't have redirected stdout/stderr
+                     Parameters to terminal logger. (Short form: -tlp)
+                     The available parameters.
+                        default--Specifies the default behavior of the terminal
+                        logger. It requires one of the following values:
+                           - `on`, `true`  forces TerminalLogger to be used even
+                            when it would be disabled.
+                           - `off`, `false` forces TerminalLogger to not be used
+                            even when it would be enabled.
+                           - `auto` enables TerminalLogger when the terminal
+                            supports it and the session doesn't have redirected
+                            stdout/stderr
+                        verbosity--Override the -verbosity setting for this
+                        logger
+                        showCommandLine--Show TaskCommandLineEvent messages
 
                       Example:
-                        -terminalLoggerParameters:default=auto
+                        -tlp:default=auto;verbosity=diag;shownCommandLine
     </target>
         <note>
-      LOCALIZATION: "-terminalLoggerParameters", "-tlp", "on", "true", "off", "false", "auto" should not be localized.
+      LOCALIZATION: "-terminalLoggerParameters", "-tlp", "default", "on", "true", "off", "false", "auto", "verbosity", "showCommandLine" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
