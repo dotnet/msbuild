@@ -3019,7 +3019,7 @@ namespace Microsoft.Build.CommandLine
 
 
         /// <summary>
-        /// Identifies if there is rsp files near the project file 
+        /// Identifies if there is rsp files near the project file
         /// </summary>
         /// <returns>true if there autoresponse file was found</returns>
         private static bool CheckAndGatherProjectAutoResponseFile(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches commandLineSwitches, bool recursing, string commandLine)
@@ -4555,51 +4555,15 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_1_Syntax"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_2_Description"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_3_SwitchesHeader"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_9_TargetSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_10_PropertySwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_17_MaximumCPUSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_23_ToolsVersionSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_12_VerbositySwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_13_ConsoleLoggerParametersSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_14_NoConsoleLoggerSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_20_FileLoggerSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_22_FileLoggerParametersSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_18_DistributedLoggerSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_21_DistributedFileLoggerSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_11_LoggerSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_30_BinaryLoggerSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_28_WarnAsErrorSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_40_WarnNotAsErrorSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_29_WarnAsMessageSwitch"));
-#if FEATURE_XML_SCHEMA_VALIDATION
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_15_ValidateSwitch"));
-#endif
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_19_IgnoreProjectExtensionsSwitch"));
-#if FEATURE_NODE_REUSE // Do not advertise the switch when feature is off, even though we won't fail to parse it for compatibility with existing build scripts
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_24_NodeReuse"));
-#endif
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_25_PreprocessSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_38_TargetsSwitch"));
-
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_26_DetailedSummarySwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_31_RestoreSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_33_RestorePropertySwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_32_ProfilerSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_34_InteractiveSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_35_IsolateProjectsSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_InputCachesFiles"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_OutputCacheFile"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_36_GraphBuildSwitch"));
-#if FEATURE_REPORTFILEACCESSES
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_42_ReportFileAccessesSwitch"));
-#endif
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_39_LowPrioritySwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_41_QuestionSwitch"));
+            foreach (string parameterizedSwitchRsouceId in CommandLineSwitches.GetParameterizedSwitchResourceIds())
+            {
+                Console.WriteLine(AssemblyResources.GetString(parameterizedSwitchRsouceId));
+            }
+            foreach (string parameterlessSwitchRsouceId in CommandLineSwitches.GetParameterlessSwitchResourceIds())
+            {
+                Console.WriteLine(AssemblyResources.GetString(parameterlessSwitchRsouceId));
+            }
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_7_ResponseFile"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_8_NoAutoResponseSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_5_NoLogoSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_6_VersionSwitch"));
-            Console.WriteLine(AssemblyResources.GetString("HelpMessage_4_HelpSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_16_Examples"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_37_DocsLink"));
         }
