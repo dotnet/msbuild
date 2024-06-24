@@ -202,7 +202,7 @@
            AlwaysCreate="true" />
   </Target>
 
-  <UsingTask TaskName="MSBuild.Bootstrap.Utils.Tasks.InstallDotNetCoreTask" AssemblyFile="$(ArtifactsBinDir)MSBuild.Bootstrap.Utils\$(Configuration)\$(TargetFramework)\MSBuild.Bootstrap.Utils.dll" Condition="!$(TargetFramework.StartsWith('net4'))" />
+  <UsingTask TaskName="MSBuild.Bootstrap.Utils.Tasks.InstallDotNetCoreTask" AssemblyFile="$(ArtifactsBinDir)MSBuild.Bootstrap.Utils\$(Configuration)\netstandard2.0\MSBuild.Bootstrap.Utils.dll" Condition="!$(TargetFramework.StartsWith('net4'))" />
   <Target Name="BootstrapNetCore" DependsOnTargets="CleanBootstrapFolder">
 
     <PropertyGroup>

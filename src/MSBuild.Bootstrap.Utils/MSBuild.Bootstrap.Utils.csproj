@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>$(LatestDotNetCoreForMSBuild)</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
     <IsPackable>false</IsPackable>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -8,8 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
-    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
-    <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
   </ItemGroup>
 

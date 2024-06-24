@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Runtime.InteropServices;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
 namespace MSBuild.Bootstrap.Utils.Tasks
@@ -24,13 +23,10 @@ namespace MSBuild.Bootstrap.Utils.Tasks
             Version = string.Empty;
         }
 
-        [Required]
         public string InstallDir { get; set; }
 
-        [Required]
         public string DotNetInstallScriptRootPath { get; set; }
 
-        [Required]
         public string Version { get; set; }
 
         public override bool Execute()
