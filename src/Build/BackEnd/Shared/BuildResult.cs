@@ -120,7 +120,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// When this key is in the dictionary <see cref="_savedEnvironmentVariables"/>, serialize the build result version.
         /// </summary>
-        private const string VersionKeyName = "MSBUILDFEATUREBUILDRESULTHASVERSION";
+        private const string VersionKeyName = "MSBUILDFEATUREBUILDRESULTHASVERSION=";
 
         /// <summary>
         /// Presence of this key is in the dictionary <see cref="_savedEnvironmentVariables"/> indicates that it was null.
@@ -128,7 +128,7 @@ namespace Microsoft.Build.Execution
         /// <remarks>
         /// There is a behavioral difference between dictionary <see cref="_savedEnvironmentVariables"/> being empty and being null. Adding a magic key to distinguish these situations on deserialization. 
         /// </remarks>
-        private const string SavedEnvironmentVariablesDictionaryWasNull = "MSBUILDSAVEDENVIRONMENTVARIABLESWASNULL";
+        private const string SavedEnvironmentVariablesDictionaryWasNull = "MSBUILDSAVEDENVIRONMENTVARIABLESWASNULL=";
 
         /// <summary>
         /// Snapshot of the current directory from the configuration this result comes from.
@@ -682,7 +682,7 @@ namespace Microsoft.Build.Execution
                             _savedEnvironmentVariables.Remove(VersionKeyName);
                         }
                     }
-                    else
+                    else if (translator.Mode == TranslationDirection.ReadFromStream)
                     {
                         // Read the dictionary. If the special key VersionKeyName present there, also read a version and remove the special keys.
                         // Presence of special key SavedEnvironmentVariablesDictionaryWasNull indicates that the dictionary was null.
