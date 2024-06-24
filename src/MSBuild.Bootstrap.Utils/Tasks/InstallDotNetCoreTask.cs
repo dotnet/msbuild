@@ -37,6 +37,8 @@ namespace MSBuild.Bootstrap.Utils.Tasks
                 DownloadScript(executionSettings.ScriptName, executionSettings.ScriptsFullPath);
             }
 
+            MakeScriptExecutable(executionSettings.ScriptsFullPath);
+
             return RunScript(executionSettings);
         }
 
@@ -49,6 +51,31 @@ namespace MSBuild.Bootstrap.Utils.Tasks
 
                 string scriptContent = response.Content.ReadAsStringAsync().Result;
                 File.WriteAllText(scriptPath, scriptContent);
+            }
+        }
+
+        private void MakeScriptExecutable(string scriptPath)
+        {
+            if (IsWindows)
+            {
+                return;
+            }
+
+            using (var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "/bin/chmod",
+                    Arguments = $"+x {scriptPath}",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                },
+            })
+            {
+                process.Start();
+                process.WaitForExit();
             }
         }
 
@@ -99,8 +126,8 @@ namespace MSBuild.Bootstrap.Utils.Tasks
 
             var startInfo = new ProcessStartInfo
             {
-                FileName = IsWindows ? executableName : "chmod",
-                Arguments = IsWindows ? scriptArgs : $"+x {scriptPath} {scriptArgs}",
+                FileName = executableName,
+                Arguments = scriptArgs,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
