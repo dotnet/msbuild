@@ -607,7 +607,7 @@ namespace Microsoft.Build.BackEnd
             /// <param name="additionalEntriesKeys">Additional entries keys</param>
             public void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys)
             {
-                if (!TranslateNullable(dictionary as IDictionary<string, string>))
+                if (!TranslateNullable(dictionary))
                 {
                     return;
                 }
