@@ -195,6 +195,7 @@
     <Compile Include="CombinePath.cs" />
     <Compile Include="CommandLineBuilderExtension.cs" />
     <Compile Include="ResourceHandling\*.cs" />
+    <Compile Include="WasmTask.cs" />
     <Compile Include="GetCompatiblePlatform.cs" />
     <Compile Include="SetRidAgnosticValueForProjects.cs" />
     <Compile Include="BuildCacheDisposeWrapper.cs" />
@@ -671,6 +672,7 @@
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Resources.Extensions" />
+    <PackageReference Include="wasmtime" />
   </ItemGroup>
 
   <!-- Mimics AddRefAssemblies from MSBuild.csproj -->

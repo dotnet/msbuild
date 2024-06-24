@@ -2,7 +2,6 @@
   <!-- Import references updated by Dependabot.
        This file is for package references updated manually or by Darc/Maestro. -->
   <Import Project="dependabot\Packages.props" />
-
   <!--
     Make sure to update the binding redirects (in src\MSBuild\app.config and src\MSBuild\app.amd64.config) for any changes to
     the list of assemblies redistributed by MSBuild (non-MSBuild assemblies in the .vsix package).
@@ -30,6 +29,7 @@
     <PackageVersion Include="System.Text.Json" Version="$(SystemTextJsonVersion)" />
     <PackageVersion Include="System.Threading.Channels" Version="$(SystemThreadingChannelsVersion)" />
     <PackageVersion Include="System.Threading.Tasks.Dataflow" Version="$(SystemThreadingTasksDataflowVersion)" />
+    <PackageVersion Include="wasmtime" Version="19.0.1" />
     <PackageVersion Include="xunit.console" Version="$(XUnitVersion)" />
   </ItemGroup>
 </Project>
