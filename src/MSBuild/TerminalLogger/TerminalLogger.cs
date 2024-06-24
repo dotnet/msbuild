@@ -207,8 +207,6 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private bool _showCommandLine = false;
 
-    private bool _cancellationMessageRendered;
-
     /// <summary>
     /// Default constructor, used by the MSBuild logger infra.
     /// </summary>
@@ -453,9 +451,8 @@ internal sealed partial class TerminalLogger : INodeLogger
 
     private void StatusEventRaised(object sender, BuildStatusEventArgs e)
     {
-        if (e is BuildCanceledEventArgs buildCanceledEventArgs && !_cancellationMessageRendered)
+        if (e is BuildCanceledEventArgs buildCanceledEventArgs)
         {
-            _cancellationMessageRendered = true;
             RenderImmediateMessage(e.Message!);
         }
     }
