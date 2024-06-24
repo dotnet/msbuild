@@ -603,8 +603,8 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             /// <param name="dictionary">The dictionary to be translated.</param>
             /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
-            /// <param name="additionalEntries">The extra entries to be translated</param>
-            /// <param name="additionalEntriesKeys">The extra entries keys</param>
+            /// <param name="additionalEntries">Additional entries to be translated</param>
+            /// <param name="additionalEntriesKeys">Additional entries keys</param>
             public void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys)
             {
                 if (!TranslateNullable(dictionary as IDictionary<string, string>))
