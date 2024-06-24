@@ -113,22 +113,9 @@ namespace Microsoft.Build.Execution
         private Dictionary<string, string> _savedEnvironmentVariables;
 
         /// <summary>
-        /// Lock object for the dictionary <see cref="_savedEnvironmentVariables"/>.
-        /// </summary>
-        private readonly object _lock = new object();
-
-        /// <summary>
         /// When this key is in the dictionary <see cref="_savedEnvironmentVariables"/>, serialize the build result version.
         /// </summary>
-        private const string VersionKeyName = "MSBUILDFEATUREBUILDRESULTHASVERSION=";
-
-        /// <summary>
-        /// Presence of this key is in the dictionary <see cref="_savedEnvironmentVariables"/> indicates that it was null.
-        /// </summary>
-        /// <remarks>
-        /// There is a behavioral difference between dictionary <see cref="_savedEnvironmentVariables"/> being empty and being null. Adding a magic key to distinguish these situations on deserialization. 
-        /// </remarks>
-        private const string SavedEnvironmentVariablesDictionaryWasNull = "MSBUILDSAVEDENVIRONMENTVARIABLESWASNULL=";
+        private const string VersionKeyName = "=MSBUILDFEATUREBUILDRESULTHASVERSION=";
 
         /// <summary>
         /// Snapshot of the current directory from the configuration this result comes from.
@@ -654,57 +641,31 @@ namespace Microsoft.Build.Execution
             }
             else
             {
-                lock (_lock)
+                Dictionary<string, string> additionalEntries = new();
+                HashSet<string> additionalEntriesKeys = new HashSet<string>
                 {
-                    if (translator.Mode == TranslationDirection.WriteToStream)
-                    {
-                        // Add the special key VersionKeyName indicating the presence of a version to the _savedEnvironmentVariables dictionary.
-                        // If the dictionary was null, add another special key SavedEnvironmentVariablesDictionaryWasNull to the dictionary.
-                        if (_savedEnvironmentVariables is null)
-                        {
-                            _savedEnvironmentVariables = new Dictionary<string, string>
-                            {
-                                { SavedEnvironmentVariablesDictionaryWasNull, String.Empty }
-                            };
-                        }
+                    VersionKeyName
+                };
 
-                        _savedEnvironmentVariables.Add(VersionKeyName, String.Empty);
-                        translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
+                if (translator.Mode == TranslationDirection.WriteToStream)
+                {
+                    // Add the special key VersionKeyName to additional entries indicating the presence of a version to the _savedEnvironmentVariables dictionary.
+                    additionalEntries.Add(VersionKeyName, String.Empty);
+
+                    translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase, ref additionalEntries, additionalEntriesKeys);
+                    translator.Translate(ref _version);
+                }
+                else if (translator.Mode == TranslationDirection.ReadFromStream)
+                {
+                    // Read the dictionary. If the special key VersionKeyName present there, also read a version and remove the special keys.
+                    translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase, ref additionalEntries, additionalEntriesKeys);
+                    if (additionalEntries is not null && additionalEntries.ContainsKey(VersionKeyName))
+                    {
                         translator.Translate(ref _version);
-
-                        // Remove the added keys from the dictionary.
-                        if (_savedEnvironmentVariables.ContainsKey(SavedEnvironmentVariablesDictionaryWasNull))
-                        {
-                            _savedEnvironmentVariables = null;
-                        }
-                        else
-                        {
-                            _savedEnvironmentVariables.Remove(VersionKeyName);
-                        }
                     }
-                    else if (translator.Mode == TranslationDirection.ReadFromStream)
+                    else
                     {
-                        // Read the dictionary. If the special key VersionKeyName present there, also read a version and remove the special keys.
-                        // Presence of special key SavedEnvironmentVariablesDictionaryWasNull indicates that the dictionary was null.
-                        translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
-
-                        if ((_savedEnvironmentVariables is not null) && _savedEnvironmentVariables.ContainsKey(VersionKeyName))
-                        {
-                            if (_savedEnvironmentVariables.ContainsKey(SavedEnvironmentVariablesDictionaryWasNull))
-                            {
-                                _savedEnvironmentVariables = null;
-                            }
-                            else
-                            {
-                                _savedEnvironmentVariables.Remove(VersionKeyName);
-                            }
-
-                            translator.Translate(ref _version);
-                        }
-                        else
-                        {
-                            _version = 0;
-                        }
+                        _version = 0;
                     }
                 }
             }
