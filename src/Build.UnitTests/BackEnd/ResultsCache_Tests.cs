@@ -421,6 +421,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 resultsCache.Translate(TranslationHelpers.GetWriteTranslator());
 
                 env.SetEnvironmentVariable("MSBUILDDONOTVERSIONBUILDRESULT", $"{envValue2}");
+                Traits.UpdateFromEnvironment();
 
                 var copy = new ResultsCache(TranslationHelpers.GetReadTranslator());
 
