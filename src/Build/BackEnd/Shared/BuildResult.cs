@@ -682,7 +682,7 @@ namespace Microsoft.Build.Execution
                             _savedEnvironmentVariables.Remove(VersionKeyName);
                         }
                     }
-                    else
+                    else if (translator.Mode == TranslationDirection.ReadFromStream)
                     {
                         // Read the dictionary. If the special key VersionKeyName present there, also read a version and remove the special keys.
                         // Presence of special key SavedEnvironmentVariablesDictionaryWasNull indicates that the dictionary was null.
