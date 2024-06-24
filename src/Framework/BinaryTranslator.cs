@@ -1318,10 +1318,8 @@ namespace Microsoft.Build.BackEnd
             /// <param name="additionalEntriesKeys">Additional entries keys.</param>
             public void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys)
             {
-                IDictionary<string, string> copy = dictionary;
-
                 // Translate whether object is Null
-                if ((copy is null) && ((additionalEntries is null) || (additionalEntries.Count == 0)))
+                if ((dictionary is null) && ((additionalEntries is null) || (additionalEntries.Count == 0)))
                 {
                     _writer.Write(false);
                     return;
@@ -1333,7 +1331,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // Writing dictionary, extra entries and special key if copy dictionary was null
-                int count = (copy is null ? 0 : copy.Count) + (additionalEntries is null ? 0 : additionalEntries.Count) + (copy is null ? 1 : 0);
+                int count = (dictionary is null ? 0 : dictionary.Count) + (additionalEntries is null ? 0 : additionalEntries.Count) + (dictionary is null ? 1 : 0);
                 _writer.Write(count);
 
                 // If the dictionary was null, add a special key SpecialKeyForDictionaryBeingNull to the dictionary.
@@ -1357,10 +1355,10 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                if (copy is not null)
+                if (dictionary is not null)
                 {
                     // Translate dictionary
-                    foreach (KeyValuePair<string, string> pair in copy)
+                    foreach (KeyValuePair<string, string> pair in dictionary)
                     {
                         string key = pair.Key;
                         Translate(ref key);
