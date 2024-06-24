@@ -20,16 +20,16 @@ dotnet build -bl -analyze
 
 "Two projects should not share their OutputPath nor IntermediateOutputPath locations"
 
-It is not recommended to share output path nor intermediate output path between multiple projects. Such practice can lead to silent overwrites of the outputs. Such overwrites will depepend on the order of the build, that might not be guaranteed (if not explicitly configured) and hence it can cause nondeterministic behavior of the build.
+It is not recommended to share output path nor intermediate output path between multiple projects. Such practice can lead to silent overwrites of the outputs. Such overwrites will depend on the order of the build, that might not be guaranteed (if not explicitly configured) and hence it can cause nondeterministic behavior of the build.
 
-If you want to produce outputs in a consolidated output folder - you might be looking for [Artifacts output layout](https://learn.microsoft.com/en-us/dotnet/core/sdk/artifacts-output) and/or [Microsoft.Build.Artifacts SDK](https://github.com/microsoft/MSBuildSdks/tree/main/src/Artifacts).
+If you want to produce outputs in a consolidated output folder - consider using the [Artifacts output layout](https://learn.microsoft.com/en-us/dotnet/core/sdk/artifacts-output) and/or [Microsoft.Build.Artifacts SDK](https://github.com/microsoft/MSBuildSdks/tree/main/src/Artifacts).
 
 
 ## <a name="BC0102"></a>BC0102 - Double writes.
 
 "Two tasks should not write the same file"
 
-This is a similar problem as ['BC0101 - Shared output path'](#BC0101) - however with higher granularity. It is not recomended that multiple tasks attempts to write to a single file - as such behavior might lead to nondeterminism of a build (as result can be dependant on the order of the tasks execution if those belong to independent projects) or/and to a lost updates.
+This is a similar problem as ['BC0101 - Shared output path'](#BC0101) - however with higher granularity. It is not recomended that multiple tasks attempt to write to a single file - as such behavior might lead to nondeterminism of a build (as result can be dependent on the order of the tasks execution if those belong to independent projects) or/and to a lost updates.
 
 If you want multiple tasks to update file in a one-by-one pipeline fashion, it is recommended to give each intermediate output a distinct name - preventing silent mixups if any of the tasks in the chain are skipped or removed.
 
