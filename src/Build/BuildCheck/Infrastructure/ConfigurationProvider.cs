@@ -233,6 +233,7 @@ internal sealed class ConfigurationProvider
         var editorConfigValue = _buildAnalyzerConfiguration.GetOrAdd(cacheKey, (key) =>
         {
             BuildAnalyzerConfiguration? editorConfig = BuildAnalyzerConfiguration.Null;
+            editorConfig.RuleId = ruleId;
             var config = GetConfiguration(projectFullPath, ruleId);
 
             if (config.Any())

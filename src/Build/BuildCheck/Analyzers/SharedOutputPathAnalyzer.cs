@@ -17,7 +17,7 @@ internal sealed class SharedOutputPathAnalyzer : BuildAnalyzer
     public static BuildAnalyzerRule SupportedRule = new BuildAnalyzerRule("BC0101", "ConflictingOutputPath",
         "Two projects should not share their OutputPath nor IntermediateOutputPath locations",
         "Projects {0} and {1} have conflicting output paths: {2}.",
-        new BuildAnalyzerConfiguration() { Severity = BuildAnalyzerResultSeverity.Warning, IsEnabled = true });
+        new BuildAnalyzerConfiguration() { RuleId = "BC0101", Severity = BuildAnalyzerResultSeverity.Warning, IsEnabled = true });
 
     public override string FriendlyName => "MSBuild.SharedOutputPathAnalyzer";
 
