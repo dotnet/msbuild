@@ -2950,6 +2950,9 @@ namespace Microsoft.Build.Execution
             });
         }
 
+        /// <summary>
+        /// Sets <see cref="BuildParameters.IsBuildCheckEnabled"/> to true. Used for BuildCheck Replay Mode.
+        /// </summary>
         internal void EnableBuildCheck()
         {
             _buildParameters ??= new BuildParameters();
