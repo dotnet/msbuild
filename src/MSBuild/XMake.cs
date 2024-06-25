@@ -1145,8 +1145,8 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
-            Console.WriteLine(ResourceUtilities.GetResourceString("AbortingBuild"));
             s_buildCancellationSource.Cancel();
+            
 
             // The OS takes a lock in
             // kernel32.dll!_SetConsoleCtrlHandler, so if a task

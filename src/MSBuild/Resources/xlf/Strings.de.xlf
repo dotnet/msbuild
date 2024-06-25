@@ -1994,11 +1994,6 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
   </note>
       </trans-unit>
-      <trans-unit id="AbortingBuild">
-        <source>Attempting to cancel the build...</source>
-        <target state="translated">Es wird versucht, den Buildvorgang abzubrechen...</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidPreprocessPath">
         <source>MSBUILD : error MSB1047: File to preprocess to is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1047: Die vorzuverarbeitende Datei ist ungültig. {0}</target>

@@ -1485,9 +1485,6 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>
-  <data name="AbortingBuild" xml:space="preserve">
-    <value>Attempting to cancel the build...</value>
-  </data>
   <data name="InvalidPreprocessPath" xml:space="preserve">
     <value>MSBUILD : error MSB1047: File to preprocess to is not valid. {0}</value>
     <comment>{StrBegin="MSBUILD : error MSB1047: "}</comment>

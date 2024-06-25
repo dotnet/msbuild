@@ -781,6 +781,9 @@ namespace Microsoft.Build.Execution
 
         private void CancelAllSubmissions(bool async)
         {
+            ILoggingService loggingService = ((IBuildComponentHost)this).LoggingService;
+            loggingService.LogBuildCanceled();
+
             var parentThreadCulture = _buildParameters != null
                 ? _buildParameters.Culture
                 : CultureInfo.CurrentCulture;

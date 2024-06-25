@@ -421,6 +421,15 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <inheritdoc />
+        public void LogBuildCanceled()
+        {
+            string message = ResourceUtilities.GetResourceString("AbortingBuild"); 
+            BuildCanceledEventArgs buildEvent = new BuildCanceledEventArgs(message);
+
+            ProcessLoggingEvent(buildEvent);
+        }
+
+        /// <inheritdoc />
         public BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId)
             => new BuildEventContext(submissionId, nodeId, NextEvaluationId, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
 

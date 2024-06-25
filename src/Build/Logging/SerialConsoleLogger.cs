@@ -587,6 +587,10 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
                 }
             }
+            else if (e is BuildCanceledEventArgs buildCanceled)
+            {;
+                Console.WriteLine(e.Message);
+            }
         }
 
         /// <summary>
