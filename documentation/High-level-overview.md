@@ -1,19 +1,42 @@
 # MsBuild high level overview
 
 ## What is MSBuild
+MSBuild is a build platform used mainly for C# projects within .NET and Visual Studio. But when referencing MSBuild technically we can divide what MSBuild actually is in 3 main parts:
+- Programming language that uses XML semantic to define build actions and data.
+- API and command line program that interprets and manipulates the programming language.
+- Build engine that executes a build based on the programmin language inputs.
 
-MSBuild is 3 things, and when reffering to MSBuild you need to know which part you are reffering to.
-- Programming language in XML semantic
-- Build engine: it is more general then make for example
-- API and command line program to interpret the programming language, and a library o
-    - API for manipulating the programming language itself (VS uses it, by their properties UI).
-- More extensibilities
-    - Loggers, custom dlls, some other stuff, tasks (Msbuild task,)
-    - Factories
-    - there is also exec
+MSBuild also contains some extensibility aspects that mostly interact with the API and engine. These are built to increase customization and interaction capability. 
+
+This document covers all part of MSBuild in a general manner. So there will be no in depth technical details, or how-to's. If you'd like to learn how to use MSBuild to improve your builds please visit [Learn Microsoft](https://learn.microsoft.com/en-us/visualstudio/msbuild).
 
 
-## In-line vs VS builds
+## MSBuild the programming language
+The MSBuild programming language is a programming language that uses XML semantics with a focus on describing a project. You can see an [exmaple here](https://github.com/dotnet/msbuild/blob/main/src/Build/Microsoft.Build.csproj). 
+
+The MSBuilkd XML is built around representing a project's data. It uses various attributes to do so:
+- [Tasks](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-targets) are how actions are defined in MSBuild, they're a unit of executable code to perform build operations. Most used tasks are defined within MSBuild itself, but can also be externally authored by implementing the `ITask` interface.
+- [Targets](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-targets) represents a group os tasks, in which their order matters. It is a set of instructions for the MSBuild engine to build from.
+- [Items](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-items) are inputs to the build system, mostly to tasks or targets. They can represent project files, code files, libraries and most things that a project can depend on.
+- [Properties](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-properties) are name value pairs, they're used to store data that is used throughout the build.
+
+These attributes are defined within `.csproj` files, which are considered *projects*. `.sln` solution files can be normally found in .NET projects, are actually not written with MSBuild XML, but it is interpreted during project build so all projects can be identified.
+
+Since the project file defines the data used for the build, the actual build instructions are imported through imports of libraries, that contains their own tasks and targets. One example that is vastly used is the SDK with `dotnet build`. These librearies also extend what can be done with a build, and overal functionality.
+
+## MSBuild the API
+It is a library of common build logic that defined basic things, like the convept of output folder, intermediate folder, so other tools can utilize these resources. 
+It is also a way to manipulate the MSBuild Language without directly changing the language on a project itself.
+It is an API focused on building .NET programs so there are some specific things.
+ - Common targets: 
+Core idea behind those targets is you're either manipulating MSBuild data or figuring out the intermediate. What things should be passed to the compiler, or you are invoking tools 
+    - like command line aplications (exe). We also offer base class toolTask to provide an interface for that.
+
+### ToolTask
+We offer an interface called ToolTask where you can implement custom tasks to be processed during the build. This is more perfomant (on windows) than writing a script to do the same thing.
+
+The engine will construct the task, call the execute method and then you can do whatever you want (was written in the task) during the execution
+
 
 ## Extensibilities
 We have some extensibilities within MSBuild:
@@ -227,29 +250,3 @@ With this second mode you need to specify input and output results cache so diff
 *Watch the Roman knowledge hand off to get more information about MSBuil server*
 
 The MSBuild server is the idea of separating some processes. Splitting the entry point executable that lives for one build invocation, and the scheduler and the 1st in-proc node. This way you don't need to JIT and you can preserve your in-memory cache.
-
-## MSBuild the programming language
-This is not a general puporse language. Thefocus is to describe a project. So generally when it runs there is an output to files. Easier to express data rather than logic. We have properties and items -> data types (basically string, and string dictionary with a string attached).
-Project file generally defines data, and what defined the actual process of the build is imported, either through the SDK, or though an explicit import elements that has libraries of tasks and targets that can be used to support building.
-It has the resources for incremental builds and some performance improvments.
-
-Has targets, targets can contain tasks. Tasks do arbitrary things, and there is an odering contraint when coding and executing them.
-
-### Tasks
-How we define this items within the MSBuild language.
-
-In the task API there is a way that a task tells the engine it is blocked on results that depend on another task.
-### Lifetimes
-
-## MSBuild the API
-It is a library of common build logic that defined basic things, like the convept of output folder, intermediate folder, so other tools can utilize these resources. 
-It is also a way to manipulate the MSBuild Language without directly changing the language on a project itself.
-It is an API focused on building .NET programs so there are some specific things.
- - Common targets: 
-Core idea behind those targets is you're either manipulating MSBuild data or figuring out the intermediate. What things should be passed to the compiler, or you are invoking tools 
-    - like command line aplications (exe). We also offer base class toolTask to provide an interface for that.
-
-### ToolTask
-We offer an interface called ToolTask where you can implement custom tasks to be processed during the build. This is more perfomant (on windows) than writing a script to do the same thing.
-
-The engine will construct the task, call the execute method and then you can do whatever you want (was written in the task) during the execution
