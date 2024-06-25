@@ -912,7 +912,8 @@ internal sealed partial class TerminalLogger : INodeLogger
             && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project)
             && Verbosity > LoggerVerbosity.Quiet)
         {
-            if (!String.IsNullOrEmpty(e.Message) && IsImmediateMessage(e.Message!))
+            if ((!String.IsNullOrEmpty(e.Message) && IsImmediateMessage(e.Message!)) ||
+                IsCopyTaskRetryCode(e.Code))
             {
                 RenderImmediateMessage(FormatWarningMessage(e, Indentation));
             }
@@ -938,6 +939,9 @@ internal sealed partial class TerminalLogger : INodeLogger
 #else
         _immediateMessageKeywords.Any(imk => message.IndexOf(imk, StringComparison.OrdinalIgnoreCase) >= 0);
 #endif
+
+
+    private bool IsCopyTaskRetryCode(string code) => code == "MSB3026";
 
     /// <summary>
     /// The <see cref="IEventSource.ErrorRaised"/> callback.
