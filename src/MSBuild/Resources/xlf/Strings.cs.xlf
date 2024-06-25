@@ -2006,11 +2006,6 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
   </note>
       </trans-unit>
-      <trans-unit id="AbortingBuild">
-        <source>Attempting to cancel the build...</source>
-        <target state="translated">Pokus o zrušení sestavování...</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidPreprocessPath">
         <source>MSBUILD : error MSB1047: File to preprocess to is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1047: Soubor, do kterého má být provedeno předběžné zpracování, není platný. {0}</target>
