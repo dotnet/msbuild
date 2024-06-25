@@ -35,46 +35,50 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Constructs a task logging context from a parent target context and a task node.
         /// </summary>
         internal TaskLoggingContext(TargetLoggingContext targetLoggingContext, string projectFullPath, ProjectTargetInstanceChild task, string taskAssemblyLocation)
-            : base(targetLoggingContext)
+            : base(targetLoggingContext, CreateInitialContext(targetLoggingContext, projectFullPath, task, taskAssemblyLocation))
         {
             _targetLoggingContext = targetLoggingContext;
             _task = task;
+            _taskName = GetTaskName(task);
+            this.IsValid = true;
+        }
 
-            ProjectTaskInstance taskInstance = task as ProjectTaskInstance;
-            if (taskInstance != null)
-            {
-                _taskName = taskInstance.Name;
-            }
-            else
-            {
-                ProjectPropertyGroupTaskInstance propertyGroupInstance = task as ProjectPropertyGroupTaskInstance;
-                if (propertyGroupInstance != null)
-                {
-                    _taskName = "PropertyGroup";
-                }
-                else
-                {
-                    ProjectItemGroupTaskInstance itemGroupInstance = task as ProjectItemGroupTaskInstance;
-                    if (itemGroupInstance != null)
-                    {
-                        _taskName = "ItemGroup";
-                    }
-                    else
-                    {
-                        _taskName = "Unknown";
-                    }
-                }
-            }
-
-            this.BuildEventContext = LoggingService.LogTaskStarted2(
+        private static BuildEventContext CreateInitialContext(TargetLoggingContext targetLoggingContext,
+            string projectFullPath, ProjectTargetInstanceChild task, string taskAssemblyLocation)
+        {
+            BuildEventContext buildEventContext = targetLoggingContext.LoggingService.LogTaskStarted2(
                 targetLoggingContext.BuildEventContext,
-                _taskName,
+                GetTaskName(task),
                 projectFullPath,
                 task.Location.File,
                 task.Location.Line,
                 task.Location.Column,
                 taskAssemblyLocation);
-            this.IsValid = true;
+
+            return buildEventContext;
+        }
+
+        private static string GetTaskName(ProjectTargetInstanceChild task)
+        {
+            ProjectTaskInstance taskInstance = task as ProjectTaskInstance;
+            if (taskInstance != null)
+            {
+                return taskInstance.Name;
+            }
+
+            ProjectPropertyGroupTaskInstance propertyGroupInstance = task as ProjectPropertyGroupTaskInstance;
+            if (propertyGroupInstance != null)
+            {
+                return "PropertyGroup";
+            }
+
+            ProjectItemGroupTaskInstance itemGroupInstance = task as ProjectItemGroupTaskInstance;
+            if (itemGroupInstance != null)
+            {
+                return "ItemGroup";
+            }
+
+            return "Unknown";
         }
 
         /// <summary>

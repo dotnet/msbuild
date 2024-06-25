@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -90,6 +91,7 @@ namespace Microsoft.Build.BackEnd
                             }
 
                             bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(property.Name, evaluatedValue, property.Location, Project.IsImmutable));
+                            LoggingContext.ProcessPropertyWrite(new PropertyWriteInfo(property.Name, string.IsNullOrEmpty(evaluatedValue), property.Location));
                         }
                     }
                 }

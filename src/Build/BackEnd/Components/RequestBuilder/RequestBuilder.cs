@@ -1225,7 +1225,8 @@ namespace Microsoft.Build.BackEnd
             {
                 buildCheckManager.EndProjectRequest(
                     BuildCheckDataSource.BuildExecution,
-                    _requestEntry.Request.ParentBuildEventContext);
+                    _requestEntry.Request.ParentBuildEventContext,
+                    _requestEntry.RequestConfiguration.ProjectFullPath);
             }
 
             BuildResult CopyTargetResultsFromProxyTargetsToRealTargets(BuildResult resultFromTargetBuilder)

@@ -7,13 +7,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Experimental.BuildCheck;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 internal class NullBuildCheckManagerProvider : IBuildCheckManagerProvider
 {
-    public IBuildCheckManager Instance { get; } = new NullBuildCheckManager();
+    private readonly NullBuildCheckManager _instance = new NullBuildCheckManager();
+    public IBuildCheckManager Instance => _instance;
+    public IBuildEngineDataRouter BuildEngineDataRouter => _instance;
 
     public void InitializeComponent(IBuildComponentHost host) { }
     public void ShutdownComponent() { }

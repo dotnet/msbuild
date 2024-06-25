@@ -15,6 +15,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
+using Microsoft.Build.BuildCheck.Infrastructure;
 
 #nullable disable
 
@@ -355,6 +356,11 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Router of the build engine runtime execution information.
+        /// </summary>
+        public IBuildEngineDataRouter BuildEngineDataRouter => this;
 
         /// <summary>
         /// Properties we need to serialize from the child node
