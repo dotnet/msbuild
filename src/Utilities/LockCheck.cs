@@ -12,10 +12,14 @@ using Microsoft.Build.Shared;
 
 #nullable disable
 
-namespace Microsoft.Build.Tasks
+namespace Microsoft.Build.Utilities
 {
-    [SupportedOSPlatform("windows")]
-    internal class LockCheck
+    /// <summary>
+    /// This class implements checking what processes are locking a file on Windows.
+    /// It uses the Restart Manager API to do this. Other platforms are skipped.
+    /// Use the method <see cref="GetLockedFileMessage"/> to get a message to inform the user which processes have a lock on a given file.
+    /// </summary>
+    public static class LockCheck
     {
         [Flags]
         internal enum ApplicationStatus
@@ -111,7 +115,7 @@ namespace Microsoft.Build.Tasks
         private static extern int RmEndSession(uint pSessionHandle);
 
         [DllImport(RestartManagerDll, CharSet = CharSet.Unicode)]
-        public static extern int RmGetList(uint dwSessionHandle,
+        internal static extern int RmGetList(uint dwSessionHandle,
             out uint pnProcInfoNeeded,
             ref uint pnProcInfo,
             [In, Out] RM_PROCESS_INFO[] rgAffectedApps,
@@ -247,9 +251,21 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Try to get a message to inform the user which processes have a lock on a given file.
+        /// Try to get a message to inform the user which processes have a lock on a given file. On Windows it uses the Restart Manager API.
         /// </summary>
-        internal static string GetLockedFileMessage(string file)
+        /// <param name="filePath">The path of the file to check.</param>
+        /// <returns>A message to inform the user which processes have a lock on the file if known, <see cref="string.Empty"/> otherwise. Always returns <see cref="string.Empty"/> on operating systems other than Windows.</returns>
+        public static string GetLockedFileMessage(string filePath)
+        {
+            if (NativeMethodsShared.IsWindows)
+            {
+                return GetLockedFileMessageWindows(filePath);
+            }
+            return string.Empty;
+        }
+
+        [SupportedOSPlatform("windows")]
+        private static string GetLockedFileMessageWindows(string filePath)
         {
             string message = string.Empty;
 
@@ -257,9 +273,9 @@ namespace Microsoft.Build.Tasks
             {
                 if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
                 {
-                    var processes = GetProcessesLockingFile(file);
+                    var processes = GetProcessesLockingFile(filePath);
                     message = !string.IsNullOrEmpty(processes)
-                        ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("Task.FileLocked", processes)
+                        ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LockCheck.FileLocked", processes)
                         : String.Empty;
                 }
             }

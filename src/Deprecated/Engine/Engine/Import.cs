@@ -13,9 +13,9 @@ namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
     /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-    /// <xref:Microsoft.Build.Construction>
-    /// <xref:Microsoft.Build.Evaluation>
-    /// <xref:Microsoft.Build.Execution>
+    /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+    /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+    /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
     /// 
     /// This class represents a single Import element in a project file
     /// </summary>
@@ -59,9 +59,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Returns true if this Import came from an imported project
         /// </summary>
@@ -85,9 +85,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Returns the original import path from the Import element
         /// </summary>
@@ -128,9 +128,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Returns the full evaluated import path
         /// </summary>
@@ -154,9 +154,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// The condition string for this UsingTask
         /// </summary>
