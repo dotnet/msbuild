@@ -26,7 +26,7 @@ namespace Microsoft.Build.BackEnd
         /// Presence of this key in the dictionary indicates that it was null.
         /// </summary>
         /// <remarks>
-        /// This is needed for a workaround.
+        /// This constant is needed for a workaround concerning serializing <see cref="BuildResult"/> with a version.
         /// </remarks>
         private const string SpecialKeyForDictionaryBeingNull = "=MSBUILDDICTIONARYWASNULL=";
 
@@ -605,6 +605,10 @@ namespace Microsoft.Build.BackEnd
             /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
             /// <param name="additionalEntries">Additional entries to be translated</param>
             /// <param name="additionalEntriesKeys">Additional entries keys</param>
+            /// <remarks>
+            /// This overload is needed for a workaround concerning serializing <see cref="BuildResult"/> with a version.
+            /// It deserializes additional entries together with the main dictionary.
+            /// </remarks>
             public void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys)
             {
                 if (!TranslateNullable(dictionary))
@@ -1316,9 +1320,13 @@ namespace Microsoft.Build.BackEnd
             /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
             /// <param name="additionalEntries">Additional entries to be translated.</param>
             /// <param name="additionalEntriesKeys">Additional entries keys.</param>
+            /// <remarks>
+            /// This overload is needed for a workaround concerning serializing <see cref="BuildResult"/> with a version.
+            /// It serializes additional entries together with the main dictionary.
+            /// </remarks>
             public void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys)
             {
-                // Translate whether object is Null
+                // Translate whether object is null
                 if ((dictionary is null) && ((additionalEntries is null) || (additionalEntries.Count == 0)))
                 {
                     _writer.Write(false);
@@ -1330,11 +1338,14 @@ namespace Microsoft.Build.BackEnd
                     _writer.Write(true);
                 }
 
-                // Writing dictionary, extra entries and special key if copy dictionary was null
-                int count = (dictionary is null ? 0 : dictionary.Count) + (additionalEntries is null ? 0 : additionalEntries.Count) + (dictionary is null ? 1 : 0);
+                // Writing a dictionary, additional entries and special key if dictionary was null. We need the special key for distinguishing whether the initial dictionary was null or empty.
+                int count = (dictionary is null ? 1 : 0) +
+                            (additionalEntries is null ? 0 : additionalEntries.Count) +
+                            (dictionary is null ? 0 : dictionary.Count);
+
                 _writer.Write(count);
 
-                // If the dictionary was null, add a special key SpecialKeyForDictionaryBeingNull to the dictionary.
+                // If the dictionary was null, serialize a special key SpecialKeyForDictionaryBeingNull.
                 if (dictionary is null)
                 {
                     string key = SpecialKeyForDictionaryBeingNull;
@@ -1343,9 +1354,9 @@ namespace Microsoft.Build.BackEnd
                     Translate(ref value);
                 }
 
+                // Serialize additional entries
                 if (additionalEntries is not null)
                 {
-                    // Translate extra entries
                     foreach (KeyValuePair<string, string> pair in additionalEntries)
                     {
                         string key = pair.Key;
@@ -1355,9 +1366,9 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
+                // Serialize dictionary
                 if (dictionary is not null)
                 {
-                    // Translate dictionary
                     foreach (KeyValuePair<string, string> pair in dictionary)
                     {
                         string key = pair.Key;

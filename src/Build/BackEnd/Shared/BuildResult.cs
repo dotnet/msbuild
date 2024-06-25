@@ -630,10 +630,16 @@ namespace Microsoft.Build.Execution
             // This is a work-around for the bug https://github.com/dotnet/msbuild/issues/10208
             // We are adding a version field to this class to make the ResultsCache backwards compatible with at least 2 previous releases.
             // The adding of a version field is done without a breaking change in 3 steps, each separated with at least 1 intermediate release.
-            // 1st step (done): Add a special key to the dictionary. The presence of this key indicates that the version is serialized next.
-            // When serializing, add a key to the dictionary and a version field. Delete the special key from the dictionary during the deserialization and read a version if it presents.
-            // 2nd step: Stop writing a special key to the dictionary. Always serialize and de-serialize the version field. Remove the special keys if they present in the dictionary.
-            // 3rd step: Stop removing the special keys from the dictionary.
+            //
+            // 1st step (done): Add a special key to the _savedEnvironmentVariables dictionary during the serialization. A workaround overload of the TranslateDictionary function is created to achieve it.
+            // The presence of this key will indicate that the version is serialized next.
+            // When serializing, add a key to the dictionary and serialize a version field.
+            // Do not actually save the special key to dictionary during the deserialization, but read a version as a next field if it presents.
+            //
+            // 2nd step: Stop serialize a special key with the dictionary _savedEnvironmentVariables using the TranslateDictionary function workaround overload. Always serialize and de-serialize the version field.
+            // Continue to deserialize _savedEnvironmentVariables with the TranslateDictionary function workaround overload in order not to deserialize dictionary with the special keys.
+            //
+            // 3rd step: Stop using the TranslateDictionary function workaround overload during _savedEnvironmentVariables deserialization.
             if (_version == 0)
             {
                 // Escape hatch: serialize/deserialize without version field.
@@ -652,13 +658,18 @@ namespace Microsoft.Build.Execution
                     // Add the special key VersionKeyName to additional entries indicating the presence of a version to the _savedEnvironmentVariables dictionary.
                     additionalEntries.Add(VersionKeyName, String.Empty);
 
+                    // Serialize the special key together with _savedEnvironmentVariables dictionary using the workaround overload of TranslateDictionary:
                     translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase, ref additionalEntries, additionalEntriesKeys);
+
+                    // Serialize version
                     translator.Translate(ref _version);
                 }
                 else if (translator.Mode == TranslationDirection.ReadFromStream)
                 {
-                    // Read the dictionary. If the special key VersionKeyName present there, also read a version and remove the special keys.
+                    // Read the dictionary using the workaround overload of TranslateDictionary: special keys (additionalEntriesKeys) would be read to additionalEntries instead of the _savedEnvironmentVariables dictionary.
                     translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase, ref additionalEntries, additionalEntriesKeys);
+
+                    // If the special key VersionKeyName present in additionalEntries, also read a version, otherwise set it to 0.
                     if (additionalEntries is not null && additionalEntries.ContainsKey(VersionKeyName))
                     {
                         translator.Translate(ref _version);
