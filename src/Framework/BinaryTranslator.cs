@@ -26,7 +26,7 @@ namespace Microsoft.Build.BackEnd
         /// Presence of this key in the dictionary indicates that it was null.
         /// </summary>
         /// <remarks>
-        /// This constant is needed for a workaround concerning serializing <see cref="BuildResult"/> with a version.
+        /// This constant is needed for a workaround concerning serializing BuildResult with a version.
         /// </remarks>
         private const string SpecialKeyForDictionaryBeingNull = "=MSBUILDDICTIONARYWASNULL=";
 
@@ -606,7 +606,7 @@ namespace Microsoft.Build.BackEnd
             /// <param name="additionalEntries">Additional entries to be translated</param>
             /// <param name="additionalEntriesKeys">Additional entries keys</param>
             /// <remarks>
-            /// This overload is needed for a workaround concerning serializing <see cref="BuildResult"/> with a version.
+            /// This overload is needed for a workaround concerning serializing BuildResult with a version.
             /// It deserializes additional entries together with the main dictionary.
             /// </remarks>
             public void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys)
@@ -1321,7 +1321,7 @@ namespace Microsoft.Build.BackEnd
             /// <param name="additionalEntries">Additional entries to be translated.</param>
             /// <param name="additionalEntriesKeys">Additional entries keys.</param>
             /// <remarks>
-            /// This overload is needed for a workaround concerning serializing <see cref="BuildResult"/> with a version.
+            /// This overload is needed for a workaround concerning serializing BuildResult with a version.
             /// It serializes additional entries together with the main dictionary.
             /// </remarks>
             public void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys)
