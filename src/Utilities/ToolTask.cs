@@ -1053,7 +1053,9 @@ namespace Microsoft.Build.Utilities
         /// <param name="proc"></param>
         private static void WaitForProcessExit(Process proc)
         {
-            proc.WaitForExit();
+            // Using overload with timeout prevents hanging in case that grandchild process is still running
+            // See https://github.com/dotnet/runtime/issues/51277 and https://github.com/dotnet/msbuild/issues/2981#issuecomment-818581362
+            proc.WaitForExit(int.MaxValue);
 
             // Process.WaitForExit() may return prematurely. We need to check to be sure.
             while (!proc.HasExited)
