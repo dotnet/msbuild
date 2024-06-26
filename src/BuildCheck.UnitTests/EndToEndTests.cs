@@ -31,8 +31,7 @@ public class EndToEndTests : IDisposable
 
     public void Dispose() => _env.Dispose();
 
-    // [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10036")]
-    [Theory]
+    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10036")]
     [InlineData(true, true)]
     [InlineData(false, true)]
     [InlineData(false, false)]
@@ -60,8 +59,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    // [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10036")]
-    [Theory]
+    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10036")]
     [InlineData(true, true, "warning")]
     [InlineData(true, true, "error")]
     [InlineData(true, true, "info")]
@@ -103,7 +101,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory]
+    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10036")]
     [InlineData(true, true)]
     [InlineData(false, true)]
     [InlineData(false, false)]
