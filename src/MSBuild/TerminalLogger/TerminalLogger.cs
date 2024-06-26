@@ -913,7 +913,7 @@ internal sealed partial class TerminalLogger : INodeLogger
             && Verbosity > LoggerVerbosity.Quiet)
         {
             if ((!String.IsNullOrEmpty(e.Message) && IsImmediateMessage(e.Message!)) ||
-                IsCopyTaskRetryCode(e.Code))
+                IsImmediateWarning(e.Code))
             {
                 RenderImmediateMessage(FormatWarningMessage(e, Indentation));
             }
@@ -941,7 +941,7 @@ internal sealed partial class TerminalLogger : INodeLogger
 #endif
 
 
-    private bool IsCopyTaskRetryCode(string code) => code == "MSB3026";
+    private bool IsImmediateWarning(string code) => code == "MSB3026";
 
     /// <summary>
     /// The <see cref="IEventSource.ErrorRaised"/> callback.
