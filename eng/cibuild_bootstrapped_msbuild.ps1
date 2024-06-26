@@ -78,14 +78,18 @@ try {
 
   if ($msbuildEngine -eq 'vs')
   {
-    $buildToolPath = Join-Path $bootstrapRoot "net472\MSBuild\Current\Bin\MSBuild.exe"
+    $buildToolPath = Join-Path $bootstrapRoot "net472\sdk\Current\Bin\MSBuild.exe"
     $buildToolCommand = "";
     $buildToolFramework = "net472"
   }
   else
   {
     $buildToolPath = Join-Path $bootstrapRoot "net8.0\dotnet.exe"
-    $buildToolCommand = "";
+
+    # Must be consistent with the version in BootStrapMsBuild.props
+    $netVersion="8.0.302"
+    $buildToolCommand = Join-Path $bootstrapRoot "net8.0\sdk" $netVersion "MSBuild.dll";
+
     $buildToolFramework = "net8.0"
   }
 

@@ -206,7 +206,6 @@
   <Target Name="BootstrapNetCore" DependsOnTargets="CleanBootstrapFolder">
 
     <PropertyGroup>
-      <NetVersion>8.0.302</NetVersion>
       <InstallDir>$(ArtifactsBinDir)bootstrap\$(TargetFramework)\</InstallDir>
     </PropertyGroup>
 
@@ -216,8 +215,14 @@
   <Target Name="BootstrapNetCorePatch" AfterTargets="BootstrapNetCore">
 
     <ItemGroup>
-      <FreshlyBuiltNetBinaries Include="$(OutDir)**\*.*" />
+     <!-- *.deps.json are excluded because they will cause the conflicts on an attempt to build solution with the bootstraped bits. -->
+      <FreshlyBuiltNetBinaries Include="$(OutDir)**\*.*" Exclude="$(OutDir)**\*.deps.json" />
     </ItemGroup>
+
+    <!-- The copying of these dependencies is required by bootstrap\**\sdk\**\NuGet.RestoreEx.targets. Otherwise NuGet.Build.Tasks.dll can not be found. -->
+    <Copy SourceFiles="@(_NuGetRuntimeDependencies)"
+          DestinationFolder="$(BootstrapDestination)"
+          SkipUnchangedFiles="true" />
 
     <Copy SourceFiles="@(FreshlyBuiltNetBinaries)"
       DestinationFiles="@(FreshlyBuiltNetBinaries->'$(InstallDir)sdk\$(NetVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />

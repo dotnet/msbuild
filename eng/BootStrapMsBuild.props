@@ -5,16 +5,20 @@
    relying on bootstrapped MSBuild
    -->
 
+  <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
+    <NetVersion>8.0.302</NetVersion>
+  </PropertyGroup>
+
   <PropertyGroup>
     <BootstrapDestination>$(ArtifactsBinDir)bootstrap\</BootstrapDestination>
     <BootstrapDestination Condition="'$(Platform)' == 'x64' or '$(Platform)' == 'arm64'">$(BootstrapDestination)$(Platform)\</BootstrapDestination>
-    <BootstrapDestination>$(BootstrapDestination)$(TargetFramework.ToLowerInvariant())\MSBuild\</BootstrapDestination>
+    <BootstrapDestination>$(BootstrapDestination)$(TargetFramework.ToLowerInvariant())\sdk\$(NetVersion)\</BootstrapDestination>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <BootstrapBinaryDestination>$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin</BootstrapBinaryDestination>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
     <BootstrapBinaryDestination>$(BootstrapDestination)</BootstrapBinaryDestination>
   </PropertyGroup>

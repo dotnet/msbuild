@@ -42,15 +42,23 @@ namespace MSBuild.Bootstrap.Utils.Tasks
             return RunScript(executionSettings);
         }
 
-        private void DownloadScript(string scriptName, string scriptPath)
+        private async void DownloadScript(string scriptName, string scriptPath)
         {
             using (HttpClient client = new HttpClient())
             {
-                HttpResponseMessage response = client.GetAsync($"{DotNetInstallBaseUrl}{scriptName}").Result;
-                response.EnsureSuccessStatusCode();
-
-                string scriptContent = response.Content.ReadAsStringAsync().Result;
-                File.WriteAllText(scriptPath, scriptContent);
+                HttpResponseMessage response = await client.GetAsync($"{DotNetInstallBaseUrl}{scriptName}");
+                if (response.IsSuccessStatusCode)
+                {
+                    string scriptContent = await response.Content.ReadAsStringAsync();
+                    if (!string.IsNullOrEmpty(scriptContent))
+                    {
+                        File.WriteAllText(scriptPath, scriptContent);
+                    }
+                }
+                else
+                {
+                    Log.LogError($"Install-scripts download from {DotNetInstallBaseUrl} error. Status code: {response.StatusCode}.");
+                }
             }
         }
 
@@ -74,7 +82,7 @@ namespace MSBuild.Bootstrap.Utils.Tasks
                 },
             })
             {
-                process.Start();
+                _ = process.Start();
                 process.WaitForExit();
             }
         }
@@ -83,19 +91,23 @@ namespace MSBuild.Bootstrap.Utils.Tasks
         {
             using (Process process = new Process { StartInfo = executionSettings.StartInfo })
             {
-                process.Start();
-                string output = process.StandardOutput.ReadToEnd();
-                Log.LogMessage(output);
-
-                string errors = process.StandardError.ReadToEnd();
-                process.WaitForExit();
-
-                if (process.ExitCode != 0)
+                bool started = process.Start();
+                if (started)
                 {
-                    if (!string.IsNullOrEmpty(errors))
+                    string output = process.StandardOutput.ReadToEnd() ?? string.Empty;
+                    Log.LogMessage($"Install-scripts output logs: {output}");
+
+                    process.WaitForExit();
+
+                    if (process.ExitCode != 0)
                     {
-                        Log.LogError("Errors: " + errors);
+                        string errors = process.StandardError.ReadToEnd() ?? string.Empty;
+                        Log.LogError("Install-scripts execution errors: " + errors);
                     }
+                }
+                else
+                {
+                    Log.LogError("Process for install-scripts execution has not started.");
                 }
             }
 
@@ -122,7 +134,7 @@ namespace MSBuild.Bootstrap.Utils.Tasks
             string scriptPath = Path.Combine(DotNetInstallScriptRootPath, $"{ScriptName}.{scriptExtension}");
             string scriptArgs = IsWindows
                 ? $"-NoProfile -ExecutionPolicy Bypass -File {scriptPath} -Version {Version} -InstallDir {InstallDir}"
-                : $"--version {Version} --install-dir {InstallDir}";
+                : $"{scriptPath} --version {Version} --install-dir {InstallDir}";
 
             var startInfo = new ProcessStartInfo
             {
