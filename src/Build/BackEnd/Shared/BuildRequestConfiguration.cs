@@ -775,14 +775,31 @@ namespace Microsoft.Build.BackEnd
                     "Targets must be same as proxy targets");
             }
 
-            var allTargets = new List<(string name, TargetBuiltReason reason)>(_projectInitialTargets.Count + nonInitialTargets.Count);
+            bool hasInitialTargets = request.Targets.Count == 0 ? false : true;
 
-            allTargets.AddRange(_projectInitialTargets.ConvertAll(target => (target, TargetBuiltReason.InitialTargets)));
-            allTargets.AddRange(
-                (request.Targets.Count == 0)
-                ? _projectDefaultTargets.ConvertAll(target => (target, TargetBuiltReason.DefaultTargets))
-                : request.Targets.ConvertAll(target => (target, TargetBuiltReason.EntryTargets))
-            );
+            List<(string name, TargetBuiltReason reason)> allTargets = new(
+                _projectInitialTargets.Count +
+                (hasInitialTargets ? _projectDefaultTargets.Count : request.Targets.Count));
+
+            foreach (var target in _projectInitialTargets)
+            {
+                allTargets.Add((target, TargetBuiltReason.InitialTargets));
+            }
+
+            if (hasInitialTargets)
+            {
+                foreach (var target in request.Targets)
+                {
+                    allTargets.Add((target, TargetBuiltReason.EntryTargets));
+                }
+            }
+            else
+            {
+                foreach (var target in _projectDefaultTargets)
+                {
+                    allTargets.Add((target, TargetBuiltReason.DefaultTargets));
+                }
+            }
 
             return allTargets;
         }
