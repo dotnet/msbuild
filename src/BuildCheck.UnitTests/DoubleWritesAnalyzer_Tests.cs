@@ -41,7 +41,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
                 }
             }
 
-            private void ResultHandler(BuildAnalyzerWrapper wrapper, LoggingContext context, BuildAnalyzerConfigurationInternal[] configs, BuildCheckResult result)
+            private void ResultHandler(BuildAnalyzerWrapper wrapper, IAnalysisContext context, BuildAnalyzerConfigurationInternal[] configs, BuildCheckResult result)
                 => Results.Add(result);
         }
 
