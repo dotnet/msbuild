@@ -24,7 +24,7 @@ public static class BuildCheckReplayModeConnector
     /// </summary>
     /// <param name="buildManager"><see cref="BuildManager"/> to get the registered <see cref="IBuildCheckManagerProvider"/> component from.</param>
     /// <param name="replayEventSource">The initial event source.</param>
-    /// <returns>The merged event source for binary log replay.</returns>
+    /// <returns>The merged <see cref="IEventSource"/>. Used for binary log replay.</returns>
     public static IEventSource GetMergedEventSource(
         BuildManager buildManager,
         IEventSource replayEventSource)
