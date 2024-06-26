@@ -15,14 +15,14 @@ using Microsoft.Build.Logging;
 namespace Microsoft.Build.Experimental.BuildCheck;
 
 /// <summary>
-/// The class that created an <see cref="IEventSource"/> for binary log replay with BuildCheck enabled.
+/// The class that creates an <see cref="IEventSource"/> for binary log replay with BuildCheck enabled.
 /// </summary>
 public static class BuildCheckReplayModeConnector
 {
     /// <summary>
-    /// Gets merged event source for binary log replay with BuildCheck enabled.
+    /// Gets merged <see cref="IEventSource"/> for binary log replay with BuildCheck enabled.
     /// </summary>
-    /// <param name="buildManager"><see cref="BuildManager"/> that has <see cref="IBuildCheckManagerProvider"/> component.</param>
+    /// <param name="buildManager"><see cref="BuildManager"/> to get the registered <see cref="IBuildCheckManagerProvider"/> component from.</param>
     /// <param name="replayEventSource">The initial event source.</param>
     /// <returns>The merged event source for binary log replay.</returns>
     public static IEventSource GetMergedEventSource(
