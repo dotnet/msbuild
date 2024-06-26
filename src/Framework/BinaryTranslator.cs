@@ -599,7 +599,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Translates a dictionary of { string, string } adding extra entries.
+            /// Translates a dictionary of { string, string } with additional entries. The dictionary might be null despite being populated.
             /// </summary>
             /// <param name="dictionary">The dictionary to be translated.</param>
             /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
@@ -634,6 +634,9 @@ namespace Microsoft.Build.BackEnd
                     {
                         // Presence of special key SpecialKeyForDictionaryBeingNull indicates that the dictionary was null.
                         dictionary = null;
+
+                        // If the dictionary is null, we should have only two keys: SpecialKeyForDictionaryBeingNull, SpecialKeyForVersion
+                        Debug.Assert(count == 2);
                     }
                     else if (dictionary is not null)
                     {
@@ -1314,7 +1317,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Translates a dictionary of { string, string } adding extra entries.
+            /// Translates a dictionary of { string, string } adding additional entries.
             /// </summary>
             /// <param name="dictionary">The dictionary to be translated.</param>
             /// <param name="comparer">The comparer used to instantiate the dictionary.</param>

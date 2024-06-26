@@ -115,7 +115,12 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// When this key is in the dictionary <see cref="_savedEnvironmentVariables"/>, serialize the build result version.
         /// </summary>
-        private const string VersionKeyName = "=MSBUILDFEATUREBUILDRESULTHASVERSION=";
+        private const string SpecialKeyForVersion = "=MSBUILDFEATUREBUILDRESULTHASVERSION=";
+
+        /// <summary>
+        /// Set of additional keys tat might be added to the dictionary <see cref="_savedEnvironmentVariables"/>.
+        /// </summary>
+        private static readonly HashSet<string> s_additionalEntriesKeys = new HashSet<string> { SpecialKeyForVersion };
 
         /// <summary>
         /// Snapshot of the current directory from the configuration this result comes from.
@@ -137,7 +142,7 @@ namespace Microsoft.Build.Execution
         /// The flags provide additional control over the build results and may affect the cached value.
         /// </summary>
         /// <remarks>
-        /// Is optional.
+        /// Is optional, the field is expected to be present starting <see cref="_version"/> 1.
         /// </remarks>
         private BuildRequestDataFlags _buildRequestDataFlags;
 
@@ -413,16 +418,11 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// BuildResult schema version.
-        /// </summary>
-        public int Version => _version;
-
-        /// <summary>
         /// Gets the flags that were used in the build request to which these results are associated.
         /// See <see cref="Execution.BuildRequestDataFlags"/> for examples of the available flags.
         /// </summary>
         /// <remarks>
-        /// Is optional, exists starting version 1.
+        /// Is optional, this property exists starting <see cref="_version"/> 1.
         /// </remarks>
         public BuildRequestDataFlags? BuildRequestDataFlags => (_version > 0) ? _buildRequestDataFlags : null;
 
@@ -648,18 +648,14 @@ namespace Microsoft.Build.Execution
             else
             {
                 Dictionary<string, string> additionalEntries = new();
-                HashSet<string> additionalEntriesKeys = new HashSet<string>
-                {
-                    VersionKeyName
-                };
 
                 if (translator.Mode == TranslationDirection.WriteToStream)
                 {
-                    // Add the special key VersionKeyName to additional entries indicating the presence of a version to the _savedEnvironmentVariables dictionary.
-                    additionalEntries.Add(VersionKeyName, String.Empty);
+                    // Add the special key SpecialKeyForVersion to additional entries indicating the presence of a version to the _savedEnvironmentVariables dictionary.
+                    additionalEntries.Add(SpecialKeyForVersion, String.Empty);
 
                     // Serialize the special key together with _savedEnvironmentVariables dictionary using the workaround overload of TranslateDictionary:
-                    translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase, ref additionalEntries, additionalEntriesKeys);
+                    translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase, ref additionalEntries, s_additionalEntriesKeys);
 
                     // Serialize version
                     translator.Translate(ref _version);
@@ -667,10 +663,10 @@ namespace Microsoft.Build.Execution
                 else if (translator.Mode == TranslationDirection.ReadFromStream)
                 {
                     // Read the dictionary using the workaround overload of TranslateDictionary: special keys (additionalEntriesKeys) would be read to additionalEntries instead of the _savedEnvironmentVariables dictionary.
-                    translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase, ref additionalEntries, additionalEntriesKeys);
+                    translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase, ref additionalEntries, s_additionalEntriesKeys);
 
-                    // If the special key VersionKeyName present in additionalEntries, also read a version, otherwise set it to 0.
-                    if (additionalEntries is not null && additionalEntries.ContainsKey(VersionKeyName))
+                    // If the special key SpecialKeyForVersion present in additionalEntries, also read a version, otherwise set it to 0.
+                    if (additionalEntries is not null && additionalEntries.ContainsKey(SpecialKeyForVersion))
                     {
                         translator.Translate(ref _version);
                     }
