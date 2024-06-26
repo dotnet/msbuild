@@ -11,7 +11,7 @@ MSBuild also contains some extensibility aspects that mostly interact with the A
 This document covers all part of MSBuild in a general manner. So there will be no in depth technical details, or how-to's. If you'd like to learn how to use MSBuild to improve your builds please visit [Learn Microsoft](https://learn.microsoft.com/en-us/visualstudio/msbuild).
 
 
-## MSBuild the programming language
+## MSBuild XML Language
 The MSBuild programming language is a programming language that uses XML semantics with a focus on describing a project. You can see an [exmaple here](https://github.com/dotnet/msbuild/blob/main/src/Build/Microsoft.Build.csproj). 
 
 The MSBuilkd XML is built around representing a project's data. It uses various attributes to do so:
@@ -24,7 +24,8 @@ These attributes are defined within `.csproj` files, which are considered *proje
 
 Since the project file defines the data used for the build, the actual build instructions are imported through imports of libraries, that contains their own tasks and targets. One example that is vastly used is the SDK with `dotnet build`. These librearies also extend what can be done with a build, and overal functionality.
 
-## MSBuild the API
+## MSBuild API
+**TODO**
 It is a library of common build logic that defined basic things, like the convept of output folder, intermediate folder, so other tools can utilize these resources. 
 It is also a way to manipulate the MSBuild Language without directly changing the language on a project itself.
 It is an API focused on building .NET programs so there are some specific things.
@@ -33,65 +34,22 @@ Core idea behind those targets is you're either manipulating MSBuild data or fig
     - like command line aplications (exe). We also offer base class toolTask to provide an interface for that.
 
 ### ToolTask
+**TODO**
 We offer an interface called ToolTask where you can implement custom tasks to be processed during the build. This is more perfomant (on windows) than writing a script to do the same thing.
 
 The engine will construct the task, call the execute method and then you can do whatever you want (was written in the task) during the execution
 
-
-## Extensibilities
-We have some extensibilities within MSBuild:
-This includes some built-in tasks: Exec, and Factories.
-Resolvers are just devdiv / dotnet kinda thing
-    Discover resolvers on a folder next to MSBuild. Mitigation to threats is installing MSBuild to an admin only location. No way to specify a custom resolver.
-
-### Packaging system
-MSBiuld actually does not understand packages and packaging systems. We use NuGet as apackaging system for that function. It downloads, unzips and then provides a path to MSBuild to that package.
-
-### Diagnosability
-Once upon a time we had a debugger, but we deprecated in favor of a more robust logging system.
-We focus on logs for debuggability.
-
-Engine writes some ETW (event tracing for windows) events
-
-### Loggers
-Build logic cannot manipulate loggers, you have to pass the DLL.
-We build our logging system based on events, we have a bunch of event types. Some of them are special and used by Binary Logger or BuildCheck, where we focus con code structure events.
-
-All our events need to be serializable to go to binary log and to keep communication with the main node.
-
-Beyond the integrated loggers, there can also be pluggable loggers that can receive events through .net event handlers.:
-- Binary logger
-- Console/terminal logger
-- Text log
-
-#### Binary logger
-Implemetation is based around the communication and serialization protocal that MSBuild uses.
-This is not officially supported by us, but it is one of the most used tools for debugging. It is considered a pluggable logger.
-
-### Resolvers
-
-
-### Restore
-Restore is primarily a built-in target.
-Restore has 2 modes:
-- Normal MSBuild operation, walk the graph of projects to determine all things that need to be restored and then feed that into the restore task.
-- Graph operations, which is done in a separate process, which calls our graph API to load the graph build.
-
-The package restore is done by NuGet, not within MSBuild scope of responsbility, since engine does not understand "packages".
-
-### Telemetry
-We have telemetry points / information thought the .net SDK but not through VS.
-It is basically a special logger that pays attention to telemetry events, which allows the CLI to have a single telemtry opt-out that applies to MSBuild without too much work on our part.
-
-
 ## Engine
+**TODO**
 When we commonly say "Build a project" we actually mean in MSBuild, evaluate and then build what you found.
 
 ### Processes
+**TODO**
 When you start executing MSBuild from the command line / exe. You start a process, which runs some code, starts to build stuff in that process, and then that process becomes the scheduler node and one of the worker nodes. So it is both the entry point and the scheduler.
 The problem is that when that process ends, it exits and the OS tears it down. No more meory cache, we have kittering (what is this?), and for the next build you have to redo everything.
 
 ### Entry points
+**TODO**
 We have a few entrypoints to the MSBuild engine / where MSBuild is executed, but it is manily VS, SDK and CLI. All of those go through the API to access the engine.
 
 As input to  everything we have:
@@ -100,6 +58,7 @@ As input to  everything we have:
  - .g.props from NuGet restore imports.
 
 ### Evaluate operation
+**TODO**
 *this is not a build*
 "Tell me about this project" , where the project is the entry point, data, etc....
  - For IDE purposes, it also tells which C# files are checked in, project name etc...
@@ -115,6 +74,7 @@ Evaluation should have no side effects on disk, just an in memory representation
  So running sequence is: imports (which can honestly be anything, even environmental variables), item definitions, items, tasks and targets. But nothing really executed. We do have a white list of used things that prevent side effects.
 
 #### imports
+**TODO**
 More in depth explanation of all the imports we handle.
 Imports can be anything. Can be a path, property expansions, properties fallback on environmental variables, known folder that you can access.
 There are globbed imports, like the VS directory and sdk that have import folders with wild card imports.
@@ -122,15 +82,18 @@ From the MSBuild perspective, when we get to imports, for example NuGet imports.
 Core MSBuild does not do tool resolution via registry, just use the copy of the tools that is in a folder next to us. However, there are functions that read the registry and the some SDKs use those.
 
 ### Execution operation
+**TODO**
 Requires evaluation operation. When we commonly say "Build a project" we actually mean in MSBuild, evaluate and then build what you found.
 
 #### Executing a task
+**TODO**
 XML defines a task and you have a using element that has the configuration. When you execute the task, MSBuild looks up executing tasks, gets the DLL and what class to look at, and loads it with the properties that are present in the XML. Now we instantite an object of that class and of the task type (example ToolTask). We set a lot of properties that were defined in the XML (with potential task and item expansions) and then we call the execute method.
 
 The execute method can do whatever it wants, including reportin back through an IBuildEngineInterface to do a few operations including logging.
 And then we return.
 
 #### Task Host
+**TODO**
 When a task needs to run in a different .NET invironment than the one currently in, we handle that through the Task Host.
 
 MSBuild starts a new process of the correct environment, uses an IPC mechanism to feed information for that task, run it in another process, and get information back.
@@ -143,18 +106,22 @@ Where you might want to do this:
  - You have a task that is built in the same repo you're building your code and might change between runs. In this case we make sure that the DLLs are not locked at the end of the building. (Sandbox execution)
 
 ### SDK interaction
+**TODO**
 There are a few XML attributes or elements that will trigger SDK resolution, for example Project SDK=" " tag. When that happens we will go and ask the resolver who ca tell us where the SDK. There is also the top level element that has this effect. We can also add the import element so it specifies which file you're looking for.
 
 ### Cache
+**TODO**
 Special property or something that points to a dll that implements the cache interface. Like a plugin, so it would work out of a nuget package.
 Task host cache (described more in the task host section (link))
 
 #### Register Task Objects
+**TODO**
 If you are a tak and you need to meaningfully share state between invocations of said task in a single build or across builds the engine provides a mechanism to manage the lifetime of a .net object. When defining scope of objecdt's lifetime if can be per build or indefinetly.
 This is available per node basis if you need to use it.
 There is no serialization or desirialization, just a caching mechanism in memory.
 
 #### Project result cache
+**TODO**
 (Are there toher types of cache?)
 Cache keeps the results of built projects / tasks (project result cache). Cache is mostly on memory but can spill on disk.
 RAR state cache has some custom on disk format.
@@ -164,6 +131,7 @@ Build results are stored as items
 The return and output attributes from a targets already serialize the results from said task. The result of a task is generally, sucess, failure and a list of items that succeeded.
 
 #### Project result cache plugin
+**TODO**
 It was mainly use for distributed builds like CloudBuild.
 Works as a middle layer between the scheduler and the cache, which allows more functionallity to be pluged in there. So scheduler asks t if they can satisfy node requests for project results.
 Also adds profiles on disk, so it knows where to look for reults when asked.
@@ -171,9 +139,11 @@ We hash the inputs so we can create those profiles, and the plugin uses those to
 When it gets a hit, it downloads and copy the files to the right place, desirialize the the result payload and provide it to the engine.
 
 #### Incremental build
+**TODO**
 All the output from the builds that are in memory becomes one big cache for MSBuild. The targets inputs and outputs that is what get's cached / saved. We don't really know how it works, oops.
 
 ### Scheduler
+**TODO**
 Something the schedules the execution of chunks of projects (targets or projects).
 Scheduler maintains results of executed targets., as well as remembering which projects were already built and have their results. When a result is asked from a task / project that was built previously it gets it from the cache.
 When communicating within the process. A task talks to the engine, which then communicates with the scheduler, to either get results or be blocked.
@@ -185,11 +155,11 @@ It can also see pending requests. For example, when one task depends on another,
 When a node is finished or blocked, the scheduler consider if they can assign more work to a specific node. And that is how out multiprocess stuff become parallelism.
 
 #### MSBuild Task
-
+**TODO**
 We don't get it as a task but as an intrinsic method. Almost the same but different?
 
 ### Parallelism
-
+**TODO**
 Tasks run sequentially.
 
 Parallelism is at the project level. Each project is single threaded until the process yields o MSBuild passes a task call.
@@ -198,6 +168,7 @@ MSBuild keeps control of the level of parallelism. Tasks however can implement p
 For multi targeted builds, parallelism can be achieved but there are some extra steps. The outer build produces a list where the include of the list is the same project file each time, but different metadata for the target frameworks, and that is passed to the single MSBuild task so that it can build it in parallel.
 
 #### Batching
+**TODO**
 Batching can be done in the targets and task levels.
 
 
@@ -205,6 +176,7 @@ Batching can be done in the targets and task levels.
 
 
 ### IPC (interprocess communication)
+**TODO**
 During execution we have different OS processes that need to talk with each other.
  - Command line inout
  - Console output
@@ -230,6 +202,7 @@ Message Layer:
 Is a custom serialization protocol that is MSBuild specific. Dsigned to be easy to implement new types (ITranslatable). All the types are known internal MSBuild types, with extra dictionary fields to support user custom strings.
 
 ### Graph build
+**TODO**
 Try to evaluate all projects upfront and form relationships between them. So, projects get evaluated, but instead of going and building it, we look at the evaluated project and try to figure out the other projects it references.
 Looks at specific items like Project Refence in order to construct a dependency graph.
 
@@ -247,6 +220,57 @@ With this second mode you need to specify input and output results cache so diff
 
 
 ### MSbuid Server
+**TODO**
 *Watch the Roman knowledge hand off to get more information about MSBuil server*
 
 The MSBuild server is the idea of separating some processes. Splitting the entry point executable that lives for one build invocation, and the scheduler and the 1st in-proc node. This way you don't need to JIT and you can preserve your in-memory cache.
+
+
+
+## Extensibilities
+**TODO**
+
+MSBuild includes some extensibilities to it's main process. There were added to support MSBuild in various scenarios, as well as improve user experience with the build process.
+
+
+We have some extensibilities within MSBuild:
+This includes some built-in tasks: Exec, and Factories.
+Resolvers are just devdiv / dotnet kinda thing
+    Discover resolvers on a folder next to MSBuild. Mitigation to threats is installing MSBuild to an admin only location. No way to specify a custom resolver.
+
+### Packaging system
+MSBuild interacts with external packages in almost every build. However the MSBuild engine does not recognize external packages as third parties, and it also does not handle external dependencies. This is done by a packaging system. The supported one being NuGet. As such, it is NuGet that is responsible for finding the packages, downloading them, and providing the MSBuild engine with a package path for the build.
+
+### Diagnosability / Loggers
+Diagnosability within MSBuild went through some changes. Before we had a debugger, where you could step through the XML during the build and debug. This was discardted in favour of a log focused approach, where MSBuild has a more robust logging system that contains more data to identify what is happening during a build.
+
+Beyond loggers, we have some ETW (Event Tracing for Windows) events which can also be identified through loggers.
+
+#### General Loggers
+Logging within MSBuild consists of various integrated and pluggable loggers. Integrated loggers generally processes code structure events, such as communication between nodes during build, or data for BuildCheck analyzers to run properly.Built-in loggers include the Binary Logger, Console / Terminal logger, and a Text Log. Pluggable loggers are third party loggers that can receive events through the MSBuild API, or the .NET event handlers.
+
+Pluggable loggers are added through DLLs, and MSBuild engine identifies them at the beginning of the build. Because of this, build logic is not able to manipulate loggers.
+
+#### Binary logger
+Implemetation is based around the communication and serialization protocal that MSBuild uses.
+This is not officially supported by us, but it is one of the most used tools for debugging. It is considered a pluggable logger.
+
+### Resolvers
+**TODO**
+
+### Restore
+**TODO**
+The restore operation is a built-in target within MSBuild. It goes through 
+
+restore walks through the graph of projects to be built and determines all items that need to be restored, it then feeds the information into the restore task.
+Restore is primarily a built-in target.
+Restore has 2 modes:
+- Normal MSBuild operation, walk the graph of projects to determine all things that need to be restored and then feed that into the restore task.
+- Graph operations, which is done in a separate process, which calls our graph API to load the graph build.
+
+The package restore is done by NuGet, not within MSBuild scope of responsbility, since engine does not understand "packages".
+
+### Telemetry
+MSBuild has a few telemetry points, moslty through the .NET SDK. It is implemented as a logger that keeps track of telemtry events in the SDK, this allows to have a single opt-out mechanism that also works for MSBuild.
+
+Visual Studio telemetry was removed once MSBuild went open source, and it was never added again.
