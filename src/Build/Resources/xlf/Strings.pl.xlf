@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pl" original="../Strings.resx">
     <body>
+      <trans-unit id="AbortingBuild">
+        <source>Attempting to cancel the build...</source>
+        <target state="new">Attempting to cancel the build...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AmbiguousTaskParameterError">
         <source>MSB4001: The "{0}" task has more than one parameter called "{1}".</source>
         <target state="translated">MSB4001: Zadanie „{0}” zawiera więcej niż jeden parametr o nazwie „{1}”.</target>
@@ -514,6 +519,11 @@
         <target state="translated">Projekt „{0}” nie został zaimportowany przez projekt „{1}” o ({2},{3}) z powodu wyrażenia ocenianego jako pusty ciąg.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectImportsCollectorFileIOFail">
+        <source>An exception occurred when adding the file '{0}', Exception: '{1}'</source>
+        <target state="translated">Wystąpił wyjątek podczas dodawania pliku „{0}”. Wyjątek: „{1}”</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">Wartość początkowa właściwości: $({0})=„{1}” Źródło: {2}</target>
@@ -554,6 +564,13 @@ Błędy: {3}</target>
         <source>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</source>
         <target state="translated">Wystąpił błąd programu do rozpoznawania zestawu SDK „{0}” podczas próby rozpoznania zestawu SDK „{1}”. Wyjątek: „{2}”</target>
         <note />
+      </trans-unit>
+      <trans-unit id="SDKResolverNullMessage">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</source>
+        <target state="translated">Program rozpoznawania nazw „{0}” próbował rozpoznać zestaw SDK „{1}” i zwrócił wartość null jako ciąg na liście ostrzeżeń lub błędów.</target>
+        <note>
+      LOCALIZATION: Do not localize the word SDK.
+    </note>
       </trans-unit>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>

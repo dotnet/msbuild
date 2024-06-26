@@ -463,6 +463,11 @@ namespace Microsoft.Build.BackEnd.Logging
         void LogBuildFinished(bool success);
 
         /// <summary>
+        /// Logs that the build has canceled
+        /// </summary>
+        void LogBuildCanceled();
+
+        /// <summary>
         /// Create an evaluation context, by generating a new evaluation id.
         /// </summary>
         /// <param name="nodeId">The node id</param>
@@ -650,6 +655,7 @@ namespace Microsoft.Build.BackEnd.Logging
             get;
             set;
         }
+
         #endregion
         /// <summary>
         /// Entry point for a sink to consume an event.

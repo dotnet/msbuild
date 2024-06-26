@@ -229,8 +229,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         Terminal = new Terminal();
     }
 
-    public TerminalLogger(LoggerVerbosity verbosity)
-        : this()
+    public TerminalLogger(LoggerVerbosity verbosity) : this()
     {
         Verbosity = verbosity;
     }
@@ -273,6 +272,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         eventSource.TargetStarted += TargetStarted;
         eventSource.TargetFinished += TargetFinished;
         eventSource.TaskStarted += TaskStarted;
+        eventSource.StatusEventRaised += StatusEventRaised;
 
         eventSource.MessageRaised += MessageRaised;
         eventSource.WarningRaised += WarningRaised;
@@ -283,6 +283,7 @@ internal sealed partial class TerminalLogger : INodeLogger
             eventSource4.IncludeEvaluationPropertiesAndItems();
         }
     }
+
 
     /// <summary>
     /// Parses out the logger parameters from the Parameters string.
@@ -398,14 +399,14 @@ internal sealed partial class TerminalLogger : INodeLogger
 
         Terminal.BeginUpdate();
         try
-        { 
+        {
             if (Verbosity > LoggerVerbosity.Quiet)
             {
                 string duration = (e.Timestamp - _buildStartTime).TotalSeconds.ToString("F1");
                 string buildResult = RenderBuildResult(e.Succeeded, _buildErrorsCount, _buildWarningsCount);
 
                 Terminal.WriteLine("");
-                if(_testRunSummaries.Any())
+                if (_testRunSummaries.Any())
                 {
                     var total = _testRunSummaries.Sum(t => t.Total);
                     var failed = _testRunSummaries.Sum(t => t.Failed);
@@ -460,6 +461,14 @@ internal sealed partial class TerminalLogger : INodeLogger
         _restoreFailed = false;
         _testStartTime = null;
         _testEndTime = null;
+    }
+
+    private void StatusEventRaised(object sender, BuildStatusEventArgs e)
+    {
+        if (e is BuildCanceledEventArgs buildCanceledEventArgs)
+        {
+            RenderImmediateMessage(e.Message!);
+        }
     }
 
     /// <summary>
@@ -864,7 +873,16 @@ internal sealed partial class TerminalLogger : INodeLogger
                                             : e.Timestamp > _testEndTime
                                                 ? e.Timestamp : _testEndTime;
                                 }
-                                
+
+                                break;
+                            }
+
+                        case "TLTESTOUTPUT":
+                            {
+                                if (e.Message != null && Verbosity > LoggerVerbosity.Quiet)
+                                {
+                                    RenderImmediateMessage(e.Message);
+                                }
                                 break;
                             }
                     }
@@ -936,7 +954,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     private void ErrorRaised(object sender, BuildErrorEventArgs e)
     {
         BuildEventContext? buildEventContext = e.BuildEventContext;
-        
+
         if (buildEventContext is not null
             && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project)
             && Verbosity > LoggerVerbosity.Quiet)
@@ -951,7 +969,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         }
     }
 
-#endregion
+    #endregion
 
     #region Refresher thread implementation
 

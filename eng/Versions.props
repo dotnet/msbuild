@@ -2,8 +2,8 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
   <PropertyGroup>
-    <VersionPrefix>17.11.0</VersionPrefix>
-    <PackageValidationBaselineVersion>17.8.3</PackageValidationBaselineVersion>
+    <VersionPrefix>17.12.0</VersionPrefix>
+    <PackageValidationBaselineVersion>17.11.0-preview-24318-05</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
@@ -48,11 +48,11 @@
          Otherwise, this version of dotnet will not be installed and the build will error out. -->
     <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
     <MicrosoftCodeAnalysisCollectionsVersion>4.2.0-1.22102.8</MicrosoftCodeAnalysisCollectionsVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>8.0.0-beta.24270.4</MicrosoftDotNetXUnitExtensionsVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>8.0.0-beta.24311.3</MicrosoftDotNetXUnitExtensionsVersion>
     <MicrosoftExtensionsDependencyModelVersion>7.0.0</MicrosoftExtensionsDependencyModelVersion>
     <MicrosoftIORedistVersion>6.0.0</MicrosoftIORedistVersion>
-    <MicrosoftNetCompilersToolsetVersion>4.11.0-3.24301.1</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>6.11.0-preview.2.76</NuGetBuildTasksVersion>
+    <MicrosoftNetCompilersToolsetVersion>4.11.0-3.24313.9</MicrosoftNetCompilersToolsetVersion>
+    <NuGetBuildTasksVersion>6.11.0-rc.101</NuGetBuildTasksVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">

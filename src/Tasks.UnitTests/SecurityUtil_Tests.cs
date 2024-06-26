@@ -35,7 +35,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             // the certificate was generated locally and does not contain any sensitive information
             string pathToCertificate = Path.Combine(TestAssembliesPaths, "mycert.pfx");
-            X509Certificate2 certificate = TestCertHelper.MockCertificate(pathToCertificate);
+            using X509Certificate2 certificate = TestCertHelper.MockCertificate(pathToCertificate);
 
             void SignAction() => SecurityUtilities.SignFile(
                 certificate?.Thumbprint,

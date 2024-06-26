@@ -1973,6 +1973,11 @@ namespace Microsoft.Build.Evaluation
             public event BuildFinishedEventHandler BuildFinished;
 
             /// <summary>
+            /// The BuildCanceled logging event
+            /// </summary>
+            public event BuildCanceledEventHandler BuildCanceled;
+
+            /// <summary>
             /// The ProjectStarted logging event
             /// </summary>
             public event ProjectStartedEventHandler ProjectStarted;
@@ -2021,7 +2026,7 @@ namespace Microsoft.Build.Evaluation
             /// The telemetry sent event.
             /// </summary>
             public event TelemetryEventHandler TelemetryLogged;
-
+            
             /// <summary>
             /// Should evaluation events include generated metaprojects?
             /// </summary>
@@ -2390,6 +2395,14 @@ namespace Microsoft.Build.Evaluation
             private void BuildFinishedHandler(object sender, BuildFinishedEventArgs e)
             {
                 BuildFinished?.Invoke(sender, e);
+            }
+
+            /// <summary>
+            /// Handler for BuildCanceled events.
+            /// </summary>
+            private void BuildCanceledHandler(object sender, BuildCanceledEventArgs e)
+            {
+                BuildCanceled?.Invoke(sender, e);
             }
 
             /// <summary>

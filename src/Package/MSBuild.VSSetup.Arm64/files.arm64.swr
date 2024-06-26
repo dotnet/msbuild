@@ -54,76 +54,63 @@ folder InstallDir:\MSBuild\Current\Bin\arm64\cs
   file source=$(Arm64BinPath)cs\MSBuild.resources.dll
   file source=$(Arm64BinPath)cs\Microsoft.Build.Tasks.Core.resources.dll
   file source=$(Arm64BinPath)cs\Microsoft.Build.Utilities.Core.resources.dll
-  file source=$(TaskHostArm64BinPath)cs\MSBuildTaskHost.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\de
   file source=$(Arm64BinPath)de\Microsoft.Build.resources.dll
   file source=$(Arm64BinPath)de\MSBuild.resources.dll
   file source=$(Arm64BinPath)de\Microsoft.Build.Tasks.Core.resources.dll
   file source=$(Arm64BinPath)de\Microsoft.Build.Utilities.Core.resources.dll
-  file source=$(TaskHostArm64BinPath)de\MSBuildTaskHost.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\es
   file source=$(Arm64BinPath)es\Microsoft.Build.resources.dll
   file source=$(Arm64BinPath)es\MSBuild.resources.dll
   file source=$(Arm64BinPath)es\Microsoft.Build.Tasks.Core.resources.dll
   file source=$(Arm64BinPath)es\Microsoft.Build.Utilities.Core.resources.dll
-  file source=$(TaskHostArm64BinPath)es\MSBuildTaskHost.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\fr
   file source=$(Arm64BinPath)fr\Microsoft.Build.resources.dll
   file source=$(Arm64BinPath)fr\MSBuild.resources.dll
   file source=$(Arm64BinPath)fr\Microsoft.Build.Tasks.Core.resources.dll
   file source=$(Arm64BinPath)fr\Microsoft.Build.Utilities.Core.resources.dll
-  file source=$(TaskHostArm64BinPath)fr\MSBuildTaskHost.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\it
   file source=$(Arm64BinPath)it\Microsoft.Build.resources.dll
   file source=$(Arm64BinPath)it\MSBuild.resources.dll
   file source=$(Arm64BinPath)it\Microsoft.Build.Tasks.Core.resources.dll
   file source=$(Arm64BinPath)it\Microsoft.Build.Utilities.Core.resources.dll
-  file source=$(TaskHostArm64BinPath)it\MSBuildTaskHost.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\ja
   file source=$(Arm64BinPath)ja\Microsoft.Build.resources.dll
   file source=$(Arm64BinPath)ja\MSBuild.resources.dll
   file source=$(Arm64BinPath)ja\Microsoft.Build.Tasks.Core.resources.dll
   file source=$(Arm64BinPath)ja\Microsoft.Build.Utilities.Core.resources.dll
-  file source=$(TaskHostArm64BinPath)ja\MSBuildTaskHost.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\ko
   file source=$(Arm64BinPath)ko\Microsoft.Build.resources.dll
   file source=$(Arm64BinPath)ko\MSBuild.resources.dll
   file source=$(Arm64BinPath)ko\Microsoft.Build.Tasks.Core.resources.dll
   file source=$(Arm64BinPath)ko\Microsoft.Build.Utilities.Core.resources.dll
-  file source=$(TaskHostArm64BinPath)ko\MSBuildTaskHost.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\pl
   file source=$(Arm64BinPath)pl\Microsoft.Build.resources.dll
   file source=$(Arm64BinPath)pl\MSBuild.resources.dll
   file source=$(Arm64BinPath)pl\Microsoft.Build.Tasks.Core.resources.dll
   file source=$(Arm64BinPath)pl\Microsoft.Build.Utilities.Core.resources.dll
-  file source=$(TaskHostArm64BinPath)pl\MSBuildTaskHost.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\pt-BR
   file source=$(Arm64BinPath)pt-BR\Microsoft.Build.resources.dll
   file source=$(Arm64BinPath)pt-BR\MSBuild.resources.dll
   file source=$(Arm64BinPath)pt-BR\Microsoft.Build.Tasks.Core.resources.dll
   file source=$(Arm64BinPath)pt-BR\Microsoft.Build.Utilities.Core.resources.dll
-  file source=$(TaskHostArm64BinPath)pt-BR\MSBuildTaskHost.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\ru
   file source=$(Arm64BinPath)ru\Microsoft.Build.resources.dll
   file source=$(Arm64BinPath)ru\MSBuild.resources.dll
   file source=$(Arm64BinPath)ru\Microsoft.Build.Tasks.Core.resources.dll
   file source=$(Arm64BinPath)ru\Microsoft.Build.Utilities.Core.resources.dll
-  file source=$(TaskHostArm64BinPath)ru\MSBuildTaskHost.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\tr
   file source=$(Arm64BinPath)tr\Microsoft.Build.resources.dll
   file source=$(Arm64BinPath)tr\MSBuild.resources.dll
   file source=$(Arm64BinPath)tr\Microsoft.Build.Tasks.Core.resources.dll
   file source=$(Arm64BinPath)tr\Microsoft.Build.Utilities.Core.resources.dll
-  file source=$(TaskHostArm64BinPath)tr\MSBuildTaskHost.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\zh-Hans
   file source=$(Arm64BinPath)zh-Hans\Microsoft.Build.resources.dll
   file source=$(Arm64BinPath)zh-Hans\MSBuild.resources.dll
   file source=$(Arm64BinPath)zh-Hans\Microsoft.Build.Tasks.Core.resources.dll
   file source=$(Arm64BinPath)zh-Hans\Microsoft.Build.Utilities.Core.resources.dll
-  file source=$(TaskHostArm64BinPath)zh-Hans\MSBuildTaskHost.resources.dll
 folder InstallDir:\MSBuild\Current\Bin\arm64\zh-Hant
   file source=$(Arm64BinPath)zh-Hant\Microsoft.Build.resources.dll
   file source=$(Arm64BinPath)zh-Hant\MSBuild.resources.dll
   file source=$(Arm64BinPath)zh-Hant\Microsoft.Build.Tasks.Core.resources.dll
   file source=$(Arm64BinPath)zh-Hant\Microsoft.Build.Utilities.Core.resources.dll
-  file source=$(TaskHostArm64BinPath)zh-Hant\MSBuildTaskHost.resources.dll

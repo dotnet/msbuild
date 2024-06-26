@@ -9,6 +9,7 @@ using System.IO;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Analyzers;
 
@@ -44,11 +45,11 @@ internal sealed class SharedOutputPathAnalyzer : BuildAnalyzer
         }
 
         string? binPath, objPath;
-
-        context.Data.EvaluatedProperties.TryGetValue("OutputPath", out binPath);
-        context.Data.EvaluatedProperties.TryGetValue("IntermediateOutputPath", out objPath);
+        context.Data.EvaluatedProperties.TryGetPathValue("OutputPath", out binPath);
+        context.Data.EvaluatedProperties.TryGetPathValue("IntermediateOutputPath", out objPath);
 
         string? absoluteBinPath = CheckAndAddFullOutputPath(binPath, context);
+        // Check objPath only if it is different from binPath
         if (
             !string.IsNullOrEmpty(objPath) && !string.IsNullOrEmpty(absoluteBinPath) &&
             !objPath.Equals(binPath, StringComparison.CurrentCultureIgnoreCase)
@@ -72,6 +73,9 @@ internal sealed class SharedOutputPathAnalyzer : BuildAnalyzer
         {
             path = Path.Combine(Path.GetDirectoryName(projectPath)!, path);
         }
+
+        // Normalize the path to avoid false negatives due to different path representations.
+        path = Path.GetFullPath(path);
 
         if (_projectsPerOutputPath.TryGetValue(path!, out string? conflictingProject))
         {

@@ -670,7 +670,7 @@ namespace Microsoft.Build.UnitTests
             FileUtilities.DeleteNoThrow(binaryLogger.FilePath);
 
             // We need to create the file to satisfy the invariant set by the ctor of this testclass
-            File.Create(_logFile);
+            File.Create(_logFile).Dispose();
         }
 
         [Fact]
@@ -691,7 +691,7 @@ namespace Microsoft.Build.UnitTests
             FileUtilities.DeleteNoThrow(binaryLogger.FilePath);
 
             // We need to create the file to satisfy the invariant set by the ctor of this testclass
-            File.Create(_logFile);
+            File.Create(_logFile).Dispose();
         }
 
         public void Dispose()

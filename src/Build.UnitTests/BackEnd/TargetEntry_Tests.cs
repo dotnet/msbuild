@@ -853,13 +853,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 List<ILogger> loggers = new List<ILogger>();
                 loggers.Add(logger);
 
-                ProjectCollection collection = new ProjectCollection();
-                Project project = new Project(
-                    XmlReader.Create(new StringReader(content)),
+                using ProjectCollection collection = new ProjectCollection();
+                using ProjectFromString projectFromString = new(
+                    content,
                     (IDictionary<string, string>)null,
                     ObjectModelHelpers.MSBuildDefaultToolsVersion,
-                    collection)
-                { FullPath = FileUtilities.GetTemporaryFile() };
+                    collection);
+                Project project = projectFromString.Project;
+
+                project.FullPath = FileUtilities.GetTemporaryFile();
                 project.Save();
                 File.Delete(project.FullPath);
 
@@ -892,6 +894,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     NodeProviderInProc inProcNodeProvider = ((IBuildComponentHost)manager).GetComponent(BuildComponentType.InProcNodeProvider) as NodeProviderInProc;
 
                     inProcNodeProvider?.Dispose();
+                    manager.Dispose();
                 }
             }
         }
@@ -1175,8 +1178,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             FileStream stream = File.Create("testProject.proj");
             stream.Dispose();
-
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             return project.CreateProjectInstance();
         }
 

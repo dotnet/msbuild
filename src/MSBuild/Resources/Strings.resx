@@ -929,6 +929,118 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
+  <data name="HelpMessage_43_GetPropertySwitch" Visibility="Public">
+    <value>  -getProperty:propertyName,...
+                     Write out the value of one or more specified properties
+                     after evaluation, without executing the build, or if either
+                     the -targets option or the -getTargetResult option is
+                     used, write out the values after the build.
+    </value>
+    <comment>
+      LOCALIZATION: "-getProperty", "-targets" and "-getTargetResult" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </comment>
+  </data>
+  <data name="HelpMessage_44_GetItemSwitch" Visibility="Public">
+    <value>  -getItem:itemName,...
+                     Write out the value of one or more specified items and
+                     their associated metadata after evaluation without
+                     executing the build, or if either the -targets option
+                     or the -getTargetResult option is used, write out
+                     the values after the build.
+    </value>
+    <comment>
+      LOCALIZATION: "-getItem", "targets" and "getTargetResult" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </comment>
+  </data>
+  <data name="HelpMessage_45_GetTargetResultSwitch" Visibility="Public">
+    <value>  -getTargetResult:targetName,...
+                     Write out the output value of one or more targets and
+                     the specified targets will be executed.
+    </value>
+    <comment>
+      LOCALIZATION: "-getTargetResult" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </comment>
+  </data>
+  <data name="HelpMessage_46_FeatureAvailabilitySwitch" Visibility="Public">
+    <value>  -featureAvailability:featureName,...
+                     Check feature availability. The result is one of the
+                     strings "Undefined", "Available", "NotAvailable" and
+                     "Preview".
+                     - Undefined - the availability of the feature is undefined
+                     (the feature name is unknown to the feature availability
+                     checker)
+                     - NotAvailable - the feature is not available (unlike
+                     Undefined, the feature name is known to the feature
+                     availability checker and it knows the feature is not
+                     supported by current MSBuild engine)
+                     - Available - the feature is available
+                     - Preview - the feature is in preview (not stable)
+                     (Short form: -fa)
+    </value>
+    <comment>
+      LOCALIZATION: "-featureAvailability", "-fa", "Undefined", "Available" "NotAvailable" and "Preview"should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </comment>
+  </data>
+  <data name="HelpMessage_47_TerminalLoggerSwitch" Visibility="Public">
+    <value>  -terminalLogger[:auto,on,off]
+                     Enable or disable the terminal logger. Terminal logger
+                     provides enhanced build output on the console in real time,
+                     organized logically by project, and designed to highlight
+                     actionable information. Specify auto (or use the option
+                     without arguments) to use the terminal logger only if the
+                     standard output is not redirected. Don't parse the output
+                     or otherwise rely on it remaining unchanged in future
+                     versions. This option is available in MSBuild 17.8 and
+                     later.
+                     (Short form: -tl)
+    </value>
+    <comment>
+      LOCALIZATION: "-terminalLogger", "-tl", and "auto" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </comment>
+  </data>
+  <data name="HelpMessage_51_GetResultOutputFileSwitch" Visibility="Public">
+    <value>  -getResultOutputFile:file
+                     Redirect output from get* into a file.
+
+                     Example:
+                     -getProperty:Bar -getResultOutputFile:Biz.txt
+                     This writes the value of property Bar into Biz.txt.
+    </value>
+    <comment>
+      LOCALIZATION: "-getResultOutputFile", "get*" and "-getProperty" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </comment>
+  </data>
+  <data name="HelpMessage_48_TerminalLoggerParametersSwitch" Visibility="Public">
+    <value>  -terminalLoggerParameters: &lt;parameters&gt;
+                     Parameters to terminal logger. (Short form: -tlp)
+                     The available parameters.
+                        default--Specifies the default behavior of the terminal
+                        logger. It requires one of the following values:
+                           - `on`, `true`  forces TerminalLogger to be used even
+                            when it would be disabled.
+                           - `off`, `false` forces TerminalLogger to not be used
+                            even when it would be enabled.
+                           - `auto` enables TerminalLogger when the terminal
+                            supports it and the session doesn't have redirected
+                            stdout/stderr
+                        verbosity--Override the -verbosity setting for this
+                        logger
+                        showCommandLine--Show TaskCommandLineEvent messages
+
+                      Example:
+                        -tlp:default=auto;verbosity=diag;shownCommandLine
+    </value>
+    <comment>
+      LOCALIZATION: "-terminalLoggerParameters", "-tlp", "default", "on", "true", "off", "false", "auto", "verbosity", "showCommandLine" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </comment>
+  </data>
   <data name="InvalidConfigurationFile" xml:space="preserve">
     <value>MSBUILD : Configuration error MSB1043: The application could not start. {0}</value>
     <comment>
@@ -1106,10 +1218,10 @@
     </comment>
   </data>
   <data name="MissingFeatureAvailabilityError" UESanitized="true" Visibility="Public">
-    <value>MSBUILD : error MSB1067: Must provide a feature name for the featureavailability switch.</value>
+    <value>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</value>
     <comment>
-      {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureavailability". The user must pass in an actual feature name
-      following the switch, as in "msbuild.exe -featureavailability:blah".
+      {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureAvailability". The user must pass in an actual feature name
+      following the switch, as in "msbuild.exe -featureAvailability:blah".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>
@@ -1282,7 +1394,7 @@
     <value>MSBUILD : error MSB1066: Specify one or more parameters for the terminal logger if using the -terminalLoggerParameters switch</value>
     <comment>
       {StrBegin="MSBUILD : error MSB1066: "}
-      UE: This happens if the user does something like "msbuild.exe -termionalLoggerParameters:". The user must pass in one or more parameters
+      UE: This happens if the user does something like "msbuild.exe -terminalLoggerParameters:". The user must pass in one or more parameters
       after the switch e.g. "msbuild.exe -terminalLoggerParameters:default=auto".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
@@ -1372,9 +1484,6 @@
       This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
-  </data>
-  <data name="AbortingBuild" xml:space="preserve">
-    <value>Attempting to cancel the build...</value>
   </data>
   <data name="InvalidPreprocessPath" xml:space="preserve">
     <value>MSBUILD : error MSB1047: File to preprocess to is not valid. {0}</value>
@@ -1660,6 +1769,19 @@
   <data name="TestSummary_Succeeded" xml:space="preserve">
     <value>succeeded: {0}</value>
     <comment>{0} whole number</comment>
+  </data>
+  <data name="LongPaths" xml:space="preserve">
+    <value>Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</value>
+    <comment>"Windows" is the OS, "LongPathsEnabled" should not be localized, and {0} will be "enabled"/"disabled"/"not set"</comment>
+  </data>
+  <data name="LongPaths_Enabled" xml:space="preserve">
+    <value>enabled</value>
+  </data>
+  <data name="LongPaths_Disabled" xml:space="preserve">
+    <value>disabled</value>
+  </data>
+  <data name="LongPaths_Missing" xml:space="preserve">
+    <value>not set</value>
   </data>
   <!-- **** TerminalLogger strings end **** -->
     <!--

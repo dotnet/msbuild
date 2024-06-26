@@ -274,12 +274,12 @@
       <trans-unit id="Copy.Retrying">
         <source>MSB3026: Could not copy "{0}" to "{1}". Beginning retry {2} in {3}ms. {4} {5}</source>
         <target state="translated">MSB3026: "{0}" を "{1}" にコピーできませんでした。{3} ミリ秒以内に {2} 回目の再試行を開始します。{4} {5}</target>
-        <note>{StrBegin="MSB3026: "} LOCALIZATION: {0} and {1} are paths. {2} and {3} are numbers. {4} is an optional localized message. {5} is either empty or a string from Copy.FileLocked ("The file is locked by: "{0}"")</note>
+        <note>{StrBegin="MSB3026: "} LOCALIZATION: {0} and {1} are paths. {2} and {3} are numbers. {4} is an optional localized message. {5} is either empty or a string from Utilities LockCheck.FileLocked ("The file is locked by: "{0}"")</note>
       </trans-unit>
       <trans-unit id="Copy.ExceededRetries">
         <source>MSB3027: Could not copy "{0}" to "{1}". Exceeded retry count of {2}. Failed. {3}</source>
         <target state="translated">MSB3027: "{0}" を "{1}" にコピーできませんでした。{2} 回の再試行回数を超えたため、失敗しました。{3}</target>
-        <note>{StrBegin="MSB3027: "} LOCALIZATION: {0} and {1} are paths. {2} is a number. {3} is either empty or a string from Copy.FileLocked ("The file is locked by: "{0}"")</note>
+        <note>{StrBegin="MSB3027: "} LOCALIZATION: {0} and {1} are paths. {2} is a number. {3} is either empty or a string from Utilities LockCheck.FileLocked ("The file is locked by: "{0}"")</note>
       </trans-unit>
       <trans-unit id="Copy.InvalidRetryCount">
         <source>MSB3028: {0} is an invalid retry count. Value must not be negative.</source>
@@ -357,8 +357,8 @@
         <note />
       </trans-unit>
       <trans-unit id="Delete.Error">
-        <source>MSB3061: Unable to delete file "{0}". {1}</source>
-        <target state="translated">MSB3061: ファイル "{0}" を削除できません。{1}</target>
+        <source>MSB3061: Unable to delete file "{0}". {1} {2}</source>
+        <target state="translated">MSB3061: ファイル "{0}" を削除できません。{1} {2}</target>
         <note>{StrBegin="MSB3061: "}</note>
       </trans-unit>
       <trans-unit id="Delete.InvalidRetryCount">
@@ -372,9 +372,9 @@
         <note>{StrBegin="MSB3029: "} LOCALIZATION: {0} is a number.</note>
       </trans-unit>
       <trans-unit id="Delete.Retrying">
-        <source>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3}</source>
-        <target state="translated">MSB3062: ファイル "{0}" を削除できませんでした。{1} の再試行を {2}ミリ秒で開始します。{3}</target>
-        <note>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message.</note>
+        <source>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3} {4}</source>
+        <target state="translated">MSB3062: ファイル "{0}" を削除できませんでした。{2} ミリ秒で再試行 {1} を開始しています。{3} {4}</target>
+        <note>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message, {4} is message from LockCheck.</note>
       </trans-unit>
       <trans-unit id="Delete.SkippingNonexistentFile">
         <source>File "{0}" doesn't exist. Skipping.</source>
@@ -1519,8 +1519,8 @@
         <note>{StrBegin="MSB3676: "}</note>
       </trans-unit>
       <trans-unit id="Move.Error">
-        <source>MSB3677: Unable to move file "{0}" to "{1}". {2}</source>
-        <target state="translated">MSB3677: ファイル "{0}" を "{1}" に移動できません。{2}</target>
+        <source>MSB3677: Unable to move file "{0}" to "{1}". {2} {3}</source>
+        <target state="translated">MSB3677: ファイル "{0}" を "{1}" に移動できません。{2} {3}</target>
         <note>{StrBegin="MSB3677: "}</note>
       </trans-unit>
       <trans-unit id="Move.ExactlyOneTypeOfDestination">
@@ -2564,11 +2564,6 @@
         <target state="translated">MSB3353: 遅延署名に必要な公開キーは指定されませんでした。</target>
         <note>{StrBegin="MSB3353: "}</note>
       </trans-unit>
-      <trans-unit id="Task.FileLocked">
-        <source>The file is locked by: "{0}"</source>
-        <target state="translated">このファイルは "{0}" によってロックされています。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
         <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
         <target state="translated">MSB4803: タスク "{0}" は .NET Core バージョンの MSBuild ではサポートされていません。.NET Framework バージョンの MSBuild をご使用ください。詳細については、https://aka.ms/msbuild/MSB4803 をご覧ください。</target>
@@ -2590,8 +2585,8 @@
         <note>{StrBegin="MSB3371: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotMakeFileWritable">
-        <source>MSB3372: The file "{0}" cannot be made writable. {1}</source>
-        <target state="translated">MSB3372: ファイル "{0}" を書き込み可能にすることはできません。{1}</target>
+        <source>MSB3372: The file "{0}" cannot be made writable. {1} {2}</source>
+        <target state="translated">MSB3372: ファイル "{0}" を書き込み可能にすることはできません。{1} {2}</target>
         <note>{StrBegin="MSB3372: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotRestoreAttributes">
@@ -2600,8 +2595,8 @@
         <note>{StrBegin="MSB3373: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotTouch">
-        <source>MSB3374: The last access/last write time on file "{0}" cannot be set. {1}</source>
-        <target state="translated">MSB3374: ファイル "{0}" に最後にアクセスした、または書き込んだ時間を設定できません。{1}</target>
+        <source>MSB3374: The last access/last write time on file "{0}" cannot be set. {1} {2}</source>
+        <target state="translated">MSB3374: ファイル "{0}" に最後にアクセスした、または書き込んだ時間を設定できません。{1} {2}</target>
         <note>{StrBegin="MSB3374: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CreatingFile">
@@ -2695,8 +2690,8 @@
         <note>{StrBegin="MSB3936: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotMakeFileWriteable">
-        <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2}</source>
-        <target state="translated">MSB3935: 解凍先のファイル "{1}" が読み取り専用で、書き込み可能にすることができないため、ファイル "{0}" を解凍できませんでした。{2}</target>
+        <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</source>
+        <target state="translated">MSB3935: 解凍先のファイル "{0}" が読み取り専用で、書き込み可能にすることができないため、ファイル "{1}" を解凍できませんでした。{2} {3}</target>
         <note>{StrBegin="MSB3935: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotOpenFile">
@@ -2780,8 +2775,8 @@
         <note>{StrBegin="MSB3715: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
-        <source>MSB3491: Could not write lines to file "{0}". {1}</source>
-        <target state="translated">MSB3491: 行をファイル "{0}" に書き込めませんでした。{1}</target>
+        <source>MSB3491: Could not write lines to file "{0}". {1} {2}</source>
+        <target state="translated">MSB3491: 行をファイル "{0}" に書き込めませんでした。{1} {2}</target>
         <note>{StrBegin="MSB3491: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.InvalidTargetFrameworkMoniker">
@@ -3050,8 +3045,8 @@
         <note>{StrBegin="MSB3712: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotWriteOutput">
-        <source>MSB3713: The file "{0}" could not be created. {1}</source>
-        <target state="translated">MSB3713: ファイル "{0}" を作成できませんでした。{1}</target>
+        <source>MSB3713: The file "{0}" could not be created. {1} {2}</source>
+        <target state="translated">MSB3713: ファイル "{0}" を作成できませんでした。{1} {2}</target>
         <note>{StrBegin="MSB3713: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.SkippedNumberedParameter">
@@ -3500,8 +3495,8 @@
         <note>{StrBegin="MSB3941: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFailed">
-        <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2}</source>
-        <target state="translated">MSB3943: ディレクトリ "{0}" をファイル "{1}" に zip 圧縮できませんでした。{2}</target>
+        <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2} {3}</source>
+        <target state="translated">MSB3943: ディレクトリ "{0}" をファイル "{1}" に zip 圧縮できませんでした。{2} {3}</target>
         <note>{StrBegin="MSB3943: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFileExists">
