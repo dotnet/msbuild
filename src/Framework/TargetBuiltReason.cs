@@ -43,6 +43,6 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// The target was one of the targets explicitly called to be built.
         /// </summary>
-        EntryTargets
+        EntryTargets,
     }
 }

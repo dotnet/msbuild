@@ -735,9 +735,12 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
+                // The buildReason argument for this function can be BeforeTargets or AfterTargets, we don't want to override the reason when adding a new entry
+                // If the reason is None, it means it does not depend on another target. So we can use the target's BuiltReason.
+                TargetBuiltReason entryReason = buildReason == TargetBuiltReason.None ? targetSpecification._targetBuiltReason : buildReason;
+
                 // Add to the list of targets to push.  We don't actually put it on the stack here because we could run into a circular dependency
                 // during this loop, in which case the target stack would be out of whack.
-                TargetBuiltReason entryReason = buildReason == TargetBuiltReason.None ? targetSpecification._targetBuiltReason : buildReason;
                 TargetEntry newEntry = new TargetEntry(_requestEntry, this as ITargetBuilderCallback, targetSpecification, baseLookup, parentTargetEntry, entryReason, _componentHost, _projectLoggingContext, stopProcessingOnCompletion);
 
                 newEntry.ErrorTarget = addAsErrorTarget;
