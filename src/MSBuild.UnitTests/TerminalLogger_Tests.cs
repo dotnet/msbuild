@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests
 
         private readonly string _projectFile = NativeMethods.IsUnixLike ? "/src/project.proj" : @"C:\src\project.proj";
         private readonly string _projectFile2 = NativeMethods.IsUnixLike ? "/src/project2.proj" : @"C:\src\project2.proj";
-        private readonly string _projectFileWithForeignSymbols = NativeMethods.IsUnixLike ? "/src/проектТерминал/本地化.proj" : @"C:\src\проектТерминал\本地化.proj";
+        private readonly string _projectFileWithNonAnsiSymbols = NativeMethods.IsUnixLike ? "/src/проектТерминал/本地化.proj" : @"C:\src\проектТерминал\本地化.proj";
 
         private StringWriter _outputWriter = new();
 
@@ -457,14 +457,14 @@ namespace Microsoft.Build.UnitTests
         {
             // Send message in order to set project output path
             BuildMessageEventArgs e = MakeMessageEventArgs(
-                    $"本地化 -> {_projectFileWithForeignSymbols.Replace("cproj", "dll")}",
+                    $"本地化 -> {_projectFileWithNonAnsiSymbols.Replace("cproj", "dll")}",
                     MessageImportance.High);
-            e.ProjectFile = _projectFileWithForeignSymbols;
+            e.ProjectFile = _projectFileWithNonAnsiSymbols;
 
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
                 MessageRaised?.Invoke(_eventSender, e);
-            }, _projectFileWithForeignSymbols);
+            }, _projectFileWithNonAnsiSymbols);
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
