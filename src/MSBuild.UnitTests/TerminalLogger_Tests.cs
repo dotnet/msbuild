@@ -335,7 +335,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public Task PrintCopyTaskRetryWarningAsImmediateMessage_Failed()
         {
-            InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, _projectFile, () =>
             {
                 WarningRaised?.Invoke(_eventSender, MakeCopyRetryWarning(1));
                 WarningRaised?.Invoke(_eventSender, MakeCopyRetryWarning(2));
